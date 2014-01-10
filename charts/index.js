@@ -1,18 +1,29 @@
 KISSY.add("charts/index" , function( S ){
 
    window.Site = {
-        local: !! ~location.search.indexOf('local'),
-        debug: !! ~location.search.indexOf('debug'),
-        build: !! ~location.search.indexOf('build')
+        local : !! ~location.search.indexOf('local'),
+        daily : !! ~location.search.indexOf('daily'),
+        debug : !! ~location.search.indexOf('debug'),
+        build : !! ~location.search.indexOf('build')
    };
 
-   var chartsUrl = "http://g.tbcdn.cn/thx/canvax";
-   Site.local && ( chartsUrl = "./" )
+   var chartsUrl = "http://g.tbcdn.cn/thx/charts";
+
+   var canvaxVersion = "1.0.0";
+   var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax";
+
+   if( Site.local ){
+       chartsUrl = "./";
+   };
+
+   if( Site.daily ){
+       chartsUrl = "http://g.assets.daily.taobao.net/thx/canvax/1.0.0/";
+   } 
 
    KISSY.config({
         packages: [{
-            name  : 'charts',
-            path  :  chartsUrl,
+            name  : 'charts'   ,
+            path  :  chartsUrl ,
             debug :  Site.debug
         }]
    });
@@ -84,7 +95,6 @@ KISSY.add("charts/index" , function( S ){
             callback( chart );
        });
    }
-
    chartRute();
 
    var Charts = {};
@@ -108,10 +118,28 @@ KISSY.add("charts/index" , function( S ){
               me.done( me._readyHand );
            }
        });
+   };
+
+   Charts.BrokenLine = function( el ){
+       this.name = "uploading";
+       this.el   = el;
+       var me    = this;
+       this._readyHand = null;
+       this.done = function( fun ){
+            if( this.chart ){ 
+                fun.apply( this , [ this.chart ] );
+            } else {
+                this._readyHand = fun;
+            }
+       };
+       chartRute( this , function( chart ){
+           me.chart = chart;
+           if( me._readyHand ) {
+              //如果有_readyHand
+              me.done( me._readyHand );
+           }
+       });
    }
 
    return Charts;
-} , {
-   requires : [
-   ]
-})
+} )
