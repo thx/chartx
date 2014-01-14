@@ -74,7 +74,7 @@ var options = {
 }
 
 
-KISSY.use("charts/ ,node" , function( S , Charts ){
+KISSY.use("visualization/ ,node" , function( S , Charts ){
 
     window.brokenLine = new Charts.BrokenLine( S.all("#canvasTest") );
     brokenLine.done( function( chart ){

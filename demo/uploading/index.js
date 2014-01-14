@@ -1,8 +1,10 @@
 KISSY.ready( function(S){
-   KISSY.use("charts/ , charts/chart/uploading/ , anim , node " , function( S , Charts , uploading , Anim ){
+   KISSY.use("visualization/ , anim , node " , function( S , Charts , uploading , Anim ){
       var el = S.all("#loading");
-      var ul = new uploading( el );
-      ul.draw();
+      var ul = new Charts.upLoading( el );
+      ul.done(function( chart ){
+          chart.draw();
+      });
 
       window.ul = ul;
 
