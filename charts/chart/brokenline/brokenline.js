@@ -258,7 +258,6 @@ KISSY.add("charts/chart/brokenline/BrokenLine" , function( S , Base , Tools , xA
                   var itemHeight = gSpriteC.height - Math.round((gSpriteC.height - self._yOverDiff) * ( data[d][ self.fieldList[field].index ] / (maxY-minY) ));
                   pointList.push( [x , itemHeight] );
               };
-
               //这个时候的数据要给xAxis保留一份
               self.xAxis.getxAxisPoints( pointList , groupWidth );
 

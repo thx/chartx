@@ -38,10 +38,11 @@ KISSY.ready(function(){
 var options = {
     //title : "first charts",
     xAxis : {
-        field : "val1",
+        field : "val4",
         TextStyle:{
             color : "black"
         },
+        lineColor:'#ff0000',
         customPL:function(pointList){
             return [
                 "星期一",

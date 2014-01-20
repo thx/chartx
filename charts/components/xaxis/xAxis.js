@@ -25,11 +25,12 @@ KISSY.add("charts/components/xaxis/xAxis" , function( S , Canvax ){
              //如果用户没有配置field字段，那么就默认索引1为的数据类型字段
              self.field = data[0][0];
           };
-
+          console.log(self.field)
           self.dataOrg.length = 0;
           for(var d=1,dl = data.length ; d<dl ; d++){
              self.dataOrg.push( data[d][ self.chart.fieldList[self.field].index] );
           }
+          console.log(self.dataOrg)
        },
        xAxisLayout : function(){
           var self  = this;
@@ -79,8 +80,8 @@ KISSY.add("charts/components/xaxis/xAxis" , function( S , Canvax ){
           var self     = this;
           var xSpriteC = self.sprite.context;
           var pCount   = self.xPointList.length;
-          S.each( self.xPointList , function( xp , i ){
-              var x = xp.x ;
+          S.each( self.xPointList , function( o , i ){
+              var x = o.x ;
               //和折线一样，最后一个刻度做hack处理
               if(i == (pCount-1)) {
                   //x = xSpriteC.width
@@ -110,7 +111,7 @@ KISSY.add("charts/components/xaxis/xAxis" , function( S , Canvax ){
                   }
               } 
               self.sprite.addChild(new Canvax.Display.Text(
-                xp.text.toString()
+                o.text.toString()
                 ,
                 {
                   context : textOpt
