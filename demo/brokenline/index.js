@@ -73,14 +73,23 @@ var options = {
         return brokenPlist;
     }
 }
+ 
+
+KISSY.config({
+    packages: [{
+        name  :  'dvix'  ,
+        path  :  '../../',
+        debug :  true
+    }
+    ]
+});
 
 
-KISSY.use("charts/ ,node" , function( S , Charts ){
 
-    window.brokenLine = new Charts.BrokenLine( S.all("#canvasTest") );
-    brokenLine.done( function( chart ){
-        chart.draw( data1 , options );
-    } );
+KISSY.use(" dvix/chart/brokenline/ , node " , function( S , BrokenLine ){
+
+    window.brokenLine = new BrokenLine( S.all("#canvasTest") );
+    brokenLine.draw( data1 , options );
 
 });
 });
