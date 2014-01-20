@@ -9,9 +9,9 @@ module.exports = function(grunt) {
             },
             app: {
                 expand: true,
-                cwd: "build/visualization/",
+                cwd: "build/dvix/",
                 src: ['**/*.js', '!**/*-min.js'],
-                dest: "build/visualization/",
+                dest: "build/dvix/",
                 ext: '-min.js' // '-min.js'
             }
         },
@@ -22,8 +22,7 @@ module.exports = function(grunt) {
                  expand: true, src: ['library/underscore.js' , 'library/excanvas.js' , 'library/color.js'], dest: 'build/'
              },
              */
-             {
-                 expand: true, cwd: 'visualization', src: ['**'], dest: 'build/visualization'}
+             { expand: true, cwd: 'dvix', src: ['**'], dest: 'build/dvix'}
              ]
          }
       }
