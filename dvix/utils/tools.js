@@ -108,14 +108,11 @@ KISSY.add('dvix/utils/tools',function(S){
 			};
             if(s >= 1000){
                 var num = parseInt(s/1000);
-                return $n.toString().replace( num , num+symbol )
+                return $n.toString().replace( num , num + symbol )
             } else {
                 return s;
-            }
-            
+            }   
 		}
-
-
    }
 
 });

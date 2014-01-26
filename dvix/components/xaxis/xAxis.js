@@ -1,130 +1,194 @@
-KISSY.add("dvix/components/xaxis/xAxis" , function( S , Dvix ){
-   var Canvax  = Dvix.Canvax;
-   var xAxis = function( chart , opt ){
-       this.chart      = chart ;       //必选择，属于那个图表。很多数据的从这个上面去去
-       this.field      = opt.field     || null;
-       this.TextStyle  = opt.TextStyle || null;
-       this.lineColor  = opt.lineColor || "#D6D6D6";
-       this.customPL   = opt.customPL  || null;
+KISSY.add("dvix/components/xaxis/xAxis" , function( S , Dvix  , Tools ){
+    var Canvax = Dvix.Canvax;
+    var xAxis = function(opt){
+        this.w = 0;
+        this.h = 22
 
-       this.dataOrg    = [];//从brokenline.data获得的xAxis 的 源数据，下面的data的数据从这里计算而来
-       this.data       = [];
-       this.xPointList = [];
-       this.sprite     = null;
-   }; 
+        this.dis        = opt.dis       || 2;         //线到文本的距离
 
-   xAxis.prototype = {
-       /*
-        *@data      chart的数据源
-        *@fieldList 上面的data数据中的第一行字段集合
-       */
-       getxAxisData: function(){
-          //获取xAxis的数据
-          var self  = this;
-          var data  = self.chart.data;
-          if (!self.field){
-             //如果用户没有配置field字段，那么就默认索引1为的数据类型字段
-             self.field = data[0][0];
-          };
-
-          self.dataOrg.length = 0;
-          for(var d=1,dl = data.length ; d<dl ; d++){
-             self.dataOrg.push( data[d][ self.chart.fieldList[self.field].index] );
-          }
-       },
-       xAxisLayout : function(){
-          var self  = this;
-          var yContext = self.chart.yAxis.sprite.context;
-          var xHeight  = Math.round( self.chart.oneStrSize.en.height*2 );
-          self.sprite = new Canvax.Display.Sprite({
-             context : {
-               x     : yContext.width,
-               y     : self.chart.height - xHeight,
-               width : self.chart.width  - yContext.width,
-               height: xHeight
-             }
-          });
-        },
-        //x轴专属，计算x的xPointList
-        getxAxisPoints : function( pointList , groupWidth ){
-          var self = this;
-    
-          //如果有用户自定义的x轴数据
-          if( self.customPL ){
-              var c_list = self.customPL( pointList );
-              var speed  = parseInt( (pointList.length - 1) / (c_list.length-1) );
-              if( c_list.constructor == Array && c_list.length > 0 ){
-                  //外面传入的数据只有text
-                  S.each(c_list , function(p , i){
-                      var newP = {
-                          x   : pointList[ i * speed ][0],//i*speed*groupWidth - i,
-                          text: p
-                      }
-                      self.xPointList.push( newP );
-                  });
-              }
-          };
-
-          //计算xAxis的xPointList
-          if( self.xPointList.length == 0 ){
-              S.each(pointList,function(p , i){
-                  //TODO:这里目前只做简单的push，如果节点过多的话，还要多做一层处理
-                  self.xPointList.push({
-                      x    : p[0] ,
-                      text : self.dataOrg[i]
-                  });
-              });
-          };
-        },
-        xAxisDraw : function(){
-          var self     = this;
-          var xSpriteC = self.sprite.context;
-          var pCount   = self.xPointList.length;
-          S.each( self.xPointList , function( xp , i ){
-              var x = xp.x ;
-              //和折线一样，最后一个刻度做hack处理
-              if(i == (pCount-1)) {
-                  //x = xSpriteC.width
-              }
-              self.sprite.addChild(new Canvax.Shapes.Line({
-                  context : {
-                      xStart      : x,
-                      yStart      : 0,
-                      xEnd        : x,
-                      yEnd        : 5,
-                      lineWidth   : 1,
-                      strokeStyle : self.lineColor
-                  }
-              }));
-
-              var textOpt = {
-                  x   : x,
-                  y   : 5,
-                  fillStyle:"blank",
-                  //textBackgroundColor:"red"
-                  //textBaseline:"middle"
-              }
-              if(i>0){
-                  textOpt.textAlign="center";
-                  if(i == (pCount-1)){
-                      textOpt.textAlign="right";
-                  }
-              } 
-              self.sprite.addChild(new Canvax.Display.Text(
-                xp.text.toString()
-                ,
-                {
-                  context : textOpt
-                })
-              );
-          })
+        this.line = {
+                enabled : 1,                          //是否有line
+                width   : 1,
+                height  : 6,
+                strokeStyle   : '#BEBEBE'
         }
-   };
 
-   return xAxis;
+        this.max  = { 
+                left    : 0,                          //第一个文字最左侧坐标的最大值              
+                right   : 0,                          //最后一个文字最右侧坐标的最大值
+
+                txtH    : 14                          //文字最大高
+        }
+
+        this.data       = [];                          //{x:100, content:'1000'}
+        this.layoutData = [];                          //this.data(可能数据过多),重新编排后的数据集合, 并根据此数组展现文字和线条
+        this.probOneStrSize = null;
+        this.sprite     = null;
+        this.txtSp      = null;
+        this.lineSp     = null;
+
+        this.init(opt)
+    };
+
+    xAxis.prototype = {
+        init:function(opt){
+          var self  = this;
+          self._configInit(opt);
+          probOneStrSize = Tools.probOneStrSize()
+          self.sprite = new Canvax.Display.Sprite();
+        },
+        setX:function($n){
+          this.sprite.context.x = $n
+        },
+        setY:function($n){
+          this.sprite.context.y = $n
+        },
+
+        draw:function(opt){
+          this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
+          var self  = this;
+          self._configData(opt) 	
+          self._trimLayoutData()
+          self._widget()
+          self._layout()
+
+          self.h = self.line.height + self.dis + self.max.txtH
+        },
+
+        //初始化配置
+        _configInit:function(opt){
+        	var self = this
+          	if(opt){
+            }
+        },
+         //配置数据
+        _configData:function(opt){
+          	var self = this
+          	opt = opt || {}
+
+          	self.w  = opt.w  || 0;      
+          	self.h  = opt.h  || 0;
+          	self.max.right = self.w
+
+          	if(opt.max)
+            	self.max.left   = opt.max.left || self.max.left,
+            	self.max.right  = opt.max.right || self.max.right;
+        },
+      
+        _widget:function(){
+            var self  = this;
+            var arr = self.layoutData
+
+          	self.txtSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.txtSp)
+         	self.lineSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.lineSp)
+
+          	for(var a = 0, al = arr.length; a < al; a++){
+
+              	var o = arr[a]
+              	var x = o.x, y = self.line.height + self.dis
+              	var content = Tools.numAddSymbol(o.content)
+              	//文字
+              	var txt = new Canvax.Display.Text(content,
+                   {
+                    context : {
+                        x  : x,
+                        y  : y,
+                        fillStyle   :"blank",
+                        textBackgroundColor:'#ff2380',
+                        // textAlign   :"center",
+                        // textBaseline:"middle"
+                   }
+              	})
+              	self.txtSp.addChild(txt);
+
+              	//线条
+              	var line = new Canvax.Shapes.Line({
+                  	id      : a,
+                  	context : {
+                      	x           : x,
+                      	y           : 0,
+                      	xEnd        : 0,
+                      	yEnd        : self.line.height,
+                      	lineWidth   : self.line.width,
+                      	strokeStyle : self.line.strokeStyle
+                  	}
+              	})
+              	self.lineSp.addChild(line)
+          	}
+
+           	for(var a = 0, al = self.txtSp.getNumChildren(); a < al; a++){
+           		var font = self.txtSp.getChildAt(a)
+           		var x = parseInt(font.context.x - font.getTextWidth() / 2)
+           		font.context.x = x
+           	}
+        },
+
+        _layout:function(){
+        	var self = this
+			var firstText = self.txtSp.getChildAt(0)
+			var popText = self.txtSp.getChildAt(self.txtSp.getNumChildren() - 1)
+
+			if(firstText && firstText.context.x < -self.max.left){
+				firstText.context.x = -parseInt(self.max.left)
+			}
+			if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > self.max.right)) {
+				popText.context.x = parseInt(self.max.right - popText.getTextWidth())
+			}
+        },
+
+        _trimLayoutData:function(){
+            var self = this
+            var tmp = []
+            var max = 0                                                           //获取文字最大的length
+            var arr = self.data
+            for(var a = 0, al = arr.length; a < al; a++){
+              var o = arr[a]
+              var s = Tools.numAddSymbol(o.content)
+              max   = Math.max(max, s.length)
+            }
+
+            var textMaxWidth = probOneStrSize.en.width * max                       //获取文字最大宽
+            var maxWidth =  self.max.right                                         //总共能多少像素展现
+            var n = Math.floor(maxWidth / (textMaxWidth + 10))                     //能展现几个
+            n = n > arr.length ? arr.length : n
+            var dis = Math.floor(arr.length / (n - 1))                             //array中展现间隔
+            dis = arr.length == 2 && n == 2 ? 1 : dis       
+            dis = arr.length == 1 && n == 1 ? 0 : dis       
+                                                                                   //存放展现的数据
+            for(var a = 0, al = arr.length; a < al; a++){
+              var o = arr[dis * a]
+              if(o){
+                tmp.push(arr[dis * a])
+              }
+            }
+            if (tmp.length > n) {
+              dis = Math.ceil(arr.length / (n - 1))
+              dis = arr.length == 2 && n == 2 ? 1 : dis       
+              dis = arr.length == 1 && n == 1 ? 0 : dis
+              tmp = []                                                           
+              for(a = 0, al = arr.length; a < al; a++){
+                o = arr[dis * a]
+                if (o) {
+                  tmp.push(arr[dis * a])
+                }
+              }
+            }
+          
+            if (n == 1 && tmp.length == 0 ) {                                      //防止连第一条都没的情况
+                tmp[0] = arr[0]
+            }
+            if (n == 2 && tmp.length == 1 && arr.length >= 2) {
+                tmp[1] = arr[arr.length - 1]
+            }
+            self.layoutData = tmp
+        }
+    };
+
+    return xAxis;
 
 } , {
-   requires : [
-       "dvix/"
-   ]
+    requires : [
+       "dvix/",
+       "dvix/utils/tools",
+    ] 
 })
