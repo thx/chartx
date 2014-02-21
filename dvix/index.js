@@ -9,6 +9,9 @@ if(  (/daily.taobao.net/g).test(location.host)  ){
     Site.daily = true;
 }
 
+//TODO
+Site.daily = true;
+
 var canvaxVersion = "1.0.0";
 var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
 if( Site.daily ){
