@@ -22,7 +22,8 @@ module.exports = function(grunt) {
                  expand: true, src: ['library/underscore.js' , 'library/excanvas.js' , 'library/color.js'], dest: 'build/'
              },
              */
-             { expand: true, cwd: 'dvix', src: ['**'], dest: 'build/dvix'}
+             { expand: true, cwd: 'dvix', src: ['**'], dest: 'build/dvix'},
+             { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'}
              ]
          }
       }
