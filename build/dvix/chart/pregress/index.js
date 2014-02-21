@@ -1,68 +1,63 @@
 KISSY.add("dvix/chart/pregress/index" , function( S , Dvix ){
    var Canvax  = Dvix.Canvax;
-   var loadIng = function( el ){
+   var preGress = function( el , opt ){
        this.canvax = new Canvax( {
                el : el
        } );
-       this.secW   = 20;
        this.width  = parseInt( el.width() );
        this.height = parseInt( el.height());
 
-       this.r = Math.min( this.width , this.height ) / 2;
-       this.stage_bg = new Canvax.Display.Stage({
-           context : {
-               width  : this.width,
-               height : this.height
-           }
-       });
-       this.stage = new Canvax.Display.Stage({
-           context : {
-               width  : this.width,
-               height : this.height
-           }
-       });
+       this.config = _.extend({
+          ringWidth : 20,
+          ringColor : '#8d76c4',
+          bColor    : '#E6E6E6'
+       }, opt );
 
-       this.stage_bg.addChild( new Canvax.Shapes.Sector({
+       this.r = Math.min( this.width , this.height ) / 2;
+   
+       this.stage = new Canvax.Display.Stage();
+
+       this.stage.addChild( new Canvax.Shapes.Sector({
           context : {
                x : this.height / 2,
                y : this.width / 2,
 
                r : this.r,
-               r0: this.r - this.secW,
+               r0: this.r - this.config.ringWidth,
                startAngle : 0 ,
                endAngle   : 360,
-               fillStyle  : "#E6E6E6",
+               fillStyle  : this.config.bColor,
                lineJoin   : "round"
              }
        }) );
 
        this.stage.addChild( new Canvax.Shapes.Sector({
-          id : "speed",
+          id : "rate",
           context : {
                x : this.height / 2,
                y : this.width / 2,
 
                r : this.r,
-               r0: this.r - this.secW,
+               r0: this.r - this.config.ringWidth,
                startAngle : 0 ,
-               endAngle   : 1 ,
-               fillStyle  : "#DB7F9A",
+               endAngle   : 0 ,
+               fillStyle  : this.config.ringColor,
                lineJoin   : "round"
              }
        }) );
+
    };
 
-   loadIng.prototype = {
+   preGress.prototype = {
        draw : function( opt ){
-          this.canvax.addChild( this.stage_bg );
           this.canvax.addChild( this.stage );
        },
-       setSpeed : function( s ){
-          this.stage.getChildById("speed").context.endAngle = s
+       setRate : function( s ){
+          this.stage.getChildById("rate").context.endAngle = s
        }
    };
 
-   return loadIng;
+   return preGress;
 
 } , {
    requires : [

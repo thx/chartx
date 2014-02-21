@@ -1,91 +1,95 @@
-KISSY.add("dvix/components/yaxis/yAxis" , function( S , Dvix , Datasection , Tools ){
+KISSY.add("dvix/components/yaxis/yAxis" , function( S , Dvix , Tools ){
     var Canvax = Dvix.Canvax;
-    var yAxis = function( chart , opt ){
-        this.chart      = chart;//必选择，属于那个图表。很多数据的从这个上面去去
-        this.dataMode   = opt.dataMode  || 0;//1为换算成百分比
-        this.fields     = opt.fields    || [];
-        this.TextStyle  = opt.TextStyle || null;
+    var yAxis = function(opt){
+        this.w = 0;
 
-        this.dataOrg    = [];//从brokenline.data 得到的yAxisd的源数据
-        this.data       = [];
+        this.dis        = opt.dis       || 6;         //线到文本的距离
+
+        this.line = {
+                 enabled : 1,                         //是否有line
+                 width   : 6,
+                 height  : 3,
+                 strokeStyle   : '#BEBEBE'
+        }
+
+        this.data       = [];      //{y:-100, content:'1000'}
         this.sprite     = null;
+        this.txtSp      = null;
+        this.lineSp     = null;
+
+        this.init(opt)
     };
 
     yAxis.prototype = {
-        getyAxisData : function(){
-          //获取yAxis的数据
-          var self      = this;
-          var data      = self.chart.data;
-
-          if (self.fields.length == 0){
-             //如果用户没有配置fields，那么就默认除开以外的所有字段都要显示
-             for (var i = 0 , l = data[0].length ; i<l ; i++){
-                 if ( data[0][i] !== self.chart.xAxis.field ){
-                    self.fields.push( data[0][i] );
-                 }
-             }
-          }
-
-          S.each( self.fields , function(field , ind){
-               var arr=[];
-               S.each(data , function(item , i){
-                   if(i==0){
-                       return;
-                   }
-                   arr.push( item[ self.chart.fieldList[field].index ] );
-               });
-               self.dataOrg.push(arr); 
-          });
-
-          if ( self.dataMode==1){
-              //需要转换为百分比
-              S.each( self.dataOrg , function(data ,i){
-                 self.dataOrg[i] = Tools.getArrScales(data);
-              } );
-          }
-          
-        },
-        yAxisLayout : function(){
+        init:function(){
           var self  = this;
 
-          //用self.dataOrg的原始数据得到计算出实际在self 上 要显示的数据
-          self.data = Datasection.section( Tools.getChildsArr( self.dataOrg ) , 5 );
-
-          //计算data里面字符串最宽的值
-          var max=0;
-          S.each( self.data , function(data , i){
-            max = Math.max( max , data.toString().length );
-          });
-
-          self.sprite = new Canvax.Display.Sprite({
-             context : {
-               x     : 0,
-               y     : self.chart.yMarginTop,
-               width : (max + 1) * self.chart.oneStrSize.en.width,
-               //height = 总高减去 top 预留 部分 减去x的高，x的高固定为 英文字符的高*2
-               height: self.chart.height - self.chart.yMarginTop - Math.round( self.chart.oneStrSize.en.height*2 )
-             }
-          });
-
+          self.sprite = new Canvax.Display.Sprite();
+          
         },
-        yAxisDraw : function(){
-          var self     = this;
-          var ySpriteC = self.sprite.context;
-          S.each(self.data , function( item , i ){
-             var x = ySpriteC.width;
-             var y = ySpriteC.height - i*self.chart._yBlock;
-             self.sprite.addChild(new Canvax.Display.Text(
-                item , {
+        setX:function($n){
+          this.sprite.context.x = $n
+        },
+        setY:function($n){
+          this.sprite.context.y = $n
+        },
+        draw : function(){
+          var self  = this;
+          this.data = [{y:0,content:'00000'},{y:-100,content:'10000'},{y:-200,content:'20000'},{y:-300,content:'30000'}]
+          
+          self._widget()
+        },
+
+        _widget:function(){
+          var self  = this;
+          var arr = this.data
+
+          self.txtSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.txtSp)
+          self.lineSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.lineSp)
+
+          var maxW = 0;
+          for(var a = 0, al = arr.length; a < al; a++){
+              var o = arr[a]
+              var x = 0, y = o.y
+              var content = Tools.numAddSymbol(o.content)
+              //文字
+              var txt = new Canvax.Display.Text(content,
+                   {
+                    context : {
+                        x  : x,
+                        y  : y,
+                        fillStyle   :"blank",
+                        // textBackgroundColor:'#0000ff',
+                        textAlign   :"right",
+                        textBaseline:"middle"
+                   }
+              })
+              self.txtSp.addChild(txt);
+              maxW = Math.max(maxW, txt.getTextWidth());
+
+              //线条
+              var line = new Canvax.Shapes.Line({
+                  id      : a,
                   context : {
-                      x  : x - self.chart.oneStrSize.en.width,
-                      y  : y,
-                      fillStyle:"blank",
-                      textAlign:"right",
-                      textBaseline:"middle"
+                      x           : 0,
+                      y           : y,
+                      xEnd        : self.line.width,
+                      yEnd        : 0,
+                      lineWidth   : self.line.height,
+                      strokeStyle : self.line.strokeStyle
                   }
-                })
-             );
-          })
+              })
+              self.lineSp.addChild(line)
+          }
+          self.txtSp.context.x  = maxW;
+          self.lineSp.context.x = maxW + self.dis
+
+          if(self.line.enabled){
+            self.w = maxW + self.dis + self.line.width
+          }else{
+            self.lineSp.context.visible = false
+            self.w = maxW 
+          }
         }
     };
 
@@ -94,8 +98,6 @@ KISSY.add("dvix/components/yaxis/yAxis" , function( S , Dvix , Datasection , Too
 } , {
     requires : [
        "dvix/",
-       "dvix/utils/datasection",
        "dvix/utils/tools",
-
     ] 
 })

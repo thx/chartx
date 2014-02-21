@@ -1,10 +1,11 @@
-KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis ){
+KISSY.add("dvix/chart/line/" , function( S , Dvix , Tools , xAxis , yAxis, Back){
     /*
      *@node chart在dom里的目标容器节点。
     */
     var Canvax = Dvix.Canvax;
-    var Brokenline = function( node ){
-        this.title         =  "brokenline";
+    window.Canvax = Canvax
+    var Line = function( node ){
+        this.title         =  "line";
         this.type          =  null;
         this.oneStrSize    =  null;
         this.element       =  null;//chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
@@ -25,6 +26,7 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
         this.spaceWidthMin =  1;
         this.xAxis         =  null;
         this.yAxis         =  null;
+        this.back          =  null;
         this.graphs =  {
             barColor   : ["#458AE6" , "#39BCC0" , "#5BCB8A"],
             lineColor  : "#D6D6D6",
@@ -35,10 +37,10 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
             return arr;
         }
 
-		this.init.apply(this , arguments);
+	   	this.init.apply(this , arguments);
     };
 
-    Brokenline.prototype = {
+    Line.prototype = {
 
         _yBlock    : 0, //y轴方向，分段取整后的值
         _yOverDiff : 0, //y轴方向把分段取整后多余的像素
@@ -55,9 +57,17 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
           })
 
           self.stage = new Canvax.Display.Stage({
+              id      : 'core',
               context : {
-                width : self.width,
-                height: self.height
+                  x : 0.5,
+                  y : 0.5
+              }
+          });
+          self.stageBG = new Canvax.Display.Stage({
+              id      : 'bg',
+              context : {
+                  x : 0.5,
+                  y : 0.5
               }
           });
 
@@ -66,7 +76,6 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
         },
         draw : function(data , options){
           var self = this;
-          //开始绘图
 
           //初始化数据和配置
           self._config(data , options);
@@ -74,16 +83,10 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
           //从chart属性的data 里面获取yAxis xAxis的源data
           self._initData();
 
-          //得到了data后从Axis的data 计算 yAxis xAxis的layout相关
-          self._initLayout();
-
-          //计算barWidth spaceWidth
-          self._calculateDataRange();
-
-          //所有数据准备好后，终于开始绘图啦
+          // //所有数据准备好后，终于开始绘图啦
           self._startDraw();
 
-          //绘制结束，添加到舞台
+          // //绘制结束，添加到舞台
           self._drawEnd();
         },
         _config  : function( data , options){
@@ -96,22 +99,14 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
               };
           }
 
-          if( options.xAxis ) {
-              //如果有x轴
-              self.xAxis = new xAxis( self , options.xAxis );
-              options.xAxis = null;
-              delete options.xAxis;
-          };
+          self.xAxis = new xAxis(options.xAxis);
 
-          if( options.yAxis ) {
-              //如果有x轴
-              self.yAxis = new yAxis( self , options.yAxis );
-              options.yAxis = null;
-              delete options.yAxis;
-          };
+          self.yAxis = new yAxis(options.yAxis);
+
+          self.back = new Back(options.back);
 
           if(options){
-              S.mix(self , options , undefined , undefined , true);
+              // S.mix(self , options , undefined , undefined , true);
           }
         },
         _getIndexForField:function( field , arr ){
@@ -122,29 +117,48 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
           }
         },
         _initData:function(){
-          //获取Axis 的data
           var self = this;
-          self.xAxis.getxAxisData();
-          self.yAxis.getyAxisData();
         },
-        _initLayout:function(){
-          var self = this;
-          self.yMarginTop = Math.round(self.oneStrSize.en.height / 2); 
-          self.yAxis.yAxisLayout();
-          self.xAxis.xAxisLayout();
-          self._graphsLayout();
-        },
+ 
         _startDraw : function(){
           var self = this;
-          self._graphsDraw();
-          self.yAxis.yAxisDraw();
-          self.xAxis.xAxisDraw();
+          // self._graphsDraw();
+          var x
+          var y = this.height - self.xAxis.h
+
+          self.yAxis.draw();
+          self.yAxis.setY(y)
+
+          x = self.yAxis.w
+
+          self.xAxis.draw({w:self.width - self.yAxis.w});
+          self.xAxis.setX(x), self.xAxis.setY(y)
+
+          self.back.draw({
+              w    : self.width - self.yAxis.w,
+              h    : y - 10,
+              xAxis:{
+                  // w   : 400,
+                  data:[{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}]
+              },
+              yAxis:{
+                  h : 300,
+                  data:[{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
+              }
+          });
+          self.back.setX(x), self.back.setY(y)
+          // self.xAxis.xAxisDraw();
         },
         _drawEnd : function(){
           var self = this;
-          self.stage.addChild( self.xAxis.sprite );
-          self.stage.addChild( self.yAxis.sprite );
-          self.stage.addChild( self.graphs.sprite );
+         
+          self.stageBG.addChild(self.back.sprite)
+
+          self.stage.addChild(self.yAxis.sprite);
+          self.stage.addChild(self.xAxis.sprite);
+          // self.stage.addChild( self.xAxis.sprite );
+          // self.stage.addChild( self.graphs.sprite );
+          self.canvax.addChild( self.stageBG );
           self.canvax.addChild( self.stage );
         },
         _graphsLayout : function(){
@@ -278,12 +292,13 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
           });
         }
     };
-    return Brokenline;
+    return Line;
 } , {
     requires: [
         'dvix/',
         'dvix/utils/tools',
         'dvix/components/xaxis/xAxis',
         'dvix/components/yaxis/yAxis',
+        'dvix/components/back/Back',
     ]
 });
