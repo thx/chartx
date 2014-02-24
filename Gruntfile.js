@@ -23,7 +23,8 @@ module.exports = function(grunt) {
              },
              */
              { expand: true, cwd: 'dvix', src: ['**'], dest: 'build/dvix'},
-             { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'}
+             { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'},
+             { expand: true, cwd: 'gameDemo', src: ['**'], dest: 'build/gameDemo'}
              ]
          }
       }
