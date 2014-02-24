@@ -1,5 +1,5 @@
-KISSY.add("dvix/chart/pregress/recharge" , function( S , Dvix ){
-   var Canvax  = Dvix.Canvax;
+KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
+   var Canvax  = Chart.Canvax;
    var animate  = function(){
         timer   = requestAnimationFrame( animate ); 
         Canvax.Animation.update();
@@ -80,8 +80,6 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Dvix ){
 
        this.stage.addChild( btn );
 
-
-       
        if( this.config.rate > 0 ){
            this.setRate( this.config.rate , true );
        };
@@ -91,7 +89,7 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Dvix ){
    };
 
    
-   Canvax.Base.creatClass( Recharge , Canvax.Event.EventDispatcher , {
+   Canvax.Base.creatClass( Recharge , Chart , {
        draw : function( opt ){
            this.canvax.addChild( this.stage );
        },
@@ -129,7 +127,7 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Dvix ){
 
 } , {
    requires : [
-     "dvix/"
+     "dvix/chart/"
    ]
 })
 

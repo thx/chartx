@@ -1,0 +1,1 @@
+KISSY.add("dvix/chart/",function(a,b){var c=b.Canvax,d=function(){arguments.callee.superclass.constructor.apply(this,arguments)};return c.Base.creatClass(d,c.Event.EventDispatcher,{reSet:function(){this.canvax&&this.canvax.reset()}}),d.Canvax=c,d},{requires:["dvix/"]});
