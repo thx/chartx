@@ -9,7 +9,7 @@ KISSY.add("dvix/chart/" , function( S , Dvix ){
 
     Canvax.Base.creatClass( Chart , Canvax.Event.EventDispatcher , {
         reSet : function(){
-           this.canvax && this.canvax.reset();
+           this.canvax && this.canvax.reSet();
         }
     });
 
