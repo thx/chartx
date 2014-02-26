@@ -23,7 +23,7 @@
         KISSY.config({
             packages: [{
                 name  :  'dvix'  ,
-                path  :  '../../',
+                path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
                 debug :  true
             } 
             ]
@@ -34,7 +34,9 @@
                 var el       = S.all("#eggGame");
 
                 window.egg = new Egg( el , {
-
+                    eggMoveEnd : function(){
+                      alert("砸蛋后的回调")
+                    }
                 } );
 
             }); 

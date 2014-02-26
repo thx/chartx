@@ -71,12 +71,17 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
            self.fire("recharge")
        });
 
-       this.stage.getChildById("rate").on("touch" , function(){
-           
-       }).on("release" , function(){
-           
-       })
+       this.stage.getChildById("rate").on("touch" , function( e ){
+           self.holdHand( e )
+       }).on("release" , function( e ){
+           self.releaseHand( e );
+       });
 
+       this.stage.getChildById("bg").on("touch" , function( e ){
+           self.holdHand( e )
+       }).on("release" , function( e ){
+           self.releaseHand( e );
+       });
 
        this.stage.addChild( btn );
 
@@ -118,8 +123,83 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
        },
        rateToAngle : function(){
            return this.config.rate / 100 * 180
-       }
+       },
+       holdHand    : function( e ){
+           var self  = this;
+           var num   = 100 - this.config.rate;;
+           var color = self.config.bColor;
+           if( e.target.id == "rate" ){
+               num   = this.config.rate;
+               color = self.config.ringColor;
+           } 
+           var btn = this.stage.getChildById("btn");
+          
+           new Canvax.Animation.Tween( { ringWidth : this.config.ringWidth } )
+               .to( { ringWidth : this.config.ringWidth * 3 / 4 }, 300 )
+               .onUpdate( function () {
+                   btn.context.r   = self.r - this.ringWidth
+               } ).start();  
 
+           var textSp = new Canvax.Display.Sprite({
+               id      : "holdTextSp",
+               context : {
+                   x   : btn.context.x - btn.context.r,
+                   y   : btn.context.y - btn.context.r,
+                 width : btn.context.r,
+                height : btn.context.r
+               }
+           });
+           var text  = new Canvax.Display.Text("0" , {
+               context : {
+                     x            : btn.context.r,
+                     y            : btn.context.r,
+                     fillStyle    : color,
+                     fontSize     : 25,
+                     textAlign    : "right",
+                     textBaseline : "middle"
+               }
+           } );
+
+           var text_float  = new Canvax.Display.Text(".00%" , {
+               context : {
+                     x            : btn.context.r,
+                     y            : btn.context.r + 3,
+                     fillStyle    : color,
+                     fontSize     : 15,
+                     textAlign    : "left",
+                     textBaseline : "middle"
+               }
+           } );
+           textSp.addChild( text );
+           textSp.addChild( text_float );
+           this.stage.addChild( textSp );
+
+           new Canvax.Animation.Tween( { num : 0 } )
+               .to( { num : num }, 300 )
+               .onUpdate( function () {
+                    text.resetText( parseInt(this.num).toString() );
+                    text_float.resetText( "." + this.num.toFixed(2).toString().split(".")[1] + "%" );
+               } ).start(); 
+           animate();
+
+       },
+       releaseHand : function( e ){
+           Canvax.Animation.removeAll();
+           this.stage.getChildById("holdTextSp").destroy();
+
+           var self = this;
+           if( e.target.id == "rate" ){
+               
+           }
+           var btn = this.stage.getChildById("btn");
+          
+           new Canvax.Animation.Tween( { ringWidth : ( this.r - btn.context.r ) } )
+               .to( { ringWidth : this.config.ringWidth }, 500 )
+               .onUpdate( function () {
+                   btn.context.r   = self.r - this.ringWidth
+               } ).start(); 
+
+       }
    } );
 
 
