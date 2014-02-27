@@ -1,37 +1,67 @@
-KISSY.add("dvix/chart/line/" , function( S , Dvix , Tools , xAxis , yAxis, Back){
+KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
     /*
      *@node chart在dom里的目标容器节点。
     */
     var Canvax = Dvix.Canvax;
     window.Canvax = Canvax
     var Line = function( node ){
-        this.title         =  "line";
-        this.type          =  null;
-        this.oneStrSize    =  null;
-        this.element       =  null;//chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-        this.canvax        =  null;
-        this.width         =  0;
-        this.height        =  0;
-        this.data          =  null;
-        this.dataRange     =  { //在上面的data池里面，当前可视尺寸内能现实的data范围，为以后的添加左右拖放放大缩小等扩展功能做准备
-             start     :  0,
-             to        :  0
-        };
-        this.fieldList     =  { //从上面的data获取得到的第一条数据的field字段列表
-            title      :   "",
-            index      :   0
-        };
-        this.barWidth      =  1;
-        this.spaceWidth    =  5; //默认为5，实际上会在_calculateDataRange中计算出来
-        this.spaceWidthMin =  1;
-        this.xAxis         =  null;
-        this.yAxis         =  null;
-        this.back          =  null;
-        this.graphs =  {
-            barColor   : ["#458AE6" , "#39BCC0" , "#5BCB8A"],
-            lineColor  : "#D6D6D6",
-            sprite     : null
-        };
+        this.version       =  '0.1'                    //图表版本
+        this.type          =  'line';                  //图表类型
+        this.canvax        =  null;                    //Canvax实例
+        this.element       =  null;                    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+        this.width         =  0;                       //图表区域宽
+        this.height        =  0;                       //图表区域高
+        this.config        =  {
+            mode       : 1,                            //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
+            event      : {
+                enabled : 1
+            }
+        }
+
+        this.dataFrame     =  {                        //数据框架集合
+            org        :[],                            //最原始的数据  
+            data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
+            yAxis      :{                              //y轴
+                fields     :  [],                      //字段集合 对应this.data
+                org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
+                section    :  [],                      //分段之后数据[200, 400, 600, 800, 1000, 1200, 1400, 1600]
+                data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
+            },
+            xAxis      :{                              //x轴
+                field      :  '',                      //字段 对应this.data
+                org        :  [],                      //原始数据['星期一','星期二']
+                data       :  []                       //坐标数据[{x:100,content:'星期一'},{x:200,content:'星期二'}]
+            },
+            graphs     :{                              //图形
+                data       :  [],                      //二维 数据集合等[[{x:0,y:-100},{}],[]]
+                disX       :  0                        //每两个点之间的距离
+            }
+        }
+
+        this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
+        this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
+
+        this._disX         =  0;                       //图表区域离左右的距离
+        this._disY         =  6;                       //图表区域离上下的距离
+        this._disYAndO     =  6;                       //y轴原点之间的距离
+
+        this._disXAxisLine =  6;                       //x轴两端预留的最小值
+        this._disYAxisTopLine =  6;                    //y轴顶端预留的最小值
+        this._disOriginX   =  0;                       //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
+
+        this._yMaxHeight   =  0;                       //y轴最大高
+        this._yGraphsHeight=  0;                       //y轴第一条线到原点的高
+
+        this._xMaxWidth    =  0;                       //x轴最大宽(去掉y轴之后)
+        this._xGraphsWidth =  0;                       //x轴宽(去掉两端)
+
+        this._baseNumber   =  0;                       //基础点
+
+        this._xAxis        =  null;
+        this._yAxis        =  null;
+        this._back         =  null;
+        this._graphs       =  null;
+        this._tips         =  null;
 
         this.customPL  = function(arr){
             return arr;
@@ -42,254 +72,392 @@ KISSY.add("dvix/chart/line/" , function( S , Dvix , Tools , xAxis , yAxis, Back)
 
     Line.prototype = {
 
-        _yBlock    : 0, //y轴方向，分段取整后的值
-        _yOverDiff : 0, //y轴方向把分段取整后多余的像素
-
-        init : function( node ){
-          var self = this;
-
-          self.element = node;
-          self.width   = parseInt(node.width());
-          self.height  = parseInt(node.height());
+        init:function(node){
+            var self = this;
+            self.element = node;
+            self.width   = parseInt(node.width());
+            self.height  = parseInt(node.height());
           
-          self.canvax = new Canvax({
-              el : self.element
-          })
+            self.canvax = new Canvax({
+                el : self.element
+            })
 
-          self.stage = new Canvax.Display.Stage({
-              id      : 'core',
-              context : {
-                  x : 0.5,
-                  y : 0.5
-              }
-          });
-          self.stageBG = new Canvax.Display.Stage({
-              id      : 'bg',
-              context : {
-                  x : 0.5,
-                  y : 0.5
-              }
-          });
+            self.stageTip = new Canvax.Display.Stage({
+                id      : 'tip',
+                context : {
+                    x : 0.5,
+                    y : 0.5
+                }
+            });
 
-          //先探测出来单个英文字符和单个的中文字符所占的高宽
-          self.oneStrSize = Tools.probOneStrSize();
+            self.stage = new Canvax.Display.Stage({
+                id      : 'core',
+                context : {
+                    x : 0.5,
+                    y : 0.5
+                }
+            });
+            self.stageBg = new Canvax.Display.Stage({
+                id      : 'bg',
+                context : {
+                    x : 0.5,
+                    y : 0.5
+                }
+            });
         },
-        draw : function(data , options){
-          var self = this;
+        draw:function(data, opt){
+            var self = this;
 
-          //初始化数据和配置
-          self._config(data , options);
-          
-          //从chart属性的data 里面获取yAxis xAxis的源data
-          self._initData();
+            self._initConfig(data, opt);               //初始化配置
+ 
+            self._initModule(opt)                      //初始化模块                      
+            
+            self._initData();                          //从chart属性的data 里面获取yAxis xAxis的源data
 
-          // //所有数据准备好后，终于开始绘图啦
-          self._startDraw();
+            self._startDraw();                         //所有数据准备好后，终于开始绘图啦
 
-          // //绘制结束，添加到舞台
-          self._drawEnd();
+            self._drawEnd();                           //绘制结束，添加到舞台
         },
-        _config  : function( data , options){
-          var self  = this;
-          self.data = data;
+        _initConfig:function(data, opt){
+            var self  = this;
+            self.dataFrame.org = data;
 
-          for ( var i=0,l=data[0].length; i<l ; i++ ){
-              self.fieldList[ data[0][i] ] = {
-                 index : self._getIndexForField( data[0][i] , data[0] )
-              };
-          }
+            if(opt){
+                self.config.mode = opt.mode || self.config.mode
+                self._disXAxisLine    = (opt.disXAxisLine    || opt.disXAxisLine    == 0) ? opt.disXAxisLine    : self._disXAxisLine
+                self._disYAxisTopLine = (opt.disYAxisTopLine || opt.disYAxisTopLine == 0) ? opt.disYAxisTopLine : self._disYAxisTopLine
+                self._disYAndO        = (opt.disYAndO        || opt.disYAndO == 0       ) ? opt.disYAndO        : self._disYAndO
+                var event = opt.event
+                if(event){
+                    self.config.event.enabled = event.enabled == 0 ? 0 : self.config.event.enabled
+                }
 
-          self.xAxis = new xAxis(options.xAxis);
+                var yAxis = opt.yAxis
+                if(yAxis){
+                    self.dataFrame.yAxis.fields = yAxis.fields || self.dataFrame.yAxis.fields
+                }
 
-          self.yAxis = new yAxis(options.yAxis);
-
-          self.back = new Back(options.back);
-
-          if(options){
-              // S.mix(self , options , undefined , undefined , true);
-          }
+                var xAxis = opt.xAxis
+                if(xAxis){
+                    self.dataFrame.xAxis.field = xAxis.field || self.dataFrame.xAxis.field
+                }
+            }
         },
-        _getIndexForField:function( field , arr ){
-          for( var i=0,l=arr.length ; i<l;i++){
-             if ( field === arr[i] ){
-                return i;
-             }
-          }
+
+        _initModule:function(opt){
+            var self  = this;
+            self._xAxis  = new xAxis(opt.xAxis);
+            self._yAxis  = new yAxis(opt.yAxis);
+            self._back   = new Back(opt.back);
+            self._graphs = new Graphs(opt.graphs);
+            self._tips   = new Tips(opt.tips)
         },
+
         _initData:function(){
-          var self = this;
+            var self = this;
+
+            var total = []
+            var arr = self.dataFrame.org
+
+            for(var a = 0, al = arr[0].length; a < al; a++){
+                var o = {}
+                o.field = arr[0][a]
+                o.index = a
+                o.data  = []
+                total.push(o)
+            }
+
+            for(var a = 1, al = arr.length; a < al; a++){
+                for(var b = 0, bl = arr[a].length; b < bl; b++){
+                    total[b].data.push(arr[a][b])
+                }     
+            }
+            self.dataFrame.data = total
+            //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
+
+            var arr = self.dataFrame.data
+            for(var a = 0, al = arr.length; a < al; a++){
+                var o = arr[a]
+                if(!self.dataFrame.xAxis.field){
+                    if(a == 0){
+                        self.dataFrame.xAxis.org = o.data
+                    }
+                    if(self.dataFrame.yAxis.fields.length == 0){
+                        if(a != 0){
+                            self.dataFrame.yAxis.org.push(o.data)
+                        }
+                    }else{
+                        for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
+                            if(o.field == self.dataFrame.yAxis.fields[b]){
+                                self.dataFrame.yAxis.org[b] = o.data
+                            }
+                        }
+                    }
+                }else{
+                    if(o.field == self.dataFrame.xAxis.field){
+                        self.dataFrame.xAxis.org = o.data
+                    }
+                    if(self.dataFrame.yAxis.fields.length == 0){
+                        if(o.field != self.dataFrame.xAxis.field){
+                            self.dataFrame.yAxis.org.push(o.data)
+                        }
+                    }else{
+                        for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
+                            if(o.field == self.dataFrame.yAxis.fields[b]){
+                                self.dataFrame.yAxis.org[b] = o.data
+                            }
+                        } 
+                    }
+                }
+            }
         },
  
         _startDraw : function(){
-          var self = this;
-          // self._graphsDraw();
-          var x
-          var y = this.height - self.xAxis.h
+            var self = this;
+            // self.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
+            // self.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
 
-          self.yAxis.draw();
-          self.yAxis.setY(y)
+            var arr = Tools.getChildsArr(self.dataFrame.yAxis.org)
+            self.dataFrame.yAxis.section = DataSection.section(arr)
+            
+            self._baseNumber = self.dataFrame.yAxis.section[0]
+            if(arr.length == 1){
+                self.dataFrame.yAxis.section[0] = arr[0] * 2
+                self._baseNumber = 0
+            }
 
-          x = self.yAxis.w
+            self._chartWidth  = self.width  - 2 * self._disX
+            self._chartHeight = self.height - 2 * self._disY
 
-          self.xAxis.draw({w:self.width - self.yAxis.w});
-          self.xAxis.setX(x), self.xAxis.setY(y)
+            self._yMaxHeight    = self._chartHeight - self._xAxis.h
+            self._yGraphsHeight = self._yMaxHeight - self._getYAxisDisLine()
+            self._trimYAxis()
 
-          self.back.draw({
-              w    : self.width - self.yAxis.w,
-              h    : y - 10,
-              xAxis:{
-                  // w   : 400,
-                  data:[{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}]
-              },
-              yAxis:{
-                  h : 300,
-                  data:[{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
-              }
-          });
-          self.back.setX(x), self.back.setY(y)
-          // self.xAxis.xAxisDraw();
+            var x = self._disX
+            var y = this.height - self._xAxis.h - self._disY
+
+            self._yAxis.draw({
+                data:self.dataFrame.yAxis.data
+            });
+            self._yAxis.setX(x), self._yAxis.setY(y)
+
+            var _yAxisW = self._yAxis.w
+            if(self.config.mode == 2){
+                _yAxisW = 0
+                self._disYAndO = 0
+            }
+            x = self._disX + _yAxisW + self._disYAndO
+
+            self._xMaxWidth    = self._chartWidth - _yAxisW - self._disYAndO
+            self._xGraphsWidth = self._xMaxWidth - self._getXAxisDisLine()
+            self._disOriginX   = parseInt((self._xMaxWidth - self._xGraphsWidth) / 2)
+            self._trimXAxis()
+            self._xAxis.draw({
+                w    :   self._xMaxWidth,
+                max  :   {
+                    left  : -(_yAxisW + self._disYAndO + self._disOriginX),
+                    right : self._xGraphsWidth + self._disOriginX
+                },
+                data :   self.dataFrame.xAxis.data
+            });
+            self._xAxis.setX(x + self._disOriginX), self._xAxis.setY(y)
+
+            self._back.draw({
+                w    : self._chartWidth - _yAxisW - self._disYAndO,
+                h    : y,
+                xAxis:{
+                    data:self.dataFrame.yAxis.data
+                }
+            });
+            self._back.setX(x), self._back.setY(y)
+
+            self.dataFrame.graphs.disX = self._getGraphsDisX()
+            self._trimGraphs()
+            self._graphs.draw({
+                w    : self._xGraphsWidth,
+                h    : self._yGraphsHeight,
+                data : self.dataFrame.graphs.data,
+                disX : self.dataFrame.graphs.disX
+            })
+            self._graphs.setX(x + self._disOriginX), self._graphs.setY(y)
+            if(self.config.event.enabled){
+                self._graphs.sprite.on(EventType.HOLD,function(e){
+                    self._onInduceHandler(e)
+                })
+                self._graphs.sprite.on(EventType.DRAG,function(e){
+                    self._onInduceHandler(e)
+                })
+                self._graphs.sprite.on(EventType.RELEASE,function(e){
+                    self._offInduceHandler(e)
+                })
+            }
         },
-        _drawEnd : function(){
-          var self = this;
+        _trimYAxis:function(){
+            var self = this
+            var max = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
+            var arr = self.dataFrame.yAxis.section
+            var tmpData = []
+            for (var a = 0, al = arr.length; a < al; a++ ) {
+                var y = - (arr[a] - self._baseNumber) / (max - self._baseNumber) * self._yGraphsHeight
+                y = isNaN(y) ? 0 : parseInt(y)                                                    
+                tmpData[a] = { 'content':arr[a], 'y': y }
+            }
+            self.dataFrame.yAxis.data = tmpData
+        },
+        _getYAxisDisLine:function(){                   //获取y轴顶高到第一条线之间的距离         
+            var self = this
+            var disMin = self._disYAxisTopLine
+            var disMax = 2 * disMin
+            var dis = disMin
+            dis = disMin + self._yMaxHeight % self.dataFrame.yAxis.section.length
+            dis = dis > disMax ? disMax : dis
+            return dis
+        },
+
+        _trimXAxis:function(){
+            var self = this
+            var max = self.dataFrame.xAxis.org.length
+            var arr = self.dataFrame.xAxis.org
+            var tmpData = []
+            for (var a = 0, al  = arr.length; a < al; a++ ) {
+                var o = {'content':arr[a], 'x':parseInt(a / (max - 1) * self._xGraphsWidth)}
+                tmpData.push( o )
+            }
+            if(max == 1){
+                o.x = parseInt(self._xGraphsWidth / 2)
+            }
+            self.dataFrame.xAxis.data = tmpData
+        },
+        _getXAxisDisLine:function(){                   //获取x轴两端预留的距离
+            var self = this
+            var disMin = self._disXAxisLine
+            var disMax = 2 * disMin
+            var dis = disMin
+            dis = disMin + self._xMaxWidth % self.dataFrame.xAxis.org.length
+            dis = dis > disMax ? disMax : dis
+            dis = isNaN(dis) ? 0 : dis
+            return dis
+        },
+
+        _trimGraphs:function(){
+            var self = this                                                           
+            var maxYAxis = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
+            var maxXAxis = self.dataFrame.xAxis.org.length
+            var arr = self.dataFrame.yAxis.org
+            var tmpData = []
+            for (var a = 0, al = arr.length; a < al; a++ ) {
+                for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
+                    !tmpData[a] ? tmpData[a] = [] : ''
+                    var y = - (arr[a][b] - self._baseNumber) / (maxYAxis - self._baseNumber) * self._yGraphsHeight
+                    y = isNaN(y) ? 0 : y
+                    tmpData[a][b] = {'value':arr[a][b], 'x':b / (maxXAxis - 1) * self._xGraphsWidth,'y':y}
+                }
+            }
+            if(maxXAxis == 1){
+                if(tmpData[0] && tmpData[0][0]){
+                    tmpData[0][0].x = parseInt(self._xGraphsWidth / 2)
+                }
+            }
+            self.dataFrame.graphs.data = tmpData
+        },
+        //每两个点之间的距离
+        _getGraphsDisX:function(){
+            var self = this
+            return self._xGraphsWidth / (self.dataFrame.xAxis.org.length - 1)
+        },
+
+        _drawEnd:function(){
+            var self = this;
+            self.stageBg.addChild(self._back.sprite)
+
+            self.stage.addChild(self._xAxis.sprite);
+            self.stage.addChild(self._graphs.sprite);
+            self.stage.addChild(self._yAxis.sprite);
+
+            self.stageTip.addChild(self._tips.sprite)
          
-          self.stageBG.addChild(self.back.sprite)
-
-          self.stage.addChild(self.yAxis.sprite);
-          self.stage.addChild(self.xAxis.sprite);
-          // self.stage.addChild( self.xAxis.sprite );
-          // self.stage.addChild( self.graphs.sprite );
-          self.canvax.addChild( self.stageBG );
-          self.canvax.addChild( self.stage );
+            self.canvax.addChild(self.stageBg);
+            self.canvax.addChild(self.stage);
+            self.canvax.addChild(self.stageTip)
         },
-        _graphsLayout : function(){
-          var self   = this;
-          var yContext = self.yAxis.sprite.context;
-          self.graphs.sprite = new Canvax.Display.Sprite({
-             context : {
-               x     : yContext.width,
-               y     : yContext.y,
-               width : self.width - yContext.width,
-               height: yContext.height
-             }
-          });
+
+        _onInduceHandler:function($evt){
+            var self = this
+            var strokeStyles = self._graphs.line.strokeStyle.overs
+            var context = self._tips.opt.context
+            var disTop = self._tips.opt.disTop
+            var iGroup = $evt.info.iGroup, iNode = $evt.info.iNode
+
+            var x = parseInt($evt.info.nodeInfo.stageX), y = parseInt(disTop)
+            var data = []
+            var arr  = self.dataFrame.graphs.data
+            for(var a = 0, al = arr.length; a < al; a++){
+                if(!data[a]){
+                    data[a] = []
+
+                    var o = {
+                        content  : context.prefix.values[a],
+                        bold     : context.bolds[a],
+                        fontSize : context.fontSizes[a],
+                        fillStyle: context.fillStyles[a],
+                        sign     : {
+                            enabled   : 1,
+                            trim      : 1,
+                            fillStyle : strokeStyles[a]
+                        }
+                    }
+                    data[a].push(o)
+                }
+                
+                var o = {
+                    content  : Tools.numAddSymbol(arr[a][iNode].value),
+                    bold     : context.bolds[a],
+                    fontSize : context.fontSizes[a],
+                    fillStyle: context.fillStyles[a],
+                    y_align  : 1
+                }
+                data[a].push(o)
+            }
+
+            var tips = {
+                w    : self.width,
+                h    : self.height
+            }
+            tips.tip = {
+                x    : x,
+                y    : y,
+                data : data
+            }
+
+            var yEnd = self._graphs.getY() - disTop
+            tips.line = {
+                x    : x,
+                y    : parseInt(self._graphs.getY()),
+                yEnd : -yEnd
+            }
+
+            var data = []
+            var arr = $evt.info.nodesInfoList
+            for(var a = 0, al = arr.length; a < al; a++){
+                var o = {
+                    x         : parseInt(arr[a].stageX),
+                    y         : parseInt(arr[a].stageY),
+                    fillStyle : strokeStyles[a]
+                }
+                data.push(o)
+            }
+            tips.nodes = {
+                data : data
+            }
+
+            self._tips.remove()
+            self._tips.draw(tips)
         },
-        _calculateDataRange : function(){
-          //计算当前可视范围内能显示的data的范围，和spaceWidth barWidth
-          var self     = this;
-          var gSpriteC = self.graphs.sprite.context;
-          var dl       = self.data.length-1;//因为第一行是field，所以要 -1
-
-          //数据需要截断的情况
-          self.dataRange.start = 1;
-          if ( (self.barWidth + self.spaceWidthMin) * dl > gSpriteC.width ){
-             self.dataRange.to = parseInt( gSpriteC.width / (self.barWidth + self.spaceWidthMin));
-          } else {
-             self.dataRange.to = dl;
-          }
-
-          //@gwidth 单个分组的bar+space的宽度 ，，，，，  重新计算barWidth spaceWidth
-          var gwidth = (gSpriteC.width - self.barWidth) / (self.dataRange.to - self.dataRange.start);
-          self.spaceWidth = gwidth - self.barWidth;
-
-          //真正绘制之前 还要计算y轴的相关数据
-          self._yBlock    = parseInt( gSpriteC.height / (self.yAxis.data.length - 1));
-          //v方向均分后还多余的部分px
-          self._yOverDiff =  gSpriteC.height - self._yBlock *( self.yAxis.data.length - 1 );
-
-        },
-        _graphsDraw : function(){
-          //开始真正绘图
-          //先画背景框
-          var self          = this;
-          var data          = self.data;
-          var yAxis         = self.yAxis;
-          var xAxis         = self.xAxis;
-          var graphs        = self.graphs;
-          var gSpriteC    = graphs.sprite.context;
-          
-
-          //画背景虚线
-          for ( var i=0,l=yAxis.data.length-1 ; i<l ; i++ ){
-             var linex = - self.oneStrSize.en.width + 2;
-             var liney = Math.round( i * self._yBlock ) + self._yOverDiff; 
-             graphs.sprite.addChild(new Canvax.Shapes.Line({
-                 context : {
-                     xStart      : linex,
-                     yStart      : liney,
-                     xEnd        : linex + gSpriteC.width + self.oneStrSize.en.width - 2,
-                     yEnd        : liney,
-                     lineType    : "dashed",
-                     lineWidth   : 1,
-                     strokeStyle : graphs.lineColor
-                 }
-             }));
-          };
-
-          //画左边线
-          graphs.sprite.addChild(new Canvax.Shapes.Line({
-              id : "line-left",
-              context : {
-                  xStart      : 0,
-                  yStart      : -gSpriteC.y,
-                  xEnd        : 0,
-                  yEnd        : gSpriteC.height,
-                  lineWidth   : 1,
-                  strokeStyle : graphs.lineColor
-              }
-          }));
-
-          //画下边线
-          graphs.sprite.addChild(new Canvax.Shapes.Line({
-              id : "line-bottom",
-              context : {
-                  xStart      : 0,
-                  yStart      : gSpriteC.height,
-                  xEnd        : self.width - gSpriteC.x,
-                  yEnd        : gSpriteC.height,
-                  lineWidth   : 1,
-                  strokeStyle : graphs.lineColor
-              }
-          }));
-
-          var dataRange = self.dataRange;
-          var maxY      = 0;//yAxis方向最大值
-          var minY      = 0;//yAxis方向最小
-
-          S.each( yAxis.data , function(item ,i){
-            maxY = Math.max(maxY,item);
-            minY = Math.min(minY,item);
-          } );
-
-          //一条数据分组占据的width
-          var groupWidth = self.barWidth + self.spaceWidth;
-
-          S.each( yAxis.fields , function(field , fi){
-              var pointList = [];
-
-              for (var d = dataRange.start ; d<=dataRange.to ; d++){
-                  var groupI = d - dataRange.start; 
-                  var x = Math.round( groupI * ( groupWidth ) );
-
-                  var itemHeight = gSpriteC.height - Math.round((gSpriteC.height - self._yOverDiff) * ( data[d][ self.fieldList[field].index ] / (maxY-minY) ));
-                  pointList.push( [x , itemHeight] );
-              };
-
-              //这个时候的数据要给xAxis保留一份
-              self.xAxis.getxAxisPoints( pointList , groupWidth );
-
-              //设置原点
-              var gs_origin = (yAxis.data.length - 1 - S.indexOf( 0 , yAxis.data )) * self._yBlock -  graphs.sprite.context.height;
-              graphs.sprite.addChild( new Canvax.Shapes.BrokenLine({
-                  context : {
-                      pointList   : self.customPL( pointList ),
-                      strokeStyle : 'red',
-                      lineWidth   : 1,
-                      x           : 0,
-                      y           : gs_origin
-                  }
-              }) );
-
-          });
+        _offInduceHandler:function($evt){
+            var self = this
+            if(self._tips){
+                self._tips.remove()
+            }
         }
     };
     return Line;
@@ -297,8 +465,12 @@ KISSY.add("dvix/chart/line/" , function( S , Dvix , Tools , xAxis , yAxis, Back)
     requires: [
         'dvix/',
         'dvix/utils/tools',
+        'dvix/utils/datasection',
+        'dvix/event/eventtype',
         'dvix/components/xaxis/xAxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
+        'dvix/components/line/Graphs',
+        'dvix/components/tips/Tips'
     ]
 });

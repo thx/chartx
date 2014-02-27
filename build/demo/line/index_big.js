@@ -31,14 +31,10 @@ KISSY.ready(function(){
     ];
     var options = {
         // title : "first charts",
-        // disXAxisLine : 0,
+        // disXAxisLine : 26,
         // disYAxisTopLine : 26,
+        disYAndO : 20,
         mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
-
-        event : {
-            enabled : 0                                //是否有事件响应(tips)
-        },
-
         yAxis : {
             mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
             fields : ["val4","val3"],
@@ -48,7 +44,7 @@ KISSY.ready(function(){
                 // strokeStyle : '#ff0000'
             },
             text:{
-                // fillStyle:'#ff0000',
+                fillStyle:'#999999',
                 fontSize  : 12
             }
         },
@@ -62,7 +58,6 @@ KISSY.ready(function(){
                 strokeStyle   : '#cccccc'
             },
             text:{
-                mode      : 2,
                 fontSize  : 10
             }
         },
@@ -92,7 +87,7 @@ KISSY.ready(function(){
                     normals : [0.8, 0.7],
                 }
             }
-        },
+        },       
         tips  :{
             // disTop : 50,
             context:{
@@ -104,10 +99,9 @@ KISSY.ready(function(){
                 fillStyles:['#333333','#999999','#999999']
             },
             tip  : {
-                // back:{
-                    // enabled : 0
+                back:{
                     // disX:10
-                // }
+                }
             },
             line : {
                 // lineType: ''
@@ -117,6 +111,7 @@ KISSY.ready(function(){
             }
         }
     }
+     
 
     KISSY.config({
         packages: [{
@@ -126,6 +121,8 @@ KISSY.ready(function(){
         }
         ]
     });
+
+
 
     KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
 

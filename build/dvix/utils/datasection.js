@@ -1,5 +1,5 @@
 KISSY.add('dvix/utils/datasection',function(S){
-	 function normalizeTickInterval(interval, magnitude) {
+	function normalizeTickInterval(interval, magnitude) {
         var normalized, i;
         // var multiples = [1, 2, 2.5, 5, 10];
         var multiples = [1, 2, 5, 10];
@@ -36,6 +36,8 @@ KISSY.add('dvix/utils/datasection',function(S){
 
     function getLinearTickPositions(arr,$maxPart,$cfg) {
     	var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) :1
+    	//返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
+    	var isInt = $cfg && $cfg.isInt ? 1 : 0 
 
 		if(isNaN(scale)){
 			scale = 1
@@ -72,6 +74,9 @@ KISSY.add('dvix/utils/datasection',function(S){
         var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
 
         tickInterval = normalizeTickInterval(tickInterval, magnitude);
+        if(isInt){
+        	tickInterval = Math.ceil(tickInterval)
+        }
 
         var pos,
             lastPos,
