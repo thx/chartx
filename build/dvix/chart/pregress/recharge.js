@@ -68,14 +68,15 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
            }
        });
 
+       
        //添加十字的图形
        var spW  = btn.context.r * 3 / 4 * 2;
        var spH  = btn.context.r * 3 / 4 * 2;
        var addBtnSp = new Canvax.Display.Sprite({
            id      : "cross",
            context : {
-               x   : (btn.context.x - btn.context.r) * 5 / 4,
-               y   : (btn.context.y - btn.context.r) * 5 / 4,
+               x   : (btn.context.x - spW / 2) ,
+               y   : (btn.context.y - spH / 2) ,
                width : spW,
                height: spH,
                scaleOrigin : {
