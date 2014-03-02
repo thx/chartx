@@ -22,6 +22,7 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
           ringColor : '#f59622',
           bColor    : '#3c3c3c',
           btnColor  : 'white',
+          crossLineColor : '#666666',
           rate      : 0 , // 0 - 100
        }, opt );
    
@@ -67,6 +68,68 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
            }
        });
 
+       //添加十字的图形
+       var spW  = btn.context.r * 3 / 4 * 2;
+       var spH  = btn.context.r * 3 / 4 * 2;
+       var addBtnSp = new Canvax.Display.Sprite({
+           id      : "cross",
+           context : {
+               x   : (btn.context.x - btn.context.r) * 5 / 4,
+               y   : (btn.context.y - btn.context.r) * 5 / 4,
+               width : spW,
+               height: spH,
+               scaleOrigin : {
+                   x : spW / 2,
+                   y : spH / 2
+               },
+               rotateOrigin : {
+                   x : spW / 2,
+                   y : spH / 2
+               }
+            }
+       });
+       addBtnSp.addChild(new Canvax.Shapes.Line({
+           context : {
+               xStart : 0,
+               yStart : addBtnSp.context.height / 2,
+               xEnd : addBtnSp.context.width,
+               yEnd : addBtnSp.context.height / 2,
+               lineWidth : 1,
+               strokeStyle : this.config.crossLineColor
+           }
+       }));
+
+       addBtnSp.addChild(new Canvax.Shapes.Line({
+           context : {
+               xStart : addBtnSp.context.width / 2,
+               yStart : 0,
+               xEnd : addBtnSp.context.width / 2,
+               yEnd : addBtnSp.context.height,
+               lineWidth : 1,
+               strokeStyle : this.config.crossLineColor
+           }
+       }));
+
+       var crossRectWidth = 6;
+       var rw = (addBtnSp.context.width - crossRectWidth) / 2;
+       var rh = (addBtnSp.context.height - crossRectWidth)/ 2;
+       addBtnSp.addChild(new Canvax.Shapes.Rect({
+           context : {
+               x   :  rw ,
+               y   :  rh ,
+               width : crossRectWidth,
+               height: crossRectWidth,
+               rotation : 45,
+               rotateOrigin : {
+                  x : crossRectWidth / 2,
+                  y : crossRectWidth / 2
+               },
+               fillStyle : this.config.crossLineColor
+       
+           }
+       }));
+       //添加十字的图形结束
+
        btn.on("tap" , function(){
            self.fire("recharge")
        });
@@ -84,6 +147,7 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
        });
 
        this.stage.addChild( btn );
+       this.stage.addChild( addBtnSp );
 
        if( this.config.rate > 0 ){
            this.setRate( this.config.rate , true );
@@ -132,7 +196,10 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
                num   = this.config.rate;
                color = self.config.ringColor;
            } 
-           var btn = this.stage.getChildById("btn");
+           var cross = this.stage.getChildById("cross");
+           cross.context.visible = false; //把加号隐藏
+
+           var btn   = this.stage.getChildById("btn");
           
            new Canvax.Animation.Tween( { ringWidth : this.config.ringWidth } )
                .to( { ringWidth : this.config.ringWidth * 3 / 4 }, 300 )
@@ -192,13 +259,17 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
                
            }
            var btn = this.stage.getChildById("btn");
+           var cross = this.stage.getChildById("cross");
+           cross.context.visible = true; //把加号隐藏
+           cross.context.alpha    = 0;
           
-           new Canvax.Animation.Tween( { ringWidth : ( this.r - btn.context.r ) } )
-               .to( { ringWidth : this.config.ringWidth }, 500 )
+           new Canvax.Animation.Tween( { ringWidth : ( this.r - btn.context.r ) ,  rotation : 0 , alpha : 0 } )
+               .to( { ringWidth : this.config.ringWidth , rotation : 360 , alpha : 1 }, 500 )
                .onUpdate( function () {
-                   btn.context.r   = self.r - this.ringWidth
+                   btn.context.r   = self.r - this.ringWidth;
+                   cross.context.rotation   = this.rotation;
+                   cross.context.alpha      = this.alpha;
                } ).start(); 
-
        }
    } );
 
