@@ -72,7 +72,7 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
        //添加十字的图形
        var spW  = btn.context.r * 3 / 4 * 2;
        var spH  = btn.context.r * 3 / 4 * 2;
-       var addBtnSp = new Canvax.Display.Sprite({
+       window.addBtnSp = new Canvax.Display.Sprite({
            id      : "cross",
            context : {
                x   : (btn.context.x - spW / 2) ,
@@ -262,14 +262,14 @@ KISSY.add("dvix/chart/pregress/recharge" , function( S , Chart ){
            var btn = this.stage.getChildById("btn");
            var cross = this.stage.getChildById("cross");
            cross.context.visible = true; //把加号隐藏
-           cross.context.alpha    = 0;
+           cross.context.globalAlpha    = 0;
           
-           new Canvax.Animation.Tween( { ringWidth : ( this.r - btn.context.r ) ,  rotation : 0 , alpha : 0 } )
-               .to( { ringWidth : this.config.ringWidth , rotation : 360 , alpha : 1 }, 500 )
+           new Canvax.Animation.Tween( { ringWidth : ( this.r - btn.context.r ) ,  rotation : 0 , globalAlpha : 0 } )
+               .to( { ringWidth : this.config.ringWidth , rotation : 360 , globalAlpha : 1 }, 500 )
                .onUpdate( function () {
-                   btn.context.r   = self.r - this.ringWidth;
-                   cross.context.rotation   = this.rotation;
-                   cross.context.alpha      = this.alpha;
+                   btn.context.r             = self.r - this.ringWidth;
+                   cross.context.rotation    = this.rotation;
+                   cross.context.globalAlpha = this.globalAlpha;
                } ).start(); 
        }
    } );
