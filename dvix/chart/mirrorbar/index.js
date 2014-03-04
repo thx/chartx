@@ -1,18 +1,21 @@
-KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
+KISSY.add("dvix/chart/mirrorbar/" , function(S, Dvix, Tools, DataSection, EventType, yAxis, Back, Graphs, Tips){
     /*
      *@node chart在dom里的目标容器节点。
     */
     var Canvax = Dvix.Canvax;
     window.Canvax = Canvax
-    var Line = function( node ){
+    var Mirrorbar = function( node ){
         this.version       =  '0.1'                    //图表版本
-        this.type          =  'line';                  //图表类型(折线图)
+        this.type          =  'mirrorbar';             //图表类型(镜像直方图)
         this.canvax        =  null;                    //Canvax实例
         this.element       =  null;                    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width         =  0;                       //图表区域宽
         this.height        =  0;                       //图表区域高
         this.config        =  {
             mode       : 1,                            //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
+            dataSection:{
+                maxPart: 9,
+            },
             event      : {
                 enabled : 1
             }
@@ -24,13 +27,14 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             yAxis      :{                              //y轴
                 fields     :  [],                      //字段集合 对应this.data
                 org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
-                section    :  [],                      //分段之后数据[200, 400, 600, 800, 1000, 1200, 1400, 1600]
+                section    :  {
+                    length :  2,                       //用来标识外部数据传入几个数组
+                    org    :  [],                      //分段之后数据[1800,1200,600,0,600,1200,1800]
+                    data   :  [],                      //如果length >= 2 分段之后数据, 第一个和最后一个已删除[1200,600,0,600,1200]
+                                                       //如果length == 1 分段之后数据, 第一个和最后一个不删除[0,600,1200]
+                    spanABS:  0,                       //跨度,第一个值的绝对值 + 最后一个值的绝对值 
+                },
                 data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
-            },
-            xAxis      :{                              //x轴
-                field      :  '',                      //字段 对应this.data
-                org        :  [],                      //原始数据['星期一','星期二']
-                data       :  []                       //坐标数据[{x:100,content:'星期一'},{x:200,content:'星期二'}]
             },
             graphs     :{                              //图形
                 data       :  [],                      //二维 数据集合等[[{x:0,y:-100},{}],[]]
@@ -41,13 +45,9 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
         this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
 
-        this._disX         =  0;                       //图表区域离左右的距离
-        this._disY         =  6;                       //图表区域离上下的距离
+        this._disX         =  10;                      //图表区域离左右的距离
+        this._disY         =  10;                      //图表区域离上下的距离
         this._disYAndO     =  6;                       //y轴原点之间的距离
-
-        this._disXAxisLine =  6;                       //x轴两端预留的最小值
-        this._disYAxisTopLine =  6;                    //y轴顶端预留的最小值
-        this._disOriginX   =  0;                       //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
 
         this._yMaxHeight   =  0;                       //y轴最大高
         this._yGraphsHeight=  0;                       //y轴第一条线到原点的高
@@ -57,7 +57,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
 
         this._baseNumber   =  0;                       //基础点
 
-        this._xAxis        =  null;
         this._yAxis        =  null;
         this._back         =  null;
         this._graphs       =  null;
@@ -66,7 +65,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
 	   	this.init.apply(this , arguments);
     };
 
-    Line.prototype = {
+    Mirrorbar.prototype = {
 
         init:function(node){
             var self = this;
@@ -115,9 +114,9 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
 
             if(opt){
                 self.config.mode = opt.mode || self.config.mode
-                self._disXAxisLine    = (opt.disXAxisLine    || opt.disXAxisLine    == 0) ? opt.disXAxisLine    : self._disXAxisLine
-                self._disYAxisTopLine = (opt.disYAxisTopLine || opt.disYAxisTopLine == 0) ? opt.disYAxisTopLine : self._disYAxisTopLine
-                self._disYAndO        = (opt.disYAndO        || opt.disYAndO == 0       ) ? opt.disYAndO        : self._disYAndO
+                self._disX     = opt.disX      || self._disX
+                self._disY     = opt.disY      || self._disY
+                self._disYAndO = (opt.disYAndO || opt.disYAndO == 0) ? opt.disYAndO : self._disYAndO
                 var event = opt.event
                 if(event){
                     self.config.event.enabled = event.enabled == 0 ? 0 : self.config.event.enabled
@@ -127,17 +126,11 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 if(yAxis){
                     self.dataFrame.yAxis.fields = yAxis.fields || self.dataFrame.yAxis.fields
                 }
-
-                var xAxis = opt.xAxis
-                if(xAxis){
-                    self.dataFrame.xAxis.field = xAxis.field || self.dataFrame.xAxis.field
-                }
             }
         },
 
         _initModule:function(opt){
             var self  = this;
-            self._xAxis  = new xAxis(opt.xAxis);
             self._yAxis  = new yAxis(opt.yAxis);
             self._back   = new Back(opt.back);
             self._graphs = new Graphs(opt.graphs);
@@ -169,35 +162,15 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             var arr = self.dataFrame.data
             for(var a = 0, al = arr.length; a < al; a++){
                 var o = arr[a]
-                if(!self.dataFrame.xAxis.field){
-                    if(a == 0){
-                        self.dataFrame.xAxis.org = o.data
-                    }
-                    if(self.dataFrame.yAxis.fields.length == 0){
-                        if(a != 0){
-                            self.dataFrame.yAxis.org.push(o.data)
-                        }
-                    }else{
-                        for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
-                            if(o.field == self.dataFrame.yAxis.fields[b]){
-                                self.dataFrame.yAxis.org[b] = o.data
-                            }
-                        }
+                if(self.dataFrame.yAxis.fields.length == 0){
+                    if(a != 0){
+                        self.dataFrame.yAxis.org.push(o.data)
                     }
                 }else{
-                    if(o.field == self.dataFrame.xAxis.field){
-                        self.dataFrame.xAxis.org = o.data
-                    }
-                    if(self.dataFrame.yAxis.fields.length == 0){
-                        if(o.field != self.dataFrame.xAxis.field){
-                            self.dataFrame.yAxis.org.push(o.data)
+                    for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
+                        if(o.field == self.dataFrame.yAxis.fields[b]){
+                            self.dataFrame.yAxis.org[b] = o.data
                         }
-                    }else{
-                        for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
-                            if(o.field == self.dataFrame.yAxis.fields[b]){
-                                self.dataFrame.yAxis.org[b] = o.data
-                            }
-                        } 
                     }
                 }
             }
@@ -205,27 +178,17 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
  
         _startDraw : function(){
             var self = this;
-            // self.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
-            // self.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
-
-            var arr = Tools.getChildsArr(self.dataFrame.yAxis.org)
-            self.dataFrame.yAxis.section = DataSection.section(arr)
-
-            self._baseNumber = self.dataFrame.yAxis.section[0]
-            if(arr.length == 1){
-                self.dataFrame.yAxis.section[0] = arr[0] * 2
-                self._baseNumber = 0
-            }
+            self._trimSection()
 
             self._chartWidth  = self.width  - 2 * self._disX
             self._chartHeight = self.height - 2 * self._disY
 
-            self._yMaxHeight    = self._chartHeight - self._xAxis.h
-            self._yGraphsHeight = self._yMaxHeight - self._getYAxisDisLine()
+            self._yMaxHeight    = self._chartHeight
+            self._yGraphsHeight = self._yMaxHeight
             self._trimYAxis()
 
             var x = self._disX
-            var y = this.height - self._xAxis.h - self._disY
+            var y = self.height - self._disY
 
             self._yAxis.draw({
                 data:self.dataFrame.yAxis.data
@@ -240,18 +203,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             x = self._disX + _yAxisW + self._disYAndO
 
             self._xMaxWidth    = self._chartWidth - _yAxisW - self._disYAndO
-            self._xGraphsWidth = self._xMaxWidth - self._getXAxisDisLine()
-            self._disOriginX   = parseInt((self._xMaxWidth - self._xGraphsWidth) / 2)
-            self._trimXAxis()
-            self._xAxis.draw({
-                w    :   self._xMaxWidth,
-                max  :   {
-                    left  : -(_yAxisW + self._disYAndO + self._disOriginX),
-                    right : self._xGraphsWidth + self._disOriginX
-                },
-                data :   self.dataFrame.xAxis.data
-            });
-            self._xAxis.setX(x + self._disOriginX), self._xAxis.setY(y)
+            self._xGraphsWidth = self._xMaxWidth
 
             self._back.draw({
                 w    : self._chartWidth - _yAxisW - self._disYAndO,
@@ -262,7 +214,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             });
             self._back.setX(x), self._back.setY(y)
 
-            self.dataFrame.graphs.disX = self._getGraphsDisX()
+            return
             self._trimGraphs()
             self._graphs.draw({
                 w    : self._xGraphsWidth,
@@ -270,7 +222,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 data : self.dataFrame.graphs.data,
                 disX : self.dataFrame.graphs.disX
             })
-            self._graphs.setX(x + self._disOriginX), self._graphs.setY(y)
+            self._graphs.setX(x), self._graphs.setY(y)
             if(self.config.event.enabled){
                 self._graphs.sprite.on(EventType.HOLD,function(e){
                     self._onInduceHandler(e)
@@ -283,6 +235,60 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 })
             }
         },
+
+        _trimSection:function(){                       //调整Section各数据
+            var self = this
+            self.dataFrame.yAxis.section.length  = self.dataFrame.yAxis.org.length
+            self.dataFrame.yAxis.section.org     = self._getSection()
+            if(self.dataFrame.yAxis.section.length >= 2){
+                var arr = S.clone(self.dataFrame.yAxis.section.org)
+                var spanABS = Math.abs(arr.shift()) +  Math.abs(arr.pop())
+                self.dataFrame.yAxis.section.data = arr
+                self.dataFrame.yAxis.section.spanABS = spanABS
+            }else{
+                self.dataFrame.yAxis.section.data = S.clone(self.dataFrame.yAxis.section.org)
+            }
+            console.log(self.dataFrame.yAxis.section)
+        },
+
+        _getSection:function(){                        //获取处理后的y轴数据(原始包含两端最大值的数组)
+            var self = this
+            var section = []
+            var arr = self.dataFrame.yAxis.org
+            var maxPart = parseInt((self.config.dataSection.maxPart - 1) / 2)
+
+
+            console.log(DataSection.section([0,0,0,0,0,0], maxPart, {mode:1}))
+
+            if(arr.length >= 2){
+                var section1 = DataSection.section(arr[0], maxPart, {mode:1})
+                var section2 = DataSection.section(arr[1], maxPart, {mode:1})
+
+                var max1 = section1[section1.length - 1]
+                var max2 = section2[section2.length - 1]
+
+                if(max1 >= max2){
+                    section2 = S.clone(section1)
+                }else{
+                    section1 = S.clone(section2)
+                }
+
+                if(section1[0] == 0){
+                    section2.shift()
+                }else{
+                    section2.unshift(0)
+                }     
+                section2.sort(function(a,b){return b-a;})
+
+                section = section2.concat(section1)
+            }else{
+                section = DataSection.section(arr[0], maxPart, {mode:1})
+
+            }
+            console.log('section = ' + section)
+            return section
+        },
+
         _trimYAxis:function(){
             var self = this
             var max = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
@@ -294,40 +300,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 tmpData[a] = { 'content':arr[a], 'y': y }
             }
             self.dataFrame.yAxis.data = tmpData
-        },
-        _getYAxisDisLine:function(){                   //获取y轴顶高到第一条线之间的距离         
-            var self = this
-            var disMin = self._disYAxisTopLine
-            var disMax = 2 * disMin
-            var dis = disMin
-            dis = disMin + self._yMaxHeight % self.dataFrame.yAxis.section.length
-            dis = dis > disMax ? disMax : dis
-            return dis
-        },
-
-        _trimXAxis:function(){
-            var self = this
-            var max = self.dataFrame.xAxis.org.length
-            var arr = self.dataFrame.xAxis.org
-            var tmpData = []
-            for (var a = 0, al  = arr.length; a < al; a++ ) {
-                var o = {'content':arr[a], 'x':parseInt(a / (max - 1) * self._xGraphsWidth)}
-                tmpData.push( o )
-            }
-            if(max == 1){
-                o.x = parseInt(self._xGraphsWidth / 2)
-            }
-            self.dataFrame.xAxis.data = tmpData
-        },
-        _getXAxisDisLine:function(){                   //获取x轴两端预留的距离
-            var self = this
-            var disMin = self._disXAxisLine
-            var disMax = 2 * disMin
-            var dis = disMin
-            dis = disMin + self._xMaxWidth % self.dataFrame.xAxis.org.length
-            dis = dis > disMax ? disMax : dis
-            dis = isNaN(dis) ? 0 : dis
-            return dis
         },
 
         _trimGraphs:function(){
@@ -351,17 +323,11 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             }
             self.dataFrame.graphs.data = tmpData
         },
-        //每两个点之间的距离
-        _getGraphsDisX:function(){
-            var self = this
-            return self._xGraphsWidth / (self.dataFrame.xAxis.org.length - 1)
-        },
 
         _drawEnd:function(){
             var self = this;
             self.stageBg.addChild(self._back.sprite)
 
-            self.stage.addChild(self._xAxis.sprite);
             self.stage.addChild(self._graphs.sprite);
             self.stage.addChild(self._yAxis.sprite);
 
@@ -451,14 +417,13 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             }
         }
     };
-    return Line;
+    return Mirrorbar;
 } , {
     requires: [
         'dvix/',
         'dvix/utils/tools',
         'dvix/utils/datasection',
         'dvix/event/eventtype',
-        'dvix/components/xaxis/xAxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
         'dvix/components/line/Graphs',

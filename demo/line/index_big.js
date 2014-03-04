@@ -117,6 +117,7 @@ KISSY.ready(function(){
         packages: [{
             name  :  'dvix'  ,
             path  :  '../../',
+            // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
             debug :  true
         }
         ]

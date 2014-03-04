@@ -12,10 +12,10 @@ KISSY.ready(function(){
         [ 6  , 390  , 546 , 300 ] ,
         [ 7 , 201  , 101 , 500 ] ,
         [8  , 1145 , 145 , 100 ] ,
-        [ 9 , 488  , 88  , 700 ] ,
+        [ 9 , 488  , 88  , 1700 ] ,
         [ 10  , 390  , 546 , 300 ],
         [ 11  , 390  , 546 , 300 ],
-        [ 12  , 390  , 546 , 300 ],
+        [ 12  , 390  , 1546 , 300 ],
         [ 13  , 390  , 546 , 300 ],
         [ 14  , 390  , 546 , 300 ],
         [ 15  , 390  , 546 , 300 ],
@@ -31,18 +31,16 @@ KISSY.ready(function(){
     ];
     var options = {
         // title : "first charts",
-        // disXAxisLine : 0,
-        // disYAxisTopLine : 26,
+        // disX : 10,
+        // disY : 10,
         mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
-
         event : {
             enabled : 0                                //是否有事件响应(tips)
         },
 
         yAxis : {
             mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
-            fields : ["val4","val3"],
-            // dataMode:0,
+            fields : ["val4"],
             line:{
                 enabled : 0,
                 // strokeStyle : '#ff0000'
@@ -52,24 +50,9 @@ KISSY.ready(function(){
                 fontSize  : 12
             }
         },
-        xAxis : {
-            // field : "val2",
-            disY: 6,
-            dis : 6,
-            line:{
-                width   : 2,
-                height  : 4,
-                strokeStyle   : '#cccccc'
-            },
-            text:{
-                mode      : 2,
-                fontSize  : 10
-            }
-        },
         back : {
             xOrigin:{
-                thinkness:1,
-                strokeStyle : '#333333'
+                enabled:0
             },
             yOrigin:{
                 enabled:0
@@ -127,10 +110,10 @@ KISSY.ready(function(){
         ]
     });
 
-    KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
+    KISSY.use("dvix/chart/mirrorbar/ , node" , function( S , Mirrorbar ){
 
-        window.line = new Line( S.all("#canvasTest") );
-        line.draw( data1 , options );
+        window.mirrorbar = new Mirrorbar( S.all("#canvasTest") );
+        mirrorbar.draw( data1 , options );
 
     });
 });
