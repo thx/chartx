@@ -40,7 +40,7 @@ KISSY.ready(function(){
 
         yAxis : {
             mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
-            fields : ["val4"],
+            fields : ["val4",'val3'],
             line:{
                 enabled : 0,
                 // strokeStyle : '#ff0000'

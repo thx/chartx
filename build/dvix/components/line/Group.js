@@ -103,7 +103,7 @@ KISSY.add("dvix/components/line/Group" , function(S, Dvix, Tools){
                 context : {
                     path        : d, 
                     fillStyle   : self.fill.strokeStyle,
-                    alpha       : self.fill.alpha
+                    globalAlpha : self.fill.alpha
                 }
             }))
         },

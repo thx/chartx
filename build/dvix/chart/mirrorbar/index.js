@@ -26,13 +26,17 @@ KISSY.add("dvix/chart/mirrorbar/" , function(S, Dvix, Tools, DataSection, EventT
             data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
             yAxis      :{                              //y轴
                 fields     :  [],                      //字段集合 对应this.data
-                org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
+                org        :  [],                      //二维 原始数据[[301,100,700],[201,145,88]]
                 section    :  {
                     length :  2,                       //用来标识外部数据传入几个数组
                     org    :  [],                      //分段之后数据[1800,1200,600,0,600,1200,1800]
-                    data   :  [],                      //如果length >= 2 分段之后数据, 第一个和最后一个已删除[1200,600,0,600,1200]
-                                                       //如果length == 1 分段之后数据, 第一个和最后一个不删除[0,600,1200]
-                    spanABS:  0,                       //跨度,第一个值的绝对值 + 最后一个值的绝对值 
+                    _org   :  [],                      //分段之后数据 有负数[-1800,-1200,-600,0,600,1200,1800]
+                    data   :  [],                      //分段之后数据, 第一个和最后一个已删除[1200,600,0,600,1200]
+                    _data  :  [],                      //分段之后数据, 第一个和最后一个已删除 有负数[-1200,-600,0,600,1200]
+                    maxs   :  [],                      //最大两端的值,下端先push[1800,1800]
+                    _maxs  :  [],                      //最大两端的值,下端先push[-1800,1800]
+                    _baseNumber : 0,                   //基数 负数[-1200]
+                    spanABS:  0,                       //跨度,第一个值的绝对值 + 最后一个值的绝对值
                 },
                 data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
             },
@@ -44,6 +48,7 @@ KISSY.add("dvix/chart/mirrorbar/" , function(S, Dvix, Tools, DataSection, EventT
 
         this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
         this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
+        this._chartCenterY =  0;                       //中心点Y
 
         this._disX         =  10;                      //图表区域离左右的距离
         this._disY         =  10;                      //图表区域离上下的距离
@@ -238,66 +243,83 @@ KISSY.add("dvix/chart/mirrorbar/" , function(S, Dvix, Tools, DataSection, EventT
 
         _trimSection:function(){                       //调整Section各数据
             var self = this
-            self.dataFrame.yAxis.section.length  = self.dataFrame.yAxis.org.length
-            self.dataFrame.yAxis.section.org     = self._getSection()
-            if(self.dataFrame.yAxis.section.length >= 2){
-                var arr = S.clone(self.dataFrame.yAxis.section.org)
-                var spanABS = Math.abs(arr.shift()) +  Math.abs(arr.pop())
-                self.dataFrame.yAxis.section.data = arr
-                self.dataFrame.yAxis.section.spanABS = spanABS
-            }else{
-                self.dataFrame.yAxis.section.data = S.clone(self.dataFrame.yAxis.section.org)
-            }
+            console.log(self.dataFrame.yAxis.org)
+            var o = self._getSection()
+            self.dataFrame.yAxis.section.org     = o.section
+            self.dataFrame.yAxis.section._org    = o._section
+
+            var arr = S.clone(self.dataFrame.yAxis.section.org)
+            var frist = arr.shift(), last = arr.pop()
+            self.dataFrame.yAxis.section.maxs.push(frist), self.dataFrame.yAxis.section.maxs.push(last)
+            var spanABS = frist + last
+            self.dataFrame.yAxis.section.data = arr
+            self.dataFrame.yAxis.section.spanABS = spanABS
+
+            var _arr = S.clone(self.dataFrame.yAxis.section._org)
+            var frist = _arr.shift(), last = _arr.pop()
+            self.dataFrame.yAxis.section._maxs.push(frist), self.dataFrame.yAxis.section._maxs.push(last)
+            self.dataFrame.yAxis.section._data = _arr
+
             console.log(self.dataFrame.yAxis.section)
         },
 
         _getSection:function(){                        //获取处理后的y轴数据(原始包含两端最大值的数组)
             var self = this
             var section = []
+            var _section = []
             var arr = self.dataFrame.yAxis.org
             var maxPart = parseInt((self.config.dataSection.maxPart - 1) / 2)
 
+            // console.log(DataSection.section([0,0,0,0,0,0], maxPart, {mode:1}))
 
-            console.log(DataSection.section([0,0,0,0,0,0], maxPart, {mode:1}))
-
-            if(arr.length >= 2){
-                var section1 = DataSection.section(arr[0], maxPart, {mode:1})
-                var section2 = DataSection.section(arr[1], maxPart, {mode:1})
-
-                var max1 = section1[section1.length - 1]
-                var max2 = section2[section2.length - 1]
-
-                if(max1 >= max2){
-                    section2 = S.clone(section1)
-                }else{
-                    section1 = S.clone(section2)
-                }
-
-                if(section1[0] == 0){
-                    section2.shift()
-                }else{
-                    section2.unshift(0)
-                }     
-                section2.sort(function(a,b){return b-a;})
-
-                section = section2.concat(section1)
-            }else{
-                section = DataSection.section(arr[0], maxPart, {mode:1})
-
+            if(arr.length <= 1){
+                arr.push([0])
             }
-            console.log('section = ' + section)
-            return section
+
+            var section1 = DataSection.section(arr[0], maxPart, {mode:1})
+            var section2 = DataSection.section(arr[1], maxPart, {mode:1})
+
+            var max1 = section1[section1.length - 1]
+            var max2 = section2[section2.length - 1]
+
+            if(max1 >= max2){
+                section2 = S.clone(section1)
+            }else{
+                section1 = S.clone(section2)
+            }
+
+            if(section1[0] == 0){
+                section2.shift()
+            }else{
+                section2.unshift(0)
+            }     
+            section1.sort(function(a,b){return b-a;})
+            
+            var tmp = []
+            for(var a = 0, al = section1.length; a < al; a++){
+                tmp.push(-section1[a])
+            }
+            section = section1.concat(section2)
+            _section = tmp.concat(section2)
+            console.log({section:section, _section:_section})
+            return {section:section, _section:_section}
         },
 
         _trimYAxis:function(){
             var self = this
-            var max = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
-            var arr = self.dataFrame.yAxis.section
+            var pn = 1
+            var max = self.dataFrame.yAxis.section.spanABS
+            var arr = self.dataFrame.yAxis.section._data
+            var contents = self.dataFrame.yAxis.section.data
+            // var baseNumber = 
+
+
             var tmpData = []
             for (var a = 0, al = arr.length; a < al; a++ ) {
                 var y = - (arr[a] - self._baseNumber) / (max - self._baseNumber) * self._yGraphsHeight
-                y = isNaN(y) ? 0 : parseInt(y)                                                    
-                tmpData[a] = { 'content':arr[a], 'y': y }
+                // var y = - (arr[a] - self._baseNumber) / (max - self._baseNumber) * self._yGraphsHeight
+                // y = isNaN(y) ? 0 : parseInt(y)                                                    
+                // tmpData[a] = { 'content':arr[a], 'y': y }
             }
             self.dataFrame.yAxis.data = tmpData
         },

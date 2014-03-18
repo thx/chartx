@@ -121,7 +121,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
                     width       : self.w,
                     height      : self.h,
                     fillStyle   : '#000000',
-                    alpha       : 0.1
+                    globalAlpha : 0
                 }
             })
             self.sprite.addChild(self.induce)

@@ -6,7 +6,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
     window.Canvax = Canvax
     var Line = function( node ){
         this.version       =  '0.1'                    //图表版本
-        this.type          =  'line';                  //图表类型
+        this.type          =  'line';                  //图表类型(折线图)
         this.canvax        =  null;                    //Canvax实例
         this.element       =  null;                    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width         =  0;                       //图表区域宽
@@ -63,10 +63,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         this._graphs       =  null;
         this._tips         =  null;
 
-        this.customPL  = function(arr){
-            return arr;
-        }
-
 	   	this.init.apply(this , arguments);
     };
 
@@ -107,15 +103,10 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         },
         draw:function(data, opt){
             var self = this;
-
             self._initConfig(data, opt);               //初始化配置
- 
             self._initModule(opt)                      //初始化模块                      
-            
-            self._initData();                          //从chart属性的data 里面获取yAxis xAxis的源data
-
-            self._startDraw();                         //所有数据准备好后，终于开始绘图啦
-
+            self._initData();                          //初始化数据
+            self._startDraw();                         //开始绘图
             self._drawEnd();                           //绘制结束，添加到舞台
         },
         _initConfig:function(data, opt){
@@ -219,7 +210,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
 
             var arr = Tools.getChildsArr(self.dataFrame.yAxis.org)
             self.dataFrame.yAxis.section = DataSection.section(arr)
-            
+
             self._baseNumber = self.dataFrame.yAxis.section[0]
             if(arr.length == 1){
                 self.dataFrame.yAxis.section[0] = arr[0] * 2
