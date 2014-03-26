@@ -18,7 +18,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             }
         }
 
-        this.dataFrame     =  {                        //数据框架集合
+        this.dataFrameOrg     =  {                        //数据框架集合
             org        :[],                            //最原始的数据  
             data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
             yAxis      :{                              //y轴
@@ -37,6 +37,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 disX       :  0                        //每两个点之间的距离
             }
         }
+        this.dataFrame = {}
 
         this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
         this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
@@ -109,8 +110,21 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             self._startDraw();                         //开始绘图
             self._drawEnd();                           //绘制结束，添加到舞台
         },
+        clear:function(){
+            var self = this
+            self.stageBg.removeAllChildren()
+            self.stage.removeAllChildren()
+            self.stageTip.removeAllChildren()
+            // self.canvax.removeAllChildren()
+        },
+        reset:function(data, opt){
+            var self = this
+            self.clear()
+            self.draw(data, opt)
+        },
         _initConfig:function(data, opt){
             var self  = this;
+            self.dataFrame = S.clone(self.dataFrameOrg)
             self.dataFrame.org = data;
 
             if(opt){
@@ -373,12 +387,13 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         },
 
         _onInduceHandler:function($evt){
+            if(!$evt.info)
+            return
             var self = this
             var strokeStyles = self._graphs.line.strokeStyle.overs
             var context = self._tips.opt.context
             var disTop = self._tips.opt.disTop
             var iGroup = $evt.info.iGroup, iNode = $evt.info.iNode
-
             var x = parseInt($evt.info.nodeInfo.stageX), y = parseInt(disTop)
             var data = []
             var arr  = self.dataFrame.graphs.data

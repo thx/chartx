@@ -36,7 +36,7 @@ KISSY.ready(function(){
         mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
 
         event : {
-            enabled : 0                                //是否有事件响应(tips)
+            enabled : 1                                //是否有事件响应(tips)
         },
 
         yAxis : {
@@ -128,9 +128,11 @@ KISSY.ready(function(){
     });
 
     KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
-
-        window.line = new Line( S.all("#canvasTest") );
+        var line = new Line( S.all("#canvasTest") );
         line.draw( data1 , options );
-
+        window.line = line
+        window.data1 = data1
+        window.options = options
+        options.yAxis.fields = ["val3","val2","val4"]
     });
 });

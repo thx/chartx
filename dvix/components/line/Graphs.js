@@ -128,34 +128,18 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
 
             self.induce.on(EventType.HOLD, function(e){
                 var o = self._getInfoHandler(e)
-                if(o){
-                    self.sprite.fire({
-                        type   : EventType.HOLD,
-                        info   : o,
-                        e      : e
-                    })
-                }
+                e.info = o;
             })
             self.induce.on(EventType.DRAG, function(e){
                 var o = self._getInfoHandler(e)
-                if(o){
-                    self.sprite.fire({
-                        type   : EventType.DRAG,
-                        info   : o,
-                        e      : e
-                    })
-                }
+                e.info = o;
             })
             self.induce.on(EventType.RELEASE, function(e){
                 var o = {
                     iGroup : self.iGroup,
                     iNode  : self.iNode
                 }
-                self.sprite.fire({
-                    type   : EventType.RELEASE,
-                    info   : o,
-                    e      : e
-                })
+                e.info = o;
                 self.iGroup = 0, self.iNode = -1
             })
         },
