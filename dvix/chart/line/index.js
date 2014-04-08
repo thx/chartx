@@ -74,9 +74,16 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             self.element = node;
             self.width   = parseInt(node.width());
             self.height  = parseInt(node.height());
-          
+
             self.canvax = new Canvax({
-                el : self.element
+                el : self.element,
+                context:{
+                    rotation : 90,
+                    rotateOrigin : {
+                        x : self.width / 2,
+                        y : self.height / 2
+                    }
+                }
             })
 
             self.stageTip = new Canvax.Display.Stage({
