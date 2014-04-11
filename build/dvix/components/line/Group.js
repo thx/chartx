@@ -43,8 +43,6 @@ KISSY.add("dvix/components/line/Group" , function(S, Dvix, Tools){
             var self = this
             var o = S.clone(self.data[$index])
             if(o){
-                var point = self.sprite.localToGlobal({x:o.x, y:o.y})
-                o.stageX = point.x, o.stageY = point.y
                 o.fillStyle = self.line.strokeStyle 
                 o.alpha = self.fill.alpha
                 return o

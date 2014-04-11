@@ -76,53 +76,70 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             self.height  = parseInt(node.height());
 
             self.canvax = new Canvax({
-                el : self.element,
-                context:{
-                    rotation : 90,
-                    rotateOrigin : {
-                        x : self.width / 2,
-                        y : self.height / 2
-                    }
-                }
+                el : self.element
             })
 
-            self.stageTip = new Canvax.Display.Stage({
-                id      : 'tip',
+            self.stage  = new Canvax.Display.Stage({
+                id : "main",
                 context : {
-                    x : 0.5,
-                    y : 0.5
+                   x : 0.5,
+                   y : 0.5
                 }
+            });
+            self.canvax.addChild( self.stage );
+
+            self.stageTip = new Canvax.Display.Sprite({
+                id      : 'tip'
             });
 
-            self.stage = new Canvax.Display.Stage({
-                id      : 'core',
-                context : {
-                    x : 0.5,
-                    y : 0.5
-                }
+            self.core    = new Canvax.Display.Sprite({
+                id      : 'core'
             });
-            self.stageBg = new Canvax.Display.Stage({
-                id      : 'bg',
-                context : {
-                    x : 0.5,
-                    y : 0.5
-                }
+            self.stageBg  = new Canvax.Display.Sprite({
+                id      : 'bg'
             });
+
+            self.stage.addChild(self.stageBg);
+            self.stage.addChild(self.core);
+            self.stage.addChild(self.stageTip);
+
         },
         draw:function(data, opt){
             var self = this;
+            if( opt.rotate ) {
+              self.rotate( opt.rotate );
+            }
             self._initConfig(data, opt);               //初始化配置
             self._initModule(opt)                      //初始化模块                      
             self._initData();                          //初始化数据
             self._startDraw();                         //开始绘图
             self._drawEnd();                           //绘制结束，添加到舞台
+          
+            self._arguments = arguments;
+            window.hoho = self;
+
         },
         clear:function(){
             var self = this
             self.stageBg.removeAllChildren()
-            self.stage.removeAllChildren()
+            self.core.removeAllChildren()
             self.stageTip.removeAllChildren()
             // self.canvax.removeAllChildren()
+        },
+        rotate : function( angle ){
+            var self = this;
+            var currW = self.width;
+            var currH = self.height;
+            self.width  = currH;
+            self.height = currW;
+
+            _.each( self.stage.children , function( sprite ){
+                sprite.context.rotation       = angle || -90;
+                sprite.context.x              = ( currW - currH ) / 2 ;
+                sprite.context.y              = ( currH - currW ) / 2 ;
+                sprite.context.rotateOrigin.x = self.width  * sprite.context.$model.scaleX / 2;
+                sprite.context.rotateOrigin.y = self.height * sprite.context.$model.scaleY / 2;
+            });
         },
         reset:function(data, opt){
             var self = this
@@ -382,15 +399,13 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             var self = this;
             self.stageBg.addChild(self._back.sprite)
 
-            self.stage.addChild(self._xAxis.sprite);
-            self.stage.addChild(self._graphs.sprite);
-            self.stage.addChild(self._yAxis.sprite);
+            self.core.addChild(self._xAxis.sprite);
+            self.core.addChild(self._graphs.sprite);
+            self.core.addChild(self._yAxis.sprite);
 
             self.stageTip.addChild(self._tips.sprite)
          
-            self.canvax.addChild(self.stageBg);
-            self.canvax.addChild(self.stage);
-            self.canvax.addChild(self.stageTip)
+           
         },
 
         _onInduceHandler:function($evt){
@@ -401,7 +416,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             var context = self._tips.opt.context
             var disTop = self._tips.opt.disTop
             var iGroup = $evt.info.iGroup, iNode = $evt.info.iNode
-            var x = parseInt($evt.info.nodeInfo.stageX), y = parseInt(disTop)
             var data = []
             var arr  = self.dataFrame.graphs.data
             for(var a = 0, al = arr.length; a < al; a++){
@@ -431,30 +445,33 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 }
                 data[a].push(o)
             }
-
+            var x = parseInt($evt.info.nodeInfo.stageX), y = parseInt(disTop)
+            var tipsPoint = $evt.target.localToGlobal( $evt.info.nodeInfo , self.core );
             var tips = {
                 w    : self.width,
                 h    : self.height
             }
             tips.tip = {
-                x    : x,
-                y    : y,
+                x    : tipsPoint.x,
+                y    : tipsPoint.y,
                 data : data
             }
 
             var yEnd = self._graphs.getY() - disTop
             tips.line = {
-                x    : x,
+                x    : tipsPoint.x,
                 y    : parseInt(self._graphs.getY()),
                 yEnd : -yEnd
             }
 
             var data = []
             var arr = $evt.info.nodesInfoList
-            for(var a = 0, al = arr.length; a < al; a++){
+            for(var a = 0 , al = arr.length; a < al; a++){
+                arr[a].y = $evt.target.context.height - Math.abs( arr[a].y )
+                var circlePoint = $evt.target.localToGlobal( arr[a] , self.core );
                 var o = {
-                    x         : parseInt(arr[a].stageX),
-                    y         : parseInt(arr[a].stageY),
+                    x         : parseInt( circlePoint.x ),
+                    y         : parseInt( circlePoint.y ),
                     fillStyle : strokeStyles[a]
                 }
                 data.push(o)

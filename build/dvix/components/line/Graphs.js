@@ -114,8 +114,9 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
                 self.sprite.addChild(group.sprite)
                 self.groups.push(group)
             }
-
+            
             self.induce = new Canvax.Shapes.Rect({
+                id    : "induce",
                 context:{
                     y           : -self.h,
                     width       : self.w,
@@ -127,7 +128,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
             self.sprite.addChild(self.induce)
 
             self.induce.on(EventType.HOLD, function(e){
-                var o = self._getInfoHandler(e)
+                var o = self._getInfoHandler(e);
                 e.info = o;
             })
             self.induce.on(EventType.DRAG, function(e){
@@ -146,6 +147,8 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
         _getInfoHandler:function(e){
             var self = this
             var point = e.point
+            
+            console.log(point.x+"|"+point.y)
             // var stagePoint
             var x = Number(point.x), y = Number(point.y) - Number(self.h)
 
@@ -156,7 +159,6 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
             if(tmpINode >= self.data[0].length){
                 return
             }
-
             if(tmpINode != self.iNode){
                 self._nodesInfoList = []                 //节点信息集合
                 self._nodesYList = []                    //节点y轴坐标集合
@@ -168,15 +170,17 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
                 }
 
             }
+
             var tmpIGroup = Tools.getDisMinATArr(y, self._nodesYList)
             if(tmpIGroup == self.iGroup && tmpINode == self.iNode){
-            }else{
+
+            } else {
                 self.iGroup = tmpIGroup, self.iNode = tmpINode
                 var nodeInfo = self.groups[tmpIGroup].getNodeInfoAt(tmpINode)
 
                 var o = {
-                    iGroup : self.iGroup,
-                    iNode  : self.iNode,
+                    iGroup        : self.iGroup,
+                    iNode         : self.iNode,
                     nodeInfo      : S.clone(nodeInfo),
                     nodesInfoList : S.clone(self._nodesInfoList)
                 }

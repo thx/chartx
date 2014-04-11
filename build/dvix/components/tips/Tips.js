@@ -131,7 +131,7 @@ KISSY.add("dvix/components/tips/Tips" , function(S, Dvix, Tip, Line, Nodes, Tool
                 self.tip.setX(x), self.tip.setY(y)
             }
             if(self.opt.line){
-                self.line.draw(self.config.line)
+                self.line.draw(self.config.line);
                 self.line.setX(self.config.line.x), self.line.setY(self.config.line.y)
             }
             if(self.opt.nodes){
