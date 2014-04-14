@@ -116,8 +116,9 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             self._drawEnd();                           //绘制结束，添加到舞台
           
             self._arguments = arguments;
-            window.hoho = self;
 
+            //下面这个是全局调用测试的时候用的
+            window.hoho = self;
         },
         clear:function(){
             var self = this
@@ -144,6 +145,8 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         reset:function(data, opt){
             var self = this
             self.clear()
+            self.width   = parseInt(self.element.width());
+            self.height  = parseInt(self.element.height());
             self.draw(data, opt)
         },
         _initConfig:function(data, opt){

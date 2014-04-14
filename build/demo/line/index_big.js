@@ -130,6 +130,8 @@ KISSY.ready(function(){
 
         window.line = new Line( S.all("#canvasTest") );
         line.draw( data1 , options );
+        window.data1   = data1;
+        window.options = options;
 
     });
 });
