@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/line/Group" , function(S, Dvix, Tools){
+KISSY.add("dvix/components/line/Group" , function(S, Dvix, BrokenLine, Path, Tools){
     var Canvax = Dvix.Canvax;
     var Group = function(opt){
         this.w       = 0;   
@@ -17,7 +17,7 @@ KISSY.add("dvix/components/line/Group" , function(S, Dvix, Tools){
         this.data       = [];                          //[{x:0,y:-100},{}]
         this.sprite     = null;                        
 
-        this.init(opt)
+        this.init( opt )
     };
 
     Group.prototype = {
@@ -87,30 +87,41 @@ KISSY.add("dvix/components/line/Group" , function(S, Dvix, Tools){
                 var o = self.data[a]
                 list.push([o.x, o.y])
             }
-            self.sprite.addChild(new Canvax.Shapes.BrokenLine({
+
+            var bline = new BrokenLine({
                 context : {
                     pointList   : list,
                     strokeStyle : self.line.strokeStyle,
                     lineWidth   : 1,
-                    y           : self.y
+                    y           : self.y,
+                    smooth      : 1
                 }
-            }))
+            });
 
-            var d = self._fillLine({lines:self.data})
-            self.sprite.addChild(new Canvax.Shapes.Path({
+            self.sprite.addChild( bline );
+
+            
+            self.sprite.addChild(new Path({
                 context : {
-                    path        : d, 
+                    path        : self._fillLine( bline ), 
                     fillStyle   : self.fill.strokeStyle,
                     globalAlpha : self.fill.alpha
                 }
             }))
         },
 
-        _fillLine:function($o){                        //填充直线
-            var L = 'L'
-            var arr = $o.lines
-            var d = Tools.getPath(arr)
+        _fillLine:function( bline ){                        //填充直线
+            var fillPath = _.clone( bline.getPointList() );
+            fillPath.push( 
+                [ fillPath[ bline.pointsLen -1 ][0] , -1.5 ],
+                [ fillPath[0][0] , -1.5 ],
+                [ fillPath[0][0] , fillPath[0][1] ]
+            );
+            
+            return Tools.getPath(fillPath);
 
+                debugger
+            var d = Tools.getPath(arr)
             d += ' ' + L + ' ' + (Number(arr[arr.length - 1].x)) + ' ' + (-1.5)
             d += ' ' + L + ' ' + (Number(arr[0].x)) + ' ' + (-1.5)
             d += ' ' + L + ' ' + (Number(arr[0].x)) + ' ' + (Number(arr[0].y))
@@ -124,6 +135,8 @@ KISSY.add("dvix/components/line/Group" , function(S, Dvix, Tools){
 } , {
     requires : [
         "dvix/",
-        "dvix/utils/tools",
+        "canvax/shape/BrokenLine",
+        "canvax/shape/Path",
+        "dvix/utils/tools"
     ] 
 })

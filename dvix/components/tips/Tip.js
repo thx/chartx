@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/tips/Tip" , function(S, Dvix, Tools){
+KISSY.add("dvix/components/tips/Tip" , function(S, Dvix, Circle, Rect, Tools){
     var Canvax = Dvix.Canvax;
     var Tip = function(opt){
         this.w          = 0;
@@ -199,7 +199,7 @@ KISSY.add("dvix/components/tips/Tip" , function(S, Dvix, Tools){
                         var fillStyle   = o.sign.fillStyle || '#000000'
 
                         if (o.sign.enabled && o.sign.trim) {
-                            var sign = new Canvax.Shapes.Circle({
+                            var sign = new Circle({
                                 context:{
                                     r         : radius,
                                     fillStyle : fillStyle
@@ -230,7 +230,7 @@ KISSY.add("dvix/components/tips/Tip" , function(S, Dvix, Tools){
             self.widgetSp.context.x = x, self.widgetSp.context.y = y
 
             if(self.back.enabled){
-                self.backSp.addChild(new Canvax.Shapes.Rect({
+                self.backSp.addChild(new Rect({
                     context : {
                         width       : w,
                         height      : h,
@@ -249,6 +249,8 @@ KISSY.add("dvix/components/tips/Tip" , function(S, Dvix, Tools){
 } , {
     requires : [
         "dvix/",
-        "dvix/utils/tools",
+        "canvax/shape/Circle",
+        "canvax/shape/Rect",
+        "dvix/utils/tools"
     ] 
 })

@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Group ){
+KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Rect, Tools, EventType, Group ){
     var Canvax = Dvix.Canvax;
     var Graphs = function(opt){
         this.w       = 0;   
@@ -115,7 +115,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
                 self.groups.push(group)
             }
             
-            self.induce = new Canvax.Shapes.Rect({
+            self.induce = new Rect({
                 id    : "induce",
                 context:{
                     y           : -self.h,
@@ -196,8 +196,9 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
 } , {
     requires : [
         "dvix/",
+        "canvax/shape/Rect",
         "dvix/utils/tools",
         "dvix/event/eventtype",
-        "dvix/components/line/Group",
+        "dvix/components/line/Group"
     ] 
 })

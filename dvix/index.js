@@ -20,6 +20,10 @@ if( Site.daily ){
     canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/" + canvaxVersion + "/";
 }
 
+//本地环境测试
+canvaxUrl = "http://nick.daily.taobao.net/canvax"
+
+
 KISSY.config({
     packages: [{
         name  : 'canvax' , 

@@ -312,6 +312,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 disX : self.dataFrame.graphs.disX
             })
             self._graphs.setX(x + self._disOriginX), self._graphs.setY(y)
+                
             if(self.config.event.enabled){
                 self._graphs.sprite.on(EventType.HOLD,function(e){
                     self._onInduceHandler(e)

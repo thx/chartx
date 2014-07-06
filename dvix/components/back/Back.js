@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/back/Back" , function(S, Dvix, Tools){
+KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
     var Canvax = Dvix.Canvax;
     var Back = function(opt){
         this.w       = 0;   
@@ -115,7 +115,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Tools){
             var arr = self.xAxis.data
             for(var a = 0, al = arr.length; a < al; a++){
                 var o = arr[a]
-                var line = new Canvax.Shapes.Line({
+                var line = new Line({
                     context : {
                         xStart      : 0,
                         yStart      : o.y,
@@ -134,7 +134,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Tools){
             var arr = self.yAxis.data
             for(var a = 0, al = arr.length; a < al; a++){
                 var o = arr[a]
-                var line = new Canvax.Shapes.Line({
+                var line = new Line({
                     context : {
                         xStart      : o.x,
                         yStart      : 0,
@@ -150,7 +150,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Tools){
             }
 
             //原点开始的y轴线
-            var line = new Canvax.Shapes.Line({
+            var line = new Line({
                 context : {
                     xEnd        : 0,
                     yEnd        : -self.h,
@@ -162,7 +162,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Tools){
                 self.yOriginSp.addChild(line)
 
             //原点开始的x轴线
-            var line = new Canvax.Shapes.Line({
+            var line = new Line({
                 context : {
                     xEnd        : self.w,
                     yEnd        : 0,
@@ -181,6 +181,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Tools){
 } , {
     requires : [
         "dvix/",
+        "canvax/shape/Line",
         "dvix/utils/tools",
     ] 
 })

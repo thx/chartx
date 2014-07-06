@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Tools){
+KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
     var Canvax = Dvix.Canvax;
     var xAxis = function(opt){
         this.w = 0;
@@ -150,7 +150,7 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Tools){
                 var o = arr[a]
                 var x = o.x
                 //线条
-                var line = new Canvax.Shapes.Line({
+                var line = new Line({
                     id      : a,
                     context : {
                         x           : x,
@@ -248,6 +248,7 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Tools){
 } , {
     requires : [
         "dvix/",
-        "dvix/utils/tools",
+        "canvax/shape/Line",
+        "dvix/utils/tools"
     ] 
 })
