@@ -21,6 +21,7 @@ if( Site.daily ){
 
 //本地环境测试
 //canvaxUrl = "http://nick.daily.taobao.net/canvax"
+    
 
 KISSY.config({
     packages: [{
