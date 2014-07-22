@@ -1,4 +1,4 @@
-KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis ){
+KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Line , BrokenLine , Tools , xAxis , yAxis ){
     /*
      *@node chart在dom里的目标容器节点。
     */
@@ -198,7 +198,7 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
           for ( var i=0,l=yAxis.data.length-1 ; i<l ; i++ ){
              var linex = - self.oneStrSize.en.width + 2;
              var liney = Math.round( i * self._yBlock ) + self._yOverDiff; 
-             graphs.sprite.addChild(new Canvax.Shapes.Line({
+             graphs.sprite.addChild(new Line({
                  context : {
                      xStart      : linex,
                      yStart      : liney,
@@ -212,7 +212,7 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
           };
 
           //画左边线
-          graphs.sprite.addChild(new Canvax.Shapes.Line({
+          graphs.sprite.addChild(new Line({
               id : "line-left",
               context : {
                   xStart      : 0,
@@ -225,7 +225,7 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
           }));
 
           //画下边线
-          graphs.sprite.addChild(new Canvax.Shapes.Line({
+          graphs.sprite.addChild(new Line({
               id : "line-bottom",
               context : {
                   xStart      : 0,
@@ -265,7 +265,7 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
 
               //设置原点
               var gs_origin = (yAxis.data.length - 1 - S.indexOf( 0 , yAxis.data )) * self._yBlock -  graphs.sprite.context.height;
-              graphs.sprite.addChild( new Canvax.Shapes.BrokenLine({
+              graphs.sprite.addChild( new BrokenLine({
                   context : {
                       pointList   : self.customPL( pointList ),
                       strokeStyle : 'red',
@@ -282,6 +282,8 @@ KISSY.add("dvix/chart/brokenline/" , function( S , Dvix , Tools , xAxis , yAxis 
 } , {
     requires: [
         'dvix/',
+        'canvax/shape/Line',
+        'canvax/shape/BrokenLine',
         'dvix/utils/tools',
         'dvix/components/xaxis/xAxis',
         'dvix/components/yaxis/yAxis',

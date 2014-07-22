@@ -172,6 +172,6 @@ KISSY.add("dvix/components/tips/Tips" , function(S, Dvix, Tip, Line, Nodes, Tool
         "dvix/components/tips/Tip",
         "dvix/components/tips/Line",
         "dvix/components/tips/Nodes",
-        "dvix/utils/tools",
+        "dvix/utils/tools"
     ] 
 })

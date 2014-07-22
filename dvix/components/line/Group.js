@@ -92,9 +92,9 @@ KISSY.add("dvix/components/line/Group" , function(S, Dvix, BrokenLine, Path, Too
                 context : {
                     pointList   : list,
                     strokeStyle : self.line.strokeStyle,
-                    lineWidth   : 1,
+                    lineWidth   : 2,
                     y           : self.y,
-                    smooth      : 1
+                    smooth      : true 
                 }
             });
 
@@ -120,7 +120,6 @@ KISSY.add("dvix/components/line/Group" , function(S, Dvix, BrokenLine, Path, Too
             
             return Tools.getPath(fillPath);
 
-                debugger
             var d = Tools.getPath(arr)
             d += ' ' + L + ' ' + (Number(arr[arr.length - 1].x)) + ' ' + (-1.5)
             d += ' ' + L + ' ' + (Number(arr[0].x)) + ' ' + (-1.5)

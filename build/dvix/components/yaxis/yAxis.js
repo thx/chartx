@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix, Tools){
+KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools){
     var Canvax = Dvix.Canvax;
     var yAxis = function(opt){
         this.w = 0;
@@ -122,7 +122,7 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix, Tools){
                 maxW = Math.max(maxW, txt.getTextWidth());
 
                 //线条
-                var line = new Canvax.Shapes.Line({
+                var line = new Line({
                     id      : a,
                     context : {
                         x           : 0,
@@ -140,7 +140,7 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix, Tools){
 
             if(self.line.enabled){
                 self.w = maxW + self.dis + self.line.width
-            }else{
+            } else {
                 self.lineSp.context.visible = false
                 self.w = maxW 
             }
@@ -152,6 +152,7 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix, Tools){
 } , {
     requires : [
         "dvix/",
-        "dvix/utils/tools",
+        "canvax/shape/Line",
+        "dvix/utils/tools"
     ] 
 })

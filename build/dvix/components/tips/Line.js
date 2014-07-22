@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/tips/Line" , function(S, Dvix, Tools){
+KISSY.add("dvix/components/tips/Line" , function(S, Dvix, CanvaxLine, Tools){
     var Canvax = Dvix.Canvax;
     var Line = function(opt){
 
@@ -23,7 +23,11 @@ KISSY.add("dvix/components/tips/Line" , function(S, Dvix, Tools){
         init:function(opt){
             var self  = this;
             self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite();
+            self.sprite = new Canvax.Display.Sprite(
+                    {
+                      id : "tipLine"
+                    }
+                    );
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -60,7 +64,8 @@ KISSY.add("dvix/components/tips/Line" , function(S, Dvix, Tools){
 
         _widget:function(){
             var self  = this;
-            var line = new Canvax.Shapes.Line({
+
+            var line = new CanvaxLine({
                 context : {
                     xStart      : self.xStart,
                     yStart      : self.yStart,
@@ -80,6 +85,7 @@ KISSY.add("dvix/components/tips/Line" , function(S, Dvix, Tools){
 } , {
     requires : [
         "dvix/",
-        "dvix/utils/tools",
+        "canvax/shape/Line",
+        "dvix/utils/tools"
     ] 
 })

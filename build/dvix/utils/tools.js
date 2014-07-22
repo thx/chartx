@@ -156,11 +156,21 @@ KISSY.add('dvix/utils/tools',function(S){
 		 */
 		getPath:function($arr){
 			var M = 'M', L = 'L', Z = 'z'
-	    	var s = M + $arr[0].x + ' ' + $arr[0].y
+	    	var s = '';
+            if( _.isArray( $arr[0] ) ){
+                s = M + $arr[0][0] + ' ' + $arr[0][1]
+            } else {
+                s = M + $arr[0].x + ' ' + $arr[0].y
+            }
 	    	for(var a = 1,al = $arr.length; a < al ; a++){
-
-	    		var x = $arr[a].x
-	    		var y = $arr[a].y
+                var x = 0 , y = 0 , item = $arr[a]; 
+                if( _.isArray( item ) ){
+                    x = item[0];
+                    y = item[1];
+                } else {
+                    x = item.x;
+                    y = item.y;
+                }
 	    		s += ' ' + L + x + ' ' + y
 	    	}
 	    	// s += ' ' + Z

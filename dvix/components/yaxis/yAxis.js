@@ -140,7 +140,7 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools){
 
             if(self.line.enabled){
                 self.w = maxW + self.dis + self.line.width
-            }else{
+            } else {
                 self.lineSp.context.visible = false
                 self.w = maxW 
             }

@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Group ){
+KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Rect, Tools, Tween , EventType, Group ){
     var Canvax = Dvix.Canvax;
     var Graphs = function(opt){
         this.w       = 0;   
@@ -57,7 +57,28 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
             self._configData(opt)
             self._widget()
         },
-
+        /**
+         * 生长动画
+         */
+        grow : function(){
+            var self  = this;
+            var timer = null;
+            var growAnima = function(){
+               var bezierT = new Tween.Tween( { h : 0 } )
+               .to( { h : self.h }, 500 )
+               .onUpdate( function (  ) {
+                   self.sprite.context.scaleY = this.h / self.h;
+               } ).onComplete( function(){
+                   cancelAnimationFrame( timer );
+               }).start();
+               animate();
+            };
+            function animate(){
+                timer    = requestAnimationFrame( animate ); 
+                Tween.update();
+            };
+            growAnima();
+        },
         //初始化配置
         _initConfig:function(opt){
             var self = this
@@ -102,7 +123,6 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
                     line   :{
                         strokeStyle : self.line.strokeStyle.normals[a]
                     },
-
                     fill   :{
                         strokeStyle : self.line.strokeStyle.normals[a],
                         alpha       : self.line.alpha.normals[a]
@@ -115,7 +135,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
                 self.groups.push(group)
             }
             
-            self.induce = new Canvax.Shapes.Rect({
+            self.induce = new Rect({
                 id    : "induce",
                 context:{
                     y           : -self.h,
@@ -196,8 +216,10 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Dvix, Tools, EventType, Gr
 } , {
     requires : [
         "dvix/",
+        "canvax/shape/Rect",
         "dvix/utils/tools",
+        "canvax/animation/Tween",
         "dvix/event/eventtype",
-        "dvix/components/line/Group",
+        "dvix/components/line/Group"
     ] 
 })

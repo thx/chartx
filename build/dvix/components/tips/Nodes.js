@@ -1,4 +1,4 @@
-KISSY.add("dvix/components/tips/Nodes" , function(S, Dvix, Tools){
+KISSY.add("dvix/components/tips/Nodes" , function(S, Dvix, Circle, Tools){
     var Canvax = Dvix.Canvax;
     var Nodes = function(opt){
 
@@ -63,7 +63,7 @@ KISSY.add("dvix/components/tips/Nodes" , function(S, Dvix, Tools){
                 var strokeStyle= o.strokeStyle || '#000000'
                 var thinkness  = (o.thinkness  || o.thinkness == 0) ? o.thinkness : 1.5  
 
-                var sign = new Canvax.Shapes.Circle({
+                var sign = new Circle({
                     context:{
                         r           : radius,
                         fillStyle   : fillStyle,
@@ -82,6 +82,7 @@ KISSY.add("dvix/components/tips/Nodes" , function(S, Dvix, Tools){
 } , {
     requires : [
         "dvix/",
-        "dvix/utils/tools",
+        "canvax/shape/Circle",
+        "dvix/utils/tools"
     ] 
 })

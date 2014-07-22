@@ -225,7 +225,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                             }
                         }
                     }
-                }else{
+                } else {
                     if(o.field == self.dataFrame.xAxis.field){
                         self.dataFrame.xAxis.org = o.data
                     }
@@ -248,7 +248,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             var self = this;
             // self.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
             // self.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
-
+debugger; 
             var arr = Tools.getChildsArr(self.dataFrame.yAxis.org)
             self.dataFrame.yAxis.section = DataSection.section(arr)
 
@@ -310,8 +310,12 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 h    : self._yGraphsHeight,
                 data : self.dataFrame.graphs.data,
                 disX : self.dataFrame.graphs.disX
-            })
+            });
+            //执行生长动画
+            self._graphs.grow();
+
             self._graphs.setX(x + self._disOriginX), self._graphs.setY(y)
+                
             if(self.config.event.enabled){
                 self._graphs.sprite.on(EventType.HOLD,function(e){
                     self._onInduceHandler(e)

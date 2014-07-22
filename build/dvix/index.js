@@ -8,17 +8,20 @@ window.Site = {
 if(  (/daily.taobao.net/g).test(location.host)  ){
     Site.daily = true;
 }
-
 //TODO
 //Site.daily = true;
 //Site.debug = true;
 
-var canvaxVersion = "1.0.1";
+var canvaxVersion = "2014.07.21";
 var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
 if( Site.daily ){
-    canvaxVersion = '1.0.1';
+    canvaxVersion = '2014.07.21';
     canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/" + canvaxVersion + "/";
 }
+
+//本地环境测试
+canvaxUrl = "http://nick.daily.taobao.net/canvax"
+
 
 KISSY.config({
     packages: [{

@@ -107,6 +107,7 @@ KISSY.add("dvix/chart/mirrorbar/" , function(S, Dvix, Tools, DataSection, EventT
         },
         draw:function(data, opt){
             var self = this;
+            debugger
             self._initConfig(data, opt);               //初始化配置
             self._initModule(opt)                      //初始化模块                      
             self._initData();                          //初始化数据
@@ -219,8 +220,7 @@ KISSY.add("dvix/chart/mirrorbar/" , function(S, Dvix, Tools, DataSection, EventT
             });
             self._back.setX(x), self._back.setY(y)
 
-            return
-            self._trimGraphs()
+            //self._trimGraphs()
             self._graphs.draw({
                 w    : self._xGraphsWidth,
                 h    : self._yGraphsHeight,
@@ -326,6 +326,7 @@ KISSY.add("dvix/chart/mirrorbar/" , function(S, Dvix, Tools, DataSection, EventT
 
         _trimGraphs:function(){
             var self = this                                                           
+                debugger;
             var maxYAxis = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
             var maxXAxis = self.dataFrame.xAxis.org.length
             var arr = self.dataFrame.yAxis.org
