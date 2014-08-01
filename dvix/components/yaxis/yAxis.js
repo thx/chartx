@@ -1,6 +1,6 @@
-KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools){
+KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools , DataSection){
     var Canvax = Dvix.Canvax;
-    var yAxis = function(opt){
+    var yAxis = function(opt , data){
         this.w = 0;
 
         this.mode = 1                                  //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
@@ -19,19 +19,28 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools){
                 fontSize  : 12
         }
 
-        this.data       = [];                          //{y:-100, content:'1000'}
-        this.sprite     = null;
-        this.txtSp      = null;
-        this.lineSp     = null;
+        this.data        = [];                          //{y:-100, content:'1000'}
+        this.dataSection = [];
+        this.sprite      = null;
+        this.txtSp       = null;
+        this.lineSp      = null;
+        
+        //yAxis的左上角坐标
+        this.x           = 0;
+        this.y           = 0;
+        
+        this._disYAxisTopLine =  6;                       //y轴顶端预留的最小值
+        this._yMaxHeight      =  0;                       //y轴最大高
+        this._yGraphsHeight   =  0;                       //y轴第一条线到原点的高
 
-        this.init(opt)
+        this.init(opt , data);
     };
 
     yAxis.prototype = {
-        init:function(opt){
-            var self  = this;
-            self._initConfig(opt)
-            self.sprite = new Canvax.Display.Sprite();
+        init:function( opt , data ){
+            this._initConfig( opt );
+            this._initData( data );
+            this.sprite = new Canvax.Display.Sprite();
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -39,20 +48,62 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools){
         setY:function($n){
             this.sprite.context.y = $n
         },
-        draw:function(opt){
-            var self  = this;
-            self._configData(opt)
-            self._widget()
-        },
+        draw:function( opt ){
+            //self._configData(opt)
+            if( opt.pos ){
+                opt.pos.x && (this.x = opt.pos.x);
+                opt.pos.y && (this.y = opt.pos.y);
+            }
+            opt.yMaxHeight && ( this._yMaxHeight = opt.yMaxHeight );
+            
+            this._yGraphsHeight = this._yMaxHeight  - this._getYAxisDisLine();
 
+            this.setX( this.x );
+            this.setY( this.y );
+            this._trimYAxis();
+            this._widget();
+        },
+        _trimYAxis:function(){
+            var max = this.dataSection[ this.dataSection.length - 1 ];
+            var tmpData = []
+            for (var a = 0, al = this.dataSection.length; a < al; a++ ) {
+                var y = - (this.dataSection[a] - this._baseNumber) / (max - this._baseNumber) * this._yGraphsHeight
+                y = isNaN(y) ? 0 : parseInt(y)                                                    
+                tmpData[a] = { 'content':this.dataSection[a], 'y': y }
+            }
+            this.data = tmpData
+        },
+        _getYAxisDisLine:function(){                   //获取y轴顶高到第一条线之间的距离         
+            var disMin = this._disYAxisTopLine
+            var disMax = 2 * disMin
+            var dis    = disMin
+            dis = disMin + this._yMaxHeight % this.dataSection.length;
+            dis = dis > disMax ? disMax : dis
+            return dis
+        },
+        _initData  : function( data ){
+
+            var arr = Tools.getChildsArr( data.org );
+            this.dataSection = DataSection.section(arr);
+            this._baseNumber = this.dataSection[0];
+            if(arr.length == 1){
+                this.dataSection[0] = arr[0] * 2;
+                this._baseNumber    = 0;
+            }
+
+
+        },
         //初始化配置
-        _initConfig:function(opt){
+        _initConfig: function(opt){
           var self = this
             if(opt){
                 self.dis  = opt.dis || opt.dis == 0 ? opt.dis : self.dis
                 self.mode = opt.mode|| self.mode
 
                 var line = opt.line
+
+                self._disYAxisTopLine = (opt.disYAxisTopLine || opt.disYAxisTopLine == 0) ? opt.disYAxisTopLine : self._disYAxisTopLine
+                
                 if(line){
                     self.line.enabled = line.enabled == 0 ? 0 : self.line.enabled;
                     self.line.strokeStyle = line.strokeStyle || self.line.strokeStyle
@@ -65,13 +116,16 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools){
                 }
             }
         },
+
         //配置数据
+        /*
         _configData:function(opt){
             var self = this
             var opt = opt || {}
 
             self.data  = opt.data  || [];
         },
+        */
 
         _widget:function(){
             var self  = this;
@@ -153,6 +207,7 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools){
     requires : [
         "dvix/",
         "canvax/shape/Line",
-        "dvix/utils/tools"
+        "dvix/utils/tools",
+        'dvix/utils/datasection'
     ] 
 })

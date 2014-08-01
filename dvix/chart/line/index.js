@@ -24,7 +24,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             yAxis      :{                              //y轴
                 fields     :  [],                      //字段集合 对应this.data
                 org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
-                section    :  [],                      //分段之后数据[200, 400, 600, 800, 1000, 1200, 1400, 1600]
                 data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
             },
             xAxis      :{                              //x轴
@@ -47,11 +46,9 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         this._disYAndO     =  6;                       //y轴原点之间的距离
 
         this._disXAxisLine =  6;                       //x轴两端预留的最小值
-        this._disYAxisTopLine =  6;                    //y轴顶端预留的最小值
         this._disOriginX   =  0;                       //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
 
-        this._yMaxHeight   =  0;                       //y轴最大高
-        this._yGraphsHeight=  0;                       //y轴第一条线到原点的高
+       
 
         this._xMaxWidth    =  0;                       //x轴最大宽(去掉y轴之后)
         this._xGraphsWidth =  0;                       //x轴宽(去掉两端)
@@ -109,16 +106,21 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             if( opt.rotate ) {
               self.rotate( opt.rotate );
             }
+
             self._initConfig(data, opt);               //初始化配置
-            self._initModule(opt)                      //初始化模块                      
+
             self._initData();                          //初始化数据
+
+            self._initModule( opt , self.dataFrame );                      //初始化模块  
+
             self._startDraw();                         //开始绘图
+
             self._drawEnd();                           //绘制结束，添加到舞台
           
             self._arguments = arguments;
 
             //下面这个是全局调用测试的时候用的
-            window.hoho = self;
+            //window.hoho = self;
         },
         clear:function(){
             var self = this
@@ -165,31 +167,32 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 }
 
                 var yAxis = opt.yAxis
-                if(yAxis){
+                if( yAxis ){
                     self.dataFrame.yAxis.fields = yAxis.fields || self.dataFrame.yAxis.fields
                 }
 
                 var xAxis = opt.xAxis
-                if(xAxis){
+                if( xAxis ){
                     self.dataFrame.xAxis.field = xAxis.field || self.dataFrame.xAxis.field
                 }
             }
         },
 
-        _initModule:function(opt){
-            var self  = this;
-            self._xAxis  = new xAxis(opt.xAxis);
-            self._yAxis  = new yAxis(opt.yAxis);
-            self._back   = new Back(opt.back);
-            self._graphs = new Graphs(opt.graphs);
-            self._tips   = new Tips(opt.tips)
+        _initModule:function(opt , data){
+            this._xAxis  = new xAxis(opt.xAxis , data.xAxis);
+            this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
+            this._back   = new Back(opt.back);
+            this._graphs = new Graphs(opt.graphs);
+            this._tips   = new Tips(opt.tips)
         },
 
         _initData:function(){
             var self = this;
 
             var total = []
-            var arr = self.dataFrame.org
+            var arr = self.dataFrame.org;
+
+            
 
             for(var a = 0, al = arr[0].length; a < al; a++){
                 var o = {}
@@ -210,15 +213,25 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             var arr = self.dataFrame.data
             for(var a = 0, al = arr.length; a < al; a++){
                 var o = arr[a]
+
+                //如果没有配置xAxis的字段。
                 if(!self.dataFrame.xAxis.field){
+
+                    //那么默认第一个字段就为xAxis的数据字段
                     if(a == 0){
                         self.dataFrame.xAxis.org = o.data
                     }
+
+                    //如果yAxis的字段集合（yAxis可以为集合）也没有配置
                     if(self.dataFrame.yAxis.fields.length == 0){
+
+                        //那么除开第一个字段外（因为这个时候第一个字段为xAxis字段）都默认设置为yAxis字段
                         if(a != 0){
                             self.dataFrame.yAxis.org.push(o.data)
                         }
-                    }else{
+
+                    } else {
+                        //当然，如果yAxis有配置，自然 所有的 配置里面都设置为yAxis字段
                         for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
                             if(o.field == self.dataFrame.yAxis.fields[b]){
                                 self.dataFrame.yAxis.org[b] = o.data
@@ -226,14 +239,18 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                         }
                     }
                 } else {
+                    //如果有配置xAxis字段，当然，就用配置的xAxis了
                     if(o.field == self.dataFrame.xAxis.field){
                         self.dataFrame.xAxis.org = o.data
                     }
+                    //那么y呢？
+                    //如果y有配置就用除开xAxis以外的所有字段
                     if(self.dataFrame.yAxis.fields.length == 0){
                         if(o.field != self.dataFrame.xAxis.field){
                             self.dataFrame.yAxis.org.push(o.data)
                         }
-                    }else{
+                    } else {
+                        //没有就用x以外的所有字段
                         for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
                             if(o.field == self.dataFrame.yAxis.fields[b]){
                                 self.dataFrame.yAxis.org[b] = o.data
@@ -248,7 +265,10 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             var self = this;
             // self.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
             // self.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
-debugger; 
+            
+
+
+            /*
             var arr = Tools.getChildsArr(self.dataFrame.yAxis.org)
             self.dataFrame.yAxis.section = DataSection.section(arr)
 
@@ -257,27 +277,36 @@ debugger;
                 self.dataFrame.yAxis.section[0] = arr[0] * 2
                 self._baseNumber = 0
             }
+            */
 
             self._chartWidth  = self.width  - 2 * self._disX
             self._chartHeight = self.height - 2 * self._disY
 
-            self._yMaxHeight    = self._chartHeight - self._xAxis.h
-            self._yGraphsHeight = self._yMaxHeight - self._getYAxisDisLine()
-            self._trimYAxis()
+            //self._yMaxHeight    = self._chartHeight - self._xAxis.h
+            //self._yGraphsHeight = self._yMaxHeight  - self._getYAxisDisLine();
+
+
+            //self._trimYAxis()
 
             var x = self._disX
             var y = this.height - self._xAxis.h - self._disY
 
             self._yAxis.draw({
-                data:self.dataFrame.yAxis.data
+                pos : {
+                    x : x,
+                    y : y
+                },
+                yMaxHeight : self._chartHeight - self._xAxis.h
             });
-            self._yAxis.setX(x), self._yAxis.setY(y)
+
+            //self._yAxis.setX(x), self._yAxis.setY(y)
 
             var _yAxisW = self._yAxis.w
             if(self.config.mode == 2){
                 _yAxisW = 0
                 self._disYAndO = 0
             }
+
             x = self._disX + _yAxisW + self._disYAndO
 
             self._xMaxWidth    = self._chartWidth - _yAxisW - self._disYAndO
@@ -298,7 +327,7 @@ debugger;
                 w    : self._chartWidth - _yAxisW - self._disYAndO,
                 h    : y,
                 xAxis:{
-                    data:self.dataFrame.yAxis.data
+                    data : self._yAxis.data
                 }
             });
             self._back.setX(x), self._back.setY(y)
@@ -307,7 +336,7 @@ debugger;
             self._trimGraphs()
             self._graphs.draw({
                 w    : self._xGraphsWidth,
-                h    : self._yGraphsHeight,
+                h    : self._yAxis._yGraphsHeight,
                 data : self.dataFrame.graphs.data,
                 disX : self.dataFrame.graphs.disX
             });
@@ -328,6 +357,7 @@ debugger;
                 })
             }
         },
+        /*
         _trimYAxis:function(){
             var self = this
             var max = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
@@ -339,17 +369,17 @@ debugger;
                 tmpData[a] = { 'content':arr[a], 'y': y }
             }
             self.dataFrame.yAxis.data = tmpData
-        },
+        }, 
+        
         _getYAxisDisLine:function(){                   //获取y轴顶高到第一条线之间的距离         
-            var self = this
-            var disMin = self._disYAxisTopLine
+            var disMin = this._disYAxisTopLine
             var disMax = 2 * disMin
-            var dis = disMin
-            dis = disMin + self._yMaxHeight % self.dataFrame.yAxis.section.length
+            var dis    = disMin
+            dis = disMin + this._yMaxHeight % this._yAxis.dataSection.length;
             dis = dis > disMax ? disMax : dis
             return dis
         },
-
+        */
         _trimXAxis:function(){
             var self = this
             var max = self.dataFrame.xAxis.org.length
@@ -377,14 +407,14 @@ debugger;
 
         _trimGraphs:function(){
             var self = this                                                           
-            var maxYAxis = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
+            var maxYAxis = self._yAxis.dataSection[ self._yAxis.dataSection.length - 1 ]
             var maxXAxis = self.dataFrame.xAxis.org.length
             var arr = self.dataFrame.yAxis.org
             var tmpData = []
             for (var a = 0, al = arr.length; a < al; a++ ) {
                 for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
                     !tmpData[a] ? tmpData[a] = [] : ''
-                    var y = - (arr[a][b] - self._baseNumber) / (maxYAxis - self._baseNumber) * self._yGraphsHeight
+                    var y = - (arr[a][b] - self._baseNumber) / (maxYAxis - self._baseNumber) * self._yAxis._yGraphsHeight
                     y = isNaN(y) ? 0 : y
                     tmpData[a][b] = {'value':arr[a][b], 'x':b / (maxXAxis - 1) * self._xGraphsWidth,'y':y}
                 }

@@ -58,7 +58,7 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
             self._trimLayoutData()
             self._widget()
             self._layout()
-
+debugger
             self.h = self.disY + self.line.height + self.dis + self.max.txtH
         },
         getLayoutData:function(){                       //获取真正显示的数据组合
