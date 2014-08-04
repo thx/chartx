@@ -45,13 +45,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         this._disY         =  6;                       //图表区域离上下的距离
         this._disYAndO     =  6;                       //y轴原点之间的距离
 
-        this._disXAxisLine =  6;                       //x轴两端预留的最小值
-        this._disOriginX   =  0;                       //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
-
-       
-
-        this._xMaxWidth    =  0;                       //x轴最大宽(去掉y轴之后)
-        this._xGraphsWidth =  0;                       //x轴宽(去掉两端)
 
         this._baseNumber   =  0;                       //基础点
 
@@ -67,75 +60,71 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
     Line.prototype = {
 
         init:function(node){
-            var self = this;
-            self.element = node;
-            self.width   = parseInt(node.width());
-            self.height  = parseInt(node.height());
+            this.element = node;
+            this.width   = parseInt(node.width());
+            this.height  = parseInt(node.height());
 
-            self.canvax = new Canvax({
-                el : self.element
+            this.canvax = new Canvax({
+                el : this.element
             })
 
-            self.stage  = new Canvax.Display.Stage({
+            this.stage  = new Canvax.Display.Stage({
                 id : "main",
                 context : {
                    x : 0.5,
                    y : 0.5
                 }
             });
-            self.canvax.addChild( self.stage );
+            this.canvax.addChild( this.stage );
 
-            self.stageTip = new Canvax.Display.Sprite({
+            this.stageTip = new Canvax.Display.Sprite({
                 id      : 'tip'
             });
 
-            self.core    = new Canvax.Display.Sprite({
+            this.core    = new Canvax.Display.Sprite({
                 id      : 'core'
             });
-            self.stageBg  = new Canvax.Display.Sprite({
+            this.stageBg  = new Canvax.Display.Sprite({
                 id      : 'bg'
             });
 
-            self.stage.addChild(self.stageBg);
-            self.stage.addChild(self.core);
-            self.stage.addChild(self.stageTip);
+            this.stage.addChild(this.stageBg);
+            this.stage.addChild(this.core);
+            this.stage.addChild(this.stageTip);
 
         },
         draw:function(data, opt){
-            var self = this;
             if( opt.rotate ) {
-              self.rotate( opt.rotate );
+              this.rotate( opt.rotate );
             }
 
-            self._initConfig(data, opt);               //初始化配置
+            this._initConfig(data, opt);               //初始化配置
 
-            self._initData();                          //初始化数据
+            this._initData();                          //初始化数据
 
-            self._initModule( opt , self.dataFrame );                      //初始化模块  
+            this._initModule( opt , this.dataFrame );                      //初始化模块  
 
-            self._startDraw();                         //开始绘图
+            this._startDraw();                         //开始绘图
 
-            self._drawEnd();                           //绘制结束，添加到舞台
+            this._drawEnd();                           //绘制结束，添加到舞台
           
-            self._arguments = arguments;
+            this._arguments = arguments;
 
             //下面这个是全局调用测试的时候用的
-            //window.hoho = self;
+            //window.hoho = this;
         },
         clear:function(){
-            var self = this
-            self.stageBg.removeAllChildren()
-            self.core.removeAllChildren()
-            self.stageTip.removeAllChildren()
-            // self.canvax.removeAllChildren()
+            this.stageBg.removeAllChildren()
+            this.core.removeAllChildren()
+            this.stageTip.removeAllChildren()
         },
         rotate : function( angle ){
-            var self = this;
-            var currW = self.width;
-            var currH = self.height;
-            self.width  = currH;
-            self.height = currW;
+            var currW = this.width;
+            var currH = this.height;
+            this.width  = currH;
+            this.height = currW;
 
+            var self = this;
             _.each( self.stage.children , function( sprite ){
                 sprite.context.rotation       = angle || -90;
                 sprite.context.x              = ( currW - currH ) / 2 ;
@@ -145,35 +134,32 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             });
         },
         reset:function(data, opt){
-            var self = this
-            self.clear()
-            self.width   = parseInt(self.element.width());
-            self.height  = parseInt(self.element.height());
-            self.draw(data, opt)
+            this.clear()
+            this.width   = parseInt(this.element.width());
+            this.height  = parseInt(this.element.height());
+            this.draw(data, opt)
         },
         _initConfig:function(data, opt){
-            var self  = this;
-            self.dataFrame = S.clone(self.dataFrameOrg)
-            self.dataFrame.org = data;
+            this.dataFrame     = S.clone(this.dataFrameOrg)
+            this.dataFrame.org = data;
 
-            if(opt){
-                self.config.mode = opt.mode || self.config.mode
-                self._disXAxisLine    = (opt.disXAxisLine    || opt.disXAxisLine    == 0) ? opt.disXAxisLine    : self._disXAxisLine
-                self._disYAxisTopLine = (opt.disYAxisTopLine || opt.disYAxisTopLine == 0) ? opt.disYAxisTopLine : self._disYAxisTopLine
-                self._disYAndO        = (opt.disYAndO        || opt.disYAndO == 0       ) ? opt.disYAndO        : self._disYAndO
+            if( opt ){
+                this.config.mode = opt.mode || this.config.mode
+                this._disXAxisLine    = (opt.disXAxisLine    || opt.disXAxisLine    == 0) ? opt.disXAxisLine    : this._disXAxisLine
+                this._disYAndO        = (opt.disYAndO        || opt.disYAndO == 0       ) ? opt.disYAndO        : this._disYAndO
                 var event = opt.event
                 if(event){
-                    self.config.event.enabled = event.enabled == 0 ? 0 : self.config.event.enabled
+                    this.config.event.enabled = event.enabled == 0 ? 0 : this.config.event.enabled
                 }
 
                 var yAxis = opt.yAxis
                 if( yAxis ){
-                    self.dataFrame.yAxis.fields = yAxis.fields || self.dataFrame.yAxis.fields
+                    this.dataFrame.yAxis.fields = yAxis.fields || this.dataFrame.yAxis.fields
                 }
 
                 var xAxis = opt.xAxis
                 if( xAxis ){
-                    self.dataFrame.xAxis.field = xAxis.field || self.dataFrame.xAxis.field
+                    this.dataFrame.xAxis.field = xAxis.field || this.dataFrame.xAxis.field
                 }
             }
         },
@@ -191,8 +177,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
 
             var total = []
             var arr = self.dataFrame.org;
-
-            
 
             for(var a = 0, al = arr[0].length; a < al; a++){
                 var o = {}
@@ -267,30 +251,14 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             // self.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
             
 
-
-            /*
-            var arr = Tools.getChildsArr(self.dataFrame.yAxis.org)
-            self.dataFrame.yAxis.section = DataSection.section(arr)
-
-            self._baseNumber = self.dataFrame.yAxis.section[0]
-            if(arr.length == 1){
-                self.dataFrame.yAxis.section[0] = arr[0] * 2
-                self._baseNumber = 0
-            }
-            */
-
+            //先计算出图表区域的大小
             self._chartWidth  = self.width  - 2 * self._disX
             self._chartHeight = self.height - 2 * self._disY
-
-            //self._yMaxHeight    = self._chartHeight - self._xAxis.h
-            //self._yGraphsHeight = self._yMaxHeight  - self._getYAxisDisLine();
-
-
-            //self._trimYAxis()
 
             var x = self._disX
             var y = this.height - self._xAxis.h - self._disY
 
+            //绘制yAxis
             self._yAxis.draw({
                 pos : {
                     x : x,
@@ -299,7 +267,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 yMaxHeight : self._chartHeight - self._xAxis.h
             });
 
-            //self._yAxis.setX(x), self._yAxis.setY(y)
 
             var _yAxisW = self._yAxis.w
             if(self.config.mode == 2){
@@ -308,21 +275,21 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             }
 
             x = self._disX + _yAxisW + self._disYAndO
+            
 
-            self._xMaxWidth    = self._chartWidth - _yAxisW - self._disYAndO
-            self._xGraphsWidth = self._xMaxWidth - self._getXAxisDisLine()
-            self._disOriginX   = parseInt((self._xMaxWidth - self._xGraphsWidth) / 2)
-            self._trimXAxis()
+            //绘制x轴
             self._xAxis.draw({
-                w    :   self._xMaxWidth,
+                w    :   self._chartWidth - _yAxisW - self._disYAndO,
                 max  :   {
-                    left  : -(_yAxisW + self._disYAndO + self._disOriginX),
-                    right : self._xGraphsWidth + self._disOriginX
+                    left  : -(_yAxisW + self._disYAndO)
                 },
-                data :   self.dataFrame.xAxis.data
+                pos  : {
+                    x : x,
+                    y : y
+                }
             });
-            self._xAxis.setX(x + self._disOriginX), self._xAxis.setY(y)
 
+            //绘制背景网格
             self._back.draw({
                 w    : self._chartWidth - _yAxisW - self._disYAndO,
                 h    : y,
@@ -335,7 +302,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             self.dataFrame.graphs.disX = self._getGraphsDisX()
             self._trimGraphs()
             self._graphs.draw({
-                w    : self._xGraphsWidth,
+                w    : self._xAxis.xGraphsWidth,
                 h    : self._yAxis._yGraphsHeight,
                 data : self.dataFrame.graphs.data,
                 disX : self.dataFrame.graphs.disX
@@ -343,7 +310,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             //执行生长动画
             self._graphs.grow();
 
-            self._graphs.setX(x + self._disOriginX), self._graphs.setY(y)
+            self._graphs.setX(x + self._xAxis.disOriginX), self._graphs.setY(y)
                 
             if(self.config.event.enabled){
                 self._graphs.sprite.on(EventType.HOLD,function(e){
@@ -357,54 +324,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                 })
             }
         },
-        /*
-        _trimYAxis:function(){
-            var self = this
-            var max = self.dataFrame.yAxis.section[self.dataFrame.yAxis.section.length - 1]
-            var arr = self.dataFrame.yAxis.section
-            var tmpData = []
-            for (var a = 0, al = arr.length; a < al; a++ ) {
-                var y = - (arr[a] - self._baseNumber) / (max - self._baseNumber) * self._yGraphsHeight
-                y = isNaN(y) ? 0 : parseInt(y)                                                    
-                tmpData[a] = { 'content':arr[a], 'y': y }
-            }
-            self.dataFrame.yAxis.data = tmpData
-        }, 
-        
-        _getYAxisDisLine:function(){                   //获取y轴顶高到第一条线之间的距离         
-            var disMin = this._disYAxisTopLine
-            var disMax = 2 * disMin
-            var dis    = disMin
-            dis = disMin + this._yMaxHeight % this._yAxis.dataSection.length;
-            dis = dis > disMax ? disMax : dis
-            return dis
-        },
-        */
-        _trimXAxis:function(){
-            var self = this
-            var max = self.dataFrame.xAxis.org.length
-            var arr = self.dataFrame.xAxis.org
-            var tmpData = []
-            for (var a = 0, al  = arr.length; a < al; a++ ) {
-                var o = {'content':arr[a], 'x':parseInt(a / (max - 1) * self._xGraphsWidth)}
-                tmpData.push( o )
-            }
-            if(max == 1){
-                o.x = parseInt(self._xGraphsWidth / 2)
-            }
-            self.dataFrame.xAxis.data = tmpData
-        },
-        _getXAxisDisLine:function(){                   //获取x轴两端预留的距离
-            var self = this
-            var disMin = self._disXAxisLine
-            var disMax = 2 * disMin
-            var dis = disMin
-            dis = disMin + self._xMaxWidth % self.dataFrame.xAxis.org.length
-            dis = dis > disMax ? disMax : dis
-            dis = isNaN(dis) ? 0 : dis
-            return dis
-        },
-
         _trimGraphs:function(){
             var self = this                                                           
             var maxYAxis = self._yAxis.dataSection[ self._yAxis.dataSection.length - 1 ]
@@ -416,12 +335,12 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
                     !tmpData[a] ? tmpData[a] = [] : ''
                     var y = - (arr[a][b] - self._baseNumber) / (maxYAxis - self._baseNumber) * self._yAxis._yGraphsHeight
                     y = isNaN(y) ? 0 : y
-                    tmpData[a][b] = {'value':arr[a][b], 'x':b / (maxXAxis - 1) * self._xGraphsWidth,'y':y}
+                    tmpData[a][b] = {'value':arr[a][b], 'x':b / (maxXAxis - 1) * self._xAxis.xGraphsWidth,'y':y}
                 }
             }
             if(maxXAxis == 1){
                 if(tmpData[0] && tmpData[0][0]){
-                    tmpData[0][0].x = parseInt(self._xGraphsWidth / 2)
+                    tmpData[0][0].x = parseInt(self._xAxis.xGraphsWidth / 2)
                 }
             }
             self.dataFrame.graphs.data = tmpData
@@ -429,7 +348,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         //每两个点之间的距离
         _getGraphsDisX:function(){
             var self = this
-            return self._xGraphsWidth / (self.dataFrame.xAxis.org.length - 1)
+            return self._xAxis.xGraphsWidth / (self.dataFrame.xAxis.org.length - 1)
         },
 
         _drawEnd:function(){

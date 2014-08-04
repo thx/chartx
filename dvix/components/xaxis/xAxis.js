@@ -1,6 +1,6 @@
 KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
     var Canvax = Dvix.Canvax;
-    var xAxis = function(opt){
+    var xAxis = function(opt , data){
         this.w = 0;
         this.h = 24
 
@@ -27,22 +27,29 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
                 fontSize  : 13
         }
 
+        this.disXAxisLine =  6;                        //x轴两端预留的最小值
+        this.disOriginX   =  0;                       //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
+        this.xGraphsWidth =  0;                       //x轴宽(去掉两端)
+
+        this.dataOrg    = [];                          //源数据
         this.data       = [];                          //{x:100, content:'1000'}
         this.layoutData = [];                          //this.data(可能数据过多),重新编排后的数据集合, 并根据此数组展现文字和线条
         this.sprite     = null;
         this.txtSp      = null;
         this.lineSp     = null;
 
-        this.init(opt)
+        this.init(opt , data)
     };
 
     xAxis.prototype = {
-        init:function(opt){
-            var self  = this;
-            self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite();
+        init:function( opt , data ){
+            this.dataOrg = data.org;
 
-            self._check()                              //检测
+            this._initConfig(opt);
+
+            this.sprite = new Canvax.Display.Sprite();
+
+            this._check()                              //检测
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -50,73 +57,71 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
         setY:function($n){
             this.sprite.context.y = $n
         },
-
         draw:function(opt){
             // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
-            var self  = this;
-            self._configData(opt) 	
-            self._trimLayoutData()
-            self._widget()
-            self._layout()
-debugger
-            self.h = self.disY + self.line.height + self.dis + self.max.txtH
+
+            this._initConfig( opt );
+
+            this._trimXAxis()
+
+            //this._configData(opt) 	
+            this._trimLayoutData()
+            this._widget()
+            this._layout()
+            this.h = this.disY + this.line.height + this.dis + this.max.txtH;
+
+            this.setX( this.pos.x + this.disOriginX );
+            this.setY( this.pos.y );
         },
         getLayoutData:function(){                       //获取真正显示的数据组合
-        	var self = this
-        	return self.layoutData
+        	return this.layoutData
         },
-
         //初始化配置
-        _initConfig:function(opt){
-        	var self = this
-          	if(opt){
-                self.disY = opt.disY || opt.disY == 0 ? opt.disY : self.disY
-                self.dis  = opt.dis  || opt.dis  == 0 ? opt.dis  : self.dis
+        _initConfig:function( opt ){
+            this.w   = opt.w || 0;
+            this.max.right = this.w;
+            this.xGraphsWidth = this.w - this._getXAxisDisLine()
+            this.disOriginX   = parseInt((this.w - this.xGraphsWidth) / 2);
 
-                var line = opt.line
-                if(line){
-                    self.line.enabled = line.enabled == 0 ? 0 : self.line.enabled;
-                    self.line.height  = line.height || self.line.height;
-                    self.line.strokeStyle = line.strokeStyle || self.line.strokeStyle
-                }
-
-                var text = opt.text
-                if(text){
-                    self.text.mode      = text.mode      || self.text.mode
-                    self.text.fillStyle = text.fillStyle || self.text.fillStyle
-                    self.text.fontSize  = text.fontSize  || self.text.fontSize
-                }
+          	if( opt ){
+                //S.mix( this , opt , true);
+                _.deepExtend( this , opt );
             }
+
+            this.max.left  -= this.disOriginX;
+            this.max.right += this.disOriginX;
         },
-         //配置数据
-        _configData:function(opt){
-          	var self = this
-          	var opt = opt || {}
-
-          	self.w  = opt.w  || 0;      
-          	self.h  = opt.h  || 0;
-          	self.max.right = self.w;
-
-            self.data  = opt.data  || [];
-
-          	if(opt.max)
-            	self.max.left   = opt.max.left  || self.max.left,
-            	self.max.right  = opt.max.right || self.max.right;
+        _trimXAxis:function( data ){
+            var max  = this.dataOrg.length
+            var tmpData = []
+            for (var a = 0, al  = this.dataOrg.length; a < al; a++ ) {
+                var o = {'content':this.dataOrg[a], 'x':parseInt(a / (max - 1) * this.xGraphsWidth)}
+                tmpData.push( o )
+            }
+            if(max == 1){
+                o.x = parseInt( this.xGraphsWidth / 2 )
+            }
+            this.data = tmpData 
         },
-        
-        _check:function(){                             //检测下文字的高等
-            var self = this
+        _getXAxisDisLine:function(){//获取x轴两端预留的距离
+            var disMin = this.disXAxisLine
+            var disMax = 2 * disMin
+            var dis    = disMin
+            dis = disMin + this.w % this.dataOrg.length
+            dis = dis > disMax ? disMax : dis
+            dis = isNaN(dis) ? 0 : dis
+            return dis
+        }, 
+        _check:function(){//检测下文字的高等
             var txt = new Canvax.Display.Text('test',
                    {
                     context : {
-                        fontSize    : self.text.fontSize
+                        fontSize    : this.text.fontSize
                    }
             })
-            self.max.txtH = txt.getTextHeight()
-            self.h = self.disY + self.line.height + self.dis + self.max.txtH
-            delete txt
+            this.max.txtH = txt.getTextHeight()
+            this.h = this.disY + this.line.height + this.dis + this.max.txtH
         },
-
         _widget:function(){
             var self  = this;
             var arr = self.layoutData
@@ -188,11 +193,14 @@ debugger
         },
 
         _trimLayoutData:function(){
+            
             var self = this
             var tmp = []
             var max = 0                                                           //获取文字最大的length
             var arr = self.data
-            var textMaxWidth = 0 
+            var textMaxWidth = 0
+
+            
 
             for(var a = 0, al = arr.length; a < al; a++){
                 var o = arr[a]
@@ -249,6 +257,7 @@ debugger
     requires : [
         "dvix/",
         "canvax/shape/Line",
-        "dvix/utils/tools"
+        "dvix/utils/tools",
+        "dvix/utils/deep-extend"
     ] 
 })
