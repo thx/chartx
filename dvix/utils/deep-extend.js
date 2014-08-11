@@ -62,7 +62,11 @@ KISSY.add(function( S ){
         }
         sharedArrayKeys = _.intersection(arrays(destination), arrays(source));
         combine = function(key) {
-            return source[key] = _.union(destination[key], source[key]);
+            //TODO:这里做点修改，array的话就不需要做并集了。直接整个array覆盖。因为
+            //在大部分的场景里，array的话，应该要看成是一个basicObject
+            return source[key];
+
+            //return source[key] = _.union(destination[key], source[key]);
         };
         for (_j = 0, _len1 = sharedArrayKeys.length; _j < _len1; _j++) {
             sharedArrayKey = sharedArrayKeys[_j];

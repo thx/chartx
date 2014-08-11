@@ -13,22 +13,7 @@ KISSY.ready(function(){
         [ 7 , 201  , 101 , 500 ] ,
         [8  , 1145 , 145 , 100 ] ,
         [ 9 , 488  , 88  , 700 ] ,
-        [ 1 , 101  , 201 , 301 ],
-        [ 10  , 390  , 546 , 300 ],
-        [ 11  , 390  , 546 , 300 ],
-        [ 12  , 390  , 546 , 300 ],
-        [ 13  , 390  , 546 , 300 ],
-        [ 14  , 390  , 546 , 300 ],
-        [ 15  , 390  , 546 , 300 ],
-        [ 16  , 390  , 546 , 300 ],
-        [ 17  , 390  , 546 , 300 ],
-        [ 18  , 390  , 546 , 300 ],
-        [ 19  , 390  , 546 , 300 ],
-        [ 20  , 390  , 546 , 300 ],
-        [ 21  , 390  , 546 , 300 ],
-        [ 22  , 390  , 546 , 300 ],
-        [ 23  , 390  , 546 , 300 ],
-        [ 24  , 390  , 546 , 300 ] 
+        [ 10  , 390  , 546 , 300 ]
 
     ];
     var options = {
@@ -88,8 +73,7 @@ KISSY.ready(function(){
                 },
                 alpha       : {
                     normals : [0.8, 0.7],
-                },
-                smooth : true
+                }
             }
         },       
         tips  :{
@@ -129,10 +113,10 @@ KISSY.ready(function(){
 
 
 
-    KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
+    KISSY.use("dvix/chart/bar/ , node" , function( S , Bar ){
 
-        window.line = new Line( S.all("#canvasTest") );
-        line.draw( data1 , options );
+        window.bar = new Bar( S.all("#canvasTest") );
+        bar.draw( data1 , options );
         window.data1   = data1;
         window.options = options;
 

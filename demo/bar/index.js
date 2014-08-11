@@ -13,7 +13,6 @@ KISSY.ready(function(){
         [ 7 , 201  , 101 , 500 ] ,
         [8  , 1145 , 145 , 100 ] ,
         [ 9 , 488  , 88  , 700 ] ,
-        [ 1 , 101  , 201 , 301 ],
         [ 10  , 390  , 546 , 300 ],
         [ 11  , 390  , 546 , 300 ],
         [ 12  , 390  , 546 , 300 ],
@@ -28,26 +27,28 @@ KISSY.ready(function(){
         [ 21  , 390  , 546 , 300 ],
         [ 22  , 390  , 546 , 300 ],
         [ 23  , 390  , 546 , 300 ],
-        [ 24  , 390  , 546 , 300 ] 
-
+        [ 24  , 390  , 546 , 300 ]
     ];
     var options = {
         // title : "first charts",
-        // disXAxisLine : 26,
+        // disXAxisLine : 0,
         // disYAxisTopLine : 26,
-        //rotate   : -90,
-        disYAndO : 20,
-        mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
+        mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
+
+        event : {
+            enabled : 1                                //是否有事件响应(tips)
+        },
+
         yAxis : {
-            mode     : 1,                           //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
-            fields   : ["val4","val3"],
-            dataMode : 0,
+            mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
+            fields : ["val4","val3"],
+            // dataMode:0,
             line:{
                 enabled : 0,
                 // strokeStyle : '#ff0000'
             },
             text:{
-                fillStyle:'#999999',
+                // fillStyle:'#ff0000',
                 fontSize  : 12
             }
         },
@@ -61,6 +62,7 @@ KISSY.ready(function(){
                 strokeStyle   : '#cccccc'
             },
             text:{
+                mode      : 2,
                 fontSize  : 10
             }
         },
@@ -88,10 +90,9 @@ KISSY.ready(function(){
                 },
                 alpha       : {
                     normals : [0.8, 0.7],
-                },
-                smooth : true
+                }
             }
-        },       
+        },
         tips  :{
             // disTop : 50,
             context:{
@@ -103,9 +104,10 @@ KISSY.ready(function(){
                 fillStyles:['#333333','#999999','#999999']
             },
             tip  : {
-                back:{
+                // back:{
+                    // enabled : 0
                     // disX:10
-                }
+                // }
             },
             line : {
                 // lineType: ''
@@ -115,26 +117,18 @@ KISSY.ready(function(){
             }
         }
     }
-     
 
     KISSY.config({
         packages: [{
             name  :  'dvix'  ,
             path  :  '../../',
-            // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
             debug :  true
         }
         ]
     });
 
-
-
-    KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
-
-        window.line = new Line( S.all("#canvasTest") );
-        line.draw( data1 , options );
-        window.data1   = data1;
-        window.options = options;
-
+    KISSY.use("dvix/chart/bar/ , node" , function( S , Bar ){
+        var bar = new Bar( S.all("#canvasTest") );
+        bar.draw( data1 , options );
     });
 });

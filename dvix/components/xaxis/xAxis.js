@@ -28,8 +28,8 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
         }
 
         this.disXAxisLine =  6;                        //x轴两端预留的最小值
-        this.disOriginX   =  0;                       //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
-        this.xGraphsWidth =  0;                       //x轴宽(去掉两端)
+        this.disOriginX   =  0;                        //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
+        this.xGraphsWidth =  0;                        //x轴宽(去掉两端)
 
         this.dataOrg    = [];                          //源数据
         this.data       = [];                          //{x:100, content:'1000'}
@@ -45,7 +45,9 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
         init:function( opt , data ){
             this.dataOrg = data.org;
 
-            this._initConfig(opt);
+            if( opt ){
+                _.deepExtend( this , opt );
+            }
 
             this.sprite = new Canvax.Display.Sprite();
 
@@ -62,9 +64,8 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
 
             this._initConfig( opt );
 
-            this._trimXAxis()
+            this.data = this._trimXAxis( this.dataOrg , this.xGraphsWidth );
 
-            //this._configData(opt) 	
             this._trimLayoutData()
             this._widget()
             this._layout()
@@ -78,30 +79,27 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
         },
         //初始化配置
         _initConfig:function( opt ){
-            this.w   = opt.w || 0;
+          	if( opt ){
+                _.deepExtend( this , opt );
+            }
             this.max.right = this.w;
             this.xGraphsWidth = this.w - this._getXAxisDisLine()
             this.disOriginX   = parseInt((this.w - this.xGraphsWidth) / 2);
 
-          	if( opt ){
-                //S.mix( this , opt , true);
-                _.deepExtend( this , opt );
-            }
-
-            this.max.left  -= this.disOriginX;
-            this.max.right += this.disOriginX;
+            this.max.left  += this.disOriginX;
+            this.max.right -= this.disOriginX;
         },
-        _trimXAxis:function( data ){
-            var max  = this.dataOrg.length
-            var tmpData = []
-            for (var a = 0, al  = this.dataOrg.length; a < al; a++ ) {
-                var o = {'content':this.dataOrg[a], 'x':parseInt(a / (max - 1) * this.xGraphsWidth)}
-                tmpData.push( o )
+        _trimXAxis:function( data , xGraphsWidth ){
+            var tmpData = [];
+            var dis  = xGraphsWidth / (data.length+1);
+            for (var a = 0, al  = data.length; a < al; a++ ) {
+                var o = {
+                    'content' : data[a], 
+                    'x'       : parseInt( dis * (a+1) )
+                }
+                tmpData.push( o );
             }
-            if(max == 1){
-                o.x = parseInt( this.xGraphsWidth / 2 )
-            }
-            this.data = tmpData 
+            return tmpData;
         },
         _getXAxisDisLine:function(){//获取x轴两端预留的距离
             var disMin = this.disXAxisLine
@@ -123,16 +121,15 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
             this.h = this.disY + this.line.height + this.dis + this.max.txtH
         },
         _widget:function(){
-            var self  = this;
-            var arr = self.layoutData
+            var arr = this.layoutData
 
-          	self.txtSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.txtSp)
-         	self.lineSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.lineSp)
+          	this.txtSp  = new Canvax.Display.Sprite(),  this.sprite.addChild(this.txtSp)
+         	this.lineSp = new Canvax.Display.Sprite(),  this.sprite.addChild(this.lineSp)
 
           	for(var a = 0, al = arr.length; a < al; a++){
 
               	var o = arr[a]
-              	var x = o.x, y = self.disY + self.line.height + self.dis
+              	var x = o.x, y = this.disY + this.line.height + this.dis
               	var content = Tools.numAddSymbol(o.content)
               	//文字
               	var txt = new Canvax.Display.Text(content,
@@ -140,17 +137,14 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
                     context : {
                         x  : x,
                         y  : y,
-                        fillStyle   : self.text.fillStyle,
-                        fontSize    : self.text.fontSize,
-                        // textBackgroundColor:'#ff2380',
-                        // textAlign   :"center",
-                        // textBaseline:"middle"
+                        fillStyle   : this.text.fillStyle,
+                        fontSize    : this.text.fontSize,
                    }
               	})
-              	self.txtSp.addChild(txt);
-          	}
+              	this.txtSp.addChild(txt);
+            } 
 
-            var arr = self.text.mode == 1 ? self.layoutData : self.data
+            var arr = this.text.mode == 1 ? this.layoutData : this.data
             for(var a = 0, al = arr.length; a < al; a++){
                 var o = arr[a]
                 var x = o.x
@@ -161,93 +155,64 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
                         x           : x,
                         y           : 0,
                         xEnd        : 0,
-                        yEnd        : self.line.height,
-                        lineWidth   : self.line.width,
-                        strokeStyle : self.line.strokeStyle
+                        yEnd        : this.line.height,
+                        lineWidth   : this.line.width,
+                        strokeStyle : this.line.strokeStyle
                     }
                 })
-                line.context.y = self.disY
-                // console.log('line ' + x)
-                self.lineSp.addChild(line)
+                line.context.y = this.disY
+                this.lineSp.addChild(line)
             }
 
-           	for(var a = 0, al = self.txtSp.getNumChildren(); a < al; a++){
-           		var txt = self.txtSp.getChildAt(a)
+           	for(var a = 0, al = this.txtSp.getNumChildren(); a < al; a++){
+           		var txt = this.txtSp.getChildAt(a)
            		var x = parseInt(txt.context.x - txt.getTextWidth() / 2)
            		txt.context.x = x
-                // console.log(txt.context.x, txt.getTextWidth())
            	}
         },
-
+        /*校验第一个和最后一个文本是否超出了界限。然后决定是否矫正*/
         _layout:function(){
-        	var self = this
-			var firstText = self.txtSp.getChildAt(0)
-			var popText = self.txtSp.getChildAt(self.txtSp.getNumChildren() - 1)
+			var firstText = this.txtSp.getChildAt(0)
+			var popText = this.txtSp.getChildAt(this.txtSp.getNumChildren() - 1)
 
-			if(firstText && firstText.context.x < self.max.left){
-				firstText.context.x = parseInt(self.max.left)
+			if(firstText && firstText.context.x < this.max.left){
+				firstText.context.x = parseInt(this.max.left)
 			}
-			if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > self.max.right)) {
-				popText.context.x = parseInt(self.max.right - popText.getTextWidth())
+			if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > this.max.right)) {
+				popText.context.x = parseInt(this.max.right - popText.getTextWidth())
 			}
         },
-
         _trimLayoutData:function(){
             
-            var self = this
             var tmp = []
-            var max = 0                                                           //获取文字最大的length
-            var arr = self.data
+            var arr = this.data
             var textMaxWidth = 0
-
-            
 
             for(var a = 0, al = arr.length; a < al; a++){
                 var o = arr[a]
+                    
                 var content = Tools.numAddSymbol(o.content)
                 var txt = new Canvax.Display.Text(content,
                    {
                     context : {
-                        fillStyle   : self.text.fillStyle,
-                        fontSize    : self.text.fontSize
+                        fillStyle   : this.text.fillStyle,
+                        fontSize    : this.text.fontSize
                    }
                 })
-                textMaxWidth = Math.max(textMaxWidth, txt.getTextWidth())         //获取文字最大宽
+                textMaxWidth = Math.max(textMaxWidth, txt.getTextWidth())           //获取文字最大宽
             }
+            var maxWidth =  this.max.right                                          //总共能多少像素展现
+            var n = Math.min( Math.floor( maxWidth / textMaxWidth ) , arr.length ); //能展现几个
+            var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                            //array中展现间隔
 
-            var maxWidth =  self.max.right                                         //总共能多少像素展现
-            var n = Math.floor(maxWidth / (textMaxWidth + 10))                     //能展现几个
-            n = n > arr.length ? arr.length : n
-            var dis = Math.floor(arr.length / (n - 1))                             //array中展现间隔
-            dis = arr.length == 2 && n == 2 ? 1 : dis       
-            dis = arr.length == 1 && n == 1 ? 0 : dis       
-                                                                                   //存放展现的数据
-            for(var a = 0, al = arr.length; a < al; a++){
-                var o = arr[dis * a]
-                if(o){
-                    tmp.push(arr[dis * a])
-                }
+
+            //存放展现的数据
+            for( var a = 0 ; a < n ; a++ ){
+                var obj = arr[a + dis*a];
+                obj && tmp.push( obj );
             }
-            if (tmp.length > n) {
-                dis = Math.ceil(arr.length / (n - 1))
-                dis = arr.length == 2 && n == 2 ? 1 : dis       
-                dis = arr.length == 1 && n == 1 ? 0 : dis
-                tmp = []                                                           
-                for(a = 0, al = arr.length; a < al; a++){
-                    o = arr[dis * a]
-                    if (o) {
-                        tmp.push(arr[dis * a])
-                    }
-                }
-            }
-          
-            if (n == 1 && tmp.length == 0 ) {                                      //防止连第一条都没的情况
-                tmp[0] = arr[0]
-            }
-            if (n == 2 && tmp.length == 1 && arr.length >= 2) {
-                tmp[1] = arr[arr.length - 1]
-            }
-            self.layoutData = tmp
+ 
+            this.layoutData = tmp
         }
     };
 

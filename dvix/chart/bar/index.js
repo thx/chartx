@@ -1,4 +1,4 @@
-KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
+KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
     /*
      *@node chart在dom里的目标容器节点。
     */
@@ -6,7 +6,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
     window.Canvax = Canvax
     var Line = function( node ){
         this.version       =  '0.1'                    //图表版本
-        this.type          =  'line';                  //图表类型(折线图)
+        this.type          =  'bar';                  //图表类型(折线图)
         this.canvax        =  null;                    //Canvax实例
         this.element       =  null;                    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width         =  0;                       //图表区域宽
@@ -44,6 +44,9 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         this._disX         =  0;                       //图表区域离左右的距离
         this._disY         =  6;                       //图表区域离上下的距离
         this.disYAndO      =  6;                       //y轴原点之间的距离
+
+
+        this._baseNumber   =  0;                       //基础点
 
         this._xAxis        =  null;
         this._yAxis        =  null;
@@ -294,19 +297,23 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             });
             self._back.setX(x), self._back.setY(y)
 
-            self.dataFrame.graphs.disX = self._getGraphsDisX()
-            self._trimGraphs()
-            self._graphs.draw({
-                w    : self._xAxis.xGraphsWidth,
-                h    : self._yAxis.yGraphsHeight,
-                data : self.dataFrame.graphs.data,
-                disX : self.dataFrame.graphs.disX
+            //绘制主图形区域
+            this._graphs.draw( this._trimGraphs() , {
+                w    : this._xAxis.xGraphsWidth,
+                h    : this._yAxis.yGraphsHeight,
+                pos  : {
+                     x : x + this._xAxis.disOriginX ,
+                     y : y
+                }
             });
+
             //执行生长动画
             self._graphs.grow();
 
+            return
+
             self._graphs.setX(x + self._xAxis.disOriginX), self._graphs.setY(y)
-                
+                 
             if(self.config.event.enabled){
                 self._graphs.sprite.on(EventType.HOLD,function(e){
                     self._onInduceHandler(e)
@@ -320,32 +327,31 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             }
         },
         _trimGraphs:function(){
-            var self = this                                                           
-            var maxYAxis = self._yAxis.dataSection[ self._yAxis.dataSection.length - 1 ]
-            var maxXAxis = self.dataFrame.xAxis.org.length
-            var arr = self.dataFrame.yAxis.org
-            var tmpData = []
-            for (var a = 0, al = arr.length; a < al; a++ ) {
-                for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
-                    !tmpData[a] ? tmpData[a] = [] : ''
-                    var y = - (arr[a][b] - self._yAxis._baseNumber) / (maxYAxis - self._yAxis._baseNumber) * self._yAxis.yGraphsHeight
-                    y = isNaN(y) ? 0 : y
-                    tmpData[a][b] = {'value':arr[a][b], 'x':b / (maxXAxis - 1) * self._xAxis.xGraphsWidth,'y':y}
-                }
-            }
-            if(maxXAxis == 1){
-                if(tmpData[0] && tmpData[0][0]){
-                    tmpData[0][0].x = parseInt(self._xAxis.xGraphsWidth / 2)
-                }
-            }
-            self.dataFrame.graphs.data = tmpData
-        },
-        //每两个点之间的距离
-        _getGraphsDisX:function(){
-            var self = this
-            return self._xAxis.xGraphsWidth / (self.dataFrame.xAxis.org.length - 1)
-        },
 
+            var xArr     = this._xAxis.data;
+            var yArr     = this._yAxis.dataOrg;
+            var fields   = yArr.length;
+
+            var xDis1    = this._xAxis.xDis1;
+            //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
+            var xDis2    = xDis1 / (fields+1);
+
+            var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
+            var tmpData  = [];
+            for( var a = 0 , al = xArr.length; a < al ; a++ ){
+                for( var b = 0 ; b < fields ; b ++ ){
+                    !tmpData[b] && (tmpData[b] = []);
+                    var y = -(yArr[b][a]-this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight;
+                    var x = xArr[a].x - xDis1/2 + xDis2 * (b+1)
+                    tmpData[b][a] = {
+                        value : yArr[b][a],
+                        x     : x,
+                        y     : y
+                    }
+                }
+            };
+            return tmpData;
+        },
         _drawEnd:function(){
             var self = this;
             self.stageBg.addChild(self._back.sprite)
@@ -355,7 +361,6 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
             self.core.addChild(self._yAxis.sprite);
 
             self.stageTip.addChild(self._tips.sprite)
-         
            
         },
 
@@ -451,7 +456,7 @@ KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, 
         './xAxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
-        'dvix/components/line/Graphs',
+        './Graphs',
         'dvix/components/tips/Tips'
     ]
 });
