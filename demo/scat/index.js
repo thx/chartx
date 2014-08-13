@@ -4,55 +4,55 @@ KISSY.ready(function(){
     var S = KISSY;
     var data1= [
         ["val1","val2","val3","val4"],
-        [ 1 , 101  , 201 , 301 ] ,
-        [ 2  , 0 , 145 , 100 ] ,
-        [ 3 , 488  , 88  , 700 ] ,
+        [ "text" , 101  , 201 , 301 ] ,
+        [ 7  , 0 , 145 , 100 ] ,
+        [ 3 , 488  , 88  , 200 ] ,
         [ 4  , 390  , 546 , 300 ] ,
-        [ 5 , 0  , 88  , 700 ] ,
+        [ 5 , 0  , 88  , 400 ] ,
         [ 6  , 390  , 546 , 300 ] ,
         [ 7 , 201  , 101 , 500 ] ,
         [8  , 1145 , 145 , 100 ] ,
-        [ 9 , 488  , 88  , 1700 ] ,
-        [ 10  , 390  , 546 , 300 ],
-        [ 11  , 390  , 546 , 300 ],
-        [ 12  , 390  , 1546 , 300 ],
-        [ 13  , 390  , 546 , 300 ],
-        [ 14  , 390  , 546 , 300 ],
-        [ 15  , 390  , 546 , 300 ],
-        [ 16  , 390  , 546 , 300 ],
-        [ 17  , 390  , 546 , 300 ],
-        [ 18  , 390  , 546 , 300 ],
-        [ 19  , 390  , 546 , 300 ],
-        [ 20  , 390  , 546 , 300 ],
-        [ 21  , 390  , 546 , 300 ],
-        [ 22  , 390  , 546 , 300 ],
-        [ 23  , 390  , 546 , 300 ],
-        [ 24  , 390  , 546 , 300 ]
+        [ 9 , 488  , 88  , 530 ] ,
+        [ 10  , 390  , 546 , 300 ]
+
     ];
     var options = {
         // title : "first charts",
-        // disX : 10,
-        // disY : 10,
-        mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
-        event : {
-            enabled : 0                                //是否有事件响应(tips)
-        },
-
+        // disXAxisLine : 26,
+        // disYAxisTopLine : 26,
+        //rotate   : -90,
+        disYAndO : 20,
+        mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
         yAxis : {
-            mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
-            fields : ["val4",'val3'],
+            mode     : 1,                           //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
+            fields   : ["val4","val3"],
+            dataMode : 0,
             line:{
                 enabled : 0,
                 // strokeStyle : '#ff0000'
             },
             text:{
-                // fillStyle:'#ff0000',
+                fillStyle:'#999999',
                 fontSize  : 12
+            }
+        },
+        xAxis : {
+            field : "val2",
+            disY: 6,
+            dis : 6,
+            line:{
+                width   : 2,
+                height  : 4,
+                strokeStyle   : '#cccccc'
+            },
+            text:{
+                fontSize  : 10
             }
         },
         back : {
             xOrigin:{
-                enabled:0
+                thinkness:1,
+                strokeStyle : '#333333'
             },
             yOrigin:{
                 enabled:0
@@ -75,7 +75,7 @@ KISSY.ready(function(){
                     normals : [0.8, 0.7],
                 }
             }
-        },
+        },       
         tips  :{
             // disTop : 50,
             context:{
@@ -87,10 +87,9 @@ KISSY.ready(function(){
                 fillStyles:['#333333','#999999','#999999']
             },
             tip  : {
-                // back:{
-                    // enabled : 0
+                back:{
                     // disX:10
-                // }
+                }
             },
             line : {
                 // lineType: ''
@@ -100,20 +99,22 @@ KISSY.ready(function(){
             }
         }
     }
+     
 
     KISSY.config({
         packages: [{
             name  :  'dvix'  ,
             path  :  '../../',
+            // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
             debug :  true
         }
         ]
     });
 
-    KISSY.use("dvix/chart/mirrorbar/ , node" , function( S , Mirrorbar ){
 
-        window.mirrorbar = new Mirrorbar( S.all("#canvasTest") );
-        mirrorbar.draw( data1 , options );
 
+    KISSY.use("dvix/chart/scat/ , node" , function( S , Scat ){
+        window.scat = new Scat( S.all("#canvasTest") );
+        scat.draw( data1 , options );
     });
 });

@@ -1,4 +1,4 @@
-KISSY.add("dvix/chart/line/" , function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
+KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
     /*
      *@node chart在dom里的目标容器节点。
     */
