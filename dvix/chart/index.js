@@ -1,46 +1,16 @@
-var DvixSite = {
-        local : !! ~location.search.indexOf('local'),
-        daily : !! ~location.search.indexOf('daily'),
-        debug : !! ~location.search.indexOf('debug'),
-        build : !! ~location.search.indexOf('build')
-    };
-
-if(  (/daily.taobao.net/g).test(location.host)  ){
-    DvixSite.daily = true;
-}
-
-var canvaxVersion = "2014.07.25";
-var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
-if( DvixSite.daily ){
-    canvaxVersion = '2014.07.25';
-    canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/" + canvaxVersion + "/";
-}
-if( DvixSite.local ){
-    //本地环境测试
-    canvaxUrl = "http://nick.daily.taobao.net/canvax"
-}
-
-KISSY.config({
-    packages: [{
-        name  : 'canvax' , 
-        path  :  canvaxUrl,
-        debug :  DvixSite.debug,
-        combine : !DvixSite.local
-    }]
-});
-
-KISSY.add("dvix/chart/" , function( S , Dvix ){
+KISSY.add("dvix/chart/" , function( S , Canvax ){
     var $ = S.all;
     var Chart = function(node){
+        
         this.element       =  $(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width         =  parseInt( this.element.width() );  //图表区域宽
         this.height        =  parseInt( this.element.height() ); //图表区域高
 
         //Canvax实例
-        this.canvax        =  new Dvix.Canvax({
+        this.canvax        =  new Canvax({
             el : this.element
         });
-        this.stage         =  new Dvix.Canvax.Display.Stage({
+        this.stage         =  new Canvax.Display.Stage({
             id : "main",
             context : {
                 x : 0.5,
@@ -50,23 +20,26 @@ KISSY.add("dvix/chart/" , function( S , Dvix ){
 
         this.canvax.addChild( this.stage );
         
+        arguments.callee.superclass.constructor.apply(this, arguments);
         this.init.apply(this , arguments);
     };
 
-    Chart.Canvax = Dvix.Canvax;
+    Chart.Canvax = Canvax;
 
     Chart.extend = function(props, statics, ctor) {
         var me = this;
-        var BaseChart = function(a) {
-            me.call(this, a);
+        var BaseChart = function() {
+            me.apply(this , arguments);
             if (ctor) {
-                ctor.call(this, a);
+                ctor.apply(this, arguments);
             }
         };
         BaseChart.extend = me.extend;
         return S.extend(BaseChart, me, props, statics);
     };
-    Chart.prototype = {
+
+    
+    S.extend( Chart , Canvax.Event.EventDispatcher , {
         init   : function(){},
         rotate : function( angle ){
             var currW = this.width;
@@ -166,13 +139,13 @@ KISSY.add("dvix/chart/" , function( S , Dvix ){
                 }
             }
         }
-    };
+    });
 
     return Chart;
 
 } , {
     requires : [
-        "dvix/",
+        "canvax/",
         "node"
         ]
 })

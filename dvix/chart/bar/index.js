@@ -4,7 +4,7 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
     */
     var Canvax = Chart.Canvax;
 
-    var Line = Chart.extend( {
+    return Chart.extend( {
 
         init:function(){
             this.type          =  'scat';                  //图表类型(折线图)
@@ -206,7 +206,6 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
         }
     });
     
-    return Line;
 } , {
     requires: [
         'dvix/chart/',
