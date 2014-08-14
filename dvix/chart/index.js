@@ -66,9 +66,11 @@ KISSY.add("dvix/chart/" , function( S , Canvax ){
          * [{field:'field1',index:0,data:[1,2]} ......]
          * 这样的结构化数据格式。
          */
-        _initData  : function( data ){
+        _initData  : function( data , opt ){
 
             this.dataFrame.org = data;
+            opt.yAxis && opt.yAxis.fields && _.extend(this.dataFrame.yAxis.fields , opt.yAxis.fields);
+            opt.xAxis && opt.xAxis.field  && (this.dataFrame.xAxis.field = opt.xAxis.field);
 
             var total = [];
             var arr = this.dataFrame.org;
@@ -90,54 +92,38 @@ KISSY.add("dvix/chart/" , function( S , Canvax ){
             //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
 
             var arr = this.dataFrame.data;
-            for(var a = 0, al = arr.length; a < al; a++){
-                var o = arr[a];
 
-                //如果没有配置xAxis的字段。
-                if(!this.dataFrame.xAxis.field){
 
-                    //那么默认第一个字段就为xAxis的数据字段
-                    if(a == 0){
-                        this.dataFrame.xAxis.org = o.data
-                    }
-
-                    //如果yAxis的字段集合（yAxis可以为集合）也没有配置
-                    if(this.dataFrame.yAxis.fields.length == 0){
-
-                        //那么除开第一个字段外（因为这个时候第一个字段为xAxis字段）都默认设置为yAxis字段
-                        if(a != 0){
-                            this.dataFrame.yAxis.org.push(o.data)
-                        }
-
-                    } else {
-                        //当然，如果yAxis有配置，自然 所有的 配置里面都设置为yAxis字段
-                        for(var b = 0, bl = this.dataFrame.yAxis.fields.length; b < bl; b++){
-                            if(o.field == this.dataFrame.yAxis.fields[b]){
-                                this.dataFrame.yAxis.org[b] = o.data
-                            }
-                        }
-                    }
-                } else {
-                    //如果有配置xAxis字段，当然，就用配置的xAxis了
-                    if(o.field == this.dataFrame.xAxis.field){
-                        this.dataFrame.xAxis.org = o.data
-                    }
-                    //那么y呢？
-                    //如果y有配置就用除开xAxis以外的所有字段
-                    if(this.dataFrame.yAxis.fields.length == 0){
-                        if(o.field != this.dataFrame.xAxis.field){
-                            this.dataFrame.yAxis.org.push(o.data)
-                        }
-                    } else {
-                        //没有就用x以外的所有字段
-                        for(var b = 0, bl = this.dataFrame.yAxis.fields.length; b < bl; b++){
-                            if(o.field == this.dataFrame.yAxis.fields[b]){
-                                this.dataFrame.yAxis.org[b] = o.data
-                            }
-                        } 
-                    }
-                }
+            /*
+             * 先设置xAxis的数据
+             */
+            var xField = this.dataFrame.xAxis.field;
+            if( !xField || xField=="" ){
+                this.dataFrame.xAxis.org   = arr[0].data;
+                this.dataFrame.xAxis.field = arr[0].field;
+            } else {
+                //如果有配置好的xAxis字段
+                this.dataFrame.xAxis.org = _.findWhere( arr , { field : xField } ).data;
             }
+
+            /*
+             * 然后设置对应的yAxis数据
+             */
+            var yFields = this.dataFrame.yAxis.fields;
+            if( yFields.length == 0 ){
+                //如果yFields没有，那么就自动获取除开xField 的所有字段
+                this.dataFrame.yAxis.org = _.pluck( _.reject( arr , function( obj ){
+                   return obj.field != this.dataFrame.xAxis.field;
+                } ) , "data" );
+            } else {
+                //如果有配置yFields，那么就按照配置的来啊
+                this.dataFrame.yAxis.org = _.pluck( _.filter( arr , function( obj ){
+                   return _.some( yFields , function( field ){
+                       return obj.field == field;
+                   } ); 
+                } ) , "data" );
+            }
+
         }
     });
 

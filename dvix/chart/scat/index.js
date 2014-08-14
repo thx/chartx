@@ -7,8 +7,6 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
     return Chart.extend( {
 
         init:function(){
-            this.type          =  'scat';                  //图表类型(折线图)
-        
             this.dataFrame     =  {                        //数据框架集合
                 org        :[],                            //最原始的数据  
                 data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
@@ -66,9 +64,7 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
               this.rotate( opt.rotate );
             }
 
-            this._initConfig( opt );               //初始化配置
-
-            this._initData( data );                          //初始化数据
+            this._initData( data , opt );                          //初始化数据
 
             this._initModule( opt , this.dataFrame );                      //初始化模块  
 
@@ -92,11 +88,6 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             this.height  = parseInt(this.element.height());
             this.draw(data, opt)
         },
-        _initConfig:function(opt){
-            _.deepExtend( this.dataFrame.yAxis , opt.yAxis );
-            _.deepExtend( this.dataFrame.xAxis , opt.xAxis );
-        },
-
         _initModule:function(opt , data){
             this._xAxis  = new xAxis(opt.xAxis , data.xAxis);
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);

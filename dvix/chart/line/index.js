@@ -1,78 +1,52 @@
-KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
+KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
     /*
      *@node chart在dom里的目标容器节点。
     */
-    var Canvax = Dvix.Canvax;
-    window.Canvax = Canvax
-    var Line = function( node ){
-        this.version       =  '0.1'                    //图表版本
-        this.type          =  'line';                  //图表类型(折线图)
-        this.canvax        =  null;                    //Canvax实例
-        this.element       =  null;                    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-        this.width         =  0;                       //图表区域宽
-        this.height        =  0;                       //图表区域高
-        this.config        =  {
-            mode       : 1,                            //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
-            event      : {
-                enabled : 1
-            }
-        }
+    var Canvax = Chart.Canvax;
 
-        this.dataFrameOrg     =  {                        //数据框架集合
-            org        :[],                            //最原始的数据  
-            data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
-            yAxis      :{                              //y轴
-                fields     :  [],                      //字段集合 对应this.data
-                org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
-                data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
-            },
-            xAxis      :{                              //x轴
-                field      :  '',                      //字段 对应this.data
-                org        :  [],                      //原始数据['星期一','星期二']
-                data       :  []                       //坐标数据[{x:100,content:'星期一'},{x:200,content:'星期二'}]
-            },
-            graphs     :{                              //图形
-                data       :  [],                      //二维 数据集合等[[{x:0,y:-100},{}],[]]
-                disX       :  0                        //每两个点之间的距离
-            }
-        }
-        this.dataFrame = {}
-
-        this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
-        this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
-
-        this._disX         =  0;                       //图表区域离左右的距离
-        this._disY         =  6;                       //图表区域离上下的距离
-        this.disYAndO      =  6;                       //y轴原点之间的距离
-
-        this._xAxis        =  null;
-        this._yAxis        =  null;
-        this._back         =  null;
-        this._graphs       =  null;
-        this._tips         =  null;
-
-	   	this.init.apply(this , arguments);
-    };
-
-    Line.prototype = {
+    return Chart.extend( {
 
         init:function(node){
-            this.element = node;
-            this.width   = parseInt(node.width());
-            this.height  = parseInt(node.height());
 
-            this.canvax = new Canvax({
-                el : this.element
-            })
-
-            this.stage  = new Canvax.Display.Stage({
-                id : "main",
-                context : {
-                   x : 0.5,
-                   y : 0.5
+            this.config        =  {
+                mode       : 1,                            //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
+                event      : {
+                    enabled : 1
                 }
-            });
-            this.canvax.addChild( this.stage );
+            }
+
+            this.dataFrame     =  {                        //数据框架集合
+                org        :[],                            //最原始的数据  
+                data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
+                yAxis      :{                              //y轴
+                    fields     :  [],                      //字段集合 对应this.data
+                    org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
+                    data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
+                },
+                xAxis      :{                              //x轴
+                    field      :  null,                      //字段 对应this.data
+                    org        :  [],                      //原始数据['星期一','星期二']
+                    data       :  []                       //坐标数据[{x:100,content:'星期一'},{x:200,content:'星期二'}]
+                },
+                graphs     :{                              //图形
+                    data       :  [],                      //二维 数据集合等[[{x:0,y:-100},{}],[]]
+                    disX       :  0                        //每两个点之间的距离
+                }
+            }
+
+            this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
+            this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
+
+            this._disX         =  0;                       //图表区域离左右的距离
+            this._disY         =  6;                       //图表区域离上下的距离
+            this.disYAndO      =  6;                       //y轴原点之间的距离
+
+            this._xAxis        =  null;
+            this._yAxis        =  null;
+            this._back         =  null;
+            this._graphs       =  null;
+            this._tips         =  null;
+
 
             this.stageTip = new Canvax.Display.Sprite({
                 id      : 'tip'
@@ -95,9 +69,8 @@ KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, G
               this.rotate( opt.rotate );
             }
 
-            this._initConfig(data, opt);               //初始化配置
-
-            this._initData();                          //初始化数据
+            //根据data 和 opt中yAxis xAxis的field字段来分配this.dataFrame中的yAxis数据和xAxis数据
+            this._initData( data , opt );
 
             this._initModule( opt , this.dataFrame );                      //初始化模块  
 
@@ -136,30 +109,6 @@ KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, G
             this.height  = parseInt(this.element.height());
             this.draw(data, opt)
         },
-        _initConfig:function(data, opt){
-            this.dataFrame     = S.clone(this.dataFrameOrg)
-            this.dataFrame.org = data;
-
-            if( opt ){
-                this.config.mode = opt.mode || this.config.mode
-                this.disYAndO        = (opt.disYAndO        || opt.disYAndO == 0       ) ? opt.disYAndO        : this.disYAndO
-                var event = opt.event
-                if(event){
-                    this.config.event.enabled = event.enabled == 0 ? 0 : this.config.event.enabled
-                }
-
-                var yAxis = opt.yAxis
-                if( yAxis ){
-                    this.dataFrame.yAxis.fields = yAxis.fields || this.dataFrame.yAxis.fields
-                }
-
-                var xAxis = opt.xAxis
-                if( xAxis ){
-                    this.dataFrame.xAxis.field = xAxis.field || this.dataFrame.xAxis.field
-                }
-            }
-        },
-
         _initModule:function(opt , data){
             this._xAxis  = new xAxis(opt.xAxis , data.xAxis);
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
@@ -167,80 +116,6 @@ KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, G
             this._graphs = new Graphs(opt.graphs);
             this._tips   = new Tips(opt.tips)
         },
-
-        _initData:function(){
-            var self = this;
-
-            var total = []
-            var arr = self.dataFrame.org;
-
-            for(var a = 0, al = arr[0].length; a < al; a++){
-                var o = {}
-                o.field = arr[0][a]
-                o.index = a
-                o.data  = []
-                total.push(o)
-            }
-
-            for(var a = 1, al = arr.length; a < al; a++){
-                for(var b = 0, bl = arr[a].length; b < bl; b++){
-                    total[b].data.push(arr[a][b])
-                }     
-            }
-            self.dataFrame.data = total
-            //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
-
-            var arr = self.dataFrame.data
-            for(var a = 0, al = arr.length; a < al; a++){
-                var o = arr[a]
-
-                //如果没有配置xAxis的字段。
-                if(!self.dataFrame.xAxis.field){
-
-                    //那么默认第一个字段就为xAxis的数据字段
-                    if(a == 0){
-                        self.dataFrame.xAxis.org = o.data
-                    }
-
-                    //如果yAxis的字段集合（yAxis可以为集合）也没有配置
-                    if(self.dataFrame.yAxis.fields.length == 0){
-
-                        //那么除开第一个字段外（因为这个时候第一个字段为xAxis字段）都默认设置为yAxis字段
-                        if(a != 0){
-                            self.dataFrame.yAxis.org.push(o.data)
-                        }
-
-                    } else {
-                        //当然，如果yAxis有配置，自然 所有的 配置里面都设置为yAxis字段
-                        for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
-                            if(o.field == self.dataFrame.yAxis.fields[b]){
-                                self.dataFrame.yAxis.org[b] = o.data
-                            }
-                        }
-                    }
-                } else {
-                    //如果有配置xAxis字段，当然，就用配置的xAxis了
-                    if(o.field == self.dataFrame.xAxis.field){
-                        self.dataFrame.xAxis.org = o.data
-                    }
-                    //那么y呢？
-                    //如果y有配置就用除开xAxis以外的所有字段
-                    if(self.dataFrame.yAxis.fields.length == 0){
-                        if(o.field != self.dataFrame.xAxis.field){
-                            self.dataFrame.yAxis.org.push(o.data)
-                        }
-                    } else {
-                        //没有就用x以外的所有字段
-                        for(var b = 0, bl = self.dataFrame.yAxis.fields.length; b < bl; b++){
-                            if(o.field == self.dataFrame.yAxis.fields[b]){
-                                self.dataFrame.yAxis.org[b] = o.data
-                            }
-                        } 
-                    }
-                }
-            }
-        },
- 
         _startDraw : function(){
             var self = this;
             // self.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -265,7 +140,7 @@ KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, G
 
 
             var _yAxisW = self._yAxis.w
-            if(self.config.mode == 2){
+            if(self._yAxis.display == "none"){
                 _yAxisW = 0
                 self.disYAndO = 0
             }
@@ -440,11 +315,11 @@ KISSY.add(function(S, Dvix, Tools, DataSection, EventType, xAxis, yAxis, Back, G
                 self._tips.remove()
             }
         }
-    };
-    return Line;
+    });
+
 } , {
     requires: [
-        'dvix/',
+        'dvix/chart/',
         'dvix/utils/tools',
         'dvix/utils/datasection',
         'dvix/event/eventtype',

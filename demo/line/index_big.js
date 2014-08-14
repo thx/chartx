@@ -52,7 +52,7 @@ KISSY.ready(function(){
             }
         },
         xAxis : {
-            // field : "val2",
+            field : "val2",
             disY: 6,
             dis : 6,
             line:{
