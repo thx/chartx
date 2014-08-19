@@ -1,4 +1,4 @@
-KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips) {
+KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs) {
     /*
      *@node chart在dom里的目标容器节点。
     */
@@ -145,7 +145,6 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
         './xaxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
-        './graphs',
-        'dvix/components/tips/Tips'
+        './graphs'
     ]
 });
