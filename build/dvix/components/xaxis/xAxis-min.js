@@ -13,7 +13,7 @@ KISSY.add('dvix/components/xaxis/xAxis', function (a, b, c, d) {
             mode: 1,
             fillStyle: '#999999',
             fontSize: 13
-        }, this.disXAxisLine = 6, this.disOriginX = 0, this.xGraphsWidth = 0, this.dataOrg = [], this.dataSection = [], this.data = [], this.layoutData = [], this.sprite = null, this.txtSp = null, this.lineSp = null, this.init(a, b);
+        }, this.display = 'block', this.disXAxisLine = 6, this.disOriginX = 0, this.xGraphsWidth = 0, this.dataOrg = [], this.dataSection = [], this.data = [], this.layoutData = [], this.sprite = null, this.txtSp = null, this.lineSp = null, this.init(a, b);
     };
     return e.prototype = {
         init: function (a, c) {
@@ -29,7 +29,7 @@ KISSY.add('dvix/components/xaxis/xAxis', function (a, b, c, d) {
             this.sprite.context.y = a;
         },
         draw: function (a) {
-            this._initConfig(a), this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth), this._trimLayoutData(), 'none' != this.diaplay && (this._widget(), this._layout()), this.setX(this.pos.x + this.disOriginX), this.setY(this.pos.y);
+            this._initConfig(a), this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth), this._trimLayoutData(), 'none' != this.display && (this._widget(), this._layout()), this.setX(this.pos.x + this.disOriginX), this.setY(this.pos.y);
         },
         _initConfig: function (a) {
             a && _.deepExtend(this, a), this.max.right = this.w, this.xGraphsWidth = this.w - this._getXAxisDisLine(), this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2), this.max.left += this.disOriginX, this.max.right -= this.disOriginX;
@@ -50,7 +50,7 @@ KISSY.add('dvix/components/xaxis/xAxis', function (a, b, c, d) {
         },
         _checkText: function () {
             var a = new b.Display.Text('test', { context: { fontSize: this.text.fontSize } });
-            this.max.txtH = a.getTextHeight(), this.h = 'none' == this.diaplay ? this.max.txtH : this.disY + this.line.height + this.dis + this.max.txtH;
+            this.max.txtH = a.getTextHeight(), this.h = 'none' == this.display ? this.max.txtH : this.disY + this.line.height + this.dis + this.max.txtH;
         },
         _widget: function () {
             var a = this.layoutData;

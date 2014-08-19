@@ -26,6 +26,8 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Canvax, Line , Tools){
                 fontSize  : 13
         }
 
+        this.display = "block";
+
         this.disXAxisLine =  6;                        //x轴两端预留的最小值
         this.disOriginX   =  0;                        //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
         this.xGraphsWidth =  0;                        //x轴宽(去掉两端)
@@ -77,7 +79,7 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Canvax, Line , Tools){
 
             this._trimLayoutData();
             
-            if( this.diaplay != "none" ){
+            if( this.display != "none" ){
                 this._widget();
                 this._layout();
             } 
@@ -126,7 +128,7 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Canvax, Line , Tools){
                    }
             })
             this.max.txtH = txt.getTextHeight();
-            if( this.diaplay == "none" ){
+            if( this.display == "none" ){
                 this.h = this.max.txtH;
             } else {
                 this.h = this.disY + this.line.height + this.dis + this.max.txtH

@@ -189,7 +189,8 @@ KISSY.ready(function () {
                 text: {
                     mode: 2,
                     fontSize: 10
-                }
+                },
+                display: 'none'
             },
             back: {
                 xOrigin: {
