@@ -14,7 +14,8 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
             '#ae833a',
             '#896149'
         ];
-        this.barW = 12;
+        this.bar = { width: 12 };
+        this.bar.width = 12;
         this.sprite = null;
         _.deepExtend(this, opt);
         this.init(data);
@@ -31,11 +32,11 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
         },
         getBarFillStyle: function (i, ii, value) {
             var barFillStyle = null;
-            if (_.isArray(this.barFillStyle)) {
-                barFillStyle = this.barFillStyle[ii];
+            if (_.isArray(this.bar.fillStyle)) {
+                barFillStyle = this.bar.fillStyle[ii];
             }
-            if (_.isFunction(this.barFillStyle)) {
-                barFillStyle = this.barFillStyle(i, ii, value);
+            if (_.isFunction(this.bar.fillStyle)) {
+                barFillStyle = this.bar.fillStyle(i, ii, value);
             }
             if (!barFillStyle || barFillStyle == '') {
                 barFillStyle = this._colors[ii];
@@ -43,8 +44,8 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
             return barFillStyle;
         },
         checkBarW: function (xDis) {
-            if (this.barW >= xDis) {
-                this.barW = xDis - 1;
+            if (this.bar.width >= xDis) {
+                this.bar.width = xDis - 1;
             }
         },
         draw: function (data, opt) {
@@ -60,14 +61,14 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
                     var barData = data[ii][i];
                     var rect = new Rect({
                             context: {
-                                x: Math.round(barData.x - this.barW / 2),
+                                x: Math.round(barData.x - this.bar.width / 2),
                                 y: barData.y,
-                                width: this.barW,
+                                width: this.bar.width,
                                 height: Math.abs(barData.y),
                                 fillStyle: this.getBarFillStyle(i, ii, barData.value),
                                 radius: [
-                                    this.barW / 2,
-                                    this.barW / 2,
+                                    this.bar.width / 2,
+                                    this.bar.width / 2,
                                     0,
                                     0
                                 ]

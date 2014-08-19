@@ -67,13 +67,16 @@ KISSY.ready(function(){
             }
         },
         graphs:{
-            line:{
+            bar : {
                 strokeStyle : {
                     normals : ['#f8ab5e','#E55C5C'],
                 },
                 alpha       : {
                     normals : [0.8, 0.7],
+                },
+                fillStyle : function( line , row , value ){
                 }
+
             }
         },       
         tips  :{

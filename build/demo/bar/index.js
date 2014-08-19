@@ -207,7 +207,7 @@ KISSY.ready(function () {
             },
             // enabled : 0
             graphs: {
-                line: {
+                bar: {
                     strokeStyle: {
                         normals: [
                             '#f8ab5e',
@@ -219,6 +219,9 @@ KISSY.ready(function () {
                             0.8,
                             0.7
                         ]
+                    },
+                    fillStyle: function (line, row, value) {
+                        debugger;
                     }
                 }
             },

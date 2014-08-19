@@ -10,7 +10,7 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
             '#ecb44f',
             '#ae833a',
             '#896149'
-        ], this.barW = 12, this.sprite = null, _.deepExtend(this, a), this.init(b);
+        ], this.bar = { width: 12 }, this.bar.width = 12, this.sprite = null, _.deepExtend(this, a), this.init(b);
     };
     return e.prototype = {
         init: function () {
@@ -24,10 +24,10 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
         },
         getBarFillStyle: function (a, b, c) {
             var d = null;
-            return _.isArray(this.barFillStyle) && (d = this.barFillStyle[b]), _.isFunction(this.barFillStyle) && (d = this.barFillStyle(a, b, c)), d && '' != d || (d = this._colors[b]), d;
+            return _.isArray(this.bar.fillStyle) && (d = this.bar.fillStyle[b]), _.isFunction(this.bar.fillStyle) && (d = this.bar.fillStyle(a, b, c)), d && '' != d || (d = this._colors[b]), d;
         },
         checkBarW: function (a) {
-            this.barW >= a && (this.barW = a - 1);
+            this.bar.width >= a && (this.bar.width = a - 1);
         },
         draw: function (a, d) {
             if (_.deepExtend(this, d), 0 != a.length) {
@@ -35,14 +35,14 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
                     for (var g = new b.Display.Sprite({ id: 'barGroup' + f }), h = 0, i = a.length; i > h; h++) {
                         var j = a[h][f], k = new c({
                                 context: {
-                                    x: Math.round(j.x - this.barW / 2),
+                                    x: Math.round(j.x - this.bar.width / 2),
                                     y: j.y,
-                                    width: this.barW,
+                                    width: this.bar.width,
                                     height: Math.abs(j.y),
                                     fillStyle: this.getBarFillStyle(f, h, j.value),
                                     radius: [
-                                        this.barW / 2,
-                                        this.barW / 2,
+                                        this.bar.width / 2,
+                                        this.bar.width / 2,
                                         0,
                                         0
                                     ]
