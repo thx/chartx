@@ -1,19 +1,21 @@
-KISSY.add('dvix/chart/progress/progress-dmp-min', function (a, b, c) {
-    b.Canvax;
-    return b.extend({
+KISSY.add('dvix/chart/progress/index', function (S, Chart, Sector) {
+    var Canvax = Chart.Canvax;
+    return Chart.extend({
         config: {
             secW: 10,
             bColor: '#E6E6E6',
             pColor: '#8d76c4'
         },
-        init: function (a, b) {
-            this._initConfig(b), this.r = Math.min(this.width, this.height) / 2;
+        init: function (el, opt) {
+            this._initConfig(opt);
+            this.r = Math.min(this.width, this.height) / 2;
         },
-        _initConfig: function (a) {
-            _.extend(this.config, a);
+        _initConfig: function (opt) {
+            _.extend(this.config, opt);
         },
-        draw: function (a) {
-            this._initConfig(a), this.stage.addChild(new c({
+        draw: function (opt) {
+            this._initConfig(opt);
+            this.stage.addChild(new Sector({
                 context: {
                     x: this.height / 2,
                     y: this.width / 2,
@@ -24,7 +26,8 @@ KISSY.add('dvix/chart/progress/progress-dmp-min', function (a, b, c) {
                     fillStyle: this.config.bColor,
                     lineJoin: 'round'
                 }
-            })), this.stage.addChild(new c({
+            }));
+            this.stage.addChild(new Sector({
                 id: 'speed',
                 context: {
                     x: this.height / 2,
@@ -38,8 +41,8 @@ KISSY.add('dvix/chart/progress/progress-dmp-min', function (a, b, c) {
                 }
             }));
         },
-        setSpeed: function (a) {
-            this.stage.getChildById('speed').context.endAngle = a;
+        setSpeed: function (s) {
+            this.stage.getChildById('speed').context.endAngle = s;
         }
     });
 }, {
