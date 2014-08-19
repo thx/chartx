@@ -158,7 +158,7 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
                  * TODO:
                  * tips的title，先特殊处理下,这里本来不应该写具体的业务逻辑的
                  */
-                var objTitle = { content: this._tips.opt.titles[column][row] + '\uFF1A' };
+                var objTitle = { content: this._tips.opt.titles[i][row] + '\uFF1A' };
                 data[i].push(objTitle);
                 var obj = { content: barsData[i][row].value };
                 data[i].push(obj);

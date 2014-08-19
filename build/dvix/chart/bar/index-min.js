@@ -73,24 +73,24 @@ KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i, j) {
             this.stageBg.addChild(this._back.sprite), this.core.addChild(this._xAxis.sprite), this.core.addChild(this._graphs.sprite), this.core.addChild(this._yAxis.sprite), this.stageTip.addChild(this._tips.sprite);
         },
         _onInduceHandler: function (a) {
-            var b = a.bar, c = (b.context.fillStyle, b.row), d = b.column, e = this._graphs.data, f = [];
-            f.length = e.length;
-            for (var g = 0; g < e.length; g++) {
-                !f[g] && (f[g] = []);
-                var h = { content: this._tips.opt.titles[d][c] + '\uFF1A' };
-                f[g].push(h);
-                var i = { content: e[g][c].value };
-                f[g].push(i);
+            var b = a.bar, c = (b.context.fillStyle, b.row), d = (b.column, this._graphs.data), e = [];
+            e.length = d.length;
+            for (var f = 0; f < d.length; f++) {
+                !e[f] && (e[f] = []);
+                var g = { content: this._tips.opt.titles[f][c] + '\uFF1A' };
+                e[f].push(g);
+                var h = { content: d[f][c].value };
+                e[f].push(h);
             }
-            var j = a.target.localToGlobal(void 0, this.core), k = {
+            var i = a.target.localToGlobal(void 0, this.core), j = {
                     w: this.width,
                     h: this.height
                 };
-            k.tip = {
-                x: j.x,
-                y: j.y,
-                data: f
-            }, this._tips.remove(), this._tips.draw(k);
+            j.tip = {
+                x: i.x,
+                y: i.y,
+                data: e
+            }, this._tips.remove(), this._tips.draw(j);
         },
         _offInduceHandler: function () {
             this._tips && this._tips.remove();

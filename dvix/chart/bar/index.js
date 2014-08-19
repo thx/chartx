@@ -193,7 +193,7 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
                  */
                 
                 var objTitle = {
-                    content : this._tips.opt.titles[column][row]+"："
+                    content : this._tips.opt.titles[i][row]+"："
                 }
                 data[i].push( objTitle );
                 
