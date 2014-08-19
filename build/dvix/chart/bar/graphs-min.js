@@ -35,8 +35,8 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
                     for (var g = new b.Display.Sprite({ id: 'barGroup' + f }), h = 0, i = a.length; i > h; h++) {
                         var j = a[h][f], k = new c({
                                 context: {
-                                    x: Math.round(j.x - this.bar.width / 2),
-                                    y: parseInt(j.y),
+                                    x: Math.round(j.x - this.bar.width / 2) + 0.5,
+                                    y: parseInt(j.y) + 0.5,
                                     width: parseInt(this.bar.width),
                                     height: parseInt(Math.abs(j.y)),
                                     fillStyle: this.getBarFillStyle(f, h, j.value),

@@ -61,8 +61,14 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
                     var barData = data[ii][i];
                     var rect = new Rect({
                             context: {
-                                x: Math.round(barData.x - this.bar.width / 2),
-                                y: parseInt(barData.y),
+                                /**
+                             * 能说脏话不！
+                             * 尼玛我给整个舞台偏移了0.5，然后后面所有的偏移都用parseInt
+                             * 但是居然在低分辨率的屏幕下面居然边界糊了。
+                             * 我只好又都偏移0.5。
+                             */
+                                x: Math.round(barData.x - this.bar.width / 2) + 0.5,
+                                y: parseInt(barData.y) + 0.5,
                                 width: parseInt(this.bar.width),
                                 height: parseInt(Math.abs(barData.y)),
                                 fillStyle: this.getBarFillStyle(i, ii, barData.value),
