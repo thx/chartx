@@ -1,5 +1,4 @@
-KISSY.add("dvix/components/tips/Tips" , function(S, Dvix, Tip, Line, Nodes, Tools){
-    var Canvax = Dvix.Canvax;
+KISSY.add("dvix/components/tips/Tips" , function(S, Canvax, Tip, Line, Nodes, Tools){
     var Tips = function(opt){
         this.w          = 0;
         this.h          = 0;
@@ -168,7 +167,7 @@ KISSY.add("dvix/components/tips/Tips" , function(S, Dvix, Tip, Line, Nodes, Tool
 
 } , {
     requires : [
-        "dvix/",
+        "canvax/",
         "dvix/components/tips/Tip",
         "dvix/components/tips/Line",
         "dvix/components/tips/Nodes",

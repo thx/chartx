@@ -1,5 +1,4 @@
-KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
-    var Canvax = Dvix.Canvax;
+KISSY.add("dvix/components/back/Back" , function(S, Canvax, Line, Tools){
     var Back = function(opt){
         this.w       = 0;   
         this.h       = 0;
@@ -158,7 +157,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
 
 } , {
     requires : [
-        "dvix/",
+        "canvax/",
         "canvax/shape/Line",
         "dvix/utils/tools",
         "dvix/utils/deep-extend"

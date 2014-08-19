@@ -1,14 +1,14 @@
 KISSY.add('dvix/components/line/Group', function (a, b, c, d, e) {
-    var f = b.Canvax, g = function (a) {
-            this.w = 0, this.h = 0, this.y = 0, this.line = { strokeStyle: '#FF0000' }, this.fill = {
-                strokeStyle: '#FF0000',
-                alpha: 1
-            }, this.data = [], this.sprite = null, this.init(a);
-        };
-    return g.prototype = {
+    var f = function (a) {
+        this.w = 0, this.h = 0, this.y = 0, this.line = { strokeStyle: '#FF0000' }, this.fill = {
+            strokeStyle: '#FF0000',
+            alpha: 1
+        }, this.data = [], this.sprite = null, this.init(a);
+    };
+    return f.prototype = {
         init: function (a) {
-            var b = this;
-            b._initConfig(a), b.sprite = new f.Display.Sprite();
+            var c = this;
+            c._initConfig(a), c.sprite = new b.Display.Sprite();
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -75,10 +75,10 @@ KISSY.add('dvix/components/line/Group', function (a, b, c, d, e) {
                 b[0][1]
             ]), e.getPath(b);
         }
-    }, g;
+    }, f;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/BrokenLine',
         'canvax/shape/Path',
         'dvix/utils/tools'

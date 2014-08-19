@@ -1,5 +1,4 @@
-KISSY.add('dvix/components/tips/Tip', function (S, Dvix, Circle, Rect, Tools) {
-    var Canvax = Dvix.Canvax;
+KISSY.add('dvix/components/tips/Tip', function (S, Canvax, Circle, Rect, Tools) {
     var Tip = function (opt) {
         this.w = 0;
         this.h = 0;
@@ -271,7 +270,7 @@ KISSY.add('dvix/components/tips/Tip', function (S, Dvix, Circle, Rect, Tools) {
     return Tip;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Circle',
         'canvax/shape/Rect',
         'dvix/utils/tools'

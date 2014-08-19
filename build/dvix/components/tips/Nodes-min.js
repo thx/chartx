@@ -1,11 +1,11 @@
 KISSY.add('dvix/components/tips/Nodes', function (a, b, c) {
-    var d = b.Canvax, e = function (a) {
-            this.data = [], this.sprite = null, this.init(a);
-        };
-    return e.prototype = {
+    var d = function (a) {
+        this.data = [], this.sprite = null, this.init(a);
+    };
+    return d.prototype = {
         init: function (a) {
-            var b = this;
-            b._initConfig(a), b.sprite = new d.Display.Sprite();
+            var c = this;
+            c._initConfig(a), c.sprite = new b.Display.Sprite();
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -36,10 +36,10 @@ KISSY.add('dvix/components/tips/Nodes', function (a, b, c) {
                 a.sprite.addChild(k), k.context.x = f.x, k.context.y = f.y;
             }
         }
-    }, e;
+    }, d;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Circle',
         'dvix/utils/tools'
     ]

@@ -1,15 +1,15 @@
 KISSY.add('dvix/components/tips/Line', function (a, b, c) {
-    var d = b.Canvax, e = function (a) {
-            this.xStart = 0, this.yStart = 0, this.xEnd = 0, this.yEnd = 0, this.line = {
-                lineType: 'dashed',
-                thinkness: 1,
-                strokeStyle: '#333333'
-            }, this.sprite = null, this.init(a);
-        };
-    return e.prototype = {
+    var d = function (a) {
+        this.xStart = 0, this.yStart = 0, this.xEnd = 0, this.yEnd = 0, this.line = {
+            lineType: 'dashed',
+            thinkness: 1,
+            strokeStyle: '#333333'
+        }, this.sprite = null, this.init(a);
+    };
+    return d.prototype = {
         init: function (a) {
-            var b = this;
-            b._initConfig(a), b.sprite = new d.Display.Sprite({ id: 'tipLine' });
+            var c = this;
+            c._initConfig(a), c.sprite = new b.Display.Sprite({ id: 'tipLine' });
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -43,10 +43,10 @@ KISSY.add('dvix/components/tips/Line', function (a, b, c) {
                 });
             a.sprite.addChild(b);
         }
-    }, e;
+    }, d;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Line',
         'dvix/utils/tools'
     ]

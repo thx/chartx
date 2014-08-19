@@ -1,5 +1,4 @@
-KISSY.add('dvix/components/line/Graphs', function (S, Dvix, Rect, Tools, Tween, EventType, Group) {
-    var Canvax = Dvix.Canvax;
+KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween, EventType, Group) {
     var Graphs = function (opt) {
         this.w = 0;
         this.h = 0;
@@ -203,7 +202,7 @@ KISSY.add('dvix/components/line/Graphs', function (S, Dvix, Rect, Tools, Tween, 
     return Graphs;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Rect',
         'dvix/utils/tools',
         'canvax/animation/Tween',

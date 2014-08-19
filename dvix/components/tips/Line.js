@@ -1,5 +1,4 @@
-KISSY.add("dvix/components/tips/Line" , function(S, Dvix, CanvaxLine, Tools){
-    var Canvax = Dvix.Canvax;
+KISSY.add("dvix/components/tips/Line" , function(S, Canvax, CanvaxLine, Tools){
     var Line = function(opt){
 
         this.xStart     = 0
@@ -84,7 +83,7 @@ KISSY.add("dvix/components/tips/Line" , function(S, Dvix, CanvaxLine, Tools){
 
 } , {
     requires : [
-        "dvix/",
+        "canvax/",
         "canvax/shape/Line",
         "dvix/utils/tools"
     ] 

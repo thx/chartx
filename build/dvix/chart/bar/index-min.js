@@ -1,8 +1,8 @@
-KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i) {
-    var j = b.Canvax;
+KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i, j) {
+    var k = b.Canvax;
     return b.extend({
         init: function () {
-            this.dataFrame = null, this._xAxis = null, this._yAxis = null, this._back = null, this._graphs = null, this._tips = null, this.stageTip = new j.Display.Sprite({ id: 'tip' }), this.core = new j.Display.Sprite({ id: 'core' }), this.stageBg = new j.Display.Sprite({ id: 'bg' }), this.stage.addChild(this.stageBg), this.stage.addChild(this.core), this.stage.addChild(this.stageTip);
+            this.dataFrame = null, this._xAxis = null, this._yAxis = null, this._back = null, this._graphs = null, this._tips = null, this.stageTip = new k.Display.Sprite({ id: 'tip' }), this.core = new k.Display.Sprite({ id: 'core' }), this.stageBg = new k.Display.Sprite({ id: 'bg' }), this.stage.addChild(this.stageBg), this.stage.addChild(this.core), this.stage.addChild(this.stageTip);
         },
         draw: function (a, b) {
             b.rotate && this.rotate(b.rotate), this.dataFrame = this._initData(a, b), this._initModule(b, this.dataFrame), this._startDraw(), this._drawEnd(), this._arguments = arguments;
@@ -14,7 +14,7 @@ KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i) {
             this.clear(), this.width = parseInt(this.element.width()), this.height = parseInt(this.element.height()), this.draw(a, b);
         },
         _initModule: function (a, b) {
-            this._xAxis = new f(a.xAxis, b.xAxis), this._yAxis = new g(a.yAxis, b.yAxis), this._back = new h(a.back), this._graphs = new i(a.graphs), this._tips = new Tips(a.tips);
+            this._xAxis = new f(a.xAxis, b.xAxis), this._yAxis = new g(a.yAxis, b.yAxis), this._back = new h(a.back), this._graphs = new i(a.graphs), this._tips = new j(a.tips);
         },
         _startDraw: function () {
             var a = this, b = 0, c = this.height - this._xAxis.h;
@@ -77,6 +77,7 @@ KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i) {
         './xaxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
-        './graphs'
+        './graphs',
+        'dvix/components/tips/Tips'
     ]
 });

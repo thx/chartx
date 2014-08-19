@@ -1,7 +1,5 @@
-KISSY.add(function( S , Dvix , Circle , Tween ){
+KISSY.add(function( S , Canvax , Circle , Tween ){
  
-    var Canvax = Dvix.Canvax;
-
     var Graphs = function( opt , data ){
         this.w = 0;
         this.h = 0;
@@ -117,7 +115,7 @@ KISSY.add(function( S , Dvix , Circle , Tween ){
 
 } , {
     requires : [
-        "dvix/",
+        "canvax/",
         "canvax/shape/Circle",
         "canvax/animation/Tween"
     ]

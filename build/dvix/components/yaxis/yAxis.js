@@ -1,5 +1,4 @@
-KISSY.add('dvix/components/yaxis/yAxis', function (S, Dvix, Line, Tools, DataSection) {
-    var Canvax = Dvix.Canvax;
+KISSY.add('dvix/components/yaxis/yAxis', function (S, Canvax, Line, Tools, DataSection) {
     var yAxis = function (opt, data) {
         this.w = 0;
         this.display = 'block';    //默认为block，不显示为none
@@ -166,7 +165,7 @@ KISSY.add('dvix/components/yaxis/yAxis', function (S, Dvix, Line, Tools, DataSec
     return yAxis;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Line',
         'dvix/utils/tools',
         'dvix/utils/datasection'

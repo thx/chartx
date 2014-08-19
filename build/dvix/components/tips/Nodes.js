@@ -1,5 +1,4 @@
-KISSY.add('dvix/components/tips/Nodes', function (S, Dvix, Circle, Tools) {
-    var Canvax = Dvix.Canvax;
+KISSY.add('dvix/components/tips/Nodes', function (S, Canvax, Circle, Tools) {
     var Nodes = function (opt) {
         this.data = [];    //[o,o,o]
                            /*
@@ -79,7 +78,7 @@ KISSY.add('dvix/components/tips/Nodes', function (S, Dvix, Circle, Tools) {
     return Nodes;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Circle',
         'dvix/utils/tools'
     ]

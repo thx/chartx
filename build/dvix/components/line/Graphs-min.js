@@ -1,26 +1,26 @@
 KISSY.add('dvix/components/line/Graphs', function (a, b, c, d, e, f, g) {
-    var h = b.Canvax, i = function (a) {
-            this.w = 0, this.h = 0, this.y = 0, this.line = {
-                strokeStyle: {
-                    normals: [
-                        '#f8ab5e',
-                        '#E55C5C'
-                    ],
-                    overs: []
-                },
-                alpha: {
-                    normals: [
-                        0.8,
-                        0.7
-                    ],
-                    overs: []
-                }
-            }, this.data = [], this.disX = 0, this.groups = [], this.iGroup = 0, this.iNode = -1, this._nodesInfoList = [], this._nodesYList = [], this.sprite = null, this.induce = null, this.init(a);
-        };
-    return i.prototype = {
+    var h = function (a) {
+        this.w = 0, this.h = 0, this.y = 0, this.line = {
+            strokeStyle: {
+                normals: [
+                    '#f8ab5e',
+                    '#E55C5C'
+                ],
+                overs: []
+            },
+            alpha: {
+                normals: [
+                    0.8,
+                    0.7
+                ],
+                overs: []
+            }
+        }, this.data = [], this.disX = 0, this.groups = [], this.iGroup = 0, this.iNode = -1, this._nodesInfoList = [], this._nodesYList = [], this.sprite = null, this.induce = null, this.init(a);
+    };
+    return h.prototype = {
         init: function (a) {
-            var b = this;
-            b._initConfig(a), b.sprite = new h.Display.Sprite();
+            var c = this;
+            c._initConfig(a), c.sprite = new b.Display.Sprite();
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -130,10 +130,10 @@ KISSY.add('dvix/components/line/Graphs', function (a, b, c, d, e, f, g) {
                 c.iNode = i;
             }
         }
-    }, i;
+    }, h;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Rect',
         'dvix/utils/tools',
         'canvax/animation/Tween',

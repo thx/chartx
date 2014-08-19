@@ -1,20 +1,20 @@
 KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
-    var e = b.Canvax, f = function (a, b) {
-            this.w = 0, this.h = 0, this.pos = {
-                x: 0,
-                y: 0
-            }, this._colors = [
-                '#6f8cb2',
-                '#c77029',
-                '#f15f60',
-                '#ecb44f',
-                '#ae833a',
-                '#896149'
-            ], this.barW = 12, this.sprite = null, _.deepExtend(this, a), this.init(b);
-        };
-    return f.prototype = {
+    var e = function (a, b) {
+        this.w = 0, this.h = 0, this.pos = {
+            x: 0,
+            y: 0
+        }, this._colors = [
+            '#6f8cb2',
+            '#c77029',
+            '#f15f60',
+            '#ecb44f',
+            '#ae833a',
+            '#896149'
+        ], this.barW = 12, this.sprite = null, _.deepExtend(this, a), this.init(b);
+    };
+    return e.prototype = {
         init: function () {
-            this.sprite = new e.Display.Sprite({ id: 'graphsEl' });
+            this.sprite = new b.Display.Sprite({ id: 'graphsEl' });
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -29,10 +29,10 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
         checkBarW: function (a) {
             this.barW >= a && (this.barW = a - 1);
         },
-        draw: function (a, b) {
-            if (_.deepExtend(this, b), 0 != a.length) {
-                for (var d = a[0].length, f = 0; d > f; f++) {
-                    for (var g = new e.Display.Sprite({ id: 'barGroup' + f }), h = 0, i = a.length; i > h; h++) {
+        draw: function (a, d) {
+            if (_.deepExtend(this, d), 0 != a.length) {
+                for (var e = a[0].length, f = 0; e > f; f++) {
+                    for (var g = new b.Display.Sprite({ id: 'barGroup' + f }), h = 0, i = a.length; i > h; h++) {
                         var j = a[h][f], k = new c({
                                 context: {
                                     x: Math.round(j.x - this.barW / 2),
@@ -69,10 +69,10 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
                 };
             e();
         }
-    }, f;
+    }, e;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Rect',
         'canvax/animation/Tween'
     ]

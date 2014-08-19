@@ -1,5 +1,4 @@
-KISSY.add('dvix/components/line/Group', function (S, Dvix, BrokenLine, Path, Tools) {
-    var Canvax = Dvix.Canvax;
+KISSY.add('dvix/components/line/Group', function (S, Canvax, BrokenLine, Path, Tools) {
     var Group = function (opt) {
         this.w = 0;
         this.h = 0;
@@ -118,7 +117,7 @@ KISSY.add('dvix/components/line/Group', function (S, Dvix, BrokenLine, Path, Too
     return Group;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/BrokenLine',
         'canvax/shape/Path',
         'dvix/utils/tools'

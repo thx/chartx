@@ -1,5 +1,4 @@
-KISSY.add('dvix/chart/bar/graphs', function (S, Dvix, Rect, Tween) {
-    var Canvax = Dvix.Canvax;
+KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
     var Graphs = function (opt, data) {
         this.w = 0;
         this.h = 0;
@@ -106,7 +105,7 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Dvix, Rect, Tween) {
     return Graphs;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Rect',
         'canvax/animation/Tween'
     ]

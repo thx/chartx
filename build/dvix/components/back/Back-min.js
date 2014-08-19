@@ -1,35 +1,35 @@
 KISSY.add('dvix/components/back/Back', function (a, b, c) {
-    var d = b.Canvax, e = function (a) {
-            this.w = 0, this.h = 0, this.pos = {
-                x: 0,
-                y: 0
-            }, this.xOrigin = {
-                enabled: 1,
-                thinkness: 1,
-                strokeStyle: '#cccccc'
-            }, this.yOrigin = {
-                enabled: 1,
-                thinkness: 1,
-                strokeStyle: '#BEBEBE'
-            }, this.xAxis = {
-                enabled: 1,
-                w: 0,
-                data: [],
-                lineType: 'dashed',
-                thinkness: 1,
-                strokeStyle: '#cccccc'
-            }, this.yAxis = {
-                enabled: 1,
-                h: 0,
-                data: [],
-                lineType: 'dashed',
-                thinkness: 1,
-                strokeStyle: '#BEBEBE'
-            }, this.sprite = null, this.xOriginSp = null, this.yOriginSp = null, this.xAxisSp = null, this.yAxisSp = null, this.init(a);
-        };
-    return e.prototype = {
+    var d = function (a) {
+        this.w = 0, this.h = 0, this.pos = {
+            x: 0,
+            y: 0
+        }, this.xOrigin = {
+            enabled: 1,
+            thinkness: 1,
+            strokeStyle: '#cccccc'
+        }, this.yOrigin = {
+            enabled: 1,
+            thinkness: 1,
+            strokeStyle: '#BEBEBE'
+        }, this.xAxis = {
+            enabled: 1,
+            w: 0,
+            data: [],
+            lineType: 'dashed',
+            thinkness: 1,
+            strokeStyle: '#cccccc'
+        }, this.yAxis = {
+            enabled: 1,
+            h: 0,
+            data: [],
+            lineType: 'dashed',
+            thinkness: 1,
+            strokeStyle: '#BEBEBE'
+        }, this.sprite = null, this.xOriginSp = null, this.yOriginSp = null, this.xAxisSp = null, this.yAxisSp = null, this.init(a);
+    };
+    return d.prototype = {
         init: function (a) {
-            _.deepExtend(this, a), this.sprite = new d.Display.Sprite();
+            _.deepExtend(this, a), this.sprite = new b.Display.Sprite();
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -46,9 +46,9 @@ KISSY.add('dvix/components/back/Back', function (a, b, c) {
         },
         _widget: function () {
             var a = this;
-            a.xAxisSp = new d.Display.Sprite(), a.sprite.addChild(a.xAxisSp), a.yAxisSp = new d.Display.Sprite(), a.sprite.addChild(a.yAxisSp), a.xOriginSp = new d.Display.Sprite(), a.sprite.addChild(a.xOriginSp), a.yOriginSp = new d.Display.Sprite(), a.sprite.addChild(a.yOriginSp);
-            for (var b = a.xAxis.data, e = 1, f = b.length; f > e; e++) {
-                var g = b[e], h = new c({
+            a.xAxisSp = new b.Display.Sprite(), a.sprite.addChild(a.xAxisSp), a.yAxisSp = new b.Display.Sprite(), a.sprite.addChild(a.yAxisSp), a.xOriginSp = new b.Display.Sprite(), a.sprite.addChild(a.xOriginSp), a.yOriginSp = new b.Display.Sprite(), a.sprite.addChild(a.yOriginSp);
+            for (var d = a.xAxis.data, e = 1, f = d.length; f > e; e++) {
+                var g = d[e], h = new c({
                         context: {
                             xStart: 0,
                             yStart: g.y,
@@ -61,8 +61,8 @@ KISSY.add('dvix/components/back/Back', function (a, b, c) {
                     });
                 a.xAxis.enabled && a.xAxisSp.addChild(h);
             }
-            for (var b = a.yAxis.data, e = 1, f = b.length; f > e; e++) {
-                var g = b[e], h = new c({
+            for (var d = a.yAxis.data, e = 1, f = d.length; f > e; e++) {
+                var g = d[e], h = new c({
                         context: {
                             xStart: g.x,
                             yStart: 0,
@@ -94,10 +94,10 @@ KISSY.add('dvix/components/back/Back', function (a, b, c) {
                 });
             a.xOrigin.enabled && a.xOriginSp.addChild(h), h.context.y = -0.5;
         }
-    }, e;
+    }, d;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Line',
         'dvix/utils/tools',
         'dvix/utils/deep-extend'

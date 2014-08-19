@@ -1,18 +1,18 @@
 KISSY.add('dvix/components/yaxis/yAxis', function (a, b, c, d, e) {
-    var f = b.Canvax, g = function (a, b) {
-            this.w = 0, this.display = 'block', this.mode = 1, this.dis = 6, this.line = {
-                enabled: 1,
-                width: 6,
-                height: 3,
-                strokeStyle: '#BEBEBE'
-            }, this.text = {
-                fillStyle: 'blank',
-                fontSize: 12
-            }, this.data = [], this.dataSection = [], this.dataOrg = [], this.sprite = null, this.txtSp = null, this.lineSp = null, this.x = 0, this.y = 0, this.disYAxisTopLine = 6, this.yMaxHeight = 0, this.yGraphsHeight = 0, this.init(a, b);
-        };
-    return g.prototype = {
-        init: function (a, b) {
-            _.deepExtend(this, a), this._initData(b), this.sprite = new f.Display.Sprite();
+    var f = function (a, b) {
+        this.w = 0, this.display = 'block', this.mode = 1, this.dis = 6, this.line = {
+            enabled: 1,
+            width: 6,
+            height: 3,
+            strokeStyle: '#BEBEBE'
+        }, this.text = {
+            fillStyle: 'blank',
+            fontSize: 12
+        }, this.data = [], this.dataSection = [], this.dataOrg = [], this.sprite = null, this.txtSp = null, this.lineSp = null, this.x = 0, this.y = 0, this.disYAxisTopLine = 6, this.yMaxHeight = 0, this.yGraphsHeight = 0, this.init(a, b);
+    };
+    return f.prototype = {
+        init: function (a, c) {
+            _.deepExtend(this, a), this._initData(c), this.sprite = new b.Display.Sprite();
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -45,14 +45,14 @@ KISSY.add('dvix/components/yaxis/yAxis', function (a, b, c, d, e) {
             var a = this;
             if ('none' == a.display)
                 return a.w = 0, void 0;
-            var b = this.data;
+            var e = this.data;
             if (2 == a.mode) {
-                var e = [];
-                b.length > 2 && (e.push(b[0]), e.push(b[b.length - 1]), b = e);
+                var f = [];
+                e.length > 2 && (f.push(e[0]), f.push(e[e.length - 1]), e = f);
             }
-            a.txtSp = new f.Display.Sprite(), a.sprite.addChild(a.txtSp), a.lineSp = new f.Display.Sprite(), a.sprite.addChild(a.lineSp);
-            for (var g = 0, h = 0, i = b.length; i > h; h++) {
-                var j = b[h], k = 0, l = j.y, m = d.numAddSymbol(j.content), n = new f.Display.Text(m, {
+            a.txtSp = new b.Display.Sprite(), a.sprite.addChild(a.txtSp), a.lineSp = new b.Display.Sprite(), a.sprite.addChild(a.lineSp);
+            for (var g = 0, h = 0, i = e.length; i > h; h++) {
+                var j = e[h], k = 0, l = j.y, m = d.numAddSymbol(j.content), n = new b.Display.Text(m, {
                         context: {
                             x: k,
                             y: l,
@@ -62,7 +62,7 @@ KISSY.add('dvix/components/yaxis/yAxis', function (a, b, c, d, e) {
                             textBaseline: 'middle'
                         }
                     });
-                if (2 == a.mode && 2 == b.length) {
+                if (2 == a.mode && 2 == e.length) {
                     var o = n.getTextHeight();
                     0 == h ? n.context.y = l - parseInt(o / 2) - 2 : 1 == h && (n.context.y = l + parseInt(o / 2) + 2);
                 }
@@ -82,10 +82,10 @@ KISSY.add('dvix/components/yaxis/yAxis', function (a, b, c, d, e) {
             }
             a.txtSp.context.x = 2 == a.mode ? 0 : g, a.lineSp.context.x = g + a.dis, a.line.enabled ? a.w = g + a.dis + a.line.width : (a.lineSp.context.visible = !1, a.w = g + a.dis);
         }
-    }, g;
+    }, f;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Line',
         'dvix/utils/tools',
         'dvix/utils/datasection'

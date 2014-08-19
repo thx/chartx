@@ -1,5 +1,4 @@
-KISSY.add('dvix/chart/scat/graphs', function (S, Dvix, Circle, Tween) {
-    var Canvax = Dvix.Canvax;
+KISSY.add('dvix/chart/scat/graphs', function (S, Canvax, Circle, Tween) {
     var Graphs = function (opt, data) {
         this.w = 0;
         this.h = 0;
@@ -102,7 +101,7 @@ KISSY.add('dvix/chart/scat/graphs', function (S, Dvix, Circle, Tween) {
     return Graphs;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'canvax/shape/Circle',
         'canvax/animation/Tween'
     ]

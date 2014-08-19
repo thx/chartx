@@ -1,5 +1,4 @@
-KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools , DataSection){
-    var Canvax = Dvix.Canvax;
+KISSY.add("dvix/components/yaxis/yAxis" , function(S, Canvax , Line , Tools , DataSection){
     var yAxis = function(opt , data){
         this.w = 0;
 
@@ -178,7 +177,7 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools , Data
 
 } , {
     requires : [
-        "dvix/",
+        "canvax/",
         "canvax/shape/Line",
         "dvix/utils/tools",
         'dvix/utils/datasection'

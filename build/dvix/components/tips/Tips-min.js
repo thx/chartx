@@ -1,26 +1,26 @@
 KISSY.add('dvix/components/tips/Tips', function (a, b, c, d, e) {
-    var f = b.Canvax, g = function (a) {
-            this.w = 0, this.h = 0, this.opt = {
-                disTop: 30,
-                dis: 2,
-                context: null
-            }, this.config = {
-                tip: {
-                    x: 0,
-                    y: 0,
-                    data: []
-                },
-                line: {
-                    x: '',
-                    y: ''
-                },
-                nodes: { data: [] }
-            }, this.sprite = null, this.line = null, this.tip = null, this.nodes = null, this.init(a);
-        };
-    return g.prototype = {
+    var f = function (a) {
+        this.w = 0, this.h = 0, this.opt = {
+            disTop: 30,
+            dis: 2,
+            context: null
+        }, this.config = {
+            tip: {
+                x: 0,
+                y: 0,
+                data: []
+            },
+            line: {
+                x: '',
+                y: ''
+            },
+            nodes: { data: [] }
+        }, this.sprite = null, this.line = null, this.tip = null, this.nodes = null, this.init(a);
+    };
+    return f.prototype = {
         init: function (a) {
-            var b = this;
-            b._initConfig(a), b.sprite = new f.Display.Sprite();
+            var c = this;
+            c._initConfig(a), c.sprite = new b.Display.Sprite();
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -86,10 +86,10 @@ KISSY.add('dvix/components/tips/Tips', function (a, b, c, d, e) {
                 y: j
             };
         }
-    }, g;
+    }, f;
 }, {
     requires: [
-        'dvix/',
+        'canvax/',
         'dvix/components/tips/Tip',
         'dvix/components/tips/Line',
         'dvix/components/tips/Nodes',
