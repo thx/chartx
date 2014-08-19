@@ -74,12 +74,13 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
                        var rect = new Rect({
                         context : {
                             x         : Math.round(barData.x - this.bar.width/2),
-                            y         : barData.y,
-                            width     : this.bar.width,
-                            height    : Math.abs(barData.y),
+                            y         : parseInt(barData.y),
+                            width     : parseInt(this.bar.width),
+                            height    : parseInt(Math.abs(barData.y)),
                             fillStyle : this.getBarFillStyle( i , ii , barData.value ),
                             radius    : [this.bar.width/2 , this.bar.width/2, 0 , 0]
                         }
+                                
                     });
                     sprite.addChild( rect );
                 }

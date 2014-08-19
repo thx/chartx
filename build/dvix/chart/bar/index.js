@@ -58,7 +58,7 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             var self = this;    //首先
             //首先
             var x = 0;
-            var y = this.height - this._xAxis.h    //绘制yAxis
+            var y = parseInt(this.height - this._xAxis.h)    //绘制yAxis
 ;
             //绘制yAxis
             self._yAxis.draw({

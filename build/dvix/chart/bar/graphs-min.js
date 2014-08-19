@@ -36,9 +36,9 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
                         var j = a[h][f], k = new c({
                                 context: {
                                     x: Math.round(j.x - this.bar.width / 2),
-                                    y: j.y,
-                                    width: this.bar.width,
-                                    height: Math.abs(j.y),
+                                    y: parseInt(j.y),
+                                    width: parseInt(this.bar.width),
+                                    height: parseInt(Math.abs(j.y)),
                                     fillStyle: this.getBarFillStyle(f, h, j.value),
                                     radius: [
                                         this.bar.width / 2,

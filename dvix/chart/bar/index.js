@@ -73,7 +73,7 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
 
             //首先
             var x = 0;
-            var y = this.height - this._xAxis.h
+            var y = parseInt(this.height - this._xAxis.h)
             
             //绘制yAxis
             self._yAxis.draw({

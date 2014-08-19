@@ -17,7 +17,7 @@ KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i, j) {
             this._xAxis = new f(a.xAxis, b.xAxis), this._yAxis = new g(a.yAxis, b.yAxis), this._back = new h(a.back), this._graphs = new i(a.graphs), this._tips = new j(a.tips);
         },
         _startDraw: function () {
-            var a = this, b = 0, c = this.height - this._xAxis.h;
+            var a = this, b = 0, c = parseInt(this.height - this._xAxis.h);
             a._yAxis.draw({
                 pos: {
                     x: 0,
