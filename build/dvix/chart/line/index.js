@@ -243,7 +243,7 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
         'dvix/utils/tools',
         'dvix/utils/datasection',
         'dvix/event/eventtype',
-        './xAxis',
+        './xaxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
         'dvix/components/line/Graphs',

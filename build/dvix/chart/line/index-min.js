@@ -151,7 +151,7 @@ KISSY.add('dvix/chart/line/index-min', function (a, b, c, d, e, f, g, h, i, j) {
         'dvix/utils/tools',
         'dvix/utils/datasection',
         'dvix/event/eventtype',
-        './xAxis',
+        './xaxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
         'dvix/components/line/Graphs',
