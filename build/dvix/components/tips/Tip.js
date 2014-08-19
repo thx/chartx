@@ -47,9 +47,9 @@ KISSY.add('dvix/components/tips/Tip', function (S, Canvax, Circle, Rect, Tools) 
         //文字每一列之间的距离
         this.back = {
             enabled: 1,
-            disX: 28,
+            disX: 8,
             //文字离边框左右的距离
-            disY: 11,
+            disY: 8,
             //文字离边框上下的距离
             strokeStyle: '#333333',
             thinkness: 1.5,

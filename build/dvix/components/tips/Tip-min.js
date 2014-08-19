@@ -8,8 +8,8 @@ KISSY.add('dvix/components/tips/Tip', function (a, b, c, d, e) {
             disY: 4
         }, this.back = {
             enabled: 1,
-            disX: 28,
-            disY: 11,
+            disX: 8,
+            disY: 8,
             strokeStyle: '#333333',
             thinkness: 1.5,
             fillStyle: '#FFFFFF',
