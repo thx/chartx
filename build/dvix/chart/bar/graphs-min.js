@@ -1,5 +1,5 @@
 KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
-    var e = function (a, b) {
+    var e = function (a) {
         this.w = 0, this.h = 0, this.pos = {
             x: 0,
             y: 0
@@ -10,7 +10,7 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
             '#ecb44f',
             '#ae833a',
             '#896149'
-        ], this.bar = { width: 12 }, this.bar.width = 12, this.sprite = null, _.deepExtend(this, a), this.init(b);
+        ], this.bar = { width: 12 }, this.bar.width = 12, this.sprite = null, _.deepExtend(this, a), this.init();
     };
     return e.prototype = {
         init: function () {
@@ -31,15 +31,19 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
         },
         draw: function (a, d) {
             if (_.deepExtend(this, d), 0 != a.length) {
+                this.data = a;
                 for (var e = a[0].length, f = 0; e > f; f++) {
                     for (var g = new b.Display.Sprite({ id: 'barGroup' + f }), h = 0, i = a.length; i > h; h++) {
-                        var j = a[h][f], k = new c({
+                        var j = a[h][f], k = this.getBarFillStyle(f, h, j.value), l = new c({
+                                id: 'bar_' + h + '_' + f,
+                                row: f,
+                                column: h,
                                 context: {
                                     x: Math.round(j.x - this.bar.width / 2) + 0.5,
                                     y: parseInt(j.y) + 0.5,
                                     width: parseInt(this.bar.width),
                                     height: parseInt(Math.abs(j.y)),
-                                    fillStyle: this.getBarFillStyle(f, h, j.value),
+                                    fillStyle: k,
                                     radius: [
                                         this.bar.width / 2,
                                         this.bar.width / 2,
@@ -48,7 +52,10 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
                                     ]
                                 }
                             });
-                        g.addChild(k);
+                        l.row = f, l.column = h, l.hover(function (a) {
+                            a.bar = this;
+                        }, function () {
+                        }), g.addChild(l);
                     }
                     this.sprite.addChild(g);
                 }

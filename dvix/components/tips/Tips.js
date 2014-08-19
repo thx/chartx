@@ -38,9 +38,9 @@ KISSY.add("dvix/components/tips/Tips" , function(S, Canvax, Tip, Line, Nodes, To
     Tips.prototype = {
 
         init:function(opt){
-            var self  = this;
-            self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite();
+            //this._initConfig(opt);
+            _.deepExtend( this.opt , opt );
+            this.sprite = new Canvax.Display.Sprite();
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -171,6 +171,7 @@ KISSY.add("dvix/components/tips/Tips" , function(S, Canvax, Tip, Line, Nodes, To
         "dvix/components/tips/Tip",
         "dvix/components/tips/Line",
         "dvix/components/tips/Nodes",
-        "dvix/utils/tools"
+        "dvix/utils/tools",
+        "dvix/utils/deep-extend"
     ] 
 })

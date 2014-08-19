@@ -100,6 +100,13 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             });    //执行生长动画
             //执行生长动画
             self._graphs.grow();
+            var self = this;
+            this._graphs.sprite.on('mouseover', function (e) {
+                self._onInduceHandler(e);
+            });
+            this._graphs.sprite.on('mouseout', function (e) {
+                self._offInduceHandler(e);
+            });
         },
         _trimGraphs: function () {
             var xArr = this._xAxis.data;
@@ -128,12 +135,53 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             return tmpData;
         },
         _drawEnd: function () {
-            var self = this;
-            self.stageBg.addChild(self._back.sprite);
-            self.core.addChild(self._xAxis.sprite);
-            self.core.addChild(self._graphs.sprite);
-            self.core.addChild(self._yAxis.sprite);
-            self.stageTip.addChild(self._tips.sprite);
+            this.stageBg.addChild(this._back.sprite);
+            this.core.addChild(this._xAxis.sprite);
+            this.core.addChild(this._graphs.sprite);
+            this.core.addChild(this._yAxis.sprite);
+            this.stageTip.addChild(this._tips.sprite);
+        },
+        _onInduceHandler: function ($evt) {
+            var targetBar = $evt.bar;
+            var barFillStyle = targetBar.context.fillStyle;
+            var row = targetBar.row;
+            var column = targetBar.column;
+            var barsData = this._graphs.data;
+            var data = [];
+            data.length = barsData.length;
+            for (var i = 0; i < barsData.length; i++) {
+                !data[i] && (data[i] = []);    /**
+                 * TODO:
+                 * tips的title，先特殊处理下,这里本来不应该写具体的业务逻辑的
+                 */
+                /**
+                 * TODO:
+                 * tips的title，先特殊处理下,这里本来不应该写具体的业务逻辑的
+                 */
+                var objTitle = { content: this._tips.opt.titles[column][row] + '\uFF1A' };
+                data[i].push(objTitle);
+                var obj = { content: barsData[i][row].value };
+                data[i].push(obj);
+            }
+            var tipsPoint = $evt.target.localToGlobal(undefined, this.core);
+            var tips = {
+                    w: this.width,
+                    h: this.height
+                }    //data = [[{content:'11'},{content:'12'}],[{content:'21'}]]
+;
+            //data = [[{content:'11'},{content:'12'}],[{content:'21'}]]
+            tips.tip = {
+                x: tipsPoint.x,
+                y: tipsPoint.y,
+                data: data
+            };
+            this._tips.remove();
+            this._tips.draw(tips);
+        },
+        _offInduceHandler: function ($evt) {
+            if (this._tips) {
+                this._tips.remove();
+            }
         }
     });
 }, {

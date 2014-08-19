@@ -1,6 +1,6 @@
 KISSY.add(function( S , Canvax , Rect , Tween ){
  
-    var Graphs = function( opt , data ){
+    var Graphs = function( opt ){
         this.w = 0;
         this.h = 0;
        
@@ -24,12 +24,12 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
 
         _.deepExtend(this , opt);
 
-        this.init( data );
+        this.init( );
 
     };
 
     Graphs.prototype = {
-        init : function(){
+        init : function( ){
             this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
         },
         setX:function($n){
@@ -63,6 +63,8 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
                 return;
             }
 
+            this.data = data;
+
             //这个分组是只x方向的一维分组
             var barGroupLen = data[0].length;
 
@@ -71,23 +73,37 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
                 for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                     var barData = data[ii][i];
 
-                       var rect = new Rect({
+                    var fillStyle = this.getBarFillStyle( i , ii , barData.value );
+                    var rect = new Rect({
+                        id : "bar_"+ii+"_"+i,
+                        row : i,
+                        column : ii,
                         context : {
-                            /**
-                             * 能说脏话不！
-                             * 尼玛我给整个舞台偏移了0.5，然后后面所有的偏移都用parseInt
-                             * 但是居然在低分辨率的屏幕下面居然边界糊了。
-                             * 我只好又都偏移0.5。
-                             */
-                            x         : Math.round(barData.x - this.bar.width/2) + 0.5,
-                            y         : parseInt(barData.y) + 0.5,
-                            width     : parseInt(this.bar.width),
-                            height    : parseInt(Math.abs(barData.y)),
-                            fillStyle : this.getBarFillStyle( i , ii , barData.value ),
-                            radius    : [this.bar.width/2 , this.bar.width/2, 0 , 0]
-                        }
-                                
+                             /**
+                              * 能说脏话不！
+                              * 尼玛我给整个舞台偏移了0.5，然后后面所有的偏移都用parseInt
+                              * 但是居然在低分辨率的屏幕下面居然边界糊了。
+                              * 我只好又都偏移0.5。
+                              */
+                             x         : Math.round(barData.x - this.bar.width/2) + 0.5,
+                             y         : parseInt(barData.y) + 0.5,
+                             width     : parseInt(this.bar.width),
+                             height    : parseInt(Math.abs(barData.y)),
+                             fillStyle : fillStyle,
+                             radius    : [this.bar.width/2 , this.bar.width/2, 0 , 0]
+                         }
                     });
+
+                    rect.row = i;
+                    rect.column = ii;
+
+                    rect.hover( function( e ){
+                         e.bar    = this;
+                    }, function(){
+                    
+                    } );
+                     
+
                     sprite.addChild( rect );
                 }
                 this.sprite.addChild( sprite );

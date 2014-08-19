@@ -19,8 +19,7 @@ KISSY.add('dvix/components/tips/Tips', function (a, b, c, d, e) {
     };
     return f.prototype = {
         init: function (a) {
-            var c = this;
-            c._initConfig(a), c.sprite = new b.Display.Sprite();
+            _.deepExtend(this.opt, a), this.sprite = new b.Display.Sprite();
         },
         setX: function (a) {
             this.sprite.context.x = a;
@@ -93,6 +92,7 @@ KISSY.add('dvix/components/tips/Tips', function (a, b, c, d, e) {
         'dvix/components/tips/Tip',
         'dvix/components/tips/Line',
         'dvix/components/tips/Nodes',
-        'dvix/utils/tools'
+        'dvix/utils/tools',
+        'dvix/utils/deep-extend'
     ]
 });

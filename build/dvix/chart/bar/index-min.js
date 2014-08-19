@@ -47,6 +47,12 @@ KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i, j) {
                     y: c
                 }
             }), a._graphs.grow();
+            var a = this;
+            this._graphs.sprite.on('mouseover', function (b) {
+                a._onInduceHandler(b);
+            }), this._graphs.sprite.on('mouseout', function (b) {
+                a._offInduceHandler(b);
+            });
         },
         _trimGraphs: function () {
             var a = this._xAxis.data, b = this._yAxis.dataOrg, c = b.length, d = this._xAxis.xDis1, e = d / (c + 1);
@@ -64,8 +70,30 @@ KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i, j) {
             return g;
         },
         _drawEnd: function () {
-            var a = this;
-            a.stageBg.addChild(a._back.sprite), a.core.addChild(a._xAxis.sprite), a.core.addChild(a._graphs.sprite), a.core.addChild(a._yAxis.sprite), a.stageTip.addChild(a._tips.sprite);
+            this.stageBg.addChild(this._back.sprite), this.core.addChild(this._xAxis.sprite), this.core.addChild(this._graphs.sprite), this.core.addChild(this._yAxis.sprite), this.stageTip.addChild(this._tips.sprite);
+        },
+        _onInduceHandler: function (a) {
+            var b = a.bar, c = (b.context.fillStyle, b.row), d = b.column, e = this._graphs.data, f = [];
+            f.length = e.length;
+            for (var g = 0; g < e.length; g++) {
+                !f[g] && (f[g] = []);
+                var h = { content: this._tips.opt.titles[d][c] + '\uFF1A' };
+                f[g].push(h);
+                var i = { content: e[g][c].value };
+                f[g].push(i);
+            }
+            var j = a.target.localToGlobal(void 0, this.core), k = {
+                    w: this.width,
+                    h: this.height
+                };
+            k.tip = {
+                x: j.x,
+                y: j.y,
+                data: f
+            }, this._tips.remove(), this._tips.draw(k);
+        },
+        _offInduceHandler: function () {
+            this._tips && this._tips.remove();
         }
     });
 }, {

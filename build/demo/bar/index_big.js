@@ -30,42 +30,6 @@ KISSY.ready(function () {
                 390,
                 546,
                 300
-            ],
-            [
-                5,
-                0,
-                88,
-                700
-            ],
-            [
-                6,
-                390,
-                546,
-                300
-            ],
-            [
-                7,
-                201,
-                101,
-                500
-            ],
-            [
-                8,
-                1145,
-                145,
-                100
-            ],
-            [
-                9,
-                488,
-                88,
-                700
-            ],
-            [
-                10,
-                390,
-                546,
-                300
             ]
         ];
     var options = {
@@ -135,6 +99,20 @@ KISSY.ready(function () {
                 }
             },
             tips: {
+                titles: [
+                    [
+                        'title1',
+                        'title2',
+                        'title3',
+                        'title4'
+                    ],
+                    [
+                        'title',
+                        'title',
+                        'title',
+                        'title'
+                    ]
+                ],
                 // disTop : 50,
                 context: {
                     prefix: {
@@ -161,6 +139,7 @@ KISSY.ready(function () {
                     ]
                 },
                 tip: { back: {} },
+                //strokeStyle : '#ff0000'
                 // disX:10
                 line: {},
                 // lineType: ''
