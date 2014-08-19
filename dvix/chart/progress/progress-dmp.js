@@ -3,15 +3,13 @@ KISSY.add(function( S , Chart ,Sector ){
 
    return Chart.extend({
        config : {
-           ringWidth : 20,
-           ringColor : '#8d76c4',
-           bColor    : '#E6E6E6'
+           secW: 10,
+           bColor: '#E6E6E6',
+           pColor: '#8d76c4'
        },
        init : function( el , opt ){
            this._initConfig( opt );
            this.r = Math.min( this.width , this.height ) / 2;
-           
-
        },
        _initConfig : function( opt ){
            _.extend( this.config , opt );
@@ -24,31 +22,31 @@ KISSY.add(function( S , Chart ,Sector ){
                    y : this.width / 2,
 
                    r : this.r,
-                   r0: this.r - this.config.ringWidth,
+                   r0: this.r - this.config.secW,
                    startAngle : 0 ,
-                   endAngle   : 360,
+                   endAngle   : 359.999,
                    fillStyle  : this.config.bColor,
                    lineJoin   : "round"
                  }
            }) );
 
            this.stage.addChild( new Sector({
-              id : "rate",
+              id : "speed",
               context : {
                    x : this.height / 2,
                    y : this.width / 2,
 
                    r : this.r,
-                   r0: this.r - this.config.ringWidth,
+                   r0: this.r - this.config.secW,
                    startAngle : 0 ,
-                   endAngle   : 0 ,
-                   fillStyle  : this.config.ringColor,
+                   endAngle   : 1 ,
+                   fillStyle  : this.config.pColor,
                    lineJoin   : "round"
                  }
            }) );
        },
-       setRate : function( s ){
-          this.stage.getChildById("rate").context.endAngle = s
+       setSpeed : function( s ){
+          this.stage.getChildById("speed").context.endAngle = s
        }
    });
 

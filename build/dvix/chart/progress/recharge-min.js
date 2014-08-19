@@ -1,4 +1,4 @@
-KISSY.add('dvix/chart/pregress/recharge-min', function (a, b, c, d, e, f, g) {
+KISSY.add('dvix/chart/progress/recharge-min', function (a, b, c, d, e, f, g) {
     var h = b.Canvax, i = function () {
             return timer = requestAnimationFrame(i), g.update(), timer;
         };

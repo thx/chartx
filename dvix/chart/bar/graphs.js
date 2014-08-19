@@ -48,6 +48,11 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
             }
             return fillStyle;
         },
+        checkBarW : function( xDis ){
+            if( this.barW >= xDis ){
+                this.barW = xDis-1;
+            }
+        },
         draw : function(data , opt){
             _.deepExtend(this , opt);
             if( data.length == 0 ){

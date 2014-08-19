@@ -1,20 +1,25 @@
 module.exports = function(grunt) {
   //配置参数
   grunt.initConfig({
+     clean : {
+         build : {
+             src : "./build" 
+         }
+     },
      uglify: {
-           options: {
-               beautify: {
-                    ascii_only: true
-               }
-            },
-            app: {
-                expand: true,
-                cwd: "build/dvix/",
-                src: ['**/*.js', '!**/*-min.js'],
-                dest: "build/dvix/",
-                ext: '-min.js' // '-min.js'
+        options: {
+            beautify: {
+                 ascii_only: true
             }
-        },
+         },
+         app: {
+             expand: true,
+             cwd: "build/dvix/",
+             src: ['**/*.js', '!**/*-min.js'],
+             dest: "build/dvix/",
+             ext: '-min.js' // '-min.js'
+         }
+     },
      copy: {
          main: {
              files: [
@@ -40,10 +45,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-auto-kissy-module-name')
+  grunt.loadNpmTasks('grunt-auto-kissy-module-name');
+  grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [  'copy' , 'uglify' , 'autoname' ]);
+  grunt.registerTask('default', [ 'clean' , 'copy' , 'uglify' , 'autoname' ]);
 }
 
 

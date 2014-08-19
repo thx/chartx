@@ -135,6 +135,9 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
             var xDis2    = xDis1 / (fields+1);
 
+            //知道了xDis2 后 检测下 barW是否需要调整
+            this._graphs.checkBarW( xDis2 );
+
             var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
             var tmpData  = [];
             for( var a = 0 , al = xArr.length; a < al ; a++ ){

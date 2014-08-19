@@ -49,7 +49,9 @@ KISSY.add('dvix/chart/bar/index-min', function (a, b, c, d, e, f, g, h, i, j) {
             }), a._graphs.grow();
         },
         _trimGraphs: function () {
-            for (var a = this._xAxis.data, b = this._yAxis.dataOrg, c = b.length, d = this._xAxis.xDis1, e = d / (c + 1), f = this._yAxis.dataSection[this._yAxis.dataSection.length - 1], g = [], h = 0, i = a.length; i > h; h++)
+            var a = this._xAxis.data, b = this._yAxis.dataOrg, c = b.length, d = this._xAxis.xDis1, e = d / (c + 1);
+            this._graphs.checkBarW(e);
+            for (var f = this._yAxis.dataSection[this._yAxis.dataSection.length - 1], g = [], h = 0, i = a.length; i > h; h++)
                 for (var j = 0; c > j; j++) {
                     !g[j] && (g[j] = []);
                     var k = -(b[j][h] - this._yAxis._baseNumber) / (f - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight, l = a[h].x - d / 2 + e * (j + 1);

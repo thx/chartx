@@ -26,6 +26,9 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
             var d = null;
             return _.isArray(this.fillStyle) && (d = this.fillStyle[b]), _.isFunction(this.fillStyle) && (d = this.fillStyle(a, b, c)), d && '' != d || (d = this._colors[b]), d;
         },
+        checkBarW: function (a) {
+            this.barW >= a && (this.barW = a - 1);
+        },
         draw: function (a, b) {
             if (_.deepExtend(this, b), 0 != a.length) {
                 for (var d = a[0].length, f = 0; d > f; f++) {

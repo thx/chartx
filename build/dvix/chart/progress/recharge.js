@@ -1,7 +1,7 @@
 /**
  * 在无线直通车试用的充值进度条
  **/
-KISSY.add('dvix/chart/pregress/recharge', function (S, Chart, Sector, Circle, Line, Rect, Tween) {
+KISSY.add('dvix/chart/progress/recharge', function (S, Chart, Sector, Circle, Line, Rect, Tween) {
     var Canvax = Chart.Canvax;
     var animate = function () {
         timer = requestAnimationFrame(animate);
