@@ -32,19 +32,19 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
         setY:function($n){
             this.sprite.context.y = $n
         },
-        getFillStyle : function( i , ii , value){
-            var fillStyle = null;
+        getBarFillStyle : function( i , ii , value){
+            var barFillStyle = null;
             
-            if( _.isArray( this.fillStyle ) ){
-                fillStyle = this.fillStyle[ii]
+            if( _.isArray( this.barFillStyle ) ){
+                barFillStyle = this.barFillStyle[ii]
             }
-            if( _.isFunction( this.fillStyle ) ){
-                fillStyle = this.fillStyle( i , ii , value );
+            if( _.isFunction( this.barFillStyle ) ){
+                barFillStyle = this.barFillStyle( i , ii , value );
             }
-            if( !fillStyle || fillStyle=="" ){
-                fillStyle = this._colors[ii];
+            if( !barFillStyle || barFillStyle=="" ){
+                barFillStyle = this._colors[ii];
             }
-            return fillStyle;
+            return barFillStyle;
         },
         checkBarW : function( xDis ){
             if( this.barW >= xDis ){
@@ -71,7 +71,7 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
                             y         : barData.y,
                             width     : this.barW,
                             height    : Math.abs(barData.y),
-                            fillStyle : this.getFillStyle( i , ii , barData.value ),
+                            fillStyle : this.getBarFillStyle( i , ii , barData.value ),
                             radius    : [this.barW/2 , this.barW/2, 0 , 0]
                         }
                     });

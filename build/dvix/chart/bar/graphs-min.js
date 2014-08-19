@@ -22,9 +22,9 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
         setY: function (a) {
             this.sprite.context.y = a;
         },
-        getFillStyle: function (a, b, c) {
+        getBarFillStyle: function (a, b, c) {
             var d = null;
-            return _.isArray(this.fillStyle) && (d = this.fillStyle[b]), _.isFunction(this.fillStyle) && (d = this.fillStyle(a, b, c)), d && '' != d || (d = this._colors[b]), d;
+            return _.isArray(this.barFillStyle) && (d = this.barFillStyle[b]), _.isFunction(this.barFillStyle) && (d = this.barFillStyle(a, b, c)), d && '' != d || (d = this._colors[b]), d;
         },
         checkBarW: function (a) {
             this.barW >= a && (this.barW = a - 1);
@@ -39,7 +39,7 @@ KISSY.add('dvix/chart/bar/graphs-min', function (a, b, c, d) {
                                     y: j.y,
                                     width: this.barW,
                                     height: Math.abs(j.y),
-                                    fillStyle: this.getFillStyle(f, h, j.value),
+                                    fillStyle: this.getBarFillStyle(f, h, j.value),
                                     radius: [
                                         this.barW / 2,
                                         this.barW / 2,
