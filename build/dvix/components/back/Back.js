@@ -148,7 +148,6 @@ KISSY.add('dvix/components/back/Back', function (S, Canvax, Line, Tools) {
                 });
             if (self.xOrigin.enabled)
                 self.xOriginSp.addChild(line);
-            line.context.y = -0.5;
         }
     };
     return Back;

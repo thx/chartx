@@ -92,7 +92,7 @@ KISSY.add('dvix/components/back/Back', function (a, b, c) {
                         strokeStyle: a.xOrigin.strokeStyle
                     }
                 });
-            a.xOrigin.enabled && a.xOriginSp.addChild(h), h.context.y = -0.5;
+            a.xOrigin.enabled && a.xOriginSp.addChild(h);
         }
     }, d;
 }, {
