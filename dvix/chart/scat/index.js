@@ -7,34 +7,7 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
     return Chart.extend( {
 
         init:function(){
-            this.dataFrame     =  {                        //数据框架集合
-                org        :[],                            //最原始的数据  
-                data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
-                yAxis      :{                              //y轴
-                    fields     :  [],                      //字段集合 对应this.data
-                    org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
-                    data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
-                },
-                xAxis      :{                              //x轴
-                    field      :  '',                      //字段 对应this.data
-                    org        :  [],                      //原始数据['星期一','星期二']
-                    data       :  []                       //坐标数据[{x:100,content:'星期一'},{x:200,content:'星期二'}]
-                },
-                graphs     :{                              //图形
-                    data       :  [],                      //二维 数据集合等[[{x:0,y:-100},{}],[]]
-                    disX       :  0                        //每两个点之间的距离
-                }
-            }
-
-            this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
-            this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
-
-            this._disX         =  0;                       //图表区域离左右的距离
-            this._disY         =  6;                       //图表区域离上下的距离
-            this.disYAndO      =  6;                       //y轴原点之间的距离
-
-
-            this._baseNumber   =  0;                       //基础点
+            this.dataFrame     =  null;                    //数据集合，由_initData 初始化
 
             this._xAxis        =  null;
             this._yAxis        =  null;
@@ -64,7 +37,7 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
               this.rotate( opt.rotate );
             }
 
-            this._initData( data , opt );                          //初始化数据
+            this.dataFrame = this._initData( data , opt );                 //初始化数据
 
             this._initModule( opt , this.dataFrame );                      //初始化模块  
 
@@ -96,37 +69,26 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             this._tips   = new Tips(opt.tips)
         },
         _startDraw : function(){
-            var self = this;
-            // self.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
-            // self.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
+            //首先
+            var x = 0;
+            var y = this.height - this._xAxis.h
             
-
-            //先计算出图表区域的大小
-            self._chartWidth  = self.width  - 2 * self._disX
-            self._chartHeight = self.height - 2 * self._disY
-
-            var x = self._disX
-            var y = this.height - self._xAxis.h - self._disY
-
             //绘制yAxis
-            self._yAxis.draw({
+            this._yAxis.draw({
                 pos : {
-                    x : x,
+                    x : 0,
                     y : y
                 },
-                yMaxHeight : self._chartHeight - self._xAxis.h
+                yMaxHeight : y 
             });
 
-
-            var _yAxisW = self._yAxis.w
-            
-            x = self._disX + _yAxisW + self.disYAndO
+            x = this._yAxis.w
 
             //绘制x轴
-            self._xAxis.draw({
-                w    :   self._chartWidth - _yAxisW - self.disYAndO,
+            this._xAxis.draw({
+                w    :   this.width - x ,
                 max  :   {
-                    left  : -(_yAxisW + self.disYAndO)
+                    left  : -x
                 },
                 pos  : {
                     x : x,
@@ -135,14 +97,20 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             });
 
             //绘制背景网格
-            self._back.draw({
-                w    : self._chartWidth - _yAxisW - self.disYAndO,
+            this._back.draw({
+                w    : this.width - x ,
                 h    : y,
                 xAxis:{
-                    data : self._yAxis.data
+                    data : this._yAxis.data
+                },
+                yAxis:{
+                    data : this._xAxis.data
+                },
+                pos : {
+                    x : x + this._xAxis.disOriginX,
+                    y : y
                 }
             });
-            self._back.setX(x), self._back.setY(y)
 
             //绘制主图形区域
             this._graphs.draw( this._trimGraphs() , {
@@ -155,44 +123,56 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             });
 
             //执行生长动画
-            self._graphs.grow();
+            this._graphs.grow();
           
         },
         _trimGraphs:function(){
 
-            var xArr     = this._xAxis.data;
+            var xArr     = this._xAxis.dataOrg;
             var yArr     = this._yAxis.dataOrg;
-            var fields   = yArr.length;
 
-            var xDis1    = this._xAxis.xDis1;
-            //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
-            var xDis2    = xDis1 / (fields+1);
+            /**
+             *下面三行代码，为了在用户的xAxis.field 和 yAxis.field 数量不同的情况下
+             *自动扔掉多余的field数，保证每个点都有x，y坐标值
+             *这样的情况是散点图和 折线 柱状图 的x 轴不一样的地方
+             */
+            var fields   = Math.min(yArr.length , xArr.length);
+            xArr.length  = fields;
+            yArr.length  = fields;
+
+            var xDis    = this._xAxis.xDis;
 
             var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
+            var maxXAxis = this._xAxis.dataSection[ this._xAxis.dataSection.length - 1 ];
+
             var tmpData  = [];
-            for( var a = 0 , al = xArr.length; a < al ; a++ ){
-                for( var b = 0 ; b < fields ; b ++ ){
-                    !tmpData[b] && (tmpData[b] = []);
-                    var y = -(yArr[b][a]-this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight;
-                    var x = xArr[a].x - xDis1/2 + xDis2 * (b+1)
-                    tmpData[b][a] = {
-                        value : yArr[b][a],
-                        x     : x,
-                        y     : y
+
+            for( var i = 0 , il = yArr.length; i < il ; i++ ){
+                !tmpData[i] && (tmpData[i] = []);
+                for( var ii = 0 , iil = yArr[i].length ; ii < iil ; ii++ ){
+                    var y = -(yArr[i][ii]-this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight;
+                    var x = (xArr[i][ii]-this._xAxis._baseNumber) / (maxXAxis - this._xAxis._baseNumber) * this._xAxis.w;
+
+                    tmpData[i][ii] = {
+                        value : {
+                            x : xArr[i][ii],
+                            y : yArr[i][ii]
+                        },
+                        x : x,
+                        y : y
                     }
                 }
-            };
+            }
             return tmpData;
         },
         _drawEnd:function(){
-            var self = this;
-            self.stageBg.addChild(self._back.sprite)
+            this.stageBg.addChild(this._back.sprite)
 
-            self.core.addChild(self._xAxis.sprite);
-            self.core.addChild(self._graphs.sprite);
-            self.core.addChild(self._yAxis.sprite);
+            this.core.addChild(this._xAxis.sprite);
+            this.core.addChild(this._graphs.sprite);
+            this.core.addChild(this._yAxis.sprite);
 
-            self.stageTip.addChild(self._tips.sprite)
+            this.stageTip.addChild(this._tips.sprite)
            
         }
     });

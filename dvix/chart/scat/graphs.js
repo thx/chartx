@@ -1,4 +1,4 @@
-KISSY.add(function( S , Dvix , Rect , Tween ){
+KISSY.add(function( S , Dvix , Circle , Tween ){
  
     var Canvax = Dvix.Canvax;
 
@@ -11,9 +11,15 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
             y : 0
         }
 
-        this.barW = 6;
+        this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+
+
+        //圆圈默认半径
+        this.r = 10;
 
         this.sprite = null ;
+
+        this._circles = [];  //所有圆点的集合
 
         _.deepExtend(this , opt);
 
@@ -31,6 +37,20 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
         setY:function($n){
             this.sprite.context.y = $n
         },
+        getFillStyle : function( i , ii , value){
+            var fillStyle = null;
+            
+            if( _.isArray( this.fillStyle ) ){
+                fillStyle = this.fillStyle[ii]
+            }
+            if( _.isFunction( this.fillStyle ) ){
+                fillStyle = this.fillStyle( i , ii , value );
+            }
+            if( !fillStyle || fillStyle=="" ){
+                fillStyle = this._colors[ii];
+            }
+            return fillStyle;
+        },
         draw : function(data , opt){
             _.deepExtend(this , opt);
             if( data.length == 0 ){
@@ -44,18 +64,18 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
                 var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
                 for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                     var barData = data[ii][i];
-                    var rect = new Rect({
+
+                    var circle = new Circle({
                         context : {
-                            x         : Math.round(barData.x - this.barW/2),
-                            y         : barData.y,
-                            width     : this.barW,
-                            height    : Math.abs(barData.y),
-                            fillStyle : "#999"
-                            
-                            //radius    : [barWidth/2 , barWidth/2, 0 , 0]
+                            x           : barData.x,
+                            y           : barData.y,
+                            fillStyle   : this.getFillStyle( i , ii , barData.value ),
+                            r           : this.r,
+                            globalAlpha : 0
                         }
                     });
-                    sprite.addChild( rect );
+                    sprite.addChild( circle );
+                    this._circles.push( circle );
                 }
                 this.sprite.addChild( sprite );
             }
@@ -69,11 +89,17 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
         grow : function(){
             var self  = this;
             var timer = null;
+
             var growAnima = function(){
                var bezierT = new Tween.Tween( { h : 0 } )
-               .to( { h : self.h }, 500 )
-               .onUpdate( function (  ) {
-                   self.sprite.context.scaleY = this.h / self.h;
+               .to( { h : 100 }, 500 )
+               .onUpdate( function () {
+
+                   for( var i=0 , l=self._circles.length ; i<l ; i++ ){
+                       self._circles[i].context.globalAlpha = this.h / 100;
+                       self._circles[i].context.r = this.h / 100 * self.r;
+                   }
+                   
                } ).onComplete( function(){
                    cancelAnimationFrame( timer );
                }).start();
@@ -92,7 +118,7 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
 } , {
     requires : [
         "dvix/",
-        "canvax/shape/Rect",
+        "canvax/shape/Circle",
         "canvax/animation/Tween"
     ]
 })

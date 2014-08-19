@@ -11,7 +11,10 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
             y : 0
         }
 
-        this.barW = 6;
+        this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+
+
+        this.barW = 12;
 
         this.sprite = null ;
 
@@ -31,6 +34,20 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
         setY:function($n){
             this.sprite.context.y = $n
         },
+        getFillStyle : function( i , ii , value){
+            var fillStyle = null;
+            
+            if( _.isArray( this.fillStyle ) ){
+                fillStyle = this.fillStyle[ii]
+            }
+            if( _.isFunction( this.fillStyle ) ){
+                fillStyle = this.fillStyle( i , ii , value );
+            }
+            if( !fillStyle || fillStyle=="" ){
+                fillStyle = this._colors[ii];
+            }
+            return fillStyle;
+        },
         draw : function(data , opt){
             _.deepExtend(this , opt);
             if( data.length == 0 ){
@@ -44,15 +61,15 @@ KISSY.add(function( S , Dvix , Rect , Tween ){
                 var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
                 for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                     var barData = data[ii][i];
-                    var rect = new Rect({
+
+                       var rect = new Rect({
                         context : {
                             x         : Math.round(barData.x - this.barW/2),
                             y         : barData.y,
                             width     : this.barW,
                             height    : Math.abs(barData.y),
-                            fillStyle : "#999"
-                            
-                            //radius    : [barWidth/2 , barWidth/2, 0 , 0]
+                            fillStyle : this.getFillStyle( i , ii , barData.value ),
+                            radius    : [this.barW/2 , this.barW/2, 0 , 0]
                         }
                     });
                     sprite.addChild( rect );

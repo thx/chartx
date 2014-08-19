@@ -4,16 +4,16 @@ KISSY.ready(function(){
     var S = KISSY;
     var data1= [
         ["val1","val2","val3","val4"],
-        [ "text" , 101  , 201 , 301 ] ,
-        [ 7  , 0 , 145 , 100 ] ,
-        [ 3 , 488  , 88  , 200 ] ,
-        [ 4  , 390  , 546 , 300 ] ,
-        [ 5 , 0  , 88  , 400 ] ,
-        [ 6  , 390  , 546 , 300 ] ,
-        [ 7 , 201  , 101 , 500 ] ,
-        [8  , 1145 , 145 , 100 ] ,
-        [ 9 , 488  , 88  , 530 ] ,
-        [ 10  , 390  , 546 , 300 ]
+        [ 26 , 101  , 201 , 151 ] ,
+        [ 77  , 0 , 145 , 90 ] ,
+        [ 84 , 488  , 88  , 200 ] ,
+        [ 134  , 290  ,346 , 350 ] ,
+        [ 325 , 90  , 188  , 400 ] ,
+        [ 61  , 300  , 546 , 280 ] ,
+        [ 17 , 201  , 101 , 500 ] ,
+        [ 228  , 145 , 145 , 100 ] ,
+        [ 199 , 388  , 288  , 530 ] ,
+        [ 100  , 390  , 225 , 330 ]
 
     ];
     var options = {
@@ -25,7 +25,7 @@ KISSY.ready(function(){
         mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
         yAxis : {
             mode     : 1,                           //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
-            fields   : ["val4","val3"],
+            field   : ["val4","val3"],
             dataMode : 0,
             line:{
                 enabled : 0,
@@ -37,7 +37,7 @@ KISSY.ready(function(){
             }
         },
         xAxis : {
-            field : "val2",
+            field : ["val2" ,"val1"],
             disY: 6,
             dis : 6,
             line:{
@@ -47,23 +47,6 @@ KISSY.ready(function(){
             },
             text:{
                 fontSize  : 10
-            }
-        },
-        back : {
-            xOrigin:{
-                thinkness:1,
-                strokeStyle : '#333333'
-            },
-            yOrigin:{
-                enabled:0
-            },
-            xAxis:{
-                // lineType: ''
-                thinkness:1,
-                strokeStyle : '#cccccc'
-            },
-            yAxis:{
-                // enabled : 0
             }
         },
         graphs:{

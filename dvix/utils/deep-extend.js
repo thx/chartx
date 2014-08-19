@@ -44,6 +44,9 @@ KISSY.add(function( S ){
     };
 
     deepExtendCouple = function(destination, source, maxDepth) {
+        if( !source ) {
+            return destination
+        }
         var combine, recurse, sharedArrayKey, sharedArrayKeys, sharedObjectKey, sharedObjectKeys, _i, _j, _len, _len1;
         if (maxDepth == null) {
             maxDepth = 20;

@@ -1,1 +1,93 @@
-KISSY.add("dvix/components/yaxis/yAxis",function(a,b,c,d){var e=b.Canvax,f=function(a){this.w=0,this.mode=1,this.dis=6,this.line={enabled:1,width:6,height:3,strokeStyle:"#BEBEBE"},this.text={fillStyle:"blank",fontSize:12},this.data=[],this.sprite=null,this.txtSp=null,this.lineSp=null,this.init(a)};return f.prototype={init:function(a){var b=this;b._initConfig(a),b.sprite=new e.Display.Sprite},setX:function(a){this.sprite.context.x=a},setY:function(a){this.sprite.context.y=a},draw:function(a){var b=this;b._configData(a),b._widget()},_initConfig:function(a){var b=this;if(a){b.dis=a.dis||0==a.dis?a.dis:b.dis,b.mode=a.mode||b.mode;var c=a.line;c&&(b.line.enabled=0==c.enabled?0:b.line.enabled,b.line.strokeStyle=c.strokeStyle||b.line.strokeStyle);var d=a.text;d&&(b.text.fillStyle=d.fillStyle||b.text.fillStyle,b.text.fontSize=d.fontSize||b.text.fontSize)}},_configData:function(a){var b=this,a=a||{};b.data=a.data||[]},_widget:function(){var a=this,b=this.data;if(2==a.mode){var f=[];b.length>2&&(f.push(b[0]),f.push(b[b.length-1]),b=f)}a.txtSp=new e.Display.Sprite,a.sprite.addChild(a.txtSp),a.lineSp=new e.Display.Sprite,a.sprite.addChild(a.lineSp);for(var g=0,h=0,i=b.length;i>h;h++){var j=b[h],k=0,l=j.y,m=d.numAddSymbol(j.content),n=new e.Display.Text(m,{context:{x:k,y:l,fillStyle:a.text.fillStyle,fontSize:a.text.fontSize,textAlign:2==a.mode?"left":"right",textBaseline:"middle"}});if(2==a.mode&&2==b.length){var o=n.getTextHeight();0==h?n.context.y=l-parseInt(o/2)-2:1==h&&(n.context.y=l+parseInt(o/2)+2)}a.txtSp.addChild(n),g=Math.max(g,n.getTextWidth());var p=new c({id:h,context:{x:0,y:l,xEnd:a.line.width,yEnd:0,lineWidth:a.line.height,strokeStyle:a.line.strokeStyle}});a.lineSp.addChild(p)}a.txtSp.context.x=2==a.mode?0:g,a.lineSp.context.x=g+a.dis,a.line.enabled?a.w=g+a.dis+a.line.width:(a.lineSp.context.visible=!1,a.w=g)}},f},{requires:["dvix/","canvax/shape/Line","dvix/utils/tools"]});
+KISSY.add('dvix/components/yaxis/yAxis', function (a, b, c, d, e) {
+    var f = b.Canvax, g = function (a, b) {
+            this.w = 0, this.display = 'block', this.mode = 1, this.dis = 6, this.line = {
+                enabled: 1,
+                width: 6,
+                height: 3,
+                strokeStyle: '#BEBEBE'
+            }, this.text = {
+                fillStyle: 'blank',
+                fontSize: 12
+            }, this.data = [], this.dataSection = [], this.dataOrg = [], this.sprite = null, this.txtSp = null, this.lineSp = null, this.x = 0, this.y = 0, this.disYAxisTopLine = 6, this.yMaxHeight = 0, this.yGraphsHeight = 0, this.init(a, b);
+        };
+    return g.prototype = {
+        init: function (a, b) {
+            _.deepExtend(this, a), this._initData(b), this.sprite = new f.Display.Sprite();
+        },
+        setX: function (a) {
+            this.sprite.context.x = a;
+        },
+        setY: function (a) {
+            this.sprite.context.y = a;
+        },
+        draw: function (a) {
+            _.deepExtend(this, a), this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine(), this.setX(this.pos.x), this.setY(this.pos.y), this._trimYAxis(), this._widget();
+        },
+        _trimYAxis: function () {
+            for (var a = this.dataSection[this.dataSection.length - 1], b = [], c = 0, d = this.dataSection.length; d > c; c++) {
+                var e = -(this.dataSection[c] - this._baseNumber) / (a - this._baseNumber) * this.yGraphsHeight;
+                e = isNaN(e) ? 0 : parseInt(e), b[c] = {
+                    content: this.dataSection[c],
+                    y: e
+                };
+            }
+            this.data = b;
+        },
+        _getYAxisDisLine: function () {
+            var a = this.disYAxisTopLine, b = 2 * a, c = a;
+            return c = a + this.yMaxHeight % this.dataSection.length, c = c > b ? b : c;
+        },
+        _initData: function (a) {
+            var b = _.flatten(a.org);
+            this.dataOrg = a.org, this.dataSection = e.section(b), this._baseNumber = this.dataSection[0], 1 == b.length && (this.dataSection[0] = 2 * b[0], this._baseNumber = 0);
+        },
+        _widget: function () {
+            var a = this;
+            if ('none' == a.display)
+                return a.w = 0, void 0;
+            var b = this.data;
+            if (2 == a.mode) {
+                var e = [];
+                b.length > 2 && (e.push(b[0]), e.push(b[b.length - 1]), b = e);
+            }
+            a.txtSp = new f.Display.Sprite(), a.sprite.addChild(a.txtSp), a.lineSp = new f.Display.Sprite(), a.sprite.addChild(a.lineSp);
+            for (var g = 0, h = 0, i = b.length; i > h; h++) {
+                var j = b[h], k = 0, l = j.y, m = d.numAddSymbol(j.content), n = new f.Display.Text(m, {
+                        context: {
+                            x: k,
+                            y: l,
+                            fillStyle: a.text.fillStyle,
+                            fontSize: a.text.fontSize,
+                            textAlign: 2 == a.mode ? 'left' : 'right',
+                            textBaseline: 'middle'
+                        }
+                    });
+                if (2 == a.mode && 2 == b.length) {
+                    var o = n.getTextHeight();
+                    0 == h ? n.context.y = l - parseInt(o / 2) - 2 : 1 == h && (n.context.y = l + parseInt(o / 2) + 2);
+                }
+                a.txtSp.addChild(n), g = Math.max(g, n.getTextWidth());
+                var p = new c({
+                        id: h,
+                        context: {
+                            x: 0,
+                            y: l,
+                            xEnd: a.line.width,
+                            yEnd: 0,
+                            lineWidth: a.line.height,
+                            strokeStyle: a.line.strokeStyle
+                        }
+                    });
+                a.lineSp.addChild(p);
+            }
+            a.txtSp.context.x = 2 == a.mode ? 0 : g, a.lineSp.context.x = g + a.dis, a.line.enabled ? a.w = g + a.dis + a.line.width : (a.lineSp.context.visible = !1, a.w = g + a.dis);
+        }
+    }, g;
+}, {
+    requires: [
+        'dvix/',
+        'canvax/shape/Line',
+        'dvix/utils/tools',
+        'dvix/utils/datasection'
+    ]
+});

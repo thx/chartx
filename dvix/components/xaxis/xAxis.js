@@ -2,9 +2,9 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
     var Canvax = Dvix.Canvax;
     var xAxis = function(opt , data){
         this.w = 0;
-        this.h = 24
+        this.h = 0;
 
-        this.disY       = 6
+        this.disY       = 0
         this.dis        = 6;                           //线到文本的距离
 
         this.line = {
@@ -31,12 +31,13 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
         this.disOriginX   =  0;                        //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
         this.xGraphsWidth =  0;                        //x轴宽(去掉两端)
 
-        this.dataOrg    = [];                          //源数据
-        this.data       = [];                          //{x:100, content:'1000'}
-        this.layoutData = [];                          //this.data(可能数据过多),重新编排后的数据集合, 并根据此数组展现文字和线条
-        this.sprite     = null;
-        this.txtSp      = null;
-        this.lineSp     = null;
+        this.dataOrg     = [];                          //源数据
+        this.dataSection = [];                          //默认就等于源数据
+        this.data        = [];                          //{x:100, content:'1000'}
+        this.layoutData  = [];                          //this.data(可能数据过多),重新编排后的数据集合, 并根据此数组展现文字和线条
+        this.sprite      = null;
+        this.txtSp       = null;
+        this.lineSp      = null;
 
         this.init(opt , data)
     };
@@ -49,9 +50,18 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
                 _.deepExtend( this , opt );
             }
 
+            this.dataSection = this._initDataSection( this.dataOrg );
+
             this.sprite = new Canvax.Display.Sprite();
 
-            this._check()                              //检测
+            this._checkText();                              //检测
+        },
+        /**
+         *return dataSection 默认为xAxis.dataOrg的的faltten
+         *即 [ [1,2,3,4] ] -- > [1,2,3,4]
+         */
+        _initDataSection : function( data ){
+            return _.flatten(data);
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -64,19 +74,18 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
 
             this._initConfig( opt );
 
-            this.data = this._trimXAxis( this.dataOrg , this.xGraphsWidth );
+            this.data = this._trimXAxis( this.dataSection , this.xGraphsWidth );
 
-            this._trimLayoutData()
-            this._widget()
-            this._layout()
-            this.h = this.disY + this.line.height + this.dis + this.max.txtH;
-
+            this._trimLayoutData();
+            
+            if( this.diaplay != "none" ){
+                this._widget();
+                this._layout();
+            } 
             this.setX( this.pos.x + this.disOriginX );
             this.setY( this.pos.y );
         },
-        getLayoutData:function(){                       //获取真正显示的数据组合
-        	return this.layoutData
-        },
+
         //初始化配置
         _initConfig:function( opt ){
           	if( opt ){
@@ -110,17 +119,22 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Dvix, Line , Tools){
             dis = isNaN(dis) ? 0 : dis
             return dis
         }, 
-        _check:function(){//检测下文字的高等
+        _checkText:function(){//检测下文字的高等
             var txt = new Canvax.Display.Text('test',
                    {
                     context : {
                         fontSize    : this.text.fontSize
                    }
             })
-            this.max.txtH = txt.getTextHeight()
-            this.h = this.disY + this.line.height + this.dis + this.max.txtH
+            this.max.txtH = txt.getTextHeight();
+            if( this.diaplay == "none" ){
+                this.h = this.max.txtH;
+            } else {
+                this.h = this.disY + this.line.height + this.dis + this.max.txtH
+            }
         },
         _widget:function(){
+
             var arr = this.layoutData
 
           	this.txtSp  = new Canvax.Display.Sprite(),  this.sprite.addChild(this.txtSp)

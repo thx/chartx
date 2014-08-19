@@ -4,10 +4,15 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
         this.w       = 0;   
         this.h       = 0;
 
+        this.pos     = {
+            x : 0,
+            y : 0
+        }
+
         this.xOrigin = {                                //原点开始的x轴线
                 enabled     : 1,
                 thinkness   : 1,
-                strokeStyle : '#333333'
+                strokeStyle : '#cccccc'
         } 
         this.yOrigin = {                                //原点开始的y轴线               
                 enabled     : 1,
@@ -29,7 +34,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
                 h           : 0,
                 data        : [],                      //[{x:100},{}]
                 // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
-                lineType    : '',                      //线条类型(dashed = 虚线 | '' = 实线)
+                lineType    : 'dashed',                      //线条类型(dashed = 虚线 | '' = 实线)
                 thinkness   : 1,
                 strokeStyle : '#BEBEBE'
         } 
@@ -46,9 +51,8 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
     Back.prototype = {
 
         init:function(opt){
-            var self  = this;
-            self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite();
+            _.deepExtend(this , opt); 
+            this.sprite = new Canvax.Display.Sprite();
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -58,36 +62,11 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
         },
 
         draw : function(opt){
-            var self  = this;
-            self._configData(opt)
-            self._widget()
-        },
-
-        //初始化配置
-        _initConfig:function(opt){
-            var self = this
-            if(opt){
-                var xOrigin = opt.xOrigin
-                if(xOrigin)
-                    self.xOrigin.enabled     = xOrigin.enabled == 0 ? 0 : self.xOrigin.enabled;
-                    self.xOrigin.thinkness   = xOrigin.thinkness   || self.xOrigin.thinkness;
-                    self.xOrigin.strokeStyle = xOrigin.strokeStyle || self.xOrigin.strokeStyle;
-
-                var yOrigin = opt.yOrigin
-                if(yOrigin)
-                    self.yOrigin.enabled = yOrigin.enabled == 0 ? 0 : self.yOrigin.enabled;
-                
-                var xAxis   = opt.xAxis
-                if(xAxis)
-                    self.xAxis.enabled      = xAxis.enabled  == 0  ? 0 : self.xAxis.enabled
-                    self.xAxis.lineType     = xAxis.lineType == '' ? '': self.xAxis.lineType
-                    self.xAxis.strokeStyle  = xAxis.strokeStyle || self.xAxis.strokeStyle;
-
-                var yAxis   = opt.yAxis
-                if(yAxis)
-                    self.yAxis.enabled   = yAxis.enabled  == 0 ? 0 : self.yAxis.enabled,
-                    self.yAxis.lineType  = yAxis.lineType == 'dashed' ? 'dashed' : self.yAxis.lineType;
-            }
+            _.deepExtend( this , opt );
+            this._configData(opt)
+            this._widget();
+            this.setX(this.pos.x);
+            this.setY(this.pos.y);
         },
         //配置数据
         _configData:function(opt){
@@ -113,7 +92,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
 
             //x轴上的线集合
             var arr = self.xAxis.data
-            for(var a = 0, al = arr.length; a < al; a++){
+            for(var a = 1, al = arr.length; a < al; a++){
                 var o = arr[a]
                 var line = new Line({
                     context : {
@@ -129,10 +108,9 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
                 if(self.xAxis.enabled)
                     self.xAxisSp.addChild(line);
             }
-
             //y轴上的线集合
             var arr = self.yAxis.data
-            for(var a = 0, al = arr.length; a < al; a++){
+            for(var a = 1, al = arr.length; a < al; a++){
                 var o = arr[a]
                 var line = new Line({
                     context : {
@@ -183,5 +161,6 @@ KISSY.add("dvix/components/back/Back" , function(S, Dvix, Line, Tools){
         "dvix/",
         "canvax/shape/Line",
         "dvix/utils/tools",
+        "dvix/utils/deep-extend"
     ] 
 })

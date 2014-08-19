@@ -3,6 +3,8 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools , Data
     var yAxis = function(opt , data){
         this.w = 0;
 
+        this.display = "block";                        //默认为block，不显示为none
+
         this.mode = 1                                  //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
         this.dis  = 6                                  //线到文本的距离
 
@@ -79,9 +81,8 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools , Data
             dis = dis > disMax ? disMax : dis
             return dis
         },
-        _initData  : function( data ){
-
-            var arr = Tools.getChildsArr( data.org );
+        _initData  : function( data ){ 
+            var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
             this.dataOrg     = data.org;
             this.dataSection = DataSection.section(arr);
             this._baseNumber = this.dataSection[0];
@@ -94,6 +95,13 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools , Data
         },
         _widget:function(){
             var self  = this;
+
+            if( self.display == "none" ){
+                self.w = 0;
+                return;
+            }
+
+
             var arr = this.data
 
             if(self.mode == 2){
@@ -161,7 +169,7 @@ KISSY.add("dvix/components/yaxis/yAxis" , function(S, Dvix , Line , Tools , Data
                 self.w = maxW + self.dis + self.line.width
             } else {
                 self.lineSp.context.visible = false
-                self.w = maxW 
+                self.w = maxW + self.dis;
             }
         }
     };

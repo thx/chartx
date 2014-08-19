@@ -7,36 +7,8 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
     return Chart.extend( {
 
         init:function(){
-        
-            this.dataFrame     =  {                        //数据框架集合
-                org        :[],                            //最原始的数据  
-                data       :[],                            //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
-                yAxis      :{                              //y轴
-                    fields     :  [],                      //字段集合 对应this.data
-                    org        :  [],                      //二维 原始数据[[100,200],[1000,2000]]
-                    data       :  []                       //坐标数据[{y:100,content:'100'},{y:200,content:'200'}] 与back.data相同但当config.yAxis.mode=2时    该值进行删减且重算，back.data不受影响
-                },
-                xAxis      :{                              //x轴
-                    field      :  '',                      //字段 对应this.data
-                    org        :  [],                      //原始数据['星期一','星期二']
-                    data       :  []                       //坐标数据[{x:100,content:'星期一'},{x:200,content:'星期二'}]
-                },
-                graphs     :{                              //图形
-                    data       :  [],                      //二维 数据集合等[[{x:0,y:-100},{}],[]]
-                    disX       :  0                        //每两个点之间的距离
-                }
-            }
-
-            this._chartWidth   =  0;                       //图表渲染区域宽(去掉左右留空)
-            this._chartHeight  =  0;                       //图表渲染区域高(去掉上下留空)
-
-            this._disX         =  0;                       //图表区域离左右的距离
-            this._disY         =  6;                       //图表区域离上下的距离
-            this.disYAndO      =  6;                       //y轴原点之间的距离
-
-
-            this._baseNumber   =  0;                       //基础点
-
+            this.dataFrame     =  null;                    //数据集合，由_initData 初始化
+ 
             this._xAxis        =  null;
             this._yAxis        =  null;
             this._back         =  null;
@@ -65,7 +37,7 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
               this.rotate( opt.rotate );
             }
 
-            this._initData( data , opt );                          //初始化数据
+            this.dataFrame = this._initData( data , opt );                 //初始化数据
 
             this._initModule( opt , this.dataFrame );                      //初始化模块  
 
@@ -98,36 +70,27 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
         },
         _startDraw : function(){
             var self = this;
-            // self.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
-            // self.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
+
+            //首先
+            var x = 0;
+            var y = this.height - this._xAxis.h
             
-
-            //先计算出图表区域的大小
-            self._chartWidth  = self.width  - 2 * self._disX
-            self._chartHeight = self.height - 2 * self._disY
-
-            var x = self._disX
-            var y = this.height - self._xAxis.h - self._disY
-
             //绘制yAxis
             self._yAxis.draw({
                 pos : {
-                    x : x,
+                    x : 0,
                     y : y
                 },
-                yMaxHeight : self._chartHeight - self._xAxis.h
+                yMaxHeight : y 
             });
 
-
-            var _yAxisW = self._yAxis.w
-            
-            x = self._disX + _yAxisW + self.disYAndO
+            x = self._yAxis.w
 
             //绘制x轴
             self._xAxis.draw({
-                w    :   self._chartWidth - _yAxisW - self.disYAndO,
+                w    :   self.width - x ,
                 max  :   {
-                    left  : -(_yAxisW + self.disYAndO)
+                    left  : -x
                 },
                 pos  : {
                     x : x,
@@ -137,13 +100,16 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
 
             //绘制背景网格
             self._back.draw({
-                w    : self._chartWidth - _yAxisW - self.disYAndO,
+                w    : self.width - x ,
                 h    : y,
                 xAxis:{
                     data : self._yAxis.data
+                },
+                pos : {
+                    x : x + this._xAxis.disOriginX,
+                    y : y
                 }
             });
-            self._back.setX(x), self._back.setY(y)
 
             //绘制主图形区域
             this._graphs.draw( this._trimGraphs() , {

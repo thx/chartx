@@ -5,6 +5,7 @@ KISSY.add(function( S , xAxisBase ){
     };
     S.extend( xAxis , xAxisBase , {
         _trimXAxis:function( data , xGraphsWidth ){
+            
             var tmpData = [];
             this.xDis1  = xGraphsWidth / data.length;
             for (var a = 0, al  = data.length; a < al; a++ ) {
