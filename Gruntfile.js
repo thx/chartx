@@ -49,7 +49,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [ 'clean' , 'copy' , 'uglify' , 'autoname' ]);
+  grunt.registerTask('default', [ 'clean' , 'copy' , 'autoname' , 'uglify'  ]);
 }
 
 
