@@ -1,4 +1,4 @@
-KISSY.add("dvix/chart/" , function( S , Canvax ){
+KISSY.add(function( S , Canvax ){
     var $ = S.all;
     var Chart = function(node){
         

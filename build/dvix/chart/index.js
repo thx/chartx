@@ -1,4 +1,4 @@
-KISSY.add('dvix/chart/', function (S, Canvax) {
+KISSY.add('dvix/chart/index', function (S, Canvax) {
     var $ = S.all;
     var Chart = function (node) {
         this.element = $(node);    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
