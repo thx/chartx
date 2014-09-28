@@ -44,7 +44,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Canvax, Line, Tools){
         this.xAxisSp      = null;                       //x轴上的线集合
         this.yAxisSp      = null;                       //y轴上的线集合
 
-        this.init(opt)
+        this.init(opt);
     };
 
     Back.prototype = {
@@ -62,7 +62,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Canvax, Line, Tools){
 
         draw : function(opt){
             _.deepExtend( this , opt );
-            this._configData(opt)
+            this._configData(opt);
             this._widget();
             this.setX(this.pos.x);
             this.setY(this.pos.y);

@@ -83,10 +83,10 @@ KISSY.ready(function(){
         }
     }
      
-
-
     KISSY.use("dvix/chart/scat/ , node" , function( S , Scat ){
         window.scat = new Scat( S.all("#canvasTest") );
         scat.draw( data1 , options );
     });
+
+    
 });

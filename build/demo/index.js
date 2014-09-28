@@ -14,9 +14,9 @@ if (DvixSite.daily) {
     canvaxUrl = 'http://g.assets.daily.taobao.net/thx/canvax/' + canvaxVersion + '/';
 }
 if (DvixSite.local) {
+    //本地环境测试
+    canvaxUrl = 'http://nick.daily.taobao.net/canvax';
 }
-//本地环境测试
-//canvaxUrl = "http://nick.daily.taobao.net/canvax"
 KISSY.config({
     packages: [
         {
