@@ -1,4 +1,3 @@
-window.FlashCanvasOptions = { swfPath: 'http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/' };
 KISSY.add('dvix/chart/index', function (S, Canvax) {
     var $ = S.all;
     var Chart = function (node) {
