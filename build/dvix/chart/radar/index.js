@@ -22,16 +22,16 @@ KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Bac
             }
             if (this.options.r > minWorH) {
                 this.options.r = minWorH;
-            }
-            this.dataFrame = this._initData(data, this.options);    //初始化数据
+            }    //初始化数据
             //初始化数据
-            this._initModule(this.options, this.dataFrame);    //初始化模块  
-            //初始化模块  
-            this._startDraw();    //开始绘图
+            this.dataFrame = this._initData(data, this.options);    //初始化模块
+            //初始化模块
+            this._initModule(this.options, this.dataFrame);    //开始绘图
             //开始绘图
-            this._drawEnd();    //绘制结束，添加到舞台
+            this._startDraw();    //绘制结束，添加到舞台
+            //绘制结束，添加到舞台
+            this._drawEnd();
         },
-        //绘制结束，添加到舞台
         clear: function () {
             this.stageBg.removeAllChildren();
             this.core.removeAllChildren();
@@ -46,17 +46,8 @@ KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Bac
         _initModule: function (opt, data) {
             this._xAxis = new xAxis(opt.xAxis, data.xAxis);
             this._yAxis = new yAxis(opt.yAxis, data.yAxis);
-            var backOpt = {
-                    yDataSection: this._yAxis.dataSection,
-                    xDataSection: this._xAxis.dataSection
-                };
-            if (opt.back) {
-                backOpt = S.merge(backOpt, opt.back);
-            }
-            ;
-            this._back = new Back(backOpt);
+            this._back = new Back(opt.back);
             this._graphs = new Graphs(opt.graphs);
-            this._tips = new Tips(opt.tips);
         },
         _startDraw: function () {
             //首先
@@ -65,27 +56,24 @@ KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Bac
             var corePos = {
                     x: this.width / 2 - this.options.r,
                     y: this.height / 2 - this.options.r
-                }    //绘制x轴
+                };
+            var backAndGraphsOpt = {
+                    r: this.options.r,
+                    w: this.options.r,
+                    h: this.options.r,
+                    yDataSection: this._yAxis.dataSection,
+                    xDataSection: this._xAxis.dataSection,
+                    pos: corePos
+                }    //绘制背景网格
 ;
-            //绘制x轴
-            this._xAxis.draw({
-                w: this.width - x,
-                max: { left: -x },
-                pos: {
-                    x: x,
-                    y: y
-                }
-            });    //绘制背景网格
             //绘制背景网格
-            this._back.draw({
-                r: this.options.r,
-                w: this.options.r,
-                h: this.options.r,
-                pos: corePos
-            });
+            this._back.draw(backAndGraphsOpt);    //绘制雷达图形区域
+            //绘制雷达图形区域
+            this._graphs.draw(this._yAxis.dataOrg, backAndGraphsOpt);
         },
         _drawEnd: function () {
             this.stageBg.addChild(this._back.sprite);
+            this.stageBg.addChild(this._graphs.sprite);
         }
     });
 }, {

@@ -18,13 +18,13 @@ KISSY.add(function( S , Chart ,Sector ){
            this._initConfig( opt );
            this.stage.addChild( new Sector({
               context : {
-                   x : this.height / 2,
-                   y : this.width / 2,
+                   x : parseInt(this.height / 2),
+                   y : parseInt(this.width / 2),
 
                    r : this.r,
                    r0: this.r - this.config.secW,
                    startAngle : 0 ,
-                   endAngle   : 359.999,
+                   endAngle   : 360,
                    fillStyle  : this.config.bColor,
                    lineJoin   : "round"
                  }
@@ -33,8 +33,8 @@ KISSY.add(function( S , Chart ,Sector ){
            this.stage.addChild( new Sector({
               id : "speed",
               context : {
-                   x : this.height / 2,
-                   y : this.width / 2,
+                   x : parseInt(this.height / 2),
+                   y : parseInt(this.width / 2),
 
                    r : this.r,
                    r0: this.r - this.config.secW,

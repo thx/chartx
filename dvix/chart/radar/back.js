@@ -3,11 +3,12 @@ KISSY.add(function( S , Canvax , Isogon , Line ){
         this.width  = 0;
         this.height = 0;
         this.pos    = {x : 0 , y : 0};
-        this.r = 0; //蜘蛛网的最大半径
+        this.r      = 0; //蜘蛛网的最大半径
         this.yDataSection = [];
         this.xDataSection = [];
-        this.strokeStyle = "#999999";
-        this.lineWidth   = 1;
+        this.strokeStyle  = "#999999";
+        this.lineWidth    = 1;
+        this.sprite       = null ;
 
         this.init(opt);
     };

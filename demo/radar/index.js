@@ -10,7 +10,7 @@ KISSY.ready(function(){
         [ "Designing", 81   , 19   ] ,
         [ "Coding"   , 56   , 96   ] ,
         [ "Cycling"  , 55   , 27   ] ,
-        [ "Running"  , 40   , 101  ] 
+        [ "Running"  , 40   , 100  ] 
     ];
     var options = {
         // title : "first charts",

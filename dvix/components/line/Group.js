@@ -110,7 +110,7 @@ KISSY.add("dvix/components/line/Group" , function(S, Canvax, BrokenLine, Path, T
         },
 
         _fillLine:function( bline ){                        //填充直线
-            var fillPath = _.clone( bline.getPointList() );
+            var fillPath = _.clone( bline.context.pointList );
             fillPath.push( 
                 [ fillPath[ bline.pointsLen -1 ][0] , -1.5 ],
                 [ fillPath[0][0] , -1.5 ],

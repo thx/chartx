@@ -12,6 +12,7 @@ KISSY.add('dvix/chart/radar/back', function (S, Canvax, Isogon, Line) {
         this.xDataSection = [];
         this.strokeStyle = '#999999';
         this.lineWidth = 1;
+        this.sprite = null;
         this.init(opt);
     };
     Back.prototype = {

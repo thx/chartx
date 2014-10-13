@@ -39,7 +39,7 @@ KISSY.ready(function () {
             [
                 'Running',
                 40,
-                101
+                100
             ]
         ];
     var options = {
