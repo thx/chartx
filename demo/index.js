@@ -12,7 +12,7 @@ if(  (/daily.taobao.net/g).test(location.host)  ){
 var canvaxVersion = "2014.10.13";
 var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
 if( DvixSite.daily ){
-    canvaxVersion = '2014.10.14';
+    canvaxVersion = '2014.10.18';
     canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/" + canvaxVersion + "/";
 }
 if( DvixSite.local ){
@@ -28,7 +28,7 @@ KISSY.config({
         combine : !DvixSite.local
     },{
         name  : 'dvix',
-        path  : '../../',
+        path  : '../../build/',
         debug : DvixSite.debug,
         combine : !DvixSite.local
     }]
