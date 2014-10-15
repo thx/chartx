@@ -150,13 +150,13 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
                             
             if( this.config.event.enabled ){
                 var self = this;
-                this._graphs.sprite.on(EventType.HOLD,function(e){
+                this._graphs.sprite.on( "hold mouseover" ,function(e){
                     self._onInduceHandler(e)
                 })
-                this._graphs.sprite.on(EventType.DRAG,function(e){
+                this._graphs.sprite.on( "drag mousemove" ,function(e){
                     self._onInduceHandler(e)
                 })
-                this._graphs.sprite.on(EventType.RELEASE,function(e){
+                this._graphs.sprite.on( "release mouseout" ,function(e){
                     self._offInduceHandler(e)
                 })
             }

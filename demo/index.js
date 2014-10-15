@@ -28,7 +28,7 @@ KISSY.config({
         combine : !DvixSite.local
     },{
         name  : 'dvix',
-        path  : '../../build/',
+        path  : '../../',
         debug : DvixSite.debug,
         combine : !DvixSite.local
     }]

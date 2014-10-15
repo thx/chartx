@@ -1,5 +1,5 @@
 KISSY.add(function( S ){
-
+    //依赖underscore
     (function() {
         var arrays, basicObjects, deepClone, deepExtend, deepExtendCouple, isBasicObject,
     __slice = [].slice;
@@ -110,6 +110,5 @@ KISSY.add(function( S ){
 
 } , {
     requires : [
-        "dvix/library/underscore"
         ]
 })

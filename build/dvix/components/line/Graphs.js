@@ -138,15 +138,15 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
                 }
             });
             self.sprite.addChild(self.induce);
-            self.induce.on(EventType.HOLD, function (e) {
+            self.induce.on('hold mouseover', function (e) {
                 var o = self._getInfoHandler(e);
                 e.info = o;
             });
-            self.induce.on(EventType.DRAG, function (e) {
+            self.induce.on('drag mousemove', function (e) {
                 var o = self._getInfoHandler(e);
                 e.info = o;
             });
-            self.induce.on(EventType.RELEASE, function (e) {
+            self.induce.on('release mouseout', function (e) {
                 var o = {
                         iGroup: self.iGroup,
                         iNode: self.iNode
