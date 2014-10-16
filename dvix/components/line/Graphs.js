@@ -34,9 +34,8 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Canvax , Rect, Tools, Twee
     Graphs.prototype = {
 
         init:function(opt){
-            var self  = this;
-            self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite();
+            _.deepExtend( this , opt );
+            this.sprite = new Canvax.Display.Sprite();
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -78,31 +77,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Canvax , Rect, Tools, Twee
             };
             growAnima();
         },
-        //初始化配置
-        _initConfig:function(opt){
-            var self = this
-
-            if(opt){
-                var line = opt.line
-                if(line){
-                    var strokeStyle = line.strokeStyle
-                    if(strokeStyle){
-                        self.line.strokeStyle.normals = strokeStyle.normals || self.line.strokeStyle.normals
-                        if(strokeStyle.overs && strokeStyle.overs.length){
-                            self.line.strokeStyle.overs = strokeStyle.overs
-                        }else{
-                            self.line.strokeStyle.overs = self.line.strokeStyle.normals
-                        }
-                    }
-
-                    var alpha = line.alpha
-                    if(alpha){
-                        self.line.alpha.normals = alpha.normals || self.line.alpha.normals
-                    }
-                }
-            }
-        },
-        //配置数据
+         //配置数据
         _configData:function(opt){
             var self = this
             var opt = opt || {}
@@ -187,7 +162,6 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Canvax , Rect, Tools, Twee
                     self._nodesInfoList.push(o)
                     self._nodesYList.push(o.y)
                 }
-
             }
 
             var tmpIGroup = Tools.getDisMinATArr(y, self._nodesYList)
@@ -219,6 +193,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Canvax , Rect, Tools, Twee
         "dvix/utils/tools",
         "canvax/animation/Tween",
         "dvix/event/eventtype",
-        "dvix/components/line/Group"
+        "dvix/components/line/Group",
+        "dvix/utils/deep-extend"
     ] 
 })

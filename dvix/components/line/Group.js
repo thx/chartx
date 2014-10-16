@@ -22,9 +22,8 @@ KISSY.add("dvix/components/line/Group" , function(S, Canvax, BrokenLine, Path, T
     Group.prototype = {
 
         init:function(opt){
-            var self  = this;
-            self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite();
+            _.deepExtend( this , opt );
+            this.sprite = new Canvax.Display.Sprite();
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -50,22 +49,6 @@ KISSY.add("dvix/components/line/Group" , function(S, Canvax, BrokenLine, Path, T
             }
         },
 
-        //初始化配置
-        _initConfig:function(opt){
-            var self = this
-
-            if(opt){
-                var line = opt.line
-                if(line){
-                    self.line.strokeStyle = line.strokeStyle || self.line.strokeStyle
-                }
-                var fill = opt.fill
-                if(fill){
-                    self.fill.strokeStyle = fill.strokeStyle || self.fill.strokeStyle
-                    self.fill.alpha       = (fill.alpha      || fill.alpha == 0) ? fill.alpha : self.fill.alpha
-                } 
-            }
-        },
         //配置数据
         _configData:function(opt){
             var self = this
@@ -93,7 +76,7 @@ KISSY.add("dvix/components/line/Group" , function(S, Canvax, BrokenLine, Path, T
                     strokeStyle : self.line.strokeStyle,
                     lineWidth   : 2,
                     y           : self.y,
-                    smooth      : true 
+                    smooth      : this.smooth 
                 }
             });
 
@@ -135,6 +118,7 @@ KISSY.add("dvix/components/line/Group" , function(S, Canvax, BrokenLine, Path, T
         "canvax/",
         "canvax/shape/BrokenLine",
         "canvax/shape/Path",
-        "dvix/utils/tools"
+        "dvix/utils/tools",
+        "dvix/utils/deep-extend"
     ] 
 })

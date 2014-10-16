@@ -139,7 +139,8 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
                 w    : this._xAxis.xGraphsWidth,
                 h    : this._yAxis.yGraphsHeight,
                 data : this._trimGraphs(),
-                disX : this._getGraphsDisX()
+                disX : this._getGraphsDisX(),
+                smooth : this.smooth
             });
             this._graphs.setX( x + this._xAxis.disOriginX ), this._graphs.setY(y)
 

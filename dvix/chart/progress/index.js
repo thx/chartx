@@ -2,30 +2,30 @@ KISSY.add(function( S , Chart ,Sector ){
    var Canvax  = Chart.Canvax;
 
    return Chart.extend({
-       config : {
+       options : {
            secW: 10,
            bColor: '#E6E6E6',
            pColor: '#8d76c4'
        },
        init : function( el , opt ){
-           this._initConfig( opt );
+           this._initoptions( opt );
            this.r = Math.min( this.width , this.height ) / 2;
        },
-       _initConfig : function( opt ){
-           _.extend( this.config , opt );
+       _initoptions : function( opt ){
+           _.extend( this.options , opt );
        },
        draw : function( opt ){
-           this._initConfig( opt );
+           this._initoptions( opt );
            this.stage.addChild( new Sector({
               context : {
                    x : parseInt(this.height / 2),
                    y : parseInt(this.width / 2),
 
                    r : this.r,
-                   r0: this.r - this.config.secW,
+                   r0: this.r - this.options.secW,
                    startAngle : 0 ,
                    endAngle   : 360,
-                   fillStyle  : this.config.bColor,
+                   fillStyle  : this.options.bColor,
                    lineJoin   : "round"
                  }
            }) );
@@ -37,10 +37,10 @@ KISSY.add(function( S , Chart ,Sector ){
                    y : parseInt(this.width / 2),
 
                    r : this.r,
-                   r0: this.r - this.config.secW,
+                   r0: this.r - this.options.secW,
                    startAngle : 0 ,
                    endAngle   : 1 ,
-                   fillStyle  : this.config.pColor,
+                   fillStyle  : this.options.pColor,
                    lineJoin   : "round"
                  }
            }) );
