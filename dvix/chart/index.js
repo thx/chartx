@@ -12,11 +12,7 @@ KISSY.add(function( S , Canvax ){
             el : this.element
         });
         this.stage         =  new Canvax.Display.Stage({
-            id : "main",
-            context : {
-                x : 0.5,
-                y : 0.5
-            }
+            id : "main"
         });
 
         this.canvax.addChild( this.stage );

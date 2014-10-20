@@ -92,7 +92,7 @@ KISSY.add("dvix/components/back/Back" , function(S, Canvax, Line, Tools){
             //x轴上的线集合
             var arr = self.xAxis.data
             for(var a = 1, al = arr.length; a < al; a++){
-                var o = arr[a]
+                var o = arr[a];
                 var line = new Line({
                     context : {
                         xStart      : 0,

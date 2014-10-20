@@ -30,7 +30,7 @@ KISSY.add("dvix/components/tips/Tip" , function(S, Canvax, Circle, Rect, Tools){
             disX        : 8,                           //文字离边框左右的距离
             disY        : 8,                           //文字离边框上下的距离
             strokeStyle : '#333333',
-            thinkness   : 1.5,
+            thinkness   : 2,
             fillStyle   : '#FFFFFF',
             radius      : [4,4,4,4]
         }

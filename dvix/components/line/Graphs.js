@@ -142,10 +142,10 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Canvax , Rect, Tools, Twee
             var self = this
             var point = e.point
             
-            console.log(point.x+"|"+point.y)
+            //console.log(point.x+"|"+point.y)
             // var stagePoint
             var x = Number(point.x), y = Number(point.y) - Number(self.h)
-
+debugger
             var n = x / (self.disX / 2)
             n = n % 2 == 0 ? n : n + 1
             var tmpINode = parseInt(n / 2)

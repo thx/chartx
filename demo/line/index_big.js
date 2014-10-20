@@ -74,7 +74,7 @@ KISSY.ready(function(){
             },
             xAxis:{
                 // lineType: ''
-                thinkness:1,
+                thinkness   : 1,
                 strokeStyle : '#cccccc'
             },
             yAxis:{
@@ -96,11 +96,11 @@ KISSY.ready(function(){
             // disTop : 50,
             context:{
                 prefix:{
-                    values:['今','昨','明']
+                    values:['今','昨sdfsdfsdf','明']
                 },
-                bolds     :['bold','bold','bold'],
-                fontSizes :[14,14,14],
-                fillStyles:['#333333','#999999','#999999']
+                bolds     :['normal','normal','normal'],
+                fontSizes :[12,12,12],
+                fillStyles:['#f8ab5e','#E55C5C','#999999']
             },
             tip  : {
                 back:{

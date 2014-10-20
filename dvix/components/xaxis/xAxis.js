@@ -53,7 +53,9 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Canvax, Line , Tools){
 
             this.dataSection = this._initDataSection( this.dataOrg );
 
-            this.sprite = new Canvax.Display.Sprite();
+            this.sprite = new Canvax.Display.Sprite({
+                id : "xAxisSprite"
+            });
 
             this._checkText();                              //检测
         },
@@ -78,13 +80,14 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Canvax, Line , Tools){
             this.data = this._trimXAxis( this.dataSection , this.xGraphsWidth );
 
             this._trimLayoutData();
+
+            this.setX( this.pos.x + this.disOriginX );
+            this.setY( this.pos.y );
             
             if( this.display != "none" ){
                 this._widget();
                 this._layout();
             } 
-            this.setX( this.pos.x + this.disOriginX );
-            this.setY( this.pos.y );
         },
 
         //初始化配置
@@ -167,16 +170,15 @@ KISSY.add("dvix/components/xaxis/xAxis" , function(S, Canvax, Line , Tools){
                 var line = new Line({
                     id      : a,
                     context : {
-                        x           : x,
-                        y           : 0,
-                        xEnd        : 0,
-                        yEnd        : this.line.height,
+                        xStart      : x,
+                        yStart      : this.disY,
+                        xEnd        : x,
+                        yEnd        : this.line.height + this.disY,
                         lineWidth   : this.line.width,
                         strokeStyle : this.line.strokeStyle
                     }
-                })
-                line.context.y = this.disY
-                this.lineSp.addChild(line)
+                });
+                this.lineSp.addChild(line);
             }
 
            	for(var a = 0, al = this.txtSp.getNumChildren(); a < al; a++){

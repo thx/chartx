@@ -20,13 +20,10 @@ KISSY.add("dvix/components/tips/Line" , function(S, Canvax, CanvaxLine, Tools){
     Line.prototype = {
 
         init:function(opt){
-            var self  = this;
-            self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite(
-                    {
-                      id : "tipLine"
-                    }
-                    );
+            _.deepExtend( this , opt );
+            this.sprite = new Canvax.Display.Sprite( {
+                id : "tipLine"
+            });
         },
         setX:function($n){
             this.sprite.context.x = $n
@@ -37,33 +34,11 @@ KISSY.add("dvix/components/tips/Line" , function(S, Canvax, CanvaxLine, Tools){
 
         draw : function(opt){
             var self  = this;
-            self._configData(opt)
+            _.deepExtend( this , opt );
             self._widget()
         },
-
-        //初始化配置
-        _initConfig:function(opt){
-            var self = this
-            if(opt){
-                self.line.lineType    = opt.lineType == '' ? '' : self.line.lineType
-                self.line.thinkness   = opt.thinkness   || self.line.thinkness
-                self.line.strokeStyle = opt.strokeStyle || self.line.strokeStyle
-            }
-        },
-        //配置数据
-        _configData:function(opt){
-            var self = this
-            if(opt){
-                self.xStart = opt.xStart || self.xStart
-                self.yStart = opt.yStart || self.yStart
-                self.xEnd   = opt.xEnd   || self.xEnd
-                self.yEnd   = opt.yEnd   || self.yEnd
-            }
-        },
-
         _widget:function(){
             var self  = this;
-
             var line = new CanvaxLine({
                 context : {
                     xStart      : self.xStart,
@@ -85,6 +60,7 @@ KISSY.add("dvix/components/tips/Line" , function(S, Canvax, CanvaxLine, Tools){
     requires : [
         "canvax/",
         "canvax/shape/Line",
-        "dvix/utils/tools"
+        "dvix/utils/tools",
+        "dvix/utils/deep-extend"
     ] 
 })

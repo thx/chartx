@@ -61,18 +61,6 @@ KISSY.add("dvix/components/tips/Tips" , function(S, Canvax, Tip, Line, Nodes, To
             self._remove()
         },
 
-        //初始化配置
-        _initConfig:function(opt){
-            var self = this
-            if(opt){
-                self.opt.dis     = (opt.dis    || opt.dis == 0)    ? opt.dis    : self.opt.dis
-                self.opt.disTop  = (opt.disTop || opt.disTop == 0) ? opt.disTop : self.opt.disTop
-                self.opt.context = opt.context
-                self.opt.tip     = opt.tip
-                self.opt.line    = opt.line
-                self.opt.nodes   = opt.nodes
-            }
-        },
         _initModule:function(){
             var self = this
             if(self.opt.tip){

@@ -88,7 +88,6 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
             this._back   = new Back(opt.back);
             this._graphs = new Graphs(opt.graphs);
-            this._tips   = new Tips(opt.tips)
         },
         _startDraw : function(){
             // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -194,10 +193,13 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this.core.addChild(this._graphs.sprite);
             this.core.addChild(this._yAxis.sprite);
 
-            this.stageTip.addChild(this._tips.sprite)
         },
-
-        _onInduceHandler:function($evt){
+        _onInduceHandler : function( e ){
+            var arr  = this._graphs.data;
+            var tipsPoint = e.target.localToGlobal( e.info.nodeInfo , this.core );
+            debugger;
+        },
+        _onInduceHandler1:function($evt){
             if(!$evt.info)
             return
             var strokeStyles = this._graphs.line.strokeStyle.overs
@@ -205,7 +207,10 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             var disTop = this._tips.opt.disTop
             var iGroup = $evt.info.iGroup, iNode = $evt.info.iNode
             var data = []
-            var arr  = this._graphs.data
+            var arr  = this._graphs.data;
+            
+            debugger
+
             for(var a = 0, al = arr.length; a < al; a++){
                 if(!data[a]){
                     data[a] = []
@@ -288,6 +293,7 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
         'dvix/components/line/Graphs',
-        'dvix/components/tips/Tips'
+        './tips'
+        //'dvix/components/tips/Tips'
     ]
 });
