@@ -110,7 +110,8 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
                 w: this._xAxis.xGraphsWidth,
                 h: this._yAxis.yGraphsHeight,
                 data: this._trimGraphs(),
-                disX: this._getGraphsDisX()
+                disX: this._getGraphsDisX(),
+                smooth: this.smooth
             });
             this._graphs.setX(x + this._xAxis.disOriginX), this._graphs.setY(y)    //执行生长动画
 ;
@@ -118,13 +119,13 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
             this._graphs.grow();
             if (this.config.event.enabled) {
                 var self = this;
-                this._graphs.sprite.on(EventType.HOLD, function (e) {
+                this._graphs.sprite.on('hold mouseover', function (e) {
                     self._onInduceHandler(e);
                 });
-                this._graphs.sprite.on(EventType.DRAG, function (e) {
+                this._graphs.sprite.on('drag mousemove', function (e) {
                     self._onInduceHandler(e);
                 });
-                this._graphs.sprite.on(EventType.RELEASE, function (e) {
+                this._graphs.sprite.on('release mouseout', function (e) {
                     self._offInduceHandler(e);
                 });
             }

@@ -23,10 +23,7 @@ module.exports = function(grunt) {
      copy: {
          main: {
              files: [
-             /*{
-                 expand: true, src: ['library/underscore.js' , 'library/excanvas.js' , 'library/color.js'], dest: 'build/'
-             },
-             */
+ 
              { expand: true, cwd: 'dvix', src: ['**'], dest: 'build/dvix'},
              { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'},
              { expand: true, cwd: 'gameDemo', src: ['**'], dest: 'build/gameDemo'}
