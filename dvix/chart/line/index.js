@@ -8,7 +8,7 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
 
         init:function(node){
 
-            this.config        =  {
+            this.options        =  {
                 mode       : 1,                            //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
                 event      : {
                     enabled : 1
@@ -16,6 +16,8 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             }
 
             this.dataFrame     =  null;                    //数据集合，由_initData 初始化
+
+
 
             this._xAxis        =  null;
             this._yAxis        =  null;
@@ -41,6 +43,7 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
 
         },
         draw:function(data, opt){
+            _.deepExtend( this.options , opt );
             if( opt.rotate ) {
                 this.rotate( opt.rotate );
             }
@@ -88,6 +91,7 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
             this._back   = new Back(opt.back);
             this._graphs = new Graphs(opt.graphs);
+            this._tips   = new Tips( opt.tips );
         },
         _startDraw : function(){
             // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -148,16 +152,19 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this._graphs.grow();
 
                             
-            if( this.config.event.enabled ){
+            if( this.options.event.enabled ){
                 var self = this;
                 this._graphs.sprite.on( "hold mouseover" ,function(e){
-                    self._onInduceHandler(e)
+                    //self._onInduceHandler(e)
+                    self._tips.show( e );
                 })
                 this._graphs.sprite.on( "drag mousemove" ,function(e){
-                    self._onInduceHandler(e)
+                    //self._onInduceHandler(e)
+                    self._tips.move( e );
                 })
                 this._graphs.sprite.on( "release mouseout" ,function(e){
-                    self._offInduceHandler(e)
+                    //self._offInduceHandler(e)
+                    self._tips.hide( e );
                 })
             }
         },
@@ -192,11 +199,13 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this.core.addChild(this._xAxis.sprite);
             this.core.addChild(this._graphs.sprite);
             this.core.addChild(this._yAxis.sprite);
+            
+            this.stageTip.addChild(this._tips.sprite);
 
         },
         _onInduceHandler : function( e ){
             var arr  = this._graphs.data;
-            var tipsPoint = e.target.localToGlobal( e.info.nodeInfo , this.core );
+            var tipsPoint = e.target.localToGlobal( e.info.nodesInfoList[e.info.iGroup] );
             debugger;
         },
         _onInduceHandler1:function($evt){
@@ -293,7 +302,8 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
         'dvix/components/line/Graphs',
-        './tips'
+        './tips',
         //'dvix/components/tips/Tips'
+        "dvix/utils/deep-extend"
     ]
 });

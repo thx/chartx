@@ -40,11 +40,11 @@ KISSY.add("dvix/components/line/Group" , function(S, Canvax, BrokenLine, Path, T
         getNodeInfoAt:function($index){
             var self = this
             var o = S.clone(self.data[$index])
-            if(o){
+            if( o ){
                 o.fillStyle = self.line.strokeStyle 
                 o.alpha = self.fill.alpha
                 return o
-            }else{
+            } else {
                 return null
             }
         },
