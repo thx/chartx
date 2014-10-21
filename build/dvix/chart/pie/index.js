@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 KISSY.add('\\dvix\\chart\\pie\\index', function (S, Chart, Tools, DataSection, EventType, Pie, Graphs, PieTip) {
+=======
+KISSY.add('dvix/chart/pie/index', function (S, Chart, Tools, DataSection, EventType, Pie, Graphs, PieTip) {
+>>>>>>> origin/add-pie-chart
     /*
   *@node chart在dom里的目标容器节点。
   */

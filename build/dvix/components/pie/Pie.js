@@ -56,6 +56,7 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                             var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
                             var sinV = Math.sin((self.currentAngle + angle / 2) / 180 * Math.PI);
                             var midAngle = self.currentAngle + (endAngle - self.currentAngle) / 2;
+<<<<<<< HEAD
                             
                             var quadrant = function (ang) {
                                 if (0 <= ang && ang <= 90) {
@@ -68,6 +69,20 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                                     return 4;
                                 }
                             }(midAngle);
+=======
+                            debugger;
+                            var quadrant = function (ang) {
+                                    if (0 <= ang && ang <= 90) {
+                                        return 1;
+                                    } else if (90 < ang && ang <= 180) {
+                                        return 2;
+                                    } else if (180 < ang && ang <= 270) {
+                                        return 3;
+                                    } else if (270 < ang && ang < 360) {
+                                        return 4;
+                                    }
+                                }(midAngle);
+>>>>>>> origin/add-pie-chart
                             S.mix(data[j], {
                                 start: self.currentAngle,
                                 end: endAngle,
@@ -98,6 +113,7 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
         },
         _configColors: function () {
             var defaultColors = [
+<<<<<<< HEAD
                 '#95CEFF',
                 '#434348',
                 '#90ED7D',
@@ -109,6 +125,19 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                 '#8D4653',
                 '#91E8E1'
             ];
+=======
+                    '#95CEFF',
+                    '#434348',
+                    '#90ED7D',
+                    '#F7A35C',
+                    '#8085E9',
+                    '#F15C80',
+                    '#E4D354',
+                    '#8085E8',
+                    '#8D4653',
+                    '#91E8E1'
+                ];
+>>>>>>> origin/add-pie-chart
             this.colors = this.colors ? this.colors : defaultColors;
         },
         draw: function (opt) {
@@ -116,7 +145,11 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
             this.setY(this.pie.y);
             this._widget();    //this.sprite.context.globalAlpha = 0;
             //this.sprite.context.globalAlpha = 0;
+<<<<<<< HEAD
             
+=======
+            debugger;
+>>>>>>> origin/add-pie-chart
             S.each(this.sectors, function (sec, index) {
                 sec.context.r = 0;
                 sec.context.startAngle = 0;
@@ -128,6 +161,7 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
             var timer = null;
             var growAnima = function () {
                 var pieOpen = new Tween.Tween({
+<<<<<<< HEAD
                     alpha: 0,
                     r: 0
                 }).to({
@@ -150,6 +184,30 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                     cancelAnimationFrame(timer);
                     self.isMoving = false;
                 }).start();
+=======
+                        alpha: 0,
+                        r: 0
+                    }).to({
+                        alpha: 1,
+                        r: self.pie.r
+                    }, 800).onUpdate(function () {
+                        var me = this;
+                        self.sprite.context.globalAlpha = this.alpha;
+                        for (var i = 0; i < self.sectors.length; i++) {
+                            self.sectors[i].context.r = me.r;
+                            if (i == 0) {
+                                self.sectors[i].context.startAngle = self.sectors[i].startAngle;
+                                self.sectors[i].context.endAngle = self.sectors[i].endAngle * me.alpha;
+                            } else {
+                                self.sectors[i].context.startAngle = self.sectors[i - 1].context.endAngle;
+                                self.sectors[i].context.endAngle = self.sectors[i].context.startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.alpha;
+                            }
+                        }
+                    }).onComplete(function () {
+                        cancelAnimationFrame(timer);
+                        self.isMoving = false;
+                    }).start();
+>>>>>>> origin/add-pie-chart
                 animate();
             };
             function animate() {
@@ -196,6 +254,7 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                     var fillColor = self.getColorByIndex(self.colors, i);    //指示线
                     //指示线
                     var branchLine = new Line({
+<<<<<<< HEAD
                         context: {
                             xStart: data[i].centerx,
                             yStart: data[i].centery,
@@ -217,6 +276,31 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                             fontWeight: 'normal'
                         }
                     });                    
+=======
+                            context: {
+                                xStart: data[i].centerx,
+                                yStart: data[i].centery,
+                                xEnd: data[i].edgex,
+                                yEnd: data[i].edgey,
+                                lineWidth: 1,
+                                strokeStyle: fillColor,
+                                lineType: 'solid'
+                            }
+                        });    //指示文字
+                    //指示文字
+                    var branchTxt = new Canvax.Display.Text(data[i].name + ' : ' + data[i].txt, {
+                            context: {
+                                x: data[i].edgex,
+                                y: data[i].edgey,
+                                //fillStyle: fillColor,
+                                //strokeStyle: fillColor,              
+                                fontSize: 11,
+                                fontWeight: 'normal'
+                            }
+                        });
+                    if (i == 1)
+                        debugger;
+>>>>>>> origin/add-pie-chart
                     var bwidth = branchTxt.getTextWidth();
                     var bheight = branchTxt.getTextHeight();
                     var bx = data[i].edgex;
@@ -246,6 +330,7 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                     self.branchTxtSp.addChild(branchTxt);    //扇形主体
                     //扇形主体
                     var sector = new Sector({
+<<<<<<< HEAD
                         context: {
                             //x: data[i].isMax ? 0 : data[i].outx,
                             //y: data[i].isMax ? 0 : data[i].outy,
@@ -267,13 +352,41 @@ KISSY.add('dvix/components/pie/Pie', function (S, Canvax, Sector, Line, Rect, To
                         //clockwise: true
                         id: 'sector' + i
                     });
+=======
+                            context: {
+                                //x: data[i].isMax ? 0 : data[i].outx,
+                                //y: data[i].isMax ? 0 : data[i].outy,
+                                //x: i == 1 ? data[i].outx : 0,
+                                //y: i == 1 ? data[i].outy :0,
+                                //shadowColor: "black",
+                                //shadowOffsetX: 0,
+                                //shadowOffsetY: 0,
+                                //shadowBlur: 5,
+                                r0: 20,
+                                r: self.pie.r,
+                                startAngle: data[i].start,
+                                endAngle: data[i].end,
+                                fillStyle: fillColor,
+                                index: data[i].index,
+                                lineWidth: 2,
+                                strokeStyle: '#fff'    //clockwise: true
+                            },
+                            //clockwise: true
+                            id: 'sector' + i
+                        });
+>>>>>>> origin/add-pie-chart
                     sector.__data = data[i];
                     sector.__colorIndex = i;
                     sector.__dataIndex = i;
                     sector.__isSelected = false;    //扇形事件
                     //扇形事件
                     sector.hover(function (e) {
+<<<<<<< HEAD
                         if (!self.isMoving) {                            
+=======
+                        if (!self.isMoving) {
+                            debugger;
+>>>>>>> origin/add-pie-chart
                             //this.context.shadowBlur = 20;
                             var target = e.target;
                             var globalPoint = target.localToGlobal(e.point);
