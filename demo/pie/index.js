@@ -15,15 +15,15 @@
     ];
   var options = {
     tip: {
-      enabled:true,
+      enabled: true,
       format: '{point.title}\n{point.percentage}'
     },
     dataLabel: {
-      enabled:true,
-      format:'{point.name} : {point.percentage}'
+      enabled: true,
+      format: '{point.name} : {point.percentage}'
     },
     allowPointSelect: true,
-    cursor: 'pointer',
+    cursor: 'pointer'
     //colors:['red', 'yellow', 'blue']
   }
 
@@ -35,7 +35,7 @@
     }]
   });
 
-  KISSY.use("dvix/chart/pie/ , node", function (S, Pie) {    
+  KISSY.use("dvix/chart/pie/ , node", function (S, Pie) {
     window.pie = new Pie(S.all("#canvasTest"));
     pie.draw(data1, options);
   });
