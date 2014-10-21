@@ -27,13 +27,7 @@
     //colors:['red', 'yellow', 'blue']
   }
 
-  KISSY.config({
-    packages: [{
-      name: 'dvix',
-      path: '../../',
-      debug: true
-    }]
-  });
+
 
   KISSY.use("dvix/chart/pie/ , node", function (S, Pie) {
     window.pie = new Pie(S.all("#canvasTest"));

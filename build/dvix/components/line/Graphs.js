@@ -39,8 +39,9 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
     };
     Graphs.prototype = {
         init: function (opt) {
-            _.deepExtend(this, opt);
-            this.sprite = new Canvax.Display.Sprite();
+            var self = this;
+            self._initConfig(opt);
+            self.sprite = new Canvax.Display.Sprite();
         },
         setX: function ($n) {
             this.sprite.context.x = $n;
@@ -80,6 +81,28 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
             ;
             growAnima();
         },
+        //初始化配置
+        _initConfig: function (opt) {
+            var self = this;
+            if (opt) {
+                var line = opt.line;
+                if (line) {
+                    var strokeStyle = line.strokeStyle;
+                    if (strokeStyle) {
+                        self.line.strokeStyle.normals = strokeStyle.normals || self.line.strokeStyle.normals;
+                        if (strokeStyle.overs && strokeStyle.overs.length) {
+                            self.line.strokeStyle.overs = strokeStyle.overs;
+                        } else {
+                            self.line.strokeStyle.overs = self.line.strokeStyle.normals;
+                        }
+                    }
+                    var alpha = line.alpha;
+                    if (alpha) {
+                        self.line.alpha.normals = alpha.normals || self.line.alpha.normals;
+                    }
+                }
+            }
+        },
         //配置数据
         _configData: function (opt) {
             var self = this;
@@ -115,15 +138,15 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
                 }
             });
             self.sprite.addChild(self.induce);
-            self.induce.on('hold mouseover', function (e) {
+            self.induce.on(EventType.HOLD, function (e) {
                 var o = self._getInfoHandler(e);
                 e.info = o;
             });
-            self.induce.on('drag mousemove', function (e) {
+            self.induce.on(EventType.DRAG, function (e) {
                 var o = self._getInfoHandler(e);
                 e.info = o;
             });
-            self.induce.on('release mouseout', function (e) {
+            self.induce.on(EventType.RELEASE, function (e) {
                 var o = {
                         iGroup: self.iGroup,
                         iNode: self.iNode
@@ -184,7 +207,6 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
         'dvix/utils/tools',
         'canvax/animation/Tween',
         'dvix/event/eventtype',
-        'dvix/components/line/Group',
-        'dvix/utils/deep-extend'
+        'dvix/components/line/Group'
     ]
 });

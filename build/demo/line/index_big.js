@@ -220,7 +220,7 @@ KISSY.ready(function () {
                             0.7
                         ]
                     },
-                    smooth: false
+                    smooth: true
                 }
             },
             tips: {
