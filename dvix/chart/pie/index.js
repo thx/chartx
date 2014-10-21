@@ -109,8 +109,7 @@
       this._pie = new Pie(opt, this.dataFrame);
       this._tip = new PieTip(opt);
     },
-    _startDraw: function () {
-      debugger
+    _startDraw: function () {      
       this._pie.draw();
       this._pie.grow();
       this._tip.draw();

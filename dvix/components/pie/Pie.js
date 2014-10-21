@@ -59,7 +59,7 @@
               var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
               var sinV = Math.sin((self.currentAngle + angle / 2) / 180 * Math.PI);
               var midAngle = self.currentAngle + (endAngle - self.currentAngle) / 2;            
-              debugger  
+                
               var quadrant = function (ang) {
                 if (0 <= ang && ang <= 90) {
                   return 1;
@@ -110,8 +110,7 @@
       this.setX(this.pie.x);
       this.setY(this.pie.y);
       this._widget();
-      //this.sprite.context.globalAlpha = 0;
-      debugger
+      //this.sprite.context.globalAlpha = 0;      
       S.each(this.sectors, function (sec, index) {
         sec.context.r = 0;
         sec.context.startAngle = 0;
@@ -206,8 +205,7 @@
               fontSize: 11,
               fontWeight: 'normal'
             }
-          });
-          if(i == 1) debugger
+          });          
           var bwidth = branchTxt.getTextWidth();
           var bheight = branchTxt.getTextHeight();
           var bx = data[i].edgex;
@@ -266,8 +264,7 @@
           sector.__isSelected = false;
           //扇形事件
           sector.hover(function (e) {
-            if (!self.isMoving) {
-              debugger
+            if (!self.isMoving) {              
               //this.context.shadowBlur = 20;
               var target = e.target;
               var globalPoint = target.localToGlobal(e.point);
