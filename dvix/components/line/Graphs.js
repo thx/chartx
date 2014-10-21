@@ -115,7 +115,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Canvax , Rect, Tools, Twee
                     width       : self.w,
                     height      : self.h,
                     fillStyle   : '#000000',
-                    globalAlpha : 0.5
+                    globalAlpha : 0
                 }
             })
             self.sprite.addChild(self.induce)
@@ -144,7 +144,7 @@ KISSY.add("dvix/components/line/Graphs" , function(S, Canvax , Rect, Tools, Twee
             for (var a = 0, al = this.groups.length; a < al; a++ ) {
                 var o = this.groups[a].getNodeInfoAt(tmpINode)
                 this._nodesInfoList.push(o);
-            } 
+            }
             this.iGroup = tmpIGroup, this.iNode = tmpINode
             var node = {
                 iGroup        : this.iGroup,
