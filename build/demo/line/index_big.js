@@ -224,8 +224,11 @@ KISSY.ready(function () {
                 }
             },
             tips: {
+                prefix  : [
+                    "今天","明天"
+                ],
                 // disTop : 50,
-                context: {
+                context1: {
                     prefix: {
                         values: [
                             '\u4ECA',

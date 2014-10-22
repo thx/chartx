@@ -94,7 +94,7 @@ KISSY.ready(function(){
         },       
         tips  :{
             // disTop : 50,
-            context:{
+            context1:{
                 prefix:{
                     values:['今','昨sdfsdfsdf','明']
                 },

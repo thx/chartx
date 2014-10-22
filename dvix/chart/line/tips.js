@@ -1,13 +1,15 @@
 KISSY.add(function( S , Canvax , Line , Circle ){
-    var Tips = function(opt){
-        this.sprite  = null;
-        this.context = null; // tips的详细内容
-        this._line   = null;
-        this._nodes  = null;
-        this._tip    = null;
-        this._back   = null;
+    var Tips = function(opt , data , tipsContainer){
+        this.container = tipsContainer;
+        this.sprite    = null;
+        this.context   = null; // tips的详细内容
+        this._line     = null;
+        this._nodes    = null;
+        this._tip      = null;
+        this._back     = null;
 
-        this.prefix  = [];
+        //prefix  在tips里面放在具体value值前面的文案
+        this.prefix  = data.yAxis.field;
         
         this.init(opt);
     }
@@ -20,22 +22,27 @@ KISSY.add(function( S , Canvax , Line , Circle ){
             });
         },
         show : function(e){
-            var tipsPoint = this.getTipsPoint(e);
+            var tipsPoint = this._getTipsPoint(e);
             this._initLine(e , tipsPoint);
             this._initNodes(e , tipsPoint);
+            this._initContext(e , tipsPoint);
+            
             this._initBack(e , tipsPoint);
         },
         move : function(e){
             this._setX(e);
+            this._moveAndResetContext(e);
         },
         hide : function(e){
+            debugger
             this.sprite.removeAllChildren();
+            this._removeContext();
         },
-        getTipsPoint : function(e){
+        _getTipsPoint : function(e){
             return e.target.localToGlobal( e.info.nodesInfoList[e.info.iGroup] );
         },
         _setX : function(e){
-            var tipsPoint = this.getTipsPoint(e);
+            var tipsPoint = this._getTipsPoint(e);
             this._line.context.x  = tipsPoint.x;
             this._resetNodesPosition(e , tipsPoint);
         },
@@ -86,15 +93,32 @@ KISSY.add(function( S , Canvax , Line , Circle ){
                 self._nodes.getChildAt(i).context.y = e.target.context.height - Math.abs(node.y);
             });
         },
-        _initTipsContext : function(e , tipsPoint){
-            if( !this.context ){
-                this.context = this._getDefaultTipsContext(e)
-            }
+        _initContext : function(e , tipsPoint){
+            this._tip = S.all("<div style='display:inline-block;*display:inline;*zoom:1;'></div>");
+            this._tip.html( this._getContext(e) );
+            this.container.append( this._tip );
         },
-        _getDefaultTipsContext : function(){
+        _removeContext : function(){
+            this._tip.remove();
+            this._tip = null;
+        },
+        _moveAndResetContext : function(e){
+            this._tip.html( this._getContext(e) );
+        },
+        _getContext : function(e){
+            if( !this.context ){
+                this.context = this._getDefaultContext(e)
+            }
+            return this.context;
+        },
+        _getDefaultContext : function(e){
+            var str  = "<table>";
+            var self = this;
             _.each( e.info.nodesInfoList , function( node , i ){
-
+                str+= "<tr style='color:"+ node.fillStyle +"'><td>"+ self.prefix[i] +"</td><td>"+ node.value +"</td></tr>";
             });
+            str+="</table>";
+            return str;
         },
         _initBack : function(e){
             
