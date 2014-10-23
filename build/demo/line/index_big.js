@@ -224,39 +224,10 @@ KISSY.ready(function () {
                 }
             },
             tips: {
-                prefix  : [
-                    "今天","明天"
-                ],
-                // disTop : 50,
-                context1: {
-                    prefix: {
-                        values: [
-                            '\u4ECA',
-                            '\u6628',
-                            '\u660E'
-                        ]
-                    },
-                    bolds: [
-                        'bold',
-                        'bold',
-                        'bold'
-                    ],
-                    fontSizes: [
-                        14,
-                        14,
-                        14
-                    ],
-                    fillStyles: [
-                        '#333333',
-                        '#999999',
-                        '#999999'
-                    ]
-                },
-                tip: { back: {} },
-                // disX:10
-                line: {},
-                // lineType: ''
-                nodes: {}
+                prefix: [
+                    '\u9ED1\u8272\u73AB\u7470',
+                    '\u6C34\u6676\u4E4B\u75D5'
+                ]
             }
         };
     KISSY.config({

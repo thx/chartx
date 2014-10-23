@@ -17,14 +17,11 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
 
             this.dataFrame     =  null;                    //数据集合，由_initData 初始化
 
-
-
             this._xAxis        =  null;
             this._yAxis        =  null;
             this._back         =  null;
             this._graphs       =  null;
             this._tips         =  null;
-
 
             this.stageTip = new Canvax.Display.Sprite({
                 id      : 'tip'
@@ -40,7 +37,6 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this.stage.addChild(this.stageBg);
             this.stage.addChild(this.core);
             this.stage.addChild(this.stageTip);
-
         },
         draw:function(data, opt){
             _.deepExtend( this.options , opt );
@@ -147,25 +143,20 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             });
             this._graphs.setX( x + this._xAxis.disOriginX ), this._graphs.setY(y)
 
-
             //执行生长动画
             this._graphs.grow();
 
-                            
             if( this.options.event.enabled ){
                 var self = this;
                 this._graphs.sprite.on( "hold mouseover" ,function(e){
-                    //self._onInduceHandler(e)
                     self._tips.show( e );
-                })
+                });
                 this._graphs.sprite.on( "drag mousemove" ,function(e){
-                    //self._onInduceHandler(e)
                     self._tips.move( e );
-                })
+                });
                 this._graphs.sprite.on( "release mouseout" ,function(e){
-                    //self._offInduceHandler(e)
                     self._tips.hide( e );
-                })
+                });
             }
         },
         _trimGraphs:function(){
@@ -202,93 +193,6 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             
             this.stageTip.addChild(this._tips.sprite);
 
-        },
-        _onInduceHandler : function( e ){
-            var arr  = this._graphs.data;
-            var tipsPoint = e.target.localToGlobal( e.info.nodesInfoList[e.info.iGroup] );
-            debugger;
-        },
-        _onInduceHandler1:function($evt){
-            if(!$evt.info)
-            return
-            var strokeStyles = this._graphs.line.strokeStyle.overs
-            var context = this._tips.opt.context
-            var disTop = this._tips.opt.disTop
-            var iGroup = $evt.info.iGroup, iNode = $evt.info.iNode
-            var data = []
-            var arr  = this._graphs.data;
-            
-            debugger
-
-            for(var a = 0, al = arr.length; a < al; a++){
-                if(!data[a]){
-                    data[a] = []
-
-                    var o = {
-                        content  : context.prefix.values[a],
-                        bold     : context.bolds[a],
-                        fontSize : context.fontSizes[a],
-                        fillStyle: context.fillStyles[a],
-                        sign     : {
-                            enabled   : 1,
-                            trim      : 1,
-                            fillStyle : strokeStyles[a]
-                        }
-                    }
-                    data[a].push(o)
-                }
-                
-                var o = {
-                    content  : Tools.numAddSymbol(arr[a][iNode].value),
-                    bold     : context.bolds[a],
-                    fontSize : context.fontSizes[a],
-                    fillStyle: context.fillStyles[a],
-                    y_align  : 1
-                }
-                data[a].push(o)
-            }
-            var x = parseInt($evt.info.nodeInfo.stageX), y = parseInt(disTop)
-            var tipsPoint = $evt.target.localToGlobal( $evt.info.nodeInfo , this.core );
-            var tips = {
-                w    : this.width,
-                h    : this.height
-            }
-            tips.tip = {
-                x    : tipsPoint.x,
-                y    : tipsPoint.y,
-                data : data
-            }
-
-            var yEnd = this._graphs.getY() - disTop
-            tips.line = {
-                x    : tipsPoint.x,
-                y    : parseInt(this._graphs.getY()),
-                yEnd : -yEnd
-            }
-
-            var data = []
-            var arr = $evt.info.nodesInfoList
-            for(var a = 0 , al = arr.length; a < al; a++){
-                arr[a].y = $evt.target.context.height - Math.abs( arr[a].y )
-                var circlePoint = $evt.target.localToGlobal( arr[a] , this.core );
-                var o = {
-                    x         : parseInt( circlePoint.x ),
-                    y         : parseInt( circlePoint.y ),
-                    fillStyle : strokeStyles[a]
-                }
-                data.push(o)
-            }
-            tips.nodes = {
-                data : data
-            }
-
-            this._tips.remove()
-            this._tips.draw(tips)
-        },
-        _offInduceHandler:function($evt){
-            if( this._tips ){
-                this._tips.remove()
-            }
         }
     });
 

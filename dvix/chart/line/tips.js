@@ -33,7 +33,7 @@ KISSY.add(function( S , Canvax , Line , Circle , Rect ){
 
         },
         move : function(e){
-            this._setX(e);
+            this._resetPosition(e);
         },
         hide : function(e){
             this.sprite.removeAllChildren();
@@ -42,7 +42,7 @@ KISSY.add(function( S , Canvax , Line , Circle , Rect ){
         _getTipsPoint : function(e){
             return e.target.localToGlobal( e.info.nodesInfoList[e.info.iGroup] );
         },
-        _setX : function(e){
+        _resetPosition : function(e){
             var tipsPoint = this._getTipsPoint(e);
             this._line.context.x  = tipsPoint.x;
             this._resetNodesPosition(e , tipsPoint);
@@ -50,12 +50,13 @@ KISSY.add(function( S , Canvax , Line , Circle , Rect ){
             //在setBack之前一定要先先reset Context,
             //因为back需要context最新的width和height
             this._resetContext(e);
-
             this._back.context.x  = this._getBackX(e , tipsPoint);
-
             this._moveContext();
-
         },
+
+        /**
+         * line相关------------------------
+         */
         _initLine : function(e , tipsPoint){
             var lineOpt = _.deepExtend({
                 x       : tipsPoint.x,
@@ -74,6 +75,12 @@ KISSY.add(function( S , Canvax , Line , Circle , Rect ){
             });
             this.sprite.addChild( this._line );
         },
+
+
+
+        /**
+         *nodes相关-------------------------
+         */
         _initNodes : function(e , tipsPoint){
             this._nodes = new Canvax.Display.Sprite({
                 id : "tipsNodes",
@@ -103,6 +110,10 @@ KISSY.add(function( S , Canvax , Line , Circle , Rect ){
                 self._nodes.getChildAt(i).context.y = e.target.context.height - Math.abs(node.y);
             });
         },
+
+        /**
+         *context相关-------------------------
+         */
         _initContext : function(e , tipsPoint){
             this._tip = S.all("<div class='chart-tips' style='visibility:hidden;position:absolute;<D-r>display:inline-block;*display:inline;*zoom:1;padding:6px;'></div>");
             this._tip.html( this._getContext(e) );
@@ -138,6 +149,10 @@ KISSY.add(function( S , Canvax , Line , Circle , Rect ){
             str+="</table>";
             return str;
         },
+
+        /**
+         *Back相关-------------------------
+         */
         _initBack : function(e , tipsPoint){
             var w = this._tip.outerWidth();
             var h = this._tip.outerHeight();
@@ -157,6 +172,9 @@ KISSY.add(function( S , Canvax , Line , Circle , Rect ){
             });
             this.sprite.addChild( this._back );
         },
+        /**
+         *获取back要显示的x
+         */
         _getBackX : function( e , tipsPoint ){
             var w      = this._tip.outerWidth() + 2; //后面的2 是 两边的linewidth
             var x      = tipsPoint.x - w / 2;

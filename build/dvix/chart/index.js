@@ -10,13 +10,7 @@ KISSY.add('dvix/chart/index', function (S, Canvax) {
         //图表区域高
         //Canvax实例
         this.canvax = new Canvax({ el: this.element });
-        this.stage = new Canvax.Display.Stage({
-            id: 'main',
-            context: {
-                x: 0.5,
-                y: 0.5
-            }
-        });
+        this.stage = new Canvax.Display.Stage({ id: 'main' });
         this.canvax.addChild(this.stage);
         arguments.callee.superclass.constructor.apply(this, arguments);
         this.init.apply(this, arguments);

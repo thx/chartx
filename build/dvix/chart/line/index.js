@@ -5,7 +5,7 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
     var Canvax = Chart.Canvax;
     return Chart.extend({
         init: function (node) {
-            this.config = {
+            this.options = {
                 mode: 1,
                 //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
                 event: { enabled: 1 }
@@ -25,6 +25,7 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
             this.stage.addChild(this.stageTip);
         },
         draw: function (data, opt) {
+            _.deepExtend(this.options, opt);
             if (opt.rotate) {
                 this.rotate(opt.rotate);
             }    //根据data 和 opt中yAxis xAxis的field字段来分配this.dataFrame中的yAxis数据和xAxis数据
@@ -68,7 +69,7 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
             this._yAxis = new yAxis(opt.yAxis, data.yAxis);
             this._back = new Back(opt.back);
             this._graphs = new Graphs(opt.graphs);
-            this._tips = new Tips(opt.tips);
+            this._tips = new Tips(opt.tips, data, this.element.all('.canvax-tips'));
         },
         _startDraw: function () {
             // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -117,16 +118,16 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
 ;
             //执行生长动画
             this._graphs.grow();
-            if (this.config.event.enabled) {
+            if (this.options.event.enabled) {
                 var self = this;
                 this._graphs.sprite.on('hold mouseover', function (e) {
-                    self._onInduceHandler(e);
+                    self._tips.show(e);
                 });
                 this._graphs.sprite.on('drag mousemove', function (e) {
-                    self._onInduceHandler(e);
+                    self._tips.move(e);
                 });
                 this._graphs.sprite.on('release mouseout', function (e) {
-                    self._offInduceHandler(e);
+                    self._tips.hide(e);
                 });
             }
         },
@@ -164,78 +165,6 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
             this.core.addChild(this._graphs.sprite);
             this.core.addChild(this._yAxis.sprite);
             this.stageTip.addChild(this._tips.sprite);
-        },
-        _onInduceHandler: function ($evt) {
-            if (!$evt.info)
-                return;
-            var strokeStyles = this._graphs.line.strokeStyle.overs;
-            var context = this._tips.opt.context;
-            var disTop = this._tips.opt.disTop;
-            var iGroup = $evt.info.iGroup, iNode = $evt.info.iNode;
-            var data = [];
-            var arr = this._graphs.data;
-            for (var a = 0, al = arr.length; a < al; a++) {
-                if (!data[a]) {
-                    data[a] = [];
-                    var o = {
-                            content: context.prefix.values[a],
-                            bold: context.bolds[a],
-                            fontSize: context.fontSizes[a],
-                            fillStyle: context.fillStyles[a],
-                            sign: {
-                                enabled: 1,
-                                trim: 1,
-                                fillStyle: strokeStyles[a]
-                            }
-                        };
-                    data[a].push(o);
-                }
-                var o = {
-                        content: Tools.numAddSymbol(arr[a][iNode].value),
-                        bold: context.bolds[a],
-                        fontSize: context.fontSizes[a],
-                        fillStyle: context.fillStyles[a],
-                        y_align: 1
-                    };
-                data[a].push(o);
-            }
-            var x = parseInt($evt.info.nodeInfo.stageX), y = parseInt(disTop);
-            var tipsPoint = $evt.target.localToGlobal($evt.info.nodeInfo, this.core);
-            var tips = {
-                    w: this.width,
-                    h: this.height
-                };
-            tips.tip = {
-                x: tipsPoint.x,
-                y: tipsPoint.y,
-                data: data
-            };
-            var yEnd = this._graphs.getY() - disTop;
-            tips.line = {
-                x: tipsPoint.x,
-                y: parseInt(this._graphs.getY()),
-                yEnd: -yEnd
-            };
-            var data = [];
-            var arr = $evt.info.nodesInfoList;
-            for (var a = 0, al = arr.length; a < al; a++) {
-                arr[a].y = $evt.target.context.height - Math.abs(arr[a].y);
-                var circlePoint = $evt.target.localToGlobal(arr[a], this.core);
-                var o = {
-                        x: parseInt(circlePoint.x),
-                        y: parseInt(circlePoint.y),
-                        fillStyle: strokeStyles[a]
-                    };
-                data.push(o);
-            }
-            tips.nodes = { data: data };
-            this._tips.remove();
-            this._tips.draw(tips);
-        },
-        _offInduceHandler: function ($evt) {
-            if (this._tips) {
-                this._tips.remove();
-            }
         }
     });
 }, {
@@ -248,6 +177,8 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
         'dvix/components/line/Graphs',
-        'dvix/components/tips/Tips'
+        './tips',
+        //'dvix/components/tips/Tips'
+        'dvix/utils/deep-extend'
     ]
 });
