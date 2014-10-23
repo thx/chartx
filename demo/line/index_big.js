@@ -93,26 +93,7 @@ KISSY.ready(function(){
             }
         },       
         tips  :{
-            // disTop : 50,
-            context1:{
-                prefix:{
-                    values:['今','昨sdfsdfsdf','明']
-                },
-                bolds     :['normal','normal','normal'],
-                fontSizes :[12,12,12],
-                fillStyles:['#f8ab5e','#E55C5C','#999999']
-            },
-            tip  : {
-                back:{
-                    // disX:10
-                }
-            },
-            line : {
-                // lineType: ''
-            },
-            nodes:{
-
-            }
+            prefix  : ["黑色玫瑰","水晶之痕"]
         }
     }
      

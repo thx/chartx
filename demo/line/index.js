@@ -92,29 +92,6 @@ KISSY.ready(function(){
                     normals : [0.8, 0.7],
                 }
             }
-        },
-        tips  :{
-            // disTop : 50,
-            context:{
-                prefix:{
-                    values:['今','昨','明']
-                },
-                bolds     :['bold','bold','bold'],
-                fontSizes :[14,14,14],
-                fillStyles:['#333333','#999999','#999999']
-            },
-            tip  : {
-                // back:{
-                    // enabled : 0
-                    // disX:10
-                // }
-            },
-            line : {
-                // lineType: ''
-            },
-            nodes:{
-
-            }
         }
     }
 

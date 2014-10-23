@@ -1,4 +1,4 @@
-KISSY.add(function( S , Canvax , Line , Circle ){
+KISSY.add(function( S , Canvax , Line , Circle , Rect ){
     var Tips = function(opt , data , tipsContainer){
         this.container = tipsContainer;
         this.sprite    = null;
@@ -12,7 +12,7 @@ KISSY.add(function( S , Canvax , Line , Circle ){
         this.prefix  = data.yAxis.field;
         
         this.init(opt);
-    }
+    };
 
     Tips.prototype = {
         init : function(opt){
@@ -26,15 +26,16 @@ KISSY.add(function( S , Canvax , Line , Circle ){
             this._initLine(e , tipsPoint);
             this._initNodes(e , tipsPoint);
             this._initContext(e , tipsPoint);
-            
             this._initBack(e , tipsPoint);
+
+            //initBack后 要把tip show，然后把xy对应到back的xy上面来
+            this._moveContext();
+
         },
         move : function(e){
             this._setX(e);
-            this._moveAndResetContext(e);
         },
         hide : function(e){
-            debugger
             this.sprite.removeAllChildren();
             this._removeContext();
         },
@@ -45,6 +46,15 @@ KISSY.add(function( S , Canvax , Line , Circle ){
             var tipsPoint = this._getTipsPoint(e);
             this._line.context.x  = tipsPoint.x;
             this._resetNodesPosition(e , tipsPoint);
+
+            //在setBack之前一定要先先reset Context,
+            //因为back需要context最新的width和height
+            this._resetContext(e);
+
+            this._back.context.x  = this._getBackX(e , tipsPoint);
+
+            this._moveContext();
+
         },
         _initLine : function(e , tipsPoint){
             var lineOpt = _.deepExtend({
@@ -78,9 +88,9 @@ KISSY.add(function( S , Canvax , Line , Circle ){
                     context : {
                         y : e.target.context.height - Math.abs(node.y),
                         r : 3,
-                        fillStyle : "#ffffff",
-                        strokeStyle : node.fillStyle,
-                        lineWidth : 3
+                        fillStyle   : node.fillStyle,
+                        strokeStyle : "#ffffff",
+                        lineWidth   : 3
                     }
                 }) )
             } );
@@ -94,7 +104,7 @@ KISSY.add(function( S , Canvax , Line , Circle ){
             });
         },
         _initContext : function(e , tipsPoint){
-            this._tip = S.all("<div style='display:inline-block;*display:inline;*zoom:1;'></div>");
+            this._tip = S.all("<div class='chart-tips' style='visibility:hidden;position:absolute;<D-r>display:inline-block;*display:inline;*zoom:1;padding:6px;'></div>");
             this._tip.html( this._getContext(e) );
             this.container.append( this._tip );
         },
@@ -102,14 +112,22 @@ KISSY.add(function( S , Canvax , Line , Circle ){
             this._tip.remove();
             this._tip = null;
         },
-        _moveAndResetContext : function(e){
+        _resetContext : function(e){
             this._tip.html( this._getContext(e) );
         },
+        _moveContext  : function(e){
+            this._tip.css({
+                visibility : "visible",
+                left       : this._back.context.x+"px",
+                top        : this._back.context.y+"px"
+            })
+        },
         _getContext : function(e){
-            if( !this.context ){
-                this.context = this._getDefaultContext(e)
+            var tipsContext = this.context;
+            if( !tipsContext ){
+                tipsContext = this._getDefaultContext(e);
             }
-            return this.context;
+            return tipsContext;
         },
         _getDefaultContext : function(e){
             var str  = "<table>";
@@ -120,8 +138,36 @@ KISSY.add(function( S , Canvax , Line , Circle ){
             str+="</table>";
             return str;
         },
-        _initBack : function(e){
-            
+        _initBack : function(e , tipsPoint){
+            var w = this._tip.outerWidth();
+            var h = this._tip.outerHeight();
+            var opt = {
+                x : this._getBackX( e , tipsPoint ),
+                y : e.target.localToGlobal().y,
+                width  : w,
+                height : h,
+                lineWidth : 1,
+                strokeStyle : "#333333",
+                fillStyle : "#ffffff",
+                radius : [5]
+            }
+            this._back = new Rect({
+                id : "tipsBack",
+                context : opt
+            });
+            this.sprite.addChild( this._back );
+        },
+        _getBackX : function( e , tipsPoint ){
+            var w      = this._tip.outerWidth() + 2; //后面的2 是 两边的linewidth
+            var x      = tipsPoint.x - w / 2;
+            var stageW = e.target.getStage().context.width
+            if( x < 0 ){
+                x = 0;
+            }
+            if( x + w > stageW ){
+                x = stageW - w;
+            }
+            return x
         }
     }
     return Tips
@@ -130,6 +176,7 @@ KISSY.add(function( S , Canvax , Line , Circle ){
         "canvax/",
         "canvax/shape/Line",
         "canvax/shape/Circle",
+        "canvax/shape/Rect",
         "dvix/utils/deep-extend"
     ]
 })
