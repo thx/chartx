@@ -1,37 +1,34 @@
-KISSY.add('dvix/chart/line/tips', function (S, Canvax, Line, Circle, Rect) {
-    var Tips = function (opt, data, tipsContainer) {
-        this.container = tipsContainer;
+KISSY.add('dvix/chart/line/tips', function (S, Canvax, Line, Circle, Tip) {
+    var Tips = function (opt, data, tipDomContainer) {
         this.sprite = null;
-        this.context = null;    // tips的详细内容
-        // tips的详细内容
         this._line = null;
         this._nodes = null;
         this._tip = null;
-        this._back = null;    //prefix  在tips里面放在具体value值前面的文案
-        //prefix  在tips里面放在具体value值前面的文案
-        this.prefix = data.yAxis.field;
-        this.init(opt);
+        this.init(opt, data, tipDomContainer);
     };
     Tips.prototype = {
-        init: function (opt) {
+        init: function (opt, data, tipDomContainer) {
             _.deepExtend(this, opt);
             this.sprite = new Canvax.Display.Sprite({ id: 'tips' });
+            opt = _.deepExtend({ prefix: data.yAxis.field }, opt);
+            this._tip = new Tip(opt, tipDomContainer);
         },
         show: function (e) {
             var tipsPoint = this._getTipsPoint(e);
             this._initLine(e, tipsPoint);
             this._initNodes(e, tipsPoint);
-            this._initContext(e, tipsPoint);
-            this._initBack(e, tipsPoint);    //initBack后 要把tip show，然后把xy对应到back的xy上面来
-            //initBack后 要把tip show，然后把xy对应到back的xy上面来
-            this._moveContext();
+            this.sprite.addChild(this._tip.sprite);
+            this._tip.show(e);
         },
         move: function (e) {
             this._resetPosition(e);
+            this._tip.move(e);
         },
         hide: function (e) {
             this.sprite.removeAllChildren();
-            this._removeContext();
+            this._line = null;
+            this._nodes = null;
+            this._tip.hide(e);
         },
         _getTipsPoint: function (e) {
             return e.target.localToGlobal(e.info.nodesInfoList[e.info.iGroup]);
@@ -39,13 +36,7 @@ KISSY.add('dvix/chart/line/tips', function (S, Canvax, Line, Circle, Rect) {
         _resetPosition: function (e) {
             var tipsPoint = this._getTipsPoint(e);
             this._line.context.x = tipsPoint.x;
-            this._resetNodesPosition(e, tipsPoint);    //在setBack之前一定要先先reset Context,
-                                                       //因为back需要context最新的width和height
-            //在setBack之前一定要先先reset Context,
-            //因为back需要context最新的width和height
-            this._resetContext(e);
-            this._back.context.x = this._getBackX(e, tipsPoint);
-            this._moveContext();
+            this._resetNodesPosition(e, tipsPoint);
         },
         /**
          * line相关------------------------
@@ -99,82 +90,6 @@ KISSY.add('dvix/chart/line/tips', function (S, Canvax, Line, Circle, Rect) {
             _.each(e.info.nodesInfoList, function (node, i) {
                 self._nodes.getChildAt(i).context.y = e.target.context.height - Math.abs(node.y);
             });
-        },
-        /**
-         *context相关-------------------------
-         */
-        _initContext: function (e, tipsPoint) {
-            this._tip = S.all('<div class=\'chart-tips\' style=\'visibility:hidden;position:absolute;<D-r>display:inline-block;*display:inline;*zoom:1;padding:6px;\'></div>');
-            this._tip.html(this._getContext(e));
-            this.container.append(this._tip);
-        },
-        _removeContext: function () {
-            this._tip.remove();
-            this._tip = null;
-        },
-        _resetContext: function (e) {
-            this._tip.html(this._getContext(e));
-        },
-        _moveContext: function (e) {
-            this._tip.css({
-                visibility: 'visible',
-                left: this._back.context.x + 'px',
-                top: this._back.context.y + 'px'
-            });
-        },
-        _getContext: function (e) {
-            var tipsContext = this.context;
-            if (!tipsContext) {
-                tipsContext = this._getDefaultContext(e);
-            }
-            return tipsContext;
-        },
-        _getDefaultContext: function (e) {
-            var str = '<table>';
-            var self = this;
-            _.each(e.info.nodesInfoList, function (node, i) {
-                str += '<tr style=\'color:' + node.fillStyle + '\'><td>' + self.prefix[i] + '</td><td>' + node.value + '</td></tr>';
-            });
-            str += '</table>';
-            return str;
-        },
-        /**
-         *Back相关-------------------------
-         */
-        _initBack: function (e, tipsPoint) {
-            var w = this._tip.outerWidth();
-            var h = this._tip.outerHeight();
-            var opt = {
-                    x: this._getBackX(e, tipsPoint),
-                    y: e.target.localToGlobal().y,
-                    width: w,
-                    height: h,
-                    lineWidth: 1,
-                    strokeStyle: '#333333',
-                    fillStyle: '#ffffff',
-                    radius: [5]
-                };
-            this._back = new Rect({
-                id: 'tipsBack',
-                context: opt
-            });
-            this.sprite.addChild(this._back);
-        },
-        /**
-         *获取back要显示的x
-         */
-        _getBackX: function (e, tipsPoint) {
-            var w = this._tip.outerWidth() + 2;    //后面的2 是 两边的linewidth
-            //后面的2 是 两边的linewidth
-            var x = tipsPoint.x - w / 2;
-            var stageW = e.target.getStage().context.width;
-            if (x < 0) {
-                x = 0;
-            }
-            if (x + w > stageW) {
-                x = stageW - w;
-            }
-            return x;
         }
     };
     return Tips;
@@ -183,7 +98,7 @@ KISSY.add('dvix/chart/line/tips', function (S, Canvax, Line, Circle, Rect) {
         'canvax/',
         'canvax/shape/Line',
         'canvax/shape/Circle',
-        'canvax/shape/Rect',
+        'dvix/components/tips/tip',
         'dvix/utils/deep-extend'
     ]
 });

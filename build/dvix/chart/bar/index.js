@@ -1,4 +1,4 @@
-KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips) {
+KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs) {
     /*
      *@node chart在dom里的目标容器节点。
     */
@@ -11,7 +11,6 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             this._yAxis = null;
             this._back = null;
             this._graphs = null;
-            this._tips = null;
             this.stageTip = new Canvax.Display.Sprite({ id: 'tip' });
             this.core = new Canvax.Display.Sprite({ id: 'core' });
             this.stageBg = new Canvax.Display.Sprite({ id: 'bg' });
@@ -52,7 +51,6 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             this._yAxis = new yAxis(opt.yAxis, data.yAxis);
             this._back = new Back(opt.back);
             this._graphs = new Graphs(opt.graphs);
-            this._tips = new Tips(opt.tips);
         },
         _startDraw: function () {
             var self = this;    //首先
@@ -102,10 +100,8 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             self._graphs.grow();
             var self = this;
             this._graphs.sprite.on('mouseover', function (e) {
-                self._onInduceHandler(e);
             });
             this._graphs.sprite.on('mouseout', function (e) {
-                self._offInduceHandler(e);
             });
         },
         _trimGraphs: function () {
@@ -139,49 +135,6 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             this.core.addChild(this._xAxis.sprite);
             this.core.addChild(this._graphs.sprite);
             this.core.addChild(this._yAxis.sprite);
-            this.stageTip.addChild(this._tips.sprite);
-        },
-        _onInduceHandler: function ($evt) {
-            var targetBar = $evt.bar;
-            var barFillStyle = targetBar.context.fillStyle;
-            var row = targetBar.row;
-            var column = targetBar.column;
-            var barsData = this._graphs.data;
-            var data = [];
-            data.length = barsData.length;
-            for (var i = 0; i < barsData.length; i++) {
-                !data[i] && (data[i] = []);    /**
-                 * TODO:
-                 * tips的title，先特殊处理下,这里本来不应该写具体的业务逻辑的
-                 */
-                /**
-                 * TODO:
-                 * tips的title，先特殊处理下,这里本来不应该写具体的业务逻辑的
-                 */
-                var objTitle = { content: this._tips.opt.titles[i][row] + '\uFF1A' };
-                data[i].push(objTitle);
-                var obj = { content: barsData[i][row].value };
-                data[i].push(obj);
-            }
-            var tipsPoint = $evt.target.localToGlobal(undefined, this.core);
-            var tips = {
-                    w: this.width,
-                    h: this.height
-                }    //data = [[{content:'11'},{content:'12'}],[{content:'21'}]]
-;
-            //data = [[{content:'11'},{content:'12'}],[{content:'21'}]]
-            tips.tip = {
-                x: tipsPoint.x,
-                y: tipsPoint.y,
-                data: data
-            };
-            this._tips.remove();
-            this._tips.draw(tips);
-        },
-        _offInduceHandler: function ($evt) {
-            if (this._tips) {
-                this._tips.remove();
-            }
         }
     });
 }, {
@@ -193,7 +146,6 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
         './xaxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
-        './graphs',
-        'dvix/components/tips/Tips'
+        './graphs'
     ]
 });

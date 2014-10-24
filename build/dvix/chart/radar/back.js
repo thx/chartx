@@ -45,7 +45,7 @@ KISSY.add('dvix/chart/radar/back', function (S, Canvax, Isogon, Line) {
                     });
                 this.sprite.addChild(isogon);
             }
-            var pointList = this.sprite.children[this.sprite.children.length - 1].context.$pointList;
+            var pointList = this.sprite.children[this.sprite.children.length - 1].context.pointList;
             for (var ii = 0, ll = pointList.length; ii < ll; ii++) {
                 var line = new Line({
                         id: 'line_' + ii,
