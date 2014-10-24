@@ -13,7 +13,18 @@ KISSY.add('dvix/components/tips/Tip', function (S, Canvax, Rect) {
         this.context = null;    //tips的详细内容
         //tips的详细内容
         this._tipDom = null;
-        this._back = null;
+        this._back = null;    //所有调用tip的 event 上面 要附带有符合下面结构的info属性
+                              //会deepExtend到this.indo上面来
+        //所有调用tip的 event 上面 要附带有符合下面结构的info属性
+        //会deepExtend到this.indo上面来
+        this.info = {
+            nodesInfoList: [],
+            //符合iNode的所有Group上面的node的集合
+            iGroup: 0,
+            //数据组的索引对应二维数据map的x
+            iNode: 0    //数据点的索引对应二维数据map的y
+        };
+        //数据点的索引对应二维数据map的y
         this.init(opt);
     };
     Tip.prototype = {
@@ -41,7 +52,7 @@ KISSY.add('dvix/components/tips/Tip', function (S, Canvax, Rect) {
          *@pos {x:0,y:0}
          */
         setPosition: function (e) {
-            var pos = e.target.localToGlobal(e.point);
+            var pos = e.pos || e.target.localToGlobal(e.point);
             var x = this._checkX(pos.x);
             var y = this._checkY(pos.y);
             this.sprite.context.x = x;
@@ -71,6 +82,7 @@ KISSY.add('dvix/components/tips/Tip', function (S, Canvax, Rect) {
         },
         _getContext: function (e) {
             var tipsContext = this.context;
+            _.deepExtend(this.info, e.info || {});
             if (!tipsContext) {
                 tipsContext = this._getDefaultContext(e);
             }
@@ -79,7 +91,7 @@ KISSY.add('dvix/components/tips/Tip', function (S, Canvax, Rect) {
         _getDefaultContext: function (e) {
             var str = '<table>';
             var self = this;
-            _.each(e.info.nodesInfoList, function (node, i) {
+            _.each(self.info.nodesInfoList, function (node, i) {
                 str += '<tr style=\'color:' + node.fillStyle + '\'><td>' + self.prefix[i] + '</td><td>' + node.value + '</td></tr>';
             });
             str += '</table>';
