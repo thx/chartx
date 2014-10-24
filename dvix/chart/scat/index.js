@@ -1,4 +1,4 @@
-KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips){
+KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs){
     /*
      *@node chart在dom里的目标容器节点。
     */
@@ -13,7 +13,6 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             this._yAxis        =  null;
             this._back         =  null;
             this._graphs       =  null;
-            this._tips         =  null;
 
 
             this.stageTip = new Canvax.Display.Sprite({
@@ -66,7 +65,6 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
             this._back   = new Back(opt.back);
             this._graphs = new Graphs(opt.graphs);
-            this._tips   = new Tips(opt.tips)
         },
         _startDraw : function(){
             //首先
@@ -172,7 +170,6 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
             this.core.addChild(this._graphs.sprite);
             this.core.addChild(this._yAxis.sprite);
 
-            this.stageTip.addChild(this._tips.sprite)
            
         }
     });
@@ -186,7 +183,6 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
         './xaxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',
-        './graphs',
-        'dvix/components/tips/Tips'
+        './graphs'
     ]
 });

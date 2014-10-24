@@ -87,7 +87,7 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
             this._back   = new Back(opt.back);
             this._graphs = new Graphs(opt.graphs);
-            this._tips   = new Tips(opt.tips , data , this.element.all(".canvax-tips"));
+            this._tips   = new Tips(opt.tips , data , this.element.all(".canvax-dom-container"));
         },
         _startDraw : function(){
             // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]

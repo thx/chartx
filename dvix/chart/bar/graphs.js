@@ -9,14 +9,11 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
             y : 0
         }
 
-
         this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
-
 
         this.bar = {
             width : 12
         }
-
 
         this.bar.width = 12;
 
@@ -25,7 +22,6 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
         _.deepExtend(this , opt);
 
         this.init( );
-
     };
 
     Graphs.prototype = {
@@ -40,7 +36,6 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
         },
         getBarFillStyle : function( i , ii , value){
             var barFillStyle = null;
-            
             if( _.isArray( this.bar.fillStyle ) ){
                 barFillStyle = this.bar.fillStyle[ii]
             }
@@ -74,23 +69,19 @@ KISSY.add(function( S , Canvax , Rect , Tween ){
                     var barData = data[ii][i];
 
                     var fillStyle = this.getBarFillStyle( i , ii , barData.value );
+                    var barH      = parseInt(Math.abs(barData.y));
+                    var radiusR   = Math.min( this.bar.width/2 , barH );
                     var rect = new Rect({
                         id : "bar_"+ii+"_"+i,
                         row : i,
                         column : ii,
                         context : {
-                             /**
-                              * 能说脏话不！
-                              * 尼玛我给整个舞台偏移了0.5，然后后面所有的偏移都用parseInt
-                              * 但是居然在低分辨率的屏幕下面居然边界糊了。
-                              * 我只好又都偏移0.5。
-                              */
-                             x         : Math.round(barData.x - this.bar.width/2) + 0.5,
-                             y         : parseInt(barData.y) + 0.5,
+                             x         : Math.round(barData.x - this.bar.width/2),
+                             y         : parseInt(barData.y),
                              width     : parseInt(this.bar.width),
-                             height    : parseInt(Math.abs(barData.y)),
+                             height    : barH,
                              fillStyle : fillStyle,
-                             radius    : [this.bar.width/2 , this.bar.width/2, 0 , 0]
+                             radius    : [radiusR , radiusR, 0 , 0]
                          }
                     });
 
