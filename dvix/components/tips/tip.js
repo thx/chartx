@@ -20,7 +20,6 @@ KISSY.add(function( S , Canvax , Rect ){
             iGroup        : 0, //数据组的索引对应二维数据map的x
             iNode         : 0  //数据点的索引对应二维数据map的y
         };
-
         this.init(opt);
     }
     Tip.prototype = {
