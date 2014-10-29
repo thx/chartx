@@ -20,14 +20,13 @@ KISSY.add(function( S , Canvax , Rect ){
             iGroup        : 0, //数据组的索引对应二维数据map的x
             iNode         : 0  //数据点的索引对应二维数据map的y
         };
-
         this.init(opt);
     }
     Tip.prototype = {
         init : function(opt){
             _.deepExtend( this , opt );
             this.sprite = new Canvax.Display.Sprite({
-                id : "Tip"
+                id : "TipSprite"
             });
         },
         show : function(e){

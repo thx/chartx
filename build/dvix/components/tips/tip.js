@@ -30,7 +30,7 @@ KISSY.add('dvix/components/tips/tip', function (S, Canvax, Rect) {
     Tip.prototype = {
         init: function (opt) {
             _.deepExtend(this, opt);
-            this.sprite = new Canvax.Display.Sprite({ id: 'Tip' });
+            this.sprite = new Canvax.Display.Sprite({ id: 'TipSprite' });
         },
         show: function (e) {
             var stage = e.target.getStage();
