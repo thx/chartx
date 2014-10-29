@@ -148,7 +148,6 @@ KISSY.add(function( S , Canvax , Rect ){
             return y
         }
     }
-
     return Tip
 } , {
     requires : [
