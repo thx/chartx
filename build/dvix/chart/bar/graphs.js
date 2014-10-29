@@ -1,7 +1,8 @@
-KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
+KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween, Tip) {
     var Graphs = function (opt) {
         this.w = 0;
         this.h = 0;
+        this._tip = null;
         this.pos = {
             x: 0,
             y: 0
@@ -17,6 +18,8 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
         this.bar = { width: 12 };
         this.bar.width = 12;
         this.sprite = null;
+        this.yDataSectionLen = 0;    //y轴方向有多少个section
+        //y轴方向有多少个section
         _.deepExtend(this, opt);
         this.init();
     };
@@ -58,6 +61,7 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
             var barGroupLen = data[0].length;
             for (var i = 0; i < barGroupLen; i++) {
                 var sprite = new Canvax.Display.Sprite({ id: 'barGroup' + i });
+                var spriteHover = new Canvax.Display.Sprite({ id: 'barGroupHover' + i });
                 for (var ii = 0, iil = data.length; ii < iil; ii++) {
                     var barData = data[ii][i];
                     var fillStyle = this.getBarFillStyle(i, ii, barData.value);
@@ -65,8 +69,6 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
                     var radiusR = Math.min(this.bar.width / 2, barH);
                     var rect = new Rect({
                             id: 'bar_' + ii + '_' + i,
-                            row: i,
-                            column: ii,
                             context: {
                                 x: Math.round(barData.x - this.bar.width / 2),
                                 y: parseInt(barData.y),
@@ -81,18 +83,43 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
                                 ]
                             }
                         });
-                    rect.row = i;
-                    rect.column = ii;
-                    rect.hover(function (e) {
-                        e.bar = this;
-                    }, function () {
+                    var itemSecH = this.h / (this.yDataSectionLen - 1);
+                    var hoverRectH = Math.ceil(barH / itemSecH) * itemSecH;
+                    var hoverRect = new Rect({
+                            id: 'bar_' + ii + '_' + i + 'hover',
+                            context: {
+                                x: Math.round(barData.x - this.bar.width / 2),
+                                y: -hoverRectH,
+                                width: parseInt(this.bar.width),
+                                height: hoverRectH,
+                                fillStyle: 'black',
+                                globalAlpha: 0,
+                                cursor: 'pointer'
+                            }
+                        });
+                    hoverRect.target = rect;
+                    hoverRect.row = i;
+                    hoverRect.column = ii;
+                    hoverRect.on('mouseover', function (e) {
+                        var target = this.target.context;
+                        target.x--;
+                        target.width += 2;
+                    });
+                    hoverRect.on('mousemove', function (e) {
+                    });
+                    hoverRect.on('mouseout', function (e) {
+                        var target = this.target.context;
+                        target.x++;
+                        target.width -= 2;
                     });
                     sprite.addChild(rect);
+                    spriteHover.addChild(hoverRect);
                 }
                 this.sprite.addChild(sprite);
+                this.sprite.addChild(spriteHover);
             }
-            this.setX(this.pos.x);
-            this.setY(this.pos.y);
+            this.sprite.context.x = this.pos.x;
+            this.sprite.context.y = this.pos.y;
         },
         /**
          * 生长动画
@@ -121,6 +148,7 @@ KISSY.add('dvix/chart/bar/graphs', function (S, Canvax, Rect, Tween) {
     requires: [
         'canvax/',
         'canvax/shape/Rect',
-        'canvax/animation/Tween'
+        'canvax/animation/Tween',
+        'dvix/components/tips/tip'
     ]
 });

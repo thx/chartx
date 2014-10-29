@@ -116,20 +116,14 @@ KISSY.add(function(S, Chart , Tools, DataSection, EventType, xAxis, yAxis, Back,
                 pos  : {
                      x : x + this._xAxis.disOriginX ,
                      y : y
-                }
+                },
+                yDataSectionLen : this._yAxis.dataSection.length
             });
+
+        
 
             //执行生长动画
             self._graphs.grow();
-
-
-            var self = this;
-            this._graphs.sprite.on( "mouseover" ,function(e){
-                
-            });
-            this._graphs.sprite.on( "mouseout" ,function(e){
-
-            });
           
         },
         _trimGraphs:function(){
