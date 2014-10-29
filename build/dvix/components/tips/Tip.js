@@ -1,4 +1,4 @@
-KISSY.add('dvix/components/tips/Tip', function (S, Canvax, Rect) {
+KISSY.add('dvix/components/tips/tip', function (S, Canvax, Rect) {
     var Tip = function (opt, tipDomContainer) {
         this.tipDomContainer = tipDomContainer;
         this.cW = 0;    //容器的width
