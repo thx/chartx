@@ -1,16 +1,31 @@
 ﻿KISSY.ready(function () {
   var S = KISSY;
-  var data1 = [
-        ['Firefox', 45.0],
-        ['IE', 26.8],
-        {
-          name: 'Chrome',
-          y: 12.8,
-          selected: true
-        },
-        ['Safari', 8.5],
-        ['Opera', 6.2],
-        ['Others', 0.7]        
+  var data1 = [   
+        //['Opera1', 0.1],               
+        ['Firefox', 20],
+        ['Opera2', 1],
+        ['Opera2', 1],
+        ['Opera3', 1],
+        ['Opera4', 1],
+        ['Opera5', 1],
+        ['Opera2', 1],
+        ['Opera2', 1],
+        ['Opera3', 1],
+        ['Opera4', 1],
+        ['Opera5', 1],
+        ['Firefox', 20],        
+        ['Firefox', 20],
+        ['Opera2', 1],
+        ['Opera2', 1],
+        ['Opera3', 1],
+        ['Opera4', 1],
+        ['Opera5', 1],
+        ['Opera2', 1],
+        ['Opera2', 1],
+        ['Opera3', 1],
+        ['Opera4', 1],
+        ['Opera5', 1],
+        ['Firefox', 20]                         
     ];
   var options = {
     //浮动tip
