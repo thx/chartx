@@ -24,13 +24,13 @@ KISSY.config({
     packages: [{
         name  : 'canvax' , 
         path  :  canvaxUrl,
-        debug :  DvixSite.debug,
-        combine : !DvixSite.local
+        debug: DvixSite.debug,
+        combine : false
     },{
         name  : 'dvix',
         path  : '../../',
-        debug : DvixSite.debug,
-        combine : !DvixSite.local
+        debug: DvixSite.debug,
+        combine : false
     }]
 });
 

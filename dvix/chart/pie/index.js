@@ -113,7 +113,7 @@
             self._tip._reset(opt);
           }
         }
-      }
+      }      
       self._pie = new Pie(opt, this.dataFrame);
     },
     _startDraw: function (opt) {
