@@ -26,8 +26,7 @@ KISSY.add(function(S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, 
             this.stageTip = new Canvax.Display.Sprite({
                 id      : 'tip'
             });
-
-            this.core    = new Canvax.Display.Sprite({
+            this.core     = new Canvax.Display.Sprite({
                 id      : 'core'
             });
             this.stageBg  = new Canvax.Display.Sprite({
