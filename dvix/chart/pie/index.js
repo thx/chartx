@@ -69,6 +69,9 @@
     show: function (index) {
       this._pie && this._pie.showHideSector(index);
     },
+    slice: function (index) {
+      this._pie && this._pie.slice(index);
+    },
     _initData: function (data, opt) {
       var dataFrame = {};
       dataFrame.org = data;

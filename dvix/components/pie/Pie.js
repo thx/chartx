@@ -35,7 +35,6 @@
       self.labelFontSize = 12 * self.pie.boundWidth / 800;
       var data = self.data.data;
       self.clickMoveDis = self.pie.r / 8;
-
       if (data.length && data.length > 0) {
         if (data.length == 1) {
           S.mix(data[0], {
@@ -122,6 +121,13 @@
         else {
           self._showSector(index);
         }
+      }
+    },
+    slice: function (index) {
+      var self = this;
+      var sectorMap = self.sectorMap;
+      if (sectorMap[index] && !self.isMoving) {
+        self.moveSector(sectorMap[index].sector);
       }
     },
     getTopAndBottomIndex: function () {
@@ -580,7 +586,7 @@
           sector.on('click', function () {
             var clickSec = this;
             if (!self.isMoving) {
-              self.allowPointSelect && self.moveSector(clickSec, data);
+              self.allowPointSelect && self.moveSector(clickSec);
             }
           })
           self.sprite.addChild(sector);
