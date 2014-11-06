@@ -58,7 +58,7 @@
               }
               var percentage = data[j].y / self.total;
               var angle = 360 * percentage;
-              var endAngle = self.currentAngle + angle;
+              var endAngle = self.currentAngle + angle > 360 ? 360 : self.currentAngle + angle;
               var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
               var sinV = Math.sin((self.currentAngle + angle / 2) / 180 * Math.PI);
               var midAngle = self.currentAngle + angle / 2;
@@ -101,6 +101,26 @@
             }
             data[maxIndex].isMax = true;
           }
+        }
+      }
+    },
+    getList: function () {
+      var self = this;
+      var list = [];
+      if (self.sectors && self.sectors.length > 0) {
+        list = self.sectors;
+      }
+      return list;
+    },
+    showHideSector: function (index) {
+      var self = this;
+      var sectorMap = self.sectorMap;
+      if (sectorMap[index]) {
+        if (sectorMap[index].visible) {
+          self._hideSector(index);
+        }
+        else {
+          self._showSector(index);
         }
       }
     },
@@ -157,6 +177,9 @@
       //this.sprite.context.globalAlpha = 0;      
       if (opt.animation) {
         self.grow();
+      }
+      if (opt.complete) {
+        opt.complete.call(self);
       }
     },
     moveSector: function (clickSec) {
@@ -281,12 +304,14 @@
     _hideSector: function (index) {
       if (this.sectorMap[index]) {
         this.sectorMap[index].context.visible = false;
+        this.sectorMap[index].visible = false;
         this._hideLabel(index);
       }
     },
     _showSector: function (index) {
       if (this.sectorMap[index]) {
         this.sectorMap[index].context.visible = true;
+        this.sectorMap[index].visible = true;
         this._showLabel(index);
       }
     },
@@ -567,7 +592,8 @@
             r: self.pie.r,
             startAngle: sector.context.startAngle,
             endAngle: sector.context.endAngle,
-            color: fillColor
+            color: fillColor,
+            visible: true
           };
           self.sectors.push(moreSecData);
         }
