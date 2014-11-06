@@ -24,7 +24,7 @@
     //是否允许动画
     animation: true,
     //内圆半径
-    innerRadius: 40,
+    innerRadius: 80,
     strokeWidth: 2
     //颜色序列,若不设置，会有默认的颜色序列
     //colors:['red', 'yellow', 'blue']
@@ -60,8 +60,7 @@
 
       //使用slice方法控制扇形分合
       legendContainer.all('li').on('click', function (e) {
-        var index = e.target.getAttribute('index');
-        debugger
+        var index = e.target.getAttribute('index');        
         pie.slice(index);
       });
     })
