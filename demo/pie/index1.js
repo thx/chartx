@@ -16,7 +16,7 @@
     //周边tip
     dataLabel: {
       enabled: true,
-      format: '{point.name} : {point.percentage}'
+      format: '{point.name} : {point.txt}'
     },
     //是否允许扇形选取
     allowPointSelect: true,

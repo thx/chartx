@@ -377,8 +377,23 @@
             strokeStyle: sectorMap[currentIndex].color
           }
         })
-        //指示文字            
-        branchTxt = new Canvax.Display.Text(data[currentIndex].name + ' : ' + data[currentIndex].txt, {
+        //指示文字
+        var labelTxt = '';
+        var formatReg = /\{.+?\}/g;
+        var point = data[currentIndex];
+        if (self.dataLabel.format) {
+          labelTxt = self.dataLabel.format.replace(formatReg, function (match, index) {            
+            var matchStr = match.replace(/\{([\s\S]+?)\}/g, '$1');
+            var vals = matchStr.split('.');
+            var obj = eval(vals[0]);
+            var pro = vals[1];
+            return obj[pro];
+          });
+        }
+        else {
+          labelTxt = data[currentIndex].name + ' : ' + data[currentIndex].txt;
+        }
+        branchTxt = new Canvax.Display.Text(labelTxt, {
           context: {
             x: data[currentIndex].edgex,
             y: data[currentIndex].edgey,
