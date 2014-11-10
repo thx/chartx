@@ -35,7 +35,6 @@
       self.labelFontSize = 12 * self.pie.boundWidth / 800;
       var data = self.data.data;
       self.clickMoveDis = self.pie.r / 8;
-
       if (data.length && data.length > 0) {
         if (data.length == 1) {
           S.mix(data[0], {
@@ -122,6 +121,13 @@
         else {
           self._showSector(index);
         }
+      }
+    },
+    slice: function (index) {
+      var self = this;
+      var sectorMap = self.sectorMap;
+      if (sectorMap[index] && !self.isMoving) {
+        self.moveSector(sectorMap[index].sector);
       }
     },
     getTopAndBottomIndex: function () {
@@ -371,8 +377,23 @@
             strokeStyle: sectorMap[currentIndex].color
           }
         })
-        //指示文字            
-        branchTxt = new Canvax.Display.Text(data[currentIndex].name + ' : ' + data[currentIndex].txt, {
+        //指示文字
+        var labelTxt = '';
+        var formatReg = /\{.+?\}/g;
+        var point = data[currentIndex];
+        if (self.dataLabel.format) {
+          labelTxt = self.dataLabel.format.replace(formatReg, function (match, index) {            
+            var matchStr = match.replace(/\{([\s\S]+?)\}/g, '$1');
+            var vals = matchStr.split('.');
+            var obj = eval(vals[0]);
+            var pro = vals[1];
+            return obj[pro];
+          });
+        }
+        else {
+          labelTxt = data[currentIndex].name + ' : ' + data[currentIndex].txt;
+        }
+        branchTxt = new Canvax.Display.Text(labelTxt, {
           context: {
             x: data[currentIndex].edgex,
             y: data[currentIndex].edgey,
@@ -580,7 +601,7 @@
           sector.on('click', function () {
             var clickSec = this;
             if (!self.isMoving) {
-              self.allowPointSelect && self.moveSector(clickSec, data);
+              self.allowPointSelect && self.moveSector(clickSec);
             }
           })
           self.sprite.addChild(sector);
