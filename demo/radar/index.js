@@ -18,7 +18,7 @@ KISSY.ready(function(){
         // disYAxisTopLine : 26,
         //rotate   : -90,
         disYAndO : 20,
-        r     : 200,
+        //r     : 200,
         mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
         yAxis : {
             field   : ["val2","val3"],

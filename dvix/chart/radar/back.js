@@ -1,7 +1,5 @@
-KISSY.add(function( S , Canvax , Isogon , Line ){
+KISSY.add(function( S , Canvax , Isogon , Circle , Line ){
     var Back = function( opt ){
-        this.width  = 0;
-        this.height = 0;
         this.pos    = {x : 0 , y : 0};
         this.r      = 0; //蜘蛛网的最大半径
         this.yDataSection = [];
@@ -21,48 +19,57 @@ KISSY.add(function( S , Canvax , Isogon , Line ){
         },
         draw : function( opt ){
             _.deepExtend(this , opt);
-
-            this._layout();
             this._widget();
         },
-        _layout : function(){
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
+        setPosition : function( x , y){
+            var spc = this.sprite.context;
+            spc.x   = x;
+            spc.y   = y;
         },
         _widget : function(){
-            var isogonOrigin = parseInt(Math.asin(Math.PI/180*45)*this.r)
+            var r   = this.r;
+            var spt = this.sprite;
             for( var i=0 , l = this.yDataSection.length ; i < l ; i++ ) {
                 var isogon = new Isogon({
-                    id : "isogon_"+i,
+                    id : "isogon_" + i,
                     context : {
-                        x : isogonOrigin,
-                        y : isogonOrigin,
+                        x : r,
+                        y : r,
                         r : this.r / l * (i+1),
                         n : this.xDataSection.length,
                         strokeStyle : this.strokeStyle,
-                        lineWidth : this.lineWidth
+                        lineWidth   : this.lineWidth
                     }
                 });
-                this.sprite.addChild( isogon );
+                //给最外面的蜘蛛网添加事件，让它冒泡到外面去
+                if( i == l - 1 ) {
+                    isogon.hover(function(){},function(){});
+                    isogon.on("mousemove",function(){});
+                    //然后要把最外面的isogon的rect范围作为sprite 的 width and height
+                    var rectRange = isogon.getRect();
+                    var spc       = spt.context;
+                    spc.width     = rectRange.width;
+                    spc.height    = rectRange.height;
+                }
+                spt.addChild( isogon );
             }
 
-            var pointList = this.sprite.children[ this.sprite.children.length-1 ].context.pointList;
+            var pointList = spt.children[ spt.children.length-1 ].context.pointList;
 
             for( var ii=0 , ll = pointList.length ; ii < ll ; ii++ ){
                 var line = new Line({
                     id : "line_"+ii,
                     context : {
-                        xStart : isogonOrigin,
-                        yStart : isogonOrigin,
-                        xEnd   : pointList[ii][0]+isogonOrigin,
-                        yEnd   : pointList[ii][1]+isogonOrigin,
-                        lineWidth : this.lineWidth,
+                        xStart : r,
+                        yStart : r,
+                        xEnd   : pointList[ii][0] + r,
+                        yEnd   : pointList[ii][1] + r,
+                        lineWidth   : this.lineWidth,
                         strokeStyle : this.strokeStyle
                     }
                 });
-                this.sprite.addChild( line );
+                spt.addChild( line );
             }
-
         }
     }
     return Back;
@@ -70,6 +77,7 @@ KISSY.add(function( S , Canvax , Isogon , Line ){
     requires : [
         "canvax/",
         "canvax/shape/Isogon",
+        "canvax/shape/Circle",
         "canvax/shape/Line",
         "dvix/utils/deep-extend"
     ]
