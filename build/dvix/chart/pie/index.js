@@ -1,4 +1,4 @@
-KISSY.add('dvix/chart/pie/index', function (S, Chart, Tools, DataSection, EventType, Pie, Graphs, PieTip) {
+KISSY.add('dvix/chart/pie/index', function (S, Chart, Pie, Graphs, PieTip) {
     /*
   *@node chart在dom里的目标容器节点。
   */
@@ -26,7 +26,39 @@ KISSY.add('dvix/chart/pie/index', function (S, Chart, Tools, DataSection, EventT
             //开始绘图
             this._drawEnd();    //绘制结束，添加到舞台
             //绘制结束，添加到舞台
+            if (this._eventMap['complete'] && this._eventMap['complete'].length > 0) {
+                for (var i = 0; i < this._eventMap['complete'].length; i++) {
+                    this._eventMap['complete'][i].call(this);
+                }
+            }
             this._arguments = arguments;
+        },
+        getList: function () {
+            var self = this;
+            var list = [];
+            var item;
+            if (self._pie) {
+                var sectorList = self._pie.getList();
+                if (sectorList.length > 0) {
+                    for (var i = 0; i < sectorList.length; i++) {
+                        item = sectorList[i];
+                        list.push({
+                            name: item.sector.__data.name,
+                            index: item.sector.__dataIndex,
+                            color: item.color,
+                            r: item.r,
+                            percentage: item.sector.__data.percentage
+                        });
+                    }
+                }
+            }
+            return list;
+        },
+        show: function (index) {
+            this._pie && this._pie.showHideSector(index);
+        },
+        slice: function (index) {
+            this._pie && this._pie.slice(index);
         },
         _initData: function (data, opt) {
             var dataFrame = {};
@@ -115,9 +147,6 @@ KISSY.add('dvix/chart/pie/index', function (S, Chart, Tools, DataSection, EventT
 }, {
     requires: [
         'dvix/chart/',
-        'dvix/utils/tools',
-        'dvix/utils/datasection',
-        'dvix/event/eventtype',
         'dvix/components/pie/Pie',
         'dvix/components/line/Graphs',
         'dvix/components/pie/PieTip'

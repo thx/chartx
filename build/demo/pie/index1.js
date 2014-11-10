@@ -2,100 +2,24 @@ KISSY.ready(function () {
     var S = KISSY;
     var data1 = [
             [
-                'Firefox',
-                20
-            ],
-            [
-                'Opera2',
+                'Opera',
                 1
             ],
             [
-                'Opera2',
-                1
+                'IE',
+                3
             ],
             [
-                'Opera3',
-                1
-            ],
-            [
-                'Opera4',
-                1
-            ],
-            [
-                'Opera5',
-                1
-            ],
-            [
-                'Opera2',
-                1
-            ],
-            [
-                'Opera2',
-                1
-            ],
-            [
-                'Opera3',
-                1
-            ],
-            [
-                'Opera4',
-                1
-            ],
-            [
-                'Opera5',
-                1
+                'Chrome',
+                5
             ],
             [
                 'Firefox',
-                20
+                2
             ],
             [
-                'Firefox',
-                20
-            ],
-            [
-                'Opera2',
+                'Safari',
                 1
-            ],
-            [
-                'Opera2',
-                1
-            ],
-            [
-                'Opera3',
-                1
-            ],
-            [
-                'Opera4',
-                1
-            ],
-            [
-                'Opera5',
-                1
-            ],
-            [
-                'Opera2',
-                1
-            ],
-            [
-                'Opera2',
-                1
-            ],
-            [
-                'Opera3',
-                1
-            ],
-            [
-                'Opera4',
-                1
-            ],
-            [
-                'Opera5',
-                1
-            ],
-            [
-                'Firefox',
-                20
             ]
         ];
     var options = {
@@ -107,7 +31,7 @@ KISSY.ready(function () {
             //周边tip
             dataLabel: {
                 enabled: true,
-                format: '{point.name} : {point.percentage}'
+                format: '{point.name} : {point.txt}'
             },
             //是否允许扇形选取
             allowPointSelect: true,
@@ -115,7 +39,7 @@ KISSY.ready(function () {
             //是否允许动画
             animation: true,
             //内圆半径
-            innerRadius: 40,
+            innerRadius: 80,
             strokeWidth: 2    //颜色序列,若不设置，会有默认的颜色序列
                               //colors:['red', 'yellow', 'blue']
         };
@@ -144,11 +68,11 @@ KISSY.ready(function () {
                 var item = list[i];
                 li = S.all('<li id="list_' + item.index + '" index="' + item.index + '" style="color:' + item.color + '"><span style="background-color:' + item.color + '"></span>' + item.name + '</li>');
                 ul.append(li);
-            }    //使用show方法控制扇形的显示与隐藏
-            //使用show方法控制扇形的显示与隐藏
+            }    //使用slice方法控制扇形分合
+            //使用slice方法控制扇形分合
             legendContainer.all('li').on('click', function (e) {
                 var index = e.target.getAttribute('index');
-                pie.show(index);
+                pie.slice(index);
             });
         });
         pie.draw(data1, options);

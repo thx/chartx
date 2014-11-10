@@ -7,10 +7,10 @@ var DvixSite = {
 if (/daily.taobao.net/g.test(location.host)) {
     DvixSite.daily = true;
 }
-var canvaxVersion = '2014.10.22';
+var canvaxVersion = '2014.10.31';
 var canvaxUrl = 'http://g.tbcdn.cn/thx/canvax/' + canvaxVersion + '/';
 if (DvixSite.daily) {
-    canvaxVersion = '2014.10.22';
+    canvaxVersion = '2014.10.31';
     canvaxUrl = 'http://g.assets.daily.taobao.net/thx/canvax/' + canvaxVersion + '/';
 }
 if (DvixSite.local) {
@@ -23,13 +23,13 @@ KISSY.config({
             name: 'canvax',
             path: canvaxUrl,
             debug: DvixSite.debug,
-            combine: !DvixSite.local
+            combine: false
         },
         {
             name: 'dvix',
             path: '../../',
             debug: DvixSite.debug,
-            combine: !DvixSite.local
+            combine: false
         }
     ]
 });
