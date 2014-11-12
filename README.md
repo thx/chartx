@@ -91,8 +91,8 @@ KISSY.add("chart" , function(S , Chart){
 
 |方法|说明|
 |----|----|
-|init   |<span style="color:#df5080;">具体的chart中必须实现该接口，用来添加chart各自的默认属性设置</span> |
-|draw   |__具体的chart中必须实现该接口，用来完成绘制图表__ |
+|__init__   |__具体的chart中必须实现该接口，用来添加chart各自的默认属性设置__ |
+|__draw__   |__具体的chart中必须实现该接口，用来完成绘制图表__ |
 |clear  |无参数，清除当前chart内容|
 |resize |无参数，如果chart存放在页面上对应的dom元素大小有改变，执行chart的resize方法，会自动适配到对应dom最新的大小，然后渲染自己|
 |reset  |参数为一个object --> {data : 可选 , options : 可选},如果chart的数据源或者options配置有改动，则可以用该方法重新渲染|
