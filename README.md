@@ -12,7 +12,9 @@
 * 前端开发  ：逢春，释剑，自勉
 
 ## 怎么使用chart
+
 * 首先要配置canvax，dvix两个包
+
     ```js
     KISSY.config({
         packages: [{
@@ -24,7 +26,9 @@
         }]
     });
     ```
-* 然后使用图表的时候，要依次传给构造函数三个参数，dom 、 data 、 options
+    
+* 然后使用图表的时候，要依次传给构造函数三个参数，__dom__ 、 __data__ 、 __options__
+
     ```js
     //注意，在所有的chart的data都要要是这样的二维数组的格式
     var data  = [
