@@ -37,12 +37,12 @@ KISSY.add("chart" , function(S , Chart){
 就这样开发一个最简单的chart，这个简单的chart看上去还一无所闻，事实上Chart基类已经为它准备好了下面（具体可以查看 dvix/chart/index.js文件）。
 
 属性：
-* el 指向页面上的存放chart的dom
-* width      chart的width
-* height     chart的height
-* canvax     chart持有一个canvax对象来管理所有的绘图原件
-* stage      chart默认拥有的一个stage，你也还可以继续在cavnax上添加其他的stage
-* dataFrame  把使用chart的时候传入的 data 转换为 chart内部使用的dataFrame集合
+| el        | 指向页面上的存放chart的dom
+| width     | chart的width
+| height    | chart的height
+| canvax    | chart持有一个canvax对象来管理所有的绘图原件
+| stage     | chart默认拥有的一个stage，你也还可以继续在cavnax上添加其他的stage
+| dataFrame | 把使用chart的时候传入的 data 转换为 chart内部使用的dataFrame集合
 
 方法：
 * clear  无参数，清除当前chart内容
