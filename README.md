@@ -1,4 +1,3 @@
-
 # m2ux 数据可视化解决方案
 
 ## 概要
@@ -13,3 +12,23 @@
 * 前端开发  ：逢春，释剑，自勉
 
 ## Chart开发相关规范
+
+* 所有的chart 都 应该从chart/index创建而来
+Example
+
+```js
+KISSY.add(function(S , Chart){
+    return Chart.extend({
+        init : function(){
+        
+        },
+        draw : function(){
+        
+        }
+    })
+} , {
+    required : [
+        'dvix/chart/'
+    ]
+})
+```
