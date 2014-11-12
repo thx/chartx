@@ -11,6 +11,43 @@
 * 交互+视觉 ：小路，罗素
 * 前端开发  ：逢春，释剑，自勉
 
+## 怎么使用chart
+* 首先要配置canvax，dvix两个包
+    ```js
+    KISSY.config({
+        packages: [{
+            name  : 'canvax' , 
+            path  :  http://g.tbcdn.cn/thx/canvax/2014.11.11/
+        },{
+            name  : 'dvix',
+            path  : 'http://g.tbcdn.cn/thx/charts/1.2.2/'
+        }]
+    });
+    ```
+* 然后使用图表的时候，要依次传给构造函数三个参数，dom 、 data 、 options
+    ```js
+    //注意，在所有的chart的data都要要是这样的二维数组的格式
+    var data  = [
+        [ "val1"     ,"val2","val3"] ,
+        [ "Eating"   , 65   , 28   ] ,
+        [ "Drinking" , 59   , 48   ] ,
+        [ "Sleeping" , 90   , 40   ] ,
+        [ "Designing", 81   , 19   ] ,
+        [ "Coding"   , 56   , 96   ] ,
+        [ "Cycling"  , 55   , 27   ] ,
+        [ "Running"  , 40   , 100  ] 
+    ];
+    
+    //这里是 chart的配置信息
+    //TODO： 这里要注意该options会被deepExtend到this上面去。所以获取该mode属性的时候直接是
+    //this.mode 而不是 this.options.mode,chart内部不会再持有options这个属性。这样做是有原因的，
+    //一是不想到处都是满屏幕的options.xxx ，二是这样有利于最大化的把chart所有属性都可配置
+    var options = {
+        mode : 1
+    }
+    var chart = new Chart( S.all("chartTest") , data , options )
+    ```
+
 ## Chart开发相关规范
 
 * 所有的chart 都 应该从chart/index创建而来
