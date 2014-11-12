@@ -155,7 +155,7 @@ KISSY.ready(function () {
             }
         };
     KISSY.use('dvix/chart/scat/ , node', function (S, Scat) {
-        window.scat = new Scat(S.all('#canvasTest'));
-        scat.draw(data1, options);
+        window.scat = new Scat(S.all('#canvasTest'), data1, options);
+        scat.draw();
     });
 });

@@ -215,8 +215,8 @@ KISSY.ready(function () {
                     },
                     alpha: {
                         normals: [
-                            0.8,
-                            0.7
+                            0,
+                            0
                         ]
                     }
                 }

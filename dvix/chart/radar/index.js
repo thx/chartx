@@ -6,45 +6,43 @@ KISSY.add(function(S, Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint
 
     return Chart.extend( {
 
-        init:function( opt ){
-            this.options = {
-                r : 0
-            }
-            this.dataFrame     =  null;                    //数据集合，由_initData 初始化
+        init:function(){
+            this.r             = 0 
 
-            this._xAxis        =  null;
-            this._yAxis        =  null;
-            this._back         =  null;
-            this._graphs       =  null;
+            this._xAxis        = null;
+            this._yAxis        = null;
+            this._back         = null;
+            this._graphs       = null;
 
             this.stageBg     = new Canvax.Display.Sprite({
                 id        : 'bg'
             });
-            this.stageGraph  = new Canvax.Display.Sprite({
+            this.stageCore  = new Canvax.Display.Sprite({
                 id        : 'graph'
             });
 
             this.stage.addChild(this.stageBg);
-            this.stage.addChild(this.stageGraph);
-
+            this.stage.addChild(this.stageCore);
         },
-        draw:function(data, opt){
-
-            _.deepExtend( this.options , opt );
-
+        _getR : function(){
             var minWorH = Math.min( this.width , this.height );
             
-            if( !this.options.r ) {
-                this.options.r = minWorH / 2
+            if( !this.r ) {
+                this.r = minWorH / 2
             }
-            if( this.options.r > minWorH / 2 ){
-                 this.options.r = minWorH / 2
+            if( this.r > minWorH / 2 ){
+                 this.r = minWorH / 2
             }
 
-            //初始化数据
-            this.dataFrame = this._initData( data , this.options );                 
+            this.r -= 50;
+        },
+        draw:function(){
+
+            //计算一下半径
+            this._getR();
+
             //初始化模块
-            this._initModule( this.options , this.dataFrame );                        
+            this._initModule( this , this.dataFrame );                        
 
             //开始绘图
             this._startDraw();
@@ -88,13 +86,13 @@ KISSY.add(function(S, Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint
             //所以再这里把所有的point都转换到back上面。。。。。
             //方便得到该point所在的整个雷达上面的位置(角度，弧度)
             var origPoint  = this._back.sprite.globalToLocal( e.target.localToGlobal( e.point , this.sprite ) );
-            origPoint.x   -= this.options.r;
-            origPoint.y   -= this.options.r;
+            origPoint.x   -= this.r;
+            origPoint.y   -= this.r;
             return origPoint
         },
         clear:function(){
             this.stageBg.removeAllChildren();
-            this.stageGraph.removeAllChildren();
+            this.stageCore.removeAllChildren();
         },
         reset:function(data, opt){
             this.clear()
@@ -105,23 +103,17 @@ KISSY.add(function(S, Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint
         _initModule:function(opt , data){
             this._xAxis  = new xAxis(opt.xAxis , data.xAxis);
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
-
             this._back   = new Back( opt.back );
-
-
             this._graphs = new Graphs( opt.graphs );
         },
         _startDraw : function(){
-            //首先
-            var r = this.options.r;
-    
+            
+            var r = this.r;
             var backAndGraphsOpt = {
-                r    : this.options.r,
+                r    : r,
                 yDataSection : this._yAxis.dataSection,
                 xDataSection : this._xAxis.dataSection
             }
-
-
 
             //绘制背景网格
             this._back.draw( backAndGraphsOpt );
@@ -132,17 +124,20 @@ KISSY.add(function(S, Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint
 
             this._back.setPosition(backX , backY);
 
-
             //绘制雷达图形区域
             this._graphs.draw( this._yAxis.dataOrg , backAndGraphsOpt );
             this._graphs.setPosition(backX , backY);
 
-
-
+            //绘制xAxis标注
+            this._xAxis.draw({
+                r : r
+            });
+            this._xAxis.setPosition(backX , backY);
         },
         _drawEnd:function(){
             this.stageBg.addChild(this._back.sprite);
-            this.stageGraph.addChild(this._graphs.sprite);
+            this.stageCore.addChild(this._graphs.sprite);
+            this.stageCore.addChild(this._xAxis.sprite);
         }
     });
     

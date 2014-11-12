@@ -2,7 +2,7 @@
 KISSY.ready(function(){
 
     var S = KISSY;
-    var data1= [
+    window.data1= [
         [ "val1"     ,"val2","val3"] ,
         [ "Eating"   , 65   , 28   ] ,
         [ "Drinking" , 59   , 48   ] ,
@@ -12,7 +12,7 @@ KISSY.ready(function(){
         [ "Cycling"  , 55   , 27   ] ,
         [ "Running"  , 40   , 100  ] 
     ];
-    var options = {
+    window.options = {
         // title : "first charts",
         // disXAxisLine : 26,
         // disYAxisTopLine : 26,
@@ -35,8 +35,8 @@ KISSY.ready(function(){
     }
      
     KISSY.use("dvix/chart/radar/ , node" , function( S , Radar ){
-        window.radar = new Radar( S.all("#canvasTest") );
-        radar.draw( data1 , options );
+        window.radar = new Radar( S.all("#canvasTest") , data1 , options );
+        radar.draw();
     });
 
 });

@@ -1,19 +1,25 @@
 KISSY.add('dvix/chart/index', function (S, Canvax) {
     var $ = S.all;
-    var Chart = function (node) {
-        this.element = $(node);    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+    var Chart = function (node, data, opts) {
+        this.el = $(node);    //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-        this.width = parseInt(this.element.width());    //图表区域宽
+        this.width = parseInt(this.el.width());    //图表区域宽
         //图表区域宽
-        this.height = parseInt(this.element.height());    //图表区域高
-                                                          //Canvax实例
+        this.height = parseInt(this.el.height());    //图表区域高
+                                                     //Canvax实例
         //图表区域高
         //Canvax实例
-        this.canvax = new Canvax({ el: this.element });
+        this.canvax = new Canvax({ el: this.el });
         this.stage = new Canvax.Display.Stage({ id: 'main' });
         this.canvax.addChild(this.stage);
+        this.data = data;
+        this.options = opts;    //为所有的chart添加注册事件的能力
+        //为所有的chart添加注册事件的能力
         arguments.callee.superclass.constructor.apply(this, arguments);
         this.init.apply(this, arguments);
+        _.deepExtend(this, opts);    //数据集合，由_initData 初始化
+        //数据集合，由_initData 初始化
+        this.dataFrame = this._initData(data, this);
     };
     Chart.Canvax = Canvax;
     Chart.extend = function (props, statics, ctor) {
@@ -30,7 +36,48 @@ KISSY.add('dvix/chart/index', function (S, Canvax) {
     S.extend(Chart, Canvax.Event.EventDispatcher, {
         init: function () {
         },
-        rotate: function (angle) {
+        draw: function () {
+        },
+        /*
+         * 清除整个图表
+         **/
+        clear: function () {
+            _.each(this.canvax.children, function (stage, i) {
+                stage.removeAllChildren();
+            });
+        },
+        /**
+         * 容器的尺寸改变重新绘制
+         */
+        resize: function () {
+            this.clear();
+            this.width = parseInt(this.el.width());
+            this.height = parseInt(this.el.height());
+            this.canvax.resize();
+            this.draw();
+        },
+        /**
+         * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
+         * @param obj {data , options}
+         */
+        reset: function (obj) {
+            if (!obj || _.isEmpty(obj)) {
+                return;
+            }    //如果要切换新的数据源
+            //如果要切换新的数据源
+            if (obj.options) {
+                //注意，options的覆盖用的是deepExtend
+                //所以只需要传入要修改的 option部分
+                _.deepExtend(this, opts);
+            }
+            if (obj.data) {
+                //数据集合，由_initData 初始化
+                this.dataFrame = this._initData(data, this);
+            }
+            this.clear();
+            this.draw();
+        },
+        _rotate: function (angle) {
             var currW = this.width;
             var currH = this.height;
             this.width = currH;
@@ -56,8 +103,7 @@ KISSY.add('dvix/chart/index', function (S, Canvax) {
         _initData: function (data, opt) {
             var dataFrame = {
                     //数据框架集合
-                    org: [],
-                    //最原始的数据  
+                    //org        : [],   //最原始的数据  
                     data: [],
                     //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
                     yAxis: {
@@ -75,7 +121,7 @@ KISSY.add('dvix/chart/index', function (S, Canvax) {
                     }
                 };
             //原始数据['星期一','星期二']
-            var arr = dataFrame.org = data;
+            var arr = data;
             var fileds = arr[0];    //所有的字段集合
             //所有的字段集合
             _.extend(dataFrame.yAxis, opt.yAxis);
@@ -150,6 +196,7 @@ KISSY.add('dvix/chart/index', function (S, Canvax) {
 }, {
     requires: [
         'canvax/',
-        'node'
+        'node',
+        'dvix/utils/deep-extend'
     ]
 });
