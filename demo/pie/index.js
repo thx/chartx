@@ -50,8 +50,8 @@
   }
 
   KISSY.use("dvix/chart/pie/ , node", function (S, Pie) {
-
-    window.pie = new Pie(S.all("#canvasTest"));    
+    debugger
+    window.pie = new Pie(S.all("#canvasTest"), data1, options);
     pie.on('complete', function () {
       //使用getList方法获取圆基础信息
       /*
@@ -82,8 +82,8 @@
         var index = e.target.getAttribute('index');
         pie.show(index);
       });
-    })
+    });
 
-    pie.draw(data1, options);
+    pie.draw();
   });
 });

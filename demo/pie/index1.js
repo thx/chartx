@@ -32,7 +32,7 @@
 
   KISSY.use("dvix/chart/pie/ , node", function (S, Pie) {
 
-    window.pie = new Pie(S.all("#canvasTest"));    
+    window.pie = new Pie(S.all("#canvasTest"), data1, options);    
     pie.on('complete', function () {
       //使用getList方法获取圆基础信息
       /*
@@ -65,6 +65,6 @@
       });
     })
 
-    pie.draw(data1, options);
+    pie.draw();
   });
 });

@@ -32,9 +32,9 @@
       var self = this;
       self.total = 0;
       self.currentAngle = 0;      
-      self.labelFontSize = 12 * self.pie.boundWidth / 1000;
+      self.labelFontSize = 12 * self.boundWidth / 1000;
       var data = self.data.data;
-      self.clickMoveDis = self.pie.r / 8;
+      self.clickMoveDis = self.r / 8;
       if (data.length && data.length > 0) {
         if (data.length == 1) {
           S.mix(data[0], {
@@ -83,12 +83,12 @@
                 midAngle: midAngle,
                 outOffsetx: self.clickMoveDis * cosV,
                 outOffsety: self.clickMoveDis * sinV,
-                centerx: (self.pie.r - self.clickMoveDis) * cosV,
-                centery: (self.pie.r - self.clickMoveDis) * sinV,
-                outx: (self.pie.r + self.clickMoveDis) * cosV,
-                outy: (self.pie.r + self.clickMoveDis) * sinV,
-                edgex: (self.pie.r + 2 * self.clickMoveDis) * cosV,
-                edgey: (self.pie.r + 2 * self.clickMoveDis) * sinV,
+                centerx: (self.r - self.clickMoveDis) * cosV,
+                centery: (self.r - self.clickMoveDis) * sinV,
+                outx: (self.r + self.clickMoveDis) * cosV,
+                outy: (self.r + self.clickMoveDis) * sinV,
+                edgex: (self.r + 2 * self.clickMoveDis) * cosV,
+                edgey: (self.r + 2 * self.clickMoveDis) * sinV,
                 percentage: (percentage * 100).toFixed(1),
                 txt: (percentage * 100).toFixed(1) + '%',
                 quadrant: quadrant,
@@ -177,8 +177,8 @@
     },
     draw: function (opt) {
       var self = this;
-      self.setX(self.pie.x);
-      self.setY(self.pie.y);
+      self.setX(self.x);
+      self.setY(self.y);
       self._widget();
       //this.sprite.context.globalAlpha = 0;      
       if (opt.animation) {
@@ -241,7 +241,7 @@
       self._hideDataLabel();
       var growAnima = function () {
         var pieOpen = new Tween.Tween({ process: 0, r: 0, r0: 0 })
-               .to({ process: 1, r: self.pie.r, r0: self.pie.r0 }, 800)
+               .to({ process: 1, r: self.r, r0: self.r0 }, 800)
                .onUpdate(function () {
                  var me = this;
                  for (var i = 0; i < self.sectors.length; i++) {
@@ -327,7 +327,7 @@
       var sectorMap = self.sectorMap;
       var minTxtDis = 20;
       var labelOffsetX = 5;
-      var outCircleRadius = self.pie.r + 2 * self.clickMoveDis;
+      var outCircleRadius = self.r + 2 * self.clickMoveDis;
       var currentIndex, baseY, clockwise, isleft, minPercent;
       var currentY, adjustX, txtDis, bkLineStartPoint, bklineMidPoint, bklineEndPoint, branchLine, brokenline, branchTxt, bwidth, bheight, bx, by;
 
@@ -561,8 +561,8 @@
               //shadowOffsetX: 0,
               //shadowOffsetY: 0,
               //shadowBlur: 5,
-              r0: self.pie.r0,
-              r: self.pie.r,
+              r0: self.r0,
+              r: self.r,
               startAngle: data[i].start,
               endAngle: data[i].end,
               fillStyle: fillColor,
@@ -598,7 +598,7 @@
             self._moveTip(globalPoint);
           })
 
-          sector.on('click', function () {
+          sector.on('click', function () {            
             var clickSec = this;
             if (!self.isMoving) {
               self.allowPointSelect && self.moveSector(clickSec);
@@ -610,7 +610,7 @@
             context: sector.context,
             originx: sector.context.x,
             originy: sector.context.y,
-            r: self.pie.r,
+            r: self.r,
             startAngle: sector.context.startAngle,
             endAngle: sector.context.endAngle,
             color: fillColor,
