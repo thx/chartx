@@ -31,8 +31,8 @@
     _configData: function () {
       var self = this;
       self.total = 0;
-      self.currentAngle = 0;
-      self.labelFontSize = 12 * self.pie.boundWidth / 800;
+      self.currentAngle = 0;      
+      self.labelFontSize = 12 * self.pie.boundWidth / 1000;
       var data = self.data.data;
       self.clickMoveDis = self.pie.r / 8;
       if (data.length && data.length > 0) {

@@ -110,7 +110,7 @@
       this.draw(data, opt)
     },
     _initModule: function (opt) {
-      var self = this;
+      var self = this;     
       var w = self.width;
       var h = self.height;
       var r = Math.min(w, h) * 2 / 3 / 2;
