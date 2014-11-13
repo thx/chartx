@@ -11,15 +11,14 @@ KISSY.add('dvix/chart/index', function (S, Canvax) {
         //Canvax实例
         this.canvax = new Canvax({ el: this.el });
         this.stage = new Canvax.Display.Stage({ id: 'main' });
-        this.canvax.addChild(this.stage);
-        this.data = data;
-        this.options = opts;    //为所有的chart添加注册事件的能力
+        this.canvax.addChild(this.stage);    //为所有的chart添加注册事件的能力
         //为所有的chart添加注册事件的能力
         arguments.callee.superclass.constructor.apply(this, arguments);
         this.init.apply(this, arguments);
         _.deepExtend(this, opts);    //数据集合，由_initData 初始化
         //数据集合，由_initData 初始化
         this.dataFrame = this._initData(data, this);
+        this.draw();
     };
     Chart.Canvax = Canvax;
     Chart.extend = function (props, statics, ctor) {

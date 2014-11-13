@@ -155,8 +155,8 @@ KISSY.ready(function () {
             }]
     });
     KISSY.use('dvix/chart/bar/ , node', function (S, Bar) {
-        window.bar = new Bar(S.all('#canvasTest'), data1, options);
-        bar.draw();
+        window.bar = new Bar(S.all('#canvasTest'), data1, options);    //bar.draw();
+        //bar.draw();
         window.data1 = data1;
         window.options = options;
     });

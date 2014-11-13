@@ -36,7 +36,7 @@ KISSY.ready(function(){
      
     KISSY.use("dvix/chart/radar/ , node" , function( S , Radar ){
         window.radar = new Radar( S.all("#canvasTest") , data1 , options );
-        radar.draw();
+        //radar.draw();
     });
 
 });

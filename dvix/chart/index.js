@@ -16,19 +16,17 @@ KISSY.add(function( S , Canvax ){
 
         this.canvax.addChild( this.stage );
 
-        this.data    = data;
-        this.options = opts;
-   
         //为所有的chart添加注册事件的能力
         arguments.callee.superclass.constructor.apply(this, arguments);
 
         this.init.apply(this , arguments);
 
-
         _.deepExtend( this , opts );
 
         //数据集合，由_initData 初始化
         this.dataFrame = this._initData( data , this );
+
+        this.draw();
     };
 
     Chart.Canvax = Canvax;

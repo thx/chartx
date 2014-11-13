@@ -90,16 +90,6 @@ KISSY.add(function(S, Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint
             origPoint.y   -= this.r;
             return origPoint
         },
-        clear:function(){
-            this.stageBg.removeAllChildren();
-            this.stageCore.removeAllChildren();
-        },
-        reset:function(data, opt){
-            this.clear()
-            this.width   = parseInt(this.element.width());
-            this.height  = parseInt(this.element.height());
-            this.draw(data, opt)
-        },
         _initModule:function(opt , data){
             this._xAxis  = new xAxis(opt.xAxis , data.xAxis);
             this._yAxis  = new yAxis(opt.yAxis , data.yAxis);

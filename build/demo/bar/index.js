@@ -269,7 +269,6 @@ KISSY.ready(function () {
             }]
     });
     KISSY.use('dvix/chart/bar/ , node', function (S, Bar) {
-        var bar = new Bar(S.all('#canvasTest'), data1, options);
-        bar.draw();
+        var bar = new Bar(S.all('#canvasTest'), data1, options);    //bar.draw();
     });
 });

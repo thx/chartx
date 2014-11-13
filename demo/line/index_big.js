@@ -89,7 +89,7 @@ KISSY.ready(function(){
     KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
 
         window.line = new Line( S.all("#canvasTest") , data1 , options);
-        line.draw();
+        //line.draw();
         window.data1   = data1;
         window.options = options;
 
