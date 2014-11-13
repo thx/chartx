@@ -1,17 +1,11 @@
-KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, EventType, xAxis, yAxis, Back, Graphs, Tips) {
+KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tips) {
     /*
      *@node chart在dom里的目标容器节点。
     */
     var Canvax = Chart.Canvax;
     return Chart.extend({
         init: function (node) {
-            this.options = {
-                mode: 1,
-                //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
-                event: { enabled: 1 }
-            };
-            this.dataFrame = null;    //数据集合，由_initData 初始化
-            //数据集合，由_initData 初始化
+            this.event = { enabled: 1 };
             this._xAxis = null;
             this._yAxis = null;
             this._back = null;
@@ -24,14 +18,11 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
             this.stage.addChild(this.core);
             this.stage.addChild(this.stageTip);
         },
-        draw: function (data, opt) {
-            _.deepExtend(this.options, opt);
-            if (opt.rotate) {
-                this.rotate(opt.rotate);
-            }    //根据data 和 opt中yAxis xAxis的field字段来分配this.dataFrame中的yAxis数据和xAxis数据
-            //根据data 和 opt中yAxis xAxis的field字段来分配this.dataFrame中的yAxis数据和xAxis数据
-            this.dataFrame = this._initData(data, opt);
-            this._initModule(opt, this.dataFrame);    //初始化模块  
+        draw: function () {
+            if (this.rotate) {
+                this._rotate(this.rotate);
+            }
+            this._initModule();    //初始化模块  
             //初始化模块  
             this._startDraw();    //开始绘图
             //开始绘图
@@ -39,37 +30,12 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
             //绘制结束，添加到舞台
             this._arguments = arguments;
         },
-        clear: function () {
-            this.stageBg.removeAllChildren();
-            this.core.removeAllChildren();
-            this.stageTip.removeAllChildren();
-        },
-        rotate: function (angle) {
-            var currW = this.width;
-            var currH = this.height;
-            this.width = currH;
-            this.height = currW;
-            var self = this;
-            _.each(this.stage.children, function (sprite) {
-                sprite.context.rotation = angle || -90;
-                sprite.context.x = (currW - currH) / 2;
-                sprite.context.y = (currH - currW) / 2;
-                sprite.context.rotateOrigin.x = self.width * sprite.context.$model.scaleX / 2;
-                sprite.context.rotateOrigin.y = self.height * sprite.context.$model.scaleY / 2;
-            });
-        },
-        reset: function (data, opt) {
-            this.clear();
-            this.width = parseInt(this.element.width());
-            this.height = parseInt(this.element.height());
-            this.draw(data, opt);
-        },
-        _initModule: function (opt, data) {
-            this._xAxis = new xAxis(opt.xAxis, data.xAxis);
-            this._yAxis = new yAxis(opt.yAxis, data.yAxis);
-            this._back = new Back(opt.back);
-            this._graphs = new Graphs(opt.graphs);
-            this._tips = new Tips(opt.tips, data, this.element.all('.canvax-dom-container'));
+        _initModule: function () {
+            this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
+            this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
+            this._back = new Back(this.back);
+            this._graphs = new Graphs(this.graphs);
+            this._tips = new Tips(this.tips, this.dataFrame, this.el.all('.canvax-dom-container'));
         },
         _startDraw: function () {
             // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -118,7 +84,7 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
 ;
             //执行生长动画
             this._graphs.grow();
-            if (this.options.event.enabled) {
+            if (this.event.enabled) {
                 var self = this;
                 this._graphs.sprite.on('hold mouseover', function (e) {
                     self._tips.show(e);
@@ -172,7 +138,6 @@ KISSY.add('dvix/chart/line/index', function (S, Chart, Tools, DataSection, Event
         'dvix/chart/',
         'dvix/utils/tools',
         'dvix/utils/datasection',
-        'dvix/event/eventtype',
         './xaxis',
         'dvix/components/yaxis/yAxis',
         'dvix/components/back/Back',

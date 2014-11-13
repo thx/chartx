@@ -5,8 +5,6 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
     var Canvax = Chart.Canvax;
     return Chart.extend({
         init: function () {
-            this.dataFrame = null;    //数据集合，由_initData 初始化
-            //数据集合，由_initData 初始化
             this._xAxis = null;
             this._yAxis = null;
             this._back = null;
@@ -18,13 +16,11 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
             this.stage.addChild(this.core);
             this.stage.addChild(this.stageTip);
         },
-        draw: function (data, opt) {
-            if (opt.rotate) {
-                this.rotate(opt.rotate);
+        draw: function () {
+            if (this.rotate) {
+                this._rotate(this.rotate);
             }
-            this.dataFrame = this._initData(data, opt);    //初始化数据
-            //初始化数据
-            this._initModule(opt, this.dataFrame);    //初始化模块  
+            this._initModule();    //初始化模块  
             //初始化模块  
             this._startDraw();    //开始绘图
             //开始绘图
@@ -35,22 +31,11 @@ KISSY.add('dvix/chart/bar/index', function (S, Chart, Tools, DataSection, EventT
         },
         //下面这个是全局调用测试的时候用的
         //window.hoho = this;
-        clear: function () {
-            this.stageBg.removeAllChildren();
-            this.core.removeAllChildren();
-            this.stageTip.removeAllChildren();
-        },
-        reset: function (data, opt) {
-            this.clear();
-            this.width = parseInt(this.element.width());
-            this.height = parseInt(this.element.height());
-            this.draw(data, opt);
-        },
-        _initModule: function (opt, data) {
-            this._xAxis = new xAxis(opt.xAxis, data.xAxis);
-            this._yAxis = new yAxis(opt.yAxis, data.yAxis);
-            this._back = new Back(opt.back);
-            this._graphs = new Graphs(opt.graphs);
+        _initModule: function () {
+            this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
+            this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
+            this._back = new Back(this.back);
+            this._graphs = new Graphs(this.graphs);
         },
         _startDraw: function () {
             var self = this;    //首先

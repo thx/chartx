@@ -215,8 +215,8 @@ KISSY.ready(function () {
                     },
                     alpha: {
                         normals: [
-                            0.8,
-                            0.7
+                            0,
+                            0
                         ]
                     }
                 }
@@ -230,8 +230,8 @@ KISSY.ready(function () {
             }]
     });
     KISSY.use('dvix/chart/line/ , node', function (S, Line) {
-        var line = new Line(S.all('#canvasTest'));
-        line.draw(data1, options);
+        var line = new Line(S.all('#canvasTest'), data1, options);    //line.draw( data1 , options );
+        //line.draw( data1 , options );
         window.line = line;
         window.data1 = data1;
         window.options = options;
