@@ -1,0 +1,249 @@
+KISSY.ready(function () {
+    var S = KISSY;
+    var data1 = [
+<<<<<<< HEAD
+<<<<<<< HEAD
+        [
+            'Firefox',
+            45
+        ],
+        [
+            'IE',
+            26.8
+        ],
+        {
+            name: 'Chrome',
+            y: 12.8,
+            sliced: true,
+            selected: true
+        },
+        [
+            'Safari',
+            8.5
+        ],
+        [
+            'Opera',
+            6.2
+        ],
+        [
+            'Others',
+            0.7
+        ]
+    ];
+    var options = {
+        tip: {
+            enabled: true,
+            format: '{point.title}\n{point.percentage}'
+        },
+        dataLabel: {
+            enabled: true,
+            format: '{point.name} : {point.percentage}'
+        },
+        allowPointSelect: true,
+        cursor: 'pointer'    //colors:['red', 'yellow', 'blue']
+    };
+    //colors:['red', 'yellow', 'blue']
+    KISSY.config({
+        packages: [{
+                name: 'dvix',
+                path: '../../',
+                debug: true
+            }]
+    });
+=======
+            [
+                'Firefox',
+                45
+            ],
+            [
+                'IE',
+                26.8
+            ],
+            {
+                name: 'Chrome',
+                y: 12.8,
+                sliced: true,
+                selected: true
+            },
+            [
+                'Safari',
+                8.5
+            ],
+            [
+                'Opera',
+                6.2
+            ],
+            [
+                'Others',
+                0.7
+            ]
+        ];
+    var options = {
+=======
+            [
+                'Firefox',
+                20
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera3',
+                1
+            ],
+            [
+                'Opera4',
+                1
+            ],
+            [
+                'Opera5',
+                1
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera3',
+                1
+            ],
+            [
+                'Opera4',
+                1
+            ],
+            [
+                'Opera5',
+                1
+            ],
+            [
+                'Firefox',
+                20
+            ],
+            [
+                'Firefox',
+                20
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera3',
+                1
+            ],
+            [
+                'Opera4',
+                1
+            ],
+            [
+                'Opera5',
+                1
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera2',
+                1
+            ],
+            [
+                'Opera3',
+                1
+            ],
+            [
+                'Opera4',
+                1
+            ],
+            [
+                'Opera5',
+                1
+            ],
+            [
+                'Firefox',
+                20
+            ]
+        ];
+    var options = {
+            //浮动tip
+>>>>>>> origin
+            tip: {
+                enabled: true,
+                format: '{point.title}\n{point.percentage}'
+            },
+<<<<<<< HEAD
+=======
+            //周边tip
+>>>>>>> origin
+            dataLabel: {
+                enabled: true,
+                format: '{point.name} : {point.percentage}'
+            },
+<<<<<<< HEAD
+            allowPointSelect: true,
+            cursor: 'pointer'    //colors:['red', 'yellow', 'blue']
+        };
+    //colors:['red', 'yellow', 'blue']
+>>>>>>> origin/add-pie-chart
+    KISSY.use('dvix/chart/pie/ , node', function (S, Pie) {
+        window.pie = new Pie(S.all('#canvasTest'));
+=======
+            //是否允许扇形选取
+            allowPointSelect: true,
+            cursor: 'pointer',
+            //是否允许动画
+            animation: true,
+            //内圆半径
+            innerRadius: 40,
+            strokeWidth: 2    //颜色序列,若不设置，会有默认的颜色序列
+                              //colors:['red', 'yellow', 'blue']
+        };
+    //颜色序列,若不设置，会有默认的颜色序列
+    //colors:['red', 'yellow', 'blue']
+    KISSY.use('dvix/chart/pie/ , node', function (S, Pie) {
+        window.pie = new Pie(S.all('#canvasTest'));
+        pie.on('complete', function () {
+            //使用getList方法获取圆基础信息
+            /*
+      {
+      name:名称
+      index:索引
+      r:半径
+      color:颜色
+      percentage:百分比
+      }
+      */
+            var list = pie.getList();
+            var ul, li;
+            var legendContainer = S.all('#pieLegend');
+            legendContainer.empty();
+            ul = S.all('<ul></ul>');
+            legendContainer.append(ul);
+            for (var i = 0; i < list.length; i++) {
+                var item = list[i];
+                li = S.all('<li id="list_' + item.index + '" index="' + item.index + '" style="color:' + item.color + '"><span style="background-color:' + item.color + '"></span>' + item.name + '</li>');
+                ul.append(li);
+            }    //使用show方法控制扇形的显示与隐藏
+            //使用show方法控制扇形的显示与隐藏
+            legendContainer.all('li').on('click', function (e) {
+                var index = e.target.getAttribute('index');
+                pie.show(index);
+            });
+        });
+>>>>>>> origin
+        pie.draw(data1, options);
+    });
+});

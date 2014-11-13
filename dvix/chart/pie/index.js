@@ -1,4 +1,4 @@
-﻿KISSY.add(function (S, Chart, Tools, DataSection, EventType, Pie, Graphs, PieTip) {
+﻿KISSY.add(function (S, Chart, Pie, Graphs, PieTip) {
   /*
   *@node chart在dom里的目标容器节点。
   */
@@ -12,7 +12,6 @@
           enabled: 1
         }
       }
-
       this.stageBg = new Canvax.Display.Sprite({
         id: 'bg'
       });
@@ -33,12 +32,45 @@
 
       this._initModule(opt);                      //初始化模块  
 
-      this._startDraw();                         //开始绘图
+      this._startDraw(opt);                         //开始绘图
 
       this._drawEnd();                           //绘制结束，添加到舞台
+      
+      if (this._eventMap['complete'] && this._eventMap['complete'].length > 0) {
+        for (var i = 0; i < this._eventMap['complete'].length; i++) {
+          this._eventMap['complete'][i].call(this);
+        }
+      }
 
       this._arguments = arguments;
 
+    },
+    getList: function () {
+      var self = this;
+      var list = [];
+      var item;
+      if (self._pie) {
+        var sectorList = self._pie.getList();
+        if (sectorList.length > 0) {
+          for (var i = 0; i < sectorList.length; i++) {
+            item = sectorList[i];
+            list.push({
+              name: item.sector.__data.name,
+              index: item.sector.__dataIndex,
+              color: item.color,
+              r: item.r,
+              percentage: item.sector.__data.percentage
+            });
+          }
+        }
+      }
+      return list;
+    },
+    show: function (index) {
+      this._pie && this._pie.showHideSector(index);
+    },
+    slice: function (index) {
+      this._pie && this._pie.slice(index);
     },
     _initData: function (data, opt) {
       var dataFrame = {};
@@ -82,14 +114,24 @@
       var w = self.width;
       var h = self.height;
       var r = Math.min(w, h) * 2 / 3 / 2;
+      var r0 = parseInt(opt.innerRadius || 0);
+      var maxInnerRadius = r * 2 / 3;
+      r0 = r0 >= 0 ? r0 : 0;
+      r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
       var pieX = w / 2;
       var pieY = h / 2;
       opt = opt || {};
       opt.pie = {
         x: pieX,
         y: pieY,
+        r0: r0,
         r: r,
-        tipCallback: {
+        boundWidth: w,
+        boundHeight: h
+      };
+      if (opt.tip.enabled) {
+        self._tip = new PieTip(opt);
+        opt.tipCallback = {
           position: function (point) {
             if (self._tip) {
               self._tip.sprite.context.visible = true;
@@ -98,37 +140,29 @@
             }
           },
           isshow: function (show) {
-            console.log(show);
             self._tip.sprite.context.visible = show;
           },
           update: function (opt) {
             self._tip._reset(opt);
           }
         }
-      };
-      this._pie = new Pie(opt, this.dataFrame);
-      this._tip = new PieTip(opt);
+      }
+      self._pie = new Pie(opt, this.dataFrame);
     },
-    _startDraw: function () {      
-      this._pie.draw();
-      this._pie.grow();
-      this._tip.draw();
+    _startDraw: function (opt) {
+      this._pie.draw(opt);
     },
-
     _drawEnd: function () {
       this.core.addChild(this._pie.sprite);
-      this.stageTip.addChild(this._tip.sprite);
+      if (this._tip) this.stageTip.addChild(this._tip.sprite);
     }
   });
 
 }, {
   requires: [
         'dvix/chart/',
-        'dvix/utils/tools',
-        'dvix/utils/datasection',
-        'dvix/event/eventtype',
         'dvix/components/pie/Pie',
         'dvix/components/line/Graphs',
-        'dvix/components/tips/PieTip'
+        'dvix/components/pie/PieTip'
     ]
 });

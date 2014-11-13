@@ -31,17 +31,14 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
         //节点索引(那个点)
         this._nodesInfoList = [];    //多条线同个节点索引上的节点信息集合
         //多条线同个节点索引上的节点信息集合
-        this._nodesYList = [];    //多条线同个节点索引上的节点信息(x坐标)集合
-        //多条线同个节点索引上的节点信息(x坐标)集合
         this.sprite = null;
         this.induce = null;
         this.init(opt);
     };
     Graphs.prototype = {
         init: function (opt) {
-            var self = this;
-            self._initConfig(opt);
-            self.sprite = new Canvax.Display.Sprite();
+            _.deepExtend(this, opt);
+            this.sprite = new Canvax.Display.Sprite();
         },
         setX: function ($n) {
             this.sprite.context.x = $n;
@@ -81,28 +78,6 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
             ;
             growAnima();
         },
-        //初始化配置
-        _initConfig: function (opt) {
-            var self = this;
-            if (opt) {
-                var line = opt.line;
-                if (line) {
-                    var strokeStyle = line.strokeStyle;
-                    if (strokeStyle) {
-                        self.line.strokeStyle.normals = strokeStyle.normals || self.line.strokeStyle.normals;
-                        if (strokeStyle.overs && strokeStyle.overs.length) {
-                            self.line.strokeStyle.overs = strokeStyle.overs;
-                        } else {
-                            self.line.strokeStyle.overs = self.line.strokeStyle.normals;
-                        }
-                    }
-                    var alpha = line.alpha;
-                    if (alpha) {
-                        self.line.alpha.normals = alpha.normals || self.line.alpha.normals;
-                    }
-                }
-            }
-        },
         //配置数据
         _configData: function (opt) {
             var self = this;
@@ -138,15 +113,13 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
                 }
             });
             self.sprite.addChild(self.induce);
-            self.induce.on(EventType.HOLD, function (e) {
-                var o = self._getInfoHandler(e);
-                e.info = o;
+            self.induce.on('hold mouseover', function (e) {
+                e.info = self._getInfoHandler(e);
             });
-            self.induce.on(EventType.DRAG, function (e) {
-                var o = self._getInfoHandler(e);
-                e.info = o;
+            self.induce.on('drag mousemove', function (e) {
+                e.info = self._getInfoHandler(e);
             });
-            self.induce.on(EventType.RELEASE, function (e) {
+            self.induce.on('release mouseout', function (e) {
                 var o = {
                         iGroup: self.iGroup,
                         iNode: self.iNode
@@ -156,47 +129,23 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
             });
         },
         _getInfoHandler: function (e) {
-            var self = this;
-            var point = e.point;
-            console.log(point.x + '|' + point.y)    // var stagePoint
+            var x = e.point.x, y = e.point.y - this.h;
+            var tmpINode = parseInt((x + this.disX / 2) / this.disX);
+            var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(this._nodesInfoList, 'y'));
+            this._nodesInfoList = []    //节点信息集合
 ;
-            // var stagePoint
-            var x = Number(point.x), y = Number(point.y) - Number(self.h);
-            var n = x / (self.disX / 2);
-            n = n % 2 == 0 ? n : n + 1;
-            var tmpINode = parseInt(n / 2);
-            if (tmpINode >= self.data[0].length) {
-                return;
+            //节点信息集合
+            for (var a = 0, al = this.groups.length; a < al; a++) {
+                var o = this.groups[a].getNodeInfoAt(tmpINode);
+                this._nodesInfoList.push(o);
             }
-            if (tmpINode != self.iNode) {
-                self._nodesInfoList = []    //节点信息集合
-;
-                //节点信息集合
-                self._nodesYList = []    //节点y轴坐标集合
-;
-                //节点y轴坐标集合
-                for (var a = 0, al = self.groups.length; a < al; a++) {
-                    var group = self.groups[a];
-                    var o = group.getNodeInfoAt(tmpINode);
-                    self._nodesInfoList.push(o);
-                    self._nodesYList.push(o.y);
-                }
-            }
-            var tmpIGroup = Tools.getDisMinATArr(y, self._nodesYList);
-            if (tmpIGroup == self.iGroup && tmpINode == self.iNode) {
-            } else {
-                self.iGroup = tmpIGroup, self.iNode = tmpINode;
-                var nodeInfo = self.groups[tmpIGroup].getNodeInfoAt(tmpINode);
-                var o = {
-                        iGroup: self.iGroup,
-                        iNode: self.iNode,
-                        nodeInfo: S.clone(nodeInfo),
-                        nodesInfoList: S.clone(self._nodesInfoList)
-                    };
-                return o;
-            }
-            self.iNode = tmpINode;
-            return;
+            this.iGroup = tmpIGroup, this.iNode = tmpINode;
+            var node = {
+                    iGroup: this.iGroup,
+                    iNode: this.iNode,
+                    nodesInfoList: S.clone(this._nodesInfoList)
+                };
+            return node;
         }
     };
     return Graphs;
@@ -207,6 +156,7 @@ KISSY.add('dvix/components/line/Graphs', function (S, Canvax, Rect, Tools, Tween
         'dvix/utils/tools',
         'canvax/animation/Tween',
         'dvix/event/eventtype',
-        'dvix/components/line/Group'
+        'dvix/components/line/Group',
+        'dvix/utils/deep-extend'
     ]
 });

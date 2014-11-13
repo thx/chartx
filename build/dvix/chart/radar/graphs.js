@@ -1,7 +1,5 @@
 KISSY.add('dvix/chart/radar/graphs', function (S, Canvax, Polygon, Circle, Tween) {
     var Graphs = function (opt, data) {
-        this.width = 0;
-        this.height = 0;
         this.pos = {
             x: 0,
             y: 0
@@ -21,6 +19,7 @@ KISSY.add('dvix/chart/radar/graphs', function (S, Canvax, Polygon, Circle, Tween
         ];
         this.lineWidth = 1;
         this.sprite = null;
+        this.currentAngInd = null;
         this.init(data);
     };
     Graphs.prototype = {
@@ -44,12 +43,35 @@ KISSY.add('dvix/chart/radar/graphs', function (S, Canvax, Polygon, Circle, Tween
         draw: function (data, opt) {
             this.dataOrg = data;
             _.deepExtend(this, opt);
-            this._layout();
             this._widget();
         },
-        _layout: function () {
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
+        angHover: function (ind) {
+            if (ind != this.currentAngInd) {
+                if (this.currentAngInd != null) {
+                    this._setCircleStyleForInd(this.currentAngInd);
+                }
+                this.currentAngInd = ind;
+                this._setCircleStyleForInd(ind);
+            }
+        },
+        angOut: function () {
+            this._setCircleStyleForInd(this.currentAngInd);
+            this.currentAngInd = null;
+        },
+        _setCircleStyleForInd: function (ind) {
+            _.each(this.sprite.children, function (group, i) {
+                //因为circles的sprite在该sprite里面索引为2
+                var circle = group.getChildAt(2).getChildAt(ind);
+                var sCtx = circle.context;
+                var s = sCtx.fillStyle;
+                sCtx.fillStyle = sCtx.strokeStyle;
+                sCtx.strokeStyle = s;
+            });
+        },
+        setPosition: function (x, y) {
+            var spc = this.sprite.context;
+            spc.x = x;
+            spc.y = y;
         },
         _widget: function () {
             if (this.dataOrg.length == 0) {
@@ -59,14 +81,15 @@ KISSY.add('dvix/chart/radar/graphs', function (S, Canvax, Polygon, Circle, Tween
             if (!n || n < 2) {
                 return;
             }
-            var x = parseInt(Math.asin(Math.PI / 180 * 45) * this.r);
-            var y = x;
+            var x = y = this.r;
             var dStep = 2 * Math.PI / n;
             var beginDeg = -Math.PI / 2;
             var deg = beginDeg;
             var mxYDataSection = this.yDataSection[this.yDataSection.length - 1];
             for (var i = 0, l = this.dataOrg.length; i < l; i++) {
                 var pointList = [];
+                var group = new Canvax.Display.Sprite({ id: 'radarGroup_' + i });
+                ;
                 var circles = new Canvax.Display.Sprite({});
                 for (var ii = 0, end = n; ii < end; ii++) {
                     var r = this.r * (this.dataOrg[i][ii] / mxYDataSection);
@@ -104,10 +127,19 @@ KISSY.add('dvix/chart/radar/graphs', function (S, Canvax, Polygon, Circle, Tween
                             lineWidth: 2,
                             strokeStyle: this._colors[i]
                         }
-                    });
-                this.sprite.addChild(polygonBg);
-                this.sprite.addChild(polygonBorder);
-                this.sprite.addChild(circles);
+                    });    //最开始该poly是在的group的index，用来mouseout的时候还原到本来的位置。
+                //最开始该poly是在的group的index，用来mouseout的时候还原到本来的位置。
+                polygonBorder.originInd = i;
+                polygonBorder.hover(function () {
+                    this.parent.toFront();
+                }, function () {
+                    var backCount = this.parent.parent.getNumChildren();
+                    this.parent.toBack(backCount - this.originInd - 1);
+                });
+                group.addChild(polygonBg);
+                group.addChild(polygonBorder);
+                group.addChild(circles);
+                this.sprite.addChild(group);
             }
         }
     };

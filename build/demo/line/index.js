@@ -220,41 +220,6 @@ KISSY.ready(function () {
                         ]
                     }
                 }
-            },
-            tips: {
-                // disTop : 50,
-                context: {
-                    prefix: {
-                        values: [
-                            '\u4ECA',
-                            '\u6628',
-                            '\u660E'
-                        ]
-                    },
-                    bolds: [
-                        'bold',
-                        'bold',
-                        'bold'
-                    ],
-                    fontSizes: [
-                        14,
-                        14,
-                        14
-                    ],
-                    fillStyles: [
-                        '#333333',
-                        '#999999',
-                        '#999999'
-                    ]
-                },
-                tip: {},
-                // back:{
-                // enabled : 0
-                // disX:10
-                // }
-                line: {},
-                // lineType: ''
-                nodes: {}
             }
         };
     KISSY.config({

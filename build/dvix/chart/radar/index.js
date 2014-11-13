@@ -1,4 +1,4 @@
-KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Back, Graphs) {
+KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Back, Graphs, HitTestPoint) {
     /*
      *@node chart在dom里的目标容器节点。
     */
@@ -11,17 +11,20 @@ KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Bac
             this._xAxis = null;
             this._yAxis = null;
             this._back = null;
+            this._graphs = null;
             this.stageBg = new Canvax.Display.Sprite({ id: 'bg' });
+            this.stageGraph = new Canvax.Display.Sprite({ id: 'graph' });
             this.stage.addChild(this.stageBg);
+            this.stage.addChild(this.stageGraph);
         },
         draw: function (data, opt) {
             _.deepExtend(this.options, opt);
             var minWorH = Math.min(this.width, this.height);
             if (!this.options.r) {
-                this.options.r = minWorH;
+                this.options.r = minWorH / 2;
             }
-            if (this.options.r > minWorH) {
-                this.options.r = minWorH;
+            if (this.options.r > minWorH / 2) {
+                this.options.r = minWorH / 2;
             }    //初始化数据
             //初始化数据
             this.dataFrame = this._initData(data, this.options);    //初始化模块
@@ -31,11 +34,43 @@ KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Bac
             this._startDraw();    //绘制结束，添加到舞台
             //绘制结束，添加到舞台
             this._drawEnd();
+            var me = this;
+            this.stage.on('mousemove', function (e) {
+                var origPoint = me._getPointBack(e);    //该point对应的角度
+                //该point对应的角度
+                var angle = Math.atan2(origPoint.y, origPoint.x) * 180 / Math.PI;    //目前当前的r是 从-PI 到PI 的 值，所以转换过来的页是180 到 -180的范围值。
+                                                                                     //需要转换到0-360度
+                                                                                     //另外因为蜘蛛网的起始角度为-90度，所以还要+90 来把角度转换到对应的范围里面
+                //目前当前的r是 从-PI 到PI 的 值，所以转换过来的页是180 到 -180的范围值。
+                //需要转换到0-360度
+                //另外因为蜘蛛网的起始角度为-90度，所以还要+90 来把角度转换到对应的范围里面
+                var itemAng = 360 / me._xAxis.dataSection.length;
+                angle = (360 + angle + 90 + itemAng / 2) % 360;
+                var ind = parseInt(angle / itemAng);
+                me._graphs.angHover(ind);
+            });
+            this.stage.on('mouseout', function (e) {
+                //找到最外围的那个
+                var lastIsogon = me._back.sprite.getChildById('isogon_' + (me._yAxis.dataSection.length - 1));
+                var origPoint = me._getPointBack(e);
+                if (!HitTestPoint.isInside(lastIsogon, origPoint)) {
+                    me._graphs.angOut();
+                }
+            });
+        },
+        _getPointBack: function (e) {
+            //先把point转换到_back的坐标系内
+            //可能e.target会是 来自_graph的 polygon，
+            //所以再这里把所有的point都转换到back上面。。。。。
+            //方便得到该point所在的整个雷达上面的位置(角度，弧度)
+            var origPoint = this._back.sprite.globalToLocal(e.target.localToGlobal(e.point, this.sprite));
+            origPoint.x -= this.options.r;
+            origPoint.y -= this.options.r;
+            return origPoint;
         },
         clear: function () {
             this.stageBg.removeAllChildren();
-            this.core.removeAllChildren();
-            this.stageTip.removeAllChildren();
+            this.stageGraph.removeAllChildren();
         },
         reset: function (data, opt) {
             this.clear();
@@ -51,29 +86,26 @@ KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Bac
         },
         _startDraw: function () {
             //首先
-            var x = 0;
-            var y = this.height - this._xAxis.h;
-            var corePos = {
-                    x: this.width / 2 - this.options.r,
-                    y: this.height / 2 - this.options.r
-                };
+            var r = this.options.r;
             var backAndGraphsOpt = {
                     r: this.options.r,
-                    w: this.options.r,
-                    h: this.options.r,
                     yDataSection: this._yAxis.dataSection,
-                    xDataSection: this._xAxis.dataSection,
-                    pos: corePos
+                    xDataSection: this._xAxis.dataSection
                 }    //绘制背景网格
 ;
             //绘制背景网格
-            this._back.draw(backAndGraphsOpt);    //绘制雷达图形区域
+            this._back.draw(backAndGraphsOpt);
+            var backSpc = this._back.sprite.context;
+            var backX = (this.width - backSpc.width) / 2;
+            var backY = (this.height - backSpc.height) / 2;
+            this._back.setPosition(backX, backY);    //绘制雷达图形区域
             //绘制雷达图形区域
             this._graphs.draw(this._yAxis.dataOrg, backAndGraphsOpt);
+            this._graphs.setPosition(backX, backY);
         },
         _drawEnd: function () {
             this.stageBg.addChild(this._back.sprite);
-            this.stageBg.addChild(this._graphs.sprite);
+            this.stageGraph.addChild(this._graphs.sprite);
         }
     });
 }, {
@@ -84,6 +116,7 @@ KISSY.add('dvix/chart/radar/index', function (S, Chart, Tools, xAxis, yAxis, Bac
         'dvix/components/yaxis/yAxis',
         './back',
         './graphs',
+        'canvax/geom/HitTestPoint',
         'dvix/utils/deep-extend'
     ]
 });

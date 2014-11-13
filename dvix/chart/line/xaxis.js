@@ -12,7 +12,7 @@ KISSY.add(function( S , xAxisBase ){
                 tmpData.push({
                     content : data[0],
                     x       : parseInt( xGraphsWidth / 2 )
-                })
+                });
             } else {
                 for (var a = 0, al  = data.length; a < al; a++ ) {
                     var o = {'content':data[a], 'x':parseInt(a / (max - 1) * xGraphsWidth)}
