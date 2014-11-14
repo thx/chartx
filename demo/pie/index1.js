@@ -2,10 +2,13 @@
   var S = KISSY;
   var data1 = [        
         ['Opera', 1],
-        ['IE', 3],
-        ['Chrome', 5],
-        ['Firefox', 2],
-        ['Safari', 1]        
+        ['IE', 0],
+        ['Safari', 0],
+        ['Chrome', 0],
+        ['Firefox', 1],
+        ['Chrome', 0],
+        ['Chrome', 1],
+        ['Chrome', 0]
     ];
   var options = {
     //浮动tip

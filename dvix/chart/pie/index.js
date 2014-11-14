@@ -26,8 +26,7 @@
       //this.stage.addChild(this.stageBg);
       this.stage.addChild(this.core);
     },
-    draw: function () {
-      debugger
+    draw: function () {      
       this._initModule();                      //初始化模块
       this._startDraw();                         //开始绘图
       this._drawEnd();                           //绘制结束，添加到舞台      
@@ -45,11 +44,11 @@
           for (var i = 0; i < sectorList.length; i++) {
             item = sectorList[i];
             list.push({
-              name: item.sector.__data.name,
-              index: item.sector.__dataIndex,
+              name: item.name,
+              index: item.index,
               color: item.color,
               r: item.r,
-              percentage: item.sector.__data.percentage
+              percentage: item.percentage
             });
           }
         }
@@ -143,8 +142,7 @@
       }
       self._pie = new Pie(self.pie);
     },
-    _startDraw: function () {
-      debugger
+    _startDraw: function () {      
       this._pie.draw(this);
     },
     _drawEnd: function () {
