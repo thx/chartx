@@ -2,10 +2,22 @@
 
 ## 概要
 * git库 git@gitlab.alibaba-inc.com:thx/charts.git
-* daily环境最新版本 daily/1.2.3
-* daily环境包地址 http://g.assets.daily.taobao.net/thx/charts/1.2.3/
-* 线上环境最新版本  publish/1.2.2
-* 线上环境包地址 http://g.tbcdn.cn/thx/charts/1.2.2/
+* daily环境最新版本 daily/1.2.4
+* daily环境包地址 http://g.assets.daily.taobao.net/thx/charts/1.2.4/
+* 线上环境最新版本  publish/1.2.4
+* 线上环境包地址 http://g.tbcdn.cn/thx/charts/1.2.4/
+
+## 关于Dvix
+Dvix,意为数据可视化。
+
+关键字：canvas，跨平台，跨设备，浏览器兼容，KISSY,CMD,AMD自动适配。
+
+Dvix图标库依赖底层canvas渲染引擎canvax（git@gitlab.alibaba-inc.com:thx/canvax.git）, underscore 。所有文件按照AMD模块规范编写。不依赖任何第三方dom库。
+
+所以，只要有AMD加载器（比如requirejs） 便可以使用Dvix来实现数据可视化。
+
+同时，如果项目中使用的是KISSY 或者 seajs（CMD）。Dvix自带的通用模块定义适配器可以自动适配(http://gitlab.alibaba-inc.com/thx/canvax/issues/2)到KISSY或者seajs环境中运行。
+
 
 ## 相关成员
 * 交互+视觉 ：小路，罗素
@@ -13,19 +25,16 @@
 
 ## 怎么使用chart
 
-* 首先要配置canvax，dvix两个包
+* 首先在html中引入js脚本文件
 
-    ```js
-    KISSY.config({
-        packages: [{
-            name  : 'canvax' , 
-            path  :  http://g.tbcdn.cn/thx/canvax/2014.11.11/
-        },{
-            name  : 'dvix',
-            path  : 'http://g.tbcdn.cn/thx/charts/1.2.2/'
-        }]
-    });
-    ```
+*** daily环境为：
+
+<script src="http://g.assets.daily.taobao.net/thx/charts/1.2.4/dvix/index-min.js"></script>
+
+*** cdn环境为：
+
+<script src="http://g.tbcdn.cn/thx/charts/1.2.4/dvix/index-min.js"></script>
+
     
 * 然后使用图表的时候，要依次传给构造函数三个参数， __domElement__  、 __data__ 、 __options__
 
