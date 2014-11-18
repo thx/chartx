@@ -192,28 +192,33 @@ var Dvix = {
     
     //配置canvax包
     var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/2014.11.18/";
+
+    /*
     if( Dvix.site.daily || Dvix.site.local ){
         canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.11.18/";
     }
-    /**
-     * 下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和dvix实时调试
-     */
+    
+    //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和dvix实时调试
     if( !! ~location.search.indexOf('localcanvax') ){
         //本地环境测试
         canvaxUrl     = "http://nick.daily.taobao.net/canvax";
     }
+    */
+    
 
 
     //配置dvix包
     var dvixUrl       = "http://g.tbcdn.cn/thx/charts/1.2.4/";
+
+    /*
     if( Dvix.site.daily ){
         dvixUrl       = "http://g.assets.daily.taobao.net/thx/charts/1.2.4/";
     }
     if( Dvix.site.local ){
         dvixUrl       = "../../";
     }
+    */
     
-    //KISSY.config({
     Dvix.start( [{
             name  : 'canvax' , 
             path  : canvaxUrl
@@ -222,6 +227,5 @@ var Dvix = {
             path  : dvixUrl
         }]
     )
-    //});
 
 })(window);
