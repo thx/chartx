@@ -192,7 +192,6 @@ var Dvix = {
     
     //配置canvax包
     var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/2014.11.18/";
-
     //配置dvix包
     var dvixUrl       = "http://g.tbcdn.cn/thx/charts/1.2.5/";
     
