@@ -29,12 +29,6 @@ module.exports = function(grunt) {
              { expand: true, cwd: 'gameDemo', src: ['**'], dest: 'build/gameDemo'}
              ]
          }
-      },
-      autoname: {
-         build: {
-             // targetDir,要执行的目标目录，一般为打包的build目录
-             targetDir : "./build"
-         }
       }
   });
  
@@ -42,11 +36,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-auto-kissy-module-name');
   grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [ 'clean' , 'copy' , 'autoname' , 'uglify'  ]);
+  grunt.registerTask('default', [ 'clean' , 'copy' ,  'uglify'  ]);
 }
 
 

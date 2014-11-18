@@ -1,8 +1,13 @@
-KISSY.add('dvix/utils/deep-extend', function (S) {
-    //依赖underscore
-    (function () {
-        var arrays, basicObjects, deepClone, deepExtend, deepExtendCouple, isBasicObject, __slice = [].slice;
-        deepClone = function (obj) {
+define(
+    "dvix/utils/deep-extend",
+    [],
+    function(){
+        //依赖underscore
+        (function() {
+            var arrays, basicObjects, deepClone, deepExtend, deepExtendCouple, isBasicObject,
+        __slice = [].slice;
+    
+        deepClone = function(obj) {
             var func, isArr;
             if (!_.isObject(obj) || _.isFunction(obj)) {
                 return obj;
@@ -11,10 +16,10 @@ KISSY.add('dvix/utils/deep-extend', function (S) {
                 return new Date(obj.getTime());
             }
             if (_.isRegExp(obj)) {
-                return new RegExp(obj.source, obj.toString().replace(/.*\//, ''));
+                return new RegExp(obj.source, obj.toString().replace(/.*\//, ""));
             }
             isArr = _.isArray(obj || _.isArguments(obj));
-            func = function (memo, value, key) {
+            func = function(memo, value, key) {
                 if (isArr) {
                     memo.push(deepClone(value));
                 } else {
@@ -24,22 +29,26 @@ KISSY.add('dvix/utils/deep-extend', function (S) {
             };
             return _.reduce(obj, func, isArr ? [] : {});
         };
-        isBasicObject = function (object) {
-            return (object == null || object == undefined || object.prototype === {}.prototype || object.prototype === Object.prototype) && _.isObject(object) && !_.isArray(object) && !_.isFunction(object) && !_.isDate(object) && !_.isRegExp(object) && !_.isArguments(object);
+    
+        isBasicObject = function(object) {
+            return ( object==null || object==undefined || object.prototype === {}.prototype || object.prototype === Object.prototype) && _.isObject(object) && !_.isArray(object) && !_.isFunction(object) && !_.isDate(object) && !_.isRegExp(object) && !_.isArguments(object);
         };
-        basicObjects = function (object) {
-            return _.filter(_.keys(object), function (key) {
+    
+        basicObjects = function(object) {
+            return _.filter(_.keys(object), function(key) {
                 return isBasicObject(object[key]);
             });
         };
-        arrays = function (object) {
-            return _.filter(_.keys(object), function (key) {
+    
+        arrays = function(object) {
+            return _.filter(_.keys(object), function(key) {
                 return _.isArray(object[key]);
             });
         };
-        deepExtendCouple = function (destination, source, maxDepth) {
-            if (!source) {
-                return destination;
+    
+        deepExtendCouple = function(destination, source, maxDepth) {
+            if( !source ) {
+                return destination
             }
             var combine, recurse, sharedArrayKey, sharedArrayKeys, sharedObjectKey, sharedObjectKeys, _i, _j, _len, _len1;
             if (maxDepth == null) {
@@ -50,7 +59,7 @@ KISSY.add('dvix/utils/deep-extend', function (S) {
                 return _.extend(destination, source);
             }
             sharedObjectKeys = _.intersection(basicObjects(destination), basicObjects(source));
-            recurse = function (key) {
+            recurse = function(key) {
                 return source[key] = deepExtendCouple(destination[key], source[key], maxDepth - 1);
             };
             for (_i = 0, _len = sharedObjectKeys.length; _i < _len; _i++) {
@@ -58,19 +67,21 @@ KISSY.add('dvix/utils/deep-extend', function (S) {
                 recurse(sharedObjectKey);
             }
             sharedArrayKeys = _.intersection(arrays(destination), arrays(source));
-            combine = function (key) {
+            combine = function(key) {
                 //TODO:这里做点修改，array的话就不需要做并集了。直接整个array覆盖。因为
                 //在大部分的场景里，array的话，应该要看成是一个basicObject
-                return source[key];    //return source[key] = _.union(destination[key], source[key]);
+                return source[key];
+    
+                //return source[key] = _.union(destination[key], source[key]);
             };
-            //return source[key] = _.union(destination[key], source[key]);
             for (_j = 0, _len1 = sharedArrayKeys.length; _j < _len1; _j++) {
                 sharedArrayKey = sharedArrayKeys[_j];
                 combine(sharedArrayKey);
             }
             return _.extend(destination, source);
         };
-        deepExtend = function () {
+    
+        deepExtend = function() {
             var finalObj, maxDepth, objects, _i;
             objects = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), maxDepth = arguments[_i++];
             if (!_.isNumber(maxDepth)) {
@@ -89,6 +100,7 @@ KISSY.add('dvix/utils/deep-extend', function (S) {
             }
             return finalObj;
         };
+    
         _.mixin({
             deepClone: deepClone,
             isBasicObject: isBasicObject,
@@ -96,5 +108,8 @@ KISSY.add('dvix/utils/deep-extend', function (S) {
             arrays: arrays,
             deepExtend: deepExtend
         });
-    }.call(window));
-}, { requires: [] });
+    
+        }).call( window );
+    
+    } 
+)
