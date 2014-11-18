@@ -54,7 +54,7 @@ cdn环境为：http://g.tbcdn.cn/thx/charts/1.2.4/dvix/index-min.js
     var options = {
         mode : 1
     }
-    var chart = new Chart( S.all("chartTest") , data , options );
+    var chart = new Chart( "chartTest" , data , options );
     
     //这个时候的chart还不会渲染。需要手动调用draw方法
     chart.draw();
@@ -120,7 +120,7 @@ Example
 然后在使用该图表的时候
 
  ```js
- var pie = new Chart(S.all("#chart") , data , options);
+ var pie = new Chart("#chart" , data , options);
  pie.on("init" , function(){
      alert("Im ready now");
  })
