@@ -157,7 +157,11 @@ define(
             },
             //每两个点之间的距离
             _getGraphsDisX:function(){
-                return this._xAxis.xGraphsWidth / ( this.dataFrame.xAxis.org[0].length - 1 );
+                var n = this._xAxis.xGraphsWidth / ( this.dataFrame.xAxis.org[0].length - 1 );
+                if(this.dataFrame.xAxis.org[0].length == 1){
+                    n = 0
+                }
+                return n
             },
     
             _drawEnd:function(){

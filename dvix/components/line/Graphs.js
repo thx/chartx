@@ -146,8 +146,8 @@ define(
                 })
             },
             _getInfoHandler:function(e){
-                var x = e.point.x, y = e.point.y - this.h
-                var tmpINode = parseInt( (x + (this.disX / 2) ) / this.disX  );
+                var x = e.point.x, y = e.point.y - this.h;
+                var tmpINode = this.disX == 0 ? 0 : parseInt( (x + (this.disX / 2) ) / this.disX  );
                 
                 var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(this._nodesInfoList , "y" ));
                 this._nodesInfoList = []                 //节点信息集合

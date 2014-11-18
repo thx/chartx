@@ -66,7 +66,7 @@ var Dvix = {
             }
         } 
         if( typeof define == "function" && define.cmd ){
-            var cmdDefine = define
+            var cmdDefine = define;
             window.define = function( id , deps , factory ){
         
                 //只有固定的一些包是按照amd规范写的才需要转换。
@@ -75,18 +75,18 @@ var Dvix = {
                 if( typeof id == "string" && checkInBackages(id) ){
                     //只有canvax包下面的才需要做转换，因为canvax的module是安装amd格式编写的
                     return cmdDefine(id , deps , function( require, exports, module ){
-                        var depList = []
+                        var depList = [];
                         for( var i = 0 , l = deps.length ; i<l ; i++ ){
-                            depList.push( require(deps[i]) )
+                            depList.push( require(deps[i]) );
                         }
                         //return factory.apply(window , depList);
         
                         //其实用上面的直接return也是可以的
                         //但是为了遵循cmd的规范，还是给module的exports赋值
-                        module.exports = factory.apply(window , depList)
+                        module.exports = factory.apply(window , depList);
                     });
                 } else {
-                    return cmdDefine.apply(window , arguments)
+                    return cmdDefine.apply(window , arguments);
                 }
             }
         }    
@@ -121,23 +121,23 @@ var Dvix = {
                 combine : !Dvix.site.local
             }]} );
 
-            var packageObj = {}
-            packageObj[ name.toString() ] = path
-            window.seajs && seajs.config(         {alias : packageObj} )
-            window.requirejs && requirejs.config( {paths : packageObj} )
+            var packageObj = {};
+            packageObj[ name.toString() ] = path;
+            window.seajs && seajs.config(         {alias : packageObj} );
+            window.requirejs && requirejs.config( {paths : packageObj} );
         }
     },
     // dom操作相关代码
     getEl : function(el){
         if(_.isString(el)){
-           return document.getElementById(el)
+           return document.getElementById(el);
         }
         if(el.nodeType == 1){
            //则为一个element本身
-           return el
+           return el;
         }
         if(el.length){
-           return el[0]
+           return el[0];
         }
         return null;
     },
@@ -187,30 +187,30 @@ var Dvix = {
 //如果charts有被down下来使用。请修改下面的
 (function(){
     if(  (/daily.taobao.net/g).test(location.host)  ){
-        Dvix.site.daily = true
+        Dvix.site.daily = true;
     }
     
     //配置canvax包
-    var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/2014.11.11/"
+    var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/2014.11.18/";
     if( Dvix.site.daily || Dvix.site.local ){
-        canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.11.11/"
+        canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.11.18/";
     }
     /**
      * 下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和dvix实时调试
      */
     if( !! ~location.search.indexOf('localcanvax') ){
         //本地环境测试
-        canvaxUrl     = "http://nick.daily.taobao.net/canvax"
+        canvaxUrl     = "http://nick.daily.taobao.net/canvax";
     }
 
 
     //配置dvix包
-    var dvixUrl       = "http://g.tbcdn.cn/thx/charts/1.2.3/"
+    var dvixUrl       = "http://g.tbcdn.cn/thx/charts/1.2.4/";
     if( Dvix.site.daily ){
-        dvixUrl       = "http://g.assets.daily.taobao.net/thx/charts/1.2.3/"
+        dvixUrl       = "http://g.assets.daily.taobao.net/thx/charts/1.2.4/";
     }
     if( Dvix.site.local ){
-        dvixUrl       = "../../"
+        dvixUrl       = "../../";
     }
     
     //KISSY.config({
