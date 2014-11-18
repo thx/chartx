@@ -16,7 +16,7 @@ Dvix底层依赖cavnas渲染引擎 canvax：git@gitlab.alibaba-inc.com:thx/canva
 
 所以，只要有AMD加载器（比如requirejs） 便可以使用Dvix来实现数据可视化。
 
-同时，如果项目中使用的是KISSY 或者 seajs（CMD）。Dvix自带的通用模块定义适配器可以自动适配 (http://gitlab.alibaba-inc.com/thx/canvax/issues/2) 到KISSY或者seajs环境中运行。
+同时，如果项目中使用的是KISSY 或者 seajs（CMD）。Dvix自带的通用模块定义适配器 (http://gitlab.alibaba-inc.com/thx/canvax/issues/2) 可以自动适配到KISSY或者seajs环境中运行。
 
 
 ## 相关成员
