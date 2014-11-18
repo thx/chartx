@@ -19,28 +19,6 @@
 </style>
 <body>
     <div id="eggGame"></div>
-    <script>
-        KISSY.config({
-            packages: [{
-                name  :  'dvix'  ,
-                path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
-                debug :  true
-            } 
-            ]
-        });
-
-        KISSY.ready( function(S){
-            KISSY.use("dvix/game/egg/ , node " , function( S , Egg ){
-                var el       = S.all("#eggGame");
-
-                window.egg = new Egg( el , {
-                    eggMoveEnd : function(){
-                      alert("砸蛋后的回调")
-                    }
-                } );
-
-            }); 
-        } ); 
-    </script>
+  
 </body> 
 </html>
