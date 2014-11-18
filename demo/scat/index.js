@@ -85,7 +85,7 @@ KISSY.ready(function(){
      
     KISSY.use("dvix/chart/scat/ , node" , function( S , Scat ){
         window.scat = new Scat( S.all("#canvasTest") , data1 , options );
-        //scat.draw();
+        scat.draw();
     });
 
     

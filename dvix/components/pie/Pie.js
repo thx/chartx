@@ -28,13 +28,13 @@
       this.sprite.context.y = $n
     },
     //配置数据
-    _configData: function () {
+    _configData: function () {      
       var self = this;
       self.total = 0;
       self.currentAngle = 0;
-      self.labelFontSize = 12 * self.pie.boundWidth / 800;
+      self.labelFontSize = 12 * self.boundWidth / 1000;
       var data = self.data.data;
-      self.clickMoveDis = self.pie.r / 8;
+      self.clickMoveDis = self.r / 8;
       if (data.length && data.length > 0) {
         if (data.length == 1) {
           S.mix(data[0], {
@@ -61,7 +61,8 @@
               var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
               var sinV = Math.sin((self.currentAngle + angle / 2) / 180 * Math.PI);
               var midAngle = self.currentAngle + angle / 2;
-
+              cosV = cosV.toFixed(5);
+              sinV = sinV.toFixed(5);
               var quadrant = function (ang) {
                 if (0 <= ang && ang <= 90) {
                   return 1;
@@ -72,7 +73,7 @@
                 else if (180 < ang && ang <= 270) {
                   return 3;
                 }
-                else if (270 < ang && ang < 360) {
+                else if (270 < ang && ang <= 360) {
                   return 4;
                 }
               } (midAngle);
@@ -83,12 +84,12 @@
                 midAngle: midAngle,
                 outOffsetx: self.clickMoveDis * cosV,
                 outOffsety: self.clickMoveDis * sinV,
-                centerx: (self.pie.r - self.clickMoveDis) * cosV,
-                centery: (self.pie.r - self.clickMoveDis) * sinV,
-                outx: (self.pie.r + self.clickMoveDis) * cosV,
-                outy: (self.pie.r + self.clickMoveDis) * sinV,
-                edgex: (self.pie.r + 2 * self.clickMoveDis) * cosV,
-                edgey: (self.pie.r + 2 * self.clickMoveDis) * sinV,
+                centerx: (self.r - self.clickMoveDis) * cosV,
+                centery: (self.r - self.clickMoveDis) * sinV,
+                outx: (self.r + self.clickMoveDis) * cosV,
+                outy: (self.r + self.clickMoveDis) * sinV,
+                edgex: (self.r + 2 * self.clickMoveDis) * cosV,
+                edgey: (self.r + 2 * self.clickMoveDis) * sinV,
                 percentage: (percentage * 100).toFixed(1),
                 txt: (percentage * 100).toFixed(1) + '%',
                 quadrant: quadrant,
@@ -96,6 +97,7 @@
                 index: j,
                 isMax: false
               })
+
               self.currentAngle += angle
             }
             data[maxIndex].isMax = true;
@@ -177,8 +179,8 @@
     },
     draw: function (opt) {
       var self = this;
-      self.setX(self.pie.x);
-      self.setY(self.pie.y);
+      self.setX(self.x);
+      self.setY(self.y);
       self._widget();
       //this.sprite.context.globalAlpha = 0;      
       if (opt.animation) {
@@ -189,6 +191,7 @@
       }
     },
     moveSector: function (clickSec) {
+      if (!clickSec) return;
       var self = this;
       var data = self.data.data;
       var moveTimer = null;
@@ -198,25 +201,29 @@
       .onUpdate(function () {
         var me = this;
         S.each(self.sectors, function (sec) {
-          if (sec.sector.__dataIndex == clickSec.__dataIndex && !sec.sector.__isSelected) {
-            sec.context.x = data[sec.sector.__dataIndex].outOffsetx * me.percent;
-            sec.context.y = data[sec.sector.__dataIndex].outOffsety * me.percent;
-          }
-          else if (sec.sector.__isSelected) {
-            sec.context.x = data[sec.sector.__dataIndex].outOffsetx * (1 - me.percent);
-            sec.context.y = data[sec.sector.__dataIndex].outOffsety * (1 - me.percent);
+          if (sec.context) {
+            if (sec.index == clickSec.__dataIndex && !sec.sector.__isSelected) {
+              sec.context.x = data[sec.sector.__dataIndex].outOffsetx * me.percent;
+              sec.context.y = data[sec.sector.__dataIndex].outOffsety * me.percent;
+            }
+            else if (sec.sector.__isSelected) {
+              sec.context.x = data[sec.sector.__dataIndex].outOffsetx * (1 - me.percent);
+              sec.context.y = data[sec.sector.__dataIndex].outOffsety * (1 - me.percent);
+            }
           }
         })
       })
       .onComplete(function () {
         cancelAnimationFrame(moveTimer);
         S.each(self.sectors, function (sec) {
-          sec = sec.sector;
-          if (sec.__dataIndex == clickSec.__dataIndex && !sec.__isSelected) {
-            sec.__isSelected = true;
-          }
-          else if (sec.__isSelected) {
-            sec.__isSelected = false;
+          if (sec.sector) {
+            sec = sec.sector;
+            if (sec.__dataIndex == clickSec.__dataIndex && !sec.__isSelected) {
+              sec.__isSelected = true;
+            }
+            else if (sec.__isSelected) {
+              sec.__isSelected = false;
+            }
           }
         })
         self.isMoving = false;
@@ -233,28 +240,44 @@
       var self = this;
       var timer = null;
       S.each(self.sectors, function (sec, index) {
-        sec.context.r0 = 0;
-        sec.context.r = 0;
-        sec.context.startAngle = 0;
-        sec.context.endAngle = 0;
+        if (sec.context) {
+          sec.context.r0 = 0;
+          sec.context.r = 0;
+          sec.context.startAngle = 0;
+          sec.context.endAngle = 0;
+        }
       })
       self._hideDataLabel();
       var growAnima = function () {
         var pieOpen = new Tween.Tween({ process: 0, r: 0, r0: 0 })
-               .to({ process: 1, r: self.pie.r, r0: self.pie.r0 }, 800)
+               .to({ process: 1, r: self.r, r0: self.r0 }, 800)
                .onUpdate(function () {
                  var me = this;
                  for (var i = 0; i < self.sectors.length; i++) {
-                   self.sectors[i].context.r = me.r;
-                   self.sectors[i].context.r0 = me.r0;
-                   self.sectors[i].context.globalAlpha = me.process;
-                   if (i == 0) {
-                     self.sectors[i].context.startAngle = self.sectors[i].startAngle;
-                     self.sectors[i].context.endAngle = self.sectors[i].endAngle * me.process;
-                   }
-                   else {
-                     self.sectors[i].context.startAngle = self.sectors[i - 1].context.endAngle;
-                     self.sectors[i].context.endAngle = self.sectors[i].context.startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.process;
+                   if (self.sectors[i].context) {
+                     self.sectors[i].context.r = me.r;
+                     self.sectors[i].context.r0 = me.r0;
+                     self.sectors[i].context.globalAlpha = me.process;
+                     if (i == 0) {
+                       self.sectors[i].context.startAngle = self.sectors[i].startAngle;
+                       self.sectors[i].context.endAngle = self.sectors[i].endAngle * me.process;
+                     }
+                     else {
+                       var lastEndAngle = function (index) {                         
+                         var lastIndex = index - 1;
+                         if (lastIndex == 0) {
+                           return self.sectors[lastIndex].context ? self.sectors[lastIndex].context.endAngle : 0;
+                         }
+                         if (self.sectors[lastIndex].context) {
+                           return self.sectors[lastIndex].context.endAngle;
+                         }
+                         else {
+                           return arguments.callee(lastIndex);
+                         }
+                       } (i);
+                       self.sectors[i].context.startAngle = lastEndAngle;
+                       self.sectors[i].context.endAngle = self.sectors[i].context.startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.process;
+                     }
                    }
                  }
                }).onComplete(function () {
@@ -327,7 +350,7 @@
       var sectorMap = self.sectorMap;
       var minTxtDis = 20;
       var labelOffsetX = 5;
-      var outCircleRadius = self.pie.r + 2 * self.clickMoveDis;
+      var outCircleRadius = self.r + 2 * self.clickMoveDis;
       var currentIndex, baseY, clockwise, isleft, minPercent;
       var currentY, adjustX, txtDis, bkLineStartPoint, bklineMidPoint, bklineEndPoint, branchLine, brokenline, branchTxt, bwidth, bheight, bx, by;
 
@@ -338,7 +361,7 @@
 
       for (i = 0; i < indexs.length; i++) {
         currentIndex = indexs[i];
-        if (data[currentIndex].percentage <= minPercent) continue
+        if (data[currentIndex].y != 0 && data[currentIndex].percentage <= minPercent) continue
         currentY = data[currentIndex].edgey;
         adjustX = Math.abs(data[currentIndex].edgex);
         txtDis = currentY - baseY;
@@ -382,7 +405,7 @@
         var formatReg = /\{.+?\}/g;
         var point = data[currentIndex];
         if (self.dataLabel.format) {
-          labelTxt = self.dataLabel.format.replace(formatReg, function (match, index) {            
+          labelTxt = self.dataLabel.format.replace(formatReg, function (match, index) {
             var matchStr = match.replace(/\{([\s\S]+?)\}/g, '$1');
             var vals = matchStr.split('.');
             var obj = eval(vals[0]);
@@ -544,87 +567,108 @@
       var data = self.data.data;
       var moreSecData;
       if (data.length > 0 && self.total > 0) {
-
         self.branchSp && self.sprite.addChild(self.branchSp);
         self.branchTxtSp && self.sprite.addChild(self.branchTxtSp);
         for (var i = 0; i < data.length; i++) {
           if (self.colorIndex >= self.colors.length) self.colorIndex = 0;
           var fillColor = self.getColorByIndex(self.colors, i);
-          //扇形主体          
-          var sector = new Sector({
-            context: {
-              x: data[i].selected ? data[i].outOffsetx : 0,
-              y: data[i].selected ? data[i].outOffsety : 0,
-              //x: i == 1 ? data[i].outOffsetx : 0,
-              //y: i == 1 ? data[i].outOffsety :0,
-              //shadowColor: "black",
-              //shadowOffsetX: 0,
-              //shadowOffsetY: 0,
-              //shadowBlur: 5,
-              r0: self.pie.r0,
-              r: self.pie.r,
-              startAngle: data[i].start,
-              endAngle: data[i].end,
-              fillStyle: fillColor,
-              index: data[i].index,
-              lineWidth: self.strokeWidth,
-              strokeStyle: '#fff'
-              //clockwise: true
-            },
-            id: 'sector' + i
-          });
-          sector.__data = data[i];
-          sector.__colorIndex = i;
-          sector.__dataIndex = i;
-          sector.__isSelected = data[i].selected;
-          //扇形事件
-          sector.hover(function (e) {
-            var me = this;
-            if (!self.isMoving) {
+          if (data[i].end > data[i].start) {
+            //扇形主体          
+            var sector = new Sector({
+              context: {
+                x: data[i].selected ? data[i].outOffsetx : 0,
+                y: data[i].selected ? data[i].outOffsety : 0,
+                //x: i == 1 ? data[i].outOffsetx : 0,
+                //y: i == 1 ? data[i].outOffsety :0,
+                //shadowColor: "black",
+                //shadowOffsetX: 0,
+                //shadowOffsetY: 0,
+                //shadowBlur: 5,
+                r0: self.r0,
+                r: self.r,
+                startAngle: data[i].start,
+                endAngle: data[i].end,
+                fillStyle: fillColor,
+                index: data[i].index,
+                lineWidth: self.strokeWidth,
+                strokeStyle: '#fff'
+                //clockwise: true
+              },
+              id: 'sector' + i
+            });
+            sector.__data = data[i];
+            sector.__colorIndex = i;
+            sector.__dataIndex = i;
+            sector.__isSelected = data[i].selected;
+            //扇形事件
+            sector.hover(function (e) {
+              var me = this;
+              if (!self.isMoving) {
+                var target = e.target;
+                var globalPoint = target.localToGlobal(e.point);
+                self._redrawTip(me);
+                self._moveTip(globalPoint);
+                self._showTip();
+              }
+            }, function () {
+              if (!self.isMoving) {
+                self._hideTip();
+              }
+            })
+            sector.on('mousemove', function (e) {
               var target = e.target;
               var globalPoint = target.localToGlobal(e.point);
-              self._redrawTip(me);
               self._moveTip(globalPoint);
-              self._showTip();
-            }
-          }, function () {
-            if (!self.isMoving) {
-              self._hideTip();
-            }
-          })
-          sector.on('mousemove', function (e) {
-            var target = e.target;
-            var globalPoint = target.localToGlobal(e.point);
-            self._moveTip(globalPoint);
-          })
+            })
 
-          sector.on('click', function () {
-            var clickSec = this;
-            if (!self.isMoving) {
-              self.allowPointSelect && self.moveSector(clickSec);
-            }
-          })
-          self.sprite.addChild(sector);
-          moreSecData = {
-            sector: sector,
-            context: sector.context,
-            originx: sector.context.x,
-            originy: sector.context.y,
-            r: self.pie.r,
-            startAngle: sector.context.startAngle,
-            endAngle: sector.context.endAngle,
-            color: fillColor,
-            visible: true
-          };
-          self.sectors.push(moreSecData);
+            sector.on('click', function () {
+              var clickSec = this;
+              if (!self.isMoving) {
+                self.allowPointSelect && self.moveSector(clickSec);
+              }
+            })
+            self.sprite.addChild(sector);
+            moreSecData = {
+              name: data[i].name,
+              sector: sector,
+              context: sector.context,
+              originx: sector.context.x,
+              originy: sector.context.y,
+              r: self.r,
+              startAngle: sector.context.startAngle,
+              endAngle: sector.context.endAngle,
+              color: fillColor,
+              index: i,
+              percentage: data[i].percentage,
+              visible: true
+            };
+            self.sectors.push(moreSecData);
+          }
+          else if (data[i].end == data[i].start) {
+            self.sectors.push({
+              name: data[i].name,
+              sector: null,
+              context: null,
+              originx: 0,
+              originy: 0,
+              r: self.r,
+              startAngle: data[i].start,
+              endAngle: data[i].end,
+              color: fillColor,
+              index: i,
+              percentage: 0,
+              visible: true
+            });
+          }
         }
 
         if (self.sectors.length > 0) {
           self.sectorMap = {};
           for (var i = 0; i < self.sectors.length; i++) {
-            self.sectorMap[self.sectors[i].sector.__dataIndex] = self.sectors[i];
+            self.sectorMap[self.sectors[i].index] = self.sectors[i];
           }
         }
+
         if (self.dataLabel.enabled) {
           self._startWidgetLabel();
         }

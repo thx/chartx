@@ -1,4 +1,3 @@
-
 define(
     "dvix/chart/index",
     [
@@ -11,6 +10,7 @@ define(
             this.el            =  Dvix.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
             this.width         =  parseInt( Dvix.getStyle(this.el , "width" ) )  //图表区域宽
             this.height        =  parseInt( Dvix.getStyle(this.el , "height") ) //图表区域高
+
     
             //Canvax实例
             this.canvax        =  new Canvax({
@@ -32,7 +32,7 @@ define(
             //数据集合，由_initData 初始化
             this.dataFrame = this._initData( data , this );
     
-            this.draw();
+            //this.draw();
         };
     
         Chart.Canvax = Canvax;
