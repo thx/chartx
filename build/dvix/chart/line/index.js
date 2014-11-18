@@ -143,14 +143,14 @@ define(
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
                         !tmpData[a] ? tmpData[a] = [] : ''
+                        var x = b / (maxXAxis - 1) * this._xAxis.xGraphsWidth
+                        if(maxXAxis == 1 && arr[a].length == 1) {                      //每条线上只有一个点 那么x需要居中
+                            x = this._xAxis.xGraphsWidth / 2
+                        }
+
                         var y = - (arr[a][b] - this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight
                         y = isNaN(y) ? 0 : y
-                        tmpData[a][b] = {'value':arr[a][b], 'x':b / (maxXAxis - 1) * this._xAxis.xGraphsWidth,'y':y}
-                    }
-                }
-                if(maxXAxis == 1){
-                    if(tmpData[0] && tmpData[0][0]){
-                        tmpData[0][0].x = parseInt(this._xAxis.xGraphsWidth / 2)
+                        tmpData[a][b] = {'value':arr[a][b], 'x':x,'y':y}
                     }
                 }
                 return tmpData
