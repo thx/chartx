@@ -1,5 +1,31 @@
 var Dvix = {
-    site : {
+    start : function(){
+        //业务代码部分。
+        //如果charts有被down下来使用。请修改下面的
+        if(  (/daily.taobao.net/g).test(location.host)  ){
+            Dvix.site.daily = true;
+        }
+ 
+        //配置canvax包
+        var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/2014.11.18/";
+
+        
+
+        //配置dvix包
+        var dvixUrl       = "http://g.tbcdn.cn/thx/charts/1.2.6/";
+
+        
+        
+        Dvix.setPackages( [{
+                name  : 'canvax' , 
+                path  : canvaxUrl
+            },{
+                name  : 'dvix',
+                path  : dvixUrl
+            }]
+        );
+    }, 
+    site  : {
         local : !! ~location.search.indexOf('local'),
         daily : !! ~location.search.indexOf('daily'),
         debug : !! ~location.search.indexOf('debug'),
@@ -8,7 +34,7 @@ var Dvix = {
     /**
      *@packages array [{name:,path:}]
      */
-    start : function( packages ){
+    setPackages : function( packages ){
             
         /*       
         ## 通用模块定义
@@ -181,28 +207,4 @@ var Dvix = {
         }; 
     }
 };
-
-
-//业务代码部分。
-//如果charts有被down下来使用。请修改下面的
-(function(){
-    if(  (/daily.taobao.net/g).test(location.host)  ){
-        Dvix.site.daily = true;
-    }
-    
-    //配置canvax包
-    var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/2014.11.18/";
-    //配置dvix包
-    var dvixUrl       = "http://g.tbcdn.cn/thx/charts/1.2.6/";
-
-    
-    Dvix.start( [{
-            name  : 'canvax' , 
-            path  : canvaxUrl
-        },{
-            name  : 'dvix',
-            path  : dvixUrl
-        }]
-    )
-
-})(window);
+Dvix.start();

@@ -7,7 +7,7 @@ module.exports = function(grunt) {
          }
      },
      uglify: {
-        options: {
+         options: {
             beautify: {
                  ascii_only: true
             }
@@ -23,11 +23,24 @@ module.exports = function(grunt) {
      copy: {
          main: {
              files: [
- 
-             { expand: true, cwd: 'dvix', src: ['**'], dest: 'build/dvix'},
-             { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'},
-             { expand: true, cwd: 'gameDemo', src: ['**'], dest: 'build/gameDemo'}
+                { expand: true, cwd: 'dvix', src: ['**','!index.js'], dest: 'build/dvix'},
+                { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'}
              ]
+         }
+      },
+      concat : {
+         options: {
+             separator: '\n\n',
+             process: function(src, filepath) {
+                 var develop = /\/\/BEGIN\(develop\)[\s\S]+?\/\/END\(develop\)/mg;
+                 return src.replace( develop , "" );
+             }
+         },
+         dist : {
+             src: [
+                 'dvix/index.js'
+             ],
+             dest: 'build/dvix/index.js'
          }
       }
   });
@@ -39,7 +52,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [ 'clean' , 'copy' ,  'uglify'  ]);
+  grunt.registerTask('default', [ 'clean' , 'copy' , 'concat' , 'uglify'  ]);
 }
 
 
