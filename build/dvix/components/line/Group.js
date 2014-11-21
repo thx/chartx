@@ -29,7 +29,6 @@ define(
         };
     
         Group.prototype = {
-    
             init:function(opt){
                 _.deepExtend( this , opt );
                 this.sprite = new Canvax.Display.Sprite();
@@ -43,7 +42,7 @@ define(
     
             draw:function(opt){
                 var self  = this;
-                self._configData(opt)
+                _.deepExtend( this , opt );
                 self._widget()
             },
             getNodeInfoAt:function($index){
@@ -57,19 +56,6 @@ define(
                     return null
                 }
             },
-    
-            //配置数据
-            _configData:function(opt){
-                var self = this
-                var opt = opt || {}
-    
-                self.w  = opt.w  || 0;
-                self.h  = opt.h  || 0;
-                self.y  = opt.y  || 0;
-    
-                self.data = opt.data  || []
-            },
-    
             _widget:function(){
                 var self  = this;
     
@@ -100,7 +86,6 @@ define(
                     }
                 }))
             },
-    
             _fillLine:function( bline ){                        //填充直线
                 var fillPath = _.clone( bline.context.pointList );
                 fillPath.push( 
@@ -119,8 +104,6 @@ define(
                 return d
             }
         };
-    
         return Group;
-    
     }
 )
