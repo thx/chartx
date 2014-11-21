@@ -1,4 +1,16 @@
-﻿KISSY.add("dvix/components/pie/Pie", function (S, Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween) {
+﻿define(
+  "dvix/components/pie/Pie", 
+  [
+      "canvax/",
+      "canvax/shape/Sector",
+      "canvax/shape/Line",
+      "canvax/shape/BrokenLine",
+      "canvax/shape/Rect",
+      "dvix/utils/tools",
+      "canvax/animation/Tween",
+      "dvix/utils/deep-extend"
+  ],
+  function (Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween) {
   var Pie = function (opt, data) {
     this.data = data;
     this.sprite = null;
@@ -37,7 +49,7 @@
       self.clickMoveDis = self.r / 8;
       if (data.length && data.length > 0) {
         if (data.length == 1) {
-          S.mix(data[0], {
+          _.extend(data[0], {
             start: 0,
             end: 360,
             percentage: 100,
@@ -76,9 +88,8 @@
                 else if (270 < ang && ang <= 360) {
                   return 4;
                 }
-              } (midAngle);
-
-              S.mix(data[j], {
+              } (midAngle);              
+              _.extend(data[j], {
                 start: self.currentAngle,
                 end: endAngle,
                 midAngle: midAngle,
@@ -140,7 +151,7 @@
       var bottomBase = 90;
       var preTopDis = 90, preBottomDis = 90, currentTopDis, currentBottomDis;
       if (data.length > 0) {
-        S.each(self.data, function () {
+        _.each(self.data, function () {
           //bottom
           if (data.quadrant == 1 || data.quadrant == 2) {
             currentBottomDis = Math.abs(data.middleAngle - bottomBase);
@@ -200,7 +211,7 @@
       .easing(Tween.Easing.Quadratic.InOut)
       .onUpdate(function () {
         var me = this;
-        S.each(self.sectors, function (sec) {
+        _.each(self.sectors, function (sec) {
           if (sec.context) {
             if (sec.index == clickSec.__dataIndex && !sec.sector.__isSelected) {
               sec.context.x = data[sec.sector.__dataIndex].outOffsetx * me.percent;
@@ -215,7 +226,7 @@
       })
       .onComplete(function () {
         cancelAnimationFrame(moveTimer);
-        S.each(self.sectors, function (sec) {
+        _.each(self.sectors, function (sec) {
           if (sec.sector) {
             sec = sec.sector;
             if (sec.__dataIndex == clickSec.__dataIndex && !sec.__isSelected) {
@@ -239,7 +250,7 @@
     grow: function () {
       var self = this;
       var timer = null;
-      S.each(self.sectors, function (sec, index) {
+      _.each(self.sectors, function (sec, index) {
         if (sec.context) {
           sec.context.r0 = 0;
           sec.context.r = 0;
@@ -508,8 +519,7 @@
           clockwise: false,
           indexs: []
         }
-      }
-
+      }      
       for (var i = 0; i < data.length; i++) {
         var cur = data[i].quadrant;
         quadrantInfo[cur - 1].indexs.push(i);
@@ -677,16 +687,4 @@
   };
 
   return Pie;
-
-}, {
-  requires: [
-        "canvax/",
-        "canvax/shape/Sector",
-        "canvax/shape/Line",
-        "canvax/shape/BrokenLine",
-        "canvax/shape/Rect",
-        "dvix/utils/tools",
-        "canvax/animation/Tween",
-        "dvix/utils/deep-extend"
-    ]
 })
