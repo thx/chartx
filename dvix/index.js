@@ -11,7 +11,7 @@ var Dvix = {
 
         //BEGIN(develop)
         if( Dvix.site.daily || Dvix.site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.11.18/";
+            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.11.18/canvax";
         }
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和dvix实时调试
         if( !! ~location.search.indexOf('localcanvax') ){
@@ -28,7 +28,7 @@ var Dvix = {
             dvixUrl       = "http://g.assets.daily.taobao.net/thx/charts/1.2.6/";
         }
         if( Dvix.site.local ){
-            dvixUrl       = "../../";
+            dvixUrl       = "../../dvix";
         }
         //END(develop)
         

@@ -1,7 +1,7 @@
 ﻿define(
   "dvix/components/pie/Pie", 
   [
-      "canvax/",
+      "canvax/index",
       "canvax/shape/Sector",
       "canvax/shape/Line",
       "canvax/shape/BrokenLine",

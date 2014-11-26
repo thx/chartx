@@ -1,7 +1,7 @@
 ﻿define(
   'dvix/chart/pie/index',
   [
-        'dvix/chart/',
+        'dvix/chart/index',
         'dvix/components/pie/Pie',
         'dvix/components/line/Graphs',
         'dvix/components/pie/PieTip'
