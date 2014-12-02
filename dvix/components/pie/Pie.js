@@ -185,7 +185,7 @@
       return colors[index];
     },
     _configColors: function () {
-      var defaultColors = ['#95CEFF', '#434348', '#90ED7D', '#F7A35C', '#8085E9', '#F15C80', '#E4D354', '#8085E8', '#8D4653', '#91E8E1'];
+      var defaultColors = ['#FF7D00', '#516DCC', '#8ACC5F', '#A262CB', '#FFD202', '#CC3E3C', '#00A5FF', '#009964', '#CCB375', '#694C99'];
       this.colors = this.colors ? this.colors : defaultColors;
     },
     draw: function (opt) {

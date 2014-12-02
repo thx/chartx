@@ -6,8 +6,8 @@ requirejs.config({
   }
 });
 
-requirejs(['domReady', '../../lib/underscore', 'dvix/chart/pie/index', 'jquery-1.11.1'], function (domready, underscore, Pie, $) {
-  domready(function () {
+requirejs(['domReady', '../../lib/underscore', 'jquery-1.11.1', 'dvix/chart/pie/index'], function (domready, underscore, $, Pie) {
+  domready(function () {    
     var data1 = [
     ['Firefox', 20],
     ['Opera2', 1],
@@ -89,5 +89,5 @@ requirejs(['domReady', '../../lib/underscore', 'dvix/chart/pie/index', 'jquery-1
       });
     });
     pie.draw();
-  })  
+  })
 })
