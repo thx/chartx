@@ -125,7 +125,7 @@ define(
                         id : "radar_bg_"+i,
                         context : {
                             pointList   : pointList,
-                            globalAlpha : 0.3,
+                            globalAlpha : 0.5,
                             fillStyle   : this._colors[i]
                         }
                     });

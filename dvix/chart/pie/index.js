@@ -33,6 +33,9 @@
         this.stageTip.toFront();
         //this.stage.addChild(this.stageBg);
         this.stage.addChild(this.core);
+
+        this.dataFrame = this._initData( data , this );
+
       },
       draw: function () {
         this._initModule();                      //初始化模块

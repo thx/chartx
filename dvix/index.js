@@ -11,7 +11,7 @@ var Dvix = {
 
         //BEGIN(develop)
         if( Dvix.site.daily || Dvix.site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.11.18/canvax";
+            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.12.02/";
         }
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和dvix实时调试
         if( !! ~location.search.indexOf('localcanvax') ){
@@ -28,7 +28,7 @@ var Dvix = {
             dvixUrl       = "http://g.assets.daily.taobao.net/thx/charts/1.2.6/";
         }
         if( Dvix.site.local ){
-            dvixUrl       = "../../dvix";
+            dvixUrl       = "../../";
         }
         //END(develop)
         
@@ -79,16 +79,21 @@ var Dvix = {
             }
             return false
         }
+
+        function isArray(obj){
+            return (obj.constructor.toString().indexOf("Array") != -1)
+        }
     
         if (!window.define) {
             if(KISSY){
+                
                 window.define = function define(id, dependencies, factory) {
                     // KISSY.add(name?, factory?, deps)
                     function proxy() {
-                        var slice = [].slice;
-                        var args = slice.call(arguments, 1, arguments.length);
+                        var args = [].slice.call(arguments, 1, arguments.length);
                         return factory.apply(window, args)
                     }
+
                     switch (arguments.length) {
                         case 2:
                             factory = dependencies;
@@ -104,7 +109,18 @@ var Dvix = {
                             break;
                     }
                 };
+
                 window.define.kmd = {}
+
+                if(!window.require){
+                   window.require = function( deps , hander ){
+                       function proxy() {
+                           var args = [].slice.call(arguments, 1, arguments.length);
+                           return hander.apply(window, args)
+                       }
+                       KISSY.use( isArray(deps) ? deps.join(",") : deps , proxy );
+                   };
+                }
             }
         } 
         if( typeof define == "function" && define.cmd ){
@@ -130,6 +146,9 @@ var Dvix = {
                 } else {
                     return cmdDefine.apply(window , arguments);
                 }
+            }
+            if( window.require ){
+                window.require = seajs.use;
             }
         }    
         if( typeof define == "function" && define.amd ){
