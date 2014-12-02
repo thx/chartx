@@ -17,7 +17,7 @@ define(
     
         return Chart.extend( {
     
-            init:function(){
+            init:function(node , data , opt){
      
                 this._xAxis        =  null;
                 this._yAxis        =  null;
@@ -39,7 +39,9 @@ define(
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.core);
                 this.stage.addChild(this.stageTip);
-    
+                
+                this.dataFrame = this._initData( data , this );
+ 
             },
             draw:function(){
                 if( this.rotate ) {

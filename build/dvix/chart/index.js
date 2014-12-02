@@ -30,7 +30,7 @@ define(
             _.deepExtend( this , opts );
     
             //数据集合，由_initData 初始化
-            this.dataFrame = this._initData( data , this );
+            //this.dataFrame = this._initData( data , this );
     
             //this.draw();
         };

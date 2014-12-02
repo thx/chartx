@@ -1,7 +1,7 @@
 ﻿define(
   "dvix/components/pie/PieTip",
   [
-      "canvax/",
+      "canvax/index",
       "canvax/shape/Circle",
       "canvax/shape/Rect",
       "dvix/utils/tools"

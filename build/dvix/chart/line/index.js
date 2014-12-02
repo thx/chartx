@@ -19,7 +19,7 @@ define(
     
         return Chart.extend( {
     
-            init:function(node){
+            init:function(node , data , opt){
                 this.event         = {
                     enabled : 1
                 }
@@ -43,6 +43,9 @@ define(
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.core);
                 this.stage.addChild(this.stageTip);
+
+                this.dataFrame = this._initData( data , this );
+
             },
             draw:function(){
                 if( this.rotate ) {

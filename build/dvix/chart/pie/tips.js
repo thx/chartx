@@ -1,6 +1,6 @@
 ﻿define('dvix/chart/pie/tips',
   [
-      "canvax/",
+      "canvax/index",
       "canvax/shape/Line",
       "canvax/shape/Circle",
       "dvix/components/tips/tip",

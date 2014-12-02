@@ -18,7 +18,7 @@ define(
     
         return Chart.extend( {
     
-            init:function(){
+            init:function(node , data , opt){
                 this.r             = 0 
     
                 this._xAxis        = null;
@@ -35,6 +35,9 @@ define(
     
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.stageCore);
+                
+                this.dataFrame = this._initData( data , this );
+
             },
             _getR : function(){
                 var minWorH = Math.min( this.width , this.height );
