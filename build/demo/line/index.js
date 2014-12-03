@@ -73,14 +73,14 @@ KISSY.ready(function(){
 
     KISSY.config({
         packages: [{
-            name  :  'dvix'  ,
+            name  :  'chartx'  ,
             path  :  '../../',
             debug :  true
         }
         ]
     });
 
-    KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
+    KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
         var line = new Line( S.all("#canvasTest") , data1 , options  );
         line.draw();
         window.line = line

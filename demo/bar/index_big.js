@@ -104,7 +104,7 @@ KISSY.ready(function(){
 
     KISSY.config({
         packages: [{
-            name  :  'dvix'  ,
+            name  :  'chartx'  ,
             path  :  '../../',
             // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
             debug :  true
@@ -114,7 +114,7 @@ KISSY.ready(function(){
 
 
 
-    KISSY.use("dvix/chart/bar/ , node" , function( S , Bar ){
+    KISSY.use("chartx/chart/bar/ , node" , function( S , Bar ){
 
         window.bar = new Bar( S.all("#canvasTest") , data1 , options);
         bar.draw();

@@ -76,7 +76,7 @@ KISSY.ready(function(){
 
     KISSY.config({
         packages: [{
-            name  :  'dvix'  ,
+            name  :  'chartx'  ,
             path  :  '../../',
             // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
             debug :  true
@@ -86,7 +86,7 @@ KISSY.ready(function(){
 
 
 
-    KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
+    KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
 
         window.line = new Line( S.all("#canvasTest") , data1 , options);
         line.draw();

@@ -33,7 +33,7 @@
     //colors:['red', 'yellow', 'blue']
   }
 
-  KISSY.use("dvix/chart/pie/ , node", function (S, Pie) {
+  KISSY.use("chartx/chart/pie/ , node", function (S, Pie) {
 
     window.pie = new Pie(S.all("#canvasTest"), data1, options);    
     pie.on('complete', function () {

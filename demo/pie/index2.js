@@ -6,7 +6,7 @@ requirejs.config({
   }
 });
 
-requirejs(['domReady', '../../lib/underscore', 'jquery-1.11.1', 'dvix/chart/pie/index'], function (domready, underscore, $, Pie) {
+requirejs(['domReady', '../../lib/underscore', 'jquery-1.11.1', 'chartx/chart/pie/index'], function (domready, underscore, $, Pie) {
   domready(function () {    
     var data1 = [
     ['Firefox', 20],

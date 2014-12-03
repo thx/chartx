@@ -14,16 +14,16 @@ module.exports = function(grunt) {
          },
          app: {
              expand: true,
-             cwd: "build/dvix/",
+             cwd: "build/chartx/",
              src: ['**/*.js', '!**/*-min.js'],
-             dest: "build/dvix/",
+             dest: "build/chartx/",
              ext: '-min.js' // '-min.js'
          }
      },
      copy: {
          main: {
              files: [
-                { expand: true, cwd: 'dvix', src: ['**','!index.js'], dest: 'build/dvix'},
+                { expand: true, cwd: 'chartx', src: ['**','!index.js'], dest: 'build/chartx'},
                 { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'}
              ]
          }
@@ -38,9 +38,9 @@ module.exports = function(grunt) {
          },
          dist : {
              src: [
-                 'dvix/index.js'
+                 'chartx/index.js'
              ],
-             dest: 'build/dvix/index.js'
+             dest: 'build/chartx/index.js'
          }
       }
   });

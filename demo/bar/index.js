@@ -126,14 +126,14 @@ KISSY.ready(function(){
 
     KISSY.config({
         packages: [{
-            name  :  'dvix'  ,
+            name  :  'chartx'  ,
             path  :  '../../',
             debug :  true
         }
         ]
     });
 
-    KISSY.use("dvix/chart/bar/ , node" , function( S , Bar ){
+    KISSY.use("chartx/chart/bar/ , node" , function( S , Bar ){
         var bar = new Bar( S.all("#canvasTest") , data1 , options );
         bar.draw();
     });

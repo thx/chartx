@@ -27,9 +27,9 @@ Dvix底层依赖cavnas渲染引擎 canvax：git@gitlab.alibaba-inc.com:thx/canva
 
 * 首先在html中引入js脚本文件
 
-daily环境为：http://g.assets.daily.taobao.net/thx/charts/1.2.4/dvix/index-min.js
+daily环境为：http://g.assets.daily.taobao.net/thx/charts/1.2.4/chartx/index-min.js
 
-cdn环境为：http://g.tbcdn.cn/thx/charts/1.2.4/dvix/index-min.js
+cdn环境为：http://g.tbcdn.cn/thx/charts/1.2.4/chartx/index-min.js
 
     
 * 然后使用图表的时候，要依次传给构造函数三个参数， __domElement__  、 __data__ 、 __options__
@@ -78,12 +78,12 @@ KISSY.add("chart" , function(S , Chart){
     })
 } , {
     required : [
-        'dvix/chart/'
+        'chartx/chart/'
     ]
 })
 ```
 
-就这样开发一个最简单的chart，这个简单的chart看上去还一无所闻，事实上Chart基类已经为它准备好了下面（具体可以查看 dvix/chart/index.js文件）。
+就这样开发一个最简单的chart，这个简单的chart看上去还一无所闻，事实上Chart基类已经为它准备好了下面（具体可以查看 chartx/chart/index.js文件）。
 
 | 属性      | 说明 |
 |-----------|------|
