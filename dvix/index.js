@@ -2,9 +2,13 @@ var Dvix = {
     start: function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
+
+        //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
             Dvix.site.daily = true;
         }
+        //END(develop)
+
 
         //配置canvax包
         var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.02/";

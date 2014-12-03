@@ -13,7 +13,7 @@
     var Canvax = Chart.Canvax;
 
     return Chart.extend({
-      init: function (node) {
+      init: function (node , data , opt) {
         this.config = {
           mode: 1,
           event: {
