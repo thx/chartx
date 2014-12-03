@@ -12,7 +12,7 @@ var Dvix = {
 
 
         //配置chartx包
-        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.2.8/";
+        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.2.9/";
         
 
         Dvix.setPackages([{

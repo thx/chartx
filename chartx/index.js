@@ -25,10 +25,10 @@ var Dvix = {
 
 
         //配置chartx包
-        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.2.8/";
+        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.2.9/";
         //BEGIN(develop)
         if (Dvix.site.daily) {
-            dvixUrl = "http://g.assets.daily.taobao.net/thx/charts/1.2.8/";
+            dvixUrl = "http://g.assets.daily.taobao.net/thx/charts/1.2.9/";
         }
         if (Dvix.site.local) {
             dvixUrl = "../../";
