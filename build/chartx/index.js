@@ -7,12 +7,12 @@ var Dvix = {
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.02/";
+        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.08/";
         
 
 
         //配置chartx包
-        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.2.9/";
+        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.3.0/";
         
 
         Dvix.setPackages([{

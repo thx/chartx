@@ -13,6 +13,8 @@ define(
     
             this.dW      = 0;  //html的tips内容width
             this.dH      = 0;  //html的tips内容Height
+
+            this.backR   = 3;  //背景框的 圆角 
     
             this.sprite  = null;
             this.context = null; //tips的详细内容
@@ -58,6 +60,7 @@ define(
              *@pos {x:0,y:0}
              */
             setPosition : function( e ){
+                if(!this._tipDom) return;
                 var pos = e.pos || e.target.localToGlobal( e.point );
                 var x   = this._checkX( pos.x );
                 var y   = this._checkY( pos.y );
@@ -113,7 +116,7 @@ define(
                     lineWidth : 1,
                     strokeStyle : "#333333",
                     fillStyle : "#ffffff",
-                    radius : [5]
+                    radius : [ this.backR ]
                 }
                 this._back = new Rect({
                     id : "tipsBack",

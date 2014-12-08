@@ -11,10 +11,10 @@ var Dvix = {
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.02/";
+        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.08/";
         //BEGIN(develop)
         if( Dvix.site.daily || Dvix.site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.12.02/";
+            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.12.08/";
         }
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
         if( !! ~location.search.indexOf('localcanvax') ){
@@ -25,10 +25,10 @@ var Dvix = {
 
 
         //配置chartx包
-        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.2.9/";
+        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.3.0/";
         //BEGIN(develop)
         if (Dvix.site.daily) {
-            dvixUrl = "http://g.assets.daily.taobao.net/thx/charts/1.2.9/";
+            dvixUrl = "http://g.assets.daily.taobao.net/thx/charts/1.3.0/";
         }
         if (Dvix.site.local) {
             dvixUrl = "../../";

@@ -10,6 +10,7 @@ define(
     
         return Chart.extend({
             init : function(){
+                this.tips = {};
                 this.itemStyle = {
                     strokeStyle : "white",
                     fillStyle   : "#c9bbe6",
@@ -20,6 +21,8 @@ define(
                     fillStyle   : "#c9bbe6",
                     lineWidth   : 3
                 }
+
+                this.mapScale = Math.min( this.width / 560 , this.height / 470 );
             },
             draw : function(){
                 this._initModule();
@@ -34,6 +37,8 @@ define(
                         context : {
                             x:0,
                             y:0,
+                            scaleX : me.mapScale,
+                            scaleY : me.mapScale,
                             path :mapData.d ,
                             lineWidth   : me.itemStyle.lineWidth,
                             fillStyle   : me.itemStyle.fillStyle,
@@ -43,7 +48,7 @@ define(
                     map.mapData = mapData;
                     map.on("mouseover hold" , function(e){
                         this.context.strokeStyle = me.itemHoverStyle.strokeStyle;
-                        this.context.lineWidth   = me.itemHoverStyle.lineWidth; 
+                        this.context.lineWidth   = me.itemHoverStyle.lineWidth;
                         me._tips.show(e);
                     });
                     map.on("mouseout release" , function(e){
@@ -56,6 +61,8 @@ define(
 
             },
             _initModule : function(){
+                this.tips.cPointStyle = this.itemHoverStyle.strokeStyle;
+                this.tips.mapScale    = this.mapScale;
                 this._tips   = new Tips(this.tips , {
                     context : "中国地图"
                 } , this.canvax.getDomContainer());
