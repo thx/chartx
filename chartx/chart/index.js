@@ -7,9 +7,9 @@ define(
     ],
     function( Canvax , CanvaxBase ){
         var Chart = function(node , data , opts){
-            this.el            =  Dvix.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-            this.width         =  parseInt( Dvix.getStyle(this.el , "width" ) )  //图表区域宽
-            this.height        =  parseInt( Dvix.getStyle(this.el , "height") ) //图表区域高
+            this.el            =  Chartx.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+            this.width         =  parseInt( Chartx.getStyle(this.el , "width" ) )  //图表区域宽
+            this.height        =  parseInt( Chartx.getStyle(this.el , "height") ) //图表区域高
 
     
             //Canvax实例
@@ -49,7 +49,7 @@ define(
             return CanvaxBase.creatClass(BaseChart, me, props, statics);
         };
 
-        Dvix.extend = CanvaxBase.creatClass;
+        Chartx.extend = CanvaxBase.creatClass;
         
         CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
             init   : function(){},
@@ -67,8 +67,8 @@ define(
              */
             resize : function(){
                 this.clear()
-                this.width   = parseInt( Dvix.getStyle(this.el , "width" ) )
-                this.height  = parseInt( Dvix.getStyle(this.el , "height") )
+                this.width   = parseInt( Chartx.getStyle(this.el , "width" ) )
+                this.height  = parseInt( Chartx.getStyle(this.el , "height") )
                 this.canvax.resize()
                 this.draw()
             },

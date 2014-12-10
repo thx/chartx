@@ -115,6 +115,7 @@ define(
                                 n0 : nearestPoint[0], 
                                 n1 : nearestPoint[1]
                             }, 500 )
+                            .easing(Tween.Easing.Exponential.Out)
                             .onUpdate( function (  ) {
                                 me._nearestPoint[0] = this.n0;
                                 me._nearestPoint[1] = this.n1;
