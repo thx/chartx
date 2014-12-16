@@ -7,7 +7,7 @@ define(
         var xAxis = function( opt , data ){
             xAxis.superclass.constructor.apply( this , arguments );
         };
-        Dvix.extend( xAxis , xAxisBase , {
+        Chartx.extend( xAxis , xAxisBase , {
             //覆盖xAxisBase 中的 _trimXAxis
             _trimXAxis : function( data , xGraphsWidth ){
                 var max  = data.length

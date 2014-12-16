@@ -27,7 +27,7 @@ define(
     
             this.init.apply(this , arguments);
     
-            _.deepExtend( this , opts );
+            //_.deepExtend( this , opts );
     
             //数据集合，由_initData 初始化
             //this.dataFrame = this._initData( data , this );

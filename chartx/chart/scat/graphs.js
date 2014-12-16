@@ -64,7 +64,7 @@ define(
     
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
-    
+   
                 for( var i = 0 ; i < barGroupLen ; i++ ){
                     var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){

@@ -44,6 +44,7 @@ define(
                 this.stage.addChild(this.core);
                 this.stage.addChild(this.stageTip);
 
+                _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
 
             },

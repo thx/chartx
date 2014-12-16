@@ -1,4 +1,4 @@
-var Dvix = {
+var Chartx = {
     start: function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
@@ -7,20 +7,22 @@ var Dvix = {
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.08/";
+        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.16/";
         
 
 
         //配置chartx包
-        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.3.0/";
+        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.1/";
         
 
-        Dvix.setPackages([{
+        Chartx.path = ChartxUrl;
+
+        Chartx.setPackages([{
             name: 'canvax',
             path: canvaxUrl
         }, {
             name: 'chartx',
-            path: dvixUrl
+            path: ChartxUrl
         }]
 
         );
@@ -160,8 +162,8 @@ var Dvix = {
             window.KISSY && KISSY.config({ packages: [{
                 name: name,
                 path: path,
-                debug: Dvix.site.debug,
-                combine: !Dvix.site.local
+                debug: Chartx.site.debug,
+                combine: !Chartx.site.local
             }]
             });
 
@@ -231,4 +233,4 @@ var Dvix = {
         };
     }
 };
-Dvix.start();
+Chartx.start();

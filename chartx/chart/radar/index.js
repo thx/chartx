@@ -36,6 +36,7 @@ define(
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.stageCore);
                 
+                _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
 
             },

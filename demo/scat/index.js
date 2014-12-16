@@ -37,7 +37,7 @@ KISSY.ready(function(){
             }
         },
         xAxis : {
-            field : ["val2" ,"val1"],
+            field : ["val2" , "val1"],
             disY: 6,
             dis : 6,
             line:{

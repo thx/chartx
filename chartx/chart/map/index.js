@@ -22,6 +22,8 @@ define(
                     lineWidth   : 3
                 }
 
+                _.deepExtend( this , opts );
+
                 this.mapScale = Math.min( this.width / 560 , this.height / 470 );
             },
             draw : function(){
