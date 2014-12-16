@@ -421,7 +421,6 @@ define(
                             if (pts!==undefined){
                                 for (var i=0, j=pts.length/3; i<j; i++){
                                     var id = pts[3*i];
-debugger
                                     // canary silencer...
                                     if (stale && state.nodes[id]==undefined) continue;
 
