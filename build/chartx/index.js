@@ -12,7 +12,7 @@ var Chartx = {
 
 
         //配置chartx包
-        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.2/";
+        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.5/";
         
 
         Chartx.path = ChartxUrl;
