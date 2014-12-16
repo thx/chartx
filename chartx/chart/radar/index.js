@@ -18,7 +18,7 @@ define(
     
         return Chart.extend( {
     
-            init:function(node , data , opt){
+            init:function(node , data , opts){
                 this.r             = 0 
     
                 this._xAxis        = null;
