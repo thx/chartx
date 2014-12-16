@@ -9,7 +9,7 @@ define(
     function( Chart , Path , mapData , Tips ){
     
         return Chart.extend({
-            init : function(){
+            init : function( node , data , opts){
                 this.tips = {};
                 this.itemStyle = {
                     strokeStyle : "white",
