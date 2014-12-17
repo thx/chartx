@@ -19,7 +19,7 @@ define(
     
         return Chart.extend( {
     
-            init:function(node , data , opt){
+            init:function(node , data , opts){
                 this.event         = {
                     enabled : 1
                 }
