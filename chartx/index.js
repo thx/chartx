@@ -25,10 +25,10 @@ var Chartx = {
 
 
         //配置chartx包
-        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.5/";
+        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.6/";
         //BEGIN(develop)
         if (Chartx.site.daily) {
-            ChartxUrl = "http://g.assets.daily.taobao.net/thx/charts/1.3.5/";
+            ChartxUrl = "http://g.assets.daily.taobao.net/thx/charts/1.3.6/";
         }
         if (Chartx.site.local) {
             ChartxUrl = "../../";
