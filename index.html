@@ -1,24 +1,248 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>Canvax</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-<style type="text/css">
-    body{margin:0;padding:0;font-size:12px;background-color:#eee;padding:10px 100px 100px;}
-    //canvas {background:#999}
-</style>
+    <title>Chartx--Data Visualization Solutions</title>
 
-<script type="text/javascript" src="http://g.tbcdn.cn/kissy/k/1.3.1/seed-min.js"></script>
-<script type="text/javascript" src="http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/flashcanvas.js"></script>
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/round-about.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
 </head>
 
-<style>
-#eggGame{position: absolute;top:2px;left: 137px;display: block;width: 704px;height: 415px;}
-</style>
 <body>
-    <div id="eggGame"></div>
-  
-</body> 
+    <!--
+    <nav class="navbar navbar-inverse navbar-fixed-top" style="margin:0;" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Chartx</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#">About</a>
+                    </li>
+                    <li>
+                        <a href="#">Canvax</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        </nav>
+        -->
+        <header class="sb-page-header">
+         <!-- Introduction Row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header" style="">Chartx
+                    <small>Data Visualization Solutions</small>
+                </h1>
+                <p>
+                基于Canvas，全浏览器兼容（采用flashCanvas实现ie的兼容），跨平台，跨终端，支持移动设备的触屏交互。不依赖任何第三方Dom库，能自动适配到AMD,CMD,KISSY三种模块定义规范。
+                </p>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- Page Content -->
+    <div class="container">
+
+       
+        <!-- Team Members Row -->
+        <div class="row charts" >
+            <div class="col-lg-12">
+                <h2 class="page-header">Charts</h2>
+            </div>
+            <div class="col-lg-4 col-sm-6 text-center">
+                <div class=" panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Bar
+                            <small>柱状图</small>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/bar.png" alt="">
+                        <p>
+                        <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/1d9c3k67/embedded/result,js/" target='_blank' role="button">查看</a> 
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center">
+                <div class=" panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Line
+                            <small>折线图</small>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/line.png" alt="">
+                        <p> 
+                        <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/4u2r1wnu/embedded/result,js/" target="_blank" role="button">查看</a>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Pie
+                            <small>饼图</small>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/pie.png" alt="">
+
+                        <p> <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/o0xpbaf3/embedded/result,js/" target="_blank" role="button">查看</a> </p>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Force
+                            <small>力布局导向图</small>
+                        </h3>
+
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/force.png" alt="">
+                        <p> <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/s8hcga0j/embedded/result,js/" target="_blank" role="button">查看</a> </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>radar
+                            <small>雷达图</small>
+                        </h3>
+
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/radar.png" alt="">
+                        <p> <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/drarxnuq/embedded/result,js/" target="_blank" role="button">查看</a> </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Scat
+                            <small>散点图</small>
+                        </h3>
+
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/scat.png" alt="">
+                        <p> <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/jvazcd2j/embedded/result,js/" target="_blank" role="button">查看</a> </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Map
+                            <small>地图</small>
+                        </h3>
+
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/map.png" alt="">
+                        <p> <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/3djun8ch/embedded/result,js/" target="_blank" role="button">查看</a> </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center"><div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>recharge
+                            <small>充值进度</small>
+                        </h3>
+
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/recharge.gif" alt="">
+                        <p> <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/uh69Lg7u/embedded/result,js/" target="_blank" role="button">查看</a> </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 text-center"><div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Progress
+                            <small>标准进度环形图</small>
+                        </h3>
+
+                    </div>
+                    <div class="panel-body">
+                        <img class="img-responsive img-center" src="./img/progress.gif" alt="">
+                        <p> <a class="btn btn-primary btn-lg" href="http://jsfiddle.net/nickli/hthxz0z3/embedded/result,js/" target="_blank" role="button">查看</a> </p>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; Your Website 2014</p>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+</body>
+
 </html>
+
