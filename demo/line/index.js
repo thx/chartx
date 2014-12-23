@@ -3,8 +3,7 @@ KISSY.ready(function(){
     var S = KISSY;
     var data1= [
         ["val1","val2","val3","val4"],
-<<<<<<< HEAD
-[ 1 , 101  , 20 , 33 ] ,
+        [ 1 , 101  , 20 , 33 ] ,
         [ 2 , 67  , 51 , 26 ] ,
         [ 3 , 76  , 45 , 43 ] ,
         [ 4 , 58  , 35 , 31 ] ,
@@ -13,11 +12,7 @@ KISSY.ready(function(){
         [ 7 , 56  , 68 , 65 ] ,
         [ 8 , 99  , 83 , 51 ] 
         
-=======
-        [ 1 , 101  , 201 , 301 ],
-        [ 2 , 80,    50  , 310],
-        [ 3 , 10,   90  , 250],
->>>>>>> 6f9ff1a09e246da16fc50f79107e1d93ecdafa99
+
     ];
     var options = {
         // title : "first charts",
@@ -79,10 +74,10 @@ KISSY.ready(function(){
                     enabled : 1
                 },
                 strokeStyle : {
-                    normals : ['#f8ab5e','#E55C5C'],
+                    normals : ["#6f8cb2" , "#c77029" , "#f15f60" ],
                 },
                 alpha       : {
-                    normals : [0, 0],
+                    normals : [0.1, 0.1 , 0.1 ],
                 }
             }
         }

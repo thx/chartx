@@ -89,6 +89,7 @@ define(
  
             _widget:function(){
                 var self  = this;
+                
                 for(var a = 0,al = self.data.length; a < al; a++){
                     // console.log(a)
                     var group = new Group({
