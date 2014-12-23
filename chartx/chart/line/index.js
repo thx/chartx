@@ -52,7 +52,6 @@ define(
                 if( this.rotate ) {
                     this._rotate( this.rotate );
                 }
-    
                 this._initModule();                      //初始化模块  
     
                 this._startDraw();                         //开始绘图
