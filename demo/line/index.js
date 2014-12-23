@@ -3,6 +3,7 @@ KISSY.ready(function(){
     var S = KISSY;
     var data1= [
         ["val1","val2","val3","val4"],
+<<<<<<< HEAD
 [ 1 , 101  , 20 , 33 ] ,
         [ 2 , 67  , 51 , 26 ] ,
         [ 3 , 76  , 45 , 43 ] ,
@@ -12,6 +13,11 @@ KISSY.ready(function(){
         [ 7 , 56  , 68 , 65 ] ,
         [ 8 , 99  , 83 , 51 ] 
         
+=======
+        [ 1 , 101  , 201 , 301 ],
+        [ 2 , 80,    50  , 310],
+        [ 3 , 10,   90  , 250],
+>>>>>>> 6f9ff1a09e246da16fc50f79107e1d93ecdafa99
     ];
     var options = {
         // title : "first charts",
@@ -25,7 +31,7 @@ KISSY.ready(function(){
 
         yAxis : {
             mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
-            field : ["val4","val3"],
+            field : ["val4","val3",'val2'],
             // dataMode:0,
             line:{
                 enabled : 0,
@@ -69,6 +75,9 @@ KISSY.ready(function(){
         },
         graphs:{
             line:{
+                node : {
+                    enabled : 1
+                },
                 strokeStyle : {
                     normals : ['#f8ab5e','#E55C5C'],
                 },

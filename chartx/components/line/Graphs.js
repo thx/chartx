@@ -90,7 +90,12 @@ define(
             _widget:function(){
                 var self  = this;
                 for(var a = 0,al = self.data.length; a < al; a++){
+                    // console.log(a)
                     var group = new Group({
+                        node   :{
+                            enabled     : self.line.node.enabled
+                        },
+                        // node : 1111,
                         line   :{
                             strokeStyle : self.line.strokeStyle.normals[a]
                         },
