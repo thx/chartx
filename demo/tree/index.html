@@ -16,10 +16,67 @@
 
 <body>
  	<div id="canvasTest" style='background:#ffffff;width:800px;height:500px;'></div>
-    <script>
+    <script> 
         KISSY.ready(function(){
+            var data = {
+                huandi : {
+                    label : "皇帝",
+                    link  : [
+                        "chengxiang" , "jiangjun" , "dlzg"
+                    ]
+                },
+                chengxiang : {
+                    label : "丞相",
+                    link  : [
+                        "xl"
+                    ]
+                },
+                jiangjun   : {
+                    label : "将军",
+                    link  : [
+                        "qianfeng" , "youyi"
+                    ]
+                },
+                youyi  : {
+                    label : "右军主将",
+                    link  : [
+                        "xb1" , "xb2"
+                    ]
+                },
+
+                qianfeng  : {
+                    label : "前锋大将",
+                    link  : [
+                        "xb3" , "xb4"
+                    ]
+                },
+                dlzg      : {
+                    label : "大内总管",
+                    link  : []
+                },
+                xl : {
+                    label : "小吏",
+                    link  : []
+                },
+                xb1 : {
+                    label : "小兵1",
+                    link : []
+                },
+                xb2 : {
+                    label : "小兵2",
+                    link : []
+                },
+                xb3 : {
+                    label : "小兵3",
+                    link : []
+                },
+                xb4 : {
+                    label : "小兵4",
+                    link : []
+                }
+            };
             require("chartx/chart/tree/index" , function( Tree ){
-                var tree = new Tree("canvasTest" , {} , {});
+                window.tree = new Tree("canvasTest" , data , {});
                 tree.draw();
             });
         });

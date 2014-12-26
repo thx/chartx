@@ -26,7 +26,7 @@ define(
                 opt = _.deepExtend({
                     prefix : data.yAxis.field
                 } , opt);
-                this._tip      = new Tip( opt , tipDomContainer );
+                this._tip = new Tip( opt , tipDomContainer );
     
             },
             show : function(e){

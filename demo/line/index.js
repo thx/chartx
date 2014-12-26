@@ -78,7 +78,8 @@ KISSY.ready(function(){
                 },
                 alpha       : {
                     normals : [0.1, 0.1 , 0.1 ],
-                }
+                },
+                smooth:true
             }
         }
     }

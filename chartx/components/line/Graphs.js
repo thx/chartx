@@ -22,7 +22,9 @@ define(
                 alpha       : {
                     normals : [0.8, 0.7],
                     overs   : []
-                }
+                },
+                smooth : false
+                
             }
     
             this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
@@ -98,7 +100,8 @@ define(
                         },
                         // node : 1111,
                         line   :{
-                            strokeStyle : self.line.strokeStyle.normals[a]
+                            strokeStyle : self.line.strokeStyle.normals[a],
+                            smooth      : self.line.smooth
                         },
                         fill   :{
                             strokeStyle : self.line.strokeStyle.normals[a],
