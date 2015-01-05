@@ -27,6 +27,18 @@ define(
                 }
                 window._nodesRect = this._nodesRect;
 
+                //用来触发scale 和 drag 的rect原件
+                this._scaleDragHandRect = new Rect({
+                    context : {
+                        width : this.width,
+                        height: this.height,
+                        fillStyle   : "black",
+                        globalAlpha : 0
+                    }
+                });
+                this.stage.addChild(this._scaleDragHandRect);
+
+
                 this.sprite  = new Canvax.Display.Sprite(); 
                 this.stage.addChild( this.sprite );
 
@@ -36,6 +48,7 @@ define(
                 this.linksSp = new Canvax.Display.Sprite({id:"linksSprite"}); 
                 this.sprite.addChild( this.linksSp );
 
+                
 
             },
             draw : function(){
@@ -51,7 +64,46 @@ define(
 
                 this._widget();
                 this._initNodesSpritePos();
+
+                this._initEventHand();
             }, 
+            _initEventHand : function(){
+                var me = this;
+                var isDragIng = false;
+                this._scaleDragHandRect.on("mousedown" , function(e){
+                    me._scaleDragHandRect.toFront();
+                    isDragIng = true;
+                    me._dragTreeBegin(e);
+                });
+
+                this._scaleDragHandRect.on("mousemove" , function(e){
+                    if( isDragIng ){
+                        me._dragTreeIng(e);
+                    }
+                });
+
+                this._scaleDragHandRect.on("mouseup mouseout" , function(e){
+                     me._scaleDragHandRect.toBack();
+                     isDragIng = false;
+                     me._dragTreeEnd(e);
+                });
+            },
+            //最近一次move的point
+            _lastDragPoint : null,
+            //开始拖动tree
+            _dragTreeBegin : function(e){
+                this._lastDragPoint = e.point;
+            },
+            //tree 拖动中
+            _dragTreeIng   : function(e){
+                this.sprite.context.x += (e.point.x - this._lastDragPoint.x);
+                this.sprite.context.y += (e.point.y - this._lastDragPoint.y);
+                this._lastDragPoint = e.point;
+            },
+            //tree 拖动结束
+            _dragTreeEnd   : function(e){
+                this._lastDragPoint = null;
+            },
             /**
              *添加节点
              *@data param 要添加的 子节点。一次添加一个 {id : { label : "text" }}

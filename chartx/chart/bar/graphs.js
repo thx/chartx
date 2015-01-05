@@ -8,11 +8,9 @@ define(
     ],
     function(Canvax , Rect , Tween , Tip ){
  
-        var Graphs = function( opt ){
+        var Graphs = function( opt , tips , domContainer ){
             this.w = 0;
             this.h = 0;
-    
-            this._tip = null;
            
             this.pos = {
                 x : 0,
@@ -33,6 +31,8 @@ define(
     
             _.deepExtend(this , opt);
     
+            this._tip = new Tip( tips , domContainer );
+            
             this.init( );
         };
     
@@ -75,6 +75,7 @@ define(
     
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
+
     
                 for( var i = 0 ; i < barGroupLen ; i++ ){
                     var sprite      = new Canvax.Display.Sprite({ id : "barGroup"+i });
@@ -115,19 +116,26 @@ define(
                         hoverRect.target = rect;
                         hoverRect.row    = i;
                         hoverRect.column = ii;
-    
+
+                        var me = this;
                         hoverRect.on("mouseover" , function(e){
                             var target    = this.target.context;
                             target.x      --;
                             target.width  += 2;
+
+                            me.sprite.addChild(me._tip.sprite);
+                            me._tip.show( me._setTipInfoHandler(e , this.row , this.column ) );
+
                         }); 
                         hoverRect.on("mousemove" , function(e){
-                        
+                            me._tip.move( me._setTipInfoHandler(e , this.row , this.column ) );
                         }); 
                         hoverRect.on("mouseout" , function(e){
                             var target    = this.target.context;
                             target.x      ++;
                             target.width  -= 2;
+                            me._tip.hide(e);
+                            me.sprite.removeChild(me._tip.sprite);
                         }); 
     
                         sprite.addChild( rect );
@@ -161,10 +169,27 @@ define(
                     Tween.update();
                 };
                 growAnima();
+            },
+            _setTipInfoHandler : function(e  , iNode ,iGroup){
+                e.tipsInfo = {
+                    iGroup        : iGroup,
+                    iNode         : iNode,
+                    nodesInfoList : this._getNodeInfo(iNode)
+                };
+                return e;
+            },
+            _getNodeInfo : function( iNode ){
+                var arr = [];
+                var me  = this;
+                _.each( this.data , function( group , i ){
+                    var node = _.clone(group[iNode]);
+                    node.fillStyle = me.getBarFillStyle( iNode , i , node.value );
+                    arr.push(node);
+                } );
+                return arr;
             }
         }; 
     
         return Graphs;
-    
     } 
 )

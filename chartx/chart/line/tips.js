@@ -50,7 +50,7 @@ define(
                 this._tip.hide(e);
             },
             _getTipsPoint : function(e){
-                return e.target.localToGlobal( e.info.nodesInfoList[e.info.iGroup] );
+                return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
             },
             _resetPosition : function(e){
                 var tipsPoint = this._getTipsPoint(e);
@@ -94,7 +94,7 @@ define(
                     }
                 });
                 var self = this;
-                _.each( e.info.nodesInfoList , function( node ){
+                _.each( e.tipsInfo.nodesInfoList , function( node ){
                     self._nodes.addChild( new Circle({
                         context : {
                             y : e.target.context.height - Math.abs(node.y),
@@ -110,7 +110,7 @@ define(
             _resetNodesPosition : function(e , tipsPoint){
                 var self = this;
                 this._nodes.context.x = tipsPoint.x;
-                _.each( e.info.nodesInfoList , function( node , i ){
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
                     self._nodes.getChildAt(i).context.y = e.target.context.height - Math.abs(node.y);
                 });
             }
