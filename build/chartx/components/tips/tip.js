@@ -22,13 +22,14 @@ define(
             this._tipDom = null;
             this._back   = null;
         
-            //所有调用tip的 event 上面 要附带有符合下面结构的info属性
+            //所有调用tip的 event 上面 要附带有符合下面结构的tipsInfo属性
             //会deepExtend到this.indo上面来
-            this.info    = {
+            this.tipsInfo    = {
                 nodesInfoList : [],//符合iNode的所有Group上面的node的集合
                 iGroup        : 0, //数据组的索引对应二维数据map的x
                 iNode         : 0  //数据点的索引对应二维数据map的y
             };
+            this.prefix  = [];
             this.init(opt);
         }
         Tip.prototype = {
@@ -64,8 +65,10 @@ define(
                 var pos = e.pos || e.target.localToGlobal( e.point );
                 var x   = this._checkX( pos.x );
                 var y   = this._checkY( pos.y );
-                this.sprite.context.x = x;
-                this.sprite.context.y = y;
+
+                var _backPos = this.sprite.parent.globalToLocal( { x : x , y : y} );
+                this.sprite.context.x = _backPos.x;
+                this.sprite.context.y = _backPos.y;
                 this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;";
             },
             /**
@@ -89,7 +92,7 @@ define(
             },
             _getContext : function(e){
                 var tipsContext = this.context;
-                _.deepExtend( this.info , (e.info || {}) );
+                _.deepExtend( this.tipsInfo , (e.tipsInfo || {}) );
                 if( !tipsContext ){
                     tipsContext = this._getDefaultContext(e);
                 }
@@ -98,8 +101,13 @@ define(
             _getDefaultContext : function(e){
                 var str  = "<table>";
                 var self = this;
-                _.each( self.info.nodesInfoList , function( node , i ){
-                    str+= "<tr style='color:"+ node.fillStyle +"'><td>"+ self.prefix[i] +"</td><td>"+ node.value +"</td></tr>";
+                _.each( self.tipsInfo.nodesInfoList , function( node , i ){
+                    str+= "<tr style='color:"+ node.fillStyle +"'>";
+                    var prefixName = self.prefix[i];
+                    if( prefixName ) {
+                        str+="<td>"+ prefixName +"</td>";
+                    };
+                    str += "<td>"+ node.value +"</td></tr>";
                 });
                 str+="</table>";
                 return str;

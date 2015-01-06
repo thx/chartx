@@ -13,90 +13,30 @@ KISSY.ready(function(){
         [ 7 , 201  , 101 , 500 ] ,
         [8  , 1145 , 145 , 100 ] ,
         [ 9 , 488  , 88  , 700 ] ,
-        [ 10  , 390  , 546 , 300 ]
+        [ "最后一天"  , 390  , 546 , 300 ]
     ];
     var options = {
-        // title : "first charts",
-        // disXAxisLine : 0,
-        // disYAxisTopLine : 26,
-        mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
-
-        event : {
-            enabled : 1                                //是否有事件响应(tips)
-        },
-
         yAxis : {
-            mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
             field : ["val4","val3"],
-            // dataMode:0,
-            line:{
-                enabled : 0,
-                // strokeStyle : '#ff0000'
-            },
-            text:{
-                // fillStyle:'#ff0000',
-                fontSize  : 12
-            }
         },
         xAxis : {
-            // field : "val2",
-            disY: 6,
-            dis : 6,
+            field : ["val1"],
             line:{
-                width   : 2,
-                height  : 4,
                 strokeStyle   : '#cccccc'
-            },
-            text:{
-                mode      : 2,
-                fontSize  : 10
-            },
-            display:"none"
-             
-        },
-        back : {
-            xOrigin:{
-                thinkness:1,
-                strokeStyle : '#333333'
-            },
-            yOrigin:{
-                enabled:0
-            },
-            xAxis:{
-                // lineType: ''
-                thinkness:1,
-                strokeStyle : '#cccccc'
-            },
-            yAxis:{
-                // enabled : 0
             }
         },
         graphs:{
             bar : {
                 strokeStyle : {
                     normals : ['#f8ab5e','#E55C5C'],
-                },
-                alpha       : {
-                    normals : [0.8, 0.7],
-                },
-                fillStyle : function( line , row , value ){
                 }
-
-            }
+            },
+            eventEnabled : true
         },
         tips  :{
             prefix : ["今天","昨天"]
         }
-    }
-
-    KISSY.config({
-        packages: [{
-            name  :  'chartx'  ,
-            path  :  '../../',
-            debug :  true
-        }
-        ]
-    });
+    }   
 
     KISSY.use("chartx/chart/bar/ , node" , function( S , Bar ){
         var bar = new Bar( S.all("#canvasTest") , data1 , options );

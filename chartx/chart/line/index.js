@@ -20,9 +20,7 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this.event         = {
-                    enabled : 1
-                }
+                this.eventEnabled  =  true;
     
                 this._xAxis        =  null;
                 this._yAxis        =  null;
@@ -125,7 +123,7 @@ define(
                 //执行生长动画
                 this._graphs.grow();
     
-                if( this.event.enabled ){
+                if( this.eventEnabled ){
                     var self = this;
                     this._graphs.sprite.on( "hold mouseover" ,function(e){
                         self._tips.show( e );

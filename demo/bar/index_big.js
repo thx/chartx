@@ -73,31 +73,7 @@ KISSY.ready(function(){
             }
         },       
         tips  :{
-            titles : [
-               ["title1" , "title2" , "title3" , "title4"],
-               ["title" , "title" , "title" , "title"]
-            ],
-            // disTop : 50,
-            context:{
-                prefix:{
-                    values:['今','昨','明']
-                },
-                bolds     :['bold','bold','bold'],
-                fontSizes :[14,14,14],
-                fillStyles:['#333333','#999999','#999999']
-            },
-            tip  : {
-                back:{
-                    //strokeStyle : '#ff0000'
-                    // disX:10
-                }
-            },
-            line : {
-                // lineType: ''
-            },
-            nodes:{
-
-            }
+            prefix : ["今天","昨天"] 
         }
     }
      

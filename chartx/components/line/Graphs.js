@@ -15,6 +15,9 @@ define(
             this.y       = 0;
     
             this.line   = {
+                node : {
+                    enabled : true 
+                },
                 strokeStyle : {
                     normals : ['#f8ab5e','#E55C5C'],
                     overs   : []
@@ -23,7 +26,7 @@ define(
                     normals : [0.8, 0.7],
                     overs   : []
                 },
-                smooth : false
+                smooth : true
                 
             }
     

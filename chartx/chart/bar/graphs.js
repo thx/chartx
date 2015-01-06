@@ -22,8 +22,8 @@ define(
             this.bar = {
                 width : 12
             }
-    
-            this.bar.width = 12;
+
+            this.eventEnabled = true;
     
             this.sprite = null ;
     
@@ -61,8 +61,9 @@ define(
             },
             checkBarW : function( xDis ){
                 if( this.bar.width >= xDis ){
-                    this.bar.width = xDis-1;
+                    this.bar.width = xDis-1 > 1 ? xDis - 1 : 1;
                 }
+
             },
             draw : function(data , opt){
             
@@ -82,7 +83,7 @@ define(
                     var spriteHover = new Canvax.Display.Sprite({ id : "barGroupHover"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var barData = data[ii][i];
-    
+
                         var fillStyle = this.getBarFillStyle( i , ii , barData.value );
                         var barH      = parseInt(Math.abs(barData.y));
                         var radiusR   = Math.min( this.bar.width/2 , barH );
@@ -117,26 +118,28 @@ define(
                         hoverRect.row    = i;
                         hoverRect.column = ii;
 
-                        var me = this;
-                        hoverRect.on("mouseover" , function(e){
-                            var target    = this.target.context;
-                            target.x      --;
-                            target.width  += 2;
+                        if( this.eventEnabled ) {
+                            var me = this;
+                            hoverRect.on("mouseover" , function(e){
+                                var target    = this.target.context;
+                                target.x      --;
+                                target.width  += 2;
 
-                            me.sprite.addChild(me._tip.sprite);
-                            me._tip.show( me._setTipInfoHandler(e , this.row , this.column ) );
+                                me.sprite.addChild(me._tip.sprite);
+                                me._tip.show( me._setTipInfoHandler(e , this.row , this.column ) );
 
-                        }); 
-                        hoverRect.on("mousemove" , function(e){
-                            me._tip.move( me._setTipInfoHandler(e , this.row , this.column ) );
-                        }); 
-                        hoverRect.on("mouseout" , function(e){
-                            var target    = this.target.context;
-                            target.x      ++;
-                            target.width  -= 2;
-                            me._tip.hide(e);
-                            me.sprite.removeChild(me._tip.sprite);
-                        }); 
+                            }); 
+                            hoverRect.on("mousemove" , function(e){
+                                me._tip.move( me._setTipInfoHandler(e , this.row , this.column ) );
+                            }); 
+                            hoverRect.on("mouseout" , function(e){
+                                var target    = this.target.context;
+                                target.x      ++;
+                                target.width  -= 2;
+                                me._tip.hide(e);
+                                me.sprite.removeChild(me._tip.sprite);
+                            }); 
+                        }
     
                         sprite.addChild( rect );
                         spriteHover.addChild( hoverRect );

@@ -15,6 +15,9 @@ define(
             this.y       = 0;
     
             this.line   = {
+                node : {
+                    enabled : true 
+                },
                 strokeStyle : {
                     normals : ['#f8ab5e','#E55C5C'],
                     overs   : []
@@ -22,7 +25,9 @@ define(
                 alpha       : {
                     normals : [0.8, 0.7],
                     overs   : []
-                }
+                },
+                smooth : true
+                
             }
     
             this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
@@ -89,10 +94,17 @@ define(
  
             _widget:function(){
                 var self  = this;
+                
                 for(var a = 0,al = self.data.length; a < al; a++){
+                    // console.log(a)
                     var group = new Group({
+                        node   :{
+                            enabled     : self.line.node.enabled
+                        },
+                        // node : 1111,
                         line   :{
-                            strokeStyle : self.line.strokeStyle.normals[a]
+                            strokeStyle : self.line.strokeStyle.normals[a],
+                            smooth      : self.line.smooth
                         },
                         fill   :{
                             strokeStyle : self.line.strokeStyle.normals[a],
@@ -119,17 +131,17 @@ define(
                 self.sprite.addChild(self.induce)
     
                 self.induce.on("hold mouseover", function(e){
-                    e.info = self._getInfoHandler(e);
+                    e.tipsInfo = self._getInfoHandler(e);
                 })
                 self.induce.on("drag mousemove", function(e){
-                    e.info = self._getInfoHandler(e);
+                    e.tipsInfo = self._getInfoHandler(e);
                 })
                 self.induce.on("release mouseout", function(e){
                     var o = {
                         iGroup : self.iGroup,
                         iNode  : self.iNode
                     }
-                    e.info = o;
+                    e.tipsInfo = o;
                     self.iGroup = 0, self.iNode = -1
                 })
             },
