@@ -142,12 +142,8 @@ KISSY.ready(function(){
         ]
     });
 
-    KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
-        var line = new Line( S.all("#canvasTest") , data1 , options  );
-        line.draw();
-        window.line = line
-        window.data1 = data1
-        window.options = options
-        options.yAxis.fields = ["val3","val2","val4"]
+    KISSY.use("chartx/chart/planet/ , node" , function( S , Planet ){
+        var planet = new Planet( S.all("#canvasTest") , data1 , options  );
+        planet.draw();
     });
 });

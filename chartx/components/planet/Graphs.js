@@ -1,11 +1,11 @@
 define(
-    "chartx/components/line/Graphs" ,
+    "chartx/components/planet/Graphs" ,
     [
         "canvax/index",
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "canvax/animation/Tween",
-        "chartx/components/line/Group",
+        "chartx/components/planet/Group",
         "chartx/utils/deep-extend"
     ],
     function( Canvax , Rect, Tools, Tween , Group ){

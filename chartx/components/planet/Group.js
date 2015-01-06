@@ -1,5 +1,5 @@
 define(
-    "chartx/components/line/Group" ,
+    "chartx/components/planet/Group" ,
     [
         "canvax/index",
         "canvax/shape/BrokenLine",

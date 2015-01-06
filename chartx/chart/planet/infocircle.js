@@ -1,14 +1,11 @@
 define(
-    "chartx/chart/line/tips",
+    "chartx/chart/planet/tips",
     [
         "canvax/index",
-        "canvax/shape/Line",
         "canvax/shape/Circle",
-        "chartx/components/tips/tip",
-        "chartx/utils/deep-extend"
     ],
-    function( Canvax , Line , Circle , Tip ){
-        var Tips = function(opt , data , tipDomContainer){
+    function( Canvax, Circle){
+        var InfoCircle = function(opt , data , tipDomContainer){
             this.sprite    = null;
             this._line     = null;
             this._nodes    = null;

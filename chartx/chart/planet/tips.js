@@ -1,5 +1,5 @@
 define(
-    "chartx/chart/line/tips",
+    "chartx/chart/planet/tips",
     [
         "canvax/index",
         "canvax/shape/Line",

@@ -206,7 +206,6 @@ define(
                 }             
                 dataFrame.yAxis.field = yField;
                 dataFrame.yAxis.org   = getDataOrg( yField , total );
-                
                 return dataFrame;
             }
         });

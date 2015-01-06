@@ -1,5 +1,5 @@
 define(
-    "chartx/chart/line/index",
+    "chartx/chart/planet/index",
     [
         'chartx/chart/index',
         'chartx/utils/tools',
@@ -7,7 +7,7 @@ define(
         './xaxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
-        'chartx/components/line/Graphs',
+        'chartx/components/planet/Graphs',
         './tips',
         'chartx/utils/deep-extend'
     ],
@@ -132,15 +132,15 @@ define(
     
                 if( this.event.enabled ){
                     var self = this;
-                    this._graphs.sprite.on( "hold mouseover" ,function(e){
-                        self._tips.show( e );
-                    });
-                    this._graphs.sprite.on( "drag mousemove" ,function(e){
-                        self._tips.move( e );
-                    });
-                    this._graphs.sprite.on( "release mouseout" ,function(e){
-                        self._tips.hide( e );
-                    });
+                    // this._graphs.sprite.on( "hold mouseover" ,function(e){
+                    //     self._tips.show( e );
+                    // });
+                    // this._graphs.sprite.on( "drag mousemove" ,function(e){
+                    //     self._tips.move( e );
+                    // });
+                    // this._graphs.sprite.on( "release mouseout" ,function(e){
+                    //     self._tips.hide( e );
+                    // });
                 }
             },
             _trimGraphs:function(){
