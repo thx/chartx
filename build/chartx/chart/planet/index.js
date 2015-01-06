@@ -1,5 +1,5 @@
 define(
-    "chartx/chart/line/index",
+    "chartx/chart/planet/index",
     [
         'chartx/chart/index',
         'chartx/utils/tools',
@@ -7,7 +7,7 @@ define(
         './xaxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
-        'chartx/components/line/Graphs',
+        'chartx/components/planet/Graphs',
         './tips',
         'chartx/utils/deep-extend'
     ],
@@ -20,7 +20,9 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this.eventEnabled  =  true;
+                this.event         = {
+                    enabled : 1
+                }
     
                 this._xAxis        =  null;
                 this._yAxis        =  null;
@@ -128,17 +130,17 @@ define(
                 //执行生长动画
                 this._graphs.grow();
     
-                if( this.eventEnabled ){
+                if( this.event.enabled ){
                     var self = this;
-                    this._graphs.sprite.on( "hold mouseover" ,function(e){
-                        self._tips.show( e );
-                    });
-                    this._graphs.sprite.on( "drag mousemove" ,function(e){
-                        self._tips.move( e );
-                    });
-                    this._graphs.sprite.on( "release mouseout" ,function(e){
-                        self._tips.hide( e );
-                    });
+                    // this._graphs.sprite.on( "hold mouseover" ,function(e){
+                    //     self._tips.show( e );
+                    // });
+                    // this._graphs.sprite.on( "drag mousemove" ,function(e){
+                    //     self._tips.move( e );
+                    // });
+                    // this._graphs.sprite.on( "release mouseout" ,function(e){
+                    //     self._tips.hide( e );
+                    // });
                 }
             },
             _trimGraphs:function(){

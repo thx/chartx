@@ -1,14 +1,11 @@
 define(
-    "chartx/chart/line/tips",
+    "chartx/chart/planet/tips",
     [
         "canvax/index",
-        "canvax/shape/Line",
         "canvax/shape/Circle",
-        "chartx/components/tips/tip",
-        "chartx/utils/deep-extend"
     ],
-    function( Canvax , Line , Circle , Tip ){
-        var Tips = function(opt , data , tipDomContainer){
+    function( Canvax, Circle){
+        var InfoCircle = function(opt , data , tipDomContainer){
             this.sprite    = null;
             this._line     = null;
             this._nodes    = null;
@@ -26,7 +23,7 @@ define(
                 opt = _.deepExtend({
                     prefix : data.yAxis.field
                 } , opt);
-                this._tip = new Tip( opt , tipDomContainer );
+                this._tip      = new Tip( opt , tipDomContainer );
     
             },
             show : function(e){
@@ -50,7 +47,7 @@ define(
                 this._tip.hide(e);
             },
             _getTipsPoint : function(e){
-                return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
+                return e.target.localToGlobal( e.info.nodesInfoList[e.info.iGroup] );
             },
             _resetPosition : function(e){
                 var tipsPoint = this._getTipsPoint(e);
@@ -94,7 +91,7 @@ define(
                     }
                 });
                 var self = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node ){
+                _.each( e.info.nodesInfoList , function( node ){
                     self._nodes.addChild( new Circle({
                         context : {
                             y : e.target.context.height - Math.abs(node.y),
@@ -110,7 +107,7 @@ define(
             _resetNodesPosition : function(e , tipsPoint){
                 var self = this;
                 this._nodes.context.x = tipsPoint.x;
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.info.nodesInfoList , function( node , i ){
                     self._nodes.getChildAt(i).context.y = e.target.context.height - Math.abs(node.y);
                 });
             }
