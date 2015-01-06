@@ -20,9 +20,7 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this.event         = {
-                    enabled : 1
-                }
+                this.eventEnabled  =  true;
     
                 this._xAxis        =  null;
                 this._yAxis        =  null;
@@ -52,7 +50,6 @@ define(
                 if( this.rotate ) {
                     this._rotate( this.rotate );
                 }
-    
                 this._initModule();                      //初始化模块  
     
                 this._startDraw();                         //开始绘图
@@ -126,7 +123,7 @@ define(
                 //执行生长动画
                 this._graphs.grow();
     
-                if( this.event.enabled ){
+                if( this.eventEnabled ){
                     var self = this;
                     this._graphs.sprite.on( "hold mouseover" ,function(e){
                         self._tips.show( e );

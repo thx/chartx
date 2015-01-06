@@ -59,6 +59,9 @@ KISSY.ready(function(){
         },
         graphs:{
             line:{
+                node : {
+                    enabled : true
+                },
                 strokeStyle : {
                     normals : ['#f8ab5e','#E55C5C'],
                 },
@@ -72,26 +75,9 @@ KISSY.ready(function(){
             prefix  : ["黑色玫瑰","水晶之痕"]
         }
     }
-     
-
-    KISSY.config({
-        packages: [{
-            name  :  'chartx'  ,
-            path  :  '../../',
-            // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
-            debug :  true
-        }
-        ]
-    });
-
-
 
     KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
-
         window.line = new Line( S.all("#canvasTest") , data1 , options);
         line.draw();
-        window.data1   = data1;
-        window.options = options;
-
     });
 });

@@ -21,7 +21,7 @@ define(
     
             this.line   = {
                 node        :{
-                    enabled     : 0,
+                    enabled     : 1,
                     mode        : 0,
                     r           : {
                         normals : [2,2,2,2,2,2,2],
@@ -47,7 +47,8 @@ define(
                 alpha      : {
                     normals     : [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
                     overs       : [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-                }
+                },
+                smooth : true
             }
     
             this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
@@ -141,7 +142,8 @@ define(
                             strokeStyle : {
                                 normal  : self.line.strokeStyle.normals[a],
                                 over    : self.line.strokeStyle.overs[a]
-                            }
+                            },
+                            smooth      : self.line.smooth
                         },
                         fill   :{
                             strokeStyle : {
@@ -171,17 +173,17 @@ define(
                 self.sprite.addChild(self.induce)
     
                 self.induce.on("hold mouseover", function(e){
-                    e.info = self._getInfoHandler(e);
+                    e.tipsInfo = self._getInfoHandler(e);
                 })
                 self.induce.on("drag mousemove", function(e){
-                    e.info = self._getInfoHandler(e);
+                    e.tipsInfo = self._getInfoHandler(e);
                 })
                 self.induce.on("release mouseout", function(e){
                     var o = {
                         iGroup : self.iGroup,
                         iNode  : self.iNode
                     }
-                    e.info = o;
+                    e.tipsInfo = o;
                     self.iGroup = 0, self.iNode = -1
                 })
             },

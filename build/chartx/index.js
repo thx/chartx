@@ -7,12 +7,12 @@ var Chartx = {
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.16/";
+        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2015.01.04/";
         
 
 
         //配置chartx包
-        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.6/";
+        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.7/";
         
 
         Chartx.path = ChartxUrl;

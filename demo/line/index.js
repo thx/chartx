@@ -37,90 +37,17 @@ KISSY.ready(function(){
         [20, 179],
     ]
     var options = {
-        // title : "first charts",
-        // disXAxisLine : 0,
-        // disYAxisTopLine : 26,
-        mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[1]
 
-        event : {
-            enabled : 1                                //是否有事件响应(tips)[1]
-        },
-
-        yAxis : {                                //Y轴
-            enabled: 1,                                //是否有y轴(1 = 有 | 0 = 无)[1]
-            mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))[1]
-            field : ["val2"],
-            // field : ['val4','val3','val2'],
-            // dataMode:0,
-            line:{                                     //横向小线
-                enabled : 0,                           
-                // strokeStyle : '#ff0000'
-            },
-            text:{                                     //文字
-                // fillStyle:'#ff0000',
-                fontSize  : 12
-            }
+        yAxis : {
+            field : ["val4","val3",'val2']
         },
         xAxis : {
-            // field : "val2",
-            disY: 6,
-            dis : 6,
-            line:{
-                width   : 2,
-                height  : 4,
-                strokeStyle   : '#cccccc'
-            },
-            text:{
-                mode      : 2,
-                fontSize  : 10
-            }
-        },
-        back : {
-            xOrigin:{
-                enabled:1,
-                thinkness:1,
-                strokeStyle : '#000000'
-            },
-            yOrigin:{
-                enabled:0,
-                strokeStyle : '#000000'
-            },
-            xAxis:{
-                // lixneType: ''
-                // thinkness:1,
-                // strokeStyle : '#cccccc'
-            },
-            yAxis:{
-                enabled : 0
-            }
+            field : "val2"
         },
         graphs:{
-            line:{                               //线
-                node : {                                   //节点        
-                    enabled : 1,                           //是否有节点(1 = 有 | 0 = 无)[0]
-                    mode    : 1,                           //模式(空|0 = 都有节点 | 1 = 拐角有节点)
-                    r       : {                            //半径  注意：有几条线,有几个值
-                        normals : [3,3,3],
-                        // overs   : [2,5,2]                 
-                    },                                     
-                    fillStyle   :{                         //填充色  注意：有几条线,有几个值
-                        // normals : ['#ff0000','#ff0000','#ff0000'],
-                        // overs   : ['#ff0000','#ff0000','#ff0000']
-                    },
-                    strokeStyle :{                         //轮廓色  注意：有几条线,有几个值
-                        // normals : ['#ff0000','#ff0000','#ff0000'],         
-                        // overs : ['#ff0000','#ff0000','#ff0000']             
-                    },
-                    lineWidth   :{                         //轮廓粗细 注意：有几条线,有几个值
-                        // normals : [2,2,2],      
-                        // overs   : [2,5,2]      
-                    }         
-                },
-                strokeStyle : {                            //线颜色  注意：有几条线,有几个值
-                    //[ ['#458AE6', '#39BCC0', '#5BCB8A', '#94CC5C', '#C3CC5C', '#E6B522', '#E68422'] ]
-                    // normals : ['#6f8cb2','#c77029','#f15f60'],
-                    //[ ['#135EBF', '#2E9599', '#36B26A', '#78A64B', '#9CA632', '#BF9E39', '#BF7C39'] ]
-                    // overs                               //*
+            line:{
+                strokeStyle : {
+                    normals : ["#6f8cb2" , "#c77029" , "#f15f60" ]
                 },
                 alpha       : {                            //有填充时,透明度 注意：有几条线,有几个值
                     // normals : [0.1,0.1,0.1],
@@ -130,24 +57,8 @@ KISSY.ready(function(){
         }
     }
 
-    // function test(){
-
-    // }
-    KISSY.config({
-        packages: [{
-            name  :  'chartx'  ,
-            path  :  '../../',
-            debug :  true
-        }
-        ]
-    });
-
     KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
         var line = new Line( S.all("#canvasTest") , data1 , options  );
         line.draw();
-        window.line = line
-        window.data1 = data1
-        window.options = options
-        options.yAxis.fields = ["val3","val2","val4"]
     });
 });

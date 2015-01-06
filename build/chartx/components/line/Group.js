@@ -3,16 +3,21 @@ define(
     [
         "canvax/index",
         "canvax/shape/BrokenLine",
+        "canvax/shape/Circle",
         "canvax/shape/Path",
         "chartx/utils/tools",
         "chartx/utils/deep-extend"
     ],
-    function( Canvax, BrokenLine, Path, Tools){
+    function( Canvax, BrokenLine, Circle, Path, Tools){
         var Group = function(opt){
             this.w       = 0;   
             this.h       = 0; 
             this.y       = 0;
-    
+            
+
+            this.node    = {
+                enabled : 0
+            }
             this.line    = {
                     strokeStyle  : '#FF0000',
             }
@@ -63,28 +68,47 @@ define(
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var o = self.data[a]
                     list.push([o.x, o.y])
-                }
-    
-                var bline = new BrokenLine({
+                };
+                
+                var bline = new BrokenLine({               //线条
                     context : {
                         pointList   : list,
                         strokeStyle : self.line.strokeStyle,
                         lineWidth   : 2,
                         y           : self.y,
-                        smooth      : this.smooth 
+                        smooth      : self.line.smooth 
                     }
                 });
     
                 self.sprite.addChild( bline );
-    
                 
-                self.sprite.addChild(new Path({
+                self.sprite.addChild(new Path({            //填充
                     context : {
                         path        : self._fillLine( bline ), 
                         fillStyle   : self.fill.strokeStyle,
                         globalAlpha : self.fill.alpha
                     }
                 }))
+
+                // var node =  new Canvax.Display.Sprite();
+                // self.sprite.addChild(node)
+                if(self.node.enabled){
+                    for(var a = 0,al = self.data.length; a < al; a++){
+                        var o = self.data[a]
+                        var circle = new Circle({
+                            id : "circle",
+                            context : {
+                                x : o.x,
+                                y : o.y,
+                                r : 3,
+                                fillStyle   : '#ffffff',
+                                strokeStyle : self.line.strokeStyle,
+                                lineWidth   : 2
+                            }
+                        });
+                        self.sprite.addChild( circle );
+                    }
+                }
             },
             _fillLine:function( bline ){                        //填充直线
                 var fillPath = _.clone( bline.context.pointList );
