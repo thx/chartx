@@ -57,7 +57,6 @@ var Chartx = {
      *@packages array [{name:,path:}]
      */
     setPackages: function (packages) {
-
         /*       
         ## 通用模块定义
         Universal Module Definition
