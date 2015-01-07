@@ -3,12 +3,6 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-
-        var __FILE__, scripts = document.getElementsByTagName("script"); 
-        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
-
-        console.log(__FILE__)
-
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
             Chartx.site.daily = true;
@@ -30,25 +24,21 @@ var Chartx = {
         //END(develop)
 
 
-        //配置chartx包
-        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.7/";
-        //BEGIN(develop)
-        if (Chartx.site.daily) {
-            ChartxUrl = "http://g.assets.daily.taobao.net/thx/charts/1.3.7/";
-        }
-        if (Chartx.site.local) {
-            ChartxUrl = "../../";
-        }
-        //END(develop)
 
-        Chartx.path = ChartxUrl;
+        var __FILE__, scripts = document.getElementsByTagName("script"); 
+        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
+        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("charts/"));
+
+        //配置chartx包
+
+        Chartx.path = __FILE__+"/charts/1.3.7/";
 
         Chartx.setPackages([{
             name: 'canvax',
             path: canvaxUrl
         }, {
             name: 'chartx',
-            path: ChartxUrl
+            path: Chartx.path
         }]
 
         );
