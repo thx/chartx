@@ -3,6 +3,12 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
+
+        var __FILE__, scripts = document.getElementsByTagName("script"); 
+        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
+
+        console.log(__FILE__)
+
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
             Chartx.site.daily = true;
