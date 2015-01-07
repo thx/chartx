@@ -17,7 +17,7 @@ define(
                 el : this.el
             });
             this.stage         =  new Canvax.Display.Stage({
-                id : "main"
+                id : "main-chart-stage" + new Date().getTime()
             });
     
             this.canvax.addChild( this.stage );
