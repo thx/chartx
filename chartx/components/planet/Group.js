@@ -71,7 +71,7 @@ define(
     
             draw:function(opt){
                 var self  = this;
-                _.deepExtend( this , opt );
+                _.deepExtend(this, opt);
                 self._widget()
             },
             getNodeInfoAt:function($index){

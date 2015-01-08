@@ -84,11 +84,11 @@ define(
                 if( obj.options ){
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
-                    _.deepExtend( this , opts );
+                    _.deepExtend(this, obj.options);
                 }
                 if( obj.data ){
                     //数据集合，由_initData 初始化
-                    this.dataFrame = this._initData( data , this );
+                    this.dataFrame = this._initData( obj.data , this );
                 }
                 this.clear();
                 this.draw();
@@ -138,8 +138,8 @@ define(
                 var arr = data;
                 var fileds = arr[0]; //所有的字段集合
     
-                _.extend( dataFrame.yAxis , opt.yAxis );
-                _.extend( dataFrame.xAxis , opt.xAxis );
+                _.extend(dataFrame.yAxis , opt.yAxis);
+                _.extend(dataFrame.xAxis , opt.xAxis);
     
                 var total = [];
     
