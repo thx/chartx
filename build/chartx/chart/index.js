@@ -26,13 +26,7 @@ define(
             arguments.callee.superclass.constructor.apply(this, arguments);
     
             this.init.apply(this , arguments);
-    
-            //_.deepExtend( this , opts );
-    
-            //数据集合，由_initData 初始化
-            //this.dataFrame = this._initData( data , this );
-    
-            //this.draw();
+
         };
     
         Chart.Canvax = Canvax;
@@ -84,11 +78,11 @@ define(
                 if( obj.options ){
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
-                    _.deepExtend( this , opts );
+                    _.deepExtend( this , obj.options );
                 }
                 if( obj.data ){
                     //数据集合，由_initData 初始化
-                    this.dataFrame = this._initData( data , this );
+                    this.dataFrame = this._initData( obj.data , this );
                 }
                 this.clear();
                 this.draw();

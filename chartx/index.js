@@ -28,16 +28,9 @@ var Chartx = {
         var __FILE__, scripts = document.getElementsByTagName("script"); 
         debugger
         __FILE__ = scripts[scripts.length - 1].getAttribute("src");
-        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("charts/"));
-
+        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
         //配置chartx包
-        Chartx.path = __FILE__+"/charts/1.3.7/";
-
-        //BEGIN(develop)
-        if( __FILE__.indexOf("../../") ){
-            Chartx.path = __FILE__+"/charts/";
-        }
-        //END(develop)
+        Chartx.path = __FILE__;
 
         Chartx.setPackages([{
             name: 'canvax',
