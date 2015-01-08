@@ -3,25 +3,12 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        //BEGIN(develop)
-        if ((/daily.taobao.net/g).test(location.host)) {
-            Chartx.site.daily = true;
-        }
-        //END(develop)
+        
 
 
         //配置canvax包
         var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2015.01.04/";
-        //BEGIN(develop)
-        if( Chartx.site.daily || Chartx.site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2015.01.04/";
-        }
-        //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
-        if( !! ~location.search.indexOf('localcanvax') ){
-            //本地环境测试
-            canvaxUrl     = "http://nick.daily.taobao.net/canvax";
-        }
-        //END(develop)
+        
 
 
 
@@ -30,8 +17,9 @@ var Chartx = {
         __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("charts/"));
 
         //配置chartx包
-
         Chartx.path = __FILE__+"/charts/1.3.7/";
+
+        
 
         Chartx.setPackages([{
             name: 'canvax',

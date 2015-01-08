@@ -30,8 +30,13 @@ var Chartx = {
         __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("charts/"));
 
         //配置chartx包
-
         Chartx.path = __FILE__+"/charts/1.3.7/";
+
+        //BEGIN(develop)
+        if( __FILE__.indexOf("../../") ){
+            Chartx.path = __FILE__+"/charts/";
+        }
+        //END(develop)
 
         Chartx.setPackages([{
             name: 'canvax',
