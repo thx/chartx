@@ -71,7 +71,7 @@ define(
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
                 var x = 0 
                 var y = this.height - this._xAxis.h 
-                var _yAxisW = 0
+                //var _yAxisW = 0
                 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -81,13 +81,18 @@ define(
                     },
                     yMaxHeight : y
                 });
+
+                var _yAxisW = this._yAxis.w
+                x = _yAxisW     
                 
+                /* @因为y的是否显示已经在components/yaxis中有统一处理了。用display来做开关
                 if(this.yAxis.enabled != 0){
                     _yAxisW = this._yAxis.w
                     x = _yAxisW 
                 }else{
                     this._yAxis.sprite.context.visible = false
                 }
+                */
 
                 //绘制x轴
                 this._xAxis.draw({
