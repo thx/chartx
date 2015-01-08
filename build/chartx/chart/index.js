@@ -17,7 +17,7 @@ define(
                 el : this.el
             });
             this.stage         =  new Canvax.Display.Stage({
-                id : "main"
+                id : "main-chart-stage" + new Date().getTime()
             });
     
             this.canvax.addChild( this.stage );
@@ -206,7 +206,6 @@ define(
                 }             
                 dataFrame.yAxis.field = yField;
                 dataFrame.yAxis.org   = getDataOrg( yField , total );
-                
                 return dataFrame;
             }
         });

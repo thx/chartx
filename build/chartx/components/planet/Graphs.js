@@ -1,11 +1,11 @@
 define(
-    "chartx/components/line/Graphs" ,
+    "chartx/components/planet/Graphs" ,
     [
         "canvax/index",
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "canvax/animation/Tween",
-        "chartx/components/line/Group",
+        "chartx/components/planet/Group",
         "chartx/utils/deep-extend"
     ],
     function( Canvax , Rect, Tools, Tween , Group ){
@@ -21,7 +21,7 @@ define(
     
             this.line   = {
                 node        :{
-                    enabled     : 1,
+                    enabled     : 0,
                     mode        : 0,
                     r           : {
                         normals : [2,2,2,2,2,2,2],
@@ -47,8 +47,7 @@ define(
                 alpha      : {
                     normals     : [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
                     overs       : [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-                },
-                smooth : true
+                }
             }
     
             this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
@@ -142,8 +141,7 @@ define(
                             strokeStyle : {
                                 normal  : self.line.strokeStyle.normals[a],
                                 over    : self.line.strokeStyle.overs[a]
-                            },
-                            smooth      : self.line.smooth
+                            }
                         },
                         fill   :{
                             strokeStyle : {
@@ -173,17 +171,17 @@ define(
                 self.sprite.addChild(self.induce)
     
                 self.induce.on("hold mouseover", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.info = self._getInfoHandler(e);
                 })
                 self.induce.on("drag mousemove", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.info = self._getInfoHandler(e);
                 })
                 self.induce.on("release mouseout", function(e){
                     var o = {
                         iGroup : self.iGroup,
                         iNode  : self.iNode
                     }
-                    e.tipsInfo = o;
+                    e.info = o;
                     self.iGroup = 0, self.iNode = -1
                 })
             },

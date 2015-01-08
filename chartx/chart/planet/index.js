@@ -43,7 +43,9 @@ define(
                 this.stage.addChild(this.stageTip);
 
                 _.deepExtend(this, opts);
-                this.dataFrame = this._initData(data, this);
+                // this.dataFrame = this._initData(data, this);
+                this.dataFrame = this._initData(data, opts);
+                console.log(this.dataFrame)
 
             },
             draw:function(){
@@ -64,9 +66,10 @@ define(
                 this._graphs = new Graphs(this.graphs);
                 // this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
             },
-            _initData:function(data , opt){
-                
-            },
+            // _initData:function(data , opt){
+            //     console.log(data)
+            //     console.log(opt)
+            // },
             _startDraw : function(){
                 var self  = this;
 

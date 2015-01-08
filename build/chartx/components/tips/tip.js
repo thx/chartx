@@ -105,7 +105,7 @@ define(
                     str+= "<tr style='color:"+ node.fillStyle +"'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
-                        str+="<td>"+ prefixName +"</td>";
+                        str+="<td>"+ prefixName +"：</td>";
                     };
                     str += "<td>"+ node.value +"</td></tr>";
                 });

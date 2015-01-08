@@ -36,13 +36,21 @@ KISSY.ready(function(){
         [19, 179],
         [20, 179],
     ]
+
+    var data1 = [
+            [ "date"       , "uv1" , "uv1" , "uv2" ],
+            [ "2014-12-24" , 100        ,  200         , 300 ],
+            [ "2014-12-25" , 200        ,  250         , 100 ],
+            [ "2014-12-26" , 160        ,  260         , 180 ],
+        ]
+
     var options = {
 
         yAxis : {
-            field : ["val4","val3",'val2']
+            field : ["uv1","uv2","uv3"]
         },
         xAxis : {
-            field : "val2"
+            field : "date"
         },
         graphs:{
             line:{
@@ -56,6 +64,14 @@ KISSY.ready(function(){
             }
         }
     }
+    // KISSY.config({
+    //     packages: [{
+    //         name  :  'chartx'  ,
+    //         path  :  '../../',
+    //         debug :  true
+    //     }
+    //     ]
+    // });
 
     KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
         var line = new Line( S.all("#canvasTest") , data1 , options  );

@@ -11,18 +11,22 @@ var Chartx = {
         
 
 
-        //配置chartx包
-        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.7/";
-        
 
-        Chartx.path = ChartxUrl;
+        var __FILE__, scripts = document.getElementsByTagName("script"); 
+        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
+        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("charts/"));
+
+        //配置chartx包
+        Chartx.path = __FILE__+"/charts/1.3.7/";
+
+        
 
         Chartx.setPackages([{
             name: 'canvax',
             path: canvaxUrl
         }, {
             name: 'chartx',
-            path: ChartxUrl
+            path: Chartx.path
         }]
 
         );
@@ -37,7 +41,6 @@ var Chartx = {
      *@packages array [{name:,path:}]
      */
     setPackages: function (packages) {
-
         /*       
         ## 通用模块定义
         Universal Module Definition

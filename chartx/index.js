@@ -24,25 +24,27 @@ var Chartx = {
         //END(develop)
 
 
+
+        var __FILE__, scripts = document.getElementsByTagName("script"); 
+        debugger
+        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
+        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("charts/"));
+
         //配置chartx包
-        var ChartxUrl = "http://g.tbcdn.cn/thx/charts/1.3.7/";
+        Chartx.path = __FILE__+"/charts/1.3.7/";
+
         //BEGIN(develop)
-        if (Chartx.site.daily) {
-            ChartxUrl = "http://g.assets.daily.taobao.net/thx/charts/1.3.7/";
-        }
-        if (Chartx.site.local) {
-            ChartxUrl = "../../";
+        if( __FILE__.indexOf("../../") ){
+            Chartx.path = __FILE__+"/charts/";
         }
         //END(develop)
-
-        Chartx.path = ChartxUrl;
 
         Chartx.setPackages([{
             name: 'canvax',
             path: canvaxUrl
         }, {
             name: 'chartx',
-            path: ChartxUrl
+            path: Chartx.path
         }]
 
         );
@@ -57,7 +59,6 @@ var Chartx = {
      *@packages array [{name:,path:}]
      */
     setPackages: function (packages) {
-
         /*       
         ## 通用模块定义
         Universal Module Definition

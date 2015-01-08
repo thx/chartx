@@ -17,7 +17,7 @@ define(
                 el : this.el
             });
             this.stage         =  new Canvax.Display.Stage({
-                id : "main"
+                id : "main-chart-stage" + new Date().getTime()
             });
     
             this.canvax.addChild( this.stage );
@@ -26,13 +26,7 @@ define(
             arguments.callee.superclass.constructor.apply(this, arguments);
     
             this.init.apply(this , arguments);
-    
-            //_.deepExtend( this , opts );
-    
-            //数据集合，由_initData 初始化
-            //this.dataFrame = this._initData( data , this );
-    
-            //this.draw();
+
         };
     
         Chart.Canvax = Canvax;
@@ -130,7 +124,7 @@ define(
                         org    : []    //二维 原始数据[[100,200],[1000,2000]]
                     },
                     xAxis      : {     //x轴
-                        field  : [], //字段 对应this.data
+                        field  : [],   //字段 对应this.data
                         org    : []    //原始数据['星期一','星期二']
                     }
                 }
