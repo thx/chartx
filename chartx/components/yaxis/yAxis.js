@@ -91,7 +91,11 @@ define(
             _initData  : function( data ){ 
                 var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
                 this.dataOrg     = data.org;
-                this.dataSection = DataSection.section(arr);
+                //this.dataSection = DataSection.section(arr);
+                debugger
+                if( this.dataSection.length == 0 ){
+                    this.dataSection = DataSection.section(arr);
+                }
                 this._baseNumber = this.dataSection[0];
                 if(arr.length == 1){
                     this.dataSection[0] = arr[0] * 2;
