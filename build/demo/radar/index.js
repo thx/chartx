@@ -22,6 +22,7 @@ KISSY.ready(function(){
         mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
         yAxis : {
             field   : ["val2","val3"],
+            dataSection : [0,40,80,100]
         },
         xAxis : {
             field : ["val1"],
