@@ -148,8 +148,8 @@ define(
             },
             _drawEnd:function(){
                 this.stageBg.addChild(this._back.sprite);
-                this.stageCore.addChild(this._graphs.sprite);
                 this.stageCore.addChild(this._xAxis.sprite);
+                this.stageCore.addChild(this._graphs.sprite);
             }
         });
         
