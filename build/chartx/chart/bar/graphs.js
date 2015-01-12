@@ -8,11 +8,9 @@ define(
     ],
     function(Canvax , Rect , Tween , Tip ){
  
-        var Graphs = function( opt ){
+        var Graphs = function( opt , tips , domContainer ){
             this.w = 0;
             this.h = 0;
-    
-            this._tip = null;
            
             this.pos = {
                 x : 0,
@@ -24,8 +22,8 @@ define(
             this.bar = {
                 width : 12
             }
-    
-            this.bar.width = 12;
+
+            this.eventEnabled = true;
     
             this.sprite = null ;
     
@@ -33,6 +31,8 @@ define(
     
             _.deepExtend(this , opt);
     
+            this._tip = new Tip( tips , domContainer );
+            
             this.init( );
         };
     
@@ -61,8 +61,9 @@ define(
             },
             checkBarW : function( xDis ){
                 if( this.bar.width >= xDis ){
-                    this.bar.width = xDis-1;
+                    this.bar.width = xDis-1 > 1 ? xDis - 1 : 1;
                 }
+
             },
             draw : function(data , opt){
             
@@ -75,13 +76,14 @@ define(
     
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
+
     
                 for( var i = 0 ; i < barGroupLen ; i++ ){
                     var sprite      = new Canvax.Display.Sprite({ id : "barGroup"+i });
                     var spriteHover = new Canvax.Display.Sprite({ id : "barGroupHover"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var barData = data[ii][i];
-    
+
                         var fillStyle = this.getBarFillStyle( i , ii , barData.value );
                         var barH      = parseInt(Math.abs(barData.y));
                         var radiusR   = Math.min( this.bar.width/2 , barH );
@@ -115,20 +117,29 @@ define(
                         hoverRect.target = rect;
                         hoverRect.row    = i;
                         hoverRect.column = ii;
-    
-                        hoverRect.on("mouseover" , function(e){
-                            var target    = this.target.context;
-                            target.x      --;
-                            target.width  += 2;
-                        }); 
-                        hoverRect.on("mousemove" , function(e){
-                        
-                        }); 
-                        hoverRect.on("mouseout" , function(e){
-                            var target    = this.target.context;
-                            target.x      ++;
-                            target.width  -= 2;
-                        }); 
+
+                        if( this.eventEnabled ) {
+                            var me = this;
+                            hoverRect.on("mouseover" , function(e){
+                                var target    = this.target.context;
+                                target.x      --;
+                                target.width  += 2;
+
+                                me.sprite.addChild(me._tip.sprite);
+                                me._tip.show( me._setTipInfoHandler(e , this.row , this.column ) );
+
+                            }); 
+                            hoverRect.on("mousemove" , function(e){
+                                me._tip.move( me._setTipInfoHandler(e , this.row , this.column ) );
+                            }); 
+                            hoverRect.on("mouseout" , function(e){
+                                var target    = this.target.context;
+                                target.x      ++;
+                                target.width  -= 2;
+                                me._tip.hide(e);
+                                me.sprite.removeChild(me._tip.sprite);
+                            }); 
+                        }
     
                         sprite.addChild( rect );
                         spriteHover.addChild( hoverRect );
@@ -161,10 +172,27 @@ define(
                     Tween.update();
                 };
                 growAnima();
+            },
+            _setTipInfoHandler : function(e  , iNode ,iGroup){
+                e.tipsInfo = {
+                    iGroup        : iGroup,
+                    iNode         : iNode,
+                    nodesInfoList : this._getNodeInfo(iNode)
+                };
+                return e;
+            },
+            _getNodeInfo : function( iNode ){
+                var arr = [];
+                var me  = this;
+                _.each( this.data , function( group , i ){
+                    var node = _.clone(group[iNode]);
+                    node.fillStyle = me.getBarFillStyle( iNode , i , node.value );
+                    arr.push(node);
+                } );
+                return arr;
             }
         }; 
     
         return Graphs;
-    
     } 
 )

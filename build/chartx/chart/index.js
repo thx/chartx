@@ -7,9 +7,9 @@ define(
     ],
     function( Canvax , CanvaxBase ){
         var Chart = function(node , data , opts){
-            this.el            =  Dvix.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-            this.width         =  parseInt( Dvix.getStyle(this.el , "width" ) )  //图表区域宽
-            this.height        =  parseInt( Dvix.getStyle(this.el , "height") ) //图表区域高
+            this.el            =  Chartx.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+            this.width         =  parseInt( Chartx.getStyle(this.el , "width" ) )  //图表区域宽
+            this.height        =  parseInt( Chartx.getStyle(this.el , "height") ) //图表区域高
 
     
             //Canvax实例
@@ -17,7 +17,7 @@ define(
                 el : this.el
             });
             this.stage         =  new Canvax.Display.Stage({
-                id : "main"
+                id : "main-chart-stage" + new Date().getTime()
             });
     
             this.canvax.addChild( this.stage );
@@ -26,13 +26,7 @@ define(
             arguments.callee.superclass.constructor.apply(this, arguments);
     
             this.init.apply(this , arguments);
-    
-            _.deepExtend( this , opts );
-    
-            //数据集合，由_initData 初始化
-            //this.dataFrame = this._initData( data , this );
-    
-            //this.draw();
+
         };
     
         Chart.Canvax = Canvax;
@@ -49,7 +43,7 @@ define(
             return CanvaxBase.creatClass(BaseChart, me, props, statics);
         };
 
-        Dvix.extend = CanvaxBase.creatClass;
+        Chartx.extend = CanvaxBase.creatClass;
         
         CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
             init   : function(){},
@@ -67,8 +61,8 @@ define(
              */
             resize : function(){
                 this.clear()
-                this.width   = parseInt( Dvix.getStyle(this.el , "width" ) )
-                this.height  = parseInt( Dvix.getStyle(this.el , "height") )
+                this.width   = parseInt( Chartx.getStyle(this.el , "width" ) )
+                this.height  = parseInt( Chartx.getStyle(this.el , "height") )
                 this.canvax.resize()
                 this.draw()
             },
@@ -84,11 +78,11 @@ define(
                 if( obj.options ){
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
-                    _.deepExtend( this , opts );
+                    _.deepExtend( this , obj.options );
                 }
                 if( obj.data ){
                     //数据集合，由_initData 初始化
-                    this.dataFrame = this._initData( data , this );
+                    this.dataFrame = this._initData( obj.data , this );
                 }
                 this.clear();
                 this.draw();
@@ -206,7 +200,6 @@ define(
                 }             
                 dataFrame.yAxis.field = yField;
                 dataFrame.yAxis.org   = getDataOrg( yField , total );
-                
                 return dataFrame;
             }
         });

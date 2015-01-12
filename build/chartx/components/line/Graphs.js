@@ -13,16 +13,42 @@ define(
             this.w       = 0;   
             this.h       = 0; 
             this.y       = 0;
+
+            this.style   = {
+                    normals : ['#458AE6', '#39BCC0', '#5BCB8A', '#94CC5C', '#C3CC5C', '#E6B522', '#E68422'],
+                    overs   : ['#135EBF', '#2E9599', '#36B26A', '#78A64B', '#9CA632', '#BF9E39', '#BF7C39']
+            }
     
             this.line   = {
-                strokeStyle : {
-                    normals : ['#f8ab5e','#E55C5C'],
-                    overs   : []
+                node        :{
+                    enabled     : 1,
+                    mode        : 0,
+                    r           : {
+                        normals : [2,2,2,2,2,2,2],
+                        overs   : [3,3,3,3,3,3,3]
+                    },
+                    fillStyle   :{
+                        normals : ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
+                        overs   : this.style.overs
+                    },
+                    strokeStyle :{
+                        normals : this.style.normals,
+                        overs   : ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']
+                    },
+                    lineWidth   : {
+                        normals : [2,2,2,2,2,2,2],
+                        overs   : [2,2,2,2,2,2,2]
+                    }
                 },
-                alpha       : {
-                    normals : [0.8, 0.7],
-                    overs   : []
-                }
+                strokeStyle: {
+                    normals     : this.style.normals,
+                    overs       : this.style.overs
+                },
+                alpha      : {
+                    normals     : [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                    overs       : [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+                },
+                smooth : true
             }
     
             this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
@@ -89,13 +115,41 @@ define(
  
             _widget:function(){
                 var self  = this;
+                
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var group = new Group({
+                        node   :{
+                            enabled     : self.line.node.enabled,
+                            mode        : self.line.node.mode,
+                            r           : {
+                                normal  : self.line.node.r.normals[a],
+                                over    : self.line.node.r.overs[a]
+                            },
+                            fillStyle   :{
+                                normal  : self.line.node.fillStyle.normals[a],
+                                over    : self.line.node.fillStyle.overs[a],
+                            },
+                            strokeStyle :{
+                                normal  : self.line.node.strokeStyle.normals[a],
+                                over    : self.line.node.strokeStyle.overs[a],
+                            },
+                            lineWidth   :{
+                                normal  : self.line.node.lineWidth.normals[a],
+                                over    : self.line.node.lineWidth.overs[a]
+                            }
+                        },
                         line   :{
-                            strokeStyle : self.line.strokeStyle.normals[a]
+                            strokeStyle : {
+                                normal  : self.line.strokeStyle.normals[a],
+                                over    : self.line.strokeStyle.overs[a]
+                            },
+                            smooth      : self.line.smooth
                         },
                         fill   :{
-                            strokeStyle : self.line.strokeStyle.normals[a],
+                            strokeStyle : {
+                                normal  : self.line.strokeStyle.normals[a],
+                                over    : self.line.strokeStyle.overs[a]
+                            },
                             alpha       : self.line.alpha.normals[a]
                         }
                     })
@@ -119,17 +173,17 @@ define(
                 self.sprite.addChild(self.induce)
     
                 self.induce.on("hold mouseover", function(e){
-                    e.info = self._getInfoHandler(e);
+                    e.tipsInfo = self._getInfoHandler(e);
                 })
                 self.induce.on("drag mousemove", function(e){
-                    e.info = self._getInfoHandler(e);
+                    e.tipsInfo = self._getInfoHandler(e);
                 })
                 self.induce.on("release mouseout", function(e){
                     var o = {
                         iGroup : self.iGroup,
                         iNode  : self.iNode
                     }
-                    e.info = o;
+                    e.tipsInfo = o;
                     self.iGroup = 0, self.iNode = -1
                 })
             },

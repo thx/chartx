@@ -17,17 +17,12 @@ define(
     
         return Chart.extend( {
     
-            init:function(node , data , opt){
+            init:function(node , data , opts){
      
                 this._xAxis        =  null;
                 this._yAxis        =  null;
                 this._back         =  null;
                 this._graphs       =  null;
-    
-    
-                this.stageTip = new Canvax.Display.Sprite({
-                    id      : 'tip'
-                });
     
                 this.core    = new Canvax.Display.Sprite({
                     id      : 'core'
@@ -38,8 +33,8 @@ define(
     
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.core);
-                this.stage.addChild(this.stageTip);
                 
+                _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
  
             },
@@ -63,7 +58,9 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
-                this._graphs = new Graphs(this.graphs);
+
+                //因为tips放在graphs中，so 要吧tips的conf传到graphs中
+                this._graphs = new Graphs(this.graphs , this.tips , this.canvax.getDomContainer());
             },
             _startDraw : function(){
                 var self = this;
@@ -117,8 +114,6 @@ define(
                     },
                     yDataSectionLen : this._yAxis.dataSection.length
                 });
-    
-            
     
                 //执行生长动画
                 self._graphs.grow();

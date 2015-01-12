@@ -4,23 +4,30 @@ define(
         "canvax/index",
         "canvax/shape/Polygon",
         "canvax/shape/Circle",
-        "canvax/animation/Tween"
+        "canvax/animation/Tween",
+        "chartx/components/tips/tip"
     ],
-    function( Canvax , Polygon , Circle , Tween ){
+    function( Canvax , Polygon , Circle , Tween , Tip ){
  
-        var Graphs = function( opt , data ){
+        var Graphs = function( opt , tipsOpt , domContainer ){
             this.pos    = {x : 0 , y : 0};
             this.r = 0; //蜘蛛网的最大半径
-            this.dataOrg  = [];
-            this.yDataSection = [];
-            this.xDataSection = [];
+            this.data       = [];
+            this.yDataSection  = [];
+            this.xDataSection  = [];
             this._colors       = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
-            this.lineWidth   = 1;
+            this.fillStyle     = null;
+            this.lineWidth     = 1;
             this.sprite = null ;
             this.currentAngInd = null;
+
+            this.tips          = tipsOpt; //tip的confit
+            this.domContainer  = domContainer;
+            this._tips         = null; //tip的对象 tip的config 放到graphs的config中传递过来
+
+            this._circlesSp    = [];//一个多边形上面的点的集合
     
-            this.init( data );
-    
+            this.init( opt );
         };
     
         Graphs.prototype = {
@@ -29,42 +36,72 @@ define(
                 this.sprite = new Canvax.Display.Sprite({ 
                     id : "graphsEl"
                 });
+                this._tip = new Tip( this.tips , this.domContainer );
+                this.sprite.addChild(this._tip.sprite);
             },
             getFillStyle : function( i , ii , value){
                 var fillStyle = null;
                 if( _.isArray( this.fillStyle ) ){
-                    fillStyle = this.fillStyle[ii]
+                    fillStyle = this.fillStyle[i]
                 }
                 if( _.isFunction( this.fillStyle ) ){
                     fillStyle = this.fillStyle( i , ii , value );
                 }
                 if( !fillStyle || fillStyle=="" ){
-                    fillStyle = this._colors[ii];
+                    fillStyle = this._colors[i];
                 }
                 return fillStyle;
             },
             draw : function(data , opt){
-                this.dataOrg = data;
+                this.data = data;
                 _.deepExtend(this , opt);
                 this._widget();
             },
-            angHover : function(ind){
+            angOver : function(e , ind){
+                this._tip.show( this._getTipsInfo(e,ind));
+            },
+            angMove : function(e , ind){
                 if( ind != this.currentAngInd ){
                     if( this.currentAngInd != null ){
                         this._setCircleStyleForInd( this.currentAngInd );
                     }
                     this.currentAngInd = ind;
-                    this._setCircleStyleForInd(ind)
+                    this._setCircleStyleForInd(ind);
+                    
                 }
+                this._tip.move(this._getTipsInfo(e,ind));
             },
-            angOut : function(){
+            angOut : function(e){
                 this._setCircleStyleForInd( this.currentAngInd );
                 this.currentAngInd = null;
+                this._tip.hide(e)
+            },
+            _getTipsInfo : function(e,ind){
+                e.tipsInfo = {
+                   //iGroup  : 0,
+                    iNode   : ind,
+                    nodesInfoList : this._getTipsInfoList(e,ind)
+                };
+                return e;
+            },
+            _getTipsInfoList : function(e,ind){
+                var list = [];
+                var me   = this;
+                _.each(this.data , function( group , i ){
+                    list.push({
+                        value : group[ind],
+                        fillStyle : me.getFillStyle( i , ind , group[ind] )
+                    });
+                });
+                return list;
             },
             _setCircleStyleForInd : function(ind){
-                _.each( this.sprite.children , function( group , i ){
+                _.each( this._circlesSp , function( circles , i ){
                     //因为circles的sprite在该sprite里面索引为2
-                    var circle = group.getChildAt(2).getChildAt(ind);
+                    var circle = circles.getChildAt(ind); //group.getChildAt(2).getChildAt(ind);
+                    if(!circle){
+                        return;
+                    }
                     var sCtx   = circle.context;
                     var s      = sCtx.fillStyle;
                     sCtx.fillStyle   = sCtx.strokeStyle;
@@ -78,10 +115,10 @@ define(
                 spc.y   = y;
             },
             _widget : function(){
-                if( this.dataOrg.length == 0 ){
+                if( this.data.length == 0 ){
                     return;
                 }
-                var n = this.dataOrg[ 0 ].length;
+                var n = this.data[ 0 ].length;
                 if (!n || n < 2) { return; }
                 var x = y = this.r;
                 
@@ -90,8 +127,10 @@ define(
                 var deg      = beginDeg;
     
                 var mxYDataSection = this.yDataSection[ this.yDataSection.length - 1 ];
+
+                this._circlesSp     = [];
                 
-                for( var i=0,l=this.dataOrg.length ; i<l ; i++ ){
+                for( var i=0,l=this.data.length ; i<l ; i++ ){
     
                     var pointList = []
                     var group     = new Canvax.Display.Sprite({
@@ -100,9 +139,11 @@ define(
                     var circles   = new Canvax.Display.Sprite({
                         
                     });
+
+                    this._circlesSp.push(circles);
     
                     for (var ii = 0, end = n ; ii < end; ii ++) {
-                        var r  = this.r * ( this.dataOrg[i][ii] / mxYDataSection );
+                        var r  = this.r * ( this.data[i][ii] / mxYDataSection );
                         var px = x + r * Math.cos(deg);
                         var py = y + r * Math.sin(deg);
                         pointList.push([ px , py ]);
@@ -113,7 +154,7 @@ define(
                                 x : px,
                                 y : py,
                                 r : 5,
-                                fillStyle   : this._colors[i],
+                                fillStyle   : this.getFillStyle(i , ii , this.data[i][ii]), //this._colors[i],
                                 strokeStyle : "#ffffff",
                                 lineWidth   : 2
                             }
@@ -126,7 +167,7 @@ define(
                         context : {
                             pointList   : pointList,
                             globalAlpha : 0.5,
-                            fillStyle   : this._colors[i]
+                            fillStyle   : this.getFillStyle(i)//this._colors[i]
                         }
                     });
                     var polygonBorder = new Polygon({
@@ -134,7 +175,7 @@ define(
                         context : {
                             pointList : pointList,
                             lineWidth : 2,
-                            strokeStyle : this._colors[i]
+                            strokeStyle : this.getFillStyle(i)//this._colors[i]
                         }
                     });
     

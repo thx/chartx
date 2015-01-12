@@ -13,7 +13,7 @@
     var Canvax = Chart.Canvax;
 
     return Chart.extend({
-      init: function (node , data , opt) {
+      init: function (node , data , opts) {
         this.config = {
           mode: 1,
           event: {
@@ -34,6 +34,7 @@
         //this.stage.addChild(this.stageBg);
         this.stage.addChild(this.core);
 
+        _.deepExtend( this , opts );
         this.dataFrame = this._initData( data , this );
 
       },

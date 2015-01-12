@@ -13,20 +13,23 @@ define(
     
             this.dW      = 0;  //html的tips内容width
             this.dH      = 0;  //html的tips内容Height
+
+            this.backR   = 3;  //背景框的 圆角 
     
             this.sprite  = null;
-            this.context = null; //tips的详细内容
+            this.content = null; //tips的详细内容
             
             this._tipDom = null;
             this._back   = null;
         
-            //所有调用tip的 event 上面 要附带有符合下面结构的info属性
+            //所有调用tip的 event 上面 要附带有符合下面结构的tipsInfo属性
             //会deepExtend到this.indo上面来
-            this.info    = {
-                nodesInfoList : [],//符合iNode的所有Group上面的node的集合
+            this.tipsInfo    = {
+                nodesInfoList : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
                 iGroup        : 0, //数据组的索引对应二维数据map的x
                 iNode         : 0  //数据点的索引对应二维数据map的y
             };
+            this.prefix  = [];
             this.init(opt);
         }
         Tip.prototype = {
@@ -37,66 +40,84 @@ define(
                 });
             },
             show : function(e){
+                this.hide();
                 var stage = e.target.getStage();
                 this.cW   = stage.context.width;
                 this.cH   = stage.context.height;
     
-                this._initContext(e);
+                this._initContent(e);
                 this._initBack(e);
                 
                 this.setPosition(e);
+
+                this.sprite.toFront();
             },
             move : function(e){
-                this._setContext(e);
+                this._setContent(e);
+                this._resetBackSize(e);
                 this.setPosition(e);
             },
             hide : function(){
                 this.sprite.removeAllChildren();
-                this._removeContext();
+                this._removeContent();
             },
             /**
              *@pos {x:0,y:0}
              */
             setPosition : function( e ){
+                if(!this._tipDom) return;
                 var pos = e.pos || e.target.localToGlobal( e.point );
                 var x   = this._checkX( pos.x );
                 var y   = this._checkY( pos.y );
-                this.sprite.context.x = x;
-                this.sprite.context.y = y;
+
+                var _backPos = this.sprite.parent.globalToLocal( { x : x , y : y} );
+                this.sprite.context.x = _backPos.x;
+                this.sprite.context.y = _backPos.y;
                 this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;";
             },
             /**
-             *context相关-------------------------
+             *content相关-------------------------
              */
-            _initContext : function(e){
+            _initContent : function(e){
                 this._tipDom = document.createElement("div");
                 this._tipDom.className = "chart-tips";
                 this._tipDom.style.cssText += ";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;"
                 this.tipDomContainer.appendChild( this._tipDom );
-                this._setContext(e);
+                this._setContent(e);
             },
-            _removeContext : function(){
+            _removeContent : function(){
+                if(!this._tipDom){
+                    return;
+                }
                 this.tipDomContainer.removeChild( this._tipDom );
                 this._tipDom = null;
             },
-            _setContext : function(e){
-                this._tipDom.innerHTML = this._getContext(e);
+            _setContent : function(e){
+                if (!this._tipDom){
+                    return;
+                } 
+                this._tipDom.innerHTML = this._getContent(e);
                 this.dW = this._tipDom.offsetWidth;
                 this.dH = this._tipDom.offsetHeight;
             },
-            _getContext : function(e){
-                var tipsContext = this.context;
-                _.deepExtend( this.info , (e.info || {}) );
-                if( !tipsContext ){
-                    tipsContext = this._getDefaultContext(e);
+            _getContent : function(e){
+                _.deepExtend( this.tipsInfo , (e.tipsInfo || {}) );
+                var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
+                if( !tipsContent ){
+                    tipsContent = this._getDefaultContent(e);
                 }
-                return tipsContext;
+                return tipsContent;
             },
-            _getDefaultContext : function(e){
+            _getDefaultContent : function(e){
                 var str  = "<table>";
                 var self = this;
-                _.each( self.info.nodesInfoList , function( node , i ){
-                    str+= "<tr style='color:"+ node.fillStyle +"'><td>"+ self.prefix[i] +"</td><td>"+ node.value +"</td></tr>";
+                _.each( self.tipsInfo.nodesInfoList , function( node , i ){
+                    str+= "<tr style='color:"+ node.fillStyle +"'>";
+                    var prefixName = self.prefix[i];
+                    if( prefixName ) {
+                        str+="<td>"+ prefixName +"</td>";
+                    };
+                    str += "<td>"+ node.value +"</td></tr>";
                 });
                 str+="</table>";
                 return str;
@@ -113,13 +134,17 @@ define(
                     lineWidth : 1,
                     strokeStyle : "#333333",
                     fillStyle : "#ffffff",
-                    radius : [5]
+                    radius : [ this.backR ]
                 }
                 this._back = new Rect({
                     id : "tipsBack",
                     context : opt
                 });
                 this.sprite.addChild( this._back );
+            },
+            _resetBackSize:function(e){
+                this._back.context.width  = this.dW;
+                this._back.context.height = this.dH;
             },
     
             /**

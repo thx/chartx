@@ -8,7 +8,7 @@ define(
             this.xDis1 = 0; //x方向一维均分长度
             xAxis.superclass.constructor.apply( this , arguments );
         };
-        Dvix.extend( xAxis , xAxisBase , {
+        Chartx.extend( xAxis , xAxisBase , {
             _trimXAxis:function( data , xGraphsWidth ){
                 
                 var tmpData = [];

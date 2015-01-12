@@ -1,20 +1,20 @@
-var Dvix = {
+var Chartx = {
     start: function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
-            Dvix.site.daily = true;
+            Chartx.site.daily = true;
         }
         //END(develop)
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2014.12.02/";
+        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2015.01.04/";
         //BEGIN(develop)
-        if( Dvix.site.daily || Dvix.site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2014.12.02/";
+        if( Chartx.site.daily || Chartx.site.local ){
+            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2015.01.04/";
         }
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
         if( !! ~location.search.indexOf('localcanvax') ){
@@ -24,23 +24,19 @@ var Dvix = {
         //END(develop)
 
 
-        //配置chartx包
-        var dvixUrl = "http://g.tbcdn.cn/thx/charts/1.2.9/";
-        //BEGIN(develop)
-        if (Dvix.site.daily) {
-            dvixUrl = "http://g.assets.daily.taobao.net/thx/charts/1.2.9/";
-        }
-        if (Dvix.site.local) {
-            dvixUrl = "../../";
-        }
-        //END(develop)
 
-        Dvix.setPackages([{
+        var __FILE__, scripts = document.getElementsByTagName("script"); 
+        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
+        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
+        //配置chartx包
+        Chartx.path = __FILE__;
+
+        Chartx.setPackages([{
             name: 'canvax',
             path: canvaxUrl
         }, {
             name: 'chartx',
-            path: dvixUrl
+            path: Chartx.path
         }]
 
         );
@@ -55,7 +51,6 @@ var Dvix = {
      *@packages array [{name:,path:}]
      */
     setPackages: function (packages) {
-
         /*       
         ## 通用模块定义
         Universal Module Definition
@@ -180,8 +175,8 @@ var Dvix = {
             window.KISSY && KISSY.config({ packages: [{
                 name: name,
                 path: path,
-                debug: Dvix.site.debug,
-                combine: !Dvix.site.local
+                debug: Chartx.site.debug,
+                combine: !Chartx.site.local
             }]
             });
 
@@ -251,4 +246,4 @@ var Dvix = {
         };
     }
 };
-Dvix.start();
+Chartx.start();

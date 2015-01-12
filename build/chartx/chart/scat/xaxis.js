@@ -9,7 +9,7 @@ define(
             this.xDis = 0; //x方向一维均分长度
             xAxis.superclass.constructor.apply( this , arguments );
         };
-        Dvix.extend( xAxis , xAxisBase , {
+        Chartx.extend( xAxis , xAxisBase , {
             _initDataSection  : function( arr ){ 
                 var arr = _.flatten( arr ); //Tools.getChildsArr( data.org );
                 var dataSection = DataSection.section(arr);

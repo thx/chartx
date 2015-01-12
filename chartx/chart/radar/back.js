@@ -38,13 +38,20 @@ define(
             _widget : function(){
                 var r   = this.r;
                 var spt = this.sprite;
-                for( var i=0 , l = this.yDataSection.length ; i < l ; i++ ) {
+                var ys  = this.yDataSection;
+                var yMin = _.min(ys);
+                var yMax = _.max(ys);
+                for( var i=0 , l = ys.length ; i < l ; i++ ) {
+                    var rScale = (ys[i]-yMin) / (yMax - yMin);
+                    if( rScale == 0 ){
+                        continue;
+                    };
                     var isogon = new Isogon({
                         id : "isogon_" + i,
                         context : {
                             x : r,
                             y : r,
-                            r : this.r / l * (i+1),
+                            r : this.r * rScale,
                             n : this.xDataSection.length,
                             strokeStyle : this.strokeStyle,
                             lineWidth   : this.lineWidth

@@ -17,7 +17,7 @@ define(
     
         return Chart.extend( {
     
-            init:function(node , data , opt){
+            init:function(node , data , opts){
     
                 this._xAxis        =  null;
                 this._yAxis        =  null;
@@ -38,7 +38,8 @@ define(
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.core);
                 this.stage.addChild(this.stageTip);
-                
+
+                _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
 
             },
@@ -123,7 +124,6 @@ define(
               
             },
             _trimGraphs:function(){
-    
                 var xArr     = this._xAxis.dataOrg;
                 var yArr     = this._yAxis.dataOrg;
     
