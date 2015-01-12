@@ -16,6 +16,7 @@ define(
             this.yDataSection  = [];
             this.xDataSection  = [];
             this._colors       = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this.fillStyle     = null;
             this.lineWidth     = 1;
             this.sprite = null ;
             this.currentAngInd = null;
@@ -41,13 +42,13 @@ define(
             getFillStyle : function( i , ii , value){
                 var fillStyle = null;
                 if( _.isArray( this.fillStyle ) ){
-                    fillStyle = this.fillStyle[ii]
+                    fillStyle = this.fillStyle[i]
                 }
                 if( _.isFunction( this.fillStyle ) ){
                     fillStyle = this.fillStyle( i , ii , value );
                 }
                 if( !fillStyle || fillStyle=="" ){
-                    fillStyle = this._colors[ii];
+                    fillStyle = this._colors[i];
                 }
                 return fillStyle;
             },
@@ -89,7 +90,7 @@ define(
                 _.each(this.data , function( group , i ){
                     list.push({
                         value : group[ind],
-                        fillStyle : me.getFillStyle( ind , i , group[ind])
+                        fillStyle : me.getFillStyle( i , ind , group[ind] )
                     });
                 });
                 return list;
@@ -153,7 +154,7 @@ define(
                                 x : px,
                                 y : py,
                                 r : 5,
-                                fillStyle   : this._colors[i],
+                                fillStyle   : this.getFillStyle(i , ii , this.data[i][ii]), //this._colors[i],
                                 strokeStyle : "#ffffff",
                                 lineWidth   : 2
                             }
@@ -166,7 +167,7 @@ define(
                         context : {
                             pointList   : pointList,
                             globalAlpha : 0.5,
-                            fillStyle   : this._colors[i]
+                            fillStyle   : this.getFillStyle(i)//this._colors[i]
                         }
                     });
                     var polygonBorder = new Polygon({
@@ -174,7 +175,7 @@ define(
                         context : {
                             pointList : pointList,
                             lineWidth : 2,
-                            strokeStyle : this._colors[i]
+                            strokeStyle : this.getFillStyle(i)//this._colors[i]
                         }
                     });
     

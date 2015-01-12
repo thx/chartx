@@ -38,7 +38,7 @@ KISSY.ready(function(){
             //r : 150 //蜘蛛网的半径，决定了整个图的大小默认为chart的min(width,height)
         },
         graphs:{
-
+            fillStyle : ["red"]
         }
     }
      
