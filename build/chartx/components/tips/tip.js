@@ -25,7 +25,7 @@ define(
             //所有调用tip的 event 上面 要附带有符合下面结构的tipsInfo属性
             //会deepExtend到this.indo上面来
             this.tipsInfo    = {
-                nodesInfoList : [],//符合iNode的所有Group上面的node的集合
+                nodesInfoList : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
                 iGroup        : 0, //数据组的索引对应二维数据map的x
                 iNode         : 0  //数据点的索引对应二维数据map的y
             };
@@ -40,6 +40,7 @@ define(
                 });
             },
             show : function(e){
+                this.hide();
                 var stage = e.target.getStage();
                 this.cW   = stage.context.width;
                 this.cH   = stage.context.height;
@@ -48,9 +49,12 @@ define(
                 this._initBack(e);
                 
                 this.setPosition(e);
+
+                this.sprite.toFront();
             },
             move : function(e){
                 this._setContext(e);
+                this._resetBackSize(e);
                 this.setPosition(e);
             },
             hide : function(){
@@ -82,17 +86,23 @@ define(
                 this._setContext(e);
             },
             _removeContext : function(){
+                if(!this._tipDom){
+                    return;
+                }
                 this.tipDomContainer.removeChild( this._tipDom );
                 this._tipDom = null;
             },
             _setContext : function(e){
+                if (!this._tipDom){
+                    return;
+                } 
                 this._tipDom.innerHTML = this._getContext(e);
                 this.dW = this._tipDom.offsetWidth;
                 this.dH = this._tipDom.offsetHeight;
             },
             _getContext : function(e){
-                var tipsContext = this.context;
                 _.deepExtend( this.tipsInfo , (e.tipsInfo || {}) );
+                var tipsContext = _.isFunction(this.context) ? this.context( this.tipsInfo ) : this.context ;
                 if( !tipsContext ){
                     tipsContext = this._getDefaultContext(e);
                 }
@@ -105,7 +115,7 @@ define(
                     str+= "<tr style='color:"+ node.fillStyle +"'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
-                        str+="<td>"+ prefixName +"：</td>";
+                        str+="<td>"+ prefixName +"</td>";
                     };
                     str += "<td>"+ node.value +"</td></tr>";
                 });
@@ -131,6 +141,10 @@ define(
                     context : opt
                 });
                 this.sprite.addChild( this._back );
+            },
+            _resetBackSize:function(e){
+                this._back.context.width  = this.dW;
+                this._back.context.height = this.dH;
             },
     
             /**

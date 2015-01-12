@@ -27,6 +27,12 @@ KISSY.ready(function(){
         xAxis : {
             field : ["val1"],
         },
+        tips : {
+            //prefix : ["小明","小娜"]
+            context : function(info){
+                debugger
+            }
+        },
         back  : {
             //r : 150 //蜘蛛网的半径，决定了整个图的大小默认为chart的min(width,height)
         },
