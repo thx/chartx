@@ -67,34 +67,40 @@ define(
                 this._drawEnd();                           
     
                 var me = this;
+
+                this.stage.on("mouseover" , function(e){
+                    me._graphs.angOver( e , me._getCurrAng(e) );
+                });
                 this.stage.on("mousemove" , function(e){
-                    var origPoint = me._getPointBack(e);
-    
-                    //该point对应的角度
-                    var angle = Math.atan2( origPoint.y , origPoint.x ) * 180 / Math.PI;
-    
-                    //目前当前的r是 从-PI 到PI 的 值，所以转换过来的页是180 到 -180的范围值。
-                    //需要转换到0-360度
-                    //另外因为蜘蛛网的起始角度为-90度，所以还要+90 来把角度转换到对应的范围里面
-                    var itemAng = 360 / me._xAxis.dataSection.length;
-    
-                    angle = ( 360 + angle + 90 + itemAng/2 ) % 360;
-    
-                    var ind = parseInt(angle / itemAng);
-    
-                    me._graphs.angHover( ind );
-    
+                    me._graphs.angMove( e , me._getCurrAng(e) );
                 });
                 this.stage.on("mouseout",function(e){
                     //找到最外围的那个
                     var lastIsogon = me._back.sprite.getChildById("isogon_" + (me._yAxis.dataSection.length-1));
                     var origPoint  = me._getPointBack(e);
-    
                     if( !HitTestPoint.isInside( lastIsogon , origPoint )){
                         me._graphs.angOut( );
                     }
                 });
               
+            },
+            _getCurrAng   : function(e){
+                var origPoint = this._getPointBack(e);
+    
+                //该point对应的角度
+                var angle = Math.atan2( origPoint.y , origPoint.x ) * 180 / Math.PI;
+    
+                //目前当前的r是 从-PI 到PI 的 值，所以转换过来的页是180 到 -180的范围值。
+                //需要转换到0-360度
+                //另外因为蜘蛛网的起始角度为-90度，所以还要+90 来把角度转换到对应的范围里面
+                var itemAng = 360 / this._xAxis.dataSection.length;
+    
+                angle = ( 360 + angle + 90 + itemAng/2 ) % 360;
+    
+                var ind = parseInt(angle / itemAng);
+
+                return ind;
+
             },
             _getPointBack : function(e){
                 //先把point转换到_back的坐标系内
@@ -104,13 +110,13 @@ define(
                 var origPoint  = this._back.sprite.globalToLocal( e.target.localToGlobal( e.point , this.sprite ) );
                 origPoint.x   -= this.r;
                 origPoint.y   -= this.r;
-                return origPoint
+                return origPoint;
             },
             _initModule:function(opt , data){
                 this._xAxis  = new xAxis(opt.xAxis , data.xAxis);
                 this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
                 this._back   = new Back( opt.back );
-                this._graphs = new Graphs( opt.graphs );
+                this._graphs = new Graphs( opt.graphs , opt.tips , this.canvax.getDomContainer());
             },
             _startDraw : function(){
                 
