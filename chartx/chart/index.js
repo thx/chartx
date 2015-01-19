@@ -35,7 +35,7 @@ define(
             var me = this;
             var BaseChart = function() {
                 me.apply(this , arguments);
-                if (ctor) {
+                if ( ctor ) {
                     ctor.apply(this, arguments);
                 }
             };

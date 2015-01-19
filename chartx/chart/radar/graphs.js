@@ -17,6 +17,7 @@ define(
             this.xDataSection  = [];
             this._colors       = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
             this.fillStyle     = null;
+            this.alpha         = 0.5;
             this.lineWidth     = 1;
             this.sprite = null ;
             this.currentAngInd = null;
@@ -166,7 +167,7 @@ define(
                         id : "radar_bg_"+i,
                         context : {
                             pointList   : pointList,
-                            globalAlpha : 0.5,
+                            globalAlpha : this.alpha,//0.5,
                             fillStyle   : this.getFillStyle(i)//this._colors[i]
                         }
                     });
