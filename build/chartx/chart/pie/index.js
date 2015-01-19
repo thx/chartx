@@ -9,7 +9,7 @@
   function (Chart, Pie, Graphs, PieTip) {
     /*
     *@node chart在dom里的目标容器节点。
-    */    
+    */
     var Canvax = Chart.Canvax;
 
     return Chart.extend({
@@ -46,6 +46,9 @@
         this._arguments = arguments;
 
       },
+      getByIndex: function (index) {
+        return this._pie._getByIndex(index);
+      },
       getList: function () {
         var self = this;
         var list = [];
@@ -76,7 +79,7 @@
       _initData: function (data, opt) {
         var dataFrame = {};
         dataFrame.org = data;
-        dataFrame.data = [];        
+        dataFrame.data = [];
         if (_.isArray(data)) {
           for (var i = 0; i < data.length; i++) {
             var obj = {};
@@ -131,7 +134,16 @@
           dataLabel: self.dataLabel,
           strokeWidth: self.strokeWidth,
           allowPointSelect: self.allowPointSelect,
-          animation: self.animation
+          animation: self.animation,
+          colors:self.colors,
+          focusCallback: {
+            focus: function (index) {
+              self.fire('focused');
+            },
+            unfocus: function () {
+              self.fire('unfocused');
+            }
+          }
         };
         if (self.tip.enabled) {
           self._tip = new PieTip(self);

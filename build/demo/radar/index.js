@@ -39,7 +39,7 @@ KISSY.ready(function(){
         },
         graphs:{
             fillStyle : ["red"],
-            alpha     : 0.1
+            alpha     : 0
         }
     }
      
