@@ -20,30 +20,31 @@
             enabled: 1
           }
         }
-        this.stageBg = new Canvax.Display.Sprite({
-          id: 'bg'
-        });
-        this.core = new Canvax.Display.Sprite({
-          id: 'core'
-        });
-        this.stageTip = new Canvax.Display.Stage({
-          id: 'stageTip'
-        });
-        this.canvax.addChild(this.stageTip);
-        this.stageTip.toFront();
-        //this.stage.addChild(this.stageBg);
-        this.stage.addChild(this.core);
-
         _.deepExtend( this , opts );
         this.dataFrame = this._initData( data , this );
 
       },
       draw: function () {
-        this._initModule();                      //初始化模块
-        this._startDraw();                         //开始绘图
-        this._drawEnd();                           //绘制结束，添加到舞台      
 
-        this._arguments = arguments;
+          this.stageBg = new Canvax.Display.Sprite({
+              id: 'bg'
+          });
+          this.core = new Canvax.Display.Sprite({
+              id: 'core'
+          });
+          this.stageTip = new Canvax.Display.Stage({
+              id: 'stageTip'
+          });
+          this.canvax.addChild(this.stageTip);
+          this.stageTip.toFront();
+          //this.stage.addChild(this.stageBg);
+          this.stage.addChild(this.core);
+
+          this._initModule();                      //初始化模块
+          this._startDraw();                         //开始绘图
+          this._drawEnd();                           //绘制结束，添加到舞台      
+
+          this._arguments = arguments;
 
       },
       getByIndex: function (index) {

@@ -8,9 +8,10 @@ define(
         './back',
         './graphs',
         'canvax/geom/HitTestPoint',
+        'chartx/utils/dataformat',
         'chartx/utils/deep-extend'
     ],
-    function( Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint){
+    function( Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint ,dataFormat){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -26,20 +27,13 @@ define(
                 this._back         = null;
                 this._graphs       = null;
     
-                this.stageBg       = new Canvax.Display.Sprite({
-                    id        : 'bg'
-                });
-                this.stageCore     = new Canvax.Display.Sprite({
-                    id        : 'graph'
-                });
-    
-                this.stage.addChild(this.stageBg);
-                this.stage.addChild(this.stageCore);
+
                 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
 
             },
+            _initData : dataFormat,
             _getR : function(){
                 var minWorH = Math.min( this.width , this.height );
                 
@@ -53,6 +47,15 @@ define(
                 this.r -= 50;
             },
             draw:function(){
+                this.stageBg       = new Canvax.Display.Sprite({
+                    id        : 'bg'
+                });
+                this.stageCore     = new Canvax.Display.Sprite({
+                    id        : 'graph'
+                });
+    
+                this.stage.addChild(this.stageBg);
+                this.stage.addChild(this.stageCore);
     
                 //计算一下半径
                 this._getR();

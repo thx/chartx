@@ -35,6 +35,10 @@ define(
      
                 opt && _.deepExtend( this.config , opt );
      
+                
+     
+            },
+            draw : function( opt ){
                 this.stage.addChild( new Sector({
                    id      : "bg",
                    context : {
@@ -161,9 +165,6 @@ define(
                 if( this.config.rate > 0 ){
                     this.setRate( this.config.rate , true );
                 };
-     
-            },
-            draw : function( opt ){
                 this.canvax.addChild( this.stage );
             },
             setRate : function( r , notUseTween ){

@@ -2,7 +2,7 @@
 KISSY.ready(function(){
 
     var S = KISSY;
-    var data1= [
+    window.data1= [
         ["val1","val2","val3","val4"],
         [ 1 , 101  , 201 , 301 ] 
 
