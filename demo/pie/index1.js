@@ -1,14 +1,19 @@
 ﻿KISSY.ready(function () {
   var S = KISSY;
-  var data1 = [        
+  var data1 = [
         ['Opera', 1],
+        {
+            name: 'AAA',
+            y: 12.8,
+            selected: false
+        },
         ['IE', 0],
         ['Safari', 0],
         ['Chrome', 0],
         ['Firefox', 1],
         ['Chrome', 0],
         ['Chrome', 1],
-        ['Chrome', 0]
+        ['Chrome', 0]        
     ];
   var options = {
     //浮动tip

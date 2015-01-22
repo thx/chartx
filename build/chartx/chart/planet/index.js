@@ -30,6 +30,13 @@ define(
                 this._graphs       =  null;
                 this._tips         =  null;
     
+
+
+                _.deepExtend( this , opts );
+                this.dataFrame = this._initData( data , this );
+
+            },
+            draw:function(){
                 this.stageTip = new Canvax.Display.Sprite({
                     id      : 'tip'
                 });
@@ -44,11 +51,6 @@ define(
                 this.stage.addChild(this.core);
                 this.stage.addChild(this.stageTip);
 
-                _.deepExtend( this , opts );
-                this.dataFrame = this._initData( data , this );
-
-            },
-            draw:function(){
                 if( this.rotate ) {
                     this._rotate( this.rotate );
                 }

@@ -9,6 +9,7 @@ define(
         var xAxis = function( opt , data ){
             this.dataOrg     = [];
             this.dataSection = [];
+            this.color       = "#000000";
             this.sprite      = null;
             this.init(opt , data);
         };
@@ -64,7 +65,7 @@ define(
                     var c = {
                         x : item.x + me.r,
                         y : item.y + me.r,
-                        fillStyle : '#000000'
+                        fillStyle : me.color
                     }
     
                     c = _.deepExtend( c , me._getTextAlignForPoint(Math.atan2(item.y , item.x)) );

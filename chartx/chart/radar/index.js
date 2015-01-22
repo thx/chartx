@@ -8,9 +8,10 @@ define(
         './back',
         './graphs',
         'canvax/geom/HitTestPoint',
+        'chartx/utils/dataformat',
         'chartx/utils/deep-extend'
     ],
-    function( Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint){
+    function( Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint ,dataFormat){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -26,20 +27,13 @@ define(
                 this._back         = null;
                 this._graphs       = null;
     
-                this.stageBg       = new Canvax.Display.Sprite({
-                    id        : 'bg'
-                });
-                this.stageCore     = new Canvax.Display.Sprite({
-                    id        : 'graph'
-                });
-    
-                this.stage.addChild(this.stageBg);
-                this.stage.addChild(this.stageCore);
+
                 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
 
             },
+            _initData : dataFormat,
             _getR : function(){
                 var minWorH = Math.min( this.width , this.height );
                 
@@ -53,6 +47,15 @@ define(
                 this.r -= 50;
             },
             draw:function(){
+                this.stageBg       = new Canvax.Display.Sprite({
+                    id        : 'bg'
+                });
+                this.stageCore     = new Canvax.Display.Sprite({
+                    id        : 'graph'
+                });
+    
+                this.stage.addChild(this.stageBg);
+                this.stage.addChild(this.stageCore);
     
                 //计算一下半径
                 this._getR();
@@ -67,34 +70,40 @@ define(
                 this._drawEnd();                           
     
                 var me = this;
+
+                this.stage.on("mouseover" , function(e){
+                    me._graphs.angOver( e , me._getCurrAng(e) );
+                });
                 this.stage.on("mousemove" , function(e){
-                    var origPoint = me._getPointBack(e);
-    
-                    //该point对应的角度
-                    var angle = Math.atan2( origPoint.y , origPoint.x ) * 180 / Math.PI;
-    
-                    //目前当前的r是 从-PI 到PI 的 值，所以转换过来的页是180 到 -180的范围值。
-                    //需要转换到0-360度
-                    //另外因为蜘蛛网的起始角度为-90度，所以还要+90 来把角度转换到对应的范围里面
-                    var itemAng = 360 / me._xAxis.dataSection.length;
-    
-                    angle = ( 360 + angle + 90 + itemAng/2 ) % 360;
-    
-                    var ind = parseInt(angle / itemAng);
-    
-                    me._graphs.angHover( ind );
-    
+                    me._graphs.angMove( e , me._getCurrAng(e) );
                 });
                 this.stage.on("mouseout",function(e){
                     //找到最外围的那个
                     var lastIsogon = me._back.sprite.getChildById("isogon_" + (me._yAxis.dataSection.length-1));
                     var origPoint  = me._getPointBack(e);
-    
                     if( !HitTestPoint.isInside( lastIsogon , origPoint )){
                         me._graphs.angOut( );
                     }
                 });
               
+            },
+            _getCurrAng   : function(e){
+                var origPoint = this._getPointBack(e);
+    
+                //该point对应的角度
+                var angle = Math.atan2( origPoint.y , origPoint.x ) * 180 / Math.PI;
+    
+                //目前当前的r是 从-PI 到PI 的 值，所以转换过来的页是180 到 -180的范围值。
+                //需要转换到0-360度
+                //另外因为蜘蛛网的起始角度为-90度，所以还要+90 来把角度转换到对应的范围里面
+                var itemAng = 360 / this._xAxis.dataSection.length;
+    
+                angle = ( 360 + angle + 90 + itemAng/2 ) % 360;
+    
+                var ind = parseInt(angle / itemAng);
+
+                return ind;
+
             },
             _getPointBack : function(e){
                 //先把point转换到_back的坐标系内
@@ -104,13 +113,13 @@ define(
                 var origPoint  = this._back.sprite.globalToLocal( e.target.localToGlobal( e.point , this.sprite ) );
                 origPoint.x   -= this.r;
                 origPoint.y   -= this.r;
-                return origPoint
+                return origPoint;
             },
             _initModule:function(opt , data){
                 this._xAxis  = new xAxis(opt.xAxis , data.xAxis);
                 this._yAxis  = new yAxis(opt.yAxis , data.yAxis);
                 this._back   = new Back( opt.back );
-                this._graphs = new Graphs( opt.graphs );
+                this._graphs = new Graphs( opt.graphs , opt.tips , this.canvax.getDomContainer());
             },
             _startDraw : function(){
                 
@@ -142,8 +151,8 @@ define(
             },
             _drawEnd:function(){
                 this.stageBg.addChild(this._back.sprite);
-                this.stageCore.addChild(this._graphs.sprite);
                 this.stageCore.addChild(this._xAxis.sprite);
+                this.stageCore.addChild(this._graphs.sprite);
             }
         });
         

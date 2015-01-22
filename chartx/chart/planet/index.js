@@ -5,11 +5,12 @@ define(
         'chartx/utils/tools',
         'chartx/utils/gradient-color',
         'chartx/utils/datasection',
+        'chartx/utils/dataformat',
         'chartx/components/planet/Graphs',
         './tips',
         'chartx/utils/deep-extend',
     ],
-    function(Chart, Tools, GradientColor, DataSection, Graphs, Tips, InfoCircle){
+    function(Chart, Tools, GradientColor, DataSection, DataFormat, Graphs, Tips){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -116,6 +117,7 @@ define(
                 this._arguments = arguments;
     
             },
+            _initData:DataFormat,
             _initModule:function(){
                 this._back   = new Graphs(this.back, this);
                 this._graphs = new Graphs(this.graphs, this);

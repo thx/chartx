@@ -9,7 +9,7 @@
   function (Chart, Pie, Graphs, PieTip) {
     /*
     *@node chart在dom里的目标容器节点。
-    */    
+    */
     var Canvax = Chart.Canvax;
 
     return Chart.extend({
@@ -20,31 +20,35 @@
             enabled: 1
           }
         }
-        this.stageBg = new Canvax.Display.Sprite({
-          id: 'bg'
-        });
-        this.core = new Canvax.Display.Sprite({
-          id: 'core'
-        });
-        this.stageTip = new Canvax.Display.Stage({
-          id: 'stageTip'
-        });
-        this.canvax.addChild(this.stageTip);
-        this.stageTip.toFront();
-        //this.stage.addChild(this.stageBg);
-        this.stage.addChild(this.core);
-
         _.deepExtend( this , opts );
         this.dataFrame = this._initData( data , this );
 
       },
       draw: function () {
-        this._initModule();                      //初始化模块
-        this._startDraw();                         //开始绘图
-        this._drawEnd();                           //绘制结束，添加到舞台      
 
-        this._arguments = arguments;
+          this.stageBg = new Canvax.Display.Sprite({
+              id: 'bg'
+          });
+          this.core = new Canvax.Display.Sprite({
+              id: 'core'
+          });
+          this.stageTip = new Canvax.Display.Stage({
+              id: 'stageTip'
+          });
+          this.canvax.addChild(this.stageTip);
+          this.stageTip.toFront();
+          //this.stage.addChild(this.stageBg);
+          this.stage.addChild(this.core);
 
+          this._initModule();                      //初始化模块
+          this._startDraw();                         //开始绘图
+          this._drawEnd();                           //绘制结束，添加到舞台      
+
+          this._arguments = arguments;
+
+      },
+      getByIndex: function (index) {
+        return this._pie._getByIndex(index);
       },
       getList: function () {
         var self = this;
@@ -76,7 +80,7 @@
       _initData: function (data, opt) {
         var dataFrame = {};
         dataFrame.org = data;
-        dataFrame.data = [];        
+        dataFrame.data = [];
         if (_.isArray(data)) {
           for (var i = 0; i < data.length; i++) {
             var obj = {};
@@ -131,7 +135,16 @@
           dataLabel: self.dataLabel,
           strokeWidth: self.strokeWidth,
           allowPointSelect: self.allowPointSelect,
-          animation: self.animation
+          animation: self.animation,
+          colors:self.colors,
+          focusCallback: {
+            focus: function (index) {
+              self.fire('focused');
+            },
+            unfocus: function () {
+              self.fire('unfocused');
+            }
+          }
         };
         if (self.tip.enabled) {
           self._tip = new PieTip(self);

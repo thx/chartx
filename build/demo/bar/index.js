@@ -27,8 +27,9 @@ KISSY.ready(function(){
         },
         graphs:{
             bar : {
-                strokeStyle : {
-                    normals : ['#f8ab5e','#E55C5C'],
+                fillStyle   : function(i , ii , value){
+                    var colors = ['#f8ab5e','#E55C5C']
+                    return colors[i]
                 }
             },
             eventEnabled : true

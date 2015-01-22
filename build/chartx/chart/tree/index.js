@@ -26,7 +26,8 @@ define(
                     bottom : 0
                 }
                 window._nodesRect = this._nodesRect;
-
+            },
+            draw : function(){
                 //用来触发scale 和 drag 的rect原件
                 this._scaleDragHandRect = new Rect({
                     context : {
@@ -48,10 +49,7 @@ define(
                 this.linksSp = new Canvax.Display.Sprite({id:"linksSprite"}); 
                 this.sprite.addChild( this.linksSp );
 
-                
 
-            },
-            draw : function(){
                 this.g = new Dagre.graphlib.Graph();
 
                 this.g.setGraph({

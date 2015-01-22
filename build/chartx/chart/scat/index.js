@@ -7,9 +7,10 @@ define(
         './xaxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
-        './graphs'
+        './graphs',
+        'chartx/utils/dataformat'
     ],
-    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs){
+    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -24,6 +25,13 @@ define(
                 this._back         =  null;
                 this._graphs       =  null;
     
+
+
+                _.deepExtend( this , opts );
+                this.dataFrame = this._initData( data , this );
+
+            },
+            draw:function(){
                 this.stageTip = new Canvax.Display.Sprite({
                     id      : 'tip'
                 });
@@ -39,11 +47,6 @@ define(
                 this.stage.addChild(this.core);
                 this.stage.addChild(this.stageTip);
 
-                _.deepExtend( this , opts );
-                this.dataFrame = this._initData( data , this );
-
-            },
-            draw:function(){
                 if( this.rotate ) {
                   this._rotate( this.rotate );
                 }
@@ -59,6 +62,7 @@ define(
                 //下面这个是全局调用测试的时候用的
                 //window.hoho = this;
             },
+            _initData  : dataFormat,
             _initModule:function(){
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);

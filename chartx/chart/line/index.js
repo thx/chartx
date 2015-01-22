@@ -9,9 +9,10 @@ define(
         'chartx/components/back/Back',
         'chartx/components/line/Graphs',
         './tips',
+        'chartx/utils/dataformat',
         'chartx/utils/deep-extend'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tips){
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tips , dataFormat){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -27,7 +28,12 @@ define(
                 this._back         =  null;
                 this._graphs       =  null;
                 this._tips         =  null;
-    
+
+                _.deepExtend( this , opts );
+                this.dataFrame = this._initData( data , this );
+
+            },
+            draw:function(){
                 this.stageTip = new Canvax.Display.Sprite({
                     id      : 'tip'
                 });
@@ -42,10 +48,6 @@ define(
                 this.stage.addChild(this.core);
                 this.stage.addChild(this.stageTip);
 
-                _.deepExtend( this , opts );
-                this.dataFrame = this._initData( data , this );
-            },
-            draw:function(){
                 if( this.rotate ) {
                     this._rotate( this.rotate );
                 }
@@ -58,6 +60,7 @@ define(
                 this._arguments = arguments;
     
             },
+            _initData  : dataFormat,
             _initModule:function(){
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
