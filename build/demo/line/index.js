@@ -54,6 +54,12 @@ KISSY.ready(function(){
         },
         graphs:{
             line:{
+                node        :{
+                    fillStyle   :{
+                        normals : ['#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000'],
+                        overs   : ['#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000'],
+                    },
+                },
                 strokeStyle : {
                     normals : ["#6f8cb2" , "#c77029" , "#f15f60" ]
                 },
@@ -64,6 +70,14 @@ KISSY.ready(function(){
             }
         }
     }
+    // KISSY.config({
+    //     packages: [{
+    //         name  :  'chartx'  ,
+    //         path  :  '../../',
+    //         debug :  true
+    //     }
+    //     ]
+    // });
 
     KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
         var line = new Line( S.all("#canvasTest") , data1 , options  );

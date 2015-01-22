@@ -78,6 +78,7 @@ define(
                 if( obj.options ){
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
+
                     _.deepExtend( this , obj.options );
 
                     //配置的变化有可能也会导致data的改变
@@ -106,6 +107,7 @@ define(
                     sprite.context.rotateOrigin.y = self.height * sprite.context.$model.scaleY / 2;
                 });
             },
+
             //默认每个chart都要内部实现一个_initData
             _initData  : function( data ){
                 return data;
