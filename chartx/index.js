@@ -26,7 +26,6 @@ var Chartx = {
 
 
         var __FILE__, scripts = document.getElementsByTagName("script"); 
-        debugger
         __FILE__ = scripts[scripts.length - 1].getAttribute("src");
         __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
         //配置chartx包

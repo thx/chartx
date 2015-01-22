@@ -44,7 +44,6 @@ define(
 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
-
             },
             draw:function(){
                 if( this.rotate ) {

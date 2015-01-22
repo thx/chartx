@@ -30,15 +30,41 @@ define(
      		 * 将二维数组转换成一维数组
      		 * @param  {[Array]} $arr [二维数组]
      		 * @return {[Array]}      [一维数组]
-     	   */
-     	   getChildsArr:function($arr){
+     	    */
+     	    getChildsArr:function($arr){
      			var arr = []
      			for (var i = 0, l = $arr.length; i < l; i++){
      				var tmp = $arr[i]
      				arr = arr.concat(tmp);
      			}
      			return arr;
-     	   },
+     	    },
+            /**
+             * 从一个数组中获取出该数组中最大一个值
+             * @param  {[Array]}  $arr [数组]
+             * @return {[Number]}      [最大值]
+            */  
+            getMaxAtArr:function($arr){
+                /*        
+                var index = -1        
+                for(var a = 0, al = $arr.length; a < al; a++){
+                    var pre  = $arr[a]
+                    var next = $arr[a + 1]
+                    if(!isNaN(pre) && !isNaN(next)){
+                        if(pre > next){
+                            index = a 
+                        }else{
+                            index = a + 1
+                        }
+                    }
+                }
+                return index
+                */
+                $arr.sort(function(a1,a2){
+                    return a2 - a1
+                });
+                return $arr[0]
+            },
      	   /**
      		 * 根据$start和$end 从一个数组中合并数据
      		 * @param  {[Array]} $arr    [数组]
@@ -75,6 +101,22 @@ define(
      			}
      			return index
      		},
+            /**
+             * 计算数组中的每个值与$max的比列 并返回比列数组(比列精确到exact位)
+             * @param  {[Array]}  $arr     [数组]
+             * @param  {[Number]} $max     [数字]
+             * @param  {[Number]} $exact   [数字 一个整数 2 = 0.01]
+             * @return {[Array]}           [对应的比例数组]
+            */
+            getArrScalesAtArr:function($arr,$max,$exact){
+                var arr = []
+                for (var a = 0 , al = $arr.length; a < al; a++) {
+                    var n = $arr[a]
+                    var scale =  n/$max
+                    arr.push(this.numExact(scale, $exact))
+                }
+                return arr
+            },
             /**
      		* 计算数组中的每个值 占该数组总值的比例 并按原始索引返回对应的比例数组  比例总和为100
      		* @param  {[Array]} $arr    [数组]
@@ -130,8 +172,19 @@ define(
      				arr[maxIndex] = arr[maxIndex] + (100 - total)
      			}
      			return arr
-     	   },
-            	/**
+     	    },
+             /**
+             * 将一个数字精确到小数点后$exact位
+             * @param  {[Number]} $n     [数字]
+             * @param  {[Number]} $exact [千分位上的符号]
+             * @return {[Number]}        [精确之后的数字(会四舍五入)]
+             */
+            numExact:function($n,$exact){
+                var exact = !isNaN($exact) ? $exact : 2
+                var exactNumber = Math.pow(10, exact)
+                return Math.round($n * exactNumber) / exactNumber
+            },
+            /**
      		 * 数字千分位加','号
      		 * @param  {[Number]} $n [数字]
      		 * @param  {[type]} $s [千分位上的符号]

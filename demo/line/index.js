@@ -54,6 +54,12 @@ KISSY.ready(function(){
         },
         graphs:{
             line:{
+                node        :{
+                    fillStyle   :{
+                        normals : ['#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000'],
+                        overs   : ['#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000'],
+                    },
+                },
                 strokeStyle : {
                     normals : ["#6f8cb2" , "#c77029" , "#f15f60" ]
                 },
