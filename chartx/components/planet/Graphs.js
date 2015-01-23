@@ -11,9 +11,6 @@ define(
     function( Canvax , Rect, Tools, Tween , InfoCircle){
         var Graphs = function(opt, root){
             this.root       = root; 
-            this.w          = 0;   
-            this.h          = 0; 
-            
             this.data       = [];                          //二维 [[o, o, ...],[]]
                                                            // o = {x:0, y:0, r:{normal:''}, ...}  见InfoCircle接口
             this.sprite     = null; 
@@ -96,9 +93,8 @@ define(
                         if(o.enabled != 0){
                             var circle = new InfoCircle(o, self.root, {ringID:a, x:tmpX, y:tmpY})
                             circle.setX(tmpX), circle.setY(tmpY)
+                            groupSprite.addChild(circle.sprite)
                         }
-                        groupSprite.addChild(circle.sprite)
-
                     }
                     self.sprite.addChild(groupSprite)
                 }
