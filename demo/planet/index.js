@@ -51,7 +51,7 @@ KISSY.ready(function(){
             enabled : 1,                              //是否有事件响应(tips)[1]
             on : function(o){
                 //e.ringID = 第几个环(从0开始 0 = 品牌)   e.ID = 第几个行星(从1开始)
-                console.log(o)
+                // console.log(o)
             }
         },
 
