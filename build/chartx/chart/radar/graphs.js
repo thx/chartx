@@ -24,7 +24,7 @@ define(
 
             this.tips          = tipsOpt; //tip的confit
             this.domContainer  = domContainer;
-            this._tips         = null; //tip的对象 tip的config 放到graphs的config中传递过来
+            this._tip         = null; //tip的对象 tip的config 放到graphs的config中传递过来
 
             this._circlesSp    = [];//一个多边形上面的点的集合
     

@@ -28,9 +28,17 @@
     ];
     var options = {
         //浮动tip
+        /*
         tip: {
             enabled: true,
             format: '{point.title}\n{point.percentage}'
+        },
+        */
+        tips : {
+            content : function(){
+                debugger
+
+            }
         },
         //周边tip
         dataLabel: {
@@ -52,7 +60,7 @@
     KISSY.use("chartx/chart/pie/ , node", function (S, Pie) {
         window.pie = new Pie(S.all("#canvasTest"), data1, options);
         pie.on('focused', function (e) {
-            debugger
+
         })
         pie.on('complete', function () {
             //使用getList方法获取圆基础信息
