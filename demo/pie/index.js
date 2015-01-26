@@ -35,6 +35,7 @@
         },
         */
         tips : {
+            enable  : false,
             content : function(){
                 debugger
 
