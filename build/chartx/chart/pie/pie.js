@@ -344,13 +344,16 @@
                 },
                 _getTipsInfo : function(e,ind){
                     var data = this.data.data[ind];
+                
                     var fillColor = this.getColorByIndex(this.colors, ind);
+    
                     e.tipsInfo = {
-                        iNode     : ind,
-                        name      : data.name,
-                        value     : data.percentage,
-                        scale     : data.txt,
-                        fillStyle : fillColor
+                        iNode      : ind,
+                        name       : data.name,
+                        percentage : data.percentage,
+                        value      : data.y,
+                        fillStyle  : fillColor,
+                        data       : this.data.org[ind]
                     };
                     return e;
                 },

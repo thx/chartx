@@ -25,9 +25,9 @@ define(
             //所有调用tip的 event 上面 要附带有符合下面结构的tipsInfo属性
             //会deepExtend到this.indo上面来
             this.tipsInfo    = {
-                nodesInfoList : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
-                iGroup        : 0, //数据组的索引对应二维数据map的x
-                iNode         : 0  //数据点的索引对应二维数据map的y
+                //nodesInfoList : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
+                //iGroup        : 0, //数据组的索引对应二维数据map的x
+                //iNode         : 0  //数据点的索引对应二维数据map的y
             };
             this.prefix  = [];
             this.init(opt);
