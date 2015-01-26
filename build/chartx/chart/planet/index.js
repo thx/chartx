@@ -2,6 +2,7 @@ define(
     "chartx/chart/planet/index",
     [
         'chartx/chart/index',
+        "canvax/shape/Rect",
         'chartx/utils/tools',
         'chartx/utils/gradient-color',
         'chartx/utils/datasection',
@@ -10,7 +11,7 @@ define(
         './tips',
         'chartx/utils/deep-extend',
     ],
-    function(Chart, Tools, GradientColor, DataSection, DataFormat, Graphs, Tips){
+    function(Chart, Rect,Tools, GradientColor, DataSection, DataFormat, Graphs, Tips){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -56,28 +57,36 @@ define(
                             normal:60
                         },
                         fillStyle : {
-                            normal: '#ff0000'
+                            normal: '#70639c'
                         },
                         text    :{
                             content : '品牌',
-                            place   : 'center'
+                            place   : 'center',
+                            fillStyle : {
+                                normal : '#ffffff'
+                            }
                         }
                     },
                     fillStyle   :  {
-                        dNormals:  [],                               //默认配色
-                        normals :  '',                               //自定义配色
+                        dNormals:  '#b28fce',                        //默认配色
+                        normals :  '#b28fce',                         //自定义配色
                         overs   :  ['#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099']
                     }
                 },
                 this.back          = {
                     // enableds:  [],                               //哪些环显示,对应data长度[1,0,1,0](1 = 显示 | 0 不显示)
                     space       :  150,                             //在该距离内的环不予显示
+                    fillStyle   :  {
+                        first   :  '#e5dfec',
+                        last    :  '#faf6ff',
+                        normals :  [],
+                    },
                     strokeStyle :  {
-                        normals :  ['#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099','#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099','#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099','#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099','#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099','#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099'],
-                        overs   :  ['#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099']
+                        normals :  ['#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff']
                     }
                 }
-    
+                
+                this._bg           =  null;
                 this._back         =  null;
                 this._graphs       =  null;
                 this._tips         =  null;
@@ -91,9 +100,9 @@ define(
                 this._trimData()
             },
             draw:function(){
-                this.stageTip = new Canvax.Display.Sprite({
-                    id      : 'tip'
-                });
+                // this.stageTip = new Canvax.Display.Sprite({
+                //     id      : 'tip'
+                // });
                 this.stageCore     = new Canvax.Display.Sprite({
                     id      : 'core'
                 });
@@ -103,7 +112,7 @@ define(
     
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.stageCore);
-                this.stage.addChild(this.stageTip);
+                // this.stage.addChild(this.stageTip);
 
                 if( this.rotate ) {
                     this._rotate( this.rotate );
@@ -119,6 +128,7 @@ define(
             },
             _initData:DataFormat,
             _initModule:function(){
+                this._bg     = new Canvax.Display.Sprite();
                 this._back   = new Graphs(this.back, this);
                 this._graphs = new Graphs(this.graphs, this);
                 // this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
@@ -172,10 +182,13 @@ define(
                 }
                 self.dataFrame.back.rdata = rdata               //得到实际每个环的半径
                                                            //完成背景数据结构
+
+                self.back.fillStyle.normals = new GradientColor(self.back.fillStyle.first, self.back.fillStyle.last,self.dataFrame.back.rings + 1)
                 var enIndex = 0
                 for(var a = 0, al = backData.length; a < al; a++){
                     var o = backData[a]
                     o.r = {normal:rdata[a]}
+                    o.fillStyle = {normal:self.back.fillStyle.normals[a]}
                     if(a != 0){
                         if((a - enIndex) * ringAg > self.back.space){       //间隔显示环
                             enIndex = a
@@ -185,7 +198,7 @@ define(
                     }
                 }
                 //-------------------------------------------完成背景
-                self.graphs.fillStyle.normals = new GradientColor('#ff0000','#ffffff',self.dataFrame.back.rings)
+                // self.graphs.fillStyle.normals = new GradientColor('#ff0000','#ffffff',self.dataFrame.back.rings)
                 self.dataFrame.graphs.maxR  = self._getPlanetMaxR()
                 self.dataFrame.graphs.baseR = 0.3 * self.dataFrame.graphs.maxR
                                                                 //环大小
@@ -313,23 +326,29 @@ define(
                 }
             },
             _startDraw : function(){
-                var self  = this;
+                var self = this;
+                var rect = new Rect({
+                        context:{
+                            width       : self.width,
+                            height      : self.height,
+                            fillStyle   : self.back.fillStyle.last
+                        }
+                })
+                self._bg.addChild(rect)
+
                 self._back.draw({
-                    w    : self.width,
-                    h    : self.height,
-                    data : self.dataFrame.back.data,
+                    data : self.dataFrame.back.data.reverse(),
                     event: {enabled : 0}
                 }) 
 
                 self._graphs.draw({
-                    w    : self.width,
-                    h    : self.height,
                     data : self.dataFrame.graphs.data,
                     event: {enabled : 1}
                 })
             },
     
             _drawEnd:function(){
+                this.stageBg.addChild(this._bg)
                 this.stageBg.addChild(this._back.sprite)
                 this.stageCore.addChild(this._graphs.sprite);
                 // this.stageTip.addChild(this._tips.sprite);
@@ -385,6 +404,9 @@ define(
                 }
                 if( _.isFunction(self.graphs.fillStyle.normals)){
                     fillStyle = self.graphs.fillStyle.normals(o);
+                }
+                if(_.isString(self.graphs.fillStyle.normals)){
+                    fillStyle = self.graphs.fillStyle.normals
                 }
                 if( !fillStyle || fillStyle == "" ){
                     fillStyle = self.graphs.fillStyle.dNormals[o.ringID - 1]

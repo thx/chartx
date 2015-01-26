@@ -104,14 +104,14 @@ define(
                 _.deepExtend( this.tipsInfo , (e.tipsInfo || {}) );
                 var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
                 if( !tipsContent ){
-                    tipsContent = this._getDefaultContent(e);
+                    tipsContent = this._getDefaultContent( this.tipsInfo );
                 }
                 return tipsContent;
             },
-            _getDefaultContent : function(e){
+            _getDefaultContent : function( info ){
                 var str  = "<table>";
                 var self = this;
-                _.each( self.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( info.nodesInfoList , function( node , i ){
                     str+= "<tr style='color:"+ node.fillStyle +"'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {

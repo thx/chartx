@@ -36,6 +36,7 @@
                     this.sprite = new Canvax.Display.Sprite();
 
                     this._tip = new Tip( this.tips , this.domContainer );
+                    this._tip._getDefaultContent = this._getTipDefaultContent;
                     this.sprite.addChild(this._tip.sprite);
 
                     if (this.dataLabel.enabled) {
@@ -331,60 +332,28 @@
                 },
                 _showTip: function (e , ind) {
                     this._tip.show( this._getTipsInfo(e,ind) );
-
-                    /*
-                       var self = this;
-                       if (self.tipCallback) {
-                       self.tipCallback.isshow(true);
-                       }
-                       */
                 },
                 _hideTip: function (e) {
                     this._tip.hide(e);
-                    /*
-                       var self = this;
-                       if (self.tipCallback) {
-                       self.tipCallback.isshow(false);
-                       }
-                       */
                 },
                 _moveTip: function ( e , ind ) {
                     this._tip.move( this._getTipsInfo(e,ind) )
-                        /*
-                           var self = this;
-                           if (self.tipCallback) {
-                           self.tipCallback.position(pos);
-                           }
-                           */
+                },
+                _getTipDefaultContent : function(info){
+                    return "<div style='color:"+info.fillStyle+"'><div style='padding-bottom:8px;'>" + info.name + "：" + info.value +"</div>"+info.scale+"</div>";
                 },
                 _getTipsInfo : function(e,ind){
+                    var data = this.data.data[ind];
+                    var fillColor = this.getColorByIndex(this.colors, ind);
                     e.tipsInfo = {
-                        //iGroup  : 0,
-                        iNode   : ind,
-                        nodesInfoList : this._getTipsInfoList(e,ind)
+                        iNode     : ind,
+                        name      : data.name,
+                        value     : data.percentage,
+                        scale     : data.txt,
+                        fillStyle : fillColor
                     };
                     return e;
                 },
-                _getTipsInfoList : function(e,ind){
-                    var list = [];
-                    var me   = this;
-                    _.each(this.data , function( group , i ){
-                        list.push({
-                            value     : group[ind],
-                            fillStyle : "red"//me.getFillStyle( i , ind , group[ind] )
-                        });
-                    });
-                    return list;
-                },
-
-                /*
-                   _redrawTip: function (opt) {
-                   var self = this;
-                   if (self.tipCallback) {
-                   self.tipCallback.update(opt);
-                   }
-                   },
-                   */
                 _hideSector: function (index) {
                     if (this.sectorMap[index]) {
                         this.sectorMap[index].context.visible = false;
@@ -454,21 +423,21 @@
                         branchLine = new Line({
                             context: {
                                 xStart: data[currentIndex].centerx,
-                                   yStart: data[currentIndex].centery,
-                                   xEnd: data[currentIndex].outx,
-                                   yEnd: data[currentIndex].outy,
-                                   lineWidth: 1,
-                                   strokeStyle: sectorMap[currentIndex].color,
-                                   lineType: 'solid'
+                                yStart: data[currentIndex].centery,
+                                xEnd: data[currentIndex].outx,
+                                yEnd: data[currentIndex].outy,
+                                lineWidth: 1,
+                                strokeStyle: sectorMap[currentIndex].color,
+                                lineType: 'solid'
                             }
                         });
                         brokenline = new BrokenLine({
                             context: {
                                 lineType: 'solid',
-                                   smooth: false,
-                                   pointList: [bkLineStartPoint, bklineMidPoint, bklineEndPoint],
-                                   lineWidth: 1,
-                                   strokeStyle: sectorMap[currentIndex].color
+                                smooth: false,
+                                pointList: [bkLineStartPoint, bklineMidPoint, bklineEndPoint],
+                                lineWidth: 1,
+                                strokeStyle: sectorMap[currentIndex].color
                             }
                         })
                         //指示文字
@@ -490,10 +459,10 @@
                         branchTxt = new Canvax.Display.Text(labelTxt, {
                             context: {
                                 x: data[currentIndex].edgex,
-                                  y: data[currentIndex].edgey,
-                                  fontSize: self.labelFontSize,
-                                  fontWeight: 'normal',
-                                  fillStyle: sectorMap[currentIndex].color
+                                y: data[currentIndex].edgey,
+                                fontSize: self.labelFontSize,
+                                fontWeight: 'normal',
+                                fillStyle: sectorMap[currentIndex].color
                             }
                         });
                         bwidth = branchTxt.getTextWidth();
@@ -554,16 +523,16 @@
                     var quadrantsOrder = [];
                     var quadrantInfo = [{
                         indexs: [],
-                            count: 0
+                        count: 0
                     }, {
                         indexs: [],
-                            count: 0
+                        count: 0
                     }, {
                         indexs: [],
-                            count: 0
+                        count: 0
                     }, {
                         indexs: [],
-                            count: 0
+                        count: 0
                     }];
                     //默认从top开始画
                     var widgetInfo = {
@@ -647,22 +616,15 @@
                                 var sector = new Sector({
                                     context: {
                                         x: data[i].selected ? data[i].outOffsetx : 0,
-                                    y: data[i].selected ? data[i].outOffsety : 0,
-                                    //x: i == 1 ? data[i].outOffsetx : 0,
-                                    //y: i == 1 ? data[i].outOffsety :0,
-                                    //shadowColor: "black",
-                                    //shadowOffsetX: 0,
-                                    //shadowOffsetY: 0,
-                                    //shadowBlur: 5,
-                                    r0: self.r0,
-                                    r: self.r,
-                                    startAngle: data[i].start,
-                                    endAngle: data[i].end,
-                                    fillStyle: fillColor,
-                                    index: data[i].index,
-                                    lineWidth: self.strokeWidth,
-                                    strokeStyle: '#fff'
-                                    //clockwise: true
+                                        y: data[i].selected ? data[i].outOffsety : 0,
+                                        r0: self.r0,
+                                        r: self.r,
+                                        startAngle: data[i].start,
+                                        endAngle: data[i].end,
+                                        fillStyle: fillColor,
+                                        index: data[i].index,
+                                        lineWidth: self.strokeWidth,
+                                        strokeStyle: '#fff'
                                     },
                                     id: 'sector' + i
                                 });
@@ -674,12 +636,7 @@
                                 sector.hover(function (e) {
                                     var me = this;
                                     if (!self.isMoving) {
-                                        //var target = e.target;
-                                        //var globalPoint = target.localToGlobal(e.point);
-                                        //self._redrawTip(me);
-                                        //self._moveTip(globalPoint);
                                         self._showTip( e , this.__dataIndex );
-
                                         self._sectorFocus(this.__dataIndex);
                                     }
                                 }, function (e) {
@@ -689,8 +646,6 @@
                                     }
                                 })
                                 sector.on('mousemove', function (e) {
-                                    //var target = e.target;
-                                    //var globalPoint = target.localToGlobal(e.point);
                                     self._moveTip( e , this.__dataIndex );
                                 })
 
