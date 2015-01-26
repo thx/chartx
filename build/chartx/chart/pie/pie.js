@@ -339,7 +339,7 @@
                     this._tip.move( this._getTipsInfo(e,ind) )
                 },
                 _getTipDefaultContent : function(info){
-                    return "<div style='color:"+info.fillStyle+"'><div style='padding-bottom:8px;'>" + info.name + "：" + info.value +"</div>"+parseInt(info.percentage)+"%</div>";
+                    return "<div style='color:"+info.fillStyle+"'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value +"</div>"+parseInt(info.percentage)+"%</div>";
                 },
                 _getTipsInfo : function(e,ind){
                     var data = this.data.data[ind];
