@@ -29,6 +29,7 @@ module.exports = function(grunt) {
          }
       },
       concat : {
+         /*
          options: {
              separator: '\n\n',
              process: function(src, filepath) {
@@ -36,6 +37,7 @@ module.exports = function(grunt) {
                  return src.replace( develop , "" );
              }
          },
+         */
          dist : {
              src: [
                  'chartx/index.js'

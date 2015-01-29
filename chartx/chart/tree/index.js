@@ -1,3 +1,18 @@
+/***
+ *  data 的数据结构 为 
+ *  data = {
+ *      "节点id" ：{
+ *         width  : 46, //单行文本可选，话会在_initNodesAndLinks中计算，但是多行文本必须自己计算出size
+ *         height : 31, //同上
+ *         label  : "德玛西亚", 
+ *         ......
+ *         link   : ["盖伦","德玛西亚皇子"], //值均为节点id,必须有
+ *         parent : ["亚索"] //可不传 会在_initNodesAndLinks 中计算
+ *      }
+ *  }
+ *
+ */
+
 define(
     "chartx/chart/tree/index",
     [ 
@@ -12,11 +27,25 @@ define(
         var Canvax = Chart.Canvax;
         return Chart.extend({
             init : function( node , data , opts ){
-                _.deepExtend( this , opts );
                 this.data   = data;
-                this.nodeFillStyle   = "#6f8cb2";
-                this.nodeStrokeStyle = "#c77029";
-                this.linkStrokeStyle = "#896149";
+                this.nodeFillStyle   = "#ffffff";
+                this.nodeStrokeStyle = "#58c592";
+                this.linkStrokeStyle = "#e5e5e5";
+                this.labelColor      = "#58c592";
+
+                this.graph  = {
+                    rankdir : "TB",
+                    nodesep : 30,
+                    edgesep : 30,
+                    ranksep : 50
+                }
+                this.node   = {
+                    width   : 88,
+                    height  : 88
+                }
+
+                _.deepExtend( this , opts );
+
 
                 //所有node分布的 外围矩形范围
                 this._nodesRect = {
@@ -52,12 +81,12 @@ define(
 
                 this.g = new Dagre.graphlib.Graph();
 
-                this.g.setGraph({
-                    //rankdir : "BT"
-                });
+                this.g.setGraph( this.graph );
 
-                this.g.setDefaultEdgeLabel(function() { return {}; });
-
+                this.g.setDefaultEdgeLabel(function() { return {
+                    
+                }; });
+ 
                 this._initNodesAndLinks();
 
                 this._widget();
@@ -128,7 +157,6 @@ define(
                         this._setParentLink( data[i] , targetId );
 
                         addShapes.push( this._creatLinkLine( targetId , i ) );
-
                         this.g.setEdge( targetId , i );
 
                         this._updateLayout( function(){
@@ -173,6 +201,40 @@ define(
                     child.parent.push( parentNodeId );
                 }
             },
+            //@params dataNode 传入一个node的 data
+            //要求返回一个sprite节点包括好的内容
+            //业务的需求不同可以各自覆盖该方法
+            //如果node的width and height都是没有默认 和配置，必须在这计算的话，
+            //记得要给dataNode的width height 赋值
+            getNodeContent : function( dataNode ){
+                var sprite = new Canvax.Display.Sprite({}); 
+                
+                //先创建text，根据text来计算node需要的width和height
+                var label =  new Canvax.Display.Text( dataNode.label , {
+                    context : {
+                        fillStyle    : this.labelColor,
+                        textAlign    : "center",
+                        textBaseline : "middle"
+                    }
+                });
+
+                if( !dataNode.width ){
+                    dataNode.width  = label.getTextWidth()  + 20;
+                }
+                if( !dataNode.height ){
+                    dataNode.height = label.getTextHeight() + 15;
+                }
+
+                sprite.addChild( label );
+
+                sprite.context.width  = dataNode.width;
+                sprite.context.height = dataNode.height;
+                label.context.x       = dataNode.width / 2;
+                label.context.y       = dataNode.height / 2;
+
+                return sprite;
+
+            },
             //根据data 来 初始化 node  也 连接线 的 shapes 到 sprite
             _initNodesAndLinks : function( data ){
                 var me = this;
@@ -180,21 +242,21 @@ define(
                 !data ? (data = me.data) : (addShapes = []);
                 for( var i in data ){
                     var dataNode = data[i];
+                    //如果datanode中没有width
+                    if( !dataNode.width && this.node.width ){
+                        dataNode.width = this.node.width;
+                    };
+                    //如果datanode中没有height
+                    if( !dataNode.height && this.node.height ){
+                        dataNode.height = this.node.height;
+                    };
 
-                    //先创建text，根据text来计算node需要的width和height
-                    var label =  new Canvax.Display.Text( dataNode.label , {
-                        id : "label_"+i,
+                    var node = new Canvax.Display.Sprite({
+                        id : "node_"+i,
                         context : {
-                            fillStyle    : "white",
-                            textAlign    : "center",
-                            textBaseline : "middle",
-                            globalAlpha  : 0
+                            globalAlpha : 0
                         }
-                    });
-                    dataNode.width  = label.getTextWidth()  + 20;
-                    dataNode.height = label.getTextHeight() + 15;
-
-                                        
+                    });                 
                     var rect = new Rect({
                         id : "rect_"+i,
                         context : {
@@ -202,19 +264,22 @@ define(
                             strokeStyle : this.nodeStrokeStyle,
                             lineWidth   : 1,
                             width : dataNode.width,
-                            height: dataNode.height,
-                            globalAlpha : 0
+                            height: dataNode.height
                         }
                     });
+                    node.addChild( rect );
+                    node.addChild( this.getNodeContent(dataNode) );  
 
-                    this.nodesSp.addChild(rect);
-                    this.nodesSp.addChild(label);
-
-                    if(_.isArray(addShapes)){
-                        addShapes.push(label);
-                        addShapes.push(rect);
+                    //然后要看该dateNode是否有子节点，有的话就要给改node添加个尾巴
+                    if( _.isArray( dataNode.link ) && dataNode.link.length > 0 ){
+                        node.addChild( this._getTail( data ) );
                     }
 
+                    this.nodesSp.addChild( node );
+
+                    if(_.isArray(addShapes)){
+                        addShapes.push( node );
+                    }
 
                     me.g.setNode( i , dataNode );
 
@@ -260,24 +325,21 @@ define(
                 me.g.nodes().forEach(function(v) {
                     var node = me.g.node(v);
                     
-                    var lc = me.nodesSp.getChildById("label_" + v).context;
-                
-                    lc.x = node.x;
-                    lc.y = node.y;
-                    lc.globalAlpha = 1;
+                    var nodeSp = me.nodesSp.getChildById("node_" + v).context;
+                    nodeSp.x = node.x;
+                    nodeSp.y = node.y;
+                    nodeSp.globalAlpha = 1;
+                    
 
-                    var rc  = me.nodesSp.getChildById("rect_" + v).context;
-                    rc.x  = node.x - node.width/2;
-                    rc.y  = node.y - node.height/2;
-                    rc.globalAlpha = 1;
-
-                    me._nodesRect.left = Math.min( me._nodesRect.left , node.x - node.width/2 );
-                    me._nodesRect.top  = Math.min( me._nodesRect.top  , node.y - node.height/2 );
+                    me._nodesRect.left   = Math.min( me._nodesRect.left   , node.x - node.width/2 );
+                    me._nodesRect.top    = Math.min( me._nodesRect.top    , node.y - node.height/2 );
                     me._nodesRect.right  = Math.max( me._nodesRect.right  , node.x + node.width/2  );
                     me._nodesRect.bottom = Math.max( me._nodesRect.bottom , node.y + node.height/2 );
 
                 });
+                return;
                 me.g.edges().forEach(function(e) {
+                    
                     var edge = me.g.edge(e);
                     var lc = me.linksSp.getChildById("link_"+e.v+"_"+e.w).context;
                     lc.xStart = edge.points[0].x;
@@ -285,6 +347,20 @@ define(
                     lc.xEnd   = edge.points[2].x;
                     lc.yEnd   = edge.points[2].y;
                     lc.globalAlpha = 1;
+
+                    KISSY.each( edge.points , function(point,i){
+                        var colors=["red","blue","green"];
+                    
+                       me.sprite.addChild(new Circle({
+                           context : {
+                               r : 3,
+                               x : point.x,
+                               y : point.y,
+                               fillStyle : colors[i]
+                           }
+                       }))
+                    } );
+                    
                 });
             },
             _updateLayout : function(callback){
