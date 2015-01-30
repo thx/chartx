@@ -29,7 +29,6 @@ define(
         return Chart.extend({
             init : function( node , data , opts ){
                 this.data   = data;
-
                 this.graph  = {
                     rankdir : "TB",
                     nodesep : 30,
