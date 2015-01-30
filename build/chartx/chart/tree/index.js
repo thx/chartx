@@ -19,29 +19,33 @@ define(
         "chartx/chart/index",
         "canvax/shape/Rect",
         "canvax/shape/Line",
+        "canvax/shape/Path",
         "canvax/shape/Circle",
         "chartx/layout/tree/dagre",
         "canvax/animation/Tween"
     ],
-    function( Chart , Rect , Line , Circle , Dagre , Tween ){
+    function( Chart , Rect , Line , Path , Circle , Dagre , Tween ){
         var Canvax = Chart.Canvax;
         return Chart.extend({
             init : function( node , data , opts ){
                 this.data   = data;
-                this.nodeFillStyle   = "#ffffff";
-                this.nodeStrokeStyle = "#58c592";
-                this.linkStrokeStyle = "#e5e5e5";
-                this.labelColor      = "#58c592";
 
                 this.graph  = {
                     rankdir : "TB",
                     nodesep : 30,
                     edgesep : 30,
-                    ranksep : 50
+                    ranksep : 60
                 }
                 this.node   = {
                     width   : 88,
-                    height  : 88
+                    height  : 88,
+                    fillStyle   : "#ffffff",
+                    strokeStyle : "#e5e5e5",
+                    strokeStyleHover : "#58c592",
+                    labelColor : "#58c592"
+                }
+                this.link  = {
+                    r  : 4
                 }
 
                 _.deepExtend( this , opts );
@@ -212,7 +216,7 @@ define(
                 //先创建text，根据text来计算node需要的width和height
                 var label =  new Canvax.Display.Text( dataNode.label , {
                     context : {
-                        fillStyle    : this.labelColor,
+                        fillStyle    : this.node.labelColor,
                         textAlign    : "center",
                         textBaseline : "middle"
                     }
@@ -233,6 +237,28 @@ define(
                 label.context.y       = dataNode.height / 2;
 
                 return sprite;
+
+            },
+            _getTail : function(dataNode){
+                var begin,end;
+                if( this.graph.rankdir == "TB" ){
+                    //如果是从上到下的结构,默认， 目前也先只做这个模式
+                    begin = [ dataNode.width/2 , dataNode.height ];
+                    end   = [ dataNode.width/2 , dataNode.height + this.graph.ranksep * 5 / 10  ]
+                }
+
+                var link = new Line({
+                    context : {
+                        xStart : begin[0],
+                        yStart : begin[1],
+                        xEnd   : end[0],
+                        yEnd   : end[1],
+                        strokeStyle : this.node.strokeStyle,
+                        lineWidth   : 1
+                    }
+                });
+
+                return link;
 
             },
             //根据data 来 初始化 node  也 连接线 的 shapes 到 sprite
@@ -260,8 +286,8 @@ define(
                     var rect = new Rect({
                         id : "rect_"+i,
                         context : {
-                            fillStyle   : this.nodeFillStyle,
-                            strokeStyle : this.nodeStrokeStyle,
+                            fillStyle   : this.node.fillStyle,
+                            strokeStyle : this.node.strokeStyle,
                             lineWidth   : 1,
                             width : dataNode.width,
                             height: dataNode.height
@@ -272,7 +298,7 @@ define(
 
                     //然后要看该dateNode是否有子节点，有的话就要给改node添加个尾巴
                     if( _.isArray( dataNode.link ) && dataNode.link.length > 0 ){
-                        node.addChild( this._getTail( data ) );
+                        node.addChild( this._getTail( dataNode ) );
                     }
 
                     this.nodesSp.addChild( node );
@@ -291,31 +317,40 @@ define(
 
                     if( links.length > 0 ){
                         _.each( links , function( childId , x ){
-           
                             me._creatLinkLine( i , childId);
-                       
                             me._setParentLink( data[ childId ] , i );
-
                             me.g.setEdge( i , childId );
-
                         } );
                     }
                 }
-
                 return addShapes;
 
             },
+            //只创建一个link对应的Path，不设置具体的位置。
             _creatLinkLine : function( pId , cId ){
-                var link = new Line({
+                var link = new Path({
                     id : "link_"+pId+"_"+cId,
                     context : {
-                       strokeStyle : this.nodeStrokeStyle,
-                       lineWidth   : 1,
-                       globalAlpha : 0
+                        path : "M0,0",
+                        strokeStyle : this.node.strokeStyle,
+                        lineWidth:1
                     }
                 });
                 this.linksSp.addChild(link);
                 return link;
+            },
+            _getLinkPath : function( wbegin , wvControl , vTailPoint ){
+                var me = this;
+                var path = "M"+wbegin.x+"," + wbegin.y;
+                if( vTailPoint.x == wbegin.x ){
+                    path+= "L"+vTailPoint.x+","+vTailPoint.y;   
+                } else {
+                    path+= "L"+wbegin.x+"," + (wvControl.y + me.link.r);
+                    path+= "Q"+wbegin.x+"," + wvControl.y + ",";
+                    path+= (( vTailPoint.x > wbegin.x ? 1 : -1 )*me.link.r + wbegin.x ) + "," + wvControl.y;
+                    path+= "L"+vTailPoint.x+","+vTailPoint.y
+                }
+                return path;
             },
             _widget : function(){
                 var me = this;
@@ -326,28 +361,44 @@ define(
                     var node = me.g.node(v);
                     
                     var nodeSp = me.nodesSp.getChildById("node_" + v).context;
-                    nodeSp.x = node.x;
-                    nodeSp.y = node.y;
+                    nodeSp.x = node.x - node.width/2;
+                    nodeSp.y = node.y - node.height/2;
                     nodeSp.globalAlpha = 1;
                     
-
                     me._nodesRect.left   = Math.min( me._nodesRect.left   , node.x - node.width/2 );
                     me._nodesRect.top    = Math.min( me._nodesRect.top    , node.y - node.height/2 );
                     me._nodesRect.right  = Math.max( me._nodesRect.right  , node.x + node.width/2  );
                     me._nodesRect.bottom = Math.max( me._nodesRect.bottom , node.y + node.height/2 );
 
+
+                    //test
+                    /*
+                    me.sprite.addChild(new Circle({
+                        context : {
+                            r : 6,
+                            x : node.x,
+                            y : node.y,
+                            fillStyle : "#58c592"
+                        }
+                    }))
+                    */
+
+
                 });
-                return;
+            
                 me.g.edges().forEach(function(e) {
                     
-                    var edge = me.g.edge(e);
-                    var lc = me.linksSp.getChildById("link_"+e.v+"_"+e.w).context;
-                    lc.xStart = edge.points[0].x;
-                    lc.yStart = edge.points[0].y;
-                    lc.xEnd   = edge.points[2].x;
-                    lc.yEnd   = edge.points[2].y;
-                    lc.globalAlpha = 1;
+                    var edge  = me.g.edge(e);
+                    var vnode = me.g.node(e.v); //这个link的父端节点
 
+                    var vTailPoint = {x:vnode.x , y:vnode.y+vnode.height/2+me.graph.ranksep*5/10};//父节点的尾巴末端
+                    var wbegin     = edge.points[2];//子节点的发射点
+                    var wvControl  = {x:wbegin.x , y:vTailPoint.y}; //从wbegin 发射到vTailPoint 的控制折点
+                    
+                    var lc = me.linksSp.getChildById("link_"+e.v+"_"+e.w).context;
+                    lc.path = me._getLinkPath( wbegin , wvControl , vTailPoint );
+
+                    /*
                     KISSY.each( edge.points , function(point,i){
                         var colors=["red","blue","green"];
                     
@@ -360,56 +411,56 @@ define(
                            }
                        }))
                     } );
+                    */
                     
                 });
             },
-            _updateLayout : function(callback){
-                this._tweenLayout( this._getLayoutChanged() , callback);
+
+            _getPos : function(){
+                //先记录所有shapes的原始位置
+                var me  = this;
+                var pos = {};
+                me.g.nodes().forEach(function(v) {
+                    pos[ "node_"+v+"_x" ] = node.x - node.width/2;
+                    pos[ "node_"+v+"_y" ] = node.y - node.height/2;
+                });
+                me.g.edges().forEach(function(e) {
+                    var edge  = me.g.edge(e);
+                    var vnode = me.g.node(e.v); //这个link的父端节点
+
+                    var vTailPoint = {x:vnode.x , y:vnode.y+vnode.height/2+me.graph.ranksep*5/10};//父节点的尾巴末端
+                    var wbegin     = edge.points[2];//子节点的发射点
+                    var wvControl  = {x:wbegin.x , y:vTailPoint.y}; //从wbegin 发射到vTailPoint 的控制折点
+
+                    //父节点尾巴
+                    pos[ "link_"+e.v+"_"+e.w+"_vTailPointX" ] = vTailPoint.x;
+                    pos[ "link_"+e.v+"_"+e.w+"_vTailPointY" ] = vTailPoint.y;
+                    //子节点的发射点
+                    pos[ "link_"+e.v+"_"+e.w+"_wbeginX" ]     = wbegin.x;
+                    pos[ "link_"+e.v+"_"+e.w+"_wbeginY" ]     = wbegin.y;
+                    //控制点
+                    pos[ "link_"+e.v+"_"+e.w+"_wvControlX" ]  = wvControl.x;
+                    pos[ "link_"+e.v+"_"+e.w+"_wvControlY" ]  = wvControl.y;
+
+                });
+                return pos;
             },
             //布局变动 {pos : posTo}
             _getLayoutChanged : function(){
-                 var me = this;
+                 var me  = this;
 
-                 //先记录所有shapes的原始位置
-                 var pos = {};
-                 _.each( me.nodesSp.children , function( childShape ){
-                     var cc = childShape.context;
-                     pos[childShape.id+"_x"] = cc.x;
-                     pos[childShape.id+"_y"] = cc.y;
-                 } );
-                 _.each( me.linksSp.children , function( linkShape ){
-                     var lc = linkShape.context;
-                     pos[linkShape.id+"_xStart"] = lc.xStart;
-                     pos[linkShape.id+"_yStart"] = lc.yStart;
-                     pos[linkShape.id+"_xEnd"]   = lc.xEnd;
-                     pos[linkShape.id+"_yEnd"]   = lc.yEnd;
-                 } );
+                 var pos = this._getPos();
 
                  //然后重新layout计算目标布局
                  Dagre.layout( me.g );
-                 var posTo = {};
-                 me.g.nodes().forEach(function(v) {
-                     var node = me.g.node(v);
-                    
-                     var labelId = "label_" + v;
-                     posTo[ labelId + "_x" ] = node.x;
-                     posTo[ labelId + "_y" ] = node.y;
-                     var rectId  = "rect_" + v;
-                     posTo[ rectId + "_x" ]  = node.x - node.width/2;
-                     posTo[ rectId + "_y" ]  = node.y - node.height/2;
-                     
-                 });
-                 me.g.edges().forEach(function(e) {
-                     var edge   = me.g.edge(e);
-                     var linkId = "link_"+e.v+"_"+e.w;
-                     posTo[linkId+"_xStart"] = edge.points[0].x;
-                     posTo[linkId+"_yStart"] = edge.points[0].y;
-                     posTo[linkId+"_xEnd"]   = edge.points[2].x;
-                     posTo[linkId+"_yEnd"]   = edge.points[2].y;
-                 });
 
-                 return {pos : pos , posTo : posTo}
+                 var posTo = me._getPos();
 
+                 return { pos : pos , posTo : posTo }
+
+            },
+            _updateLayout : function(callback){
+                this._tweenLayout( this._getLayoutChanged() , callback);
             },
             /**
              * 重新布局动画
