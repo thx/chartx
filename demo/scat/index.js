@@ -17,14 +17,10 @@ KISSY.ready(function(){
 
     ];
     var options = {
-        // title : "first charts",
-        // disXAxisLine : 26,
-        // disYAxisTopLine : 26,
-        //rotate   : -90,
+ 
         disYAndO : 20,
         mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
         yAxis : {
-            mode     : 1,                           //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
             field   : ["val4","val3"],
             dataMode : 0,
             line:{
@@ -60,15 +56,6 @@ KISSY.ready(function(){
             }
         },       
         tips  :{
-            // disTop : 50,
-            context:{
-                prefix:{
-                    values:['今','昨','明']
-                },
-                bolds     :['bold','bold','bold'],
-                fontSizes :[14,14,14],
-                fillStyles:['#333333','#999999','#999999']
-            },
             tip  : {
                 back:{
                     // disX:10

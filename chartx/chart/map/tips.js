@@ -35,7 +35,7 @@ define(
     
                 opt = _.deepExtend({
                     prefix : data.field,
-                    context: "中国地图"
+                    content: "中国地图"
                 } , opt);
                 this._tip      = new Tip( opt , tipDomContainer );
             },
