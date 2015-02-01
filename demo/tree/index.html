@@ -78,6 +78,18 @@
             require("chartx/chart/tree/index" , function( Tree ){
                 window.tree = new Tree("canvasTest" , data , {});
                 tree.draw();
+                tree.on("nodeMousehover" , function(){
+                    console.log( "nodeMouseHover" );
+                });
+
+                tree.on("nodeMouseout" , function(){
+                    console.log( "nodeMouseOut" );
+                });
+
+                tree.on("nodeClick" , function(e){
+                    debugger
+                    console.log( "nodeClick" );
+                });
             });
         });
     </script>
