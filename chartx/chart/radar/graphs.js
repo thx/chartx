@@ -79,7 +79,7 @@ define(
             },
             _getTipsInfo : function(e,ind){
                 e.tipsInfo = {
-                   //iGroup  : 0,
+                    iGroup  : e.groupInd || 0,
                     iNode   : ind,
                     nodesInfoList : this._getTipsInfoList(e,ind)
                 };
@@ -181,12 +181,13 @@ define(
                     });
     
                     //最开始该poly是在的group的index，用来mouseout的时候还原到本来的位置。
-                    polygonBorder.originInd = i;
-                    polygonBorder.hover(function(){
+                    polygonBorder.groupInd = i;
+                    polygonBorder.hover(function(e){
+                        e.groupInd = this.groupInd;
                         this.parent.toFront();
                     },function(){
                         var backCount = this.parent.parent.getNumChildren();
-                        this.parent.toBack( backCount - this.originInd - 1 );
+                        this.parent.toBack( backCount - this.groupInd - 1 );
                     })
     
                     group.addChild( polygonBg );
