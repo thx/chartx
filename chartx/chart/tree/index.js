@@ -297,6 +297,10 @@ define(
                 !data ? (data = me.data) : (addShapes = []);
                 for( var i in data ){
                     var dataNode = data[i];
+
+                    //手动把i 设置为node的id
+                    dataNode.id  = i;
+
                     //如果datanode中没有width
                     if( !dataNode.width && this.node.width ){
                         dataNode.width = this.node.width;
@@ -305,7 +309,27 @@ define(
                     if( !dataNode.height && this.node.height ){
                         dataNode.height = this.node.height;
                     };
+                
+                    //现在设置好node 和 edge 的结构
+                    me.g.setNode( i , dataNode );
 
+                    if( !dataNode.link ){
+                        dataNode.link = [];
+                    }
+
+                    var links = dataNode.link;
+
+                    if( links.length > 0 ){
+                        _.each( links , function( childId , x ){
+                            me._creatLinkLine( i , childId);
+                            me._setParentLink( data[ childId ] , i );
+                            me.g.setEdge( i , childId );
+                        } );
+                    }
+                    //设置node 和 edge 的结构 end
+
+
+                    //这个时候 开始绘制对应的cavnax节点用来显示了
                     var node = new Canvax.Display.Sprite({
                         id : "node_"+i,
                         context : {
@@ -322,8 +346,12 @@ define(
                             height: dataNode.height
                         }
                     });
+
+                    //在这个rect上面附加对应的node的信息。方便fire到侦听的事件中可以很方便的拿到位置等数据
+                    rect.node = dataNode;//me.g.node(i);
+
                     node.addChild( rect );
-                    node.addChild( this.getNodeContent(dataNode) );  
+                    node.addChild( this.getNodeContent(dataNode) );
 
                     //然后要看该dateNode是否有子节点，有的话就要给改node添加个尾巴
                     if( _.isArray( dataNode.link ) && dataNode.link.length > 0 ){
@@ -334,7 +362,7 @@ define(
  
                     //给node添加事件侦听
                     rect.hover(function(e){
-                        me.fire("nodeMousehover",e);
+                        me.fire("nodeMouseover",e);
                     },function(e){
                         me.fire("nodeMouseout",e);
                     });
@@ -347,21 +375,7 @@ define(
                         addShapes.push( node );
                     }
 
-                    me.g.setNode( i , dataNode );
-
-                    if( !dataNode.link ){
-                        dataNode.link = [];
-                    }
-
-                    var links = dataNode.link;
-
-                    if( links.length > 0 ){
-                        _.each( links , function( childId , x ){
-                            me._creatLinkLine( i , childId);
-                            me._setParentLink( data[ childId ] , i );
-                            me.g.setEdge( i , childId );
-                        } );
-                    }
+                    
                 }
                 return addShapes;
 
@@ -564,7 +578,7 @@ define(
             //初次渲染的时候自动把拓扑图居中
             _initNodesSpritePos : function(){
                 this.sprite.context.x = (this.width - (this._nodesRect.right - this._nodesRect.left)) / 2;
-                this.sprite.context.y = 10;
+                this.sprite.context.y = 80;
 
             }
         });

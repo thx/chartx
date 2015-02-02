@@ -79,8 +79,8 @@
             require("chartx/chart/tree/index" , function( Tree ){
                 window.tree = new Tree("canvasTest" , data , {});
                 tree.draw();
-                tree.on("nodeMousehover" , function(){
-                    console.log( "nodeMouseHover" );
+                tree.on("nodeMouseover" , function(){
+                    console.log( "nodeMouseover" );
                 });
 
                 tree.on("nodeMouseout" , function(){
