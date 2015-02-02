@@ -108,8 +108,7 @@ define(
                     })
                     self.sprite.addChild(rect) 
                 }
-
-                if(self.event.enabled){                    //事件
+                if(self.event.enabled == 1){               //事件
                     self._event(circle)
                     if(rect){
                         self._event(rect)
