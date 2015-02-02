@@ -9,13 +9,14 @@
     body{margin:0;padding:0;font-size:12px;background-color:#eee;padding:10px 100px 100px;}
     //canvas {background:#999}
 </style>
+<!--<script type="text/javascript" src="../../node_modules/kissy/build/seed.js"></script>-->
+<script src="http://g.tbcdn.cn/kissy/k/1.4.5/seed-min.js"></script>
 
-<script type="text/javascript" src="../../node_modules/kissy/build/seed.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 </head>
 
 <body>
- 	<div id="canvasTest" style='background:#ffffff;width:800px;height:500px;'></div>
+ 	<div id="canvasTest" style='background:#ffffff;width:800px;height:800px;'></div>
     <script> 
         KISSY.ready(function(){
             var data = {
@@ -78,6 +79,18 @@
             require("chartx/chart/tree/index" , function( Tree ){
                 window.tree = new Tree("canvasTest" , data , {});
                 tree.draw();
+                tree.on("nodeMousehover" , function(){
+                    console.log( "nodeMouseHover" );
+                });
+
+                tree.on("nodeMouseout" , function(){
+                    console.log( "nodeMouseOut" );
+                });
+
+                tree.on("nodeClick" , function(e){
+                    debugger
+                    console.log( "nodeClick" );
+                });
             });
         });
     </script>

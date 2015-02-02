@@ -71,7 +71,8 @@ define(
                         fillStyle   : self.fillStyle.normal,
                         strokeStyle : self.strokeStyle.normal || '000000',
                         lineWidth   : self.lineWidth.normal   || 0,
-                        globalAlpha : self.globalAlpha.normal
+                        globalAlpha : self.globalAlpha.normal,
+                        cursor      : self.event.enabled ? 'pointer' : ''
                     }
                 });
                 self.circle = circle
@@ -101,7 +102,8 @@ define(
                             width       : txt.getTextWidth() + 2,
                             height      : txt.getTextHeight(),
                             fillStyle   : '#000000',
-                            globalAlpha : 0
+                            globalAlpha : 0,
+                            cursor      : self.event.enabled ? 'pointer' : ''
                         }
                     })
                     self.sprite.addChild(rect) 
