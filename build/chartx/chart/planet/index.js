@@ -32,7 +32,7 @@ define(
                 this.ringDis       = 10                     //环和环之间的距离     
 
                 this.dataFrame     = {                      //数据格式
-                    org     :      data,                             //原始数据 参数：data
+                    org     :      [],                               //原始数据 参数：data
                     orgData :      [],                               //原始数据转二维数组 方便交互数据
                     data    :      [],                               //经_initData之后的数据
                     back    :      {
@@ -52,6 +52,7 @@ define(
                     }
                 }
                 this.graphs        = {
+                    maxR        : 100,
                     core        : {
                         r       : {
                             normal:60
@@ -69,13 +70,13 @@ define(
                     },
                     fillStyle   :  {
                         dNormals:  '#b28fce',                        //默认配色
-                        normals :  '#b28fce',                         //自定义配色
+                        normals :  '#b28fce',                        //自定义配色
                         overs   :  ['#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099']
                     }
                 },
                 this.back          = {
                     // enableds:  [],                               //哪些环显示,对应data长度[1,0,1,0](1 = 显示 | 0 不显示)
-                    space       :  150,                             //在该距离内的环不予显示
+                    space       :  '',                             //在该距离内的环不予显示
                     fillStyle   :  {
                         first   :  '#e5dfec',
                         last    :  '#faf6ff',
@@ -90,23 +91,28 @@ define(
                 this._back         =  null;
                 this._graphs       =  null;
                 this._tips         =  null;
-    
-                _.deepExtend(this, opts);
-                // this.dataFrame = this._initData(data, this);
-                _.deepExtend(this.dataFrame, this._initData(data, opts));
 
+                _.deepExtend(this, opts);
+
+                data = this._trimData(data)
+
+                this.dataFrame.org = data
+
+                _.deepExtend(this.dataFrame, this._initData(data, opts));
+                // console.log(this.dataFrame)
+                // return
                 this.cx = this.cx != '' ? this.cx : this.initCX, this.cy = this.cy != '' ? this.cy : parseInt(this.height / 2)
 
-                this._trimData()
+                this._countData()
             },
             draw:function(){
                 // this.stageTip = new Canvax.Display.Sprite({
                 //     id      : 'tip'
                 // });
-                this.stageCore     = new Canvax.Display.Sprite({
+                this.stageCore   = new Canvax.Display.Sprite({
                     id      : 'core'
                 });
-                this.stageBg  = new Canvax.Display.Sprite({
+                this.stageBg     = new Canvax.Display.Sprite({
                     id      : 'bg'
                 });
     
@@ -132,8 +138,34 @@ define(
                 this._back   = new Graphs(this.back, this);
                 this._graphs = new Graphs(this.graphs, this);
                 // this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
-            },                                   
-            _trimData:function(){                          //调整数据
+            },
+            _trimData:function(data){                      //调整数据
+                var self = this
+                var arr = []
+                var n = _.indexOf(data[0], self.xAxis.field)
+                for(var a = 0, al = data.length; a < al; a++){
+                    if(!isNaN(data[a][n])){
+                        !arr[data[a][n]] ? arr[data[a][n]] = [] : -1
+                        arr[data[a][n]].push(data[a])
+                    }
+                }
+                arr = _.flatten(arr,true)
+                arr = _.compact(arr) 
+                var index = 0
+                var curIndex = 0
+                for(var a = 0, al = arr.length; a < al; a++){
+                    var orgIndex = arr[a][n]
+                    if(curIndex != orgIndex){
+                        curIndex = orgIndex
+                        index++ 
+                    }
+                    arr[a][n] = index
+                }
+                // console.log(arr)
+                arr.unshift(data[0])
+                return arr
+            },                                    
+            _countData:function(){                         //计算数据
                 var self = this
                                                            //原始数据转二维数组 方便交互数据
                 var org = self.dataFrame.org, orgData = []
@@ -312,7 +344,7 @@ define(
                             tmpIndex++
                             o.x = tmpData[tmpIndex].x
                             o.y = tmpData[tmpIndex].y
-                            // o.text = {content:numData[tmpIndex]}
+                            // o.text = {content:numData[tmpIndex]}  //测试
                         }
                     }
                 }
@@ -343,7 +375,7 @@ define(
 
                 self._graphs.draw({
                     data : self.dataFrame.graphs.data,
-                    event: {enabled : 1}
+                    event: {enabled : self.event.enabled}
                 })
             },
     
@@ -373,6 +405,7 @@ define(
                 var self = this
                 var r = 0
                 r = parseInt((self.dataFrame.back.ringAg - self.ringDis) / 2)
+                r = self.graphs.maxR < r ? self.graphs.maxR : r
                 return r
             },
             _getBackRingAverage:function(){                //获取背景中环与环之间的距离均值

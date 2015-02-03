@@ -24,8 +24,6 @@ define(
                 this._yAxis        =  null;
                 this._back         =  null;
                 this._graphs       =  null;
-    
-
 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );

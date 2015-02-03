@@ -29,7 +29,6 @@ define(
         return Chart.extend({
             init : function( node , data , opts ){
                 this.data   = data;
-
                 this.graph  = {
                     rankdir : "TB",
                     nodesep : 30,
@@ -141,6 +140,10 @@ define(
              *targetId 要添加到的目标node的Id
              */
             addTo : function( data , targetId ){
+                if(!this.data[targetId]){
+                    //要添加的目标节点不存在
+                    return;
+                }
                 for( i in data ){
                     if( this.data[i] ){
                         //说明已经有一个这样的id了
@@ -158,7 +161,14 @@ define(
                         var addShapes = this._initNodesAndLinks(obj);
                         obj = null;
 
+
+                        //仅仅是在link的逻辑上面建立好父子关系
                         this._setParentLink( data[i] , targetId );
+
+                        //但是如果发现这个时候的target link的length为0的话，说明这个时候的target肯定没有tail
+                        //那么就要手动建立一个
+                        this.nodesSp.getChildById("node_" + targetId).addChild( this._getTail( targetId ) );
+                        
 
                         addShapes.push( this._creatLinkLine( targetId , i ) );
                         this.g.setEdge( targetId , i );
@@ -174,13 +184,23 @@ define(
                 };
             },
             remove : function(id){
-                this._remove(id);
+                var me = this;
+                var parent = me.data[id].parent;
+                me._remove(id);
+
+                //然后要检测下parent的link是不是删除了自己后就link.length==0了
+                //如果是==0，就要把parent的tail尾巴给干掉
+                if( me.data[parent].link.length == 0 ){
+                    me.nodesSp.getChildById("node_" + parent).getChildById("tail_"+parent).remove();
+                }
+                
                 this._updateLayout();
             },
             //删除某个节点，对应的所有子节点都会被删除
             _remove: function( id ){
                 var me   = this;
                 var node = this.data[id];
+                
                 _.each(node.parent , function(parent,i){
                     //先删除父亲节点和自己的关系
                     me.g.removeEdge( parent , id );
@@ -188,14 +208,21 @@ define(
                     //然后删除代表关系的链接线
                     me.linksSp.getChildById("link_"+parent+"_"+id).remove();
 
+                    //然后在parent的link中把自己给删除了
+                    _.each( me.data[ parent ].link , function( target , i ){
+                        if( target == id ){
+                            me.data[ parent ].link.splice( i , 1 );
+                            return false;
+                        }
+                    } );
+
                 });
                 _.each(node.link , function( child , i ){
                     me._remove( child );
                 });
                 delete this.data[id];
                 this.g.removeNode(id);
-                this.nodesSp.getChildById("label_"+id).remove();
-                this.nodesSp.getChildById("rect_"+id).remove();
+                this.nodesSp.getChildById("node_"+id).remove();
                 node = null;
             },
             _setParentLink : function( child , parentNodeId ){
@@ -224,10 +251,10 @@ define(
 
                 if( !dataNode.width ){
                     dataNode.width  = label.getTextWidth()  + 20;
-                }
+                };
                 if( !dataNode.height ){
                     dataNode.height = label.getTextHeight() + 15;
-                }
+                };
 
                 sprite.addChild( label );
 
@@ -239,15 +266,17 @@ define(
                 return sprite;
 
             },
-            _getTail : function(dataNode){
+            _getTail : function(nodeId){
+                var dataNode = this.data[nodeId];
                 var begin,end;
                 if( this.graph.rankdir == "TB" ){
                     //如果是从上到下的结构,默认， 目前也先只做这个模式
                     begin = [ dataNode.width/2 , dataNode.height ];
                     end   = [ dataNode.width/2 , dataNode.height + this.graph.ranksep * 5 / 10  ]
-                }
+                };
 
                 var link = new Line({
+                    id   : "tail_"+nodeId,
                     context : {
                         xStart : begin[0],
                         yStart : begin[1],
@@ -268,6 +297,10 @@ define(
                 !data ? (data = me.data) : (addShapes = []);
                 for( var i in data ){
                     var dataNode = data[i];
+
+                    //手动把i 设置为node的id
+                    dataNode.id  = i;
+
                     //如果datanode中没有width
                     if( !dataNode.width && this.node.width ){
                         dataNode.width = this.node.width;
@@ -276,7 +309,27 @@ define(
                     if( !dataNode.height && this.node.height ){
                         dataNode.height = this.node.height;
                     };
+                
+                    //现在设置好node 和 edge 的结构
+                    me.g.setNode( i , dataNode );
 
+                    if( !dataNode.link ){
+                        dataNode.link = [];
+                    }
+
+                    var links = dataNode.link;
+
+                    if( links.length > 0 ){
+                        _.each( links , function( childId , x ){
+                            me._creatLinkLine( i , childId);
+                            me._setParentLink( data[ childId ] , i );
+                            me.g.setEdge( i , childId );
+                        } );
+                    }
+                    //设置node 和 edge 的结构 end
+
+
+                    //这个时候 开始绘制对应的cavnax节点用来显示了
                     var node = new Canvax.Display.Sprite({
                         id : "node_"+i,
                         context : {
@@ -293,35 +346,36 @@ define(
                             height: dataNode.height
                         }
                     });
+
+                    //在这个rect上面附加对应的node的信息。方便fire到侦听的事件中可以很方便的拿到位置等数据
+                    rect.node = dataNode;//me.g.node(i);
+
                     node.addChild( rect );
-                    node.addChild( this.getNodeContent(dataNode) );  
+                    node.addChild( this.getNodeContent(dataNode) );
 
                     //然后要看该dateNode是否有子节点，有的话就要给改node添加个尾巴
                     if( _.isArray( dataNode.link ) && dataNode.link.length > 0 ){
-                        node.addChild( this._getTail( dataNode ) );
+                        node.addChild( this._getTail( i ) );
                     }
 
                     this.nodesSp.addChild( node );
+ 
+                    //给node添加事件侦听
+                    rect.hover(function(e){
+                        me.fire("nodeMouseover",e);
+                    },function(e){
+                        me.fire("nodeMouseout",e);
+                    });
+                    rect.on("click" , function(e){
+                        me.fire("nodeClick" , e);
+                    });
+                    //时间侦听over
 
                     if(_.isArray(addShapes)){
                         addShapes.push( node );
                     }
 
-                    me.g.setNode( i , dataNode );
-
-                    if( !dataNode.link ){
-                        dataNode.link = [];
-                    }
-
-                    var links = dataNode.link;
-
-                    if( links.length > 0 ){
-                        _.each( links , function( childId , x ){
-                            me._creatLinkLine( i , childId);
-                            me._setParentLink( data[ childId ] , i );
-                            me.g.setEdge( i , childId );
-                        } );
-                    }
+                    
                 }
                 return addShapes;
 
@@ -421,26 +475,32 @@ define(
                 var me  = this;
                 var pos = {};
                 me.g.nodes().forEach(function(v) {
-                    pos[ "node_"+v+"_x" ] = node.x - node.width/2;
-                    pos[ "node_"+v+"_y" ] = node.y - node.height/2;
+                    var node = me.g.node(v);
+                    pos[ "node_"+v+"_x" ] = node.x ? (node.x - node.width/2)  : 0;
+                    pos[ "node_"+v+"_y" ] = node.x ? (node.y - node.height/2) : 0;
                 });
                 me.g.edges().forEach(function(e) {
-                    var edge  = me.g.edge(e);
-                    var vnode = me.g.node(e.v); //这个link的父端节点
+                    var vnode = me.g.node( e.v );//这个link的父端节点
+                    var edge       = me.g.edge(e);
+                    var vTailPoint,wbegin,wvControl;
 
-                    var vTailPoint = {x:vnode.x , y:vnode.y+vnode.height/2+me.graph.ranksep*5/10};//父节点的尾巴末端
-                    var wbegin     = edge.points[2];//子节点的发射点
-                    var wvControl  = {x:wbegin.x , y:vTailPoint.y}; //从wbegin 发射到vTailPoint 的控制折点
+                    if( edge.points ){
+                        vTailPoint = {x:vnode.x , y:vnode.y+vnode.height/2+me.graph.ranksep*5/10};//父节点的尾巴末端
+                        wbegin     = edge.points[2];//子节点的发射点
+                        wvControl  = {x:wbegin.x , y:vTailPoint.y}; //从wbegin 发射到vTailPoint 的控制折点
+                    } else {
+                        vTailPoint = wbegin = wvControl = {x:0,y:0}
+                    }
 
                     //父节点尾巴
-                    pos[ "link_"+e.v+"_"+e.w+"_vTailPointX" ] = vTailPoint.x;
-                    pos[ "link_"+e.v+"_"+e.w+"_vTailPointY" ] = vTailPoint.y;
+                    pos[ "link_"+e.v+"_"+e.w+"_vTailPoint-x" ] = vTailPoint.x;
+                    pos[ "link_"+e.v+"_"+e.w+"_vTailPoint-y" ] = vTailPoint.y;
                     //子节点的发射点
-                    pos[ "link_"+e.v+"_"+e.w+"_wbeginX" ]     = wbegin.x;
-                    pos[ "link_"+e.v+"_"+e.w+"_wbeginY" ]     = wbegin.y;
+                    pos[ "link_"+e.v+"_"+e.w+"_wbegin-x" ]     = wbegin.x;
+                    pos[ "link_"+e.v+"_"+e.w+"_wbegin-y" ]     = wbegin.y;
                     //控制点
-                    pos[ "link_"+e.v+"_"+e.w+"_wvControlX" ]  = wvControl.x;
-                    pos[ "link_"+e.v+"_"+e.w+"_wvControlY" ]  = wvControl.y;
+                    pos[ "link_"+e.v+"_"+e.w+"_wvControl-x" ]  = wvControl.x;
+                    pos[ "link_"+e.v+"_"+e.w+"_wvControl-y" ]  = wvControl.y;
 
                 });
                 return pos;
@@ -462,6 +522,9 @@ define(
             _updateLayout : function(callback){
                 this._tweenLayout( this._getLayoutChanged() , callback);
             },
+            _creatPathOnTween : function(){
+            
+            },
             /**
              * 重新布局动画
              */
@@ -473,6 +536,7 @@ define(
                    .to( obj.posTo, 300 )
                    .onUpdate( function (  ) {
 
+                       var linkPaths = {}; //
                        for( var id in this ){
                            var val = this[id];
                            var p  = id.slice( id.lastIndexOf("_") ).replace("_","");
@@ -481,9 +545,22 @@ define(
                            if( p == "x" || p == "y" ){
                                me.nodesSp.getChildById( id ).context[p] = val;
                            } else {
-                               me.linksSp.getChildById( id ).context[p] = val;
+                               if( !linkPaths[ id ] ){
+                                   linkPaths[ id ] = {};
+                               };
+                               var pointName = p.slice( 0 , p.indexOf("-") );
+                               var coordinateName =  p.slice( p.indexOf("-")+1 );                              
+                               if( !linkPaths[id][pointName] ){
+                                   linkPaths[id][pointName] = {};
+                               };
+                               linkPaths[id][pointName][coordinateName] = val;
                            }
-                       };                       
+                       };            
+                       for( var link in linkPaths ){
+                           var l = linkPaths[link];
+                           var path = me._getLinkPath( l.wbegin , l.wvControl , l.vTailPoint );
+                           me.linksSp.getChildById(link).context.path = path;
+                       }
 
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
@@ -501,7 +578,7 @@ define(
             //初次渲染的时候自动把拓扑图居中
             _initNodesSpritePos : function(){
                 this.sprite.context.x = (this.width - (this._nodesRect.right - this._nodesRect.left)) / 2;
-                this.sprite.context.y = 10;
+                this.sprite.context.y = 80;
 
             }
         });

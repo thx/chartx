@@ -75,9 +75,13 @@ define(
                  */
                 var xField = dataFrame.xAxis.field;
                 
-                if( !xField || xField=="" || (_.isArray(xField) && xField.length == 0) || !_.find(total , function( obj ){
-                        return obj.field == xField;
-                    })){
+                if( !xField || xField=="" || (_.isArray(xField) && (xField.length == 0 || !_.find(total , function( obj ){
+                        if( _.indexOf( xField , obj.field ) >= 0 ){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }) ) ) ){
                     dataFrame.xAxis.org = [ total[0].data  ];
                     xField = dataFrame.xAxis.field = [ total[0].field ];
                 } else {
