@@ -1,6 +1,9 @@
 KISSY.ready(function(){
 
     var S = KISSY;
+
+   
+    /*
     var data1= [
         // y , x , size
         ["hot","recommend","num","info"],
@@ -47,6 +50,43 @@ KISSY.ready(function(){
         // [ 60 ,  28  , 99 ,  {name:''} ],
         // [ 60 ,  29  , 99 ,  {name:''} ]
     ];
+    */
+    var data1 = [
+        ["tagId","recommend","num","info"],
+        // [10022,4,3939,{"name":"Sarah Johnson","tagId":10022}],
+        // [10012,12,8835,{"name":"Nancy Rodriguez","tagId":10012}],
+        // [10019,16,6612,{"name":"Laura Allen","tagId":10019}],
+        // [10014,23,3909,{"name":"Brian Brown","tagId":10014}],
+        // [10035,26,8733,{"name":"Shirley White","tagId":10035}],
+        // [10016,27,9161,{"name":"Susan Gonzalez","tagId":10016}],
+        // [10031,32,7427,{"name":"Kevin Lewis","tagId":10031}],
+        // [10018,33,6292,{"name":"Betty Martinez","tagId":10018}],
+        // [10023,35,82,{"name":"Elizais","tagId":10020}],
+        // [10021,71,3333,{"name":"Ronald Lopez","tagId":10021}],
+        // [10015,73,222,{"name":"Richard Martinez","tagId":10015}],
+        // [10024,82,4379,{"name":"James Anderson","tagId":10024}],
+        // [10033,84,2714,{"name":"Carol Johnson","tagId":10033}],
+        // [10013,92,4603,{"name":"Edward Miller","tagId":10013}],
+        // [10032,92,7002,{"name":"Mark Williams","tagId":10032}],
+        // [10011,92,140,{"name":"Ruth Williams","tagId":10011}],
+        // [10034,97,9807,{"name":"Ruth White","tagId":10034}]] 
+        [1,4,3939,{"name":"Sarah Johnson","tagId":10022}],
+        // [2,12,8835,{"name":"Nancy Rodriguez","tagId":10012}],
+        // [3,16,6612,{"name":"Laura Allen","tagId":10019}],
+        // [4,23,3909,{"name":"Brian Brown","tagId":10014}],
+        // [5,26,8733,{"name":"Shirley White","tagId":10035}],
+        // [6,27,9161,{"name":"Susan Gonzalez","tagId":10016}],
+        // [7,32,7427,{"name":"Kevin Lewis","tagId":10031}],
+        // [8,33,6292,{"name":"Betty Martinez","tagId":10018}],
+        // [9,35,82,{"name":"Elizais","tagId":10020}],
+        // [10,71,3333,{"name":"Ronald Lopez","tagId":10021}],
+        // [11,73,222,{"name":"Richard Martinez","tagId":10015}],
+        // [12,82,4379,{"name":"James Anderson","tagId":10024}],
+        // [13,84,2714,{"name":"Carol Johnson","tagId":10033}],
+        [14,92,4603,{"name":"Edward Miller","tagId":10013}],
+        [15,92,7002,{"name":"Mark Williams","tagId":10032}],
+        [16,92,140,{"name":"Ruth Williams","tagId":10011}],
+        [17,97,9807,{"name":"Ruth White","tagId":10034}]] 
     var options = {
         cx    : 30,                              //品牌圆心x坐标
         event : {
@@ -58,7 +98,7 @@ KISSY.ready(function(){
         },
 
         yAxis : {                                //Y轴
-            field : ["hot"]
+            field : ["tagId"]
         },
         xAxis : {
             field : "recommend"

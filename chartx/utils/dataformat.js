@@ -31,7 +31,7 @@ define(
     
                 _.extend( dataFrame.yAxis , this.yAxis );
                 _.extend( dataFrame.xAxis , this.xAxis );
-    
+
                 var total = [];
     
                 for(var a = 0, al = fileds.length; a < al; a++){
@@ -104,6 +104,8 @@ define(
                 }             
                 dataFrame.yAxis.field = yField;
                 dataFrame.yAxis.org   = getDataOrg( yField , total );
+
+
                 return dataFrame;
             }
 

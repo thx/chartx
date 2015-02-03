@@ -161,12 +161,13 @@ define(
                     }
                     arr[a][n] = index
                 }
-                // console.log(arr)
                 arr.unshift(data[0])
+                console.log(arr)
                 return arr
             },                                    
             _countData:function(){                         //计算数据
                 var self = this
+                console.log(self.dataFrame)
                                                            //原始数据转二维数组 方便交互数据
                 var org = self.dataFrame.org, orgData = []
                 var indexData = self._getDataFromOrg(self.xAxis.field)
@@ -177,12 +178,13 @@ define(
                        orgData[index].push(org[a + 1])
                     }
                 }
-                self.dataFrame.orgData = orgData                                    
+                self.dataFrame.orgData = orgData       
+                console.log(self.dataFrame.orgData)                             
                 //-------------------------------------------原始数据转二维数组
 
                 var backData = []
                 
-                var xDataOrg = self.dataFrame.xAxis.org[0] //初步规划背景数据结构      
+                var xDataOrg = self.dataFrame.xAxis.org[0] //初步规划背景数据结构    
                 for(var a = 0, al = xDataOrg.length; a < al; a++){
                     !backData[xDataOrg[a]] ? backData[xDataOrg[a]] = [] : -1
                     var o = {
@@ -214,7 +216,7 @@ define(
                 }
                 self.dataFrame.back.rdata = rdata               //得到实际每个环的半径
                                                            //完成背景数据结构
-
+                console.log(backData)
                 self.back.fillStyle.normals = new GradientColor(self.back.fillStyle.first, self.back.fillStyle.last,self.dataFrame.back.rings + 1)
                 var enIndex = 0
                 for(var a = 0, al = backData.length; a < al; a++){
@@ -348,18 +350,22 @@ define(
                         }
                     }
                 }
+                console.log(self.dataFrame.graphs.data)
+                console.log(graphsData)
+                console.log(self.dataFrame.orgData)
                                                            //行星颜色(不算core)
                 for(var a = 1, al = graphsData.length; a < al; a++){
                     for(var b = 0, bl = graphsData[a].length; b < bl; b++){
                         var o = graphsData[a][b]
-                        o.ringID = a, o.ID = (b + 1), o.orgData = self.dataFrame.orgData[a][b]
+                        console.log(a,b)
+                        // o.ringID = a, o.ID = (b + 1), o.orgData = self.dataFrame.orgData[a][b]
                         o.fillStyle = {normal:self._getGraphsFillStyle(o)}
                     }
                 }
             },
             _startDraw : function(){
                 var self = this;
-                var rect = new Rect({
+                var rect  = new Rect({
                         context:{
                             width       : self.width,
                             height      : self.height,
