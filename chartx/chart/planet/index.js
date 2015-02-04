@@ -32,9 +32,9 @@ define(
                 this.ringDis       = 10                     //环和环之间的距离     
 
                 this.dataFrame     = {                      //数据格式
-                    org     :      [],                               //原始数据 参数：data
-                    orgData :      [],                               //原始数据转二维数组 方便交互数据
-                    data    :      [],                               //经_initData之后的数据
+                    org     :      [],                          //原始数据 经trimData之后
+                    orgData :      [],                          //原始数据转三维数组 方便交互数据
+                    data    :      [],                          //经_initData之后的数据
                     back    :      {
                         rings   :  0,                                //分组(有几个环)
                         ringAg  :  0,                                //环与环之间距离的平均值
@@ -45,14 +45,18 @@ define(
                     graphs  :      {
                         data    :  [],                               //二维, 根据此值绘制各圆(算core),[[{},{},...],[...],[...]]
                         maxR    :  0,                                //行星最大直径
-                        baseR   :  0,                                //行星的基础最小直径(占最大1/5)                        
+                        baseR   :  0,                                //行星的基础最小直径(占最大0.3)                        
                         rdata   :  [],                               //行星,所有行星半径集合(不算core),[60, 50, 50, 40]
                         maxRdata:  [],                               //行星,每个环上最大行星半径集合(不算core),[60, 50, 50]
                         maxYdata:  []                                //行星,每个环上最大高度集合(不算core)(去除2个半径 最高和最低),[60, 50, 50]
                     }
                 }
                 this.graphs        = {
+                    minR        : 1,
                     maxR        : 100,
+                    layout      : {
+                        mode    : 0                                  //模式(0 = 根据yAxis.field计算比例  |  1 = 上下错开)
+                    },
                     core        : {
                         r       : {
                             normal:60
@@ -99,7 +103,7 @@ define(
                 this.dataFrame.org = data
 
                 _.deepExtend(this.dataFrame, this._initData(data, opts));
-                // console.log(this.dataFrame)
+
                 // return
                 this.cx = this.cx != '' ? this.cx : this.initCX, this.cy = this.cy != '' ? this.cy : parseInt(this.height / 2)
 
@@ -142,6 +146,7 @@ define(
             _trimData:function(data){                      //调整数据
                 var self = this
                 var arr = []
+
                 var n = _.indexOf(data[0], self.xAxis.field)
                 for(var a = 0, al = data.length; a < al; a++){
                     if(!isNaN(data[a][n])){
@@ -161,7 +166,6 @@ define(
                     }
                     arr[a][n] = index
                 }
-                // console.log(arr)
                 arr.unshift(data[0])
                 return arr
             },                                    
@@ -177,12 +181,12 @@ define(
                        orgData[index].push(org[a + 1])
                     }
                 }
-                self.dataFrame.orgData = orgData                                    
+                self.dataFrame.orgData = orgData       
                 //-------------------------------------------原始数据转二维数组
 
                 var backData = []
                 
-                var xDataOrg = self.dataFrame.xAxis.org[0] //初步规划背景数据结构      
+                var xDataOrg = self.dataFrame.xAxis.org[0] //初步规划背景数据结构    
                 for(var a = 0, al = xDataOrg.length; a < al; a++){
                     !backData[xDataOrg[a]] ? backData[xDataOrg[a]] = [] : -1
                     var o = {
@@ -214,7 +218,6 @@ define(
                 }
                 self.dataFrame.back.rdata = rdata               //得到实际每个环的半径
                                                            //完成背景数据结构
-
                 self.back.fillStyle.normals = new GradientColor(self.back.fillStyle.first, self.back.fillStyle.last,self.dataFrame.back.rings + 1)
                 var enIndex = 0
                 for(var a = 0, al = backData.length; a < al; a++){
@@ -232,14 +235,13 @@ define(
                 //-------------------------------------------完成背景
                 // self.graphs.fillStyle.normals = new GradientColor('#ff0000','#ffffff',self.dataFrame.back.rings)
                 self.dataFrame.graphs.maxR  = self._getPlanetMaxR()
-                self.dataFrame.graphs.baseR = 0.3 * self.dataFrame.graphs.maxR
                                                                 //环大小
                 var numData = self._getDataFromOrg(self.graphs.size.field)
                 var scaleData = Tools.getArrScalesAtArr(numData, Tools.getMaxAtArr(_.clone(numData)))
                 var rdata = []
                 for(var a = 0, al = scaleData.length; a < al; a++){
                     var scale = scaleData[a]
-                    var r = self.dataFrame.graphs.baseR + (self.dataFrame.graphs.maxR - self.dataFrame.graphs.baseR) * scale
+                    var r = self.graphs.minR + (self.dataFrame.graphs.maxR - self.graphs.minR) * scale
                         r = Math.round(r)
                     rdata.push(r)
                 }
@@ -297,54 +299,114 @@ define(
                     maxYData.push(dis)
                 }
                 self.dataFrame.graphs.maxYData = maxYData       //完成每个环上最大高度集合
-                                                                     //y
-                var numData = self._getDataFromOrg(self.yAxis.field)
-                                                                     //平均值 =平均值的numData[a]  y位于self.cy 
-                var numAg   = Tools.getArrMergerNumber(numData) / numData.length 
+ 
                                                                 //计算行星y
                 var tmpData  = []
-                var exAgMax  = 0                                     //大于平均值的最大值 
-                var exAgData = []                                    //大于平均值的集合
-                for(var a = 0, al = xDataOrg.length; a < al; a++){
-                    var index = xDataOrg[a] - 1
-                    var num = numData[a]
-                        // num = num > 2 * numAg ? 2 * numAg : num
-                    var y = self.cy + (numAg - num) / numAg * (maxYData[index] / 2)
-                    if(num > 2 * numAg){
-                        exAgMax = exAgMax < (num - numAg) ? (num - numAg) : exAgMax
+                if(self.graphs.layout.mode == 0){
+                                                                     //y
+                    var numData = self._getDataFromOrg(self.yAxis.field)
+                                                                     //平均值 =平均值的numData[a]  y位于self.cy
+                    var numAg   = Tools.getArrMergerNumber(numData) / numData.length 
+                    var exAgMax  = 0                                      //大于平均值的最大值 
+                    var exAgData = []                                     //大于平均值的集合
+                    for(var a = 0, al = xDataOrg.length; a < al; a++){
+                        var index = xDataOrg[a] - 1
+                        var num = numData[a]
+                            // num = num > 2 * numAg ? 2 * numAg : num
+                        var y = self.cy + (numAg - num) / numAg * (maxYData[index] / 2)
+                        if(num > 2 * numAg){
+                            exAgMax = exAgMax < (num - numAg) ? (num - numAg) : exAgMax
+                        }
+                        if(num > numAg){                                  //位于self.cy之上
+                            exAgData[a] = 1
+                        }
+                        tmpData[a] = {y:y}
+                    }                                                     //self.cy上的做y比列计算
+                    for(var a = 0, al = exAgData.length; a < al; a++){
+                        var b = exAgData[a]
+                        var index = xDataOrg[a] - 1
+                        var num = numData[a]
+                        if(b && exAgMax != 0){
+                            tmpData[a].y = self.cy - (num - numAg)/ exAgMax * (maxYData[index] / 2)
+                        }
                     }
-                    if(num > numAg){                                 //位于self.cy之上
-                        exAgData[a] = 1
+                }else{                                               //上下错开排列
+                                                                          //同一环中最多有几个行星
+                    var max = Tools.getMaxChildArrLength(self.dataFrame.orgData) 
+                                                                          //y轴分段
+                    var yAg = max * 2 + 3
+                    var yAgs=_.range(1,yAg + 1)
+                    // console.log(yAg)
+                    // console.log('yAgs : ' + yAgs)
+                    // console.log('xDataOrg : ' + xDataOrg)
+                    // console.log('maxYData : ' + maxYData)
+                    var yc  = parseInt(yAg / 2) + 1
+                    var order = [yc + parseInt(yc/2), yc, yc - parseInt(yc/2)]
+                    var orderlen = order.length
+                    var groups = []
+                    var places = []
+                        places[0] = [0]
+                    for(var a = 0, al = xDataOrg.length; a < al; a++){
+                        var index = xDataOrg[a] - 1
+                        var place = order[(index + 1) % orderlen]
+                        var scale = (place - 1) / (yAg -1)
+                        tmpData[a] = {}
+                        tmpData[a].y = self.cy - (maxYData[index] / 2) + scale * maxYData[index]
+
+                        if(xDataOrg[a - 1] && index == xDataOrg[a - 1] - 1){
+                            // console.log(index + 1)
+                            !groups[index + 1] ? groups[index + 1] = [] : -1
+                            if(groups[index + 1].length == 0){
+                                groups[index + 1].push(tmpData[a - 1])
+                            }
+                            groups[index + 1].push(tmpData[a])
+
+                        }
+
+                        !places[index + 1] ? places[index + 1] = [] : -1
+                        places[index + 1].push(place)
                     }
-                    tmpData[a] = {y:y}
-                }                                                    //self.cy上的做y比列计算
-                for(var a = 0, al = exAgData.length; a < al; a++){
-                    var b = exAgData[a]
-                    var index = xDataOrg[a] - 1
-                    var num = numData[a]
-                    if(b && exAgMax != 0){
-                        tmpData[a].y = self.cy - (num - numAg)/ exAgMax * (maxYData[index] / 2)
+                    var tmpIndex = -1
+                    // console.log('places : ' + places.length )
+                    for(var a = 0, al = places.length; a < al; a++){
+                        if(places[a].length > 1){
+                            places[a] = self._getPlace(self._without(yAgs, places[a-1]), places[a].length, 1)
+                            // console.log('-----------------------------')
+                            for(var b = 0, bl = places[a].length; b < bl; b++){
+                                var o = tmpData[tmpIndex]
+                                var scale = (places[a][b] - 1) / (yAg -1)
+                                o.y = self.cy - (maxYData[a - 1] / 2) + scale * maxYData[a - 1]
+                                // console.log(places[a][b], o.y)
+                                tmpIndex++
+                            }
+                        }else{
+                            tmpIndex++
+                        }
                     }
+                    // console.log(places)
+                    // console.log('groups : ' + groups)
+                    // console.log(tmpData.length, tmpData)   
                 }
-                                                             //行星往环上靠
+                                                                //行星往环上靠
                 for(var a = 0, al = tmpData.length; a < al; a++){
                     var o = tmpData[a]
                     var index = xDataOrg[a] - 1
                     var r = self.dataFrame.back.rdata[index]
                     var h = o.y - self.cy
                     o.x = self.cx + self._getDisForRH(r,h)
+                    // o.x = self.dataFrame.back.rdata[a]
                 }
 
-                var tmpIndex = -1
+                var tmpIndex = 0
                 for(var a = 0, al = graphsData.length; a < al; a++){
                     for(var b = 0, bl = graphsData[a].length; b < bl; b++){
                         var o = graphsData[a][b]
                         if(a > 0){
                             // o.x = self.cx + self.dataFrame.back.rdata[a - 1]
-                            tmpIndex++
                             o.x = tmpData[tmpIndex].x
                             o.y = tmpData[tmpIndex].y
                             // o.text = {content:numData[tmpIndex]}  //测试
+                            tmpIndex++
                         }
                     }
                 }
@@ -357,9 +419,42 @@ define(
                     }
                 }
             },
+            _without:function($arr,$values){
+                var arr = _.clone($arr)
+                for(var a = 0, al = $values.length; a < al; a++){
+                    arr = _.without(arr,$values[a])
+                }
+                return arr
+            },
+            _getPlace:function($arr,$n,$place){
+                var arr = []
+                // $arr = [1,2,3,4,5]
+                if($place == 1){                           //从两端开始排序
+                    var index = 0
+                    var b = true
+                    for(var a = 0, al = $arr.length; a < al; a++){
+                        if(b){
+                            arr.push($arr[index])
+                            index++
+                        }else{
+                            arr.push($arr[$arr.length - index])
+                        }
+                        b = !b
+                    }
+                }
+                // }//else if($place == 2){                     //从中间开始排序
+                //     var index = parseInt(arr.length / 2)
+                //     console.log('index ' + index)
+                // //}
+                // console.log(arr)
+
+                arr.length = $n
+                // console.log(arr)
+                return arr
+            },
             _startDraw : function(){
                 var self = this;
-                var rect = new Rect({
+                var rect  = new Rect({
                         context:{
                             width       : self.width,
                             height      : self.height,
