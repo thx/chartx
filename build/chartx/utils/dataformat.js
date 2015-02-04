@@ -31,7 +31,7 @@ define(
     
                 _.extend( dataFrame.yAxis , this.yAxis );
                 _.extend( dataFrame.xAxis , this.xAxis );
-    
+
                 var total = [];
     
                 for(var a = 0, al = fileds.length; a < al; a++){
@@ -74,7 +74,7 @@ define(
                  * 先设置xAxis的数据
                  */
                 var xField = dataFrame.xAxis.field;
-                
+               debugger 
                 if( !xField || xField=="" || (_.isArray(xField) && (xField.length == 0 || !_.find(total , function( obj ){
                         if( _.indexOf( xField , obj.field ) >= 0 ){
                             return true;
@@ -104,6 +104,8 @@ define(
                 }             
                 dataFrame.yAxis.field = yField;
                 dataFrame.yAxis.org   = getDataOrg( yField , total );
+
+
                 return dataFrame;
             }
 
