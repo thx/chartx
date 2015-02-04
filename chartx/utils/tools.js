@@ -118,6 +118,21 @@ define(
                 return arr
             },
             /**
+             * 从一个二维数组中获取子数组最长的长度值
+             * @param  {[Array]}  $arr:Array [数组]
+             * @return {[Number]}            [数字]
+             */
+            getMaxChildArrLength:function($arr) {
+                var n = 0
+                var arr = $arr
+                for (var a = 0, al = arr.length; a < al; a++ ) {
+                    if(arr[a]){
+                        n = Math.max(n, arr[a].length)
+                    }
+                }
+                return n
+            },
+            /**
      		* 计算数组中的每个值 占该数组总值的比例 并按原始索引返回对应的比例数组  比例总和为100
      		* @param  {[Array]} $arr    [数组]
      		* @return {[Array]}         [对应的比例数组]
