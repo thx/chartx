@@ -74,7 +74,7 @@ define(
                  * 先设置xAxis的数据
                  */
                 var xField = dataFrame.xAxis.field;
-                
+               debugger 
                 if( !xField || xField=="" || (_.isArray(xField) && (xField.length == 0 || !_.find(total , function( obj ){
                         if( _.indexOf( xField , obj.field ) >= 0 ){
                             return true;
