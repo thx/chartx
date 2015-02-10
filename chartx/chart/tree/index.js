@@ -28,6 +28,7 @@ define(
         var Canvax = Chart.Canvax;
         return Chart.extend({
             init : function( node , data , opts ){
+                
                 this.data   = data;
                 this.graph  = {
                     rankdir : "TB",
@@ -184,6 +185,7 @@ define(
                 };
             },
             remove : function(id){
+                
                 var me = this;
                 var parent = me.data[id].parent;
                 me._remove(id);
@@ -200,13 +202,19 @@ define(
             _remove: function( id ){
                 var me   = this;
                 var node = this.data[id];
-                
+                //从tree的末端开始删除
+                for( var i = 0,l=node.link.length; i<l; i++ ){
+                    me._remove( node.link[i] );
+                    i--;
+                    l--;
+                }
+
+                //首先，删除父节点和自己的edge关系，已经edge对应的link连接线
                 _.each(node.parent , function(parent,i){
                     //先删除父亲节点和自己的关系
                     me.g.removeEdge( parent , id );
-
                     //然后删除代表关系的链接线
-                    me.linksSp.getChildById("link_"+parent+"_"+id).remove();
+                    me.linksSp.getChildById("link_"+parent+"_"+id).remove(); 
 
                     //然后在parent的link中把自己给删除了
                     _.each( me.data[ parent ].link , function( target , i ){
@@ -215,11 +223,8 @@ define(
                             return false;
                         }
                     } );
-
                 });
-                _.each(node.link , function( child , i ){
-                    me._remove( child );
-                });
+                
                 delete this.data[id];
                 this.g.removeNode(id);
                 this.nodesSp.getChildById("node_"+id).remove();

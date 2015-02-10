@@ -11,11 +11,12 @@ define(
     function( Canvax, BrokenLine, Circle, Path, Tools){
         window.Canvax = Canvax
         var Group = function(opt){
-            this.w       = 0;   
-            this.h       = 0; 
-            this.y       = 0;
+            this._groupId = 0;
+            this.w        = 0;   
+            this.h        = 0; 
+            this.y        = 0;
 
-            this.node    = {                     //节点 
+            this.node     = {                     //节点 
                 enabled     : 0,                           //是否有
                 control     : function(){}, 
                 mode        : 0,                           //模式[0 = 都有节点 | 1 = 拐角才有节点]

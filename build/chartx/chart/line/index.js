@@ -148,10 +148,10 @@ define(
                 }
             },
             _trimGraphs:function(){
-                var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ]
-                var maxXAxis = this.dataFrame.xAxis.org[0].length
-                var arr      = this.dataFrame.yAxis.org
-                var tmpData  = []
+                var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
+                var maxXAxis = this.dataFrame.xAxis.org[0].length;
+                var arr      = this.dataFrame.yAxis.org;
+                var tmpData  = [];
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
                         !tmpData[a] ? tmpData[a] = [] : ''
@@ -165,6 +165,7 @@ define(
                         tmpData[a][b] = {'value':arr[a][b], 'x':x,'y':y}
                     }
                 }
+                
                 return tmpData
             },
             //每两个点之间的距离

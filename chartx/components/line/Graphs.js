@@ -112,12 +112,28 @@ define(
                 };
                 growAnima();
             },
- 
+            //styleType , normals , groupInd
+            _getColor : function( opt ){
+                var color = null;
+                if( _.isArray( opt.styleType ) ){
+                    color = opt.styleType[ groupInd ]
+                }
+                if( _.isFunction( opt.styleType ) ){
+                    color = opt.styleType( groupInd );
+                }
+                if( !color || color=="" ){
+                    color = opt.normals[ groupInd ];
+                }
+                return color;
+            },
+
             _widget:function(){
                 var self  = this;
                 
                 for(var a = 0,al = self.data.length; a < al; a++){
+                    
                     var group = new Group({
+                        _groupInd : a,
                         node   :{
                             enabled     : self.line.node.enabled,
                             mode        : self.line.node.mode,
@@ -125,11 +141,11 @@ define(
                                 normal  : self.line.node.r.normals[a],
                                 over    : self.line.node.r.overs[a]
                             },
-                            fillStyle   :{
+                            fillStyle   : {
                                 normal  : self.line.node.fillStyle.normals[a],
                                 over    : self.line.node.fillStyle.overs[a],
                             },
-                            strokeStyle :{
+                            strokeStyle : {
                                 normal  : self.line.node.strokeStyle.normals[a],
                                 over    : self.line.node.strokeStyle.overs[a],
                             },
@@ -152,12 +168,14 @@ define(
                             },
                             alpha       : self.line.alpha.normals[a]
                         }
-                    })
+                    });
+                    
                     group.draw({
                         data   : self.data[a],
                     })
-                    self.sprite.addChild(group.sprite)
-                    self.groups.push(group)
+                    self.sprite.addChild(group.sprite);
+                    self.groups.push(group);
+                    
                 }
                 
                 self.induce = new Rect({
