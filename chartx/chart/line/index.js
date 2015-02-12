@@ -29,6 +29,7 @@ define(
                 this._graphs       =  null;
                 this._tips         =  null;
 
+                
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
             },
@@ -64,7 +65,7 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
-                this._graphs = new Graphs(this.graphs);
+                this._graphs = new Graphs( this.graphs , this.stage.context2D );
                 this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
             },
             _startDraw : function(){
