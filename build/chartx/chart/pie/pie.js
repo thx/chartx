@@ -18,7 +18,7 @@
                 this.branchSp    = null;
                 this.branchTxtSp = null;
 
-                this.tips          = _.deepExtend({enable:true} , tipsOpt); //tip的confit
+                this.tips          = _.deepExtend({ enabled : true } , tipsOpt); //tip的confit
                 this.domContainer  = domContainer;
                 this._tip         = null; //tip的对象 tip的config 放到graphs的config中传递过来
 
@@ -638,21 +638,21 @@
                                 sector.hover(function (e) {
                                     var me = this;
                                     if (!self.isMoving) {
-                                        if(self.tips.enable){
+                                        if(self.tips.enabled){
                                             self._showTip( e , this.__dataIndex );
                                         }
                                         self._sectorFocus(this.__dataIndex);
                                     }
                                 }, function (e) {
                                     if (!self.isMoving) {
-                                        if(self.tips.enable){
+                                        if(self.tips.enabled){
                                             self._hideTip(e);
                                         }
                                         self._sectorUnfocus();
                                     }
                                 })
                                 sector.on('mousemove', function (e) {
-                                    if(self.tips.enable){
+                                    if(self.tips.enabled){
                                         self._moveTip( e , this.__dataIndex );
                                     }
                                 })

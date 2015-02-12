@@ -21,7 +21,6 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this.eventEnabled  =  true;
     
                 this._xAxis        =  null;
                 this._yAxis        =  null;
@@ -135,18 +134,34 @@ define(
                 //执行生长动画
                 this._graphs.grow();
     
-                if( this.eventEnabled ){
-                    var self = this;
-                    this._graphs.sprite.on( "hold mouseover" ,function(e){
+                var self = this;
+                this._graphs.sprite.on( "hold mouseover" ,function(e){
+                    if( self._tips.enabled ){
+                        self._setXaxisYaxisToTipsInfo(e);
                         self._tips.show( e );
-                    });
-                    this._graphs.sprite.on( "drag mousemove" ,function(e){
+                    }
+                });
+                this._graphs.sprite.on( "drag mousemove" ,function(e){
+                    if( self._tips.enabled ){
+                        self._setXaxisYaxisToTipsInfo(e);
                         self._tips.move( e );
-                    });
-                    this._graphs.sprite.on( "release mouseout" ,function(e){
+                    }
+                });
+                this._graphs.sprite.on( "release mouseout" ,function(e){
+                    if( self._tips.enabled ){
                         self._tips.hide( e );
-                    });
+                    }
+                });
+            },
+            _setXaxisYaxisToTipsInfo : function(e){
+                e.tipsInfo.xAxis = {
+                    field : this.dataFrame.xAxis.field,
+                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
                 }
+                var me = this;
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    node.field = me.dataFrame.yAxis.field[ i ];
+                } );
             },
             _trimGraphs:function(){
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];

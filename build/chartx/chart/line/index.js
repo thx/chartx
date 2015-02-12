@@ -21,7 +21,6 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this.eventEnabled  =  true;
     
                 this._xAxis        =  null;
                 this._yAxis        =  null;
@@ -29,6 +28,7 @@ define(
                 this._graphs       =  null;
                 this._tips         =  null;
 
+                
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
             },
@@ -64,7 +64,7 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
-                this._graphs = new Graphs(this.graphs);
+                this._graphs = new Graphs( this.graphs , this.stage.context2D );
                 this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
             },
             _startDraw : function(){
@@ -134,18 +134,34 @@ define(
                 //执行生长动画
                 this._graphs.grow();
     
-                if( this.eventEnabled ){
-                    var self = this;
-                    this._graphs.sprite.on( "hold mouseover" ,function(e){
+                var self = this;
+                this._graphs.sprite.on( "hold mouseover" ,function(e){
+                    if( self._tips.enabled ){
+                        self._setXaxisYaxisToTipsInfo(e);
                         self._tips.show( e );
-                    });
-                    this._graphs.sprite.on( "drag mousemove" ,function(e){
+                    }
+                });
+                this._graphs.sprite.on( "drag mousemove" ,function(e){
+                    if( self._tips.enabled ){
+                        self._setXaxisYaxisToTipsInfo(e);
                         self._tips.move( e );
-                    });
-                    this._graphs.sprite.on( "release mouseout" ,function(e){
+                    }
+                });
+                this._graphs.sprite.on( "release mouseout" ,function(e){
+                    if( self._tips.enabled ){
                         self._tips.hide( e );
-                    });
+                    }
+                });
+            },
+            _setXaxisYaxisToTipsInfo : function(e){
+                e.tipsInfo.xAxis = {
+                    field : this.dataFrame.xAxis.field,
+                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
                 }
+                var me = this;
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    node.field = me.dataFrame.yAxis.field[ i ];
+                } );
             },
             _trimGraphs:function(){
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];

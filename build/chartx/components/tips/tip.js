@@ -112,10 +112,10 @@ define(
                 var str  = "<table>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
-                    str+= "<tr style='color:"+ node.fillStyle +"'>";
+                    str+= "<tr style='color:"+(node.color || node.fillStyle) +"'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
-                        str+="<td>"+ prefixName +"</td>";
+                        str+="<td>"+ prefixName +"：</td>";
                     };
                     str += "<td>"+ node.value +"</td></tr>";
                 });

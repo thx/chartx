@@ -58,18 +58,15 @@ KISSY.ready(function(){
             }
         },
         graphs:{
-            line:{
                 node : {
                     enabled : true
                 },
-                strokeStyle : {
-                    normals : ['#f8ab5e','#E55C5C'],
-                },
-                alpha       : {
-                    normals : [0.8, 0.7],
-                },
-                smooth :false 
-            }
+                line : {
+                    strokeStyle : {
+                        normals : ['#f8ab5e','#E55C5C'],
+                    }
+                }
+  
         },       
         tips  :{
             prefix  : ["黑色玫瑰","水晶之痕"]

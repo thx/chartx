@@ -160,8 +160,6 @@ define(
                 });
                 self.sprite.addChild( fill );  
 
-                debugger;
-
                 
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)

@@ -13,6 +13,7 @@ define(
             this._line     = null;
             this._nodes    = null;
             this._tip      = null;
+            this.enabled   = true;
             this.init(opt , data , tipDomContainer);
         };
     

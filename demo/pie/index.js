@@ -35,8 +35,8 @@
         },
         */
         tips : {
-            //enable  : false,
-            content : function(){
+            //enabled  : false,
+            content : function(info){
                 debugger
 
             }
