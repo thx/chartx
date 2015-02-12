@@ -217,12 +217,12 @@ var Chartx = {
     },
     getOffset: function (el) {
         var box = el.getBoundingClientRect(),
-        doc = el.ownerDocument,
-        body = doc.body,
+        doc     = el.ownerDocument,
+        body    = doc.body,
         docElem = doc.documentElement,
 
         // for ie  
-        clientTop = docElem.clientTop || body.clientTop || 0,
+        clientTop  = docElem.clientTop || body.clientTop || 0,
         clientLeft = docElem.clientLeft || body.clientLeft || 0,
 
         // In Internet Explorer 7 getBoundingClientRect property is treated as physical, 

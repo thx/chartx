@@ -63,7 +63,12 @@ define(
                 this._back   = new Back(this.back);
 
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
-                this._graphs = new Graphs(this.graphs , this.tips , this.canvax.getDomContainer());
+                this._graphs = new Graphs(
+                        this.graphs , 
+                        this.tips , 
+                        this.canvax.getDomContainer(),
+                        this.dataFrame
+                        );
             },
             _startDraw : function(){
                 var self = this;
