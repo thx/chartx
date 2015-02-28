@@ -37,7 +37,7 @@
         tips : {
             //enabled  : false,
             content : function(info){
-                debugger
+                return "xxx"
 
             }
         },

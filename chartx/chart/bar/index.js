@@ -53,8 +53,6 @@ define(
               
                 this._arguments = arguments;
     
-                //下面这个是全局调用测试的时候用的
-                //window.hoho = this;
             },
             _initData  : dataFormat,
             _initModule:function(){

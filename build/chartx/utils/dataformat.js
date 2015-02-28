@@ -11,10 +11,10 @@ define(
          * [{field:'field1',index:0,data:[1,2]} ......]
          * 这样的结构化数据格式。
          */
-        return function( data ){
+        return function( data , opt ){
     
               var dataFrame  = {    //数据框架集合
-                    //org        : [],   //最原始的数据  
+                    org        : [],   //最原始的数据  
                     data       : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
                     yAxis      : {     //y轴
                         field  : [],   //字段集合 对应this.data
@@ -27,10 +27,16 @@ define(
                 }
     
                 var arr = data;
+                dataFrame.org = arr;
                 var fileds = arr[0]; //所有的字段集合
     
-                _.extend( dataFrame.yAxis , this.yAxis );
-                _.extend( dataFrame.xAxis , this.xAxis );
+                this.yAxis && _.extend( dataFrame.yAxis , this.yAxis );
+                this.xAxis && _.extend( dataFrame.xAxis , this.xAxis );
+
+                if( opt ){
+                    opt.yAxis && _.extend( dataFrame.yAxis , opt.yAxis );
+                    opt.xAxis && _.extend( dataFrame.xAxis , opt.xAxis );
+                }
 
                 var total = [];
     

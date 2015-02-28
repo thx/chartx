@@ -134,11 +134,11 @@ define(
                                 target.width  += 2;
 
                                 me.sprite.addChild(me._tip.sprite);
-                                me._tip.show( me._setTipInfoHandler(e , this.row , this.column ) );
+                                me._tip.show( me._setTipsInfoHandler(e , this.row , this.column ) );
 
                             }); 
                             hoverRect.on("mousemove" , function(e){
-                                me._tip.move( me._setTipInfoHandler(e , this.row , this.column ) );
+                                me._tip.move( me._setTipsInfoHandler(e , this.row , this.column ) );
                             }); 
                             hoverRect.on("mouseout" , function(e){
                                 var target    = this.target.context;
@@ -191,7 +191,7 @@ define(
                     node.field = me.dataFrame.yAxis.field[ i ];
                 } );
             },
-            _setTipInfoHandler : function(e  , iNode ,iGroup){
+            _setTipsInfoHandler : function(e  , iNode ,iGroup){
                 e.tipsInfo = {
                     iGroup        : iGroup,
                     iNode         : iNode,

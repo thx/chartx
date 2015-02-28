@@ -91,7 +91,13 @@ define(
                 },
                 _widget : function(){
                     var sys = ParticleSystem(1000, 800, 10);
-                    sys.parameters({stiffness:900, repulsion:2000, gravity:true, dt:0.015});
+                    sys.parameters({
+                        stiffness:900, 
+                        repulsion:2000, 
+                        gravity:true, 
+                        dt:0.015 ,
+                        //precision:0.6
+                    });
                     sys.renderer = this._simpleRenderer("viewport");
                     sys.graft({nodes:this.data.nodes, edges:this.data.edges});
                 }
