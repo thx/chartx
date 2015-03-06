@@ -133,7 +133,8 @@ define(
                 var tmpINode = this.disX == 0 ? 0 : parseInt( (x + (this.disX / 2) ) / this.disX  );
                 
                 var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(this._nodesInfoList , "y" ));
-                this._nodesInfoList = []                 //节点信息集合
+                this._nodesInfoList = [];                 //节点信息集合
+                
                 for (var a = 0, al = this.groups.length; a < al; a++ ) {
                     var o = this.groups[a].getNodeInfoAt(tmpINode)
                     this._nodesInfoList.push(o);

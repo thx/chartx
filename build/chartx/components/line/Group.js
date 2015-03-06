@@ -23,7 +23,7 @@ define(
             this.line      = {                     //线
                 strokeStyle : {
                     normal  : this.colors[ this._groupInd ],
-                    over    : this.colors[ this._groupInd ]
+                    over    : null//this.colors[ this._groupInd ]
                 },
                 smooth      : true
             }
@@ -42,8 +42,8 @@ define(
                     over    : '#ffffff'
                 },
                 strokeStyle :{//轮廓颜色
-                    normal  : this.line.strokeStyle.normal,
-                    over    : this.line.strokeStyle.over
+                    normal  : null,//this.line.strokeStyle.normal,
+                    over    : null //this.line.strokeStyle.over
                 },
                 lineWidth   : {//轮廓粗细
                     normal  : 2, //[2,2,2,2,2,2,2],
@@ -53,8 +53,8 @@ define(
     
             this.fill    = {                     //填充
                 fillStyle : {
-                    normal  : this.line.strokeStyle.normal,
-                    over    : this.line.strokeStyle.over
+                    normal  : null, //this.line.strokeStyle.normal,
+                    over    : null  //this.line.strokeStyle.over
                 },
                 alpha       : 0.1
             }
@@ -68,6 +68,17 @@ define(
         Group.prototype = {
             init:function(opt){
                 _.deepExtend( this , opt );
+
+                if( !this.line.strokeStyle.over ){
+                    this.line.strokeStyle.over = this.line.strokeStyle.normal;
+                }
+
+                //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
+                !this.node.strokeStyle.normal && ( this.node.strokeStyle.normal = this.line.strokeStyle.normal );
+                !this.node.strokeStyle.over   && ( this.node.strokeStyle.over   = this.line.strokeStyle.over   );
+                !this.fill.fillStyle.normal   && ( this.fill.fillStyle.normal   = this.line.strokeStyle.normal );
+                !this.fill.fillStyle.over     && ( this.fill.fillStyle.over     = this.line.strokeStyle.over   );
+      
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX:function($n){

@@ -68,7 +68,7 @@ KISSY.ready(function(){
         graphs:{
                 line:{
                     strokeStyle : {
-                        //normal : ["yellow" , "#c77029" , "#f15f60" ]
+                        normal : [ "#c77029" , "#f15f60" ]
                     }
                 }
         }
