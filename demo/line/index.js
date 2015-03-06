@@ -59,11 +59,11 @@ KISSY.ready(function(){
         },
         yAxis : {
             enabled : false,
-            field : ["uv1","uv2","uv3"]
+            //field : ["uv1","uv2","uv3"]
         },
         xAxis : {
             enabled : false,
-            field : "date"
+            //field : "date"
         },
         graphs:{
                 line:{

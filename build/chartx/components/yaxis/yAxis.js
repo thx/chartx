@@ -10,7 +10,8 @@ define(
         var yAxis = function(opt , data){
             this.w = 0;
     
-            this.display = "block";                        //默认为block，不显示为none
+            //this.display = "block";                        //默认为block，不显示为none
+            this.enabled = 1;//true false 1,0都可以
     
             this.mode = 1                                  //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
             this.dis  = 6                                  //线到文本的距离
@@ -105,7 +106,7 @@ define(
             _widget:function(){
                 var self  = this;
     
-                if( self.display == "none" ){
+                if( !self.enabled ){ //self.display == "none" 
                     self.w = 0;
                     return;
                 }
