@@ -82,7 +82,7 @@ define(
                     _.deepExtend( this , obj.options );
 
                     //配置的变化有可能也会导致data的改变
-                    this.dataFrame = this._initData( obj.data );
+                    this.dataFrame = this._initData( this.dataFrame.org );
                 }
                 if( obj.data ){
                     //数据集合，由_initData 初始化
