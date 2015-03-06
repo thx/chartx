@@ -47,9 +47,11 @@ KISSY.ready(function(){
     var options = {
 
         yAxis : {
+            enabled : 0,
             field : ["uv1","uv2","uv3"]
         },
         xAxis : {
+            enabled : 0,
             field : "date"
         },
         graphs:{
@@ -67,6 +69,17 @@ KISSY.ready(function(){
                     // normals : [0.1,0.1,0.1],
                     // overs                               //*
                 }
+            }
+        },
+        back:{
+            xOrigin:{
+                enabled : 0
+            },
+            yOrigin:{
+                enabled : 0
+            },
+            xAxis  :{
+                enabled : 0
             }
         }
     }
