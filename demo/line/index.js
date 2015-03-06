@@ -46,10 +46,23 @@ KISSY.ready(function(){
 
     var options = {
 
+        back  : {
+             xOrigin:{
+                enabled : 0
+            },
+            yOrigin:{
+                enabled : 0
+            },
+            xAxis  :{
+                enabled : 0
+            }
+        },
         yAxis : {
+            enabled : false,
             field : ["uv1","uv2","uv3"]
         },
         xAxis : {
+            enabled : false,
             field : "date"
         },
         graphs:{
