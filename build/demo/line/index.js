@@ -58,7 +58,11 @@ KISSY.ready(function(){
             }
         },
         yAxis : {
-            enabled : false,
+            //enabled : false,
+            dataSection : [-100,0,100,200,500],
+            textFormat : function( text ){
+                return text+"%"
+            }
             //field : ["uv1","uv2","uv3"]
         },
         xAxis : {
@@ -68,7 +72,7 @@ KISSY.ready(function(){
         graphs:{
                 line:{
                     strokeStyle : {
-                        normal : [ "#c77029" , "#f15f60" ]
+                        normal : ["#c77029" , "#f15f60" ]
                     }
                 }
         }
