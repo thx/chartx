@@ -2,22 +2,24 @@ var Chartx = {
     start: function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
+        
+        var canvaxVersion = "2015.02.28";
+        var chartxVersion = "1,4,7";
+
 
         
 
 
         //配置canvax包
-        var canvaxVersion = "2015.02.28";
         var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
+
         
 
+        
+        //如果是在cdn环境的话还是用自己配置的version
+        Chartx.path   = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
 
-
-        var __FILE__, scripts = document.getElementsByTagName("script"); 
-        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
-        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
-        //配置chartx包
-        Chartx.path = __FILE__;
+        
 
         Chartx.setPackages([{
             name: 'canvax',
