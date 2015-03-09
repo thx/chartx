@@ -25,10 +25,14 @@ define(
                         org    : []    //原始数据['星期一','星期二']
                     }
                 }
+
+                if( !data || data.length == 0 ){
+                    return dataFrame
+                }
     
                 var arr = data;
                 dataFrame.org = arr;
-                var fileds = arr[0]; //所有的字段集合
+                var fileds = arr[0] ? arr[0] : []; //所有的字段集合
     
                 this.yAxis && _.extend( dataFrame.yAxis , this.yAxis );
                 this.xAxis && _.extend( dataFrame.xAxis , this.xAxis );

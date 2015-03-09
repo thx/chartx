@@ -18,6 +18,8 @@
                 this.branchSp    = null;
                 this.branchTxtSp = null;
 
+                this.dataLabel   = true;
+
                 this.tips          = _.deepExtend({ enabled : true } , tipsOpt); //tip的confit
                 this.domContainer  = domContainer;
                 this._tip         = null; //tip的对象 tip的config 放到graphs的config中传递过来

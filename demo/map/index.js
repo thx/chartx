@@ -7,6 +7,7 @@ function domready(){
         [ "湖南省" , 80 ],
         [ "湖北省" , 9 ]
     ];
+
     var options = {
         areaField : "area", //可选，默认为第一个字段
         area : {
