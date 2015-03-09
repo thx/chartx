@@ -130,7 +130,7 @@
                         boundWidth: w,
                         boundHeight: h,
                         data: self.dataFrame,
-                        dataLabel: self.dataLabel,
+                        //dataLabel: self.dataLabel, 
                         strokeWidth: self.strokeWidth,
                         allowPointSelect: self.allowPointSelect,
                         animation: self.animation,
@@ -144,6 +144,10 @@
                             }
                         }
                     };
+
+                    if( self.dataLabel ){
+                        self.pie.dataLabel = self.dataLabel;
+                    }
 
                     self._pie = new Pie(self.pie , self.tips , self.canvax.getDomContainer());
                 },
