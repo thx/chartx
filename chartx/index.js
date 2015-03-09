@@ -11,10 +11,11 @@ var Chartx = {
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2015.02.28/";
+        var canvaxVersion = "2015.02.28";
+        var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
         //BEGIN(develop)
         if( Chartx.site.daily || Chartx.site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2015.02.28/";
+            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/"+ canvaxVersion +"/";
         }
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
         if( !! ~location.search.indexOf('localcanvax') ){

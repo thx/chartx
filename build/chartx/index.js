@@ -7,7 +7,8 @@ var Chartx = {
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2015.02.28/";
+        var canvaxVersion = "2015.02.28";
+        var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
         
 
 
