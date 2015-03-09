@@ -4,7 +4,7 @@ var Chartx = {
         //如果charts有被down下来使用。请修改下面的
         
         var canvaxVersion = "2015.02.28";
-        var chartxVersion = "1.4.8";
+        var chartxVersion = "1.4.9";
 
 
         //BEGIN(develop)
