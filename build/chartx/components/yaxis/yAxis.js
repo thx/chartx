@@ -99,15 +99,15 @@ define(
                 this.dataOrg     = data.org;
                 
                 if( this.dataSection.length == 0 ){
-                    this.dataSection = DataSection.section(arr);
+                    this.dataSection = DataSection.section( arr , 3 );
                 }
+
                 this._baseNumber = this.dataSection[0];
+
                 if(arr.length == 1){
                     this.dataSection[0] = arr[0] * 2;
                     this._baseNumber    = 0;
                 }
-    
-    
             },
             _widget:function(){
                 var self  = this;

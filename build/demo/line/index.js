@@ -59,7 +59,7 @@ KISSY.ready(function(){
         },
         yAxis : {
             //enabled : false,
-            dataSection : [-100,0,100,200,500],
+            //dataSection : [-100,0,100,200,500],
             textFormat : function( text ){
                 return text+"%"
             }
