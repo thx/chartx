@@ -18,7 +18,9 @@
                 this.branchSp    = null;
                 this.branchTxtSp = null;
 
-                this.dataLabel   = true;
+                this.dataLabel   = {
+                    enabled : true 
+                };
 
                 this.tips          = _.deepExtend({ enabled : true } , tipsOpt); //tip的confit
                 this.domContainer  = domContainer;
@@ -26,8 +28,8 @@
 
                 this.init(opt);
                 this.colorIndex = 0;
-                this.sectors = [];
-                this.isMoving = false;
+                this.sectors    = [];
+                this.isMoving   = false;
 
             };
 
