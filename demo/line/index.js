@@ -46,33 +46,8 @@ KISSY.ready(function(){
 
     var options = {
 
-        yAxis : {
-            enabled : 0,
-            field : ["uv1","uv2","uv3"]
-        },
-        xAxis : {
-            enabled : 0,
-            field : "date"
-        },
-        graphs:{
-            line:{
-                node        :{
-                    fillStyle   :{
-                        normals : ['#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000'],
-                        overs   : ['#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000', '#FF0000'],
-                    },
-                },
-                strokeStyle : {
-                    normals : ["#6f8cb2" , "#c77029" , "#f15f60" ]
-                },
-                alpha       : {                            //有填充时,透明度 注意：有几条线,有几个值
-                    // normals : [0.1,0.1,0.1],
-                    // overs                               //*
-                }
-            }
-        },
-        back:{
-            xOrigin:{
+        back  : {
+             xOrigin:{
                 enabled : 0
             },
             yOrigin:{
@@ -81,6 +56,21 @@ KISSY.ready(function(){
             xAxis  :{
                 enabled : 0
             }
+        },
+        yAxis : {
+            enabled : 0,
+            field : ["uv1","uv2","uv3"]
+        },
+        xAxis : {
+            enabled : 0,
+            field : ["uv1","uv2","uv3"]
+        },
+        graphs:{
+                line:{
+                    strokeStyle : {
+                        //normal : ["yellow" , "#c77029" , "#f15f60" ]
+                    }
+                }
         }
     }
     // KISSY.config({

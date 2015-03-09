@@ -13,7 +13,7 @@ define(
             this.r      = 0; //蜘蛛网的最大半径
             this.yDataSection = [];
             this.xDataSection = [];
-            this.strokeStyle  = "#999999";
+            this.strokeStyle  = "#e5e5e5";
             this.lineWidth    = 1;
             this.sprite       = null ;
     

@@ -34,7 +34,8 @@ define(
                     fontSize  : 13
             }
     
-            this.display = "block";
+            //this.display = "block";
+            this.enabled = 1 ; //1,0 true ,false 
     
             this.disXAxisLine =  6;                        //x轴两端预留的最小值
             this.disOriginX   =  0;                        //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
@@ -92,7 +93,7 @@ define(
                 this.setX( this.pos.x + this.disOriginX );
                 this.setY( this.pos.y );
                 
-                if( this.display != "none" ){
+                if( this.enabled ){ //this.display != "none"
                     this._widget();
                     this._layout();
                 } 
@@ -139,8 +140,8 @@ define(
                        }
                 })
                 this.max.txtH = txt.getTextHeight();
-                if( this.display == "none" ){
-                    this.h = this.max.txtH;
+                if( !this.enabled ){ //this.display == "none"
+                    this.h = this.dis;//this.max.txtH;
                 } else {
                     this.h = this.disY + this.line.height + this.dis + this.max.txtH
                 }

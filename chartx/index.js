@@ -11,10 +11,10 @@ var Chartx = {
 
 
         //配置canvax包
-        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2015.02.01/";
+        var canvaxUrl = "http://g.tbcdn.cn/thx/canvax/2015.02.28/";
         //BEGIN(develop)
         if( Chartx.site.daily || Chartx.site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2015.02.01/";
+            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/2015.02.28/";
         }
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
         if( !! ~location.search.indexOf('localcanvax') ){
@@ -206,23 +206,14 @@ var Chartx = {
         }
         return null;
     },
-    getStyle: function (el, cssName) {
-        var len = arguments.length, sty, f, fv;
-
-        'currentStyle' in el ? sty = el.currentStyle : 'getComputedStyle' in window
-            ? sty = window.getComputedStyle(el, null) : null;
-
-        sty = (len == 2) ? sty[cssName] : sty;
-        return sty;
-    },
     getOffset: function (el) {
         var box = el.getBoundingClientRect(),
-        doc = el.ownerDocument,
-        body = doc.body,
+        doc     = el.ownerDocument,
+        body    = doc.body,
         docElem = doc.documentElement,
 
         // for ie  
-        clientTop = docElem.clientTop || body.clientTop || 0,
+        clientTop  = docElem.clientTop || body.clientTop || 0,
         clientLeft = docElem.clientLeft || body.clientLeft || 0,
 
         // In Internet Explorer 7 getBoundingClientRect property is treated as physical, 

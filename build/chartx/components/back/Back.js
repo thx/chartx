@@ -19,12 +19,12 @@ define(
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
                     thinkness   : 1,
-                    strokeStyle : '#cccccc'
+                    strokeStyle : '#e5e5e5'
             } 
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
                     thinkness   : 1,
-                    strokeStyle : '#BEBEBE'
+                    strokeStyle : '#e5e5e5'
             }
             this.xAxis   = {                                //x轴上的线
                     enabled     : 1,
@@ -33,7 +33,7 @@ define(
                     // data        : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'dashed',                //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#cccccc'
+                    strokeStyle : '#e5e5e5'
             }
     
             this.yAxis   = {                                //y轴上的线
@@ -43,7 +43,7 @@ define(
                     // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : '',                      //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#BEBEBE'
+                    strokeStyle : '#e5e5e5'
             } 
     
             this.sprite       = null;                       //总的sprite

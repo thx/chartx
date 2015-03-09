@@ -8,7 +8,8 @@ define(
     ],
     function(Canvax , Rect , Tween , Tip ){
  
-        var Graphs = function( opt , tips , domContainer ){
+        var Graphs = function( opt , tips , domContainer , dataFrame ){
+            this.dataFrame = dataFrame;
             this.w = 0;
             this.h = 0;
            
@@ -46,18 +47,25 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
-            getBarFillStyle : function( i , ii , value){
-                var barFillStyle = null;
-                if( _.isArray( this.bar.fillStyle ) ){
-                    barFillStyle = this.bar.fillStyle[ii]
+            _getColor : function( c , i , ii , value){
+                var style = null;
+                if( _.isString( c ) ){
+                    style = c
                 }
-                if( _.isFunction( this.bar.fillStyle ) ){
-                    barFillStyle = this.bar.fillStyle( i , ii , value );
+                if( _.isArray( c ) ){
+                    style = c[ii]
                 }
-                if( !barFillStyle || barFillStyle=="" ){
-                    barFillStyle = this._colors[ii];
+                if( _.isFunction( c ) ){
+                    style = c( {
+                        iGroup : ii,
+                        iNode  : i,
+                        value  : value
+                    } );//i , ii , value );
                 }
-                return barFillStyle;
+                if( !style || style == "" ){
+                    style = this._colors[ii]
+                }
+                return style;
             },
             checkBarW : function( xDis ){
                 if( this.bar.width >= xDis ){
@@ -84,7 +92,7 @@ define(
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var barData = data[ii][i];
 
-                        var fillStyle = this.getBarFillStyle( i , ii , barData.value );
+                        var fillStyle = this._getColor( this.bar.fillStyle , i , ii , barData.value );
                         var barH      = parseInt(Math.abs(barData.y));
                         var radiusR   = Math.min( this.bar.width/2 , barH );
                         var rect = new Rect({
@@ -126,11 +134,11 @@ define(
                                 target.width  += 2;
 
                                 me.sprite.addChild(me._tip.sprite);
-                                me._tip.show( me._setTipInfoHandler(e , this.row , this.column ) );
+                                me._tip.show( me._setTipsInfoHandler(e , this.row , this.column ) );
 
                             }); 
                             hoverRect.on("mousemove" , function(e){
-                                me._tip.move( me._setTipInfoHandler(e , this.row , this.column ) );
+                                me._tip.move( me._setTipsInfoHandler(e , this.row , this.column ) );
                             }); 
                             hoverRect.on("mouseout" , function(e){
                                 var target    = this.target.context;
@@ -173,12 +181,23 @@ define(
                 };
                 growAnima();
             },
-            _setTipInfoHandler : function(e  , iNode ,iGroup){
+            _setXaxisYaxisToTipsInfo : function(e){
+                e.tipsInfo.xAxis = {
+                    field : this.dataFrame.xAxis.field,
+                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
+                }
+                var me = this;
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    node.field = me.dataFrame.yAxis.field[ i ];
+                } );
+            },
+            _setTipsInfoHandler : function(e  , iNode ,iGroup){
                 e.tipsInfo = {
                     iGroup        : iGroup,
                     iNode         : iNode,
                     nodesInfoList : this._getNodeInfo(iNode)
                 };
+                this._setXaxisYaxisToTipsInfo( e ); 
                 return e;
             },
             _getNodeInfo : function( iNode ){
@@ -186,7 +205,7 @@ define(
                 var me  = this;
                 _.each( this.data , function( group , i ){
                     var node = _.clone(group[iNode]);
-                    node.fillStyle = me.getBarFillStyle( iNode , i , node.value );
+                    node.fillStyle = me._getColor( me.bar.fillStyle , iNode , i , node.value );
                     arr.push(node);
                 } );
                 return arr;

@@ -12,10 +12,13 @@ define(
         var Tips = function( opt , data , tipDomContainer ){
             this.sprite      = null;
 
+
             this._triangle   = null;
             this._tip        = null;
+            this.prefix      = [];
 
-            this.mapScale       = 1;
+
+            this._mapScale       = 1;
 
             this.cPointStyle = "white";
 
@@ -34,19 +37,35 @@ define(
                 });
     
                 opt = _.deepExtend({
-                    prefix : data.field,
-                    content: "中国地图"
+                    //prefix  : data.field
+                    //content : "中国地图"
+                    //重置tips的默认内容函数
+                    _getDefaultContent : function( info ){
+                        var str  = "<table>";
+                        var self = this;
+                        str +=     "<tr><td colspan='2'>"+info.area.value+"</td></tr>"
+                        _.each( info.nodesInfoList , function( node , i ){
+                            str+= "<tr style='color:"+(node.color || node.fillStyle) +"'>";
+                            var prefixName = self.prefix[i];
+                            if( !prefixName ) {
+                                prefixName = node.field
+                            }
+                            str += "<td>"+ prefixName +"：</td>";
+                            str += "<td>"+ node.value +"</td></tr>";
+                        });
+                        str+="</table>";
+                        return str;
+                    }
                 } , opt);
                 this._tip      = new Tip( opt , tipDomContainer );
             },
-            show : function(e){
+            show : function(e , mapData){
                 this.sprite.addChild( this._tip.sprite );
                 this._tip.show(e);
                 this._weight(e);
                 this._tip.sprite.toFront();
                 this.sprite.toFront();
                 this._triangle.context.globalAlpha = 0.7;
-
             },
             move : function(e){
                 this._tip.move(e);
@@ -57,7 +76,7 @@ define(
                 this._triangle.context.globalAlpha = 0;
             },
             _weight : function(e){
-                var cPoint = [ e.target.mapData.cx*this.mapScale , e.target.mapData.cy*this.mapScale ];
+                var cPoint = [ e.target.mapData.cx*this._mapScale , e.target.mapData.cy*this._mapScale ];
                 this._cPoint = new Circle({
                     context : {
                         x : cPoint[0],
@@ -70,7 +89,7 @@ define(
 
 
                 var tipPosition = "left"
-                if( cPoint[0] < this.mapScale * 560 / 2 ){
+                if( cPoint[0] < this._mapScale * 560 / 2 ){
                     tipPosition = "right";
                 }
         

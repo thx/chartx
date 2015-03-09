@@ -7,16 +7,16 @@ define(
     ],
     function( Canvax , CanvaxBase ){
         var Chart = function(node , data , opts){
-            this.el            =  Chartx.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-            this.width         =  parseInt( Chartx.getStyle(this.el , "width" ) )  //图表区域宽
-            this.height        =  parseInt( Chartx.getStyle(this.el , "height") ) //图表区域高
+            this.el     =  Chartx.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+            this.width  =  parseInt( this.el.offsetWidth )  //图表区域宽
+            this.height =  parseInt( this.el.offsetHeight ) //图表区域高
 
     
             //Canvax实例
-            this.canvax        =  new Canvax({
+            this.canvax =  new Canvax({
                 el : this.el
             });
-            this.stage         =  new Canvax.Display.Stage({
+            this.stage  =  new Canvax.Display.Stage({
                 id : "main-chart-stage" + new Date().getTime()
             });
     
@@ -60,11 +60,11 @@ define(
              * 容器的尺寸改变重新绘制
              */
             resize : function(){
-                this.clear()
-                this.width   = parseInt( Chartx.getStyle(this.el , "width" ) )
-                this.height  = parseInt( Chartx.getStyle(this.el , "height") )
-                this.canvax.resize()
-                this.draw()
+                this.clear();
+                this.width   = parseInt( this.el.offsetWidth );
+                this.height  = parseInt( this.el.offsetHeight );
+                this.canvax.resize();
+                this.draw();
             },
             /**
              * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。

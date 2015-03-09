@@ -8,11 +8,10 @@ define(
         'chartx/utils/datasection',
         'chartx/utils/dataformat',
         'chartx/components/planet/Graphs',
-        // './tips',
-        './xaxis',
+        './tips',
         'chartx/utils/deep-extend',
     ],
-    function(Chart, Rect,Tools, GradientColor, DataSection, DataFormat, Graphs, XAxis){
+    function(Chart, Rect,Tools, GradientColor, DataSection, DataFormat, Graphs, Tips){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -30,6 +29,7 @@ define(
                 this.cx            = '';                    //圆心
                 this.cy            = ''
                 this.initCX        = 60                     //默认圆心
+                this.ringDis       = 10                     //环和环之间的距离     
 
                 this.dataFrame     = {                      //数据格式
                     org     :      [],                          //原始数据 经trimData之后
@@ -51,7 +51,6 @@ define(
                     }
                 }
                 this.graphs        = {
-                    disY        : 4,                                 //行星与容器上、下之间的最小距离
                     minR        : 1,
                     maxR        : 100,
                     layout      : {
@@ -76,21 +75,15 @@ define(
                         dNormals:  '#b28fce',                        //默认配色
                         normals :  '#b28fce',                        //自定义配色
                         overs   :  ['#ff0000','#ff9900','#ffff00','#009900','#00ff00','#0000ff','#660099']
-                    },
-                    text        :  {
-                        fillStyle: {
-                            normal : '#ff0000'
-                        }
                     }
                 },
                 this.back          = {
                     // enableds:  [],                               //哪些环显示,对应data长度[1,0,1,0](1 = 显示 | 0 不显示)
-                    ringDis     :  10,                             //环和环之间的距离
                     space       :  '',                             //在该距离内的环不予显示
                     fillStyle   :  {
                         first   :  '#e5dfec',
                         last    :  '#faf6ff',
-                        normals :  []
+                        normals :  [],
                     },
                     strokeStyle :  {
                         normals :  ['#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff']
@@ -99,7 +92,6 @@ define(
                 
                 this._bg           =  null;
                 this._back         =  null;
-                this._xAxis        =  null;
                 this._graphs       =  null;
                 this._tips         =  null;
 
@@ -147,7 +139,6 @@ define(
             _initModule:function(){
                 this._bg     = new Canvax.Display.Sprite();
                 this._back   = new Graphs(this.back, this);
-                this._xAxis  = new XAxis(this.xAxis.bar, this)
                 this._graphs = new Graphs(this.graphs, this);
                 // this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
             },
@@ -203,7 +194,7 @@ define(
                         r           : {normal:125 * (a + 1)},
                         fillStyle   : {normal:''},
                         lineWidth   : {normal:2},
-                        strokeStyle : {normal:self.back.strokeStyle.normals[xDataOrg[a] - 1]}
+                        strokeStyle : {normal:self.back.strokeStyle.normals[xDataOrg[a] - 1]},
                         // enabled     : self.back.enableds[xDataOrg[a] - 1]
                     }
                     if(backData[xDataOrg[a]].length < 1){
@@ -267,7 +258,7 @@ define(
                         y          : 100,
                         r          : {normal:r},
                         fillStyle  : {normal:self.graphs.fillStyle.normals[xDataOrg[a] - 1]},
-                        text       : {content:content, fillStyle:{normal:self.graphs.text.fillStyle.normal}}
+                        text       : {content:content}
                     }
                     graphsData[xDataOrg[a]].push(o)
 
@@ -303,8 +294,7 @@ define(
                 for(var a = 0, al = rdata.length; a < al; a++){
                     var r = 2 * rdata[a] > self.height ? self.height : rdata[a]
                     r = 2 * r < self.height ? 2 * r : r
-                    // console.log(r)
-                    var dis = r - maxRdata[a] * 2 - self.graphs.disY * 2
+                    var dis = r - maxRdata[a] * 2 - 2 * 2
                     maxYData.push(dis)
                 }
                 self.dataFrame.graphs.maxYData = maxYData       //完成每个环上最大高度集合
@@ -339,56 +329,85 @@ define(
                             tmpData[a].y = self.cy - (num - numAg)/ exAgMax * (maxYData[index] / 2)
                         }
                     }
-                    var tmpIndex = 0
-                    for(var a = 1, al = graphsData.length; a < al; a++){
-                        for(var b = 0, bl = graphsData[a].length; b < bl; b++){
-                            var o = graphsData[a][b]
-                            var index = a - 1
-                            var r = self.dataFrame.back.rdata[index]
-                            var y = tmpData[tmpIndex].y
-                            var h = y - self.cy
-                            o.x = self.cx + self._getDisForRH(r,h), o.y = y
-                            o.ringID = a, o.ID = (b + 1), o.orgData = self.dataFrame.orgData[a][b]
-                            o.fillStyle = {normal:self._getGraphsFillStyle(o)}
-                            // o.text = {content:numData[tmpIndex]}
-                            tmpIndex++
-                        }
-                    }
                 }else{                                               //上下错开排列
                                                                           //同一环中最多有几个行星
                     var max = Tools.getMaxChildArrLength(self.dataFrame.orgData) 
                                                                           //y轴分段
-                    var yAg = max * 2 + 5
-                    var yAgs=_.range(1, yAg + 1)
+                    var yAg = max * 2 + 3
+                    var yAgs=_.range(1,yAg + 1)
                     var yc  = parseInt(yAg / 2) + 1
-                    // var order = [yc + parseInt((yc - 1) * (yc - 1) / yc), yc, yc - parseInt((yc - 1) * (yc - 2) / yc), yc + parseInt((yc - 1) * (yc - 2) / yc), yc - parseInt((yc - 1) * (yc - 1) / yc)]
                     var order = [yc + parseInt(yc/2), yc, yc - parseInt(yc/2)]
-                    // console.log(order)
                     var orderlen = order.length
                     var groups = []
-                    var places = [[0]]
-                    // console.log('yAg :' + yAg)
-                    // console.log('yAgs :' + yAgs)
-                    for(var a = 1, al = graphsData.length; a < al; a++){
-                        for(var b = 0, bl = graphsData[a].length; b < bl; b++){
-                            var o = graphsData[a][b]
-                            var index = a - 1
-                            var prePlaces = _.flatten(places[a - 1]).concat(_.flatten(places[a]))
-                            var place = self._getPlace(prePlaces, yAgs, order[(index + 1) % orderlen], (b % 2 ? true : false))
-                            var scale = (place - 1) / (yAg -1)
-                            var y = self.cy - (maxYData[index] / 2) + scale * maxYData[index]
-                            var r = self.dataFrame.back.rdata[index]
-                            var h = y - self.cy
-                            o.x = self.cx + self._getDisForRH(r,h), o.y = y         //行星往环上靠
-                            o.ringID = a, o.ID = (b + 1), o.orgData = self.dataFrame.orgData[a][b]
-                            o.fillStyle = {normal:self._getGraphsFillStyle(o)}
+                    var places = []
+                        places[0] = [0]
+                    for(var a = 0, al = xDataOrg.length; a < al; a++){
+                        var index = xDataOrg[a] - 1
+                        var place = order[(index + 1) % orderlen]
+                        var scale = (place - 1) / (yAg -1)
+                        tmpData[a] = {}
+                        tmpData[a].y = self.cy - (maxYData[index] / 2) + scale * maxYData[index]
 
-                            // o.text = {content:place}
-                            !places[a] ? places[a] = [] : -1
-                            places[a].push(place)
+                        if(xDataOrg[a - 1] && index == xDataOrg[a - 1] - 1){
+                            // console.log(index + 1)
+                            !groups[index + 1] ? groups[index + 1] = [] : -1
+                            if(groups[index + 1].length == 0){
+                                groups[index + 1].push(tmpData[a - 1])
+                            }
+                            groups[index + 1].push(tmpData[a])
+
+                        }
+
+                        !places[index + 1] ? places[index + 1] = [] : -1
+                        places[index + 1].push(place)
+                    }
+                    var tmpIndex = -1
+                    for(var a = 0, al = places.length; a < al; a++){
+                        if(places[a].length > 1){
+                            places[a] = self._getPlace(self._without(yAgs, places[a-1]), places[a].length, 1)
+                            // console.log('-----------------------------')
+                            for(var b = 0, bl = places[a].length; b < bl; b++){
+                                var o = tmpData[tmpIndex]
+                                var scale = (places[a][b] - 1) / (yAg -1)
+                                o.y = self.cy - (maxYData[a - 1] / 2) + scale * maxYData[a - 1]
+                                // console.log(places[a][b], o.y)
+                                tmpIndex++
+                            }
+                        }else{
+                            tmpIndex++
                         }
                     }
-                    // console.log(places)
+                }
+                                                                //行星往环上靠
+                for(var a = 0, al = tmpData.length; a < al; a++){
+                    var o = tmpData[a]
+                    var index = xDataOrg[a] - 1
+                    var r = self.dataFrame.back.rdata[index]
+                    var h = o.y - self.cy
+                    o.x = self.cx + self._getDisForRH(r,h)
+                    // o.x = self.dataFrame.back.rdata[a]
+                }
+
+                var tmpIndex = 0
+                for(var a = 0, al = graphsData.length; a < al; a++){
+                    for(var b = 0, bl = graphsData[a].length; b < bl; b++){
+                        var o = graphsData[a][b]
+                        if(a > 0){
+                            // o.x = self.cx + self.dataFrame.back.rdata[a - 1]
+                            o.x = tmpData[tmpIndex].x
+                            o.y = tmpData[tmpIndex].y
+                            // o.text = {content:numData[tmpIndex]}  //测试
+                            tmpIndex++
+                        }
+                    }
+                }
+                                                           //行星颜色(不算core)
+                for(var a = 1, al = graphsData.length; a < al; a++){
+                    for(var b = 0, bl = graphsData[a].length; b < bl; b++){
+                        var o = graphsData[a][b]
+                        o.ringID = a, o.ID = (b + 1), o.orgData = self.dataFrame.orgData[a][b]
+                        o.fillStyle = {normal:self._getGraphsFillStyle(o)}
+                    }
                 }
             },
             _without:function($arr,$values){
@@ -398,36 +417,31 @@ define(
                 }
                 return arr
             },
-            _getPlace:function(prePlaces, curPlaces, place, b){
-                var self = this
-                // console.log('------------------------')
-                // console.log(prePlaces,b)
-                // console.log(curPlaces)
-                var n = ''
-                // console.log(prePlaces,':',curPlaces,':',place)
-                if(_.indexOf(prePlaces, place) == -1){
-                    n = place
-                }else{
-                    var curPlaces = self._without(curPlaces, prePlaces)
-                    // console.log('curPlaces ' + curPlaces)
-                    /*
-                    var dis = 0
-                    if(curPlaces.length % 2 == 0){
-                        var index = curPlaces.length / 2
-                    }else{
-                        var index = (curPlaces.length - 1) / 2
+            _getPlace:function($arr,$n,$place){
+                var arr = []
+                // $arr = [1,2,3,4,5]
+                if($place == 1){                           //从两端开始排序
+                    var index = 0
+                    var b = true
+                    for(var a = 0, al = $arr.length; a < al; a++){
+                        if(b){
+                            arr.push($arr[index])
+                            index++
+                        }else{
+                            arr.push($arr[$arr.length - index])
+                        }
+                        b = !b
                     }
-                    n = curPlaces[index - 1]
-                    */
-                    if(b){
-                        var index = 1
-                    }else{
-                        var index = curPlaces.length - 1
-                    }
-                    n = curPlaces[index - 1]
                 }
-                // console.log(n)
-                return n
+                // }//else if($place == 2){                     //从中间开始排序
+                //     var index = parseInt(arr.length / 2)
+                //     console.log('index ' + index)
+                // //}
+                // console.log(arr)
+
+                arr.length = $n
+                // console.log(arr)
+                return arr
             },
             _startDraw : function(){
                 var self = this;
@@ -445,10 +459,6 @@ define(
                     event: {enabled : 0}
                 }) 
 
-                self._xAxis.draw({
-                    width: self.width
-                })
-
                 self._graphs.draw({
                     data : self.dataFrame.graphs.data,
                     event: {enabled : self.event.enabled}
@@ -458,7 +468,6 @@ define(
             _drawEnd:function(){
                 this.stageBg.addChild(this._bg)
                 this.stageBg.addChild(this._back.sprite)
-                this.stageBg.addChild(this._xAxis.sprite), this._xAxis.gradient()
                 this.stageCore.addChild(this._graphs.sprite);
                 // this.stageTip.addChild(this._tips.sprite);
             },
@@ -481,7 +490,7 @@ define(
             _getPlanetMaxR:function(){                     //获取行星最大半径
                 var self = this
                 var r = 0
-                r = parseInt((self.dataFrame.back.ringAg - self.back.ringDis) / 2)
+                r = parseInt((self.dataFrame.back.ringAg - self.ringDis) / 2)
                 r = self.graphs.maxR < r ? self.graphs.maxR : r
                 return r
             },
