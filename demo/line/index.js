@@ -40,7 +40,8 @@ KISSY.ready(function(){
     var data1 = [
             [ "date"       , "uv1" , "uv3" , "uv2" ],
             [ "2014-12-24" , 100        ,  200         , 300 ],
-            [ "2014-12-25" , 200        ,  250         , 100 ],
+            [ "2014-12-25" , 0        ,  0         , 0 ],
+            [ "2014-12-25" , 0        ,  0         , 0 ],
             [ "2014-12-26" , 160        ,  260         , 180 ],
         ]
 
@@ -62,11 +63,12 @@ KISSY.ready(function(){
             //dataSection : [-100,0,100,200,500],
             textFormat : function( text ){
                 return text+"%"
-            }
-            //field : ["uv1","uv2","uv3"]
+            },
+            field : ["uv1"]
         },
         xAxis : {
-            enabled : false,
+            dataSection : ["星期一" , "星期二" ],
+            enabled : true,
             //field : "date"
         },
         graphs:{

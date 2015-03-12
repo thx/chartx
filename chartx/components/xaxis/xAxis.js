@@ -60,7 +60,9 @@ define(
                     _.deepExtend( this , opt );
                 }
     
-                this.dataSection = this._initDataSection( this.dataOrg );
+                if( this.dataSection == 0 ){
+                    this.dataSection = this._initDataSection( this.dataOrg );
+                }
     
                 this.sprite = new Canvax.Display.Sprite({
                     id : "xAxisSprite"
