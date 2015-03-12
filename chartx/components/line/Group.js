@@ -192,6 +192,7 @@ define(
                     for(var a = 0,al = self.data.length; a < al; a++){
                         var o = self.data[a]
                         self._nodeInd = a;
+                        debugger
                         var circle = new Circle({
                             id : "circle",
                             context : {
@@ -200,7 +201,7 @@ define(
                                 r           : self._getProp( self.node.r.normal ),
                                 fillStyle   : self._getProp( self.node.fillStyle.normal ) || "#ffffff",
                                 strokeStyle : self._getProp( self.node.strokeStyle.normal ) || self._getColor( self.line.strokeStyle.normal ),
-                                lineWidth   : self._getProp( self.node.lineWidth.normal )
+                                lineWidth   : self._getProp( self.node.lineWidth.normal ) || 2
                             }
                         });
 
