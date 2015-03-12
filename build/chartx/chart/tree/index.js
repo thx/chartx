@@ -367,9 +367,12 @@ define(
  
                     //给node添加事件侦听
                     rect.hover(function(e){
-                        me.fire("nodeMouseover",e);
+                        me.fire( "nodeMouseover" , e );
+                        //在fire的时候已经把 e 的type 修改为了nodeMouseover 所以要修正
+                        e.type = "mouseover";
                     },function(e){
-                        me.fire("nodeMouseout",e);
+                        me.fire( "nodeMouseout"  , e );
+                        e.type = "mouseout";
                     });
                     rect.on("click" , function(e){
                         me.fire("nodeClick" , e);
@@ -379,11 +382,8 @@ define(
                     if(_.isArray(addShapes)){
                         addShapes.push( node );
                     }
-
-                    
                 }
                 return addShapes;
-
             },
             //只创建一个link对应的Path，不设置具体的位置。
             _creatLinkLine : function( pId , cId ){

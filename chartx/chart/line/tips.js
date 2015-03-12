@@ -9,6 +9,9 @@ define(
     ],
     function( Canvax , Line , Circle , Tip ){
         var Tips = function(opt , data , tipDomContainer){
+            this.line      = {
+                enabled      : 1
+            }
             this.sprite    = null;
             this._line     = null;
             this._nodes    = null;
@@ -40,7 +43,7 @@ define(
         
             },
             move : function(e){
-                this._resetPosition(e);
+                this._resetStatus(e);
     
                 this._tip.move(e);
             },
@@ -53,10 +56,12 @@ define(
             _getTipsPoint : function(e){
                 return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
             },
-            _resetPosition : function(e){
+            _resetStatus : function(e){
                 var tipsPoint = this._getTipsPoint(e);
-                this._line.context.x  = tipsPoint.x;
-                this._resetNodesPosition(e , tipsPoint);
+                if(this._line){
+                    this._line.context.x  = tipsPoint.x;
+                }
+                this._resetNodesStatus(e , tipsPoint);
             },
     
             /**
@@ -74,11 +79,13 @@ define(
                     lineWidth   : 1,
                     strokeStyle : "#333333" 
                 } , this.line);
-                this._line = new Line({
-                    id : "tipsLine",
-                    context : lineOpt
-                });
-                this.sprite.addChild( this._line );
+                if(this.line.enabled){
+                    this._line = new Line({
+                        id : "tipsLine",
+                        context : lineOpt
+                    });
+                    this.sprite.addChild( this._line );
+                }
             },
     
     
@@ -108,11 +115,16 @@ define(
                 } );
                 this.sprite.addChild( this._nodes );
             },
-            _resetNodesPosition : function(e , tipsPoint){
+            _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
                 this._nodes.context.x = tipsPoint.x;
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    self._nodes.getChildAt(i).context.y = e.target.context.height - Math.abs(node.y);
+                    var circle = self._nodes.getChildAt(i)
+                    circle.context.y           = e.target.context.height - Math.abs(node.y);
+                    circle.context.r           = node.r
+                    circle.context.fillStyle   = node.fillStyle
+                    circle.context.strokeStyle = node.strokeStyle
+                    circle.context.lineWidth   = node.lineWidth
                 });
             }
         }

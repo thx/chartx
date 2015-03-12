@@ -22,9 +22,9 @@ define(
                     height  : 3,
                     strokeStyle   : '#BEBEBE'
             }
-    
+     
             this.text = {
-                    fillStyle : 'blank',
+                    fillStyle : '#000000',
                     //fontSize  : 13//
                     fontSize  : 12
             }
@@ -45,7 +45,12 @@ define(
             this.disYAxisTopLine =  6;                       //y轴顶端预留的最小值
             this.yMaxHeight      =  0;                       //y轴最大高
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
-    
+
+            //最终显示到y轴上面的文本的格式化扩展
+            //比如用户的数据是80 但是 对应的显示要求确是80%
+            //后面的%符号就需要用额外的contentFormat来扩展
+            this.textFormat   =  null;   
+
             this.init(opt , data);
         };
     
@@ -75,9 +80,9 @@ define(
                 var max = this.dataSection[ this.dataSection.length - 1 ];
                 var tmpData = []
                 for (var a = 0, al = this.dataSection.length; a < al; a++ ) {
-                    var y = - (this.dataSection[a] - this._baseNumber) / (max - this._baseNumber) * this.yGraphsHeight
-                    y = isNaN(y) ? 0 : parseInt(y)                                                    
-                    tmpData[a] = { 'content':this.dataSection[a], 'y': y }
+                    var y = - (this.dataSection[a] - this._baseNumber) / (max - this._baseNumber) * this.yGraphsHeight;
+                    y = isNaN(y) ? 0 : parseInt(y);                                                    
+                    tmpData[a] = { 'content':this.dataSection[a], 'y': y };
                 }
                 this.data = tmpData
             },
@@ -92,16 +97,17 @@ define(
             _initData  : function( data ){ 
                 var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
                 this.dataOrg     = data.org;
+                
                 if( this.dataSection.length == 0 ){
-                    this.dataSection = DataSection.section(arr);
+                    this.dataSection = DataSection.section( arr , 3 );
                 }
+
                 this._baseNumber = this.dataSection[0];
+
                 if(arr.length == 1){
                     this.dataSection[0] = arr[0] * 2;
                     this._baseNumber    = 0;
                 }
-    
-    
             },
             _widget:function(){
                 var self  = this;
@@ -127,11 +133,17 @@ define(
     
                 var maxW = 0;
                 for(var a = 0, al = arr.length; a < al; a++){
-                    var o = arr[a]
-                    var x = 0, y = o.y
-                    var content = Tools.numAddSymbol(o.content)
+                    var o = arr[a];
+                    var x = 0, y = o.y;
+                    
+                    var content = Tools.numAddSymbol( o.content );
+
+                    if( _.isFunction(self.textFormat) ){
+                        content = self.textFormat( content );
+                    }
+
                     //文字
-                    var txt = new Canvax.Display.Text(content,
+                    var txt = new Canvax.Display.Text( content ,
                        {
                         context : {
                             x  : x,

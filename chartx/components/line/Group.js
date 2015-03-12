@@ -13,6 +13,7 @@ define(
         window.Canvax = Canvax
         var Group = function( a , opt , ctx){
             this._groupInd = a;
+            this._nodeInd  = -1;
             this.ctx       = ctx;
             this.w         = 0;   
             this.h         = 0; 
@@ -23,7 +24,7 @@ define(
             this.line      = {                     //线
                 strokeStyle : {
                     normal  : this.colors[ this._groupInd ],
-                    over    : this.colors[ this._groupInd ]
+                    over    : null//this.colors[ this._groupInd ]
                 },
                 smooth      : true
             }
@@ -42,8 +43,8 @@ define(
                     over    : '#ffffff'
                 },
                 strokeStyle :{//轮廓颜色
-                    normal  : this.line.strokeStyle.normal,
-                    over    : this.line.strokeStyle.over
+                    normal  : null,//this.line.strokeStyle.normal,
+                    over    : null //this.line.strokeStyle.over
                 },
                 lineWidth   : {//轮廓粗细
                     normal  : 2, //[2,2,2,2,2,2,2],
@@ -53,21 +54,32 @@ define(
     
             this.fill    = {                     //填充
                 fillStyle : {
-                    normal  : this.line.strokeStyle.normal,
-                    over    : this.line.strokeStyle.over
+                    normal  : null, //this.line.strokeStyle.normal,
+                    over    : null  //this.line.strokeStyle.over
                 },
                 alpha       : 0.1
             }
     
             this.data       = [];                          //[{x:0,y:-100},{}]
             this.sprite     = null;                        
-    
+           
             this.init( opt )
         };
     
         Group.prototype = {
             init:function(opt){
                 _.deepExtend( this , opt );
+
+                if( !this.line.strokeStyle.over ){
+                    this.line.strokeStyle.over = this.line.strokeStyle.normal;
+                }
+
+                //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
+                !this.node.strokeStyle.normal && ( this.node.strokeStyle.normal = this.line.strokeStyle.normal );
+                !this.node.strokeStyle.over   && ( this.node.strokeStyle.over   = this.line.strokeStyle.over   );
+                !this.fill.fillStyle.normal   && ( this.fill.fillStyle.normal   = this.line.strokeStyle.normal );
+                !this.fill.fillStyle.over     && ( this.fill.fillStyle.over     = this.line.strokeStyle.over   );
+      
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX:function($n){
@@ -96,7 +108,8 @@ define(
                 }
                 if( _.isFunction( s ) ){
                     return s( {
-                        iGroup : this._groupInd
+                        iGroup : this._groupInd,
+                        iNode  : this._nodeInd
                     } );
                 }
                 return s
@@ -104,6 +117,7 @@ define(
             //这个是tips需要用到的 
             getNodeInfoAt:function($index){
                 var self = this;
+                self._nodeInd = $index
                 var o = _.clone(self.data[$index])
                 if( o ){
                     o.r           = self._getProp(self.node.r.over);
@@ -112,6 +126,8 @@ define(
                     o.color       = self._getColor(self.node.strokeStyle.over); //这个给tips里面的文本用
                     o.lineWidth   = self._getProp(self.node.lineWidth.over);
                     o.alpha       = self._getProp(self.fill.alpha);
+                    // o.fillStyle = '#cc3300'
+                    // console.log(o.fillStyle)
                     return o
                 } else {
                     return null
@@ -166,6 +182,7 @@ define(
                 if(self.node.enabled){                     //拐角的圆点
                     for(var a = 0,al = self.data.length; a < al; a++){
                         var o = self.data[a]
+                        self._nodeInd = a
                         var circle = new Circle({
                             id : "circle",
                             context : {
@@ -195,6 +212,7 @@ define(
                             self.sprite.addChild(circle);
                         }
                     }
+                    self._nodeInd = -1
                 }
             },
             _fillLine:function( bline ){                        //填充直线

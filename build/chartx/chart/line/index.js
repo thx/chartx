@@ -86,15 +86,6 @@ define(
                 var _yAxisW = this._yAxis.w
                 x = _yAxisW     
                 
-                /* @因为y的是否显示已经在components/yaxis中有统一处理了。用display来做开关
-                if(this.yAxis.enabled != 0){
-                    _yAxisW = this._yAxis.w
-                    x = _yAxisW 
-                }else{
-                    this._yAxis.sprite.context.visible = false
-                }
-                */
-
                 //绘制x轴
                 this._xAxis.draw({
                     w    :   this.width - _yAxisW ,

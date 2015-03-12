@@ -46,16 +46,33 @@ KISSY.ready(function(){
 
     var options = {
 
+        back  : {
+             xOrigin:{
+                enabled : 0
+            },
+            yOrigin:{
+                enabled : 0
+            },
+            xAxis  :{
+                enabled : 0
+            }
+        },
         yAxis : {
-            field : ["uv1","uv2","uv3"]
+            //enabled : false,
+            //dataSection : [-100,0,100,200,500],
+            textFormat : function( text ){
+                return text+"%"
+            }
+            //field : ["uv1","uv2","uv3"]
         },
         xAxis : {
-            field : "date"
+            enabled : false,
+            //field : "date"
         },
         graphs:{
                 line:{
                     strokeStyle : {
-                        //normal : ["yellow" , "#c77029" , "#f15f60" ]
+                        normal : ["#c77029" , "#f15f60" ]
                     }
                 }
         }
