@@ -132,13 +132,11 @@ KISSY.ready(function(){
                         if(o.iNode == anchorXIndex){
                             return '#cc3300'
                         }
-                        return '#ffffff'
                     },
                     over:function(o){
                         if(o.iNode == anchorXIndex){
                             return '#cc3300'
                         }
-                        return '#ffffff'
                     }
                 },
                 strokeStyle:{
@@ -146,13 +144,11 @@ KISSY.ready(function(){
                         if(o.iNode == anchorXIndex){
                             return '#cc3300'
                         }
-                        return '#1054a3'
                     },
                     over:function(o){
                         if(o.iNode == anchorXIndex){
                             return '#cc3300'
                         }
-                        return '#1054a3'
                     }
                 },
                 lineWidth:{
@@ -160,7 +156,6 @@ KISSY.ready(function(){
                         if(o.iNode == anchorXIndex){
                             return 4
                         }
-                        return 2
                     }
                 }
             }
