@@ -73,7 +73,7 @@ define(
                 max += length * 0.05;
             }
             
-            var tickInterval = (max - min) * 72 / 365;
+            var tickInterval = (max - min) * 0.3;//72 / 365;
             var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
     
             tickInterval = normalizeTickInterval(tickInterval, magnitude);

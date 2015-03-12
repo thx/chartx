@@ -75,8 +75,10 @@ KISSY.ready(function(){
                 line:{
                     strokeStyle : {
                         normal : ["#c77029" , "#f15f60" ]
-                    }
-                }
+                    },
+                    smooth:false
+                },
+                smooth:false
         }
     }
     // KISSY.config({
