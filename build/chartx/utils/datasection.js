@@ -37,7 +37,8 @@ define(
          * Set the tick positions of a linear axis to round values like whole tens or every five.
          */
     
-        function getLinearTickPositions(arr) {
+        function getLinearTickPositions(arr,$maxPart,$cfg) {
+            
         	var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) :1
         	//返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
         	var isInt = $cfg && $cfg.isInt ? 1 : 0 
