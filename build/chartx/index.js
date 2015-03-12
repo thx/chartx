@@ -17,7 +17,10 @@ var Chartx = {
 
         
         //如果是在cdn环境的话还是用自己配置的version
-        Chartx.path   = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
+        Chartx.path     = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
+        if( Chartx.site.daily || Chartx.site.local ){
+            Chartx.path = "http://g.assets.daily.taobao.net/thx/charts/"+ chartxVersion +"/";
+        }
 
         
 
