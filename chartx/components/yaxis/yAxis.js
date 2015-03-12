@@ -24,7 +24,7 @@ define(
             }
      
             this.text = {
-                    fillStyle : 'blank',
+                    fillStyle : '#000000',
                     //fontSize  : 13//
                     fontSize  : 12
             }
