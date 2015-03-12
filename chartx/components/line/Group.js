@@ -192,7 +192,6 @@ define(
                     for(var a = 0,al = self.data.length; a < al; a++){
                         var o = self.data[a]
                         self._nodeInd = a;
-                        debugger
                         var circle = new Circle({
                             id : "circle",
                             context : {

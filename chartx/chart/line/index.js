@@ -120,9 +120,10 @@ define(
                         y : y
                     }
                 });
-                if(this.anchor.enabled){
+            
+                if(this._anchor.enabled){
                     //绘制点位线
-                    var pos = this._getPosAtGraphs(this.anchor.xIndex, this.anchor.num)
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
                     // console.log(x,y)
                     // console.log(pos.x, pos.y)
                     this._anchor.draw({
