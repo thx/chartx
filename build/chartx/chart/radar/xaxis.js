@@ -2,8 +2,7 @@ define(
     "chartx/chart/radar/xaxis",
     [
         "canvax/index",
-        "canvax/shape/Isogon",
-        "chartx/utils/deep-extend"
+        "canvax/shape/Isogon"
     ],
     function( Canvax , Isogon ){
         var xAxis = function( opt , data ){

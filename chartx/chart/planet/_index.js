@@ -8,8 +8,7 @@ define(
         'chartx/utils/datasection',
         'chartx/utils/dataformat',
         'chartx/components/planet/Graphs',
-        './tips',
-        'chartx/utils/deep-extend',
+        './tips'
     ],
     function(Chart, Rect,Tools, GradientColor, DataSection, DataFormat, Graphs, Tips){
         /*

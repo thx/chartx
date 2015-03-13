@@ -4,8 +4,7 @@ define(
         "canvax/index",
         "canvax/shape/Isogon",
         "canvax/shape/Circle",
-        "canvax/shape/Line",
-        "chartx/utils/deep-extend"
+        "canvax/shape/Line"
     ],
     function( Canvax , Isogon , Circle , Line ){
         var Back = function( opt ){

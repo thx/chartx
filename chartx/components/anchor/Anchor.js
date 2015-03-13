@@ -2,8 +2,7 @@ define(
     "chartx/components/anchor/Anchor" , 
     [
         "canvax/index",
-        "canvax/shape/Line",
-        "chartx/utils/deep-extend"
+        "canvax/shape/Line"
     ],
     function(Canvax, Line){
         var Anchor = function(opt , data){

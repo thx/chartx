@@ -4,8 +4,7 @@ define(
         "canvax/index",
         "canvax/shape/Line",
         "canvax/shape/Circle",
-        "chartx/components/tips/tip",
-        "chartx/utils/deep-extend"
+        "chartx/components/tips/tip"
     ],
     function( Canvax , Line , Circle , Tip ){
         var Tips = function(opt , data , tipDomContainer){

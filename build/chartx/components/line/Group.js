@@ -6,8 +6,7 @@ define(
         "canvax/shape/Circle",
         "canvax/shape/Path",
         "chartx/utils/tools",
-        "chartx/utils/colorformat",
-        "chartx/utils/deep-extend"
+        "chartx/utils/colorformat"
     ],
     function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat ){
         window.Canvax = Canvax

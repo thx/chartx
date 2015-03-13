@@ -3,8 +3,7 @@ define(
     [
         "canvax/index",
         "canvax/shape/Line",
-        "chartx/utils/tools",
-        "chartx/utils/deep-extend"
+        "chartx/utils/tools"
     ],
     function(Canvax, Line , Tools){
         var xAxis = function(opt , data){

@@ -9,8 +9,7 @@ define(
         'chartx/utils/dataformat',
         'chartx/components/planet/Graphs',
         // './tips',
-        './xaxis',
-        'chartx/utils/deep-extend',
+        './xaxis'
     ],
     function(Chart, Rect,Tools, GradientColor, DataSection, DataFormat, Graphs, XAxis){
         /*

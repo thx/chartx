@@ -10,8 +10,7 @@ define(
         'chartx/components/anchor/Anchor',
         'chartx/components/line/Graphs',
         './tips',
-        'chartx/utils/dataformat',
-        'chartx/utils/deep-extend'
+        'chartx/utils/dataformat'
     ],
     function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips , dataFormat){
         /*

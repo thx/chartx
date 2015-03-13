@@ -8,8 +8,7 @@
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip",
-        "chartx/utils/deep-extend"
+        "chartx/components/tips/tip"
         ],
         function (Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween , Tip) {
             var Pie = function (opt, tipsOpt , domContainer) {

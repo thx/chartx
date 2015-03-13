@@ -9,8 +9,7 @@ define(
         "canvax/shape/Circle",
         "canvax/shape/Line",
         "canvax/shape/Rect",
-        "canvax/animation/Tween",
-        "chartx/utils/deep-extend"
+        "canvax/animation/Tween"
     ],
     function( Chart , Sector , Circle , Line , Rect , Tween ){
         var Canvax  = Chart.Canvax;
