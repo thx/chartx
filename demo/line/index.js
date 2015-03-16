@@ -166,6 +166,7 @@ KISSY.ready(function(){
             },
             content : function(info){
                 var str  = "<table>";
+                
                 // var color =  (node.color || node.fillStyle)
                 var color = info.iNode >= anchorXIndex ? '#cc3300' : '#26b471'
                 str += '<tr style="color:' + color +'"><td>' + '出价：' + data1[info.iNode + 1][0] + '元' + '</td></tr>'

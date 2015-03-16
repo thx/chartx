@@ -24,7 +24,7 @@ define(
                 this.event         = {
                     enabled   : 0,
                     This      : this,
-                    on        : this._click
+                    on        : this._click || function(){}
                 }
     
                 this._xAxis        =  null;
@@ -229,7 +229,7 @@ define(
             },
             _click:function(o){
                 var self = this.This                            //this = this.event
-                this.on(o)
+                self.on(o)
             },
         });
     
