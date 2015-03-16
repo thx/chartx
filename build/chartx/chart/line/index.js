@@ -24,7 +24,7 @@ define(
                 this.event         = {
                     enabled   : 0,
                     This      : this,
-                    on        : this._click || function(){}
+                    on        : null
                 }
     
                 this._xAxis        =  null;
@@ -34,7 +34,6 @@ define(
                 this._graphs       =  null;
                 this._tips         =  null;
 
-                
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
             },
@@ -229,8 +228,10 @@ define(
             },
             _click:function(o){
                 var self = this.This                            //this = this.event
-                self.on(o)
-            },
+                if(_.isFunction(self.on)){
+                    self.on(o)
+                }
+            }
         });
     
     } 
