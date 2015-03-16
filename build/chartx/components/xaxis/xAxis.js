@@ -3,8 +3,7 @@ define(
     [
         "canvax/index",
         "canvax/shape/Line",
-        "chartx/utils/tools",
-        "chartx/utils/deep-extend"
+        "chartx/utils/tools"
     ],
     function(Canvax, Line , Tools){
         var xAxis = function(opt , data){
@@ -30,6 +29,7 @@ define(
     
             this.text = {
                     mode      : 1,                         //模式(1 = 文字有几个线有几条 | 2 = 线不做过滤)
+                    dis       : 0,                         //间隔(间隔几个文本展现)
                     fillStyle : '#999999',
                     fontSize  : 13
             }
@@ -55,13 +55,15 @@ define(
         xAxis.prototype = {
             init:function( opt , data ){
                 this.dataOrg = data.org;
-    
+                
                 if( opt ){
                     _.deepExtend( this , opt );
                 }
     
-                this.dataSection = this._initDataSection( this.dataOrg );
-    
+                if(this.dataSection.length == 0){
+                    this.dataSection = this._initDataSection( this.dataOrg );
+                }
+
                 this.sprite = new Canvax.Display.Sprite({
                     id : "xAxisSprite"
                 });
@@ -87,7 +89,7 @@ define(
                 this._initConfig( opt );
     
                 this.data = this._trimXAxis( this.dataSection , this.xGraphsWidth );
-    
+              
                 this._trimLayoutData();
     
                 this.setX( this.pos.x + this.disOriginX );
@@ -97,6 +99,7 @@ define(
                     this._widget();
                     this._layout();
                 } 
+                // this.data = this.layoutData
             },
     
             //初始化配置
@@ -107,7 +110,7 @@ define(
                 this.max.right = this.w;
                 this.xGraphsWidth = this.w - this._getXAxisDisLine()
                 this.disOriginX   = parseInt((this.w - this.xGraphsWidth) / 2);
-    
+
                 this.max.left  += this.disOriginX;
                 this.max.right -= this.disOriginX;
             },
@@ -152,11 +155,11 @@ define(
     
               	this.txtSp  = new Canvax.Display.Sprite(),  this.sprite.addChild(this.txtSp)
              	this.lineSp = new Canvax.Display.Sprite(),  this.sprite.addChild(this.lineSp)
-    
               	for(var a = 0, al = arr.length; a < al; a++){
     
                   	var o = arr[a]
                   	var x = o.x, y = this.disY + this.line.height + this.dis
+
                   	var content = Tools.numAddSymbol(o.content)
                   	//文字
                   	var txt = new Canvax.Display.Text(content,
@@ -209,7 +212,6 @@ define(
     			}
             },
             _trimLayoutData:function(){
-                
                 var tmp = []
                 var arr = this.data
                 var textMaxWidth = 0
@@ -228,10 +230,13 @@ define(
                     textMaxWidth = Math.max(textMaxWidth, txt.getTextWidth())           //获取文字最大宽
                 }
                 var maxWidth =  this.max.right                                          //总共能多少像素展现
-                var n = Math.min( Math.floor( maxWidth / textMaxWidth ) , arr.length ); //能展现几个
+                // console.log(Math.floor( maxWidth / (textMaxWidth + 30) ), arr.length)
+                var n = Math.min( Math.floor( maxWidth / textMaxWidth) , arr.length ); //能展现几个
                 var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                            //array中展现间隔
-    
-    
+                if(this.text.dis){
+                    dis = this.text.dis
+                }
+
                 //存放展现的数据
                 for( var a = 0 ; a < n ; a++ ){
                     var obj = arr[a + dis*a];

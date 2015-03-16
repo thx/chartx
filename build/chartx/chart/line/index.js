@@ -7,12 +7,12 @@ define(
         './xaxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
+        'chartx/components/anchor/Anchor',
         'chartx/components/line/Graphs',
         './tips',
-        'chartx/utils/dataformat',
-        'chartx/utils/deep-extend'
+        'chartx/utils/dataformat'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tips , dataFormat){
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips , dataFormat){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -21,9 +21,15 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
+                this.event         = {
+                    enabled   : 0,
+                    This      : this,
+                    on        : this._click || function(){}
+                }
     
                 this._xAxis        =  null;
                 this._yAxis        =  null;
+                this._anchor       =  null;
                 this._back         =  null;
                 this._graphs       =  null;
                 this._tips         =  null;
@@ -64,7 +70,8 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
-                this._graphs = new Graphs( this.graphs , this.stage.context2D );
+                this._anchor = new Anchor(this.anchor)
+                this._graphs = new Graphs( this.graphs, this);
                 this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
             },
             _startDraw : function(){
@@ -85,7 +92,6 @@ define(
 
                 var _yAxisW = this._yAxis.w
                 x = _yAxisW     
-                
                 //绘制x轴
                 this._xAxis.draw({
                     w    :   this.width - _yAxisW ,
@@ -105,20 +111,37 @@ define(
                         data : this._yAxis.data
                     },
                     yAxis:{
-                        data : this._xAxis.data
+                        data : this._xAxis.layoutData
                     },
                     pos  : {
                         x : x + this._xAxis.disOriginX,
                         y : y
                     }
                 });
-                
+            
+                if(this._anchor.enabled){
+                    //绘制点位线
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
+                    // console.log(x,y)
+                    // console.log(pos.x, pos.y)
+                    this._anchor.draw({
+                        w    : this.width,
+                        h    : y,
+                        pos  : {
+                            x : pos.x,
+                            y : y + pos.y
+                        }
+                    });
+                    this._anchor.setX(x + this._xAxis.disOriginX)//, this._anchor.setY(y)
+                }
+
                 this._graphs.draw({
                     w    : this._xAxis.xGraphsWidth,
                     h    : this._yAxis.yGraphsHeight,
                     data : this._trimGraphs(),
                     disX : this._getGraphsDisX(),
-                    smooth : this.smooth
+                    smooth : this.smooth,
+                    event: {enabled : this.event.enabled}
                 });
                 this._graphs.setX( x + this._xAxis.disOriginX ), this._graphs.setY(y)
     
@@ -155,25 +178,34 @@ define(
                 } );
             },
             _trimGraphs:function(){
+                //debugger 
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var maxXAxis = this.dataFrame.xAxis.org[0].length;
+                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
                         !tmpData[a] ? tmpData[a] = [] : ''
-                        var x = b / (maxXAxis - 1) * this._xAxis.xGraphsWidth
-                        if(maxXAxis == 1 && arr[a].length == 1) {                      //每条线上只有一个点 那么x需要居中
+                        var x = b / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
+                        if(maxXAxisLen == 1 && arr[a].length == 1) {                      //每条线上只有一个点 那么x需要居中
                             x = this._xAxis.xGraphsWidth / 2
                         }
 
                         var y = - (arr[a][b] - this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight
                         y = isNaN(y) ? 0 : y
                         tmpData[a][b] = {'value':arr[a][b], 'x':x,'y':y}
+                        // console.log(arr[a][b], x, y)
                     }
                 }
-                
                 return tmpData
+            },
+            //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
+            _getPosAtGraphs:function(index,num){
+                var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
+                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
+                var x = index / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
+                var y = -(num - this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight
+                return {x:x, y:y}
             },
             //每两个点之间的距离
             _getGraphsDisX:function(){
@@ -186,6 +218,7 @@ define(
     
             _drawEnd:function(){
                 this.stageBg.addChild(this._back.sprite)
+                this.stageBg.addChild(this._anchor.sprite)
     
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._graphs.sprite);
@@ -193,7 +226,11 @@ define(
                 
                 this.stageTip.addChild(this._tips.sprite);
     
-            }
+            },
+            _click:function(o){
+                var self = this.This                            //this = this.event
+                self.on(o)
+            },
         });
     
     } 

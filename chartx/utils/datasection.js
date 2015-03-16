@@ -37,7 +37,8 @@ define(
          * Set the tick positions of a linear axis to round values like whole tens or every five.
          */
     
-        function getLinearTickPositions(arr) {
+        function getLinearTickPositions(arr,$maxPart,$cfg) {
+            
         	var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) :1
         	//返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
         	var isInt = $cfg && $cfg.isInt ? 1 : 0 
@@ -53,14 +54,18 @@ define(
             var min = Math.min.apply(null,arr) 
     
             if(min==max){
-            	if(max>=0){
-            		min= 0
+            	if(max > 0){
+            		min = 0
             		// min= Math.round(max/2);
-            	}
-            	else{
-            		min=max*2;
-            	}
+            	} else if(max < 0){
+            		min = max*2;
+            	} else {
+                    max = 1;
+                    return [0]
+                }
             }
+
+            
     
             var length = max - min;
             if (length) {
@@ -73,7 +78,7 @@ define(
                 max += length * 0.05;
             }
             
-            var tickInterval = (max - min) * 72 / 365;
+            var tickInterval = (max - min) * 0.3;//72 / 365;
             var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
     
             tickInterval = normalizeTickInterval(tickInterval, magnitude);

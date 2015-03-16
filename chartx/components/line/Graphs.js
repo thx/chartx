@@ -5,8 +5,7 @@ define(
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "canvax/animation/Tween",
-        "chartx/components/line/Group",
-        "chartx/utils/deep-extend"
+        "chartx/components/line/Group"
     ],
     function( Canvax , Rect, Tools, Tween , Group ){
         var Graphs = function(opt,root){
@@ -59,9 +58,8 @@ define(
             },
     
             draw:function(opt){
-                var self  = this;
                 _.deepExtend( this , opt );
-                self._widget()
+                this._widget()
             },
             /**
              * 生长动画

@@ -24,7 +24,7 @@ define(
             }
      
             this.text = {
-                    fillStyle : 'blank',
+                    fillStyle : '#000000',
                     //fontSize  : 13//
                     fontSize  : 12
             }
@@ -101,6 +101,8 @@ define(
                 if( this.dataSection.length == 0 ){
                     this.dataSection = DataSection.section( arr , 3 );
                 }
+
+                
 
                 this._baseNumber = this.dataSection[0];
 

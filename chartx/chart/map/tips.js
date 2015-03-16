@@ -5,8 +5,7 @@ define(
         "canvax/shape/Circle",
         "chartx/components/tips/tip",
         "canvax/shape/Polygon",
-        "canvax/animation/Tween",
-        "chartx/utils/deep-extend"
+        "canvax/animation/Tween"
     ],
     function( Canvax , Circle , Tip , Polygon , Tween ){
         var Tips = function( opt , data , tipDomContainer ){

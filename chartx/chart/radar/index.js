@@ -8,8 +8,7 @@ define(
         './back',
         './graphs',
         'canvax/geom/HitTestPoint',
-        'chartx/utils/dataformat',
-        'chartx/utils/deep-extend'
+        'chartx/utils/dataformat'
     ],
     function( Chart , Tools ,  xAxis, yAxis, Back, Graphs , HitTestPoint ,dataFormat){
         /*

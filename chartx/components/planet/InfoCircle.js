@@ -3,8 +3,7 @@ define(
     [
         "canvax/index",
         "canvax/shape/Circle",
-        "canvax/shape/Rect",
-        "chartx/utils/deep-extend"
+        "canvax/shape/Rect"
     ],
     function(Canvax, Circle, Rect){
         var InfoCircle = function(opt, root, fire){

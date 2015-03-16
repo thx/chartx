@@ -6,8 +6,7 @@ define(
         "canvax/shape/Circle",
         "canvax/shape/Path",
         "chartx/utils/tools",
-        "chartx/utils/colorformat",
-        "chartx/utils/deep-extend"
+        "chartx/utils/colorformat"
     ],
     function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat ){
         window.Canvax = Canvax
@@ -57,6 +56,7 @@ define(
                     normal  : null, //this.line.strokeStyle.normal,
                     over    : null  //this.line.strokeStyle.over
                 },
+                gradient    : true,
                 alpha       : 0.1
             }
     
@@ -82,17 +82,9 @@ define(
       
                 this.sprite = new Canvax.Display.Sprite();
             },
-            setX:function($n){
-                this.sprite.context.x = $n
-            },
-            setY:function($n){
-                this.sprite.context.y = $n
-            },
-    
             draw:function(opt){
-                var self  = this;
                 _.deepExtend( this , opt );
-                self._widget()
+                this._widget()
             },
             //styleType , normals , groupInd
             _getColor : function( s ){
@@ -121,10 +113,10 @@ define(
                 var o = _.clone(self.data[$index])
                 if( o ){
                     o.r           = self._getProp(self.node.r.over);
-                    o.fillStyle   = self._getColor(self.node.fillStyle.over);
-                    o.strokeStyle = self._getColor(self.node.strokeStyle.over);
-                    o.color       = self._getColor(self.node.strokeStyle.over); //这个给tips里面的文本用
-                    o.lineWidth   = self._getProp(self.node.lineWidth.over);
+                    o.fillStyle   = self._getProp(self.node.fillStyle.over) || "#ffffff";
+                    o.strokeStyle = self._getProp(self.node.strokeStyle.over) || self._getColor( self.line.strokeStyle.over );
+                    o.color       = self._getProp(self.node.strokeStyle.over) || self._getColor( self.line.strokeStyle.over ); //这个给tips里面的文本用
+                    o.lineWidth   = self._getProp(self.node.lineWidth.over) || 2; 
                     o.alpha       = self._getProp(self.fill.alpha);
                     // o.fillStyle = '#cc3300'
                     // console.log(o.fillStyle)
@@ -135,7 +127,7 @@ define(
             },
             _widget:function(){
                 var self  = this;
-    
+   
                 var list = []
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var o = self.data[a]
@@ -160,24 +152,26 @@ define(
                 self.sprite.addChild( bline );
                 
 
-                //从bline中找到最高的点
+                var fill_gradient = null;
+                if( self.fill.gradient ){
+                    //从bline中找到最高的点
+                    var topP = _.min( bline.context.pointList , function(p){return p[1]} );
+                    //创建一个线性渐变
+                    fill_gradient  =  self.ctx.createLinearGradient(topP[0],topP[1],topP[0],0);
 
-                var topP = _.min( bline.context.pointList , function(p){return p[1]} );
-                //创建一个线性渐变
-                var fill_gradient  =  self.ctx.createLinearGradient(topP[0],topP[1],topP[0],0);
+                    var rgb  = ColorFormat.colorRgb( self._getColor( self.fill.fillStyle.normal ) );
+                    var rgba0 = rgb.replace(')', ', '+ self._getProp( self.fill.alpha ) +')').replace('RGB', 'RGBA');
+                    fill_gradient.addColorStop( 0 , rgba0 );
 
-                var rgb  = ColorFormat.colorRgb( self._getColor( self.fill.fillStyle.normal ) );
-                var rgba0 = rgb.replace(')', ', '+ self._getProp( self.fill.alpha ) +')').replace('RGB', 'RGBA');
-                fill_gradient.addColorStop( 0 , rgba0 );
-
-                var rgba1 = rgb.replace(')', ', 0)').replace('RGB', 'RGBA');
-                fill_gradient.addColorStop( 1 , rgba1 );
+                    var rgba1 = rgb.replace(')', ', 0)').replace('RGB', 'RGBA');
+                    fill_gradient.addColorStop( 1 , rgba1 );
+                }
 
                 var fill = new Path({            //填充
                     context : {
                         path        : self._fillLine( bline ), 
-                        fillStyle   : fill_gradient,//self._getColor( self.fill.fillStyle.normal ),
-                        globalAlpha : 1//self._getProp( self.fill.alpha )
+                        fillStyle   : fill_gradient || self._getColor( self.fill.fillStyle.normal ),
+                        globalAlpha : fill_gradient ? 1 : self.fill.alpha//self._getProp( self.fill.alpha )
                     }
                 });
                 self.sprite.addChild( fill );  
@@ -188,16 +182,16 @@ define(
                 if(self.node.enabled){                     //拐角的圆点
                     for(var a = 0,al = self.data.length; a < al; a++){
                         var o = self.data[a]
-                        self._nodeInd = a
+                        self._nodeInd = a;
                         var circle = new Circle({
                             id : "circle",
                             context : {
                                 x           : o.x,
                                 y           : o.y,
                                 r           : self._getProp( self.node.r.normal ),
-                                fillStyle   : self._getColor( self.node.fillStyle.normal ),
-                                strokeStyle : self._getColor( self.node.strokeStyle.normal ),
-                                lineWidth   : self._getProp( self.node.lineWidth.normal )
+                                fillStyle   : self._getProp( self.node.fillStyle.normal ) || "#ffffff",
+                                strokeStyle : self._getProp( self.node.strokeStyle.normal ) || self._getColor( self.line.strokeStyle.normal ),
+                                lineWidth   : self._getProp( self.node.lineWidth.normal ) || 2
                             }
                         });
 

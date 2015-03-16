@@ -2,8 +2,7 @@ define(
     "chartx/components/tips/tip",
     [
          "canvax/index",
-         "canvax/shape/Rect",
-         "chartx/utils/deep-extend"
+         "canvax/shape/Rect"
     ],
     function( Canvax , Rect ){
         var Tip = function( opt , tipDomContainer ){

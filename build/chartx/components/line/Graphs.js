@@ -5,20 +5,19 @@ define(
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "canvax/animation/Tween",
-        "chartx/components/line/Group",
-        "chartx/utils/deep-extend"
+        "chartx/components/line/Group"
     ],
     function( Canvax , Rect, Tools, Tween , Group ){
-        var Graphs = function(opt,ctx){
+        var Graphs = function(opt,root){
             this.w       = 0;   
             this.h       = 0; 
             this.y       = 0;
 
             //这里所有的opt都要透传给group
             this.opt     = opt;
-            this.ctx     = ctx;
+            this.root    = root;
+            this.ctx     = root.stage.context2D
 
-    
             this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
             this.disX       = 0;                           //点与点之间的间距
             this.groups     = [];                          //群组集合     
@@ -29,7 +28,11 @@ define(
             this._nodesInfoList = [];                      //多条线同个节点索引上的节点信息集合
     
             this.sprite     = null;  
-            this.induce     = null;                      
+            this.induce     = null;                         
+
+            this.event      = {
+                enabled       : 0
+            }    
     
             this.init(opt)
         };
@@ -55,9 +58,8 @@ define(
             },
     
             draw:function(opt){
-                var self  = this;
                 _.deepExtend( this , opt );
-                self._widget()
+                this._widget()
             },
             /**
              * 生长动画
@@ -108,24 +110,33 @@ define(
                         width       : self.w,
                         height      : self.h,
                         fillStyle   : '#000000',
-                        globalAlpha : 0
+                        globalAlpha : 0,
+                        cursor      : self.event.enabled ? 'pointer' : ''
                     }
                 })
                 self.sprite.addChild(self.induce)
     
                 self.induce.on("hold mouseover", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
                 })
                 self.induce.on("drag mousemove", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
                 })
                 self.induce.on("release mouseout", function(e){
+                    e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
                     var o = {
                         iGroup : self.iGroup,
                         iNode  : self.iNode
                     }
                     e.tipsInfo = o;
                     self.iGroup = 0, self.iNode = -1
+                })
+                self.induce.on("click", function(e){
+                    e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
                 })
             },
             _getInfoHandler:function(e){
@@ -146,6 +157,15 @@ define(
                     nodesInfoList : _.clone(this._nodesInfoList)
                 }
                 return node;
+            },
+            _fireHandler:function(e){
+                var self = this
+                var o = {
+                    eventType : e.type,
+                    iGroup    : e.tipsInfo.iGroup + 1,
+                    iNode     : e.tipsInfo.iNode + 1
+                }
+                self.root.event.on(o)
             }
         };
     

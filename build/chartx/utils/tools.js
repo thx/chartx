@@ -206,17 +206,17 @@ define(
      		 * @return {[String]}    [根据$s提供的值 对千分位进行分隔 并且小数点上自动加上'.'号  组合成字符串]
      		 */
      		numAddSymbol:function($n,$s){
-                 var s = Number($n);
+                var s = Number($n);
      			var symbol = $s ? $s : ','
      			if( !s ){
      				return String($n);
      			};
-                 if(s >= 1000){
-                     var num = parseInt(s/1000);
-                     return String($n.toString().replace( num , num + symbol ))
-                 } else {
-                     return String(s);
-                 }   
+                if(s >= 1000){
+                    var num = parseInt(s/1000);
+                    return String($n.toString().replace( num , num + symbol ))
+                } else {
+                    return String($n);
+                }   
      		},
             	/**
      		 * 获取一个path路径

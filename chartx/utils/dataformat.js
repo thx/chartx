@@ -100,7 +100,7 @@ define(
                     }
                     dataFrame.xAxis.org = getDataOrg( xField , total );
                 }
-                    
+                 
                 /*
                  * 然后设置对应的yAxis数据
                  */

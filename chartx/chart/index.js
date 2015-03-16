@@ -2,8 +2,7 @@ define(
     "chartx/chart/index",
     [
         "canvax/index",
-        "canvax/core/Base",
-        "chartx/utils/deep-extend"
+        "canvax/core/Base"
     ],
     function( Canvax , CanvaxBase ){
         var Chart = function(node , data , opts){

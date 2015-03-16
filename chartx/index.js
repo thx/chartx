@@ -3,8 +3,8 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
         
-        var canvaxVersion = "2015.03.12";
-        var chartxVersion = "1.5.2";
+        var canvaxVersion = "2015.03.13";
+        var chartxVersion = "1.5.7";
 
 
         //BEGIN(develop)
@@ -24,13 +24,16 @@ var Chartx = {
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
         if( !! ~location.search.indexOf('localcanvax') ){
             //本地环境测试
-            canvaxUrl     = "http://nick.daily.taobao.net/canvax";
+            canvaxUrl     = "http://nick.daily.taobao.net/canvax/";
         }
         //END(develop)
 
         
         //如果是在cdn环境的话还是用自己配置的version
-        Chartx.path   = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
+        Chartx.path     = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
+        if( Chartx.site.daily || Chartx.site.local ){
+            Chartx.path = "http://g.assets.daily.taobao.net/thx/charts/"+ chartxVersion +"/";
+        }
 
         //BEGIN(develop)
         var __FILE__, scripts = document.getElementsByTagName("script"); 

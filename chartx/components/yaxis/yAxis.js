@@ -102,6 +102,8 @@ define(
                     this.dataSection = DataSection.section( arr , 3 );
                 }
 
+                
+
                 this._baseNumber = this.dataSection[0];
 
                 if(arr.length == 1){

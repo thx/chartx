@@ -5,8 +5,7 @@ define(
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "canvax/animation/Tween",
-        'chartx/components/planet/InfoCircle',
-        "chartx/utils/deep-extend"
+        'chartx/components/planet/InfoCircle'
     ],
     function( Canvax , Rect, Tools, Tween , InfoCircle){
         var Graphs = function(opt, root){

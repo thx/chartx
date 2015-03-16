@@ -10,8 +10,7 @@ define(
         'chartx/components/anchor/Anchor',
         'chartx/components/line/Graphs',
         './tips',
-        'chartx/utils/dataformat',
-        'chartx/utils/deep-extend'
+        'chartx/utils/dataformat'
     ],
     function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips , dataFormat){
         /*
@@ -92,7 +91,6 @@ define(
 
                 var _yAxisW = this._yAxis.w
                 x = _yAxisW     
-                
                 //绘制x轴
                 this._xAxis.draw({
                     w    :   this.width - _yAxisW ,
@@ -119,9 +117,10 @@ define(
                         y : y
                     }
                 });
-                if(this.anchor.enabled){
+            
+                if(this._anchor.enabled){
                     //绘制点位线
-                    var pos = this._getPosAtGraphs(this.anchor.xIndex, this.anchor.num)
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
                     // console.log(x,y)
                     // console.log(pos.x, pos.y)
                     this._anchor.draw({
@@ -178,15 +177,16 @@ define(
                 } );
             },
             _trimGraphs:function(){
+                //debugger 
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var maxXAxis = this.dataFrame.xAxis.org[0].length;
+                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
                         !tmpData[a] ? tmpData[a] = [] : ''
-                        var x = b / (maxXAxis - 1) * this._xAxis.xGraphsWidth
-                        if(maxXAxis == 1 && arr[a].length == 1) {                      //每条线上只有一个点 那么x需要居中
+                        var x = b / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
+                        if(maxXAxisLen == 1 && arr[a].length == 1) {                      //每条线上只有一个点 那么x需要居中
                             x = this._xAxis.xGraphsWidth / 2
                         }
 
@@ -201,8 +201,8 @@ define(
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs:function(index,num){
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var maxXAxis = this.dataFrame.xAxis.org[0].length;
-                var x = index / (maxXAxis - 1) * this._xAxis.xGraphsWidth
+                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
+                var x = index / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
                 var y = -(num - this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight
                 return {x:x, y:y}
             },
@@ -228,7 +228,7 @@ define(
             },
             _click:function(o){
                 var self = this.This                            //this = this.event
-                if(self.on){
+                if(_.isFunction(self.on)){
                     self.on(o)
                 }
             }

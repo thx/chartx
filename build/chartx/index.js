@@ -3,8 +3,8 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
         
-        var canvaxVersion = "2015.02.28";
-        var chartxVersion = "1.5.1";
+        var canvaxVersion = "2015.03.13";
+        var chartxVersion = "1.5.7";
 
 
         
@@ -17,7 +17,10 @@ var Chartx = {
 
         
         //如果是在cdn环境的话还是用自己配置的version
-        Chartx.path   = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
+        Chartx.path     = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
+        if( Chartx.site.daily || Chartx.site.local ){
+            Chartx.path = "http://g.assets.daily.taobao.net/thx/charts/"+ chartxVersion +"/";
+        }
 
         
 
