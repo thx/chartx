@@ -73,9 +73,10 @@ KISSY.ready(function(){
             on : function(e){
                 if(e.eventType == 'click'){
                     //e.iGroup = 第几条线(从1开始)   e.iNode = 第几个节点(从1开始)
-                    console.log(e.iGroup, e.iNode)
+                    // console.log(e.iGroup, e.iNode)
                     console.log(data1[e.iNode][0], data1[e.iNode][1])
                 }
+                console.log(e.eventType, data1[e.iNode][0], data1[e.iNode][1])
             }
         },
 

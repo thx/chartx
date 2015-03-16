@@ -77,6 +77,11 @@ KISSY.ready(function(){
         // [16,92,140,{"name":"Ruth Williams","tagId":10011}],
         // [17,97,9807,{"name":"Ruth White","tagId":10034}]] 
     ]
+    // var data1 = 
+    // [["tagId","recommend","num","info"],[0,5,100,{"name":"111486","tagId":0}],[1,1,78,{"name":"111488","tagId":1}],[2,10,40,{"name":"111487","tagId":2}],[3,23,25,{"name":"111922","tagId":3}],[4,1,18,{"name":"111491","tagId":4}],[5,6,13,{"name":"111545","tagId":5}],[6,6,13,{"name":"112065","tagId":6}],[7,6,13,{"name":"112124","tagId":7}],[8,6,13,{"name":"112070","tagId":8}],[9,50,9,{"name":"111544","tagId":9}],[10,51,9,{"name":"111489","tagId":10}],[11,41,7,{"name":"111558","tagId":11}],[12,22,6,{"name":"112067","tagId":12}],[13,22,6,{"name":"112126","tagId":13}],[14,22,6,{"name":"111559","tagId":14}],[15,22,6,{"name":"112072","tagId":15}],[16,66,6,{"name":"111688","tagId":16}],[17,33,2,{"name":"112066","tagId":17}],[18,20,2,{"name":"111641","tagId":18}],[19,33,2,{"name":"111539","tagId":19}],[20,33,2,{"name":"112125","tagId":20}],[21,33,2,{"name":"112071","tagId":21}],[22,38,2,{"name":"111640","tagId":22}],[23,40,2,{"name":"111542","tagId":23}],[24,48,2,{"name":"111543","tagId":24}],[25,36,1,{"name":"111560","tagId":25}],[26,47,1,{"name":"111642","tagId":26}],[27,58,1,{"name":"111541","tagId":27}],[28,62,1,{"name":"111689","tagId":28}],[29,67,1,{"name":"111643","tagId":29}]]
+
+
+    // var options = {"cx":30,"event":{"enabled":1},"yAxis":{"field":["tagId"]},"xAxis":{"field":"recommend","bar":{"enabled":1,"y":275,"x":25,"width":1104,"fillStyle":{"normal":["#70649a","#b28fce"]},"text":{"contents":["高偏好度","低偏好度"]}}},"graphs":{"disY":20,"minR":6,"maxR":50,"layout":{"mode":1},"size":{"field":"num"},"info":{"field":"info","content":"name"},"core":{"r":{"normal":60},"text":{"content":"美的中创专\n卖店"}},"text":{"fillStyle":{"normal":"#666"}}},"back":{"space":150}}
     var options = {
         cx    : 30,                              //圆心坐标x
         event : {

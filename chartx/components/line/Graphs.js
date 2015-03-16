@@ -129,11 +129,6 @@ define(
                 self.induce.on("release mouseout", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
-                    var o = {
-                        iGroup : self.iGroup,
-                        iNode  : self.iNode
-                    }
-                    e.tipsInfo = o;
                     self.iGroup = 0, self.iNode = -1
                 })
                 self.induce.on("click", function(e){
@@ -143,15 +138,17 @@ define(
             },
             _getInfoHandler:function(e){
                 var x = e.point.x, y = e.point.y - this.h;
+                //todo:底层加判断
+                x = x > this.w ? this.w : x
                 var tmpINode = this.disX == 0 ? 0 : parseInt( (x + (this.disX / 2) ) / this.disX  );
-                
-                var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(this._nodesInfoList , "y" ));
+
                 this._nodesInfoList = [];                 //节点信息集合
-                
+                var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(this._nodesInfoList , "y" ));
                 for (var a = 0, al = this.groups.length; a < al; a++ ) {
                     var o = this.groups[a].getNodeInfoAt(tmpINode)
-                    this._nodesInfoList.push(o);
+                    o && this._nodesInfoList.push(o);
                 }
+
                 this.iGroup = tmpIGroup, this.iNode = tmpINode
                 var node = {
                     iGroup        : this.iGroup,
