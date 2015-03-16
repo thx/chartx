@@ -54,14 +54,18 @@ define(
             var min = Math.min.apply(null,arr) 
     
             if(min==max){
-            	if(max>=0){
-            		min= 0
+            	if(max > 0){
+            		min = 0
             		// min= Math.round(max/2);
-            	}
-            	else{
-            		min=max*2;
-            	}
+            	} else if(max < 0){
+            		min = max*2;
+            	} else {
+                    max = 1;
+                    return [0]
+                }
             }
+
+            
     
             var length = max - min;
             if (length) {

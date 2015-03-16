@@ -82,17 +82,9 @@ define(
       
                 this.sprite = new Canvax.Display.Sprite();
             },
-            setX:function($n){
-                this.sprite.context.x = $n
-            },
-            setY:function($n){
-                this.sprite.context.y = $n
-            },
-    
             draw:function(opt){
-                var self  = this;
                 _.deepExtend( this , opt );
-                self._widget()
+                this._widget()
             },
             //styleType , normals , groupInd
             _getColor : function( s ){
@@ -135,7 +127,7 @@ define(
             },
             _widget:function(){
                 var self  = this;
-    
+   
                 var list = []
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var o = self.data[a]

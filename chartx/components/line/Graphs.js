@@ -58,9 +58,8 @@ define(
             },
     
             draw:function(opt){
-                var self  = this;
                 _.deepExtend( this , opt );
-                self._widget()
+                this._widget()
             },
             /**
              * 生长动画
