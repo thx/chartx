@@ -71,6 +71,10 @@ define(
              **/
             add : function( field , ind ){
             
+                if( _.indexOf( this.yAxis.field , field ) >= 0 ){
+                    return;
+                }
+
                 var i = this.yAxis.field.length;
                 if( ind != undefined && ind != null ){
                     i = ind;

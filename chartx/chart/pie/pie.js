@@ -91,6 +91,9 @@
                                     cosV = cosV.toFixed(5);
                                     sinV = sinV.toFixed(5);
                                     var quadrant = function (ang) {
+                                        if( ang > 360 ){
+                                            ang = 360;
+                                        }
                                         if (0 <= ang && ang <= 90) {
                                             return 1;
                                         }
