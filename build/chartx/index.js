@@ -3,8 +3,8 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
         
-        var canvaxVersion = "2015.03.13";
-        var chartxVersion = "1.5.7";
+        var canvaxVersion = "2015.03.20";
+        var chartxVersion = "1.5.8";
 
 
         

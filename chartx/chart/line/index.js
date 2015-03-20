@@ -64,6 +64,78 @@ define(
                 this._arguments = arguments;
     
             },
+            /*
+             *添加一个yAxis字段，也就是添加一条brokenline折线
+             *@params field 添加的字段
+             *@params ind 添加到哪个位置 默认在最后面
+             **/
+            add : function( field , ind ){
+            
+                var i = this.yAxis.field.length;
+                if( ind != undefined && ind != null ){
+                    i = ind;
+                };
+
+                //首先，yAxis要重新计算
+                this.yAxis.field.splice(ind , 0 , field);
+                this.dataFrame = this._initData( this.dataFrame.org , this );
+
+                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
+
+                //然后yAxis更新后，对应的背景也要更新
+                this._back.update({
+                    xAxis:{
+                        data : this._yAxis.data
+                    }
+                });
+
+                this._graphs.add({
+                    data : this._trimGraphs()
+                } , ind);
+                //this._graphs.update();
+
+
+            },
+            /*
+             *删除一个yaxis字段，也就是删除一条brokenline线
+             *@params target 也可以是字段名字，也可以是 index
+             **/
+            remove : function( target ){
+                var ind = null;
+                if( _.isNumber(target) ){
+                    //说明是索引
+                    ind = target;
+                } else {
+                    //说明是名字，转换为索引
+                    ind = _.indexOf( this.yAxis.field , target );
+                }
+                if( ind != null && ind != undefined && ind != -1 ){
+                    this._remove(ind);
+                }
+            },
+            _remove : function( ind ){
+            
+                //首先，yAxis要重新计算
+                //先在dataFrame中更新yAxis的数据
+                this.dataFrame.yAxis.field.splice(ind , 1);
+                this.dataFrame.yAxis.org.splice(ind , 1);
+                //this.yAxis.field.splice(ind , 1);
+
+                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
+
+                //然后yAxis更新后，对应的背景也要更新
+                this._back.update({
+                    xAxis:{
+                        data : this._yAxis.data
+                    }
+                });
+
+                //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
+                this._graphs.remove(ind);
+                this._graphs.update({
+                    data : this._trimGraphs()
+                });
+            },
             _initData  : dataFormat,
             _initModule:function(){
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
@@ -88,8 +160,8 @@ define(
                     },
                     yMaxHeight : y
                 });
-
-                var _yAxisW = this._yAxis.w
+ 
+                var _yAxisW = this._yAxis.w;
                 x = _yAxisW     
                 //绘制x轴
                 this._xAxis.draw({
@@ -137,6 +209,7 @@ define(
                 this._graphs.draw({
                     w    : this._xAxis.xGraphsWidth,
                     h    : this._yAxis.yGraphsHeight,
+                    //yBasePoint :  this._yAxis.basePoint,
                     data : this._trimGraphs(),
                     disX : this._getGraphsDisX(),
                     smooth : this.smooth,
@@ -177,7 +250,7 @@ define(
                 } );
             },
             _trimGraphs:function(){
-                //debugger 
+                //debugger
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
                 var arr      = this.dataFrame.yAxis.org;
@@ -190,10 +263,13 @@ define(
                             x = this._xAxis.xGraphsWidth / 2
                         }
 
-                        var y = - (arr[a][b] - this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight
+                        var y = - (arr[a][b] - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
                         y = isNaN(y) ? 0 : y
-                        tmpData[a][b] = {'value':arr[a][b], 'x':x,'y':y}
-                        // console.log(arr[a][b], x, y)
+                        tmpData[a][b] = {
+                            value : arr[a][b],
+                            x : x,
+                            y : y,
+                        };
                     }
                 }
                 return tmpData
@@ -203,7 +279,7 @@ define(
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
                 var x = index / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
-                var y = -(num - this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight
+                var y = -(num - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
                 return {x:x, y:y}
             },
             //每两个点之间的距离

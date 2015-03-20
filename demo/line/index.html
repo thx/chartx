@@ -18,11 +18,22 @@
 		function test_reset(){
 			line.reset(data1, options);
 		}
+
+        function del(){
+            line.remove("val2");
+        }
+
+        function add(){
+            line.add("val2" , 0)
+        }
 </script>
 <body>
  	<div id="canvasTest" style='background:#ffffff;width:560px;height:300px;'></div>
  	<form name="form" onsubmit="return false;">
 		<input type="button" value="reset" onclick="test_reset()" />
+		<input type="button" value="删除第一条折线" onclick="del()" />
+		<input type="button" value="把刚才删除的添加回来" onclick="add()" />
+
     </form>
 </body> 
 </html>

@@ -46,6 +46,9 @@ define(
             this.yMaxHeight      =  0;                       //y轴最大高
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
 
+            this.baseNumber      =  null;
+            this.basePoint       =  null;  //value为baseNumber的point {x,y}
+
             //最终显示到y轴上面的文本的格式化扩展
             //比如用户的数据是80 但是 对应的显示要求确是80%
             //后面的%符号就需要用额外的contentFormat来扩展
@@ -66,8 +69,17 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
+            //删除一个字段
+            update : function( opt , data ){
+                //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+                _.deepExtend( this , opt );
+                this._initData( data );
+                this.draw();
+            },
             draw:function( opt ){
-                _.deepExtend( this , opt );            
+                opt && _.deepExtend( this , opt );            
     
                 this.yGraphsHeight = this.yMaxHeight  - this._getYAxisDisLine();
     
@@ -78,13 +90,23 @@ define(
             },
             _trimYAxis:function(){
                 var max = this.dataSection[ this.dataSection.length - 1 ];
-                var tmpData = []
+                var tmpData = [];
                 for (var a = 0, al = this.dataSection.length; a < al; a++ ) {
-                    var y = - (this.dataSection[a] - this._baseNumber) / (max - this._baseNumber) * this.yGraphsHeight;
+                    var y = - (this.dataSection[a] - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
                     y = isNaN(y) ? 0 : parseInt(y);                                                    
-                    tmpData[a] = { 'content':this.dataSection[a], 'y': y };
+                    tmpData[a] = { content : this.dataSection[a] , y : y };
                 }
-                this.data = tmpData
+
+                this.data = tmpData;
+
+                //设置basePoint
+                var basePy = - (this.baseNumber - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
+                basePy = isNaN(basePy) ? 0 : parseInt(basePy); 
+                this.basePoint = {
+                    content : this.baseNumber ,
+                    y       : basePy
+                }
+    
             },
             _getYAxisDisLine:function(){                   //获取y轴顶高到第一条线之间的距离         
                 var disMin = this.disYAxisTopLine
@@ -95,6 +117,7 @@ define(
                 return dis
             },
             _initData  : function( data ){ 
+                
                 var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
                 this.dataOrg     = data.org;
                 
@@ -102,19 +125,20 @@ define(
                     this.dataSection = DataSection.section( arr , 3 );
                 }
 
-                
-
-                this._baseNumber = this.dataSection[0];
-
+                this._bottomNumber = this.dataSection[0];
                 if(arr.length == 1){
                     this.dataSection[0] = arr[0] * 2;
-                    this._baseNumber    = 0;
+                    this._bottomNumber  = 0;
+                }
+
+                if( this.baseNumber == null ){
+                    this.baseNumber = this._bottomNumber > 0 ? this._bottomNumber : 0;
                 }
             },
             _widget:function(){
                 var self  = this;
     
-                if( !self.enabled ){ //self.display == "none" 
+                if( !self.enabled ){
                     self.w = 0;
                     return;
                 }

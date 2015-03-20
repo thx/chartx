@@ -27,7 +27,6 @@ define(
             }
             this.xAxis   = {                                //x轴上的线
                     enabled     : 1,
-                    w           : 0,
                     data        : [],                      //[{y:100},{}]
                     // data        : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'dashed',                //线条类型(dashed = 虚线 | '' = 实线)
@@ -37,7 +36,6 @@ define(
     
             this.yAxis   = {                                //y轴上的线
                     enabled     : 0,
-                    h           : 0,
                     data        : [],                      //[{x:100},{}]
                     // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : '',                      //线条类型(dashed = 虚线 | '' = 实线)
@@ -69,28 +67,17 @@ define(
     
             draw : function(opt){
                 _.deepExtend( this , opt );
-                this._configData(opt);
+                //this._configData(opt);
                 this._widget();
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
             },
-            //配置数据
-            _configData:function(opt){
-                var self = this
-                self.w  = opt.w  || 0;      
-                self.h  = opt.h  || 0;
-                if(opt.xAxis)
-                    self.xAxis.w    = opt.xAxis.w || self.w,
-                    self.xAxis.data = opt.xAxis.data;
-    
-                if(opt.yAxis)
-                    self.yAxis.h    = opt.yAxis.h || self.h,
-                    self.yAxis.data = opt.yAxis.data;
+            update : function( opt ){
+                this.sprite.removeAllChildren();
+                this.draw( opt );
             },
-    
             _widget:function(){
                 var self  = this;
-              
                 self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp)
                 self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp)
                 self.xOriginSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xOriginSp)
@@ -104,7 +91,7 @@ define(
                         context : {
                             xStart      : 0,
                             yStart      : o.y,
-                            xEnd        : self.xAxis.w,
+                            xEnd        : self.w,
                             yEnd        : o.y,
                             lineType    : self.xAxis.lineType,
                             lineWidth   : self.xAxis.thinkness,
@@ -123,7 +110,7 @@ define(
                             xStart      : o.x,
                             yStart      : 0,
                             xEnd        : o.x,
-                            yEnd        : -self.yAxis.h,
+                            yEnd        : -self.h,
                             lineType    : self.yAxis.lineType,
                             lineWidth   : self.yAxis.thinkness,
                             strokeStyle : self.yAxis.strokeStyle  

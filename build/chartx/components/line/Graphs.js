@@ -33,7 +33,7 @@ define(
             this.event      = {
                 enabled       : 0
             }    
-    
+
             this.init(opt)
         };
     
@@ -59,32 +59,66 @@ define(
     
             draw:function(opt){
                 _.deepExtend( this , opt );
-                this._widget()
+                this._widget( opt );
             },
             /**
              * 生长动画
              */
             grow : function(){
-                var self  = this;
-                var timer = null;
-                var growAnima = function(){
-                   var bezierT = new Tween.Tween( { h : 0 } )
-                   .to( { h : self.h }, 300 )
-                   .onUpdate( function (  ) {
-                       self.sprite.context.scaleY = this.h / self.h;
-                   } ).onComplete( function(){
-                       cancelAnimationFrame( timer );
-                   }).start();
-                   animate();
-                };
-                function animate(){
-                    timer    = requestAnimationFrame( animate ); 
-                    Tween.update();
-                };
-                growAnima();
+                _.each(this.groups , function( g , i ){
+                    g._grow();
+                });
             },
+            /*
+             *@params opt
+             *@params ind 最新添加的数据所在的索引位置
+             **/
+            add : function( opt , ind ){
+                debugger
+                var self = this;
+                _.deepExtend( this , opt );
+                var group = new Group(
+                    ind , //_groupInd
+                    self.opt,
+                    self.ctx
+                );
+                
+                group.draw({
+                    data       : self.data[ind]
+                });
+                self.sprite.addChildAt(group.sprite , ind);
+                self.groups.splice(ind , 0 , group);
 
-            _widget:function(){
+                _.each(this.groups , function( g , i ){
+                    //_groupInd要重新计算
+                    g._groupInd = i;
+                    g.update({
+                        data : self.data[i]
+                    });
+                });
+
+            },
+            /*
+             *删除 ind
+             **/
+            remove : function( i ){
+                var target = this.groups.splice( i , 1 )[0];
+                target.destroy();    
+            },
+            /*
+             * 更新下最新的状态
+             **/
+            update : function( opt ){
+                _.deepExtend( this , opt );
+                //剩下的要更新下位置
+                var self = this;
+                _.each(this.groups , function( g , i ){
+                    g.update({
+                        data : self.data[i]
+                    });
+                });
+            },
+            _widget:function( opt ){
                 var self  = this;
                 
                 for(var a = 0,al = self.data.length; a < al; a++){
@@ -96,7 +130,7 @@ define(
                     );
                     
                     group.draw({
-                        data   : self.data[a],
+                        data       : self.data[a]
                     })
                     self.sprite.addChild(group.sprite);
                     self.groups.push(group);
@@ -162,7 +196,9 @@ define(
                     iGroup    : e.tipsInfo.iGroup + 1,
                     iNode     : e.tipsInfo.iNode + 1
                 }
-                self.root.event.on(o)
+                if(_.isFunction(self.root.event.on)){
+                    self.root.event.on(o);
+                }
             }
         };
     

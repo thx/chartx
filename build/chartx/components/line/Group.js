@@ -6,9 +6,10 @@ define(
         "canvax/shape/Circle",
         "canvax/shape/Path",
         "chartx/utils/tools",
-        "chartx/utils/colorformat"
+        "chartx/utils/colorformat",
+        "canvax/animation/Tween",
     ],
-    function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat ){
+    function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat , Tween ){
         window.Canvax = Canvax
         var Group = function( a , opt , ctx){
             this._groupInd = a;
@@ -34,27 +35,27 @@ define(
                 control     : function(){}, 
                 mode        : 0,  //模式[0 = 都有节点 | 1 = 拐角才有节点]
                 r           : {   //半径 node 圆点的半径
-                    normal  : 2,  //[2,2,2,2,2,2,2],
-                    over    : 3   //[3,3,3,3,3,3,3]
+                    normal  : 2,  
+                    over    : 3  
                 },
                 fillStyle   :{//填充
-                    normal  : '#ffffff',//['#FFFFFF', '#FFFFFF', '#FFFFFF','#FFFFFF', '#FFFFFF'],
+                    normal  : '#ffffff',
                     over    : '#ffffff'
                 },
                 strokeStyle :{//轮廓颜色
-                    normal  : null,//this.line.strokeStyle.normal,
-                    over    : null //this.line.strokeStyle.over
+                    normal  : null,
+                    over    : null
                 },
                 lineWidth   : {//轮廓粗细
-                    normal  : 2, //[2,2,2,2,2,2,2],
-                    over    : 2  //[2,2,2,2,2,2,2]
+                    normal  : 2, 
+                    over    : 2 
                 }
             }
     
             this.fill    = {                     //填充
                 fillStyle : {
-                    normal  : null, //this.line.strokeStyle.normal,
-                    over    : null  //this.line.strokeStyle.over
+                    normal  : null, 
+                    over    : null 
                 },
                 gradient    : true,
                 alpha       : 0.1
@@ -63,6 +64,10 @@ define(
             this.data       = [];                          //[{x:0,y:-100},{}]
             this.sprite     = null;                        
            
+
+            this._pointList = [];//brokenline最终的状态
+            this._currPointList = [];//brokenline 动画中的当前状态
+
             this.init( opt )
         };
     
@@ -84,7 +89,21 @@ define(
             },
             draw:function(opt){
                 _.deepExtend( this , opt );
-                this._widget()
+                this._widget();
+            },
+            update : function(opt){
+                _.deepExtend( this , opt );
+                var list = [];
+                for(var a = 0,al = this.data.length; a < al; a++){
+                    var o = this.data[a];
+                    list.push([ o.x , o.y ]);
+                };
+                this._pointList = list; 
+                this._grow();
+            },
+            //自我销毁
+            destroy : function(){
+                this.sprite.remove();
             },
             //styleType , normals , groupInd
             _getColor : function( s ){
@@ -125,16 +144,70 @@ define(
                     return null
                 }
             },
+            _grow : function(){
+                var self  = this;
+                var timer = null;
+                var growAnima = function(){
+                   var bezierT = new Tween.Tween( self._getPointY( self._currPointList ) )
+                   .to( self._getPointY( self._pointList ), 1500 )
+                   .easing( Tween.Easing.Quintic.Out )
+                   .onUpdate( function (  ) {
+
+                       for( var p in this ){
+                           self._currPointList[ parseInt( p.split("_")[1] ) ][1] = this[p];
+                       };
+                       self._bline.context.pointList = _.clone(self._currPointList);
+                       self._fill.context.path       = self._fillLine( self._bline );
+                       _.each( self._circles.children , function( circle , i ){
+                           var ind = parseInt(circle.id.split("_")[1]);
+                           circle.context.y = self._currPointList[ ind ][1];
+                       } );
+
+                   } ).onComplete( function(){
+                       cancelAnimationFrame( timer );
+                   }).start();
+                   animate();
+                };
+                function animate(){
+                    timer    = requestAnimationFrame( animate ); 
+                    Tween.update();
+                };
+                growAnima();
+
+            },
+            _getPointY : function( list ){
+                var obj = {};
+                _.each( list , function( p , i ){
+                    obj["p_"+i] = p[1]
+                } );
+                return obj;
+            },
             _widget:function(){
                 var self  = this;
    
-                var list = []
+                var list = [];
                 for(var a = 0,al = self.data.length; a < al; a++){
-                    var o = self.data[a]
-                    list.push([o.x, o.y])
+                    var o = self.data[a];
+                    list.push([
+                        o.x ,
+                        o.y
+                    ]);
                 };
-                
+                self._pointList = list;
+
+                list = [];
+                for(var a = 0,al = self.data.length; a < al; a++){
+                    var o = self.data[a];
+                    list.push([ 
+                        o.x ,
+                        self.data[0].y
+                    ]);
+                };
+                self._currPointList = list;
+
+
                 var bline = new BrokenLine({               //线条
+                    id : "brokenline_" + self._groupInd,
                     context : {
                         pointList   : list,
                         strokeStyle : self._getColor( self.line.strokeStyle.normal ),//self.line.strokeStyle.normal,
@@ -150,6 +223,7 @@ define(
                     }
                 });
                 self.sprite.addChild( bline );
+                self._bline = bline;
                 
 
                 var fill_gradient = null;
@@ -174,20 +248,22 @@ define(
                         globalAlpha : fill_gradient ? 1 : self.fill.alpha//self._getProp( self.fill.alpha )
                     }
                 });
-                self.sprite.addChild( fill );  
+                self.sprite.addChild( fill );
+                self._fill = fill;
 
                 
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)
                 if(self.node.enabled){                     //拐角的圆点
+                    this._circles = new Canvax.Display.Sprite({ id : "circles"});
+                    this.sprite.addChild(this._circles);
                     for(var a = 0,al = self.data.length; a < al; a++){
-                        var o = self.data[a]
                         self._nodeInd = a;
                         var circle = new Circle({
-                            id : "circle",
+                            id : "circle_" + a,
                             context : {
-                                x           : o.x,
-                                y           : o.y,
+                                x           : self._currPointList[a][0],
+                                y           : self._currPointList[a][1],
                                 r           : self._getProp( self.node.r.normal ),
                                 fillStyle   : self._getProp( self.node.fillStyle.normal ) || "#ffffff",
                                 strokeStyle : self._getProp( self.node.strokeStyle.normal ) || self._getColor( self.line.strokeStyle.normal ),
@@ -198,8 +274,8 @@ define(
                         self.node.control()
 
                         var nodeEnabled = true 
-                        if(self.node.mode == 1){           //拐角才有节点
-                            var value = o.value
+                        if( self.node.mode == 1 ){           //拐角才有节点
+                            var value = self.data[a].value
                             var pre   = self.data[a - 1]
                             var next  = self.data[a + 1]
                             if(pre && next){
@@ -209,28 +285,23 @@ define(
                             }
                         }
                         if(nodeEnabled){
-                            self.sprite.addChild(circle);
+                            self._circles.addChild(circle);
                         }
                     }
                     self._nodeInd = -1
                 }
             },
             _fillLine:function( bline ){                        //填充直线
+                
                 var fillPath = _.clone( bline.context.pointList );
                 fillPath.push( 
-                    [ fillPath[ bline.pointsLen -1 ][0] , -1.5 ],
+                    [ fillPath[ fillPath.length -1 ][0] , -1.5 ],
                     [ fillPath[0][0] , -1.5 ],
                     [ fillPath[0][0] , fillPath[0][1] ]
                 );
                 
                 return Tools.getPath(fillPath);
-    
-                var d = Tools.getPath(arr)
-                d += ' ' + L + ' ' + (Number(arr[arr.length - 1].x)) + ' ' + (-1.5)
-                d += ' ' + L + ' ' + (Number(arr[0].x)) + ' ' + (-1.5)
-                d += ' ' + L + ' ' + (Number(arr[0].x)) + ' ' + (Number(arr[0].y))
-    
-                return d
+
             }
         };
         return Group;
