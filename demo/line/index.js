@@ -38,6 +38,11 @@ KISSY.ready(function(){
                 fillStyle : '#000000'
             },
             field : "val1"
+        },
+        graphs : {
+            line : {
+                lineWidth : 0 
+            }
         }
     }
     // KISSY.config({

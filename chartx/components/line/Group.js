@@ -26,6 +26,7 @@ define(
                     normal  : this.colors[ this._groupInd ],
                     over    : null//this.colors[ this._groupInd ]
                 },
+                lineWidth   : 2,
                 smooth      : true
             }
 
@@ -158,7 +159,7 @@ define(
                        };
                        self._bline.context.pointList = _.clone(self._currPointList);
                        self._fill.context.path       = self._fillLine( self._bline );
-                       _.each( self._circles.children , function( circle , i ){
+                       self._circles && _.each( self._circles.children , function( circle , i ){
                            var ind = parseInt(circle.id.split("_")[1]);
                            circle.context.y = self._currPointList[ ind ][1];
                        } );
@@ -211,7 +212,7 @@ define(
                     context : {
                         pointList   : list,
                         strokeStyle : self._getColor( self.line.strokeStyle.normal ),//self.line.strokeStyle.normal,
-                        lineWidth   : 2,
+                        lineWidth   : self.line.lineWidth,
                         y           : self.y,
                         smooth      : self.line.smooth 
                     },
@@ -232,11 +233,11 @@ define(
                     //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
                     self.fill.alpha.length = 2 ;
                     if( self.fill.alpha[0] == undefined ){
-                        self.fill.alpha[0] = 0
-                    }
+                        self.fill.alpha[0] = 0;
+                    };
                     if( self.fill.alpha[1] == undefined ){
-                        self.fill.alpha[1] = 0
-                    }
+                        self.fill.alpha[1] = 0;
+                    };
 
                     //从bline中找到最高的点
                     var topP = _.min( bline.context.pointList , function(p){return p[1]} );
@@ -264,7 +265,7 @@ define(
                 
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)
-                if(self.node.enabled){                     //拐角的圆点
+                if( self.node.enabled && !!self.line.lineWidth ){                     //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({ id : "circles"});
                     this.sprite.addChild(this._circles);
                     for(var a = 0,al = self.data.length; a < al; a++){
