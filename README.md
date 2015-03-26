@@ -1,2 +1,2 @@
 最新daily branch
-daily/1.6.0
+daily/1.6.2
