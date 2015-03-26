@@ -74,7 +74,6 @@ define(
              *@params ind 最新添加的数据所在的索引位置
              **/
             add : function( opt , ind ){
-                debugger
                 var self = this;
                 _.deepExtend( this , opt );
                 var group = new Group(

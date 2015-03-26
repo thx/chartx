@@ -168,7 +168,7 @@ define(
                             x  : x,
                             y  : y,
                             fillStyle   : this.text.fillStyle,
-                            fontSize    : this.text.fontSize,
+                            fontSize    : this.text.fontSize
                        }
                   	})
                   	this.txtSp.addChild(txt);
