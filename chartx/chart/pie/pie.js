@@ -10,25 +10,25 @@
         "canvax/animation/Tween",
         "chartx/components/tips/tip"
         ],
-        function (Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween , Tip) {
-            var Pie = function (opt, tipsOpt , domContainer) {
-                this.data        = null;
-                this.sprite      = null;
-                this.branchSp    = null;
+        function (Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween, Tip) {
+            var Pie = function (opt, tipsOpt, domContainer) {
+                this.data = null;
+                this.sprite = null;
+                this.branchSp = null;
                 this.branchTxtSp = null;
 
-                this.dataLabel   = {
-                    enabled : true 
+                this.dataLabel = {
+                    enabled: true
                 };
 
-                this.tips          = _.deepExtend({ enabled : true } , tipsOpt); //tip的confit
-                this.domContainer  = domContainer;
-                this._tip         = null; //tip的对象 tip的config 放到graphs的config中传递过来
+                this.tips = _.deepExtend({ enabled: true }, tipsOpt); //tip的confit
+                this.domContainer = domContainer;
+                this._tip = null; //tip的对象 tip的config 放到graphs的config中传递过来
 
                 this.init(opt);
                 this.colorIndex = 0;
-                this.sectors    = [];
-                this.isMoving   = false;
+                this.sectors = [];
+                this.isMoving = false;
 
             };
 
@@ -37,7 +37,7 @@
                     _.deepExtend(this, opt);
                     this.sprite = new Canvax.Display.Sprite();
 
-                    this._tip = new Tip( this.tips , this.domContainer );
+                    this._tip = new Tip(this.tips, this.domContainer);
                     this._tip._getDefaultContent = this._getTipDefaultContent;
                     this.sprite.addChild(this._tip.sprite);
 
@@ -91,7 +91,7 @@
                                     cosV = cosV.toFixed(5);
                                     sinV = sinV.toFixed(5);
                                     var quadrant = function (ang) {
-                                        if( ang > 360 ){
+                                        if (ang > 360) {
                                             ang = 360;
                                         }
                                         if (0 <= ang && ang <= 90) {
@@ -127,7 +127,8 @@
                                         isMax: false
                                     })
 
-                                    self.currentAngle += angle
+                                    self.currentAngle += angle;
+                                    if (self.currentAngle > 360) self.currentAngle = 360;
                                 }
                                 data[maxIndex].isMax = true;
                             }
@@ -333,32 +334,32 @@
                     if (this.branchSp && this.branchTxtSp) {
                         this.branchSp.context.globalAlpha = 0;
                         this.branchTxtSp.context.globalAlpha = 0;
-                    } 
+                    }
                 },
-                _showTip: function (e , ind) {
-                    this._tip.show( this._getTipsInfo(e,ind) );
+                _showTip: function (e, ind) {
+                    this._tip.show(this._getTipsInfo(e, ind));
                 },
                 _hideTip: function (e) {
                     this._tip.hide(e);
                 },
-                _moveTip: function ( e , ind ) {
-                    this._tip.move( this._getTipsInfo(e,ind) )
+                _moveTip: function (e, ind) {
+                    this._tip.move(this._getTipsInfo(e, ind))
                 },
-                _getTipDefaultContent : function(info){
-                    return "<div style='color:"+info.fillStyle+"'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value +"</div>"+parseInt(info.percentage)+"%</div>";
+                _getTipDefaultContent: function (info) {
+                    return "<div style='color:" + info.fillStyle + "'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div>" + parseInt(info.percentage) + "%</div>";
                 },
-                _getTipsInfo : function(e,ind){
+                _getTipsInfo: function (e, ind) {
                     var data = this.data.data[ind];
-                
+
                     var fillColor = this.getColorByIndex(this.colors, ind);
-    
+
                     e.tipsInfo = {
-                        iNode      : ind,
-                        name       : data.name,
-                        percentage : data.percentage,
-                        value      : data.y,
-                        fillStyle  : fillColor,
-                        data       : this.data.org[ind]
+                        iNode: ind,
+                        name: data.name,
+                        percentage: data.percentage,
+                        value: data.y,
+                        fillStyle: fillColor,
+                        data: this.data.org[ind]
                     };
                     return e;
                 },
@@ -407,10 +408,10 @@
                     minPercent = isleft ? lmin : rmin;
 
                     for (i = 0; i < indexs.length; i++) {
-                        currentIndex = indexs[i];      
+                        currentIndex = indexs[i];
                         //若Y值小于最小值，不画label    
                         if (data[currentIndex].y != 0 && data[currentIndex].percentage <= minPercent) continue
-                            currentY = data[currentIndex].edgey;
+                        currentY = data[currentIndex].edgey;
                         adjustX = Math.abs(data[currentIndex].edgex);
                         txtDis = currentY - baseY;
                         if (i != 0 && ((Math.abs(txtDis) < minTxtDis) || (isup && txtDis < 0) || (!isup && txtDis > 0))) {
@@ -644,22 +645,22 @@
                                 sector.hover(function (e) {
                                     var me = this;
                                     if (!self.isMoving) {
-                                        if(self.tips.enabled){
-                                            self._showTip( e , this.__dataIndex );
+                                        if (self.tips.enabled) {
+                                            self._showTip(e, this.__dataIndex);
                                         }
                                         self._sectorFocus(this.__dataIndex);
                                     }
                                 }, function (e) {
                                     if (!self.isMoving) {
-                                        if(self.tips.enabled){
+                                        if (self.tips.enabled) {
                                             self._hideTip(e);
                                         }
                                         self._sectorUnfocus();
                                     }
                                 })
                                 sector.on('mousemove', function (e) {
-                                    if(self.tips.enabled){
-                                        self._moveTip( e , this.__dataIndex );
+                                    if (self.tips.enabled) {
+                                        self._moveTip(e, this.__dataIndex);
                                     }
                                 })
 
