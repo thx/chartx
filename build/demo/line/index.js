@@ -12,6 +12,7 @@ KISSY.ready(function(){
         [ 7 , 56  , 68 , 65 ] ,
         [ 8 , 99  , 83 , 51 ] 
     ];
+var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2015-03-21",8.95],["2015-03-22",8.13],["2015-03-23",9.56],["2015-03-24",8.87],["2015-03-25",8.32],["2015-03-26",8.33]]');
     var options = {
         back  : {
             yAxis     :{
@@ -27,7 +28,7 @@ KISSY.ready(function(){
             textFormat : function( text ){
                 return text + "%"
             },
-            field : ["val2" , "val3"]
+            field : ["消耗"]//["val2" , "val3"]
         },
         xAxis : {
             // enabled : false,
@@ -37,7 +38,7 @@ KISSY.ready(function(){
                 //dis       : 2,
                 //fillStyle : '#000000'
             },
-            field : "val1"
+            field : ["日期"]//"val1"
         },
         graphs : {
             line : {

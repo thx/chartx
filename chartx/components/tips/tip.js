@@ -13,10 +13,13 @@ define(
             this.dW      = 0;  //html的tips内容width
             this.dH      = 0;  //html的tips内容Height
 
-            this.backR   = 3;  //背景框的 圆角 
+            this.backR   = 5;  //背景框的 圆角 
     
             this.sprite  = null;
             this.content = null; //tips的详细内容
+
+            this.fillStyle = "#000000";
+            this.alpha     = 0.5
             
             this._tipDom = null;
             this._back   = null;
@@ -111,7 +114,7 @@ define(
                 var str  = "<table>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
-                    str+= "<tr style='color:"+(node.color || node.fillStyle) +"'>";
+                    str+= "<tr style='color:white'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
                         str+="<td>"+ prefixName +"：</td>";
@@ -131,10 +134,12 @@ define(
                     width  : this.dW,
                     height : this.dH,
                     lineWidth : 1,
-                    strokeStyle : "#333333",
-                    fillStyle : "#ffffff",
-                    radius : [ this.backR ]
-                }
+                    //strokeStyle : "#333333",
+                    fillStyle : this.fillStyle,
+                    radius : [ this.backR ],
+                    globalAlpha  : this.alpha
+                };
+               
                 this._back = new Rect({
                     id : "tipsBack",
                     context : opt
