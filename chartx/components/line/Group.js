@@ -59,7 +59,7 @@ define(
                     over    : null 
                 },
                 //gradient    : true,
-                alpha       : 0.1
+                alpha       : 0.3
             }
     
             this.data       = [];                          //[{x:0,y:-100},{}]

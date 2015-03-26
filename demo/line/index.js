@@ -35,7 +35,7 @@ KISSY.ready(function(){
             text:{
                 mode      : 1,
                 //dis       : 2,
-                fillStyle : '#000000'
+                //fillStyle : '#000000'
             },
             field : "val1"
         },

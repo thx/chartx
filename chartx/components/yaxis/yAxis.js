@@ -143,7 +143,6 @@ define(
                     return;
                 }
     
-    
                 var arr = this.data
     
                 if(self.mode == 2){
