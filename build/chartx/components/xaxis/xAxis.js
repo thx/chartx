@@ -231,7 +231,7 @@ define(
                 }
                 var maxWidth =  this.max.right                                          //总共能多少像素展现
                 // console.log(Math.floor( maxWidth / (textMaxWidth + 30) ), arr.length)
-                var n = Math.min( Math.floor( maxWidth / textMaxWidth) , arr.length ); //能展现几个
+                var n = Math.min( Math.floor( maxWidth / textMaxWidth ) , arr.length ); //能展现几个
                 var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                            //array中展现间隔
                 if(this.text.dis){
                     dis = this.text.dis
