@@ -83,7 +83,7 @@ define(
             _initContent : function(e){
                 this._tipDom = document.createElement("div");
                 this._tipDom.className = "chart-tips";
-                this._tipDom.style.cssText += ";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;"
+                this._tipDom.style.cssText += ";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;"
                 this.tipDomContainer.appendChild( this._tipDom );
                 this._setContent(e);
             },
