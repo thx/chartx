@@ -17,7 +17,7 @@ KISSY.ready(function(){
     ];
     var options = {
         yAxis : {
-            field : ["val32"],
+            field : ["val3"],
         },
         xAxis : {
             field : ["val1"],

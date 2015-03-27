@@ -21,7 +21,8 @@ define(
             this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
     
             this.bar = {
-                width : 12
+                width  : 12,
+                radius : 2
             }
 
             this.eventEnabled = true;
@@ -94,17 +95,23 @@ define(
 
                         var fillStyle = this._getColor( this.bar.fillStyle , i , ii , barData.value );
                         var barH      = parseInt(Math.abs(barData.y));
-                        var radiusR   = Math.min( this.bar.width/2 , barH );
+                        
+                        var rectCxt   = {
+                            x         : Math.round(barData.x - this.bar.width/2),
+                            y         : parseInt(barData.y),
+                            width     : parseInt(this.bar.width),
+                            height    : barH,
+                            fillStyle : fillStyle
+                        };
+
+                        if( !!this.bar.radius ){
+                            var radiusR   = Math.min( this.bar.width/2 , barH );
+                            radiusR = Math.min( radiusR , this.bar.radius );
+                            rectCxt.radius = [radiusR , radiusR, 0 , 0];
+                        }
                         var rect = new Rect({
-                            id : "bar_"+ii+"_"+i,
-                            context : {
-                                x         : Math.round(barData.x - this.bar.width/2),
-                                y         : parseInt(barData.y),
-                                width     : parseInt(this.bar.width),
-                                height    : barH,
-                                fillStyle : fillStyle,
-                                radius    : [radiusR , radiusR, 0 , 0]
-                             }
+                            id      : "bar_"+ii+"_"+i,
+                            context : rectCxt
                         });
     
                         var itemSecH   = this.h/( this.yDataSectionLen - 1 );

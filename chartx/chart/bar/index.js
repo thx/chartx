@@ -143,7 +143,7 @@ define(
                 for( var a = 0 , al = xArr.length; a < al ; a++ ){
                     for( var b = 0 ; b < fields ; b ++ ){
                         !tmpData[b] && (tmpData[b] = []);
-                        var y = -(yArr[b][a]-this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight;
+                        var y = -(yArr[b][a]-this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
                         var x = xArr[a].x - xDis1/2 + xDis2 * (b+1)
                         tmpData[b][a] = {
                             value : yArr[b][a],
