@@ -23,6 +23,8 @@ KISSY.ready(function(){
             field : ["val1"],
             line:{
                 strokeStyle   : '#cccccc'
+            },
+            text : {
             }
         },
         graphs:{

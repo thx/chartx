@@ -135,7 +135,6 @@ KISSY.ready(function(){
                         return '#cc3300'
                     }
                 },
-                   
                 lineWidth:function(o){
                     if(o.iNode == anchorXIndex){
                         return 4

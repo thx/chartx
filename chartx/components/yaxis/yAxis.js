@@ -26,7 +26,8 @@ define(
             this.text = {
                     fillStyle : '#999999',
                     //fontSize  : 13//
-                    fontSize  : 12
+                    fontSize  : 12,
+                    textAlign : "right"
             }
     
             this.data        = [];                          //{y:-100, content:'1000'}
@@ -176,7 +177,7 @@ define(
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
                             // textBackgroundColor:'#0000ff',
-                            textAlign    : self.mode == 2 ? "left" : "right",
+                            textAlign    : self.text.textAlign,//self.mode == 2 ? "left" : "right",
                             textBaseline : "middle"
                        }
                     })
