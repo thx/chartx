@@ -18,8 +18,9 @@ define(
             this.sprite  = null;
             this.content = null; //tips的详细内容
 
-            this.fillStyle = "#000000";
-            this.alpha     = 0.5
+            this.fillStyle   = "#000000";
+            this.strokeStyle = null;
+            this.alpha       = 0.5;
             
             this._tipDom = null;
             this._back   = null;
@@ -139,6 +140,10 @@ define(
                     radius : [ this.backR ],
                     globalAlpha  : this.alpha
                 };
+
+                if( this.strokeStyle ){
+                    opt.strokeStyle = this.strokeStyle;
+                }
                
                 this._back = new Rect({
                     id : "tipsBack",
