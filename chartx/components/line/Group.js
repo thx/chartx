@@ -12,20 +12,17 @@ define(
     function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat , Tween ){
         window.Canvax = Canvax
         var Group = function( a , opt , ctx){
-            this._groupInd = a;
-            this._nodeInd  = -1;
-            this.ctx       = ctx;
-            this.w         = 0;   
-            this.h         = 0; 
-            this.y         = 0;
+            this._groupInd  = a;
+            this._nodeInd   = -1;
+            this.ctx        = ctx;
+            this.w          = 0;   
+            this.h          = 0; 
+            this.y          = 0;
 
-            this.colors    = ['#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'],
+            this.colors     = ['#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'],
 
-            this.line      = {                     //线
-                strokeStyle : {
-                    normal  : this.colors[ this._groupInd ],
-                    over    : null//this.colors[ this._groupInd ]
-                },
+            this.line       = {                     //线
+                strokeStyle : this.colors[ this._groupInd ],
                 lineWidth   : 2,
                 smooth      : true
             }
@@ -35,30 +32,14 @@ define(
                 enabled     : 1,  //是否有
                 control     : function(){}, 
                 mode        : 0,  //模式[0 = 都有节点 | 1 = 拐角才有节点]
-                r           : {   //半径 node 圆点的半径
-                    normal  : 2,  
-                    over    : 3  
-                },
-                fillStyle   :{//填充
-                    normal  : '#ffffff',
-                    over    : '#ffffff'
-                },
-                strokeStyle :{//轮廓颜色
-                    normal  : null,
-                    over    : null
-                },
-                lineWidth   : {//轮廓粗细
-                    normal  : 2, 
-                    over    : 2 
-                }
+                r           : 2,//半径 node 圆点的半径
+                fillStyle   : '#ffffff',
+                strokeStyle : null,
+                lineWidth   : 2
             }
     
             this.fill    = {                     //填充
-                fillStyle : {
-                    normal  : null, 
-                    over    : null 
-                },
-                //gradient    : true,
+                fillStyle   : null,
                 alpha       : 0.3
             }
     
@@ -76,16 +57,9 @@ define(
             init:function(opt){
                 _.deepExtend( this , opt );
 
-                if( !this.line.strokeStyle.over ){
-                    this.line.strokeStyle.over = this.line.strokeStyle.normal;
-                }
-
                 //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
-                !this.node.strokeStyle.normal && ( this.node.strokeStyle.normal = this.line.strokeStyle.normal );
-                !this.node.strokeStyle.over   && ( this.node.strokeStyle.over   = this.line.strokeStyle.over   );
-                !this.fill.fillStyle.normal   && ( this.fill.fillStyle.normal   = this.line.strokeStyle.normal );
-                !this.fill.fillStyle.over     && ( this.fill.fillStyle.over     = this.line.strokeStyle.over   );
-      
+                !this.node.strokeStyle && ( this.node.strokeStyle = this.line.strokeStyle );
+                !this.fill.fillStyle   && ( this.fill.fillStyle   = this.line.strokeStyle );
                 this.sprite = new Canvax.Display.Sprite();
             },
             draw:function(opt){
@@ -132,11 +106,11 @@ define(
                 self._nodeInd = $index
                 var o = _.clone(self.data[$index])
                 if( o ){
-                    o.r           = self._getProp(self.node.r.over);
-                    o.fillStyle   = self._getProp(self.node.fillStyle.over) || "#ffffff";
-                    o.strokeStyle = self._getProp(self.node.strokeStyle.over) || self._getColor( self.line.strokeStyle.over );
-                    o.color       = self._getProp(self.node.strokeStyle.over) || self._getColor( self.line.strokeStyle.over ); //这个给tips里面的文本用
-                    o.lineWidth   = self._getProp(self.node.lineWidth.over) || 2; 
+                    o.r           = self._getProp(self.node.r);
+                    o.fillStyle   = self._getProp(self.node.fillStyle) || "#ffffff";
+                    o.strokeStyle = self._getProp(self.node.strokeStyle) || self._getColor( self.line.strokeStyle );
+                    o.color       = self._getProp(self.node.strokeStyle) || self._getColor( self.line.strokeStyle ); //这个给tips里面的文本用
+                    o.lineWidth   = self._getProp(self.node.lineWidth) || 2; 
                     o.alpha       = self._getProp(self.fill.alpha);
                     // o.fillStyle = '#cc3300'
                     // console.log(o.fillStyle)
@@ -211,7 +185,7 @@ define(
                     id : "brokenline_" + self._groupInd,
                     context : {
                         pointList   : list,
-                        strokeStyle : self._getColor( self.line.strokeStyle.normal ),//self.line.strokeStyle.normal,
+                        strokeStyle : self._getColor( self.line.strokeStyle ),
                         lineWidth   : self.line.lineWidth,
                         y           : self.y,
                         smooth      : self.line.smooth 
@@ -244,7 +218,7 @@ define(
                     //创建一个线性渐变
                     fill_gradient  =  self.ctx.createLinearGradient(topP[0],topP[1],topP[0],0);
 
-                    var rgb  = ColorFormat.colorRgb( self._getColor( self.fill.fillStyle.normal ) );
+                    var rgb  = ColorFormat.colorRgb( self._getColor( self.fill.fillStyle ) );
                     var rgba0 = rgb.replace(')', ', '+ self._getProp( self.fill.alpha[0] ) +')').replace('RGB', 'RGBA');
                     fill_gradient.addColorStop( 0 , rgba0 );
 
@@ -255,7 +229,7 @@ define(
                 var fill = new Path({            //填充
                     context : {
                         path        : self._fillLine( bline ), 
-                        fillStyle   : fill_gradient || self._getColor( self.fill.fillStyle.normal ),
+                        fillStyle   : fill_gradient || self._getColor( self.fill.fillStyle ),
                         globalAlpha : fill_gradient ? 1 : self.fill.alpha//self._getProp( self.fill.alpha )
                     }
                 });
@@ -275,10 +249,10 @@ define(
                             context : {
                                 x           : self._currPointList[a][0],
                                 y           : self._currPointList[a][1],
-                                r           : self._getProp( self.node.r.normal ),
-                                fillStyle   : self._getProp( self.node.fillStyle.normal ) || "#ffffff",
-                                strokeStyle : self._getProp( self.node.strokeStyle.normal ) || self._getColor( self.line.strokeStyle.normal ),
-                                lineWidth   : self._getProp( self.node.lineWidth.normal ) || 2
+                                r           : self._getProp( self.node.r ),
+                                fillStyle   : self._getProp( self.node.fillStyle ) || "#ffffff",
+                                strokeStyle : self._getProp( self.node.strokeStyle ) || self._getColor( self.line.strokeStyle),
+                                lineWidth   : self._getProp( self.node.lineWidth ) || 2
                             }
                         });
 

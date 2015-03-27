@@ -118,45 +118,27 @@ KISSY.ready(function(){
             field : "date"
         },
         graphs:{
-
             line:{
-                strokeStyle : {
-                    normal : ["#1054a3"]
-                }
+                strokeStyle : "#1054a3"
             },
             fill:{
                 alpha:0
             },
             node:{
-                fillStyle:{
-                    normal:function(o){
-                        if(o.iNode == anchorXIndex){
-                            return '#cc3300'
-                        }
-                    },
-                    over:function(o){
-                        if(o.iNode == anchorXIndex){
-                            return '#cc3300'
-                        }
+                fillStyle:function(o){
+                    if(o.iNode == anchorXIndex){
+                        return '#cc3300'
                     }
                 },
-                strokeStyle:{
-                    normal:function(o){
-                        if(o.iNode == anchorXIndex){
-                            return '#cc3300'
-                        }
-                    },
-                    over:function(o){
-                        if(o.iNode == anchorXIndex){
-                            return '#cc3300'
-                        }
+                strokeStyle:function(o){
+                    if(o.iNode == anchorXIndex){
+                        return '#cc3300'
                     }
                 },
-                lineWidth:{
-                    normal:function(o){
-                        if(o.iNode == anchorXIndex){
-                            return 4
-                        }
+                   
+                lineWidth:function(o){
+                    if(o.iNode == anchorXIndex){
+                        return 4
                     }
                 }
             }
@@ -165,6 +147,9 @@ KISSY.ready(function(){
             line : {
                 enabled : 0
             },
+            fillStyle : "white",
+            strokeStyle : "#999",
+            alpha:1,
             content : function(info){
                 var str  = "<table>";
                 
