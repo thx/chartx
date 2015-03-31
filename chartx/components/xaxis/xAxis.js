@@ -7,10 +7,13 @@ define(
     ],
     function(Canvax, Line , Tools){
         var xAxis = function(opt , data){
+            this.graphw = 0;
+            this.graphh = 0;
+            this.yAxisW = 0;
             this.w = 0;
             this.h = 0;
     
-            this.disY       = 0
+            this.disY       = 1;
             this.dis        = 6;                           //线到文本的距离
     
             this.line = {
@@ -20,19 +23,17 @@ define(
                     strokeStyle   : '#cccccc'
             }
     
-            this.max  = { 
-                    left    : 0,                           //第一个文字最左侧坐标的最大值              
-                    right   : 0,                           //最后一个文字最右侧坐标的最大值
-    
-                    txtH    : 14                           //文字最大高
-            }
-    
             this.text = {
-                    mode      : 1,                         //模式(1 = 文字有几个线有几条 | 2 = 线不做过滤)
                     dis       : 0,                         //间隔(间隔几个文本展现)
                     fillStyle : '#999999',
                     fontSize  : 13,
                     rotation  : 0
+            }
+            this.maxTxtH = 0;
+
+            this.pos = {
+                x  : null,
+                y  : null
             }
     
             //this.display = "block";
@@ -47,12 +48,15 @@ define(
             this.data        = [];                          //{x:100, content:'1000'}
             this.layoutData  = [];                          //this.data(可能数据过多),重新编排后的数据集合, 并根据此数组展现文字和线条
             this.sprite      = null;
-            this.txtSp       = null;
-            this.lineSp      = null;
 
             this._textMaxWidth = 0;
+            this.leftDisX      = 0; //x轴最左边需要的间距。默认等于第一个x value字符串长度的一半
+
+            //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
+            //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
+            this.filter       =  null; //function(params){}; 
     
-            this.init(opt , data)
+            this.init(opt , data);
         };
     
         xAxis.prototype = {
@@ -96,7 +100,7 @@ define(
                 this.data = this._trimXAxis( this.dataSection , this.xGraphsWidth );
                 this._trimLayoutData();
 
-                this.setX( this.pos.x + this.disOriginX );
+                this.setX( this.pos.x );
                 this.setY( this.pos.y );
                 
                 if( this.enabled ){ //this.display != "none"
@@ -113,13 +117,19 @@ define(
             _initConfig:function( opt ){
               	if( opt ){
                     _.deepExtend( this , opt );
+                };
+
+                this.yAxisW = Math.max( this.yAxisW , this.leftDisX );
+                this.w      = this.graphw - this.yAxisW;
+                if( this.pos.x == null ){
+                    this.pos.x =  this.yAxisW + this.disOriginX;
                 }
-                this.max.right = this.w;
+                if( this.pos.y == null ){
+                    this.pos.y =  this.graphh - this.h;
+                }
+
                 this.xGraphsWidth = this.w - this._getXAxisDisLine()
                 this.disOriginX   = parseInt((this.w - this.xGraphsWidth) / 2);
-
-                this.max.left  += this.disOriginX;
-                this.max.right -= this.disOriginX;
             },
             _trimXAxis:function( data , xGraphsWidth ){
                 var tmpData = [];
@@ -146,34 +156,35 @@ define(
                 if( !this.enabled ){ //this.display == "none"
                     this.h = this.dis;//this.max.txtH;
                 } else {
-                                        
-                    if( !!this.text.rotation ){
-                        this.h = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                    } else {
-                        var txt = new Canvax.Display.Text('test',
+                    var txt = new Canvax.Display.Text( this.dataSection[0] ,
                                 {
                                     context : {
                                         fontSize    : this.text.fontSize
                                     }
                                 });
-                        this.max.txtH = txt.getTextHeight();
-                        this.h = this.disY + this.line.height + this.dis + this.max.txtH;
+                    this.maxTxtH = txt.getTextHeight();
+                    
+                    if( !!this.text.rotation ){
+                        this.h = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
+                        this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180)*txt.getTextWidth() + 8;
+                    } else {
+                        this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
+                        this.leftDisX = txt.getTextWidth() / 2;
                     }
                 }
             },
             _widget:function(){
                 var arr = this.layoutData
-    
-              	this.txtSp  = new Canvax.Display.Sprite(),  this.sprite.addChild(this.txtSp)
-             	this.lineSp = new Canvax.Display.Sprite(),  this.sprite.addChild(this.lineSp)
+
               	for(var a = 0, al = arr.length; a < al; a++){
     
+                    var xNode = new Canvax.Display.Sprite({id : "xNode"+a});
+
                   	var o = arr[a]
                   	var x = o.x, y = this.disY + this.line.height + this.dis
 
                   	var content = Tools.numAddSymbol(o.content);
                   	//文字
-                   
                   	var txt = new Canvax.Display.Text(content,
                        {
                         context : {
@@ -186,16 +197,16 @@ define(
                             textBaseline: !!this.text.rotation ? "middle" : "top"
                        }
                   	});
-                  	this.txtSp.addChild(txt);
-                } 
-    
-                var arr = this.text.mode == 1 ? this.layoutData : this.data
-                for(var a = 0, al = arr.length; a < al; a++){
-                    var o = arr[a]
-                    var x = o.x
+                  	xNode.addChild(txt);
+                    if( !this.text.rotation ){
+               	    	txt.context.x = parseInt(txt.context.x - txt.getTextWidth() / 2) ;
+                    } else {
+                        txt.context.x += 5;
+                        txt.context.y += 3;
+                    }
+
                     //线条
                     var line = new Line({
-                        id      : a,
                         context : {
                             xStart      : x,
                             yStart      : this.disY,
@@ -205,29 +216,25 @@ define(
                             strokeStyle : this.line.strokeStyle
                         }
                     });
-                    this.lineSp.addChild(line);
-                }
-    
-                if( !this.text.rotation ){
-                    //在非斜排xAxis的情况下面需要居中矫正
-               	    for(var a = 0, al = this.txtSp.getNumChildren(); a < al; a++){
-               	    	var txt = this.txtSp.getChildAt(a)
-               	    	var x = parseInt(txt.context.x - txt.getTextWidth() / 2)
-               	    	txt.context.x = x
-               	    }
-                }
-                
+                    xNode.addChild( line );
+
+                    //这里可以由用户来自定义过滤 来 决定 该node的样式
+                    this.filter && this.filter({
+                        data  : arr,
+                        index : a,
+                        txt   : txt,
+                        line  : line
+                    });
+
+                    this.sprite.addChild( xNode );
+                };
+                        
             },
             /*校验第一个和最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout:function(){
-    			var firstText = this.txtSp.getChildAt(0)
-    			var popText = this.txtSp.getChildAt(this.txtSp.getNumChildren() - 1)
-    
-    			if(firstText && firstText.context.x < this.max.left){
-    				firstText.context.x = parseInt(this.max.left)
-    			}
-    			if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > this.max.right)) {
-    				popText.context.x = parseInt(this.max.right - popText.getTextWidth())
+    			var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
+                if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > this.w)) {
+    				popText.context.x = parseInt(this.w - popText.getTextWidth())
     			}
             },
             _getTextMaxWidth : function(){
@@ -254,10 +261,10 @@ define(
             _trimLayoutData:function(){
                 var tmp = []
                 var arr = this.data
-       
-                var maxWidth =  this.max.right                                          //总共能多少像素展现
-                var n = Math.min( Math.floor( maxWidth / this._textMaxWidth ) , arr.length ); //能展现几个
-                var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                            //array中展现间隔
+    
+                //总共能多少像素展现
+                var n = Math.min( Math.floor( this.w / this._textMaxWidth ) , arr.length ); //能展现几个
+                var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                  //array中展现间隔
                 if(this.text.dis){
                     dis = this.text.dis
                 }

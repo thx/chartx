@@ -127,7 +127,6 @@ define(
                    .to( self._getPointY( self._pointList ), 1500 )
                    .easing( Tween.Easing.Quintic.Out )
                    .onUpdate( function (  ) {
-
                        for( var p in this ){
                            self._currPointList[ parseInt( p.split("_")[1] ) ][1] = this[p];
                        };
@@ -280,8 +279,8 @@ define(
                 
                 var fillPath = _.clone( bline.context.pointList );
                 fillPath.push( 
-                    [ fillPath[ fillPath.length -1 ][0] , -1.5 ],
-                    [ fillPath[0][0] , -1.5 ],
+                    [ fillPath[ fillPath.length -1 ][0] , -1 ],
+                    [ fillPath[0][0] , -1 ],
                     [ fillPath[0][0] , fillPath[0][1] ]
                 );
                 

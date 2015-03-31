@@ -20,6 +20,7 @@ var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],[
             }
         },
         yAxis : {
+            //mode : 2, //去掉mode的配置，改为layoutdatafilter过滤的方式来自定义
             enabled : true,
             text:{
                 fillStyle : '#666666'
@@ -27,6 +28,13 @@ var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],[
             //dataSection : [-80,-60,-40,-20,0,20,40,60,80],
             textFormat : function( text ){
                 return text + "%"
+            },
+            line : {
+                enabled : true,
+            },
+            //过滤器
+            filter : function(e){
+                //debugger
             },
             field : ["消耗"]//["val2" , "val3"]
         },
@@ -38,6 +46,9 @@ var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],[
                 rotation  : 30, 
                 //dis       : 2,
                 //fillStyle : '#000000'
+            },
+            filter : function(e){
+            
             },
             field : ["日期"]//"val1"
         },
