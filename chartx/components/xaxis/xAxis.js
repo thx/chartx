@@ -219,7 +219,7 @@ define(
                     xNode.addChild( line );
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
-                    this.filter && this.filter({
+                    _.isFunction(this.filter) && this.filter({
                         data  : arr,
                         index : a,
                         txt   : txt,
@@ -259,6 +259,11 @@ define(
                 return this._textMaxWidth;
             },
             _trimLayoutData:function(){
+                if(this.text.rotation){
+                    //如果 有 选择的话，就不需要过滤x数据，直接全部显示了
+                    this.layoutData = this.data;
+                    return;
+                }
                 var tmp = []
                 var arr = this.data
     
