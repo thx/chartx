@@ -46,7 +46,7 @@ define(
             this.dataOrg     = [];                          //源数据
             this.dataSection = [];                          //默认就等于源数据
             this.data        = [];                          //{x:100, content:'1000'}
-            this.layoutData  = [];                          //this.data(可能数据过多),重新编排后的数据集合, 并根据此数组展现文字和线条
+            this.layoutData  = [];                          //this.data(可能数据过多),重新编排过滤后的数据集合, 并根据此数组展现文字和线条
             this.sprite      = null;
 
             this._textMaxWidth = 0;
@@ -220,10 +220,10 @@ define(
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
                     _.isFunction(this.filter) && this.filter({
-                        data  : arr,
-                        index : a,
-                        txt   : txt,
-                        line  : line
+                        layoutData  : arr,
+                        index       : a,
+                        txt         : txt,
+                        line        : line
                     });
 
                     this.sprite.addChild( xNode );

@@ -11,11 +11,9 @@ define(
         var Tips = function( opt , data , tipDomContainer ){
             this.sprite      = null;
 
-
             this._triangle   = null;
             this._tip        = null;
             this.prefix      = [];
-
 
             this._mapScale       = 1;
 
@@ -24,6 +22,7 @@ define(
             this._nearestPoint= null;
             this._thirdPoint  = null;
             this._tween       = null;
+
             this.init(opt , data , tipDomContainer);
         };
 
@@ -32,7 +31,7 @@ define(
                 
                 _.deepExtend(this , opt);
                 this.sprite = new Canvax.Display.Sprite({
-                    id : "tips"
+                    id : "map-tips"
                 });
     
                 opt = _.deepExtend({
@@ -40,11 +39,12 @@ define(
                     //content : "中国地图"
                     //重置tips的默认内容函数
                     _getDefaultContent : function( info ){
+                        
                         var str  = "<table>";
                         var self = this;
-                        str +=     "<tr><td colspan='2'>"+info.area.value+"</td></tr>"
+                        str +=     "<tr style='color:#999'><td colspan='2'>"+info.area.value+"</td></tr>"
                         _.each( info.nodesInfoList , function( node , i ){
-                            str+= "<tr style='color:"+(node.color || node.fillStyle) +"'>";
+                            str+= "<tr style='color:#999'>";
                             var prefixName = self.prefix[i];
                             if( !prefixName ) {
                                 prefixName = node.field
@@ -56,7 +56,12 @@ define(
                         return str;
                     }
                 } , opt);
-                this._tip      = new Tip( opt , tipDomContainer );
+
+                this._tip = new Tip( _.deepExtend( {
+                    alpha       : 1,
+                    fillStyle   : "#ffffff",
+                    strokeStyle : "#b0b0b0"
+                } , opt ) , tipDomContainer );
             },
             show : function(e , mapData){
                 this.sprite.addChild( this._tip.sprite );
@@ -75,7 +80,8 @@ define(
                 this._triangle.context.globalAlpha = 0;
             },
             _weight : function(e){
-                var cPoint = [ e.target.mapData.cx*this._mapScale , e.target.mapData.cy*this._mapScale ];
+                var br = this._tip.backR;
+                var cPoint = [ e.target.mapData.cp[0]*this._mapScale , e.target.mapData.cp[1]*this._mapScale ];
                 this._cPoint = new Circle({
                     context : {
                         x : cPoint[0],
@@ -87,9 +93,9 @@ define(
                 this.sprite.addChild( this._cPoint );
 
 
-                var tipPosition = "left"
+                var tp = "left"
                 if( cPoint[0] < this._mapScale * 560 / 2 ){
-                    tipPosition = "right";
+                    tp = "right";
                 }
         
                 //最靠近cPoint的 一个 背景三角形的 校准点到cPoint的距离
@@ -97,9 +103,10 @@ define(
 
                 //先计算出来最靠近cPoint 的 校准点
                 var nearestPoint = [
-                    cPoint[0] + Math.cos(-Math.PI*(tipPosition=="left" ? 3 : 2)/5) * mr,
-                    cPoint[1] + Math.sin(-Math.PI*(tipPosition=="left" ? 3 : 2)/5) * mr
+                    cPoint[0] + Math.cos(-Math.PI*(tp=="left" ? 3 : 2)/5) * mr,
+                    cPoint[1] + Math.sin(-Math.PI*(tp=="left" ? 3 : 2)/5) * mr
                 ];
+                
                 if( nearestPoint[1] < 0 ){
                     nearestPoint[1] = 2;
                 }
@@ -109,12 +116,9 @@ define(
                 var tipH = this._tip.dH;
 
                 var thirdPoint = [
-                    nearestPoint[0] + (tipPosition=="left" ? -tipW : tipW ), // - tipW,
-                    nearestPoint[1] + tipH
+                    nearestPoint[0] + (tp=="left" ? -tipW : tipW ), // - tipW,
+                    nearestPoint[1] + tipH 
                 ];
-
-                //因为tip的背景框有可能是圆角的，所以要加上tip的backR，否则三角形的背景框会露出来
-                nearestPoint[1] += this._tip.backR;  
 
                 if( this._thirdPoint && this._nearestPoint ){
                    
@@ -137,14 +141,20 @@ define(
                             .onUpdate( function (  ) {
                                 me._nearestPoint[0] = this.n0;
                                 me._nearestPoint[1] = this.n1;
-                                me._thirdPoint[0] = this.n0 + (tipPosition=="left" ? -tipW : tipW );
+                                me._thirdPoint[0] = this.n0 + (tp=="left" ? -tipW : tipW );
                                 me._thirdPoint[1] = this.n1 + tipH;
                                 
-                                me._triangle.context.pointList = [cPoint , me._nearestPoint , me._thirdPoint];
+                                var n_p = me._nearestPoint;
+                                var t_p = me._thirdPoint;
+                                me._triangle.context.pointList = [
+                                    cPoint ,
+                                    [ n_p[0]    , n_p[1]+br ] ,
+                                    [ t_p[0]+(tp=="left" ? br : -br) , t_p[1] ]
+                                ];
 
                                 //然后吧tip移动到对应的 计算出来的两个点上面
                                 var _tipPos = me.sprite.localToGlobal({
-                                    x : tipPosition=="left" ? me._thirdPoint[0] : me._nearestPoint[0],
+                                    x : tp=="left" ? me._thirdPoint[0] : me._nearestPoint[0],
                                     y : me._nearestPoint[1]
                                 });
 
@@ -163,9 +173,15 @@ define(
                     };
                     Anima();
                 } else {
+                    var n_p = nearestPoint;
+                    var t_p = thirdPoint;
                     this._triangle = new Polygon({
                         context : {
-                            pointList   : [cPoint , nearestPoint , thirdPoint],
+                            pointList   : [
+                                cPoint , 
+                                [ n_p[0]    , n_p[1]+br ] ,
+                                [ t_p[0] + (tp=="left" ? br : -br) , t_p[1] ]
+                            ],
                             fillStyle   : "white",
                             globalAlpha : 0.7
                         }
@@ -176,7 +192,7 @@ define(
 
                     //然后吧tip移动到对应的 计算出来的两个点上面
                     var _tipPos = this.sprite.localToGlobal({
-                        x : tipPosition=="left" ? thirdPoint[0] : nearestPoint[0],
+                        x : tp=="left" ? thirdPoint[0] : nearestPoint[0],
                         y : nearestPoint[1]
                     });
 

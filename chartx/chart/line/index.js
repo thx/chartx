@@ -182,7 +182,7 @@ define(
                     w    : this._xAxis.w ,
                     h    : y,
                     xAxis:{
-                        data : this._yAxis.data
+                        data : this._yAxis.layoutData
                     },
                     yAxis:{
                         data : this._xAxis.layoutData

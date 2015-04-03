@@ -22,9 +22,10 @@ define(
                     fontSize  : 12,
                     textAlign : "right"
             }
-            this.data        = [];                          //{y:-100, content:'1000'}
-            this.dataSection = [];
-            this.dataOrg     = [];
+            this.layoutData  = [];                           //dataSection对应的layout数据{y:-100, content:'1000'}
+            this.dataSection = [];                           //从原数据dataOrg 中 结果datasection重新计算后的数据
+            this.dataOrg     = [];                           //源数据
+
             this.sprite      = null;
             this.x           = 0;
             this.y           = 0;
@@ -33,16 +34,16 @@ define(
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
 
             this.baseNumber      =  null;
-            this.basePoint       =  null;  //value为baseNumber的point {x,y}
+            this.basePoint       =  null;                    //value为baseNumber的point {x,y}
 
             //最终显示到y轴上面的文本的格式化扩展
             //比如用户的数据是80 但是 对应的显示要求确是80%
             //后面的%符号就需要用额外的contentFormat来扩展
-            this.textFormat   =  null;  
+            this.textFormat      =  null;  
             
             //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
-            this.filter       =  null; //function(params){}; 
+            this.filter          =  null; //function(params){}; 
 
             this.init(opt , data);
         };
@@ -85,7 +86,7 @@ define(
                     tmpData[a] = { content : this.dataSection[a] , y : y };
                 }
 
-                this.data = tmpData;
+                this.layoutData = tmpData;
 
                 //设置basePoint
                 var basePy = - (this.baseNumber - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
@@ -135,7 +136,7 @@ define(
                     self.w = 0;
                     return;
                 }
-                var arr = this.data;
+                var arr = this.layoutData;
                 var maxW = 0;
                 for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
@@ -178,11 +179,11 @@ define(
                     }; 
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
-                    self.filter && self.filter({
-                        data  : self.dataSection,
-                        index : a,
-                        txt   : txt,
-                        line  : line
+                    _.isFunction(self.filter) && self.filter({
+                        layoutData  : self.dataSection,
+                        index       : a,
+                        txt         : txt,
+                        line        : line
                     });
 
                     self.sprite.addChild( yNode );
