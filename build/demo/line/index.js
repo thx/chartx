@@ -1,3 +1,12 @@
+
+
+function del(){
+    line.remove("val2");
+}
+
+function add(){
+    line.add("val2" , 0)
+}
 KISSY.ready(function(){
 
     var S = KISSY;
@@ -12,7 +21,7 @@ KISSY.ready(function(){
         [ 7 , 56  , 68 , 65 ] ,
         [ 8 , 99  , 83 , 51 ] 
     ];
-var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],["2015-03-22",8.13],["2015-03-23",9.56],["2015-03-24",8.87],["2015-03-25",8.32],["2015-03-26",8.33],["2015-03-20",9.39],["2011",8.95],["2015-03-22",8.13],["2015-03-23",9.56],["2015-03-24",8.87],["2015-03-25",8.32],["2015-03-26",8.33]]');
+var data2 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],["2015-03-22",8.13],["2015-03-23",9.56],["2015-03-24",8.87],["2015-03-25",8.32],["2015-03-26",8.33],["2015-03-20",9.39],["2011",8.95],["2015-03-22",8.13],["2015-03-23",9.56],["2015-03-24",8.87],["2015-03-25",8.32],["2015-03-26",8.33]]');
     var options = {
         back  : {
             yAxis     :{
@@ -36,14 +45,14 @@ var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],[
             filter : function(e){
                 //debugger
             },
-            field : ["消耗"]//["val2" , "val3"]
+            field : ["val2" , "val3"]
         },
         xAxis : {
             // enabled : false,
             // dataSection : [0,0.5,1.0,1.5,2.0],
             text:{
                 mode      : 1,
-                rotation  : 30, 
+                //rotation  : 30, 
                 //dis       : 2,
                 //fillStyle : '#000000'
             },
@@ -54,29 +63,14 @@ var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],[
                 }
                 */
             },
-            field : ["日期"]//"val1"
-        },
-        graphs : {
-            line : {
-                lineWidth : 0 
-            }
+            field : "val1"
         }
-    }
-    // KISSY.config({
-    //     packages: [{
-    //         name  :  'chartx'  ,
-    //         path  :  '../../',
-    //         debug :  true
-    //     }
-    //     ]
-    // });
 
-    //KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
-    //    window.line = new Line( S.all("#canvasTest") , data1 , options  );
-    //    line.draw();
-    //});
+    }
+
 
     Chartx.create.line("canvasTest" , data1 , options).then(function( line ){
+        window.line = line;
         line.draw();
     })
 });
