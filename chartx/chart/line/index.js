@@ -89,7 +89,7 @@ define(
                 //然后yAxis更新后，对应的背景也要更新
                 this._back.update({
                     xAxis:{
-                        data : this._yAxis.data
+                        data : this._yAxis.layoutData
                     }
                 });
 
@@ -130,7 +130,7 @@ define(
                 //然后yAxis更新后，对应的背景也要更新
                 this._back.update({
                     xAxis:{
-                        data : this._yAxis.data
+                        data : this._yAxis.layoutData
                     }
                 });
 
@@ -296,8 +296,8 @@ define(
                 this.stageBg.addChild(this._anchor.sprite)
     
                 this.core.addChild(this._xAxis.sprite);
-                this.core.addChild(this._graphs.sprite);
                 this.core.addChild(this._yAxis.sprite);
+                this.core.addChild(this._graphs.sprite);
                 
                 this.stageTip.addChild(this._tips.sprite);
     

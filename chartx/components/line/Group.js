@@ -40,7 +40,7 @@ define(
     
             this.fill    = {                     //填充
                 fillStyle   : null,
-                alpha       : 0.3
+                alpha       : 0.1
             }
     
             this.data       = [];                          //[{x:0,y:-100},{}]
