@@ -41,8 +41,8 @@ KISSY.ready(function(){
         }
     }   
 
-    KISSY.use("chartx/chart/bar/ , node" , function( S , Bar ){
-        var bar = new Bar( S.all("#canvasTest") , data1 , options );
-        bar.draw();
-    });
+    Chartx.create.bar("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
+
 });

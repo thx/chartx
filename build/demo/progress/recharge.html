@@ -14,7 +14,18 @@
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <script type="text/javascript">
 
-KISSY.ready( function(S){
+    KISSY.ready( function(S){
+            var data    = [];
+            var options = {
+                rate : 60,
+                type : "recharge" 
+            }
+
+            Chartx.create.progress("loading" , data , options).then(function( chart ){
+                chart.draw();
+            })
+
+            /*
         KISSY.use("chartx/chart/progress/recharge , node " , function( S , Recharge ){
             var el       = S.all("#loading");
             var recharge = new Recharge( el , {rate:60} );
@@ -29,7 +40,10 @@ KISSY.ready( function(S){
             window.recharge = recharge;
 
             }); 
+            */
         } );
+
+
 </script>
 </head>
 

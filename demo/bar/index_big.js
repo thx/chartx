@@ -78,24 +78,9 @@ KISSY.ready(function(){
     }
      
 
-    KISSY.config({
-        packages: [{
-            name  :  'chartx'  ,
-            path  :  '../../',
-            // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
-            debug :  true
-        }
-        ]
-    });
 
+    Chartx.create.bar("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
 
-
-    KISSY.use("chartx/chart/bar/ , node" , function( S , Bar ){
-
-        window.bar = new Bar( S.all("#canvasTest") , data1 , options);
-        bar.draw();
-        window.data1   = data1;
-        window.options = options;
-
-    });
 });

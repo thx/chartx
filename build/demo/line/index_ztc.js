@@ -135,7 +135,6 @@ KISSY.ready(function(){
                         return '#cc3300'
                     }
                 },
-                   
                 lineWidth:function(o){
                     if(o.iNode == anchorXIndex){
                         return 4
@@ -183,8 +182,13 @@ KISSY.ready(function(){
     //     ]
     // });
 
-    KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
-        var line = new Line( S.all("#canvasTest") , data1 , options  );
+    //KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
+    //    var line = new Line( S.all("#canvasTest") , data1 , options  );
+    //    line.draw();
+    //});
+
+    Chartx.create.line("canvasTest" , data1 , options).then(function( line ){
         line.draw();
-    });
+    })
+
 });

@@ -48,9 +48,14 @@ function domready(){
         } 
     };
 
-    require("chartx/chart/map/index" , function( Map ){
-        var map = new Map("canvasTest" , data , options);
+    //Chartx.series.map("canvasTest" , data , options).then(function( map ){
+    //    map.draw();
+    //})
+
+    Chartx.create.map("canvasTest" , data , options).then(function( map ){
         map.draw();
-    });
+    })
+
+
 
 }

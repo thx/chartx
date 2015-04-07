@@ -154,10 +154,9 @@ var data = {
 };
          
          var options = {};
-         require("chartx/chart/force/index" , function( Force ){
-             var force = new Force("canvasTest" , data , options);
-             force.draw();
-         }); 
+         Chartx.create.force("canvasTest" , data , options).then(function( chart ){
+             chart.draw();
+         })
      }
 
 

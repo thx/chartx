@@ -24,9 +24,10 @@ define(
                 this.area = {
                     strokeStyle : "white",
                     fillStyle   : this.normalColor,
-                    lineWidth   : 3
+                    lineWidth   : 1
                 };
 
+                //默认的areaField字段
                 this.areaField = "area";
 
                 this.tips = {
@@ -291,16 +292,16 @@ define(
                     
                     area.mapData = md;
                     area.on("mouseover hold" , function(e){
-                        this.context.strokeStyle = me._getColor( me.area.strokeStyle , this.mapData  );
-                        this.context.fillStyle   = me._getColor( me.area.fillStyle   , this.mapData  );
-                        this.context.lineWidth   = me.area.lineWidth;
+                        this.context.cursor      = "pointer";
+                        this.context.lineWidth   = me.area.lineWidth+1;
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
-                    });
+                    })
                     area.on("mouseout release" , function(e){
-                        this.context.strokeStyle = me._getColor( me.area.strokeStyle , this.mapData );
-                        this.context.fillStyle   = me._getColor( me.area.fillStyle   , this.mapData );
                         this.context.lineWidth   = me.area.lineWidth;
                         me._tips.hide( e );
+                    });;
+                    area.on("click" , function(e){
+
                     });
 
                     me.sprite.addChild( area_sp ); 

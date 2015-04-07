@@ -19,7 +19,11 @@ define(
             this.content = null; //tips的详细内容
 
             this.fillStyle   = "#000000";
+            this.text        = {
+                fillStyle    : "#ffffff"
+            };
             this.strokeStyle = null;
+            this.lineWidth   = 1;
             this.alpha       = 0.5;
             
             this._tipDom = null;
@@ -115,7 +119,7 @@ define(
                 var str  = "<table>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
-                    str+= "<tr style='color:white'>";
+                    str+= "<tr style='color:"+ self.text.fillStyle +"'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
                         str+="<td>"+ prefixName +"：</td>";
@@ -134,7 +138,7 @@ define(
                     y : 0,
                     width  : this.dW,
                     height : this.dH,
-                    lineWidth : 1,
+                    lineWidth : this.lineWidth,
                     //strokeStyle : "#333333",
                     fillStyle : this.fillStyle,
                     radius : [ this.backR ],

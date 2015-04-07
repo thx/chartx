@@ -20,7 +20,7 @@ define(
         };
      
         return Chart.extend({
-            init : function( el , opt ){
+            init : function( el , data , opt ){
                 this.r = Math.min( this.width , this.height ) / 2;
                 this._beginAngle = 270;
                 this.config = {

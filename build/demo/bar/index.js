@@ -17,12 +17,14 @@ KISSY.ready(function(){
     ];
     var options = {
         yAxis : {
-            field : ["val3"],
+            field : ["val3","val2"],
         },
         xAxis : {
             field : ["val1"],
             line:{
                 strokeStyle   : '#cccccc'
+            },
+            text : {
             }
         },
         graphs:{
@@ -39,8 +41,8 @@ KISSY.ready(function(){
         }
     }   
 
-    KISSY.use("chartx/chart/bar/ , node" , function( S , Bar ){
-        var bar = new Bar( S.all("#canvasTest") , data1 , options );
-        bar.draw();
-    });
+    Chartx.create.bar("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
+
 });

@@ -6,7 +6,7 @@ requirejs.config({
   }
 });
 
-requirejs(['domReady', '../../lib/underscore', 'jquery-1.11.1', 'chartx/chart/pie/index'], function (domready, underscore, $, Pie) {
+requirejs(['domReady',  'jquery-1.11.1'], function (domready,  $ ) {
   domready(function () {    
     var data1 = [
     ['Firefox', 20],
@@ -56,38 +56,40 @@ requirejs(['domReady', '../../lib/underscore', 'jquery-1.11.1', 'chartx/chart/pi
       //颜色序列,若不设置，会有默认的颜色序列
       //colors:['red', 'yellow', 'blue']
     }
+debugger
+     Chartx.create.pie("canvasTest" , data1 , options).then(function( pie ){
+         pie.on('complete', function () {
+          //使用getList方法获取圆基础信息
+          /*
+          {
+          name:名称
+          index:索引
+          r:半径
+          color:颜色
+          percentage:百分比
+          }
+          */
+          var list = pie.getList();
+          var ul, li;
+          var legendContainer = $("#pieLegend");
+          legendContainer.empty();
+          ul = $('<ul></ul>');
+          legendContainer.append(ul);
 
-    window.pie = new Pie(Dvix.getEl("canvasTest"), data1, options);
-    pie.on('complete', function () {
-      //使用getList方法获取圆基础信息
-      /*
-      {
-      name:名称
-      index:索引
-      r:半径
-      color:颜色
-      percentage:百分比
-      }
-      */
-      var list = pie.getList();
-      var ul, li;
-      var legendContainer = $("#pieLegend");
-      legendContainer.empty();
-      ul = $('<ul></ul>');
-      legendContainer.append(ul);
+          for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            li = $('<li id="list_' + item.index + '" index="' + item.index + '" style="color:' + item.color + '"><span style="background-color:' + item.color + '"></span>' + item.name + '</li>');
+            ul.append(li);
+          }
 
-      for (var i = 0; i < list.length; i++) {
-        var item = list[i];
-        li = $('<li id="list_' + item.index + '" index="' + item.index + '" style="color:' + item.color + '"><span style="background-color:' + item.color + '"></span>' + item.name + '</li>');
-        ul.append(li);
-      }
-
-      //使用show方法控制扇形的显示与隐藏
-      $('li', legendContainer).on('click', function (e) {
-        var index = e.target.getAttribute('index');
-        pie.show(index);
-      });
-    });
-    pie.draw();
+          //使用show方法控制扇形的显示与隐藏
+          $('li', legendContainer).on('click', function (e) {
+            var index = e.target.getAttribute('index');
+            pie.show(index);
+          });
+         });
+         pie.draw();
+     })
+    
   })
 })

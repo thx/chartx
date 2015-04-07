@@ -34,12 +34,12 @@ define(
                 dataFrame.org = arr;
                 var fileds = arr[0] ? arr[0] : []; //所有的字段集合
     
-                this.yAxis && _.extend( dataFrame.yAxis , this.yAxis );
-                this.xAxis && _.extend( dataFrame.xAxis , this.xAxis );
+                this.yAxis && ( dataFrame.yAxis.field = this.yAxis.field );
+                this.xAxis && ( dataFrame.xAxis.field = this.xAxis.field );
 
                 if( opt ){
-                    opt.yAxis && _.extend( dataFrame.yAxis , opt.yAxis );
-                    opt.xAxis && _.extend( dataFrame.xAxis , opt.xAxis );
+                    opt.yAxis && ( dataFrame.yAxis.field , opt.yAxis.field );
+                    opt.xAxis && ( dataFrame.xAxis.field , opt.xAxis.field );
                 }
 
                 var total = [];

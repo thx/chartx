@@ -31,21 +31,21 @@ define(
                     // data        : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'dashed',                //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#e5e5e5'
+                    strokeStyle : '#e5e5e5',
+                    filter      : null
             }
     
             this.yAxis   = {                                //y轴上的线
                     enabled     : 0,
                     data        : [],                      //[{x:100},{}]
                     // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
-                    lineType    : '',                      //线条类型(dashed = 虚线 | '' = 实线)
+                    lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#e5e5e5'
+                    strokeStyle : '#e5e5e5',
+                    filter      : null
             } 
     
             this.sprite       = null;                       //总的sprite
-            this.xOriginSp    = null;                       //原点开始的x轴线
-            this.yOriginSp    = null;                       //原点开始的y轴线
             this.xAxisSp      = null;                       //x轴上的线集合
             this.yAxisSp      = null;                       //y轴上的线集合
     
@@ -80,8 +80,6 @@ define(
                 var self  = this;
                 self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp)
                 self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp)
-                self.xOriginSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xOriginSp)
-                self.yOriginSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yOriginSp)
     
                 //x轴上的线集合
                 var arr = self.xAxis.data
@@ -98,8 +96,14 @@ define(
                             strokeStyle : self.xAxis.strokeStyle  
                         }
                     })
-                    if(self.xAxis.enabled)
+                    if(self.xAxis.enabled){
+                        _.isFunction( self.xAxis.filter ) && self.xAxis.filter({
+                            layoutData : self.xAxis.data,
+                            index      : a,
+                            line       : line
+                        });
                         self.xAxisSp.addChild(line);
+                    }
                 }
                 //y轴上的线集合
                 var arr = self.yAxis.data
@@ -116,8 +120,14 @@ define(
                             strokeStyle : self.yAxis.strokeStyle  
                         }
                     })
-                    if(self.yAxis.enabled)
+                    if(self.yAxis.enabled){
+                        _.isFunction( self.yAxis.filter ) && self.yAxis.filter({
+                            layoutData : self.yAxis.data,
+                            index      : a,
+                            line       : line
+                        });
                         self.yAxisSp.addChild(line);
+                    }
                 }
 
                 //原点开始的y轴线
@@ -130,7 +140,7 @@ define(
                     }
                 })
                 if(self.yOrigin.enabled)
-                    self.yOriginSp.addChild(line)
+                    self.sprite.addChild(line)
     
                 //原点开始的x轴线
                 var line = new Line({
@@ -142,7 +152,7 @@ define(
                     }
                 })
                 if(self.xOrigin.enabled)
-                    self.xOriginSp.addChild(line)
+                    self.sprite.addChild(line)
             }
         };
     

@@ -148,8 +148,8 @@ KISSY.ready(function(){
 
     }
 
-    KISSY.use("chartx/chart/planet/, node" , function( S , Planet ){
-        var planet = new Planet( S.all("#canvasTest") , data1 , options  );
-        planet.draw();
-    });
+
+    Chartx.create.planet("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
 });

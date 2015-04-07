@@ -69,60 +69,61 @@ define(
                         );
             },
             _startDraw : function(){
-                var self = this;
-                //首先
-                var x = 0;
                 var y = parseInt(this.height - this._xAxis.h)
                 
                 //绘制yAxis
-                self._yAxis.draw({
+                this._yAxis.draw({
                     pos : {
                         x : 0,
                         y : y
                     },
                     yMaxHeight : y 
                 });
-    
-                x = self._yAxis.w
-    
+
+                var _yAxisW = this._yAxis.w;
+
                 //绘制x轴
-                self._xAxis.draw({
-                    w    :   self.width - x ,
-                    max  :   {
-                        left  : -x
-                    },
-                    pos  : {
-                        x : x,
-                        y : y
-                    }
+                this._xAxis.draw({
+                    graphh :   this.height,
+                    graphw :   this.width,
+                    yAxisW :   _yAxisW
                 });
-    
+                if( this._xAxis.yAxisW != _yAxisW ){
+                    //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
+                    this._yAxis.resetWidth( this._xAxis.yAxisW );
+                    _yAxisW = this._xAxis.yAxisW;
+                };
+
                 //绘制背景网格
-                self._back.draw({
-                    w    : self.width - x ,
+                this._back.draw({
+                    w    : this._xAxis.w ,
                     h    : y,
                     xAxis:{
-                        data : self._yAxis.data
+                        data : this._yAxis.layoutData
                     },
-                    pos : {
-                        x : x + this._xAxis.disOriginX,
+                    yAxis:{
+                        data : this._xAxis.layoutData
+                    },
+                    pos  : {
+                        x : _yAxisW,
                         y : y
                     }
                 });
-    
+
+            
                 //绘制主图形区域
                 this._graphs.draw( this._trimGraphs() , {
                     w    : this._xAxis.xGraphsWidth,
                     h    : this._yAxis.yGraphsHeight,
                     pos  : {
-                         x : x + this._xAxis.disOriginX ,
+                         x : _yAxisW ,
                          y : y
                     },
                     yDataSectionLen : this._yAxis.dataSection.length
                 });
     
                 //执行生长动画
-                self._graphs.grow();
+                this._graphs.grow();
               
             },
             _trimGraphs:function(){

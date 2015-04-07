@@ -68,9 +68,7 @@ define(
                 this._graphs = new Graphs(this.graphs);
             },
             _startDraw : function(){
-                //首先
-                var x = 0;
-                var y = this.height - this._xAxis.h
+                var y = parseInt(this.height - this._xAxis.h)
                 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -80,33 +78,34 @@ define(
                     },
                     yMaxHeight : y 
                 });
+                
+                var _yAxisW = this._yAxis.w;
     
-                x = this._yAxis.w
     
                 //绘制x轴
                 this._xAxis.draw({
-                    w    :   this.width - x ,
-                    max  :   {
-                        left  : -x
-                    },
-                    pos  : {
-                        x : x,
-                        y : y
-                    }
+                    graphh :   this.height,
+                    graphw :   this.width,
+                    yAxisW :   _yAxisW
                 });
+                if( this._xAxis.yAxisW != _yAxisW ){
+                    //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
+                    this._yAxis.resetWidth( this._xAxis.yAxisW );
+                    _yAxisW = this._xAxis.yAxisW;
+                };
     
                 //绘制背景网格
                 this._back.draw({
-                    w    : this.width - x ,
+                    w    : this._xAxis.w ,
                     h    : y,
                     xAxis:{
-                        data : this._yAxis.data
+                        data : this._yAxis.layoutData
                     },
                     yAxis:{
-                        data : this._xAxis.data
+                        data : this._xAxis.layoutData
                     },
                     pos : {
-                        x : x + this._xAxis.disOriginX,
+                        x : _yAxisW,
                         y : y
                     }
                 });
@@ -116,7 +115,7 @@ define(
                     w    : this._xAxis.xGraphsWidth,
                     h    : this._yAxis.yGraphsHeight,
                     pos  : {
-                         x : x + this._xAxis.disOriginX ,
+                         x : _yAxisW ,
                          y : y
                     }
                 });
@@ -148,7 +147,7 @@ define(
                 for( var i = 0 , il = yArr.length; i < il ; i++ ){
                     !tmpData[i] && (tmpData[i] = []);
                     for( var ii = 0 , iil = yArr[i].length ; ii < iil ; ii++ ){
-                        var y = -(yArr[i][ii]-this._yAxis._baseNumber) / (maxYAxis - this._yAxis._baseNumber) * this._yAxis.yGraphsHeight;
+                        var y = -(yArr[i][ii]-this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
                         var x = (xArr[i][ii]-this._xAxis._baseNumber) / (maxXAxis - this._xAxis._baseNumber) * this._xAxis.w;
     
                         tmpData[i][ii] = {
@@ -161,6 +160,7 @@ define(
                         }
                     }
                 }
+                
                 return tmpData;
             },
             _drawEnd:function(){

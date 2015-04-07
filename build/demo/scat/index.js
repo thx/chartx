@@ -69,11 +69,8 @@ KISSY.ready(function(){
             }
         }
     }
-     
-    KISSY.use("chartx/chart/scat/ , node" , function( S , Scat ){
-        window.scat = new Scat( S.all("#canvasTest") , data1 , options );
-        scat.draw();
-    });
-
+    Chartx.create.scat("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
     
 });

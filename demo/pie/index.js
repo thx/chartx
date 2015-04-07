@@ -1,4 +1,6 @@
 ﻿KISSY.ready(function () {
+    KISSY.use("node" , function(){
+    
     var S = KISSY;
     var data1 = [
         ['Firefox', 20],
@@ -58,8 +60,7 @@
         //colors:['red', 'yellow', 'blue']
     }
 
-    KISSY.use("chartx/chart/pie/ , node", function (S, Pie) {
-        window.pie = new Pie(S.all("#canvasTest"), data1, options);
+    Chartx.create.pie("canvasTest" , data1 , options).then(function( pie ){
         pie.on('focused', function (e) {
 
         })
@@ -96,5 +97,7 @@
         });
 
         pie.draw();
-    });
+    })
+ })
+
 });

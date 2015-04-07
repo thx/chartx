@@ -71,8 +71,12 @@ var data1 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],[
     //     ]
     // });
 
-    KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
-        window.line = new Line( S.all("#canvasTest") , data1 , options  );
+    //KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
+    //    window.line = new Line( S.all("#canvasTest") , data1 , options  );
+    //    line.draw();
+    //});
+
+    Chartx.create.line("canvasTest" , data1 , options).then(function( line ){
         line.draw();
-    });
+    })
 });

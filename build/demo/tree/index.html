@@ -76,8 +76,8 @@
                     link : []
                 }
             };
-            require("chartx/chart/tree/index" , function( Tree ){
-                window.tree = new Tree("canvasTest" , data , {});
+
+            Chartx.create.tree("canvasTest" , data , {}).then(function( tree ){
                 tree.draw();
                 tree.on("nodeMouseover" , function(){
                     console.log( "nodeMouseover" );
@@ -91,7 +91,8 @@
                     debugger
                     console.log( "nodeClick" );
                 });
-            });
+            })
+
         });
     </script>
 </body> 

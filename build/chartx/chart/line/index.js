@@ -152,44 +152,43 @@ define(
             _startDraw : function(){
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
-                var x = 0 
-                var y = this.height - this._xAxis.h 
-                //var _yAxisW = 0
+                var y = this.height - this._xAxis.h;
                 
                 //绘制yAxis
                 this._yAxis.draw({
                     pos : {
-                        x : x,
+                        x : 0,
                         y : y
                     },
                     yMaxHeight : y
                 });
  
                 var _yAxisW = this._yAxis.w;
-                x = _yAxisW     
+                
                 //绘制x轴
                 this._xAxis.draw({
-                    w    :   this.width - _yAxisW ,
-                    max  :   {
-                        left  : -_yAxisW
-                    },
-                    pos  : {
-                        x : x,
-                        y : y
-                    }
+                    graphh :   this.height,
+                    graphw :   this.width,
+                    yAxisW :   _yAxisW
                 });
+                if( this._xAxis.yAxisW != _yAxisW ){
+                    //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
+                    this._yAxis.resetWidth( this._xAxis.yAxisW );
+                    _yAxisW = this._xAxis.yAxisW;
+                };
+
                 //绘制背景网格
                 this._back.draw({
-                    w    : this.width - _yAxisW ,
+                    w    : this._xAxis.w ,
                     h    : y,
                     xAxis:{
-                        data : this._yAxis.data
+                        data : this._yAxis.layoutData
                     },
                     yAxis:{
                         data : this._xAxis.layoutData
                     },
                     pos  : {
-                        x : x + this._xAxis.disOriginX,
+                        x : _yAxisW,
                         y : y
                     }
                 });
@@ -197,8 +196,6 @@ define(
                 if(this._anchor.enabled){
                     //绘制点位线
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
-                    // console.log(x,y)
-                    // console.log(pos.x, pos.y)
                     this._anchor.draw({
                         w    : this.width,
                         h    : y,
@@ -207,19 +204,18 @@ define(
                             y : y + pos.y
                         }
                     });
-                    this._anchor.setX(x + this._xAxis.disOriginX)//, this._anchor.setY(y)
+                    this._anchor.setX(_yAxisW + this._xAxis.disOriginX)//, this._anchor.setY(y)
                 }
 
                 this._graphs.draw({
                     w    : this._xAxis.xGraphsWidth,
                     h    : this._yAxis.yGraphsHeight,
-                    //yBasePoint :  this._yAxis.basePoint,
                     data : this._trimGraphs(),
                     disX : this._getGraphsDisX(),
                     smooth : this.smooth,
                     event: {enabled : this.event.enabled}
                 });
-                this._graphs.setX( x + this._xAxis.disOriginX ), this._graphs.setY(y)
+                this._graphs.setX( _yAxisW ), this._graphs.setY(y)
     
                 //执行生长动画
                 this._graphs.grow();

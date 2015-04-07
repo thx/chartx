@@ -1,4 +1,6 @@
 ﻿KISSY.ready(function () {
+  KISSY.use("node" , function(){
+  
   var S = KISSY;
   var data1 = [
         ['Opera', 1],
@@ -38,10 +40,8 @@
     //colors:['red', 'yellow', 'blue']
   }
 
-  KISSY.use("chartx/chart/pie/ , node", function (S, Pie) {
-
-    window.pie = new Pie(S.all("#canvasTest"), data1, options);    
-    pie.on('complete', function () {
+  Chartx.create.pie("canvasTest" , data1 , options).then(function( pie ){
+      pie.on('complete', function () {
       //使用getList方法获取圆基础信息
       /*
       {
@@ -72,7 +72,9 @@
         pie.slice(index);
       });
     })
-
-    pie.draw();
+      pie.draw();
   });
-});
+
+   });
+
+ });

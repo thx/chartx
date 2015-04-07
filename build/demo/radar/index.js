@@ -42,10 +42,9 @@ KISSY.ready(function(){
             alpha     : 0
         }
     }
-     
-    KISSY.use("chartx/chart/radar/ , node" , function( S , Radar ){
-        window.radar = new Radar( S.all("#canvasTest") , data1 , options );
-        radar.draw();
-    });
+    Chartx.create.radar("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
+
 
 });

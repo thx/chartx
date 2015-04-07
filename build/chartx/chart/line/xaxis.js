@@ -20,7 +20,10 @@ define(
                     });
                 } else {
                     for (var a = 0, al  = data.length; a < al; a++ ) {
-                        var o = {'content':data[a], 'x':parseInt(a / (max - 1) * xGraphsWidth)}
+                        var o = {
+                            'content':data[a], 
+                            'x':parseInt(a / (max - 1) * xGraphsWidth)
+                        }
                         tmpData.push( o )
                     }
                 }
