@@ -3,21 +3,135 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>Canvax</title>
+<title>xChart demo -- line</title>
 
 <style type="text/css">
-    body{margin:0;padding:0;font-size:12px;background-color:#eee;padding:10px 100px 100px;}
-    //canvas {background:#999}
+    body{margin:0;padding:0;font-size:12px;background-color:#eee;}
+    body .CodeMirror pre {font-size:13px;}
+    table { width:100%; height:100%; border:none; border-spacing:0; border-collapse:0; }
+    table td { border:none; vertical-align:top;padding:0;}
+    .test-c {text-align:left;padding-top:10px;}
+    #canvasTest {margin:0}
+    body .CodeMirror {
+        height: auto;
+        width : auto;
+    }
+    #chartdemo-r {
+        overflow-y:auto;
+    }
+    #run {font-size:38px;cursor:pointer;float:left;margin-right:20px;color:#814C00}
 
 </style>
-<script src="http://g.tbcdn.cn/kissy/k/1.4.5/seed-min.js"></script>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+
+
 <script type="text/javascript" src="../../chartx/index.js"></script>
-<script type="text/javascript" src="./custom_xyAxis_datasection.js"></script>
-</head>
-<script type="text/javascript">
-		
+
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<script>
+    function mirrorResize(){
+        $(".CodeMirror ,#chartdemo-r").css("height" , (document.documentElement.clientHeight||document.body.clientHeight)+"px");
+        $(".CodeMirror").css("width" , (document.documentElement.clientWidth||document.body.clientWidth) / 2  +"px");
+    }
+    $(function(){
+            var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+                lineNumbers: true,
+                styleActiveLine: true,
+                matchBrackets: true
+            }); 
+            editor.setOption("theme", "zenburn");
+            $("#run").on("click" , function(){
+                window.eval(editor.getValue());
+            });
+            mirrorResize();
+            document.body.onresize = function(){
+                mirrorResize();
+            };
+            window.eval(editor.getValue());
+
+    });
 </script>
-<body>
- 	<div id="canvasTest" style='background:#ffffff;width:560px;height:300px;'></div>
+<!-- codemirror end -->
+
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+
+</head>
+<body >
+
+<table>
+    <tr>
+        <td style="width:50%;">
+<form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 76  , 45 , 43    ],
+    [ 4      , 58  , 35 , 31    ],
+    [ 5      , 79  , 73 , 71    ],
+    [ 6      , 88  , 54 , 39    ],
+    [ 7      , 56  , 68 , 65    ],
+    [ 8      , 99  , 83 , 51    ]
+];
+//chart的配置信息
+var options = {
+    yAxis : {
+        field : ["uv" , "pv"],
+        //一般 yAxis.dataSection 一般都是根据传入的field然后
+        //通过一个section的算法来计算。但是也可以用户自主来设置一组dataSection
+        //用来显示在y轴上面的文本
+        dataSection : [-100,-50,0,50,100,150]
+    },
+    xAxis : {
+        field : "xfield",
+        //和yAxis轴的dataSection配置同理
+        dataSection : [ "星期一" , "星期二" , "星期三" , "星期四" ]
+    }
+};
+//Chartx.create.line开始初始化chart实例
+Chartx.create.line("canvasTest" , data , options).then(function( line ){
+    //在then中拿到chart的实例line，然后draw到画布上
+    line.draw();
+});
+</textarea></form>
+
+        </td>
+        <td style="width:50%;padding:0 10px;">
+            <div id="chartdemo-r">
+                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                    <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                    <h4>折线图（line chart）- 自定义的x轴和y轴数据</h4>
+                    <p>
+                    联系人：@逢春 @释剑
+                    </p>
+                </div>
+                <div  class="test-c">
+                    <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+
+
+            </div>
+        </td>
+    </tr>
+</table>
+ 
+    
 </body> 
 </html>
+

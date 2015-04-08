@@ -3,26 +3,158 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>Canvax</title>
+<title>xChart demo -- line</title>
 
 <style type="text/css">
-    body{margin:0;padding:0;font-size:12px;background-color:#eee;padding:10px 100px 100px;}
-    //canvas {background:#999}
+    body{margin:0;padding:0;font-size:12px;background-color:#eee;}
+    body .CodeMirror pre {font-size:13px;}
+    table { width:100%; height:100%; border:none; border-spacing:0; border-collapse:0; }
+    table td { border:none; vertical-align:top;padding:0;}
+    .test-c {text-align:left;padding-top:10px;}
+    #canvasTest {margin:0}
+    body .CodeMirror {
+        height: auto;
+        width : auto;
+    }
+    #chartdemo-r {
+        overflow-y:auto;
+    }
+    #run {font-size:38px;cursor:pointer;float:left;margin-right:20px;color:#814C00}
 
 </style>
-<script src="http://g.tbcdn.cn/kissy/k/1.4.5/seed-min.js"></script>
-<script type="text/javascript" src="../../chartx/index.js"></script>
-<script type="text/javascript" src="./add_remove_line.js"></script>
-</head>
-<script type="text/javascript">
-		
-</script>
-<body>
- 	<div id="canvasTest" style='background:#ffffff;width:560px;height:300px;'></div>
- 	<form name="form" onsubmit="return false;">
-		<input type="button" value="删除第一条折线" onclick="del()" />
-		<input type="button" value="把刚才删除的添加回来" onclick="add()" />
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 
-    </form>
+
+<script type="text/javascript" src="../../chartx/index.js"></script>
+
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<script>
+    function mirrorResize(){
+        $(".CodeMirror ,#chartdemo-r").css("height" , (document.documentElement.clientHeight||document.body.clientHeight)+"px");
+        $(".CodeMirror").css("width" , (document.documentElement.clientWidth||document.body.clientWidth) / 2  +"px");
+    }
+    $(function(){
+            var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+                lineNumbers: true,
+                styleActiveLine: true,
+                matchBrackets: true
+            }); 
+            editor.setOption("theme", "zenburn");
+            $("#run").on("click" , function(){
+                window.eval(editor.getValue());
+            });
+            mirrorResize();
+            document.body.onresize = function(){
+                mirrorResize();
+            };
+            window.eval(editor.getValue());
+
+    });
+</script>
+<!-- codemirror end -->
+
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+
+</head>
+<body >
+
+<table>
+    <tr>
+        <td style="width:50%;">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 76  , 45 , 43    ],
+    [ 4      , 58  , 35 , 31    ],
+    [ 5      , 79  , 73 , 71    ],
+    [ 6      , 88  , 54 , 39    ],
+    [ 7      , 56  , 68 , 65    ],
+    [ 8      , 99  , 83 , 51    ]
+];
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的field字段
+var options = {
+    yAxis : {
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "xfield"
+    }
+};
+//Chartx.create.line开始初始化chart实例
+Chartx.create.line("canvasTest" , data , options).then(function( line ){
+    //在then中拿到chart的实例line，然后draw到画布上
+    line.draw();
+
+    //把line暂存到window下面，好在del 和add 中使用
+    window.line = line;
+});
+
+//删除uv线的处理函数
+function del(){
+    line.remove("uv");
+}
+
+//添加uv线的处理函数
+//line.add的第二个参数为添加到整个线列表的index
+//默认为把新的线添加到最上面，push操作
+function add(){
+    line.add("uv" , 0)
+}
+</textarea></form>
+
+        </td>
+        <td style="width:50%;padding:0 10px;">
+            <div id="chartdemo-r">
+                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                    <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+                    <h4>折线图（line chart）- 添加折线，或者删除折线</h4>
+                    <p>
+                        联系人：@逢春 @释剑
+                    </p>
+                </div>
+                <div  class="test-c">
+                    <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+                <form name="form" onsubmit="return false;" style="padding:20px;">
+                    <button type="button" class="btn btn-default " onclick="del()">
+                        删除uv线
+                    </button>
+
+                    <button type="button" class="btn btn-default " onclick="add()">
+                        添加uv线
+                    </button>
+
+                </form>
+
+                <p>
+                折线图Line提供删除<code>remove</code>和增加<code>add</code>线条两个方法。</br>
+                <code>remove</code>的参数只有一个，就是对应的某个yAxis字段。</br>
+                <code>add</code>则有两个参数，第一个是要增加的yAxis字段，第二个则为要添加到整个折线列表的index索引值，0代表最底层，会出现在所有折线的最底部,默认不填写为所有折线的最顶层。
+                </p>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
 </body> 
 </html>
+
