@@ -3,19 +3,89 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>Canvax</title>
-
-<style type="text/css">
-    body{margin:0;padding:0;font-size:12px;}
-    //canvas {background:#999}
-
-</style>
-<script src="http://g.tbcdn.cn/kissy/k/1.4.5/seed-min.js"></script>
+<title>xChart demo -- line</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
-<script type="text/javascript" src="./index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
 </head>
+<body >
 
-<body onload="domready()">
- 	<div id="canvasTest" style=';width:500px;height:500px;'></div>
+<table>
+    <tr>
+        <td id="td-vl">
+<form><textarea id="code" name="code">
+var data = [
+    [ "area"   , "click" ],
+    [ "广东省" , 111 ],
+    [ "浙江省" , 100 ],
+    [ "湖南省" , 80 ],
+    [ "湖北省" , 9 ]
+];
+
+var options = {
+    mapType : "china", //默认便是中国地图
+    areaField : "area", //可选，默认为第一个字段
+    area : {
+        fillStyle : function( area ){
+           if( area ){
+               //点击量超过100的就显示为蓝色
+               if( area[1] > 100 ){
+                   return "#135EBF"
+               }
+           }
+        }
+    },
+    tips : {
+        field  : ["click"],//可选，默认为除开areaField外的所有字段
+        prefix : ["点击量"]
+    } 
+};
+
+Chartx.create.map("canvasTest" , data , options).then(function( map ){
+    map.draw();
+})
+            </textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>中国地图</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
 </body> 
 </html>
+
+

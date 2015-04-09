@@ -4,5 +4,5 @@
 
 daily环境为 <script>http://g-assets.daily.taobao.net/thx/charts/chartx/index.js</scirpt>
 
-cdn环境为   <script>http://g.tbcdn.cn/thx/charts//chartx/index.js</scirpt>
+cdn环境为   <script>http://g.tbcdn.cn/thx/charts/1.6.1/chartx/index.js</scirpt>
 

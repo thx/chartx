@@ -270,9 +270,6 @@ define(
                 //总共能多少像素展现
                 var n = Math.min( Math.floor( this.w / this._textMaxWidth ) , arr.length ); //能展现几个
                 var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                  //array中展现间隔
-                if(this.text.dis){
-                    dis = this.text.dis
-                }
 
                 //存放展现的数据
                 for( var a = 0 ; a < n ; a++ ){
