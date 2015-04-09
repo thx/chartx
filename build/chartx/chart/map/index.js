@@ -170,6 +170,18 @@ define(
                 }
                 return value;
             },
+            /**
+             * 经纬度转平面坐标
+             * @param {Object} p
+             */
+            geo2pos : function (mapType, p) {
+                if (!this._mapDataMap[mapType].transform) {
+                    return null;
+                }
+                return this._mapDataMap[mapType].projection.geo2pos(
+                    this._mapDataMap[mapType].transform, p
+                );
+            },
             _getSingleProvince : function (mapType, path, position) {
                 var textPosition;
                 var name = path.properties.name;

@@ -4,8 +4,7 @@ var Chartx = {
     series  : {},
     start   : function () {
         //业务代码部分。
-        //如果charts有被down下来使用。请修改下面的
-        
+        //如果charts有被down下来使用。请修改下面的 
         var canvaxVersion = "2015.04.01";
         var chartxVersion = "1.6.2";
 
@@ -64,17 +63,23 @@ var Chartx = {
                         return Chartx._queryChart(name , el , data , options);
                     }
                 }
-            }
-        }
+            };
+        };
         Chartx.create = PropertyFactory( Chartx._series );
     },
     _queryChart : function(name , el , data , options){
         return {
             then : function( fn ){
                 var path = "chartx/chart/"+name+"/"+( options.type ? options.type : "index" );
+                var me   = this;
                 require( [path] , function( chartConstructor ){
-                    _.isFunction(fn) && fn( new chartConstructor(el , data , options) );
+                    if( !me._destory ){
+                        _.isFunction(fn) && fn( new chartConstructor(el , data , options) );
+                    }
                 } );
+            },
+            destory : function(){
+                this._destory = true;
             }
         };
     },

@@ -81,7 +81,9 @@ define(
             },
             _weight : function(e){
                 var br = this._tip.backR;
-                var cPoint = [ e.target.mapData.cp[0]*this._mapScale , e.target.mapData.cp[1]*this._mapScale ];
+                
+                //cp -- > textX , textY
+                var cPoint = [ e.target.mapData.textX * this._mapScale , e.target.mapData.textY * this._mapScale ];
                 this._cPoint = new Circle({
                     context : {
                         x : cPoint[0],

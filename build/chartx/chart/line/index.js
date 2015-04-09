@@ -204,7 +204,7 @@ define(
                             y : y + pos.y
                         }
                     });
-                    this._anchor.setX(_yAxisW + this._xAxis.disOriginX)//, this._anchor.setY(y)
+                    this._anchor.setX(_yAxisW )//, this._anchor.setY(y)
                 }
 
                 this._graphs.draw({

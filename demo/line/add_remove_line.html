@@ -4,30 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
 <title>xChart demo -- line</title>
-
-<style type="text/css">
-    body{margin:0;padding:0;font-size:12px;background-color:#eee;}
-    body .CodeMirror pre {font-size:13px;}
-    table { width:100%; height:100%; border:none; border-spacing:0; border-collapse:0; }
-    table td { border:none; vertical-align:top;padding:0;}
-    .test-c {text-align:left;padding-top:10px;}
-    #canvasTest {margin:0}
-    body .CodeMirror {
-        height: auto;
-        width : auto;
-    }
-    #chartdemo-r {
-        overflow-y:auto;
-    }
-    #run {font-size:38px;cursor:pointer;float:left;margin-right:20px;color:#814C00}
-
-</style>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
-
-
 <script type="text/javascript" src="../../chartx/index.js"></script>
-
 <!-- codemirror -->
 <script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
 <script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
@@ -36,44 +15,21 @@
 <link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
 <link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
 <link rel="stylesheet" href="../../lib/codemirror/docs.css">
-<script>
-    function mirrorResize(){
-        $(".CodeMirror ,#chartdemo-r").css("height" , (document.documentElement.clientHeight||document.body.clientHeight)+"px");
-        $(".CodeMirror").css("width" , (document.documentElement.clientWidth||document.body.clientWidth) / 2  +"px");
-    }
-    $(function(){
-            var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-                lineNumbers: true,
-                styleActiveLine: true,
-                matchBrackets: true
-            }); 
-            editor.setOption("theme", "zenburn");
-            $("#run").on("click" , function(){
-                window.eval(editor.getValue());
-            });
-            mirrorResize();
-            document.body.onresize = function(){
-                mirrorResize();
-            };
-            window.eval(editor.getValue());
-
-    });
-</script>
 <!-- codemirror end -->
-
 <!--bootstrap-->
 <script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
 <link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
 <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
 <!--bootstrap end-->
-
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
 </head>
 <body >
 
 <table>
     <tr>
-        <td style="width:50%;">
+        <td id="td_l">
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
@@ -120,11 +76,11 @@ function add(){
 </textarea></form>
 
         </td>
-        <td style="width:50%;padding:0 10px;">
+        <td style="padding:0 10px;" id="td-vr">
             <div id="chartdemo-r">
                 <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                     <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
-                    <h4>折线图（line chart）- 添加折线，或者删除折线</h4>
+                    <h4>折线图（line chart）- 添加,删除折线</h4>
                     <p>
                         联系人：@逢春 @释剑
                     </p>
@@ -136,18 +92,33 @@ function add(){
                     <button type="button" class="btn btn-default " onclick="del()">
                         删除uv线
                     </button>
-
                     <button type="button" class="btn btn-default " onclick="add()">
                         添加uv线
                     </button>
-
                 </form>
 
-                <p>
-                折线图Line提供删除<code>remove</code>和增加<code>add</code>线条两个方法。</br>
-                <code>remove</code>的参数只有一个，就是对应的某个yAxis字段。</br>
-                <code>add</code>则有两个参数，第一个是要增加的yAxis字段，第二个则为要添加到整个折线列表的index索引值，0代表最底层，会出现在所有折线的最底部,默认不填写为所有折线的最顶层。
-                </p>
+            
+                折线图Line提供删除<code>remove</code>和增加<code>add</code>线条两个方法。
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <td>方法</td>
+                            <td>参数</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>remove</code></td>
+                            <td>的参数只有一个，就是对应的某个yAxis字段。</td>
+                        </tr>
+                        <tr>
+                            <td><code>add</code></td>
+                            <td>则有两个参数，第一个是要增加的yAxis字段，第二个则为要添加到整个折线列表的index索引值，0代表最底层，会出现在所有折线的最底部,默认不填写为所有折线的最顶层。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
 
             </div>
         </td>

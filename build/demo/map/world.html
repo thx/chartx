@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -30,8 +30,33 @@
 <table>
     <tr>
         <td id="td-vl">
-            <form><textarea id="code" name="code">
-console.log("helloworld");            
+<form><textarea id="code" name="code">
+var data = [
+    [ "area"   , "click" ]
+];
+
+var options = {
+    mapType   : "world", //默认为china 中国地图
+    areaField : "area", //可选，默认为第一个字段
+    area : {
+        fillStyle : function( area ){
+           if( area ){
+               //点击量超过100的就显示为蓝色
+               if( area[1] > 100 ){
+                   return "#135EBF"
+               }
+           }
+        }
+    },
+    tips : {
+        field  : ["click"],//可选，默认为除开areaField外的所有字段
+        prefix : ["点击量"]
+    } 
+};
+
+Chartx.create.map("canvasTest" , data , options).then(function( map ){
+    map.draw();
+})
             </textarea></form>
 
         </td>
@@ -40,9 +65,9 @@ console.log("helloworld");
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>图表名称</h4>
+                <h4>世界地图</h4>
                 <p>
-                    联系人：@xxx
+                    联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
@@ -58,4 +83,5 @@ console.log("helloworld");
     
 </body> 
 </html>
+
 
