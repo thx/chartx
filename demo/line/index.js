@@ -1,115 +1,76 @@
 
+
+function del(){
+    line.remove("val2");
+}
+
+function add(){
+    line.add("val2" , 0)
+}
 KISSY.ready(function(){
 
     var S = KISSY;
     var data1= [
         ["val1","val2","val3","val4"],
-        [ 1 , 101  , 201 , 301 ] ,
-        [ 2  , 0 , 145 , 100 ] ,
-        [ 3 , 488  , 88  , 700 ] ,
-        [ 4  , 390  , 546 , 300 ] ,
-        [ 5 , 0  , 88  , 700 ] ,
-        [ 6  , 390  , 546 , 300 ] ,
-        [ 7 , 201  , 101 , 500 ] ,
-        [8  , 1145 , 145 , 100 ] ,
-        [ 9 , 488  , 88  , 700 ] ,
-        [ 10  , 390  , 546 , 300 ],
-        [ 11  , 390  , 546 , 300 ],
-        [ 12  , 390  , 546 , 300 ],
-        [ 13  , 390  , 546 , 300 ],
-        [ 14  , 390  , 546 , 300 ],
-        [ 15  , 390  , 546 , 300 ],
-        [ 16  , 390  , 546 , 300 ],
-        [ 17  , 390  , 546 , 300 ],
-        [ 18  , 390  , 546 , 300 ],
-        [ 19  , 390  , 546 , 300 ],
-        [ 20  , 390  , 546 , 300 ],
-        [ 21  , 390  , 546 , 300 ],
-        [ 22  , 390  , 546 , 300 ],
-        [ 23  , 390  , 546 , 300 ],
-        [ 24  , 390  , 546 , 300 ]
+        [ 1 , 101  , 20 , 33 ] ,
+        [ 2 , 67  , 51 , 26 ] ,
+        [ 3 , 76  , 45 , 43 ] ,
+        [ 4 , 58  , 35 , 31 ] ,
+        [ 5 , 79  , 73 , 71 ] ,
+        [ 6 , 88  , 54 , 39 ] ,
+        [ 7 , 56  , 68 , 65 ] ,
+        [ 8 , 99  , 83 , 51 ] 
     ];
+var data2 = JSON.parse('[["日期","消耗"],["2015-03-20",9.39],["2011",8.95],["2015-03-22",8.13],["2015-03-23",9.56],["2015-03-24",8.87],["2015-03-25",8.32],["2015-03-26",8.33],["2015-03-20",9.39],["2011",8.95],["2015-03-22",8.13],["2015-03-23",9.56],["2015-03-24",8.87],["2015-03-25",8.32],["2015-03-26",8.33]]');
     var options = {
-        // title : "first charts",
-        // disXAxisLine : 0,
-        // disYAxisTopLine : 26,
-        mode  : 1,                                     //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
-
-        event : {
-            enabled : 1                                //是否有事件响应(tips)
-        },
-
-        yAxis : {
-            mode   : 1,                                //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
-            field : ["val4","val3"],
-            // dataMode:0,
-            line:{
-                enabled : 0,
-                // strokeStyle : '#ff0000'
-            },
-            text:{
-                // fillStyle:'#ff0000',
-                fontSize  : 12
+        back  : {
+            yAxis     :{
+                enabled  : 1
             }
+        },
+        yAxis : {
+            //mode : 2, //去掉mode的配置，改为layoutdatafilter过滤的方式来自定义
+            enabled : true,
+            text:{
+                fillStyle : '#666666'
+            },
+            //dataSection : [-80,-60,-40,-20,0,20,40,60,80],
+            textFormat : function( text ){
+                return text + "%"
+            },
+            line : {
+                enabled : true,
+            },
+            //过滤器
+            filter : function(e){
+                //debugger
+            },
+            field : ["val2" , "val3"]
         },
         xAxis : {
-            // field : "val2",
-            disY: 6,
-            dis : 6,
-            line:{
-                width   : 2,
-                height  : 4,
-                strokeStyle   : '#cccccc'
-            },
+            // enabled : false,
+            // dataSection : [0,0.5,1.0,1.5,2.0],
             text:{
-                mode      : 2,
-                fontSize  : 10
-            }
-        },
-        back : {
-            xOrigin:{
-                thinkness:1,
-                strokeStyle : '#333333'
+                mode      : 1,
+                //rotation  : 30, 
+                //dis       : 2,
+                //fillStyle : '#000000'
             },
-            yOrigin:{
-                enabled:0
-            },
-            xAxis:{
-                // lineType: ''
-                thinkness:1,
-                strokeStyle : '#cccccc'
-            },
-            yAxis:{
-                // enabled : 0
-            }
-        },
-        graphs:{
-            line:{
-                strokeStyle : {
-                    normals : ['#f8ab5e','#E55C5C'],
-                },
-                alpha       : {
-                    normals : [0.8, 0.7],
+            filter : function(e){
+                /*
+                if( e.index == 0 ){
+                    e.txt.context.visible = false;
                 }
-            }
+                */
+            },
+            field : "val1"
         }
+
     }
 
-    KISSY.config({
-        packages: [{
-            name  :  'dvix'  ,
-            path  :  '../../',
-            debug :  true
-        }
-        ]
-    });
 
-    KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
-        var line = new Line( S.all("#canvasTest") );
-        line.draw( data1 , options );
-        window.line = line
-        window.data1 = data1
-        window.options = options
-        options.yAxis.fields = ["val3","val2","val4"]
-    });
+    Chartx.create.line("canvasTest" , data1 , options).then(function( line ){
+        window.line = line;
+        line.draw();
+    })
 });

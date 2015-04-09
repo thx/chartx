@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,25 +10,19 @@
     //canvas {background:#999}
 
 </style>
-<script type="text/javascript" src="../../node_modules/kissy/build/seed.js"></script>
-<!-- <script type="text/javascript" src="../../dvix/library/kissy.js"></script> -->
-<!-- daily -->
-<!-- <script type="text/javascript" src="../../dvix/library/underscore.js"></script>
-<script type="text/javascript" src="../../dvix/library/canvax/index.js"></script> -->
-<!--<script type="text/javascript" src="http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/flashcanvas.js"></script>-->
-<!-- <script type="text/javascript" src="../../dvix/library/flashCanvas/flashcanvas.js"></script> -->
-<script type="text/javascript" src="../index.js"></script>
+<script src="http://g.tbcdn.cn/kissy/k/1.4.5/seed-min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
 <script type="text/javascript" src="./index.js"></script>
 </head>
 <script type="text/javascript">
-		function test_reset(){
-			line.reset(data1, options);
-		}
+		
 </script>
 <body>
  	<div id="canvasTest" style='background:#ffffff;width:560px;height:300px;'></div>
  	<form name="form" onsubmit="return false;">
-		<input type="button" value="reset" onclick="test_reset()" />
+		<input type="button" value="删除第一条折线" onclick="del()" />
+		<input type="button" value="把刚才删除的添加回来" onclick="add()" />
+
     </form>
 </body> 
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -11,12 +11,22 @@
 </style>
 
 <script type="text/javascript" src="http://g.tbcdn.cn/kissy/k/1.3.1/seed-min.js"></script>
-<script type="text/javascript" src="../index.js"></script>
-<script type="text/javascript" src="http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/flashcanvas.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
 <script type="text/javascript">
 
-KISSY.ready( function(S){
-        KISSY.use("dvix/chart/pregress/recharge , node " , function( S , Recharge ){
+    KISSY.ready( function(S){
+            var data    = [];
+            var options = {
+                rate : 60,
+                type : "recharge" 
+            }
+
+            Chartx.create.progress("loading" , data , options).then(function( chart ){
+                chart.draw();
+            })
+
+            /*
+        KISSY.use("chartx/chart/progress/recharge , node " , function( S , Recharge ){
             var el       = S.all("#loading");
             var recharge = new Recharge( el , {rate:60} );
             recharge.draw();
@@ -30,7 +40,10 @@ KISSY.ready( function(S){
             window.recharge = recharge;
 
             }); 
+            */
         } );
+
+
 </script>
 </head>
 

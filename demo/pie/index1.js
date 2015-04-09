@@ -1,11 +1,21 @@
 ﻿KISSY.ready(function () {
+  KISSY.use("node" , function(){
+  
   var S = KISSY;
-  var data1 = [        
+  var data1 = [
         ['Opera', 1],
-        ['IE', 3],
-        ['Chrome', 5],
-        ['Firefox', 2],
-        ['Safari', 1]        
+        {
+            name: 'AAA',
+            y: 12.8,
+            selected: false
+        },
+        ['IE', 0],
+        ['Safari', 0],
+        ['Chrome', 0],
+        ['Firefox', 1],
+        ['Chrome', 0],
+        ['Chrome', 1],
+        ['Chrome', 0]        
     ];
   var options = {
     //浮动tip
@@ -30,10 +40,8 @@
     //colors:['red', 'yellow', 'blue']
   }
 
-  KISSY.use("dvix/chart/pie/ , node", function (S, Pie) {
-
-    window.pie = new Pie(S.all("#canvasTest"));    
-    pie.on('complete', function () {
+  Chartx.create.pie("canvasTest" , data1 , options).then(function( pie ){
+      pie.on('complete', function () {
       //使用getList方法获取圆基础信息
       /*
       {
@@ -64,7 +72,9 @@
         pie.slice(index);
       });
     })
-
-    pie.draw(data1, options);
+      pie.draw();
   });
-});
+
+   });
+
+ });

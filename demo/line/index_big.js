@@ -2,7 +2,7 @@
 KISSY.ready(function(){
 
     var S = KISSY;
-    var data1= [
+    window.data1= [
         ["val1","val2","val3","val4"],
         [ 1 , 101  , 201 , 301 ] 
 
@@ -58,40 +58,27 @@ KISSY.ready(function(){
             }
         },
         graphs:{
-            line:{
-                strokeStyle : {
-                    normals : ['#f8ab5e','#E55C5C'],
+                node : {
+                    enabled : true
                 },
-                alpha       : {
-                    normals : [0.8, 0.7],
-                },
-                smooth : true
-            }
+                line : {
+                    strokeStyle : {
+                        normals : ['#f8ab5e','#E55C5C'],
+                    }
+                }
+  
         },       
         tips  :{
             prefix  : ["黑色玫瑰","水晶之痕"]
         }
     }
-     
 
-    KISSY.config({
-        packages: [{
-            name  :  'dvix'  ,
-            path  :  '../../',
-            // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
-            debug :  true
-        }
-        ]
-    });
+    //KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
+    //    window.line = new Line( S.all("#canvasTest") , data1 , options);
+    //    line.draw();
+    //});
 
-
-
-    KISSY.use("dvix/chart/line/ , node" , function( S , Line ){
-
-        window.line = new Line( S.all("#canvasTest") );
-        line.draw( data1 , options );
-        window.data1   = data1;
-        window.options = options;
-
-    });
+    Chartx.create.line("canvasTest" , data1 , options).then(function( line ){
+        line.draw();
+    })
 });

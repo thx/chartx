@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>Canvax</title>
+
+<style type="text/css">
+    body{margin:0;padding:0;font-size:12px;background-color:#eee;padding:10px 100px 100px;}
+    //canvas {background:#999}
+</style>
+<!--<script type="text/javascript" src="../../node_modules/kissy/build/seed.js"></script>-->
+<script src="http://g.tbcdn.cn/kissy/k/1.4.5/seed-min.js"></script>
+
+<script type="text/javascript" src="../../chartx/index.js"></script>
+</head>
+
+<body>
+ 	<div id="canvasTest" style='background:#ffffff;width:800px;height:800px;'></div>
+    <script> 
+        KISSY.ready(function(){
+            var data = {
+                huandi : {
+                    label : "皇帝",
+                    link  : [
+                        "chengxiang" , "jiangjun" , "dlzg"
+                    ]
+                },
+                chengxiang : {
+                    label : "丞相",
+                    link  : [
+                        "xl"
+                    ]
+                },
+                jiangjun   : {
+                    label : "将军",
+                    link  : [
+                        "qianfeng" , "youyi"
+                    ]
+                },
+                youyi  : {
+                    label : "右军主将",
+                    link  : [
+                        "xb1" , "xb2"
+                    ]
+                },
+
+                qianfeng  : {
+                    label : "前锋大将",
+                    link  : [
+                        "xb3" , "xb4"
+                    ]
+                },
+                dlzg      : {
+                    label : "大内总管",
+                    link  : []
+                },
+                xl : {
+                    label : "小吏",
+                    link  : []
+                },
+                xb1 : {
+                    label : "小兵1",
+                    link : []
+                },
+                xb2 : {
+                    label : "小兵2",
+                    link : []
+                },
+                xb3 : {
+                    label : "小兵3",
+                    link : []
+                },
+                xb4 : {
+                    label : "小兵4",
+                    link : []
+                }
+            };
+
+            Chartx.create.tree("canvasTest" , data , {}).then(function( tree ){
+                tree.draw();
+                tree.on("nodeMouseover" , function(){
+                    console.log( "nodeMouseover" );
+                });
+
+                tree.on("nodeMouseout" , function(){
+                    console.log( "nodeMouseOut" );
+                });
+
+                tree.on("nodeClick" , function(e){
+                    debugger
+                    console.log( "nodeClick" );
+                });
+            })
+
+        });
+    </script>
+</body> 
+</html>
+

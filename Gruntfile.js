@@ -7,33 +7,41 @@ module.exports = function(grunt) {
          }
      },
      uglify: {
-        options: {
+         options: {
             beautify: {
                  ascii_only: true
             }
          },
          app: {
              expand: true,
-             cwd: "build/dvix/",
+             cwd: "build/chartx/",
              src: ['**/*.js', '!**/*-min.js'],
-             dest: "build/dvix/",
+             dest: "build/chartx/",
              ext: '-min.js' // '-min.js'
          }
      },
      copy: {
          main: {
              files: [
- 
-             { expand: true, cwd: 'dvix', src: ['**'], dest: 'build/dvix'},
-             { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'},
-             { expand: true, cwd: 'gameDemo', src: ['**'], dest: 'build/gameDemo'}
+                { expand: true, cwd: 'chartx', src: ['**','!index.js'], dest: 'build/chartx'},
+                { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'}
              ]
          }
       },
-      autoname: {
-         build: {
-             // targetDir,要执行的目标目录，一般为打包的build目录
-             targetDir : "./build"
+      concat : {
+
+         options: {
+             separator: '\n\n',
+             process: function(src, filepath) {
+                 var develop = /\/\/BEGIN\(develop\)[\s\S]+?\/\/END\(develop\)/mg;
+                 return src.replace( develop , "" );
+             }
+         },
+         dist : {
+             src: [
+                 'chartx/index.js'
+             ],
+             dest: 'build/chartx/index.js'
          }
       }
   });
@@ -42,11 +50,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-auto-kissy-module-name');
   grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [ 'clean' , 'copy' , 'autoname' , 'uglify'  ]);
+  grunt.registerTask('default', [ 'clean' , 'copy' , 'concat' , 'uglify'  ]);
 }
 
 

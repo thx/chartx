@@ -73,53 +73,14 @@ KISSY.ready(function(){
             }
         },       
         tips  :{
-            titles : [
-               ["title1" , "title2" , "title3" , "title4"],
-               ["title" , "title" , "title" , "title"]
-            ],
-            // disTop : 50,
-            context:{
-                prefix:{
-                    values:['今','昨','明']
-                },
-                bolds     :['bold','bold','bold'],
-                fontSizes :[14,14,14],
-                fillStyles:['#333333','#999999','#999999']
-            },
-            tip  : {
-                back:{
-                    //strokeStyle : '#ff0000'
-                    // disX:10
-                }
-            },
-            line : {
-                // lineType: ''
-            },
-            nodes:{
-
-            }
+            prefix : ["今天","昨天"] 
         }
     }
      
 
-    KISSY.config({
-        packages: [{
-            name  :  'dvix'  ,
-            path  :  '../../',
-            // path  :  'http://g.assets.daily.taobao.net/thx/charts/1.0.0/',
-            debug :  true
-        }
-        ]
-    });
 
+    Chartx.create.bar("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
 
-
-    KISSY.use("dvix/chart/bar/ , node" , function( S , Bar ){
-
-        window.bar = new Bar( S.all("#canvasTest") );
-        bar.draw( data1 , options );
-        window.data1   = data1;
-        window.options = options;
-
-    });
 });

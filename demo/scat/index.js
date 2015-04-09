@@ -17,14 +17,10 @@ KISSY.ready(function(){
 
     ];
     var options = {
-        // title : "first charts",
-        // disXAxisLine : 26,
-        // disYAxisTopLine : 26,
-        //rotate   : -90,
+ 
         disYAndO : 20,
         mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
         yAxis : {
-            mode     : 1,                           //模式( 1 = 正常 | 2 = 显示两条(最下面 + 最上面 且与背景线不对其))
             field   : ["val4","val3"],
             dataMode : 0,
             line:{
@@ -37,7 +33,7 @@ KISSY.ready(function(){
             }
         },
         xAxis : {
-            field : ["val2" ,"val1"],
+            field : ["val2" , "val1"],
             disY: 6,
             dis : 6,
             line:{
@@ -60,15 +56,6 @@ KISSY.ready(function(){
             }
         },       
         tips  :{
-            // disTop : 50,
-            context:{
-                prefix:{
-                    values:['今','昨','明']
-                },
-                bolds     :['bold','bold','bold'],
-                fontSizes :[14,14,14],
-                fillStyles:['#333333','#999999','#999999']
-            },
             tip  : {
                 back:{
                     // disX:10
@@ -82,11 +69,8 @@ KISSY.ready(function(){
             }
         }
     }
-     
-
-
-    KISSY.use("dvix/chart/scat/ , node" , function( S , Scat ){
-        window.scat = new Scat( S.all("#canvasTest") );
-        scat.draw( data1 , options );
-    });
+    Chartx.create.scat("canvasTest" , data1 , options).then(function( chart ){
+        chart.draw();
+    })
+    
 });
