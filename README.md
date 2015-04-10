@@ -31,7 +31,7 @@ Chartx.create.map("canvasTest" , data , options).then(function( chart ){
 
 在magix的OPOA项目环境中，我们提供magix扩展来在业务中方便的使用chartx。
 
-首先，请在项目的ini.js文件，找到`exts`配置，加入'chartx/magixext'。
+首先，请在项目的ini.js文件，找到`exts`配置，加入`chartx/magixext`。
 
 这个时候我们可以在view中很方便的使用`createChart`方法来创建图表了。
 
@@ -48,14 +48,14 @@ DEMO
 return View.extend({
     init: function(data) {
     },
-    render: function(e) { //locationChange里的e跑到这里的e了
+    render: function(e) {
         var me = this
         me.renderByPagelet({});
         me._createWorldMap();
     },
     _createWorldMap : function(){
         var me = this;
-        me.createChart("map" , "worldmap" , [] , {
+        me.createChart("map" , $("#worldmap") , [] , {
             mapType : "world"
         }).then(function( chart ){
             chart.draw();
