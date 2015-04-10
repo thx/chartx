@@ -22,7 +22,7 @@ cdn环境为   <script>http://g.tbcdn.cn/thx/charts/{{版本号}}/chartx/index.j
 
 ```javascript
 Chartx.create.map("canvasTest" , data , options).then(function( chart ){
-    //在 promise 中 拿到创建好的图表实例
+    //在 promise 中 拿到创建好的图表实例，然后调用该图表实例的draw方法，将图表绘制到页面中
     chart.draw();
 })
 ```
