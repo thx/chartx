@@ -20,9 +20,11 @@ cdn环境为   <script>http://g.tbcdn.cn/thx/charts/{{版本号}}/chartx/index.j
 | 2 |data --> 绘制图表的数据，无数据则传入空数组[]|
 | 3 |options --> 绘制图表的配置|
 
+
 ```javascript
 Chartx.create.map(el , data , options)
 ```
+
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
@@ -34,6 +36,10 @@ Chartx.create.map(el , data , options).then(function( chart ){
 });
 
 ```
+
+TODO：promise 回调函数的执行在 chart的 绘制之前。。。
+
+
 
 ### 3，在magix环境的项目中使用chartx
 
@@ -62,8 +68,10 @@ view.createChart( chartType , el , data , options).then(function( chart ){
 
 ```
 
+TODO：同上，promise 回调函数的执行在 chart的 绘制之前。。。
 
-DEMO
+
+DEMO：
 ```javascript
 return View.extend({
     init: function(data) {
