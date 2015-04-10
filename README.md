@@ -22,13 +22,13 @@ cdn环境为   <script>http://g.tbcdn.cn/thx/charts/{{版本号}}/chartx/index.j
 
 
 
-创建一个line chart
+#####创建一个line chart
 ```javascript
 Chartx.create.line(el , data , options)
 ```
 
 
-如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
+#####如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
 ```javascript
 Chartx.create.line(el , data , options).then(function( chart ){
