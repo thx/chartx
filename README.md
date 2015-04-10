@@ -37,7 +37,7 @@ Chartx.create.map(el , data , options).then(function( chart ){
 
 ```
 
-TODO：promise 回调函数的执行在 chart的 绘制之前。。。
+TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
 
 
 
@@ -68,7 +68,7 @@ view.createChart( chartType , el , data , options).then(function( chart ){
 
 ```
 
-TODO：同上，promise 回调函数的执行在 chart的 绘制之前。。。
+TODO：同上，promise then 回调函数的执行在 chart的 绘制之前。。。
 
 
 DEMO：
