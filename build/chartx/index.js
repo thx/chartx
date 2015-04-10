@@ -48,12 +48,19 @@ var Chartx = {
                 var me   = this;
                 require( [path] , function( chartConstructor ){
                     if( !me._destory ){
-                        _.isFunction(fn) && fn( new chartConstructor(el , data , options) );
+                        me.chart = new chartConstructor(el , data , options)
+                        _.isFunction(fn) && fn( me.chart );
                     }
                 } );
+                return this;
             },
-            destory : function(){
+            _destory : false,
+            chart    : null,
+            destroy  : function(){
+                console.log("chart destroy!");
                 this._destory = true;
+                this.chart.destroy();
+                delete this.chart;
             }
         };
     },

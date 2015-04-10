@@ -13,4 +13,3 @@ define("chartx/magixext" , [window.KISSY ? "magix/view" : "magix"] , function(Vi
         }
     });
 });
-

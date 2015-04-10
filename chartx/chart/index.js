@@ -48,6 +48,13 @@ define(
             init   : function(){},
             draw   : function(){},
             /*
+             * chart的销毁 
+            */
+            destroy: function(){
+                this.clear();
+                this.el.innerHTML = "";
+            },
+            /*
              * 清除整个图表
              **/
             clear : function(){
@@ -116,4 +123,4 @@ define(
         return Chart;
     
     }
-)
+);
