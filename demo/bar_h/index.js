@@ -1,7 +1,7 @@
 
-KISSY.ready(function(){
+$(function(){
 
-    var S = KISSY;
+
     var data1= [
         ["y","line1","line2","line3"],
         [ '1-2K' , 101  , 201 , 0 ] ,
@@ -54,8 +54,8 @@ KISSY.ready(function(){
         }
     }   
 
-    KISSY.use("chartx/chart/bar_h/ , node" , function( S , Bar ){
-        var bar = new Bar( S.all("#canvasTest") , data1 , options );
+    require(["chartx/chart/bar/horizontal"] , function( S , Bar ){
+        var bar = new Bar( "canvasTest" , data1 , options );
         bar.draw();
     });
 
