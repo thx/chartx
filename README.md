@@ -21,10 +21,18 @@ cdn环境为   <script>http://g.tbcdn.cn/thx/charts/{{版本号}}/chartx/index.j
 | 3 |options --> 绘制图表的配置|
 
 ```javascript
-Chartx.create.map("canvasTest" , data , options).then(function( chart ){
-    //在 promise 中 拿到创建好的图表实例，然后调用该图表实例的draw方法，将图表绘制到页面中
-    chart.draw();
-})
+Chartx.create.map(el , data , options)
+```
+
+如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
+
+```javascript
+Chartx.create.map(el , data , options).then(function( chart ){
+    chart.on("eventType" , function(e){
+        do something ......
+    });
+});
+
 ```
 
 ### 3，在magix环境的项目中使用chartx
@@ -37,11 +45,23 @@ Chartx.create.map("canvasTest" , data , options).then(function( chart ){
 
 ```javascript
 view.createChart( chartType , el , data , options ).then(function(chart){
-    chart.draw() 
+    chart.draw()
 });
 ```
 
 view.createChart 唯一的不一样就是第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应
+
+如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
+
+```javascript
+view.createChart( chartType , el , data , options).then(function( chart ){
+    chart.on("eventType" , function(e){
+        do something ......
+    });
+});
+
+```
+
 
 DEMO
 ```javascript
