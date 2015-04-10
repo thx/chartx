@@ -87,8 +87,6 @@ return View.extend({
         var me = this;
         me.createChart("map" , $("#worldmap") , [] , {
             mapType : "world"
-        }).then(function( chart ){
-            chart.draw();
         });
     }
 });
