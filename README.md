@@ -21,15 +21,17 @@ cdn环境为   <script>http://g.tbcdn.cn/thx/charts/{{版本号}}/chartx/index.j
 | 3 |options --> 绘制图表的配置|
 
 
+
+创建一个line chart
 ```javascript
-Chartx.create.map(el , data , options)
+Chartx.create.line(el , data , options)
 ```
 
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
 ```javascript
-Chartx.create.map(el , data , options).then(function( chart ){
+Chartx.create.line(el , data , options).then(function( chart ){
     chart.on("eventType" , function(e){
         do something ......
     });
