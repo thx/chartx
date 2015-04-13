@@ -55,3 +55,26 @@ Chartx.create.line(el , data , options).then(function( chart ){
 });
 
 ```
+
+TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
+
+
+
+## 在magix环境中使用chartx
+### 扩展插件
+
+
+在magix的OPOA项目环境中，我们提供magix扩展来在业务中方便的使用chartx。
+
+首先肯定是要先在页面中引入Chartx的js库文件，然后在项目的<code>ini.js</code>文件中找到<code>exts</code>配置，加入<code>chartx/magixext</code>。
+
+
+### 创建图表
+
+
+加载了<code>chartx/magixext</code>后，magix会在view中扩展一个专门用来创建图表的接口函数<code>createChart</code>，现在你可以很方便的在每个view中创建图表了。在view中创建的图表在view自身销毁的时候也会自行销毁，不需要使用者手动去管理。
+
+
+```js
+view.createChart( chartType , el , data , options )
+```
