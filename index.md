@@ -1,7 +1,3 @@
----
-layout: post
-title: Chartx
----
 
 Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染引擎Canvax（canvax的基于心跳包的主动渲染机制在图表这样并不需要高帧率的场景中有着非常良好的性能）。
 
