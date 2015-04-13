@@ -1,3 +1,7 @@
+---
+layout: post
+title: Chartx
+---
 
 Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染引擎Canvax（canvax的基于心跳包的主动渲染机制在图表这样并不需要高帧率的场景中有着非常良好的性能）。
 
@@ -28,11 +32,12 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index.j
 目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'tree']
 该类型方法需要三个参数。
 
-el      --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象 
+ | 参数位置 | 说明 |
+ | -------- | ---- |
+ | 1        | el   --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象 |
+ | 2        | data --> 绘制图表的数据，无数据则传入空数组[]                                      |
+ | 3        | options --> 绘制图表的配置                                                         |
 
-data    --> 绘制图表的数据，无数据则传入空数组[]                                  
-
-options --> 绘制图表的配置                                                         
 
 
 创建一个line chart
