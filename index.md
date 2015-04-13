@@ -32,7 +32,6 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index.j
 目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'tree']
 该类型方法需要三个参数。
 
-
 创建一个line chart
 
 ```js
