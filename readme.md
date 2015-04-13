@@ -1,119 +1,95 @@
-# Seed of THX
+## xChart使用方式
 
-欢迎使用 thx/base 创建 THX 风格的文档网站。
+### 1，在页面引入xChart的库文件
 
-## 所含内容
+daily环境为 <script>http://g-assets.daily.taobao.net/thx/charts/chartx/index.js</scirpt>
 
-```bash
-.
-├── Gruntfile.js
-├── _config.yml
-├── _includes
-│   ├── archive.html
-│   └── ceiling.html
-├── assets
-│   ├── base.css
-│   ├── img
-│   │   └── bg.jpg
-│   └── syntax
-│       └── github.css
-├── package.json
-└── readme.md
+cdn环境为   <script>http://g.tbcdn.cn/thx/charts/{{版本号}}/chartx/index.js</scirpt>
+
+当前最新CDN版本号为1.6.1
+
+### 2，创建图表
+
+在全局图表对象Chartx下面有一个create对象，上面挂载着全部的图表类型
+目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'tree']
+该类型方法需要三个参数，
+
+| 参数位置  | 说明 |
+| --------- | ---- |
+| 1 |el   --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象|
+| 2 |data --> 绘制图表的数据，无数据则传入空数组[]|
+| 3 |options --> 绘制图表的配置|
+
+
+
+##### 创建一个line chart
+```javascript
+Chartx.create.line(el , data , options)
 ```
 
-thx/base 本质上就是个 jekyll 脚手架，我们可以在其基础上快速开发稳当网站。同时，thx/base
-还包含 [THX 系列站点](http://thx.alibaba-inc.com) 风格的样式等资源文件，以及用来与
-thx/base 保持同步的 Grunt 任务。
 
-## 用法
+##### 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
-### 准备
+```javascript
+Chartx.create.line(el , data , options).then(function( chart ){
+    chart.on("eventType" , function(e){
+        do something ......
+    });
+});
 
-需要安装 jekyll 与 git。 Mac 用户，可以如此安装 jekyll：
-
-```bash
-sudo gem install github-pages
 ```
 
-如果装了 [Homebrew](http://brew.sh/)，则可以如此安装 git：
+TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
 
-```bash
-brew install git
+
+
+### 3，在magix环境的项目中使用chartx
+
+在magix的OPOA项目环境中，我们提供magix扩展来在业务中方便的使用chartx。
+
+首先，请在项目的ini.js文件，找到`exts`配置，加入`chartx/magixext`。
+
+这个时候我们可以在view中很方便的使用`createChart`方法来创建图表了。
+
+```javascript
+view.createChart( chartType , el , data , options ).then(function(chart){
+    chart.draw()
+});
 ```
 
-Windows 用户，推荐安装 [msysgit](https://code.google.com/p/msysgit/)。安装 jekyll
-的方法请看 [阿狼的文章](http://stormtea123.github.io/jekyll-window7.av/)。
+view.createChart 唯一的不一样就是第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应
 
-### 简要步骤
+如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
-- 获取代码
-- 修改配置
-- 添加内容
+```javascript
+view.createChart( chartType , el , data , options).then(function( chart ){
+    chart.on("eventType" , function(e){
+        do something ......
+    });
+});
 
-```bash
-git clone git@github.com:thx/base.git
 ```
 
-修改 _config.yml ，在 baseurl 一栏填上你的仓库名称：
+TODO：同上，promise then 回调函数的执行在 chart的 绘制之前。。。
 
-```diff
---- a/_config.yml
-+++ b/_config.yml
-@@ -1,4 +1,4 @@
--baseurl: /your-project
-+baseurl: /brix-core
+
+DEMO：
+```javascript
+return View.extend({
+    init: function(data) {
+    },
+    render: function(e) {
+        var me = this
+        me.renderByPagelet({});
+        me._createWorldMap();
+    },
+    _createWorldMap : function(){
+        var me = this;
+        me.createChart("map" , $("#worldmap") , [] , {
+            mapType : "world"
+        });
+    }
+});
+
 ```
 
-修改 package.json ，填上 name 一栏：
-
-```diff
---- a/package.json
-+++ b/package.json
-@@ -1,5 +1,5 @@
- {
--  "name": "base",
-+  "name": "brix-core",
-```
-
-当然还要修改 git remote：
-
-```bash
-git remote set-url origin git@github.com:thx/brix-core.git
-```
-
-### 范例
-
-请参考如下示例：
-
-- [thx.github.io](https://github.com/thx/thx.github.io)
-- [brix-core](https://github.com/thx/brix-core/tree/gh-pages)
-- [magix](https://github.com/thx/magix/tree/gh-pages)
-
-### 同步 thx/base
-
-站点开发完毕之后，thx/base 有更新时，我们很可能需要同步过来，可以使用内建的 Grunt 命令：
-
-```bash
-$ grunt base:pull:github
-```
-
-如果你对 thx/base 的调整感兴趣，也可以在你的文档项目的平级目录放置 thx/base 的代码，例如：
-
-```bash
-➜  Projects  tree -L 1 thx
-thx
-├── base
-└── thx.github.io
-```
-
-然后在 thx.github.io 中专心开发，觉得都搞定之后，再使用如下命令：
-
-```bash
-$ grunt base:push
-```
-
-就可以把修改过的 thx/base 相关文件（CSS、`_includes` 等）推送到 thx/base 目录了。
-
-## 来源
-
-当前风格模仿自 http://www.awwwards.com/10-html-css-online-code-editors-for-web-developers.html
