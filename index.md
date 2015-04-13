@@ -40,14 +40,14 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index.j
 
 创建一个line chart
 
-``` js
+```js
 Chartx.create.line(el , data , options)
 ```
 
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
-``` js
+```js
 Chartx.create.line(el , data , options).then(function( chart ){
     chart.on("eventType" , function(e){
         do something ......
@@ -77,4 +77,97 @@ TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
 
 ```js
 view.createChart( chartType , el , data , options )
+```
+
+TODO：view.createChart 第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应
+
+如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
+
+```js
+view.createChart( chartType , el , data , options).then(function( chart ){
+    chart.on("eventType" , function(e){
+        do something ......
+    });
+});
+
+```
+
+TODO：同上，promise then 回调函数的执行在 chart的 绘制之前。。。
+
+
+DEMO：
+
+```js
+return View.extend({
+    init: function(data) {
+    },
+    render: function(e) {
+        var me = this
+        me.renderByPagelet({});
+        me._createWorldMap();
+    },
+    _createWorldMap : function(){
+        var me = this;
+        me.createChart("map" , $("#worldmap") , [] , {
+            mapType : "world"
+        });
+    }
+});
+
+```
+
+## Chartx的数据格式
+
+在Chartx中，所有的图表都采用如下同一种数据格式，这样的数据格式并不具有任何图表相关的意义，和后台约定数据格式的时候能做到完全的解耦，不需要特定的为某图表来设计json格式。
+
+然后每个图表都会有自己的dataFormat函数来将其转换为自己需要的数据。
+
+
+第一行是表头。
+
+```js
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 76  , 45 , 43    ],
+    [ 4      , 58  , 35 , 31    ],
+    [ 5      , 79  , 73 , 71    ],
+    [ 6      , 88  , 54 , 39    ],
+    [ 7      , 56  , 68 , 65    ],
+    [ 8      , 99  , 83 , 51    ]
+];
+```
+
+比如用上面的数据来创建折线图。
+
+```js
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+var options = {
+    yAxis : {
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "xfield"
+    }
+};
+//Chartx.create.line开始初始化chart实例
+Chartx.create.line("canvasTest" , data , options);
+```
+
+在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame
+
+```js
+chart.dataFrame  = {    //数据集合对象
+    org        : [],   //最原始的数据 , 也就是传入的data 
+    data       : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
+    yAxis      : {     //y轴
+        field  : [],   //字段集合 对应this.data
+        org    : []    //二维 原始数据[[100,200],[1000,2000]]
+    },
+    xAxis      : {     //x轴
+        field  : [],   //字段 对应this.data
+        org    : []    //原始数据['星期一','星期二']
+    }
+}
 ```
