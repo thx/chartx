@@ -34,22 +34,22 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index.j
 
 | 参数位置  | 说明 |
 | --------- | ---- |
-| 1 |el   --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象 |
-| 2 |data --> 绘制图表的数据，无数据则传入空数组[] |
-| 3 |options --> 绘制图表的配置 |
+| 1 | el   --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象 |
+| 2 | data --> 绘制图表的数据，无数据则传入空数组[] |
+| 3 | options --> 绘制图表的配置 |
 
 
 
 创建一个line chart
 
-```javascript
+```js
 Chartx.create.line(el , data , options)
 ```
 
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
-```javascript
+```js
 Chartx.create.line(el , data , options).then(function( chart ){
     chart.on("eventType" , function(e){
         do something ......
@@ -77,7 +77,7 @@ TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
 加载了<code>chartx/magixext</code>后，magix会在view中扩展一个专门用来创建图表的接口函数<code>createChart</code>，现在你可以很方便的在每个view中创建图表了。在view中创建的图表在view自身销毁的时候也会自行销毁，不需要使用者手动去管理。
 
 
-```javascript
+```js
 view.createChart( chartType , el , data , options )
 ```
 
@@ -85,7 +85,7 @@ TODO：view.createChart 第一个参数为要创建的图表类型，后面三�
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
-```javascript
+```js
 view.createChart( chartType , el , data , options).then(function( chart ){
     chart.on("eventType" , function(e){
         do something ......
@@ -99,7 +99,7 @@ TODO：同上，promise then 回调函数的执行在 chart的 绘制之前。�
 
 DEMO：
 
-```javascript
+```js
 return View.extend({
     init: function(data) {
     },
@@ -143,7 +143,7 @@ var data= [
 
 比如用上面的数据来创建折线图。
 
-```base
+```js
 //chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
@@ -159,7 +159,7 @@ Chartx.create.line("canvasTest" , data , options);
 
 在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame
 
-```base
+```js
 chart.dataFrame  = {    //数据集合对象
     org        : [],   //最原始的数据 , 也就是传入的data 
     data       : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
