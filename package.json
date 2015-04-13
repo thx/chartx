@@ -2,9 +2,9 @@
   "name": "chartx",
   "private": true,
   "version": "0.0.1",
-  "description": "Base files of THX websites.",
-  "homepage": "http://thx.github.io/",
-  "author": "Chen Yicai <yicai.cyj@taobao.com>",
+  "description": "Data Visualization Solutions",
+  "homepage": "https://github.com/nickli",
+  "author": "li tao<litao.lt@alibaba-inc.com>",
   "devDependencies": {
     "grunt": "~0.4.2",
     "unzip": "~0.1.9",
