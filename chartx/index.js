@@ -4,7 +4,7 @@ var Chartx = {
     start   : function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的 
-        var canvaxVersion = "2015.04.10";
+        var canvaxVersion = "2015.04.13";
         var chartxVersion = "1.6.2";
 
         //BEGIN(develop)
@@ -61,16 +61,9 @@ var Chartx = {
         };
     },
     _queryChart : function(name , el , data , options){
-        return {
+        var promise = {
             then : function( fn ){
-                var path = "chartx/chart/"+name+"/"+( options.type ? options.type : "index" );
-                var me   = this;
-                require( [path] , function( chartConstructor ){
-                    if( !me._destory ){
-                        me.chart = new chartConstructor(el , data , options)
-                        _.isFunction(fn) && fn( me.chart );
-                    }
-                } );
+                this._thenFn = fn;
                 return this;
             },
             _destory : false,
@@ -80,8 +73,24 @@ var Chartx = {
                 this._destory = true;
                 this.chart.destroy();
                 delete this.chart;
+                promise = null;
             }
         };
+
+        var path = "chartx/chart/"+name+"/"+( options.type ? options.type : "index" );
+        require( [path] , function( chartConstructor ){
+            if( !promise._destory ){
+                promise.chart = new chartConstructor(el , data , options);
+                setTimeout(function(){
+                    _.isFunction( promise._thenFn ) && promise._thenFn( promise.chart );
+                } , 1);
+                //在then处理函数执行了后自动draw
+                promise.chart.draw();
+            }
+        } );
+
+        return promise;
+
     },
     site: {
         local: !! ~location.search.indexOf('local'),

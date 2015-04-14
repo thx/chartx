@@ -24,7 +24,9 @@ define(
                 this.area = {
                     strokeStyle : "white",
                     fillStyle   : this.normalColor,
-                    lineWidth   : 1
+                    lineWidth   : 1,
+                    linkage     : false,
+                    text        : true, //也可以是function，会把txt文本对象作为参数抛出
                 };
 
                 //默认的areaField字段
@@ -45,19 +47,36 @@ define(
                 this.tips.field = this._dataFrame.yAxis.field;
 
                 this._mapScale = 1 //Math.min( this.width / 560 , this.height / 470 );
-
                 
                 this.sprite    = new Canvax.Display.Sprite({
                     id   : "mapSp"
                 });
-                this.stage.addChild( this.sprite );
+                
             },
             draw : function(){
+
+                //因为draw的时候可能是 reset触发的。这个时候要先清除了sprite的所有子节点
+                //然后把它重新add入stage
+                this.sprite.removeAllChildren();
+                this.stage.addChild( this.sprite );
+                this._tips && this._tips.hide();
+
                 this._initModule();
                 var me = this;
+
                 this._getMapData( this.mapType , function( md ){
                     me._widget( md );
+                    //绘制完了后调整当前sprite的尺寸和位置
+                    me._setSpPos();
                 } );
+            },
+            _setSpPos : function( ){
+                var tf  = this._mapDataMap[this.mapType].transform;
+                var spc = this.sprite.context;
+                spc.width  = tf.width;
+                spc.height = tf.height;
+                spc.x      = (this.width  - tf.width ) / 2;
+                spc.y      = (this.height - tf.height) / 2;
             },
             _getMapData : function( mt , callback ){
                 var me = this;
@@ -71,8 +90,8 @@ define(
             _mapDataCallback : function (mt, callback) {
                 var self = this;
                 return function ( md ) {
-                    self._mapDataMap[mt].mapData = md;
-                    self._mapDataMap[mt].rate = 0.75;
+                    self._mapDataMap[mt].mapData    = md;
+                    self._mapDataMap[mt].rate       = 0.75;
                     self._mapDataMap[mt].projection = Projection;
                     var d = self._getProjectionData(mt, md);     // 地图数据
                     _.isFunction(callback) && callback( d );
@@ -219,8 +238,8 @@ define(
             _getTransform : function (bbox, rate) {
                 var width;
                 var height;
-                var graphWidth  = this.canvax.width;
-                var graphHeight = this.canvax.height;
+                var graphWidth  = this.width;
+                var graphHeight = this.height;
                 
                 width  = !width  ? graphWidth  : (this.parsePercent(width, graphWidth));
                 height = !height ? graphHeight : (this.parsePercent(height, graphHeight));
@@ -285,6 +304,7 @@ define(
                         id   : "tips_"+i,
                         name : md.properties.name 
                     });
+
                     var shapeCtx = {
                         x:0,
                         y:0,
@@ -307,14 +327,40 @@ define(
                         this.context.cursor      = "pointer";
                         this.context.lineWidth   = me.area.lineWidth+1;
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
-                    })
+                    });
+
                     area.on("mouseout release" , function(e){
                         this.context.lineWidth   = me.area.lineWidth;
-                        me._tips.hide( e );
-                    });;
-                    area.on("click" , function(e){
-
+                        me._tips.hide( e ); 
                     });
+
+                    area.on("click" , function(e){
+                        //地图联动， 目前只支持省市联动
+                        if( me.area.linkage ) {
+                            me.mapType = mapParams.params[ this.mapData.name ] ? this.mapData.name : "china" 
+                        };
+
+                        me.fire("areaClick" , e ); 
+                    });
+
+                    area_sp.on("click" , function(){
+                        //alert("sp")
+                    });
+
+                    if( me.area.text ){
+                        //文字
+                        var txt = new Canvax.Display.Text( 
+                            _.isFunction(me.area.text) ? me.area.text(this.mapData.name) : this.mapData.name,
+                            {
+                                context : {
+                                   x  : x,
+                                   y  : y,
+                                   fillStyle    : self.text.fillStyle,
+                                   textBaseline : "middle"
+                                }   
+                           }
+                        );
+                    }
 
                     me.sprite.addChild( area_sp ); 
                 });

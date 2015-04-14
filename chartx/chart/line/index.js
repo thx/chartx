@@ -279,7 +279,10 @@ define(
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
                 var x = index / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
-                var y = -(num - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
+                var y = -(num - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
+                if(maxYAxis == 0){
+                    y = 0;
+                }
                 return {x:x, y:y}
             },
             //每两个点之间的距离
