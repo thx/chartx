@@ -42,9 +42,9 @@ define(
                         
                         var str  = "<table>";
                         var self = this;
-                        str +=     "<tr style='color:#999'><td colspan='2'>"+info.area.value+"</td></tr>"
+                        str +=     "<tr style='color:#333'><td colspan='2'>"+info.area.value+"</td></tr>"
                         _.each( info.nodesInfoList , function( node , i ){
-                            str+= "<tr style='color:#999'>";
+                            str+= "<tr style='color:#333'>";
                             var prefixName = self.prefix[i];
                             if( !prefixName ) {
                                 prefixName = node.field

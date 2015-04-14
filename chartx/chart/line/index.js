@@ -268,7 +268,7 @@ define(
                         tmpData[a][b] = {
                             value : arr[a][b],
                             x : x,
-                            y : y,
+                            y : y
                         };
                     }
                 }

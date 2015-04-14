@@ -26,7 +26,10 @@ define(
                     fillStyle   : this.normalColor,
                     lineWidth   : 1,
                     linkage     : false,
-                    text        : true, //也可以是function，会把txt文本对象作为参数抛出
+                    text        : {
+                        fillStyle : "#000",
+                        enabled   : true
+                    }
                 };
 
                 //默认的areaField字段
@@ -299,9 +302,17 @@ define(
                 var me = this;
                 var mapDataList = features;
 
+                var area_txt_sp;
+                if( me.area.text.enabled ){
+                    area_txt_sp = new Canvax.Display.Sprite({
+                        id   : "area_name"
+                    });
+                }
+
+
                 _.each(mapDataList , function( md , i ){
                     var area_sp = new Canvax.Display.Sprite({
-                        id   : "tips_"+i,
+                        id   : "area_"+i,
                         name : md.properties.name 
                     });
 
@@ -313,7 +324,8 @@ define(
                         path        : md.path,
                         lineWidth   : me.area.lineWidth,
                         fillStyle   : me._getColor( me.area.fillStyle   , md ),
-                        strokeStyle : me._getColor( me.area.strokeStyle , md )
+                        strokeStyle : me._getColor( me.area.strokeStyle , md ),
+                        cursor      : "pointer"
                     };
 
                     var area   = new Path({
@@ -324,13 +336,12 @@ define(
                     
                     area.mapData = md;
                     area.on("mouseover hold" , function(e){
-                        this.context.cursor      = "pointer";
-                        this.context.lineWidth   = me.area.lineWidth+1;
+                        me.fire("areaOver" , e);
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
                     });
 
                     area.on("mouseout release" , function(e){
-                        this.context.lineWidth   = me.area.lineWidth;
+                        me.fire("areaOut" , e);
                         me._tips.hide( e ); 
                     });
 
@@ -347,23 +358,31 @@ define(
                         //alert("sp")
                     });
 
-                    if( me.area.text ){
+                    if( me.area.text.enabled  ){
                         //文字
                         var txt = new Canvax.Display.Text( 
-                            _.isFunction(me.area.text) ? me.area.text(this.mapData.name) : this.mapData.name,
+                            _.isFunction(me.area.text.filter) ? me.area.text.filter(md.name) : md.name,
                             {
                                 context : {
-                                   x  : x,
-                                   y  : y,
-                                   fillStyle    : self.text.fillStyle,
-                                   textBaseline : "middle"
+                                   x  : md.textX,
+                                   y  : md.textY,
+                                   fillStyle    : me.area.text.fillStyle,
+                                   textBaseline : "middle",
+                                   textAlign    : "center"
+                                   
                                 }   
-                           }
+                            }
                         );
+                        txt.on("click" , function( e ){
+                            alert("s")
+                        })
+                        area_txt_sp.addChild( txt ); 
                     }
 
                     me.sprite.addChild( area_sp ); 
+                    
                 });
+                area_txt_sp && me.sprite.addChild( area_txt_sp ); 
 
             },
             _initModule : function(){
