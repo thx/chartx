@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
+<title>xChart demo -- line custom_xyAxis_datasection</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -61,10 +61,7 @@ var options = {
     }
 };
 //Chartx.create.line开始初始化chart实例
-Chartx.create.line("canvasTest" , data , options).then(function( line ){
-    //在then中拿到chart的实例line，然后draw到画布上
-    line.draw();
-});
+Chartx.create.line("canvasTest" , data , options)
 </textarea></form>
 
         </td>

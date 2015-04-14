@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
+<title>xChart demo -- provinces_linkage</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -30,32 +30,41 @@
 <table>
     <tr>
         <td id="td-vl">
-            <form><textarea id="code" name="code">
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
-var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 76  , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 39    ],
-    [ 7      , 56  , 68 , 65    ],
-    [ 8      , 99  , 83 , 51    ]
+<form><textarea id="code" name="code">
+var data = [
+    [ "area"   , "click" ],
+    [ "广东省" , 111 ],
+    [ "浙江省" , 100 ],
+    [ "湖南省" , 80 ],
+    [ "湖北省" , 9 ]
 ];
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+
 var options = {
-    yAxis : {
-        field : ["uv" , "pv"]
+    mapType : "china", //默认便是中国地图
+    areaField : "area", //可选，默认为第一个字段
+    area : {
+        fillStyle : function( area ){
+           if( area ){
+               //点击量超过100的就显示为蓝色
+               if( area[1] > 100 ){
+                   return "#135EBF"
+               }
+           }
+        },
+        linkage : true //开启地图联动功能，目前只支持省市联动
     },
-    xAxis : {
-        field : "xfield"
-    }
+    tips : {
+        field  : ["click"],//可选，默认为除开areaField外的所有字段
+        prefix : ["点击量"]
+    } 
 };
-//Chartx.create.line开始初始化chart实例
-Chartx.create.line("canvasTest" , data , options);
-</textarea></form>
+
+Chartx.create.map("canvasTest" , data , options).then(function(map){
+    map.on("areaClick" , function( e ){
+        map.reset();
+    });
+});
+            </textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -63,26 +72,15 @@ Chartx.create.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>中国地图</h4>
                 <p>
-                    联系人：@逢春 @释剑
+                    联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
-            <!--
-            <form name="form" onsubmit="return false;">
-                <button type="button" class="btn btn-default " onclick="del()">
-                    删除uv线
-                </button>
 
-                <button type="button" class="btn btn-default " onclick="add()">
-                    添加uv线
-                </button>
-
-            </form>
-            -->
 
             </div>
         </td>
@@ -92,3 +90,5 @@ Chartx.create.line("canvasTest" , data , options);
     
 </body> 
 </html>
+
+

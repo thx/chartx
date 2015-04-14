@@ -32,60 +32,37 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-                
-    var data = [
-        ["y","line1","line2","line3"],
-        [ '1-2K' , 101  , 201 , 0 ] ,
-        [ '2-3K'  , 88 , 145 , 0 ] ,
-        [ '3-4k' , 488  , 88  , 0 ] ,
-        [ '4-5k'  , 390  , 546 , 0 ] ,
-        [ '5-6k' , 1000  , 88  , 0 ] 
-    ];
-    var options = {
-        type  : 'horizontal',
-        yAxis : {
-            field : ["y"],
-            line:{
-                width         : 4,
-                height        : 1
+var data = [
+    ["y","line1","line2","line3"],
+    [ '1-2K' , 101  , 201 , 0 ] ,
+    [ '2-3K'  , 88 , 145 , 0 ] ,
+    [ '3-4k' , 488  , 88  , 0 ] ,
+    [ '4-5k'  , 390  , 546 , 0 ] ,
+    [ '5-6k' , 1000  , 88  , 0 ] 
+];
+var options = {
+    type  : 'horizontal',
+    yAxis : {
+        field : ["y"]
+    },
+    xAxis : {
+        field : ["line1",'line2']
+    },
+    graphs:{
+        bar : {
+            fillStyle   : function(i , ii , value){
+                var colors = ['#f8ab5e','#E55C5C']
+                return colors[i]
             }
-        },
-        xAxis : {
-            field : ["line1",'line2'],
-            // disXAxisLine : 6,
-            line:{
-                width         : 3,
-                height        : 6,
-                strokeStyle   : '#cccccc'
-            }
-        },
-        back :{
-            xAxis:{
-                enabled : 0
-            },
-            yAxis:{
-                enabled :1,
-                lineType:'dashed'
-            }
-        },
-        graphs:{
-            bar : {
-                fillStyle   : function(i , ii , value){
-                    var colors = ['#f8ab5e','#E55C5C']
-                    return colors[i]
-                }
-            },
-            eventEnabled : true
-        },
-        tips  :{
-            prefix : ["今天","昨天"]
         }
-    }       
+    },
+    tips  :{
+        prefix : ["今天","昨天"]
+    }
+}       
 
-    Chartx.create.bar("canvasTest" , data , options).then(function( chart ){
-        chart.draw();
-    }) 
-
+Chartx.create.bar("canvasTest" , data , options);  
+    
             </textarea></form>
 
         </td>

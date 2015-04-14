@@ -76,14 +76,17 @@ define(
             },
             hide : function(e){
                 this._tip.hide(e);
-                this._cPoint.remove();
-                this._triangle.context.globalAlpha = 0;
+                this._cPoint   && this._cPoint.remove();
+                this._triangle && (this._triangle.context.globalAlpha = 0);
             },
             _weight : function(e){
                 var br = this._tip.backR;
-                
                 //cp -- > textX , textY
-                var cPoint = [ e.target.mapData.textX * this._mapScale , e.target.mapData.textY * this._mapScale ];
+                var targetOffSet = e.target.localToGlobal();
+                var cPoint = [ 
+                    e.target.mapData.textX * this._mapScale + targetOffSet.x, 
+                    e.target.mapData.textY * this._mapScale + targetOffSet.y
+                ];
                 this._cPoint = new Circle({
                     context : {
                         x : cPoint[0],

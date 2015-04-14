@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -24,6 +24,7 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
+<!--<script type="text/javascript" src="../bar_h/index.js"></script>-->
 </head>
 <body >
 
@@ -31,31 +32,38 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
-var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 76  , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 39    ],
-    [ 7      , 56  , 68 , 65    ],
-    [ 8      , 99  , 83 , 51    ]
+var data = [
+    ["y","line1","line2","line3"],
+    [ '1-2K' , 101  , 201 , 0 ] ,
+    [ '2-3K'  , 88 , 145 , 0 ] ,
+    [ '3-4k' , 488  , 88  , 0 ] ,
+    [ '4-5k'  , 390  , 546 , 0 ] ,
+    [ '5-6k' , 1000  , 88  , 0 ] 
 ];
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
+    type  : 'horizontal',
     yAxis : {
-        field : ["uv" , "pv"]
+        field : ["y"]
     },
     xAxis : {
-        field : "xfield"
+        field : ["line1",'line2']
+    },
+    graphs:{
+        bar : {
+            fillStyle   : function(i , ii , value){
+                var colors = ['#f8ab5e','#E55C5C']
+                return colors[i]
+            }
+        }
+    },
+    tips  :{
+        prefix : ["今天","昨天"]
     }
-};
-//Chartx.create.line开始初始化chart实例
-Chartx.create.line("canvasTest" , data , options);
-</textarea></form>
+}       
+
+Chartx.create.bar("canvasTest" , data , options);  
+    
+            </textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -63,26 +71,15 @@ Chartx.create.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>图表名称</h4>
                 <p>
-                    联系人：@逢春 @释剑
+                    联系人：@xxx
                 </p>
             </div>
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
-            <!--
-            <form name="form" onsubmit="return false;">
-                <button type="button" class="btn btn-default " onclick="del()">
-                    删除uv线
-                </button>
 
-                <button type="button" class="btn btn-default " onclick="add()">
-                    添加uv线
-                </button>
-
-            </form>
-            -->
 
             </div>
         </td>
@@ -92,3 +89,4 @@ Chartx.create.line("canvasTest" , data , options);
     
 </body> 
 </html>
+
