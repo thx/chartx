@@ -93,8 +93,9 @@ define(
              *nodes相关-------------------------
              */
             _initNodes : function(e , tipsPoint){
+                
                 this._nodes = new Canvax.Display.Sprite({
-                    id : "tipsNodes",
+                    id : "line-tipsNodes",
                     context : {
                         x   : tipsPoint.x,
                         y   : e.target.localToGlobal().y
@@ -102,15 +103,30 @@ define(
                 });
                 var self = this;
                 _.each( e.tipsInfo.nodesInfoList , function( node ){
-                    self._nodes.addChild( new Circle({
+                    var csp = new Canvax.Display.Sprite({
                         context : {
-                            y : e.target.context.height - Math.abs(node.y),
-                            r : node.r,
-                            fillStyle   : node.fillStyle,
+                            y : e.target.context.height - Math.abs(node.y) 
+                        }
+                    });
+                    csp.addChild( new Circle({
+                        context : {
+                            r : node.r + 2 ,
+                            fillStyle   : "white",//node.fillStyle,
                             strokeStyle : node.strokeStyle,
                             lineWidth   : node.lineWidth
                         }
-                    }) )
+                    }) );
+
+                    csp.addChild( new Circle({
+                        context : {
+                            r : node.r,
+                            fillStyle   : node.strokeStyle
+                            //strokeStyle : node.strokeStyle,
+                            //lineWidth   : node.lineWidth + 2
+                        }
+                    }) );
+
+                    self._nodes.addChild( csp );
                 } );
                 this.sprite.addChild( this._nodes );
             },
@@ -123,7 +139,7 @@ define(
                     circle.context.r           = node.r
                     circle.context.fillStyle   = node.fillStyle
                     circle.context.strokeStyle = node.strokeStyle
-                    circle.context.lineWidth   = node.lineWidth
+                    circle.context.lineWidth   = node.lineWidth+2
                 });
             }
         }

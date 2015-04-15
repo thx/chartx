@@ -255,13 +255,13 @@ define(
                             }
                         });
 
-                        self.node.control()
+                        self.node.control();
 
                         var nodeEnabled = true 
                         if( self.node.mode == 1 ){           //拐角才有节点
-                            var value = self.data[a].value
-                            var pre   = self.data[a - 1]
-                            var next  = self.data[a + 1]
+                            var value = self.data[a].value;
+                            var pre   = self.data[a - 1];
+                            var next  = self.data[a + 1];
                             if(pre && next){
                                 if(value == pre.value && value == next.value){
                                     nodeEnabled = false
