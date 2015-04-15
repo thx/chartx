@@ -154,7 +154,7 @@ define(
                 if( !this.enabled ){ //this.display == "none"
                     this.h = this.dis;//this.max.txtH;
                 } else {
-                    var txt = new Canvax.Display.Text( this.dataSection[0] ,
+                    var txt = new Canvax.Display.Text( this.dataSection[0] || "test" ,
                                 {
                                     context : {
                                         fontSize    : this.text.fontSize
@@ -236,6 +236,9 @@ define(
             },
             /*校验第一个和最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout:function(){
+
+                if(this.sprite.getNumChildren()==0)
+                    return;
     			var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
                 if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > this.w)) {
     				popText.context.x = parseInt(this.w - popText.getTextWidth())
@@ -250,7 +253,7 @@ define(
                     }
                 };
                        
-                var txt = new Canvax.Display.Text( maxLenText ,
+                var txt = new Canvax.Display.Text( maxLenText || "test" ,
                     {
                     context : {
                         fillStyle   : this.text.fillStyle,
