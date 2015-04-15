@@ -5,7 +5,6 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的 
         var canvaxVersion = "2015.04.13";
-        var chartxVersion = "1.6.2";
 
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
@@ -13,33 +12,31 @@ var Chartx = {
         }
         //END(develop)
 
+        
+        
+        var __FILE__, scripts = document.getElementsByTagName("script"); 
+        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
+        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
+        Chartx.path = __FILE__;
+
+        if( (/daily.taobao.net/g).test( __FILE__ ) ){
+            Chartx.site.daily = true;
+        }
+
         //配置canvax包
         var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
-
-        //BEGIN(develop)
+        
         if( Chartx.site.daily || Chartx.site.local ){
             canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/"+ canvaxVersion +"/";
         }
+        //BEGIN(develop)
         //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
         if( !! ~location.search.indexOf('localcanvax') ){
             //本地环境测试
             canvaxUrl     = "http://nick.daily.taobao.net/canvax/";
         }
         //END(develop)
-        
-        //如果是在cdn环境的话还是用自己配置的version
-        Chartx.path     = "http://g.tbcdn.cn/thx/charts/"+ chartxVersion +"/";
-        if( Chartx.site.daily || Chartx.site.local ){
-            Chartx.path = "http://g.assets.daily.taobao.net/thx/charts/"+ chartxVersion +"/";
-        }
 
-        //BEGIN(develop)
-        var __FILE__, scripts = document.getElementsByTagName("script"); 
-        __FILE__ = scripts[scripts.length - 1].getAttribute("src");
-        __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
-        
-        Chartx.path = __FILE__;
-        //END(develop)
 
         Chartx.setPackages([{
             name: 'canvax',

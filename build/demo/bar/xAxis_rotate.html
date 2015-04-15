@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
+<title>xChart demo -- line xAxis_rotate</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -30,26 +30,29 @@
 <table>
     <tr>
         <td id="td-vl">
-            <form><textarea id="code" name="code">
+<form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 76  , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 39    ],
-    [ 7      , 56  , 68 , 65    ],
-    [ 8      , 99  , 83 , 51    ]
+    ["time"       ,"uv" ,"pv","click"],
+    ["2015-11-12" , 101 , 20 , 33    ],
+    ["2015-11-13" , 67  , 51 , 26    ],
+    ["2015-11-14" , 76  , 45 , 43    ],
+    ["2015-11-15" , 58  , 35 , 31    ],
+    ["2015-11-16" , 79  , 73 , 71    ],
+    ["2015-11-17" , 88  , 54 , 39    ],
+    ["2015-11-18" , 56  , 68 , 65    ],
+    ["2015-11-19" , 99  , 83 , 51    ]
 ];
 var options = {
     yAxis : {
         field : ["uv","pv"],
     },
     xAxis : {
-        field : ["xfield"],
+        field : ["time"],
+        text  : {
+            rotation : 20
+        }
     },
     graphs:{
         bar : {
@@ -63,29 +66,25 @@ Chartx.create.bar("canvasTest" , data , options);
         </td>
         <td style="padding:0 10px;" id="td-vr">
             <div id="chartdemo-r">
-            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
-
-                <h4>折线图（line chart）- 基础折线图</h4>
-                <p>
-                    联系人：@逢春 @释剑
-                </p>
-            </div>
-            <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
-            </div>
-            <!--
-            <form name="form" onsubmit="return false;">
-                <button type="button" class="btn btn-default " onclick="del()">
-                    删除uv线
-                </button>
-
-                <button type="button" class="btn btn-default " onclick="add()">
-                    添加uv线
-                </button>
-
-            </form>
-            -->
+                    <h4>折线图（line chart）- xAxis轴上面文本旋转</h4>
+                    <p>
+                        联系人：@逢春 @释剑
+                    </p>
+                </div>
+                <div  class="test-c">
+                    <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+                
+                <div class="highlight" style="margin-top:30px;">
+                    <p>
+                    一般的来讲，只有在xAxis轴上面的单个文本都比较长的时候，会出现前后文本堆叠在一起的情况，这个时候建议使用该配置。
+                    </p>
+                    <pre>
+                    options.xAxis.text.rotation = 30; //TODO: 30是角度，可以任意调节
+                    </pre>
+                </div>
 
             </div>
         </td>
