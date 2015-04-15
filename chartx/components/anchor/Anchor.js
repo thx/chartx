@@ -99,8 +99,8 @@ define(
                 var nodepos = this.sprite.localToGlobal({x : this.cross.x ,  y: this.cross.y });
                 var circle = new Circle({
                     context : {
-                        x           : nodepos.x,
-                        y           : nodepos.y,
+                        x           : parseInt(nodepos.x),
+                        y           : parseInt(nodepos.y),
                         r           : self._getProp( self.node.r ),
                         fillStyle   : self._getProp( self.node.fillStyle ) || "#ff0000",
                         strokeStyle : self._getProp( self.node.strokeStyle ) || '#cc3300',

@@ -97,7 +97,7 @@ define(
                 this._nodes = new Canvax.Display.Sprite({
                     id : "line-tipsNodes",
                     context : {
-                        x   : tipsPoint.x,
+                        x   : parseInt(tipsPoint.x),
                         y   : e.target.localToGlobal().y
                     }
                 });
@@ -132,7 +132,7 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
-                this._nodes.context.x = tipsPoint.x;
+                this._nodes.context.x = parseInt(tipsPoint.x);
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
                     var circle = self._nodes.getChildAt(i)
                     circle.context.y           = e.target.context.height - Math.abs(node.y);

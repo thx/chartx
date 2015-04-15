@@ -285,9 +285,10 @@ define(
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs:function(index,num){
+                // debugger
+                var x = this._xAxis.data[index].x
+                var y = this._yAxis.data
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
-                var x = index / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
                 var y = -(num - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
                 if(maxYAxis == 0){
                     y = 0;
