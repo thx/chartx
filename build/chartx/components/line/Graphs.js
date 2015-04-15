@@ -28,10 +28,6 @@ define(
             this.sprite     = null;  
             this.induce     = null;                         
 
-            this.event      = {
-                enabled       : 0
-            }    
-
             this.init(opt)
         };
     
@@ -142,7 +138,7 @@ define(
                         height      : self.h,
                         fillStyle   : '#000000',
                         globalAlpha : 0,
-                        cursor      : self.event.enabled ? 'pointer' : ''
+                        cursor      : 'pointer'
                     }
                 })
                 self.sprite.addChild(self.induce)

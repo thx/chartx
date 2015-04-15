@@ -221,8 +221,7 @@ define(
                     h    : this._yAxis.yGraphsHeight,
                     data : this._trimGraphs(),
                     disX : this._getGraphsDisX(),
-                    smooth : this.smooth,
-                    event: {enabled : this.event.enabled}
+                    smooth : this.smooth
                 });
                 this._graphs.setX( _yAxisW ), this._graphs.setY(y)
     
