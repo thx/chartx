@@ -66,8 +66,6 @@ define(
                 if( opt ){
                     _.deepExtend( this , opt );
                 }
-
-                this.text.rotation = -Math.abs( this.text.rotation );
     
                 if(this.dataSection.length == 0){
                     this.dataSection = this._initDataSection( this.dataOrg );
@@ -165,8 +163,14 @@ define(
                     this.maxTxtH = txt.getTextHeight();
                     
                     if( !!this.text.rotation ){
-                        this.h = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                        this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180)*txt.getTextWidth() + 8;
+                        if( this.text.rotation % 90 == 0 ){
+                            this.h = this._textMaxWidth;
+                            this.leftDisX = txt.getTextHeight() / 2;
+                        } else {
+                            this.h = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
+                            this.h += txt.getTextHeight();
+                            this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * txt.getTextWidth() + 8;
+                        }
                     } else {
                         this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
                         this.leftDisX = txt.getTextWidth() / 2;
@@ -192,7 +196,7 @@ define(
                             y  : y,
                             fillStyle   : this.text.fillStyle,
                             fontSize    : this.text.fontSize,
-                            rotation    : this.text.rotation,
+                            rotation    : -Math.abs(this.text.rotation),
                             textAlign   : !!this.text.rotation ? "right"  : "left",
                             textBaseline: !!this.text.rotation ? "middle" : "top"
                        }

@@ -187,12 +187,12 @@ define(
                         strokeStyle : self._getColor( self.line.strokeStyle ),
                         lineWidth   : self.line.lineWidth,
                         y           : self.y,
-                        smooth      : self.line.smooth 
-                    },
-                    //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
-                    smoothFilter    : function( rp ){
-                        if( rp[1] > 0 ) {
-                            rp[1] = 0;
+                        smooth      : self.line.smooth,
+                        //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
+                        smoothFilter    : function( rp ){
+                            if( rp[1] > 0 ) {
+                                rp[1] = 0;
+                            }
                         }
                     }
                 });
