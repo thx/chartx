@@ -58,7 +58,7 @@ define(
             _resetStatus : function(e){
                 var tipsPoint = this._getTipsPoint(e);
                 if(this._line){
-                    this._line.context.x  = tipsPoint.x;
+                    this._line.context.x  = parseInt(tipsPoint.x);
                 }
                 this._resetNodesStatus(e , tipsPoint);
             },
@@ -67,8 +67,9 @@ define(
              * line相关------------------------
              */
             _initLine : function(e , tipsPoint){
+                
                 var lineOpt = _.deepExtend({
-                    x       : tipsPoint.x,
+                    x       : parseInt(tipsPoint.x),
                     y       : e.target.localToGlobal().y,
                     xStart  : 0,
                     yStart  : e.target.context.height,
@@ -97,7 +98,7 @@ define(
                 this._nodes = new Canvax.Display.Sprite({
                     id : "line-tipsNodes",
                     context : {
-                        x   : tipsPoint.x,
+                        x   : parseInt(tipsPoint.x),
                         y   : e.target.localToGlobal().y
                     }
                 });
@@ -130,7 +131,7 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
-                this._nodes.context.x = tipsPoint.x;
+                this._nodes.context.x = parseInt(tipsPoint.x);
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;
                     csps.y           = e.target.context.height - Math.abs(node.y);
