@@ -97,7 +97,7 @@ define(
                 this._nodes = new Canvax.Display.Sprite({
                     id : "line-tipsNodes",
                     context : {
-                        x   : parseInt(tipsPoint.x),
+                        x   : tipsPoint.x,
                         y   : e.target.localToGlobal().y
                     }
                 });
@@ -121,8 +121,6 @@ define(
                         context : {
                             r : node.r,
                             fillStyle   : node.strokeStyle
-                            //strokeStyle : node.strokeStyle,
-                            //lineWidth   : node.lineWidth + 2
                         }
                     }) );
 
@@ -132,14 +130,14 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
-                this._nodes.context.x = parseInt(tipsPoint.x);
+                this._nodes.context.x = tipsPoint.x;
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    var circle = self._nodes.getChildAt(i)
-                    circle.context.y           = e.target.context.height - Math.abs(node.y);
-                    circle.context.r           = node.r
-                    circle.context.fillStyle   = node.fillStyle
-                    circle.context.strokeStyle = node.strokeStyle
-                    circle.context.lineWidth   = node.lineWidth+2
+                    var csps         = self._nodes.getChildAt(i).context;
+                    csps.y           = e.target.context.height - Math.abs(node.y);
+                    csps.r           = node.r
+                    csps.fillStyle   = node.fillStyle
+                    csps.strokeStyle = node.strokeStyle
+                    csps.lineWidth   = node.lineWidth+2
                 });
             }
         }
