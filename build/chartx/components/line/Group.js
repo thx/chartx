@@ -260,6 +260,7 @@ define(
                             var pre   = self.data[a - 1];
                             var next  = self.data[a + 1];
                             if(pre && next){
+                                debugger;
                                 if(value == pre.value && value == next.value){
                                     circle.context.visible = false;
                                 }
