@@ -1,0 +1,13 @@
+baseurl: /chartx
+markdown: redcarpet
+pygments: true
+safe: true
+lsi: false
+permalink: /:categories/:title
+excerpt_separator: "\n\n"
+exclude:
+  - Gruntfile.js
+  - "*.sublime-project"
+  - package.json
+  - readme.md
+  - node_modules

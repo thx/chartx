@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- line add_remove_line</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td_l">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 76  , 45 , 43    ],
+    [ 4      , 58  , 35 , 31    ],
+    [ 5      , 79  , 73 , 71    ],
+    [ 6      , 88  , 54 , 39    ],
+    [ 7      , 56  , 68 , 65    ],
+    [ 8      , 99  , 83 , 51    ]
+];
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的field字段
+var options = {
+    yAxis : {
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "xfield"
+    }
+};
+//Chartx.create.line开始初始化chart实例
+Chartx.create.line("canvasTest" , data , options).then(function( line ){
+    //把line暂存到window下面，好在del 和add 中使用
+    window.line = line;
+});
+
+//删除uv线的处理函数
+function del(){
+    line.remove("uv");
+}
+
+//添加uv线的处理函数
+//line.add的第二个参数为添加到整个线列表的index
+//默认为把新的线添加到最上面，push操作
+function add(){
+    line.add("uv" , 0)
+}
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                    <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+                    <h4>折线图（line chart）- 添加,删除折线</h4>
+                    <p>
+                        联系人：@逢春 @释剑
+                    </p>
+                </div>
+                <div  class="test-c">
+                    <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+                <form name="form" onsubmit="return false;" style="padding:20px;">
+                    <button type="button" class="btn btn-default " onclick="del()">
+                        删除uv线
+                    </button>
+                    <button type="button" class="btn btn-default " onclick="add()">
+                        添加uv线
+                    </button>
+                </form>
+
+            
+                折线图Line提供删除<code>remove</code>和增加<code>add</code>线条两个方法。
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <td>方法</td>
+                            <td>参数</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>remove</code></td>
+                            <td>的参数只有一个，就是对应的某个yAxis字段。</td>
+                        </tr>
+                        <tr>
+                            <td><code>add</code></td>
+                            <td>则有两个参数，第一个是要增加的yAxis字段，第二个则为要添加到整个折线列表的index索引值，0代表最底层，会出现在所有折线的最底部,默认不填写为所有折线的最顶层。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
