@@ -30,8 +30,7 @@ define(
 
             this.node     = {                     //节点 
                 enabled     : 1,  //是否有
-                control     : function(){}, 
-                mode        : 0,  //模式[0 = 都有节点 | 1 = 拐角才有节点]
+                corner      : false,  //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
                 r           : 2,//半径 node 圆点的半径
                 fillStyle   : '#ffffff',
                 strokeStyle : null,
@@ -255,22 +254,18 @@ define(
                             }
                         });
 
-                        self.node.control();
 
-                        var nodeEnabled = true 
-                        if( self.node.mode == 1 ){           //拐角才有节点
+                        if( self.node.corner ){           //拐角才有节点
                             var value = self.data[a].value;
                             var pre   = self.data[a - 1];
                             var next  = self.data[a + 1];
                             if(pre && next){
                                 if(value == pre.value && value == next.value){
-                                    nodeEnabled = false
+                                    circle.context.visible = false;
                                 }
                             }
-                        }
-                        if(nodeEnabled){
-                            self._circles.addChild(circle);
-                        }
+                        };
+                        self._circles.addChild(circle);
                     }
                     self._nodeInd = -1
                 }
