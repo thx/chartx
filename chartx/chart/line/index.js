@@ -198,23 +198,7 @@ define(
                     }
                 });
             
-                if(this._anchor.enabled){
-                    //绘制点位线
-                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
-                    this._anchor.draw({
-                        w    : this.width - _yAxisW,
-                        h    : y,
-                        cross  : {
-                            x : pos.x,
-                            y : y + pos.y
-                        },
-                        pos   : {
-                            x : _yAxisW,
-                            y : 0
-                        }
-                    });
-                    //, this._anchor.setY(y)
-                }
+                
 
                 this._graphs.draw({
                     w    : this._xAxis.xGraphsWidth,
@@ -246,6 +230,25 @@ define(
                         self._tips.hide( e );
                     }
                 });
+
+
+                if(this._anchor.enabled){
+                    //绘制点位线
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
+                    this._anchor.draw({
+                        w    : this.width - _yAxisW,
+                        h    : y,
+                        cross  : {
+                            x : pos.x,
+                            y : y + pos.y
+                        },
+                        pos   : {
+                            x : _yAxisW,
+                            y : 0
+                        }
+                    });
+                    //, this._anchor.setY(y)
+                }
             },
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {
@@ -285,13 +288,8 @@ define(
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs:function(index,num){
                 // debugger
-                var x = this._xAxis.data[index].x
-                var y = this._yAxis.data
-                var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var y = -(num - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
-                if(maxYAxis == 0){
-                    y = 0;
-                }
+                var x = this._xAxis.data[index].x;
+                var y = this._graphs.data[0][index].y
                 return {x:x, y:y}
             },
             //每两个点之间的距离
