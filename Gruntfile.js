@@ -54,6 +54,10 @@ module.exports = function(grunt) {
  
   //注册任务
   grunt.registerTask('build', [ 'clean' , 'copy' , 'concat' , 'uglify'  ]);
+
+  grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json')
+  })
+
+  grunt.loadTasks('_tasks')
 }
-
-
