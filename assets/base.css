@@ -188,7 +188,7 @@ a {
 }
 
 #nav .logo .dib {
-    vertical-align: middle;
+    vertical-align: top;
 }
 
 #nav .iconlogo {
@@ -199,8 +199,8 @@ a {
 
 #nav .logo-text {
     color: #fff;
-    font-size: 32px;
-    margin-left: 10px;
+    font-size: 27px;
+    margin-left: 0;
 }
 
 #nav.fixed .iconlogo {
