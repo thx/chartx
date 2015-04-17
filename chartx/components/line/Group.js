@@ -21,7 +21,7 @@ define(
 
             this.colors     = ['#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'],
 
-            this.line       = {                     //线
+            this.line       = {                   //线
                 strokeStyle : this.colors[ this._groupInd ],
                 lineWidth   : 2,
                 smooth      : true
@@ -29,15 +29,15 @@ define(
 
 
             this.node     = {                     //节点 
-                enabled     : 1,  //是否有
-                corner      : false,  //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-                r           : 2,//半径 node 圆点的半径
+                enabled     : 1,                       //是否有
+                corner      : false,                   //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
+                r           : 2,                       //半径 node 圆点的半径
                 fillStyle   : '#ffffff',
                 strokeStyle : null,
                 lineWidth   : 2
             }
     
-            this.fill    = {                     //填充
+            this.fill    = {                      //填充
                 fillStyle   : null,
                 alpha       : 0.1
             }
