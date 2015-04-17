@@ -6,7 +6,6 @@ KISSY.add("chartx/index" , function( S ){
         debug : !! ~location.search.indexOf('debug'),
         build : !! ~location.search.indexOf('build')
    };
-
    var dvixVersion   = "1.0.0";
    var dvixUrl       = "http://g.tbcdn.cn/thx/charts";
 
