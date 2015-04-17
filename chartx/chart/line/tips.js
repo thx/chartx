@@ -115,7 +115,7 @@ define(
                     });
                     csp.addChild( new Circle({
                         context : {
-                            r : node.r + 2 ,
+                            r : node.r + 2 + 2 ,
                             fillStyle   : "white",//node.fillStyle,
                             strokeStyle : node.strokeStyle,
                             lineWidth   : node.lineWidth
@@ -124,7 +124,7 @@ define(
 
                     csp.addChild( new Circle({
                         context : {
-                            r : node.r,
+                            r : node.r + 1,
                             fillStyle   : node.strokeStyle
                         }
                     }) );
