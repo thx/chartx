@@ -29,9 +29,9 @@ define(
                     enabled     : 1,
                     data        : [],                      //[{y:100},{}]
                     // data        : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
-                    lineType    : 'dashed',                //线条类型(dashed = 虚线 | '' = 实线)
+                    lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#e5e5e5',
+                    strokeStyle : '#f5f5f5', //'#e5e5e5',
                     filter      : null
             }
     
@@ -41,7 +41,7 @@ define(
                     // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#e5e5e5',
+                    strokeStyle : '#f5f5f5',//'#e5e5e5',
                     filter      : null
             } 
     
