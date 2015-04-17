@@ -28,7 +28,8 @@ define(
             this.eventEnabled = true;
     
             this.sprite = null ;
-    
+            this.txtsSp = null
+
             this.yDataSectionLen = 0; //y轴方向有多少个section
     
             _.deepExtend(this , opt);
@@ -41,6 +42,7 @@ define(
         Graphs.prototype = {
             init : function( ){
                 this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
+                this.txtsSp = new Canvax.Display.Sprite({ id : "txtsSp" , context:{visible:false}});
             },
             setX:function($n){
                 this.sprite.context.x = $n
@@ -75,7 +77,6 @@ define(
 
             },
             draw : function(data , opt){
-            
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -162,14 +163,37 @@ define(
                                 me.sprite.removeChild(me._tip.sprite);
                             }); 
                         }
-    
+                        
+                         //文字
+                        var content = barData.value
+                        if( _.isFunction(this.text.format) ){
+                            content = this.text.format( content );
+                        };
+
+                        var txt = new Canvax.Display.Text( content ,
+                           {
+                            context : {
+                                x  : barH + 2,
+                                y  : barData.y,
+                                fillStyle    : this.text.fillStyle,
+                                fontSize     : this.text.fontSize,
+                                textAlign    : this.text.textAlign
+                           }
+                        });
+                        if(txt.context.x + txt.getTextWidth()> this.w){
+                            txt.context.x = barH - txt.getTextWidth() - 2  
+                        }
+                        txt.context.y = barData.y - txt.getTextHeight() / 2
+                        this.txtsSp.addChild(txt)
+
                         sprite.addChild( rect );
                         spriteHover.addChild( hoverRect );
                     }
                     this.sprite.addChild( sprite );
                     this.sprite.addChild( spriteHover );
                 }
-    
+                this.sprite.addChild(this.txtsSp)
+
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
             },
@@ -185,6 +209,7 @@ define(
                    .onUpdate( function (  ) {
                        self.sprite.context.scaleX = this.h / self.h;
                    } ).onComplete( function(){
+                       self._growEnd();
                        cancelAnimationFrame( timer );
                    }).start();
                    animate();
@@ -194,6 +219,11 @@ define(
                     Tween.update();
                 };
                 growAnima();
+            },
+             _growEnd : function(){
+                if(this.text.enabled){
+                    this.txtsSp.context.visible = true
+                }
             },
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {
