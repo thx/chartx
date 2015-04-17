@@ -1,5 +1,5 @@
 define(
-    "chartx/chart/bar_h/graphs",
+    "chartx/chart/bar/graphs",
     [
         "canvax/index",
         "canvax/shape/Rect",
@@ -24,6 +24,12 @@ define(
                 width  : 12,
                 radius : 2
             }
+            this.text = {
+                    fillStyle : '#999999',
+                    fontSize  : 12,
+                    textAlign : "left",
+                    format    : null
+            }
 
             this.eventEnabled = true;
     
@@ -41,6 +47,7 @@ define(
         Graphs.prototype = {
             init : function( ){
                 this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
+                this.txtsSp = new Canvax.Display.Sprite({ id : "txtsSp" , context:{visible:false}});
             },
             setX:function($n){
                 this.sprite.context.x = $n
@@ -75,7 +82,7 @@ define(
 
             },
             draw : function(data , opt){
-            
+                // debugger
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -92,18 +99,14 @@ define(
                     var spriteHover = new Canvax.Display.Sprite({ id : "barGroupHover"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var barData = data[ii][i];
-                        // console.log(barData.y)
                         var fillStyle = this._getColor( this.bar.fillStyle , i , ii , barData.value );
-                        var barH      = parseInt(Math.abs(barData.x));
+                        var barH      = parseInt(Math.abs(barData.y));
+                        
                         var rectCxt   = {
-                            // x         : Math.round(barData.x - this.bar.width/2),
-                            // y         : parseInt(barData.y),
-                            // width     : parseInt(this.bar.width),
-                            // height    : barH,
-                            x         : 0,
-                            y         : Math.round(barData.y - this.bar.width/2),
-                            width     : barH,
-                            height    : parseInt(this.bar.width),
+                            x         : Math.round(barData.x - this.bar.width/2),
+                            y         : parseInt(barData.y),
+                            width     : parseInt(this.bar.width),
+                            height    : barH,
                             fillStyle : fillStyle
                         };
 
@@ -117,19 +120,15 @@ define(
                             context : rectCxt
                         });
     
-                        // var itemSecH   = this.h/( this.yDataSectionLen - 1 );
-                        // var hoverRectH = Math.ceil(barH/itemSecH) * itemSecH;
+                        var itemSecH   = this.h/( this.yDataSectionLen - 1 );
+                        var hoverRectH = Math.ceil(barH/itemSecH) * itemSecH;
                         var hoverRect  = new Rect({
                             id : "bar_"+ii+"_"+i+"hover",
                             context : {
-                                // x           : Math.round(barData.x - this.bar.width/2),
-                                // y           : -hoverRectH,
-                                // width       : parseInt(this.bar.width),
-                                // height      : hoverRectH,
-                                x           : 0,
-                                y           : Math.round(barData.y - this.bar.width/2),
-                                width       : this.w,
-                                height      : parseInt(this.bar.width),
+                                x           : Math.round(barData.x - this.bar.width/2),
+                                y           : -hoverRectH,
+                                width       : parseInt(this.bar.width),
+                                height      : hoverRectH,
                                 fillStyle   : "black",
                                 globalAlpha : 0,
                                 cursor      : "pointer"
@@ -144,8 +143,8 @@ define(
                             var me = this;
                             hoverRect.on("mouseover" , function(e){
                                 var target    = this.target.context;
-                                target.y      --;
-                                target.height += 2;
+                                target.x      --;
+                                target.width  += 2;
 
                                 me.sprite.addChild(me._tip.sprite);
                                 me._tip.show( me._setTipsInfoHandler(e , this.row , this.column ) );
@@ -156,19 +155,41 @@ define(
                             }); 
                             hoverRect.on("mouseout" , function(e){
                                 var target    = this.target.context;
-                                target.y      ++;
-                                target.height -= 2;
+                                target.x      ++;
+                                target.width  -= 2;
                                 me._tip.hide(e);
                                 me.sprite.removeChild(me._tip.sprite);
                             }); 
                         }
-    
+
+                        //文字
+                        var content = barData.value
+                        if( _.isFunction(this.text.format) ){
+                            content = this.text.format( content );
+                        };
+
+
+                        var txt = new Canvax.Display.Text( content ,
+                           {
+                            context : {
+                                x  : barData.x,
+                                y  : rectCxt.y,
+                                fillStyle    : this.text.fillStyle,
+                                fontSize     : this.text.fontSize,
+                                textAlign    : this.text.textAlign
+                           }
+                        });
+                        txt.context.x = barData.x - txt.getTextWidth() / 2 , txt.context.y = rectCxt.y - txt.getTextHeight()
+                        this.txtsSp.addChild(txt)
+
                         sprite.addChild( rect );
                         spriteHover.addChild( hoverRect );
                     }
+
                     this.sprite.addChild( sprite );
                     this.sprite.addChild( spriteHover );
                 }
+                this.sprite.addChild(this.txtsSp)
     
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
@@ -183,8 +204,9 @@ define(
                    var bezierT = new Tween.Tween( { h : 0 } )
                    .to( { h : self.h }, 500 )
                    .onUpdate( function (  ) {
-                       self.sprite.context.scaleX = this.h / self.h;
+                       self.sprite.context.scaleY = this.h / self.h;
                    } ).onComplete( function(){
+                       self._growEnd();
                        cancelAnimationFrame( timer );
                    }).start();
                    animate();
@@ -194,6 +216,9 @@ define(
                     Tween.update();
                 };
                 growAnima();
+            },
+            _growEnd : function(){
+                this.txtsSp.context.visible = true
             },
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {
