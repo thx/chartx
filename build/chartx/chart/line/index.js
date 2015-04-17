@@ -207,6 +207,7 @@ define(
                     disX : this._getGraphsDisX(),
                     smooth : this.smooth
                 });
+
                 this._graphs.setX( _yAxisW ), this._graphs.setY(y)
     
                 //执行生长动画
@@ -215,14 +216,26 @@ define(
                 var self = this;
                 this._graphs.sprite.on( "hold mouseover" ,function(e){
                     if( self._tips.enabled ){
-                        self._setXaxisYaxisToTipsInfo(e);
-                        self._tips.show( e );
+                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                            self._setXaxisYaxisToTipsInfo(e);
+                            self._tips.show( e );
+                        }
                     }
                 });
                 this._graphs.sprite.on( "drag mousemove" ,function(e){
                     if( self._tips.enabled ){
-                        self._setXaxisYaxisToTipsInfo(e);
-                        self._tips.move( e );
+                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                            self._setXaxisYaxisToTipsInfo(e);
+                            if( self._tips._isShow ){
+                                self._tips.move( e );
+                            } else {
+                                self._tips.show( e );
+                            }
+                        } else {
+                            if( self._tips._isShow ){
+                                self._tips.hide( e );
+                            }
+                        }
                     }
                 });
                 this._graphs.sprite.on( "release mouseout" ,function(e){
@@ -250,6 +263,8 @@ define(
                     //, this._anchor.setY(y)
                 }
             },
+            //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+            //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
@@ -263,17 +278,12 @@ define(
             _trimGraphs:function(){
                 //debugger
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
-                        !tmpData[a] ? tmpData[a] = [] : ''
-                        var x = b / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
-                        if(maxXAxisLen == 1 && arr[a].length == 1) {                      //每条线上只有一个点 那么x需要居中
-                            x = this._xAxis.xGraphsWidth / 2
-                        }
-
+                        !tmpData[a] ? tmpData[a] = [] : '';
+                        var x = this._xAxis.data[b].x;
                         var y = - (arr[a][b] - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
                         y = isNaN(y) ? 0 : y
                         tmpData[a][b] = {
@@ -294,8 +304,9 @@ define(
             },
             //每两个点之间的距离
             _getGraphsDisX:function(){
-                var n = this._xAxis.xGraphsWidth / ( this.dataFrame.xAxis.org[0].length - 1 );
-                if(this.dataFrame.xAxis.org[0].length == 1){
+                var dsl = this._xAxis.dataSection.length;
+                var n   = this._xAxis.xGraphsWidth / (dsl - 1);
+                if( dsl == 1){
                     n = 0
                 }
                 return n

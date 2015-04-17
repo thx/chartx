@@ -22,6 +22,7 @@ define(
             this.colors     = ['#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'],
 
             this.line       = {                   //线
+                enabled     : 1,
                 strokeStyle : this.colors[ this._groupInd ],
                 lineWidth   : 2,
                 smooth      : true
@@ -195,6 +196,9 @@ define(
                         }
                     }
                 });
+                if(!this.line.enabled){
+                    bline.context.visible = false
+                }
                 self.sprite.addChild( bline );
                 self._bline = bline;
                 

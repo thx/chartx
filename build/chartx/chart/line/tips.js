@@ -15,6 +15,7 @@ define(
             this._line     = null;
             this._nodes    = null;
             this._tip      = null;
+            this._isShow   = false;
             this.enabled   = true;
             this.init(opt , data , tipDomContainer);
         };
@@ -39,11 +40,12 @@ define(
     
                 this.sprite.addChild(this._tip.sprite);
                 this._tip.show(e);
+
+                this._isShow = true;
         
             },
             move : function(e){
                 this._resetStatus(e);
-    
                 this._tip.move(e);
             },
             hide : function(e){
@@ -51,6 +53,8 @@ define(
                 this._line  = null;
                 this._nodes = null;
                 this._tip.hide(e);
+
+                this._isShow = false;
             },
             _getTipsPoint : function(e){
                 return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
