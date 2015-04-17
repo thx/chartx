@@ -71,6 +71,10 @@ define(
                     this.dataSection = this._initDataSection( this.dataOrg );
                 }
 
+                if(!this.line.enabled){
+                    this.line.height = 0
+                }
+
                 this.sprite = new Canvax.Display.Sprite({
                     id : "xAxisSprite"
                 });
@@ -209,25 +213,27 @@ define(
                         txt.context.y += 3;
                     }
 
-                    //线条
-                    var line = new Line({
-                        context : {
-                            xStart      : x,
-                            yStart      : this.disY,
-                            xEnd        : x,
-                            yEnd        : this.line.height + this.disY,
-                            lineWidth   : this.line.width,
-                            strokeStyle : this.line.strokeStyle
-                        }
-                    });
-                    xNode.addChild( line );
+                    if(this.line.enabled){
+                        //线条
+                        var line = new Line({
+                            context : {
+                                xStart      : x,
+                                yStart      : this.disY,
+                                xEnd        : x,
+                                yEnd        : this.line.height + this.disY,
+                                lineWidth   : this.line.width,
+                                strokeStyle : this.line.strokeStyle
+                            }
+                        });
+                        xNode.addChild( line );
+                    }
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
                     _.isFunction(this.filter) && this.filter({
                         layoutData  : arr,
                         index       : a,
                         txt         : txt,
-                        line        : line
+                        line        : line || null
                     });
 
                     this.sprite.addChild( xNode );
