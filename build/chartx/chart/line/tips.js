@@ -79,9 +79,9 @@ define(
                     yStart  : e.target.context.height,
                     xEnd    : 0,
                     yEnd    : 0,
-                    lineType    : "dashed",
+                    //lineType    : "dashed",
                     lineWidth   : 1,
-                    strokeStyle : "#333333" 
+                    strokeStyle : "#cccccc" 
                 } , this.line);
                 if(this.line.enabled){
                     this._line = new Line({
@@ -91,7 +91,6 @@ define(
                     this.sprite.addChild( this._line );
                 }
             },
-    
     
     
             /**

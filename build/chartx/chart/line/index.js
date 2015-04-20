@@ -182,10 +182,12 @@ define(
                     _yAxisW = this._xAxis.yAxisW;
                 };
 
+                var _graphsH = Math.abs(this._yAxis.layoutData[ 0 ].y - this._yAxis.layoutData.slice(-1)[0].y);
+
                 //绘制背景网格
                 this._back.draw({
                     w    : this._xAxis.w ,
-                    h    : y,
+                    h    : _graphsH,
                     xAxis:{
                         data : this._yAxis.layoutData
                     },
@@ -250,14 +252,14 @@ define(
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
                     this._anchor.draw({
                         w    : this.width - _yAxisW,
-                        h    : y,
+                        h    : _graphsH,
                         cross  : {
                             x : pos.x,
-                            y : y + pos.y
+                            y : _graphsH + pos.y
                         },
                         pos   : {
                             x : _yAxisW,
-                            y : 0
+                            y : y - _graphsH
                         }
                     });
                     //, this._anchor.setY(y)

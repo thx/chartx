@@ -80,8 +80,8 @@ define(
                 var self  = this;
                 self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp)
                 self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp)
-    
-                //x轴上的线集合
+   
+                //x轴方向的线集合
                 var arr = self.xAxis.data
                 for(var a = 1, al = arr.length; a < al; a++){
                     var o = arr[a];
@@ -104,10 +104,11 @@ define(
                         });
                         self.xAxisSp.addChild(line);
                     }
-                }
-                //y轴上的线集合
+                };
+
+                //y轴方向的线集合
                 var arr = self.yAxis.data
-                for(var a = 1, al = arr.length; a < al; a++){
+                for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a]
                     var line = new Line({
                         context : {
@@ -117,7 +118,8 @@ define(
                             yEnd        : -self.h,
                             lineType    : self.yAxis.lineType,
                             lineWidth   : self.yAxis.thinkness,
-                            strokeStyle : self.yAxis.strokeStyle  
+                            strokeStyle : self.yAxis.strokeStyle,
+                            visible     : o.x ? true : false
                         }
                     })
                     if(self.yAxis.enabled){

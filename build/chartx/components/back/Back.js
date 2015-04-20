@@ -29,9 +29,9 @@ define(
                     enabled     : 1,
                     data        : [],                      //[{y:100},{}]
                     // data        : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
-                    lineType    : 'dashed',                //线条类型(dashed = 虚线 | '' = 实线)
+                    lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#e5e5e5',
+                    strokeStyle : '#f5f5f5', //'#e5e5e5',
                     filter      : null
             }
     
@@ -41,7 +41,7 @@ define(
                     // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
-                    strokeStyle : '#e5e5e5',
+                    strokeStyle : '#f5f5f5',//'#e5e5e5',
                     filter      : null
             } 
     
@@ -80,8 +80,8 @@ define(
                 var self  = this;
                 self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp)
                 self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp)
-    
-                //x轴上的线集合
+   
+                //x轴方向的线集合
                 var arr = self.xAxis.data
                 for(var a = 1, al = arr.length; a < al; a++){
                     var o = arr[a];
@@ -104,10 +104,11 @@ define(
                         });
                         self.xAxisSp.addChild(line);
                     }
-                }
-                //y轴上的线集合
+                };
+
+                //y轴方向的线集合
                 var arr = self.yAxis.data
-                for(var a = 1, al = arr.length; a < al; a++){
+                for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a]
                     var line = new Line({
                         context : {
@@ -117,7 +118,8 @@ define(
                             yEnd        : -self.h,
                             lineType    : self.yAxis.lineType,
                             lineWidth   : self.yAxis.thinkness,
-                            strokeStyle : self.yAxis.strokeStyle  
+                            strokeStyle : self.yAxis.strokeStyle,
+                            visible     : o.x ? true : false
                         }
                     })
                     if(self.yAxis.enabled){
