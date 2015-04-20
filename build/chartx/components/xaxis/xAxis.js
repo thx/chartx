@@ -66,8 +66,6 @@ define(
                 if( opt ){
                     _.deepExtend( this , opt );
                 }
-
-                this.text.rotation = -Math.abs( this.text.rotation );
     
                 if(this.dataSection.length == 0){
                     this.dataSection = this._initDataSection( this.dataOrg );
@@ -156,7 +154,7 @@ define(
                 if( !this.enabled ){ //this.display == "none"
                     this.h = this.dis;//this.max.txtH;
                 } else {
-                    var txt = new Canvax.Display.Text( this.dataSection[0] ,
+                    var txt = new Canvax.Display.Text( this.dataSection[0] || "test" ,
                                 {
                                     context : {
                                         fontSize    : this.text.fontSize
@@ -165,8 +163,14 @@ define(
                     this.maxTxtH = txt.getTextHeight();
                     
                     if( !!this.text.rotation ){
-                        this.h = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                        this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180)*txt.getTextWidth() + 8;
+                        if( this.text.rotation % 90 == 0 ){
+                            this.h = this._textMaxWidth;
+                            this.leftDisX = txt.getTextHeight() / 2;
+                        } else {
+                            this.h = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
+                            this.h += txt.getTextHeight();
+                            this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * txt.getTextWidth() + 8;
+                        }
                     } else {
                         this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
                         this.leftDisX = txt.getTextWidth() / 2;
@@ -192,7 +196,7 @@ define(
                             y  : y,
                             fillStyle   : this.text.fillStyle,
                             fontSize    : this.text.fontSize,
-                            rotation    : this.text.rotation,
+                            rotation    : -Math.abs(this.text.rotation),
                             textAlign   : !!this.text.rotation ? "right"  : "left",
                             textBaseline: !!this.text.rotation ? "middle" : "top"
                        }
@@ -232,6 +236,9 @@ define(
             },
             /*校验第一个和最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout:function(){
+
+                if(this.sprite.getNumChildren()==0)
+                    return;
     			var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
                 if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > this.w)) {
     				popText.context.x = parseInt(this.w - popText.getTextWidth())
@@ -246,7 +253,7 @@ define(
                     }
                 };
                        
-                var txt = new Canvax.Display.Text( maxLenText ,
+                var txt = new Canvax.Display.Text( maxLenText || "test" ,
                     {
                     context : {
                         fillStyle   : this.text.fillStyle,
@@ -270,9 +277,6 @@ define(
                 //总共能多少像素展现
                 var n = Math.min( Math.floor( this.w / this._textMaxWidth ) , arr.length ); //能展现几个
                 var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                  //array中展现间隔
-                if(this.text.dis){
-                    dis = this.text.dis
-                }
 
                 //存放展现的数据
                 for( var a = 0 ; a < n ; a++ ){

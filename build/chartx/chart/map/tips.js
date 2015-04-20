@@ -42,9 +42,9 @@ define(
                         
                         var str  = "<table>";
                         var self = this;
-                        str +=     "<tr style='color:#999'><td colspan='2'>"+info.area.value+"</td></tr>"
+                        str +=     "<tr style='color:#333'><td colspan='2'>"+info.area.value+"</td></tr>"
                         _.each( info.nodesInfoList , function( node , i ){
-                            str+= "<tr style='color:#999'>";
+                            str+= "<tr style='color:#333'>";
                             var prefixName = self.prefix[i];
                             if( !prefixName ) {
                                 prefixName = node.field
@@ -76,12 +76,17 @@ define(
             },
             hide : function(e){
                 this._tip.hide(e);
-                this._cPoint.remove();
-                this._triangle.context.globalAlpha = 0;
+                this._cPoint   && this._cPoint.remove();
+                this._triangle && (this._triangle.context.globalAlpha = 0);
             },
             _weight : function(e){
                 var br = this._tip.backR;
-                var cPoint = [ e.target.mapData.cp[0]*this._mapScale , e.target.mapData.cp[1]*this._mapScale ];
+                //cp -- > textX , textY
+                var targetOffSet = e.target.localToGlobal();
+                var cPoint = [ 
+                    e.target.mapData.textX * this._mapScale + targetOffSet.x, 
+                    e.target.mapData.textY * this._mapScale + targetOffSet.y
+                ];
                 this._cPoint = new Circle({
                     context : {
                         x : cPoint[0],

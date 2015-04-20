@@ -46,7 +46,15 @@ define(
         
         CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
             init   : function(){},
+            dataFrame : null, //每个图表的数据集合 都 存放在dataFrame中。
             draw   : function(){},
+            /*
+             * chart的销毁 
+            */
+            destroy: function(){
+                this.clear();
+                this.el.innerHTML = "";
+            },
             /*
              * 清除整个图表
              **/
@@ -70,20 +78,23 @@ define(
              * @param obj {data , options}
              */
             reset : function( obj ){
+                /*如果用户有调用reset就说明用户是有想要绘制的 
+                 *还是把这个权利交给使用者自己来控制吧
                 if( !obj || _.isEmpty(obj)){
                     return;
                 }
+                */
                 //如果要切换新的数据源
-                if( obj.options ){
+                if( obj && obj.options ){
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
 
                     _.deepExtend( this , obj.options );
 
                     //配置的变化有可能也会导致data的改变
-                    this.dataFrame = this._initData( this.dataFrame.org );
+                    this.dataFrame && (this.dataFrame = this._initData( this.dataFrame.org ));
                 }
-                if( obj.data ){
+                if( obj && obj.data ){
                     //数据集合，由_initData 初始化
                     this.dataFrame = this._initData( obj.data );
                 }
@@ -116,4 +127,4 @@ define(
         return Chart;
     
     }
-)
+);

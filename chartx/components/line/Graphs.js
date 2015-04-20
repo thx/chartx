@@ -25,14 +25,8 @@ define(
             this.iGroup     = 0;                           //群组索引(哪条线)
             this.iNode      = -1;                          //节点索引(那个点)
     
-            this._nodesInfoList = [];                      //多条线同个节点索引上的节点信息集合
-    
             this.sprite     = null;  
             this.induce     = null;                         
-
-            this.event      = {
-                enabled       : 0
-            }    
 
             this.init(opt)
         };
@@ -144,7 +138,7 @@ define(
                         height      : self.h,
                         fillStyle   : '#000000',
                         globalAlpha : 0,
-                        cursor      : self.event.enabled ? 'pointer' : ''
+                        cursor      : 'pointer'
                     }
                 })
                 self.sprite.addChild(self.induce)
@@ -173,18 +167,18 @@ define(
                 x = x > this.w ? this.w : x
                 var tmpINode = this.disX == 0 ? 0 : parseInt( (x + (this.disX / 2) ) / this.disX  );
 
-                this._nodesInfoList = [];                 //节点信息集合
-                var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(this._nodesInfoList , "y" ));
+                var _nodesInfoList = [];                 //节点信息集合
+                var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(_nodesInfoList , "y" ));
                 for (var a = 0, al = this.groups.length; a < al; a++ ) {
                     var o = this.groups[a].getNodeInfoAt(tmpINode)
-                    o && this._nodesInfoList.push(o);
+                    o && _nodesInfoList.push(o);
                 }
 
                 this.iGroup = tmpIGroup, this.iNode = tmpINode
                 var node = {
                     iGroup        : this.iGroup,
                     iNode         : this.iNode,
-                    nodesInfoList : _.clone(this._nodesInfoList)
+                    nodesInfoList : _.clone(_nodesInfoList)
                 }
                 return node;
             },

@@ -1,0 +1,14 @@
+body{margin:0;padding:0;font-size:12px;background-color:white!important;}
+body .CodeMirror pre {font-size:13px;}
+table { width:100%;border:none; border-spacing:0; border-collapse:0; }
+table td { border:none; vertical-align:top;padding:0;}
+.test-c {text-align:left;padding-top:10px;}
+#canvasTest {margin:0}
+body .CodeMirror {
+    height: auto;
+    width : auto;
+}
+#chartdemo-r {
+    overflow-y:auto;
+}
+#run {font-size:38px;cursor:pointer;float:left;margin-right:20px;color:#814C00}

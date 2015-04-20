@@ -3,21 +3,95 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>Canvax</title>
-
-<style type="text/css">
-    body{margin:0;padding:0;font-size:12px;background-color:#eee;padding:10px 100px 100px;}
-    //canvas {background:#999}
-
-</style>
-<script src="http://g.tbcdn.cn/kissy/k/1.4.5/seed-min.js"></script>
+<title>xChart demo -- line xAxis_rotate</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
-<script type="text/javascript" src="./xAxis_rotate.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
 </head>
-<script type="text/javascript">
-		
-</script>
-<body>
- 	<div id="canvasTest" style='background:#ffffff;width:560px;height:300px;'></div>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["time"       ,"uv" ,"pv","click"],
+    ["2015-11-12" , 101 , 20 , 33    ],
+    ["2015-11-13" , 67  , 51 , 26    ],
+    ["2015-11-14" , 76  , 45 , 43    ],
+    ["2015-11-15" , 58  , 35 , 31    ],
+    ["2015-11-16" , 79  , 73 , 71    ],
+    ["2015-11-17" , 88  , 54 , 39    ],
+    ["2015-11-18" , 56  , 68 , 65    ],
+    ["2015-11-19" , 99  , 83 , 51    ]
+];
+//chart的配置信息
+var options = {
+    yAxis : {
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "time",
+        //当单个xAxis值比较长的时候，比如这个data里面的time.
+        //需要让xAxis轴上面的文本实现旋转来避免xAxis上面的文本前后堆叠在一起
+        //需要加上如下配置
+        text:{
+            rotation  : 30 
+        }
+        
+    }
+};
+//Chartx.create.line开始初始化chart实例
+Chartx.create.line("canvasTest" , data , options);
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+                    <h4>折线图（line chart）- xAxis轴上面文本旋转</h4>
+                    <p>
+                        联系人：@逢春 @释剑
+                    </p>
+                </div>
+                <div  class="test-c">
+                    <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+                
+                <div class="highlight" style="margin-top:30px;">
+                    <p>
+                    一般的来讲，只有在xAxis轴上面的单个文本都比较长的时候，会出现前后文本堆叠在一起的情况，这个时候建议使用该配置。
+                    </p>
+                    <pre>
+                    options.xAxis.text.rotation = 30; //TODO: 30是角度，可以任意调节
+                    </pre>
+                </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
 </body> 
 </html>

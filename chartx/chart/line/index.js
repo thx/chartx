@@ -58,8 +58,6 @@ define(
                 this._initModule();                        //初始化模块  
     
                 this._startDraw();                         //开始绘图
-    
-                this._drawEnd();                           //绘制结束，添加到舞台
               
                 this._arguments = arguments;
     
@@ -148,6 +146,13 @@ define(
                 this._anchor = new Anchor(this.anchor)
                 this._graphs = new Graphs( this.graphs, this);
                 this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
+
+                this.stageBg.addChild(this._back.sprite);
+                this.stageBg.addChild(this._anchor.sprite);
+                this.core.addChild(this._xAxis.sprite);
+                this.core.addChild(this._yAxis.sprite);
+                this.core.addChild(this._graphs.sprite);
+                this.stageTip.addChild(this._tips.sprite);
             },
             _startDraw : function(){
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -193,27 +198,14 @@ define(
                     }
                 });
             
-                if(this._anchor.enabled){
-                    //绘制点位线
-                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
-                    this._anchor.draw({
-                        w    : this.width,
-                        h    : y,
-                        pos  : {
-                            x : pos.x,
-                            y : y + pos.y
-                        }
-                    });
-                    this._anchor.setX(_yAxisW + this._xAxis.disOriginX)//, this._anchor.setY(y)
-                }
+                
 
                 this._graphs.draw({
                     w    : this._xAxis.xGraphsWidth,
                     h    : this._yAxis.yGraphsHeight,
                     data : this._trimGraphs(),
                     disX : this._getGraphsDisX(),
-                    smooth : this.smooth,
-                    event: {enabled : this.event.enabled}
+                    smooth : this.smooth
                 });
                 this._graphs.setX( _yAxisW ), this._graphs.setY(y)
     
@@ -238,6 +230,25 @@ define(
                         self._tips.hide( e );
                     }
                 });
+
+
+                if(this._anchor.enabled){
+                    //绘制点位线
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
+                    this._anchor.draw({
+                        w    : this.width - _yAxisW,
+                        h    : y,
+                        cross  : {
+                            x : pos.x,
+                            y : y + pos.y
+                        },
+                        pos   : {
+                            x : _yAxisW,
+                            y : 0
+                        }
+                    });
+                    //, this._anchor.setY(y)
+                }
             },
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {
@@ -268,7 +279,7 @@ define(
                         tmpData[a][b] = {
                             value : arr[a][b],
                             x : x,
-                            y : y,
+                            y : y
                         };
                     }
                 }
@@ -276,10 +287,9 @@ define(
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs:function(index,num){
-                var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
-                var x = index / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
-                var y = -(num - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
+                // debugger
+                var x = this._xAxis.data[index].x;
+                var y = this._graphs.data[0][index].y
                 return {x:x, y:y}
             },
             //每两个点之间的距离
@@ -289,18 +299,6 @@ define(
                     n = 0
                 }
                 return n
-            },
-    
-            _drawEnd:function(){
-                this.stageBg.addChild(this._back.sprite)
-                this.stageBg.addChild(this._anchor.sprite)
-    
-                this.core.addChild(this._xAxis.sprite);
-                this.core.addChild(this._yAxis.sprite);
-                this.core.addChild(this._graphs.sprite);
-                
-                this.stageTip.addChild(this._tips.sprite);
-    
             },
             _click:function(o){
                 var self = this.This                            //this = this.event

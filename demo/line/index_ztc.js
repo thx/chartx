@@ -66,7 +66,9 @@ KISSY.ready(function(){
        [ "1.9"        , 54         ,  260         , 180 ],
        [ "2.0"        , 60         ,  260         , 180 ]
     ]
+    var data1 = JSON.parse('[["price","rate"],["0.06","0"],["0.07","0"],["0.08","0"],["0.09","0"],["0.10","0"],["0.11","0"],["0.12","0"],["0.13","0"],["0.14","0"],["0.15","0"],["0.16","0"],["0.17","0"],["0.18","0"],["0.19","0"],["0.20","0"],["0.22","0"],["0.24","0"],["0.26","0"],["0.28","0"],["0.30","0"],["0.33","0"],["0.36","0"],["0.39","0"],["0.42","0"],["0.46","0"],["0.50","0"],["0.55","0"],["0.60","0"],["0.66","0"],["0.72","0"],["0.79","0"],["0.86","0"],["0.94","0"],["1.03","0"],["1.13","0"],["1.24","0"],["1.36","0"],["1.49","0"],["1.63","0"],["1.79","0"],["1.96","0"]]')
     var anchorXIndex = 9                              //瞄准器x轴索引
+    /*
     var options = {
         event : {
             enabled : 1,                              //是否开启手型
@@ -118,26 +120,45 @@ KISSY.ready(function(){
             field : "date"
         },
         graphs:{
+
             line:{
-                strokeStyle : "#1054a3"
+                strokeStyle : {
+                    normal : ["#1054a3"]
+                }
             },
             fill:{
                 alpha:0
             },
             node:{
-                fillStyle:function(o){
-                    if(o.iNode == anchorXIndex){
-                        return '#cc3300'
+                fillStyle:{
+                    normal:function(o){
+                        if(o.iNode == anchorXIndex){
+                            return '#cc3300'
+                        }
+                    },
+                    over:function(o){
+                        if(o.iNode == anchorXIndex){
+                            return '#cc3300'
+                        }
                     }
                 },
-                strokeStyle:function(o){
-                    if(o.iNode == anchorXIndex){
-                        return '#cc3300'
+                strokeStyle:{
+                    normal:function(o){
+                        if(o.iNode == anchorXIndex){
+                            return '#cc3300'
+                        }
+                    },
+                    over:function(o){
+                        if(o.iNode == anchorXIndex){
+                            return '#cc3300'
+                        }
                     }
                 },
-                lineWidth:function(o){
-                    if(o.iNode == anchorXIndex){
-                        return 4
+                lineWidth:{
+                    normal:function(o){
+                        if(o.iNode == anchorXIndex){
+                            return 4
+                        }
                     }
                 }
             }
@@ -146,9 +167,6 @@ KISSY.ready(function(){
             line : {
                 enabled : 0
             },
-            fillStyle : "white",
-            strokeStyle : "#999",
-            alpha:1,
             content : function(info){
                 var str  = "<table>";
                 
@@ -173,6 +191,58 @@ KISSY.ready(function(){
             }
         }
     }
+    */
+    var options = {
+        "event":{"enabled":1},
+         "back":{
+            "yAxis":{"enabled":1}
+                },
+        "anchor":{
+            "enabled":1,
+            "num":"0.10",
+            "xIndex":4,
+            "xAxis":{
+                "fillStyle":"#cc3300"
+                   },
+            "yAxis":{
+                "fillStyle":"#cc3300"
+                    }
+                },
+        "yAxis":{
+            enabled:1,
+            "text":{
+                "fillStyle":"#666666"
+                   },
+            "field":["rate"]
+                },
+        "xAxis":{
+            "text":{
+                // "mode":1,
+                // "dis":5,
+                "fillStyle":"#000000"
+                   },
+            "field":"price"
+                },
+        "graphs":{
+            "line":{
+                "strokeStyle":'#1054a3'
+                   },
+            "fill":{
+                "alpha":0
+                   },
+            "node":{
+                "fillStyle":{},
+                "strokeStyle":{},
+                "lineWidth":{}
+                   }
+                 },
+        "tips":{
+            "line":{
+                "enabled":1
+                   }
+               }
+        }
+    // var options = JSON.parse('{"event":{"enabled":1},"back":{"yAxis":{"enabled":1}},"anchor":{"enabled":1,"num":"0.10","xIndex":4,"xAxis":{"fillStyle":"#cc3300"},"yAxis":{"fillStyle":"#cc3300"}},"yAxis":{"text":{"fillStyle":"#666666"},"field":["rate"]},"xAxis":{"text":{"mode":1,"dis":1,"fillStyle":"#000000"},"field":"price"},"graphs":{"line":{"strokeStyle":{"normal":["#1054a3"]}},"fill":{"alpha":0},"node":{"fillStyle":{},"strokeStyle":{},"lineWidth":{}}},"tips":{"line":{"enabled":1}}}')
     // KISSY.config({
     //     packages: [{
     //         name  :  'chartx'  ,
@@ -182,13 +252,8 @@ KISSY.ready(function(){
     //     ]
     // });
 
-    //KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
-    //    var line = new Line( S.all("#canvasTest") , data1 , options  );
-    //    line.draw();
-    //});
-
-    Chartx.create.line("canvasTest" , data1 , options).then(function( line ){
+    KISSY.use("chartx/chart/line/ , node" , function( S , Line ){
+        var line = new Line( S.all("#canvasTest") , data1 , options  );
         line.draw();
-    })
-
+    });
 });

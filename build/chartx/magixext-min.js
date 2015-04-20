@@ -1,0 +1,1 @@
+define("chartx/magixext",[window.KISSY?"magix/view":"magix"],function(a){a=a.View||a,a.mixin({createChart:function(a,b,c,d){var e=this,f={then:function(a){this._promiseHand=a},_promiseHand:null};return e.manage(Chartx.create[a](b,c,d).then(function(a){setTimeout(function(){_.isFunction(f._promiseHand)&&f._promiseHand(a)},2)})),f}})});

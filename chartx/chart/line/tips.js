@@ -58,7 +58,7 @@ define(
             _resetStatus : function(e){
                 var tipsPoint = this._getTipsPoint(e);
                 if(this._line){
-                    this._line.context.x  = tipsPoint.x;
+                    this._line.context.x  = parseInt(tipsPoint.x);
                 }
                 this._resetNodesStatus(e , tipsPoint);
             },
@@ -67,8 +67,9 @@ define(
              * line相关------------------------
              */
             _initLine : function(e , tipsPoint){
+                
                 var lineOpt = _.deepExtend({
-                    x       : tipsPoint.x,
+                    x       : parseInt(tipsPoint.x),
                     y       : e.target.localToGlobal().y,
                     xStart  : 0,
                     yStart  : e.target.context.height,
@@ -93,37 +94,51 @@ define(
              *nodes相关-------------------------
              */
             _initNodes : function(e , tipsPoint){
+                
                 this._nodes = new Canvax.Display.Sprite({
-                    id : "tipsNodes",
+                    id : "line-tipsNodes",
                     context : {
-                        x   : tipsPoint.x,
+                        x   : parseInt(tipsPoint.x),
                         y   : e.target.localToGlobal().y
                     }
                 });
                 var self = this;
                 _.each( e.tipsInfo.nodesInfoList , function( node ){
-                    self._nodes.addChild( new Circle({
+                    var csp = new Canvax.Display.Sprite({
                         context : {
-                            y : e.target.context.height - Math.abs(node.y),
-                            r : node.r,
-                            fillStyle   : node.fillStyle,
+                            y : e.target.context.height - Math.abs(node.y) 
+                        }
+                    });
+                    csp.addChild( new Circle({
+                        context : {
+                            r : node.r + 2 ,
+                            fillStyle   : "white",//node.fillStyle,
                             strokeStyle : node.strokeStyle,
                             lineWidth   : node.lineWidth
                         }
-                    }) )
+                    }) );
+
+                    csp.addChild( new Circle({
+                        context : {
+                            r : node.r,
+                            fillStyle   : node.strokeStyle
+                        }
+                    }) );
+
+                    self._nodes.addChild( csp );
                 } );
                 this.sprite.addChild( this._nodes );
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
-                this._nodes.context.x = tipsPoint.x;
+                this._nodes.context.x = parseInt(tipsPoint.x);
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    var circle = self._nodes.getChildAt(i)
-                    circle.context.y           = e.target.context.height - Math.abs(node.y);
-                    circle.context.r           = node.r
-                    circle.context.fillStyle   = node.fillStyle
-                    circle.context.strokeStyle = node.strokeStyle
-                    circle.context.lineWidth   = node.lineWidth
+                    var csps         = self._nodes.getChildAt(i).context;
+                    csps.y           = e.target.context.height - Math.abs(node.y);
+                    csps.r           = node.r
+                    csps.fillStyle   = node.fillStyle
+                    csps.strokeStyle = node.strokeStyle
+                    csps.lineWidth   = node.lineWidth+2
                 });
             }
         }
