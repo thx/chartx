@@ -364,22 +364,24 @@ define(
                             _.isFunction(me.area.text.filter) ? me.area.text.filter(md.name) : md.name,
                             {
                                 context : {
-                                   x  : md.textX,
-                                   y  : md.textY,
-                                   fillStyle    : me.area.text.fillStyle,
-                                   textBaseline : "middle",
-                                   textAlign    : "center"
+                                    cursor : "pointer",
+                                    x  : md.textX,
+                                    y  : md.textY,
+                                    fillStyle    : me.area.text.fillStyle,
+                                    textBaseline : "middle",
+                                    textAlign    : "center"
                                    
                                 }   
                             }
                         );
                         txt.on("click" , function( e ){
+                            debugger
                             alert("s")
                         })
                         area_txt_sp.addChild( txt ); 
                     }
 
-                    me.sprite.addChild( area_sp ); 
+                    //me.sprite.addChild( area_sp ); 
                     
                 });
                 area_txt_sp && me.sprite.addChild( area_txt_sp ); 
