@@ -14,6 +14,8 @@ define(
                 x : 0,
                 y : 0
             }
+
+            this.enabled = 1;
     
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
@@ -78,6 +80,10 @@ define(
             },
             _widget:function(){
                 var self  = this;
+                if(!this.enabled){
+                    return
+                }
+
                 self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp)
                 self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp)
     
