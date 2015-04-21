@@ -387,7 +387,7 @@ define(
                             this.area.fire("mouseout release" , e); 
                         });
                         txt.on("click" , function( e ){
-                            this.area.fire("mouseout release" , e); 
+                            this.area.fire("click" , e); 
                         });
                         area_txt_sp.addChild( txt ); 
                     }
