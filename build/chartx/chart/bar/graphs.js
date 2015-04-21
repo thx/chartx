@@ -25,6 +25,7 @@ define(
                 radius : 2
             }
             this.text = {
+                    enabled   : 0,
                     fillStyle : '#999999',
                     fontSize  : 12,
                     textAlign : "left",
@@ -34,6 +35,7 @@ define(
             this.eventEnabled = true;
     
             this.sprite = null ;
+            this.txtsSp = null ;
     
             this.yDataSectionLen = 0; //y轴方向有多少个section
     
@@ -168,7 +170,6 @@ define(
                             content = this.text.format( content );
                         };
 
-
                         var txt = new Canvax.Display.Text( content ,
                            {
                             context : {
@@ -218,7 +219,9 @@ define(
                 growAnima();
             },
             _growEnd : function(){
-                this.txtsSp.context.visible = true
+                if(this.text.enabled){
+                    this.txtsSp.context.visible = true
+                }
             },
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {

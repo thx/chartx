@@ -6,11 +6,7 @@ var Chartx = {
         //如果charts有被down下来使用。请修改下面的 
         var canvaxVersion = "2015.04.19";
 
-        //BEGIN(develop)
-        if ((/daily.taobao.net/g).test(location.host)) {
-            Chartx.site.daily = true;
-        }
-        //END(develop)
+        
 
         
         
@@ -29,13 +25,7 @@ var Chartx = {
         if( Chartx.site.daily || Chartx.site.local ){
             canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/"+ canvaxVersion +"/";
         }
-        //BEGIN(develop)
-        //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
-        if( !! ~location.search.indexOf('localcanvax') ){
-            //本地环境测试
-            canvaxUrl     = "http://nick.daily.taobao.net/canvax/";
-        }
-        //END(develop)
+        
 
 
         Chartx.setPackages([{

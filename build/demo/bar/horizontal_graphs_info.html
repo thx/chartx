@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- world map</title>
+<title>xChart demo -- bar</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -24,40 +24,48 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
+<!--<script type="text/javascript" src="../bar_h/index.js"></script>-->
 </head>
 <body >
 
 <table>
     <tr>
         <td id="td-vl">
-<form><textarea id="code" name="code">
+            <form><textarea id="code" name="code">
 var data = [
-    [ "area"   , "click" ]
+    ["y","line1","line2","line3"],
+    [ '1-2K' , 101  , 201 , 0 ] ,
+    [ '2-3K'  , 88 , 145 , 0 ] ,
+    [ '3-4k' , 488  , 88  , 0 ] ,
+    [ '4-5k'  , 390  , 546 , 0 ] ,
+    [ '5-6k' , 1000  , 88  , 0 ] 
 ];
-
 var options = {
-    mapType   : "world", //默认为china 中国地图
-    areaField : "area", //可选，默认为第一个字段
-    area : {
-        fillStyle : function( area ){
-           if( area ){
-               //点击量超过100的就显示为蓝色
-               if( area[1] > 100 ){
-                   return "#135EBF"
-               }
-           }
+    type  : 'horizontal',
+    yAxis : {
+        field : ["y"]
+    },
+    xAxis : {
+        field : ["line1",'line2']
+    },
+    graphs:{
+        bar : {
+            fillStyle   : function(i , ii , value){
+                var colors = ['#f8ab5e','#E55C5C']
+                return colors[i]
+            }
         },
-        text : {
-            enabled : false
+        text: {
+            enabled : 1
         }
     },
-    tips : {
-        field  : ["click"],//可选，默认为除开areaField外的所有字段
-        prefix : ["点击量"]
-    } 
-};
+    tips  :{
+        prefix : ["今天","昨天"]
+    }
+}       
 
-Chartx.create.map("canvasTest" , data , options)
+Chartx.create.bar("canvasTest" , data , options);  
+    
             </textarea></form>
 
         </td>
@@ -66,9 +74,9 @@ Chartx.create.map("canvasTest" , data , options)
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>世界地图</h4>
+                <h4>柱状图-横向</h4>
                 <p>
-                    联系人：@释剑
+                    联系人：@逢春
                 </p>
             </div>
             <div  class="test-c">
@@ -84,5 +92,4 @@ Chartx.create.map("canvasTest" , data , options)
     
 </body> 
 </html>
-
 

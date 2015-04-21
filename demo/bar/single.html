@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- world map</title>
+<title>xChart demo -- bar</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -30,35 +30,58 @@
 <table>
     <tr>
         <td id="td-vl">
-<form><textarea id="code" name="code">
-var data = [
-    [ "area"   , "click" ]
-];
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","line1"],
+    [ 1      , 101],
+    [ 2      , 67 ],
+    [ 3      , 76 ],
+    [ 4      , 58 ],
+    [ 5      , 79 ],
+    [ 6      , 88 ],
+    [ 7      , 56 ],
+    [ 8      , 99 ]
 
+];
 var options = {
-    mapType   : "world", //默认为china 中国地图
-    areaField : "area", //可选，默认为第一个字段
-    area : {
-        fillStyle : function( area ){
-           if( area ){
-               //点击量超过100的就显示为蓝色
-               if( area[1] > 100 ){
-                   return "#135EBF"
-               }
-           }
-        },
-        text : {
-            enabled : false
+    back  : {
+        enabled : 0     
+    },
+    yAxis : {
+        enabled : 0,
+        field : ["line1"],
+    },
+    xAxis : {
+        field : ["xfield"],
+        line  : {
+            enabled : 0
         }
     },
-    tips : {
-        field  : ["click"],//可选，默认为除开areaField外的所有字段
-        prefix : ["点击量"]
-    } 
-};
+    graphs:{
+        bar  : {
+            width       : 30,
+            fillStyle   : function(info){
+                //info.iGroup    第几条线    从0开始
+                //info.iNode     第几个支柱  从0开始
+                //info.value     具体值
+                return '#f86532'
+            }
+        },
+        text : {
+            enabled : 1,
+            format  : function(content){
+                return content + '%'
+            }
+        }
+    },
+    tips  :{
 
-Chartx.create.map("canvasTest" , data , options)
-            </textarea></form>
+    }
+}   
+Chartx.create.bar("canvasTest" , data , options);
+</textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -66,15 +89,26 @@ Chartx.create.map("canvasTest" , data , options)
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>世界地图</h4>
+                <h4>折线图（bar chart）- 基础柱状图</h4>
                 <p>
-                    联系人：@释剑
+                    联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
+            <!--
+            <form name="form" onsubmit="return false;">
+                <button type="button" class="btn btn-default " onclick="del()">
+                    删除uv线
+                </button>
 
+                <button type="button" class="btn btn-default " onclick="add()">
+                    添加uv线
+                </button>
+
+            </form>
+            -->
 
             </div>
         </td>
@@ -84,5 +118,3 @@ Chartx.create.map("canvasTest" , data , options)
     
 </body> 
 </html>
-
-
