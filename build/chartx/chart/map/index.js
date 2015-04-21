@@ -5,7 +5,6 @@ define(
         'chartx/chart/index',
         'canvax/shape/Path',
         'canvax/shape/Polygon',
-        //'chartx/chart/map/mapdata',
         'chartx/chart/map/map-data/params',
         'chartx/chart/map/map-data/geo-coord',
         'chartx/chart/map/map-data/text-fixed',
@@ -336,11 +335,17 @@ define(
                     
                     area.mapData = md;
                     area.on("mouseover hold" , function(e){
+                        if( e.fromTarget && e.fromTarget.type == "text" &&  e.fromTarget.text == this.mapData.name ){
+                            return;
+                        };
                         me.fire("areaOver" , e);
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
                     });
 
                     area.on("mouseout release" , function(e){
+                        if( e.toTarget && e.toTarget.type == "text" &&  e.toTarget.text == this.mapData.name ){
+                            return;
+                        };
                         me.fire("areaOut" , e);
                         me._tips.hide( e ); 
                     });
@@ -350,15 +355,10 @@ define(
                         if( me.area.linkage ) {
                             me.mapType = mapParams.params[ this.mapData.name ] ? this.mapData.name : "china" 
                         };
-
                         me.fire("areaClick" , e ); 
                     });
 
-                    area_sp.on("click" , function(){
-                        //alert("sp")
-                    });
-
-                    if( me.area.text.enabled  ){
+                    if( me.area.text.enabled ){
                         //文字
                         var txt = new Canvax.Display.Text( 
                             _.isFunction(me.area.text.filter) ? me.area.text.filter(md.name) : md.name,
@@ -370,18 +370,29 @@ define(
                                     fillStyle    : me.area.text.fillStyle,
                                     textBaseline : "middle",
                                     textAlign    : "center"
-                                   
                                 }   
                             }
                         );
+                        txt.area = area;
+                        txt.on("mouseover hold" , function(e){
+                            if( e.fromTarget && e.fromTarget == this.area ){
+                                return;
+                            };
+                            this.area.fire("mouseover hold" , e);
+                        });
+                        txt.on("mouseout release" , function(e){
+                            if( e.toTarget && e.toTarget == this.area ){
+                                return;
+                            };
+                            this.area.fire("mouseout release" , e); 
+                        });
                         txt.on("click" , function( e ){
-                            debugger
-                            alert("s")
-                        })
+                            this.area.fire("mouseout release" , e); 
+                        });
                         area_txt_sp.addChild( txt ); 
                     }
 
-                    //me.sprite.addChild( area_sp ); 
+                    me.sprite.addChild( area_sp ); 
                     
                 });
                 area_txt_sp && me.sprite.addChild( area_txt_sp ); 

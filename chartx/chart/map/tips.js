@@ -93,7 +93,7 @@ define(
                     context : {
                         x : cPoint[0],
                         y : cPoint[1],
-                        r : 3,
+                        r : 2,
                         fillStyle : this.cPointStyle
                     }
                 });

@@ -358,10 +358,6 @@ define(
                         me.fire("areaClick" , e ); 
                     });
 
-                    area_sp.on("click" , function(){
-                        //alert("sp")
-                    });
-
                     if( me.area.text.enabled ){
                         //文字
                         var txt = new Canvax.Display.Text( 
@@ -379,19 +375,19 @@ define(
                         );
                         txt.area = area;
                         txt.on("mouseover hold" , function(e){
-                            if( e.fromTarget && e.fromTarget == txt.area ){
+                            if( e.fromTarget && e.fromTarget == this.area ){
                                 return;
                             };
-                            txt.area.fire("mouseover hold" , e);
+                            this.area.fire("mouseover hold" , e);
                         });
                         txt.on("mouseout release" , function(e){
-                            if( e.toTarget && e.toTarget == txt.area ){
+                            if( e.toTarget && e.toTarget == this.area ){
                                 return;
                             };
-                            txt.area.fire("mouseout release" , e); 
+                            this.area.fire("mouseout release" , e); 
                         });
                         txt.on("click" , function( e ){
-                            alert("s")
+                            this.area.fire("mouseout release" , e); 
                         });
                         area_txt_sp.addChild( txt ); 
                     }
