@@ -28,7 +28,8 @@ define(
             
             this._tipDom = null;
             this._back   = null;
-            this._offset = 10; //tips内容到鼠标位置的偏移量
+
+            this.offset = 10; //tips内容到鼠标位置的偏移量
         
             //所有调用tip的 event 上面 要附带有符合下面结构的tipsInfo属性
             //会deepExtend到this.indo上面来
@@ -75,8 +76,8 @@ define(
             setPosition : function( e ){
                 if(!this._tipDom) return;
                 var pos = e.pos || e.target.localToGlobal( e.point );
-                var x   = this._checkX( pos.x + this._offset );
-                var y   = this._checkY( pos.y + this._offset );
+                var x   = this._checkX( pos.x + this.offset );
+                var y   = this._checkY( pos.y + this.offset );
 
                 var _backPos = this.sprite.parent.globalToLocal( { x : x , y : y} );
                 this.sprite.context.x = _backPos.x;

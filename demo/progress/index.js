@@ -1,9 +1,10 @@
 KISSY.ready( function(S){
  
    var data    = [];
-   var options = {}
+   var options = {
+       secW   : 30
+   }
 
    Chartx.create.progress("loading" , data , options).then(function( chart ){
-       chart.draw();
    })
 } );
