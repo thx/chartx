@@ -4,10 +4,9 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "chartx/utils/tools",
-        "canvax/animation/Tween",
         "chartx/components/line/Group"
     ],
-    function( Canvax , Rect, Tools, Tween , Group ){
+    function( Canvax , Rect, Tools, Group ){
         var Graphs = function(opt,root){
             this.w       = 0;   
             this.h       = 0; 

@@ -60,10 +60,12 @@ define(
                 this._tip = new Tip( _.deepExtend( {
                     alpha       : 1,
                     fillStyle   : "#ffffff",
-                    strokeStyle : "#b0b0b0"
+                    strokeStyle : "#b0b0b0",
+                    offset     : 0
                 } , opt ) , tipDomContainer );
             },
             show : function(e , mapData){
+                this._cPoint   && this._cPoint.remove();
                 this.sprite.addChild( this._tip.sprite );
                 this._tip.show(e);
                 this._weight(e);
@@ -82,10 +84,10 @@ define(
             _weight : function(e){
                 var br = this._tip.backR;
                 //cp -- > textX , textY
-                var targetOffSet = e.target.localToGlobal();
+                var targetOffSet = e.currentTarget.localToGlobal();
                 var cPoint = [ 
-                    e.target.mapData.textX * this._mapScale + targetOffSet.x, 
-                    e.target.mapData.textY * this._mapScale + targetOffSet.y
+                    e.currentTarget.mapData.textX * this._mapScale + targetOffSet.x, 
+                    e.currentTarget.mapData.textY * this._mapScale + targetOffSet.y
                 ];
                 this._cPoint = new Circle({
                     context : {
@@ -163,6 +165,7 @@ define(
                                     y : me._nearestPoint[1]
                                 });
 
+                                
                                 me._tip.setPosition({
                                     pos : _tipPos
                                 });
