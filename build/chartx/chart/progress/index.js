@@ -23,8 +23,8 @@ define(
                 this._initoptions( opt );
                 this.stage.addChild( new Sector({
                    context : {
-                        x : parseInt(this.height / 2),
-                        y : parseInt(this.width / 2),
+                        x : parseInt(this.width  / 2),
+                        y : parseInt(this.height / 2),
      
                         r : this.r,
                         r0: this.r - this.secW,
@@ -38,8 +38,8 @@ define(
                 this.stage.addChild( new Sector({
                    id : "speed",
                    context : {
-                        x : parseInt(this.height / 2),
-                        y : parseInt(this.width / 2),
+                        x : parseInt(this.width  / 2),
+                        y : parseInt(this.height / 2),
      
                         r : this.r,
                         r0: this.r - this.secW,

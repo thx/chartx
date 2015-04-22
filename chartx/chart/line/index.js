@@ -34,6 +34,8 @@ define(
                 this._graphs       =  null;
                 this._tips         =  null;
 
+                this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
+
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
             },
@@ -217,11 +219,15 @@ define(
     
                 var self = this;
                 this._graphs.sprite.on( "hold mouseover" ,function(e){
-                    if( self._tips.enabled ){
-                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                    if( self._tips.enabled &&
+                        self._preTipsInode && self._preTipsInode != e.tipsInfo.iNode &&
+                        e.tipsInfo.nodesInfoList.length > 0
+                        ){
                             self._setXaxisYaxisToTipsInfo(e);
                             self._tips.show( e );
-                        }
+
+                            //触发
+                            //self.fire( "" , e );
                     }
                 });
                 this._graphs.sprite.on( "drag mousemove" ,function(e){

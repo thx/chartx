@@ -137,7 +137,7 @@
                         boundHeight: h,
                         data: self.dataFrame,
                         //dataLabel: self.dataLabel, 
-                        allowPointSelect: self.allowPointSelect,
+                        allowPointSelect: self.allowPointSelect || true,
                         animation: self.animation,
                         colors:self.colors,
                         focusCallback: {

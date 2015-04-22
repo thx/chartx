@@ -339,6 +339,7 @@ define(
                             return;
                         };
                         me.fire("areaOver" , e);
+                        debugger
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
                     });
 
