@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
+<title>xChart demo -- bar</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -32,38 +32,36 @@
         <td id="td-vl">
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 76  , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 39    ],
-    [ 7      , 56  , 68 , 65    ],
-    [ 8      , 99  , 83 , 51    ]
+    ["ie"     , 30],
+    ["chrome" , 35],
+    ["firefox", 20],
+    ["safari" , 10],
+    ["其他"   , 5]
 ];
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
-    yAxis : {
-        field : ["uv"]
-    },
-    xAxis : {
-        field : "xfield"
-    },
-    graphs : {
-        fill : {
-            //配置折线的fill填充为一个渐变。
-            //我们这里的渐变只支持透明度的渐变，默认的alpha属性是一个num ，
-            //如果你传入一个num的数组，图表就会把fill渲染出从第一个元素透明度值到第二个
-            //元素透明度值的渐变。
-            alpha : [ 0.5 , 0 ]
+    tips : {
+        //enabled  : false,
+        content : function(info){
+            return info.data[0]+"："+info.data[1]+"%"
         }
-    }
+    },
+    //周边tip
+    dataLabel: {
+        enabled: true,
+        format: '{point.name} : {point.percentage}'
+    },
+    //内圆半径
+    innerRadius: 0
 };
-//Chartx.create.line开始初始化chart实例
-Chartx.create.line("canvasTest" , data , options);
+Chartx.create.pie("canvasTest" , data , options).then(function( pie ){
+    pie.on('focused' , function (e) {
+
+    });
+    pie.on('complete', function (e) {
+
+    });
+});
 </textarea></form>
 
         </td>
@@ -72,15 +70,14 @@ Chartx.create.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图 - 填充区为渐变的折线图</h4>
+                <h4>饼图（pie chart）- 基础饼图</h4>
                 <p>
-                    联系人：@逢春 @释剑
+                    联系人：@自勉
                 </p>
             </div>
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
-
 
             </div>
         </td>
@@ -90,3 +87,5 @@ Chartx.create.line("canvasTest" , data , options);
     
 </body> 
 </html>
+
+

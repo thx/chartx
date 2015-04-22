@@ -47,14 +47,17 @@ var data= [
 ];
 var options = {
     back  : {
+        //配置取消背景
         enabled : 0     
     },
     yAxis : {
+        //配置y轴不显示，但是y轴的field字段还是需要配置
         enabled : 0,
         field : ["line1"],
     },
     xAxis : {
         field : ["xfield"],
+        //x轴上面的线条配置为不显示
         line  : {
             enabled : 0
         }
@@ -71,13 +74,11 @@ var options = {
         },
         text : {
             enabled : 1,
+            //格式显示的文本，比如加上百分号
             format  : function(content){
                 return content + '%'
             }
         }
-    },
-    tips  :{
-
     }
 }   
 Chartx.create.bar("canvasTest" , data , options);
@@ -89,7 +90,7 @@ Chartx.create.bar("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（bar chart）- 基础柱状图</h4>
+                <h4>折线图 - 简单柱状图 ，无背景，无y轴</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>
@@ -97,18 +98,6 @@ Chartx.create.bar("canvasTest" , data , options);
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
-            <!--
-            <form name="form" onsubmit="return false;">
-                <button type="button" class="btn btn-default " onclick="del()">
-                    删除uv线
-                </button>
-
-                <button type="button" class="btn btn-default " onclick="add()">
-                    添加uv线
-                </button>
-
-            </form>
-            -->
 
             </div>
         </td>
