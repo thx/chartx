@@ -35,7 +35,6 @@
                     });
                     this.canvax.addChild(this.stageTip);
                     this.stageTip.toFront();
-                    //this.stage.addChild(this.stageBg);
                     this.stage.addChild(this.core);
 
                     this._initModule();                      //初始化模块
@@ -115,7 +114,14 @@
                     var self = this;
                     var w = self.width;
                     var h = self.height;
+                    
                     var r = Math.min(w, h) * 2 / 3 / 2;
+                    if( !self.dataLabel.enabled ){
+                        r = Math.min( w , h ) / 2 ;
+                        //要预留clickMoveDis位置来hover sector 的时候外扩
+                        r -= r / 11;
+                    }
+
                     var r0 = parseInt(self.innerRadius || 0);
                     var maxInnerRadius = r * 2 / 3;
                     r0 = r0 >= 0 ? r0 : 0;
@@ -131,7 +137,6 @@
                         boundHeight: h,
                         data: self.dataFrame,
                         //dataLabel: self.dataLabel, 
-                        strokeWidth: self.strokeWidth,
                         allowPointSelect: self.allowPointSelect,
                         animation: self.animation,
                         colors:self.colors,
@@ -161,3 +166,4 @@
                 }
             });
         });
+

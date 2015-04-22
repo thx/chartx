@@ -58,10 +58,10 @@
                 _configData: function () {
                     var self = this;
                     self.total = 0;
-                    self.currentAngle = 0;
+                    self.currentAngle  = 0;
                     self.labelFontSize = 12 * self.boundWidth / 1000;
-                    var data = self.data.data;
-                    self.clickMoveDis = self.r / 8;
+                    var data           = self.data.data;
+                    self.clickMoveDis  =  self.r / 11;
                     if (data.length && data.length > 0) {
                         if (data.length == 1) {
                             _.extend(data[0], {
@@ -226,7 +226,7 @@
                     var data = self.data.data;
                     var moveTimer = null;
                     var move = new Tween.Tween({ percent: 0 })
-                        .to({ percent: 1 }, 200)
+                        .to({ percent: 1 }, 100)
                         .easing(Tween.Easing.Quadratic.InOut)
                         .onUpdate(function () {
                             var me = this;
@@ -623,17 +623,17 @@
                             if (data[i].end > data[i].start) {
                                 //扇形主体          
                                 var sector = new Sector({
+                                    hoverClone : false,
                                     context: {
-                                        x: data[i].selected ? data[i].outOffsetx : 0,
-                                        y: data[i].selected ? data[i].outOffsety : 0,
-                                        r0: self.r0,
-                                        r: self.r,
-                                        startAngle: data[i].start,
-                                        endAngle: data[i].end,
-                                        fillStyle: fillColor,
-                                        index: data[i].index,
-                                        lineWidth: self.strokeWidth,
-                                        strokeStyle: '#fff'
+                                        x          : data[i].selected ? data[i].outOffsetx : 0,
+                                        y          : data[i].selected ? data[i].outOffsety : 0,
+                                        r0         : self.r0,
+                                        r          : self.r,
+                                        startAngle : data[i].start,
+                                        endAngle   : data[i].end,
+                                        fillStyle  : fillColor,
+                                        index      : data[i].index,
+                                        cursor     : "pointer"
                                     },
                                     id: 'sector' + i
                                 });
@@ -644,32 +644,28 @@
                                 //扇形事件
                                 sector.hover(function (e) {
                                     var me = this;
-                                    if (!self.isMoving) {
+                                    //if (!self.isMoving) {
                                         if (self.tips.enabled) {
                                             self._showTip(e, this.__dataIndex);
                                         }
                                         self._sectorFocus(this.__dataIndex);
-                                    }
+                                    //}
+                                    self.allowPointSelect && self.moveSector(this);
                                 }, function (e) {
-                                    if (!self.isMoving) {
+                                    //if (!self.isMoving) {
                                         if (self.tips.enabled) {
                                             self._hideTip(e);
                                         }
                                         self._sectorUnfocus();
-                                    }
-                                })
+                                    //}
+                                    self.allowPointSelect && self.moveSector(this);
+                                });
                                 sector.on('mousemove', function (e) {
                                     if (self.tips.enabled) {
                                         self._moveTip(e, this.__dataIndex);
                                     }
-                                })
+                                });
 
-                                sector.on('click', function () {
-                                    var clickSec = this;
-                                    if (!self.isMoving) {
-                                        self.allowPointSelect && self.moveSector(clickSec);
-                                    }
-                                })
                                 self.sprite.addChild(sector);
                                 moreSecData = {
                                     name: data[i].name,
@@ -721,3 +717,4 @@
 
             return Pie;
         })
+
