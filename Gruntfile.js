@@ -53,7 +53,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [ 'clean' , 'copy' , 'concat' , 'uglify'  ]);
+  grunt.registerTask('build', [ 'clean' , 'copy' , 'concat' , 'uglify'  ]);
+
+  grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json')
+  })
+
+  grunt.loadTasks('_tasks')
 }
-
-

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>Chartx demo</title>
+{% include demo_scripts.html %}
+{% include demo_styles.html %}
+</head>
+<body >
+    <table>
+    <tr>
+        <td id="td-vl">
+<form><textarea id="code" name="code">
+{{ content }}
+</textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                    <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                    <h4>{{ page.title }}</h4>
+                    <p>
+                    联系人：{{ page.author }}
+                    </p>
+                </div>
+                <div  class="test-c">
+                    <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+</body> 
+</html>
+

@@ -20,7 +20,12 @@ define(
             this.text = {
                     fillStyle : '#999999',
                     fontSize  : 12,
-                    textAlign : "right"
+                    textAlign : "right",
+                    //最终显示到y轴上面的文本的格式化扩展
+                    //比如用户的数据是80 但是 对应的显示要求确是80%
+                    //后面的%符号就需要用额外的contentFormat来扩展
+                    format    : null
+
             }
             this.layoutData  = [];                           //dataSection对应的layout数据{y:-100, content:'1000'}
             this.dataSection = [];                           //从原数据dataOrg 中 结果datasection重新计算后的数据
@@ -36,10 +41,7 @@ define(
             this.baseNumber      =  null;
             this.basePoint       =  null;                    //value为baseNumber的point {x,y}
 
-            //最终显示到y轴上面的文本的格式化扩展
-            //比如用户的数据是80 但是 对应的显示要求确是80%
-            //后面的%符号就需要用额外的contentFormat来扩展
-            this.textFormat      =  null;  
+            //this.textFormat      =  null;  
             
             //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
@@ -142,8 +144,8 @@ define(
                     var o = arr[a];
                     var x = 0, y = o.y;
                     var content = Tools.numAddSymbol( o.content );
-                    if( _.isFunction(self.textFormat) ){
-                        content = self.textFormat( content );
+                    if( _.isFunction(self.text.format) ){
+                        content = self.text.format( content );
                     };
                     var yNode = new Canvax.Display.Sprite({ id : "yNode"+a });
 
