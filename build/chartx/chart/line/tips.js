@@ -134,6 +134,10 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
+                if( this._nodes.children.length != e.tipsInfo.nodesInfoList.length ){
+                    this._nodes.removeAllChildren();
+                    this._initNodes( e , tipsPoint );
+                }
                 this._nodes.context.x = parseInt(tipsPoint.x);
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;

@@ -27,7 +27,7 @@ define(
             this.sprite     = null;  
             this.induce     = null;                         
 
-            this.init(opt)
+            this.init(opt);
         };
     
         Graphs.prototype = {
@@ -171,14 +171,15 @@ define(
                 for (var a = 0, al = this.groups.length; a < al; a++ ) {
                     var o = this.groups[a].getNodeInfoAt(tmpINode)
                     o && _nodesInfoList.push(o);
-                }
+                };
 
                 this.iGroup = tmpIGroup, this.iNode = tmpINode
                 var node = {
                     iGroup        : this.iGroup,
                     iNode         : this.iNode,
                     nodesInfoList : _.clone(_nodesInfoList)
-                }
+                };
+                console.log(node.nodesInfoList)
                 return node;
             },
             _fireHandler:function(e){
