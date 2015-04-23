@@ -54,7 +54,9 @@ define(
     
                 for(var a = 1, al = arr.length; a < al; a++){
                     for(var b = 0, bl = arr[a].length; b < bl; b++){
-                        total[b].data.push(arr[a][b]);
+                        if( arr[a][b] ){
+                            total[b].data.push(arr[a][b]);
+                        }
                     }     
                 }
     
@@ -72,9 +74,7 @@ define(
                     for( var i=0,l=$field.length; i<l ; i++ ){
                         for( var ii=0,iil=arr.length ; ii<iil ; ii++ ){
                              if( $field[i] == arr[ii].field ){
-                                 if(type != 'yAxis' || (type == 'yAxis' && arr[ii].data)){
-                                    newData.push( arr[ii].data );
-                                 }
+                                 newData.push( arr[ii].data );
                                  break;
                              }
                         }
@@ -115,7 +115,6 @@ define(
                 }             
                 dataFrame.yAxis.field = yField;
                 dataFrame.yAxis.org   = getDataOrg( yField , total, 'yAxis');
-
 
                 return dataFrame;
             }
