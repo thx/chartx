@@ -72,7 +72,7 @@ define(
                     for( var i=0,l=$field.length; i<l ; i++ ){
                         for( var ii=0,iil=arr.length ; ii<iil ; ii++ ){
                              if( $field[i] == arr[ii].field ){
-                                 if(type == 'yAxis' && arr[ii].data){
+                                 if(type != 'yAxis' || (type == 'yAxis' && arr[ii].data)){
                                     newData.push( arr[ii].data );
                                  }
                                  break;
