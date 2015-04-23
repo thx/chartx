@@ -49,8 +49,13 @@ var Chartx = {
     },
     _queryChart : function(name , el , data , options){
         var promise = {
+            _thenFn : [],
             then : function( fn ){
-                this._thenFn = fn;
+                if( this.chart ){
+                    _.isFunction( fn ) && fn( this.chart );
+                    return this; 
+                }
+                this._thenFn.push( fn );
                 return this;
             },
             _destory : false,
@@ -61,16 +66,19 @@ var Chartx = {
                 this.chart.destroy();
                 delete this.chart;
                 promise = null;
-            }
+            },
+            path     : null
         };
 
+
         var path = "chartx/chart/"+name+"/"+( options.type ? options.type : "index" );
-        require( [path] , function( chartConstructor ){
+        require( [ path ] , function( chartConstructor ){
             if( !promise._destory ){
                 promise.chart = new chartConstructor(el , data , options);
-                setTimeout(function(){
-                    _.isFunction( promise._thenFn ) && promise._thenFn( promise.chart );
-                } , 1);
+                _.each(promise._thenFn , function( fn ){
+                    _.isFunction( fn ) && fn( promise.chart );
+                });
+                promise._thenFn = [];
                 //在then处理函数执行了后自动draw
                 promise.chart.draw();
             }
