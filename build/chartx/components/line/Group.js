@@ -103,7 +103,7 @@ define(
             //这个是tips需要用到的 
             getNodeInfoAt:function($index){
                 var self = this;
-                self._nodeInd = $index
+                self._nodeInd = $index;
                 var o = _.clone(self.data[$index])
                 if( o ){
                     o.r           = self._getProp(self.node.r);
@@ -112,6 +112,8 @@ define(
                     o.color       = self._getProp(self.node.strokeStyle) || self._getColor( self.line.strokeStyle ); //这个给tips里面的文本用
                     o.lineWidth   = self._getProp(self.node.lineWidth) || 2; 
                     o.alpha       = self._getProp(self.fill.alpha);
+                    
+                    o._groupInd   = self._groupInd;
                     // o.fillStyle = '#cc3300'
                     // console.log(o.fillStyle)
                     return o

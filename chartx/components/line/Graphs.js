@@ -114,7 +114,6 @@ define(
                 var self  = this;
                 
                 for(var a = 0,al = self.data.length; a < al; a++){
-                    
                     var group = new Group(
                         a , //_groupInd
                         self.opt,
