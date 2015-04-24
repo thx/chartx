@@ -36,14 +36,14 @@ script: assets/post.js
     <ul class="menu">
     {% for category in site.categories %}
       <li>
-        <a href="{{ site.baseurl }}/{{ category[0] }}" class="entry">
+        <a href="http://thx.github.io/{{ category[0] }}" class="entry">
           <i class="iconfont mi-{{ category[0] }}"></i>
           {{ category[0] | capitalize }}
         </a>
       </li>
     {% endfor %}
       <li>
-        <a href="./example.md" class="entry">
+        <a href="./example.html" class="entry">
           <i class="iconfont">&#61464;</i> DEMO
         </a>
       </li>
