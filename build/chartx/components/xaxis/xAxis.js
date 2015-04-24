@@ -28,11 +28,7 @@ define(
                     fillStyle : '#999999',
                     fontSize  : 13,
                     rotation  : 0,
-<<<<<<< HEAD
-                    format    : null                       //和y轴的format同理
-=======
                     textAlign : null
->>>>>>> daily/1.6.8
             }
             this.maxTxtH = 0;
 
@@ -163,7 +159,7 @@ define(
                 if( !this.enabled ){ //this.display == "none"
                     this.h = this.dis;//this.max.txtH;
                 } else {
-                    var txt = new Canvax.Display.Text( this._getFormatText(this.dataSection[0]) || "test" ,
+                    var txt = new Canvax.Display.Text( this.dataSection[0] || "test" ,
                                 {
                                     context : {
                                         fontSize    : this.text.fontSize
@@ -187,7 +183,7 @@ define(
                 }
             },
             _widget:function(){
-                var arr = this.layoutData;
+                var arr = this.layoutData
 
               	for(var a = 0, al = arr.length; a < al; a++){
     
@@ -198,7 +194,7 @@ define(
 
                   	var content = Tools.numAddSymbol(o.content);
                   	//文字
-                  	var txt = new Canvax.Display.Text( this._getFormatText(content),
+                  	var txt = new Canvax.Display.Text(content,
                        {
                         context : {
                             x  : x,
@@ -255,13 +251,6 @@ define(
     				popText.context.x = parseInt(this.w - popText.getTextWidth())
     			}
             },
-            _getFormatText : function( text ){
-                if(_.isFunction( this.text.format )){
-                    return this.text.format( text );
-                } else {
-                    return text
-                }
-            },
             _getTextMaxWidth : function(){
                 var arr = this.dataSection;
                 var maxLenText   = arr[0];
@@ -271,7 +260,7 @@ define(
                     }
                 };
                        
-                var txt = new Canvax.Display.Text( this._getFormatText(maxLenText) || "test" ,
+                var txt = new Canvax.Display.Text( maxLenText || "test" ,
                     {
                     context : {
                         fillStyle   : this.text.fillStyle,

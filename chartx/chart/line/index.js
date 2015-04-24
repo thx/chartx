@@ -291,6 +291,9 @@ define(
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
                         !tmpData[a] ? tmpData[a] = [] : '';
+                        if( b >= this._xAxis.data.length ){
+                            break;
+                        }
                         var x = this._xAxis.data[b].x;
                         var y = - (arr[a][b] - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
                         y = isNaN(y) ? 0 : y
