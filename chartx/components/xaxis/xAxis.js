@@ -206,14 +206,12 @@ define(
                             fillStyle   : this.text.fillStyle,
                             fontSize    : this.text.fontSize,
                             rotation    : -Math.abs(this.text.rotation),
-                            textAlign   : this.text.textAlign || (!!this.text.rotation ? "right"  : "left"),
+                            textAlign   : this.text.textAlign || (!!this.text.rotation ? "right"  : "center"),
                             textBaseline: !!this.text.rotation ? "middle" : "top"
                        }
                   	});
                   	xNode.addChild(txt);
-                    if( !this.text.rotation ){
-               	    	txt.context.x = parseInt(txt.context.x - txt.getTextWidth() / 2) ;
-                    } else {
+                    if( !!this.text.rotation ){
                         txt.context.x += 5;
                         txt.context.y += 3;
                     }
