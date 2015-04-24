@@ -27,7 +27,8 @@ define(
                     dis       : 0,                         //间隔(间隔几个文本展现)
                     fillStyle : '#999999',
                     fontSize  : 13,
-                    rotation  : 0
+                    rotation  : 0,
+                    textAlign : null
             }
             this.maxTxtH = 0;
 
@@ -201,7 +202,7 @@ define(
                             fillStyle   : this.text.fillStyle,
                             fontSize    : this.text.fontSize,
                             rotation    : -Math.abs(this.text.rotation),
-                            textAlign   : !!this.text.rotation ? "right"  : "left",
+                            textAlign   : this.text.textAlign || (!!this.text.rotation ? "right"  : "left"),
                             textBaseline: !!this.text.rotation ? "middle" : "top"
                        }
                   	});
