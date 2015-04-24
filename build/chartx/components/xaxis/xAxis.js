@@ -28,6 +28,7 @@ define(
                     fillStyle : '#999999',
                     fontSize  : 13,
                     rotation  : 0,
+                    format    : null,
                     textAlign : null
             }
             this.maxTxtH = 0;
@@ -112,7 +113,7 @@ define(
                     if( !this.text.rotation ){
                         this._layout();
                     }
-                } 
+                }
                 // this.data = this.layoutData
             },
     
@@ -182,6 +183,13 @@ define(
                     }
                 }
             },
+            _getFormatText : function( text ){
+                if(_.isFunction( this.text.format )){
+                    return this.text.format( text );
+                } else {
+                    return text
+                }
+            },
             _widget:function(){
                 var arr = this.layoutData
 
@@ -192,8 +200,14 @@ define(
                   	var o = arr[a]
                   	var x = o.x, y = this.disY + this.line.height + this.dis
 
-                  	var content = Tools.numAddSymbol(o.content);
-                  	//文字
+                  	var content = o.content;
+                    if(_.isFunction( this.text.format )){
+                        content = this.text.format( content );
+                    } else {
+                        content = Tools.numAddSymbol(content);
+                    }
+
+                    //文字
                   	var txt = new Canvax.Display.Text(content,
                        {
                         context : {
