@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- line</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 76  , 51 , 43    ],
+    [ 4      , 58  , 51 , 31    ],
+    [ 5      , 79  , 73 , 71    ],
+    [ 6      , 88  , 73 , 39    ],
+    [ 7      , 56  , 73 , 65    ],
+    [ 8      , 99  , 83 , 51    ]
+];
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+var options = {
+    yAxis : {
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "xfield"
+    },
+    graphs : {
+        //要配置只有在拐点的时候才出现node原点，有个前提就是line的smooth必须是falsh的情况下
+        line : {
+            smooth : false
+        },
+        node : {
+            //配置拐点才出现节点
+            corner : true
+        }
+    }
+};
+//Chartx.create.line开始初始化chart实例
+Chartx.create.line("canvasTest" , data , options);
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图 - 折线上拐点才出现圆点</h4>
+                <p>
+                    联系人：@逢春 @释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
