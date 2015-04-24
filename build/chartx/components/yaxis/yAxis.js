@@ -20,7 +20,7 @@ define(
             this.text = {
                     fillStyle : '#999999',
                     fontSize  : 12,
-                    textAlign : "right"
+                    textAlign : "right",
                     format    : null
             }
             this.layoutData  = [];                           //dataSection对应的layout数据{y:-100, content:'1000'}
