@@ -179,7 +179,7 @@ define(
                     iNode         : this.iNode,
                     nodesInfoList : _.clone(_nodesInfoList)
                 };
-                console.log(node.nodesInfoList)
+                // console.log(node.nodesInfoList)
                 return node;
             },
             _fireHandler:function(e){
