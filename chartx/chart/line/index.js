@@ -273,14 +273,14 @@ define(
             },
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
-            _setXaxisYaxisToTipsInfo : function(e){
+            _setXaxisYaxisToTipsInfo : function( e ){
                 e.tipsInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
                     value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
                 }
                 var me = this;
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    node.field = me.dataFrame.yAxis.field[ i ];
+                    node.field = me.dataFrame.yAxis.field[ node._groupInd ];
                 } );
             },
             _trimGraphs:function(){
