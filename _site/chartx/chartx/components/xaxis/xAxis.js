@@ -28,11 +28,8 @@ define(
                     fillStyle : '#999999',
                     fontSize  : 13,
                     rotation  : 0,
-<<<<<<< HEAD
                     format    : null                       //和y轴的format同理
-=======
                     textAlign : null
->>>>>>> daily/1.6.8
             }
             this.maxTxtH = 0;
 

@@ -21,15 +21,12 @@ define(
                     fillStyle : '#999999',
                     fontSize  : 12,
                     textAlign : "right",
-<<<<<<< HEAD
                     //最终显示到y轴上面的文本的格式化扩展
                     //比如用户的数据是80 但是 对应的显示要求确是80%
                     //后面的%符号就需要用额外的contentFormat来扩展
                     format    : null
 
-=======
-                    format    : null
->>>>>>> daily/1.6.8
+
             }
             this.layoutData  = [];                           //dataSection对应的layout数据{y:-100, content:'1000'}
             this.dataSection = [];                           //从原数据dataOrg 中 结果datasection重新计算后的数据
