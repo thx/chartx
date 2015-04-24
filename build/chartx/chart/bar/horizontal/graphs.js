@@ -4,9 +4,10 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip"
+        "chartx/components/tips/tip",
+        "chartx/utils/tools"
     ],
-    function(Canvax , Rect , Tween , Tip ){
+    function(Canvax , Rect , Tween , Tip, Tools ){
  
         var Graphs = function( opt , tips , domContainer , dataFrame ){
             this.dataFrame = dataFrame;
@@ -168,7 +169,9 @@ define(
                         var content = barData.value
                         if( _.isFunction(this.text.format) ){
                             content = this.text.format( content );
-                        };
+                        }else{
+                            content = Tools.numAddSymbol(content);
+                        }
 
                         var txt = new Canvax.Display.Text( content ,
                            {

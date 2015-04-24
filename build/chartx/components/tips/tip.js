@@ -2,9 +2,10 @@ define(
     "chartx/components/tips/tip",
     [
          "canvax/index",
-         "canvax/shape/Rect"
+         "canvax/shape/Rect",
+         "chartx/utils/tools"
     ],
-    function( Canvax , Rect ){
+    function( Canvax , Rect, Tools ){
         var Tip = function( opt , tipDomContainer ){
             this.tipDomContainer = tipDomContainer;
             this.cW      = 0;  //容器的width
@@ -130,7 +131,8 @@ define(
                             str+="<td>"+ node.field +"：</td>";
                         }
                     };
-                    str += "<td>"+ node.value +"</td></tr>";
+
+                    str += "<td>"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
                 return str;
