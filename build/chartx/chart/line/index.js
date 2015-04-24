@@ -305,7 +305,7 @@ define(
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs:function(index,num){
-                // debugger
+                //debugger
                 var x = this._xAxis.data[index].x;
                 var y = this._graphs.data[0][index].y
                 return {x:x, y:y}
