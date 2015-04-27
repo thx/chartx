@@ -170,11 +170,11 @@ define(
                     
                     if( !!this.text.rotation ){
                         if( this.text.rotation % 90 == 0 ){
-                            this.h = this._textMaxWidth;
+                            this.h        = this._textMaxWidth;
                             this.leftDisX = txt.getTextHeight() / 2;
                         } else {
-                            this.h = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                            this.h += txt.getTextHeight();
+                            this.h        = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
+                            this.h        += txt.getTextHeight();
                             this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * txt.getTextWidth() + 8;
                         }
                     } else {
