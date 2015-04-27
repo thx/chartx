@@ -8,7 +8,7 @@ title:  chart demos
 <div class="charts">
     <dl class="chart">
         <dt>
-        <img src="">
+        <img src="./assets/chart/line/index.png">
         </dt>
         <dd>
             <h5>
@@ -22,15 +22,12 @@ title:  chart demos
 
     <dl class="chart">
         <dt>
-        <img src="">
+        <img src="./assets/chart/line/add_remove_line.gif">
         </dt>
         <dd>
             <h5>
-            基础折线图
+            添加，删除折线
             </h5>
-            <span>
-            全部默认配置
-            </span>
         </dd>
     </dl>
     <dl class="chart">

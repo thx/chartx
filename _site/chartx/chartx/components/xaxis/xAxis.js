@@ -28,11 +28,7 @@ define(
                     fillStyle : '#999999',
                     fontSize  : 13,
                     rotation  : 0,
-<<<<<<< HEAD
                     format    : null                       //和y轴的format同理
-=======
-                    format    : null,
->>>>>>> daily/1.6.8
                     textAlign : null
             }
             this.maxTxtH = 0;
@@ -204,11 +200,7 @@ define(
                   	var o = arr[a]
                   	var x = o.x, y = this.disY + this.line.height + this.dis
 
-<<<<<<< HEAD
-                  	var content = Tools.numAddSymbol(o.content);
-                  	//文字
-                  	var txt = new Canvax.Display.Text( this._getFormatText(content),
-=======
+
                   	var content = o.content;
                     if(_.isFunction( this.text.format )){
                         content = this.text.format( content );
@@ -218,7 +210,6 @@ define(
 
                     //文字
                   	var txt = new Canvax.Display.Text(content,
->>>>>>> daily/1.6.8
                        {
                         context : {
                             x  : x,

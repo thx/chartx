@@ -41,11 +41,7 @@ define(
 
             this.baseNumber      =  null;
             this.basePoint       =  null;                    //value为baseNumber的point {x,y}
-<<<<<<< HEAD
 
-            //this.textFormat      =  null;  
-=======
->>>>>>> daily/1.6.8
             
             //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
@@ -147,19 +143,13 @@ define(
                 for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var x = 0, y = o.y;
-<<<<<<< HEAD
-                    var content = Tools.numAddSymbol( o.content );
-                    if( _.isFunction(self.text.format) ){
-                        content = self.text.format( content );
-                    };
-=======
+
                     var content = o.content
                     if( _.isFunction(self.text.format) ){
                         content = self.text.format(content );
                     }else{
                         content = Tools.numAddSymbol(content);
                     }
->>>>>>> daily/1.6.8
                     var yNode = new Canvax.Display.Sprite({ id : "yNode"+a });
 
                     //文字
