@@ -19,7 +19,7 @@ define(
             this.h          = 0; 
             this.y          = 0;
 
-            this.colors     = ['#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'],
+            this.colors     = ["#42a8d7",'#666666','#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'],
 
             this.line       = {                   //线
                 enabled     : 1,
