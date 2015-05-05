@@ -39,6 +39,10 @@ define(
                     _promiseHand : []
                 };
                 var query = window.KISSY ? KISSY.all : $;
+                el = _.clean(el);
+                if( el.slice(0,1)!= "#" && el.slice(0,1)!="." ){
+                    el = "#"+el;
+                };
                 query = query("#"+this.id+" " + el);
                 me.manage( Chartx.create[ type ]( query , data , opts ).then(function( chart ){
                     obj.chart = chart;
