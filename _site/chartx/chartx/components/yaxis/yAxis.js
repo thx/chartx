@@ -112,6 +112,9 @@ define(
                 this.dataOrg     = data.org;
                 
                 if( this.dataSection.length == 0 ){
+                    if( !this.enabled ){
+                        arr.unshift( 0 );
+                    } 
                     this.dataSection = DataSection.section( arr , 3 );
                 }
                 this._bottomNumber = this.dataSection[0];

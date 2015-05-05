@@ -16,7 +16,7 @@ define(
     
         return Chart.extend({
             init : function( node , data , opts){
-                this.mapType     = "china";//map类型 默认为中国地图
+                this.mapName     = "china";//map类型 默认为中国地图
                 this._mapDataMap = {};
                 this.tips = {};
                 this.normalColor = "#c9bbe6";
@@ -24,7 +24,7 @@ define(
                     strokeStyle : "white",
                     fillStyle   : this.normalColor,
                     lineWidth   : 1,
-                    linkage     : false,
+                    linkage     : false, //是否开启省市联动，目前只支持中国地图
                     text        : {
                         fillStyle : "#000",
                         enabled   : true
@@ -40,13 +40,10 @@ define(
 
                 _.deepExtend( this , opts );
 
-                this._dataFrame = DataFormat(data , {
-                     xAxis : {field : [ this.areaField ]},
-                     yAxis : {field : this.tips.field }
-                });
+                this._initData( data );
 
                 //DataFormat后会重新计算出来最后的field
-                this.tips.field = this._dataFrame.yAxis.field;
+                this.tips.field = this.dataFrame.yAxis.field;
 
                 this._mapScale = 1 //Math.min( this.width / 560 , this.height / 470 );
                 
@@ -54,6 +51,13 @@ define(
                     id   : "mapSp"
                 });
                 
+            },
+            _initData : function( data ){
+                this.dataFrame = DataFormat(data , {
+                     xAxis : {field : [ this.areaField ]},
+                     yAxis : {field : this.tips.field }
+                });
+                return this.dataFrame;
             },
             draw : function(){
 
@@ -66,14 +70,14 @@ define(
                 this._initModule();
                 var me = this;
 
-                this._getMapData( this.mapType , function( md ){
+                this._getMapData( this.mapName , function( md ){
                     me._widget( md );
                     //绘制完了后调整当前sprite的尺寸和位置
                     me._setSpPos();
                 } );
             },
             _setSpPos : function( ){
-                var tf  = this._mapDataMap[this.mapType].transform;
+                var tf  = this._mapDataMap[this.mapName].transform;
                 var spc = this.sprite.context;
                 spc.width  = tf.width;
                 spc.height = tf.height;
@@ -86,7 +90,7 @@ define(
                 mapParams.params[ mt ].getGeoJson( this._mapDataCallback( mt , callback ) );
             },
             /**
-             * @param {string} mt mapType
+             * @param {string} mt mapName
              * @param {function} callback 
              */
             _mapDataCallback : function (mt, callback) {
@@ -102,17 +106,17 @@ define(
             /**
              * 按需加载相关地图 
              */
-            _getProjectionData : function (mapType, mapData) {
-                var normalProjection = this._mapDataMap[mapType].projection;
+            _getProjectionData : function (mapName, mapData) {
+                var normalProjection = this._mapDataMap[mapName].projection;
                 var province = [];
-                var bbox = this._mapDataMap[mapType].bbox 
+                var bbox = this._mapDataMap[mapName].bbox 
                            || normalProjection.getBbox( mapData );
                 
                 var transform = this._getTransform(
                     bbox,
-                    this._mapDataMap[mapType].rate
+                    this._mapDataMap[mapName].rate
                 );
-                var lastTransform = this._mapDataMap[mapType].lastTransform || {scale:{}};
+                var lastTransform = this._mapDataMap[mapName].lastTransform || {scale:{}};
                 
                 var pathArray;
                 if (transform.left != lastTransform.left
@@ -125,14 +129,14 @@ define(
                     lastTransform = _.clone(transform);
                 }
                 else {
-                    transform = this._mapDataMap[mapType].transform;
-                    pathArray = this._mapDataMap[mapType].pathArray;
+                    transform = this._mapDataMap[mapName].transform;
+                    pathArray = this._mapDataMap[mapName].pathArray;
                 }
                 
-                this._mapDataMap[mapType].bbox = bbox;
-                this._mapDataMap[mapType].transform = transform;
-                this._mapDataMap[mapType].lastTransform = lastTransform;
-                this._mapDataMap[mapType].pathArray = pathArray;
+                this._mapDataMap[mapName].bbox = bbox;
+                this._mapDataMap[mapName].transform = transform;
+                this._mapDataMap[mapName].lastTransform = lastTransform;
+                this._mapDataMap[mapName].pathArray = pathArray;
                 
                 var position = [transform.left, transform.top];
                 for (var i = 0, l = pathArray.length; i < l; i++) {
@@ -142,19 +146,19 @@ define(
                         pathArray[i].cp                    // 平面坐标
                     );
                     console.log(
-                        this.pos2geo(mapType, pathArray[i].cp),  // 平面坐标转经纬度
-                        this.geo2pos(mapType, mapData.features[i].properties.cp)
+                        this.pos2geo(mapName, pathArray[i].cp),  // 平面坐标转经纬度
+                        this.geo2pos(mapName, mapData.features[i].properties.cp)
                     )
                     */
                     province.push(this._getSingleProvince(
-                        mapType, pathArray[i], position
+                        mapName, pathArray[i], position
                     ));
                 }
                 
                 // 中国地图加入南海诸岛
-                if (mapType == 'china' && false) {
+                if (mapName == 'china' && false) {
                     var leftTop = this.geo2pos(
-                        mapType, 
+                        mapName, 
                         GeoCoord['南海诸岛'] || _mapParams['南海诸岛'].textCoord
                     );
                     // scale.x : width  = 10.51 : 64
@@ -168,7 +172,7 @@ define(
                         textPosition[1] += TextFixed['南海诸岛'][1];
                     }
                     province.push({
-                        name : this._nameChange(mapType, '南海诸岛'),
+                        name : this._nameChange(mapName, '南海诸岛'),
                         path : _mapParams['南海诸岛'].getPath(leftTop, scale),
                         position : position,
                         textX : textPosition[0],
@@ -195,22 +199,22 @@ define(
              * 经纬度转平面坐标
              * @param {Object} p
              */
-            geo2pos : function (mapType, p) {
-                if (!this._mapDataMap[mapType].transform) {
+            geo2pos : function (mapName, p) {
+                if (!this._mapDataMap[mapName].transform) {
                     return null;
                 }
-                return this._mapDataMap[mapType].projection.geo2pos(
-                    this._mapDataMap[mapType].transform, p
+                return this._mapDataMap[mapName].projection.geo2pos(
+                    this._mapDataMap[mapName].transform, p
                 );
             },
-            _getSingleProvince : function (mapType, path, position) {
+            _getSingleProvince : function (mapName, path, position) {
                 var textPosition;
                 var name = path.properties.name;
                 var textFixed = TextFixed[name] || [0, 0];
                 if (GeoCoord[name]) {
                     // 经纬度直接定位不加textFixed
                     textPosition = this.geo2pos(
-                        mapType, 
+                        mapName, 
                         GeoCoord[name]
                     );
                 } else if (path.cp) {
@@ -219,9 +223,9 @@ define(
                         path.cp[1] + textFixed[1]
                     ];
                 } else {
-                    var bbox = this._mapDataMap[mapType].bbox;
+                    var bbox = this._mapDataMap[mapName].bbox;
                     textPosition = this.geo2pos(
-                        mapType, 
+                        mapName, 
                         [bbox.left + bbox.width / 2, bbox.top + bbox.height / 2]
                     );
                     textPosition[0] += textFixed[0];
@@ -277,11 +281,14 @@ define(
 
 
             _getDataForArea : function( area ){
-                var data = null;
+                var data = {
+                    area : area
+                };
                 var me   = this;
-                _.each( this._dataFrame.xAxis.org[ 0 ] , function( areaData , i ){
-                    if( areaData.indexOf( area.name ) >= 0 ){
-                        data = me._dataFrame.org[ i+1 ];
+                _.each( this.dataFrame.xAxis.org[ 0 ] , function( areaData , i ){
+                    if( areaData.indexOf( area.name ) >= 0 || area.name.indexOf( areaData ) >= 0 ){
+                        data.data      = me.dataFrame.org[ i+1 ];
+                        data.dataIndex = i;
                     }
                 } );
                 return data;
@@ -339,7 +346,6 @@ define(
                             return;
                         };
                         me.fire("areaOver" , e);
-                        debugger
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
                     });
 
@@ -354,8 +360,13 @@ define(
                     area.on("click" , function(e){
                         //地图联动， 目前只支持省市联动
                         if( me.area.linkage ) {
-                            me.mapType = mapParams.params[ this.mapData.name ] ? this.mapData.name : "china" 
+                            if( me.mapName == "台湾" || this.mapData.name == me.mapName ){
+                                me.mapName =  "china";
+                            } else {
+                                me.mapName = mapParams.params[ this.mapData.name ] ? this.mapData.name : "china"
+                            }
                         };
+                        e.area = this.mapData;
                         me.fire("areaClick" , e ); 
                     });
 
@@ -419,11 +430,11 @@ define(
                 //先计算好这个area是否在data中有传入数据
                 var areaData = this._getDataForArea( mapData );
 
-                if( areaData ){
+                if( areaData.data ){
                     _.each( this.tips.field , function( field , i ){
                         tipsInfo.nodesInfoList.push({
                             field  : field ,
-                            value  : areaData[ _.indexOf( me._dataFrame.org[0] , field ) ]
+                            value  : areaData.data[ _.indexOf( me.dataFrame.org[0] , field ) ]
                         });
                     } );
                 }

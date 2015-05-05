@@ -158,7 +158,8 @@ define(
             }, 
             _checkText:function(){//检测下文字的高等
                 if( !this.enabled ){ //this.display == "none"
-                    this.h = this.dis;//this.max.txtH;
+                    this.dis = 0;
+                    this.h   = 0; //this.dis;//this.max.txtH;
                 } else {
                     var txt = new Canvax.Display.Text( this.dataSection[0] || "test" ,
                                 {
@@ -170,11 +171,11 @@ define(
                     
                     if( !!this.text.rotation ){
                         if( this.text.rotation % 90 == 0 ){
-                            this.h = this._textMaxWidth;
+                            this.h        = this._textMaxWidth;
                             this.leftDisX = txt.getTextHeight() / 2;
                         } else {
-                            this.h = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                            this.h += txt.getTextHeight();
+                            this.h        = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
+                            this.h        += txt.getTextHeight();
                             this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * txt.getTextWidth() + 8;
                         }
                     } else {

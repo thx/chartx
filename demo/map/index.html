@@ -43,11 +43,16 @@ var options = {
     mapType : "china", //默认便是中国地图
     areaField : "area", //可选，默认为第一个字段
     area : {
-        fillStyle : function( area ){
-           if( area ){
+        fillStyle : function( arg ){
+           if( arg.data ){
                //点击量超过100的就显示为蓝色
-               if( area[1] > 100 ){
+               if( arg.data[1] > 100 ){
                    return "#135EBF"
+               }
+           }
+           if( arg.dataIndex ){
+               if( arg.dataIndex > 0 ){
+                   return "red"
                }
            }
         }

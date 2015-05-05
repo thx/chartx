@@ -4,10 +4,26 @@ define(
         window.KISSY ? "magix/view" : "magix",
         window.KISSY ? "node" : null
     ],
-    function(View){
+    function( View ){
         View=View.View||View;
         View.mixin({
-            createChart : function(type , el , data , opts){
+            createChart : function( opt ){
+
+                var type , el , data , opts ;
+
+                var args = arguments;
+                if( args.length > 1 && !_.isObject(args[0]) ){
+                    type = args[0];
+                    el   = args[1];
+                    data = args[2];
+                    opts = args[3];
+                } else {
+                    type = opt.type;
+                    el   = opt.el;
+                    data = opt.data; 
+                    opts = opt.opts;
+                };
+
                 var me  = this;
                 var obj =  {
                     then : function(fn){
