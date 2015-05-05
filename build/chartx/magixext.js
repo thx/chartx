@@ -39,7 +39,7 @@ define(
                     _promiseHand : []
                 };
                 var query = window.KISSY ? KISSY.all : $;
-               // el = _.clean(el);
+                el = el.replace(/(^\s*)|(\s*$)/g, "");
                 if( el.slice(0,1)!= "#" && el.slice(0,1)!="." ){
                     el = "#"+el;
                 };
