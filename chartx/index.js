@@ -225,6 +225,11 @@ var Chartx = {
             packageObj[name] = path;
             if (window.seajs) {
                 packageObj[name] = path + name;
+                //BEGIN(develop)
+                if( path == "../../" && name == "chartx" ){
+                    packageObj[name] = window.location.origin+"/charts/chartx"
+                }
+                //END(develop)
                 seajs.config({ paths: packageObj });
             }
             if (window.requirejs) {

@@ -215,6 +215,7 @@ var Chartx = {
             packageObj[name] = path;
             if (window.seajs) {
                 packageObj[name] = path + name;
+                
                 seajs.config({ paths: packageObj });
             }
             if (window.requirejs) {
