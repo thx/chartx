@@ -227,7 +227,7 @@ var Chartx = {
                 packageObj[name] = path + name;
                 //BEGIN(develop)
                 if( path == "../../" && name == "chartx" ){
-                    packageObj[name] = window.location.origin+"/charts/chartx"
+                    packageObj[name] = window.location.origin+window.location.pathname.split("/").slice(0 , -3).join("/")+"/chartx"
                 }
                 //END(develop)
                 seajs.config({ paths: packageObj });
