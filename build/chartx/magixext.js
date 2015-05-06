@@ -39,8 +39,12 @@ define(
                     _promiseHand : []
                 };
                 var query = window.KISSY ? KISSY.all : $;
-                query = query("#"+this.id+" #" + el);
-                me.manage( Chartx.create[ type ]( el , data , opts ).then(function( chart ){
+                el = el.replace(/(^\s*)|(\s*$)/g, "");
+                if( el.slice(0,1)!= "#" && el.slice(0,1)!="." ){
+                    el = "#"+el;
+                };
+                query = query("#"+this.id+" " + el);
+                me.manage( Chartx.create[ type ]( query , data , opts ).then(function( chart ){
                     obj.chart = chart;
                     _.each( obj._promiseHand , function( fn ){
                         _.isFunction( fn ) && fn( chart );
