@@ -17,6 +17,7 @@ var Chartx = {
         var __FILE__, scripts = document.getElementsByTagName("script"); 
         __FILE__ = scripts[scripts.length - 1].getAttribute("src");
         __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
+        
         Chartx.path = __FILE__;
 
         if( (/daily.taobao.net/g).test( __FILE__ ) ){
@@ -127,7 +128,7 @@ var Chartx = {
         function checkInBackages(id) {
             if (packages.length > 0) {
                 for (var i = 0, l = packages.length; i < l; i++) {
-                    if (id.indexOf(packages.name) == 0) {
+                    if (id.indexOf(packages[i].name) == 0) {
                         return true
                     }
                 }
@@ -140,7 +141,6 @@ var Chartx = {
 
         if (!window.define) {
             if(KISSY){
-
                 window.define = function define(id, dependencies, factory) {
                     // KISSY.add(name?, factory?, deps)
                     function proxy() {
@@ -184,6 +184,7 @@ var Chartx = {
                 //只有固定的一些包是按照amd规范写的才需要转换。
                 //比如canvax项目，是按照amd规范的，但是这个包是给业务项目中去使用的。
                 //而这个业务使用seajs规范，所以业务中自己的本身的module肯定是按照seajs来编写的不需要转换
+                
                 if( typeof id == "string" && checkInBackages(id) ){
                     //只有canvax包下面的才需要做转换，因为canvax的module是安装amd格式编写的
                     return cmdDefine(id , deps , function( require, exports, module ){
@@ -201,27 +202,12 @@ var Chartx = {
                     return cmdDefine.apply(window , arguments);
                 }
             }
-            if( window.require ){
+            if( !window.require ){
                 window.require = seajs.use;
             }
         }    
         if( typeof define == "function" && define.amd ){
             //额，本来就是按照amd规范来开发的，就不需要改造了。
-        }
-
-        var configs = {
-            packages: [
-            {
-                //name : "canvax",
-                //path : baseUrl 
-            }
-            ],
-            alias: {
-                //"canvax" : baseUrl
-            },
-            paths: {
-                //"canvax" : baseUrl
-            }
         }
 
         for (var i = 0, l = packages.length; i < l; i++) {
