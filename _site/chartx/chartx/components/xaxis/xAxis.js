@@ -28,7 +28,7 @@ define(
                     fillStyle : '#999999',
                     fontSize  : 13,
                     rotation  : 0,
-                    format    : null                       //和y轴的format同理
+                    format    : null,                       //和y轴的format同理
                     textAlign : null
             }
             this.maxTxtH = 0;

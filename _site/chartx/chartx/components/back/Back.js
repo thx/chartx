@@ -153,8 +153,9 @@ define(
                 //原点开始的x轴线
                 var line = new Line({
                     context : {
+                        yStart      : 0 - 1,
                         xEnd        : self.w,
-                        yEnd        : 0,
+                        yEnd        : 0 - 1,
                         lineWidth   : self.xOrigin.thinkness,
                         strokeStyle : self.xOrigin.strokeStyle
                     }

@@ -632,22 +632,9 @@ a {
     }
 
     #page .stoc {
-        background: none;
-        -webkit-transition: opacity 5s ease-in-out;
-        -moz-transition: opacity 5s ease-in-out;
-        -ms-transition: opacity 5s ease-in-out;
-        -o-transition: opacity 5s ease-in-out;
-        transition: opacity 5s ease-in-out;
-        opacity: .3
     }
 
     #page .stoc:hover {
-        -webkit-transition: opacity .3s ease-out;
-        -moz-transition: opacity .3s ease-out;
-        -ms-transition: opacity .3s ease-out;
-        -o-transition: opacity .3s ease-out;
-        transition: opacity .3s ease-out;
-        opacity: .999999;
     }
 
     #page .stoc {
@@ -673,7 +660,7 @@ a {
         top: 15px;
     }
     #page .stoc .folded ol {
-        display: none;
+        
     }
 }
 
