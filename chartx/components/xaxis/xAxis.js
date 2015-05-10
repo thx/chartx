@@ -74,7 +74,7 @@ define(
                 }
 
                 if(!this.line.enabled){
-                    this.line.height = 0
+                    this.line.height = 1
                 }
 
                 this.sprite = new Canvax.Display.Sprite({
@@ -159,7 +159,7 @@ define(
             _checkText:function(){//检测下文字的高等
                 if( !this.enabled ){ //this.display == "none"
                     this.dis = 0;
-                    this.h   = 0; //this.dis;//this.max.txtH;
+                    this.h   = 1; //this.dis;//this.max.txtH;
                 } else {
                     var txt = new Canvax.Display.Text( this._getFormatText(this.dataSection[0]) || "test" ,
                                 {

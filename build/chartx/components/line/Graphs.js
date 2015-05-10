@@ -76,7 +76,7 @@ define(
                 );
                 
                 group.draw({
-                    data       : self.data[ind]
+                    data       : ind > self.data.length-1 ? self.data[self.data.length-1]: self.data[ind]
                 });
                 self.sprite.addChildAt(group.sprite , ind);
                 self.groups.splice(ind , 0 , group);

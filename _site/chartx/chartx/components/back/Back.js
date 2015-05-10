@@ -137,7 +137,7 @@ define(
                         self.yAxisSp.addChild(line);
                     }
                 }
-
+debugger
                 //原点开始的y轴线
                 var line = new Line({
                     context : {
@@ -153,9 +153,8 @@ define(
                 //原点开始的x轴线
                 var line = new Line({
                     context : {
-                        yStart      : 0 - 1,
                         xEnd        : self.w,
-                        yEnd        : 0 - 1,
+                        yEnd        : 0,
                         lineWidth   : self.xOrigin.thinkness,
                         strokeStyle : self.xOrigin.strokeStyle
                     }

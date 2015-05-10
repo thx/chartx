@@ -80,8 +80,14 @@ define(
                     i = ind;
                 };
 
+
                 //首先，yAxis要重新计算
-                this.yAxis.field.splice(ind , 0 , field);
+                if( ind == undefined ){
+                    this.yAxis.field.push( field );
+                    ind = this.yAxis.field.length-1;
+                } else {
+                    this.yAxis.field.splice(ind , 0 , field);
+                }
                 this.dataFrame = this._initData( this.dataFrame.org , this );
 
                 this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
@@ -184,7 +190,8 @@ define(
                     _yAxisW = this._xAxis.yAxisW;
                 };
 
-                var _graphsH = Math.abs(this._yAxis.layoutData[ 0 ].y - this._yAxis.layoutData.slice(-1)[0].y);
+                var _graphsH = this._yAxis.yGraphsHeight;
+                //Math.abs(this._yAxis.layoutData[ 0 ].y - this._yAxis.layoutData.slice(-1)[0].y);
 
                 //绘制背景网格
                 this._back.draw({
