@@ -14,7 +14,7 @@ var Chartx = {
         __FILE__ = scripts[scripts.length - 1].getAttribute("src");
         __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
         
-        Chartx.path = __FILE__;
+        Chartx.path = __FILE__.replace(/(^\s*)|(\s*$)/g, "");
 
         if( (/daily.taobao.net/g).test( __FILE__ ) ){
             Chartx.site.daily = true;
