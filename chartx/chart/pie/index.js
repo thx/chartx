@@ -23,7 +23,7 @@
 
                 },
                 draw: function () {
-
+debugger
                     this.stageBg = new Canvax.Display.Sprite({
                         id: 'bg'
                     });
