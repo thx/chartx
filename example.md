@@ -6,6 +6,7 @@ title:  chart demos
 ## 折线图
 
 <div class="charts">
+    <a target="_blank" href="./demo/line/index.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/index.png">
@@ -19,7 +20,9 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>
 
+    <a target="_blank" href="./demo/line/add_remove_line.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/add_remove_line.gif">
@@ -30,6 +33,9 @@ title:  chart demos
             </h5>
         </dd>
     </dl>
+    </a>
+
+    <a target="_blank" href="./demo/line/xAxis_rotate.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/xAxis_rotate.png">
@@ -43,7 +49,9 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>
 
+    <a target="_blank" href="./demo/line/anchor.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/anchor.gif">
@@ -57,7 +65,9 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>
 
+    <a target="_blank" href="./demo/line/corner.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/corner.png">
@@ -71,8 +81,10 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>
 
 
+    <a target="_blank" href="./demo/line/custom_xyAxis_datasection.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/custom_xyAxis_datasection.png">
@@ -86,10 +98,12 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>
 
 
 
 
+    <a target="_blank" href="./demo/line/fill_gradient.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/fill_gradient.png">
@@ -103,6 +117,7 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>
 
 </div>
 
