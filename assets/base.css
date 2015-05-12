@@ -1227,7 +1227,7 @@ h4:hover .anchor-link {
 }
 .chart {
     width:200px;
-    height:200px;
+    height:220px;
     display:inline-block;
     *display:inline;
     zoom:1;
@@ -1239,7 +1239,7 @@ h4:hover .anchor-link {
     background:#fafafa;
 }
 .chart dt , .chart dd {
-    padding-right:10px;
+    padding:5px;
     margin-top:0;
     color:#666;
     font-size:13px;
