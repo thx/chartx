@@ -2,9 +2,10 @@ define(
     "chartx/components/tips/tip",
     [
          "canvax/index",
-         "canvax/shape/Rect"
+         "canvax/shape/Rect",
+         "chartx/utils/tools"
     ],
-    function( Canvax , Rect ){
+    function( Canvax , Rect, Tools ){
         var Tip = function( opt , tipDomContainer ){
             this.tipDomContainer = tipDomContainer;
             this.cW      = 0;  //容器的width
@@ -28,7 +29,8 @@ define(
             
             this._tipDom = null;
             this._back   = null;
-            this._offset = 10; //tips内容到鼠标位置的偏移量
+
+            this.offset = 10; //tips内容到鼠标位置的偏移量
         
             //所有调用tip的 event 上面 要附带有符合下面结构的tipsInfo属性
             //会deepExtend到this.indo上面来
@@ -75,8 +77,8 @@ define(
             setPosition : function( e ){
                 if(!this._tipDom) return;
                 var pos = e.pos || e.target.localToGlobal( e.point );
-                var x   = this._checkX( pos.x + this._offset );
-                var y   = this._checkY( pos.y + this._offset );
+                var x   = this._checkX( pos.x + this.offset );
+                var y   = this._checkY( pos.y + this.offset );
 
                 var _backPos = this.sprite.parent.globalToLocal( { x : x , y : y} );
                 this.sprite.context.x = _backPos.x;
@@ -129,7 +131,8 @@ define(
                             str+="<td>"+ node.field +"：</td>";
                         }
                     };
-                    str += "<td>"+ node.value +"</td></tr>";
+
+                    str += "<td>"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
                 return str;

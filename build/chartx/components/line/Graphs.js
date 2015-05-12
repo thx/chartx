@@ -4,10 +4,9 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "chartx/utils/tools",
-        "canvax/animation/Tween",
         "chartx/components/line/Group"
     ],
-    function( Canvax , Rect, Tools, Tween , Group ){
+    function( Canvax , Rect, Tools, Group ){
         var Graphs = function(opt,root){
             this.w       = 0;   
             this.h       = 0; 
@@ -28,7 +27,7 @@ define(
             this.sprite     = null;  
             this.induce     = null;                         
 
-            this.init(opt)
+            this.init(opt);
         };
     
         Graphs.prototype = {
@@ -77,7 +76,7 @@ define(
                 );
                 
                 group.draw({
-                    data       : self.data[ind]
+                    data       : ind > self.data.length-1 ? self.data[self.data.length-1]: self.data[ind]
                 });
                 self.sprite.addChildAt(group.sprite , ind);
                 self.groups.splice(ind , 0 , group);
@@ -115,7 +114,6 @@ define(
                 var self  = this;
                 
                 for(var a = 0,al = self.data.length; a < al; a++){
-                    
                     var group = new Group(
                         a , //_groupInd
                         self.opt,
@@ -172,14 +170,15 @@ define(
                 for (var a = 0, al = this.groups.length; a < al; a++ ) {
                     var o = this.groups[a].getNodeInfoAt(tmpINode)
                     o && _nodesInfoList.push(o);
-                }
+                };
 
                 this.iGroup = tmpIGroup, this.iNode = tmpINode
                 var node = {
                     iGroup        : this.iGroup,
                     iNode         : this.iNode,
                     nodesInfoList : _.clone(_nodesInfoList)
-                }
+                };
+                // console.log(node.nodesInfoList)
                 return node;
             },
             _fireHandler:function(e){

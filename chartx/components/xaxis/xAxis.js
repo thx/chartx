@@ -27,7 +27,9 @@ define(
                     dis       : 0,                         //间隔(间隔几个文本展现)
                     fillStyle : '#999999',
                     fontSize  : 13,
-                    rotation  : 0
+                    rotation  : 0,
+                    format    : null,
+                    textAlign : null
             }
             this.maxTxtH = 0;
 
@@ -71,6 +73,10 @@ define(
                     this.dataSection = this._initDataSection( this.dataOrg );
                 }
 
+                if(!this.line.enabled){
+                    this.line.height = 1
+                }
+
                 this.sprite = new Canvax.Display.Sprite({
                     id : "xAxisSprite"
                 });
@@ -107,7 +113,7 @@ define(
                     if( !this.text.rotation ){
                         this._layout();
                     }
-                } 
+                }
                 // this.data = this.layoutData
             },
     
@@ -152,7 +158,8 @@ define(
             }, 
             _checkText:function(){//检测下文字的高等
                 if( !this.enabled ){ //this.display == "none"
-                    this.h = this.dis;//this.max.txtH;
+                    this.dis = 0;
+                    this.h   = 1; //this.dis;//this.max.txtH;
                 } else {
                     var txt = new Canvax.Display.Text( this.dataSection[0] || "test" ,
                                 {
@@ -164,17 +171,24 @@ define(
                     
                     if( !!this.text.rotation ){
                         if( this.text.rotation % 90 == 0 ){
-                            this.h = this._textMaxWidth;
+                            this.h        = this._textMaxWidth;
                             this.leftDisX = txt.getTextHeight() / 2;
                         } else {
-                            this.h = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                            this.h += txt.getTextHeight();
+                            this.h        = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
+                            this.h        += txt.getTextHeight();
                             this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * txt.getTextWidth() + 8;
                         }
                     } else {
                         this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
                         this.leftDisX = txt.getTextWidth() / 2;
                     }
+                }
+            },
+            _getFormatText : function( text ){
+                if(_.isFunction( this.text.format )){
+                    return this.text.format( text );
+                } else {
+                    return text
                 }
             },
             _widget:function(){
@@ -187,8 +201,14 @@ define(
                   	var o = arr[a]
                   	var x = o.x, y = this.disY + this.line.height + this.dis
 
-                  	var content = Tools.numAddSymbol(o.content);
-                  	//文字
+                  	var content = o.content;
+                    if(_.isFunction( this.text.format )){
+                        content = this.text.format( content );
+                    } else {
+                        content = Tools.numAddSymbol(content);
+                    }
+
+                    //文字
                   	var txt = new Canvax.Display.Text(content,
                        {
                         context : {
@@ -197,37 +217,37 @@ define(
                             fillStyle   : this.text.fillStyle,
                             fontSize    : this.text.fontSize,
                             rotation    : -Math.abs(this.text.rotation),
-                            textAlign   : !!this.text.rotation ? "right"  : "left",
+                            textAlign   : this.text.textAlign || (!!this.text.rotation ? "right"  : "center"),
                             textBaseline: !!this.text.rotation ? "middle" : "top"
                        }
                   	});
                   	xNode.addChild(txt);
-                    if( !this.text.rotation ){
-               	    	txt.context.x = parseInt(txt.context.x - txt.getTextWidth() / 2) ;
-                    } else {
+                    if( !!this.text.rotation ){
                         txt.context.x += 5;
                         txt.context.y += 3;
                     }
 
-                    //线条
-                    var line = new Line({
-                        context : {
-                            xStart      : x,
-                            yStart      : this.disY,
-                            xEnd        : x,
-                            yEnd        : this.line.height + this.disY,
-                            lineWidth   : this.line.width,
-                            strokeStyle : this.line.strokeStyle
-                        }
-                    });
-                    xNode.addChild( line );
+                    if(this.line.enabled){
+                        //线条
+                        var line = new Line({
+                            context : {
+                                xStart      : x,
+                                yStart      : this.disY,
+                                xEnd        : x,
+                                yEnd        : this.line.height + this.disY,
+                                lineWidth   : this.line.width,
+                                strokeStyle : this.line.strokeStyle
+                            }
+                        });
+                        xNode.addChild( line );
+                    }
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
                     _.isFunction(this.filter) && this.filter({
                         layoutData  : arr,
                         index       : a,
                         txt         : txt,
-                        line        : line
+                        line        : line || null
                     });
 
                     this.sprite.addChild( xNode );

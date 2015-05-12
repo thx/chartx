@@ -34,6 +34,8 @@ define(
                 this._graphs       =  null;
                 this._tips         =  null;
 
+                this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
+
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
             },
@@ -78,8 +80,14 @@ define(
                     i = ind;
                 };
 
+
                 //首先，yAxis要重新计算
-                this.yAxis.field.splice(ind , 0 , field);
+                if( ind == undefined ){
+                    this.yAxis.field.push( field );
+                    ind = this.yAxis.field.length-1;
+                } else {
+                    this.yAxis.field.splice(ind , 0 , field);
+                }
                 this.dataFrame = this._initData( this.dataFrame.org , this );
 
                 this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
@@ -182,10 +190,13 @@ define(
                     _yAxisW = this._xAxis.yAxisW;
                 };
 
+                var _graphsH = this._yAxis.yGraphsHeight;
+                //Math.abs(this._yAxis.layoutData[ 0 ].y - this._yAxis.layoutData.slice(-1)[0].y);
+
                 //绘制背景网格
                 this._back.draw({
                     w    : this._xAxis.w ,
-                    h    : y,
+                    h    : _graphsH,
                     xAxis:{
                         data : this._yAxis.layoutData
                     },
@@ -207,6 +218,7 @@ define(
                     disX : this._getGraphsDisX(),
                     smooth : this.smooth
                 });
+
                 this._graphs.setX( _yAxisW ), this._graphs.setY(y)
     
                 //执行生长动画
@@ -214,15 +226,31 @@ define(
     
                 var self = this;
                 this._graphs.sprite.on( "hold mouseover" ,function(e){
-                    if( self._tips.enabled ){
-                        self._setXaxisYaxisToTipsInfo(e);
-                        self._tips.show( e );
+                    if( self._tips.enabled &&
+                        self._preTipsInode && self._preTipsInode != e.tipsInfo.iNode &&
+                        e.tipsInfo.nodesInfoList.length > 0
+                        ){
+                            self._setXaxisYaxisToTipsInfo(e);
+                            self._tips.show( e );
+
+                            //触发
+                            //self.fire( "" , e );
                     }
                 });
                 this._graphs.sprite.on( "drag mousemove" ,function(e){
                     if( self._tips.enabled ){
-                        self._setXaxisYaxisToTipsInfo(e);
-                        self._tips.move( e );
+                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                            self._setXaxisYaxisToTipsInfo(e);
+                            if( self._tips._isShow ){
+                                self._tips.move( e );
+                            } else {
+                                self._tips.show( e );
+                            }
+                        } else {
+                            if( self._tips._isShow ){
+                                self._tips.hide( e );
+                            }
+                        }
                     }
                 });
                 this._graphs.sprite.on( "release mouseout" ,function(e){
@@ -237,43 +265,43 @@ define(
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
                     this._anchor.draw({
                         w    : this.width - _yAxisW,
-                        h    : y,
+                        h    : _graphsH,
                         cross  : {
                             x : pos.x,
-                            y : y + pos.y
+                            y : _graphsH + pos.y
                         },
                         pos   : {
                             x : _yAxisW,
-                            y : 0
+                            y : y - _graphsH
                         }
                     });
                     //, this._anchor.setY(y)
                 }
             },
-            _setXaxisYaxisToTipsInfo : function(e){
+            //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+            //方便外部自定义tip是的content
+            _setXaxisYaxisToTipsInfo : function( e ){
                 e.tipsInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
                     value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
                 }
                 var me = this;
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    node.field = me.dataFrame.yAxis.field[ i ];
+                    node.field = me.dataFrame.yAxis.field[ node._groupInd ];
                 } );
             },
             _trimGraphs:function(){
                 //debugger
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
-                var maxXAxisLen = this.dataFrame.xAxis.org[0].length;
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
-                        !tmpData[a] ? tmpData[a] = [] : ''
-                        var x = b / (maxXAxisLen - 1) * this._xAxis.xGraphsWidth
-                        if(maxXAxisLen == 1 && arr[a].length == 1) {                      //每条线上只有一个点 那么x需要居中
-                            x = this._xAxis.xGraphsWidth / 2
+                        !tmpData[a] ? tmpData[a] = [] : '';
+                        if( b >= this._xAxis.data.length ){
+                            break;
                         }
-
+                        var x = this._xAxis.data[b].x;
                         var y = - (arr[a][b] - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
                         y = isNaN(y) ? 0 : y
                         tmpData[a][b] = {
@@ -287,15 +315,16 @@ define(
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs:function(index,num){
-                // debugger
+                //debugger
                 var x = this._xAxis.data[index].x;
                 var y = this._graphs.data[0][index].y
                 return {x:x, y:y}
             },
             //每两个点之间的距离
             _getGraphsDisX:function(){
-                var n = this._xAxis.xGraphsWidth / ( this.dataFrame.xAxis.org[0].length - 1 );
-                if(this.dataFrame.xAxis.org[0].length == 1){
+                var dsl = this._xAxis.dataSection.length;
+                var n   = this._xAxis.xGraphsWidth / (dsl - 1);
+                if( dsl == 1){
                     n = 0
                 }
                 return n

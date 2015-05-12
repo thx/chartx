@@ -6,7 +6,7 @@ daily环境为 <script>http://g-assets.daily.taobao.net/thx/charts/chartx/index.
 
 cdn环境为   <script>http://g.tbcdn.cn/thx/charts/{{版本号}}/chartx/index.js</scirpt>
 
-当前最新CDN版本号为1.6.1
+当前最新CDN版本号为1.6.9
 
 ### 2，创建图表
 

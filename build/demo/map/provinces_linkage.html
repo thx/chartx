@@ -39,15 +39,27 @@ var data = [
     [ "湖北省" , 9 ]
 ];
 
+//如果点击广东，就reset这个数据
+var data_guandong = [
+    [ "area" , "click" ],
+    [ "清远" , 101     ],
+    [ "东莞" , 88      ]
+]
+
 var options = {
-    mapType : "china", //默认便是中国地图
+    mapName : "china", //默认便是中国地图
     areaField : "area", //可选，默认为第一个字段
     area : {
-        fillStyle : function( area ){
-           if( area ){
+        fillStyle : function( arg ){
+           if( arg.data ){
                //点击量超过100的就显示为蓝色
-               if( area[1] > 100 ){
+               if( arg.data[1] > 100 ){
                    return "#135EBF"
+               }
+           }
+           if( arg.dataIndex != undefined ){
+               if( arg.dataIndex > 0 ){
+                   return "red"
                }
            }
         },
@@ -61,10 +73,20 @@ var options = {
 
 Chartx.create.map("canvasTest" , data , options).then(function(map){
     map.on("areaClick" , function( e ){
-        map.reset();
+        //e上面有个area属性
+        var obj = {};
+        if( map.mapName == "广东" ){
+            obj.data = data_guandong
+        };
+        
+        if( map.mapName == "china" ){
+            obj.data = data
+        };
+
+        map.reset( obj );
     });
 });
-            </textarea></form>
+</textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -72,7 +94,7 @@ Chartx.create.map("canvasTest" , data , options).then(function(map){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>中国地图</h4>
+                <h4>中国地图- 省市地图联动</h4>
                 <p>
                     联系人：@释剑
                 </p>

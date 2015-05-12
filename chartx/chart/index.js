@@ -52,13 +52,13 @@ define(
              * chart的销毁 
             */
             destroy: function(){
-                this.clear();
+                this.clean();
                 this.el.innerHTML = "";
             },
             /*
              * 清除整个图表
              **/
-            clear : function(){
+            clean : function(){
                 _.each( this.canvax.children , function( stage , i ){
                     stage.removeAllChildren();
                 } );
@@ -67,7 +67,7 @@ define(
              * 容器的尺寸改变重新绘制
              */
             resize : function(){
-                this.clear();
+                this.clean();
                 this.width   = parseInt( this.el.offsetWidth );
                 this.height  = parseInt( this.el.offsetHeight );
                 this.canvax.resize();
@@ -98,7 +98,7 @@ define(
                     //数据集合，由_initData 初始化
                     this.dataFrame = this._initData( obj.data );
                 }
-                this.clear();
+                this.clean();
                 this.draw();
             },
             

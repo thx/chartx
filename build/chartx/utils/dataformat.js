@@ -54,14 +54,16 @@ define(
     
                 for(var a = 1, al = arr.length; a < al; a++){
                     for(var b = 0, bl = arr[a].length; b < bl; b++){
-                        total[b].data.push(arr[a][b]);
+                        if( arr[a][b] ){
+                            total[b].data.push(arr[a][b]);
+                        }
                     }     
                 }
     
                 dataFrame.data = total;
                 //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
     
-                var getDataOrg = function( $field , totalList ){
+                var getDataOrg = function( $field , totalList, type ){
                     var arr = _.filter( totalList , function( obj ){
                         return _.some( $field , function( field ){
                             return obj.field == field;
@@ -112,8 +114,7 @@ define(
                     yField = [ yField ];
                 }             
                 dataFrame.yAxis.field = yField;
-                dataFrame.yAxis.org   = getDataOrg( yField , total );
-
+                dataFrame.yAxis.org   = getDataOrg( yField , total, 'yAxis');
 
                 return dataFrame;
             }

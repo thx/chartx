@@ -94,10 +94,12 @@ define(
                     _yAxisW = this._xAxis.yAxisW;
                 };
 
+                var _graphsH = this._yAxis.yGraphsHeight;
+                //Math.abs(this._yAxis.layoutData[ 0 ].y - this._yAxis.layoutData.slice(-1)[0].y);
                 //绘制背景网格
                 this._back.draw({
                     w    : this._xAxis.w ,
-                    h    : y,
+                    h    : _graphsH,
                     xAxis:{
                         data : this._yAxis.layoutData
                     },

@@ -15,6 +15,7 @@ define(
             this._line     = null;
             this._nodes    = null;
             this._tip      = null;
+            this._isShow   = false;
             this.enabled   = true;
             this.init(opt , data , tipDomContainer);
         };
@@ -39,11 +40,12 @@ define(
     
                 this.sprite.addChild(this._tip.sprite);
                 this._tip.show(e);
+
+                this._isShow = true;
         
             },
             move : function(e){
                 this._resetStatus(e);
-    
                 this._tip.move(e);
             },
             hide : function(e){
@@ -51,6 +53,8 @@ define(
                 this._line  = null;
                 this._nodes = null;
                 this._tip.hide(e);
+
+                this._isShow = false;
             },
             _getTipsPoint : function(e){
                 return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
@@ -75,9 +79,9 @@ define(
                     yStart  : e.target.context.height,
                     xEnd    : 0,
                     yEnd    : 0,
-                    lineType    : "dashed",
+                    //lineType    : "dashed",
                     lineWidth   : 1,
-                    strokeStyle : "#333333" 
+                    strokeStyle : "#cccccc" 
                 } , this.line);
                 if(this.line.enabled){
                     this._line = new Line({
@@ -87,7 +91,6 @@ define(
                     this.sprite.addChild( this._line );
                 }
             },
-    
     
     
             /**
@@ -111,7 +114,7 @@ define(
                     });
                     csp.addChild( new Circle({
                         context : {
-                            r : node.r + 2 ,
+                            r : node.r + 2 + 2 ,
                             fillStyle   : "white",//node.fillStyle,
                             strokeStyle : node.strokeStyle,
                             lineWidth   : node.lineWidth
@@ -120,7 +123,7 @@ define(
 
                     csp.addChild( new Circle({
                         context : {
-                            r : node.r,
+                            r : node.r + 1,
                             fillStyle   : node.strokeStyle
                         }
                     }) );
@@ -131,6 +134,10 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
+                if( this._nodes.children.length != e.tipsInfo.nodesInfoList.length ){
+                    this._nodes.removeAllChildren();
+                    this._initNodes( e , tipsPoint );
+                }
                 this._nodes.context.x = parseInt(tipsPoint.x);
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;

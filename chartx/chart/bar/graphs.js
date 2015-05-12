@@ -4,9 +4,10 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip"
+        "chartx/components/tips/tip",
+        "chartx/utils/tools"
     ],
-    function(Canvax , Rect , Tween , Tip ){
+    function(Canvax , Rect , Tween , Tip, Tools ){
  
         var Graphs = function( opt , tips , domContainer , dataFrame ){
             this.dataFrame = dataFrame;
@@ -18,16 +19,24 @@ define(
                 y : 0
             }
     
-            this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
     
             this.bar = {
                 width  : 12,
                 radius : 2
             }
+            this.text = {
+                    enabled   : 0,
+                    fillStyle : '#999999',
+                    fontSize  : 12,
+                    textAlign : "left",
+                    format    : null
+            }
 
             this.eventEnabled = true;
     
             this.sprite = null ;
+            this.txtsSp = null ;
     
             this.yDataSectionLen = 0; //y轴方向有多少个section
     
@@ -41,6 +50,7 @@ define(
         Graphs.prototype = {
             init : function( ){
                 this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
+                this.txtsSp = new Canvax.Display.Sprite({ id : "txtsSp" , context:{visible:false}});
             },
             setX:function($n){
                 this.sprite.context.x = $n
@@ -75,7 +85,7 @@ define(
 
             },
             draw : function(data , opt){
-            
+                // debugger
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -92,7 +102,6 @@ define(
                     var spriteHover = new Canvax.Display.Sprite({ id : "barGroupHover"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var barData = data[ii][i];
-
                         var fillStyle = this._getColor( this.bar.fillStyle , i , ii , barData.value );
                         var barH      = parseInt(Math.abs(barData.y));
                         
@@ -155,13 +164,36 @@ define(
                                 me.sprite.removeChild(me._tip.sprite);
                             }); 
                         }
-    
+
+                        //文字
+                        var content = barData.value
+                        if( _.isFunction(this.text.format) ){
+                            content = this.text.format( content );
+                        }else{
+                            content = Tools.numAddSymbol(content);
+                        }
+
+                        var txt = new Canvax.Display.Text( content ,
+                           {
+                            context : {
+                                x  : barData.x,
+                                y  : rectCxt.y,
+                                fillStyle    : this.text.fillStyle,
+                                fontSize     : this.text.fontSize,
+                                textAlign    : this.text.textAlign
+                           }
+                        });
+                        txt.context.x = barData.x - txt.getTextWidth() / 2 , txt.context.y = rectCxt.y - txt.getTextHeight()
+                        this.txtsSp.addChild(txt)
+
                         sprite.addChild( rect );
                         spriteHover.addChild( hoverRect );
                     }
+
                     this.sprite.addChild( sprite );
                     this.sprite.addChild( spriteHover );
                 }
+                this.sprite.addChild(this.txtsSp)
     
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
@@ -178,6 +210,7 @@ define(
                    .onUpdate( function (  ) {
                        self.sprite.context.scaleY = this.h / self.h;
                    } ).onComplete( function(){
+                       self._growEnd();
                        cancelAnimationFrame( timer );
                    }).start();
                    animate();
@@ -187,6 +220,11 @@ define(
                     Tween.update();
                 };
                 growAnima();
+            },
+            _growEnd : function(){
+                if(this.text.enabled){
+                    this.txtsSp.context.visible = true
+                }
             },
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {
