@@ -60,7 +60,7 @@ title:  chart demos
 
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/line/corner.gif">
+        <img src="./assets/chart/line/corner.png">
         </dt>
         <dd>
             <h5>
