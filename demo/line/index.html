@@ -36,13 +36,13 @@
 var data= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , 101 , 20 , 33    ],
-    [ 2      , 0  , 51 , 26    ],
-    [ 3      , 0  , 45 , 43    ],
+    [ 2      , 0   , 51 , 26    ],
+    [ 3      , 0   , 45 , 43    ],
     [ 4      , 58  , 35 , 31    ],
     [ 5      , 79  , 73 , 71    ],
     [ 6      , 88  , 54 , 39    ],
     [ 7      , 56  , 68 , 65    ],
-    [ 8      , 0  , 83 , 51    ]
+    [ 8      , 0   , 83 , 51    ]
 ];
 //chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
@@ -72,18 +72,6 @@ var chartx = Chartx.create.line("canvasTest" , data , options);
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
-            <!--
-            <form name="form" onsubmit="return false;">
-                <button type="button" class="btn btn-default " onclick="del()">
-                    删除uv线
-                </button>
-
-                <button type="button" class="btn btn-default " onclick="add()">
-                    添加uv线
-                </button>
-
-            </form>
-            -->
 
             </div>
         </td>

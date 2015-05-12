@@ -243,19 +243,20 @@ define(
                 
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)
-                if( self.node.enabled && !!self.line.lineWidth ){                     //拐角的圆点
+                if( (self.node.enabled || list.length==1) && !!self.line.lineWidth ){                     //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({ id : "circles"});
                     this.sprite.addChild(this._circles);
                     for(var a = 0,al = self.data.length; a < al; a++){
-                        self._nodeInd = a;
+                        self._nodeInd   = a;
+                        var strokeStyle = self._getProp( self.node.strokeStyle ) || self._getColor( self.line.strokeStyle);
                         var circle = new Circle({
                             id : "circle_" + a,
                             context : {
                                 x           : self._currPointList[a][0],
                                 y           : self._currPointList[a][1],
                                 r           : self._getProp( self.node.r ),
-                                fillStyle   : self._getProp( self.node.fillStyle ) || "#ffffff",
-                                strokeStyle : self._getProp( self.node.strokeStyle ) || self._getColor( self.line.strokeStyle),
+                                fillStyle   : list.length == 1 ? strokeStyle : self._getProp( self.node.fillStyle ) || "#ffffff",
+                                strokeStyle : strokeStyle,
                                 lineWidth   : self._getProp( self.node.lineWidth ) || 2
                             }
                         });
