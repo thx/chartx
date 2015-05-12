@@ -1,30 +1,42 @@
-<p>Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染引擎Canvax（canvax的基于心跳包的主动渲染机制在图表这样并不需要高帧率的场景中有着非常良好的性能）。</p>
-<p>能自动适配AMD,CMD,KISSY的模块加载环境。</p>
-<p>能自动适配到ie6，7，8等低端浏览器（采用flashcanvas来实现兼容）。</p>
-<p>能适配PC,Mobile终端。</p>
-<h2 id="chartx的使用">Chartx的使用</h2><p>请确认在引入Chart js库文件的时候页面已经有AMD(requires),CMD(seajs),KISSY等任一模块加载环境。</p>
-<h3 id="在页面引入chartx库文件">在页面引入Chartx库文件</h3><p>daily环境为 <code><a href="http://g-assets.daily.taobao.net/thx/charts/chartx/index.js">http://g-assets.daily.taobao.net/thx/charts/chartx/index.js</a></code></p>
-<p>cdn环境为   <code><a href="http://g.tbcdn.cn/thx/charts/版本号/chartx/index.js">http://g.tbcdn.cn/thx/charts/版本号/chartx/index.js</a></code></p>
-<p>当前最新CDN版本号为1.6.8</p>
-<h3 id="创建图表">创建图表</h3><p>在全局图表对象Chartx下面有一个create对象，上面挂载着全部的图表类型
+<h2 id="xchart使用方式">xChart使用方式</h2><h3 id="1，在页面引入xchart的库文件">1，在页面引入xChart的库文件</h3><p>daily环境为 <script><a href="http://g-assets.daily.taobao.net/thx/charts/chartx/index.js">http://g-assets.daily.taobao.net/thx/charts/chartx/index.js</a></scirpt></p>
+<p>cdn环境为   <script><a href="http://g.tbcdn.cn/thx/charts//chartx/index.js">http://g.tbcdn.cn/thx/charts//chartx/index.js</a></scirpt></p>
+<p>当前最新CDN版本号为1.6.9</p>
+<h3 id="2，创建图表">2，创建图表</h3><p>在全局图表对象Chartx下面有一个create对象，上面挂载着全部的图表类型
 目前有[&#39;bar&#39; , &#39;force&#39; , &#39;line&#39; , &#39;map&#39; , &#39;pie&#39; , &#39;planet&#39; , &#39;progress&#39; , &#39;radar&#39; , &#39;scat&#39; , &#39;tree&#39;]
-该类型方法需要三个参数。</p>
-<ul>
-<li>el      --&gt; DOM树中对应的节点，可以是id 也可以是kissy.all(&quot;#id&quot;)或者jquery(&quot;#id&quot;)对象 </li>
-<li>data    --&gt; 绘制图表的数据，无数据则传入空数组[]                                      </li>
-<li>options --&gt; 绘制图表的配置                                                         </li>
-</ul>
-<p>创建一个line chart</p>
-<div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options)</code></pre></div><p>如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作</p>
-<div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options).then(<span class="function"><span class="keyword">function</span><span class="params">( chart )</span>{</span>
+该类型方法需要三个参数，</p>
+<table>
+<thead>
+<tr>
+<th>参数位置</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>el   --&gt; DOM树中对应的节点，可以是id 也可以是kissy.all(&quot;#id&quot;)或者jquery(&quot;#id&quot;)对象</td>
+</tr>
+<tr>
+<td>2</td>
+<td>data --&gt; 绘制图表的数据，无数据则传入空数组[]</td>
+</tr>
+<tr>
+<td>3</td>
+<td>options --&gt; 绘制图表的配置</td>
+</tr>
+</tbody>
+</table>
+<h5 id="创建一个line-chart">创建一个line chart</h5><div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options)</code></pre></div><h5 id="如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作">如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作</h5><div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options).then(<span class="function"><span class="keyword">function</span><span class="params">( chart )</span>{</span>
     chart.on(<span class="string">"eventType"</span> , <span class="function"><span class="keyword">function</span><span class="params">(e)</span>{</span>
         <span class="keyword">do</span> something ......
     });
 });</code></pre></div><p>TODO：promise then 回调函数的执行在 chart的 绘制之前。。。</p>
-<h2 id="在magix环境中使用chartx">在magix环境中使用chartx</h2><h3 id="扩展插件">扩展插件</h3><p>在magix的OPOA项目环境中，我们提供magix扩展来在业务中方便的使用chartx。</p>
-<p>首先肯定是要先在页面中引入Chartx的js库文件，然后在项目的<code>ini.js</code>文件中找到<code>exts</code>配置，加入<code>chartx/magixext</code>。</p>
-<h3 id="创建图表">创建图表</h3><p>加载了<code>chartx/magixext</code>后，magix会在view中扩展一个专门用来创建图表的接口函数<code>createChart</code>，现在你可以很方便的在每个view中创建图表了。在view中创建的图表在view自身销毁的时候也会自行销毁，不需要使用者手动去管理。</p>
-<div class="highlight"><pre><code class="javascript">view.createChart( chartType , el , data , options )</code></pre></div><p>TODO：view.createChart 第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应</p>
+<h3 id="3，在magix环境的项目中使用chartx">3，在magix环境的项目中使用chartx</h3><p>在magix的OPOA项目环境中，我们提供magix扩展来在业务中方便的使用chartx。</p>
+<p>首先，请在项目的ini.js文件，找到<code>exts</code>配置，加入<code>chartx/magixext</code>。</p>
+<p>这个时候我们可以在view中很方便的使用<code>createChart</code>方法来创建图表了。</p>
+<div class="highlight"><pre><code class="javascript">view.createChart( chartType , el , data , options ).then(<span class="function"><span class="keyword">function</span><span class="params">(chart)</span>{</span>
+    chart.draw()
+});</code></pre></div><p>view.createChart 唯一的不一样就是第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应</p>
 <p>如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作</p>
 <div class="highlight"><pre><code class="javascript">view.createChart( chartType , el , data , options).then(<span class="function"><span class="keyword">function</span><span class="params">( chart )</span>{</span>
     chart.on(<span class="string">"eventType"</span> , <span class="function"><span class="keyword">function</span><span class="params">(e)</span>{</span>
@@ -46,43 +58,4 @@
             mapType : <span class="string">"world"</span>
         });
     }
-});</code></pre></div><h2 id="chartx的数据格式">Chartx的数据格式</h2><p>在Chartx中，所有的图表都采用如下同一种数据格式，这样的数据格式并不具有任何图表相关的意义，和后台约定数据格式的时候能做到完全的解耦，不需要特定的为某图表来设计json格式。</p>
-<p>然后每个图表都会有自己的dataFormat函数来将其转换为自己需要的数据。</p>
-<p>第一行是表头。</p>
-<div class="highlight"><pre><code class="javascript"><span class="keyword">var</span> data= [
-    [<span class="string">"xfield"</span>,<span class="string">"uv"</span> ,<span class="string">"pv"</span>,<span class="string">"click"</span>],
-    [ <span class="number">1</span>      , <span class="number">101</span> , <span class="number">20</span> , <span class="number">33</span>    ],
-    [ <span class="number">2</span>      , <span class="number">67</span>  , <span class="number">51</span> , <span class="number">26</span>    ],
-    [ <span class="number">3</span>      , <span class="number">76</span>  , <span class="number">45</span> , <span class="number">43</span>    ],
-    [ <span class="number">4</span>      , <span class="number">58</span>  , <span class="number">35</span> , <span class="number">31</span>    ],
-    [ <span class="number">5</span>      , <span class="number">79</span>  , <span class="number">73</span> , <span class="number">71</span>    ],
-    [ <span class="number">6</span>      , <span class="number">88</span>  , <span class="number">54</span> , <span class="number">39</span>    ],
-    [ <span class="number">7</span>      , <span class="number">56</span>  , <span class="number">68</span> , <span class="number">65</span>    ],
-    [ <span class="number">8</span>      , <span class="number">99</span>  , <span class="number">83</span> , <span class="number">51</span>    ]
-];</code></pre></div><p>比如用上面的数据来创建折线图。</p>
-<div class="highlight"><pre><code class="javascript"><span class="comment">//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段</span>
-<span class="keyword">var</span> options = {
-    yAxis : {
-        field : [<span class="string">"uv"</span> , <span class="string">"pv"</span>]
-    },
-    xAxis : {
-        field : <span class="string">"xfield"</span>
-    }
-};
-<span class="comment">//Chartx.create.line开始初始化chart实例</span>
-Chartx.create.line(<span class="string">"canvasTest"</span> , data , options);</code></pre></div><p>在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame</p>
-<div class="highlight"><pre><code class="javascript">chart.dataFrame  = {    <span class="comment">//数据集合对象</span>
-    org        : [],   <span class="comment">//最原始的数据 , 也就是传入的data </span>
-    data       : [],   <span class="comment">//最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}</span>
-    yAxis      : {     <span class="comment">//y轴</span>
-        field  : [],   <span class="comment">//字段集合 对应this.data</span>
-        org    : []    <span class="comment">//二维 原始数据[[100,200],[1000,2000]]</span>
-    },
-    xAxis      : {     <span class="comment">//x轴</span>
-        field  : [],   <span class="comment">//字段 对应this.data</span>
-        org    : []    <span class="comment">//原始数据['星期一','星期二']</span>
-    }
-}</code></pre></div><h2 id="chartx的配置">Chartx的配置</h2><p>在Chartx的世界里，我们的图表的适配到各种不一样的风格和交互行为都从配置中得到体现。</p>
-<p>具体的配置详见每个图表的配置文档，文档开发中... </p>
-<p>我们所有的chart实例上不再拥有专门用来存放配置的config或者options对象，我们通过深度merge来把配置直接挂载在chart实例上。</p>
-<p>而图表中<code>_</code>开头的变量，都是属于内部变量，大部分由内部计算的来，不建议在options参数中配置。</p>
+});</code></pre></div>

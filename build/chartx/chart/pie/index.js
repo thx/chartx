@@ -23,7 +23,7 @@
 
                 },
                 draw: function () {
-
+                    console.log("pie draw");
                     this.stageBg = new Canvax.Display.Sprite({
                         id: 'bg'
                     });

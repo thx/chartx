@@ -159,13 +159,13 @@ define(
                         content = Tools.numAddSymbol(content);
                     }
                     var yNode = new Canvax.Display.Sprite({ id : "yNode"+a });
-
+                     
                     //文字
                     var txt = new Canvax.Display.Text( content ,
                        {
                         context : {
                             x  : x,
-                            y  : y,
+                            y  : y + ( a == 0 ? -3 : 0 ),
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
                             textAlign    : self.text.textAlign,

@@ -26,6 +26,15 @@ define(
                 radius : 2
             }
 
+            this.text = {
+                    enabled   : 0,
+                    fillStyle : '#999999',
+                    fontSize  : 12,
+                    textAlign : "left",
+                    format    : null
+            }
+            
+
             this.eventEnabled = true;
     
             this.sprite = null ;

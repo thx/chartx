@@ -137,7 +137,7 @@ define(
                         self.yAxisSp.addChild(line);
                     }
                 }
-debugger
+
                 //原点开始的y轴线
                 var line = new Line({
                     context : {
