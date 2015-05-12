@@ -1227,11 +1227,16 @@ h4:hover .anchor-link {
 }
 .chart {
     width:200px;
+    height:200px;
     display:inline-block;
     *display:inline;
     zoom:1;
     float:left;
     margin-bottom:20px;
+    cursor:pointer;
+}
+.chart:hover {
+    background:#fafafa;
 }
 .chart dt , .chart dd {
     padding-right:10px;
