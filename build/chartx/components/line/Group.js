@@ -158,9 +158,32 @@ define(
                 } );
                 return obj;
             },
+            _filterEmptyValue : function( list ){
+                //从左边开始 删除 value为非number的item
+                for( var i=0,l=list.length ; i<l ; i++ ){
+                    if( !_.isNumber(list[i].value) ){
+                        list.shift();
+                        l --;
+                        i --;
+                    } else {
+                        break;
+                    }
+                }
+
+                //从右边开始删除 value为非number的item
+                for( var i=list.length-1 ; i > 0 ; i-- ){
+                    if( !_.isNumber(list[i].value) ){
+                        list.pop();
+                    } else {
+                        break;
+                    }
+                }
+            },
             _widget:function(){
                 var self  = this;
-   
+
+                self._filterEmptyValue( self.data );
+                
                 var list = [];
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var o = self.data[a];
@@ -246,7 +269,7 @@ define(
                 if( (self.node.enabled || list.length==1) && !!self.line.lineWidth ){                     //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({ id : "circles"});
                     this.sprite.addChild(this._circles);
-                    for(var a = 0,al = self.data.length; a < al; a++){
+                    for(var a = 0,al = list.length; a < al; a++){
                         self._nodeInd   = a;
                         var strokeStyle = self._getProp( self.node.strokeStyle ) || self._getColor( self.line.strokeStyle);
                         var circle = new Circle({
@@ -263,9 +286,9 @@ define(
 
 
                         if( self.node.corner ){           //拐角才有节点
-                            var value = self.data[a].value;
-                            var pre   = self.data[a - 1];
-                            var next  = self.data[a + 1];
+                            var value = list[a].value;
+                            var pre   = list[a - 1];
+                            var next  = list[a + 1];
                             if(pre && next){
                                 if(value == pre.value && value == next.value){
                                     circle.context.visible = false;

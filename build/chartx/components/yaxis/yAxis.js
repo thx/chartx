@@ -104,7 +104,7 @@ define(
                 
                 var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
                 this.dataOrg     = data.org;
-                
+               
                 if( this.dataSection.length == 0 ){
                     //if( !this.enabled ){
                     //    arr.unshift( 0 );
