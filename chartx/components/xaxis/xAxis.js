@@ -24,7 +24,6 @@ define(
             }
     
             this.text = {
-                    dis       : 0,                         //间隔(间隔几个文本展现)
                     fillStyle : '#999999',
                     fontSize  : 13,
                     rotation  : 0,
@@ -279,18 +278,24 @@ define(
                         fillStyle   : this.text.fillStyle,
                         fontSize    : this.text.fontSize
                     }
-                })
+                });
 
-                this._textMaxWidth = txt.getTextWidth();
+                if(this.text.rotation){
+                    this._textMaxWidth = txt.getTextHeight() * 2;
+                } else {
+                    this._textMaxWidth = txt.getTextWidth();
+                }
 
                 return this._textMaxWidth;
             },
             _trimLayoutData:function(){
+                /*
                 if(this.text.rotation){
                     //如果 有 选择的话，就不需要过滤x数据，直接全部显示了
                     this.layoutData = this.data;
                     return;
                 }
+                */
                 var tmp = []
                 var arr = this.data
     
