@@ -32,29 +32,40 @@
         <td id="td-vl">
 <form><textarea id="code" name="code">
 var data = [
-    [ "area"   , "click" ],
-    [ "广东省" , 111 ],
-    [ "浙江省" , 100 ],
-    [ "湖南省" , 80 ],
-    [ "湖北省" , 9 ]
+    [ "area"   , "click" , "color"],
+    [ "广东省" , 111     , "#3871BF"],
+    [ "浙江省" , 100     , "#3871BF"],
+    [ "湖南省" , 80      , "#5182C7"],
+    [ "湖北省" , 9       , "#5182C7"],
+    [ "山西省" , 1       , "#6B95CF"],
+    [ "山东省" , 33      , "#6B95CF"],
+    [ "上海"   , 1000    , "#88AAD9"],
+    [ "江苏省" , 200     , "#88AAD9"],
+    [ "福建省" , 300     , "#A6BFE2"],
+    [ "江西省" , 500     , "#BBCFED"],
+    [ "广西"   , 10000   , null ]
 ];
+
 
 var options = {
     mapName : "china", //默认便是中国地图
     areaField : "area", //可选，默认为第一个字段
     area : {
+        /*
+        * @params arg  至少包含一个area属性
+        * 如果该area在data中。那么还会包含有data , dataIndex 连个属性
+        * 其中 data为一个{ area : "湖南省" , click:80 , color : "#5182C7" } 对象
+        * dataIndex 就是 改dataitem 在 整个data中的索引,比如湖南，dataIndex==2
+        */
         fillStyle : function( arg ){
-           if( arg.data ){
-               //点击量超过100的就显示为蓝色
-               if( arg.data[1] > 100 ){
-                   return "#135EBF"
-               }
-           }
-           if( arg.dataIndex != undefined){
-               if( arg.dataIndex > 0 ){
-                   return "red"
-               }
-           }
+            var c;
+            if( arg.data ){
+                c = arg.data.color;
+                if( arg.data.click >= 10000 ){
+                    c = "red"; //点击超过10000就显示红色，表示热点地区
+                }
+            }
+            return c;
         }
     },
     tips : {
@@ -90,5 +101,3 @@ Chartx.create.map("canvasTest" , data , options)
     
 </body> 
 </html>
-
-
