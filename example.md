@@ -234,6 +234,52 @@ title:  chart demos
 </div>
 
 
+## 地图
+
+<div class="charts">
+    <a target="_blank" href="./demo/map/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/map/index.png">
+        </dt>
+        <dd>
+            <h5>
+            中国地图
+            </h5>
+            <span>
+            全部默认配置
+            </span>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/map/provinces_linkage.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/map/provinces_linkage.gif">
+        </dt>
+        <dd>
+            <h5>
+            中国地图省市联动
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/map/world.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/map/world.png">
+        </dt>
+        <dd>
+            <h5>
+            世界地图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+</div>
+
 ## 饼图
 
 ## 雷达图
@@ -241,8 +287,6 @@ title:  chart demos
 ## 散点图
 
 ## 树状图
-
-## 地图
 
 ## 力导向布局图
 
