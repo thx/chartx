@@ -304,8 +304,8 @@ define(
                 
                 var fillPath = _.clone( bline.context.pointList );
                 fillPath.push( 
-                    [ fillPath[ fillPath.length -1 ][0] , -1 ],
-                    [ fillPath[0][0] , -1 ],
+                    [ fillPath[ fillPath.length -1 ][0] , 0 ],
+                    [ fillPath[0][0] , 0 ],
                     [ fillPath[0][0] , fillPath[0][1] ]
                 );
                 
