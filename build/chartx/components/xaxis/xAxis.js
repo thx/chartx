@@ -294,21 +294,24 @@ define(
                 var mw  = this._textMaxWidth;
     
                 if( !!this.text.rotation ){
-                    mw  = this._textMaxHeight * 2;
-                }
+                    mw  = this._textMaxHeight * 1.5;
+                };
 
                 //总共能多少像素展现
-                var n = Math.min( Math.floor( this.w / mw ) , arr.length ); //能展现几个
-                var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                  //array中展现间隔
+                var n = Math.min( Math.floor( this.w / mw ) , arr.length - 1 ); //能展现几个
 
-                //存放展现的数据
-                for( var a = 0 ; a < n ; a++ ){
-                    var obj = arr[a + dis*a];
-                    obj && tmp.push( obj );
-                }
-     
-                this.layoutData    = tmp;
-                
+                if( n >= arr.length - 1 ){
+                    this.layoutData = arr;
+                } else {
+                    //需要做间隔
+                    var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );  //array中展现间隔
+                    //存放展现的数据
+                    for( var a = 0 ; a < n ; a++ ){
+                        var obj = arr[a + dis*a];
+                        obj && tmp.push( obj );
+                    };
+                    this.layoutData    = tmp;
+                }; 
             }
         };
     
