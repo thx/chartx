@@ -202,7 +202,7 @@ title:  chart demos
     <a target="_blank" href="./demo/bar/single.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/bar/sinale.png">
+        <img src="./assets/chart/bar/single.png">
         </dt>
         <dd>
             <h5>

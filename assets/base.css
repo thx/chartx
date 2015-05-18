@@ -1254,3 +1254,7 @@ h4:hover .anchor-link {
 h2 {
     border-bottom:1px solid #d3d5d8!important;
 }
+
+.chart img {
+    width:190px;
+}
