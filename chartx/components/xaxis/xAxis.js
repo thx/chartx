@@ -294,7 +294,7 @@ define(
                 var mw  = this._textMaxWidth;
     
                 if( !!this.text.rotation ){
-                    mw  = this._textMaxHeight;
+                    mw  = this._textMaxHeight * 2;
                 }
 
                 //总共能多少像素展现
