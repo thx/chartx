@@ -25,7 +25,7 @@ define(
     
             this.text = {
                     fillStyle : '#999999',
-                    fontSize  : 13,
+                    fontSize  : 12,
                     rotation  : 0,
                     format    : null,
                     textAlign : null
@@ -258,9 +258,17 @@ define(
 
                 if(this.sprite.getNumChildren()==0)
                     return;
+        
     			var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
-                if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > this.w)) {
-    				popText.context.x = parseInt(this.w - popText.getTextWidth())
+                if (popText) {
+                    if( popText.context.textAlign == "center" &&
+                        popText.context.x + popText.context.width / 2 > this.w ){
+                        popText.context.x = this.w - popText.context.width / 2
+                    };
+                    if( popText.context.textAlign == "left" &&
+                        popText.context.x + popText.context.width > this.w ){
+                        popText.context.x = this.w - popText.context.width
+                    };
     			}
             },
             _getTextMaxWidth : function(){
