@@ -170,12 +170,12 @@ define(
                     
                     if( !!this.text.rotation ){
                         if( this.text.rotation % 90 == 0 ){
-                            this.h        = this._textMaxWidth;
-                            this.leftDisX = txt.getTextHeight() / 2;
+                            this.h        = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
                         } else {
-                            this.h        = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                            this.h        += txt.getTextHeight();
-                            this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * txt.getTextWidth() + 8;
+                            var sinR      = Math.sin(Math.abs( this.text.rotation ) * Math.PI / 180);
+                            var cosR      = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180);
+                            this.h        = sinR * this._textMaxWidth + txt.getTextHeight() + 5; 
+                            this.leftDisX = cosR * txt.getTextWidth() + 8;
                         }
                     } else {
                         this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
@@ -266,6 +266,7 @@ define(
             _getTextMaxWidth : function(){
                 var arr = this.dataSection;
                 var maxLenText   = arr[0];
+            
                 for( var a=0,l=arr.length ; a < l ; a++ ){
                     if( arr[a].length > maxLenText.length ){
                         maxLenText = arr[a];
@@ -280,27 +281,24 @@ define(
                     }
                 });
 
-                if(this.text.rotation){
-                    this._textMaxWidth = txt.getTextHeight() * 2;
-                } else {
-                    this._textMaxWidth = txt.getTextWidth();
-                }
+                this._textMaxWidth = txt.getTextWidth();
+                this._textMaxHeight = txt.getTextHeight();
 
                 return this._textMaxWidth;
             },
             _trimLayoutData:function(){
-                /*
-                if(this.text.rotation){
-                    //如果 有 选择的话，就不需要过滤x数据，直接全部显示了
-                    this.layoutData = this.data;
-                    return;
-                }
-                */
+
                 var tmp = []
                 var arr = this.data
+
+                var mw  = this._textMaxWidth;
     
+                if( !!this.text.rotation ){
+                    mw  = this._textMaxHeight;
+                }
+
                 //总共能多少像素展现
-                var n = Math.min( Math.floor( this.w / this._textMaxWidth ) , arr.length ); //能展现几个
+                var n = Math.min( Math.floor( this.w / mw ) , arr.length ); //能展现几个
                 var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                  //array中展现间隔
 
                 //存放展现的数据

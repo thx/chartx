@@ -14,7 +14,7 @@ define(
             this.line = {
                     enabled : 1,                           //是否有line
                     width   : 6,
-                    height  : 3,
+                    lineWidth  : 3,
                     strokeStyle   : '#BEBEBE'
             }
             this.text = {
@@ -177,7 +177,7 @@ define(
                                 y           : y,
                                 xEnd        : self.line.width,
                                 yEnd        : 0,
-                                lineWidth   : self.line.height,
+                                lineWidth   : self.line.lineWidth,
                                 strokeStyle : self.line.strokeStyle
                             }
                         });                 
