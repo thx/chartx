@@ -216,7 +216,7 @@
                     if (opt.animation) {
                         self.grow();
                     }
-                    if (opt.complete) {
+                    if (opt.complete) {                        
                         opt.complete.call(self);
                     }
                 },
@@ -666,9 +666,10 @@
                                     }
                                 });
 
-                                self.sprite.addChild(sector);
+                                self.sprite.addChild(sector);                                
                                 moreSecData = {
                                     name: data[i].name,
+                                    value:data[i].y,
                                     sector: sector,
                                     context: sector.context,
                                     originx: sector.context.x,
