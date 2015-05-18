@@ -57,6 +57,7 @@ define(
                      xAxis : {field : [ this.areaField ]},
                      yAxis : {field : this.tips.field }
                 });
+                
                 return this.dataFrame;
             },
             draw : function(){
@@ -280,14 +281,24 @@ define(
             },
 
 
+
+            /*返回{area : "湖南" , click : 222} 这样的格式*/
+            _createDataObj  : function( arr , titles ){
+                var obj = {};
+                _.each( titles , function( t , i ){
+                    obj[t] = arr[i]
+                } );
+                return obj;
+            },
             _getDataForArea : function( area ){
                 var data = {
                     area : area
                 };
                 var me   = this;
+                
                 _.each( this.dataFrame.xAxis.org[ 0 ] , function( areaData , i ){
                     if( areaData.indexOf( area.name ) >= 0 || area.name.indexOf( areaData ) >= 0 ){
-                        data.data      = me.dataFrame.org[ i+1 ];
+                        data.data      = me._createDataObj(me.dataFrame.org[ i+1 ] , me.dataFrame.org[ 0 ]);
                         data.dataIndex = i;
                     }
                 } );
@@ -432,10 +443,13 @@ define(
 
                 if( areaData.data ){
                     _.each( this.tips.field , function( field , i ){
-                        tipsInfo.nodesInfoList.push({
-                            field  : field ,
-                            value  : areaData.data[ _.indexOf( me.dataFrame.org[0] , field ) ]
-                        });
+                        var val = areaData.data[ field ];
+                        if( val !== undefined && val !== null ){
+                            tipsInfo.nodesInfoList.push({
+                                field  : field ,
+                                value  : areaData.data[ field ]
+                            });
+                        }
                     } );
                 }
 
