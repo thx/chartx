@@ -123,6 +123,117 @@ title:  chart demos
 
 ## 柱状图
 
+<div class="charts">
+    <a target="_blank" href="./demo/bar/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/index.png">
+        </dt>
+        <dd>
+            <h5>
+            基础柱状图
+            </h5>
+            <span>
+            全部默认配置
+            </span>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/bar/horizontal.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/horizontal.png">
+        </dt>
+        <dd>
+            <h5>
+            横向柱状图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/bar/graphs_info.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/graphs_info.png">
+        </dt>
+        <dd>
+            <h5>
+            柱形图上面带描述
+            </h5>
+            <span>
+            y轴的矩形柱上附带对应的数据信息
+            </span>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/bar/horizontal_graphs_info.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/horizontal_graphs_info.png">
+        </dt>
+        <dd>
+            <h5>
+            横向柱形图上面带描述
+            </h5>
+            <span>
+            横向柱形图x轴方向的矩形柱上附带对应的数据信息
+            </span>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/bar/custom_xyAxis_datasection.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/custom_xyAxis_datasection.png">
+        </dt>
+        <dd>
+            <h5>
+            自定义柱状图的xAxis ，yAxis轴信息
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+
+    <a target="_blank" href="./demo/bar/single.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/sinale.png">
+        </dt>
+        <dd>
+            <h5>
+            简单样式的柱状图
+            </h5>
+            <span>
+            没有显示xAxis,yAxis,背景，只有柱状图形区域的简单柱状图
+            </span>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/bar/xAxis_rotate.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/xAxis_rotate.png">
+        </dt>
+        <dd>
+            <h5>
+            xAxis旋转
+            </h5>
+            <span>
+            和折线图一样，当xAxis文案较长，比如2015-05-18这样，建议采用xAxis旋转增加可读性
+            </span>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
+
 ## 饼图
 
 ## 雷达图

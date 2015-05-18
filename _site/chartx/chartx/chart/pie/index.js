@@ -4,22 +4,22 @@
         'chartx/chart/index',
         'chartx/chart/pie/pie'
         ],
-        function (Chart, Pie ) {
+        function (Chart, Pie) {
             /*
-             *@node chart在dom里的目标容器节点。
-             */
+            *@node chart在dom里的目标容器节点。
+            */
             var Canvax = Chart.Canvax;
 
             return Chart.extend({
-                init: function (node , data , opts) {
+                init: function (node, data, opts) {
                     this.config = {
                         mode: 1,
                         event: {
                             enabled: 1
                         }
                     };
-                    _.deepExtend( this , opts );
-                    this.dataFrame = this._initData( data , this );
+                    _.deepExtend(this, opts);
+                    this.dataFrame = this._initData(data, this);
 
                 },
                 draw: function () {
@@ -61,6 +61,7 @@
                                     index: item.index,
                                     color: item.color,
                                     r: item.r,
+                                    value: item.value,
                                     percentage: item.percentage
                                 });
                             }
@@ -101,12 +102,12 @@
                 },
                 clear: function () {
                     this.stageBg.removeAllChildren()
-                        this.core.removeAllChildren()
-                        this.stageTip.removeAllChildren();
+                    this.core.removeAllChildren()
+                    this.stageTip.removeAllChildren();
                 },
                 reset: function (data, opt) {
                     this.clear()
-                        this.width = parseInt(this.element.width());
+                    this.width = parseInt(this.element.width());
                     this.height = parseInt(this.element.height());
                     this.draw(data, opt)
                 },
@@ -114,10 +115,10 @@
                     var self = this;
                     var w = self.width;
                     var h = self.height;
-                    
+
                     var r = Math.min(w, h) * 2 / 3 / 2;
-                    if( !self.dataLabel.enabled ){
-                        r = Math.min( w , h ) / 2 ;
+                    if (!self.dataLabel.enabled) {
+                        r = Math.min(w, h) / 2;
                         //要预留clickMoveDis位置来hover sector 的时候外扩
                         r -= r / 11;
                     }
@@ -139,7 +140,7 @@
                         //dataLabel: self.dataLabel, 
                         allowPointSelect: self.allowPointSelect || true,
                         animation: self.animation,
-                        colors:self.colors,
+                        colors: self.colors,
                         focusCallback: {
                             focus: function (index) {
                                 self.fire('focused');
@@ -150,11 +151,11 @@
                         }
                     };
 
-                    if( self.dataLabel ){
+                    if (self.dataLabel) {
                         self.pie.dataLabel = self.dataLabel;
                     }
 
-                    self._pie = new Pie(self.pie , self.tips , self.canvax.getDomContainer());
+                    self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
                 },
                 _startDraw: function () {
                     this._pie.draw(this);
@@ -162,7 +163,7 @@
                 _drawEnd: function () {
                     this.core.addChild(this._pie.sprite);
                     if (this._tip) this.stageTip.addChild(this._tip.sprite);
-                    this.fire('complete');
+                    this.fire('complete', this.getList());
                 }
             });
         });

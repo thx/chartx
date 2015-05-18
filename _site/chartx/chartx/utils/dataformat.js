@@ -54,9 +54,9 @@ define(
     
                 for(var a = 1, al = arr.length; a < al; a++){
                     for(var b = 0, bl = arr[a].length; b < bl; b++){
-                        if( arr[a][b] ){
+                        //if( arr[a][b] ){
                             total[b].data.push(arr[a][b]);
-                        }
+                        //}
                     }     
                 }
     

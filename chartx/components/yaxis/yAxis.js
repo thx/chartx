@@ -14,7 +14,7 @@ define(
             this.line = {
                     enabled : 1,                           //是否有line
                     width   : 6,
-                    height  : 3,
+                    lineWidth  : 3,
                     strokeStyle   : '#BEBEBE'
             }
             this.text = {
@@ -110,7 +110,7 @@ define(
                 
                 var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
                 this.dataOrg     = data.org;
-                
+               
                 if( this.dataSection.length == 0 ){
                     //if( !this.enabled ){
                     //    arr.unshift( 0 );
@@ -184,7 +184,7 @@ define(
                                 y           : y,
                                 xEnd        : self.line.width,
                                 yEnd        : 0,
-                                lineWidth   : self.line.height,
+                                lineWidth   : self.line.lineWidth,
                                 strokeStyle : self.line.strokeStyle
                             }
                         });                 

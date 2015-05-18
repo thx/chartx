@@ -24,9 +24,8 @@ define(
             }
     
             this.text = {
-                    dis       : 0,                         //间隔(间隔几个文本展现)
                     fillStyle : '#999999',
-                    fontSize  : 13,
+                    fontSize  : 12,
                     rotation  : 0,
                     format    : null,
                     textAlign : null
@@ -171,12 +170,12 @@ define(
                     
                     if( !!this.text.rotation ){
                         if( this.text.rotation % 90 == 0 ){
-                            this.h        = this._textMaxWidth;
-                            this.leftDisX = txt.getTextHeight() / 2;
+                            this.h        = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
                         } else {
-                            this.h        = Math.sin(Math.abs(this.text.rotation ) * Math.PI / 180) * this._textMaxWidth;
-                            this.h        += txt.getTextHeight();
-                            this.leftDisX = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180) * txt.getTextWidth() + 8;
+                            var sinR      = Math.sin(Math.abs( this.text.rotation ) * Math.PI / 180);
+                            var cosR      = Math.cos(Math.abs( this.text.rotation ) * Math.PI / 180);
+                            this.h        = sinR * this._textMaxWidth + txt.getTextHeight() + 5; 
+                            this.leftDisX = cosR * txt.getTextWidth() + 8;
                         }
                     } else {
                         this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
@@ -259,14 +258,23 @@ define(
 
                 if(this.sprite.getNumChildren()==0)
                     return;
+        
     			var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
-                if (popText && (Number(popText.context.x + Number(popText.getTextWidth())) > this.w)) {
-    				popText.context.x = parseInt(this.w - popText.getTextWidth())
+                if (popText) {
+                    if( popText.context.textAlign == "center" &&
+                        popText.context.x + popText.context.width / 2 > this.w ){
+                        popText.context.x = this.w - popText.context.width / 2
+                    };
+                    if( popText.context.textAlign == "left" &&
+                        popText.context.x + popText.context.width > this.w ){
+                        popText.context.x = this.w - popText.context.width
+                    };
     			}
             },
             _getTextMaxWidth : function(){
                 var arr = this.dataSection;
                 var maxLenText   = arr[0];
+            
                 for( var a=0,l=arr.length ; a < l ; a++ ){
                     if( arr[a].length > maxLenText.length ){
                         maxLenText = arr[a];
@@ -279,33 +287,39 @@ define(
                         fillStyle   : this.text.fillStyle,
                         fontSize    : this.text.fontSize
                     }
-                })
+                });
 
                 this._textMaxWidth = txt.getTextWidth();
+                this._textMaxHeight = txt.getTextHeight();
 
                 return this._textMaxWidth;
             },
             _trimLayoutData:function(){
-                if(this.text.rotation){
-                    //如果 有 选择的话，就不需要过滤x数据，直接全部显示了
-                    this.layoutData = this.data;
-                    return;
-                }
+
                 var tmp = []
                 var arr = this.data
-    
-                //总共能多少像素展现
-                var n = Math.min( Math.floor( this.w / this._textMaxWidth ) , arr.length ); //能展现几个
-                var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );                  //array中展现间隔
 
-                //存放展现的数据
-                for( var a = 0 ; a < n ; a++ ){
-                    var obj = arr[a + dis*a];
-                    obj && tmp.push( obj );
-                }
-     
-                this.layoutData    = tmp;
-                
+                var mw  = this._textMaxWidth;
+    
+                if( !!this.text.rotation ){
+                    mw  = this._textMaxHeight * 1.5;
+                };
+
+                //总共能多少像素展现
+                var n = Math.min( Math.floor( this.w / mw ) , arr.length - 1 ); //能展现几个
+
+                if( n >= arr.length - 1 ){
+                    this.layoutData = arr;
+                } else {
+                    //需要做间隔
+                    var dis = Math.max( Math.ceil( arr.length / n - 1 ) , 0 );  //array中展现间隔
+                    //存放展现的数据
+                    for( var a = 0 ; a < n ; a++ ){
+                        var obj = arr[a + dis*a];
+                        obj && tmp.push( obj );
+                    };
+                    this.layoutData    = tmp;
+                }; 
             }
         };
     

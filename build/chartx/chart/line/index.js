@@ -27,12 +27,12 @@ define(
                     on        : null
                 }
     
-                this._xAxis        =  null;
-                this._yAxis        =  null;
-                this._anchor       =  null;
-                this._back         =  null;
-                this._graphs       =  null;
-                this._tips         =  null;
+                this._xAxis   =  null;
+                this._yAxis   =  null;
+                this._anchor  =  null;
+                this._back    =  null;
+                this._graphs  =  null;
+                this._tips    =  null;
 
                 this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
 
@@ -50,9 +50,9 @@ define(
                     id      : 'bg'
                 });
     
-                this.stage.addChild(this.stageBg);
-                this.stage.addChild(this.core);
-                this.stage.addChild(this.stageTip);
+                this.stage.addChild( this.stageBg );
+                this.stage.addChild( this.core );
+                this.stage.addChild( this.stageTip );
 
                 if( this.rotate ) {
                     this._rotate( this.rotate );

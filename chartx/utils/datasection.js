@@ -45,13 +45,12 @@ define(
     
     		if(isNaN(scale)){
     			scale = 1
-    		}
-            // var max = arrayMax(arr);
-            var max = Math.max.apply(null,arr)
+    		};
+
+            var max = _.max(arr);
             var initMax = max
             max *= scale
-            // var min = arrayMin(arr);
-            var min = Math.min.apply(null,arr) 
+            var min = _.min(arr); 
     
             if(min==max){
             	if(max > 0){
