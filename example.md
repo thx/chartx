@@ -339,7 +339,7 @@ title:  chart demos
     <a target="_blank" href="./demo/radar/constom_yAxis.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/radar/constom_yAxis.gif">
+        <img src="./assets/chart/radar/constom_yAxis.png">
         </dt>
         <dd>
             <h5>
