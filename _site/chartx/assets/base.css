@@ -4,7 +4,9 @@
 body {
     background: #e4e6e5;
 }
-
+body .stoc {
+    background:none;
+}
 .justify, .dib-box .justify {
     line-height: inherit;
 }

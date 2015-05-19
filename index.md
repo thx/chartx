@@ -17,7 +17,9 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 请确认在引入Chart js库文件的时候页面已经有AMD(requires),CMD(seajs),KISSY等任一模块加载环境。
 
 
-### 在页面引入Chartx库文件
+### 引入Chartx库文件
+
+请在html页面中引入Chartx的js库文件
 
 daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index.js</code>
 
