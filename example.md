@@ -283,7 +283,7 @@ title:  chart demos
     <a target="_blank" href="./demo/pie/index.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/pie/index.png">
+        <img src="./assets/chart/pie/index.gif">
         </dt>
         <dd>
             <h5>
