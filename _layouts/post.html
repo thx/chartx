@@ -14,7 +14,7 @@ script: assets/post.js
         <div class="authors">
           {% for author in page.authors %}
           <address>
-            <a href="http://thx.github.io/{{ author.homepage }}">{{ author.name }}</a>
+            <a href="{{ author.homepage }}">{{ author.name }}</a>
           </address>
           {% endfor %}
         </div>
