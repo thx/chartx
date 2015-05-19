@@ -36,10 +36,12 @@ KISSY.use('node,event', function(S, Node) {
         }
     })
 
+    /*
     S.one('#J_settingsToggler').on('click', function(e) {
         S.one('.settings').toggleClass('settings-visible')
         e.stopPropagation()
     })
+    */
 
     S.one('body').on('click', function() {
         S.one('#page').removeClass('page-dodged')
@@ -71,9 +73,11 @@ KISSY.use('node,event', function(S, Node) {
         console.log(S.one('body').scrollTop())
         if (S.one('body').scrollTop() > 10) {
             S.one('#nav').addClass('fixed')
+            S.one('#stoc').addClass('fixed')
         }
         else {
-            S.one('#nav').removeClass('fixed')
+            S.one('#nav').removeClass('fixed');
+            S.one('#stoc').removeClass('fixed');
         }
     })
 
