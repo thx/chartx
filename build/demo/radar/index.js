@@ -13,19 +13,12 @@ KISSY.ready(function(){
         [ "Running"  , 40   , 100  ] 
     ];
     window.options = {
-        // title : "first charts",
-        // disXAxisLine : 26,
-        // disYAxisTopLine : 26,
-        //rotate   : -90,
-        disYAndO : 20,
-        //r     : 200,
-        mode  : 1,                                  //模式( 1 = 正常(y轴在背景左侧) | 2 = 叠加(y轴叠加在背景上))[默认：1]
         yAxis : {
             field   : ["val2","val3"],
             dataSection : [0,40,80,100]
         },
         xAxis : {
-            field : ["val1"],
+            field : ["xfield"],
         },
         tips : {
             prefix : ["小明","小娜"]
@@ -38,12 +31,11 @@ KISSY.ready(function(){
             //r : 150 //蜘蛛网的半径，决定了整个图的大小默认为chart的min(width,height)
         },
         graphs:{
-            fillStyle : ["red"],
-            alpha     : 0
+            fillStyle : ["red"]
+            //alpha     : 0
         }
     }
     Chartx.create.radar("canvasTest" , data1 , options).then(function( chart ){
-        chart.draw();
     })
 
 

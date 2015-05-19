@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar</title>
+<title>xChart demo -- radar</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -26,48 +26,39 @@
 <link rel="stylesheet" href="../../lib/demo.css">
 </head>
 <body >
-
+ 
 <table>
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
 var data= [
-    ["ie"     , 30],
-    ["chrome" , 35],
-    ["firefox", 20],
-    ["safari" , 10],
-    ["其他"   , 5]
+    [ "英雄"     , "攻击力" ,"操作难度"] ,
+    [ "德玛皇子" , 65       , 28   ] ,
+    [ "疾风剑豪" , 59       , 48   ] ,
+    [ "盖伦"     , 90       , 40   ] ,
+    [ "寒冰射手" , 81       , 19   ] ,
+    [ "武器大师" , 56       , 96   ] ,
+    [ "战争之王" , 55       , 27   ] ,
+    [ "瑞文"     , 40       , 100  ] 
 ];
 var options = {
+    yAxis : {
+        field : ["攻击力","操作难度"],
+        dataSection : [0,40,80,100]
+    },
+    xAxis : {
+        field : ["英雄"],
+    },
     tips : {
-        //enabled  : false,
-        content : function(info){
-            return info.data[0]+"："+info.data[1]+"%"
-        }
+        prefix : ["攻击力","操作难度"]
     },
-    //周边tip
-    dataLabel: {
-        enabled: false,
-        format: '{point.name} : {point.percentage}'
-    },
-    //是否允许扇形选取
-    allowPointSelect: true,
-    //是否允许动画
-    animation: true,
-    //内圆半径
-    innerRadius: 50
-    //颜色序列,若不设置，会有默认的颜色序列
-    //colors:['red', 'yellow', 'blue']
-};
-Chartx.create.pie("canvasTest" , data , options).then(function( pie ){
-    pie.on('focused' , function (e) {
-
-    });
-    pie.on('complete', function (e) {
-
-    });
-});
+    graphs : {
+        alpha : 0.2
+    }
+}   
+Chartx.create.radar("canvasTest" , data , options);
 </textarea></form>
 
         </td>
@@ -76,9 +67,9 @@ Chartx.create.pie("canvasTest" , data , options).then(function( pie ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>饼图（pie chart）- 基础饼图</h4>
+                <h4>折线图 - 雷达图</h4>
                 <p>
-                    联系人：@自勉
+                    联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
@@ -93,5 +84,4 @@ Chartx.create.pie("canvasTest" , data , options).then(function( pie ){
     
 </body> 
 </html>
-
-
+ 
