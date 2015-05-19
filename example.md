@@ -351,6 +351,24 @@ title:  chart demos
 
 </div>
 
+## 雷达图
+
+<div class="charts">
+    <a target="_blank" href="./demo/scat/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/scat/index.png">
+        </dt>
+        <dd>
+            <h5>
+            基础散点图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 
 ## 散点图
 
