@@ -537,7 +537,7 @@ a {
     #page {
         text-align: left;
         width: 800px;
-        margin: 130px auto 0;
+        margin: 80px auto 0;
     }
 
     #nav {
@@ -638,7 +638,7 @@ a {
     }
 
     #page .stoc {
-        top: 113px;
+        top: 80px;
         bottom: 20px;
         left: 50%;
         right: auto;
@@ -657,7 +657,7 @@ a {
         overflow: hidden;
     }
     #page .fixed .stoc {
-        top: 20px;
+        top: 50px;
     }
     #page .stoc .folded ol {
         
