@@ -4,12 +4,8 @@ var Chartx = {
     start   : function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的 
-<<<<<<< HEAD
 
-        var canvaxVersion = "2015.04.23";
-=======
         var canvaxVersion = "2015.05.19";
->>>>>>> daily/1.7.2
 
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
