@@ -25,8 +25,6 @@ define(
                 this._yAxis        = null;
                 this._back         = null;
                 this._graphs       = null;
-    
-
                 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
@@ -35,15 +33,13 @@ define(
             _initData : dataFormat,
             _getR : function(){
                 var minWorH = Math.min( this.width , this.height );
-                
                 if( !this.r ) {
                     this.r = minWorH / 2
-                }
+                };
                 if( this.r > minWorH / 2 ){
                      this.r = minWorH / 2
-                }
-    
-                this.r -= 50;
+                };
+                this.r -= 20;
             },
             draw:function(){
                 this.stageBg       = new Canvax.Display.Sprite({

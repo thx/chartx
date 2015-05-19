@@ -322,6 +322,36 @@ title:  chart demos
 
 ## 雷达图
 
+<div class="charts">
+    <a target="_blank" href="./demo/radar/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/radar/index.png">
+        </dt>
+        <dd>
+            <h5>
+            基础雷达图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/radar/constom_yAxis.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/radar/constom_yAxis.gif">
+        </dt>
+        <dd>
+            <h5>
+            雷达图，可以自定义y轴维度
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
+
 ## 散点图
 
 ## 树状图
