@@ -10,6 +10,9 @@ module.exports = function(grunt) {
          options: {
             beautify: {
                  ascii_only: true
+            },
+            compress: {
+                drop_console: true
             }
          },
          app: {
