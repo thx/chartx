@@ -68,8 +68,8 @@ KISSY.use('node,event', function(S, Node) {
     })
 
     S.one(window).on('scroll', function(e) {
-        var ceilingHeight = S.one('#ceiling').outerHeight()
-        if (S.one('body').scrollTop() > ceilingHeight) {
+        //var ceilingHeight = S.one('#ceiling').outerHeight()
+        if (S.one('body').scrollTop() > 100) {
             S.one('#nav').addClass('fixed')
             S.one('#stoc').addClass('fixed')
         }
