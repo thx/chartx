@@ -351,7 +351,7 @@ title:  chart demos
 
 </div>
 
-## 雷达图
+## 散点图
 
 <div class="charts">
     <a target="_blank" href="./demo/scat/index.html">
@@ -370,7 +370,6 @@ title:  chart demos
 </div>
 
 
-## 散点图
 
 ## 树状图
 
