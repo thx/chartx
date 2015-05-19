@@ -70,7 +70,6 @@ KISSY.use('node,event', function(S, Node) {
     })
 
     S.one(window).on('scroll', function(e) {
-        console.log(S.one('body').scrollTop())
         if (S.one('body').scrollTop() > 10) {
             S.one('#nav').addClass('fixed')
             S.one('#stoc').addClass('fixed')
