@@ -163,7 +163,7 @@
                 _drawEnd: function () {
                     this.core.addChild(this._pie.sprite);
                     if (this._tip) this.stageTip.addChild(this._tip.sprite);
-                    this.fire('complete', this.getList());
+                    this.fire('complete', { data: this.getList() });
                 }
             });
         });
