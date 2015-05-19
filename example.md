@@ -336,10 +336,10 @@ title:  chart demos
     </dl>
     </a>
 
-    <a target="_blank" href="./demo/radar/constom_yAxis.html">
+    <a target="_blank" href="./demo/radar/custom_yAxis.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/radar/constom_yAxis.png">
+        <img src="./assets/chart/radar/custom_yAxis.png">
         </dt>
         <dd>
             <h5>
