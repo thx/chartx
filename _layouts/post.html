@@ -14,7 +14,7 @@ script: assets/post.js
         <div class="authors">
           {% for author in page.authors %}
           <address>
-            <a href="{{ author.homepage }}">{{ author.name }}</a>
+            <a href="http://thx.github.io/{{ author.homepage }}">{{ author.name }}</a>
           </address>
           {% endfor %}
         </div>
@@ -36,7 +36,7 @@ script: assets/post.js
     <ul class="menu">
     {% for category in site.categories %}
       <li>
-        <a href="http://thx.github.io/{{ category[0] }}" class="entry">
+        <a href="http://nickli.github.io/{{ category[0] }}" class="entry">
           <i class="iconfont mi-{{ category[0] }}"></i>
           {{ category[0] | capitalize }}
         </a>
