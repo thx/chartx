@@ -246,9 +246,6 @@ title:  chart demos
             <h5>
             中国地图
             </h5>
-            <span>
-            全部默认配置
-            </span>
         </dd>
     </dl>
     </a>
@@ -281,6 +278,47 @@ title:  chart demos
 </div>
 
 ## 饼图
+
+<div class="charts">
+    <a target="_blank" href="./demo/pie/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/pie/index.png">
+        </dt>
+        <dd>
+            <h5>
+            基础饼图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/pie/nodatalabel.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/pie/nodatalabel.gif">
+        </dt>
+        <dd>
+            <h5>
+            饼图，无周边tip 
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/pie/solid.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/pie/solid.png">
+        </dt>
+        <dd>
+            <h5>
+            实心饼图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+</div>
 
 ## 雷达图
 
