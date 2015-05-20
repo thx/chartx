@@ -14,7 +14,7 @@
  */
 
 define(
-    "chartx/chart/tree/index",
+    "chartx/chart/topo/tree",
     [ 
         "chartx/chart/index",
         "canvax/shape/Rect",
@@ -28,21 +28,20 @@ define(
         var Canvax = Chart.Canvax;
         return Chart.extend({
             init : function( node , data , opts ){
-                
-                this.data   = data;
+                this.data   = this._initData( data );
                 this.graph  = {
                     rankdir : "TB",
-                    nodesep : 30,
-                    edgesep : 30,
-                    ranksep : 60
+                    nodesep : 20,
+                    edgesep : 20,
+                    ranksep : 30
                 }
                 this.node   = {
-                    width   : 88,
-                    height  : 88,
+                    width   : 60,
+                    height  : 60,
                     fillStyle   : "#ffffff",
                     strokeStyle : "#e5e5e5",
                     strokeStyleHover : "#58c592",
-                    labelColor : "#58c592"
+                    labelColor : "#666"
                 }
                 this.link  = {
                     r  : 4
@@ -98,6 +97,35 @@ define(
 
                 this._initEventHand();
             }, 
+            /*
+             * @data 为 
+             * [ "id"       , "label" , "link"],
+             * [ "limin"    , "李明"  , [] ],
+             * [ "hanleilei", "韩雷雷", [] ]
+             *
+             * 转换为{
+             *    limin : {
+             *       label : "李明"
+             *    }
+             * }
+             * */
+            _initData : function( data ){
+                var obj = {};
+                var titles = data.shift();
+
+                _.each( data , function( item ){
+                    var idInd   = _.indexOf( titles , "id" );
+                    var itemObj = {};
+                    _.each( titles , function( t , ii ){
+                        if( ii != idInd ){
+                            itemObj[ t ] = item[ ii ];
+                        }
+                    } );
+
+                    obj[ item[ idInd ] ] = itemObj;
+                } );
+                return obj;
+            },
             _initEventHand : function(){
                 var me = this;
                 var isDragIng = false;
@@ -583,7 +611,7 @@ define(
             //初次渲染的时候自动把拓扑图居中
             _initNodesSpritePos : function(){
                 this.sprite.context.x = (this.width - (this._nodesRect.right - this._nodesRect.left)) / 2;
-                this.sprite.context.y = 80;
+                this.sprite.context.y = 10;
 
             }
         });
