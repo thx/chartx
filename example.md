@@ -373,6 +373,7 @@ title:  chart demos
 ## 拓扑图
 
 <div class="charts">
+
     <a target="_blank" href="./demo/topo/tree.html">
     <dl class="chart">
         <dt>
@@ -385,6 +386,20 @@ title:  chart demos
         </dd>
     </dl>
     </a>
+
+    <a target="_blank" href="./demo/topo/tree-h.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/topo/tree-h.png">
+        </dt>
+        <dd>
+            <h5>
+            从左到右的横向树形tree
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
 </div>
 
 
