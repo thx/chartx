@@ -12,7 +12,7 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 能适配PC,Mobile终端。
 
 
-ww交流群 ：1238542386
+<code>ww交流群 ：1238542386</code>
 
 
 ## Chartx的使用
