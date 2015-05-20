@@ -450,7 +450,7 @@ define(
                         path += "Q" + wvControl.x + "," + wvControl.y + ",";
                         path += wvControl.x + "," + ( (vTailPoint.y > wbegin.y ? 1 : -1) * me.link.r + wvControl.y );
                         path += "L"+vTailPoint.x+","+vTailPoint.y;
-                    }
+                    } 
                 }
                 return path;
             },
