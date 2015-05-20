@@ -12,6 +12,9 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 能适配PC,Mobile终端。
 
 
+ww交流群 ：1238542386
+
+
 ## Chartx的使用
 
 请确认在引入Chart js库文件的时候页面已经有AMD(requires),CMD(seajs),KISSY等任一模块加载环境。
