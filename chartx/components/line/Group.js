@@ -161,23 +161,23 @@ define(
             _filterEmptyValue : function( list ){
                 //从左边开始 删除 value为非number的item
                 for( var i=0,l=list.length ; i<l ; i++ ){
-                    if( !_.isNumber(list[i].value) ){
+                    if( isNaN(list[i].value) ){
                         list.shift();
                         l --;
                         i --;
                     } else {
                         break;
                     }
-                }
+                };
 
                 //从右边开始删除 value为非number的item
                 for( var i=list.length-1 ; i > 0 ; i-- ){
-                    if( !_.isNumber(list[i].value) ){
+                    if( isNaN(list[i].value) ){
                         list.pop();
                     } else {
                         break;
                     }
-                }
+                };
             },
             _widget:function(){
                 var self  = this;
