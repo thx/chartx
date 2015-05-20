@@ -403,10 +403,26 @@ title:  chart demos
 </div>
 
 
+## progress进度图表
+
+<div class="charts">
+    <a target="_blank" href="./demo/progress/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/progress/index.gif">
+        </dt>
+        <dd>
+            <h5>
+            基础进度图表
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 
 ## 力导向布局图
-
-## progress进度图表
 
 ## 自有原创图表
 
