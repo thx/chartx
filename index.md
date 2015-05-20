@@ -31,7 +31,7 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index.j
 ### 创建图表
 
 在全局图表对象Chartx下面有一个create对象，上面挂载着全部的图表类型
-目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'tree']
+目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo']
 该类型方法需要三个参数。
 
 - el      --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象 
