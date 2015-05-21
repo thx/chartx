@@ -184,12 +184,12 @@ define(
                 var self = this;
                 var o = {
                     eventType : e.type,
-                    iGroup    : e.tipsInfo.iGroup,
-                    iNode     : e.tipsInfo.iNode 
-                }
+                    iGroup    : e.tipsInfo.iGroup + 1,
+                    iNode     : e.tipsInfo.iNode + 1 
+                };
                 if(_.isFunction(self.root.event.on)){
                     self.root.event.on(o);
-                }
+                };
             }
         };
     
