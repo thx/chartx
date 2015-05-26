@@ -253,7 +253,7 @@ define(
                 };
                         
             },
-            /*校验第一个和最后一个文本是否超出了界限。然后决定是否矫正*/
+            /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout:function(){
 
                 if(this.sprite.getNumChildren()==0)
@@ -261,14 +261,24 @@ define(
         
     			var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
                 if (popText) {
-                    if( popText.context.textAlign == "center" &&
-                        popText.context.x + popText.context.width / 2 > this.w ){
-                        popText.context.x = this.w - popText.context.width / 2
+                    var pc = popText.context;
+                    if( pc.textAlign == "center" &&
+                        pc.x + popText.context.width / 2 > this.w ){
+                        pc.x = this.w - popText.context.width / 2
                     };
-                    if( popText.context.textAlign == "left" &&
-                        popText.context.x + popText.context.width > this.w ){
-                        popText.context.x = this.w - popText.context.width
+                    if( pc.textAlign == "left" &&
+                        pc.x + popText.context.width > this.w ){
+                        pc.x = this.w - popText.context.width
                     };
+                    //倒数第二个text
+                    var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
+              
+                    var ppc = popPreText.context;
+                    
+                    //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
+                    if( ppc.visible && pc.x < ppc.x + ppc.width ){
+                        pc.visible = false;
+                    }
     			}
             },
             _getTextMaxWidth : function(){
