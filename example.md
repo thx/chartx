@@ -421,6 +421,24 @@ title:  chart demos
 
 </div>
 
+## 和旋图
+
+<div class="charts">
+    <a target="_blank" href="./demo/chord/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/chord/index.png">
+        </dt>
+        <dd>
+            <h5>
+            基础和旋图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 
 ## 力导向布局图
 

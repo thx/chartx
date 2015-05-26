@@ -186,10 +186,10 @@ define(
                     eventType : e.type,
                     iGroup    : e.tipsInfo.iGroup,
                     iNode     : e.tipsInfo.iNode 
-                }
+                };
                 if(_.isFunction(self.root.event.on)){
                     self.root.event.on(o);
-                }
+                };
             }
         };
     

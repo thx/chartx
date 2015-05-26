@@ -1,11 +1,11 @@
 var Chartx = {
-    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo'],
+    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord'],
     create  : {},
     start   : function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的 
 
-        var canvaxVersion = "2015.05.21";
+        var canvaxVersion = "2015.05.22";
 
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
