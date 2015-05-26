@@ -30,7 +30,7 @@ define(
                     x : this.width  / 2,
                     y : this.height / 2
                 };
-                this.r = Math.min( this.width , this.height ) / 2;
+                this.r = Math.min( this.width , this.height ) / 2 - 3;
 
                 this.groups   = new Canvax.Display.Sprite();
                 this.chords   = new Canvax.Display.Sprite({
@@ -62,6 +62,22 @@ define(
                         id: 'sector' + i
                     });
                     me.groups.addChild( sector );
+
+                    sector.group = group;
+
+                    sector.hover( function( e ){
+                        var g = this.group;
+                        _.each( me.chords.children , function( c ){
+                            if( !(c.chord.source.index == g.index || c.chord.target.index == g.index) ){
+                                c.context.globalAlpha = 0.1
+                            }
+                        } );
+                    } , function( e ){
+                        var g = this.chord;
+                        _.each( me.chords.children , function( c ){
+                            c.context.globalAlpha = 0.5;
+                        } );
+                    } );
                 } );
 
                 _.each( this.chord.chords() , function( chord ){
@@ -97,6 +113,7 @@ define(
                         globalAlpha : 0.5
                     }
                 });
+                chordPath.chord = chord;
                 return chordPath;
                 
             },
