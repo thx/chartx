@@ -161,11 +161,14 @@ define(
                 } );
                 return obj;
             },
+            _isNotNum : function( val ){
+                return isNaN(val) || val === null || val === "" 
+            },
             _filterEmptyValue : function( list ){
                 
                 //从左边开始 删除 value为非number的item
                 for( var i=0,l=list.length ; i<l ; i++ ){
-                    if( isNaN(list[i].value) ){
+                    if( this._isNotNum(list[i].value) ){
                         list.shift();
                         l --;
                         i --;
@@ -176,7 +179,7 @@ define(
 
                 //从右边开始删除 value为非number的item
                 for( var i=list.length-1 ; i > 0 ; i-- ){
-                    if( isNaN(list[i].value) ){
+                    if( this._isNotNum(list[i].value) ){
                         list.pop();
                     } else {
                         break;
