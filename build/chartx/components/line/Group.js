@@ -159,6 +159,7 @@ define(
                 return obj;
             },
             _filterEmptyValue : function( list ){
+                
                 //从左边开始 删除 value为非number的item
                 for( var i=0,l=list.length ; i<l ; i++ ){
                     if( isNaN(list[i].value) ){
@@ -183,7 +184,12 @@ define(
                 var self  = this;
 
                 self._filterEmptyValue( self.data );
-                
+            
+                if( self.data.length == 0 ){
+                    //filter后，data可能length==0
+                    return;
+                }
+
                 var list = [];
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var o = self.data[a];
