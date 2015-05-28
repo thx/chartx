@@ -291,7 +291,7 @@ define(
                 } );
             },
             _trimGraphs:function(){
-                //debugger
+                debugger
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];

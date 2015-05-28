@@ -36,7 +36,6 @@ define(
         /**
          * Set the tick positions of a linear axis to round values like whole tens or every five.
          */
-    
         function getLinearTickPositions(arr,$maxPart,$cfg) {
 
             arr = _.without( arr , undefined , null , "" );
