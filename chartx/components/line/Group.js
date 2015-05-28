@@ -124,6 +124,9 @@ define(
             _grow : function(){
                 var self  = this;
                 var timer = null;
+                if( self._currPointList.length == 0 ){
+                    return;
+                }
                 var growAnima = function(){
                    var bezierT = new Tween.Tween( self._getPointY( self._currPointList ) )
                    .to( self._getPointY( self._pointList ), 1500 )
