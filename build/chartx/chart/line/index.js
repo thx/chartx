@@ -151,7 +151,7 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
-                this._anchor = new Anchor(this.anchor)
+                this._anchor = new Anchor(this.anchor);
                 this._graphs = new Graphs( this.graphs, this);
                 this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
 
@@ -291,7 +291,7 @@ define(
                 } );
             },
             _trimGraphs:function(){
-                //debugger
+                debugger
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];

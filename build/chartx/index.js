@@ -59,14 +59,16 @@ var Chartx = {
                 this._thenFn.push( fn );
                 return this;
             },
-            _destory : false,
+            _destroy : false,
             chart    : null,
             destroy  : function(){
                 console.log("chart destroy!");
-                this._destory = true;
-                this.chart.destroy();
-                delete this.chart;
-                promise = null;
+                this._destroy = true;
+                if( this.chart ){ 
+                    this.chart.destroy();
+                    delete this.chart;
+                    promise = null;
+                }
             },
             path     : null
         };
@@ -74,7 +76,7 @@ var Chartx = {
 
         var path = "chartx/chart/"+name+"/"+( options.type ? options.type : "index" );
         require( [ path ] , function( chartConstructor ){
-            if( !promise._destory ){
+            if( !promise._destroy ){
                 promise.chart = new chartConstructor(el , data , options);
                 _.each(promise._thenFn , function( fn ){
                     _.isFunction( fn ) && fn( promise.chart );
@@ -82,6 +84,11 @@ var Chartx = {
                 promise._thenFn = [];
                 //在then处理函数执行了后自动draw
                 promise.chart.draw();
+                promise.path = path;
+            } else {
+                //如果require回来的时候发现已经promise._destroy == true了
+                //说明已经其已经不需要创建了，可能宿主环境已经销毁
+                
             }
         } );
 
