@@ -17,15 +17,15 @@ define(
             this.root    = root;
             this.ctx     = root.stage.context2D
 
-            this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
-            this.disX       = 0;                           //点与点之间的间距
-            this.groups     = [];                          //群组集合     
+            this.data    = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
+            this.disX    = 0;                           //点与点之间的间距
+            this.groups  = [];                          //群组集合     
     
-            this.iGroup     = 0;                           //群组索引(哪条线)
-            this.iNode      = -1;                          //节点索引(那个点)
+            this.iGroup  = 0;                           //群组索引(哪条线)
+            this.iNode   = -1;                          //节点索引(那个点)
     
-            this.sprite     = null;  
-            this.induce     = null;                         
+            this.sprite  = null;  
+            this.induce  = null;                         
 
             this.init(opt);
         };
@@ -33,7 +33,6 @@ define(
         Graphs.prototype = {
     
             init:function(opt){
-                //_.deepExtend( this , opt );
                 this.opt = opt;
                 this.sprite = new Canvax.Display.Sprite();
             },

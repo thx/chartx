@@ -1,5 +1,6 @@
 module.exports = function(grunt) {
   //配置参数
+  var bc = "build/chartx/"
   grunt.initConfig({
      clean : {
          build : {
@@ -17,9 +18,9 @@ module.exports = function(grunt) {
          },
          app: {
              expand: true,
-             cwd: "build/chartx/",
+             cwd: bc,
              src: ['**/*.js', '!**/*-min.js'],
-             dest: "build/chartx/",
+             dest:bc,
              ext: '-min.js' // '-min.js'
          }
      },
@@ -42,9 +43,69 @@ module.exports = function(grunt) {
          },
          dist : {
              src: [
-                 'chartx/index.js'
+                 //'chartx/index.js'
+                 bc+"index.js",
+                 bc+"components/**/*.js"
              ],
-             dest: 'build/chartx/index.js'
+             dest: bc+'index.js'
+         },
+         bar : {
+             src : [
+                 bc+"chart/bar/index.js",
+                 bc+"chart/bar/graphs.js",
+                 bc+"chart/bar/tips.js",
+                 bc+"chart/bar/xaxis.js"
+             ],
+             dest : bc+"chart/bar/index.js"
+         },
+         bar_h : {
+             src : [
+                 bc+"chart/bar/horizontal.js",
+                 bc+"chart/bar/horizontal/graphs.js",
+                 bc+"chart/bar/horizontal/tips.js",
+                 bc+"chart/bar/horizontal/xaxis.js"
+             ],
+             dest : bc+"chart/bar/horizontal.js"
+         },
+         line : {
+             src : [
+                 bc+"chart/line/index.js",
+                 bc+"chart/line/tips.js",
+                 bc+"chart/line/xaxis.js"
+             ],
+             dest : bc+"chart/line/index.js"
+         },
+         map : {
+             src : [
+                 bc+"chart/map/index.js",
+                 bc+"chart/map/mapdata.js",
+                 bc+"chart/map/tips.js"
+             ],
+             dest : bc+"chart/map/index.js"
+         },
+         pie : {
+             src : [
+                 bc+"chart/pie/index.js",
+                 bc+"chart/pie/pie.js",
+             ],
+             dest : bc+"chart/pie/index.js"
+         },
+         radar : {
+             src : [
+                 bc+"chart/radar/index.js",
+                 bc+"chart/radar/back.js",
+                 bc+"chart/radar/graphs.js",
+                 bc+"chart/radar/xaxis.js",
+             ],
+             dest : bc+"chart/radar/index.js"
+         },
+         scat : {
+             src : [
+                 bc+"chart/scat/index.js",
+                 bc+"chart/scat/xaxis.js",
+                 bc+"chart/scat/graphs.js"
+             ],
+             dest : bc+"chart/scat/index.js"
          }
       }
   });
