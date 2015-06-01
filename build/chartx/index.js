@@ -244,36 +244,6 @@ var Chartx = {
             return el[0];
         }
         return null;
-    },
-    getOffset: function (el) {
-        var box = el.getBoundingClientRect(),
-        doc     = el.ownerDocument,
-        body    = doc.body,
-        docElem = doc.documentElement,
-
-        // for ie  
-        clientTop  = docElem.clientTop || body.clientTop || 0,
-        clientLeft = docElem.clientLeft || body.clientLeft || 0,
-
-        // In Internet Explorer 7 getBoundingClientRect property is treated as physical, 
-        // while others are logical. Make all logical, like in IE8. 
-
-        zoom = 1;
-        if (body.getBoundingClientRect) {
-            var bound = body.getBoundingClientRect();
-            zoom = (bound.right - bound.left) / body.clientWidth;
-        }
-        if (zoom > 1) {
-            clientTop = 0;
-            clientLeft = 0;
-        }
-        var top = box.top / zoom + (window.pageYOffset || docElem && docElem.scrollTop / zoom || body.scrollTop / zoom) - clientTop,
-            left = box.left / zoom + (window.pageXOffset || docElem && docElem.scrollLeft / zoom || body.scrollLeft / zoom) - clientLeft;
-
-        return {
-            top: top,
-                left: left
-        };
     }
 };
 
