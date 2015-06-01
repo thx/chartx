@@ -26,7 +26,7 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 
 daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index.js</code>
 
-cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index.js</code>
+cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-min].js</code>
 
 当前最新CDN版本号为1.7.2
 
