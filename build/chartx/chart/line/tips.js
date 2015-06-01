@@ -142,10 +142,6 @@ define(
                 _.each( e.tipsInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;
                     csps.y           = e.target.context.height - Math.abs(node.y);
-                    csps.r           = node.r
-                    csps.fillStyle   = node.fillStyle
-                    csps.strokeStyle = node.strokeStyle
-                    csps.lineWidth   = node.lineWidth+2
                 });
             }
         }
