@@ -173,3 +173,174 @@ define(
         
     }
 );
+
+
+define(
+    "chartx/chart/scat/xaxis",
+    [
+        "chartx/components/xaxis/xAxis",
+        "chartx/utils/datasection"
+    ],
+    function(xAxisBase , DataSection ){
+        var xAxis = function( opt , data ){
+            this.xDis = 0; //x方向一维均分长度
+            xAxis.superclass.constructor.apply( this , arguments );
+        };
+        Chartx.extend( xAxis , xAxisBase , {
+            _initDataSection  : function( arr ){ 
+                var arr = _.flatten( arr ); //Tools.getChildsArr( data.org );
+                var dataSection = DataSection.section(arr);
+                this._baseNumber = dataSection[0];
+    
+                if( dataSection.length == 1 ){
+                    //TODO;散点图中的xaxis不应该只有一个值，至少应该有个区间
+                    dataSection.push( 100 );
+                }
+                return dataSection;
+            },
+            /**
+             *@param data 就是上面 _initDataSection计算出来的dataSection
+             */
+            _trimXAxis : function( data , xGraphsWidth ){
+                var tmpData = [];
+                this.xDis  = xGraphsWidth / (data.length-1);
+                for (var a = 0, al  = data.length; a < al; a++ ) {
+                    var o = {
+                        'content' : data[a], 
+                        'x'       : this.xDis * a
+                    }
+                    tmpData.push( o );
+                }
+                return tmpData;
+            } 
+        } );
+    
+        return xAxis;
+    }
+);
+
+
+define(
+    "chartx/chart/scat/graphs",
+    [
+        "canvax/index",
+        "canvax/shape/Circle",
+        "canvax/animation/Tween"
+    ],
+    function( Canvax , Circle , Tween ){
+ 
+        var Graphs = function( opt , data ){
+            this.w = 0;
+            this.h = 0;
+           
+            this.pos = {
+                x : 0,
+                y : 0
+            }
+    
+            this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+    
+    
+            //圆圈默认半径
+            this.r = 10;
+    
+            this.sprite = null ;
+    
+            this._circles = [];  //所有圆点的集合
+    
+            _.deepExtend(this , opt);
+    
+            this.init( data );
+    
+        };
+    
+        Graphs.prototype = {
+            init : function(){
+                this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
+            },
+            setX:function($n){
+                this.sprite.context.x = $n
+            },
+            setY:function($n){
+                this.sprite.context.y = $n
+            },
+            getFillStyle : function( i , ii , value){
+                var fillStyle = null;
+                
+                if( _.isArray( this.fillStyle ) ){
+                    fillStyle = this.fillStyle[ii]
+                }
+                if( _.isFunction( this.fillStyle ) ){
+                    fillStyle = this.fillStyle( i , ii , value );
+                }
+                if( !fillStyle || fillStyle=="" ){
+                    fillStyle = this._colors[ii];
+                }
+                return fillStyle;
+            },
+            draw : function(data , opt){
+                _.deepExtend(this , opt);
+                if( data.length == 0 ){
+                    return;
+                }
+    
+                //这个分组是只x方向的一维分组
+                var barGroupLen = data[0].length;
+   
+                for( var i = 0 ; i < barGroupLen ; i++ ){
+                    var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
+                    for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
+                        var barData = data[ii][i];
+    
+                        var circle = new Circle({
+                            context : {
+                                x           : barData.x,
+                                y           : barData.y,
+                                fillStyle   : this.getFillStyle( i , ii , barData.value ),
+                                r           : this.r,
+                                globalAlpha : 0
+                            }
+                        });
+                        sprite.addChild( circle );
+                        this._circles.push( circle );
+                    }
+                    this.sprite.addChild( sprite );
+                }
+    
+                this.setX( this.pos.x );
+                this.setY( this.pos.y );
+            },
+            /**
+             * 生长动画
+             */
+            grow : function(){
+                var self  = this;
+                var timer = null;
+    
+                var growAnima = function(){
+                   var bezierT = new Tween.Tween( { h : 0 } )
+                   .to( { h : 100 }, 500 )
+                   .onUpdate( function () {
+    
+                       for( var i=0 , l=self._circles.length ; i<l ; i++ ){
+                           self._circles[i].context.globalAlpha = this.h / 100;
+                           self._circles[i].context.r = this.h / 100 * self.r;
+                       }
+                       
+                   } ).onComplete( function(){
+                       cancelAnimationFrame( timer );
+                   }).start();
+                   animate();
+                };
+                function animate(){
+                    timer    = requestAnimationFrame( animate ); 
+                    Tween.update();
+                };
+                growAnima();
+            }
+        }; 
+    
+        return Graphs;
+    
+    }
+)
