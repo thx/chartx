@@ -138,23 +138,24 @@ define(
                         globalAlpha : 0,
                         cursor      : 'pointer'
                     }
-                })
-                self.sprite.addChild(self.induce)
+                });
+
+                self.sprite.addChild(self.induce);
     
-                self.induce.on("hold mouseover", function(e){
+                self.induce.on("panstart mouseover", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
-                self.induce.on("drag mousemove", function(e){
+                self.induce.on("panmove mousemove", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
-                self.induce.on("release mouseout", function(e){
+                self.induce.on("panend mouseout", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                     self.iGroup = 0, self.iNode = -1
                 })
-                self.induce.on("click", function(e){
+                self.induce.on("tap click", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })

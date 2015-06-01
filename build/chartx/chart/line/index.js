@@ -34,7 +34,7 @@ define(
                 this._graphs  =  null;
                 this._tips    =  null;
 
-                this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
+                //this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
@@ -151,7 +151,7 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
-                this._anchor = new Anchor(this.anchor)
+                this._anchor = new Anchor(this.anchor);
                 this._graphs = new Graphs( this.graphs, this);
                 this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
 
@@ -225,9 +225,9 @@ define(
                 this._graphs.grow();
     
                 var self = this;
-                this._graphs.sprite.on( "hold mouseover" ,function(e){
+                this._graphs.sprite.on( "panstart mouseover" ,function(e){
                     if( self._tips.enabled &&
-                        self._preTipsInode && self._preTipsInode != e.tipsInfo.iNode &&
+                        //self._preTipsInode && self._preTipsInode != e.tipsInfo.iNode &&
                         e.tipsInfo.nodesInfoList.length > 0
                         ){
                             self._setXaxisYaxisToTipsInfo(e);
@@ -237,7 +237,7 @@ define(
                             //self.fire( "" , e );
                     }
                 });
-                this._graphs.sprite.on( "drag mousemove" ,function(e){
+                this._graphs.sprite.on( "panmove mousemove" ,function(e){
                     if( self._tips.enabled ){
                         if( e.tipsInfo.nodesInfoList.length > 0 ){
                             self._setXaxisYaxisToTipsInfo(e);
@@ -253,7 +253,7 @@ define(
                         }
                     }
                 });
-                this._graphs.sprite.on( "release mouseout" ,function(e){
+                this._graphs.sprite.on( "panend mouseout" ,function(e){
                     if( self._tips.enabled ){
                         self._tips.hide( e );
                     }
@@ -291,7 +291,6 @@ define(
                 } );
             },
             _trimGraphs:function(){
-                //debugger
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];

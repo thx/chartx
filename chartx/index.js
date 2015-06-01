@@ -5,7 +5,7 @@ var Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的 
 
-        var canvaxVersion = "2015.05.22";
+        var canvaxVersion = "2015.05.29";
 
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
@@ -70,14 +70,16 @@ var Chartx = {
                 this._thenFn.push( fn );
                 return this;
             },
-            _destory : false,
+            _destroy : false,
             chart    : null,
             destroy  : function(){
                 console.log("chart destroy!");
-                this._destory = true;
-                this.chart.destroy();
-                delete this.chart;
-                promise = null;
+                this._destroy = true;
+                if( this.chart ){ 
+                    this.chart.destroy();
+                    delete this.chart;
+                    promise = null;
+                }
             },
             path     : null
         };
@@ -85,7 +87,7 @@ var Chartx = {
 
         var path = "chartx/chart/"+name+"/"+( options.type ? options.type : "index" );
         require( [ path ] , function( chartConstructor ){
-            if( !promise._destory ){
+            if( !promise._destroy ){
                 promise.chart = new chartConstructor(el , data , options);
                 _.each(promise._thenFn , function( fn ){
                     _.isFunction( fn ) && fn( promise.chart );
@@ -93,6 +95,11 @@ var Chartx = {
                 promise._thenFn = [];
                 //在then处理函数执行了后自动draw
                 promise.chart.draw();
+                promise.path = path;
+            } else {
+                //如果require回来的时候发现已经promise._destroy == true了
+                //说明已经其已经不需要创建了，可能宿主环境已经销毁
+                
             }
         } );
 
@@ -252,36 +259,6 @@ var Chartx = {
             return el[0];
         }
         return null;
-    },
-    getOffset: function (el) {
-        var box = el.getBoundingClientRect(),
-        doc     = el.ownerDocument,
-        body    = doc.body,
-        docElem = doc.documentElement,
-
-        // for ie  
-        clientTop  = docElem.clientTop || body.clientTop || 0,
-        clientLeft = docElem.clientLeft || body.clientLeft || 0,
-
-        // In Internet Explorer 7 getBoundingClientRect property is treated as physical, 
-        // while others are logical. Make all logical, like in IE8. 
-
-        zoom = 1;
-        if (body.getBoundingClientRect) {
-            var bound = body.getBoundingClientRect();
-            zoom = (bound.right - bound.left) / body.clientWidth;
-        }
-        if (zoom > 1) {
-            clientTop = 0;
-            clientLeft = 0;
-        }
-        var top = box.top / zoom + (window.pageYOffset || docElem && docElem.scrollTop / zoom || body.scrollTop / zoom) - clientTop,
-            left = box.left / zoom + (window.pageXOffset || docElem && docElem.scrollLeft / zoom || body.scrollLeft / zoom) - clientLeft;
-
-        return {
-            top: top,
-                left: left
-        };
     }
 };
 
