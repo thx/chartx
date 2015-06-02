@@ -19,15 +19,23 @@ module.exports = function(grunt) {
          app: {
              expand: true,
              cwd: bc,
-             src: ['**/*.js', '!**/*-min.js'],
+             src: ['**/*.js'],
              dest:bc,
-             ext: '-min.js' // '-min.js'
+             ext: '.js' // '.js'
+         },
+         min: {
+             expand: true,
+             cwd: bc,
+             src: ['**/*.js'],
+             dest:bc,
+             ext: '-min.js' // '.js'
          }
      },
      copy: {
          main: {
              files: [
-                { expand: true, cwd: 'chartx', src: ['**','!index.js'], dest: 'build/chartx'},
+                //{ expand: true, cwd: 'chartx', src: ['**','!index.js'], dest: 'build/chartx'},
+                { expand: true, cwd: 'chartx', src: ['**'], dest: 'build/chartx'},
                 { expand: true, cwd: 'demo', src: ['**'], dest: 'build/demo'}
              ]
          }
@@ -43,9 +51,10 @@ module.exports = function(grunt) {
          },
          dist : {
              src: [
-                'chartx/index.js',
-                'chartx/chart/index.js',
-                 //bc+"index.js",
+                //'chartx/index.js',
+                //'chartx/chart/index.js',
+                 bc+"index.js",
+                 bc+"chart/index.js",
                  bc+"components/**/*.js"
              ],
              dest: bc+'index.js'
@@ -118,7 +127,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [ 'clean' , 'copy' , 'concat' , 'uglify'  ]);
+  grunt.registerTask('default', [ 'clean' , 'copy' , 'uglify:app' , 'concat' ,  'uglify:min'  ]);
 }
 
 
