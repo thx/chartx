@@ -61,19 +61,21 @@ module.exports = function(grunt) {
          },
          bar : {
              src : [
-                 bc+"chart/bar/index.js",
                  bc+"chart/bar/graphs.js",
                  bc+"chart/bar/tips.js",
-                 bc+"chart/bar/xaxis.js"
+                 bc+"chart/bar/xaxis.js",
+
+                 bc+"chart/bar/index.js"
+                 
              ],
              dest : bc+"chart/bar/index.js"
          },
          bar_h : {
              src : [
-                 bc+"chart/bar/horizontal.js",
                  bc+"chart/bar/horizontal/graphs.js",
                  bc+"chart/bar/horizontal/tips.js",
-                 bc+"chart/bar/horizontal/xaxis.js"
+                 bc+"chart/bar/horizontal/xaxis.js",
+                 bc+"chart/bar/horizontal.js"
              ],
              dest : bc+"chart/bar/horizontal.js"
          },
@@ -87,33 +89,38 @@ module.exports = function(grunt) {
          },
          map : {
              src : [
-                 bc+"chart/map/index.js",
                  bc+"chart/map/mapdata.js",
-                 bc+"chart/map/tips.js"
+                 bc+"chart/map/tips.js",
+
+                 bc+"chart/map/index.js",
+                 
              ],
              dest : bc+"chart/map/index.js"
          },
          pie : {
              src : [
-                 bc+"chart/pie/index.js",
                  bc+"chart/pie/pie.js",
+                 bc+"chart/pie/index.js"
+                 
              ],
              dest : bc+"chart/pie/index.js"
          },
          radar : {
              src : [
-                 bc+"chart/radar/index.js",
                  bc+"chart/radar/back.js",
                  bc+"chart/radar/graphs.js",
                  bc+"chart/radar/xaxis.js",
+                 bc+"chart/radar/index.js"
+                 
              ],
              dest : bc+"chart/radar/index.js"
          },
          scat : {
              src : [
-                 bc+"chart/scat/index.js",
                  bc+"chart/scat/xaxis.js",
-                 bc+"chart/scat/graphs.js"
+                 bc+"chart/scat/graphs.js",
+                 bc+"chart/scat/index.js"
+                 
              ],
              dest : bc+"chart/scat/index.js"
          }
