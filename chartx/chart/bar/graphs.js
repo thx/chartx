@@ -176,14 +176,19 @@ define(
                         var txt = new Canvax.Display.Text( content ,
                            {
                             context : {
-                                x  : barData.x,
-                                y  : rectCxt.y,
+                                //x  : barData.x,
+                                //y  : rectCxt.y,
                                 fillStyle    : this.text.fillStyle,
                                 fontSize     : this.text.fontSize,
                                 textAlign    : this.text.textAlign
                            }
                         });
-                        txt.context.x = barData.x - txt.getTextWidth() / 2 , txt.context.y = rectCxt.y - txt.getTextHeight()
+                        txt.context.x = barData.x - txt.getTextWidth() / 2;
+                        txt.context.y = rectCxt.y - txt.getTextHeight();
+                        if( txt.context.y + this.h < 0 ){
+                            txt.context.y = -this.h;
+                        }
+
                         this.txtsSp.addChild(txt)
 
                         sprite.addChild( rect );
