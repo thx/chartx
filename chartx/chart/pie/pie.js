@@ -55,83 +55,73 @@
                     this.sprite.context.y = $n
                 },
                 //配置数据
-                _configData: function () {
+                _configData: function () {                    
                     var self = this;
                     self.total = 0;
-                    self.currentAngle  = 0;
+                    self.currentAngle = 0;
                     self.labelFontSize = 12 * self.boundWidth / 1000;
-                    var data           = self.data.data;
-                    self.clickMoveDis  =  self.r / 11;
+                    var data = self.data.data;
+                    self.clickMoveDis = self.r / 11;
                     if (data.length && data.length > 0) {
-                        if (data.length == 1) {
-                            _.extend(data[0], {
-                                start: 0,
-                                end: 360,
-                                percentage: 100,
-                                txt: 100 + '%',
-                                isMax: true
-                            })
-                        }
-                        else {
-                            for (var i = 0; i < data.length; i++) {
-                                self.total += data[i].y;
-                            }
-                            if (self.total > 0) {
-                                var maxIndex = 0;
-                                for (var j = 0; j < data.length; j++) {
-                                    if (j > 0 && percentage * 100 > data[maxIndex].percentage) {
-                                        maxIndex = j;
-                                    }
-                                    var percentage = data[j].y / self.total;
-                                    var angle = 360 * percentage;
-                                    var endAngle = self.currentAngle + angle > 360 ? 360 : self.currentAngle + angle;
-                                    var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
-                                    var sinV = Math.sin((self.currentAngle + angle / 2) / 180 * Math.PI);
-                                    var midAngle = self.currentAngle + angle / 2;
-                                    cosV = cosV.toFixed(5);
-                                    sinV = sinV.toFixed(5);
-                                    var quadrant = function (ang) {
-                                        if (ang > 360) {
-                                            ang = 360;
-                                        }
-                                        if (0 <= ang && ang <= 90) {
-                                            return 1;
-                                        }
-                                        else if (90 < ang && ang <= 180) {
-                                            return 2;
-                                        }
-                                        else if (180 < ang && ang <= 270) {
-                                            return 3;
-                                        }
-                                        else if (270 < ang && ang <= 360) {
-                                            return 4;
-                                        }
-                                    } (midAngle);
-                                    _.extend(data[j], {
-                                        start: self.currentAngle,
-                                        end: endAngle,
-                                        midAngle: midAngle,
-                                        outOffsetx: self.clickMoveDis * cosV,
-                                        outOffsety: self.clickMoveDis * sinV,
-                                        centerx: (self.r - self.clickMoveDis) * cosV,
-                                        centery: (self.r - self.clickMoveDis) * sinV,
-                                        outx: (self.r + self.clickMoveDis) * cosV,
-                                        outy: (self.r + self.clickMoveDis) * sinV,
-                                        edgex: (self.r + 2 * self.clickMoveDis) * cosV,
-                                        edgey: (self.r + 2 * self.clickMoveDis) * sinV,
-                                        percentage: (percentage * 100).toFixed(1),
-                                        txt: (percentage * 100).toFixed(1) + '%',
-                                        quadrant: quadrant,
-                                        labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
-                                        index: j,
-                                        isMax: false
-                                    })
 
-                                    self.currentAngle += angle;
-                                    if (self.currentAngle > 360) self.currentAngle = 360;
+                        for (var i = 0; i < data.length; i++) {
+                            self.total += data[i].y;
+                        }
+                        if (self.total > 0) {
+                            var maxIndex = 0;
+                            for (var j = 0; j < data.length; j++) {
+                                if (j > 0 && percentage * 100 > data[maxIndex].percentage) {
+                                    maxIndex = j;
                                 }
-                                data[maxIndex].isMax = true;
+                                var percentage = data[j].y / self.total;
+                                var angle = 360 * percentage;
+                                var endAngle = self.currentAngle + angle > 360 ? 360 : self.currentAngle + angle;
+                                var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
+                                var sinV = Math.sin((self.currentAngle + angle / 2) / 180 * Math.PI);
+                                var midAngle = self.currentAngle + angle / 2;
+                                cosV = cosV.toFixed(5);
+                                sinV = sinV.toFixed(5);
+                                var quadrant = function (ang) {
+                                    if (ang > 360) {
+                                        ang = 360;
+                                    }
+                                    if (0 <= ang && ang <= 90) {
+                                        return 1;
+                                    }
+                                    else if (90 < ang && ang <= 180) {
+                                        return 2;
+                                    }
+                                    else if (180 < ang && ang <= 270) {
+                                        return 3;
+                                    }
+                                    else if (270 < ang && ang <= 360) {
+                                        return 4;
+                                    }
+                                } (midAngle);
+                                _.extend(data[j], {
+                                    start: self.currentAngle,
+                                    end: endAngle,
+                                    midAngle: midAngle,
+                                    outOffsetx: self.clickMoveDis * cosV,
+                                    outOffsety: self.clickMoveDis * sinV,
+                                    centerx: (self.r - self.clickMoveDis) * cosV,
+                                    centery: (self.r - self.clickMoveDis) * sinV,
+                                    outx: (self.r + self.clickMoveDis) * cosV,
+                                    outy: (self.r + self.clickMoveDis) * sinV,
+                                    edgex: (self.r + 2 * self.clickMoveDis) * cosV,
+                                    edgey: (self.r + 2 * self.clickMoveDis) * sinV,
+                                    percentage: (percentage * 100).toFixed(1),
+                                    txt: (percentage * 100).toFixed(1) + '%',
+                                    quadrant: quadrant,
+                                    labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
+                                    index: j,
+                                    isMax: false
+                                })
+
+                                self.currentAngle += angle;
+                                if (self.currentAngle > 360) self.currentAngle = 360;
                             }
+                            data[maxIndex].isMax = true;
                         }
                     }
                 },
@@ -216,7 +206,7 @@
                     if (opt.animation) {
                         self.grow();
                     }
-                    if (opt.complete) {                        
+                    if (opt.complete) {
                         opt.complete.call(self);
                     }
                 },
@@ -623,17 +613,17 @@
                             if (data[i].end > data[i].start) {
                                 //扇形主体          
                                 var sector = new Sector({
-                                    hoverClone : false,
+                                    hoverClone: false,
                                     context: {
-                                        x          : data[i].selected ? data[i].outOffsetx : 0,
-                                        y          : data[i].selected ? data[i].outOffsety : 0,
-                                        r0         : self.r0,
-                                        r          : self.r,
-                                        startAngle : data[i].start,
-                                        endAngle   : data[i].end,
-                                        fillStyle  : fillColor,
-                                        index      : data[i].index,
-                                        cursor     : "pointer"
+                                        x: data[i].selected ? data[i].outOffsetx : 0,
+                                        y: data[i].selected ? data[i].outOffsety : 0,
+                                        r0: self.r0,
+                                        r: self.r,
+                                        startAngle: data[i].start,
+                                        endAngle: data[i].end,
+                                        fillStyle: fillColor,
+                                        index: data[i].index,
+                                        cursor: "pointer"
                                     },
                                     id: 'sector' + i
                                 });
@@ -645,18 +635,18 @@
                                 sector.hover(function (e) {
                                     var me = this;
                                     //if (!self.isMoving) {
-                                        if (self.tips.enabled) {
-                                            self._showTip(e, this.__dataIndex);
-                                        }
-                                        self._sectorFocus(this.__dataIndex);
+                                    if (self.tips.enabled) {
+                                        self._showTip(e, this.__dataIndex);
+                                    }
+                                    self._sectorFocus(this.__dataIndex);
                                     //}
                                     self.allowPointSelect && self.moveSector(this);
                                 }, function (e) {
                                     //if (!self.isMoving) {
-                                        if (self.tips.enabled) {
-                                            self._hideTip(e);
-                                        }
-                                        self._sectorUnfocus();
+                                    if (self.tips.enabled) {
+                                        self._hideTip(e);
+                                    }
+                                    self._sectorUnfocus();
                                     //}
                                     self.allowPointSelect && self.moveSector(this);
                                 });
@@ -666,10 +656,10 @@
                                     }
                                 });
 
-                                self.sprite.addChild(sector);                                
+                                self.sprite.addChild(sector);
                                 moreSecData = {
                                     name: data[i].name,
-                                    value:data[i].y,
+                                    value: data[i].y,
                                     sector: sector,
                                     context: sector.context,
                                     originx: sector.context.x,
