@@ -16,13 +16,7 @@ module.exports = function(grunt) {
                 drop_console: true
             }
          },
-         app: {
-             expand: true,
-             cwd: bc,
-             src: ['**/*.js'],
-             dest:bc,
-             ext: '.js' // '.js'
-         },
+
          min: {
              expand: true,
              cwd: bc,
@@ -134,7 +128,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
  
   //注册任务
-  grunt.registerTask('default', [ 'clean' , 'copy' , 'uglify:app' , 'concat' ,  'uglify:min'  ]);
+  grunt.registerTask('default', [ 'clean' , 'copy' ,  'concat' ,  'uglify:min'  ]);
 }
 
 

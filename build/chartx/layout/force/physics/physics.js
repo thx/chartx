@@ -1,1 +1,374 @@
-define("chartx/layout/force/physics/physics",["chartx/layout/force/physics/atoms","chartx/layout/force/physics/barnes-hut"],function(a,b){var c=function(c,d,e,f,g,h){!a&&self.Atoms&&(a=self.Atoms),!b&&self.BarnesHutTree&&(b=self.BarnesHutTree);var i=b(),j={particles:{},springs:{}},k={particles:{}},l=[],m=[],n=0,o={sum:0,max:0,mean:0},p={topleft:new a.Point(-1,-1),bottomright:new a.Point(1,1)},q=1e3,r={integrator:["verlet","euler"].indexOf(h)>=0?h:"verlet",stiffness:void 0!==d?d:1e3,repulsion:void 0!==e?e:600,friction:void 0!==f?f:.3,gravity:!1,dt:void 0!==c?c:.02,theta:.4,init:function(){return r},modifyPhysics:function(a){_.each(["stiffness","repulsion","friction","gravity","dt","precision","integrator"],function(b,c){if(void 0!==a[b]){if("precision"==b)return void(r.theta=1-a[b]);if(r[b]=a[b],"stiffness"==b){var d=a[b];_.each(j.springs,function(a,b){a.k=d})}}})},addNode:function(b){var c=b.id,d=b.m,e=p.bottomright.x-p.topleft.x,f=p.bottomright.y-p.topleft.y,g=new a.Point(null!=b.x?b.x:p.topleft.x+e*Math.random(),null!=b.y?b.y:p.topleft.y+f*Math.random());j.particles[c]=new a.Particle(g,d),j.particles[c].connections=0,j.particles[c].fixed=1===b.f,k.particles[c]=j.particles[c],l.push(j.particles[c])},dropNode:function(a){var b=a.id,c=j.particles[b],d=$.inArray(c,l);d>-1&&l.splice(d,1),delete j.particles[b],delete k.particles[b]},modifyNode:function(a,b){if(a in j.particles){var c=j.particles[a];"x"in b&&(c.p.x=b.x),"y"in b&&(c.p.y=b.y),"m"in b&&(c.m=b.m),"f"in b&&(c.fixed=1===b.f),"_m"in b&&(void 0===c._m&&(c._m=c.m),c.m=b._m)}},addSpring:function(b){var c=b.id,d=b.l,e=j.particles[b.fm],f=j.particles[b.to];void 0!==e&&void 0!==f&&(j.springs[c]=new a.Spring(e,f,d,r.stiffness),m.push(j.springs[c]),e.connections++,f.connections++,delete k.particles[b.fm],delete k.particles[b.to])},dropSpring:function(a){var b=a.id,c=j.springs[b];c.point1.connections--,c.point2.connections--;var d=$.inArray(c,m);d>-1&&m.splice(d,1),delete j.springs[b]},_update:function(a){return n++,_.each(a,function(a,b){a.t in r&&r[a.t](a)}),n},tick:function(){r.tendParticles(),"euler"==r.integrator?(r.updateForces(),r.updateVelocity(r.dt),r.updatePosition(r.dt)):(r.updateForces(),r.cacheForces(),r.updatePosition(r.dt),r.updateForces(),r.updateVelocity(r.dt)),r.tock()},tock:function(){var a=[];_.each(j.particles,function(b,c){a.push(c),a.push(b.p.x),a.push(b.p.y)}),g&&g({geometry:a,epoch:n,energy:o,bounds:p})},tendParticles:function(){_.each(j.particles,function(a,b){void 0!==a._m&&(Math.abs(a.m-a._m)<1?(a.m=a._m,delete a._m):a.m*=.98),a.v.x=a.v.y=0})},updateForces:function(){r.repulsion>0&&(r.theta>0?r.applyBarnesHutRepulsion():r.applyBruteForceRepulsion()),r.stiffness>0&&r.applySprings(),r.applyCenterDrift(),r.gravity&&r.applyCenterGravity()},cacheForces:function(){_.each(j.particles,function(a,b){a._F=a.f})},applyBruteForceRepulsion:function(){_.each(j.particles,function(b,c){_.each(j.particles,function(c,d){if(b!==c){var e=b.p.subtract(c.p),f=Math.max(1,e.magnitude()),g=(e.magnitude()>0?e:a.Point.random(1)).normalize();b.applyForce(g.multiply(r.repulsion*(c._m||c.m)*.5).divide(f*f*.5)),c.applyForce(g.multiply(r.repulsion*(b._m||b.m)*.5).divide(f*f*-.5))}})})},applyBarnesHutRepulsion:function(){if(p.topleft&&p.bottomright){var b=new a.Point(p.bottomright),c=new a.Point(p.topleft);i.init(c,b,r.theta),_.each(j.particles,function(a,b){i.insert(a)}),_.each(j.particles,function(a,b){i.applyForces(a,r.repulsion)})}},applySprings:function(){_.each(j.springs,function(b,c){var d=b.point2.p.subtract(b.point1.p),e=b.length-d.magnitude(),f=(d.magnitude()>0?d:a.Point.random(1)).normalize();b.point1.applyForce(f.multiply(b.k*e*-.5)),b.point2.applyForce(f.multiply(b.k*e*.5))})},applyCenterDrift:function(){var b=0,c=new a.Point(0,0);if(_.each(j.particles,function(a,d){c.add(a.p),b++}),0!=b){var d=c.divide(-b);_.each(j.particles,function(a,b){a.applyForce(d)})}},applyCenterGravity:function(){_.each(j.particles,function(a,b){var c=a.p.multiply(-1);a.applyForce(c.multiply(r.repulsion/100))})},updateVelocity:function(b){var c=0,d=0,e=0;_.each(j.particles,function(f,g){if(f.fixed)return f.v=new a.Point(0,0),void(f.f=new a.Point(0,0));"euler"==r.integrator?f.v=f.v.add(f.f.multiply(b)).multiply(1-r.friction):f.v=f.v.add(f.f.add(f._F.divide(f.m)).multiply(.5*b)).multiply(1-r.friction),f.f.x=f.f.y=0;var h=f.v.magnitude();h>q&&(f.v=f.v.divide(h*h));var h=f.v.magnitude(),i=h*h;c+=i,d=Math.max(i,d),e++}),o={sum:c,max:d,mean:c/e,n:e}},updatePosition:function(b){var c=null,d=null;_.each(j.particles,function(e,f){if("euler"==r.integrator)e.p=e.p.add(e.v.multiply(b));else{var g=e.f.multiply(.5*b*b).divide(e.m);e.p=e.p.add(e.v.multiply(b)).add(g)}if(!c)return c=new a.Point(e.p.x,e.p.y),void(d=new a.Point(e.p.x,e.p.y));var h=e.p;null!==h.x&&null!==h.y&&(h.x>c.x&&(c.x=h.x),h.y>c.y&&(c.y=h.y),h.x<d.x&&(d.x=h.x),h.y<d.y&&(d.y=h.y))}),p={topleft:d||new a.Point(-1,-1),bottomright:c||new a.Point(1,1)}},systemEnergy:function(a){return o}};return r.init()};return self.Physics=c,c});
+define(
+        "chartx/layout/force/physics/physics",
+        [
+            "chartx/layout/force/physics/atoms",
+            "chartx/layout/force/physics/barnes-hut"
+        ],
+        function( Atoms , BarnesHutTree ){
+            var Physics = function(dt, stiffness, repulsion, friction, updateFn, integrator){
+
+                //for webworker
+                if(!Atoms && self.Atoms){
+                    Atoms = self.Atoms;
+                }
+                if(!BarnesHutTree && self.BarnesHutTree){
+                    BarnesHutTree = self.BarnesHutTree;
+                }
+                //for webworker end
+
+
+                var bhTree = BarnesHutTree(); // for computing particle repulsion
+                var active = {particles:{}, springs:{}};
+                var free = {particles:{}};
+                var particles = [];
+                var springs = [];
+                var _epoch=0;
+                var _energy = {sum:0, max:0, mean:0};
+                var _bounds = {topleft:new Atoms.Point(-1,-1), bottomright:new Atoms.Point(1,1)};
+
+                var SPEED_LIMIT = 1000; // the max particle velocity per tick
+
+                var that = {
+                    integrator:['verlet','euler'].indexOf(integrator)>=0 ? integrator : 'verlet',
+                    stiffness:(stiffness!==undefined) ? stiffness : 1000,
+                    repulsion:(repulsion!==undefined)? repulsion : 600,
+                    friction:(friction!==undefined)? friction : .3,
+                    gravity:false,
+                    dt:(dt!==undefined)? dt : 0.02,
+                    theta:.4, // the criterion value for the barnes-hut s/d calculation
+                    
+                    init:function(){
+                        return that
+                    },
+
+                    modifyPhysics:function(param){
+                        _.each(['stiffness','repulsion','friction','gravity','dt','precision', 'integrator'], function(p , i){
+                            
+                            if (param[p]!==undefined){
+                                if (p=='precision'){
+                                    that.theta = 1-param[p];
+                                    return
+                                };
+                                that[p] = param[p];
+
+                                if (p=='stiffness'){
+                                    var stiff=param[p];
+                                    _.each(active.springs, function(spring , id){
+                                        spring.k = stiff
+                                    })             
+                                }
+                            }
+                        })
+                    },
+
+                    addNode:function(c){
+                        var id = c.id;
+                        var mass = c.m;
+
+                        var w = _bounds.bottomright.x - _bounds.topleft.x;
+                        var h = _bounds.bottomright.y - _bounds.topleft.y;
+                        var randomish_pt = new Atoms.Point(
+                                (c.x != null) ? c.x: _bounds.topleft.x + w*Math.random(),
+                                (c.y != null) ? c.y: _bounds.topleft.y + h*Math.random()
+                                );
+
+
+                        active.particles[id] = new Atoms.Particle(randomish_pt, mass);
+                        active.particles[id].connections = 0;
+                        active.particles[id].fixed = (c.f===1);
+                        free.particles[id] = active.particles[id];
+                        particles.push(active.particles[id]);     
+                    },
+
+                    dropNode:function(c){
+                        var id = c.id;
+                        var dropping = active.particles[id];
+                        var idx = $.inArray(dropping, particles);
+                        if (idx>-1) {
+                            particles.splice(idx,1)
+                        }
+                        delete active.particles[id];
+                        delete free.particles[id];
+                    },
+
+                    modifyNode:function(id, mods){
+                        if (id in active.particles){
+                            var pt = active.particles[id];
+                            if ('x' in mods) pt.p.x = mods.x;
+                            if ('y' in mods) pt.p.y = mods.y;
+                            if ('m' in mods) pt.m = mods.m;
+                            if ('f' in mods) pt.fixed = (mods.f===1);
+                            if ('_m' in mods){
+                                if (pt._m===undefined) pt._m = pt.m;
+                                pt.m = mods._m;            
+                            }
+                        }
+                    },
+
+                    addSpring:function(c){
+                        var id = c.id;
+                            var length = c.l;
+                            var from = active.particles[c.fm];
+                            var to = active.particles[c.to];
+
+                            if (from!==undefined && to!==undefined){
+                                active.springs[id] = new Atoms.Spring(from, to, length, that.stiffness);
+                                springs.push(active.springs[id]);
+
+                                from.connections++;
+                                to.connections++;
+
+                                delete free.particles[c.fm];
+                                delete free.particles[c.to];
+                            }
+                    },
+
+                    dropSpring:function(c){
+                        var id = c.id;
+                        var dropping = active.springs[id];
+
+                        dropping.point1.connections--;
+                        dropping.point2.connections--;
+
+                        var idx = $.inArray(dropping, springs);
+                        if (idx>-1){
+                            springs.splice(idx,1)
+                        }
+                        delete active.springs[id]
+                    },
+
+                    _update:function(changes){
+                        // batch changes phoned in (automatically) by a ParticleSystem
+                        _epoch++;
+
+                        _.each(changes, function(c,i){
+                            if (c.t in that) that[c.t](c)
+                        })
+                        return _epoch
+                    },
+
+                    tick:function(){ 
+                        
+                        that.tendParticles();
+                        if (that.integrator=='euler'){
+                            that.updateForces();
+                            that.updateVelocity(that.dt)
+                                that.updatePosition(that.dt)
+                        }else{
+                            //default to verlet
+                            that.updateForces();
+                            that.cacheForces();           // snapshot f(t)
+                            that.updatePosition(that.dt); // update position to x(t + 1)
+                            that.updateForces();          // calculate f(t+1)
+                            that.updateVelocity(that.dt); // update using f(t) and f(t+1) 
+                        }
+                        that.tock()
+                    },
+
+                    tock:function(){
+                        var coords = [];
+                        _.each(active.particles, function(pt,id){
+                            coords.push(id)
+                            coords.push(pt.p.x)
+                            coords.push(pt.p.y)
+                        })
+
+                        if (updateFn) updateFn({geometry:coords, epoch:_epoch, energy:_energy, bounds:_bounds})
+                    },
+
+                    tendParticles:function(){
+                        _.each(active.particles, function(pt , id){
+                            if (pt._m!==undefined){
+                                if (Math.abs(pt.m-pt._m)<1){
+                                    pt.m = pt._m;
+                                    delete pt._m
+                                }else{
+                                    pt.m *= .98
+                                }
+                            }
+
+                            // zero out the velocity from one tick to the next
+                            pt.v.x = pt.v.y = 0           
+                        })
+
+                    },
+
+
+                    // Physics stuff      
+                    updateForces:function() {
+                        if (that.repulsion>0){
+                            if (that.theta>0) that.applyBarnesHutRepulsion()
+                            else that.applyBruteForceRepulsion()
+                        }
+                        if (that.stiffness>0) that.applySprings();
+                        that.applyCenterDrift();
+                        if (that.gravity) that.applyCenterGravity();
+                    },
+
+                    cacheForces:function() {
+                        _.each(active.particles, function(point,id) {
+                            point._F = point.f;
+                        });
+                    },
+
+                    applyBruteForceRepulsion:function(){
+                        _.each(active.particles, function(point1,id1){
+                            _.each(active.particles, function(point2,id2){
+                                if (point1 !== point2){
+                                    var d = point1.p.subtract(point2.p);
+                                    var distance = Math.max(1.0, d.magnitude());
+                                    var direction = ((d.magnitude()>0) ? d : Atoms.Point.random(1)).normalize()
+
+                                // apply force to each end point
+                                // (consult the cached `real' mass value if the mass is being poked to allow
+                                // for repositioning. the poked mass will still be used in .applyforce() so
+                                // all should be well)
+                                point1.applyForce(direction.multiply(that.repulsion*(point2._m||point2.m)*.5)
+                                    .divide(distance * distance * 0.5) );
+                            point2.applyForce(direction.multiply(that.repulsion*(point1._m||point1.m)*.5)
+                                .divide(distance * distance * -0.5) );
+
+                                }
+                            })          
+                        })
+                    },
+
+                    applyBarnesHutRepulsion:function(){
+                        if (!_bounds.topleft || !_bounds.bottomright) return
+                            var bottomright = new Atoms.Point(_bounds.bottomright)
+                                var topleft = new Atoms.Point(_bounds.topleft)
+
+                                // build a barnes-hut tree...
+                                bhTree.init(topleft, bottomright, that.theta)        
+                                _.each(active.particles, function(particle , id ){
+                                    bhTree.insert(particle)
+                                })
+
+                        // ...and use it to approximate the repulsion forces
+                        _.each(active.particles, function(particle , id){
+                            bhTree.applyForces(particle, that.repulsion)
+                        })
+                    },
+
+                    applySprings:function(){
+                        _.each(active.springs, function(spring,id){
+                            var d = spring.point2.p.subtract(spring.point1.p); // the direction of the spring
+                            var displacement = spring.length - d.magnitude()//Math.max(.1, d.magnitude());
+                            var direction = ( (d.magnitude()>0) ? d : Atoms.Point.random(1) ).normalize()
+
+                            // BUG:
+                            // since things oscillate wildly for hub nodes, should probably normalize spring
+                            // forces by the number of incoming edges for each node. naive normalization 
+                            // doesn't work very well though. what's the `right' way to do it?
+
+                            // apply force to each end point
+                            spring.point1.applyForce(direction.multiply(spring.k * displacement * -0.5))
+                            spring.point2.applyForce(direction.multiply(spring.k * displacement * 0.5))
+                        });
+                    },
+
+
+                    applyCenterDrift:function(){
+                        // find the centroid of all the particles in the system and shift everything
+                        // so the cloud is centered over the origin
+                        var numParticles = 0
+                            var centroid = new Atoms.Point(0,0)
+                            _.each(active.particles, function( point , id ) {
+                                centroid.add(point.p)
+                                numParticles++
+                            });
+
+                        if (numParticles==0) return
+
+                            var correction = centroid.divide(-numParticles)
+                                _.each(active.particles, function( point , id ) {
+                                    point.applyForce(correction)
+                                })
+
+                    },
+                    applyCenterGravity:function(){
+                        _.each(active.particles, function( point , id ) {
+                            var direction = point.p.multiply(-1.0);
+                            point.applyForce(direction.multiply(that.repulsion / 100.0));
+                        });
+                    },
+
+                    updateVelocity:function(timestep){
+                        // translate forces to a new velocity for this particle
+                        var sum=0, max=0, n = 0;
+                        _.each(active.particles, function( point , id ) {
+                            if (point.fixed){
+                                point.v = new Atoms.Point(0,0)
+                            point.f = new Atoms.Point(0,0)
+                            return
+                            }
+
+                            if (that.integrator=='euler'){
+                                point.v = point.v.add(point.f.multiply(timestep)).multiply(1-that.friction);
+                            }else{
+                                point.v = point.v.add(point.f.add(point._F.divide(point.m)).multiply(timestep*0.5)).multiply(1-that.friction);
+                            }
+                            point.f.x = point.f.y = 0
+
+                            var speed = point.v.magnitude()          
+                            if (speed>SPEED_LIMIT) point.v = point.v.divide(speed*speed)
+
+                            var speed = point.v.magnitude();
+                        var e = speed*speed
+                            sum += e
+                            max = Math.max(e,max)
+                            n++
+                        });
+                        _energy = {sum:sum, max:max, mean:sum/n, n:n}
+
+                    },
+
+                    updatePosition:function(timestep){
+                        // translate velocity to a position delta
+                        var bottomright = null
+                            var topleft = null        
+
+                            _.each(active.particles, function(point , i) {
+
+                                // move the node to its new position
+                                if (that.integrator=='euler'){
+                                    point.p = point.p.add(point.v.multiply(timestep));
+                                }else{
+                                    //this should follow the equation
+                                    //x(t+1) = x(t) + v(t) * timestep + 1/2 * timestep^2 * a(t)
+                                    var accel = point.f.multiply(0.5 * timestep * timestep).divide(point.m);
+                                    point.p = point.p.add(point.v.multiply(timestep)).add(accel);
+                                }
+
+                                if (!bottomright){
+                                    bottomright = new Atoms.Point(point.p.x, point.p.y)
+                                topleft = new Atoms.Point(point.p.x, point.p.y)
+                                return
+                                }
+
+                                var pt = point.p
+                                if (pt.x===null || pt.y===null) return
+                                if (pt.x > bottomright.x) bottomright.x = pt.x;
+                                if (pt.y > bottomright.y) bottomright.y = pt.y;          
+                                if (pt.x < topleft.x)     topleft.x = pt.x;
+                                if (pt.y < topleft.y)     topleft.y = pt.y;
+                            });
+
+                        _bounds = {topleft:topleft||new Atoms.Point(-1,-1), bottomright:bottomright||new Atoms.Point(1,1)}
+                    },
+
+                    systemEnergy:function(timestep){
+                        // system stats
+                        return _energy
+                    }
+
+
+                }
+                return that.init()
+            }
+
+            //for worker
+            self.Physics = Physics;
+            return Physics;
+        }
+)

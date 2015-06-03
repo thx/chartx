@@ -1,1 +1,106 @@
-define("chartx/chart/force/index",["chartx/chart/index","canvax/shape/Line","canvax/shape/Circle","chartx/layout/force/physics/system"],function(a,b,c,d){var e=a.Canvax;return a.extend({data:null,init:function(a,b,c){this.data=b,this.edgeStyle="rgba(110,139,180,0.3)",this.nodeStyle="#c9701c",this.particleSystem=null,this.spriteEdge=new e.Display.Sprite({id:"spriteEdge"}),this.spriteNode=new e.Display.Sprite({id:"spriteNode"}),this.stage.addChild(this.spriteEdge),this.stage.addChild(this.spriteNode)},draw:function(){this._widget()},_simpleRenderer:function(a){var d=this,e={init:function(a){d.particleSystem=a,d.particleSystem.screenSize(d.width,d.height),d.particleSystem.screenPadding(80)},redraw:function(){d.particleSystem.eachEdge(function(a,c,e){var f=d.spriteEdge.getChildById("edge"+a._id);f?(f.context.xStart=c.x,f.context.yStart=c.y,f.context.xEnd=e.x,f.context.yEnd=e.y,f.context.lineWidth=4*a.data.weight):d.spriteEdge.addChild(new b({id:"edge"+a._id,context:{xStart:c.x,yStart:c.y,xEnd:e.x,yEnd:e.y,lineWidth:4*a.data.weight,strokeStyle:d.edgeStyle}}))}),d.particleSystem.eachNode(function(a,b){var e=d.spriteNode.getChildById("node"+a._id);e?(e.context.x=b.x,e.context.y=b.y):d.spriteNode.addChild(new c({id:"node"+a._id,context:{x:b.x,y:b.y,r:6,fillStyle:d.nodeStyle}}))})}};return e},_widget:function(){var a=d(1e3,800,10);a.parameters({stiffness:900,repulsion:2e3,gravity:!0,dt:.015}),a.renderer=this._simpleRenderer("viewport"),a.graft({nodes:this.data.nodes,edges:this.data.edges})}})});
+define(
+        "chartx/chart/force/index",
+        [
+            'chartx/chart/index',
+            'canvax/shape/Line',
+            'canvax/shape/Circle',
+            'chartx/layout/force/physics/system'
+        ],
+        function( Chart , Line , Circle , ParticleSystem ){
+            var Canvax = Chart.Canvax;
+            return Chart.extend({
+                data : null,
+                init : function( node , data , opt ){
+                    this.data = data;
+
+                    this.edgeStyle = "rgba(110,139,180,0.3)";//"#6e8bb4";
+                    this.nodeStyle = "#c9701c";
+
+                    this.particleSystem = null;
+                    this.spriteEdge = new Canvax.Display.Sprite({
+                        id      : 'spriteEdge'
+                    });;
+                    this.spriteNode = new Canvax.Display.Sprite({
+                        id      : 'spriteNode'
+                    });
+
+                    this.stage.addChild( this.spriteEdge );
+                    this.stage.addChild( this.spriteNode );
+                },
+                draw : function(){
+                    this._widget();
+                },
+                _simpleRenderer : function(canvas){
+                    
+                    var me = this;
+                    var that = {
+                        init:function(system){
+                            me.particleSystem = system;
+                            me.particleSystem.screenSize(me.width, me.height); 
+                            me.particleSystem.screenPadding(80); 
+                        },
+                        redraw:function(){
+                            me.particleSystem.eachEdge(function(edge, pt1, pt2){
+                                var line = me.spriteEdge.getChildById( "edge"+edge._id );
+                                if( line ){
+                                    line.context.xStart = pt1.x;
+                                    line.context.yStart = pt1.y;
+                                    line.context.xEnd   = pt2.x;
+                                    line.context.yEnd   = pt2.y;
+                                    line.context.lineWidth = 4*edge.data.weight;
+                                } else {
+                                    me.spriteEdge.addChild(new Line({
+                                        id : "edge"+edge._id,
+                                        context : {
+                                            xStart : pt1.x,
+                                            yStart : pt1.y,
+                                            xEnd   : pt2.x,
+                                            yEnd   : pt2.y,
+                                            lineWidth : 4*edge.data.weight,
+                                            strokeStyle : me.edgeStyle//"rgba(255,255,255, .333)"
+                                        }
+                                    }));
+                                }
+                            });
+                            
+
+                            me.particleSystem.eachNode(function(node, pt){
+                                //debugger;
+                                // node: {mass:#, p:{x,y}, name:"", data:{}}
+                                // pt:   {x:#, y:#}  node position in screen coords
+                                var circle = me.spriteNode.getChildById("node"+node._id);
+                                if( circle ){
+                                    circle.context.x = pt.x;
+                                    circle.context.y = pt.y;
+                                } else {
+                                    me.spriteNode.addChild(new Circle({
+                                        id : "node"+node._id,
+                                        context : {
+                                            x : pt.x,
+                                            y : pt.y,
+                                            r : 6,
+                                            fillStyle : me.nodeStyle
+                                        }
+                                    }));
+                                }
+
+                            });   			
+                        }
+                    };
+                    return that
+                },
+                _widget : function(){
+                    var sys = ParticleSystem(1000, 800, 10);
+                    sys.parameters({
+                        stiffness:900, 
+                        repulsion:2000, 
+                        gravity:true, 
+                        dt:0.015 ,
+                        //precision:0.6
+                    });
+                    sys.renderer = this._simpleRenderer("viewport");
+                    sys.graft({nodes:this.data.nodes, edges:this.data.edges});
+                }
+            });
+        }
+);

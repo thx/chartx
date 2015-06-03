@@ -1,1 +1,171 @@
-define("chartx/components/yaxis/yAxis_h",["canvax/index","canvax/shape/Line","chartx/utils/tools"],function(a,b,c){var d=function(a,b){this.w=0,this.enabled=1,this.dis=6,this.line={enabled:1,width:6,height:3,strokeStyle:"#BEBEBE"},this.text={fillStyle:"#999999",fontSize:12},this.data=[],this.dataOrg=[],this.sprite=null,this.txtSp=null,this.lineSp=null,this.x=0,this.y=0,this.disYAxisTopLine=6,this.yMaxHeight=0,this.yGraphsHeight=0,this.yDis1=0,this.textFormat=null,this.init(a,b)};return d.prototype={init:function(b,c){_.deepExtend(this,b),this._initData(c),this.sprite=new a.Display.Sprite},setX:function(a){this.sprite.context.x=a},setY:function(a){this.sprite.context.y=a},update:function(a,b){this.sprite.removeAllChildren(),_.deepExtend(this,a),this._initData(b),this.draw()},draw:function(a){a&&_.deepExtend(this,a),this.yGraphsHeight=this.yMaxHeight-this._getYAxisDisLine(),this.yDis1=this.yGraphsHeight/this.dataOrg.length,this.setX(this.pos.x),this.setY(this.pos.y),this._trimYAxis(),this._widget()},_trimYAxis:function(){for(var a=this.dataOrg,b=[],c=0,d=a.length;d>c;c++){var e=-(c+1)*this.yDis1+this.yDis1/2;e=isNaN(e)?0:parseInt(e),b[c]={content:this.dataOrg[c],y:e}}this.data=b},_getYAxisDisLine:function(){var a=this.disYAxisTopLine,b=2*a,c=a;return c=a+this.yMaxHeight%this.dataOrg.length,c=c>b?b:c},_initData:function(a){this.dataOrg=a.org[0]},_widget:function(){var d=this;if(!d.enabled)return void(d.w=0);d.txtSp=new a.Display.Sprite,d.sprite.addChild(d.txtSp),d.lineSp=new a.Display.Sprite,d.sprite.addChild(d.lineSp);for(var e=this.data,f=0,g=0,h=e.length;h>g;g++){var i=e[g],j=0,k=i.y,l=c.numAddSymbol(i.content);_.isFunction(d.textFormat)&&(l=d.textFormat(l));var m=new a.Display.Text(l,{context:{x:j,y:k,fillStyle:d.text.fillStyle,fontSize:d.text.fontSize,textAlign:"right",textBaseline:"middle"}});d.txtSp.addChild(m),f=Math.max(f,m.getTextWidth());var n=new b({id:g,context:{x:0,y:k,xEnd:d.line.width,yEnd:0,lineWidth:d.line.height,strokeStyle:d.line.strokeStyle}});d.lineSp.addChild(n)}d.txtSp.context.x=f,d.lineSp.context.x=f+d.dis,d.line.enabled?d.w=f+d.dis+d.line.width:(d.lineSp.context.visible=!1,d.w=f+d.dis)}},d});
+define(    
+    "chartx/components/yaxis/yAxis_h" , 
+    [
+        "canvax/index",
+        "canvax/shape/Line",
+        "chartx/utils/tools"//,
+        // 'chartx/utils/datasection'
+    ],
+    function( Canvax , Line , Tools){
+        var yAxis = function(opt , data){
+            this.w = 0;
+            this.enabled = 1;//true false 1,0都可以
+            this.dis  = 6                                  //线到文本的距离
+    
+            this.line = {
+                    enabled : 1,                           //是否有line
+                    width   : 6,
+                    height  : 3,
+                    strokeStyle   : '#BEBEBE'
+            }
+     
+            this.text = {
+                    fillStyle : '#999999',
+                    //fontSize  : 13//
+                    fontSize  : 12
+            }
+    
+            this.data        = [];                          //{y:-100, content:'1000'}
+            this.dataOrg     = [];
+    
+    
+            this.sprite      = null;
+            this.txtSp       = null;
+            this.lineSp      = null;
+            
+            //yAxis的左上角坐标
+            this.x           = 0;
+            this.y           = 0;
+            
+            this.disYAxisTopLine =  6;                       //y轴顶端预留的最小值
+            this.yMaxHeight      =  0;                       //y轴最大高
+            this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
+            this.yDis1           =  0;                       //y轴每一组的高
+
+            //最终显示到y轴上面的文本的格式化扩展
+            //比如用户的数据是80 但是 对应的显示要求确是80%
+            //后面的%符号就需要用额外的contentFormat来扩展
+            this.textFormat   =  null;   
+
+            this.init(opt , data);
+        };
+    
+        yAxis.prototype = {
+            init:function( opt , data ){
+                _.deepExtend( this , opt );
+                this._initData( data );
+                this.sprite = new Canvax.Display.Sprite();
+            },
+            setX:function($n){
+                this.sprite.context.x = $n
+            },
+            setY:function($n){
+                this.sprite.context.y = $n
+            },
+            //删除一个字段
+            update : function( opt , data ){
+                //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                _.deepExtend( this , opt );
+                this._initData( data );
+                this.draw();
+            },
+            draw:function( opt ){
+                opt && _.deepExtend( this , opt );            
+    
+                this.yGraphsHeight = this.yMaxHeight  - this._getYAxisDisLine();
+                this.yDis1         = this.yGraphsHeight / this.dataOrg.length 
+    
+                this.setX( this.pos.x );
+                this.setY( this.pos.y );
+                this._trimYAxis();
+                this._widget();
+            },
+            _trimYAxis:function(){
+                var arr = this.dataOrg
+                var tmpData = [];
+                for(var a = 0, al = arr.length; a < al; a++){
+                    var y = - (a + 1) * this.yDis1 + this.yDis1 / 2
+                    y = isNaN(y) ? 0 : parseInt(y);
+                    tmpData[a] = {content:this.dataOrg[a], y:y}
+                }
+                this.data = tmpData
+             },
+            _getYAxisDisLine:function(){                   //获取y轴顶高到第一条线之间的距离         
+                var disMin = this.disYAxisTopLine
+                var disMax = 2 * disMin
+                var dis    = disMin
+                dis = disMin + this.yMaxHeight % this.dataOrg.length;
+                dis = dis > disMax ? disMax : dis
+                return dis
+            },
+            _initData  : function( data ){ 
+                this.dataOrg     = data.org[0];
+            },
+            _widget:function(){
+                var self  = this;
+                if( !self.enabled ){
+                    self.w = 0;
+                    return;
+                }
+                
+                self.txtSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.txtSp)
+                self.lineSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.lineSp)
+                
+                var arr = this.data
+                var maxW = 0;
+                for(var a = 0, al = arr.length; a < al; a++){
+                    var o = arr[a];
+                    var x = 0, y = o.y;
+                    
+                    var content = Tools.numAddSymbol( o.content );
+
+                    if( _.isFunction(self.textFormat) ){
+                        content = self.textFormat( content );
+                    }
+
+                    //文字
+                    var txt = new Canvax.Display.Text( content ,
+                       {
+                        context : {
+                            x  : x,
+                            y  : y,
+                            fillStyle    : self.text.fillStyle,
+                            fontSize     : self.text.fontSize,
+                            // textBackgroundColor:'#0000ff',
+                            textAlign    : "right",
+                            textBaseline : "middle"
+                       }
+                    })
+    
+    
+                    self.txtSp.addChild(txt);
+                    maxW = Math.max(maxW, txt.getTextWidth());
+    
+                    //线条
+                    var line = new Line({
+                        id      : a,
+                        context : {
+                            x           : 0,
+                            y           : y,
+                            xEnd        : self.line.width,
+                            yEnd        : 0,
+                            lineWidth   : self.line.height,
+                            strokeStyle : self.line.strokeStyle
+                        }
+                    })
+                    self.lineSp.addChild(line)
+                }
+                self.txtSp.context.x  = maxW;
+                self.lineSp.context.x = maxW + self.dis
+                if(self.line.enabled){
+                    self.w = maxW + self.dis + self.line.width
+                } else {
+                    self.lineSp.context.visible = false
+                    self.w = maxW + self.dis;
+                }
+            }
+        };
+        return  yAxis;
+    } 
+)

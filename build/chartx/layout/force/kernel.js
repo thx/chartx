@@ -1,1 +1,283 @@
-define("chartx/layout/force/kernel",["chartx/layout/force/physics/physics"],function(a){var b=function(b){var c="file:"==window.location.protocol&&navigator.userAgent.toLowerCase().indexOf("chrome")>-1,d=void 0!==window.Worker&&!c,e=null,f=null,g=[];g.last=new Date;var h=null,i=null,j=null,k=null,l=!1,m={system:b,tween:null,nodes:{},init:function(){m.tween=f;var c=b.parameters();return d?(h=setInterval(m.screenUpdate,c.timeout),e=new Worker(Chartx.path+"chartx/layout/force/worker.js"),e.onmessage=m.workerMsg,e.onerror=function(a){},e.postMessage({type:"physics",physics:_.extend(c,{timeout:Math.ceil(c.timeout)})})):(e=a(c.dt,c.stiffness,c.repulsion,c.friction,m.system._updateGeometry,c.integrator),m.start()),m},graphChanged:function(a){d?e.postMessage({type:"changes",changes:a}):e._update(a),m.start()},particleModified:function(a,b){d?e.postMessage({type:"modify",id:a,mods:b}):e.modifyNode(a,b),m.start()},physicsModified:function(a){isNaN(a.timeout)||(d?(clearInterval(h),h=setInterval(m.screenUpdate,a.timeout)):(clearInterval(j),j=null)),d?e.postMessage({type:"sys",param:a}):e.modifyPhysics(a),m.start()},workerMsg:function(a){var b=a.data.type;"stopping"==b&&(clearInterval(h),h=null),"geometry"==b&&m.workerUpdate(a.data)},_lastPositions:null,workerUpdate:function(a){m._lastPositions=a,m._lastBounds=a.bounds},_lastFrametime:(new Date).valueOf(),_lastBounds:null,_currentRenderer:null,screenUpdate:function(){var a=((new Date).valueOf(),!1);if(null!==m._lastPositions&&(m.system._updateGeometry(m._lastPositions),m._lastPositions=null,a=!0),f&&f.busy()&&(a=!0),m.system._updateBounds(m._lastBounds)&&(a=!0),a){var b=m.system.renderer;if(void 0!==b){b!==i&&(b.init(m.system),i=b),f&&f.tick(),b.redraw();var c=g.last;g.last=new Date,g.push(g.last-c),g.length>50&&g.shift()}}},physicsUpdate:function(){f&&f.tick(),e.tick();var a=m.system._updateBounds();f&&f.busy()&&(a=!0);var b=m.system.renderer,c=new Date,b=m.system.renderer;void 0!==b&&(b!==i&&(b.init(m.system),i=b),b.redraw({timestamp:c}));var d=g.last;g.last=c,g.push(g.last-d),g.length>50&&g.shift();var h=e.systemEnergy();(h.mean+h.max)/2<1?(null===k&&(k=(new Date).valueOf()),(new Date).valueOf()-k>1e3&&(clearInterval(j),j=null)):k=null},fps:function(a){if(void 0!==a){var b=1e3/Math.max(1,targetFps);m.physicsModified({timeout:b})}for(var c=0,d=0,e=g.length;e>d;d++)c+=g[d];var f=c/Math.max(1,g.length);return isNaN(f)?0:Math.round(1e3/f)},start:function(a){null===j&&(!l||a)&&(l=!1,d?e.postMessage({type:"start"}):(k=null,j=setInterval(m.physicsUpdate,m.system.parameters().timeout)))},stop:function(){l=!0,d?e.postMessage({type:"stop"}):null!==j&&(clearInterval(j),j=null)}};return m.init()};return b});
+define(
+        "chartx/layout/force/kernel",
+        [
+            'chartx/layout/force/physics/physics'
+        ],
+        function( Physics ){
+            var Kernel = function(pSystem){
+                // in chrome, web workers aren't available to pages with file:// urls
+                var chrome_local_file = window.location.protocol == "file:" && navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+                var USE_WORKER = (window.Worker !== undefined && !chrome_local_file);    
+
+                //USE_WORKER = false;
+
+                var _physics = null;
+                var _tween = null;
+                var _fpsWindow = []; // for keeping track of the actual frame rate
+                _fpsWindow.last = new Date();
+                var _screenInterval = null;
+                var _attached = null;
+
+                var _tickInterval = null;
+                var _lastTick = null;
+                var _paused = false;
+
+                var that = {
+                    system:pSystem,
+                    tween:null,
+                    nodes:{},
+
+                    init:function(){ 
+
+                        /* tween暂时用不到
+                        if (typeof(Tween)!='undefined'){
+                            _tween = Tween()
+                        } else if (typeof(arbor.Tween)!='undefined') {
+                            _tween = arbor.Tween()
+                        } else {
+                            _tween = {
+                                busy:function(){return false},
+                                tick:function(){return true},
+                                to:function(){
+                                    trace('Please include arbor-tween.js to enable tweens');
+                                    _tween.to=function(){}; return
+                                } 
+                            }
+                        };
+                        */
+
+
+                        that.tween = _tween;
+
+                        var params = pSystem.parameters();
+
+                        if(USE_WORKER){
+                            _screenInterval = setInterval(that.screenUpdate, params.timeout);
+
+                            _physics = new Worker( Chartx.path + 'chartx/layout/force/worker.js');
+                            _physics.onmessage = that.workerMsg;
+                            _physics.onerror = function(e){
+                                //error
+                            };
+                            _physics.postMessage({
+                                type : "physics", 
+                                physics : _.extend( params , {
+                                    timeout:Math.ceil(params.timeout)
+                                })
+                            });
+                        } else {
+                            _physics = Physics(
+                                    params.dt,
+                                    params.stiffness,
+                                    params.repulsion,
+                                    params.friction,
+                                    that.system._updateGeometry,
+                                    params.integrator
+                                    );
+                            that.start()
+                        }
+
+                        return that
+                    },
+
+                    graphChanged:function(changes){
+                        if (USE_WORKER) {
+                            _physics.postMessage({type:"changes","changes":changes});
+                        } else {
+                            _physics._update(changes)
+                        }
+                        that.start() 
+                    },
+
+                    particleModified:function(id, mods){
+                        if (USE_WORKER) {
+                            _physics.postMessage({type:"modify", id:id, mods:mods}) 
+                        } else {
+                            _physics.modifyNode(id, mods)
+                        }
+                        that.start() 
+                    },
+                    physicsModified:function(param){
+                        if (!isNaN(param.timeout)){
+                            if (USE_WORKER){
+                                clearInterval(_screenInterval);
+                                _screenInterval = setInterval(that.screenUpdate, param.timeout);
+                            }else{
+                                clearInterval(_tickInterval);
+                                _tickInterval=null
+                            }
+                        }
+                        if (USE_WORKER) {
+                            _physics.postMessage({type:'sys',param:param});
+                        } else {
+                            _physics.modifyPhysics(param)
+                        }
+                        that.start(); 
+                    },
+
+                    workerMsg:function(e){
+                        var type = e.data.type;
+                        if( type == 'stopping' ){
+                            clearInterval(_screenInterval); 
+                            _screenInterval = null;
+                        }
+                        if (type=='geometry'){
+                            that.workerUpdate(e.data)
+                        } else {
+                            //trace('physics:',e.data)
+                        }
+                    },
+                    _lastPositions:null,
+                    workerUpdate:function(data){
+                        that._lastPositions = data;
+                        that._lastBounds = data.bounds
+                    },
+
+                    // the main render loop when running in web worker mode
+                    _lastFrametime:new Date().valueOf(),
+                    _lastBounds:null,
+                    _currentRenderer:null,
+                    screenUpdate:function(){        
+                        //console.log("run")
+                        var now = new Date().valueOf();
+
+                        var shouldRedraw = false;
+                        if (that._lastPositions!==null){
+                            that.system._updateGeometry(that._lastPositions);
+                            that._lastPositions = null;
+                            shouldRedraw = true;
+                        }
+
+                        if (_tween && _tween.busy()) {
+                            shouldRedraw = true
+                        }
+
+                        if (that.system._updateBounds(that._lastBounds)){
+                            shouldRedraw=true
+                        }
+
+
+                        if (shouldRedraw){
+                            var render = that.system.renderer;
+                            if (render!==undefined){
+                                if (render !== _attached){
+                                    render.init(that.system);
+                                    _attached = render;
+                                }          
+
+                                if (_tween){
+                                    _tween.tick()
+                                }
+                                render.redraw();
+
+                                var prevFrame = _fpsWindow.last;
+                                _fpsWindow.last = new Date();
+                                _fpsWindow.push(_fpsWindow.last-prevFrame);
+                                if (_fpsWindow.length>50) {
+                                    _fpsWindow.shift()
+                                }
+                            }
+                        }
+                    },
+
+                    // the main render loop when running in non-worker mode
+                    physicsUpdate:function(){
+
+                        if (_tween) {
+                            _tween.tick();
+                        }
+                        _physics.tick();
+
+                        var stillActive = that.system._updateBounds();
+                        if (_tween && _tween.busy()) {
+                            stillActive = true
+                        }
+
+                        var render = that.system.renderer;
+                        var now = new Date();  
+                        var render = that.system.renderer;
+                        if (render!==undefined){
+                            if (render !== _attached){
+                                render.init(that.system);
+                                _attached = render;
+                            }          
+                            render.redraw({timestamp:now});
+                        }
+
+                        var prevFrame = _fpsWindow.last;
+                        _fpsWindow.last = now;
+                        _fpsWindow.push(_fpsWindow.last-prevFrame);
+                        if (_fpsWindow.length>50) {
+                            _fpsWindow.shift()
+                        }
+
+                        var sysEnergy = _physics.systemEnergy();
+                        if ((sysEnergy.mean + sysEnergy.max)/2 < 1){
+                            if (_lastTick===null) {
+                                _lastTick=new Date().valueOf()
+                            }
+                            if (new Date().valueOf()-_lastTick>1000){
+                                console.log('stop-nonWorker')
+                                clearInterval(_tickInterval);
+                                _tickInterval = null
+                            } else {
+                                // 'pausing'
+                            }
+                        }else{
+                            // 'continuing'
+                            _lastTick = null
+                        }
+                    },
+
+
+                    fps:function(newTargetFPS){
+                        if (newTargetFPS!==undefined){
+                            var timeout = 1000/Math.max(1,targetFps);
+                            that.physicsModified({timeout:timeout});
+                        }
+
+                        var totInterv = 0;
+                        for (var i=0, j=_fpsWindow.length; i<j; i++){
+                            totInterv+=_fpsWindow[i]
+                        }
+                        var meanIntev = totInterv/Math.max(1,_fpsWindow.length);
+                        if (!isNaN(meanIntev)){
+                            return Math.round(1000/meanIntev)
+                        } else {
+                            return 0
+                        }
+                    },
+                    start:function(unpause){
+                        if (_tickInterval !== null) return; // already running
+                        if (_paused && !unpause) return; // we've been .stopped before, wait for unpause
+                        _paused = false;
+
+                        if (USE_WORKER){
+                            _physics.postMessage({type:"start"})
+                        }else{
+                            _lastTick = null;
+                            _tickInterval = setInterval(that.physicsUpdate, that.system.parameters().timeout)
+                        }
+                    },
+                    stop:function(){
+                        _paused = true;
+                        if (USE_WORKER){
+                            _physics.postMessage({type:"stop"});
+                        }else{
+                            if (_tickInterval!==null){
+                                clearInterval(_tickInterval);
+                                _tickInterval = null
+                            }
+                        }
+                    }
+                }
+
+                return that.init()    
+            }
+
+            return Kernel;
+
+        }
+);
+
+

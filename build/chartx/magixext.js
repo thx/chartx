@@ -1,1 +1,60 @@
-define("chartx/magixext",[window.KISSY?"magix/view":"magix",window.KISSY?"node":null],function(a){a=a.View||a,a.mixin({createChart:function(a){var b,c,d,e,f=arguments;f.length>1&&!_.isObject(f[0])?(b=f[0],c=f[1],d=f[2],e=f[3]):(b=a.type,c=a.el,d=a.data,e=a.opts);var g=this,h={then:function(a){return this.chart?(_.isFunction(a)&&a(this.chart),this):(this._promiseHand.push(a),this)},chart:null,_promiseHand:[]},i=window.KISSY?KISSY.all:$;return c=c.replace(/(^\s*)|(\s*$)/g,""),"#"!=c.slice(0,1)&&"."!=c.slice(0,1)&&(c="#"+c),i=i("#"+this.id+" "+c),g.manage(Chartx.create[b](i,d,e).then(function(a){h.chart=a,_.each(h._promiseHand,function(b){_.isFunction(b)&&b(a)}),h._promiseHand=[]})),h}})});
+define(
+    "chartx/magixext", 
+    [
+        window.KISSY ? "magix/view" : "magix",
+        window.KISSY ? "node" : null
+    ],
+    function( View ){
+        View=View.View||View;
+        View.mixin({
+            createChart : function( opt ){
+
+                var type , el , data , opts ;
+
+                var args = arguments;
+                if( args.length > 1 && !_.isObject(args[0]) ){
+                    type = args[0];
+                    el   = args[1];
+                    data = args[2];
+                    opts = args[3];
+                } else {
+                    type = opt.type;
+                    el   = opt.el;
+                    data = opt.data; 
+                    opts = opt.opts;
+                };
+
+                var me  = this;
+                var obj =  {
+                    then : function(fn){
+                        if( this.chart ){
+                            _.isFunction( fn ) && fn( this.chart );
+                            return this; 
+                        };
+
+                        this._promiseHand.push( fn );
+                        return this;
+                    },
+                    chart : null,
+                    _promiseHand : []
+                };
+                var query = window.KISSY ? KISSY.all : $;
+                el = el.replace(/(^\s*)|(\s*$)/g, "");
+                if( el.slice(0,1)!= "#" && el.slice(0,1)!="." ){
+                    el = "#"+el;
+                };
+                query = query("#"+this.id+" " + el);
+                me.manage( Chartx.create[ type ]( query , data , opts ).then(function( chart ){
+                    obj.chart = chart;
+                    _.each( obj._promiseHand , function( fn ){
+                        _.isFunction( fn ) && fn( chart );
+                    } );
+                    obj._promiseHand = [];
+                }) );
+
+                return obj;
+
+            }
+        });
+    }
+);
