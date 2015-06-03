@@ -100,8 +100,8 @@
 <li>options --&gt; 绘制图表的配置                                                         </li>
 </ul>
 <p>创建一个line chart</p>
-<div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options)</code></pre></div><p>如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作</p>
-<div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options).then(<span class="function"><span class="keyword">function</span><span class="params">( chart )</span>{</span>
+<div class="highlight"><pre><code class="javascript">Chartx.line(el , data , options)</code></pre></div><p>如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作</p>
+<div class="highlight"><pre><code class="javascript">Chartx.line(el , data , options).then(<span class="function"><span class="keyword">function</span><span class="params">( chart )</span>{</span>
     chart.on(<span class="string">"eventType"</span> , <span class="function"><span class="keyword">function</span><span class="params">(e)</span>{</span>
         <span class="keyword">do</span> something ......
     });
@@ -154,8 +154,8 @@
         field : <span class="string">"xfield"</span>
     }
 };
-<span class="comment">//Chartx.create.line开始初始化chart实例</span>
-Chartx.create.line(<span class="string">"canvasTest"</span> , data , options);</code></pre></div><p>在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame</p>
+<span class="comment">//Chartx.line开始初始化chart实例</span>
+Chartx.line(<span class="string">"canvasTest"</span> , data , options);</code></pre></div><p>在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame</p>
 <div class="highlight"><pre><code class="javascript">chart.dataFrame  = {    <span class="comment">//数据集合对象</span>
     org        : [],   <span class="comment">//最原始的数据 , 也就是传入的data </span>
     data       : [],   <span class="comment">//最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}</span>

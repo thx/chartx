@@ -46,14 +46,14 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-
 创建一个line chart
 
 ```js
-Chartx.create.line(el , data , options)
+Chartx.line(el , data , options)
 ```
 
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
 ```js
-Chartx.create.line(el , data , options).then(function( chart ){
+Chartx.line(el , data , options).then(function( chart ){
     chart.on("eventType" , function(e){
         do something ......
     });
@@ -156,8 +156,8 @@ var options = {
         field : "xfield"
     }
 };
-//Chartx.create.line开始初始化chart实例
-Chartx.create.line("canvasTest" , data , options);
+//Chartx.line开始初始化chart实例
+Chartx.line("canvasTest" , data , options);
 ```
 
 在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame

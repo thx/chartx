@@ -26,7 +26,7 @@
 </tr>
 </tbody>
 </table>
-<h5 id="创建一个line-chart">创建一个line chart</h5><div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options)</code></pre></div><h5 id="如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作">如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作</h5><div class="highlight"><pre><code class="javascript">Chartx.create.line(el , data , options).then(<span class="function"><span class="keyword">function</span><span class="params">( chart )</span>{</span>
+<h5 id="创建一个line-chart">创建一个line chart</h5><div class="highlight"><pre><code class="javascript">Chartx.line(el , data , options)</code></pre></div><h5 id="如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作">如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作</h5><div class="highlight"><pre><code class="javascript">Chartx.line(el , data , options).then(<span class="function"><span class="keyword">function</span><span class="params">( chart )</span>{</span>
     chart.on(<span class="string">"eventType"</span> , <span class="function"><span class="keyword">function</span><span class="params">(e)</span>{</span>
         <span class="keyword">do</span> something ......
     });

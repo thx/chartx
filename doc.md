@@ -14,7 +14,7 @@ title:  Chartx Documentation
 ### 折线图
 
 ```js
-Chartx.create.line(el , data , options);
+Chartx.line(el , data , options);
 ```
 
 #### 数据
@@ -37,7 +37,7 @@ var data= [
 
 ```js
 var options = {
-    xAxis : {}, //x轴组件配置
+    xAxis : {}, //x轴组件配置,详见[xAxis](#xaxis)组件配置
     yAxis : {}, //y轴组件配置
     back  : {}, //背景组件配置
     anchor: {}, //瞄准器组件配置，可选，不需要瞄准器可以不做配置
@@ -45,6 +45,8 @@ var options = {
     graphs: {}  //折线图绘图配置
 }
 ```
+
+其中
 
 
 
