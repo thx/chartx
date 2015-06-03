@@ -5,11 +5,11 @@ title: Chartx
 
 Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染引擎Canvax（canvax的基于心跳包的主动渲染机制在图表这样并不需要高帧率的场景中有着非常良好的性能）。
 
-能自动适配AMD,CMD,KISSY的模块加载环境。
+能自动适配 AMD , CMD , KISSY 的模块加载环境。
 
 <code><a href="./demo/line-kissy.html" target="_blank">基于kissy的折线图</a></code>
-<code><a href="./demo/line-require.html" target="_blank">基于requirejs的折线图</a></code>
-<code><a href="./demo/line-sea" target="_blank">基于seajs的折线图</a></code>
+<code><a href="./demo/line-require.html" target="_blank">基于requirejs(AMD)的折线图</a></code>
+<code><a href="./demo/line-sea" target="_blank">基于seajs(CMD)的折线图</a></code>
 
 
 能自动适配到ie6，7，8等低端浏览器（采用flashcanvas来实现兼容）。
@@ -18,6 +18,10 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 
 
 <code>ww交流群 ：1238542386</code>
+
+
+
+
 
 
 ## Chartx的使用
@@ -29,7 +33,7 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 
 请在html页面中引入Chartx的js库文件
 
-daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index.js</code>
+daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index[-min].js</code>
 
 cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-min].js</code>
 
