@@ -53,8 +53,8 @@ var options = {
         field : "xfield"
     }
 };
-//Chartx.create.line开始初始化chart实例
-Chartx.create.line("canvasTest" , data , options).then(function( line ){
+//Chartx.line开始初始化chart实例
+Chartx.line("canvasTest" , data , options).then(function( line ){
     _.each(["uv","pv"] , function( id , i ){
         document.getElementById(id).onclick = function(e){
             if( !this.checked ){

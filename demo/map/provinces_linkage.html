@@ -79,7 +79,7 @@ var options = {
     } 
 };
 
-Chartx.create.map("canvasTest" , data , options).then(function(map){
+Chartx.map("canvasTest" , data , options).then(function(map){
     map.on("areaClick" , function( e ){
         //TODO: 要实现联动，需要开发者，在这里手动重置map
         var obj = {};

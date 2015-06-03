@@ -38,7 +38,7 @@ var options = {
     r          : 100
 }
 
-Chartx.create.progress("canvasTest" , data , options).then(function( chart ){
+Chartx.progress("canvasTest" , data , options).then(function( chart ){
     setTimeout(function(){
         //setRatio @params 为0-100的num
         chart.setRatio( 60 );
