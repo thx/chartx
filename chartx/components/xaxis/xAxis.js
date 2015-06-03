@@ -311,7 +311,7 @@ define(
                 var tmp = []
                 var arr = this.data
 
-                var mw  = this._textMaxWidth;
+                var mw  = this._textMaxWidth + 10;
     
                 if( !!this.text.rotation ){
                     mw  = this._textMaxHeight * 1.5;
