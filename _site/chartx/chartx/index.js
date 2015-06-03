@@ -12,6 +12,7 @@ var Chartx = {
         if ((/daily.taobao.net/g).test(location.host)) {
             Chartx._site.daily = true;
         }
+        Chartx._site.debug = true;
         //END(develop)
 
         

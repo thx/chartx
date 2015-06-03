@@ -1,1 +1,199 @@
-define("chartx/components/line/Graphs",["canvax/index","canvax/shape/Rect","chartx/utils/tools","chartx/components/line/Group"],function(a,b,c,d){var e=function(a,b){this.w=0,this.h=0,this.y=0,this.opt=a,this.root=b,this.ctx=b.stage.context2D,this.data=[],this.disX=0,this.groups=[],this.iGroup=0,this.iNode=-1,this.sprite=null,this.induce=null,this.init(a)};return e.prototype={init:function(b){this.opt=b,this.sprite=new a.Display.Sprite},setX:function(a){this.sprite.context.x=a},setY:function(a){this.sprite.context.y=a},getX:function(){return this.sprite.context.x},getY:function(){return this.sprite.context.y},draw:function(a){_.deepExtend(this,a),this._widget(a)},grow:function(){_.each(this.groups,function(a,b){a._grow()})},add:function(a,b){var c=this;_.deepExtend(this,a);var e=new d(b,c.opt,c.ctx);e.draw({data:b>c.data.length-1?c.data[c.data.length-1]:c.data[b]}),c.sprite.addChildAt(e.sprite,b),c.groups.splice(b,0,e),_.each(this.groups,function(a,b){a._groupInd=b,a.update({data:c.data[b]})})},remove:function(a){var b=this.groups.splice(a,1)[0];b.destroy()},update:function(a){_.deepExtend(this,a);var b=this;_.each(this.groups,function(a,c){a.update({data:b.data[c]})})},_widget:function(a){for(var c=this,e=0,f=c.data.length;f>e;e++){var g=new d(e,c.opt,c.ctx);g.draw({data:c.data[e]}),c.sprite.addChild(g.sprite),c.groups.push(g)}c.induce=new b({id:"induce",context:{y:-c.h,width:c.w,height:c.h,fillStyle:"#000000",globalAlpha:0,cursor:"pointer"}}),c.sprite.addChild(c.induce),c.induce.on("panstart mouseover",function(a){a.tipsInfo=c._getInfoHandler(a),c._fireHandler(a)}),c.induce.on("panmove mousemove",function(a){a.tipsInfo=c._getInfoHandler(a),c._fireHandler(a)}),c.induce.on("panend mouseout",function(a){a.tipsInfo=c._getInfoHandler(a),c._fireHandler(a),c.iGroup=0,c.iNode=-1}),c.induce.on("tap click",function(a){a.tipsInfo=c._getInfoHandler(a),c._fireHandler(a)})},_getInfoHandler:function(a){var b=a.point.x,d=a.point.y-this.h;b=b>this.w?this.w:b;for(var e=0==this.disX?0:parseInt((b+this.disX/2)/this.disX),f=[],g=c.getDisMinATArr(d,_.pluck(f,"y")),h=0,i=this.groups.length;i>h;h++){var j=this.groups[h].getNodeInfoAt(e);j&&f.push(j)}this.iGroup=g,this.iNode=e;var k={iGroup:this.iGroup,iNode:this.iNode,nodesInfoList:_.clone(f)};return k},_fireHandler:function(a){var b=this,c={eventType:a.type,iGroup:a.tipsInfo.iGroup,iNode:a.tipsInfo.iNode};_.isFunction(b.root.event.on)&&b.root.event.on(c)}},e});
+define(
+    "chartx/components/line/Graphs" ,
+    [
+        "canvax/index",
+        "canvax/shape/Rect",
+        "chartx/utils/tools",
+        "chartx/components/line/Group"
+    ],
+    function( Canvax , Rect, Tools, Group ){
+        var Graphs = function(opt,root){
+            this.w       = 0;   
+            this.h       = 0; 
+            this.y       = 0;
+
+            //这里所有的opt都要透传给group
+            this.opt     = opt;
+            this.root    = root;
+            this.ctx     = root.stage.context2D
+
+            this.data    = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
+            this.disX    = 0;                           //点与点之间的间距
+            this.groups  = [];                          //群组集合     
+    
+            this.iGroup  = 0;                           //群组索引(哪条线)
+            this.iNode   = -1;                          //节点索引(那个点)
+    
+            this.sprite  = null;  
+            this.induce  = null;                         
+
+            this.init(opt);
+        };
+    
+        Graphs.prototype = {
+    
+            init:function(opt){
+                this.opt = opt;
+                this.sprite = new Canvax.Display.Sprite();
+            },
+            setX:function($n){
+                this.sprite.context.x = $n
+            },
+            setY:function($n){
+                this.sprite.context.y = $n
+            },
+            getX:function(){
+                return this.sprite.context.x
+            },
+            getY:function(){
+                return this.sprite.context.y
+            },
+    
+            draw:function(opt){
+                _.deepExtend( this , opt );
+                this._widget( opt );
+            },
+            /**
+             * 生长动画
+             */
+            grow : function(){
+                _.each(this.groups , function( g , i ){
+                    g._grow();
+                });
+            },
+            /*
+             *@params opt
+             *@params ind 最新添加的数据所在的索引位置
+             **/
+            add : function( opt , ind ){
+                var self = this;
+                _.deepExtend( this , opt );
+                var group = new Group(
+                    ind , //_groupInd
+                    self.opt,
+                    self.ctx
+                );
+                
+                group.draw({
+                    data       : ind > self.data.length-1 ? self.data[self.data.length-1]: self.data[ind]
+                });
+                self.sprite.addChildAt(group.sprite , ind);
+                self.groups.splice(ind , 0 , group);
+
+                _.each(this.groups , function( g , i ){
+                    //_groupInd要重新计算
+                    g._groupInd = i;
+                    g.update({
+                        data : self.data[i]
+                    });
+                });
+
+            },
+            /*
+             *删除 ind
+             **/
+            remove : function( i ){
+                var target = this.groups.splice( i , 1 )[0];
+                target.destroy();    
+            },
+            /*
+             * 更新下最新的状态
+             **/
+            update : function( opt ){
+                _.deepExtend( this , opt );
+                //剩下的要更新下位置
+                var self = this;
+                _.each(this.groups , function( g , i ){
+                    g.update({
+                        data : self.data[i]
+                    });
+                });
+            },
+            _widget:function( opt ){
+                var self  = this;
+                
+                for(var a = 0,al = self.data.length; a < al; a++){
+                    var group = new Group(
+                        a , //_groupInd
+                        self.opt,
+                        self.ctx
+                    );
+                    
+                    group.draw({
+                        data       : self.data[a]
+                    })
+                    self.sprite.addChild(group.sprite);
+                    self.groups.push(group);
+                    
+                }
+                
+                self.induce = new Rect({
+                    id    : "induce",
+                    context:{
+                        y           : -self.h,
+                        width       : self.w,
+                        height      : self.h,
+                        fillStyle   : '#000000',
+                        globalAlpha : 0,
+                        cursor      : 'pointer'
+                    }
+                });
+
+                self.sprite.addChild(self.induce);
+    
+                self.induce.on("panstart mouseover", function(e){
+                    e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
+                })
+                self.induce.on("panmove mousemove", function(e){
+                    e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
+                })
+                self.induce.on("panend mouseout", function(e){
+                    e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
+                    self.iGroup = 0, self.iNode = -1
+                })
+                self.induce.on("tap click", function(e){
+                    e.tipsInfo = self._getInfoHandler(e);
+                    self._fireHandler(e)
+                })
+            },
+            _getInfoHandler:function(e){
+                var x = e.point.x, y = e.point.y - this.h;
+                //todo:底层加判断
+                x = x > this.w ? this.w : x
+                var tmpINode = this.disX == 0 ? 0 : parseInt( (x + (this.disX / 2) ) / this.disX  );
+
+                var _nodesInfoList = [];                 //节点信息集合
+                var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(_nodesInfoList , "y" ));
+                for (var a = 0, al = this.groups.length; a < al; a++ ) {
+                    var o = this.groups[a].getNodeInfoAt(tmpINode)
+                    o && _nodesInfoList.push(o);
+                };
+
+                this.iGroup = tmpIGroup, this.iNode = tmpINode
+                var node = {
+                    iGroup        : this.iGroup,
+                    iNode         : this.iNode,
+                    nodesInfoList : _.clone(_nodesInfoList)
+                };
+                return node;
+            },
+            _fireHandler:function(e){
+                var self = this;
+                var o = {
+                    eventType : e.type,
+                    iGroup    : e.tipsInfo.iGroup,
+                    iNode     : e.tipsInfo.iNode 
+                };
+                if(_.isFunction(self.root.event.on)){
+                    self.root.event.on(o);
+                };
+            }
+        };
+    
+        return Graphs;
+    
+    } 
+)
