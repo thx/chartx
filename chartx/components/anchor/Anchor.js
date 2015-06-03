@@ -114,7 +114,7 @@ define(
                     return s();
                 }
                 return s
-            },           
+            }           
         };
     
         return Anchor;

@@ -44,6 +44,7 @@ var data= [
     [ 7      , 55  , 68 , 65    ],
     [ 8      , 66   , 83 , 51    ]
 ];
+
 //chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
@@ -54,8 +55,8 @@ var options = {
         field : "xfield"
     }
 };
-//Chartx.create.line开始初始化chart实例
-var chartx = Chartx.create.line("canvasTest" , data , options);
+//Chartx.line开始初始化chart实例
+var chartx = Chartx.line("canvasTest" , data , options);
 </textarea></form>
 
         </td>

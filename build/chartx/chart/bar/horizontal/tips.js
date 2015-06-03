@@ -1,9 +1,1 @@
-define(
-    "chartx/chart/bar/horizontal/tips",
-    [
-        "chartx/components/tips/tip"
-    ],
-    function(){
-    
-    }
-)
+define("chartx/chart/bar/horizontal/tips",["chartx/components/tips/tip"],function(){});

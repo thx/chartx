@@ -53,9 +53,8 @@ var options = {
         field : "xfield"
     }
 };
-//Chartx.create.line开始初始化chart实例
-Chartx.create.line("canvasTest" , data , options).then(function( line ){
-    //把line暂存到window下面，好在del 和add 中使用
+//Chartx.line开始初始化chart实例
+Chartx.line("canvasTest" , data , options).then(function( line ){
     _.each(["uv","pv"] , function( id , i ){
         document.getElementById(id).onclick = function(e){
             if( !this.checked ){

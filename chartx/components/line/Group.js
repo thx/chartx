@@ -124,6 +124,9 @@ define(
             _grow : function(){
                 var self  = this;
                 var timer = null;
+                if( self._currPointList.length == 0 ){
+                    return;
+                }
                 var growAnima = function(){
                    var bezierT = new Tween.Tween( self._getPointY( self._currPointList ) )
                    .to( self._getPointY( self._pointList ), 1500 )
@@ -158,32 +161,41 @@ define(
                 } );
                 return obj;
             },
+            _isNotNum : function( val ){
+                return isNaN(val) || val === null || val === "" 
+            },
             _filterEmptyValue : function( list ){
+                
                 //从左边开始 删除 value为非number的item
                 for( var i=0,l=list.length ; i<l ; i++ ){
-                    if( !_.isNumber(list[i].value) ){
+                    if( this._isNotNum(list[i].value) ){
                         list.shift();
                         l --;
                         i --;
                     } else {
                         break;
                     }
-                }
+                };
 
                 //从右边开始删除 value为非number的item
                 for( var i=list.length-1 ; i > 0 ; i-- ){
-                    if( !_.isNumber(list[i].value) ){
+                    if( this._isNotNum(list[i].value) ){
                         list.pop();
                     } else {
                         break;
                     }
-                }
+                };
             },
             _widget:function(){
                 var self  = this;
 
                 self._filterEmptyValue( self.data );
-                
+            
+                if( self.data.length == 0 ){
+                    //filter后，data可能length==0
+                    return;
+                }
+
                 var list = [];
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var o = self.data[a];

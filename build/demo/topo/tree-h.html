@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- tree图</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//topology图 的 key 一定 至少要包含有id ，label ， link 
+var data = [
+    [ "id"   , "label"   , "link"                      ],
+    [ "lol"  , "英雄联盟", [ "dmhz" , "jfjh"  ]        ],
+    [ 'dmhz' , "德玛皇子", [ "ms" , "gl"  ]            ],
+    [ 'jfjh' , "亚索"    , [ "wqds" ]                  ],
+    [ 'hbss' , "艾希"    , [ "mgn" , "jj" ]            ],
+    [ 'ms'   , "盲僧"    , [ "hbss" ]                  ],
+    [ 'wqds' , "武器大师", [ "zzzw" ]                  ],
+    [ 'zzzw' , "潘神"    , [  ]                        ],
+    [ 'js'   , "剑圣"    , [  ]                        ],
+    [ 'jj'   , "剑姬"    , [  ]                        ],
+    [ 'mgn'  , "莫甘娜"  , [  ]                        ],
+    [ 'gl'   , "盖伦"    , [  "js" ]                   ]
+];
+
+var options = {
+    type : "tree",
+    graph : {
+        rankdir : "LR"
+    }
+}
+
+
+Chartx.topo("canvasTest" , data , options).then(function( tree ){
+    tree.on("nodeMouseover" , function(){
+        console.log( "nodeMouseover" );
+    });
+
+    tree.on("nodeMouseout" , function(){
+        console.log( "nodeMouseOut" );
+    });
+
+    tree.on("nodeClick" , function(e){
+        console.log( "nodeClick" );
+    });
+})
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>topology图(tree)</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
+
+

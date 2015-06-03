@@ -14,7 +14,7 @@
  */
 
 define(
-    "chartx/chart/tree/index",
+    "chartx/chart/topo/tree",
     [ 
         "chartx/chart/index",
         "canvax/shape/Rect",
@@ -28,21 +28,20 @@ define(
         var Canvax = Chart.Canvax;
         return Chart.extend({
             init : function( node , data , opts ){
-                
-                this.data   = data;
+                this.data   = this._initData( data );
                 this.graph  = {
                     rankdir : "TB",
-                    nodesep : 30,
-                    edgesep : 30,
-                    ranksep : 60
+                    nodesep : 20,
+                    edgesep : 20,
+                    ranksep : 30
                 }
                 this.node   = {
-                    width   : 88,
-                    height  : 88,
+                    width   : 60,
+                    height  : 60,
                     fillStyle   : "#ffffff",
                     strokeStyle : "#e5e5e5",
                     strokeStyleHover : "#58c592",
-                    labelColor : "#58c592"
+                    labelColor : "#666"
                 }
                 this.link  = {
                     r  : 4
@@ -98,6 +97,35 @@ define(
 
                 this._initEventHand();
             }, 
+            /*
+             * @data 为 
+             * [ "id"       , "label" , "link"],
+             * [ "limin"    , "李明"  , [] ],
+             * [ "hanleilei", "韩雷雷", [] ]
+             *
+             * 转换为{
+             *    limin : {
+             *       label : "李明"
+             *    }
+             * }
+             * */
+            _initData : function( data ){
+                var obj = {};
+                var titles = data.shift();
+
+                _.each( data , function( item ){
+                    var idInd   = _.indexOf( titles , "id" );
+                    var itemObj = {};
+                    _.each( titles , function( t , ii ){
+                        if( ii != idInd ){
+                            itemObj[ t ] = item[ ii ];
+                        }
+                    } );
+
+                    obj[ item[ idInd ] ] = itemObj;
+                } );
+                return obj;
+            },
             _initEventHand : function(){
                 var me = this;
                 var isDragIng = false;
@@ -277,8 +305,13 @@ define(
                 if( this.graph.rankdir == "TB" ){
                     //如果是从上到下的结构,默认， 目前也先只做这个模式
                     begin = [ dataNode.width/2 , dataNode.height ];
-                    end   = [ dataNode.width/2 , dataNode.height + this.graph.ranksep * 5 / 10  ]
+                    end   = [ dataNode.width/2 , dataNode.height + this.graph.ranksep / 2  ];
                 };
+                if( this.graph.rankdir == "LR" ){
+                    //如果是从左到右模式
+                    begin = [ dataNode.width , dataNode.height / 2 ];
+                    end   = [ dataNode.width + this.graph.ranksep / 2 , dataNode.height / 2  ];
+                }
 
                 var link = new Line({
                     id   : "tail_"+nodeId,
@@ -401,13 +434,23 @@ define(
             _getLinkPath : function( wbegin , wvControl , vTailPoint ){
                 var me = this;
                 var path = "M"+wbegin.x+"," + wbegin.y;
-                if( vTailPoint.x == wbegin.x ){
+                if( vTailPoint.x == wbegin.x && (me.graph.rankdir == "TB" || me.graph.rankdir == "BT" ) || 
+                    vTailPoint.y == wbegin.y && (me.graph.rankdir == "LR" || me.graph.rankdir == "RL") 
+                ){
                     path+= "L"+vTailPoint.x+","+vTailPoint.y;   
                 } else {
-                    path+= "L"+wbegin.x+"," + (wvControl.y + me.link.r);
-                    path+= "Q"+wbegin.x+"," + wvControl.y + ",";
-                    path+= (( vTailPoint.x > wbegin.x ? 1 : -1 )*me.link.r + wbegin.x ) + "," + wvControl.y;
-                    path+= "L"+vTailPoint.x+","+vTailPoint.y
+                    if( me.graph.rankdir == "TB" ){
+                        path += "L"+wbegin.x+"," + (wvControl.y + me.link.r);
+                        path += "Q"+wbegin.x+"," + wvControl.y + ",";
+                        path += (( vTailPoint.x > wbegin.x ? 1 : -1 ) * me.link.r + wbegin.x ) + "," + wvControl.y;
+                        path += "L"+vTailPoint.x+","+vTailPoint.y
+                    } 
+                    if( me.graph.rankdir == "LR" ){
+                        path += "L" + ( wvControl.x + me.link.r ) + "," + wbegin.y;
+                        path += "Q" + wvControl.x + "," + wvControl.y + ",";
+                        path += wvControl.x + "," + ( (vTailPoint.y > wbegin.y ? 1 : -1) * me.link.r + wvControl.y );
+                        path += "L"+vTailPoint.x+","+vTailPoint.y;
+                    } 
                 }
                 return path;
             },
@@ -442,7 +485,6 @@ define(
                     }))
                     */
 
-
                 });
             
                 me.g.edges().forEach(function(e) {
@@ -450,15 +492,25 @@ define(
                     var edge  = me.g.edge(e);
                     var vnode = me.g.node(e.v); //这个link的父端节点
 
-                    var vTailPoint = {x:vnode.x , y:vnode.y+vnode.height/2+me.graph.ranksep*5/10};//父节点的尾巴末端
                     var wbegin     = edge.points[2];//子节点的发射点
-                    var wvControl  = {x:wbegin.x , y:vTailPoint.y}; //从wbegin 发射到vTailPoint 的控制折点
+
+                    var vTailPoint = {x:0 , y:0};//父节点的尾巴末端
+                    var wvControl  = {x:0 , y:0}; //从wbegin 发射到vTailPoint 的控制折点
+                    if( me.graph.rankdir == "TB" ){
+                        vTailPoint = { x : vnode.x , y : vnode.y + vnode.height/2 + me.graph.ranksep / 2 };
+                        wvControl  = { x : wbegin.x , y:vTailPoint.y}; 
+                    }
+                    if( me.graph.rankdir == "LR" ){
+                        vTailPoint = { x : vnode.x + vnode.width / 2 + me.graph.ranksep / 2 , y : vnode.y  };
+                        wvControl  = { x : vTailPoint.x , y:wbegin.y};
+                    }
                     
                     var lc = me.linksSp.getChildById("link_"+e.v+"_"+e.w).context;
                     lc.path = me._getLinkPath( wbegin , wvControl , vTailPoint );
 
+                    
                     /*
-                    KISSY.each( edge.points , function(point,i){
+                    _.each( edge.points , function(point,i){
                         var colors=["red","blue","green"];
                     
                        me.sprite.addChild(new Circle({
@@ -471,6 +523,7 @@ define(
                        }))
                     } );
                     */
+                    
                     
                 });
             },
@@ -583,7 +636,7 @@ define(
             //初次渲染的时候自动把拓扑图居中
             _initNodesSpritePos : function(){
                 this.sprite.context.x = (this.width - (this._nodesRect.right - this._nodesRect.left)) / 2;
-                this.sprite.context.y = 80;
+                this.sprite.context.y = 10;
 
             }
         });

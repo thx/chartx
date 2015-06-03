@@ -17,15 +17,15 @@ define(
             this.root    = root;
             this.ctx     = root.stage.context2D
 
-            this.data       = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
-            this.disX       = 0;                           //点与点之间的间距
-            this.groups     = [];                          //群组集合     
+            this.data    = [];                          //二维 [[{x:0,y:-100,...},{}],[]]
+            this.disX    = 0;                           //点与点之间的间距
+            this.groups  = [];                          //群组集合     
     
-            this.iGroup     = 0;                           //群组索引(哪条线)
-            this.iNode      = -1;                          //节点索引(那个点)
+            this.iGroup  = 0;                           //群组索引(哪条线)
+            this.iNode   = -1;                          //节点索引(那个点)
     
-            this.sprite     = null;  
-            this.induce     = null;                         
+            this.sprite  = null;  
+            this.induce  = null;                         
 
             this.init(opt);
         };
@@ -33,7 +33,6 @@ define(
         Graphs.prototype = {
     
             init:function(opt){
-                //_.deepExtend( this , opt );
                 this.opt = opt;
                 this.sprite = new Canvax.Display.Sprite();
             },
@@ -138,23 +137,24 @@ define(
                         globalAlpha : 0,
                         cursor      : 'pointer'
                     }
-                })
-                self.sprite.addChild(self.induce)
+                });
+
+                self.sprite.addChild(self.induce);
     
-                self.induce.on("hold mouseover", function(e){
+                self.induce.on("panstart mouseover", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
-                self.induce.on("drag mousemove", function(e){
+                self.induce.on("panmove mousemove", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
-                self.induce.on("release mouseout", function(e){
+                self.induce.on("panend mouseout", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                     self.iGroup = 0, self.iNode = -1
                 })
-                self.induce.on("click", function(e){
+                self.induce.on("tap click", function(e){
                     e.tipsInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
@@ -186,10 +186,10 @@ define(
                     eventType : e.type,
                     iGroup    : e.tipsInfo.iGroup,
                     iNode     : e.tipsInfo.iNode 
-                }
+                };
                 if(_.isFunction(self.root.event.on)){
                     self.root.event.on(o);
-                }
+                };
             }
         };
     
