@@ -9,7 +9,7 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 
 <code><a href="./demo/line-kissy.html" target="_blank">基于kissy的折线图</a></code>
 <code><a href="./demo/line-requirejs.html" target="_blank">基于requirejs(AMD)的折线图</a></code>
-<code><a href="./demo/line-sea" target="_blank">基于seajs(CMD)的折线图</a></code>
+<code><a href="./demo/line-seajs.html" target="_blank">基于seajs(CMD)的折线图</a></code>
 
 
 能自动适配到ie6，7，8等低端浏览器（采用flashcanvas来实现兼容）。
