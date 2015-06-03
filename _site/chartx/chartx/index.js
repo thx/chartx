@@ -1,11 +1,12 @@
 var Chartx = {
     _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord'],
+    canvax  : null,
     create  : {},
     _start   : function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的 
 
-        var canvaxVersion = "2015.05.29";
+        var canvaxVersion = "2015.06.01";
 
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
@@ -86,22 +87,34 @@ var Chartx = {
 
 
         var path = "chartx/chart/"+name+"/"+( options.type ? options.type : "index" );
-        require( [ path ] , function( chartConstructor ){
-            if( !promise._destroy ){
-                promise.chart = new chartConstructor(el , data , options);
-                _.each(promise._thenFn , function( fn ){
-                    _.isFunction( fn ) && fn( promise.chart );
-                });
-                promise._thenFn = [];
-                //在then处理函数执行了后自动draw
-                promise.chart.draw();
-                promise.path = path;
-            } else {
-                //如果require回来的时候发现已经promise._destroy == true了
-                //说明已经其已经不需要创建了，可能宿主环境已经销毁
-                
-            }
-        } );
+        var getChart = function(){
+            require( [ path ] , function( chartConstructor ){
+                if( !promise._destroy ){
+                    promise.chart = new chartConstructor(el , data , options);
+                    _.each(promise._thenFn , function( fn ){
+                        _.isFunction( fn ) && fn( promise.chart );
+                    });
+                    promise._thenFn = [];
+                    //在then处理函数执行了后自动draw
+                    promise.chart.draw();
+                    promise.path = path;
+                } else {
+                    //如果require回来的时候发现已经promise._destroy == true了
+                    //说明已经其已经不需要创建了，可能宿主环境已经销毁
+                    
+                }
+            } );
+        }
+
+        //首次使用，需要预加载好canvax。
+        if( this.canvax ){
+            getChart();
+        } else {
+            require(["canvax/index"] , function( C ){
+                this.canvax = C;
+                getChart();
+            });
+        }
 
         return promise;
 
@@ -234,8 +247,9 @@ var Chartx = {
             if (window.seajs) {
                 packageObj[name] = path + name;
                 //BEGIN(develop)
-                if( path == "../../" && name == "chartx" ){
-                    packageObj[name] = window.location.origin+window.location.pathname.split("/").slice(0 , -3).join("/")+"/chartx"
+                if( path.indexOf("../")>=0 && name == "chartx" ){
+                    var si = path.split("../").length;
+                    packageObj[name] = window.location.origin+window.location.pathname.split("/").slice(0 , -si).join("/")+"/chartx"
                 }
                 //END(develop)
                 seajs.config({ paths: packageObj });
