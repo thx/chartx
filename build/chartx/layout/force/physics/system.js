@@ -1,1 +1,664 @@
-define("chartx/layout/force/physics/system",["chartx/layout/force/kernel","chartx/layout/force/physics/atoms"],function(a,b){var c=function(c,d,e,f,g,h,i,j){var k=[],l=null,m=0,n=null,o=.04,p=[20,20,20,20],q=null,r=null;if("object"==typeof c){var s=c;e=s.friction,c=s.repulsion,g=s.fps,h=s.dt,d=s.stiffness,f=s.gravity,i=s.precision,j=s.integrator}"verlet"!=j&&"euler"!=j&&(j="verlet"),e=isNaN(e)?.5:e,c=isNaN(c)?1e3:c,g=isNaN(g)?55:g,d=isNaN(d)?600:d,h=isNaN(h)?.02:h,i=isNaN(i)?.6:i,f=f===!0;var t,u=void 0!==g?1e3/g:20,v={integrator:j,repulsion:c,stiffness:d,friction:e,dt:h,gravity:f,precision:i,timeout:u},w={renderer:null,tween:null,nodes:{},edges:{},adjacency:{},names:{},kernel:null},x={parameters:function(a){return void 0!==a&&(isNaN(a.precision)||(a.precision=Math.max(0,Math.min(1,a.precision))),_.each(v,function(b,c){void 0!==a[c]&&(v[c]=a[c])}),w.kernel.physicsModified(a)),v},fps:function(a){return void 0===a?w.kernel.fps():void x.parameters({timeout:1e3/(a||50)})},start:function(){w.kernel.start()},stop:function(){w.kernel.stop()},addNode:function(a,c){c=c||{};var d=w.names[a];if(d)return d.data=c,d;if(void 0!=a){var e=void 0!=c.x?c.x:null,f=void 0!=c.y?c.y:null,g=c.fixed?1:0,h=new b.Node(c);return h.name=a,w.names[a]=h,w.nodes[h._id]=h,k.push({t:"addNode",id:h._id,m:h.mass,x:e,y:f,f:g}),x._notify(),h}},pruneNode:function(a){var b=x.getNode(a);"undefined"!=typeof w.nodes[b._id]&&(delete w.nodes[b._id],delete w.names[b.name]),_.each(w.edges,function(a,c){(a.source._id===b._id||a.target._id===b._id)&&x.pruneEdge(a)}),k.push({t:"dropNode",id:b._id}),x._notify()},getNode:function(a){return void 0!==a._id?a:"string"==typeof a||"number"==typeof a?w.names[a]:void 0},eachNode:function(a){_.each(w.nodes,function(b,c){if(null!=b._p.x&&null!=b._p.y){var d=null!==n?x.toScreen(b._p):b._p;a.call(x,b,d)}})},addEdge:function(a,c,d){a=x.getNode(a)||x.addNode(a),c=x.getNode(c)||x.addNode(c),d=d||{};var e=new b.Edge(a,c,d),f=a._id,g=c._id;w.adjacency[f]=w.adjacency[f]||{},w.adjacency[f][g]=w.adjacency[f][g]||[];var h=w.adjacency[f][g].length>0;if(h)return void $.extend(w.adjacency[f][g].data,e.data);w.edges[e._id]=e,w.adjacency[f][g].push(e);var i=void 0!==e.length?e.length:1;return k.push({t:"addSpring",id:e._id,fm:f,to:g,l:i}),x._notify(),e},pruneEdge:function(a){k.push({t:"dropSpring",id:a._id}),delete w.edges[a._id];for(var b in w.adjacency)for(var c in w.adjacency[b])for(var d=w.adjacency[b][c],e=d.length-1;e>=0;e--)w.adjacency[b][c][e]._id===a._id&&w.adjacency[b][c].splice(e,1);x._notify()},getEdges:function(a,b){return a=x.getNode(a),b=x.getNode(b),a&&b&&"undefined"!=typeof w.adjacency[a._id]&&"undefined"!=typeof w.adjacency[a._id][b._id]?w.adjacency[a._id][b._id]:[]},getEdgesFrom:function(a){if(a=x.getNode(a),!a)return[];if("undefined"!=typeof w.adjacency[a._id]){var b=[];return _.each(w.adjacency[a._id],function(a,c){b=b.concat(a)}),b}return[]},getEdgesTo:function(a){if(a=x.getNode(a),!a)return[];var b=[];return _.each(w.edges,function(c,d){c.target==a&&b.push(c)}),b},eachEdge:function(a){_.each(w.edges,function(b,c){var d=w.nodes[b.source._id]._p,e=w.nodes[b.target._id]._p;null!=d.x&&null!=e.x&&(d=null!==n?x.toScreen(d):d,e=null!==n?x.toScreen(e):e,d&&e&&a.call(x,b,d,e))})},prune:function(a){var b={dropped:{nodes:[],edges:[]}};return void 0===a?_.each(w.nodes,function(a,c){b.dropped.nodes.push(a),x.pruneNode(a)}):x.eachNode(function(c){var d=a.call(x,c,{from:x.getEdgesFrom(c),to:x.getEdgesTo(c)});d&&(b.dropped.nodes.push(c),x.pruneNode(c))}),b},graft:function(a){var b={added:{nodes:[],edges:[]}};return a.nodes&&(_.each(a.nodes,function(a,c){var d=x.getNode(c);d?d.data=a:b.added.nodes.push(x.addNode(c,a))}),a.nodes.length>0&&w.kernel.start()),a.edges&&_.each(a.edges,function(a,c){var d=x.getNode(c);d||b.added.nodes.push(x.addNode(c,{})),_.each(a,function(a,d){var e=x.getNode(d);e||b.added.nodes.push(x.addNode(d,{}));var f=x.getEdges(c,d);f.length>0?f[0].data=a:b.added.edges.push(x.addEdge(c,d,a))})}),b},merge:function(a){var b={added:{nodes:[],edges:[]},dropped:{nodes:[],edges:[]}};_.each(w.edges,function(c,d){(void 0===a.edges[c.source.name]||void 0===a.edges[c.source.name][c.target.name])&&(x.pruneEdge(c),b.dropped.edges.push(c))});var c=x.prune(function(c,d){return void 0===a.nodes[c.name]?(b.dropped.nodes.push(c),!0):void 0}),d=x.graft(a);return b.added.nodes=b.added.nodes.concat(d.added.nodes),b.added.edges=b.added.edges.concat(d.added.edges),b.dropped.nodes=b.dropped.nodes.concat(c.dropped.nodes),b.dropped.edges=b.dropped.edges.concat(c.dropped.edges),b},tweenNode:function(a,b,c){var d=x.getNode(a);d&&w.tween.to(d,b,c)},tweenEdge:function(a,b,c,d){if(void 0===d)x._tweenEdge(a,b,c);else{var e=x.getEdges(a,b);_.each(e,function(a,b){x._tweenEdge(a,c,d)})}},_tweenEdge:function(a,b,c){a&&void 0!==a._id&&w.tween.to(a,b,c)},_updateGeometry:function(a){if(void 0!=a){var b=a.epoch<m;t=a.energy;var c=a.geometry;if(void 0!==c)for(var d=0,e=c.length/3;e>d;d++){var f=c[3*d];b&&void 0==w.nodes[f]||(w.nodes[f]._p.x=c[3*d+1],w.nodes[f]._p.y=c[3*d+2])}}},screen:function(a){return void 0==a?{size:n?objcopy(n):void 0,padding:p.concat(),step:o}:(void 0!==a.size&&x.screenSize(a.size.width,a.size.height),isNaN(a.step)||x.screenStep(a.step),void(void 0!==a.padding&&x.screenPadding(a.padding)))},screenSize:function(a,b){n={width:a,height:b},x._updateBounds()},screenPadding:function(a,b,c,d){_.isArray(a)?trbl=a:trbl=[a,b,c,d];var e=trbl[0],f=trbl[1],g=trbl[2];void 0===f?trbl=[e,e,e,e]:void 0==g&&(trbl=[e,f,e,f]),p=trbl},screenStep:function(a){o=a},toScreen:function(a){if(q&&n){var c=p||[0,0,0,0],d=q.bottomright.subtract(q.topleft),e=c[3]+a.subtract(q.topleft).divide(d.x).x*(n.width-(c[1]+c[3])),f=c[0]+a.subtract(q.topleft).divide(d.y).y*(n.height-(c[0]+c[2]));return new b.Point(e,f)}},fromScreen:function(a){if(q&&n){var c=p||[0,0,0,0],d=q.bottomright.subtract(q.topleft),e=(a.x-c[3])/(n.width-(c[1]+c[3]))*d.x+q.topleft.x,f=(a.y-c[0])/(n.height-(c[0]+c[2]))*d.y+q.topleft.y;return new b.Point(e,f)}},_updateBounds:function(a){if(null!==n){r=a?a:x.bounds();var c=new b.Point(r.bottomright.x,r.bottomright.y),d=new b.Point(r.topleft.x,r.topleft.y),e=c.subtract(d),f=d.add(e.divide(2)),g=4,h=new b.Point(Math.max(e.x,g),Math.max(e.y,g));if(r.topleft=f.subtract(h.divide(2)),r.bottomright=f.add(h.divide(2)),!q)return _.isEmpty(w.nodes)?!1:(q=r,!0);var i=o;_newBounds={bottomright:q.bottomright.add(r.bottomright.subtract(q.bottomright).multiply(i)),topleft:q.topleft.add(r.topleft.subtract(q.topleft).multiply(i))};var j=new b.Point(q.topleft.subtract(_newBounds.topleft).magnitude(),q.bottomright.subtract(_newBounds.bottomright).magnitude());return j.x*n.width>1||j.y*n.height>1?(q=_newBounds,!0):!1}},energy:function(){return t},bounds:function(){var a=null,c=null;return _.each(w.nodes,function(d,e){if(!a)return a=new b.Point(d._p),void(c=new b.Point(d._p));var f=d._p;null!==f.x&&null!==f.y&&(f.x>a.x&&(a.x=f.x),f.y>a.y&&(a.y=f.y),f.x<c.x&&(c.x=f.x),f.y<c.y&&(c.y=f.y))}),a&&c?{bottomright:a,topleft:c}:{topleft:new b.Point(-1,-1),bottomright:new b.Point(1,1)}},nearest:function(a){null!==n&&(a=x.fromScreen(a));var b={node:null,point:null,distance:null};return _.each(w.nodes,function(c,d){var e=c._p;if(null!==e.x&&null!==e.y){var f=e.subtract(a).magnitude();(null===b.distance||f<b.distance)&&(b={node:c,point:e,distance:f},null!==n&&(b.screenPoint=x.toScreen(e)))}}),b.node?(null!==n&&(b.distance=x.toScreen(b.node.p).subtract(x.toScreen(a)).magnitude()),b):null},_notify:function(){null===l?m++:clearTimeout(l),l=setTimeout(x._synchronize,20)},_synchronize:function(){k.length>0&&(w.kernel.graphChanged(k),k=[],l=null)}};return w.kernel=a(x),w.tween=w.kernel.tween||null,b.Node.prototype.__defineGetter__("p",function(){var a=this,c={};return c.__defineGetter__("x",function(){return a._p.x}),c.__defineSetter__("x",function(b){w.kernel.particleModified(a._id,{x:b})}),c.__defineGetter__("y",function(){return a._p.y}),c.__defineSetter__("y",function(b){w.kernel.particleModified(a._id,{y:b})}),c.__proto__=b.Point.prototype,c}),b.Node.prototype.__defineSetter__("p",function(a){this._p.x=a.x,this._p.y=a.y,w.kernel.particleModified(this._id,{x:a.x,y:a.y})}),b.Node.prototype.__defineGetter__("mass",function(){return this._mass}),b.Node.prototype.__defineSetter__("mass",function(a){this._mass=a,w.kernel.particleModified(this._id,{m:a})}),b.Node.prototype.__defineSetter__("tempMass",function(a){w.kernel.particleModified(this._id,{_m:a})}),b.Node.prototype.__defineGetter__("fixed",function(){return this._fixed}),b.Node.prototype.__defineSetter__("fixed",function(a){this._fixed=a,w.kernel.particleModified(this._id,{f:a?1:0})}),x};return self.ParticleSystem=c,c});
+define(
+        "chartx/layout/force/physics/system",
+        [
+            'chartx/layout/force/kernel',
+            'chartx/layout/force/physics/atoms'
+        ],
+        function( Kernel , Atoms ){
+            //
+            // system.js
+            //
+            // the main controller object for creating/modifying graphs 
+            //
+
+            var ParticleSystem = function(repulsion, stiffness, friction, centerGravity, targetFps, dt, precision, integrator){
+                // also callable with ({integrator:, stiffness:, repulsion:, friction:, timestep:, fps:, dt:, gravity:})
+
+                var _changes=[];
+                var _notification=null;
+                var _epoch = 0;
+
+                var _screenSize = null;
+                var _screenStep = .04;
+                var _screenPadding = [20,20,20,20];
+                var _bounds = null;
+                var _boundsTarget = null;
+
+                if (typeof repulsion=='object'){
+                    var _p = repulsion
+                        friction = _p.friction
+                        repulsion = _p.repulsion
+                        targetFps = _p.fps
+                        dt = _p.dt
+                        stiffness = _p.stiffness
+                        centerGravity = _p.gravity
+                        precision = _p.precision
+                        integrator = _p.integrator
+                };
+
+                // param validation and defaults
+                if (integrator!='verlet' && integrator!='euler'){
+                    integrator='verlet'
+                }
+                friction = isNaN(friction) ? .5 : friction;
+                repulsion = isNaN(repulsion) ? 1000 : repulsion;
+                targetFps = isNaN(targetFps) ? 55 : targetFps;
+                stiffness = isNaN(stiffness) ? 600 : stiffness;
+                dt = isNaN(dt) ? 0.02 : dt;
+                precision = isNaN(precision) ? .6 : precision;
+                centerGravity = (centerGravity===true);
+
+                var _systemTimeout = (targetFps!==undefined) ? 1000/targetFps : 1000/50;
+
+                var _parameters = {
+                    integrator:integrator, // 
+                    repulsion:repulsion, //排斥力
+                    stiffness:stiffness, //刚度
+                    friction:friction,   //摩擦力
+                    dt:dt, //
+                    gravity:centerGravity, //重心 
+                    precision:precision,   //密度
+                    timeout:_systemTimeout
+                };
+                var _energy;
+
+                var state = {
+                    renderer:null, // this is set by the library user
+                    tween:null, // gets filled in by the Kernel
+                    nodes:{}, // lookup based on node _id's from the worker
+                    edges:{}, // likewise
+                    adjacency:{}, // {name1:{name2:{}, name3:{}}}
+                    names:{}, // lookup table based on 'name' field in data objects
+                    kernel: null
+                }
+
+                var that={
+                    parameters:function(newParams){
+                        if (newParams!==undefined){
+                            if (!isNaN(newParams.precision)){
+                                newParams.precision = Math.max(0, Math.min(1, newParams.precision))
+                            }
+                            _.each(_parameters, function(v,p){
+                                if (newParams[p]!==undefined){
+                                    _parameters[p] = newParams[p]
+                                }
+                            })
+                            state.kernel.physicsModified(newParams)
+                        }
+                        return _parameters
+                    },
+
+                    fps:function(newFPS){
+                        if (newFPS===undefined) return state.kernel.fps()
+                        else that.parameters({timeout:1000/(newFPS||50)})
+                    },
+
+                    start:function(){
+                        state.kernel.start()
+                    },
+
+                    stop:function(){
+                        state.kernel.stop()
+                    },
+
+                    addNode:function(name, data){
+                        data = data || {};
+                        var priorNode = state.names[name];
+                        if (priorNode){
+                            priorNode.data = data;
+                            return priorNode;
+                        } else if (name!=undefined){
+                            // the data object has a few magic fields that are actually used
+                            // by the simulation:
+                            //   'mass' overrides the default of 1
+                            //   'fixed' overrides the default of false
+                            //   'x' & 'y' will set a starting position rather than 
+                            //             defaulting to random placement
+                            var x = (data.x!=undefined) ? data.x : null;
+                            var y = (data.y!=undefined) ? data.y : null;
+                            var fixed = (data.fixed) ? 1 : 0;
+
+                            var node = new Atoms.Node(data);
+                            node.name = name;
+                            state.names[name] = node;
+                            state.nodes[node._id] = node;
+
+                            _changes.push({t:"addNode", id:node._id, m:node.mass, x:x, y:y, f:fixed});
+                            that._notify();
+                            return node;
+
+                        }
+                    },
+
+                    // remove a node and its associated edges from the graph
+                    pruneNode:function(nodeOrName) {
+                        var node = that.getNode(nodeOrName)
+
+                            if (typeof(state.nodes[node._id]) !== 'undefined'){
+                                delete state.nodes[node._id]
+                                    delete state.names[node.name]
+                            }
+
+
+                        _.each(state.edges, function(e,id){
+                            if (e.source._id === node._id || e.target._id === node._id){
+                                that.pruneEdge(e);
+                            }
+                        })
+
+                        _changes.push({t:"dropNode", id:node._id})
+                            that._notify();
+                    },
+
+                    getNode:function(nodeOrName){
+                        if (nodeOrName._id!==undefined){
+                            return nodeOrName
+                        }else if (typeof nodeOrName=='string' || typeof nodeOrName=='number'){
+                            return state.names[nodeOrName]
+                        }
+                        // otherwise let it return undefined
+                    },
+
+                    eachNode:function(callback){
+                        // callback should accept two arguments: Node, Point
+                        _.each(state.nodes, function(n,id){
+                            if (n._p.x==null || n._p.y==null) return
+                            var pt = (_screenSize!==null) ? that.toScreen(n._p) : n._p
+                            callback.call(that, n, pt);
+                        })
+                    },
+
+                    addEdge:function(source, target, data){
+                        source = that.getNode(source) || that.addNode(source);
+                        target = that.getNode(target) || that.addNode(target);
+                        data = data || {};
+                        var edge = new Atoms.Edge(source, target, data);;
+
+                        var src = source._id;
+                        var dst = target._id;
+                        state.adjacency[src] = state.adjacency[src] || {};
+                        state.adjacency[src][dst] = state.adjacency[src][dst] || [];
+
+                        var exists = (state.adjacency[src][dst].length > 0);
+                        if (exists){
+                            // probably shouldn't allow multiple edges in same direction
+                            // between same nodes? for now just overwriting the data...
+                            $.extend(state.adjacency[src][dst].data, edge.data);
+                            return
+                        } else {
+                            state.edges[edge._id] = edge;
+                            state.adjacency[src][dst].push(edge);
+                            var len = (edge.length!==undefined) ? edge.length : 1;
+                            _changes.push({t:"addSpring", id:edge._id, fm:src, to:dst, l:len});
+                            that._notify();
+                        }
+
+                        return edge;
+
+                    },
+
+                    // remove an edge and its associated lookup entries
+                    pruneEdge:function(edge) {
+
+                        _changes.push({t:"dropSpring", id:edge._id})
+                            delete state.edges[edge._id]
+
+                            for (var x in state.adjacency){
+                                for (var y in state.adjacency[x]){
+                                    var edges = state.adjacency[x][y];
+
+                                    for (var j=edges.length - 1; j>=0; j--)  {
+                                        if (state.adjacency[x][y][j]._id === edge._id){
+                                            state.adjacency[x][y].splice(j, 1);
+                                        }
+                                    }
+                                }
+                            }
+
+                        that._notify();
+                    },
+
+                    // find the edges from node1 to node2
+                    getEdges:function(node1, node2) {
+                        node1 = that.getNode(node1);
+                        node2 = that.getNode(node2);
+                        if (!node1 || !node2) {
+                            return []
+                        }
+
+                        if (typeof(state.adjacency[node1._id]) !== 'undefined'
+                                && typeof(state.adjacency[node1._id][node2._id]) !== 'undefined'){
+                                    return state.adjacency[node1._id][node2._id];
+                                }
+
+                        return [];
+                    },
+
+                    getEdgesFrom:function(node) {
+                        node = that.getNode(node)
+                            if (!node) return []
+
+                                if (typeof(state.adjacency[node._id]) !== 'undefined'){
+                                    var nodeEdges = []
+                                        _.each(state.adjacency[node._id], function(subEdges,id){
+                                            nodeEdges = nodeEdges.concat(subEdges)
+                                        })
+                                    return nodeEdges
+                                }
+
+                        return [];
+                    },
+
+                    getEdgesTo:function(node) {
+                        node = that.getNode(node)
+                            if (!node) return []
+
+                                var nodeEdges = []
+                                    _.each(state.edges, function(  edge , edgeId ){
+                                        if (edge.target == node) nodeEdges.push(edge)
+                                    })
+
+                        return nodeEdges;
+                    },
+
+                    eachEdge:function(callback){
+                        // callback should accept two arguments: Edge, Point
+                        _.each(state.edges, function(e , id){
+                            var p1 = state.nodes[e.source._id]._p
+                            var p2 = state.nodes[e.target._id]._p
+
+
+                            if (p1.x==null || p2.x==null) return
+
+                            p1 = (_screenSize!==null) ? that.toScreen(p1) : p1
+                            p2 = (_screenSize!==null) ? that.toScreen(p2) : p2
+
+                            if (p1 && p2) callback.call(that, e, p1, p2);
+                        })
+                    },
+
+
+                    prune:function(callback){
+                        // callback should be of the form ƒ(node, {from:[],to:[]})
+
+                        var changes = {dropped:{nodes:[], edges:[]}}
+                        if (callback===undefined){
+                            _.each(state.nodes, function( node , id ){
+                                changes.dropped.nodes.push(node)
+                                that.pruneNode(node)
+                            })
+                        }else{
+                            that.eachNode(function(node){
+                                var drop = callback.call(that, node, {from:that.getEdgesFrom(node), to:that.getEdgesTo(node)})
+                                if (drop){
+                                    changes.dropped.nodes.push(node)
+                                that.pruneNode(node)
+                                }
+                            })
+                        }
+                        // trace('prune', changes.dropped)
+                        return changes
+                    },
+
+                    graft:function(branch){
+
+                        // branch is of the form: { nodes:{name1:{d}, name2:{d},...}, 
+                        //                          edges:{fromNm:{toNm1:{d}, toNm2:{d}}, ...} }
+                        var changes = {added:{nodes:[], edges:[]}}
+                        if (branch.nodes) {
+                            _.each(branch.nodes, function( nodeData , name ){
+                                var oldNode = that.getNode(name)
+                                // should probably merge any x/y/m data as well...
+                                // if (oldNode) $.extend(oldNode.data, nodeData)
+
+                                if (oldNode) {
+                                    oldNode.data = nodeData
+                                } else {
+                                    changes.added.nodes.push( that.addNode(name, nodeData) );
+                                }
+                            })
+
+                            if(branch.nodes.length>0){
+                                state.kernel.start();
+                            }
+                        }
+
+                        if ( branch.edges ){
+                            _.each(branch.edges, function(dsts , src ){
+                                var srcNode = that.getNode(src)
+                                if (!srcNode) {
+                                    changes.added.nodes.push( that.addNode(src, {}) )
+                                }
+                            _.each(dsts, function(edgeData , dst){
+
+                                // should probably merge any x/y/m data as well...
+                                // if (srcNode) $.extend(srcNode.data, nodeData)
+
+
+                                // i wonder if it should spawn any non-existant nodes that are part
+                                // of one of these edge requests...
+                                var dstNode = that.getNode(dst)
+                                if (!dstNode) changes.added.nodes.push( that.addNode(dst, {}) )
+
+                                var oldEdges = that.getEdges(src, dst)
+                                if (oldEdges.length>0){
+                                    debugger
+                                // trace("update",src,dst)
+                                oldEdges[0].data = edgeData
+                                }else{
+                                    // trace("new ->",src,dst)
+                                    changes.added.edges.push( that.addEdge(src, dst, edgeData) )
+                                }
+                            })
+                            })
+                        }
+
+
+                        // trace('graft', changes.added)
+                        return changes
+                    },
+
+                    merge : function(branch){
+                        var changes = {added:{nodes:[], edges:[]}, dropped:{nodes:[], edges:[]}};
+
+                        _.each(state.edges, function(edge,id){
+                            if ((branch.edges[edge.source.name]===undefined || branch.edges[edge.source.name][edge.target.name]===undefined)){
+                                that.pruneEdge(edge);
+                                changes.dropped.edges.push(edge);
+                            }
+                        });
+
+                        var prune_changes = that.prune(function(node, edges){
+                            if (branch.nodes[node.name] === undefined){
+                                changes.dropped.nodes.push(node);
+                                return true;
+                            }
+                        });
+
+                        var graft_changes = that.graft(branch);        
+                        changes.added.nodes = changes.added.nodes.concat(graft_changes.added.nodes);
+                        changes.added.edges = changes.added.edges.concat(graft_changes.added.edges);
+                        changes.dropped.nodes = changes.dropped.nodes.concat(prune_changes.dropped.nodes);
+                        changes.dropped.edges = changes.dropped.edges.concat(prune_changes.dropped.edges);
+
+                        // trace('changes', changes)
+                        return changes;
+                    },
+
+
+                    tweenNode:function(nodeOrName, dur, to){
+                        var node = that.getNode(nodeOrName);
+                        if (node) {
+                            state.tween.to(node, dur, to)
+                        }
+                    },
+
+                    tweenEdge:function(a,b,c,d){
+                        if (d===undefined){
+                            // called with (edge, dur, to)
+                            that._tweenEdge(a,b,c)
+                        }else{
+                            // called with (node1, node2, dur, to)
+                            var edges = that.getEdges(a,b)
+                                _.each(edges, function(edge,i){
+                                    that._tweenEdge(edge, c, d)    
+                                })
+                        }
+                    },
+
+                    _tweenEdge:function(edge, dur, to){
+                        if (edge && edge._id!==undefined){
+                            state.tween.to(edge, dur, to)
+                        }
+                    },
+
+                    _updateGeometry:function(e){
+                        if (e != undefined){          
+                            var stale = (e.epoch<_epoch);
+
+                            _energy = e.energy;
+                            var pts = e.geometry; // an array of the form [id1,x1,y1, id2,x2,y2, ...]
+                            if (pts!==undefined){
+                                for (var i=0, j=pts.length/3; i<j; i++){
+                                    var id = pts[3*i];
+                                    // canary silencer...
+                                    if (stale && state.nodes[id]==undefined) continue;
+
+                                    state.nodes[id]._p.x = pts[3*i + 1];
+                                    state.nodes[id]._p.y = pts[3*i + 2];
+                                }
+                            }          
+                        }
+                    },
+
+                    // convert to/from screen coordinates
+                    screen:function(opts){
+                        if (opts == undefined) return {size:(_screenSize)? objcopy(_screenSize) : undefined, 
+                            padding:_screenPadding.concat(), 
+                                step:_screenStep}
+                        if (opts.size!==undefined) that.screenSize(opts.size.width, opts.size.height)
+                            if (!isNaN(opts.step)) that.screenStep(opts.step)
+                                if (opts.padding!==undefined) that.screenPadding(opts.padding)
+                    },
+
+                    screenSize:function(canvasWidth, canvasHeight){
+                        _screenSize = {width:canvasWidth,height:canvasHeight}
+                        that._updateBounds()
+                    },
+
+                    screenPadding:function(t,r,b,l){
+                        if (_.isArray(t)) trbl = t
+                        else trbl = [t,r,b,l]
+
+                            var top = trbl[0]
+                                var right = trbl[1]
+                                var bot = trbl[2]
+                                if (right===undefined) trbl = [top,top,top,top]
+                                else if (bot==undefined) trbl = [top,right,top,right]
+
+                                    _screenPadding = trbl
+                    },
+
+                    screenStep:function(stepsize){
+                        _screenStep = stepsize
+                    },
+
+                    toScreen:function(p) {
+                        if (!_bounds || !_screenSize) return
+                            // trace(p.x, p.y)
+
+                            var _padding = _screenPadding || [0,0,0,0]
+                                var size = _bounds.bottomright.subtract(_bounds.topleft)
+                                var sx = _padding[3] + p.subtract(_bounds.topleft).divide(size.x).x * (_screenSize.width - (_padding[1] + _padding[3]))
+                                var sy = _padding[0] + p.subtract(_bounds.topleft).divide(size.y).y * (_screenSize.height - (_padding[0] + _padding[2]))
+
+                                // return arbor.Point(Math.floor(sx), Math.floor(sy))
+                                return new Atoms.Point(sx, sy)
+                    },
+
+                    fromScreen:function(s) {
+                        if (!_bounds || !_screenSize) return
+
+                            var _padding = _screenPadding || [0,0,0,0]
+                                var size = _bounds.bottomright.subtract(_bounds.topleft)
+                                var px = (s.x-_padding[3]) / (_screenSize.width-(_padding[1]+_padding[3]))  * size.x + _bounds.topleft.x
+                                var py = (s.y-_padding[0]) / (_screenSize.height-(_padding[0]+_padding[2])) * size.y + _bounds.topleft.y
+
+                                return new Atoms.Point(px, py);
+                    },
+
+                    _updateBounds:function(newBounds){
+                        // step the renderer's current bounding box closer to the true box containing all
+                        // the nodes. if _screenStep is set to 1 there will be no lag. if _screenStep is
+                        // set to 0 the bounding box will remain stationary after being initially set 
+                        if (_screenSize===null) return
+
+                            if (newBounds) _boundsTarget = newBounds
+                            else _boundsTarget = that.bounds()
+
+                                // _boundsTarget = newBounds || that.bounds()
+                                // _boundsTarget.topleft = new Point(_boundsTarget.topleft.x,_boundsTarget.topleft.y)
+                                // _boundsTarget.bottomright = new Point(_boundsTarget.bottomright.x,_boundsTarget.bottomright.y)
+
+                                var bottomright = new Atoms.Point(_boundsTarget.bottomright.x, _boundsTarget.bottomright.y)
+                                    var topleft = new Atoms.Point(_boundsTarget.topleft.x, _boundsTarget.topleft.y)
+                                    var dims = bottomright.subtract(topleft)
+                                    var center = topleft.add(dims.divide(2))
+
+
+                                    var MINSIZE = 4                                   // perfect-fit scaling
+                                    // MINSIZE = Math.max(Math.max(MINSIZE,dims.y), dims.x) // proportional scaling
+
+                                    var size = new Atoms.Point(Math.max(dims.x,MINSIZE), Math.max(dims.y,MINSIZE))
+                                    _boundsTarget.topleft = center.subtract(size.divide(2))
+                                    _boundsTarget.bottomright = center.add(size.divide(2))
+
+                                    if (!_bounds){
+                                        if (_.isEmpty(state.nodes)) return false
+                                            _bounds = _boundsTarget
+                                                return true
+                                    }
+
+                        // var stepSize = (Math.max(dims.x,dims.y)<MINSIZE) ? .2 : _screenStep
+                        var stepSize = _screenStep
+                            _newBounds = {
+                                bottomright: _bounds.bottomright.add( _boundsTarget.bottomright.subtract(_bounds.bottomright).multiply(stepSize) ),
+                                topleft: _bounds.topleft.add( _boundsTarget.topleft.subtract(_bounds.topleft).multiply(stepSize) )
+                            }
+
+                        // return true if we're still approaching the target, false if we're ‘close enough’
+                        var diff = new Atoms.Point(_bounds.topleft.subtract(_newBounds.topleft).magnitude(), _bounds.bottomright.subtract(_newBounds.bottomright).magnitude())        
+                            if (diff.x*_screenSize.width>1 || diff.y*_screenSize.height>1){
+                                _bounds = _newBounds
+                                    return true
+                            }else{
+                                return false        
+                            }
+                    },
+
+                    energy:function(){
+                        return _energy
+                    },
+
+                    bounds:function(){
+                        //  TL   -1
+                        //     -1   1
+                        //        1   BR
+                        var bottomright = null
+                            var topleft = null
+
+                            // find the true x/y range of the nodes
+                            _.each(state.nodes, function(node,id){
+                                if (!bottomright){
+                                    bottomright = new Atoms.Point(node._p)
+                                topleft = new Atoms.Point(node._p)
+                                return
+                                }
+
+                                var point = node._p
+                                if (point.x===null || point.y===null) return
+                                if (point.x > bottomright.x) bottomright.x = point.x;
+                            if (point.y > bottomright.y) bottomright.y = point.y;          
+                            if   (point.x < topleft.x)   topleft.x = point.x;
+                            if   (point.y < topleft.y)   topleft.y = point.y;
+                            })
+
+
+                        // return the true range then let to/fromScreen handle the padding
+                        if (bottomright && topleft){
+                            return {bottomright: bottomright, topleft: topleft}
+                        }else{
+                            return {topleft: new Atoms.Point(-1,-1), bottomright: new Atoms.Point(1,1)};
+                        }
+                    },
+
+                    // Find the nearest node to a particular position
+                    nearest:function(pos){
+                        if (_screenSize!==null) pos = that.fromScreen(pos)
+                            // if screen size has been specified, presume pos is in screen pixel
+                            // units and convert it back to the particle system coordinates
+
+                            var min = {node: null, point: null, distance: null};
+                        var t = that;
+
+                        _.each(state.nodes, function(node,id){
+                            var pt = node._p
+                            if (pt.x===null || pt.y===null) return
+                            var distance = pt.subtract(pos).magnitude();
+                        if (min.distance === null || distance < min.distance){
+                            min = {node: node, point: pt, distance: distance};
+                            if (_screenSize!==null) min.screenPoint = that.toScreen(pt)
+                        }
+                        })
+
+                        if (min.node){
+                            if (_screenSize!==null) min.distance = that.toScreen(min.node.p).subtract(that.toScreen(pos)).magnitude()
+                                return min
+                        }else{
+                            return null
+                        }
+                    },
+
+                    _notify:function() {
+                        // pass on graph changes to the physics object in the worker thread
+                        // (using a short timeout to batch changes)
+                        if (_notification===null){
+                            _epoch++;
+                        } else {
+                            clearTimeout(_notification);
+                        }
+                        _notification = setTimeout(that._synchronize,20);
+                        // that._synchronize()
+                    },
+                    _synchronize:function(){
+                        if (_changes.length>0){
+                            state.kernel.graphChanged(_changes);
+                            _changes = [];
+                            _notification = null;
+                        }
+                    },
+                };    
+
+                state.kernel = Kernel(that);
+                state.tween = state.kernel.tween || null;
+                
+                // some magic attrs to make the Node objects phone-home their physics-relevant changes
+                Atoms.Node.prototype.__defineGetter__("p", function() { 
+                    var self = this;
+                    var roboPoint = {};
+                    roboPoint.__defineGetter__('x', function(){ return self._p.x; });
+                    roboPoint.__defineSetter__('x', function(newX){ state.kernel.particleModified(self._id, {x:newX}) });
+                    roboPoint.__defineGetter__('y', function(){ return self._p.y; });
+                    roboPoint.__defineSetter__('y', function(newY){ state.kernel.particleModified(self._id, {y:newY}) });
+                    roboPoint.__proto__ = Atoms.Point.prototype;
+                    return roboPoint;
+                })
+                Atoms.Node.prototype.__defineSetter__("p", function(newP) { 
+                    this._p.x = newP.x;
+                    this._p.y = newP.y;
+                    state.kernel.particleModified(this._id, {x:newP.x, y:newP.y});
+                })
+
+                Atoms.Node.prototype.__defineGetter__("mass", function() { return this._mass; });
+                Atoms.Node.prototype.__defineSetter__("mass", function(newM) { 
+                    this._mass = newM;
+                    state.kernel.particleModified(this._id, {m:newM});
+                })
+
+                Atoms.Node.prototype.__defineSetter__("tempMass", function(newM) { 
+                    state.kernel.particleModified(this._id, {_m:newM});
+                })
+
+                Atoms.Node.prototype.__defineGetter__("fixed", function() { return this._fixed; });
+                Atoms.Node.prototype.__defineSetter__("fixed", function(isFixed) { 
+                    this._fixed = isFixed;
+                    state.kernel.particleModified(this._id, {f:isFixed?1:0});
+                })
+
+                return that;
+            }
+
+            self.ParticleSystem = ParticleSystem;
+            return ParticleSystem;
+        }
+);

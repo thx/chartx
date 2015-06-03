@@ -1,1 +1,172 @@
-define("chartx/layout/chord",[],function(){var a=function(a,c,d){if(arguments.length<3&&(d=1,arguments.length<2&&(c=a,a=0)),(c-a)/d===1/0)throw new Error("infinite range");var e,f=[],g=b(Math.abs(d)),h=-1;if(a*=g,c*=g,d*=g,0>d)for(;(e=a+d*++h)>c;)f.push(e/g);else for(;(e=a+d*++h)<c;)f.push(e/g);return f},b=function(a){for(var b=1;a*b%1;)b*=10;return b},c=2*Math.PI,d={};return d.chord=function(){function b(){var b,l,n,o,p,q={},r=[],s=a(h),t=[];for(e=[],f=[],b=0,o=-1;++o<h;){for(l=0,p=-1;++p<h;)l+=g[o][p];r.push(l),t.push(a(h)),b+=l}for(i&&s.sort(function(a,b){return i(r[a],r[b])}),j&&t.forEach(function(a,b){a.sort(function(a,c){return j(g[b][a],g[b][c])})}),b=(c-m*h)/b,l=0,o=-1;++o<h;){for(n=l,p=-1;++p<h;){var u=s[o],v=t[u][p],w=g[u][v],x=l,y=l+=w*b;q[u+"-"+v]={index:u,subindex:v,startAngle:x,endAngle:y,value:w}}f[u]={index:u,startAngle:n,endAngle:l,value:(l-n)/b},l+=m}for(o=-1;++o<h;)for(p=o-1;++p<h;){var z=q[o+"-"+p],A=q[p+"-"+o];(z.value||A.value)&&e.push(z.value<A.value?{source:A,target:z}:{source:z,target:A})}k&&d()}function d(){e.sort(function(a,b){return k((a.source.value+a.target.value)/2,(b.source.value+b.target.value)/2)})}var e,f,g,h,i,j,k,l={},m=0;return l.matrix=function(a){return arguments.length?(h=(g=a)&&g.length,e=f=null,l):g},l.padding=function(a){return arguments.length?(m=a,e=f=null,l):m},l.sortGroups=function(a){return arguments.length?(i=a,e=f=null,l):i},l.sortSubgroups=function(a){return arguments.length?(j=a,e=null,l):j},l.sortChords=function(a){return arguments.length?(k=a,e&&d(),l):k},l.chords=function(){return e||b(),e},l.groups=function(){return f||b(),f},l},d});
+define(
+    "chartx/layout/chord",
+    [
+    
+    ],
+    function(){
+        var range = function(start, stop, step) {
+            if (arguments.length < 3) {
+              step = 1;
+              if (arguments.length < 2) {
+                stop = start;
+                start = 0;
+              }
+            }
+            if ((stop - start) / step === Infinity) throw new Error("infinite range");
+            var range = [],
+                 k = range_integerScale(Math.abs(step)),
+                 i = -1,
+                 j;
+            start *= k, stop *= k, step *= k;
+            if (step < 0) while ((j = start + step * ++i) > stop) range.push(j / k);
+            else while ((j = start + step * ++i) < stop) range.push(j / k);
+            return range;
+        };
+        var range_integerScale = function(x) {
+            var k = 1;
+            while (x * k % 1) k *= 10;
+            return k;
+        }
+
+        var τ = 2 * Math.PI;
+
+        //layout
+        var layout = {};
+        layout.chord = function() {
+            var chord = {},
+                chords,
+                groups,
+                matrix,
+                n,
+                padding = 0,
+                sortGroups,
+                sortSubgroups,
+                sortChords;
+
+            function relayout() {
+                var subgroups = {},
+                    groupSums = [],
+                    groupIndex = range(n),
+                    subgroupIndex = [],
+                    k,
+                    x,
+                    x0,
+                    i,
+                    j;
+
+                chords = [];
+                groups = [];
+
+                k = 0, i = -1; while (++i < n) {
+                    x = 0, j = -1; while (++j < n) {
+                        x += matrix[i][j];
+                    }
+                    groupSums.push(x);
+                    subgroupIndex.push(range(n));
+                    k += x;
+                };
+
+                // Sort groups…
+                if (sortGroups) {
+                    groupIndex.sort(function(a, b) {
+                        return sortGroups(groupSums[a], groupSums[b]);
+                    });
+                };
+
+                // Sort subgroups…
+                if (sortSubgroups) {
+                    subgroupIndex.forEach(function(d, i) {
+                        d.sort(function(a, b) {
+                            return sortSubgroups(matrix[i][a], matrix[i][b]);
+                        });
+                    });
+                };
+
+                k = (τ - padding * n) / k;
+
+                x = 0, i = -1; while (++i < n) {
+                    x0 = x, j = -1; while (++j < n) {
+                        var di = groupIndex[i],
+                            dj = subgroupIndex[di][j],
+                            v = matrix[di][dj],
+                            a0 = x,
+                            a1 = x += v * k;
+                        subgroups[di + "-" + dj] = {
+                            index: di,
+                            subindex: dj,
+                            startAngle: a0,
+                            endAngle: a1,
+                            value: v
+                        };
+                    }
+                    groups[di] = {
+                        index: di,
+                        startAngle: x0,
+                        endAngle: x,
+                        value: (x - x0) / k
+                    };
+                    x += padding;
+                };
+                i = -1; while (++i < n) {
+                    j = i - 1; while (++j < n) {
+                        var source = subgroups[i + "-" + j],
+                            target = subgroups[j + "-" + i];
+                        if (source.value || target.value) {
+                            chords.push(source.value < target.value
+                                    ? {source: target, target: source}
+                                    : {source: source, target: target});
+                        }
+                    }
+                }
+                if (sortChords) resort();
+            }
+            function resort() {
+                chords.sort(function(a, b) {
+                    return sortChords(
+                        (a.source.value + a.target.value) / 2,
+                        (b.source.value + b.target.value) / 2);
+                });
+            }
+            chord.matrix = function(x) {
+                if (!arguments.length) return matrix;
+                n = (matrix = x) && matrix.length;
+                chords = groups = null;
+                return chord;
+            };
+            chord.padding = function(x) {
+                if (!arguments.length) return padding;
+                padding = x;
+                chords = groups = null;
+                return chord;
+            };
+            chord.sortGroups = function(x) {
+                if (!arguments.length) return sortGroups;
+                sortGroups = x;
+                chords = groups = null;
+                return chord;
+            };
+            chord.sortSubgroups = function(x) {
+                if (!arguments.length) return sortSubgroups;
+                sortSubgroups = x;
+                chords = null;
+                return chord;
+            };
+            chord.sortChords = function(x) {
+                if (!arguments.length) return sortChords;
+                sortChords = x;
+                if (chords) resort();
+                return chord;
+            };
+            chord.chords = function() {
+                if (!chords) relayout();
+                return chords;
+            };
+            chord.groups = function() {
+                if (!groups) relayout();
+                return groups;
+            };
+            return chord;
+        };
+        return layout;
+    }
+);

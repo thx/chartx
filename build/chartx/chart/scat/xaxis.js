@@ -1,1 +1,43 @@
-define("chartx/chart/scat/xaxis",["chartx/components/xaxis/xAxis","chartx/utils/datasection"],function(a,b){var c=function(a,b){this.xDis=0,c.superclass.constructor.apply(this,arguments)};return Chartx.extend(c,a,{_initDataSection:function(a){var a=_.flatten(a),c=b.section(a);return this._baseNumber=c[0],1==c.length&&c.push(100),c},_trimXAxis:function(a,b){var c=[];this.xDis=b/(a.length-1);for(var d=0,e=a.length;e>d;d++){var f={content:a[d],x:this.xDis*d};c.push(f)}return c}}),c});
+define(
+    "chartx/chart/scat/xaxis",
+    [
+        "chartx/components/xaxis/xAxis",
+        "chartx/utils/datasection"
+    ],
+    function(xAxisBase , DataSection ){
+        var xAxis = function( opt , data ){
+            this.xDis = 0; //x方向一维均分长度
+            xAxis.superclass.constructor.apply( this , arguments );
+        };
+        Chartx.extend( xAxis , xAxisBase , {
+            _initDataSection  : function( arr ){ 
+                var arr = _.flatten( arr ); //Tools.getChildsArr( data.org );
+                var dataSection = DataSection.section(arr);
+                this._baseNumber = dataSection[0];
+    
+                if( dataSection.length == 1 ){
+                    //TODO;散点图中的xaxis不应该只有一个值，至少应该有个区间
+                    dataSection.push( 100 );
+                }
+                return dataSection;
+            },
+            /**
+             *@param data 就是上面 _initDataSection计算出来的dataSection
+             */
+            _trimXAxis : function( data , xGraphsWidth ){
+                var tmpData = [];
+                this.xDis  = xGraphsWidth / (data.length-1);
+                for (var a = 0, al  = data.length; a < al; a++ ) {
+                    var o = {
+                        'content' : data[a], 
+                        'x'       : this.xDis * a
+                    }
+                    tmpData.push( o );
+                }
+                return tmpData;
+            } 
+        } );
+    
+        return xAxis;
+    }
+);

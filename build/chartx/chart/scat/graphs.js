@@ -1,1 +1,124 @@
-define("chartx/chart/scat/graphs",["canvax/index","canvax/shape/Circle","canvax/animation/Tween"],function(a,b,c){var d=function(a,b){this.w=0,this.h=0,this.pos={x:0,y:0},this._colors=["#6f8cb2","#c77029","#f15f60","#ecb44f","#ae833a","#896149"],this.r=10,this.sprite=null,this._circles=[],_.deepExtend(this,a),this.init(b)};return d.prototype={init:function(){this.sprite=new a.Display.Sprite({id:"graphsEl"})},setX:function(a){this.sprite.context.x=a},setY:function(a){this.sprite.context.y=a},getFillStyle:function(a,b,c){var d=null;return _.isArray(this.fillStyle)&&(d=this.fillStyle[b]),_.isFunction(this.fillStyle)&&(d=this.fillStyle(a,b,c)),d&&""!=d||(d=this._colors[b]),d},draw:function(c,d){if(_.deepExtend(this,d),0!=c.length){for(var e=c[0].length,f=0;e>f;f++){for(var g=new a.Display.Sprite({id:"barGroup"+f}),h=0,i=c.length;i>h;h++){var j=c[h][f],k=new b({context:{x:j.x,y:j.y,fillStyle:this.getFillStyle(f,h,j.value),r:this.r,globalAlpha:0}});g.addChild(k),this._circles.push(k)}this.sprite.addChild(g)}this.setX(this.pos.x),this.setY(this.pos.y)}},grow:function(){function a(){d=requestAnimationFrame(a),c.update()}var b=this,d=null,e=function(){new c.Tween({h:0}).to({h:100},500).onUpdate(function(){for(var a=0,c=b._circles.length;c>a;a++)b._circles[a].context.globalAlpha=this.h/100,b._circles[a].context.r=this.h/100*b.r}).onComplete(function(){cancelAnimationFrame(d)}).start();a()};e()}},d});
+define(
+    "chartx/chart/scat/graphs",
+    [
+        "canvax/index",
+        "canvax/shape/Circle",
+        "canvax/animation/Tween"
+    ],
+    function( Canvax , Circle , Tween ){
+ 
+        var Graphs = function( opt , data ){
+            this.w = 0;
+            this.h = 0;
+           
+            this.pos = {
+                x : 0,
+                y : 0
+            }
+    
+            this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+    
+    
+            //圆圈默认半径
+            this.r = 10;
+    
+            this.sprite = null ;
+    
+            this._circles = [];  //所有圆点的集合
+    
+            _.deepExtend(this , opt);
+    
+            this.init( data );
+    
+        };
+    
+        Graphs.prototype = {
+            init : function(){
+                this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
+            },
+            setX:function($n){
+                this.sprite.context.x = $n
+            },
+            setY:function($n){
+                this.sprite.context.y = $n
+            },
+            getFillStyle : function( i , ii , value){
+                var fillStyle = null;
+                
+                if( _.isArray( this.fillStyle ) ){
+                    fillStyle = this.fillStyle[ii]
+                }
+                if( _.isFunction( this.fillStyle ) ){
+                    fillStyle = this.fillStyle( i , ii , value );
+                }
+                if( !fillStyle || fillStyle=="" ){
+                    fillStyle = this._colors[ii];
+                }
+                return fillStyle;
+            },
+            draw : function(data , opt){
+                _.deepExtend(this , opt);
+                if( data.length == 0 ){
+                    return;
+                }
+    
+                //这个分组是只x方向的一维分组
+                var barGroupLen = data[0].length;
+   
+                for( var i = 0 ; i < barGroupLen ; i++ ){
+                    var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
+                    for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
+                        var barData = data[ii][i];
+    
+                        var circle = new Circle({
+                            context : {
+                                x           : barData.x,
+                                y           : barData.y,
+                                fillStyle   : this.getFillStyle( i , ii , barData.value ),
+                                r           : this.r,
+                                globalAlpha : 0
+                            }
+                        });
+                        sprite.addChild( circle );
+                        this._circles.push( circle );
+                    }
+                    this.sprite.addChild( sprite );
+                }
+    
+                this.setX( this.pos.x );
+                this.setY( this.pos.y );
+            },
+            /**
+             * 生长动画
+             */
+            grow : function(){
+                var self  = this;
+                var timer = null;
+    
+                var growAnima = function(){
+                   var bezierT = new Tween.Tween( { h : 0 } )
+                   .to( { h : 100 }, 500 )
+                   .onUpdate( function () {
+    
+                       for( var i=0 , l=self._circles.length ; i<l ; i++ ){
+                           self._circles[i].context.globalAlpha = this.h / 100;
+                           self._circles[i].context.r = this.h / 100 * self.r;
+                       }
+                       
+                   } ).onComplete( function(){
+                       cancelAnimationFrame( timer );
+                   }).start();
+                   animate();
+                };
+                function animate(){
+                    timer    = requestAnimationFrame( animate ); 
+                    Tween.update();
+                };
+                growAnima();
+            }
+        }; 
+    
+        return Graphs;
+    
+    }
+)

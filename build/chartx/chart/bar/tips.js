@@ -1,1 +1,9 @@
-define("chartx/chart/bar/tips",["chartx/components/tips/tip"],function(){});
+define(
+    "chartx/chart/bar/tips",
+    [
+        "chartx/components/tips/tip"
+    ],
+    function(){
+    
+    }
+)
