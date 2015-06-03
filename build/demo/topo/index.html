@@ -53,7 +53,7 @@ var options = {
 }
 
 
-Chartx.create.topo("canvasTest" , data , options).then(function( tree ){
+Chartx.topo("canvasTest" , data , options).then(function( tree ){
     tree.on("nodeMouseover" , function(){
         console.log( "nodeMouseover" );
     });

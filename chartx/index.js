@@ -1,7 +1,7 @@
 var Chartx = {
     _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord'],
     create  : {},
-    start   : function () {
+    _start   : function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的 
 
@@ -9,7 +9,7 @@ var Chartx = {
 
         //BEGIN(develop)
         if ((/daily.taobao.net/g).test(location.host)) {
-            Chartx.site.daily = true;
+            Chartx._site.daily = true;
         }
         //END(develop)
 
@@ -22,13 +22,13 @@ var Chartx = {
         Chartx.path = __FILE__.replace(/(^\s*)|(\s*$)/g, "");
 
         if( (/daily.taobao.net/g).test( __FILE__ ) ){
-            Chartx.site.daily = true;
+            Chartx._site.daily = true;
         }
 
         //配置canvax包
         var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
         
-        if( Chartx.site.daily || Chartx.site.local ){
+        if( Chartx._site.daily || Chartx._site.local ){
             canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/"+ canvaxVersion +"/";
         }
         //BEGIN(develop)
@@ -40,7 +40,7 @@ var Chartx = {
         //END(develop)
 
 
-        Chartx.setPackages([{
+        Chartx._setPackages([{
             name: 'canvax',
             path: canvaxUrl
         }, {
@@ -52,7 +52,7 @@ var Chartx = {
 
         //然后就可以Chartx.create.line("el" , data , options).then( function( chart ){  } ) 的方式接入图表
         for(var a = 0,l = Chartx._charts.length ; a < l ; a++){
-            Chartx.create[ Chartx._charts[a] ] = (function( ctype ){
+            Chartx[Chartx._charts[a]] = Chartx.create[ Chartx._charts[a] ] = (function( ctype ){
                 return function(el , data , options){
                     return Chartx._queryChart(ctype , el , data , options);
                 }
@@ -106,7 +106,7 @@ var Chartx = {
         return promise;
 
     },
-    site: {
+    _site: {
         local: !! ~location.search.indexOf('local'),
         daily: !! ~location.search.indexOf('daily'),
         debug: !! ~location.search.indexOf('debug'),
@@ -115,7 +115,7 @@ var Chartx = {
     /**
      *@packages array [{name:,path:}]
      */
-    setPackages: function (packages) {
+    _setPackages: function (packages) {
         /*       
         ## 通用模块定义
         Universal Module Definition
@@ -224,8 +224,8 @@ var Chartx = {
             window.KISSY && KISSY.config({ packages: [{
                 name: name,
                 path: path,
-                debug: Chartx.site.debug,
-                combine: !Chartx.site.local
+                debug: Chartx._site.debug,
+                combine: !Chartx._site.local
             }]
             });
 
@@ -245,21 +245,7 @@ var Chartx = {
                 requirejs.config({ paths: packageObj });
             }
         }
-    },
-    // dom操作相关代码
-    getEl: function (el) {
-        if (_.isString(el)) {
-            return document.getElementById(el);
-        }
-        if (el.nodeType == 1) {
-            //则为一个element本身
-            return el;
-        }
-        if (el.length) {
-            return el[0];
-        }
-        return null;
-    }
+    } 
 };
 
-Chartx.start();
+Chartx._start();
