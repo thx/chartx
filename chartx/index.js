@@ -247,8 +247,9 @@ var Chartx = {
             if (window.seajs) {
                 packageObj[name] = path + name;
                 //BEGIN(develop)
-                if( path == "../../" && name == "chartx" ){
-                    packageObj[name] = window.location.origin+window.location.pathname.split("/").slice(0 , -3).join("/")+"/chartx"
+                if( path.indexOf("../")>=0 && name == "chartx" ){
+                    var si = path.split("../").length;
+                    packageObj[name] = window.location.origin+window.location.pathname.split("/").slice(0 , -si).join("/")+"/chartx"
                 }
                 //END(develop)
                 seajs.config({ paths: packageObj });
