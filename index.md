@@ -40,7 +40,7 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-
 
 ### 创建图表
 
-在全局图表对象Chartx下面有一个create对象，上面挂载着全部的图表类型
+在全局图表对象Chartx下面挂载着全部的图表类型
 目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo']
 该类型方法需要三个参数。
 
