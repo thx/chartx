@@ -94,6 +94,21 @@ Chartx.line(el , data , options).then(function( chart ){
 });
 ```
 
+#### PC事件
+
+* click  --> 点击事件
+* mouseover --> 进入graphs区域触发
+* mousemove --> 再graphs区域移动时触发
+* mouseout  --> 离开graphs区域触发
+
+#### Mobile事件
+
+* tap --> 手势点击graphs区域触发
+* panstart --> 手势点击graphs区域，然后开始移动时触发
+* panmove --> 手势在graphs区域移动中触发
+* panend --> 手势的移动结束时触发
+
+
 ## 柱状图
 
 
