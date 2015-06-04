@@ -198,7 +198,7 @@ define(
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         'chartx/components/anchor/Anchor',
-        'chartx/components/line/Graphs',
+        'chartx/chart/line/graphs',
         './tips',
         'chartx/utils/dataformat'
     ],

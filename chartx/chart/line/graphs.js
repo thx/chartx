@@ -1,10 +1,10 @@
 define(
-    "chartx/components/line/Graphs" ,
+    "chartx/chart/line/graphs" ,
     [
         "canvax/index",
         "canvax/shape/Rect",
         "chartx/utils/tools",
-        "chartx/components/line/Group"
+        "chartx/chart/line/group"
     ],
     function( Canvax , Rect, Tools, Group ){
         var Graphs = function(opt,root){

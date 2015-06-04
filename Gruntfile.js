@@ -77,6 +77,8 @@ module.exports = function(grunt) {
              src : [
                  bc+"chart/line/tips.js",
                  bc+"chart/line/xaxis.js",
+                 bc+"chart/line/group.js",
+                 bc+"chart/line/graphs.js",
                  bc+"chart/line/index.js"
              ],
              dest : bc+"chart/line/index.js"
