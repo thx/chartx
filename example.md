@@ -119,6 +119,21 @@ title:  chart demos
     </dl>
     </a>
 
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/line/event_touch.gif">
+        </dt>
+        <dd>
+            <h5>
+            <a target="_blank" href="./demo/line/index_event.html">PC事件处理demo</a>
+            </h5>
+
+            <h5>
+            <a target="_blank" href="./demo/line/index_touch.html">触屏事件处理demo</a>
+            </h5>
+        </dd>
+    </dl>
+
 </div>
 
 ## 柱状图
