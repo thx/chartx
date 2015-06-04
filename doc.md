@@ -58,7 +58,6 @@ var options = {
            <tr><td>strokeStyle</td><td>可以是一个颜色值，也可以是一个颜色值的数组，也可以是一个自定义函数，[<a href="#color">颜色值的规则</a>]</td></tr>
            <tr><td>smooth</td><td>是否显示平滑曲线效果的折线 默认未true</td></tr>
        </table>
-
      - node 线上的圆点配置
        <table>
        <tr><td>enabled</td><td>是否显示</td></tr>
@@ -68,14 +67,12 @@ var options = {
        <tr><td>strokeStyle</td><td>默认和line.strokeStyle一致，和同样遵循[<a href="#color">颜色值的规则</a>]</td></tr>
        <tr><td>lineWidth</td><td>圆点border大小，默认未2</td></tr>
        </table>
-
      - fill 填满折线到x轴之间的填充样式配置
        <table>
        <tr><td>enabled</td><td>是否显示填充色，默认为true</td></tr>
        <tr><td>fillStyle</td><td>默认和line.strokeStyle一致，遵循[<a href="#color">颜色值的规则</a>]。</td></tr>
        <tr><td>alpha</td><td>填充色的透明度，如果不需要填充色的折线图可以把该配置设置未0</td></tr>
        </table>
-
 
 
 <span style="margin-top:50px;" id="color">颜色值的配置规则</span>
