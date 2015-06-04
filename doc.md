@@ -9,15 +9,14 @@ title:  Chartx Documentation
 
 <code>[xAxis](#xaxis)</code>
 
-## 图表类型
 
-### 折线图
+## 折线图
 
 ```js
 Chartx.line(el , data , options);
 ```
 
-#### 数据
+### 折线图数据
 
 ```js
 var data= [
@@ -33,7 +32,7 @@ var data= [
 ];
 ```
 
-#### 配置
+### 折线图配置
 
 ```js
 var options = {
@@ -53,24 +52,33 @@ var options = {
    + [tips](#tips)
    + graphs
      - line  折线的配置
-       * enabled   是否显示
-       * lineWidth    线条大小
-       * strokeStyle    [线条颜色，可以是一个颜色值，也可以是一个颜色值的数组，也可以是一个自定义函数](#color)
-       * smooth    是否显示平滑曲线效果的折线 默认未true
+       <table>
+           <tr><td>enabled</td><td>是否显示</td></tr>
+           <tr><td>lineWidth</td><td>线条大小，默认为2</td></tr>
+           <tr><td>strokeStyle</td><td>可以是一个颜色值，也可以是一个颜色值的数组，也可以是一个自定义函数，[<a href="#color">颜色值的规则</a>]</td></tr>
+           <tr><td>smooth</td><td>是否显示平滑曲线效果的折线 默认未true</td></tr>
+       </table>
+
      - node 线上的圆点配置
-       * enabled    是否显示
-       * corner    是否再拐角的时候才出现圆点 
-       * r    圆点的半径，默认未2
-       * fillStyle    默认为白色#ffffff，和line.strokeStyle一样，也可以是值，数组，和自定义函数[颜色值的规则](#color)
-       * strokeStyle    默认和line.strokeStyle一致，和同样遵循[颜色值的规则](#color)
-       * lineWidth    圆点border大小，默认未2
+       <table>
+       <tr><td>enabled</td><td>是否显示</td></tr>
+       <tr><td>corner</td><td>是否再拐角的时候才出现圆点</td></tr>
+       <tr><td>r</td><td>圆点的半径，默认未2</td></tr>
+       <tr><td>fillStyle</td><td>默认为白色#ffffff，和line.strokeStyle一样，也可以是值，数组，和自定义函数[<a href="#color">颜色值的规则</a>]</td></tr>
+       <tr><td>strokeStyle</td><td>默认和line.strokeStyle一致，和同样遵循[<a href="#color">颜色值的规则</a>]</td></tr>
+       <tr><td>lineWidth</td><td>圆点border大小，默认未2</td></tr>
+       </table>
+
      - fill 填满折线到x轴之间的填充样式配置
-       * enabled    是否显示填充色，默认为true
-       * fillStyle    默认和line.strokeStyle一致，遵循[颜色值的规则](#color)。
-       * alpha    填充色的透明度，如果不需要填充色的折线图可以把该配置设置未0
+       <table>
+       <tr><td>enabled</td><td>是否显示填充色，默认为true</td></tr>
+       <tr><td>fillStyle</td><td>默认和line.strokeStyle一致，遵循[<a href="#color">颜色值的规则</a>]。</td></tr>
+       <tr><td>alpha</td><td>填充色的透明度，如果不需要填充色的折线图可以把该配置设置未0</td></tr>
+       </table>
 
 
-<span style="margin-top:50px;" id="color">颜色值的规则</span>
+
+<span style="margin-top:50px;" id="color">颜色值的配置规则</span>
 <table>
     <tr><td>类型</td><td>描述</td></tr>
     <tr><td>字符串</td><td>返回该值本身</td></tr>
@@ -79,9 +87,19 @@ var options = {
 </table>
 
 
+### 折线图事件
+
+```js
+Chartx.line(el , data , options).then(function( chart ){
+    chart.on("" , function(){
+        ... 
+    });
+});
+```
+
+## 柱状图
 
 
-#### 事件
 
 ## 组件
 
