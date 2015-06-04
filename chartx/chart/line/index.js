@@ -21,12 +21,6 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this.event         = {
-                    enabled   : 0,
-                    This      : this,
-                    on        : null
-                }
-    
                 this._xAxis   =  null;
                 this._yAxis   =  null;
                 this._anchor  =  null;
@@ -327,14 +321,7 @@ define(
                     n = 0
                 }
                 return n
-            },
-            _click:function(o){
-                var self = this.This                            //this = this.event
-                if(_.isFunction(self.on)){
-                    self.on(o)
-                }
             }
         });
-    
     } 
 );
