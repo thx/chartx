@@ -94,14 +94,14 @@ Chartx.line(el , data , options).then(function( chart ){
 });
 ```
 
-#### PC事件
+#### PC事件  <a target="_blank" href="./demo/line/index_event.html">demo</a>
 
 * click  --> 点击事件
 * mouseover --> 进入graphs区域触发
 * mousemove --> 再graphs区域移动时触发
 * mouseout  --> 离开graphs区域触发
 
-#### Mobile事件
+#### Mobile事件 <a target="_blank" href="./demo/line/index_touch.html">demo</a>
 
 * tap --> 手势点击graphs区域触发
 * panstart --> 手势点击graphs区域，然后开始移动时触发
