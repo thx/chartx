@@ -10,7 +10,10 @@ title:  Chartx Documentation
 <code>[xAxis](#xaxis)</code>
 
 
-## 折线图<a href="http://nickli.github.io/chartx/demo/line/index.html" target="_blank">  demo</a>
+## 折线图
+
+<a href="http://nickli.github.io/chartx/demo/line/index.html" target="_blank">  demo</a>
+
 
 ```js
 Chartx.line(el , data , options);
