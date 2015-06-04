@@ -1,5 +1,5 @@
 define(
-    "chartx/components/line/Group" ,
+    "chartx/chart/line/group" ,
     [
         "canvax/index",
         "canvax/shape/BrokenLine",
@@ -27,6 +27,7 @@ define(
                 lineWidth   : 2,
                 smooth      : true
             }
+
 
             this.node     = {                     //节点 
                 enabled     : 1,                       //是否有
