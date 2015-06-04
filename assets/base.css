@@ -1260,3 +1260,8 @@ h2 {
 .chart img {
     width:190px;
 }
+
+.type ul {
+    margin-top:0;
+    margin-bottom:0;
+}

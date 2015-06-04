@@ -28,7 +28,6 @@ define(
                 smooth      : true
             }
 
-
             this.node     = {                     //节点 
                 enabled     : 1,                       //是否有
                 corner      : false,                   //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
