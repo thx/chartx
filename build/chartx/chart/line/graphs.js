@@ -166,13 +166,14 @@ define(
                 var tmpINode = this.disX == 0 ? 0 : parseInt( (x + (this.disX / 2) ) / this.disX  );
 
                 var _nodesInfoList = [];                 //节点信息集合
-                var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(_nodesInfoList , "y" ));
-                for (var a = 0, al = this.groups.length; a < al; a++ ) {
+                for ( var a = 0, al = this.groups.length; a < al; a++ ) {
                     var o = this.groups[a].getNodeInfoAt(tmpINode)
                     o && _nodesInfoList.push(o);
                 };
 
-                this.iGroup = tmpIGroup, this.iNode = tmpINode
+                var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(_nodesInfoList , "y" ));
+
+                this.iGroup = tmpIGroup, this.iNode = tmpINode;
                 var node = {
                     iGroup        : this.iGroup,
                     iNode         : this.iNode,
@@ -181,15 +182,11 @@ define(
                 return node;
             },
             _fireHandler:function(e){
-                var self = this;
-                var o = {
-                    eventType : e.type,
-                    iGroup    : e.tipsInfo.iGroup,
-                    iNode     : e.tipsInfo.iNode 
-                };
-                if(_.isFunction(self.root.event.on)){
-                    self.root.event.on(o);
-                };
+                e.params  = {
+                    iGroup : e.tipsInfo.iGroup,
+                    iNode  : e.tipsInfo.iNode
+                }
+                this.root.fire( e.type , e );
             }
         };
     
