@@ -342,7 +342,6 @@ define(
 
                                 var oldEdges = that.getEdges(src, dst)
                                 if (oldEdges.length>0){
-                                    debugger
                                 // trace("update",src,dst)
                                 oldEdges[0].data = edgeData
                                 }else{

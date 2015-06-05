@@ -65,7 +65,6 @@ define(
                             
 
                             me.particleSystem.eachNode(function(node, pt){
-                                //debugger;
                                 // node: {mass:#, p:{x,y}, name:"", data:{}}
                                 // pt:   {x:#, y:#}  node position in screen coords
                                 var circle = me.spriteNode.getChildById("node"+node._id);

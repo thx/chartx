@@ -85,7 +85,6 @@ define(
 
             },
             draw : function(data , opt){
-                // debugger
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
