@@ -1265,6 +1265,10 @@ h2 {
     margin-top:0;
     margin-bottom:0;
 }
+.type li {
+    padding-top: 5px;
+    padding-bottom:5px;
+}
 .type table {
     margin:20px;
 }
