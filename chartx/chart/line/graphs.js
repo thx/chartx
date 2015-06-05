@@ -181,7 +181,7 @@ define(
                 };
                 return node;
             },
-            _fireHandler:function(e){
+            _fireHandler : function(e){
                 e.params  = {
                     iGroup : e.tipsInfo.iGroup,
                     iNode  : e.tipsInfo.iNode

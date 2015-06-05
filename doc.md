@@ -5,7 +5,7 @@ title:  Chartx Documentation
 
 ## Chartx的使用
 
-请确认在引入Chart js库文件的时候页面已经有AMD(requires),CMD(seajs),KISSY等任一模块加载环境。
+请确认在引入Chart js库文件的时候页面已经有AMD(requires)，CMD(seajs) ，KISSY等任一模块加载环境。
 
 
 ### 引入Chartx库文件
@@ -20,11 +20,12 @@ cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-
 
 当然，上面是alicdn上提供的地址， 你也可以下载源代码存放在自己的目录中。
 
-
 ### 创建图表
 
 在全局图表对象Chartx下面挂载着全部的图表类型
-目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo']
+
+Chartx.bar(柱状图) , Chartx.force（力布局图） , Chartx.line（折线图） , Chartx.map（地图） , Chartx.pie（饼图） , Chartx.planet（行星图） , Chartx.progress（进度图） , Chartx.radar（雷达图） , Chartx.scat（散点图） , Chartx.topo（拓扑图，树状图
+
 该类型方法需要三个参数。
 
 - el      --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象 
@@ -51,7 +52,7 @@ Chartx.line(#el , data , options).then(function( chart ){
 
 ```
 
-TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
+PS：promise then 回调函数的执行在 chart的 绘制之前。。。
 
 
 
@@ -74,7 +75,7 @@ TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
 view.createChart( chartType , #el , data , options )
 ```
 
-TODO：view.createChart 第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应
+view.createChart 第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
@@ -87,7 +88,7 @@ view.createChart( chartType , #el , data , options).then(function( chart ){
 
 ```
 
-TODO：同上，promise then 回调函数的执行在 chart的 绘制之前。。。
+同上，promise then 回调函数的执行在 chart的 绘制之前。。。
 
 
 DEMO：
@@ -114,9 +115,6 @@ return View.extend({
 ## Chartx的数据格式
 
 在Chartx中，所有的图表都采用如下同一种数据格式，这样的数据格式并不具有任何图表相关的意义，和后台约定数据格式的时候能做到完全的解耦，不需要特定的为某图表来设计json格式。
-
-然后每个图表都会有自己的dataFormat函数来将其转换为自己需要的数据。
-
 
 第一行是表头。
 
@@ -145,34 +143,6 @@ var options = {
 Chartx.line( #el , data , options);
 ```
 
-在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame
-
-```js
-chart.dataFrame  = {    //数据集合对象
-    org        : [],   //最原始的数据 , 也就是传入的data 
-    data       : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
-    yAxis      : {     //y轴
-        field  : [],   //字段集合 对应this.data
-        org    : []    //二维 原始数据[[100,200],[1000,2000]]
-    },
-    xAxis      : {     //x轴
-        field  : [],   //字段 对应this.data
-        org    : []    //原始数据['星期一','星期二']
-    }
-}
-```
-
-## Chartx的配置
-
-在Chartx的世界里，我们的图表的适配到各种不一样的风格和交互行为都从配置中得到体现。
-
-我们所有的chart实例上不再拥有专门用来存放配置的config或者options对象，我们通过深度merge来把配置直接挂载在chart实例上。
-
-而图表中<code>_</code>开头的变量，都是属于内部变量，大部分由内部计算的来，不建议在options参数中配置。
-
-__接下来在下面的文档中，我们会详细讲述每一类型的图表配置和组件配置。__
-
----
 
 ## 图表
 
@@ -182,7 +152,7 @@ __接下来在下面的文档中，我们会详细讲述每一类型的图表配
 
 <img src="./assets/chart/line/line.png" style="width:300px;"></img>
 
-其中xAxis为xAxis组件部分，yAxis为yAxis组件部分，而graphs，则为line本身的绘图区域，这个三个区域的划分还充分表现再配置上options，再graphs区域的底部，你看到的横向竖向的背景线，其实还有一个back背景组件。
+其中xAxis部分为[xAxis组件](#axis)，yAxis部分为[yAxis组件](#yaxis)，而graphs，则为折线图本身的绘图区域，再graphs区域的底部，你看到的横向竖向的背景线，其实还有一个[back背景组件](#back)。
 
 _调用代码_ ，<a href="./demo/line/index.html" target="_blank">demo</a> 
 
@@ -300,7 +270,14 @@ Chartx.line(#el , data , options).then(function( chart ){
    + fillStyle --> 文本的颜色，默认为"#999"
    + fontSize --> 字体大小，默认12px
    + rotation --> 文本以右上角做坐标原点的旋转角度，默认为0代表不旋转
-   + format --> <span id='xaxisformat'>{function}一个用来把原始元数据转换到最终展示的文本的转换函数，比如，代表一个星期的数据，元数据是1,2,3,4,5,6,7,8，但是xAxis轴上面需要显示为"星期一"，"星期二"，"星期三"，"星期四"，"星期五"，"星期六"，"星期天"。这个format函数的参数便是每一个元数据，比如是判断参数为1，就return “星期一”。</span>
+   + format --> <span id='xaxisformat'>{function}一个用来把原始元数据转换到最终展示的文本的转换函数，比如，代表一个星期的数据，元数据是0,1,2,3,4,5,6,7，但是xAxis轴上面需要显示为"星期一"，"星期二"，"星期三"，"星期四"，"星期五"，"星期六"，"星期天"。这个format函数的参数便是每一个元数据，比如是判断参数为0，就return “星期一”。</span>
+   ```js
+   format : function( v ){
+            if( v == 0 ){
+                return "星期一"    
+            }
+        }  
+    ```
    + textAlign --> 文本的横向对齐方式，默认为center，可选left，right
  - filter --> 过滤器，该过滤器和text.format不同，filter是依次来处理每个单元的line 和text，可以非常方便的来自定义ui层面的结构，比如，还是周一到周五，如果我只需要显示周一周三周五周天，那么我们可以这样。
 
@@ -422,11 +399,50 @@ back : {
 }
 ```
 
-<h3 id="anchor">anchor</h3>
+<h3 id="anchor">anchor(十字坐标瞄准器)</h3>
 
+<img src="http://nickli.github.io/chartx/assets/chart/line/anchor.gif" style="width:300px;" />
+
+上图的红色十字坐标瞄准器就是anchor组件，<a href="./demo/line/anchor.html" target="_blank">该图表demo点这里</a>
+
+ - w --> anchor的区域width
+ - h --> anchor的区域height
+ - enabled --> 是否显示
+ - xAxis
+   + lineWidth --> x轴线的lineWidth
+   + fillStyle --> x轴线的fillStyle，默认为“#cc3300”
+ - yAxis
+   + lineWidth --> y轴线的lineWidth
+   + fillStyle --> y轴线的fillStyle，默认为“#cc3300”
+ - node --> 坐标交叉点的圆点
+   + enabled --> 是否需要显示圆点
+   + r  --> 圆点半径
+   + fillStyle --> 圆点的填充色，默认为“#cc3300”
+   + strokeStyle --> 圆点的描边颜色，默认为“#cc3300”
+   + lineWidth --> 圆点描边的lineWidth
+ - pos --> anchor区域的原点坐标
+   + x 
+   + y
+ - cross --> 十字交叉点的坐标
+   + x 
+   + y
 
 <h3 id="xaxis">tips</h3>
 
+ - backR --> tip框圆角大小
+ - fillStyle --> tip框背景色，默认"#000000"
+ - text
+   + fillStyle --> tip内容文本颜色，默认"#ffffff"
+ - alpha --> tip框透明度
+ - offset --> tip框到鼠标位置的偏移量
+ - prefix --> 假如yAxis.fields配置为[ "uv" , "click" ]，那么这个时候的tip内容为这样<img src="./assets/chart/tip_prefix.png" style="height:50px;" />，给tips.prefix配置为["用户数","点击量"]后，那么结果会是这样<img src="./assets/chart/tip_prefix1.png" style="height:50px;" />
+ - content --> {function}如果tips配置了content的话，那么tip框内的内容都会是content函数的返回内容，这个时候prefix会失效。content函数的参数详情如下
 
+ <table>
+     <tr>
+         <td>iGroup</td>
+         <td></td>
+     </tr>
+ </table>
 
 
