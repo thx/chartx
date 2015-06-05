@@ -353,6 +353,73 @@ Chartx.line(#el , data , options).then(function( chart ){
 
 ### back
 
+ - enabled --> 是否显示背景
+ - xOrigin --> 原点开始的x轴线
+   + enabled --> 是否显示
+   + lineWidth --> 线的lineWidth
+   + strokeStyle --> 线颜色
+ - yOrigin --> 原点开始的x轴线
+   + enabled --> 是否显示
+   + lineWidth --> 线的lineWidth
+   + strokeStyle --> 线颜色
+ - xAxis  --> x轴方向上的线
+   + enabled --> 是否显示
+   + lineType --> 默认为实线，可选（dashed 虚线）
+   + lineWidth --> 线大小
+   + strokeStyle --> 线颜色，默认“#f5f5f5”
+   + filter --> 过滤函数，用来定制每条线条的样式。
+
+```js
+back : {
+    xAxis : {
+        filter : function( param ){
+            //param为一个包含了yAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
+            //{
+            //   layoutData : self.yAxis.layoutData,
+            //   index      : a,
+            //   line       : line
+            //}
+            // 比如，我们要把第一条线隐藏，第二条线设置为红色
+            if( param.index == 0 ){
+                param.line.context.visible = false;    
+            }
+            if( param.index == 1 ){
+                param.line.context.strokeStyle = "red";    
+            }
+        }    
+    }    
+}
+```
+
+ - yAxis  --> y轴方向上的线
+   + enabled --> 是否显示
+   + lineType --> 默认为实线，可选（dashed 虚线）
+   + lineWidth --> 线大小
+   + strokeStyle --> 线颜色，默认“#f5f5f5”
+   + filter --> 过滤函数，和上面的back.xAxis.filter功能一致，用来定制每条线条的样式。
+
+```js
+back : {
+    xAxis : {
+        filter : function( param ){
+            //param为一个包含了xAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
+            //{
+            //   layoutData : self.xAxis.layoutData,
+            //   index      : a,
+            //   line       : line
+            //}
+            // 比如，我们要把第一条线隐藏，第二条线设置为红色
+            if( param.index == 0 ){
+                param.line.context.visible = false;    
+            }
+            if( param.index == 1 ){
+                param.line.context.strokeStyle = "red";    
+            }
+        }    
+    }    
+}
+```
+
 ### anchor
 
 ### tips
