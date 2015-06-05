@@ -1276,3 +1276,7 @@ h4:hover .anchor-link {
 .type table {
     margin:20px;
 }
+.type p {
+    margin-top:20px;
+    margin-bottom:0;
+}

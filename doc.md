@@ -70,12 +70,13 @@ PS：promise then 回调函数的执行在 chart的 绘制之前。。。
 
 加载了<code>chartx/magixext</code>后，magix会在view中扩展一个专门用来创建图表的接口函数<code>createChart</code>，现在你可以很方便的在每个view中创建图表了。在view中创建的图表在view自身销毁的时候也会自行销毁，不需要使用者手动去管理。
 
+创建图表：
 
 ```js
 view.createChart( chartType , #el , data , options )
 ```
 
-view.createChart 第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应
+view.createChart 第一个参数<code>chartType</code>为要创建的图表类型，比如要创建折线图就传入"line"，后面三个参数则和上面的图表创建方式一一对应
 
 如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
 
@@ -271,13 +272,15 @@ Chartx.line(#el , data , options).then(function( chart ){
    + fontSize --> 字体大小，默认12px
    + rotation --> 文本以右上角做坐标原点的旋转角度，默认为0代表不旋转
    + format --> <span id='xaxisformat'>{function}一个用来把原始元数据转换到最终展示的文本的转换函数，比如，代表一个星期的数据，元数据是0,1,2,3,4,5,6,7，但是xAxis轴上面需要显示为"星期一"，"星期二"，"星期三"，"星期四"，"星期五"，"星期六"，"星期天"。这个format函数的参数便是每一个元数据，比如是判断参数为0，就return “星期一”。</span>
-   ```js
-   format : function( v ){
-            if( v == 0 ){
-                return "星期一"    
-            }
-        }  
-    ```
+
+     ```js
+     format : function( v ){
+         if( v == 0 ){
+             return "星期一"    
+         }
+     }  
+     ```
+
    + textAlign --> 文本的横向对齐方式，默认为center，可选left，right
  - filter --> 过滤器，该过滤器和text.format不同，filter是依次来处理每个单元的line 和text，可以非常方便的来自定义ui层面的结构，比如，还是周一到周五，如果我只需要显示周一周三周五周天，那么我们可以这样。
 
@@ -348,27 +351,27 @@ Chartx.line(#el , data , options).then(function( chart ){
    + strokeStyle --> 线颜色，默认“#f5f5f5”
    + filter --> 过滤函数，用来定制每条线条的样式。
 
-```js
-back : {
-    xAxis : {
-        filter : function( param ){
-            //param为一个包含了yAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
-            //{
-            //   layoutData : self.yAxis.layoutData,
-            //   index      : a,
-            //   line       : line
-            //}
-            // 比如，我们要把第一条线隐藏，第二条线设置为红色
-            if( param.index == 0 ){
-                param.line.context.visible = false;    
-            }
-            if( param.index == 1 ){
-                param.line.context.strokeStyle = "red";    
-            }
-        }    
-    }    
-}
-```
+     ```js
+     back : {
+         xAxis : {
+             filter : function( param ){
+                 //param为一个包含了yAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
+                 //{
+                 //   layoutData : self.yAxis.layoutData,
+                 //   index      : a,
+                 //   line       : line
+                 //}
+                 // 比如，我们要把第一条线隐藏，第二条线设置为红色
+                 if( param.index == 0 ){
+                     param.line.context.visible = false;    
+                 }
+                 if( param.index == 1 ){
+                     param.line.context.strokeStyle = "red";    
+                 }
+             }    
+         }    
+     }
+     ```
 
  - yAxis  --> y轴方向上的线
    + enabled --> 是否显示
@@ -377,27 +380,27 @@ back : {
    + strokeStyle --> 线颜色，默认“#f5f5f5”
    + filter --> 过滤函数，和上面的back.xAxis.filter功能一致，用来定制每条线条的样式。
 
-```js
-back : {
-    yAxis : {
-        filter : function( param ){
-            //param为一个包含了xAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
-            //{
-            //   layoutData : self.xAxis.layoutData,
-            //   index      : a,
-            //   line       : line
-            //}
-            // 比如，我们要把第一条线隐藏，第二条线设置为红色
-            if( param.index == 0 ){
-                param.line.context.visible = false;    
-            }
-            if( param.index == 1 ){
-                param.line.context.strokeStyle = "red";    
-            }
-        }    
-    }    
-}
-```
+     ```js
+     back : {
+         yAxis : {
+             filter : function( param ){
+                 //param为一个包含了xAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
+                 //{
+                 //   layoutData : self.xAxis.layoutData,
+                 //   index      : a,
+                 //   line       : line
+                 //}
+                 // 比如，我们要把第一条线隐藏，第二条线设置为红色
+                 if( param.index == 0 ){
+                     param.line.context.visible = false;    
+                 }
+                 if( param.index == 1 ){
+                     param.line.context.strokeStyle = "red";    
+                 }
+             }    
+         }    
+     }
+     ```
 
 <h3 id="anchor">anchor(十字坐标瞄准器)</h3>
 
