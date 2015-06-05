@@ -287,7 +287,8 @@ Chartx.line(#el , data , options).then(function( chart ){
 
 ## 组件
 
-### xAxis
+
+<h3 id="xaxis">xAxis</h3>
 
  + enabled --> 是否显示xAxis组件
  - line --> 刻度线
@@ -322,7 +323,7 @@ Chartx.line(#el , data , options).then(function( chart ){
  ```
 
 
-### yAxis
+<h3 id="yaxis">yAxis</h3>
 
  + enabled --> 是否显示yAxis轴组件
  - line    --> yAxis轴刻度线
@@ -351,7 +352,8 @@ Chartx.line(#el , data , options).then(function( chart ){
  }
  ```
 
-### back
+<h3 id="back">back</h3>
+
 
  - enabled --> 是否显示背景
  - xOrigin --> 原点开始的x轴线
@@ -420,9 +422,11 @@ back : {
 }
 ```
 
-### anchor
+<h3 id="anchor">anchor</h3>
 
-### tips
+
+<h3 id="xaxis">tips</h3>
+
 
 
 
