@@ -434,7 +434,7 @@ Chartx.line(#el , data , options).then(function( chart ){
    + x 
    + y
 
-<h3 id="xaxis">tips</h3>
+<h3 id="tips">tips</h3>
 
  - backR --> tip框圆角大小
  - fillStyle --> tip框背景色，默认"#000000"
