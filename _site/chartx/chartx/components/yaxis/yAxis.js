@@ -190,7 +190,6 @@ define(
                         });                 
                         yNode.addChild( line );
                     }; 
-debugger;
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
                     _.isFunction(self.filter) && self.filter({
                         layoutData  : self.layoutData,
