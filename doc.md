@@ -3,29 +3,195 @@ layout: post
 title:  Chartx Documentation 
 ---
 
-## 简介
+## Chartx的使用
 
-## 名词解释
-
-<code>[xAxis](#xaxis)</code>
+请确认在引入Chart js库文件的时候页面已经有AMD(requires),CMD(seajs),KISSY等任一模块加载环境。
 
 
-## 折线图
+### 引入Chartx库文件
 
-折线图line，柱状图bar，散点图scat这三个图表的分布都包含xAxis，yAxis，graphs三个区域，如图 --> 
+请在html页面中引入Chartx的js库文件
+
+daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index[-min].js</code>
+
+cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-min].js</code>
+
+当前最新CDN版本号为1.8.0。
+
+当然，上面是alicdn上提供的地址， 你也可以下载源代码存放在自己的目录中。
+
+
+### 创建图表
+
+在全局图表对象Chartx下面挂载着全部的图表类型
+目前有['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo']
+该类型方法需要三个参数。
+
+- el      --> DOM树中对应的节点，可以是id 也可以是kissy.all("#id")或者jquery("#id")对象 
+- data    --> 绘制图表的数据，无数据则传入空数组[]                                      
+- options --> 绘制图表的配置                                                         
+
+
+
+创建一个line chart
+
+```js
+Chartx.line(#el , data , options)
+```
+
+
+如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
+
+```js
+Chartx.line(#el , data , options).then(function( chart ){
+    chart.on("eventType" , function(e){
+        do something ......
+    });
+});
+
+```
+
+TODO：promise then 回调函数的执行在 chart的 绘制之前。。。
+
+
+
+## 在magix环境中使用chartx
+### 扩展插件
+
+
+在magix的OPOA项目环境中，我们提供magix扩展来在业务中方便的使用chartx。
+
+首先肯定是要先在页面中引入Chartx的js库文件，然后在项目的<code>ini.js</code>文件中找到<code>exts</code>配置，加入<code>chartx/magixext</code>。
+
+
+### 创建图表
+
+
+加载了<code>chartx/magixext</code>后，magix会在view中扩展一个专门用来创建图表的接口函数<code>createChart</code>，现在你可以很方便的在每个view中创建图表了。在view中创建的图表在view自身销毁的时候也会自行销毁，不需要使用者手动去管理。
+
+
+```js
+view.createChart( chartType , #el , data , options )
+```
+
+TODO：view.createChart 第一个参数为要创建的图表类型，后面三个参数则和上面的图表创建方式一一对应
+
+如果需要拿到chart的图表实例，来绑定事件之类的，则需要在其promise中操作
+
+```js
+view.createChart( chartType , #el , data , options).then(function( chart ){
+    chart.on("eventType" , function(e){
+        do something ......
+    });
+});
+
+```
+
+TODO：同上，promise then 回调函数的执行在 chart的 绘制之前。。。
+
+
+DEMO：
+
+```js
+return View.extend({
+    init: function(data) {
+    },
+    render: function(e) {
+        var me = this
+        me.renderByPagelet({});
+        me._createWorldMap();
+    },
+    _createWorldMap : function(){
+        var me = this;
+        me.createChart("map" , $("#worldmap") , [] , {
+            mapType : "world"
+        });
+    }
+});
+
+```
+
+## Chartx的数据格式
+
+在Chartx中，所有的图表都采用如下同一种数据格式，这样的数据格式并不具有任何图表相关的意义，和后台约定数据格式的时候能做到完全的解耦，不需要特定的为某图表来设计json格式。
+
+然后每个图表都会有自己的dataFormat函数来将其转换为自己需要的数据。
+
+
+第一行是表头。
+
+```js
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 76  , 45 , 43    ]
+];
+```
+
+比如用上面的数据来创建折线图。
+
+```js
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+var options = {
+    yAxis : {
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "xfield"
+    }
+};
+//Chartx.line开始初始化chart实例
+Chartx.line( #el , data , options);
+```
+
+在options中 把表头的字段配置入对应的xAxis yAxis 的field。然后折线图内部的dataFormat处理函数会转换出一个图表自己所需要的数据格式chart.dataFrame
+
+```js
+chart.dataFrame  = {    //数据集合对象
+    org        : [],   //最原始的数据 , 也就是传入的data 
+    data       : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
+    yAxis      : {     //y轴
+        field  : [],   //字段集合 对应this.data
+        org    : []    //二维 原始数据[[100,200],[1000,2000]]
+    },
+    xAxis      : {     //x轴
+        field  : [],   //字段 对应this.data
+        org    : []    //原始数据['星期一','星期二']
+    }
+}
+```
+
+## Chartx的配置
+
+在Chartx的世界里，我们的图表的适配到各种不一样的风格和交互行为都从配置中得到体现。
+
+我们所有的chart实例上不再拥有专门用来存放配置的config或者options对象，我们通过深度merge来把配置直接挂载在chart实例上。
+
+而图表中<code>_</code>开头的变量，都是属于内部变量，大部分由内部计算的来，不建议在options参数中配置。
+
+__接下来在下面的文档中，我们会详细讲述每一类型的图表配置和组件配置。__
+
+---
+
+## 图表
+
+### 折线图
+
+折线图line，柱状图bar，散点图scat这三个图表的分布都包含xAxis，yAxis，graphs三个区域，如图： 
 
 <img src="./assets/chart/line/line.png" style="width:300px;"></img>
 
 其中xAxis为xAxis组件部分，yAxis为yAxis组件部分，而graphs，则为line本身的绘图区域，这个三个区域的划分还充分表现再配置上options，再graphs区域的底部，你看到的横向竖向的背景线，其实还有一个back背景组件。
 
-_调用代码 --> _
+_调用代码_ ，<a href="./demo/line/index.html" target="_blank">demo</a> 
 
-
+ 
 ```js
-Chartx.line(el , data , options);
+Chartx.line(#el , data , options);
 ```
 
-### 折线图数据
+#### 折线图数据
 
 ```js
 var data= [
@@ -36,7 +202,7 @@ var data= [
 ];
 ```
 
-### 折线图配置
+#### 折线图配置
 
 ```js
 var options = {
@@ -88,26 +254,26 @@ var options = {
 </table>
 
 
-### 折线图事件
+#### 折线图事件
 
 请再then promise 中给chart实例添加事件侦听。
 
 ```js
-Chartx.line(el , data , options).then(function( chart ){
+Chartx.line(#el , data , options).then(function( chart ){
     chart.on("" , function(){
         ... 
     });
 });
 ```
 
-#### PC事件  <a target="_blank" href="./demo/line/index_event.html">demo</a>
+##### PC事件  <a target="_blank" href="./demo/line/index_event.html">demo</a>
 
 * click  --> 点击事件
 * mouseover --> 进入graphs区域触发
 * mousemove --> 再graphs区域移动时触发
 * mouseout  --> 离开graphs区域触发
 
-#### Mobile事件 <a target="_blank" href="./demo/line/index_touch.html">demo</a>
+##### Mobile事件 <a target="_blank" href="./demo/line/index_touch.html">demo</a>
 
 * tap --> 手势点击graphs区域触发
 * panstart --> 手势点击graphs区域，然后开始移动时触发
@@ -115,7 +281,7 @@ Chartx.line(el , data , options).then(function( chart ){
 * panend --> 手势的移动结束时触发
 
 
-## 柱状图
+### 柱状图
 
 
 
@@ -169,7 +335,7 @@ Chartx.line(el , data , options).then(function( chart ){
    + fontSize --> 文本大小，默认12px
    + textAlign --> 文本横向对齐方式，默认right，可选left，center
    + format    --> 和[xAxis.text.format](#xaxisformat)一样
- + filter --> 和xAxis.filter同样的功能，唯一不同的是，params.layoutData的内容
+ + filter --> 和xAxis.filter同样的功能，唯一不同的是，params.layoutData的内容，需要注意的是layoutData每个节点中的y坐标值，是 [0 , -10 , -20 .. ]
 
  ```js
   yAxis : {
