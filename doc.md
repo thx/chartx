@@ -136,6 +136,7 @@ Chartx.line(el , data , options).then(function( chart ){
    + format --> <span id='xaxisformat'>{function}一个用来把原始元数据转换到最终展示的文本的转换函数，比如，代表一个星期的数据，元数据是1,2,3,4,5,6,7,8，但是xAxis轴上面需要显示为"星期一"，"星期二"，"星期三"，"星期四"，"星期五"，"星期六"，"星期天"。这个format函数的参数便是每一个元数据，比如是判断参数为1，就return “星期一”。</span>
    + textAlign --> 文本的横向对齐方式，默认为center，可选left，right
  - filter --> 过滤器，该过滤器和text.format不同，filter是依次来处理每个单元的line 和text，可以非常方便的来自定义ui层面的结构，比如，还是周一到周五，如果我只需要显示周一周三周五周天，那么我们可以这样。
+
  ```js
  xAxis : {
      filter : function( param ){
@@ -169,6 +170,7 @@ Chartx.line(el , data , options).then(function( chart ){
    + textAlign --> 文本横向对齐方式，默认right，可选left，center
    + format    --> 和[xAxis.text.format](#xaxisformat)一样
  + filter --> 和xAxis.filter同样的功能，唯一不同的是，params.layoutData的内容
+
  ```js
   yAxis : {
      filter : function( param ){
