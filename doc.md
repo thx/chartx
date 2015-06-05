@@ -273,34 +273,38 @@ Chartx.line(#el , data , options).then(function( chart ){
    + rotation --> 文本以右上角做坐标原点的旋转角度，默认为0代表不旋转
    + format --> <span id='xaxisformat'>{function}一个用来把原始元数据转换到最终展示的文本的转换函数，比如，代表一个星期的数据，元数据是0,1,2,3,4,5,6,7，但是xAxis轴上面需要显示为"星期一"，"星期二"，"星期三"，"星期四"，"星期五"，"星期六"，"星期天"。这个format函数的参数便是每一个元数据，比如是判断参数为0，就return “星期一”。</span>
 
-     ```js
-     format : function( v ){
-         if( v == 0 ){
-             return "星期一"    
+         ```js
+         xAxis : {
+             text : {
+                 format : function( v ){
+                     if( v == 0 ){
+                         return "星期一"    
+                     }
+                 }  
+             }    
          }
-     }  
-     ```
+         ```
 
    + textAlign --> 文本的横向对齐方式，默认为center，可选left，right
  - filter --> 过滤器，该过滤器和text.format不同，filter是依次来处理每个单元的line 和text，可以非常方便的来自定义ui层面的结构，比如，还是周一到周五，如果我只需要显示周一周三周五周天，那么我们可以这样。
 
- ```js
- xAxis : {
-     filter : function( param ){
-         //filter的参数params为一个obj
-         //{
-         //    layoutData  : arr, 轴上所有显示中的节点列表[ { content :  , x :  } ... ]
-         //    index       : a,   layoutdata 中的每个节点对应的索引
-         //    txt         : txt, 节点上的txt
-         //    line        : line || null 节点上的刻度线
-         //}
-         if( (param.index+1) % 2 == 0 ){
-             //2,4,6 visible = false
-             param.txt.context.visible = flase;
-         }
-     }    
- }
- ```
+     ```js
+     xAxis : {
+         filter : function( param ){
+             //filter的参数params为一个obj
+             //{
+             //    layoutData  : arr, 轴上所有显示中的节点列表[ { content :  , x :  } ... ]
+             //    index       : a,   layoutdata 中的每个节点对应的索引
+             //    txt         : txt, 节点上的txt
+             //    line        : line || null 节点上的刻度线
+             //}
+             if( (param.index+1) % 2 == 0 ){
+                 //2,4,6 visible = false
+                 param.txt.context.visible = flase;
+             }
+         }    
+     }
+     ```
 
 
 <h3 id="yaxis">yAxis</h3>
@@ -318,19 +322,19 @@ Chartx.line(#el , data , options).then(function( chart ){
    + format    --> 和[xAxis.text.format](#xaxisformat)一样
  + filter --> 和xAxis.filter同样的功能，唯一不同的是，params.layoutData的内容，需要注意的是layoutData每个节点中的y坐标值，是 [0 , -10 , -20 .. ]
 
- ```js
-  yAxis : {
-     filter : function( param ){
-         //filter的参数params为一个obj
-         //{
-         //    layoutData  : arr, 轴上所有显示中的节点列表[ { content :  , y :  } ... ]
-         //    index       : a,   layoutdata 中的每个节点对应的索引
-         //    txt         : txt, 节点上的txt
-         //    line        : line || null 节点上的刻度线
-         //}
-     }    
- }
- ```
+     ```js
+      yAxis : {
+         filter : function( param ){
+             //filter的参数params为一个obj
+             //{
+             //    layoutData  : arr, 轴上所有显示中的节点列表[ { content :  , y :  } ... ]
+             //    index       : a,   layoutdata 中的每个节点对应的索引
+             //    txt         : txt, 节点上的txt
+             //    line        : line || null 节点上的刻度线
+             //}
+         }    
+     }
+     ```
 
 <h3 id="back">back</h3>
 
@@ -380,27 +384,27 @@ Chartx.line(#el , data , options).then(function( chart ){
    + strokeStyle --> 线颜色，默认“#f5f5f5”
    + filter --> 过滤函数，和上面的back.xAxis.filter功能一致，用来定制每条线条的样式。
 
-     ```js
-     back : {
-         yAxis : {
-             filter : function( param ){
-                 //param为一个包含了xAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
-                 //{
-                 //   layoutData : self.xAxis.layoutData,
-                 //   index      : a,
-                 //   line       : line
-                 //}
-                 // 比如，我们要把第一条线隐藏，第二条线设置为红色
-                 if( param.index == 0 ){
-                     param.line.context.visible = false;    
-                 }
-                 if( param.index == 1 ){
-                     param.line.context.strokeStyle = "red";    
-                 }
+         ```js
+         back : {
+             yAxis : {
+                 filter : function( param ){
+                     //param为一个包含了xAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
+                     //{
+                     //   layoutData : self.xAxis.layoutData,
+                     //   index      : a,
+                     //   line       : line
+                     //}
+                     // 比如，我们要把第一条线隐藏，第二条线设置为红色
+                     if( param.index == 0 ){
+                         param.line.context.visible = false;    
+                     }
+                     if( param.index == 1 ){
+                         param.line.context.strokeStyle = "red";    
+                     }
+                 }    
              }    
-         }    
-     }
-     ```
+         }
+         ```
 
 <h3 id="anchor">anchor(十字坐标瞄准器)</h3>
 
