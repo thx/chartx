@@ -1280,3 +1280,6 @@ h4:hover .anchor-link {
     margin-top:20px;
     margin-bottom:0;
 }
+.type .h3 {
+    border-bottom : 1px solid #d3d5d8!important
+}
