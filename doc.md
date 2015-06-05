@@ -400,7 +400,7 @@ back : {
 
 ```js
 back : {
-    xAxis : {
+    yAxis : {
         filter : function( param ){
             //param为一个包含了xAxis组件layoutData 以及该条件再layoutData中的索引，和着条line的canvax实例
             //{
