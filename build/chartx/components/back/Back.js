@@ -104,7 +104,7 @@ define(
                     })
                     if(self.xAxis.enabled){
                         _.isFunction( self.xAxis.filter ) && self.xAxis.filter({
-                            layoutData : self.xAxis.data,
+                            layoutData : self.yAxis.data,
                             index      : a,
                             line       : line
                         });
@@ -130,7 +130,7 @@ define(
                     })
                     if(self.yAxis.enabled){
                         _.isFunction( self.yAxis.filter ) && self.yAxis.filter({
-                            layoutData : self.yAxis.data,
+                            layoutData : self.xAxis.data,
                             index      : a,
                             line       : line
                         });
