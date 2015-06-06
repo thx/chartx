@@ -149,7 +149,7 @@ Chartx.line( #el , data , options);
 
 ### 折线图
 
-折线图line，柱状图bar，散点图scat这三个图表的分布都包含xAxis，yAxis，graphs三个区域，如图： 
+<div id="linelayout">折线图line，柱状图bar，散点图scat这三个图表的分布都包含xAxis，yAxis，graphs三个区域，如图： </div>
 
 <img src="./assets/chart/line/line.png" style="width:300px;"></img>
 
@@ -253,6 +253,67 @@ Chartx.line(#el , data , options).then(function( chart ){
 
 
 ### 柱状图
+
+柱状图的[布局和折线图（line）一样](#linelayout)。
+
+_调用代码_ ，<a href="./demo/bar/index.html" target="_blank">demo</a> 
+
+ 
+```js
+Chartx.bar(#el , data , options);
+```
+
+#### 柱状图数据
+
+```js
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 8      , 99  , 83 , 51    ]
+];
+```
+
+#### 柱状图配置
+
+```js
+var options = {
+    type  : //可选，如果填写horizontal，则会渲染横向柱状图
+    xAxis : {}, //x轴组件配置
+    yAxis : {}, //y轴组件配置
+    back  : {}, //背景组件配置
+    tips  : {}, //tips组件配置
+    graphs: {}  //柱状图绘图配置
+}
+```
+
+ - type --> 可选，如果填写horizontal，则会渲染横向柱状图，默认不配则为纵向柱状图
+ + [xAxis](#xaxis)
+ + [yAxis](#yaxis)
+ + [back](#back)
+ + [tips](#tips)
+ + graphs 
+   - bar --> 单条bar柱状图形的样式
+     *  width --> 单条bar宽度，默认12
+     *  fillStyle --> 单条bar的填充色，遵循[<a href="#color">颜色值的规则</a>]
+     *  radius --> bar的圆角
+   - text --> bar上面的文本
+     *  enabled --> 是否显示
+     *  fillStyle --> 目前不支持配置，值为"#999"
+     *  fontSize  --> 描述文本大小
+     *  format --> {function}把原始文本转换座位最终显示文本的转换函数。比如原始数据都是[0.1 , 0.2 , 0.3]，但是实际的显示需要是10%,20%,30%这样的。
+
+            ```js
+            graphs : {
+                text : {
+                    format : function( n ){
+                        return n * 100 + "%"
+                    }    
+                }    
+            }
+            ```
+
+
 
 
 
@@ -444,12 +505,31 @@ Chartx.line(#el , data , options).then(function( chart ){
  - offset --> tip框到鼠标位置的偏移量
  - prefix --> 假如yAxis.fields配置为[ "uv" , "click" ]，那么这个时候的tip内容为这样<img src="./assets/chart/tip_prefix.png" style="height:50px;" />，给tips.prefix配置为["用户数","点击量"]后，那么结果会是这样<img src="./assets/chart/tip_prefix1.png" style="height:50px;" />
  - content --> {function}如果tips配置了content的话，那么tip框内的内容都会是content函数的返回内容，这个时候prefix会失效。content函数的参数详情如下
+   + 折线图(line)，柱状图(bar)，散点图(scat)中的tips content 函数参数：
 
- <table>
-     <tr>
-         <td>iGroup</td>
-         <td></td>
-     </tr>
- </table>
+     <table>
+         <tr>
+             <td>xAxis</td>
+             <td>
+                 tip点位置对应的x轴数据。{ field : "xAxis的field配置" , value : "对应xAxis的value值" }
+             </td>
+         </tr>
+         <tr>
+             <td>iGroup</td>
+             <td>对应yAxis轴方向第几组数据，比如折线图中代表第几条折线</td>
+         </tr>
+         <tr>
+             <td>iNode</td>
+             <td>对应xAxis轴上第几个节点，比如折线图中代表线条的第几个节点</td>
+         </tr>
+         <tr>
+             <td>nodesInfoList</td>
+             <td>
+             [ { field : "这个节点对应的yAxis字段field" ,alpha: , color:  , fillStyle: , lineWidth: , r: , strokeStyle: , value: , x: , y: , } ... ]
+             </td>
+         </tr>
+     </table>
+  
+   + 地图(map)中的tips content 函数参数：
 
 
