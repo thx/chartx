@@ -16,7 +16,7 @@ daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index[-m
 
 cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-min].js</code>
 
-当前最新CDN版本号为1.8.0。
+当前最新CDN版本号为1.8.2。
 
 当然，上面是alicdn上提供的地址， 你也可以下载源代码存放在自己的目录中。
 
@@ -353,7 +353,10 @@ var options = {
      - enabled --> 是否显示区域名字文本
    + fillStyle --> 单个区域填充色，该配置可以是一个颜色值，也可以是一个函数，如果是函数的话，其参数如下：
      - area --> 单个区域的对象，包括了{id, name , path,}等属性。
-     - data --> 假如该区域在data中存在，就代表该行的data数据，比如用上面的数据来渲染中国地图的时候，在绘制"广东省"区域的时候，其fillStyle函数的参数中的data，就是<img src="./assets/chart/mapdataitem.png" style="width:200px;" />
+     - data --> 假如该区域在data中存在，就代表该行的data数据，比如用上面的数据来渲染中国地图的时候，在绘制"广东省"区域的时候，其fillStyle函数的参数中的data，就是<img src="./assets/chart/mapdataitem.png" style="width:200px;" />，并且数据已经被结合title序列化成了一个object
+
+       
+
      - dataIndex --> 和data一样，只是dataIndex返回的是该行，在整个data中的行的索引，那么，”广东省“ 的 dataIndex
      就是0（不包含title行）
 
