@@ -258,6 +258,12 @@ define(
     ],
     function( Canvax , CanvaxBase ){
         var Chart = function(node , data , opts){
+            //为了防止用户在canvax加载了并且给underscore添加了deepExtend扩展后又加载了一遍underscore
+            //检测一遍然后重新自己添加一遍扩展
+            if( _ && !_.deepExtend ){
+               CanvaxBase.setDeepExtend();            
+            }
+
             this.el     =  CanvaxBase.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
             this.width  =  parseInt( this.el.offsetWidth )  //图表区域宽
             this.height =  parseInt( this.el.offsetHeight ) //图表区域高
