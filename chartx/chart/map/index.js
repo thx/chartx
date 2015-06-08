@@ -300,6 +300,7 @@ define(
                     if( areaData.indexOf( area.name ) >= 0 || area.name.indexOf( areaData ) >= 0 ){
                         data.data      = me._createDataObj(me.dataFrame.org[ i+1 ] , me.dataFrame.org[ 0 ]);
                         data.dataIndex = i;
+                        debugger
                     }
                 } );
                 return data;

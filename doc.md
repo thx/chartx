@@ -55,7 +55,6 @@ Chartx.line(#el , data , options).then(function( chart ){
 PS：promise then 回调函数的执行在 chart的 绘制之前。。。
 
 
-
 ## 在magix环境中使用chartx
 ### 扩展插件
 
@@ -147,7 +146,7 @@ Chartx.line( #el , data , options);
 
 ## 图表
 
-### 折线图
+### 折线图(line)
 
 <div id="linelayout">折线图line，柱状图bar，散点图scat这三个图表的分布都包含xAxis，yAxis，graphs三个区域，如图： </div>
 
@@ -155,7 +154,7 @@ Chartx.line( #el , data , options);
 
 其中xAxis部分为[xAxis组件](#axis)，yAxis部分为[yAxis组件](#yaxis)，而graphs，则为折线图本身的绘图区域，再graphs区域的底部，你看到的横向竖向的背景线，其实还有一个[back背景组件](#back)。
 
-_调用代码_ ，<a href="./demo/line/index.html" target="_blank">demo</a> 
+创建折线图代码 ，<a href="./demo/line/index.html" target="_blank">demo</a> 
 
  
 ```js
@@ -251,11 +250,11 @@ mobile端事件侦听目前已经全部对接了hammer.js的大部分手势，�
 * panend --> 手势的移动结束时触发
 
 
-### 柱状图
+### 柱状图(bar)
 
 柱状图的[布局和折线图（line）一样](#linelayout)。
 
-_调用代码_ ，<a href="./demo/bar/index.html" target="_blank">demo</a> 
+创建柱状图代码 ，<a href="./demo/bar/index.html" target="_blank">demo</a> 
 
  
 ```js
@@ -313,6 +312,50 @@ var options = {
             }
             ```
 
+
+### 地图(map)
+
+地图类型里目前包括有世界地图和中国地图，其中中国地图可以实现省市联动。
+
+demo： <a href="./demo/map/world.html" target="_blank">世界地图</a> <a href="./demo/map/world.html" target="_blank">中国地图</a> <a href="./demo/map/world.html" target="_blank">中国地图省市联动</a>
+
+创建地图代码：
+
+```js
+Chartx.map(#el , data , options)
+```
+
+#### 地图数据格式
+
+var data = [
+    [ "area"   , "click" , "color"],
+    [ "广东省" , 111     , "#3871BF"],
+    [ "浙江省" , 100     , "#3871BF"]
+];
+
+#### 地图配置
+
+```js
+var options = {
+    mapName : "china" ,//地图类型，默认为china中国地图，world则为世界地图
+    areaField : "area" , //areaField字段,默认获取第一个字段，比如上面的data则就是默认area
+    area : {}, //地图的单块区域配置样式，比如中国地图是由n个省地图块拼接而成的，area就是中国地图上面单个path比如湖南省地图的样式配置。
+    tips : {}
+}
+```
+
+ - area 
+   + strokeStyle --> path区域边框颜色，默认为"white"
+   + lineWidth  --> path区域的lineWidth大小，默认为1
+   + linkage --> 是否开启省市联动，目前只有mapName为“china”的时候才有效
+   + text
+     - fillStyle --> 区域名字文本颜色，默认为"#000"
+     - enabled --> 是否显示区域名字文本
+   + fillStyle --> 单个区域填充色，该配置可以是一个颜色值，也可以是一个函数，如果是函数的话，其参数如下：
+     - area --> 单个区域的对象，包括了{id, name , path,}等属性。
+     - data --> 假如该区域在data中存在，就代表该行的data数据，比如用上面的数据来渲染中国地图的时候，在绘制"广东省"区域的时候，其fillStyle函数的参数中的data，就是<img src="./assets/chart/mapdataitem.png" style="width:200px;" />
+     - dataIndex --> 和data一样，只是dataIndex返回的是该行，在整个data中的行的索引，那么，”广东省“ 的 dataIndex
+     就是0（不包含title行）
 
 
 
