@@ -61,6 +61,17 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
+            setAllStyle : function( sty ){
+                _.each(this.sprite.children,function( s ){
+                    _.each( s.children , function( cel ){
+                        if( cel.type == "text" ){
+                            cel.context.fillStyle = sty;
+                        } else if( cel.type == "line" ) {
+                            cel.context.strokeStyle = sty;
+                        }
+                    } );
+                });
+            },
             //删除一个字段
             update : function( opt , data ){
                 //先在field里面删除一个字段，然后重新计算

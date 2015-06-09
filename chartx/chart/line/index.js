@@ -239,8 +239,6 @@ define(
                         y : y
                     }
                 });
-            
-                
 
                 this._graphs.draw({
                     w    : this._xAxis.xGraphsWidth,
@@ -250,12 +248,27 @@ define(
                     smooth : this.smooth
                 });
 
-                this._graphs.setX( _yAxisW ), this._graphs.setY(y)
+                this._graphs.setX( _yAxisW ), this._graphs.setY(y);
+
+                var self = this;
+
+
+                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
+                if( this.biaxial ){
+                    _.each( this._graphs.groups , function( group , i ){
+                        var color = group._bline.context.strokeStyle;
+                        if( i == 0 ){
+                            self._yAxis.setAllStyle( color );
+                        } else {
+                            self._yAxisR.setAllStyle( color );
+                        }
+                    } );
+                }
     
                 //执行生长动画
                 this._graphs.grow();
     
-                var self = this;
+                
                 this._graphs.sprite.on( "panstart mouseover" ,function(e){
                     if( self._tips.enabled &&
                         //self._preTipsInode && self._preTipsInode != e.tipsInfo.iNode &&
