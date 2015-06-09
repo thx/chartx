@@ -7,7 +7,8 @@ define(
         'chartx/utils/datasection'
     ],
     function( Canvax , Line , Tools , DataSection){
-        var yAxis = function(opt , data){
+        var yAxis = function(opt , data ){
+            
             this.w = 0;
             this.enabled = 1;//true false 1,0都可以
             this.dis  = 6                                  //线到文本的距离
@@ -16,18 +17,17 @@ define(
                     width   : 6,
                     lineWidth  : 3,
                     strokeStyle   : '#BEBEBE'
-            }
+            };
             this.text = {
                     fillStyle : '#999999',
                     fontSize  : 12,
-                    textAlign : "right",
-                    //最终显示到y轴上面的文本的格式化扩展
-                    //比如用户的数据是80 但是 对应的显示要求确是80%
-                    //后面的%符号就需要用额外的contentFormat来扩展
                     format    : null
-
-
-            }
+            };
+            this.pos         = {
+                x : 0 , y : 0
+            };  
+            this.place       = "left";                       //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
+            this.biaxial     = false;                        //是否是双轴中的一份
             this.layoutData  = [];                           //dataSection对应的layout数据{y:-100, content:'1000'}
             this.dataSection = [];                           //从原数据dataOrg 中 结果datasection重新计算后的数据
             this.dataOrg     = [];                           //源数据
@@ -41,7 +41,6 @@ define(
 
             this.baseNumber      =  null;
             this.basePoint       =  null;                    //value为baseNumber的point {x,y}
-
             
             //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
@@ -61,6 +60,17 @@ define(
             },
             setY:function($n){
                 this.sprite.context.y = $n
+            },
+            setAllStyle : function( sty ){
+                _.each(this.sprite.children,function( s ){
+                    _.each( s.children , function( cel ){
+                        if( cel.type == "text" ){
+                            cel.context.fillStyle = sty;
+                        } else if( cel.type == "line" ) {
+                            cel.context.strokeStyle = sty;
+                        }
+                    } );
+                })
             },
             //删除一个字段
             update : function( opt , data ){
@@ -107,14 +117,20 @@ define(
                 return dis
             },
             _initData  : function( data ){ 
-                
-                var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
-                this.dataOrg     = data.org;
+                var arr = [];
+                if( !this.biaxial ){
+                    arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
+                } else {
+                    if( this.place == "left" ){
+                        arr = data.org[0];
+                    } else {
+                        arr = data.org[1];
+                    }
+                }
+
+                this.dataOrg     = arr;//data.org;
                
                 if( this.dataSection.length == 0 ){
-                    //if( !this.enabled ){
-                    //    arr.unshift( 0 );
-                    //} 
                     this.dataSection = DataSection.section( arr , 3 );
                 };
 
@@ -151,7 +167,6 @@ define(
                 for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var x = 0, y = o.y;
-
                     var content = o.content
                     if( _.isFunction(self.text.format) ){
                         content = self.text.format(content );
@@ -164,11 +179,11 @@ define(
                     var txt = new Canvax.Display.Text( content ,
                        {
                         context : {
-                            x  : x,
+                            x  : x + ( self.place == "left" ? 0 : 5 ),
                             y  : y + ( a == 0 ? -3 : 0 ),
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
-                            textAlign    : self.text.textAlign,
+                            textAlign    : self.place == "left" ? "right" : "left",
                             textBaseline : "middle"
                        }
                     });
@@ -180,7 +195,7 @@ define(
                         //线条
                         var line = new Line({
                             context : {
-                                x           : 0 + self.dis,
+                                x           : 0 + ( self.place == "left" ? +1 : -1 ) * self.dis,
                                 y           : y,
                                 xEnd        : self.line.width,
                                 yEnd        : 0,

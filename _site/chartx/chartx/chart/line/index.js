@@ -28,6 +28,12 @@ define(
                 this._graphs  =  null;
                 this._tips    =  null;
 
+                this.xAxis    = {};
+                this.yAxis    = {};
+                this.graphs   = {};
+            
+                this.biaxial  =  false;
+
                 //this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
 
                 _.deepExtend( this , opts );
@@ -142,8 +148,19 @@ define(
             },
             _initData  : dataFormat,
             _initModule:function(){
+
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
+
+                if( this.biaxial ){
+                    this.yAxis.biaxial = true;
+                }
+
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
+                //再折线图中会有双轴图表
+                if( this.biaxial ){
+                    this._yAxisR = new yAxis( _.extend(_.clone(this.yAxis),{place:"right"}) , this.dataFrame.yAxis );
+                }
+ 
                 this._back   = new Back(this.back);
                 this._anchor = new Anchor(this.anchor);
                 this._graphs = new Graphs( this.graphs, this);
@@ -153,10 +170,13 @@ define(
                 this.stageBg.addChild(this._anchor.sprite);
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._yAxis.sprite);
+                if( this._yAxisR ){
+                    this.core.addChild( this._yAxisR.sprite );
+                }
                 this.core.addChild(this._graphs.sprite);
                 this.stageTip.addChild(this._tips.sprite);
             },
-            _startDraw : function(){
+            _startDraw : function(){ 
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
                 var y = this.height - this._xAxis.h;
@@ -171,11 +191,25 @@ define(
                 });
  
                 var _yAxisW = this._yAxis.w;
+            
+                //如果有双轴
+                var _yAxisRW = 0;
+                if( this._yAxisR ){
+                    this._yAxisR.draw({
+                        pos : {
+                            x : 0,
+                            y : y
+                        },
+                        yMaxHeight : y
+                    });
+                    _yAxisRW = this._yAxisR.w;
+                    this._yAxisR.setX( this.width - _yAxisRW );
+                }
                 
                 //绘制x轴
                 this._xAxis.draw({
                     graphh :   this.height,
-                    graphw :   this.width,
+                    graphw :   this.width - _yAxisRW,
                     yAxisW :   _yAxisW
                 });
                 if( this._xAxis.yAxisW != _yAxisW ){
@@ -189,21 +223,22 @@ define(
 
                 //绘制背景网格
                 this._back.draw({
-                    w    : this._xAxis.w ,
+                    w    : this._xAxis.xGraphsWidth,
                     h    : _graphsH,
-                    xAxis:{
-                        data : this._yAxis.layoutData
+                    xAxis: {
+                        data    : this._yAxis.layoutData
                     },
-                    yAxis:{
+                    yAxis: {
                         data : this._xAxis.layoutData
+                    },
+                    yOrigin : {
+                        biaxial : this.biaxial
                     },
                     pos  : {
                         x : _yAxisW,
                         y : y
                     }
                 });
-            
-                
 
                 this._graphs.draw({
                     w    : this._xAxis.xGraphsWidth,
@@ -213,12 +248,27 @@ define(
                     smooth : this.smooth
                 });
 
-                this._graphs.setX( _yAxisW ), this._graphs.setY(y)
+                this._graphs.setX( _yAxisW ), this._graphs.setY(y);
+
+                var self = this;
+
+
+                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
+                if( this.biaxial ){
+                    _.each( this._graphs.groups , function( group , i ){
+                        var color = group._bline.context.strokeStyle;
+                        if( i == 0 ){
+                            self._yAxis.setAllStyle( color );
+                        } else {
+                            self._yAxisR.setAllStyle( color );
+                        }
+                    } );
+                }
     
                 //执行生长动画
                 this._graphs.grow();
     
-                var self = this;
+                
                 this._graphs.sprite.on( "panstart mouseover" ,function(e){
                     if( self._tips.enabled &&
                         //self._preTipsInode && self._preTipsInode != e.tipsInfo.iNode &&
@@ -258,7 +308,7 @@ define(
                     //绘制点位线
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
                     this._anchor.draw({
-                        w    : this.width - _yAxisW,
+                        w    : this.width - _yAxisW - _yAxisRW,
                         h    : _graphsH,
                         cross  : {
                             x : pos.x,
@@ -285,17 +335,22 @@ define(
                 } );
             },
             _trimGraphs:function(){
-                var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
+                var _yAxis   = this._yAxis;
+                var maxYAxis = _yAxis.dataSection[ _yAxis.dataSection.length - 1 ];
                 var arr      = this.dataFrame.yAxis.org;
                 var tmpData  = [];
                 for (var a = 0, al = arr.length; a < al; a++ ) {
+                    if( this.biaxial && a > 0 ){
+                        _yAxis   = this._yAxisR;
+                        maxYAxis = _yAxis.dataSection[ _yAxis.dataSection.length - 1 ];
+                    }
                     for (var b = 0, bl = arr[a].length ; b < bl; b++ ) {
                         !tmpData[a] ? tmpData[a] = [] : '';
                         if( b >= this._xAxis.data.length ){
                             break;
                         }
                         var x = this._xAxis.data[b].x;
-                        var y = - (arr[a][b] - this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight
+                        var y = - (arr[a][b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
                         y = isNaN(y) ? 0 : y
                         tmpData[a][b] = {
                             value : arr[a][b],

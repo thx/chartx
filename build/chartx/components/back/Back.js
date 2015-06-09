@@ -25,7 +25,8 @@ define(
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
                     thinkness   : 1,
-                    strokeStyle : '#e5e5e5'
+                    strokeStyle : '#e5e5e5',
+                    biaxial     : false
             }
             this.xAxis   = {                                //x轴上的线
                     enabled     : 1,
@@ -149,6 +150,21 @@ define(
                 })
                 if(self.yOrigin.enabled)
                     self.sprite.addChild(line)
+
+                if( self.yOrigin.biaxial ){
+                    var lineR = new Line({
+                        context : {
+                            xStart      : self.w,
+                            xEnd        : self.w,
+                            yEnd        : -self.h,
+                            lineWidth   : self.yOrigin.thinkness,
+                            strokeStyle : self.yOrigin.strokeStyle
+                        }
+                    })
+                    if(self.yOrigin.enabled)
+                        self.sprite.addChild(lineR)
+
+                }
     
                 //原点开始的x轴线
                 var line = new Line({

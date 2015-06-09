@@ -16,7 +16,7 @@ daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index[-m
 
 cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-min].js</code>
 
-当前最新CDN版本号为<code>1.8.3</code>。
+当前最新CDN版本号为<code>1.8.5</code>。
 
 当然，上面是alicdn上提供的地址， 你也可以下载源代码存放在自己的目录中。
 

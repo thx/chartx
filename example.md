@@ -119,6 +119,22 @@ title:  chart demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/line/biaxial.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/line/biaxial.png">
+        </dt>
+        <dd>
+            <h5>
+            双y轴折线图
+            </h5>
+            <span>
+            只有yAxis.field配置了两个字段的时候可用
+            </span>
+        </dd>
+    </dl>
+    </a>
+
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/event_touch.gif">
