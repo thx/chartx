@@ -16,7 +16,7 @@ daily环境为 <code>http://g-assets.daily.taobao.net/thx/charts/chartx/index[-m
 
 cdn环境为   <code>http://g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-min].js</code>
 
-当前最新CDN版本号为1.8.2。
+当前最新CDN版本号为<code>1.8.2</code>。
 
 当然，上面是alicdn上提供的地址， 你也可以下载源代码存放在自己的目录中。
 
@@ -353,15 +353,67 @@ var options = {
      - enabled --> 是否显示区域名字文本
    + fillStyle --> 单个区域填充色，该配置可以是一个颜色值，也可以是一个函数，如果是函数的话，其参数如下：
      - area --> 单个区域的对象，包括了{id, name , path,}等属性。
-     - data --> 假如该区域在data中存在，就代表该行的data数据，比如用上面的数据来渲染中国地图的时候，在绘制"广东省"区域的时候，其fillStyle函数的参数中的data，就是<img src="./assets/chart/mapdataitem.png" style="width:200px;" />，并且数据已经被结合title序列化成了一个object
+     - data --> 假如该区域在data中存在，就代表该行的data数据，比如用上面的数据来渲染中国地图的时候，在绘制"广东省"区域的时候，其fillStyle函数的参数中的data，就是<img src="./assets/chart/mapdataitem.png" style="width:200px;" />，并且数据已经被结合title序列化成了一个object：
 
-       
+         ```js
+         data : {
+             area  : "广东省",
+             click : 111,
+             color : "#3871BF"
+         }
+         ```
 
-     - dataIndex --> 和data一样，只是dataIndex返回的是该行，在整个data中的行的索引，那么，”广东省“ 的 dataIndex
-     就是0（不包含title行）
+     - dataIndex --> 和data一样，只是dataIndex返回的是该行，在整个data中的行的索引，那么”广东省“的dataIndex就是0（不包含title行）
+
+### 饼图(pie)
+
+<a target="_blank" href="./demo/pie/index.html">基础饼图demo</a>
+
+创建饼图代码：
+
+```js
+Chartx.pie( #el , data , options );
+```
+
+#### pie数据格式：
+
+```js
+var data= [
+    ["ie"     , 30],
+    ["chrome" , 35],
+    ["firefox", 20],
+    ["safari" , 10],
+    ["其他"   , 5]
+];
+```
+
+TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式，因为再pie里面是默认了第一列座位key字段，后续会统一过来。
+
+#### pie图的配置
+
+- innerRadius --> 内圆半径，默认为0，即为实心饼图
+- animation --> 是否执行进场动画
+- dataLabel --> 拼图的外接触角tips配置
+  + enabled --> 是否显示
+  + format --> 格式化模板，比如下面的代码：
+ 
+      ```js
+      //周边tip
+      dataLabel: {
+          enabled: true,
+          format: '{point.name} : {point.percentage}'
+      }
+      ```
+    会得到这样的效果<img src="./assets/chart/pielabeltip.png" style="width:200px;" />  
 
 
+### 雷达图(radar)
 
+雷达图的基本布局：
+
+<img src="./assets/chart/radarlayout.png" style="width:300px;" />
+
+雷达图的布局和折线图柱状图散点图这样的[xAxis，yAxis，graphs的很清晰的三国分立布局](#linelayout)不一样，但是它也其实也可以理解为是弯曲了的x轴和y轴，就好比一本书，它有着清晰的xy轴的坐标系，但是你把它握成一个圆筒的时候，这个时候它的x轴就成了一个环状。
 
 ## 组件
 

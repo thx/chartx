@@ -74,6 +74,7 @@ define(
                     for( var i=0,l=$field.length; i<l ; i++ ){
                         for( var ii=0,iil=arr.length ; ii<iil ; ii++ ){
                              if( $field[i] == arr[ii].field ){
+                                 var d = arr[ii].data
                                  newData.push( arr[ii].data );
                                  break;
                              }
