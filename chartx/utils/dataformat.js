@@ -29,7 +29,6 @@ define(
                 if( !data || data.length == 0 ){
                     return dataFrame
                 }
-    
                 var arr = data;
                 dataFrame.org = arr;
                 var fileds = arr[0] ? arr[0] : []; //所有的字段集合
@@ -51,14 +50,14 @@ define(
                     o.data  = [];
                     total.push(o);
                 }
-    
+ 
+                /*
                 for(var a = 1, al = arr.length; a < al; a++){
                     for(var b = 0, bl = arr[a].length; b < bl; b++){
-                        //if( arr[a][b] ){
-                            total[b].data.push(arr[a][b]);
-                        //}
+                        total[b].data.push(arr[a][b]);
                     }     
                 }
+                */
     
                 dataFrame.data = total;
                 //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
@@ -93,14 +92,14 @@ define(
                             return false;
                         }
                     }) ) ) ){
-                    dataFrame.xAxis.org = [ total[0].data  ];
+                    //dataFrame.xAxis.org = [ total[0].data  ];
                     xField = dataFrame.xAxis.field = [ total[0].field ];
                 } else {
                     //如果有配置好的xAxis字段
                     if( _.isString(xField) ){
                         xField = [xField];
                     }
-                    dataFrame.xAxis.org = getDataOrg( xField , total );
+                    //dataFrame.xAxis.org = getDataOrg( xField , total );
                 }
                  
                 /*
@@ -114,7 +113,22 @@ define(
                     yField = [ yField ];
                 }             
                 dataFrame.yAxis.field = yField;
-                dataFrame.yAxis.org   = getDataOrg( yField , total, 'yAxis');
+
+
+                for(var a = 1, al = arr.length; a < al; a++){
+                    for(var b = 0, bl = arr[a].length; b < bl; b++){
+                        var val = arr[a][b];
+                        if( _.indexOf( dataFrame.yAxis.field , arr[0][b] ) >= 0 ){
+                            //yAxis的数据需要Number
+                            val = Number( val );
+                        }
+                        total[b].data.push( val );
+                    }     
+                }
+
+
+                dataFrame.xAxis.org = getDataOrg( xField , total );
+                dataFrame.yAxis.org = getDataOrg( yField , total );
 
                 return dataFrame;
             }
