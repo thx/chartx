@@ -107,7 +107,7 @@ define(
                 return dis
             },
             _initData  : function( data ){ 
-               debugger 
+                
                 var arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
                 this.dataOrg     = data.org;
                
