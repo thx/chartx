@@ -1,4 +1,4 @@
-var Chartx = {
+window.Chartx || (Chartx = {
     _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord'],
     canvax  : null,
     create  : {},
@@ -66,6 +66,9 @@ var Chartx = {
                 }
             })(Chartx._charts[a]);
         };
+
+        Chartx._start = null;
+        delete Chartx._start;
     },
     _queryChart : function(name , el , data , options){
         var promise = {
@@ -267,6 +270,6 @@ var Chartx = {
             }
         }
     } 
-};
+});
 
-Chartx._start();
+Chartx._start && Chartx._start();
