@@ -4,7 +4,7 @@ window.Chartx || (Chartx = {
     create  : {},
     _start   : function () {
         //业务代码部分。
-        //如果charts有被down下来使用。请修改下面的 
+        //如果charts有被down下来使用。请修改下面的
 
         var canvaxVersion = "2015.06.06";
 
@@ -13,7 +13,7 @@ window.Chartx || (Chartx = {
         Chartx._site.debug = true;
         //END(develop)
 
-        var __FILE__, scripts = document.getElementsByTagName("script"); 
+        var __FILE__, scripts = document.getElementsByTagName("script");
         for( var i = scripts.length - 1; i>=0 ; i--  ){
             var __F__ = scripts[ i ].getAttribute("src");
             if( __F__.indexOf("chartx/index") >= 0 ){
@@ -26,7 +26,7 @@ window.Chartx || (Chartx = {
         __FILE__ = scripts[scripts.length - 1].getAttribute("src");
         __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
         */
-        
+
         Chartx.path = __FILE__.replace(/(^\s*)|(\s*$)/g, "");
 
         if( (/daily.taobao.net/g).test( __FILE__ ) ){
@@ -76,7 +76,7 @@ window.Chartx || (Chartx = {
             then : function( fn ){
                 if( this.chart ){
                     _.isFunction( fn ) && fn( this.chart );
-                    return this; 
+                    return this;
                 }
                 this._thenFn.push( fn );
                 return this;
@@ -86,7 +86,7 @@ window.Chartx || (Chartx = {
             destroy  : function(){
                 console.log("chart destroy!");
                 this._destroy = true;
-                if( this.chart ){ 
+                if( this.chart ){
                     this.chart.destroy();
                     delete this.chart;
                     promise = null;
@@ -111,7 +111,7 @@ window.Chartx || (Chartx = {
                 } else {
                     //如果require回来的时候发现已经promise._destroy == true了
                     //说明已经其已经不需要创建了，可能宿主环境已经销毁
-                    
+
                 }
             } );
         }
@@ -139,7 +139,7 @@ window.Chartx || (Chartx = {
      *@packages array [{name:,path:}]
      */
     _setPackages: function (packages) {
-        /*       
+        /*
         ## 通用模块定义
         Universal Module Definition
         兼容 AMD KISSY CMD
@@ -207,7 +207,7 @@ window.Chartx || (Chartx = {
                     };
                 }
             }
-        } 
+        }
         if( typeof define == "function" && define.cmd ){
             var cmdDefine = define;
             window.define = function( id , deps , factory ){
@@ -215,7 +215,7 @@ window.Chartx || (Chartx = {
                 //只有固定的一些包是按照amd规范写的才需要转换。
                 //比如canvax项目，是按照amd规范的，但是这个包是给业务项目中去使用的。
                 //而这个业务使用seajs规范，所以业务中自己的本身的module肯定是按照seajs来编写的不需要转换
-                
+
                 if( typeof id == "string" && checkInBackages(id) ){
                     //只有canvax包下面的才需要做转换，因为canvax的module是安装amd格式编写的
                     return cmdDefine(id , deps , function( require, exports, module ){
@@ -236,7 +236,7 @@ window.Chartx || (Chartx = {
             if( !window.require ){
                 window.require = seajs.use;
             }
-        }    
+        }
         if( typeof define == "function" && define.amd ){
             //额，本来就是按照amd规范来开发的，就不需要改造了。
         }
@@ -245,10 +245,10 @@ window.Chartx || (Chartx = {
             var name = packages[i].name.toString();
             var path = packages[i].path;
             window.KISSY && KISSY.config({ packages: [{
-                name: name,
-                path: path,
-                debug: Chartx._site.debug,
-                combine: !Chartx._site.local
+                name    : name,
+                path    : path,
+                debug   : Chartx._site.debug,
+                combine : !Chartx._site.local
             }]
             });
 
@@ -269,7 +269,7 @@ window.Chartx || (Chartx = {
                 requirejs.config({ paths: packageObj });
             }
         }
-    } 
+    }
 });
 
 Chartx._start && Chartx._start();

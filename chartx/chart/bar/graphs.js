@@ -90,8 +90,7 @@ define(
                     return;
                 }
     
-                this.data = data;
-    
+                this.data = data; 
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
 
@@ -100,6 +99,7 @@ define(
                     var sprite      = new Canvax.Display.Sprite({ id : "barGroup"+i });
                     var spriteHover = new Canvax.Display.Sprite({ id : "barGroupHover"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
+                        
                         var barData = data[ii][i];
                         var fillStyle = this._getColor( this.bar.fillStyle , i , ii , barData.value );
                         var barH      = parseInt(Math.abs(barData.y));
