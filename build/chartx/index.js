@@ -10,21 +10,29 @@ var Chartx = {
 
         
 
-        
-        
         var __FILE__, scripts = document.getElementsByTagName("script"); 
+        for( var i = scripts.length - 1; i>=0 ; i--  ){
+            var __F__ = scripts[ i ].getAttribute("src");
+            if( __F__.indexOf("chartx/index") >= 0 ){
+                __FILE__ = __F__.substr(0 , __F__.indexOf("chartx/"));
+                break;
+            }
+        }
+
+        /*
         __FILE__ = scripts[scripts.length - 1].getAttribute("src");
         __FILE__ = __FILE__.substr(0 , __FILE__.indexOf("chartx/"));
+        */
         
         Chartx.path = __FILE__.replace(/(^\s*)|(\s*$)/g, "");
 
         if( (/daily.taobao.net/g).test( __FILE__ ) ){
             Chartx._site.daily = true;
-        }
+            Chartx._site.debug = true;
+        };
 
         //配置canvax包
         var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
-        
         if( Chartx._site.daily || Chartx._site.local ){
             canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/"+ canvaxVersion +"/";
         }
