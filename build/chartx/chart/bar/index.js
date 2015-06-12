@@ -90,8 +90,7 @@ define(
                     return;
                 }
     
-                this.data = data;
-    
+                this.data = data; 
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
 
@@ -100,6 +99,7 @@ define(
                     var sprite      = new Canvax.Display.Sprite({ id : "barGroup"+i });
                     var spriteHover = new Canvax.Display.Sprite({ id : "barGroupHover"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
+                        
                         var barData = data[ii][i];
                         var fillStyle = this._getColor( this.bar.fillStyle , i , ii , barData.value );
                         var barH      = parseInt(Math.abs(barData.y));
@@ -441,31 +441,51 @@ define(
             },
             _trimGraphs:function(){
     
+                var me       = this;
                 var xArr     = this._xAxis.data;
                 var yArr     = this._yAxis.dataOrg;
-                var fields   = yArr.length;
+                var hLen     = yArr.length; //bar的横向分组length
+                
     
                 var xDis1    = this._xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
-                var xDis2    = xDis1 / (fields+1);
+                var xDis2    = xDis1 / (hLen+1);
     
                 //知道了xDis2 后 检测下 barW是否需要调整
                 this._graphs.checkBarW( xDis2 );
     
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var tmpData  = [];
-                for( var a = 0 , al = xArr.length; a < al ; a++ ){
-                    for( var b = 0 ; b < fields ; b ++ ){
-                        !tmpData[b] && (tmpData[b] = []);
-                        var y = -(yArr[b][a]-this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
-                        var x = xArr[a].x - xDis1/2 + xDis2 * (b+1)
-                        tmpData[b][a] = {
-                            value : yArr[b][a],
-                            x     : x,
-                            y     : y
+                for( var b = 0 ; b < hLen ; b ++ ){
+                    !tmpData[b] && (tmpData[b] = []);
+                    
+                    _.each( yArr[b] , function( subv , a ){
+                        var x = xArr[a].x - xDis1/2 + xDis2 * (b+1);
+
+                        if( _.isArray( subv ) ){
+                            !tmpData[b][a] && (tmpData[b][a] = []);
+                            _.each( subv , function( val , i ){
+                                var y = -(val-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight;
+                                if( a > 0 ){
+                                    y += tmpData[b][a-1][i].y
+                                };
+                                tmpData[b][a].push({
+                                    value : val,
+                                    x     : x,
+                                    y     : y
+                                });
+                            } );
+                        } else {
+                            tmpData[b][a] = {
+                                value : yArr[b][a],
+                                x     : x,
+                                y     : -(yArr[b][a]-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
+                            };
                         }
-                    }
-                };
+                    } );
+
+                    
+                }
                 return tmpData;
             },
             _drawEnd:function(){

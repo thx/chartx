@@ -128,7 +128,7 @@ define(
                     }
                 }
 
-                this.dataOrg     = arr;//data.org;
+                this.dataOrg     = data.org; //这里必须是data.org
                
                 if( this.dataSection.length == 0 ){
                     this.dataSection = DataSection.section( arr , 3 );
