@@ -19,7 +19,7 @@ define(
                 y : 0
             }
     
-            this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149" , "#4d7fff"];
     
             this.bar = {
                 width  : 12,
@@ -58,24 +58,25 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
-            _getColor : function( c , i , ii , value){
+            _getColor : function( c ,groups, vLen , i , h , v , value){
                 var style = null;
                 if( _.isString( c ) ){
                     style = c
                 }
                 if( _.isArray( c ) ){
-                    style = c[ii]
+                    style = _.flatten(c)[ vLen > 1 ? v+i*groups % (vLen*(i+1)) : i ]
                 }
                 if( _.isFunction( c ) ){
                     style = c( {
-                        iGroup : ii,
-                        iNode  : i,
+                        iGroup : i,
+                        iNode  : h,
+                        iLay   : v,
                         value  : value
-                    } );//i , ii , value );
+                    } );
                 }
                 if( !style || style == "" ){
-                    style = this._colors[ii]
-                }
+                    style = this._colors[ vLen > 1 ? v+i*groups % (vLen*(i+1)) : i ];
+                } 
                 return style;
             },
             checkBarW : function( xDis ){
@@ -91,6 +92,50 @@ define(
                 }
     
                 this.data = data; 
+                var me    = this;
+                var groups= data.length; 
+                _.each( data , function( h_group , i){
+                    //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
+                    //h_group就会为两组，一组代表uv 一组代表pv。
+                    var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+
+                    //vLen 为一单元bar上面纵向堆叠的length
+                    //比如yAxis.field = [
+                    //    ["uv","pv"],  vLen == 2
+                    //    "click"       vLen == 1
+                    //]
+                    var vLen   = h_group.length;
+                    if( vLen == 0 ) return;
+
+                    for( h = 0 ; h < h_group[0].length ; h++ ){
+                        var spv = new Canvax.Display.Sprite({ id : "spv"+i+"_h_"+h });
+                        for( v = 0 ; v < vLen ; v++ ){
+                            //单个的bar，从纵向的底部开始堆叠矩形
+                            var rectData = h_group[v][h];
+                            var rectH    = parseInt(Math.abs(rectData.y));
+                            if( v > 0 ){
+                                rectH    = rectH - parseInt(Math.abs( h_group[v-1][h].y) );
+                            }
+                            var fillStyle= me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , rectData.value );
+                            var rectCxt  = {
+                                x        : Math.round(rectData.x - me.bar.width/2),
+                                y        : parseInt(rectData.y),
+                                width    : parseInt(me.bar.width),
+                                height   : rectH,
+                                fillStyle: fillStyle 
+                            };
+                            var rectEl   = new Rect({
+                                context  : rectCxt
+                            });
+                            console.log( rectCxt.x );
+                            spv.addChild( rectEl );
+                        };
+                        spg.addChild(spv);
+                    }
+                    me.sprite.addChild( spg );
+                } );
+
+                /*
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
 
@@ -197,7 +242,8 @@ define(
                     this.sprite.addChild( sprite );
                     this.sprite.addChild( spriteHover );
                 }
-                this.sprite.addChild(this.txtsSp)
+                this.sprite.addChild(this.txtsSp);
+                */
     
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;

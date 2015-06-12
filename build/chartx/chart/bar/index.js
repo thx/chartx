@@ -19,7 +19,7 @@ define(
                 y : 0
             }
     
-            this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149" , "#4d7fff"];
     
             this.bar = {
                 width  : 12,
@@ -58,24 +58,25 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
-            _getColor : function( c , i , ii , value){
+            _getColor : function( c ,groups, vLen , i , h , v , value){
                 var style = null;
                 if( _.isString( c ) ){
                     style = c
                 }
                 if( _.isArray( c ) ){
-                    style = c[ii]
+                    style = _.flatten(c)[ vLen > 1 ? v+i*groups % (vLen*(i+1)) : i ]
                 }
                 if( _.isFunction( c ) ){
                     style = c( {
-                        iGroup : ii,
-                        iNode  : i,
+                        iGroup : i,
+                        iNode  : h,
+                        iLay   : v,
                         value  : value
-                    } );//i , ii , value );
+                    } );
                 }
                 if( !style || style == "" ){
-                    style = this._colors[ii]
-                }
+                    style = this._colors[ vLen > 1 ? v+i*groups % (vLen*(i+1)) : i ];
+                } 
                 return style;
             },
             checkBarW : function( xDis ){
@@ -91,6 +92,50 @@ define(
                 }
     
                 this.data = data; 
+                var me    = this;
+                var groups= data.length; 
+                _.each( data , function( h_group , i){
+                    //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
+                    //h_group就会为两组，一组代表uv 一组代表pv。
+                    var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+
+                    //vLen 为一单元bar上面纵向堆叠的length
+                    //比如yAxis.field = [
+                    //    ["uv","pv"],  vLen == 2
+                    //    "click"       vLen == 1
+                    //]
+                    var vLen   = h_group.length;
+                    if( vLen == 0 ) return;
+
+                    for( h = 0 ; h < h_group[0].length ; h++ ){
+                        var spv = new Canvax.Display.Sprite({ id : "spv"+i+"_h_"+h });
+                        for( v = 0 ; v < vLen ; v++ ){
+                            //单个的bar，从纵向的底部开始堆叠矩形
+                            var rectData = h_group[v][h];
+                            var rectH    = parseInt(Math.abs(rectData.y));
+                            if( v > 0 ){
+                                rectH    = rectH - parseInt(Math.abs( h_group[v-1][h].y) );
+                            }
+                            var fillStyle= me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , rectData.value );
+                            var rectCxt  = {
+                                x        : Math.round(rectData.x - me.bar.width/2),
+                                y        : parseInt(rectData.y),
+                                width    : parseInt(me.bar.width),
+                                height   : rectH,
+                                fillStyle: fillStyle 
+                            };
+                            var rectEl   = new Rect({
+                                context  : rectCxt
+                            });
+                            console.log( rectCxt.x );
+                            spv.addChild( rectEl );
+                        };
+                        spg.addChild(spv);
+                    }
+                    me.sprite.addChild( spg );
+                } );
+
+                /*
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
 
@@ -197,7 +242,8 @@ define(
                     this.sprite.addChild( sprite );
                     this.sprite.addChild( spriteHover );
                 }
-                this.sprite.addChild(this.txtsSp)
+                this.sprite.addChild(this.txtsSp);
+                */
     
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
@@ -337,8 +383,7 @@ define(
                 this._graphs       =  null;
     
                 _.deepExtend( this , opts );
-                this.dataFrame = this._initData( data , this );
- 
+                this.dataFrame = this._initData( data );
             },
             draw:function(){
                 this.core    = new Canvax.Display.Sprite({
@@ -365,7 +410,16 @@ define(
                 this._arguments = arguments;
     
             },
-            _initData  : dataFormat,
+            _initData  : function( data ){
+                var d = dataFormat.apply( this , [data] );
+                _.each( d.yAxis.field , function(field , i){
+                    if( !_.isArray( field ) ){
+                        field = [field];
+                        d.yAxis.org[ i ] = [ d.yAxis.org[ i ] ];
+                    }
+                } );
+                return d;
+            },
             _initModule:function(){
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
@@ -440,13 +494,11 @@ define(
               
             },
             _trimGraphs:function(){
-    
                 var me       = this;
                 var xArr     = this._xAxis.data;
                 var yArr     = this._yAxis.dataOrg;
                 var hLen     = yArr.length; //bar的横向分组length
                 
-    
                 var xDis1    = this._xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2    = xDis1 / (hLen+1);
@@ -456,35 +508,24 @@ define(
     
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var tmpData  = [];
+
                 for( var b = 0 ; b < hLen ; b ++ ){
                     !tmpData[b] && (tmpData[b] = []);
-                    
-                    _.each( yArr[b] , function( subv , a ){
-                        var x = xArr[a].x - xDis1/2 + xDis2 * (b+1);
-
-                        if( _.isArray( subv ) ){
-                            !tmpData[b][a] && (tmpData[b][a] = []);
-                            _.each( subv , function( val , i ){
-                                var y = -(val-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight;
-                                if( a > 0 ){
-                                    y += tmpData[b][a-1][i].y
-                                };
-                                tmpData[b][a].push({
-                                    value : val,
-                                    x     : x,
-                                    y     : y
-                                });
-                            } );
-                        } else {
-                            tmpData[b][a] = {
-                                value : yArr[b][a],
-                                x     : x,
-                                y     : -(yArr[b][a]-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
+                    _.each( yArr[b] , function( subv , v ){
+                        !tmpData[b][v] && (tmpData[b][v] = []);
+                        _.each( subv , function( val , i ){
+                            var x = xArr[i].x - xDis1/2 + xDis2 * (b+1);
+                            var y = -(val-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight;
+                            if( v > 0 ){
+                                y += tmpData[b][v-1][i].y
                             };
-                        }
+                            tmpData[b][v].push({
+                                value : val,
+                                x     : x,
+                                y     : y
+                            });
+                        } );
                     } );
-
-                    
                 }
                 return tmpData;
             },

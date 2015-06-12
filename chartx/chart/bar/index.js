@@ -26,8 +26,7 @@ define(
                 this._graphs       =  null;
     
                 _.deepExtend( this , opts );
-                this.dataFrame = this._initData( data , this );
- 
+                this.dataFrame = this._initData( data );
             },
             draw:function(){
                 this.core    = new Canvax.Display.Sprite({
@@ -54,7 +53,16 @@ define(
                 this._arguments = arguments;
     
             },
-            _initData  : dataFormat,
+            _initData  : function( data ){
+                var d = dataFormat.apply( this , [data] );
+                _.each( d.yAxis.field , function(field , i){
+                    if( !_.isArray( field ) ){
+                        field = [field];
+                        d.yAxis.org[ i ] = [ d.yAxis.org[ i ] ];
+                    }
+                } );
+                return d;
+            },
             _initModule:function(){
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
@@ -129,13 +137,11 @@ define(
               
             },
             _trimGraphs:function(){
-    
                 var me       = this;
                 var xArr     = this._xAxis.data;
                 var yArr     = this._yAxis.dataOrg;
                 var hLen     = yArr.length; //bar的横向分组length
                 
-    
                 var xDis1    = this._xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2    = xDis1 / (hLen+1);
@@ -145,35 +151,24 @@ define(
     
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var tmpData  = [];
+
                 for( var b = 0 ; b < hLen ; b ++ ){
                     !tmpData[b] && (tmpData[b] = []);
-                    
-                    _.each( yArr[b] , function( subv , a ){
-                        var x = xArr[a].x - xDis1/2 + xDis2 * (b+1);
-
-                        if( _.isArray( subv ) ){
-                            !tmpData[b][a] && (tmpData[b][a] = []);
-                            _.each( subv , function( val , i ){
-                                var y = -(val-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight;
-                                if( a > 0 ){
-                                    y += tmpData[b][a-1][i].y
-                                };
-                                tmpData[b][a].push({
-                                    value : val,
-                                    x     : x,
-                                    y     : y
-                                });
-                            } );
-                        } else {
-                            tmpData[b][a] = {
-                                value : yArr[b][a],
-                                x     : x,
-                                y     : -(yArr[b][a]-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
+                    _.each( yArr[b] , function( subv , v ){
+                        !tmpData[b][v] && (tmpData[b][v] = []);
+                        _.each( subv , function( val , i ){
+                            var x = xArr[i].x - xDis1/2 + xDis2 * (b+1);
+                            var y = -(val-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight;
+                            if( v > 0 ){
+                                y += tmpData[b][v-1][i].y
                             };
-                        }
+                            tmpData[b][v].push({
+                                value : val,
+                                x     : x,
+                                y     : y
+                            });
+                        } );
                     } );
-
-                    
                 }
                 return tmpData;
             },

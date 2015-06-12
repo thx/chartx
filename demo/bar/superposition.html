@@ -42,7 +42,7 @@ var data= [
     [ 5      , 79  , 73 , 71    ,234],
     [ 6      , 88  , 54 , 39    ,423],
     [ 7      , 56  , 68 , 65    ,89],
-    [ 8      , 99  , 83 , 51    ,1]
+    [ 8      , 99  , 83 , 51    ,88]
 
 ];
 var options = {
@@ -54,6 +54,14 @@ var options = {
     },
     xAxis : {
         field : ["xfield"],
+    },
+    graphs : {
+        bar : {
+            fillStyle : [
+                [ "#458ae6" , "#94cc5c" ],
+                [ "#999999" , "#cccccc" ]
+            ]
+        }
     }
 }   
 Chartx.bar("canvasTest" , data , options);
