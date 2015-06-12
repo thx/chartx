@@ -477,7 +477,6 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
  - text --> yAxis轴的文本
    + fillStyle --> 文本颜色，默认“#999”
    + fontSize --> 文本大小，默认12px
-   + textAlign --> 文本横向对齐方式，默认right，可选left，center
    + format    --> 和[xAxis.text.format](#xaxisformat)一样
  + filter --> 和xAxis.filter同样的功能，唯一不同的是，params.layoutData的内容，需要注意的是layoutData每个节点中的y坐标值，是 [0 , -10 , -20 .. ]
 
