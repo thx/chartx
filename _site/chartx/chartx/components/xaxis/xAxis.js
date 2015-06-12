@@ -158,7 +158,7 @@ define(
             _checkText:function(){//检测下文字的高等
                 if( !this.enabled ){ //this.display == "none"
                     this.dis = 0;
-                    this.h   = 1; //this.dis;//this.max.txtH;
+                    this.h   = 3; //this.dis;//this.max.txtH;
                 } else {
                     var txt = new Canvax.Display.Text( this._getFormatText(this.dataSection[0]) || "test" ,
                                 {
