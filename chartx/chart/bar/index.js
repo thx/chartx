@@ -5,7 +5,8 @@ define(
         'chartx/utils/tools',
         'chartx/utils/datasection',
         './xaxis',
-        'chartx/components/yaxis/yAxis',
+        './yaxis',
+        //'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         './graphs',
         'chartx/utils/dataformat'
@@ -152,6 +153,7 @@ define(
                 var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
                 var tmpData  = [];
 
+                
                 for( var b = 0 ; b < hLen ; b ++ ){
                     !tmpData[b] && (tmpData[b] = []);
                     _.each( yArr[b] , function( subv , v ){

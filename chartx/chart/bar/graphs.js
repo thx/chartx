@@ -64,7 +64,11 @@ define(
                     style = c
                 }
                 if( _.isArray( c ) ){
-                    style = _.flatten(c)[ vLen > 1 ? v+i*groups % (vLen*(i+1)) : i ]
+                    var cl  = c[ i ];
+                    if( !_.isArray( cl ) ){
+                        cl  = [ cl ];
+                    }
+                    style = cl[ v ];
                 }
                 if( _.isFunction( c ) ){
                     style = c( {
@@ -83,21 +87,22 @@ define(
                 if( this.bar.width >= xDis ){
                     this.bar.width = xDis-1 > 1 ? xDis - 1 : 1;
                 }
-
             },
             draw : function(data , opt){
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
-                }
+                };
     
                 this.data = data; 
                 var me    = this;
                 var groups= data.length; 
                 _.each( data , function( h_group , i){
+                    /*
                     //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
                     //h_group就会为两组，一组代表uv 一组代表pv。
                     var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+                    */
 
                     //vLen 为一单元bar上面纵向堆叠的length
                     //比如yAxis.field = [
@@ -106,9 +111,40 @@ define(
                     //]
                     var vLen   = h_group.length;
                     if( vLen == 0 ) return;
+                    var hLen   = h_group[0].length;
 
-                    for( h = 0 ; h < h_group[0].length ; h++ ){
-                        var spv = new Canvax.Display.Sprite({ id : "spv"+i+"_h_"+h });
+                    for( h = 0 ; h < hLen ; h++ ){
+                        var groupH;
+                        if( i == 0 ){
+                            //横向的分组
+                            groupH = new Canvax.Display.Sprite({ id : "barGroup_" + h });
+                            me.sprite.addChild(groupH);
+                        
+                            var itemW = me.w / hLen;
+                            var hoverRect = new Rect({
+                                id      : "bhr_"+h,
+                                context : {
+                                    x           : itemW * h,
+                                    y           : -me.h,
+                                    width       : itemW,
+                                    height      : me.h,
+                                    fillStyle   : "#ccc",
+                                    globalAlpha : 0,
+                                }
+                            });
+
+                            groupH.addChild( hoverRect );
+                            
+                            hoverRect.hover(function(e){
+                                this.context.globalAlpha = 0.1;
+                            } , function(e){
+                                this.context.globalAlpha = 0;
+                            });
+                            
+                        } else {
+                            groupH = me.sprite.getChildById("barGroup_"+h)
+                        };
+
                         for( v = 0 ; v < vLen ; v++ ){
                             //单个的bar，从纵向的底部开始堆叠矩形
                             var rectData = h_group[v][h];
@@ -124,16 +160,51 @@ define(
                                 height   : rectH,
                                 fillStyle: fillStyle 
                             };
+                            if( !!me.bar.radius ){
+                                var radiusR   = Math.min( me.bar.width/2 , rectH );
+                                radiusR = Math.min( radiusR , me.bar.radius );
+                                rectCxt.radius = [radiusR , radiusR, 0 , 0];
+                                if( v > 0 ){
+                                    rectCxt.radius = [radiusR];
+                                }
+                            };
                             var rectEl   = new Rect({
                                 context  : rectCxt
                             });
-                            console.log( rectCxt.x );
-                            spv.addChild( rectEl );
+
+                            groupH.addChild( rectEl );
+
+                            //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
+                            if( vLen == 1 ){
+                                //文字
+                                var content = rectData.value
+                                if( _.isFunction(me.text.format) ){
+                                    content = me.text.format( content );
+                                }else{
+                                    content = Tools.numAddSymbol(content);
+                                }
+                                var txt = new Canvax.Display.Text( content ,
+                                   {
+                                    context : {
+                                        fillStyle    : me.text.fillStyle,
+                                        fontSize     : me.text.fontSize,
+                                        textAlign    : me.text.textAlign
+                                   }
+                                });
+                                txt.context.x = rectData.x - txt.getTextWidth() / 2;
+                                txt.context.y = rectCxt.y - txt.getTextHeight();
+                                if( txt.context.y + me.h < 0 ){
+                                    txt.context.y = -me.h;
+                                }
+                                me.txtsSp.addChild(txt)
+                            }
                         };
-                        spg.addChild(spv);
                     }
-                    me.sprite.addChild( spg );
                 } );
+
+                if( this.txtsSp.children.length > 0 ){
+                    this.sprite.addChild(this.txtsSp);
+                };
 
                 /*
                 //这个分组是只x方向的一维分组
