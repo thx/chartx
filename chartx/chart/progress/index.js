@@ -139,7 +139,9 @@ define(
                        if( _.isFunction( self.text.format ) ){
                            txt = self.text.format( this.r );
                        }
-                       self.stage.getChildById("ratioText").resetText( txt );
+                       if(self.text.enabled){
+                           self.stage.getChildById("ratioText").resetText( txt );
+                       }
 
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
