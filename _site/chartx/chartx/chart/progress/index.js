@@ -44,8 +44,8 @@ define(
                 this.stage.addChild( this._getCircle( this.startAngle + this.angleCount , this.r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
                 this.stage.addChild( new Sector({
                    context : {
-                        x  : parseInt(this.width  / 2),
-                        y  : parseInt(this.height / 2),
+                        x  : this.width / 2,
+                        y  : this.height / 2,
      
                         r  : br,
                         r0 : br0,
@@ -64,8 +64,8 @@ define(
                 this.stage.addChild( new Sector({
                    id : "speed",
                    context : {
-                        x  : parseInt(this.width  / 2),
-                        y  : parseInt(this.height / 2),
+                        x  : this.width  / 2,
+                        y  : this.height / 2,
                         r  : this.r,
                         r0 : this.r - this.barWidth,
                         startAngle : this.startAngle ,
@@ -84,8 +84,8 @@ define(
                         {
                             id  : "ratioText",
                             context : {
-                                x  : parseInt(this.width  / 2),
-                                y  : parseInt(this.height / 2),
+                                x  : this.width  / 2,
+                                y  : this.height / 2,
                                 fillStyle   : this.text.fillStyle,
                                 fontSize    : this.text.fontSize,
                                 textAlign   : "center",
@@ -99,8 +99,8 @@ define(
                 var radian = Math.PI / 180 * angle;
                 var c = new Circle({
                     context : {
-                        x   : Math.cos( radian ) * r + parseInt(this.width  / 2),
-                        y   : Math.sin( radian ) * r + parseInt(this.height / 2),
+                        x   : Math.cos( radian ) * r + this.width  / 2,
+                        y   : Math.sin( radian ) * r + this.height / 2,
                         r   : cr,
                         fillStyle : fillStyle
                     }
@@ -110,8 +110,8 @@ define(
             _resetCirclePos : function( angle , r  ){
                 var radian = Math.PI / 180 * angle;
                 var r      = this.r-this.barWidth/2;
-                var x      = Math.cos( radian ) * r + parseInt(this.width  / 2);
-                var y      = Math.sin( radian ) * r + parseInt(this.height / 2);
+                var x      = Math.cos( radian ) * r + this.width  / 2;
+                var y      = Math.sin( radian ) * r + this.height / 2;
                 this._circle.context.x = x;
                 this._circle.context.y = y;
             },
@@ -124,9 +124,10 @@ define(
             setRatio  : function( s ){
                 var self  = this;
                 var timer = null;
+                var times = 700 * Math.abs(s - self.currRatio) / 100;
                 var growAnima = function(){
                    self.tween = new Tween.Tween( { r : self.currRatio } )
-                   .to( { r : s } , 1100 )
+                   .to( { r : s } , times )
                    .easing( Tween.Easing.Quadratic.Out )
                    .onUpdate( function (  ) {
                        
@@ -139,7 +140,9 @@ define(
                        if( _.isFunction( self.text.format ) ){
                            txt = self.text.format( this.r );
                        }
-                       self.stage.getChildById("ratioText").resetText( txt );
+                       if(self.text.enabled){
+                           self.stage.getChildById("ratioText").resetText( txt );
+                       }
 
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
