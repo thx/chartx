@@ -19,7 +19,7 @@ define(
                 y : 0
             }
     
-            this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149" , "#4d7fff"];
     
             this.bar = {
                 width  : 12,
@@ -58,39 +58,155 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
-            _getColor : function( c , i , ii , value){
+            _getColor : function( c ,groups, vLen , i , h , v , value){
                 var style = null;
                 if( _.isString( c ) ){
                     style = c
                 }
                 if( _.isArray( c ) ){
-                    style = c[ii]
+                    var cl  = c[ i ];
+                    if( !_.isArray( cl ) ){
+                        cl  = [ cl ];
+                    }
+                    style = cl[ v ];
                 }
                 if( _.isFunction( c ) ){
                     style = c( {
-                        iGroup : ii,
-                        iNode  : i,
+                        iGroup : i,
+                        iNode  : h,
+                        iLay   : v,
                         value  : value
-                    } );//i , ii , value );
+                    } );
                 }
                 if( !style || style == "" ){
-                    style = this._colors[ii]
-                }
+                    style = this._colors[ vLen > 1 ? v+i*groups % (vLen*(i+1)) : i ];
+                } 
                 return style;
             },
             checkBarW : function( xDis ){
                 if( this.bar.width >= xDis ){
                     this.bar.width = xDis-1 > 1 ? xDis - 1 : 1;
                 }
-
             },
             draw : function(data , opt){
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
-                }
+                };
     
                 this.data = data; 
+                var me    = this;
+                var groups= data.length; 
+                _.each( data , function( h_group , i){
+                    /*
+                    //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
+                    //h_group就会为两组，一组代表uv 一组代表pv。
+                    var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+                    */
+
+                    //vLen 为一单元bar上面纵向堆叠的length
+                    //比如yAxis.field = [
+                    //    ["uv","pv"],  vLen == 2
+                    //    "click"       vLen == 1
+                    //]
+                    var vLen   = h_group.length;
+                    if( vLen == 0 ) return;
+                    var hLen   = h_group[0].length;
+
+                    for( h = 0 ; h < hLen ; h++ ){
+                        var groupH;
+                        if( i == 0 ){
+                            //横向的分组
+                            groupH = new Canvax.Display.Sprite({ id : "barGroup_" + h });
+                            me.sprite.addChild(groupH);
+                        
+                            var itemW = me.w / hLen;
+                            var hoverRect = new Rect({
+                                id      : "bhr_"+h,
+                                context : {
+                                    x           : itemW * h,
+                                    y           : -me.h,
+                                    width       : itemW,
+                                    height      : me.h,
+                                    fillStyle   : "#ccc",
+                                    globalAlpha : 0,
+                                }
+                            });
+
+                            groupH.addChild( hoverRect );
+                            
+                            hoverRect.hover(function(e){
+                                this.context.globalAlpha = 0.1;
+                            } , function(e){
+                                this.context.globalAlpha = 0;
+                            });
+                            
+                        } else {
+                            groupH = me.sprite.getChildById("barGroup_"+h)
+                        };
+
+                        for( v = 0 ; v < vLen ; v++ ){
+                            //单个的bar，从纵向的底部开始堆叠矩形
+                            var rectData = h_group[v][h];
+                            var rectH    = parseInt(Math.abs(rectData.y));
+                            if( v > 0 ){
+                                rectH    = rectH - parseInt(Math.abs( h_group[v-1][h].y) );
+                            }
+                            var fillStyle= me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , rectData.value );
+                            var rectCxt  = {
+                                x        : Math.round(rectData.x - me.bar.width/2),
+                                y        : parseInt(rectData.y),
+                                width    : parseInt(me.bar.width),
+                                height   : rectH,
+                                fillStyle: fillStyle 
+                            };
+                            if( !!me.bar.radius ){
+                                var radiusR   = Math.min( me.bar.width/2 , rectH );
+                                radiusR = Math.min( radiusR , me.bar.radius );
+                                rectCxt.radius = [radiusR , radiusR, 0 , 0];
+                                if( v > 0 ){
+                                    rectCxt.radius = [radiusR];
+                                }
+                            };
+                            var rectEl   = new Rect({
+                                context  : rectCxt
+                            });
+
+                            groupH.addChild( rectEl );
+
+                            //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
+                            if( vLen == 1 ){
+                                //文字
+                                var content = rectData.value
+                                if( _.isFunction(me.text.format) ){
+                                    content = me.text.format( content );
+                                }else{
+                                    content = Tools.numAddSymbol(content);
+                                }
+                                var txt = new Canvax.Display.Text( content ,
+                                   {
+                                    context : {
+                                        fillStyle    : me.text.fillStyle,
+                                        fontSize     : me.text.fontSize,
+                                        textAlign    : me.text.textAlign
+                                   }
+                                });
+                                txt.context.x = rectData.x - txt.getTextWidth() / 2;
+                                txt.context.y = rectCxt.y - txt.getTextHeight();
+                                if( txt.context.y + me.h < 0 ){
+                                    txt.context.y = -me.h;
+                                }
+                                me.txtsSp.addChild(txt)
+                            }
+                        };
+                    }
+                } );
+
+                if( this.txtsSp.children.length > 0 ){
+                    this.sprite.addChild(this.txtsSp);
+                };
+
+                /*
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
 
@@ -197,7 +313,8 @@ define(
                     this.sprite.addChild( sprite );
                     this.sprite.addChild( spriteHover );
                 }
-                this.sprite.addChild(this.txtsSp)
+                this.sprite.addChild(this.txtsSp);
+                */
     
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
