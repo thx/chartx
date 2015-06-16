@@ -450,6 +450,7 @@ title:  chart demos
 ## progress进度图表
 
 <div class="charts">
+
     <a target="_blank" href="./demo/progress/index.html">
     <dl class="chart">
         <dt>
@@ -458,6 +459,19 @@ title:  chart demos
         <dd>
             <h5>
             基础进度图表
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/progress/index1.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/progress/index1.gif">
+        </dt>
+        <dd>
+            <h5>
+            进度图表二
             </h5>
         </dd>
     </dl>

@@ -4,18 +4,20 @@ define(
         "canvax/index",
         "chartx/chart/index",
         "canvax/shape/Sector",
+        "canvax/shape/Circle",
         "canvax/animation/Tween"
     ],
-    function( Canvax , Chart ,Sector , Tween ){
+    function( Canvax , Chart ,Sector , Circle , Tween ){
      
         return Chart.extend({
             init : function( el ,  data , opts ){
 
-                this.barWidth    = 10,
-                this.normalColor = '#E6E6E6',
-                this.progColor   = '#8d76c4',
+                this.barWidth    = 10;
+                this.axisWidth   = null;//背景轴的width，默认等于barWidth
+                this.normalColor = '#E6E6E6';
+                this.progColor   = '#8d76c4';
                 this.startAngle  = -90;
-                this.endAngle    = this.startAngle;
+                this.angleCount    = 360;
                 this.currRatio   = 0; //当前比率
 
                 //进度文字
@@ -24,29 +26,41 @@ define(
                     fillStyle : "#666",
                     format    : null,
                     fontSize  : 30
-                }
+                };
 
                 _.deepExtend( this , opts );
+
+                !this.axisWidth && ( this.axisWidth = this.barWidth )
 
                 !this.r && (this.r = Math.min( this.width , this.height ) / 2);
 
                 this.tween = null;
             },
             draw : function( opt ){
+
+                var br  = this.r - ( this.barWidth - this.axisWidth )/2;
+                var br0 = this.r - this.axisWidth - ( this.barWidth - this.axisWidth )/2
+                this.stage.addChild( this._getCircle( this.startAngle , this.r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
+                this.stage.addChild( this._getCircle( this.startAngle + this.angleCount , this.r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
                 this.stage.addChild( new Sector({
                    context : {
-                        x : parseInt(this.width  / 2),
-                        y : parseInt(this.height / 2),
+                        x  : parseInt(this.width  / 2),
+                        y  : parseInt(this.height / 2),
      
-                        r : this.r,
-                        r0: this.r - this.barWidth,
+                        r  : br,
+                        r0 : br0,
                         startAngle : this.startAngle ,
-                        endAngle   : this.startAngle + 360,
+                        endAngle   : this.startAngle + this.angleCount,
                         fillStyle  : this.normalColor,
                         lineJoin   : "round"
                       }
                 }) );
+
+
      
+                this._circle = this._getCircle( this.startAngle , this.r-this.barWidth/2 , this.barWidth/2 , this.progColor );
+                this.stage.addChild( this._circle );
+                this.stage.addChild( this._circle.clone() );
                 this.stage.addChild( new Sector({
                    id : "speed",
                    context : {
@@ -75,15 +89,37 @@ define(
                                 fillStyle   : this.text.fillStyle,
                                 fontSize    : this.text.fontSize,
                                 textAlign   : "center",
-                                textBaseline: "middle" 
+                                textBaseline: "middle"
                             }
                   	    })
                     )
                 }
             },
+            _getCircle : function( angle , r , cr , fillStyle){
+                var radian = Math.PI / 180 * angle;
+                var c = new Circle({
+                    context : {
+                        x   : Math.cos( radian ) * r + parseInt(this.width  / 2),
+                        y   : Math.sin( radian ) * r + parseInt(this.height / 2),
+                        r   : cr,
+                        fillStyle : fillStyle
+                    }
+                });
+                return c;
+            },
+            _resetCirclePos : function( angle , r  ){
+                var radian = Math.PI / 180 * angle;
+                var r      = this.r-this.barWidth/2;
+                var x      = Math.cos( radian ) * r + parseInt(this.width  / 2);
+                var y      = Math.sin( radian ) * r + parseInt(this.height / 2);
+                this._circle.context.x = x;
+                this._circle.context.y = y;
+            },
             //设置比例0-100
             _setRatio : function( s ){
-                this.stage.getChildById("speed").context.endAngle = s / 100 * 360 + this.startAngle;
+                var currAngle = s / 100 * this.angleCount + this.startAngle;
+                this.stage.getChildById("speed").context.endAngle = currAngle;
+                this._resetCirclePos( currAngle );
             },
             setRatio  : function( s ){
                 var self  = this;
@@ -91,7 +127,7 @@ define(
                 var growAnima = function(){
                    self.tween = new Tween.Tween( { r : self.currRatio } )
                    .to( { r : s } , 1100 )
-                   .easing( Tween.Easing.Quintic.Out )
+                   .easing( Tween.Easing.Quadratic.Out )
                    .onUpdate( function (  ) {
                        
                        self._setRatio( this.r );
