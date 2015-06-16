@@ -269,7 +269,7 @@ title:  chart demos
         </dt>
         <dd>
             <h5>
-            纵向有堆叠的折线图
+            纵向有堆叠的柱状图
             </h5>
         </dd>
     </dl>
