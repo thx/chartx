@@ -98,6 +98,7 @@ define(
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;
                 var c = new Circle({
+                    xyToInt : false,
                     context : {
                         x   : Math.cos( radian ) * r + this.width  / 2,
                         y   : Math.sin( radian ) * r + this.height / 2,
