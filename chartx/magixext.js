@@ -10,6 +10,8 @@ define(
 
             var type , el , data , opts ;
 
+            var _ = window._ || KISSY;
+
             var args = arguments;
             if( args.length > 1 && !_.isObject(args[0]) ){
                 type = args[0];
