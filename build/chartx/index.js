@@ -2056,7 +2056,7 @@ define(
                 dis = dis > disMax ? disMax : dis
                 return dis
             },
-            _initData  : function( data ){ 
+            _setDataSection : function( data ){
                 var arr = [];
                 if( !this.biaxial ){
                     arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
@@ -2067,13 +2067,14 @@ define(
                         arr = data.org[1];
                     }
                 }
-
+                return arr;
+            },
+            _initData  : function( data ){ 
+                var arr = this._setDataSection(data);
                 this.dataOrg     = data.org; //这里必须是data.org
-               
                 if( this.dataSection.length == 0 ){
                     this.dataSection = DataSection.section( arr , 3 );
                 };
-
                 //如果还是0
                 if( this.dataSection.length == 0 ){
                     this.dataSection = [0]
