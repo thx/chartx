@@ -124,9 +124,10 @@ define(
             setRatio  : function( s ){
                 var self  = this;
                 var timer = null;
+                var times = 700 * Math.abs(s - self.currRatio) / 100;
                 var growAnima = function(){
                    self.tween = new Tween.Tween( { r : self.currRatio } )
-                   .to( { r : s } , 1100 )
+                   .to( { r : s } , times )
                    .easing( Tween.Easing.Quadratic.Out )
                    .onUpdate( function (  ) {
                        
