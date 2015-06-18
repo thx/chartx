@@ -172,7 +172,7 @@ window.Chartx || (Chartx = {
 
         if (!window.define) {
             if(KISSY){
-                window.define = function define(id, dependencies, factory) {
+                window.define = function( id, dependencies, factory ) {
                     // KISSY.add(name?, factory?, deps)
                     function proxy() {
                         var args = [].slice.call(arguments, 1, arguments.length);
