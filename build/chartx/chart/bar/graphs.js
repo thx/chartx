@@ -129,7 +129,7 @@ define(
                                     width       : itemW,
                                     height      : me.h,
                                     fillStyle   : "#ccc",
-                                    globalAlpha : 0,
+                                    globalAlpha : 0
                                 }
                             });
 
