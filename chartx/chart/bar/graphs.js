@@ -89,6 +89,7 @@ define(
                 }
             },
             draw : function(data , opt){
+                console.log(data)
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -129,7 +130,7 @@ define(
                                     width       : itemW,
                                     height      : me.h,
                                     fillStyle   : "#ccc",
-                                    globalAlpha : 0,
+                                    globalAlpha : 0
                                 }
                             });
 
@@ -361,6 +362,7 @@ define(
                 e.tipsInfo = {
                     iGroup        : iGroup,
                     iNode         : iNode,
+                    // iV
                     nodesInfoList : this._getNodeInfo(iNode)
                 };
                 this._setXaxisYaxisToTipsInfo( e ); 
