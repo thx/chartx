@@ -6,7 +6,7 @@ window.Chartx || (Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.06.19";
+        var canvaxVersion = "2015.06.20";
 
         
 
@@ -163,7 +163,7 @@ window.Chartx || (Chartx = {
 
         if (!window.define) {
             if(KISSY){
-                window.define = function define(id, dependencies, factory) {
+                window.define = function( id, dependencies, factory ) {
                     // KISSY.add(name?, factory?, deps)
                     function proxy() {
                         var args = [].slice.call(arguments, 1, arguments.length);
