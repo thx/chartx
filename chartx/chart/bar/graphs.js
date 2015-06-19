@@ -136,11 +136,20 @@ define(
 
                             groupH.addChild( hoverRect );
                             
-                            hoverRect.hover(function(e){
-                                this.context.globalAlpha = 0.1;
-                            } , function(e){
-                                this.context.globalAlpha = 0;
-                            });
+                            // hoverRect.hover(function(e){
+                            //     this.context.globalAlpha = 0.1;
+                            // } , function(e){
+                            //     this.context.globalAlpha = 0;
+                            // });
+                            hoverRect.on("panstart mouseover", function(e){
+                                me._fireHandler(e)
+                            })
+                            hoverRect.on("panmove mousemove", function(e){
+                                me._fireHandler(e)
+                            })
+                            hoverRect.on("panend mouseout", function(e){
+                                me._fireHandler(e)
+                            })    
                             
                         } else {
                             groupH = me.sprite.getChildById("barGroup_"+h)
@@ -172,7 +181,7 @@ define(
                             var rectEl   = new Rect({
                                 context  : rectCxt
                             });
-
+                            
                             groupH.addChild( rectEl );
 
                             //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
@@ -377,6 +386,14 @@ define(
                     arr.push(node);
                 } );
                 return arr;
+            },
+            _fireHandler:function(e){
+                // console.log(e.type)
+                // e.params  = {
+                //     iGroup : e.tipsInfo.iGroup,
+                //     iNode  : e.tipsInfo.iNode
+                // }
+                // this.root.fire( e.type , e );
             }
         }; 
     
