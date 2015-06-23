@@ -55,11 +55,13 @@
                     this.sprite.context.y = $n
                 },
                 //配置数据
-                _configData: function () {                    
+                _configData: function () {
                     var self = this;
                     self.total = 0;
                     self.currentAngle = 0;
-                    self.labelFontSize = 12 * self.boundWidth / 1000;
+                    var adjustFontSize = 12 * self.boundWidth / 1000;
+                    self.labelFontSize = adjustFontSize < 12 ? 12 : adjustFontSize;
+
                     var data = self.data.data;
                     self.clickMoveDis = self.r / 11;
                     if (data.length && data.length > 0) {
