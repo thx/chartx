@@ -89,6 +89,7 @@ define(
                 }
             },
             draw : function(data , opt){
+                console.log(data)
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -128,18 +129,31 @@ define(
                                     y           : -me.h,
                                     width       : itemW,
                                     height      : me.h,
-                                    fillStyle   : "#ccc",
-                                    globalAlpha : 0
+                                    fillStyle   : "#000000",
+                                    globalAlpha : 1
                                 }
                             });
 
                             groupH.addChild( hoverRect );
                             
-                            hoverRect.hover(function(e){
-                                this.context.globalAlpha = 0.1;
-                            } , function(e){
-                                this.context.globalAlpha = 0;
-                            });
+                            // hoverRect.hover(function(e){
+                            //     this.context.globalAlpha = 0.1;
+                            // } , function(e){
+                            //     this.context.globalAlpha = 0;
+                            // });
+                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1
+                            // hoverRect.on("panstart mouseover", function(e){
+                            //     e.tipsInfo = me._getInfoHandler(e);
+                            //     me._fireHandler(e)
+                            // })
+                            // hoverRect.on("panmove mousemove", function(e){
+                            //     // e.tipsInfo = me._getInfoHandler(e);
+                            //     // me._fireHandler(e)
+                            // })
+                            // hoverRect.on("panend mouseout", function(e){
+                            //     // e.tipsInfo = me._getInfoHandler(e);
+                            //     // me._fireHandler(e)
+                            // })    
                             
                         } else {
                             groupH = me.sprite.getChildById("barGroup_"+h)
@@ -171,7 +185,7 @@ define(
                             var rectEl   = new Rect({
                                 context  : rectCxt
                             });
-
+                            
                             groupH.addChild( rectEl );
 
                             //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
@@ -199,6 +213,32 @@ define(
                                 me.txtsSp.addChild(txt)
                             }
                         };
+
+                        //支柱感应区
+                        if(vLen > 0){
+                            var rectCxt = {
+                                x        : rectEl.context.x,
+                                y        : 0,
+                                width    : rectEl.context.width,
+                                height   : -parseInt(Math.abs(rectData.y)),
+                                fillStyle: '#ff0000',
+                                globalAlpha : 1
+                            }
+                            
+
+                            var hoverRect1= new Rect({
+                                context  : rectCxt
+                            });
+
+                            groupH.addChild( hoverRect1 );
+                            hoverRect1.iGroup = h, hoverRect1.iNode = i, hoverRect1.iLay = -1
+                            hoverRect1.on("click", function(e){
+                                debugger
+                                console.log('aaaa')
+                                // e.tipsInfo = me._getInfoHandler(e);
+                                // me._fireHandler(e)
+                            })
+                        }
                     }
                 } );
 
@@ -347,6 +387,27 @@ define(
                     this.txtsSp.context.visible = true
                 }
             },
+            _getInfoHandler:function(e){
+                // console.log(e.target.iLay)
+                var node = {
+                    iGroup        : e.target.iGroup,
+                    iNode         : e.target.iNode,
+                    iLay            : e.target.iLay,
+                    nodesInfoList : this._getNodeInfo(e.target.iGroup, e.target.iNode, e.target.iLay)
+                };
+                // console.log(node)
+                return node
+            },
+            _setTipsInfoHandler1 : function(e, iGroup, iNode, iLay){
+                e.tipsInfo = {
+                    iGroup        : iGroup,
+                    iNode         : iNode,
+                    iLay          : iLay,
+                    nodesInfoList : this._getNodeInfo(iNode)
+                };
+                this._setXaxisYaxisToTipsInfo( e ); 
+                return e;
+            },
             _setXaxisYaxisToTipsInfo : function(e){
                 e.tipsInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
@@ -357,24 +418,36 @@ define(
                     node.field = me.dataFrame.yAxis.field[ i ];
                 } );
             },
-            _setTipsInfoHandler : function(e  , iNode ,iGroup){
-                e.tipsInfo = {
-                    iGroup        : iGroup,
-                    iNode         : iNode,
-                    nodesInfoList : this._getNodeInfo(iNode)
-                };
-                this._setXaxisYaxisToTipsInfo( e ); 
-                return e;
-            },
-            _getNodeInfo : function( iNode ){
-                var arr = [];
+            _getNodeInfo : function(iGroup, iNode, iLay){
+            var arr = [];
                 var me  = this;
-                _.each( this.data , function( group , i ){
-                    var node = _.clone(group[iNode]);
-                    node.fillStyle = me._getColor( me.bar.fillStyle , iNode , i , node.value );
-                    arr.push(node);
-                } );
+                console.log('===========================')
+                console.log(iGroup, iNode, iLay)
+                var groups = me.data.length; 
+                _.each(me.data , function( h_group , i){
+                    var node
+                    var vLen   = h_group.length;
+                    if( vLen == 0 ) return;
+                    var hLen   = h_group[0].length;
+                    for( h = 0 ; h < hLen ; h++ ){
+                        if(h == iGroup){
+                            for( v = 0 ; v < vLen ; v++ ){
+                                node = h_group[v][h]
+                                node.fillStyle = me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , node.value );
+                                arr.push(node)
+                            }
+                        }
+                    }
+                })
                 return arr;
+            },
+            _fireHandler:function(e){
+                // console.log(e.type)
+                // e.params  = {
+                //     iGroup : e.tipsInfo.iGroup,
+                //     iNode  : e.tipsInfo.iNode
+                // }
+                // this.root.fire( e.type , e );
             }
         }; 
     
