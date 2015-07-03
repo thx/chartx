@@ -133,11 +133,11 @@ define(
 
                             groupH.addChild( hoverRect );
                             
-                            // hoverRect.hover(function(e){
-                            //     this.context.globalAlpha = 0.1;
-                            // } , function(e){
-                            //     this.context.globalAlpha = 0;
-                            // });
+                            hoverRect.hover(function(e){
+                                this.context.globalAlpha = 0.1;
+                            } , function(e){
+                                this.context.globalAlpha = 0;
+                            });
                             hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1
  
                             hoverRect.on("panstart mouseover mousemove mouseout", function(e){

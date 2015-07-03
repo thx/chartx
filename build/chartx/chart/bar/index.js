@@ -4,15 +4,14 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip",
         "chartx/utils/tools"
     ],
-    function(Canvax , Rect , Tween , Tip, Tools ){
+    function(Canvax , Rect , Tween , Tools ){
  
-        var Graphs = function( opt , tips , domContainer , dataFrame ){
-            this.dataFrame = dataFrame;
+        var Graphs = function( opt, root ){
             this.w = 0;
             this.h = 0;
+            this.root = root;
            
             this.pos = {
                 x : 0,
@@ -42,8 +41,6 @@ define(
     
             _.deepExtend(this , opt);
     
-            this._tip = new Tip( tips , domContainer );
-            
             this.init( );
         };
     
@@ -89,6 +86,7 @@ define(
                 }
             },
             draw : function(data , opt){
+                // console.log(data)
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -128,7 +126,7 @@ define(
                                     y           : -me.h,
                                     width       : itemW,
                                     height      : me.h,
-                                    fillStyle   : "#ccc",
+                                    fillStyle   : "#000000",
                                     globalAlpha : 0
                                 }
                             });
@@ -140,6 +138,20 @@ define(
                             } , function(e){
                                 this.context.globalAlpha = 0;
                             });
+                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1
+ 
+                            hoverRect.on("panstart mouseover mousemove mouseout", function(e){
+                                e.tipsInfo = me._getInfoHandler(e);
+                                me._fireHandler(e)
+                            })
+                            // hoverRect.on("panmove mousemove", function(e){
+                            //     // e.tipsInfo = me._getInfoHandler(e);
+                            //     // me._fireHandler(e)
+                            // })
+                            // hoverRect.on("panend mouseout", function(e){
+                            //     // e.tipsInfo = me._getInfoHandler(e);
+                            //     // me._fireHandler(e)
+                            // })    
                             
                         } else {
                             groupH = me.sprite.getChildById("barGroup_"+h)
@@ -148,6 +160,7 @@ define(
                         for( v = 0 ; v < vLen ; v++ ){
                             //单个的bar，从纵向的底部开始堆叠矩形
                             var rectData = h_group[v][h];
+                            rectData.iGroup = h, rectData.iNode = i, rectData.iLay = v
                             var rectH    = parseInt(Math.abs(rectData.y));
                             if( v > 0 ){
                                 rectH    = rectH - parseInt(Math.abs( h_group[v-1][h].y) );
@@ -171,7 +184,7 @@ define(
                             var rectEl   = new Rect({
                                 context  : rectCxt
                             });
-
+                            
                             groupH.addChild( rectEl );
 
                             //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
@@ -199,6 +212,29 @@ define(
                                 me.txtsSp.addChild(txt)
                             }
                         };
+
+                        //支柱感应区
+                        if(vLen > 0){
+                            var rectCxt = {
+                                x        : rectEl.context.x,
+                                y        : -parseInt(Math.abs(rectData.y)),
+                                width    : rectEl.context.width,
+                                height   : parseInt(Math.abs(rectData.y)),
+                                fillStyle: '#ff0000',
+                                globalAlpha : 0
+                            }
+
+                            var hoverRect= new Rect({
+                                context  : rectCxt
+                            });
+
+                            groupH.addChild( hoverRect );
+                            hoverRect.iGroup = h, hoverRect.iNode = i, hoverRect.iLay = -1
+                            hoverRect.on("panstart mouseover mousemove mouseout", function(e){
+                                e.tipsInfo = me._getInfoHandler(e);
+                                me._fireHandler(e)
+                            })
+                        }
                     }
                 } );
 
@@ -347,34 +383,59 @@ define(
                     this.txtsSp.context.visible = true
                 }
             },
-            _setXaxisYaxisToTipsInfo : function(e){
-                e.tipsInfo.xAxis = {
-                    field : this.dataFrame.xAxis.field,
-                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
-                }
-                var me = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    node.field = me.dataFrame.yAxis.field[ i ];
-                } );
-            },
-            _setTipsInfoHandler : function(e  , iNode ,iGroup){
-                e.tipsInfo = {
-                    iGroup        : iGroup,
-                    iNode         : iNode,
-                    nodesInfoList : this._getNodeInfo(iNode)
+            _getInfoHandler:function(e){
+                // console.log(e.target.iLay)
+                var node = {
+                    iGroup        : e.target.iGroup,
+                    iNode         : e.target.iNode,
+                    iLay            : e.target.iLay,
+                    nodesInfoList : this._getNodeInfo(e.target.iGroup, e.target.iNode, e.target.iLay)
                 };
-                this._setXaxisYaxisToTipsInfo( e ); 
-                return e;
+
+                // e.tipsInfo.xAxis = {
+                //     field : this.dataFrame.xAxis.field,
+                //     value : this.dataFrame.xAxis.org[0][ e.target.iNode ]
+                // }
+                // var me = this;
+                // _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                //     node.field = me.dataFrame.yAxis.field[ i ];
+                // } );
+                return node
             },
-            _getNodeInfo : function( iNode ){
+            _getNodeInfo : function(iGroup, iNode, iLay){
                 var arr = [];
                 var me  = this;
-                _.each( this.data , function( group , i ){
-                    var node = _.clone(group[iNode]);
-                    node.fillStyle = me._getColor( me.bar.fillStyle , iNode , i , node.value );
-                    arr.push(node);
-                } );
+                // console.log('===========================')
+                // console.log(iGroup, iNode, iLay)
+                var groups = me.data.length; 
+                _.each(me.data , function( h_group , i){
+                    var node
+                    var vLen   = h_group.length;
+                    if( vLen == 0 ) return;
+                    var hLen   = h_group[0].length;
+                    for( h = 0 ; h < hLen ; h++ ){
+                        if(h == iGroup){
+                            for( v = 0 ; v < vLen ; v++ ){
+                                if(iNode == i || iNode == -1){
+                                    // console.log(i, v, h)
+                                    node = h_group[v][h]
+                                    node.fillStyle = me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , node.value );
+                                    // node.
+                                    arr.push(node)
+                                }
+                            }
+                        }
+                    }
+                })
                 return arr;
+            },
+            _fireHandler:function(e){
+                e.params  = {
+                    iGroup : e.tipsInfo.iGroup,
+                    iNode  : e.tipsInfo.iNode,
+                    iLay   : e.tipsInfo.iLay
+                }
+                this.root.fire( e.type , e );
             }
         }; 
     
@@ -436,7 +497,7 @@ define(
                         var count = 0;
                         for( var ii = 0 ; ii < vLen ; ii++ ){
                             count += d[ii][i];
-                            min = Math.min( d[ii][i] );
+                            min = Math.min( d[ii][i], min );
                         }
                         varr.push( count );
                     }
@@ -463,9 +524,10 @@ define(
         //'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         './graphs',
+        "chartx/components/tips/tip",
         'chartx/utils/dataformat'
     ],
-    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat ){
+    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , Tip , dataFormat ){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -479,6 +541,7 @@ define(
                 this._yAxis        =  null;
                 this._back         =  null;
                 this._graphs       =  null;
+                this._tip          =  null;
     
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data );
@@ -490,16 +553,19 @@ define(
                 this.stageBg  = new Canvax.Display.Sprite({
                     id      : 'bg'
                 });
+                this.stageTip  = new Canvax.Display.Sprite({
+                    id      : 'tip'
+                });
     
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.core);
-
+                this.stage.addChild(this.stageTip);
 
                 if( this.rotate ) {
                   this._rotate( this.rotate );
                 }
     
-                this._initModule();                      //初始化模块  
+                this._initModule();                        //初始化模块  
     
                 this._startDraw();                         //开始绘图
     
@@ -522,16 +588,16 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
 
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
                 this._graphs = new Graphs(
                         this.graphs , 
-                        this.tips , 
-                        this.canvax.getDomContainer(),
-                        this.dataFrame
+                        this
                         );
             },
             _startDraw : function(){
+                var self  = this;
                 var y = parseInt(this.height - this._xAxis.h)
                 
                 //绘制yAxis
@@ -589,7 +655,34 @@ define(
     
                 //执行生长动画
                 this._graphs.grow();
-              
+
+                this._graphs.sprite.on( "panstart mouseover" ,function(e){
+                    self._setXaxisYaxisToTipsInfo(e);
+                    self._tip.show( e );
+                });
+                this._graphs.sprite.on( "panstart mousemove" ,function(e){
+                    self._setXaxisYaxisToTipsInfo(e);
+                    self._tip.show( e );
+                });
+                this._graphs.sprite.on( "panstart mouseout" ,function(e){
+                    self._tip.hide( e );
+                });
+            },
+            //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+            //方便外部自定义tip是的content
+            _setXaxisYaxisToTipsInfo : function( e ){
+                e.tipsInfo.xAxis = {
+                    field : this.dataFrame.xAxis.field,
+                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iGroup ]
+                }
+                var me = this;
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    if(_.isArray(me.dataFrame.yAxis.field[node.iNode])){
+                        node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
+                    }else{
+                        node.field = me.dataFrame.yAxis.field[node.iNode]
+                    }
+                } );
             },
             _trimGraphs:function(){
                 var me       = this;
@@ -635,9 +728,8 @@ define(
                 this.core.addChild(this._graphs.sprite);
                 this.core.addChild(this._yAxis.sprite);
                
+                this.stageTip.addChild(this._tip.sprite);
             }
-            
         });
-        
     }
 );
