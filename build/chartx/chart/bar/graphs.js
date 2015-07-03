@@ -126,7 +126,7 @@ define(
                                     y           : -me.h,
                                     width       : itemW,
                                     height      : me.h,
-                                    fillStyle   : "#000000",
+                                    fillStyle   : "#ccc",
                                     globalAlpha : 0
                                 }
                             });
