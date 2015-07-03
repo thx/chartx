@@ -42,7 +42,6 @@ define(
                 this._tip.show(e);
 
                 this._isShow = true;
-        
             },
             move : function(e){
                 this._resetStatus(e);
@@ -79,7 +78,6 @@ define(
                     yStart  : e.target.context.height,
                     xEnd    : 0,
                     yEnd    : 0,
-                    //lineType    : "dashed",
                     lineWidth   : 1,
                     strokeStyle : "#cccccc" 
                 } , this.line);
@@ -144,7 +142,7 @@ define(
                     csps.y           = e.target.context.height - Math.abs(node.y);
                 });
             }
-        }
+        };
         return Tips
     } 
 );
@@ -211,7 +209,7 @@ define(
 
             this.colors     = ["#42a8d7",'#666666','#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'],
 
-            this.line       = {                   //线
+            this.line       = {//线
                 enabled     : 1,
                 strokeStyle : this.colors[ this._groupInd ],
                 lineWidth   : 2,
@@ -219,21 +217,22 @@ define(
             }
 
 
-            this.node     = {                     //节点 
-                enabled     : 1,                       //是否有
-                corner      : false,                   //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-                r           : 2,                       //半径 node 圆点的半径
+            this.node     = {//节点 
+                enabled     : 1,         //是否有
+                corner      : false,     //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
+                r           : 2,         //半径 node 圆点的半径
                 fillStyle   : '#ffffff',
                 strokeStyle : null,
                 lineWidth   : 2
             }
     
-            this.fill    = {                      //填充
+            this.fill    = {//填充
                 fillStyle   : null,
                 alpha       : 0.1
             }
     
-            this.data       = [];                          //[{x:0,y:-100},{}]
+            this.dataOrg    = [];   //data的原始数据
+            this.data       = [];   //data会在wight中过滤一遍，把两边的空节点剔除
             this.sprite     = null;                        
            
 
@@ -294,8 +293,8 @@ define(
             getNodeInfoAt:function($index){
                 var self = this;
                 self._nodeInd = $index;
-                var o = _.clone(self.data[$index])
-                if( o ){
+                var o = _.clone(self.dataOrg[$index]);
+                if( o && o.value != null && o.value != undefined && o.value != ""  ){
                     o.r           = self._getProp(self.node.r);
                     o.fillStyle   = self._getProp(self.node.fillStyle) || "#ffffff";
                     o.strokeStyle = self._getProp(self.node.strokeStyle) || self._getColor( self.line.strokeStyle );
@@ -379,6 +378,7 @@ define(
             _widget:function(){
                 var self  = this;
 
+                self.dataOrg = _.clone(self.data);
                 self._filterEmptyValue( self.data );
             
                 if( self.data.length == 0 ){
