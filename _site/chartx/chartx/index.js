@@ -257,10 +257,15 @@ window.Chartx || (Chartx = {
             if (window.seajs) {
                 packageObj[name] = path + name;
                 //BEGIN(develop)
+                if (!window.location.origin) {
+                    window.location.origin = window.location.protocol + "//" 
+                        + window.location.hostname 
+                        + (window.location.port ? ':' + window.location.port: '');
+                };
                 if( path.indexOf("../")>=0 && name == "chartx" ){
                     var si = path.split("../").length;
                     packageObj[name] = window.location.origin+window.location.pathname.split("/").slice(0 , -si).join("/")+"/chartx"
-                }
+                };
                 //END(develop)
                 seajs.config({ paths: packageObj });
             }
