@@ -49,7 +49,7 @@ var options = {
     yAxis : {
         field : [
              [ "uv" , "pv" ],
-             "click"
+             ["click"]
              //[ "click" , "show" ]
         ],
     },
@@ -65,7 +65,19 @@ var options = {
         }
     }
 }   
-Chartx.bar("canvasTest" , data , options);
+var chartx = Chartx.bar("canvasTest" , data , options);
+chartx.then(function( line ){
+    line.on( "mouseover" , function( e ){
+        eventHandler(e);
+    } );
+    //mobile 触屏事件对应的为
+    //tap(点击)， panstart(手势准备开始移动) ，panmove(手势移动中)， panend(手势移动结束)
+});
+var eventHandler = function( e ){
+    <!-- console.log(e.params.iGroup, e.params.iNode, e.params.iLay) -->
+    <!-- var log = "<div>type："+ e.type + " iGroup：" + e.params.iGroup + " iNode：" + e.params.iNode + " iLay: " + e.params.iLay + "</div>"; -->
+    <!-- $("#chart-event-log").prepend( $(log) ); -->
+}
 </textarea></form>
 
         </td>

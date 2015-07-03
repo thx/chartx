@@ -183,7 +183,7 @@ define(
                 return node;
             },
             _fireHandler:function(e){
-                console.log(e)
+                // console.log(e)
                 e.params  = {
                     iGroup : e.tipsInfo.iGroup,
                     iNode  : e.tipsInfo.iNode
