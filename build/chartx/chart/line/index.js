@@ -696,6 +696,7 @@ define(
                 var tmpIGroup = Tools.getDisMinATArr(y, _.pluck(_nodesInfoList , "y" ));
 
                 this.iGroup = tmpIGroup, this.iNode = tmpINode;
+                //iGroup 第几条线   iNode 第几个点   都从0开始
                 var node = {
                     iGroup        : this.iGroup,
                     iNode         : this.iNode,
@@ -704,6 +705,7 @@ define(
                 return node;
             },
             _fireHandler:function(e){
+                // console.log(e)
                 e.params  = {
                     iGroup : e.tipsInfo.iGroup,
                     iNode  : e.tipsInfo.iNode
@@ -996,7 +998,7 @@ define(
                         ){
                             self._setXaxisYaxisToTipsInfo(e);
                             self._tips.show( e );
-
+                            // console.log(e)
                             //触发
                             //self.fire( "" , e );
                     }

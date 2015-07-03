@@ -111,14 +111,12 @@ define(
                 for(var a = 1, al = arr.length; a < al; a++){
                     for(var b = 0, bl = arr[a].length; b < bl; b++){
                         var val = arr[a][b];
-                        if( _.indexOf( allYFields , arr[0][b] ) >= 0 ){
-                            //yAxis的数据需要Number
-                            val = Number( val );
+                        if( !!val && _.indexOf( allYFields , arr[0][b] ) >= 0 ){
+                            val = (isNaN(Number( val )) ? val : Number( val ));
                         }
                         total[b].data.push( val );
                     }     
-                }
-
+                };
                 dataFrame.xAxis.org = getDataOrg( xField , total );
                 dataFrame.yAxis.org = getDataOrg( yField , total , "yAxis");
 
