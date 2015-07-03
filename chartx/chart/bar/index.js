@@ -9,9 +9,10 @@ define(
         //'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         './graphs',
+        "chartx/components/tips/tip",
         'chartx/utils/dataformat'
     ],
-    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat ){
+    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , Tip , dataFormat ){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -25,6 +26,7 @@ define(
                 this._yAxis        =  null;
                 this._back         =  null;
                 this._graphs       =  null;
+                this._tip          =  null;
     
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data );
@@ -36,16 +38,19 @@ define(
                 this.stageBg  = new Canvax.Display.Sprite({
                     id      : 'bg'
                 });
+                this.stageTip  = new Canvax.Display.Sprite({
+                    id      : 'tip'
+                });
     
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.core);
-
+                this.stage.addChild(this.stageTip);
 
                 if( this.rotate ) {
                   this._rotate( this.rotate );
                 }
     
-                this._initModule();                      //初始化模块  
+                this._initModule();                        //初始化模块  
     
                 this._startDraw();                         //开始绘图
     
@@ -68,16 +73,16 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
 
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
                 this._graphs = new Graphs(
                         this.graphs , 
-                        this.tips , 
-                        this.canvax.getDomContainer(),
-                        this.dataFrame
+                        this
                         );
             },
             _startDraw : function(){
+                var self  = this;
                 var y = parseInt(this.height - this._xAxis.h)
                 
                 //绘制yAxis
@@ -135,7 +140,34 @@ define(
     
                 //执行生长动画
                 this._graphs.grow();
-              
+
+                this._graphs.sprite.on( "panstart mouseover" ,function(e){
+                    self._setXaxisYaxisToTipsInfo(e);
+                    self._tip.show( e );
+                });
+                this._graphs.sprite.on( "panstart mousemove" ,function(e){
+                    self._setXaxisYaxisToTipsInfo(e);
+                    self._tip.show( e );
+                });
+                this._graphs.sprite.on( "panstart mouseout" ,function(e){
+                    self._tip.hide( e );
+                });
+            },
+            //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+            //方便外部自定义tip是的content
+            _setXaxisYaxisToTipsInfo : function( e ){
+                e.tipsInfo.xAxis = {
+                    field : this.dataFrame.xAxis.field,
+                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iGroup ]
+                }
+                var me = this;
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    if(_.isArray(me.dataFrame.yAxis.field[node.iNode])){
+                        node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
+                    }else{
+                        node.field = me.dataFrame.yAxis.field[node.iNode]
+                    }
+                } );
             },
             _trimGraphs:function(){
                 var me       = this;
@@ -181,9 +213,8 @@ define(
                 this.core.addChild(this._graphs.sprite);
                 this.core.addChild(this._yAxis.sprite);
                
+                this.stageTip.addChild(this._tip.sprite);
             }
-            
         });
-        
     }
 );
