@@ -19,7 +19,7 @@ define(
                         var count = 0;
                         for( var ii = 0 ; ii < vLen ; ii++ ){
                             count += d[ii][i];
-                            min = Math.min( d[ii][i] );
+                            min = Math.min( d[ii][i], min );
                         }
                         varr.push( count );
                     }
