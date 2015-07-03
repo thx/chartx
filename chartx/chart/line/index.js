@@ -276,7 +276,7 @@ define(
                         ){
                             self._setXaxisYaxisToTipsInfo(e);
                             self._tips.show( e );
-                            console.log(e)
+                            // console.log(e)
                             //触发
                             //self.fire( "" , e );
                     }

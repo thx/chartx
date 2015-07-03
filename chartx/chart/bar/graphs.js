@@ -4,15 +4,14 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip",
         "chartx/utils/tools"
     ],
-    function(Canvax , Rect , Tween , Tip, Tools ){
+    function(Canvax , Rect , Tween , Tools ){
  
-        var Graphs = function( opt , tips , domContainer , dataFrame ){
-            this.dataFrame = dataFrame;
+        var Graphs = function( opt, root ){
             this.w = 0;
             this.h = 0;
+            this.root = root;
            
             this.pos = {
                 x : 0,
@@ -42,8 +41,6 @@ define(
     
             _.deepExtend(this , opt);
     
-            this._tip = new Tip( tips , domContainer );
-            
             this.init( );
         };
     
@@ -89,7 +86,7 @@ define(
                 }
             },
             draw : function(data , opt){
-                console.log(data)
+                // console.log(data)
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -130,7 +127,7 @@ define(
                                     width       : itemW,
                                     height      : me.h,
                                     fillStyle   : "#000000",
-                                    globalAlpha : 1
+                                    globalAlpha : 0
                                 }
                             });
 
@@ -142,10 +139,11 @@ define(
                             //     this.context.globalAlpha = 0;
                             // });
                             hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1
-                            // hoverRect.on("panstart mouseover", function(e){
-                            //     e.tipsInfo = me._getInfoHandler(e);
-                            //     me._fireHandler(e)
-                            // })
+ 
+                            hoverRect.on("panstart mouseover mousemove mouseout", function(e){
+                                e.tipsInfo = me._getInfoHandler(e);
+                                me._fireHandler(e)
+                            })
                             // hoverRect.on("panmove mousemove", function(e){
                             //     // e.tipsInfo = me._getInfoHandler(e);
                             //     // me._fireHandler(e)
@@ -162,6 +160,7 @@ define(
                         for( v = 0 ; v < vLen ; v++ ){
                             //单个的bar，从纵向的底部开始堆叠矩形
                             var rectData = h_group[v][h];
+                            rectData.iGroup = h, rectData.iNode = i, rectData.iLay = v
                             var rectH    = parseInt(Math.abs(rectData.y));
                             if( v > 0 ){
                                 rectH    = rectH - parseInt(Math.abs( h_group[v-1][h].y) );
@@ -218,25 +217,22 @@ define(
                         if(vLen > 0){
                             var rectCxt = {
                                 x        : rectEl.context.x,
-                                y        : 0,
+                                y        : -parseInt(Math.abs(rectData.y)),
                                 width    : rectEl.context.width,
-                                height   : -parseInt(Math.abs(rectData.y)),
+                                height   : parseInt(Math.abs(rectData.y)),
                                 fillStyle: '#ff0000',
-                                globalAlpha : 1
+                                globalAlpha : 0
                             }
-                            
 
-                            var hoverRect1= new Rect({
+                            var hoverRect= new Rect({
                                 context  : rectCxt
                             });
 
-                            groupH.addChild( hoverRect1 );
-                            hoverRect1.iGroup = h, hoverRect1.iNode = i, hoverRect1.iLay = -1
-                            hoverRect1.on("click", function(e){
-                                debugger
-                                console.log('aaaa')
-                                // e.tipsInfo = me._getInfoHandler(e);
-                                // me._fireHandler(e)
+                            groupH.addChild( hoverRect );
+                            hoverRect.iGroup = h, hoverRect.iNode = i, hoverRect.iLay = -1
+                            hoverRect.on("panstart mouseover mousemove mouseout", function(e){
+                                e.tipsInfo = me._getInfoHandler(e);
+                                me._fireHandler(e)
                             })
                         }
                     }
@@ -395,34 +391,22 @@ define(
                     iLay            : e.target.iLay,
                     nodesInfoList : this._getNodeInfo(e.target.iGroup, e.target.iNode, e.target.iLay)
                 };
-                // console.log(node)
+
+                // e.tipsInfo.xAxis = {
+                //     field : this.dataFrame.xAxis.field,
+                //     value : this.dataFrame.xAxis.org[0][ e.target.iNode ]
+                // }
+                // var me = this;
+                // _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                //     node.field = me.dataFrame.yAxis.field[ i ];
+                // } );
                 return node
             },
-            _setTipsInfoHandler1 : function(e, iGroup, iNode, iLay){
-                e.tipsInfo = {
-                    iGroup        : iGroup,
-                    iNode         : iNode,
-                    iLay          : iLay,
-                    nodesInfoList : this._getNodeInfo(iNode)
-                };
-                this._setXaxisYaxisToTipsInfo( e ); 
-                return e;
-            },
-            _setXaxisYaxisToTipsInfo : function(e){
-                e.tipsInfo.xAxis = {
-                    field : this.dataFrame.xAxis.field,
-                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
-                }
-                var me = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    node.field = me.dataFrame.yAxis.field[ i ];
-                } );
-            },
             _getNodeInfo : function(iGroup, iNode, iLay){
-            var arr = [];
+                var arr = [];
                 var me  = this;
-                console.log('===========================')
-                console.log(iGroup, iNode, iLay)
+                // console.log('===========================')
+                // console.log(iGroup, iNode, iLay)
                 var groups = me.data.length; 
                 _.each(me.data , function( h_group , i){
                     var node
@@ -432,9 +416,13 @@ define(
                     for( h = 0 ; h < hLen ; h++ ){
                         if(h == iGroup){
                             for( v = 0 ; v < vLen ; v++ ){
-                                node = h_group[v][h]
-                                node.fillStyle = me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , node.value );
-                                arr.push(node)
+                                if(iNode == i || iNode == -1){
+                                    // console.log(i, v, h)
+                                    node = h_group[v][h]
+                                    node.fillStyle = me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , node.value );
+                                    // node.
+                                    arr.push(node)
+                                }
                             }
                         }
                     }
@@ -442,12 +430,12 @@ define(
                 return arr;
             },
             _fireHandler:function(e){
-                // console.log(e.type)
-                // e.params  = {
-                //     iGroup : e.tipsInfo.iGroup,
-                //     iNode  : e.tipsInfo.iNode
-                // }
-                // this.root.fire( e.type , e );
+                e.params  = {
+                    iGroup : e.tipsInfo.iGroup,
+                    iNode  : e.tipsInfo.iNode,
+                    iLay   : e.tipsInfo.iLay
+                }
+                this.root.fire( e.type , e );
             }
         }; 
     
