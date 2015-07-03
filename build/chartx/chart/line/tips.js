@@ -42,7 +42,6 @@ define(
                 this._tip.show(e);
 
                 this._isShow = true;
-        
             },
             move : function(e){
                 this._resetStatus(e);
@@ -79,7 +78,6 @@ define(
                     yStart  : e.target.context.height,
                     xEnd    : 0,
                     yEnd    : 0,
-                    //lineType    : "dashed",
                     lineWidth   : 1,
                     strokeStyle : "#cccccc" 
                 } , this.line);
@@ -144,7 +142,7 @@ define(
                     csps.y           = e.target.context.height - Math.abs(node.y);
                 });
             }
-        }
+        };
         return Tips
     } 
 );
