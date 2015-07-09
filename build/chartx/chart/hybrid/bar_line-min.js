@@ -1,0 +1,1 @@
+define("chartx/chart/hybrid/bar_line",["canvax/index","chartx/chart/bar/index","chartx/chart/line/index","chartx/components/tips/tip"],function(a,b,c,d){return b.extend({init:function(a,b,c){_.deepExtend(this,c),this.dataFrame=this._initData(b)}})});

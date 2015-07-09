@@ -118,9 +118,11 @@ define(
                             groupH = new Canvax.Display.Sprite({ id : "barGroup_" + h });
                             me.sprite.addChild(groupH);
                         
+                            //横向的分组区片感应区
                             var itemW = me.w / hLen;
                             var hoverRect = new Rect({
                                 id      : "bhr_"+h,
+                                pointChkPriority : false,
                                 context : {
                                     x           : itemW * h,
                                     y           : -me.h,
@@ -130,28 +132,17 @@ define(
                                     globalAlpha : 0
                                 }
                             });
-
                             groupH.addChild( hoverRect );
-                            
                             hoverRect.hover(function(e){
                                 this.context.globalAlpha = 0.1;
                             } , function(e){
                                 this.context.globalAlpha = 0;
                             });
-                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1
- 
+                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
                             hoverRect.on("panstart mouseover mousemove mouseout", function(e){
                                 e.tipsInfo = me._getInfoHandler(e);
                                 me._fireHandler(e)
-                            })
-                            // hoverRect.on("panmove mousemove", function(e){
-                            //     // e.tipsInfo = me._getInfoHandler(e);
-                            //     // me._fireHandler(e)
-                            // })
-                            // hoverRect.on("panend mouseout", function(e){
-                            //     // e.tipsInfo = me._getInfoHandler(e);
-                            //     // me._fireHandler(e)
-                            // })    
+                            });  
                             
                         } else {
                             groupH = me.sprite.getChildById("barGroup_"+h)
@@ -225,6 +216,7 @@ define(
                             }
 
                             var hoverRect= new Rect({
+                                id : "hbar_bigg_"+i+"smallg_"+h,
                                 context  : rectCxt
                             });
 
@@ -232,7 +224,13 @@ define(
                             hoverRect.iGroup = h, hoverRect.iNode = i, hoverRect.iLay = -1
                             hoverRect.on("panstart mouseover mousemove mouseout", function(e){
                                 e.tipsInfo = me._getInfoHandler(e);
-                                me._fireHandler(e)
+                                me._fireHandler(e);
+                                if( e.type == "mouseover" ){
+                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0.1;
+                                } 
+                                if( e.type == "mouseout" ){
+                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0;
+                                }
                             })
                         }
                     }
@@ -241,116 +239,6 @@ define(
                 if( this.txtsSp.children.length > 0 ){
                     this.sprite.addChild(this.txtsSp);
                 };
-
-                /*
-                //这个分组是只x方向的一维分组
-                var barGroupLen = data[0].length;
-
-    
-                for( var i = 0 ; i < barGroupLen ; i++ ){
-                    var sprite      = new Canvax.Display.Sprite({ id : "barGroup"+i });
-                    var spriteHover = new Canvax.Display.Sprite({ id : "barGroupHover"+i });
-                    for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
-                        
-                        var barData = data[ii][i];
-                        var fillStyle = this._getColor( this.bar.fillStyle , i , ii , barData.value );
-                        var barH      = parseInt(Math.abs(barData.y));
-                        
-                        var rectCxt   = {
-                            x         : Math.round(barData.x - this.bar.width/2),
-                            y         : parseInt(barData.y),
-                            width     : parseInt(this.bar.width),
-                            height    : barH,
-                            fillStyle : fillStyle
-                        };
-
-                        if( !!this.bar.radius ){
-                            var radiusR   = Math.min( this.bar.width/2 , barH );
-                            radiusR = Math.min( radiusR , this.bar.radius );
-                            rectCxt.radius = [radiusR , radiusR, 0 , 0];
-                        }
-                        var rect = new Rect({
-                            id      : "bar_"+ii+"_"+i,
-                            context : rectCxt
-                        });
-    
-                        var itemSecH   = this.h/( this.yDataSectionLen - 1 );
-                        var hoverRectH = Math.ceil(barH/itemSecH) * itemSecH;
-                        var hoverRect  = new Rect({
-                            id : "bar_"+ii+"_"+i+"hover",
-                            context : {
-                                x           : Math.round(barData.x - this.bar.width/2),
-                                y           : -hoverRectH,
-                                width       : parseInt(this.bar.width),
-                                height      : hoverRectH,
-                                fillStyle   : "black",
-                                globalAlpha : 0,
-                                cursor      : "pointer"
-                            }
-                        }); 
-    
-                        hoverRect.target = rect;
-                        hoverRect.row    = i;
-                        hoverRect.column = ii;
-
-                        if( this.eventEnabled ) {
-                            var me = this;
-                            hoverRect.on("mouseover" , function(e){
-                                var target    = this.target.context;
-                                target.x      --;
-                                target.width  += 2;
-
-                                me.sprite.addChild(me._tip.sprite);
-                                me._tip.show( me._setTipsInfoHandler(e , this.row , this.column ) );
-
-                            }); 
-                            hoverRect.on("mousemove" , function(e){
-                                me._tip.move( me._setTipsInfoHandler(e , this.row , this.column ) );
-                            }); 
-                            hoverRect.on("mouseout" , function(e){
-                                var target    = this.target.context;
-                                target.x      ++;
-                                target.width  -= 2;
-                                me._tip.hide(e);
-                                me.sprite.removeChild(me._tip.sprite);
-                            }); 
-                        }
-
-                        //文字
-                        var content = barData.value
-                        if( _.isFunction(this.text.format) ){
-                            content = this.text.format( content );
-                        }else{
-                            content = Tools.numAddSymbol(content);
-                        }
-
-                        var txt = new Canvax.Display.Text( content ,
-                           {
-                            context : {
-                                //x  : barData.x,
-                                //y  : rectCxt.y,
-                                fillStyle    : this.text.fillStyle,
-                                fontSize     : this.text.fontSize,
-                                textAlign    : this.text.textAlign
-                           }
-                        });
-                        txt.context.x = barData.x - txt.getTextWidth() / 2;
-                        txt.context.y = rectCxt.y - txt.getTextHeight();
-                        if( txt.context.y + this.h < 0 ){
-                            txt.context.y = -this.h;
-                        }
-
-                        this.txtsSp.addChild(txt)
-
-                        sprite.addChild( rect );
-                        spriteHover.addChild( hoverRect );
-                    }
-
-                    this.sprite.addChild( sprite );
-                    this.sprite.addChild( spriteHover );
-                }
-                this.sprite.addChild(this.txtsSp);
-                */
     
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
@@ -534,19 +422,16 @@ define(
         var Canvax = Chart.Canvax;
     
         return Chart.extend( {
-    
+            _xAxis  : null,
+            _yAxis  : null,
+            _back   : null,
+            _graphs : null,
+            _tip    : null,
             init:function(node , data , opts){
-     
-                this._xAxis        =  null;
-                this._yAxis        =  null;
-                this._back         =  null;
-                this._graphs       =  null;
-                this._tip          =  null;
-    
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data );
             },
-            draw:function(){
+            _setStages : function(){
                 this.core    = new Canvax.Display.Sprite({
                     id      : 'core'
                 });
@@ -564,7 +449,11 @@ define(
                 if( this.rotate ) {
                   this._rotate( this.rotate );
                 }
-    
+            },
+            draw:function(){
+                    
+                this._setStages();
+
                 this._initModule();                        //初始化模块  
     
                 this._startDraw();                         //开始绘图
@@ -592,9 +481,9 @@ define(
 
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
                 this._graphs = new Graphs(
-                        this.graphs , 
-                        this
-                        );
+                    this.graphs , 
+                    this
+                );
             },
             _startDraw : function(){
                 var self  = this;

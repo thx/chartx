@@ -118,9 +118,11 @@ define(
                             groupH = new Canvax.Display.Sprite({ id : "barGroup_" + h });
                             me.sprite.addChild(groupH);
                         
+                            //横向的分组区片感应区
                             var itemW = me.w / hLen;
                             var hoverRect = new Rect({
                                 id      : "bhr_"+h,
+                                pointChkPriority : false,
                                 context : {
                                     x           : itemW * h,
                                     y           : -me.h,
@@ -130,28 +132,17 @@ define(
                                     globalAlpha : 0
                                 }
                             });
-
                             groupH.addChild( hoverRect );
-                            
                             hoverRect.hover(function(e){
                                 this.context.globalAlpha = 0.1;
                             } , function(e){
                                 this.context.globalAlpha = 0;
                             });
-                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1
- 
+                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
                             hoverRect.on("panstart mouseover mousemove mouseout", function(e){
                                 e.tipsInfo = me._getInfoHandler(e);
                                 me._fireHandler(e)
-                            })
-                            // hoverRect.on("panmove mousemove", function(e){
-                            //     // e.tipsInfo = me._getInfoHandler(e);
-                            //     // me._fireHandler(e)
-                            // })
-                            // hoverRect.on("panend mouseout", function(e){
-                            //     // e.tipsInfo = me._getInfoHandler(e);
-                            //     // me._fireHandler(e)
-                            // })    
+                            });  
                             
                         } else {
                             groupH = me.sprite.getChildById("barGroup_"+h)
@@ -225,6 +216,7 @@ define(
                             }
 
                             var hoverRect= new Rect({
+                                id : "hbar_bigg_"+i+"smallg_"+h,
                                 context  : rectCxt
                             });
 
@@ -232,7 +224,13 @@ define(
                             hoverRect.iGroup = h, hoverRect.iNode = i, hoverRect.iLay = -1
                             hoverRect.on("panstart mouseover mousemove mouseout", function(e){
                                 e.tipsInfo = me._getInfoHandler(e);
-                                me._fireHandler(e)
+                                me._fireHandler(e);
+                                if( e.type == "mouseover" ){
+                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0.1;
+                                } 
+                                if( e.type == "mouseout" ){
+                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0;
+                                }
                             })
                         }
                     }
@@ -241,8 +239,7 @@ define(
                 if( this.txtsSp.children.length > 0 ){
                     this.sprite.addChild(this.txtsSp);
                 };
-
-                    
+    
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
             },
