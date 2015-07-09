@@ -19,19 +19,16 @@ define(
         var Canvax = Chart.Canvax;
     
         return Chart.extend( {
-    
+            _xAxis  : null,
+            _yAxis  : null,
+            _back   : null,
+            _graphs : null,
+            _tip    : null,
             init:function(node , data , opts){
-     
-                this._xAxis        =  null;
-                this._yAxis        =  null;
-                this._back         =  null;
-                this._graphs       =  null;
-                this._tip          =  null;
-    
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data );
             },
-            draw:function(){
+            _setStages : function(){
                 this.core    = new Canvax.Display.Sprite({
                     id      : 'core'
                 });
@@ -49,7 +46,11 @@ define(
                 if( this.rotate ) {
                   this._rotate( this.rotate );
                 }
-    
+            },
+            draw:function(){
+                    
+                this._setStages();
+
                 this._initModule();                        //初始化模块  
     
                 this._startDraw();                         //开始绘图
@@ -77,9 +78,9 @@ define(
 
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
                 this._graphs = new Graphs(
-                        this.graphs , 
-                        this
-                        );
+                    this.graphs , 
+                    this
+                );
             },
             _startDraw : function(){
                 var self  = this;
