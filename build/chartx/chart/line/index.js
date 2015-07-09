@@ -294,7 +294,7 @@ define(
                 var self = this;
                 self._nodeInd = $index;
                 var o = _.clone(self.dataOrg[$index]);
-                if( o && o.value != null && o.value != undefined && o.value != ""  ){
+                if( o && o.value != null && o.value != undefined && o.value !== ""  ){
                     o.r           = self._getProp(self.node.r);
                     o.fillStyle   = self._getProp(self.node.fillStyle) || "#ffffff";
                     o.strokeStyle = self._getProp(self.node.strokeStyle) || self._getColor( self.line.strokeStyle );
@@ -689,7 +689,7 @@ define(
 
                 var _nodesInfoList = [];                 //节点信息集合
                 for ( var a = 0, al = this.groups.length; a < al; a++ ) {
-                    var o = this.groups[a].getNodeInfoAt(tmpINode)
+                    var o = this.groups[a].getNodeInfoAt(tmpINode);
                     o && _nodesInfoList.push(o);
                 };
 
