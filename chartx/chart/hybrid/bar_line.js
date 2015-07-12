@@ -161,8 +161,11 @@ define(
                     }
                 };
                 e.tipsInfo.nodesInfoList = e.tipsInfo.nodesInfoList.concat( _nodesInfoList );
+
                 return { 
-                    x : this._xAxis.sprite.localToGlobal({x : this._xAxis.layoutData[igroup].x , y:0}).x
+                    x     : this._xAxis.sprite.localToGlobal({x : this._xAxis.layoutData[igroup].x , y:0}).x,
+                    lineH : this._graphs.h,
+                    lineTop : this._lineChart._graphs.induce.localToGlobal().y
                 }
             },
             bindEvent : function(){
