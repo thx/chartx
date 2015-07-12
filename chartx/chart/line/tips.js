@@ -27,19 +27,21 @@ define(
                     id : "tips"
                 });
     
-                opt = _.deepExtend({
-                    prefix : data.yAxis.field
-                } , opt);
+                //opt = _.deepExtend({
+                //    prefix : data.yAxis.field
+                //} , opt);
+                
                 this._tip = new Tip( opt , tipDomContainer );
     
             },
-            show : function(e){
-                var tipsPoint = this._getTipsPoint(e);
+            show : function(e , tipsPoint){
+                tipsPoint || ( tipsPoint = {} );
+                _.extend( this._getTipsPoint(e) , tipsPoint );
                 this._initLine(e , tipsPoint);
                 this._initNodes(e , tipsPoint);
     
                 this.sprite.addChild(this._tip.sprite);
-                this._tip.show(e);
+                this._tip.show(e , tipsPoint);
 
                 this._isShow = true;
             },
@@ -70,7 +72,6 @@ define(
              * line相关------------------------
              */
             _initLine : function(e , tipsPoint){
-                
                 var lineOpt = _.deepExtend({
                     x       : parseInt(tipsPoint.x),
                     y       : e.target.localToGlobal().y,

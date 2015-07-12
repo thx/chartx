@@ -162,7 +162,8 @@ define(
             _getInfoHandler:function(e){
                 var x = e.point.x, y = e.point.y - this.h;
                 //todo:底层加判断
-                x = x > this.w ? this.w : x
+                x = x > this.w ? this.w : x;
+                
                 var tmpINode = this.disX == 0 ? 0 : parseInt( (x + (this.disX / 2) ) / this.disX  );
 
                 var _nodesInfoList = [];                 //节点信息集合

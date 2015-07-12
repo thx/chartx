@@ -181,7 +181,7 @@ define(
                        {
                         context : {
                             x  : x + ( self.place == "left" ? 0 : 5 ),
-                            y  : y + ( a == 0 ? -3 : 0 ),
+                            y  : y + ( a == 0 ? -3 : 0 ) + ( a == arr.length-1 ? 3 : 0 ),
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
                             textAlign    : self.place == "left" ? "right" : "left",

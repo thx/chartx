@@ -56,12 +56,9 @@ define(
                 this._startDraw();                         //开始绘图
     
                 this._drawEnd();                           //绘制结束，添加到舞台
-              
-                this._arguments = arguments;
-    
             },
-            _initData  : function( data ){
-                var d = dataFormat.apply( this , [data] );
+            _initData  : function( data , opt ){
+                var d = dataFormat.apply( this , arguments );
                 _.each( d.yAxis.field , function(field , i){
                     if( !_.isArray( field ) ){
                         field = [field];
@@ -83,7 +80,6 @@ define(
                 );
             },
             _startDraw : function(){
-                var self  = this;
                 var y = parseInt(this.height - this._xAxis.h)
                 
                 //绘制yAxis
@@ -110,10 +106,9 @@ define(
                 };
 
                 var _graphsH = this._yAxis.yGraphsHeight;
-                //Math.abs(this._yAxis.layoutData[ 0 ].y - this._yAxis.layoutData.slice(-1)[0].y);
                 //绘制背景网格
                 this._back.draw({
-                    w    : this._xAxis.w ,
+                    w    : this._xAxis.xGraphsWidth,
                     h    : _graphsH,
                     xAxis:{
                         data : this._yAxis.layoutData
@@ -127,7 +122,6 @@ define(
                     }
                 });
 
-            
                 //绘制主图形区域
                 this._graphs.draw( this._trimGraphs() , {
                     w    : this._xAxis.xGraphsWidth,
@@ -138,22 +132,8 @@ define(
                     },
                     yDataSectionLen : this._yAxis.dataSection.length
                 });
-    
-                //执行生长动画
-                this._graphs.grow();
-
-                this._graphs.sprite.on( "panstart mouseover" ,function(e){
-                    self._setXaxisYaxisToTipsInfo(e);
-                    self._tip.show( e );
-                });
-                this._graphs.sprite.on( "panstart mousemove" ,function(e){
-                    self._setXaxisYaxisToTipsInfo(e);
-                    self._tip.show( e );
-                });
-                this._graphs.sprite.on( "panstart mouseout" ,function(e){
-                    self._tip.hide( e );
-                });
             },
+            
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo : function( e ){
@@ -170,30 +150,29 @@ define(
                     }
                 } );
             },
-            _trimGraphs:function(){
-                var me       = this;
-                var xArr     = this._xAxis.data;
-                var yArr     = this._yAxis.dataOrg;
+            _trimGraphs:function( _xAxis , _yAxis ){
+                _xAxis || ( _xAxis = this._xAxis );
+                _yAxis || ( _yAxis = this._yAxis );
+                var xArr     = _xAxis.data;
+                var yArr     = _yAxis.dataOrg;
                 var hLen     = yArr.length; //bar的横向分组length
                 
-                var xDis1    = this._xAxis.xDis1;
+                var xDis1    = _xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2    = xDis1 / (hLen+1);
     
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW( xDis2 );
+                this._graphs.checkBarW && this._graphs.checkBarW( xDis2 );
     
-                var maxYAxis = this._yAxis.dataSection[ this._yAxis.dataSection.length - 1 ];
+                var maxYAxis = _yAxis.dataSection[ _yAxis.dataSection.length - 1 ];
                 var tmpData  = [];
-
-                
                 for( var b = 0 ; b < hLen ; b ++ ){
                     !tmpData[b] && (tmpData[b] = []);
                     _.each( yArr[b] , function( subv , v ){
                         !tmpData[b][v] && (tmpData[b][v] = []);
                         _.each( subv , function( val , i ){
                             var x = xArr[i].x - xDis1/2 + xDis2 * (b+1);
-                            var y = -(val-me._yAxis._bottomNumber) / (maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight;
+                            var y = -(val-_yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
                             if( v > 0 ){
                                 y += tmpData[b][v-1][i].y
                             };
@@ -215,6 +194,25 @@ define(
                 this.core.addChild(this._yAxis.sprite);
                
                 this.stageTip.addChild(this._tip.sprite);
+
+                //执行生长动画
+                this._graphs.grow();
+
+                this.bindEvent();
+            },
+            bindEvent : function(){
+                var me = this;
+                this._graphs.sprite.on( "panstart mouseover" ,function(e){
+                    me._setXaxisYaxisToTipsInfo(e);
+                    me._tip.show( e );
+                });
+                this._graphs.sprite.on( "panstart mousemove" ,function(e){
+                    me._setXaxisYaxisToTipsInfo(e);
+                    me._tip.show( e );
+                });
+                this._graphs.sprite.on( "panstart mouseout" ,function(e){
+                    me._tip.hide( e );
+                });
             }
         });
     }
