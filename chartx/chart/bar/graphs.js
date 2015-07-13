@@ -140,8 +140,8 @@ define(
                             });
                             hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
                             hoverRect.on("panstart mouseover mousemove mouseout", function(e){
-                                e.tipsInfo = me._getInfoHandler(e);
-                                me._fireHandler(e)
+                                e.tipsInfo = me._getInfoHandler( this , e );
+                                me._fireHandler(e);
                             });  
                             
                         } else {
@@ -223,7 +223,7 @@ define(
                             groupH.addChild( hoverRect );
                             hoverRect.iGroup = h, hoverRect.iNode = i, hoverRect.iLay = -1
                             hoverRect.on("panstart mouseover mousemove mouseout", function(e){
-                                e.tipsInfo = me._getInfoHandler(e);
+                                e.tipsInfo = me._getInfoHandler( this , e );
                                 me._fireHandler(e);
                                 if( e.type == "mouseover" ){
                                     this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0.1;
@@ -271,23 +271,14 @@ define(
                     this.txtsSp.context.visible = true
                 }
             },
-            _getInfoHandler:function(e){
+            _getInfoHandler:function( target ){
                 // console.log(e.target.iLay)
                 var node = {
-                    iGroup        : e.target.iGroup,
-                    iNode         : e.target.iNode,
-                    iLay            : e.target.iLay,
-                    nodesInfoList : this._getNodeInfo(e.target.iGroup, e.target.iNode, e.target.iLay)
+                    iGroup        : target.iGroup,
+                    iNode         : target.iNode,
+                    iLay          : target.iLay,
+                    nodesInfoList : this._getNodeInfo(target.iGroup, target.iNode, target.iLay)
                 };
-
-                // e.tipsInfo.xAxis = {
-                //     field : this.dataFrame.xAxis.field,
-                //     value : this.dataFrame.xAxis.org[0][ e.target.iNode ]
-                // }
-                // var me = this;
-                // _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                //     node.field = me.dataFrame.yAxis.field[ i ];
-                // } );
                 return node
             },
             _getNodeInfo : function(iGroup, iNode, iLay){

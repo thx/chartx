@@ -36,13 +36,25 @@
 var data= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ]
+    [ 2      , 31  , 30 , 53    ],
+    [ 3      , 52  , 25 , 13    ],
+    [ 4      , 234 , 100, 133   ],
+    [ 5      , 11  , 89 , 55    ],
+    [ 6      , 89  , 52 , 88    ],
+    [ 7      , 19  , 29 , 36    ],
+    [ 8      , 101 , 20 , 77    ],
+    [ 9      , 67  , 51 , 26    ]
 
 ];
 var options = {
     type : "bar_line",
     yAxis : {
-        field : ["uv","pv"]
+        bar  : {
+            field : ["uv","pv"]
+        },
+        line : {
+            field : ["click"]
+        }
     },
     xAxis : {
         field : ["xfield"]

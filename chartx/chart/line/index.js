@@ -26,7 +26,7 @@ define(
                 this._anchor  =  null;
                 this._back    =  null;
                 this._graphs  =  null;
-                this._tips    =  null;
+                this._tip    =  null;
 
                 this.xAxis    = {};
                 this.yAxis    = {};
@@ -61,7 +61,6 @@ define(
     
                 this._startDraw();                         //开始绘图
               
-                this._arguments = arguments;
     
             },
             /*
@@ -159,12 +158,12 @@ define(
                 //再折线图中会有双轴图表
                 if( this.biaxial ){
                     this._yAxisR = new yAxis( _.extend(_.clone(this.yAxis),{place:"right"}) , this.dataFrame.yAxis );
-                }
+                } 
  
                 this._back   = new Back(this.back);
                 this._anchor = new Anchor(this.anchor);
                 this._graphs = new Graphs( this.graphs, this);
-                this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
+                this._tip   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
 
                 this.stageBg.addChild(this._back.sprite);
                 this.stageBg.addChild(this._anchor.sprite);
@@ -174,7 +173,7 @@ define(
                     this.core.addChild( this._yAxisR.sprite );
                 }
                 this.core.addChild(this._graphs.sprite);
-                this.stageTip.addChild(this._tips.sprite);
+                this.stageTip.addChild(this._tip.sprite);
             },
             _startDraw : function(){ 
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -226,7 +225,7 @@ define(
                     w    : this._xAxis.xGraphsWidth,
                     h    : _graphsH,
                     xAxis: {
-                        data    : this._yAxis.layoutData
+                        data : this._yAxis.layoutData
                     },
                     yAxis: {
                         data : this._xAxis.layoutData
@@ -269,39 +268,7 @@ define(
                 this._graphs.grow();
     
                 
-                this._graphs.sprite.on( "panstart mouseover" ,function(e){
-                    if( self._tips.enabled &&
-                        //self._preTipsInode && self._preTipsInode != e.tipsInfo.iNode &&
-                        e.tipsInfo.nodesInfoList.length > 0
-                        ){
-                            self._setXaxisYaxisToTipsInfo(e);
-                            self._tips.show( e );
-                            // console.log(e)
-                            //触发
-                            //self.fire( "" , e );
-                    }
-                });
-                this._graphs.sprite.on( "panmove mousemove" ,function(e){
-                    if( self._tips.enabled ){
-                        if( e.tipsInfo.nodesInfoList.length > 0 ){
-                            self._setXaxisYaxisToTipsInfo(e);
-                            if( self._tips._isShow ){
-                                self._tips.move( e );
-                            } else {
-                                self._tips.show( e );
-                            }
-                        } else {
-                            if( self._tips._isShow ){
-                                self._tips.hide( e );
-                            }
-                        }
-                    }
-                });
-                this._graphs.sprite.on( "panend mouseout" ,function(e){
-                    if( self._tips.enabled ){
-                        self._tips.hide( e );
-                    }
-                });
+                this.bindEvent( this._graphs.sprite );
 
 
                 if(this._anchor.enabled){
@@ -322,6 +289,37 @@ define(
                     //, this._anchor.setY(y)
                 }
             },
+            bindEvent : function( spt , _setXaxisYaxisToTipsInfo ){
+                var self = this;
+                _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
+                spt.on( "panstart mouseover" ,function(e){
+                    if( self._tip.enabled && e.tipsInfo.nodesInfoList.length > 0 ){
+                        _setXaxisYaxisToTipsInfo.apply(self,[e]);
+                        self._tip.show( e );
+                    }
+                });
+                spt.on( "panmove mousemove" ,function(e){
+                    if( self._tip.enabled ){
+                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                            _setXaxisYaxisToTipsInfo.apply(self,[e]);
+                            if( self._tip._isShow ){
+                                self._tip.move( e );
+                            } else {
+                                self._tip.show( e );
+                            }
+                        } else {
+                            if( self._tip._isShow ){
+                                self._tip.hide( e );
+                            }
+                        }
+                    }
+                });
+                spt.on( "panend mouseout" ,function(e){
+                    if( self._tip.enabled ){
+                        self._tip.hide( e );
+                    }
+                });
+            },
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo : function( e ){
@@ -334,10 +332,12 @@ define(
                     node.field = me.dataFrame.yAxis.field[ node._groupInd ];
                 } );
             },
-            _trimGraphs:function(){
-                var _yAxis   = this._yAxis;
+            _trimGraphs:function( _yAxis , dataFrame ){
+                _yAxis    || ( _yAxis    = this._yAxis );
+                dataFrame || ( dataFrame = this.dataFrame );
+
                 var maxYAxis = _yAxis.dataSection[ _yAxis.dataSection.length - 1 ];
-                var arr      = this.dataFrame.yAxis.org;
+                var arr      = dataFrame.yAxis.org;
                 var tmpData  = [];
                 for (var a = 0, al = arr.length; a < al; a++ ) {
                     if( this.biaxial && a > 0 ){
