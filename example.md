@@ -513,6 +513,24 @@ title:  chart demos
 
 </div>
 
+## 混合图
+
+<div class="charts">
+    <a target="_blank" href="./demo/hybrid/bar_line.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/hybrid/bar_line.png">
+        </dt>
+        <dd>
+            <h5>
+            柱折混合图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 
 ## 力导向布局图
 
