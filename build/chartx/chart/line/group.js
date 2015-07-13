@@ -209,6 +209,7 @@ define(
                 self._pointList = list;
 
                 list = [];
+                
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var o = self.data[a];
                     list.push([ 
@@ -280,7 +281,7 @@ define(
                 
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)
-                if( (self.node.enabled || list.length==1) && !!self.line.lineWidth ){                     //拐角的圆点
+                if( (self.node.enabled || list.length==1) && !!self.line.lineWidth ){//拐角的圆点
                     this._circles = new Canvax.Display.Sprite({ id : "circles"});
                     this.sprite.addChild(this._circles);
                     for(var a = 0,al = list.length; a < al; a++){
@@ -300,11 +301,11 @@ define(
 
 
                         if( self.node.corner ){           //拐角才有节点
-                            var value = list[a].value;
-                            var pre   = list[a - 1];
-                            var next  = list[a + 1];
+                            var y     = self._pointList[a][1];
+                            var pre   = self._pointList[a - 1];
+                            var next  = self._pointList[a + 1];
                             if(pre && next){
-                                if(value == pre.value && value == next.value){
+                                if(y == pre[1] && y == next[1]){
                                     circle.context.visible = false;
                                 }
                             }
