@@ -33,12 +33,12 @@ define(
                 dataFrame.org = arr;
                 var fileds = arr[0] ? arr[0] : []; //所有的字段集合
     
-                this.yAxis && ( dataFrame.yAxis.field = this.yAxis.field );
-                this.xAxis && ( dataFrame.xAxis.field = this.xAxis.field );
-
                 if( opt ){
-                    opt.yAxis && ( dataFrame.yAxis.field , opt.yAxis.field );
-                    opt.xAxis && ( dataFrame.xAxis.field , opt.xAxis.field );
+                    opt.yAxis  && ( dataFrame.yAxis.field = opt.yAxis.field );
+                    opt.xAxis  && ( dataFrame.xAxis.field = opt.xAxis.field );
+                } else {
+                    this.yAxis && ( dataFrame.yAxis.field = this.yAxis.field );
+                    this.xAxis && ( dataFrame.xAxis.field = this.xAxis.field );
                 }
 
                 var total = [];

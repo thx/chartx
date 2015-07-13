@@ -6,7 +6,7 @@ window.Chartx || (Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.07.08";
+        var canvaxVersion = "2015.07.15";
 
         
 
@@ -607,7 +607,7 @@ define(
                 self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp)
    
                 //x轴方向的线集合
-                var arr = self.xAxis.data
+                var arr = self.xAxis.data;
                 for(var a = 1, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var line = new Line({
@@ -986,6 +986,7 @@ define(
     ],
     function( Canvax , Rect, Tools ){
         var Tip = function( opt , tipDomContainer ){
+            this.enabled = true;
             this.tipDomContainer = tipDomContainer;
             this.cW      = 0;  //容器的width
             this.cH      = 0;  //容器的height
@@ -2117,7 +2118,7 @@ define(
                        {
                         context : {
                             x  : x + ( self.place == "left" ? 0 : 5 ),
-                            y  : y + ( a == 0 ? -3 : 0 ),
+                            y  : y + ( a == 0 ? -3 : 0 ) + ( a == arr.length-1 ? 3 : 0 ),
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
                             textAlign    : self.place == "left" ? "right" : "left",
