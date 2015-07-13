@@ -53,7 +53,6 @@ define(
     
                 this._drawEnd();                           //绘制结束，添加到舞台
               
-                this._arguments = arguments;
     
             },
             _initData  : dataFormat,

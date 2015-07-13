@@ -7,6 +7,7 @@ define(
     ],
     function( Canvax , Rect, Tools ){
         var Tip = function( opt , tipDomContainer ){
+            this.enabled = true;
             this.tipDomContainer = tipDomContainer;
             this.cW      = 0;  //容器的width
             this.cH      = 0;  //容器的height
