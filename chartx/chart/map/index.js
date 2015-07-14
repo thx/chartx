@@ -76,6 +76,8 @@ define(
                     //绘制完了后调整当前sprite的尺寸和位置
                     me._setSpPos();
                 } );
+
+                this.drawed = true;
             },
             _setSpPos : function( ){
                 var tf  = this._mapDataMap[this.mapName].transform;

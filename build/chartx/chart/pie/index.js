@@ -369,16 +369,23 @@ define(
                         this._showLabel(index);
                     }
                 },
-                _sectorFocus: function (index) {
+                _sectorFocus: function (e , index) {
                     if (this.sectorMap[index]) {
                         if (this.focusCallback) {
-                            this.focusCallback.focus(index);
+                            this.focusCallback.focus(e , index);
                         }
                     }
                 },
-                _sectorUnfocus: function () {
+                _sectorUnfocus: function (e , index) {
                     if (this.focusCallback) {
-                        this.focusCallback.unfocus();
+                        this.focusCallback.unfocus(e , index);
+                    }
+                },
+                _sectorClick : function(e , index){
+                    if (this.sectorMap[index]) {
+                        if (this.clickCallback) {
+                            this.clickCallback(e , index );
+                        }
                     }
                 },
                 _getByIndex: function (index) {
@@ -640,7 +647,7 @@ define(
                                     if (self.tips.enabled) {
                                         self._showTip(e, this.__dataIndex);
                                     }
-                                    self._sectorFocus(this.__dataIndex);
+                                    self._sectorFocus( e , this.__dataIndex );
                                     //}
                                     self.allowPointSelect && self.moveSector(this);
                                 }, function (e) {
@@ -648,7 +655,7 @@ define(
                                     if (self.tips.enabled) {
                                         self._hideTip(e);
                                     }
-                                    self._sectorUnfocus();
+                                    self._sectorUnfocus(e , this.__dataIndex);
                                     //}
                                     self.allowPointSelect && self.moveSector(this);
                                 });
@@ -656,6 +663,10 @@ define(
                                     if (self.tips.enabled) {
                                         self._moveTip(e, this.__dataIndex);
                                     }
+                                });
+
+                                sector.on('click' , function(e){
+                                    self._sectorClick( e , this.__dataIndex );
                                 });
 
                                 self.sprite.addChild(sector);
@@ -757,6 +768,7 @@ define(
                     this._drawEnd();                           //绘制结束，添加到舞台      
 
 
+                    this.drawed = true;
                 },
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);
@@ -856,12 +868,18 @@ define(
                         animation: self.animation,
                         colors: self.colors,
                         focusCallback: {
-                            focus: function (index) {
-                                self.fire('focused');
+                            focus: function (e , index) {
+                                e.sectorIndex = index;
+                                self.fire('focused' , e);
                             },
-                            unfocus: function () {
-                                self.fire('unfocused');
+                            unfocus: function (e , index) {
+                                e.sectorIndex = index;
+                                self.fire('unfocused' , e);
                             }
+                        },
+                        clickCallback : function( e , index ){
+                            e.sectorIndex = index;
+                            self.fire("click" , e);
                         }
                     };
 

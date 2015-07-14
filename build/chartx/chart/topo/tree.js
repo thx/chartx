@@ -96,6 +96,8 @@ define(
                 this._initNodesSpritePos();
 
                 this._initEventHand();
+
+                this.drawed = true;
             }, 
             /*
              * @data 为 

@@ -17,7 +17,7 @@ define(
                 this.normalColor = '#E6E6E6';
                 this.progColor   = '#8d76c4';
                 this.startAngle  = -90;
-                this.angleCount    = 360;
+                this.angleCount  = 360;
                 this.currRatio   = 0; //当前比率
 
                 //进度文字
@@ -76,11 +76,7 @@ define(
                 }) );
 
                 if( this.text.enabled ){
-                    var content = this.currRatio + "%";
-                    if( _.isFunction( this.text.format ) ){
-                        content = this.text.format( this.currRatio );
-                    }
-                    this.stage.addChild( new Canvax.Display.Text(content,
+                    this.stage.addChild( new Canvax.Display.Text( "0%",
                         {
                             id  : "ratioText",
                             context : {
@@ -93,7 +89,11 @@ define(
                             }
                   	    })
                     )
-                }
+                };
+
+                this.currRatio && this.setRatio( this.currRatio );
+                this.drawed = true;
+
             },
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;
@@ -123,9 +123,11 @@ define(
                 this._resetCirclePos( currAngle );
             },
             setRatio  : function( s ){
+                
                 var self  = this;
                 var timer = null;
-                var times = 700 * Math.abs(s - self.currRatio) / 100;
+                var times = 1000 * Math.abs(s - self.currRatio) / 100;
+                !self.drawed && (self.currRatio = 0, times = s / 100 * 1000 )
                 var growAnima = function(){
                    self.tween = new Tween.Tween( { r : self.currRatio } )
                    .to( { r : s } , times )

@@ -511,6 +511,8 @@ define(
                         me._graphs.angOut( );
                     }
                 });
+
+                this.drawed = true;
               
             },
             _getCurrAng   : function(e){

@@ -61,6 +61,7 @@ define(
     
                 this._startDraw();                         //开始绘图
               
+                this.drawed = true;
     
             },
             /*

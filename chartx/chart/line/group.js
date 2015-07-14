@@ -8,7 +8,7 @@ define(
         "chartx/utils/tools",
         "chartx/utils/colorformat",
         "canvax/animation/Tween",
-    ],
+    ], 
     function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat , Tween ){
         window.Canvax = Canvax
         var Group = function( a , opt , ctx){

@@ -16,7 +16,7 @@ define(
             this.pos = {
                 x : 0,
                 y : 0
-            }
+            };
     
             this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149" , "#4d7fff"];
     
@@ -450,6 +450,8 @@ define(
                 this._startDraw();                         //开始绘图
     
                 this._drawEnd();                           //绘制结束，添加到舞台
+                
+                this.drawed = true;
             },
             _initData  : function( data , opt ){
                 var d = dataFormat.apply( this , arguments );
@@ -602,7 +604,7 @@ define(
                 });
                 this._graphs.sprite.on( "panstart mousemove" ,function(e){
                     me._setXaxisYaxisToTipsInfo(e);
-                    me._tip.show( e );
+                    me._tip.move( e );
                 });
                 this._graphs.sprite.on( "panstart mouseout" ,function(e){
                     me._tip.hide( e );

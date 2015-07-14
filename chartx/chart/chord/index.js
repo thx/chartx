@@ -24,6 +24,7 @@ define(
             },
             draw   : function( opt ){
                 this._widget();
+                this.drawed = true;
             },
             _widget: function(  ){
                 var centre = {

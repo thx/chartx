@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'hybrid'],
+    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'venn' , 'hybrid'],
     canvax  : null,
     create  : {},
     _start   : function () {
@@ -106,7 +106,9 @@ window.Chartx || (Chartx = {
                     });
                     promise._thenFn = [];
                     //在then处理函数执行了后自动draw
-                    promise.chart.draw();
+                    //目前不能提前到then函数执行前面，因为有些图表有注册begindraw 这样的事件。
+                    promise.chart.drawed || promise.chart.draw();
+
                     promise.path = path;
                 } else {
                     //如果require回来的时候发现已经promise._destroy == true了

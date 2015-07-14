@@ -42,6 +42,7 @@
                     this._drawEnd();                           //绘制结束，添加到舞台      
 
 
+                    this.drawed = true;
                 },
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);
@@ -141,12 +142,18 @@
                         animation: self.animation,
                         colors: self.colors,
                         focusCallback: {
-                            focus: function (index) {
-                                self.fire('focused');
+                            focus: function (e , index) {
+                                e.sectorIndex = index;
+                                self.fire('focused' , e);
                             },
-                            unfocus: function () {
-                                self.fire('unfocused');
+                            unfocus: function (e , index) {
+                                e.sectorIndex = index;
+                                self.fire('unfocused' , e);
                             }
+                        },
+                        clickCallback : function( e , index ){
+                            e.sectorIndex = index;
+                            self.fire("click" , e);
                         }
                     };
 
