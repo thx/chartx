@@ -536,7 +536,7 @@ title:  chart demos
         </dt>
         <dd>
             <h5>
-            基础和旋图
+            多关系韦恩图 
             </h5>
         </dd>
     </dl>
