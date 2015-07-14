@@ -513,6 +513,37 @@ title:  chart demos
 
 </div>
 
+## 韦恩图
+
+<div class="charts">
+    <a target="_blank" href="./demo/venn/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/venn/index.png">
+        </dt>
+        <dd>
+            <h5>
+            简单韦恩图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/venn/morecircle.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/venn/morecircle.png">
+        </dt>
+        <dd>
+            <h5>
+            基础和旋图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 ## 混合图
 
 <div class="charts">
