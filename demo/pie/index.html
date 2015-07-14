@@ -62,10 +62,16 @@ var options = {
 };
 Chartx.pie("canvasTest" , data , options).then(function( pie ){    
     pie.on('focused' , function (e) {
-
+        console.log(e);
+    });
+    pie.on('unfocused' , function (e) {
+        console.log(e);
     });
     pie.on('complete', function (e) {
-        console.log("complete");
+        console.log(e);
+    });
+    pie.on('click',function(e){
+        console.log(e);
     });
 });
 </textarea></form>

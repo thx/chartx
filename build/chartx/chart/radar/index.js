@@ -511,7 +511,6 @@ define(
                         me._graphs.angOut( );
                     }
                 });
-              
             },
             _getCurrAng   : function(e){
                 var origPoint = this._getPointBack(e);

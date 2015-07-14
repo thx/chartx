@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'hybrid'],
+    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'venn' , 'hybrid'],
     canvax  : null,
     create  : {},
     _start   : function () {
@@ -87,13 +87,15 @@ window.Chartx || (Chartx = {
         var getChart = function(){
             require( [ path ] , function( chartConstructor ){
                 if( !promise._destroy ){
+                    
                     promise.chart = new chartConstructor(el , data , options);
+                    promise.chart.draw();
+
                     _.each(promise._thenFn , function( fn ){
                         _.isFunction( fn ) && fn( promise.chart );
                     });
                     promise._thenFn = [];
-                    //在then处理函数执行了后自动draw
-                    promise.chart.draw();
+
                     promise.path = path;
                 } else {
                     //如果require回来的时候发现已经promise._destroy == true了
@@ -308,6 +310,7 @@ define(
         CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
             init   : function(){},
             dataFrame : null, //每个图表的数据集合 都 存放在dataFrame中。
+            drawed : false, //如果有执行过drawed，则为true
             draw   : function(){},
             /*
              * chart的销毁 
