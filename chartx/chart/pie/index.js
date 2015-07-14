@@ -40,9 +40,6 @@
                     this._initModule();                      //初始化模块
                     this._startDraw();                         //开始绘图
                     this._drawEnd();                           //绘制结束，添加到舞台      
-
-
-                    this.drawed = true;
                 },
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);

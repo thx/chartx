@@ -92,8 +92,6 @@ define(
                 };
 
                 this.currRatio && this.setRatio( this.currRatio );
-                this.drawed = true;
-
             },
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;

@@ -390,7 +390,6 @@ define(
                     me._setSpPos();
                 } );
 
-                this.drawed = true;
             },
             _setSpPos : function( ){
                 var tf  = this._mapDataMap[this.mapName].transform;

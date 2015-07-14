@@ -100,14 +100,14 @@ window.Chartx || (Chartx = {
         var getChart = function(){
             require( [ path ] , function( chartConstructor ){
                 if( !promise._destroy ){
+                    
                     promise.chart = new chartConstructor(el , data , options);
+                    promise.chart.draw();
+
                     _.each(promise._thenFn , function( fn ){
                         _.isFunction( fn ) && fn( promise.chart );
                     });
                     promise._thenFn = [];
-                    //在then处理函数执行了后自动draw
-                    //目前不能提前到then函数执行前面，因为有些图表有注册begindraw 这样的事件。
-                    promise.chart.drawed || promise.chart.draw();
 
                     promise.path = path;
                 } else {

@@ -64,7 +64,6 @@ define(
                 //附加的lineChart._graphs 添加到core
                 this.core.addChild( this._lineChart._graphs.sprite );
 
-                this.drawed = true;
             },
             _startDraw : function(){
                 var me = this;

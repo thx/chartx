@@ -35,15 +35,12 @@ var data    = [];
 var options = {
     //配置默认进度
     barWidth   : 20,
-    r          : 100,
-    currRatio  : 30
+    r          : 100
+    //currRatio  : 30
 }
 
 Chartx.progress("canvasTest" , data , options).then(function( chart ){
-    setTimeout(function(){
-        //setRatio @params 为0-100的num
-        //chart.setRatio( 60 );
-    } , 100)
+    chart.setRatio( 60 );
 });
 </textarea></form>
 

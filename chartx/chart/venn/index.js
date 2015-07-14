@@ -47,8 +47,6 @@ define(
                 this._startDraw();
 
                 this._drawEnd();
-
-                this.drawed = true;
             },
             _initModule : function(){
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());

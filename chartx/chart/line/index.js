@@ -61,8 +61,6 @@ define(
     
                 this._startDraw();                         //开始绘图
               
-                this.drawed = true;
-    
             },
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线

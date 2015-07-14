@@ -139,8 +139,6 @@ define(
     
                 this._drawEnd();                           //绘制结束，添加到舞台
               
-                this.drawed = true;
-    
             },
             _initData:DataFormat,
             _initModule:function(){

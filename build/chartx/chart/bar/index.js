@@ -451,7 +451,6 @@ define(
     
                 this._drawEnd();                           //绘制结束，添加到舞台
                 
-                this.drawed = true;
             },
             _initData  : function( data , opt ){
                 var d = dataFormat.apply( this , arguments );
