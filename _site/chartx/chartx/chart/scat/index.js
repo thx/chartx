@@ -54,10 +54,6 @@ define(
                 this._startDraw();                         //开始绘图
     
                 this._drawEnd();                           //绘制结束，添加到舞台
-              
-    
-                //下面这个是全局调用测试的时候用的
-                //window.hoho = this;
             },
             _initData  : dataFormat,
             _initModule:function(){

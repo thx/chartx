@@ -40,8 +40,6 @@
                     this._initModule();                      //初始化模块
                     this._startDraw();                         //开始绘图
                     this._drawEnd();                           //绘制结束，添加到舞台      
-
-
                 },
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);
@@ -141,12 +139,18 @@
                         animation: self.animation,
                         colors: self.colors,
                         focusCallback: {
-                            focus: function (index) {
-                                self.fire('focused');
+                            focus: function (e , index) {
+                                e.sectorIndex = index;
+                                self.fire('focused' , e);
                             },
-                            unfocus: function () {
-                                self.fire('unfocused');
+                            unfocus: function (e , index) {
+                                e.sectorIndex = index;
+                                self.fire('unfocused' , e);
                             }
+                        },
+                        clickCallback : function( e , index ){
+                            e.sectorIndex = index;
+                            self.fire("click" , e);
                         }
                     };
 
