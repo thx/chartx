@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -24,7 +24,6 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
-<!--<script type="text/javascript" src="../bar_h/index.js"></script>-->
 </head>
 <body >
 
@@ -32,25 +31,55 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    ["星期一"      , 101 , 20 , 33    ],
-    ["星期二"      , 67  , 51 , 26    ]
+    ["xfield","uv" ,"pv","click","show"],
+    [ 1      , 101 , 20 , 33    ,100],
+    [ 2      , 67  , 51 , 26    ,35],
+    [ 3      , 76  , 45 , 43    ,43],
+    [ 4      , 58  , 35 , 31    ,345],
+    [ 5      , 79  , 73 , 71    ,234],
+    [ 6      , 88  , 54 , 39    ,423],
+    [ 7      , 56  , 68 , 65    ,89],
+    [ 8      , 99  , 83 , 51    ,88]
 
 ];
 var options = {
     type : "horizontal",
     yAxis : {
-        field : ["uv","pv"]
+        field : [
+             [ "uv" , "pv" ],
+             ["click"]
+             //[ "click" , "show" ]
+        ],
     },
     xAxis : {
-        field : ["xfield"]
+        field : ["xfield"],
+    },
+    graphs : {
+        bar : {
+            fillStyle : [
+                [ "#458ae6" , "#94cc5c" ],
+                [ "#999999" , "#cccccc" ]
+            ]
+        }
     }
-}  
-
-Chartx.bar("canvasTest" , data , options);  
-    
-            </textarea></form>
+}   
+var chartx = Chartx.bar("canvasTest" , data , options);
+chartx.then(function( line ){
+    line.on( "mouseover" , function( e ){
+        eventHandler(e);
+    } );
+    //mobile 触屏事件对应的为
+    //tap(点击)， panstart(手势准备开始移动) ，panmove(手势移动中)， panend(手势移动结束)
+});
+var eventHandler = function( e ){
+    <!-- console.log(e.params.iGroup, e.params.iNode, e.params.iLay) -->
+    <!-- var log = "<div>type："+ e.type + " iGroup：" + e.params.iGroup + " iNode：" + e.params.iNode + " iLay: " + e.params.iLay + "</div>"; -->
+    <!-- $("#chart-event-log").prepend( $(log) ); -->
+}
+</textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -58,7 +87,7 @@ Chartx.bar("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>柱状图- 横向柱状图</h4>
+                <h4>折线图 - 基础柱状图</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>
@@ -66,7 +95,6 @@ Chartx.bar("canvasTest" , data , options);
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
-
 
             </div>
         </td>
@@ -76,4 +104,3 @@ Chartx.bar("canvasTest" , data , options);
     
 </body> 
 </html>
-

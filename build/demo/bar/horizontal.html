@@ -32,34 +32,21 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-var data = [
-    ["y","line1","line2","line3"],
-    [ '1-2K' , 101  , 201 , 0 ] ,
-    [ '2-3K'  , 88 , 145 , 0 ] ,
-    [ '3-4k' , 488  , 88  , 0 ] ,
-    [ '4-5k'  , 390  , 546 , 0 ] ,
-    [ '5-6k' , 1000  , 88  , 0 ] 
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    ["星期一"      , 101 , 20 , 33    ],
+    ["星期二"      , 67  , 51 , 26    ]
+
 ];
 var options = {
-    type  : 'horizontal',
+    type : "horizontal",
     yAxis : {
-        field : ["y"]
+        field : ["uv","pv"]
     },
     xAxis : {
-        field : ["line1",'line2']
-    },
-    graphs:{
-        bar : {
-            fillStyle   : function(i , ii , value){
-                var colors = ['#f8ab5e','#E55C5C']
-                return colors[i]
-            }
-        }
-    },
-    tips  :{
-        prefix : ["今天","昨天"]
+        field : ["xfield"]
     }
-}       
+}  
 
 Chartx.bar("canvasTest" , data , options);  
     
