@@ -80,8 +80,10 @@ define(
                     this
                 );
             },
-            _startDraw : function(){
-                var y = parseInt(this.height - this._xAxis.h)
+            _startDraw : function( opt ){
+                var w = (opt && opt.w) || this.width;
+                var h = (opt && opt.h) || this.height;
+                var y = parseInt( h - this._xAxis.h );
                 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -96,8 +98,8 @@ define(
 
                 //绘制x轴
                 this._xAxis.draw({
-                    graphh :   this.height,
-                    graphw :   this.width,
+                    graphh :   h,
+                    graphw :   w,
                     yAxisW :   _yAxisW
                 });
                 if( this._xAxis.yAxisW != _yAxisW ){

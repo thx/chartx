@@ -291,6 +291,19 @@ title:  chart demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/bar/superposition_h.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/superposition_h.png">
+        </dt>
+        <dd>
+            <h5>
+            纵向有堆叠的柱状图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
 </div>
 
 

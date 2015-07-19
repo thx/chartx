@@ -222,7 +222,7 @@ define(
                        }
                   	});
                   	xNode.addChild(txt);
-                    if( !!this.text.rotation ){
+                    if( !!this.text.rotation && this.text.rotation != 90 ){
                         txt.context.x += 5;
                         txt.context.y += 3;
                     }
