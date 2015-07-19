@@ -21,7 +21,9 @@ define(
             this.text = {
                     fillStyle : '#999999',
                     fontSize  : 12,
-                    format    : null
+                    format    : null,
+                    rotation  : 0
+                    
             };
             this.pos         = {
                 x : 0 , y : 0
@@ -176,15 +178,35 @@ define(
                     }
                     var yNode = new Canvax.Display.Sprite({ id : "yNode"+a });
                      
+                 　 var textAlign = (self.place == "left" ? "right" : "left");
+                    //为横向图表把y轴反转后的 逻辑
+                    if( self.text.rotation == 90 || self.text.rotation == -90 ){
+                        textAlign = "center";
+                        if( a == arr.length - 1 ){
+                            textAlign = "right";
+                        }
+                    };
+                    var posy = y + ( a == 0 ? -3 : 0 ) + ( a == arr.length-1 ? 3 : 0 );
+                    //为横向图表把y轴反转后的 逻辑
+                    if( self.text.rotation == 90 || self.text.rotation == -90 ){
+                        if( a == arr.length - 1 ){
+                            posy = y - 2;
+                        }
+                        if( a == 0 ){
+                            posy = y;
+                        }
+                    };
+
                     //文字
                     var txt = new Canvax.Display.Text( content ,
                        {
                         context : {
                             x  : x + ( self.place == "left" ? 0 : 5 ),
-                            y  : y + ( a == 0 ? -3 : 0 ) + ( a == arr.length-1 ? 3 : 0 ),
+                            y  : posy,
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
-                            textAlign    : self.place == "left" ? "right" : "left",
+                            rotation     : -Math.abs(this.text.rotation),
+                            textAlign    : textAlign,
                             textBaseline : "middle"
                        }
                     });
