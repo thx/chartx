@@ -35,6 +35,7 @@ define(
     
             },
             show : function(e , tipsPoint){
+                if( !this.enabled ) return;
                 tipsPoint || ( tipsPoint = {} );
                 tipsPoint = _.extend( this._getTipsPoint(e) , tipsPoint );
                 
@@ -47,10 +48,12 @@ define(
                 this._isShow = true;
             },
             move : function(e){
+                if( !this.enabled ) return;
                 this._resetStatus(e);
                 this._tip.move(e);
             },
             hide : function(e){
+                if( !this.enabled ) return;
                 this.sprite.removeAllChildren();
                 this._line  = null;
                 this._nodes = null;

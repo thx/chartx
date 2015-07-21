@@ -51,6 +51,7 @@ define(
                 });
             },
             show : function(e){
+                if( !this.enabled ) return;
                 this.hide();
                 var stage = e.target.getStage();
                 this.cW   = stage.context.width;
@@ -64,11 +65,13 @@ define(
                 this.sprite.toFront();
             },
             move : function(e){
+                if( !this.enabled ) return;
                 this._setContent(e);
                 this._resetBackSize(e);
                 this.setPosition(e);
             },
             hide : function(){
+                if( !this.enabled ) return;
                 this.sprite.removeAllChildren();
                 this._removeContent();
             },
@@ -114,7 +117,7 @@ define(
             _getContent : function(e){
                 _.deepExtend( this.tipsInfo , (e.tipsInfo || {}) );
                 var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
-                if( !tipsContent ){
+                if( !tipsContent && tipsContent != 0 ){
                     tipsContent = this._getDefaultContent( this.tipsInfo );
                 }
                 return tipsContent;
