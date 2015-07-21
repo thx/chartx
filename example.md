@@ -285,7 +285,7 @@ title:  chart demos
         </dt>
         <dd>
             <h5>
-            纵向有堆叠的柱状图
+            横向有堆叠的柱状图
             </h5>
         </dd>
     </dl>
@@ -298,7 +298,7 @@ title:  chart demos
         </dt>
         <dd>
             <h5>
-            纵向有堆叠的柱状图
+            横向有堆叠的柱状图
             </h5>
         </dd>
     </dl>
