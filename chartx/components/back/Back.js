@@ -19,13 +19,13 @@ define(
     
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
-                    thinkness   : 1,
-                    strokeStyle : '#e5e5e5'
+                    thinkness   : 2,
+                    strokeStyle : '#0088cf'//'#e5e5e5'
             } 
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
-                    thinkness   : 1,
-                    strokeStyle : '#e5e5e5',
+                    thinkness   : 2,
+                    strokeStyle : '#0088cf',//'#e5e5e5',
                     biaxial     : false
             }
             this.xAxis   = {                                //x轴上的线
@@ -90,7 +90,7 @@ define(
    
                 //x轴方向的线集合
                 var arr = self.xAxis.data;
-                for(var a = 1, al = arr.length; a < al; a++){
+                for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var line = new Line({
                         context : {
