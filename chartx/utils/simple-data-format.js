@@ -15,11 +15,14 @@ define(
     "chartx/utils/simple-data-format",
     [],
     function(){
-        return function( data ){
+        return function( data, opt ){
 
             var dataFrame  = {    //数据框架集合
                 org        : [],   //最原始的数据 
-                data       : null
+                data       : {},
+                graphs     : {
+                    field  : []
+                }
             };
 
             dataFrame.org  = data;
@@ -34,6 +37,14 @@ define(
                 dataFrame.data[key] = arr;
             } );
 
+            var arr = []
+            if(opt && opt.field){
+                arr = opt.field
+            }else{
+                arr = titles
+            }
+            
+            dataFrame.graphs.field = arr
             return dataFrame;
         }
     }
