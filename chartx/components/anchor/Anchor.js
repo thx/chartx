@@ -14,18 +14,20 @@ define(
 
             this.xAxis   = {
                 lineWidth   : 1,
-                fillStyle   : '#cc3300'
+                fillStyle   : '#0088cf',
+                lineType    : "dashed"
             }
             this.yAxis   = {
                 lineWidth   : 1,
-                fillStyle   : '#cc3300'
+                fillStyle   : '#0088cf',
+                lineType    : "dashed"
             }
             this.node    = {
                 enabled     : 1,                 //是否有
                 r           : 2,                 //半径 node 圆点的半径
-                fillStyle   : '#cc3300',
-                strokeStyle : '#cc3300',
-                lineWidth   : 4
+                fillStyle   : '#0088cf',
+                strokeStyle : '#0088cf',
+                lineWidth   : 2
             }
 
             this.pos     = {
@@ -39,7 +41,7 @@ define(
 
             this.sprite  = null;
 
-            this.init(opt )
+            this.init( opt );
         };
     
         Anchor.prototype = {
@@ -67,10 +69,19 @@ define(
                     _.deepExtend( this , opt );
                 }
             },
+            resetCross : function( cross ){
+                this._xLine.context.yStart = cross.y;
+                this._xLine.context.yEnd   = cross.y;
+                this._yLine.context.xStart = cross.x;
+                this._yLine.context.xEnd   = cross.x;
 
+                var nodepos = this.sprite.localToGlobal( cross );
+                this._circle.context.x     = nodepos.x;
+                this._circle.context.y     = nodepos.y;
+            },
             _widget:function(){
                 var self = this
-                var xLine = new Line({
+                self._xLine = new Line({
                     id      : 'x',
                     context : {
                         xStart      : 0,
@@ -78,12 +89,13 @@ define(
                         xEnd        : self.w,
                         yEnd        : self.cross.y,
                         lineWidth   : self.xAxis.lineWidth,
-                        strokeStyle : self.xAxis.fillStyle
+                        strokeStyle : self.xAxis.fillStyle,
+                        lineType    : self.xAxis.lineType
                     }
                 });
-                this.sprite.addChild(xLine);
+                this.sprite.addChild(self._xLine);
 
-                var yLine = new Line({
+                self._yLine = new Line({
                     id      : 'y',
                     context : {
                         xStart      : self.cross.x,
@@ -91,13 +103,14 @@ define(
                         xEnd        : self.cross.x,
                         yEnd        : self.h,
                         lineWidth   : self.yAxis.lineWidth,
-                        strokeStyle : self.yAxis.fillStyle
+                        strokeStyle : self.yAxis.fillStyle,
+                        lineType    : self.yAxis.lineType
                     }
                 });
-                this.sprite.addChild(yLine);
+                this.sprite.addChild(self._yLine);
 
                 var nodepos = this.sprite.localToGlobal({x : this.cross.x ,  y: this.cross.y });
-                var circle = new Circle({
+                self._circle = new Circle({
                     context : {
                         x           : parseInt(nodepos.x),
                         y           : parseInt(nodepos.y),
@@ -107,7 +120,7 @@ define(
                         lineWidth   : self._getProp( self.node.lineWidth ) || 4
                     }
                 });
-                this.sprite.getStage().addChild(circle);
+                this.sprite.getStage().addChild(self._circle);
             },
             _getProp : function( s ){
                 if( _.isFunction( s ) ){

@@ -31,17 +31,19 @@ define(
             this.xAxis   = {                                //x轴上的线
                     enabled     : 1,
                     data        : [],                      //[{y:100},{}]
-                    // data        : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
+                    org         : null,                    //x轴坐标原点，默认为上面的data[0]
+                    // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
                     strokeStyle : '#f5f5f5', //'#e5e5e5',
-                    filter      : null
+                    filter      : null 
             }
     
             this.yAxis   = {                                //y轴上的线
                     enabled     : 0,
                     data        : [],                      //[{x:100},{}]
-                    // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
+                    org         : null,                    //y轴坐标原点，默认为上面的data[0]
+                    // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
                     strokeStyle : '#f5f5f5',//'#e5e5e5',
@@ -137,12 +139,18 @@ define(
                         });
                         self.yAxisSp.addChild(line);
                     }
-                }
+                };
 
                 //原点开始的y轴线
+                var xAxisOrg = (self.yAxis.org == null ? 0 : _.find( self.yAxis.data , function(obj){
+                    return obj.content == self.yAxis.org
+                } ).x );
+            
+                self.yAxis.org = xAxisOrg;
                 var line = new Line({
                     context : {
-                        xEnd        : 0,
+                        xStart      : xAxisOrg,
+                        xEnd        : xAxisOrg,
                         yEnd        : -self.h,
                         lineWidth   : self.yOrigin.thinkness,
                         strokeStyle : self.yOrigin.strokeStyle
@@ -167,10 +175,17 @@ define(
                 }
     
                 //原点开始的x轴线
+                var yAxisOrg = (self.xAxis.org == null ? 0 : _.find( self.xAxis.data , function(obj){
+                    return obj.content == self.xAxis.org
+                } ).y );
+
+                self.xAxis.org = yAxisOrg;
+
                 var line = new Line({
                     context : {
+                        yStart      : yAxisOrg,
                         xEnd        : self.w,
-                        yEnd        : 0,
+                        yEnd        : yAxisOrg,
                         lineWidth   : self.xOrigin.thinkness,
                         strokeStyle : self.xOrigin.strokeStyle
                     }

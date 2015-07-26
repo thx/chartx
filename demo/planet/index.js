@@ -132,5 +132,5 @@ KISSY.ready(function(){
         }
     }
 
-    Chartx.planet("canvasTest" , data1 , options);
+    Chartx.planet("canvasTest" , data2, options);
 });
