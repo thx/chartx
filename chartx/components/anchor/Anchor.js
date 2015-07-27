@@ -29,6 +29,10 @@ define(
                 strokeStyle : '#0088cf',
                 lineWidth   : 2
             }
+            this.text    = {
+                enabled   : 0,
+                fillStyle : "#0088cf"
+            }
 
             this.pos     = {
                 x           : 0,
@@ -40,6 +44,11 @@ define(
             }
 
             this.sprite  = null;
+
+            this._txt    = null;
+            this._circle = null;
+            this._xAxis  = null;
+            this._yAxis  = null;
 
             this.init( opt );
         };
@@ -54,7 +63,9 @@ define(
                     id : "AnchorSprite"
                 });
             },
-            draw:function(opt){
+            draw:function(opt , _xAxis , _yAxis){
+                this._xAxis = _xAxis;
+                this._yAxis = _yAxis;
                 this._initConfig( opt );
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
@@ -62,7 +73,20 @@ define(
                     this._widget();
                 } 
             },
-    
+            show:function(){
+                this.sprite.context.visible = true;
+                this._circle.context.visible= true;
+                if( this._txt ){
+                    this._txt.context.visible = true;
+                }
+            },
+            hide:function(){
+                this.sprite.context.visible = false;
+                this._circle.context.visible= false;
+                if( this._txt ){
+                    this._txt.context.visible = false;
+                }
+            },
             //初始化配置
             _initConfig:function( opt ){
               	if( opt ){
@@ -78,6 +102,32 @@ define(
                 var nodepos = this.sprite.localToGlobal( cross );
                 this._circle.context.x     = nodepos.x;
                 this._circle.context.y     = nodepos.y;
+
+                if(this.text.enabled){
+                    var nodepos = this.sprite.localToGlobal( cross );
+                    this._txt.context.x = parseInt(nodepos.x);
+                    this._txt.context.y = parseInt(nodepos.y);
+                    
+                    var xd    = this._xAxis.dataSection;
+                    var xdl   = xd.length;
+                    var xText = parseInt(cross.x / this.w * (xd[ xdl - 1 ] - xd[0]) + xd[0]);
+
+                    var yd    = this._yAxis.dataSection;
+                    var ydl   = yd.length;
+                    var yText = parseInt( (this.h - cross.y) / this.h * (yd[ ydl - 1 ] - yd[0]) + yd[0]);
+                    this._txt.resetText("（X："+xText+"，Y："+yText+"）");
+
+                    if( cross.y <= 20 ){
+                        this._txt.context.textBaseline = "top"
+                    } else {
+                        this._txt.context.textBaseline = "bottom"
+                    }
+                    if( cross.x <= this._txt.getTextWidth() ){
+                        this._txt.context.textAlign    = "left"
+                    } else {
+                        this._txt.context.textAlign    = "right"
+                    }
+                }
             },
             _widget:function(){
                 var self = this
@@ -93,7 +143,7 @@ define(
                         lineType    : self.xAxis.lineType
                     }
                 });
-                this.sprite.addChild(self._xLine);
+                self.sprite.addChild(self._xLine);
 
                 self._yLine = new Line({
                     id      : 'y',
@@ -109,7 +159,7 @@ define(
                 });
                 this.sprite.addChild(self._yLine);
 
-                var nodepos = this.sprite.localToGlobal({x : this.cross.x ,  y: this.cross.y });
+                var nodepos = self.sprite.localToGlobal( self.cross );
                 self._circle = new Circle({
                     context : {
                         x           : parseInt(nodepos.x),
@@ -120,7 +170,20 @@ define(
                         lineWidth   : self._getProp( self.node.lineWidth ) || 4
                     }
                 });
-                this.sprite.getStage().addChild(self._circle);
+                self.sprite.getStage().addChild(self._circle);
+
+                if(self.text.enabled){
+                    self._txt = new Canvax.Display.Text( "" , {
+                        context : {
+                            x : parseInt(nodepos.x),
+                            y : parseInt(nodepos.y),
+                            textAlign : "right",
+                            textBaseline : "bottom",
+                            fillStyle    : self.text.fillStyle
+                        }
+                    } );
+                    self.sprite.getStage().addChild(self._txt);
+                }
             },
             _getProp : function( s ){
                 if( _.isFunction( s ) ){
@@ -129,7 +192,6 @@ define(
                 return s
             }           
         };
-    
         return Anchor;
     
     } 

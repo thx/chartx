@@ -30,16 +30,20 @@ define(
             },
             _horizontal : function(){
                 var me = this;
+                
                 _.each( [me.core.context , me.stageBg.context ] , function( ctx ){
                     ctx.x += (me.width  - me.height) / 2;
                     ctx.y += (me.height - me.width ) / 2;
                     ctx.rotation = 90;
                     ctx.rotateOrigin.x = me.height/2;
                     ctx.rotateOrigin.y = me.width/2;
+                    
                     ctx.scaleOrigin.x  = me.height/2;
                     ctx.scaleOrigin.y  = me.width/2;
                     ctx.scaleX         = -1;
                 });
+
+            
                 //把x轴文案做一次镜像反转
                 _.each( this._xAxis.sprite.children , function( xnode ){
                     var text = xnode.children[0];

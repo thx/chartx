@@ -16,12 +16,13 @@ define(
                 x : 0,
                 y : 0
             };
+
+            this.circle = {
+                r : 12  //圆圈默认半径
+            }
     
             this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
-    
-            //圆圈默认半径
-            this.r = 10;
-    
+            
             this.sprite = null;
     
             this._circles = [];  //所有圆点的集合
@@ -62,6 +63,7 @@ define(
                 if( data.length == 0 ){
                     return;
                 };
+                self.data = data;
 
                 this.induce = new Rect({
                     id    : "induce",
@@ -77,12 +79,12 @@ define(
 
                 this.sprite.addChild(this.induce);
 
+                this.induce.on("panstart mouseover", function(e){
+                    e.tipsInfo = null;
+                });
                 this.induce.on("panmove mousemove", function(e){
-                    //e.tipsInfo = this._getInfoHandler(e);
-                    //this._fireHandler(e)
-                    
-                })
-
+                    e.tipsInfo = null;
+                });
 
     
                 //这个分组是只x方向的一维分组
@@ -99,12 +101,15 @@ define(
                                 x           : barData.x,
                                 y           : barData.y,
                                 fillStyle   : this.getFillStyle( i , ii , barData.value ),
-                                r           : this.r,
+                                r           : this.circle.r,
                                 globalAlpha : 0,
                                 cursor      : "pointer"
                             }
                         });
                         sprite.addChild( circle );
+
+                        circle.iGroup = ii;
+                        circle.iNode  = i;
 
                         circle.on("panstart mouseover", function(e){
                             e.tipsInfo = self._getInfoHandler(e);
@@ -116,7 +121,7 @@ define(
                             
                         });
                         circle.on("panend mouseout", function(e){
-                            e.tipsInfo = self._getInfoHandler(e);
+                            e.tipsInfo = {};
                             this.context.globalAlpha = 0.8;
                             this.context.r --;
                         });
@@ -133,7 +138,18 @@ define(
                 this.setY( this.pos.y );
             },
             _getInfoHandler : function(e){
-                return {}
+                var target = e.target;
+                var node = {
+                    iGroup        : target.iGroup,
+                    iNode         : target.iNode,
+                    nodesInfoList : this._getNodeInfo(target.iGroup, target.iNode)
+                };
+                return node
+            },
+            _getNodeInfo : function( iGroup , iNode ){
+                var arr  = [];
+                arr.push( this.data[iGroup][iNode] );
+                return arr;
             },
             /**
              * 生长动画
@@ -148,7 +164,7 @@ define(
                    .onUpdate( function () {
                        for( var i=0 , l=self._circles.length ; i<l ; i++ ){
                            self._circles[i].context.globalAlpha = this.h / 100 * 0.8;
-                           self._circles[i].context.r = this.h / 100 * self.r;
+                           self._circles[i].context.r = this.h / 100 * self.circle.r;
                        }
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );

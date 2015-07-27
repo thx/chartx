@@ -65,6 +65,7 @@ define(
                 } , opt ) , tipDomContainer );
             },
             show : function(e , mapData){
+                if( !this.enabled ) return;
                 this._cPoint   && this._cPoint.remove();
                 this.sprite.addChild( this._tip.sprite );
                 this._tip.show(e);
@@ -74,14 +75,17 @@ define(
                 this._triangle.context.globalAlpha = 0.7;
             },
             move : function(e){
+                if( !this.enabled ) return;
                 this._tip.move(e);
             },
             hide : function(e){
+                if( !this.enabled ) return;
                 this._tip.hide(e);
                 this._cPoint   && this._cPoint.remove();
                 this._triangle && (this._triangle.context.globalAlpha = 0);
             },
             _weight : function(e){
+                
                 var br = this._tip.backR;
                 //cp -- > textX , textY
                 var targetOffSet = e.currentTarget.localToGlobal();

@@ -9,9 +9,10 @@ define(
         'chartx/components/back/Back',
         './graphs',
         'chartx/utils/dataformat',
-        'chartx/components/anchor/Anchor'
+        'chartx/components/anchor/Anchor',
+        'chartx/components/tips/tip'
     ],
-    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat , Anchor){
+    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat , Anchor , Tip){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -65,12 +66,19 @@ define(
                 this._back   = new Back(this.back);
                 this._anchor = new Anchor(this.anchor);
                 this._graphs = new Graphs(this.graphs);
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
+                this._tip._getDefaultContent = this._getTipDefaultContent;
 
                 this.stageBg.addChild(this._back.sprite);
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._yAxis.sprite);
                 this.core.addChild(this._graphs.sprite);
                 this.core.addChild(this._anchor.sprite);
+                this.stageTip.addChild(this._tip.sprite);
+
+            },
+            _getTipDefaultContent : function( nodeInfo ){
+                return nodeInfo.xAxis.field+"："+nodeInfo.nodesInfoList[0].value.y;
             },
             _startDraw : function(opt){
                 var w = (opt && opt.w) || this.width;
@@ -144,17 +152,35 @@ define(
                             x : _yAxisW,
                             y : y - _graphsH
                         }
-                    });
-                    //, this._anchor.setY(y)
+                    } , this._xAxis , this._yAxis );
+                    this._anchor.hide()
                 };
 
                 this._bindEvent();
 
               
             },
+            _setXaxisYaxisToTipsInfo : function( e ){
+                var self = this;
+                e.tipsInfo.xAxis = {
+                    field : self.dataFrame.xAxis.field[ e.tipsInfo.iGroup ],
+                    value : self.dataFrame.xAxis.org[ e.tipsInfo.iGroup ][ e.tipsInfo.iNode ]
+                };
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    node.field = self.dataFrame.yAxis.field[ e.tipsInfo.iGroup ]
+                } );
+            },
             _bindEvent  : function(){
                 var self = this;
                 this._graphs.sprite.on("panstart mouseover", function(e){
+                    if( self._anchor.enabled ){
+                        self._anchor.show();
+                    };
+                    console.log(e.tipsInfo)
+                    if( e.tipsInfo ){
+                        self._setXaxisYaxisToTipsInfo(e);
+                        self._tip.show( e );
+                    }
                 });
                 this._graphs.sprite.on("panmove mousemove", function(e){
                     var cross = e.point;
@@ -166,8 +192,19 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.resetCross( cross );
                     }
+                    if( e.tipsInfo ){
+                        self._setXaxisYaxisToTipsInfo(e);
+                        self._tip.move( e );
+                    }
+
                 });
                 this._graphs.sprite.on("panend mouseout", function(e){
+                    if( self._anchor.enabled ){
+                        self._anchor.hide();
+                    }
+                    if( e.tipsInfo ){
+                        self._tip.hide( e );
+                    }
                 });
                 this._graphs.sprite.on("tap click", function(e){
                 });

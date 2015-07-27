@@ -14,8 +14,8 @@ define(
             this.dis  = 6                                  //线到文本的距离
             this.line = {
                     enabled : 1,                           //是否有line
-                    width   : 6,
-                    lineWidth  : 3,
+                    width   : 4,
+                    lineWidth  : 1,
                     strokeStyle   : '#BEBEBE'
             };
             this.text = {
@@ -218,7 +218,7 @@ define(
                         //线条
                         var line = new Line({
                             context : {
-                                x           : 0 + ( self.place == "left" ? +1 : -1 ) * self.dis,
+                                x           : 0 + ( self.place == "left" ? +1 : -1 ) * self.dis - 2,
                                 y           : y,
                                 xEnd        : self.line.width,
                                 yEnd        : 0,
