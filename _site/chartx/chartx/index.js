@@ -6,7 +6,7 @@ window.Chartx || (Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.07.28";
+        var canvaxVersion = "2015.07.29";
 
         //BEGIN(develop)
         Chartx._site.local = true;
