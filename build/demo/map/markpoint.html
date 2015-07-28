@@ -32,11 +32,11 @@
         <td id="td-vl">
 <form><textarea id="code" name="code">
 var data = [
-    [ "area"     , "value" ],
+    [ "area"     , "pv" ],
     [ "海门"     , 9       ],
     [ "鄂尔多斯" , 12      ],
     [ "招远"     , 12      ],
-    [ "舟山"     , 14      ],
+    [ "舟山"     , 101     ],
     [ "齐齐哈尔" , 15      ],
     [ "盐城"     , 16      ],
     [ "赤峰"     , 18      ],
@@ -54,8 +54,17 @@ var options = {
     },
     markpoint : {
         value     : "value",
-        areaField : "area"
-    }
+        areaField : "area",
+        fillStyle : function( m ){
+            if( m.data.pv > 100 ){
+                return "#3871BF"
+            }
+        }
+    },
+    tips : {
+        field  : ["pv"],//可选，默认为除开areaField外的所有字段
+        prefix : ["访问量"]
+    } 
 };
 
 Chartx.map("canvasTest" , data , options)
@@ -67,7 +76,7 @@ Chartx.map("canvasTest" , data , options)
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>中国地图</h4>
+                <h4>中国地图 - 带markpoint标注点</h4>
                 <p>
                     联系人：@释剑
                 </p>
