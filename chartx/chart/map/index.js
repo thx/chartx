@@ -37,6 +37,18 @@ define(
 
                 this.tips = {
                     field : []
+                };
+
+                this.markpoint = {
+                    enabled     : false,
+                    hr          : 4,
+                    vr          : 7,
+                    fillStyleNormal   : "#6B95CF",
+                    strokeStyleNormal : "#3871BF",
+                    lineWidth   : 1
+                }
+                if( "markpoint" in opts ){
+                    this.markpoint.enabled = true;
                 }
 
                 _.deepExtend( this , opts );
@@ -77,33 +89,8 @@ define(
 
                 this._getMapData( this.mapName , function( md ){
                     me._widget( md );
-                    if(me.markpoint){
-                        require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
-                            _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
-                                for( var g in citys ){
-                                    if( city in citys[g] ){
-                                        var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
-                                        
-                                        var droplet = new Droplet({
-                                            context : {
-                                                x : cityPos[0],
-                                                y : cityPos[1]-6, 
-                                                hr : 4,
-                                                vr : 6,
-                                                scaleY : -1,
-                                                fillStyle : "red"
-
-                                            }
-                                        });
-                                       
-                                        me.sprite.addChild( droplet );
-
-                                        break;
-                                    }
-                                }
-
-                            } );
-                        });
+                    if( me.markpoint.enabled ){
+                        me._initMarkPoint();
                     }
                     //绘制完了后调整当前sprite的尺寸和位置
                     me._setSpPos();
@@ -342,14 +329,14 @@ define(
                 } );
                 return data;
             },
-            _getColor : function( c , area ){
+            _getColor : function( c , area , normalColor ){
                 var color = c;
                 if( _.isFunction( c ) ){
                     color = c( this._getDataForArea(area) );
                 }
                 //缺省颜色
                 if( !color || color == "" ){
-                    color = this.normalColor;
+                    color = (normalColor || this.normalColor);
                 }
                 return color;
             },
@@ -465,6 +452,51 @@ define(
                 area_txt_sp && me.sprite.addChild( area_txt_sp ); 
 
             },
+            _initMarkPoint : function(){
+                var me = this;
+                var mp = me.markpoint;
+                 require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
+                     _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
+                         for( var g in citys ){
+                             if( city in citys[g] ){
+                                 var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
+                                 var md      = {
+                                     name : city
+                                 };
+                                 var droplet = new Droplet({
+                                     context : {
+                                         x  : cityPos[0],
+                                         y  : cityPos[1] - mp.vr, 
+                                         hr : mp.hr,
+                                         vr : mp.vr,
+                                         scaleY    : -1,
+                                         fillStyle : me._getColor( mp.fillStyle , md , mp.fillStyleNormal ),//mp.fillStyle,
+                                         lineWidth : mp.lineWidth,
+                                         strokeStyle : me._getColor( mp.strokeStyle , md , mp.strokeStyleNormal ),//mp.strokeStyle,
+                                         cursor    : "point"
+                                     }
+                                 });
+
+                                 droplet.mapData = md;
+                                 droplet.on("mouseover" , function(e){
+                                     me._tips.show( me._setTipsInfoHand( e , this.mapData) );
+                                     this.context.lineWidth = mp.lineWidth+2;
+                                 });
+
+                                 droplet.on("mousemove" , function(e){
+                                     me._tips.move( me._setTipsInfoHand( e , this.mapData) );
+                                 });
+                                 droplet.on("mouseout" , function(e){
+                                     me._tips.hide( );
+                                     this.context.lineWidth = mp.lineWidth
+                                 });
+                                 me.sprite.addChild( droplet );
+                                 break;
+                             }
+                         }
+                     } );
+                 });
+            },
             _initModule : function(){
                 this._tips    = new Tips(this.tips, this.canvax.getDomContainer());
                 this._tips._getDefaultContent =  function( info ){
@@ -514,7 +546,7 @@ define(
                             });
                         }
                     } );
-                }
+                };
 
                 e.tipsInfo   = tipsInfo;
                 return e;
