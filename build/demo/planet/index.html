@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- 饼图</title>
+<title>xChart demo -- 标签行星图</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -31,52 +31,90 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-var data= [
-    ["ie"     , 1939],
-    ["chrome" , 865],
-    ["firefox", 2361],
-    ["safari" , 2289],
-    ["其他"   , 1886],
-    ["其他1" , 563],
-    ["其他1" , 33],
-    ["其他1" , 60]
-];
-var options = {
-    tips : {
-        //enabled  : false,
-        content : function(info){
-            return info.data[0]+"："+info.data[1]+"%"
+    var data = [
+        ["tagId","recommend","num","info"],
+        [10022  ,4          ,3939 ,{"name":"Sarah Johnson","tagId":10022}],
+        [10022  ,4          ,3939 ,{"name":"Sarah Johnson","tagId":10022}],
+        [10012  ,12         ,1    ,{"name":"Nancy Rodriguez","tagId":10012}],
+        [10019  ,16         ,6612 ,{"name":"Laura Allen","tagId":10019}],
+        [10014  ,23         ,3909 ,{"name":"Brian Brown","tagId":10014}],
+        [10035  ,26         ,8733 ,{"name":"Shirley White","tagId":10035}],
+        [10016  ,27         ,9161 ,{"name":"Susan Gonzalez","tagId":10016}],
+        [10031  ,32         ,7427 ,{"name":"Kevin Lewis","tagId":10031}],
+        [10018  ,33         ,6292 ,{"name":"Betty Martinez","tagId":10018}],
+        [10023  ,35         ,82   ,{"name":"Elizais","tagId":10020}],
+        [10021  ,71         ,3333 ,{"name":"Ronald Lopez","tagId":10021}],
+        [10015  ,73         ,222  ,{"name":"Richard Martinez","tagId":10015}],
+        [10024  ,82         ,4379 ,{"name":"James Anderson","tagId":10024}],
+        [10024  ,82         ,4379 ,{"name":"James Anderson","tagId":10024}],
+        [10033  ,84         ,2714 ,{"name":"Carol Johnson","tagId":10033}]
+    ];
+    var options = {
+        cx    : 30,                              //圆心坐标x
+        event : {
+            enabled : 1,                              //是否有事件响应(tips)[1]
+            on : function(o){
+                //e.ringID = 第几个环(从0开始 0 = 品牌)   e.ID = 第几个行星(从1开始)
+                console.log(o)
+            }
+        },
+
+        yAxis : {                                //Y轴
+            field : ["tagId"]
+        },
+        xAxis : {
+            field : "recommend",
+            bar   : {
+                enabled   : 1,
+                y         : 428,
+                x         : 50 / 2,
+                width     : 1000 - 50,
+                fillStyle : {
+                    normal : ['#70649a', '#b28fce']
+                },
+                text      : {
+                    contents : ['极力推荐','一般推荐']
+                }
+            }
+        },
+        graphs: {
+            disY  : 10,                               //行星与容器上、下之间的最小距离
+            minR  : 10,
+            size  : {                                 //行星大小
+                field : 'num'
+            },
+            layout: {                                 //布局
+                mode  : 1                             //模式(0 = 根据yAxis.field计算比例  |  1 = 上下错开)
+            },
+            info  : {
+                field : 'info',
+                content : 'name'
+            },             
+            core  : {                                 //品牌
+                r     : {                                  //半径
+                    normal  : 60
+                },
+                text  : {
+                    content : '阿里妈妈'
+                }
+            },
+            // fillStyle:{
+            //     normals:function(o){
+            //         return '#ff0000'
+            //     }
+            // }
+            text  : {
+                fillStyle : {
+                    normal : '#0000ff'
+                }
+            }
+        },
+        back:{
+            space  : 150
         }
-    },
-    //周边tip
-    dataLabel: {
-        enabled: true,
-        format: '{point.name} : {point.percentage}'
-    },
-    //是否允许扇形选取
-    allowPointSelect: true,
-    //是否允许动画
-    animation: true,
-    //内圆半径
-    innerRadius: 50
-    //颜色序列,若不设置，会有默认的颜色序列
-    //colors:['red', 'yellow', 'blue']
-};
-Chartx.pie("canvasTest" , data , options).then(function( pie ){    
-    pie.on('focused' , function (e) {
-        console.log(e);
-    });
-    pie.on('unfocused' , function (e) {
-        console.log(e);
-    });
-    pie.on('complete', function (e) {
-        console.log(e);
-    });
-    pie.on('click',function(e){
-        console.log(e);
-    });
-});
+    }
+
+    Chartx.planet("canvasTest" , data, options);
 </textarea></form>
 
         </td>
@@ -85,9 +123,9 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>饼图（pie chart）- 基础饼图</h4>
+                <h4>标签行星图（planet chart）</h4>
                 <p>
-                    联系人：@自勉
+                    联系人：@逢春
                 </p>
             </div>
             <div  class="test-c">
