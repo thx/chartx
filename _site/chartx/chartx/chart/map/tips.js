@@ -63,7 +63,8 @@ define(
                     strokeStyle : "#b0b0b0",
                     offset     : 0
                 } , opt ) , tipDomContainer );
-            },
+            }
+            ,
             show : function(e , mapData){
                 if( !this.enabled ) return;
                 this._cPoint   && this._cPoint.remove();

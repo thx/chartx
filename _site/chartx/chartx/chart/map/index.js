@@ -9,11 +9,11 @@ define(
         'chartx/chart/map/map-data/geo-coord',
         'chartx/chart/map/map-data/text-fixed',
         'chartx/utils/projection/normal',
-        './tips',
+        'chartx/components/tips/tip',//'./tips',
         'chartx/utils/dataformat',
-        "canvax/shape/Circle"
+        "canvax/shape/Droplet"
     ],
-    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat , Circle ){
+    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat , Droplet ){
     
         return Chart.extend({
             init : function( node , data , opts){
@@ -37,6 +37,18 @@ define(
 
                 this.tips = {
                     field : []
+                };
+
+                this.markpoint = {
+                    enabled     : false,
+                    hr          : 4,
+                    vr          : 7,
+                    fillStyleNormal   : "#6B95CF",
+                    strokeStyleNormal : "#3871BF",
+                    lineWidth   : 1
+                }
+                if( "markpoint" in opts ){
+                    this.markpoint.enabled = true;
                 }
 
                 _.deepExtend( this , opts );
@@ -51,7 +63,9 @@ define(
                 this.sprite    = new Canvax.Display.Sprite({
                     id   : "mapSp"
                 });
-                
+                this.spriteTip  = new Canvax.Display.Sprite({
+                    id      : 'tip'
+                });
             },
             _initData : function( data ){
                 this.dataFrame = DataFormat(data , {
@@ -67,6 +81,7 @@ define(
                 //然后把它重新add入stage
                 this.sprite.removeAllChildren();
                 this.stage.addChild( this.sprite );
+                this.stage.addChild( this.spriteTip );
                 this._tips && this._tips.hide();
 
                 this._initModule();
@@ -74,29 +89,8 @@ define(
 
                 this._getMapData( this.mapName , function( md ){
                     me._widget( md );
-                    if(me.markpoint){
-                        require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
-                            _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
-                                for( var g in citys ){
-                                    if( city in citys[g] ){
-                                        var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
-                                        
-                                        var circle = new Circle({
-                                            context : {
-                                                x : cityPos[0] * me._mapScale,
-                                                y : cityPos[1] * me._mapScale,
-                                                fillStyle : "red",
-                                                r : 2
-                                            }
-                                        });
-                                        me.sprite.addChild(circle);
-
-                                        break;
-                                    }
-                                }
-
-                            } );
-                        });
+                    if( me.markpoint.enabled ){
+                        me._initMarkPoint();
                     }
                     //绘制完了后调整当前sprite的尺寸和位置
                     me._setSpPos();
@@ -105,6 +99,12 @@ define(
             _setSpPos : function( ){
                 var tf  = this._mapDataMap[this.mapName].transform;
                 var spc = this.sprite.context;
+                spc.width  = tf.width;
+                spc.height = tf.height;
+                spc.x      = (this.width  - tf.width ) / 2;
+                spc.y      = (this.height - tf.height) / 2;
+
+                spc = this.spriteTip.context;
                 spc.width  = tf.width;
                 spc.height = tf.height;
                 spc.x      = (this.width  - tf.width ) / 2;
@@ -330,14 +330,14 @@ define(
                 } );
                 return data;
             },
-            _getColor : function( c , area ){
+            _getColor : function( c , area , normalColor ){
                 var color = c;
                 if( _.isFunction( c ) ){
                     color = c( this._getDataForArea(area) );
                 }
                 //缺省颜色
                 if( !color || color == "" ){
-                    color = this.normalColor;
+                    color = (normalColor || this.normalColor);
                 }
                 return color;
             },
@@ -377,16 +377,19 @@ define(
 
                     area_sp.addChild( area );
                     
-                    area.mapData = md;
-                    area.on("mouseover hold" , function(e){
+                    area.mapData = md
+                    area.on("mouseover" , function(e){
                         if( e.fromTarget && e.fromTarget.type == "text" &&  e.fromTarget.text == this.mapData.name ){
                             return;
                         };
                         me.fire("areaOver" , e);
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
+                    });;
+                    area.on("mousemove" , function(e){
+                        me._tips.move( me._setTipsInfoHand(e , this.mapData) );
                     });
 
-                    area.on("mouseout release" , function(e){
+                    area.on("mouseout" , function(e){
                         if( e.toTarget && e.toTarget.type == "text" &&  e.toTarget.text == this.mapData.name ){
                             return;
                         };
@@ -423,13 +426,16 @@ define(
                             }
                         );
                         txt.area = area;
-                        txt.on("mouseover hold" , function(e){
+                        txt.on("mouseover" , function(e){
                             if( e.fromTarget && e.fromTarget == this.area ){
                                 return;
                             };
-                            this.area.fire("mouseover hold" , e);
+                            this.area.fire("mouseover" , e);
                         });
-                        txt.on("mouseout release" , function(e){
+                        txt.on("mousemove" , function(e){
+                            this.area.fire("mousemove" , e);
+                        });
+                        txt.on("mouseout" , function(e){
                             if( e.toTarget && e.toTarget == this.area ){
                                 return;
                             };
@@ -447,13 +453,77 @@ define(
                 area_txt_sp && me.sprite.addChild( area_txt_sp ); 
 
             },
+            _initMarkPoint : function(){
+                var me = this;
+                var mp = me.markpoint;
+                 require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
+                     _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
+                         for( var g in citys ){
+                             if( city in citys[g] ){
+                                 var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
+                                 var md      = {
+                                     name : city
+                                 };
+                                 var droplet = new Droplet({
+                                     context : {
+                                         x  : cityPos[0],
+                                         y  : cityPos[1] - mp.vr, 
+                                         hr : mp.hr,
+                                         vr : mp.vr,
+                                         scaleY    : -1,
+                                         fillStyle : me._getColor( mp.fillStyle , md , mp.fillStyleNormal ),//mp.fillStyle,
+                                         lineWidth : mp.lineWidth,
+                                         strokeStyle : me._getColor( mp.strokeStyle , md , mp.strokeStyleNormal ),//mp.strokeStyle,
+                                         cursor    : "point"
+                                     }
+                                 });
+
+                                 droplet.mapData = md;
+                                 droplet.on("mouseover" , function(e){
+                                     me._tips.show( me._setTipsInfoHand( e , this.mapData) );
+                                     this.context.lineWidth = mp.lineWidth+2;
+                                 });
+
+                                 droplet.on("mousemove" , function(e){
+                                     me._tips.move( me._setTipsInfoHand( e , this.mapData) );
+                                 });
+                                 droplet.on("mouseout" , function(e){
+                                     me._tips.hide( );
+                                     this.context.lineWidth = mp.lineWidth
+                                 });
+                                 me.sprite.addChild( droplet );
+                                 break;
+                             }
+                         }
+                     } );
+                 });
+            },
             _initModule : function(){
+                this._tips    = new Tips(this.tips, this.canvax.getDomContainer());
+                this._tips._getDefaultContent =  function( info ){
+                     var str  = "<table>";
+                     var self = this;
+                     str +=     "<tr><td colspan='2'>"+info.area.value+"</td></tr>"
+                     _.each( info.nodesInfoList , function( node , i ){
+                         str+= "<tr >";
+                         var prefixName = self.prefix[i];
+                         if( !prefixName ) {
+                             prefixName = node.field
+                         }
+                         str += "<td>"+ prefixName +"：</td>";
+                         str += "<td>"+ node.value +"</td></tr>";
+                     });
+                     str+="</table>";
+                     return str;
+                }
+                /*
                 this.tips.cPointStyle = this.area.strokeStyle;
                 this.tips._mapScale    = this._mapScale;
                 this._tips   = new Tips(this.tips , {
                     //context : "中国地图"
                 } , this.canvax.getDomContainer());
-                this.canvax.getHoverStage().addChild( this._tips.sprite );
+                */
+                this.spriteTip.addChild( this._tips.sprite );
             },
             _setTipsInfoHand : function( e , mapData ){
 
@@ -477,7 +547,7 @@ define(
                             });
                         }
                     } );
-                }
+                };
 
                 e.tipsInfo   = tipsInfo;
                 return e;

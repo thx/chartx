@@ -348,6 +348,19 @@ title:  chart demos
         </dd>
     </dl>
     </a>
+
+    <a target="_blank" href="./demo/map/markpoint.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/map/markpoint.png">
+        </dt>
+        <dd>
+            <h5>
+            中国地图，带markpoint标注
+            </h5>
+        </dd>
+    </dl>
+    </a>
 </div>
 
 ## 饼图
