@@ -160,6 +160,7 @@ define(
                 } , opt ) , tipDomContainer );
             },
             show : function(e , mapData){
+                if( !this.enabled ) return;
                 this._cPoint   && this._cPoint.remove();
                 this.sprite.addChild( this._tip.sprite );
                 this._tip.show(e);
@@ -169,14 +170,17 @@ define(
                 this._triangle.context.globalAlpha = 0.7;
             },
             move : function(e){
+                if( !this.enabled ) return;
                 this._tip.move(e);
             },
             hide : function(e){
+                if( !this.enabled ) return;
                 this._tip.hide(e);
                 this._cPoint   && this._cPoint.remove();
                 this._triangle && (this._triangle.context.globalAlpha = 0);
             },
             _weight : function(e){
+                
                 var br = this._tip.backR;
                 //cp -- > textX , textY
                 var targetOffSet = e.currentTarget.localToGlobal();
@@ -323,9 +327,10 @@ define(
         'chartx/chart/map/map-data/text-fixed',
         'chartx/utils/projection/normal',
         './tips',
-        'chartx/utils/dataformat'
+        'chartx/utils/dataformat',
+        "canvax/shape/Circle"
     ],
-    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat ){
+    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat , Circle ){
     
         return Chart.extend({
             init : function( node , data , opts){
@@ -386,10 +391,33 @@ define(
 
                 this._getMapData( this.mapName , function( md ){
                     me._widget( md );
+                    if(me.markpoint){
+                        require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
+                            _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
+                                for( var g in citys ){
+                                    if( city in citys[g] ){
+                                        var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
+                                        
+                                        var circle = new Circle({
+                                            context : {
+                                                x : cityPos[0] * me._mapScale,
+                                                y : cityPos[1] * me._mapScale,
+                                                fillStyle : "red",
+                                                r : 2
+                                            }
+                                        });
+                                        me.sprite.addChild(circle);
+
+                                        break;
+                                    }
+                                }
+
+                            } );
+                        });
+                    }
                     //绘制完了后调整当前sprite的尺寸和位置
                     me._setSpPos();
                 } );
-
             },
             _setSpPos : function( ){
                 var tf  = this._mapDataMap[this.mapName].transform;

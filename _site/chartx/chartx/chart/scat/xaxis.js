@@ -14,7 +14,6 @@ define(
                 var arr = _.flatten( arr ); //Tools.getChildsArr( data.org );
                 var dataSection = DataSection.section(arr);
                 this._baseNumber = dataSection[0];
-    
                 if( dataSection.length == 1 ){
                     //TODO;散点图中的xaxis不应该只有一个值，至少应该有个区间
                     dataSection.push( 100 );

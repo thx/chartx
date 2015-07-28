@@ -427,6 +427,7 @@ title:  chart demos
 ## 散点图
 
 <div class="charts">
+
     <a target="_blank" href="./demo/scat/index.html">
     <dl class="chart">
         <dt>
@@ -435,6 +436,19 @@ title:  chart demos
         <dd>
             <h5>
             基础散点图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/scat/cross_origin.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/scat/cross_origin.png">
+        </dt>
+        <dd>
+            <h5>
+            带标尺，而且自定义坐标原点的scat chart
             </h5>
         </dd>
     </dl>
@@ -581,6 +595,24 @@ title:  chart demos
 ## 自有原创图表
 
 ### 标签星系图
+
+
+<div class="charts">
+    <a target="_blank" href="./demo/planet/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/planet/index.png">
+        </dt>
+        <dd>
+            <h5>
+            标签星系图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 
 ### 充值+进度图表
 

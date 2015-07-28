@@ -14,7 +14,6 @@ define(
                 var arr = _.flatten( arr ); //Tools.getChildsArr( data.org );
                 var dataSection = DataSection.section(arr);
                 this._baseNumber = dataSection[0];
-    
                 if( dataSection.length == 1 ){
                     //TODO;散点图中的xaxis不应该只有一个值，至少应该有个区间
                     dataSection.push( 100 );
@@ -48,9 +47,10 @@ define(
     [
         "canvax/index",
         "canvax/shape/Circle",
+        "canvax/shape/Rect",
         "canvax/animation/Tween"
     ],
-    function( Canvax , Circle , Tween ){
+    function( Canvax , Circle , Rect , Tween ){
  
         var Graphs = function( opt , data ){
             this.w = 0;
@@ -59,15 +59,15 @@ define(
             this.pos = {
                 x : 0,
                 y : 0
+            };
+
+            this.circle = {
+                r : 12  //圆圈默认半径
             }
     
             this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
-    
-    
-            //圆圈默认半径
-            this.r = 10;
-    
-            this.sprite = null ;
+            
+            this.sprite = null;
     
             this._circles = [];  //所有圆点的集合
     
@@ -102,10 +102,34 @@ define(
                 return fillStyle;
             },
             draw : function(data , opt){
+                var self = this;
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
-                }
+                };
+                self.data = data;
+
+                this.induce = new Rect({
+                    id    : "induce",
+                    context:{
+                        y           : -this.h,
+                        width       : this.w,
+                        height      : this.h,
+                        fillStyle   : '#000000',
+                        globalAlpha : 0,
+                        cursor      : 'pointer'
+                    }
+                });
+
+                this.sprite.addChild(this.induce);
+
+                this.induce.on("panstart mouseover", function(e){
+                    e.tipsInfo = null;
+                });
+                this.induce.on("panmove mousemove", function(e){
+                    e.tipsInfo = null;
+                });
+
     
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
@@ -116,22 +140,60 @@ define(
                         var barData = data[ii][i];
     
                         var circle = new Circle({
+                            hoverClone : false,
                             context : {
                                 x           : barData.x,
                                 y           : barData.y,
                                 fillStyle   : this.getFillStyle( i , ii , barData.value ),
-                                r           : this.r,
-                                globalAlpha : 0
+                                r           : this.circle.r,
+                                globalAlpha : 0,
+                                cursor      : "pointer"
                             }
                         });
                         sprite.addChild( circle );
+
+                        circle.iGroup = ii;
+                        circle.iNode  = i;
+
+                        circle.on("panstart mouseover", function(e){
+                            e.tipsInfo = self._getInfoHandler(e);
+                            this.context.globalAlpha = 0.9;
+                            this.context.r ++;
+                        });
+                        circle.on("panmove mousemove", function(e){
+                            e.tipsInfo = self._getInfoHandler(e);
+                            
+                        });
+                        circle.on("panend mouseout", function(e){
+                            e.tipsInfo = {};
+                            this.context.globalAlpha = 0.8;
+                            this.context.r --;
+                        });
+                        circle.on("tap click", function(e){
+                            e.tipsInfo = self._getInfoHandler(e);
+                        });
+
                         this._circles.push( circle );
                     }
                     this.sprite.addChild( sprite );
-                }
+                };
     
                 this.setX( this.pos.x );
                 this.setY( this.pos.y );
+            },
+            _getInfoHandler : function(e){
+                var target = e.target;
+                var node = {
+                    iGroup        : target.iGroup,
+                    iNode         : target.iNode,
+                    nodesInfoList : this._getNodeInfo(target.iGroup, target.iNode)
+                };
+                return node
+            },
+            _getNodeInfo : function( iGroup , iNode ){
+                var arr  = [];
+                arr.push( this.data[iGroup][iNode] );
+                return arr;
             },
             /**
              * 生长动画
@@ -144,12 +206,10 @@ define(
                    var bezierT = new Tween.Tween( { h : 0 } )
                    .to( { h : 100 }, 500 )
                    .onUpdate( function () {
-    
                        for( var i=0 , l=self._circles.length ; i<l ; i++ ){
-                           self._circles[i].context.globalAlpha = this.h / 100;
-                           self._circles[i].context.r = this.h / 100 * self.r;
+                           self._circles[i].context.globalAlpha = this.h / 100 * 0.8;
+                           self._circles[i].context.r = this.h / 100 * self.circle.r;
                        }
-                       
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
                    }).start();
@@ -162,11 +222,9 @@ define(
                 growAnima();
             }
         }; 
-    
         return Graphs;
-    
     }
-)
+);
 
 
 define(
@@ -179,9 +237,11 @@ define(
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         './graphs',
-        'chartx/utils/dataformat'
+        'chartx/utils/dataformat',
+        'chartx/components/anchor/Anchor',
+        'chartx/components/tips/tip'
     ],
-    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat){
+    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat , Anchor , Tip){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -191,10 +251,12 @@ define(
     
             init:function(node , data , opts){
     
-                this._xAxis        =  null;
-                this._yAxis        =  null;
-                this._back         =  null;
-                this._graphs       =  null;
+                this._xAxis   =  null;
+                this._yAxis   =  null;
+                this._back    =  null;
+                this._graphs  =  null;
+                this._anchor  =  null;
+
 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
@@ -231,10 +293,26 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
+                this._anchor = new Anchor(this.anchor);
                 this._graphs = new Graphs(this.graphs);
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
+                this._tip._getDefaultContent = this._getTipDefaultContent;
+
+                this.stageBg.addChild(this._back.sprite);
+                this.core.addChild(this._xAxis.sprite);
+                this.core.addChild(this._yAxis.sprite);
+                this.core.addChild(this._graphs.sprite);
+                this.core.addChild(this._anchor.sprite);
+                this.stageTip.addChild(this._tip.sprite);
+
             },
-            _startDraw : function(){
-                var y = parseInt(this.height - this._xAxis.h)
+            _getTipDefaultContent : function( nodeInfo ){
+                return nodeInfo.xAxis.field+"："+nodeInfo.nodesInfoList[0].value.y;
+            },
+            _startDraw : function(opt){
+                var w = (opt && opt.w) || this.width;
+                var h = (opt && opt.h) || this.height;
+                var y = parseInt( h - this._xAxis.h );
                 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -250,8 +328,8 @@ define(
     
                 //绘制x轴
                 this._xAxis.draw({
-                    graphh :   this.height,
-                    graphw :   this.width,
+                    graphh :   h,
+                    graphw :   w,
                     yAxisW :   _yAxisW
                 });
                 if( this._xAxis.yAxisW != _yAxisW ){
@@ -260,10 +338,11 @@ define(
                     _yAxisW = this._xAxis.yAxisW;
                 };
     
+                var _graphsH = this._yAxis.yGraphsHeight;
                 //绘制背景网格
                 this._back.draw({
-                    w    : this._xAxis.w ,
-                    h    : y,
+                    w    : this._xAxis.xGraphsWidth ,
+                    h    : _graphsH,
                     xAxis:{
                         data : this._yAxis.layoutData
                     },
@@ -279,7 +358,7 @@ define(
                 //绘制主图形区域
                 this._graphs.draw( this._trimGraphs() , {
                     w    : this._xAxis.xGraphsWidth,
-                    h    : this._yAxis.yGraphsHeight,
+                    h    : _graphsH,
                     pos  : {
                          x : _yAxisW ,
                          y : y
@@ -288,9 +367,79 @@ define(
     
                 //执行生长动画
                 this._graphs.grow();
+
+                if(this._anchor.enabled){
+                    //绘制点位线
+                    this._anchor.draw({
+                        w    : this._xAxis.xGraphsWidth,//w - _yAxisW,
+                        h    : _graphsH,
+                        cross  : {
+                            x : this._back.yAxis.org,
+                            y : _graphsH+this._back.xAxis.org
+                        },
+                        pos   : {
+                            x : _yAxisW,
+                            y : y - _graphsH
+                        }
+                    } , this._xAxis , this._yAxis );
+                    this._anchor.hide()
+                };
+
+                this._bindEvent();
+
               
             },
-            _trimGraphs:function(){
+            _setXaxisYaxisToTipsInfo : function( e ){
+                var self = this;
+                e.tipsInfo.xAxis = {
+                    field : self.dataFrame.xAxis.field[ e.tipsInfo.iGroup ],
+                    value : self.dataFrame.xAxis.org[ e.tipsInfo.iGroup ][ e.tipsInfo.iNode ]
+                };
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    node.field = self.dataFrame.yAxis.field[ e.tipsInfo.iGroup ]
+                } );
+            },
+            _bindEvent  : function(){
+                var self = this;
+                this._graphs.sprite.on("panstart mouseover", function(e){
+                    if( self._anchor.enabled ){
+                        self._anchor.show();
+                    };
+                    console.log(e.tipsInfo)
+                    if( e.tipsInfo ){
+                        self._setXaxisYaxisToTipsInfo(e);
+                        self._tip.show( e );
+                    }
+                });
+                this._graphs.sprite.on("panmove mousemove", function(e){
+                    var cross = e.point;
+                    if( e.target.id != "induce" ){
+                        //那么肯定是从散点上面触发的，
+                        cross = e.target.localToGlobal( e.point , self._graphs.sprite );
+                        cross.y += self._graphs.h;
+                    }
+                    if( self._anchor.enabled ){
+                        self._anchor.resetCross( cross );
+                    }
+                    if( e.tipsInfo ){
+                        self._setXaxisYaxisToTipsInfo(e);
+                        self._tip.move( e );
+                    }
+
+                });
+                this._graphs.sprite.on("panend mouseout", function(e){
+                    if( self._anchor.enabled ){
+                        self._anchor.hide();
+                    }
+                    if( e.tipsInfo ){
+                        self._tip.hide( e );
+                    }
+                });
+                this._graphs.sprite.on("tap click", function(e){
+                });
+
+            },
+            _trimGraphs : function(){
                 var xArr     = this._xAxis.dataOrg;
                 var yArr     = this._yAxis.dataOrg;
     
@@ -314,7 +463,11 @@ define(
                     !tmpData[i] && (tmpData[i] = []);
                     for( var ii = 0 , iil = yArr[i].length ; ii < iil ; ii++ ){
                         var y = -(yArr[i][ii]-this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
-                        var x = (xArr[i][ii]-this._xAxis._baseNumber) / (maxXAxis - this._xAxis._baseNumber) * this._xAxis.w;
+                        var xbaseNum = this._xAxis._baseNumber;
+                        if( xbaseNum == undefined || xbaseNum == null ){
+                            xbaseNum = this._xAxis._baseNumber = this._xAxis.dataSection[0];
+                        };
+                        var x = (xArr[i][ii] - xbaseNum) / (maxXAxis - xbaseNum) * this._xAxis.w;
     
                         tmpData[i][ii] = {
                             value : {
@@ -330,10 +483,7 @@ define(
                 return tmpData;
             },
             _drawEnd:function(){
-                this.stageBg.addChild(this._back.sprite);
-                this.core.addChild(this._xAxis.sprite);
-                this.core.addChild(this._graphs.sprite);
-                this.core.addChild(this._yAxis.sprite);
+                
             }
         });
         

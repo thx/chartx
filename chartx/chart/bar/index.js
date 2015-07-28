@@ -9,7 +9,7 @@ define(
         //'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         './graphs',
-        "chartx/components/tips/tip",
+        'chartx/components/tips/tip',
         'chartx/utils/dataformat'
     ],
     function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , Tip , dataFormat ){

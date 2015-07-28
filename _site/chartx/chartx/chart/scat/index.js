@@ -8,9 +8,11 @@ define(
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         './graphs',
-        'chartx/utils/dataformat'
+        'chartx/utils/dataformat',
+        'chartx/components/anchor/Anchor',
+        'chartx/components/tips/tip'
     ],
-    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat){
+    function(Chart , Tools, DataSection, xAxis, yAxis, Back, Graphs , dataFormat , Anchor , Tip){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -20,10 +22,12 @@ define(
     
             init:function(node , data , opts){
     
-                this._xAxis        =  null;
-                this._yAxis        =  null;
-                this._back         =  null;
-                this._graphs       =  null;
+                this._xAxis   =  null;
+                this._yAxis   =  null;
+                this._back    =  null;
+                this._graphs  =  null;
+                this._anchor  =  null;
+
 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
@@ -60,10 +64,26 @@ define(
                 this._xAxis  = new xAxis(this.xAxis , this.dataFrame.xAxis);
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
+                this._anchor = new Anchor(this.anchor);
                 this._graphs = new Graphs(this.graphs);
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
+                this._tip._getDefaultContent = this._getTipDefaultContent;
+
+                this.stageBg.addChild(this._back.sprite);
+                this.core.addChild(this._xAxis.sprite);
+                this.core.addChild(this._yAxis.sprite);
+                this.core.addChild(this._graphs.sprite);
+                this.core.addChild(this._anchor.sprite);
+                this.stageTip.addChild(this._tip.sprite);
+
             },
-            _startDraw : function(){
-                var y = parseInt(this.height - this._xAxis.h)
+            _getTipDefaultContent : function( nodeInfo ){
+                return nodeInfo.xAxis.field+"："+nodeInfo.nodesInfoList[0].value.y;
+            },
+            _startDraw : function(opt){
+                var w = (opt && opt.w) || this.width;
+                var h = (opt && opt.h) || this.height;
+                var y = parseInt( h - this._xAxis.h );
                 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -79,8 +99,8 @@ define(
     
                 //绘制x轴
                 this._xAxis.draw({
-                    graphh :   this.height,
-                    graphw :   this.width,
+                    graphh :   h,
+                    graphw :   w,
                     yAxisW :   _yAxisW
                 });
                 if( this._xAxis.yAxisW != _yAxisW ){
@@ -89,10 +109,11 @@ define(
                     _yAxisW = this._xAxis.yAxisW;
                 };
     
+                var _graphsH = this._yAxis.yGraphsHeight;
                 //绘制背景网格
                 this._back.draw({
-                    w    : this._xAxis.w ,
-                    h    : y,
+                    w    : this._xAxis.xGraphsWidth ,
+                    h    : _graphsH,
                     xAxis:{
                         data : this._yAxis.layoutData
                     },
@@ -108,7 +129,7 @@ define(
                 //绘制主图形区域
                 this._graphs.draw( this._trimGraphs() , {
                     w    : this._xAxis.xGraphsWidth,
-                    h    : this._yAxis.yGraphsHeight,
+                    h    : _graphsH,
                     pos  : {
                          x : _yAxisW ,
                          y : y
@@ -117,9 +138,79 @@ define(
     
                 //执行生长动画
                 this._graphs.grow();
+
+                if(this._anchor.enabled){
+                    //绘制点位线
+                    this._anchor.draw({
+                        w    : this._xAxis.xGraphsWidth,//w - _yAxisW,
+                        h    : _graphsH,
+                        cross  : {
+                            x : this._back.yAxis.org,
+                            y : _graphsH+this._back.xAxis.org
+                        },
+                        pos   : {
+                            x : _yAxisW,
+                            y : y - _graphsH
+                        }
+                    } , this._xAxis , this._yAxis );
+                    this._anchor.hide()
+                };
+
+                this._bindEvent();
+
               
             },
-            _trimGraphs:function(){
+            _setXaxisYaxisToTipsInfo : function( e ){
+                var self = this;
+                e.tipsInfo.xAxis = {
+                    field : self.dataFrame.xAxis.field[ e.tipsInfo.iGroup ],
+                    value : self.dataFrame.xAxis.org[ e.tipsInfo.iGroup ][ e.tipsInfo.iNode ]
+                };
+                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                    node.field = self.dataFrame.yAxis.field[ e.tipsInfo.iGroup ]
+                } );
+            },
+            _bindEvent  : function(){
+                var self = this;
+                this._graphs.sprite.on("panstart mouseover", function(e){
+                    if( self._anchor.enabled ){
+                        self._anchor.show();
+                    };
+                    console.log(e.tipsInfo)
+                    if( e.tipsInfo ){
+                        self._setXaxisYaxisToTipsInfo(e);
+                        self._tip.show( e );
+                    }
+                });
+                this._graphs.sprite.on("panmove mousemove", function(e){
+                    var cross = e.point;
+                    if( e.target.id != "induce" ){
+                        //那么肯定是从散点上面触发的，
+                        cross = e.target.localToGlobal( e.point , self._graphs.sprite );
+                        cross.y += self._graphs.h;
+                    }
+                    if( self._anchor.enabled ){
+                        self._anchor.resetCross( cross );
+                    }
+                    if( e.tipsInfo ){
+                        self._setXaxisYaxisToTipsInfo(e);
+                        self._tip.move( e );
+                    }
+
+                });
+                this._graphs.sprite.on("panend mouseout", function(e){
+                    if( self._anchor.enabled ){
+                        self._anchor.hide();
+                    }
+                    if( e.tipsInfo ){
+                        self._tip.hide( e );
+                    }
+                });
+                this._graphs.sprite.on("tap click", function(e){
+                });
+
+            },
+            _trimGraphs : function(){
                 var xArr     = this._xAxis.dataOrg;
                 var yArr     = this._yAxis.dataOrg;
     
@@ -143,7 +234,11 @@ define(
                     !tmpData[i] && (tmpData[i] = []);
                     for( var ii = 0 , iil = yArr[i].length ; ii < iil ; ii++ ){
                         var y = -(yArr[i][ii]-this._yAxis._bottomNumber) / (maxYAxis - this._yAxis._bottomNumber) * this._yAxis.yGraphsHeight;
-                        var x = (xArr[i][ii]-this._xAxis._baseNumber) / (maxXAxis - this._xAxis._baseNumber) * this._xAxis.w;
+                        var xbaseNum = this._xAxis._baseNumber;
+                        if( xbaseNum == undefined || xbaseNum == null ){
+                            xbaseNum = this._xAxis._baseNumber = this._xAxis.dataSection[0];
+                        };
+                        var x = (xArr[i][ii] - xbaseNum) / (maxXAxis - xbaseNum) * this._xAxis.w;
     
                         tmpData[i][ii] = {
                             value : {
@@ -159,10 +254,7 @@ define(
                 return tmpData;
             },
             _drawEnd:function(){
-                this.stageBg.addChild(this._back.sprite);
-                this.core.addChild(this._xAxis.sprite);
-                this.core.addChild(this._graphs.sprite);
-                this.core.addChild(this._yAxis.sprite);
+                
             }
         });
         

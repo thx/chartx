@@ -1,12 +1,12 @@
 window.Chartx || (Chartx = {
-    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'venn' , 'hybrid'],
+    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'venn' , 'hybrid','funnel'],
     canvax  : null,
     create  : {},
     _start   : function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.07.21";
+        var canvaxVersion = "2015.07.28";
 
         
 
@@ -410,18 +410,24 @@ define(
 
             this.xAxis   = {
                 lineWidth   : 1,
-                fillStyle   : '#cc3300'
+                fillStyle   : '#0088cf',
+                lineType    : "dashed"
             }
             this.yAxis   = {
                 lineWidth   : 1,
-                fillStyle   : '#cc3300'
+                fillStyle   : '#0088cf',
+                lineType    : "dashed"
             }
             this.node    = {
                 enabled     : 1,                 //是否有
                 r           : 2,                 //半径 node 圆点的半径
-                fillStyle   : '#cc3300',
-                strokeStyle : '#cc3300',
-                lineWidth   : 4
+                fillStyle   : '#0088cf',
+                strokeStyle : '#0088cf',
+                lineWidth   : 2
+            }
+            this.text    = {
+                enabled   : 0,
+                fillStyle : "#0088cf"
             }
 
             this.pos     = {
@@ -435,7 +441,12 @@ define(
 
             this.sprite  = null;
 
-            this.init(opt )
+            this._txt    = null;
+            this._circle = null;
+            this._xAxis  = null;
+            this._yAxis  = null;
+
+            this.init( opt );
         };
     
         Anchor.prototype = {
@@ -448,7 +459,9 @@ define(
                     id : "AnchorSprite"
                 });
             },
-            draw:function(opt){
+            draw:function(opt , _xAxis , _yAxis){
+                this._xAxis = _xAxis;
+                this._yAxis = _yAxis;
                 this._initConfig( opt );
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
@@ -456,17 +469,65 @@ define(
                     this._widget();
                 } 
             },
-    
+            show:function(){
+                this.sprite.context.visible = true;
+                this._circle.context.visible= true;
+                if( this._txt ){
+                    this._txt.context.visible = true;
+                }
+            },
+            hide:function(){
+                this.sprite.context.visible = false;
+                this._circle.context.visible= false;
+                if( this._txt ){
+                    this._txt.context.visible = false;
+                }
+            },
             //初始化配置
             _initConfig:function( opt ){
               	if( opt ){
                     _.deepExtend( this , opt );
                 }
             },
+            resetCross : function( cross ){
+                this._xLine.context.yStart = cross.y;
+                this._xLine.context.yEnd   = cross.y;
+                this._yLine.context.xStart = cross.x;
+                this._yLine.context.xEnd   = cross.x;
 
+                var nodepos = this.sprite.localToGlobal( cross );
+                this._circle.context.x     = nodepos.x;
+                this._circle.context.y     = nodepos.y;
+
+                if(this.text.enabled){
+                    var nodepos = this.sprite.localToGlobal( cross );
+                    this._txt.context.x = parseInt(nodepos.x);
+                    this._txt.context.y = parseInt(nodepos.y);
+                    
+                    var xd    = this._xAxis.dataSection;
+                    var xdl   = xd.length;
+                    var xText = parseInt(cross.x / this.w * (xd[ xdl - 1 ] - xd[0]) + xd[0]);
+
+                    var yd    = this._yAxis.dataSection;
+                    var ydl   = yd.length;
+                    var yText = parseInt( (this.h - cross.y) / this.h * (yd[ ydl - 1 ] - yd[0]) + yd[0]);
+                    this._txt.resetText("（X："+xText+"，Y："+yText+"）");
+
+                    if( cross.y <= 20 ){
+                        this._txt.context.textBaseline = "top"
+                    } else {
+                        this._txt.context.textBaseline = "bottom"
+                    }
+                    if( cross.x <= this._txt.getTextWidth() ){
+                        this._txt.context.textAlign    = "left"
+                    } else {
+                        this._txt.context.textAlign    = "right"
+                    }
+                }
+            },
             _widget:function(){
                 var self = this
-                var xLine = new Line({
+                self._xLine = new Line({
                     id      : 'x',
                     context : {
                         xStart      : 0,
@@ -474,12 +535,13 @@ define(
                         xEnd        : self.w,
                         yEnd        : self.cross.y,
                         lineWidth   : self.xAxis.lineWidth,
-                        strokeStyle : self.xAxis.fillStyle
+                        strokeStyle : self.xAxis.fillStyle,
+                        lineType    : self.xAxis.lineType
                     }
                 });
-                this.sprite.addChild(xLine);
+                self.sprite.addChild(self._xLine);
 
-                var yLine = new Line({
+                self._yLine = new Line({
                     id      : 'y',
                     context : {
                         xStart      : self.cross.x,
@@ -487,13 +549,14 @@ define(
                         xEnd        : self.cross.x,
                         yEnd        : self.h,
                         lineWidth   : self.yAxis.lineWidth,
-                        strokeStyle : self.yAxis.fillStyle
+                        strokeStyle : self.yAxis.fillStyle,
+                        lineType    : self.yAxis.lineType
                     }
                 });
-                this.sprite.addChild(yLine);
+                this.sprite.addChild(self._yLine);
 
-                var nodepos = this.sprite.localToGlobal({x : this.cross.x ,  y: this.cross.y });
-                var circle = new Circle({
+                var nodepos = self.sprite.localToGlobal( self.cross );
+                self._circle = new Circle({
                     context : {
                         x           : parseInt(nodepos.x),
                         y           : parseInt(nodepos.y),
@@ -503,7 +566,20 @@ define(
                         lineWidth   : self._getProp( self.node.lineWidth ) || 4
                     }
                 });
-                this.sprite.getStage().addChild(circle);
+                self.sprite.getStage().addChild(self._circle);
+
+                if(self.text.enabled){
+                    self._txt = new Canvax.Display.Text( "" , {
+                        context : {
+                            x : parseInt(nodepos.x),
+                            y : parseInt(nodepos.y),
+                            textAlign : "right",
+                            textBaseline : "bottom",
+                            fillStyle    : self.text.fillStyle
+                        }
+                    } );
+                    self.sprite.getStage().addChild(self._txt);
+                }
             },
             _getProp : function( s ){
                 if( _.isFunction( s ) ){
@@ -512,7 +588,6 @@ define(
                 return s
             }           
         };
-    
         return Anchor;
     
     } 
@@ -540,29 +615,31 @@ define(
     
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
-                    thinkness   : 1,
-                    strokeStyle : '#e5e5e5'
+                    thinkness   : 2,
+                    strokeStyle : '#0088cf'//'#e5e5e5'
             } 
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
-                    thinkness   : 1,
-                    strokeStyle : '#e5e5e5',
+                    thinkness   : 2,
+                    strokeStyle : '#0088cf',//'#e5e5e5',
                     biaxial     : false
             }
             this.xAxis   = {                                //x轴上的线
                     enabled     : 1,
                     data        : [],                      //[{y:100},{}]
-                    // data        : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
+                    org         : null,                    //x轴坐标原点，默认为上面的data[0]
+                    // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
                     strokeStyle : '#f5f5f5', //'#e5e5e5',
-                    filter      : null
+                    filter      : null 
             }
     
             this.yAxis   = {                                //y轴上的线
                     enabled     : 0,
                     data        : [],                      //[{x:100},{}]
-                    // data        : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
+                    org         : null,                    //y轴坐标原点，默认为上面的data[0]
+                    // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     thinkness   : 1,
                     strokeStyle : '#f5f5f5',//'#e5e5e5',
@@ -611,7 +688,7 @@ define(
    
                 //x轴方向的线集合
                 var arr = self.xAxis.data;
-                for(var a = 1, al = arr.length; a < al; a++){
+                for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var line = new Line({
                         context : {
@@ -658,12 +735,18 @@ define(
                         });
                         self.yAxisSp.addChild(line);
                     }
-                }
+                };
 
                 //原点开始的y轴线
+                var xAxisOrg = (self.yAxis.org == null ? 0 : _.find( self.yAxis.data , function(obj){
+                    return obj.content == self.yAxis.org
+                } ).x );
+            
+                self.yAxis.org = xAxisOrg;
                 var line = new Line({
                     context : {
-                        xEnd        : 0,
+                        xStart      : xAxisOrg,
+                        xEnd        : xAxisOrg,
                         yEnd        : -self.h,
                         lineWidth   : self.yOrigin.thinkness,
                         strokeStyle : self.yOrigin.strokeStyle
@@ -688,10 +771,17 @@ define(
                 }
     
                 //原点开始的x轴线
+                var yAxisOrg = (self.xAxis.org == null ? 0 : _.find( self.xAxis.data , function(obj){
+                    return obj.content == self.xAxis.org
+                } ).y );
+
+                self.xAxis.org = yAxisOrg;
+
                 var line = new Line({
                     context : {
+                        yStart      : yAxisOrg,
                         xEnd        : self.w,
-                        yEnd        : 0,
+                        yEnd        : yAxisOrg,
                         lineWidth   : self.xOrigin.thinkness,
                         strokeStyle : self.xOrigin.strokeStyle
                     }
@@ -1548,8 +1638,8 @@ define(
             this.dis  = 6                                  //线到文本的距离
             this.line = {
                     enabled : 1,                           //是否有line
-                    width   : 6,
-                    lineWidth  : 3,
+                    width   : 4,
+                    lineWidth  : 1,
                     strokeStyle   : '#BEBEBE'
             };
             this.text = {
@@ -1752,7 +1842,7 @@ define(
                         //线条
                         var line = new Line({
                             context : {
-                                x           : 0 + ( self.place == "left" ? +1 : -1 ) * self.dis,
+                                x           : 0 + ( self.place == "left" ? +1 : -1 ) * self.dis - 2,
                                 y           : y,
                                 xEnd        : self.line.width,
                                 yEnd        : 0,
