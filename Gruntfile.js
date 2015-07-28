@@ -84,11 +84,7 @@ module.exports = function(grunt) {
          },
          map : {
              src : [
-                 bc+"chart/map/mapdata.js",
-                 bc+"chart/map/tips.js",
-
                  bc+"chart/map/index.js",
-                 
              ],
              dest : bc+"chart/map/index.js"
          },
