@@ -134,7 +134,8 @@ define(
                    .easing( Tween.Easing.Quintic.Out )
                    .onUpdate( function (  ) {
                        for( var p in this ){
-                           self._currPointList[ parseInt( p.split("_")[1] ) ][1] = this[p];
+                           var c = self._currPointList[ parseInt( p.split("_")[1] ) ];
+                           c && (c[1] = this[p])
                        };
                        self._bline.context.pointList = _.clone(self._currPointList);
                        self._fill.context.path       = self._fillLine( self._bline );
