@@ -615,12 +615,12 @@ define(
     
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
-                    thinkness   : 2,
+                    lineWidth   : 2,
                     strokeStyle : '#0088cf'//'#e5e5e5'
             } 
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
-                    thinkness   : 2,
+                    lineWidth   : 2,
                     strokeStyle : '#0088cf',//'#e5e5e5',
                     biaxial     : false
             }
@@ -630,7 +630,7 @@ define(
                     org         : null,                    //x轴坐标原点，默认为上面的data[0]
                     // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
-                    thinkness   : 1,
+                    lineWidth   : 1,
                     strokeStyle : '#f5f5f5', //'#e5e5e5',
                     filter      : null 
             }
@@ -641,7 +641,7 @@ define(
                     org         : null,                    //y轴坐标原点，默认为上面的data[0]
                     // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
-                    thinkness   : 1,
+                    lineWidth   : 1,
                     strokeStyle : '#f5f5f5',//'#e5e5e5',
                     filter      : null
             } 
@@ -697,7 +697,7 @@ define(
                             xEnd        : self.w,
                             yEnd        : o.y,
                             lineType    : self.xAxis.lineType,
-                            lineWidth   : self.xAxis.thinkness,
+                            lineWidth   : self.xAxis.lineWidth,
                             strokeStyle : self.xAxis.strokeStyle  
                         }
                     })
@@ -722,7 +722,7 @@ define(
                             xEnd        : o.x,
                             yEnd        : -self.h,
                             lineType    : self.yAxis.lineType,
-                            lineWidth   : self.yAxis.thinkness,
+                            lineWidth   : self.yAxis.lineWidth,
                             strokeStyle : self.yAxis.strokeStyle,
                             visible     : o.x ? true : false
                         }
@@ -748,7 +748,7 @@ define(
                         xStart      : xAxisOrg,
                         xEnd        : xAxisOrg,
                         yEnd        : -self.h,
-                        lineWidth   : self.yOrigin.thinkness,
+                        lineWidth   : self.yOrigin.lineWidth,
                         strokeStyle : self.yOrigin.strokeStyle
                     }
                 })
@@ -761,7 +761,7 @@ define(
                             xStart      : self.w,
                             xEnd        : self.w,
                             yEnd        : -self.h,
-                            lineWidth   : self.yOrigin.thinkness,
+                            lineWidth   : self.yOrigin.lineWidth,
                             strokeStyle : self.yOrigin.strokeStyle
                         }
                     })
@@ -781,7 +781,7 @@ define(
                         yStart      : yAxisOrg,
                         xEnd        : self.w,
                         yEnd        : yAxisOrg,
-                        lineWidth   : self.xOrigin.thinkness,
+                        lineWidth   : self.xOrigin.lineWidth,
                         strokeStyle : self.xOrigin.strokeStyle
                     }
                 })
