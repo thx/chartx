@@ -144,9 +144,9 @@ define(
                 //原点开始的y轴线
                 var xAxisOrg = (self.yAxis.org == null ? 0 : _.find( self.yAxis.data , function(obj){
                     return obj.content == self.yAxis.org
-                } ).x );
+                } ) );
             
-                self.yAxis.org = xAxisOrg;
+                //self.yAxis.org = xAxisOrg;
                 var line = new Line({
                     context : {
                         xStart      : xAxisOrg,
@@ -179,8 +179,7 @@ define(
                     return obj.content == self.xAxis.org
                 } ).y );
 
-                self.xAxis.org = yAxisOrg;
-
+                //self.xAxis.org = yAxisOrg;
                 var line = new Line({
                     context : {
                         yStart      : yAxisOrg,
