@@ -5,9 +5,10 @@ define(
         "chartx/chart/index",
         "canvax/shape/Sector",
         "canvax/shape/Circle",
-        "canvax/animation/Tween"
+        "canvax/animation/Tween",
+        "chartx/utils/simple-data-format"
     ],
-    function( Canvax , Chart ,Sector , Circle , Tween ){
+    function( Canvax , Chart ,Sector , Circle , Tween , DataFormat ){
      
         return Chart.extend({
             init : function( el ,  data , opts ){
@@ -19,6 +20,8 @@ define(
                 this.startAngle  = -90;
                 this.angleCount  = 360;
                 this.currRatio   = 0; //当前比率
+                this.barDis      = 8; //如果有多组progress，则代表两bar之间的间距
+                this.field       = null;
 
                 //进度文字
                 this.text        = {
@@ -35,7 +38,24 @@ define(
                 !this.r && (this.r = Math.min( this.width , this.height ) / 2);
 
                 this.tween = null;
+
+                this._initFieldAndData(data);
             },
+            _initFieldAndData : function( data ){
+                if( this.field ){
+                    if(  _.isString( this.field ) ){
+                        this.field = [ this.field ]
+                    }
+                    if(this.field.length > 1){
+                        this.text.enabled = 0;
+                    } 
+
+                    //有field配置才需要处理data
+                    this.dataFrame = this._initData(data);
+                    debugger
+                };
+            },
+            _initData : DataFormat,
             draw : function( opt ){
 
                 var br  = this.r - ( this.barWidth - this.axisWidth )/2;
