@@ -18,12 +18,17 @@
                             enabled: 1
                         }
                     };
+                    this.xAxis = {
+                        field  : null
+                    };
+                    this.yAxis = {
+                        field  : null
+                    };
                     _.deepExtend(this, opts);
                     this.dataFrame = this._initData(data, this);
-
                 },
                 draw: function () {
-                    console.log("pie draw");
+                    //console.log("pie draw");
                     this.stageBg = new Canvax.Display.Sprite({
                         id: 'bg'
                     });
@@ -72,7 +77,34 @@
                 slice: function (index) {
                     this._pie && this._pie.slice(index);
                 },
-                _initData: function (data, opt) {
+                _initData: function (arr, opt) {
+                    var data = [];
+
+                    /*
+                     * 用校正处理， 把pie的data入参规范和chartx数据格式一致
+                     **/
+                    if( !this.xAxis.field ){
+                        data = arr;
+                    } else {
+                        
+                        var titles  = arr.shift();
+                        var xFieldInd = _.indexOf(titles , this.xAxis.field );
+                        var yFieldInd = xFieldInd++;
+                        if( yFieldInd >= titles.length ){
+                            yFieldInd = 0;
+                        };
+                        if( this.yAxis.field ){
+                            yFieldInd = _.indexOf(titles , this.yAxis.field );
+                        };
+                        _.each( arr , function( row ){
+                            var rowData = [];
+                            rowData.push( row[xFieldInd] );
+                            rowData.push( row[yFieldInd] );
+                            data.push( rowData );
+                        } );
+                    };
+                    //矫正结束
+
                     var dataFrame = {};
                     dataFrame.org = data;
                     dataFrame.data = [];
