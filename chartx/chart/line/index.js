@@ -21,12 +21,13 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this._xAxis   =  null;
-                this._yAxis   =  null;
-                this._anchor  =  null;
-                this._back    =  null;
-                this._graphs  =  null;
-                this._tip    =  null;
+                this._opts    = opts;
+                this._xAxis   = null;
+                this._yAxis   = null;
+                this._anchor  = null;
+                this._back    = null;
+                this._graphs  = null;
+                this._tip     = null;
 
                 this.xAxis    = {};
                 this.yAxis    = {};
@@ -73,7 +74,10 @@ define(
                     return;
                 }
 
-                var i = this.yAxis.field.length;
+                var i = 0;
+                _.each( this._graphs.groups , function( g , gi ){
+                    i = Math.max(i , g._groupInd);
+                } );
                 if( ind != undefined && ind != null ){
                     i = ind;
                 };
@@ -239,16 +243,16 @@ define(
                 });
 
                 this._graphs.draw({
-                    w    : this._xAxis.xGraphsWidth,
-                    h    : this._yAxis.yGraphsHeight,
-                    data : this._trimGraphs(),
-                    disX : this._getGraphsDisX(),
+                    w      : this._xAxis.xGraphsWidth,
+                    h      : this._yAxis.yGraphsHeight,
+                    data   : this._trimGraphs(),
+                    disX   : this._getGraphsDisX(),
                     smooth : this.smooth
                 });
 
                 this._graphs.setX( _yAxisW ), this._graphs.setY(y);
 
-                var self = this;
+                var me = this;
 
 
                 //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
@@ -256,15 +260,19 @@ define(
                     _.each( this._graphs.groups , function( group , i ){
                         var color = group._bline.context.strokeStyle;
                         if( i == 0 ){
-                            self._yAxis.setAllStyle( color );
+                            me._yAxis.setAllStyle( color );
                         } else {
-                            self._yAxisR.setAllStyle( color );
+                            me._yAxisR.setAllStyle( color );
                         }
                     } );
                 }
     
                 //执行生长动画
-                this._graphs.grow();
+                this._graphs.grow( function( g ){
+                    if("markPoint" in me._opts){
+                        me._initMarkPoint( g );
+                    }
+                } );
     
                 
                 this.bindEvent( this._graphs.sprite );
@@ -287,6 +295,21 @@ define(
                     });
                     //, this._anchor.setY(y)
                 }
+            },
+            _initMarkPoint : function(g){
+                var me = this;
+                require(["chartx/components/markpoint/index"] , function( MarkPoint ){
+                    var lastNode  = g._circles.children[ g._circles.children.length - 1 ];
+                    var mpCtx     = { 
+                        point    : lastNode.localToGlobal(),
+                        r        : lastNode.context.r+2,
+                        realTime : true
+                    };
+                    new MarkPoint( me._opts , mpCtx ).done(function(){
+                        this.shape.context.visible = false;
+                        me.core.addChild( this.sprite );
+                    });
+                });
             },
             bindEvent : function( spt , _setXaxisYaxisToTipsInfo ){
                 var self = this;

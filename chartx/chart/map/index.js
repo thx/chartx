@@ -11,12 +11,13 @@ define(
         'chartx/utils/projection/normal',
         'chartx/components/tips/tip',//'./tips',
         'chartx/utils/dataformat',
-        "canvax/shape/Droplet"
+        "chartx/components/markpoint/index"
     ],
-    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat , Droplet ){
+    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat , MarkPoint ){
     
         return Chart.extend({
             init : function( node , data , opts){
+                this._opts       = opts;
                 this.mapName     = "china";//map类型 默认为中国地图
                 this._mapDataMap = {};
                 this.tips = {};
@@ -39,18 +40,6 @@ define(
                     field : []
                 };
 
-                this.markpoint = {
-                    enabled     : false,
-                    hr          : 4,
-                    vr          : 7,
-                    fillStyleNormal   : "#6B95CF",
-                    strokeStyleNormal : "#3871BF",
-                    lineWidth   : 1
-                }
-                if( "markpoint" in opts ){
-                    this.markpoint.enabled = true;
-                }
-
                 _.deepExtend( this , opts );
 
                 this._initData( data );
@@ -58,9 +47,9 @@ define(
                 //DataFormat后会重新计算出来最后的field
                 this.tips.field = this.dataFrame.yAxis.field;
 
-                this._mapScale = 1 //Math.min( this.width / 560 , this.height / 470 );
+                this._mapScale  = 1; //Math.min( this.width / 560 , this.height / 470 );
                 
-                this.sprite    = new Canvax.Display.Sprite({
+                this.sprite     = new Canvax.Display.Sprite({
                     id   : "mapSp"
                 });
                 this.spriteTip  = new Canvax.Display.Sprite({
@@ -69,10 +58,9 @@ define(
             },
             _initData : function( data ){
                 this.dataFrame = DataFormat(data , {
-                     xAxis : {field : [ this.areaField ]},
-                     yAxis : {field : this.tips.field }
+                     xAxis : { field : [ this.areaField ] },
+                     yAxis : { field : this.tips.field }
                 });
-                
                 return this.dataFrame;
             },
             draw : function(){
@@ -89,7 +77,7 @@ define(
 
                 this._getMapData( this.mapName , function( md ){
                     me._widget( md );
-                    if( me.markpoint.enabled ){
+                    if( "markPoint" in me._opts ){
                         me._initMarkPoint();
                     }
                     //绘制完了后调整当前sprite的尺寸和位置
@@ -215,8 +203,7 @@ define(
                 if (typeof value === 'string') {
                     if (_trim(value).match(/%$/)) {
                         return parseFloat(value) / 100 * maxValue;
-                    }
-
+                    };
                     return parseFloat(value);
                 }
                 return value;
@@ -325,7 +312,6 @@ define(
                     if( areaData.indexOf( area.name ) >= 0 || area.name.indexOf( areaData ) >= 0 ){
                         data.data      = me._createDataObj(me.dataFrame.org[ i+1 ] , me.dataFrame.org[ 0 ]);
                         data.dataIndex = i;
-                        debugger
                     }
                 } );
                 return data;
@@ -336,8 +322,13 @@ define(
                     color = c( this._getDataForArea(area) );
                 }
                 //缺省颜色
-                if( !color || color == "" ){
-                    color = (normalColor || this.normalColor);
+                if( (!color || color == "") ){
+                    //如果有传normal进来，就不管normalColor参数是什么，都直接用
+                    if( arguments.length >= 3 ){
+                        color = normalColor;
+                    } else {
+                        color = this.normalColor;
+                    }
                 }
                 return color;
             },
@@ -455,48 +446,44 @@ define(
             },
             _initMarkPoint : function(){
                 var me = this;
-                var mp = me.markpoint;
-                 require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
-                     _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
-                         for( var g in citys ){
-                             if( city in citys[g] ){
-                                 var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
-                                 var md      = {
-                                     name : city
-                                 };
-                                 var droplet = new Droplet({
-                                     context : {
-                                         x  : cityPos[0],
-                                         y  : cityPos[1] - mp.vr, 
-                                         hr : mp.hr,
-                                         vr : mp.vr,
-                                         scaleY    : -1,
-                                         fillStyle : me._getColor( mp.fillStyle , md , mp.fillStyleNormal ),//mp.fillStyle,
-                                         lineWidth : mp.lineWidth,
-                                         strokeStyle : me._getColor( mp.strokeStyle , md , mp.strokeStyleNormal ),//mp.strokeStyle,
-                                         cursor    : "point"
-                                     }
-                                 });
+                require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
+                    _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
+                        for( var g in citys ){
+                            if( city in citys[g] ){
+                                var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
+                                var md      = {
+                                    name : city
+                                };
+                                var mpCtx = {
+                                    point : {
+                                        x : cityPos[0],
+                                        y : cityPos[1]
+                                    }
+                                };
 
-                                 droplet.mapData = md;
-                                 droplet.on("mouseover" , function(e){
-                                     me._tips.show( me._setTipsInfoHand( e , this.mapData) );
-                                     this.context.lineWidth = mp.lineWidth+2;
-                                 });
+                                new MarkPoint( me._opts , mpCtx , me._getDataForArea(md) ).done(function(){
+                                    var shape = this.shape;
 
-                                 droplet.on("mousemove" , function(e){
-                                     me._tips.move( me._setTipsInfoHand( e , this.mapData) );
-                                 });
-                                 droplet.on("mouseout" , function(e){
-                                     me._tips.hide( );
-                                     this.context.lineWidth = mp.lineWidth
-                                 });
-                                 me.sprite.addChild( droplet );
-                                 break;
-                             }
-                         }
-                     } );
-                 });
+                                    shape.mapData = md;
+                                    shape.on("mouseover" , function(e){
+                                        me._tips.show( me._setTipsInfoHand( e , this.mapData) );
+                                        this.context.lineWidth += 2 ;
+                                    });
+
+                                    shape.on("mousemove" , function(e){
+                                        me._tips.move( me._setTipsInfoHand( e , this.mapData) );
+                                    });
+                                    shape.on("mouseout" , function(e){
+                                        me._tips.hide( );
+                                        this.context.lineWidth -= 2 
+                                    });
+                                    me.sprite.addChild( this.sprite );
+                                });
+                                break;
+                            }
+                        }
+                    } );
+                });
             },
             _initModule : function(){
                 this._tips    = new Tips(this.tips, this.canvax.getDomContainer());

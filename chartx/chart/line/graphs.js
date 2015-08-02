@@ -56,9 +56,9 @@ define(
             /**
              * 生长动画
              */
-            grow : function(){
+            grow : function( callback ){
                 _.each(this.groups , function( g , i ){
-                    g._grow();
+                    g._grow( callback );
                 });
             },
             /*
