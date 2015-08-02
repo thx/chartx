@@ -13,6 +13,9 @@ define(
             init : function( node , data , opts ){
                 this.colors = ['#fa8529','#2494ed','#7aa1ff',"#42a8d7",'#666666',  '#7aa1ff' ];
                 this.padding = 15;
+                this.nodeField  = "sets";
+                this.valueField = "size";
+                this.labelField = "label";
                 this.text = {
                     enabled   : 0,
                     fillStyle : null,
@@ -20,16 +23,42 @@ define(
                     textAlign : "center",
                     textBaseline : "middle",
                     format    : null
-                },
+                };
                 this.circle = {
                     fillAlpha : 0.25,
                     fillStyle : null,
                     strokeStyle: null,
                     lineWidth : 2
-                }
+                };
 
                 _.deepExtend( this , opts );
-                this.data = data;
+                this.data = this._initData(data);
+            },
+            _initData : function( arr ){
+                var data = [];
+                var me   = this;
+                var titles = arr.shift(0);
+                _.each( arr , function( row ){
+                    var obj = {};
+                    _.each( titles , function( title , i ){
+                        if( title == me.nodeField ){
+                            var val = row[i];
+                            if( !_.isArray( val ) ){
+                                val = [ val ];
+                            };
+                            obj.sets = val;
+                        } else if( title == me.valueField ){
+                            obj.size   = row[i];
+                        } else if( title == me.labelField ){
+                            obj.label   = row[i];
+                        } else {
+                            obj[title] = row[i];
+                        }
+                    } );
+                    data.push( obj )
+                } );
+                debugger
+                return data
             },
             draw : function(){
                 this.stageTip = new Canvax.Display.Sprite({

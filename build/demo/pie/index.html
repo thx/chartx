@@ -33,16 +33,23 @@
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 var data= [
-    ["ie"     , 1939],
-    ["chrome" , 865],
-    ["firefox", 2361],
-    ["safari" , 2289],
-    ["其他"   , 1886],
-    ["其他1" , 563],
-    ["其他1" , 33],
-    ["其他1" , 60]
+    ["node"   , "value"],
+    ["ie"     , 1939   ],
+    ["chrome" , 865    ],
+    ["firefox", 2361   ],
+    ["safari" , 2289   ],
+    ["其他"   , 1886   ],
+    ["其他1"  , 563    ],
+    ["其他1"  , 33     ],
+    ["其他1"  , 60     ]
 ];
 var options = {
+    xAxis : {
+        field : "node"
+    },
+    yAxis : {
+        field : "value"
+    },
     tips : {
         //enabled  : false,
         content : function(info){

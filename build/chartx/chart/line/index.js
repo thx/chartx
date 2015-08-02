@@ -1032,11 +1032,12 @@ define(
                     var lastNode  = g._circles.children[ g._circles.children.length - 1 ];
                     var mpCtx     = { 
                         point    : lastNode.localToGlobal(),
-                        r        : lastNode.context.r+2,
+                        r        : lastNode.context.r+1,
+                        globalAlpha : 0.8,
                         realTime : true
                     };
                     new MarkPoint( me._opts , mpCtx ).done(function(){
-                        this.shape.context.visible = false;
+                        //this.shape.context.visible = false;
                         me.core.addChild( this.sprite );
                     });
                 });
