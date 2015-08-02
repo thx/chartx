@@ -35,7 +35,7 @@ define(
                 r           : 2,         //半径 node 圆点的半径
                 fillStyle   : '#ffffff',
                 strokeStyle : null,
-                lineWidth   : 2
+                lineWidth   : 3
             }
     
             this.fill    = {//填充
@@ -122,7 +122,7 @@ define(
                     return null
                 }
             },
-            _grow : function(){
+            _grow : function( callback ){
                 var self  = this;
                 var timer = null;
                 if( self._currPointList.length == 0 ){
@@ -146,6 +146,7 @@ define(
 
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
+                       callback && callback( self );
                    }).start();
                    animate();
                 };
@@ -219,7 +220,6 @@ define(
                     ]);
                 };
                 self._currPointList = list;
-
 
                 var bline = new BrokenLine({               //线条
                     id : "brokenline_" + self._groupInd,

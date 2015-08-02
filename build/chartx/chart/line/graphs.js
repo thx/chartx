@@ -56,9 +56,9 @@ define(
             /**
              * 生长动画
              */
-            grow : function(){
+            grow : function( callback ){
                 _.each(this.groups , function( g , i ){
-                    g._grow();
+                    g._grow( callback );
                 });
             },
             /*
@@ -183,8 +183,8 @@ define(
                 };
                 return node;
             },
-            _fireHandler:function(e){
-                // console.log(e)
+            _fireHandler : function(e){
+
                 e.params  = {
                     iGroup : e.tipsInfo.iGroup,
                     iNode  : e.tipsInfo.iNode
