@@ -64,14 +64,14 @@ module.exports = function(grunt) {
              ],
              dest : bc+"chart/bar/index.js"
          },
+         /*
          bar_h : {
              src : [
-                 bc+"chart/bar/horizontal/graphs.js",
-                 bc+"chart/bar/horizontal/xaxis.js",
                  bc+"chart/bar/horizontal.js"
              ],
              dest : bc+"chart/bar/horizontal.js"
          },
+         */
          line : {
              src : [
                  bc+"chart/line/tips.js",
