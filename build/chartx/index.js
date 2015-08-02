@@ -6,7 +6,7 @@ window.Chartx || (Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.07.29";
+        var canvaxVersion = "2015.08.02";
 
         
 
@@ -740,7 +740,7 @@ define(
                 //原点开始的y轴线
                 var xAxisOrg = (self.yAxis.org == null ? 0 : _.find( self.yAxis.data , function(obj){
                     return obj.content == self.yAxis.org
-                } ) );
+                } ).x );
             
                 //self.yAxis.org = xAxisOrg;
                 var line = new Line({
@@ -794,6 +794,176 @@ define(
     
     }
 )
+
+
+define(
+    "chartx/components/markpoint/index",
+    [
+         "canvax/index",
+         "canvax/animation/Tween"
+    ],
+    function( Canvax , Tween ){
+        var markPoint = function( userOpts , chartOpts , data ){
+
+            this.data    = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
+            this.point   = {
+                x : 0 , y : 0
+            };
+            this.normalColor = "#6B95CF";
+            this.shapeType   = "circle";
+            this.fillStyle   = null;
+            this.strokeStyle = null;
+            this.lineWidth   = 1;
+            this.globalAlpha = 0.7;
+
+            //droplet opts
+            this.hr = 5;
+            this.vr = 8;
+
+            //circle opts
+            this.r  = 5;
+
+            
+            this.sprite = null;
+            this.shape  = null;
+
+            this._doneHandle = null;
+            this.done   = function( fn ){
+                this._doneHandle = fn;
+            };
+
+            this.realTime = false; //是否是实时的一个点，如果是的话会有动画
+
+            if( "markPoint" in userOpts ){
+                this.enabled = true;
+                _.deepExtend( this , userOpts.markPoint );
+            };
+            chartOpts && _.deepExtend( this , chartOpts );
+            this.init();
+        }
+        markPoint.prototype = {
+            init : function(){
+                var me = this;
+                this.sprite  = new Canvax.Display.Sprite({ 
+                    context : {
+                        x : this.point.x,
+                        y : this.point.y
+                    }
+                });
+                setTimeout( function(){
+                    me.widget();
+                } , 10 );
+            },
+            widget : function(){
+                this._fillStyle   = this._getColor( this.fillStyle   , this.data );
+                this._strokeStyle = this._getColor( this.strokeStyle , this.data );
+                switch (this.shapeType.toLocaleLowerCase()){
+                    case "circle" :
+                        this._initCircleMark();
+                        break;
+                    case "droplet" :
+                        this._initDropletMark();
+                        break;
+                }
+            },
+            _getColor : function( c , data , normalColor ){
+                var color = c;
+                if( _.isFunction( c ) ){
+                    color = c( data );
+                }
+                //缺省颜色
+                if( (!color || color == "") ){
+                    //如果有传normal进来，就不管normalColor参数是什么，都直接用
+                    if( arguments.length >= 3 ){
+                        color = normalColor;
+                    } else {
+                        color = this.normalColor;
+                    }
+                }
+                return color;
+            },
+            _done : function(){
+                this.shape.context.visible   = true;
+                this.shapeBg && (this.shapeBg.context.visible = true);
+                _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
+            },
+            _initCircleMark  : function(){
+                var me = this;
+                require(["canvax/shape/Circle"] , function( Circle ){
+                    var ctx = {
+                        r : me.r,
+                        fillStyle   : me._fillStyle,
+                        lineWidth   : me.lineWidth,
+                        strokeStyle : me._strokeStyle,
+                        globalAlpha : me.globalAlpha,
+                        cursor      : "point",
+                        visible     : false
+                    };
+                    me.shape = new Circle({
+                        context : ctx
+                    });
+                    me.sprite.addChild( me.shape );
+                    me._realTimeAnimate();
+                    me._done();
+                });
+            },
+            _realTimeAnimate : function(){
+                var me = this;
+                if( me.realTime ){
+                    if( !me.shapeBg ){
+                        me.shapeBg = me.shape.clone();
+                        me.sprite.addChildAt( me.shapeBg , 0 );
+                    };
+                
+                    var timer = null;
+                    var growAnima = function(){
+                       var realtime = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
+                       .to( { r : me.r * 3 , alpha : 0 }, 800 )
+                       .onUpdate( function (  ) {
+                           me.shapeBg.context.r = this.r;
+                           me.shapeBg.context.globalAlpha = this.alpha;
+                       } ).onComplete( function(){
+                           cancelAnimationFrame( timer );
+                       }).repeat(Infinity).delay(800).start();
+                       animate();
+                    };
+                    function animate(){
+                        timer    = requestAnimationFrame( animate ); 
+                        Tween.update();
+                    };
+                    growAnima();
+                }
+
+            },
+            _initDropletMark : function(){
+                var me = this;
+                require(["canvax/shape/Droplet"] , function( Droplet ){
+                    var ctx = {
+                        y      : -me.vr,
+                        scaleY : -1,
+                        hr     : me.hr,
+                        vr     : me.vr,
+                        fillStyle   : me._fillStyle,
+                        lineWidth   : me.lineWidth,
+                        strokeStyle : me._strokeStyle,
+                        globalAhpla : me.globalAhpla,
+                        cursor  : "point",
+                        visible : false
+                    };
+                    
+                    me.shape = new Droplet({
+                        context : ctx
+                    });
+
+                    me.sprite.addChild( me.shape );
+                    me._done();
+                    
+                });
+            }
+        }
+        return markPoint
+    } 
+);
 
 
 define(

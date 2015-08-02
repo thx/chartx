@@ -21,7 +21,7 @@ define(
             this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149" , "#4d7fff"];
     
             this.bar = {
-                width  : 12,
+                width  : 25,
                 radius : 2
             }
             this.text = {
