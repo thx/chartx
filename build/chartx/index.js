@@ -836,6 +836,7 @@ define(
             };
 
             this.realTime = false; //是否是实时的一个点，如果是的话会有动画
+            this.filter  = function(){};//过滤函数
 
             if( "markPoint" in userOpts ){
                 this.enabled = true;
@@ -843,7 +844,7 @@ define(
             };
             chartOpts && _.deepExtend( this , chartOpts );
 
-            this.filter  = function(){};//过滤函数
+            
             this.init();
         }
         markPoint.prototype = {
@@ -870,6 +871,7 @@ define(
                         this._initDropletMark();
                         break;
                 };
+                debugger
                 _.isFunction(this.filter) && this.filter( this );
             },
             _getColor : function( c , data , normalColor ){
