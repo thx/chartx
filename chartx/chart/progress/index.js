@@ -52,11 +52,17 @@ define(
 
                     //有field配置才需要处理data
                     this.dataFrame = this._initData(data);
-                    debugger
                 };
             },
             _initData : DataFormat,
-            draw : function( opt ){
+            draw      : function(){
+                if( this.field ){
+                    
+                } else {
+                    this.drawGroup(); 
+                }
+            },
+            drawGroup : function( ){
 
                 var br  = this.r - ( this.barWidth - this.axisWidth )/2;
                 var br0 = this.r - this.axisWidth - ( this.barWidth - this.axisWidth )/2

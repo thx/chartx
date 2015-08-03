@@ -18,6 +18,9 @@ define(
             this.lineWidth   = 1;
             this.globalAlpha = 0.7;
 
+            this.duration    = 800;//如果有动画，则代表动画时长
+            this.easing      = Tween.Easing.Linear.None;//动画类型
+
             //droplet opts
             this.hr = 5;
             this.vr = 8;
@@ -120,13 +123,13 @@ define(
                     var timer = null;
                     var growAnima = function(){
                        var realtime = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
-                       .to( { r : me.r * 3 , alpha : 0 }, 800 )
+                       .to( { r : me.r * 3 , alpha : 0 }, me.duration )
                        .onUpdate( function (  ) {
                            me.shapeBg.context.r = this.r;
                            me.shapeBg.context.globalAlpha = this.alpha;
-                       } ).onComplete( function(){
-                           cancelAnimationFrame( timer );
-                       }).repeat(Infinity).delay(800).start();
+                       } ).repeat(Infinity).delay(800)
+                       .easing( me.easing )
+                       .start();
                        animate();
                     };
                     function animate(){
