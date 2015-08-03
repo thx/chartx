@@ -44,6 +44,8 @@ define(
                 _.deepExtend( this , userOpts.markPoint );
             };
             chartOpts && _.deepExtend( this , chartOpts );
+
+            this.filter  = function(){};//过滤函数
             this.init();
         }
         markPoint.prototype = {
@@ -69,7 +71,8 @@ define(
                     case "droplet" :
                         this._initDropletMark();
                         break;
-                }
+                };
+                _.isFunction(this.filter) && this.filter( this );
             },
             _getColor : function( c , data , normalColor ){
                 var color = c;
