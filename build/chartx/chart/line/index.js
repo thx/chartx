@@ -204,7 +204,8 @@ define(
     ], 
     function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat , Tween ){
         window.Canvax = Canvax
-        var Group = function( a , opt , ctx){
+        var Group = function( field , a , opt , ctx){
+            this.field      = field;//_groupInd在yAxis.field中对应的值
             this._groupInd  = a;
             this._nodeInd   = -1;
             this.ctx        = ctx;
@@ -219,8 +220,7 @@ define(
                 strokeStyle : this.colors[ this._groupInd ],
                 lineWidth   : 2,
                 smooth      : true
-            }
-
+            };
 
             this.node     = {//节点 
                 enabled     : 1,         //是否有
@@ -229,17 +229,16 @@ define(
                 fillStyle   : '#ffffff',
                 strokeStyle : null,
                 lineWidth   : 3
-            }
+            };
     
             this.fill    = {//填充
                 fillStyle   : null,
                 alpha       : 0.1
-            }
+            };
     
             this.dataOrg    = [];   //data的原始数据
             this.data       = [];   //data会在wight中过滤一遍，把两边的空节点剔除
             this.sprite     = null;                        
-           
 
             this._pointList = [];//brokenline最终的状态
             this._currPointList = [];//brokenline 动画中的当前状态
@@ -598,6 +597,7 @@ define(
                 var self = this;
                 _.deepExtend( this , opt );
                 var group = new Group(
+                    self.root.yAxis.field[ind],
                     ind , //_groupInd
                     self.opt,
                     self.ctx
@@ -640,9 +640,10 @@ define(
             },
             _widget:function( opt ){
                 var self  = this;
-                
+    
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var group = new Group(
+                        self.root.yAxis.field[a],
                         a , //_groupInd
                         self.opt,
                         self.ctx
@@ -1031,8 +1032,9 @@ define(
                 require(["chartx/components/markpoint/index"] , function( MarkPoint ){
                     var lastNode  = g._circles.children[ g._circles.children.length - 1 ];
                     var mpCtx     = { 
-                        point    : lastNode.localToGlobal(),
-                        r        : lastNode.context.r+1,
+                        markTarget  : g.field,
+                        point       : lastNode.localToGlobal(),
+                        r           : lastNode.context.r+1,
                         globalAlpha : 0.8,
                         realTime : true
                     };

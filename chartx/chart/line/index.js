@@ -301,8 +301,9 @@ define(
                 require(["chartx/components/markpoint/index"] , function( MarkPoint ){
                     var lastNode  = g._circles.children[ g._circles.children.length - 1 ];
                     var mpCtx     = { 
-                        point    : lastNode.localToGlobal(),
-                        r        : lastNode.context.r+1,
+                        markTarget  : g.field,
+                        point       : lastNode.localToGlobal(),
+                        r           : lastNode.context.r+1,
                         globalAlpha : 0.8,
                         realTime : true
                     };

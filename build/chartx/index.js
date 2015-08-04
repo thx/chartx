@@ -310,7 +310,6 @@ define(
         CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
             init   : function(){},
             dataFrame : null, //每个图表的数据集合 都 存放在dataFrame中。
-            drawed : false, //如果有执行过drawed，则为true
             draw   : function(){},
             /*
              * chart的销毁 
@@ -804,9 +803,9 @@ define(
     ],
     function( Canvax , Tween ){
         var markPoint = function( userOpts , chartOpts , data ){
-
-            this.data    = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
-            this.point   = {
+            this.markTarget = null; //markpoint标准的对应元素
+            this.data       = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
+            this.point      = {
                 x : 0 , y : 0
             };
             this.normalColor = "#6B95CF";
@@ -825,7 +824,6 @@ define(
 
             //circle opts
             this.r  = 5;
-
             
             this.sprite = null;
             this.shape  = null;
@@ -836,6 +834,7 @@ define(
             };
 
             this.realTime = false; //是否是实时的一个点，如果是的话会有动画
+            this.tween    = null;  //realTime为true的话，tween则为对应的一个缓动对象
             this.filter  = function(){};//过滤函数
 
             if( "markPoint" in userOpts ){
@@ -871,7 +870,6 @@ define(
                         this._initDropletMark();
                         break;
                 };
-                debugger
                 _.isFunction(this.filter) && this.filter( this );
             },
             _getColor : function( c , data , normalColor ){
@@ -915,6 +913,12 @@ define(
                     me._done();
                 });
             },
+            destroy : function(){
+                if(this.tween){
+                    this.tween.stop();
+                }
+                this.sprite.destroy();
+            },
             _realTimeAnimate : function(){
                 var me = this;
                 if( me.realTime ){
@@ -925,7 +929,7 @@ define(
                 
                     var timer = null;
                     var growAnima = function(){
-                       var realtime = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
+                       me.tween = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
                        .to( { r : me.r * 3 , alpha : 0 }, me.duration )
                        .onUpdate( function (  ) {
                            me.shapeBg.context.r = this.r;
@@ -936,6 +940,7 @@ define(
                        animate();
                     };
                     function animate(){
+                        console.log(1)
                         timer    = requestAnimationFrame( animate ); 
                         Tween.update();
                     };

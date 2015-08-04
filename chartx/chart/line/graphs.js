@@ -69,6 +69,7 @@ define(
                 var self = this;
                 _.deepExtend( this , opt );
                 var group = new Group(
+                    self.root.yAxis.field[ind],
                     ind , //_groupInd
                     self.opt,
                     self.ctx
@@ -111,9 +112,10 @@ define(
             },
             _widget:function( opt ){
                 var self  = this;
-                
+    
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var group = new Group(
+                        self.root.yAxis.field[a],
                         a , //_groupInd
                         self.opt,
                         self.ctx
