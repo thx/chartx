@@ -13,7 +13,7 @@ define(
         return Chart.extend({
             init : function( el ,  data , opts ){
 
-                this.barWidth    = 6;
+                this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
                 this.normalColor = '#E6E6E6';
                 this.progColor   = ['#58c4bc' , '#3399d5' , '#716fb4'];
@@ -91,6 +91,7 @@ define(
                 var br0 = r - this.axisWidth - ( this.barWidth - this.axisWidth )/2
                 sprite.addChild( this._getCircle( this.startAngle , r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
                 sprite.addChild( this._getCircle( this.startAngle + this.angleCount , r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
+                
                 sprite.addChild( new Sector({
                    context : {
                         x  : this.width / 2,
