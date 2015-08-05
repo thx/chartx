@@ -982,7 +982,7 @@ define(
                         this._initDropletMark();
                         break;
                 };
-                _.isFunction(this.filter) && this.filter( this );
+               
             },
             _getColor : function( c , data , normalColor ){
                 var color = c;
@@ -1004,6 +1004,7 @@ define(
                 this.shape.context.visible   = true;
                 this.shapeBg && (this.shapeBg.context.visible = true);
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
+                _.isFunction(this.filter) && this.filter( this );
             },
             _initCircleMark  : function(){
                 var me = this;
