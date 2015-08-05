@@ -62,7 +62,8 @@ define(
                 });
             },
             _getYaxisField : function( i ){
-                return self.root.yAxis.field ? self.root.yAxis.field[i] : self.root.yAxis.line.field[i]
+                //这里要兼容从折柱混合图过来的情况
+                return this.root.yAxis.field ? this.root.yAxis.field[i] : this.root.yAxis.line.field[i]
             },
             /*
              *@params opt
