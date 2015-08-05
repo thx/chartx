@@ -320,7 +320,7 @@ define(
                 var color = c;
                 if( _.isFunction( c ) ){
                     color = c.apply(this , [ this._getDataForArea(area ) , this.dataFrame]);
-                }
+                } 
                 //缺省颜色
                 if( (!color || color == "") ){
                     //如果有传normal进来，就不管normalColor参数是什么，都直接用
