@@ -19,7 +19,7 @@ define(
                 this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
                 this.normalColor = '#E6E6E6';
-                this.progColor   = ['#58c4bc' , '#3399d5' , '#716fb4'];
+                this.progColor   = ['#58c4bc' , '#3399d5' , '#716fb4' , '#ccc'];
                 this.startAngle  = -90;
                 this.angleCount  = 360;
                 this.currRatio   = 0; //当前比率
@@ -51,8 +51,9 @@ define(
                 var me = this;
                 if(this.field && this.field.length > 1){
                     //重新计算dataCount
-                    this.dataCount = 0;
+                    
                     if( me.dataType == "absolute" ){
+                        this.dataCount = 0;
                         for( var f in me.dataFrame.data ){
                             this.dataCount += me.dataFrame.data[f][0];
                         } 

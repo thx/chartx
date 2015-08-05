@@ -319,7 +319,7 @@ define(
             _getColor : function( c , area , normalColor ){
                 var color = c;
                 if( _.isFunction( c ) ){
-                    color = c( this._getDataForArea(area) );
+                    color = c.apply(this , [ this._getDataForArea(area ) , this.dataFrame]);
                 }
                 //缺省颜色
                 if( (!color || color == "") ){
