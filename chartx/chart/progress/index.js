@@ -6,12 +6,15 @@ define(
         "canvax/shape/Sector",
         "canvax/shape/Circle",
         "canvax/animation/Tween",
-        "chartx/utils/simple-data-format"
+        "chartx/utils/simple-data-format",
+        "chartx/components/legend/index",
+        'chartx/components/tips/tip'
     ],
-    function( Canvax , Chart ,Sector , Circle , Tween , DataFormat ){
+    function( Canvax , Chart ,Sector , Circle , Tween , DataFormat , Legend , Tip ){
      
         return Chart.extend({
             init : function( el ,  data , opts ){
+                this._opts       = opts;
 
                 this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
@@ -22,6 +25,9 @@ define(
                 this.currRatio   = 0; //当前比率
                 this.barDis      = 4; //如果有多组progress，则代表两bar之间的间距
                 this.field       = null;
+            
+                this.dataType    = "account"; //默认是占比，如果是绝对值"absolute"则需要自己另外计算占比
+                this.dataCount   = 100;
 
                 //进度文字
                 this.text        = {
@@ -40,6 +46,37 @@ define(
                 this.tween = null;
 
                 this._initFieldAndData(data);
+
+                //legend;
+                var me = this;
+                if(this.field && this.field.length > 1){
+                    //重新计算dataCount
+                    this.dataCount = 0;
+                    if( me.dataType == "absolute" ){
+                        for( var f in me.dataFrame.data ){
+                            this.dataCount += me.dataFrame.data[f][0];
+                        } 
+                    }; 
+
+                    //设置legendOpt
+                    var legendOpt = _.deepExtend({
+                        label  : function( info ){
+                            return info.field+"："+parseInt(info.value / me.dataCount * 100)+"%";
+                        }
+                    } , this._opts.legend);
+                    
+                    this._legend = new Legend( this._getLegendData() , legendOpt );
+                    this.stage.addChild( this._legend.sprite );
+                    this._legend.pos( {
+                        x : this.width-this._legend.w,
+                        y : this.height/2 - this._legend.h/2
+                    } );
+                    this.width -= this._legend.w;
+                };
+
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
+                this._tip._getDefaultContent = this._getTipsDefaultContent;
+                this.stage.addChild( this._tip.sprite );
             },
             _initFieldAndData : function( data ){
                 if( this.field ){
@@ -64,9 +101,14 @@ define(
             draw      : function(){
                 var me = this;
                 if( this.field ){
+ 
                     _.each( this.field , function( field , i ){
                         me.drawGroup(i);
-                        me.setRatio( me.dataFrame.data[field][0] , field , i );
+                        var s = me.dataFrame.data[field][0];
+                        if( me.dataType == "absolute" ){
+                            s = s / me.dataCount * 1000 / 10;
+                        }
+                        me.setRatio( s , field , i );
                     } );
                 } else {
                     this.drawGroup(0); 
@@ -109,10 +151,11 @@ define(
                 var progColor = this.getColor( this.progColor , i );
      
                 this._circle = this._getCircle( this.startAngle , r-this.barWidth/2 , this.barWidth/2 , progColor );
+
                 this._circle.id = "circle_"+i;
                 sprite.addChild( this._circle );
                 sprite.addChild( this._circle.clone() );
-                sprite.addChild( new Sector({
+                var speedSec = new Sector({
                    id : "speed_"+i,
                    context : {
                         x  : this.width  / 2,
@@ -122,9 +165,26 @@ define(
                         startAngle : this.startAngle ,
                         endAngle   : this.startAngle ,
                         fillStyle  : progColor,
-                        lineJoin   : "round"
-                      }
-                }) );
+                        lineJoin   : "round",
+                        cursor     : "pointer"
+                    }
+                });
+                speedSec.ind = i;
+                sprite.addChild( speedSec );
+
+                //bindevent
+                var me = this;
+                speedSec.on( "panstart mouseover" ,function(e){
+                    e.tipsInfo = me._setTipsInfo(this , e);
+                    me._tip.show( e );
+                });
+                speedSec.on( "panstart mousemove" ,function(e){
+                    e.tipsInfo = me._setTipsInfo(this , e);
+                    me._tip.move( e );
+                });
+                speedSec.on( "panstart mouseout" ,function(e){
+                    me._tip.hide( e );
+                });
 
                 if( this.text.enabled ){
                     this.stage.addChild( new Canvax.Display.Text( "0%",
@@ -138,9 +198,23 @@ define(
                                 textAlign   : "center",
                                 textBaseline: "middle"
                             }
-                  	    })
-                    )
+                  	    }
+                    ));
                 };
+            },
+            _setTipsInfo : function( el , e ){
+                var i = el.ind;
+                var info = { dataCount : this.dataCount };
+                if( this.field ){
+                    info.field = this.field[i];
+                    info.value = this.dataFrame.data[ this.field[i] ][0]
+                } else {
+                    info.value 
+                }
+                return info;
+            },
+            _getTipsDefaultContent : function( info ){
+                return info.field+"："+parseInt(info.value / info.dataCount * 100)+"%";
             },
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;
@@ -234,6 +308,19 @@ define(
                         self._animate( _field , i );
                     }
                 } );
+            },
+            //只有field为多组数据的时候才需要legend
+            _getLegendData : function(){
+                var me   = this;
+                var data = [];
+                _.each(this.field , function( f , i ){
+                    data.push({
+                        field : f,
+                        value : me.dataFrame.data[f][0],
+                        fillStyle : me.getColor( me.progColor , i )
+                    });
+                });
+                return data;
             }
         });
      

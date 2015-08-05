@@ -32,13 +32,14 @@
         <td id="td-vl">
 <form><textarea id="code" name="code">
 var data    = [ 
-    [ "ratio" , "ratio1" , "ratio2"],
-    [ 55      , 30       , 15]
+    [ "专科" , "本科"    , "博士及以上"],
+    [ 55      , 30       , 95]
 ];
 var options = {
     //配置默认进度
     r          : 100,
-    field      : ["ratio","ratio1","ratio2"]
+    field      : ["专科","本科","博士及以上"],
+    dataType   : "absolute"//告诉图表传入的数据是绝对值，需要图表自己换算成为比例
 }
 Chartx.progress("canvasTest" , data , options).then(function( chart ){
     //chart.setRatio( 60 );
