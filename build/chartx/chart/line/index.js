@@ -589,6 +589,9 @@ define(
                     g._grow( callback );
                 });
             },
+            _getYaxisField : function( i ){
+                return self.root.yAxis.field ? self.root.yAxis.field[i] : self.root.yAxis.line.field[i]
+            },
             /*
              *@params opt
              *@params ind 最新添加的数据所在的索引位置
@@ -597,7 +600,7 @@ define(
                 var self = this;
                 _.deepExtend( this , opt );
                 var group = new Group(
-                    self.root.yAxis.field[ind],
+                    self._getYaxisField(ind),
                     ind , //_groupInd
                     self.opt,
                     self.ctx
@@ -643,7 +646,7 @@ define(
     
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var group = new Group(
-                        self.root.yAxis.field[a],
+                        self._getYaxisField(a),
                         a , //_groupInd
                         self.opt,
                         self.ctx
