@@ -6,7 +6,7 @@ window.Chartx || (Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.08.02";
+        var canvaxVersion = "2015.08.05";
 
         
 
@@ -310,7 +310,6 @@ define(
         CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
             init   : function(){},
             dataFrame : null, //每个图表的数据集合 都 存放在dataFrame中。
-            drawed : false, //如果有执行过drawed，则为true
             draw   : function(){},
             /*
              * chart的销毁 
@@ -796,6 +795,118 @@ define(
 )
 
 
+/*
+ * legendData :
+ * [
+ *    { field : "uv" , value : 100 , fillStyle : "red" }
+ *    ......
+ * ]
+ *
+ **/
+define(
+    "chartx/components/legend/index" , 
+    [
+        "canvax/index",
+        "canvax/shape/Rect"
+    ],
+    function(Canvax , Rect){
+        var Legend = function(data , opt){
+            this.data = data || [];
+            this.w = 0;
+            this.h = 0;
+            this.tag = {
+                height : 20
+            }
+            this.enabled = 1 ; //1,0 true ,false 
+
+            this.icon = {
+                width : 6,
+                height: 6,
+                lineWidth : 1,
+                fillStyle : "#999"
+            }
+            this.layoutType = "vertical"
+
+            this.sprite  = null;
+
+            this.init( opt );
+        };
+    
+        Legend.prototype = {
+            init:function( opt ){
+                if( opt ){
+                    _.deepExtend( this , opt );
+                };
+                this.sprite = new Canvax.Display.Sprite({
+                    id : "LegendSprite"
+                });
+
+                this.draw();
+            },
+            pos : function( pos ){
+                this.sprite.context.x = pos.x;
+                this.sprite.context.y = pos.y;
+            },
+            draw:function(opt , _xAxis , _yAxis){
+                if( this.enabled ){ 
+                    this._widget();
+                } 
+            },
+            label : function( info ){
+                return info.field+"："+info.value;
+            },
+            _widget:function(){
+                var me = this;
+
+                var max = 0;
+                _.each( this.data , function( obj , i ){
+                    var sprite = new Canvax.Display.Sprite({
+                        context : {
+                            height : me.tag.height,
+                            y      : me.tag.height*i
+                        }
+                    });
+                    var icon   = new Rect({
+                        context : {
+                            width : me.icon.width,
+                            height: me.icon.height,
+                            x     : 0,
+                            y     : me.tag.height/2 - me.icon.height/2,
+                            fillStyle : obj.fillStyle
+                        }
+                    });
+                    sprite.addChild( icon );
+
+                    var content= me.label(obj);
+                    var txt    = new Canvax.Display.Text( content , {
+                        context : {
+                            x : me.icon.width+6,
+                            y : me.tag.height / 2,
+                            textAlign : "left",
+                            textBaseline : "middle",
+                            fillStyle : obj.fillStyle
+                        }
+                    } );
+                    sprite.addChild(txt);
+
+                    sprite.context.width = me.icon.width + 6 + txt.getTextWidth();
+                    max = Math.max( max , sprite.context.width );
+                    me.sprite.addChild(sprite);
+                } );
+
+                me.sprite.context.width  = max;
+                me.sprite.context.height = me.sprite.children.length * me.tag.height;
+                
+                me.w = max+10;
+                me.h = me.sprite.children.length * me.tag.height;
+            }
+        };
+        return Legend;
+    
+    } 
+)
+
+
 define(
     "chartx/components/markpoint/index",
     [
@@ -804,9 +915,9 @@ define(
     ],
     function( Canvax , Tween ){
         var markPoint = function( userOpts , chartOpts , data ){
-
-            this.data    = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
-            this.point   = {
+            this.markTarget = null; //markpoint标准的对应元素
+            this.data       = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
+            this.point      = {
                 x : 0 , y : 0
             };
             this.normalColor = "#6B95CF";
@@ -816,13 +927,15 @@ define(
             this.lineWidth   = 1;
             this.globalAlpha = 0.7;
 
+            this.duration    = 800;//如果有动画，则代表动画时长
+            this.easing      = Tween.Easing.Linear.None;//动画类型
+
             //droplet opts
             this.hr = 5;
             this.vr = 8;
 
             //circle opts
             this.r  = 5;
-
             
             this.sprite = null;
             this.shape  = null;
@@ -833,12 +946,16 @@ define(
             };
 
             this.realTime = false; //是否是实时的一个点，如果是的话会有动画
+            this.tween    = null;  //realTime为true的话，tween则为对应的一个缓动对象
+            this.filter  = function(){};//过滤函数
 
             if( "markPoint" in userOpts ){
                 this.enabled = true;
                 _.deepExtend( this , userOpts.markPoint );
             };
             chartOpts && _.deepExtend( this , chartOpts );
+
+            
             this.init();
         }
         markPoint.prototype = {
@@ -864,7 +981,8 @@ define(
                     case "droplet" :
                         this._initDropletMark();
                         break;
-                }
+                };
+               
             },
             _getColor : function( c , data , normalColor ){
                 var color = c;
@@ -886,6 +1004,7 @@ define(
                 this.shape.context.visible   = true;
                 this.shapeBg && (this.shapeBg.context.visible = true);
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
+                _.isFunction(this.filter) && this.filter( this );
             },
             _initCircleMark  : function(){
                 var me = this;
@@ -907,6 +1026,12 @@ define(
                     me._done();
                 });
             },
+            destroy : function(){
+                if(this.tween){
+                    this.tween.stop();
+                }
+                this.sprite.destroy();
+            },
             _realTimeAnimate : function(){
                 var me = this;
                 if( me.realTime ){
@@ -917,17 +1042,18 @@ define(
                 
                     var timer = null;
                     var growAnima = function(){
-                       var realtime = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
-                       .to( { r : me.r * 3 , alpha : 0 }, 800 )
+                       me.tween = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
+                       .to( { r : me.r * 3 , alpha : 0 }, me.duration )
                        .onUpdate( function (  ) {
                            me.shapeBg.context.r = this.r;
                            me.shapeBg.context.globalAlpha = this.alpha;
-                       } ).onComplete( function(){
-                           cancelAnimationFrame( timer );
-                       }).repeat(Infinity).delay(800).start();
+                       } ).repeat(Infinity).delay(800)
+                       .easing( me.easing )
+                       .start();
                        animate();
                     };
                     function animate(){
+                        console.log(1)
                         timer    = requestAnimationFrame( animate ); 
                         Tween.update();
                     };

@@ -25,7 +25,7 @@ define(
                 }
             };
 
-            dataFrame.org  = data;
+            dataFrame.org  = _.clone(data);
 
             var titles = data.shift(0);
 
@@ -40,7 +40,7 @@ define(
             var arr = []
             if(opt && opt.field){
                 arr = opt.field
-            }else{
+            } else {
                 arr = titles
             }
             

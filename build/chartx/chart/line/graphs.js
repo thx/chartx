@@ -61,6 +61,10 @@ define(
                     g._grow( callback );
                 });
             },
+            _getYaxisField : function( i ){
+                //这里要兼容从折柱混合图过来的情况
+                return this.root.yAxis.field ? this.root.yAxis.field[i] : this.root.yAxis.line.field[i]
+            },
             /*
              *@params opt
              *@params ind 最新添加的数据所在的索引位置
@@ -69,6 +73,7 @@ define(
                 var self = this;
                 _.deepExtend( this , opt );
                 var group = new Group(
+                    self._getYaxisField(ind),
                     ind , //_groupInd
                     self.opt,
                     self.ctx
@@ -111,9 +116,10 @@ define(
             },
             _widget:function( opt ){
                 var self  = this;
-                
+    
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var group = new Group(
+                        self._getYaxisField(a),
                         a , //_groupInd
                         self.opt,
                         self.ctx
