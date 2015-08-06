@@ -19,7 +19,7 @@ define(
                 this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
                 this.normalColor = '#E6E6E6';
-                this.progColor   = ['#58c4bc' , '#3399d5' , '#716fb4'];
+                this.progColor   = ['#58c4bc' , '#3399d5' , '#716fb4' , '#ccc'];
                 this.startAngle  = -90;
                 this.angleCount  = 360;
                 this.currRatio   = 0; //当前比率
@@ -43,7 +43,7 @@ define(
 
                 !this.r && (this.r = Math.min( this.width , this.height ) / 2);
 
-                this.tween = null;
+                this.tweens = [];
 
                 this._initFieldAndData(data);
 
@@ -51,8 +51,9 @@ define(
                 var me = this;
                 if(this.field && this.field.length > 1){
                     //重新计算dataCount
-                    this.dataCount = 0;
+                    
                     if( me.dataType == "absolute" ){
+                        this.dataCount = 0;
                         for( var f in me.dataFrame.data ){
                             this.dataCount += me.dataFrame.data[f][0];
                         } 
@@ -77,6 +78,12 @@ define(
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
                 this._tip._getDefaultContent = this._getTipsDefaultContent;
                 this.stage.addChild( this._tip.sprite );
+            },
+            _destroy : function(){
+                _.each( this.tweens , function( t ){
+                    t.stop();
+                    Tween.remove(t);
+                } );
             },
             _initFieldAndData : function( data ){
                 if( this.field ){
@@ -253,7 +260,7 @@ define(
                 times = s / 100 * 1000 ;
 
                 var growAnima = function(){
-                   self.tween = new Tween.Tween( { r : currRatio } )
+                   var tween = new Tween.Tween( { r : currRatio } )
                    .to( { r : s } , times )
                    .easing( Tween.Easing.Quadratic.Out )
                    .onUpdate( function (  ) {
@@ -274,6 +281,7 @@ define(
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
                    }).start();
+                   self.tweens.push( tween );
                    animate();
                 };
                 function animate(){

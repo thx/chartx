@@ -21,15 +21,15 @@ define(
             this._colors = ["#42a8d7",'#666666',"#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149" , "#4d7fff"];
     
             this.bar = {
-                width  : 25,
-                radius : 2
+                width  : 22,
+                radius : 4
             }
             this.text = {
-                    enabled   : 0,
-                    fillStyle : '#999999',
-                    fontSize  : 12,
-                    textAlign : "left",
-                    format    : null
+                enabled   : 0,
+                fillStyle : '#999999',
+                fontSize  : 12,
+                textAlign : "left",
+                format    : null
             }
 
             this.eventEnabled = true;
@@ -139,9 +139,8 @@ define(
                                 this.context.globalAlpha = 0;
                             });
                             hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
-                            hoverRect.on("panstart mouseover mousemove mouseout", function(e){
-                                e.tipsInfo = me._getInfoHandler( this , e );
-                                me._fireHandler(e);
+                            hoverRect.on("panstart mouseover mousemove mouseout click", function(e){
+                                e.eventInfo = me._getInfoHandler( this , e );
                             });  
                             
                         } else {
@@ -164,19 +163,27 @@ define(
                                 height   : rectH,
                                 fillStyle: fillStyle 
                             };
-                            if( !!me.bar.radius ){
+                            if( !!me.bar.radius && v == vLen-1 ){
                                 var radiusR   = Math.min( me.bar.width/2 , rectH );
                                 radiusR = Math.min( radiusR , me.bar.radius );
                                 rectCxt.radius = [radiusR , radiusR, 0 , 0];
-                                if( v > 0 ){
-                                    rectCxt.radius = [radiusR];
-                                }
                             };
                             var rectEl   = new Rect({
                                 context  : rectCxt
                             });
                             
                             groupH.addChild( rectEl );
+
+                            rectEl.iGroup = h, rectEl.iNode = i, rectEl.iLay = v;
+                            rectEl.on("panstart mouseover mousemove mouseout click", function(e){
+                                e.eventInfo = me._getInfoHandler( this , e );
+                                if( e.type == "mouseover" ){
+                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0.1;
+                                } 
+                                if( e.type == "mouseout" ){
+                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0;
+                                }
+                            });
 
                             //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
                             if( vLen == 1 ){
@@ -203,36 +210,6 @@ define(
                                 me.txtsSp.addChild(txt)
                             }
                         };
-
-                        //支柱感应区
-                        if(vLen > 0){
-                            var rectCxt = {
-                                x        : rectEl.context.x,
-                                y        : -parseInt(Math.abs(rectData.y)),
-                                width    : rectEl.context.width,
-                                height   : parseInt(Math.abs(rectData.y)),
-                                fillStyle: '#ff0000',
-                                globalAlpha : 0
-                            }
-
-                            var hoverRect= new Rect({
-                                id : "hbar_bigg_"+i+"smallg_"+h,
-                                context  : rectCxt
-                            });
-
-                            groupH.addChild( hoverRect );
-                            hoverRect.iGroup = h, hoverRect.iNode = i, hoverRect.iLay = -1
-                            hoverRect.on("panstart mouseover mousemove mouseout", function(e){
-                                e.tipsInfo = me._getInfoHandler( this , e );
-                                me._fireHandler(e);
-                                if( e.type == "mouseover" ){
-                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0.1;
-                                } 
-                                if( e.type == "mouseout" ){
-                                    this.parent.getChildById("bhr_"+this.iGroup).context.globalAlpha = 0;
-                                }
-                            })
-                        }
                     }
                 } );
 
@@ -284,22 +261,18 @@ define(
             _getNodeInfo : function(iGroup, iNode, iLay){
                 var arr = [];
                 var me  = this;
-                // console.log('===========================')
-                // console.log(iGroup, iNode, iLay)
                 var groups = me.data.length; 
                 _.each(me.data , function( h_group , i){
-                    var node
-                    var vLen   = h_group.length;
+                    var node;
+                    var vLen = h_group.length;
                     if( vLen == 0 ) return;
-                    var hLen   = h_group[0].length;
+                    var hLen = h_group[0].length;
                     for( h = 0 ; h < hLen ; h++ ){
                         if(h == iGroup){
                             for( v = 0 ; v < vLen ; v++ ){
-                                if(iNode == i || iNode == -1){
-                                    // console.log(i, v, h)
+                                if((iNode == i || iNode == -1) && (iLay == v || iLay == -1)){
                                     node = h_group[v][h]
                                     node.fillStyle = me._getColor( me.bar.fillStyle ,groups, vLen , i , h , v , node.value );
-                                    // node.
                                     arr.push(node)
                                 }
                             }
@@ -307,14 +280,6 @@ define(
                     }
                 })
                 return arr;
-            },
-            _fireHandler:function(e){
-                e.params  = {
-                    iGroup : e.tipsInfo.iGroup,
-                    iNode  : e.tipsInfo.iNode,
-                    iLay   : e.tipsInfo.iLay
-                }
-                this.root.fire( e.type , e );
             }
         }; 
     
