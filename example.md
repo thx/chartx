@@ -533,6 +533,19 @@ title:  chart demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/progress/morebar.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/progress/morebae.png">
+        </dt>
+        <dd>
+            <h5>
+            多圆环占比图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
 </div>
 
 ## 和旋图

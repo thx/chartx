@@ -5,20 +5,29 @@ define(
         "chartx/chart/index",
         "canvax/shape/Sector",
         "canvax/shape/Circle",
-        "canvax/animation/Tween"
+        "canvax/animation/Tween",
+        "chartx/utils/simple-data-format",
+        "chartx/components/legend/index",
+        'chartx/components/tips/tip'
     ],
-    function( Canvax , Chart ,Sector , Circle , Tween ){
+    function( Canvax , Chart ,Sector , Circle , Tween , DataFormat , Legend , Tip ){
      
         return Chart.extend({
             init : function( el ,  data , opts ){
+                this._opts       = opts;
 
-                this.barWidth    = 10;
+                this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
                 this.normalColor = '#E6E6E6';
-                this.progColor   = '#8d76c4';
+                this.progColor   = ['#58c4bc' , '#3399d5' , '#716fb4' , '#ccc'];
                 this.startAngle  = -90;
                 this.angleCount  = 360;
                 this.currRatio   = 0; //当前比率
+                this.barDis      = 4; //如果有多组progress，则代表两bar之间的间距
+                this.field       = null;
+            
+                this.dataType    = "account"; //默认是占比，如果是绝对值"absolute"则需要自己另外计算占比
+                this.dataCount   = 100;
 
                 //进度文字
                 this.text        = {
@@ -34,15 +43,105 @@ define(
 
                 !this.r && (this.r = Math.min( this.width , this.height ) / 2);
 
-                this.tween = null;
-            },
-            draw : function( opt ){
+                this.tweens = [];
 
-                var br  = this.r - ( this.barWidth - this.axisWidth )/2;
-                var br0 = this.r - this.axisWidth - ( this.barWidth - this.axisWidth )/2
-                this.stage.addChild( this._getCircle( this.startAngle , this.r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
-                this.stage.addChild( this._getCircle( this.startAngle + this.angleCount , this.r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
-                this.stage.addChild( new Sector({
+                this._initFieldAndData(data);
+
+                //legend;
+                var me = this;
+                if(this.field && this.field.length > 1){
+                    //重新计算dataCount
+                    
+                    if( me.dataType == "absolute" ){
+                        this.dataCount = 0;
+                        for( var f in me.dataFrame.data ){
+                            this.dataCount += me.dataFrame.data[f][0];
+                        } 
+                    }; 
+
+                    //设置legendOpt
+                    var legendOpt = _.deepExtend({
+                        label  : function( info ){
+                            return info.field+"："+parseInt(info.value / me.dataCount * 100)+"%";
+                        }
+                    } , this._opts.legend);
+                    
+                    this._legend = new Legend( this._getLegendData() , legendOpt );
+                    this.stage.addChild( this._legend.sprite );
+                    this._legend.pos( {
+                        x : this.width-this._legend.w,
+                        y : this.height/2 - this._legend.h/2
+                    } );
+                    this.width -= this._legend.w;
+                };
+
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
+                this._tip._getDefaultContent = this._getTipsDefaultContent;
+                this.stage.addChild( this._tip.sprite );
+            },
+            _destroy : function(){
+                _.each( this.tweens , function( t ){
+                    t.stop();
+                    Tween.remove(t);
+                } );
+            },
+            _initFieldAndData : function( data ){
+                if( this.field ){
+                    this.currRatio = {};
+                    if(  _.isString( this.field ) ){
+                        this.field = [ this.field ]
+                    }
+                    if(this.field.length > 1){
+                        this.text.enabled = 0;
+                    };
+                    //有field配置才需要处理data
+                    this.dataFrame = this._initData(data);
+                    
+                    var me = this;
+                    _.each( this.field , function( field ){
+                        me.currRatio[ field ] = 0;//me.dataFrame.data[field][0];
+                    } );    
+                    
+                };
+            },
+            _initData : DataFormat,
+            draw      : function(){
+                var me = this;
+                if( this.field ){
+ 
+                    _.each( this.field , function( field , i ){
+                        me.drawGroup(i);
+                        var s = me.dataFrame.data[field][0];
+                        if( me.dataType == "absolute" ){
+                            s = s / me.dataCount * 1000 / 10;
+                        }
+                        me.setRatio( s , field , i );
+                    } );
+                } else {
+                    this.drawGroup(0); 
+                }
+            },
+            getColor  : function( colors , i ){
+                if(_.isString(colors)){
+                    return colors;
+                }
+                if(_.isArray(colors)){
+                    return colors[i]
+                }
+            },
+            drawGroup : function( i ){
+
+                var sprite = new Canvax.Display.Sprite({
+                    id     : "group_"+i
+                });
+                this.stage.addChild( sprite );
+                var r   = this.r - (Math.max( this.barWidth , this.axisWidth )+this.barDis)*i;
+                var br  = r - ( this.barWidth - this.axisWidth )/2;
+                var br0 = r - this.axisWidth - ( this.barWidth - this.axisWidth )/2
+                sprite.addChild( this._getCircle( this.startAngle , r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
+                sprite.addChild( this._getCircle( this.startAngle + this.angleCount , r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
+                
+                sprite.addChild( new Sector({
                    context : {
                         x  : this.width / 2,
                         y  : this.height / 2,
@@ -56,29 +155,48 @@ define(
                       }
                 }) );
 
-
+                var progColor = this.getColor( this.progColor , i );
      
-                this._circle = this._getCircle( this.startAngle , this.r-this.barWidth/2 , this.barWidth/2 , this.progColor );
-                this.stage.addChild( this._circle );
-                this.stage.addChild( this._circle.clone() );
-                this.stage.addChild( new Sector({
-                   id : "speed",
+                this._circle = this._getCircle( this.startAngle , r-this.barWidth/2 , this.barWidth/2 , progColor );
+
+                this._circle.id = "circle_"+i;
+                sprite.addChild( this._circle );
+                sprite.addChild( this._circle.clone() );
+                var speedSec = new Sector({
+                   id : "speed_"+i,
                    context : {
                         x  : this.width  / 2,
                         y  : this.height / 2,
-                        r  : this.r,
-                        r0 : this.r - this.barWidth,
+                        r  : r,
+                        r0 : r - this.barWidth,
                         startAngle : this.startAngle ,
                         endAngle   : this.startAngle ,
-                        fillStyle  : this.progColor,
-                        lineJoin   : "round"
-                      }
-                }) );
+                        fillStyle  : progColor,
+                        lineJoin   : "round",
+                        cursor     : "pointer"
+                    }
+                });
+                speedSec.ind = i;
+                sprite.addChild( speedSec );
+
+                //bindevent
+                var me = this;
+                speedSec.on( "panstart mouseover" ,function(e){
+                    e.tipsInfo = me._setTipsInfo(this , e);
+                    me._tip.show( e );
+                });
+                speedSec.on( "panstart mousemove" ,function(e){
+                    e.tipsInfo = me._setTipsInfo(this , e);
+                    me._tip.move( e );
+                });
+                speedSec.on( "panstart mouseout" ,function(e){
+                    me._tip.hide( e );
+                });
 
                 if( this.text.enabled ){
                     this.stage.addChild( new Canvax.Display.Text( "0%",
                         {
-                            id  : "ratioText",
+                            id  : "centerRatioText",
                             context : {
                                 x  : this.width  / 2,
                                 y  : this.height / 2,
@@ -87,11 +205,23 @@ define(
                                 textAlign   : "center",
                                 textBaseline: "middle"
                             }
-                  	    })
-                    )
+                  	    }
+                    ));
                 };
-
-                this.currRatio && this.setRatio( this.currRatio );
+            },
+            _setTipsInfo : function( el , e ){
+                var i = el.ind;
+                var info = { dataCount : this.dataCount };
+                if( this.field ){
+                    info.field = this.field[i];
+                    info.value = this.dataFrame.data[ this.field[i] ][0]
+                } else {
+                    info.value 
+                }
+                return info;
+            },
+            _getTipsDefaultContent : function( info ){
+                return info.field+"："+parseInt(info.value / info.dataCount * 100)+"%";
             },
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;
@@ -106,34 +236,37 @@ define(
                 });
                 return c;
             },
-            _resetCirclePos : function( angle , r  ){
+            _resetCirclePos : function( angle , i ){
                 var radian = Math.PI / 180 * angle;
-                var r      = this.r-this.barWidth/2;
+                //var r      = this.r-this.barWidth/2;
+                var r      = this.r - (Math.max( this.barWidth , this.axisWidth )+this.barDis)*i - this.barWidth/2;
                 var x      = Math.cos( radian ) * r + this.width  / 2;
                 var y      = Math.sin( radian ) * r + this.height / 2;
-                this._circle.context.x = x;
-                this._circle.context.y = y;
+                var circle = this.stage.getChildById("group_"+i).getChildById("circle_"+i);
+                circle.context.x = x;
+                circle.context.y = y;
             },
             //设置比例0-100
-            _setRatio : function( s ){
+            _setRatio : function( s , i ){
                 var currAngle = s / 100 * this.angleCount + this.startAngle;
-                this.stage.getChildById("speed").context.endAngle = currAngle;
-                this._resetCirclePos( currAngle );
+                this.stage.getChildById("group_"+i).getChildById("speed_"+i).context.endAngle = currAngle;
+                this._resetCirclePos( currAngle , i );
             },
-            setRatio  : function( s ){
-                
+            _animate  : function( s , field , i ){
                 var self  = this;
                 var timer = null;
-                var times = 1000 * Math.abs(s - self.currRatio) / 100;
-                !self.drawed && (self.currRatio = 0, times = s / 100 * 1000 )
+                var currRatio = self._getCurrRatio( field );
+                var times = 1000 * Math.abs(s - currRatio) / 100;
+                times = s / 100 * 1000 ;
+
                 var growAnima = function(){
-                   self.tween = new Tween.Tween( { r : self.currRatio } )
+                   var tween = new Tween.Tween( { r : currRatio } )
                    .to( { r : s } , times )
                    .easing( Tween.Easing.Quadratic.Out )
                    .onUpdate( function (  ) {
                        
-                       self._setRatio( this.r );
-                       self.currRatio = this.r;
+                       self._setRatio( this.r , i );
+                       self._setCurrRatio( field , this.r );
 
                        self.fire("ratioChange" , { currRatio : this.r } );
 
@@ -141,13 +274,14 @@ define(
                        if( _.isFunction( self.text.format ) ){
                            txt = self.text.format( this.r );
                        }
-                       if(self.text.enabled){
-                           self.stage.getChildById("ratioText").resetText( txt );
+                       if( self.text.enabled ){
+                           self.stage.getChildById("centerRatioText").resetText( txt );
                        }
 
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
                    }).start();
+                   self.tweens.push( tween );
                    animate();
                 };
                 function animate(){
@@ -155,6 +289,46 @@ define(
                     Tween.update();
                 };
                 growAnima();
+
+            },
+            _getCurrRatio : function( field ){
+                if( this.field ){
+                    return this.currRatio[field];
+                }
+                return this.currRatio;
+            },
+            _setCurrRatio : function( field , ratio ){
+                if( this.field ){
+                    this.currRatio[field] = ratio;
+                };
+                this.currRatio = ratio;
+            },
+            setRatio  : function( s , field ){
+                var self  = this;
+                _.each( self.field , function( _field , i ){
+                    if( field ){
+                        if( field == _field ){
+                            setTimeout(function(){
+                                self._animate( s , field , i );
+                            } , 200*i);    
+                        }
+                    } else {
+                        self._animate( _field , i );
+                    }
+                } );
+            },
+            //只有field为多组数据的时候才需要legend
+            _getLegendData : function(){
+                var me   = this;
+                var data = [];
+                _.each(this.field , function( f , i ){
+                    data.push({
+                        field : f,
+                        value : me.dataFrame.data[f][0],
+                        fillStyle : me.getColor( me.progColor , i )
+                    });
+                });
+                return data;
             }
         });
      

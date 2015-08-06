@@ -31,16 +31,18 @@
     <tr>
         <td id="td-vl">
 <form><textarea id="code" name="code">
-var data    = [];
+var data    = [
+    [ "ratio" ],
+    [ 60      ]
+];
 var options = {
     //配置默认进度
     barWidth   : 20,
-    r          : 100
-    //currRatio  : 30
+    r          : 100,
+    field      : "ratio"
 }
-
 Chartx.progress("canvasTest" , data , options).then(function( chart ){
-    chart.setRatio( 60 );
+    //chart.setRatio( 60 );
 });
 </textarea></form>
 
