@@ -43,7 +43,7 @@ define(
 
                 !this.r && (this.r = Math.min( this.width , this.height ) / 2);
 
-                this.tween = null;
+                this.tweens = [];
 
                 this._initFieldAndData(data);
 
@@ -78,6 +78,12 @@ define(
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
                 this._tip._getDefaultContent = this._getTipsDefaultContent;
                 this.stage.addChild( this._tip.sprite );
+            },
+            _destroy : function(){
+                _.each( this.tweens , function( t ){
+                    t.stop();
+                    Tween.remove(t);
+                } );
             },
             _initFieldAndData : function( data ){
                 if( this.field ){
@@ -254,7 +260,7 @@ define(
                 times = s / 100 * 1000 ;
 
                 var growAnima = function(){
-                   self.tween = new Tween.Tween( { r : currRatio } )
+                   var tween = new Tween.Tween( { r : currRatio } )
                    .to( { r : s } , times )
                    .easing( Tween.Easing.Quadratic.Out )
                    .onUpdate( function (  ) {
@@ -275,6 +281,7 @@ define(
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
                    }).start();
+                   self.tweens.push( tween );
                    animate();
                 };
                 function animate(){

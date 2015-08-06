@@ -56,6 +56,7 @@ define(
             destroy: function(){
                 this.clean();
                 this.el.innerHTML = "";
+                this._destroy && this._destroy();
             },
             /*
              * 清除整个图表

@@ -317,6 +317,7 @@ define(
             destroy: function(){
                 this.clean();
                 this.el.innerHTML = "";
+                this._destroy && this._destroy();
             },
             /*
              * 清除整个图表
@@ -1482,7 +1483,7 @@ define(
                 this.dH = this._tipDom.offsetHeight;
             },
             _getContent : function(e){
-                _.deepExtend( this.tipsInfo , (e.tipsInfo || {}) );
+                _.deepExtend( this.tipsInfo , (e.tipsInfo || e.eventInfo || {}) );
                 var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
                 if( !tipsContent && tipsContent != 0 ){
                     tipsContent = this._getDefaultContent( this.tipsInfo );

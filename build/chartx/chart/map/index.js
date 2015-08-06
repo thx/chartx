@@ -335,20 +335,19 @@ define(
             _widget : function( features ){
                 var me = this;
                 var mapDataList = features;
+                var mapLen      = mapDataList.length;
 
                 var area_txt_sp;
                 if( me.area.text.enabled ){
                     area_txt_sp = new Canvax.Display.Sprite({
                         id   : "area_name"
                     });
-                }
-
+                };
+                var area_sp = new Canvax.Display.Sprite({
+                    id   : "areas"
+                });
 
                 _.each(mapDataList , function( md , i ){
-                    var area_sp = new Canvax.Display.Sprite({
-                        id   : "area_"+i,
-                        name : md.properties.name 
-                    });
 
                     var shapeCtx = {
                         x:0,
@@ -363,28 +362,32 @@ define(
                     };
 
                     var area   = new Path({
+                        hoverClone : false, 
                         context : shapeCtx
                     });
 
                     area_sp.addChild( area );
                     
+                    area.defInd  = i;
                     area.mapData = md
                     area.on("mouseover" , function(e){
+                        this.toFront();
                         if( e.fromTarget && e.fromTarget.type == "text" &&  e.fromTarget.text == this.mapData.name ){
                             return;
                         };
-                        me.fire("areaOver" , e);
+                        me.fire("areaover" , e);
                         me._tips.show( me._setTipsInfoHand(e , this.mapData) );
-                    });;
+                    });
                     area.on("mousemove" , function(e){
                         me._tips.move( me._setTipsInfoHand(e , this.mapData) );
                     });
 
                     area.on("mouseout" , function(e){
+                        this.toBack( mapLen - this.defInd );
                         if( e.toTarget && e.toTarget.type == "text" &&  e.toTarget.text == this.mapData.name ){
                             return;
                         };
-                        me.fire("areaOut" , e);
+                        me.fire("areaout" , e);
                         me._tips.hide( e ); 
                     });
 
@@ -398,7 +401,7 @@ define(
                             }
                         };
                         e.area = this.mapData;
-                        me.fire("areaClick" , e ); 
+                        me.fire("areaclick" , e ); 
                     });
 
                     if( me.area.text.enabled ){
@@ -437,10 +440,8 @@ define(
                         });
                         area_txt_sp.addChild( txt ); 
                     }
-
-                    me.sprite.addChild( area_sp ); 
-                    
                 });
+                me.sprite.addChild( area_sp ); 
                 area_txt_sp && me.sprite.addChild( area_txt_sp ); 
 
             },
