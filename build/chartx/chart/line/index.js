@@ -62,7 +62,7 @@ define(
                 this._isShow = false;
             },
             _getTipsPoint : function(e){
-                return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
+                return e.target.localToGlobal( e.eventInfo.nodesInfoList[e.eventInfo.iGroup] );
             },
             _resetStatus : function(e){
                 var tipsPoint = this._getTipsPoint(e);
@@ -109,7 +109,7 @@ define(
                     }
                 });
                 var self = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node ){
+                _.each( e.eventInfo.nodesInfoList , function( node ){
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y) 
@@ -137,12 +137,12 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
-                if( this._nodes.children.length != e.tipsInfo.nodesInfoList.length ){
+                if( this._nodes.children.length != e.eventInfo.nodesInfoList.length ){
                     this._nodes.removeAllChildren();
                     this._initNodes( e , tipsPoint );
                 }
                 this._nodes.context.x = parseInt(tipsPoint.x);
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;
                     csps.y           = e.target.context.height - Math.abs(node.y);
                 });
@@ -676,20 +676,20 @@ define(
                 self.sprite.addChild(self.induce);
     
                 self.induce.on("panstart mouseover", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
                 self.induce.on("panmove mousemove", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
                 self.induce.on("panend mouseout", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                     self.iGroup = 0, self.iNode = -1
                 })
                 self.induce.on("tap click", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
             },
@@ -720,8 +720,8 @@ define(
             _fireHandler : function(e){
 
                 e.params  = {
-                    iGroup : e.tipsInfo.iGroup,
-                    iNode  : e.tipsInfo.iNode
+                    iGroup : e.eventInfo.iGroup,
+                    iNode  : e.eventInfo.iNode
                 }
                 this.root.fire( e.type , e );
             }
@@ -1052,14 +1052,14 @@ define(
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on( "panstart mouseover" ,function(e){
-                    if( self._tip.enabled && e.tipsInfo.nodesInfoList.length > 0 ){
+                    if( self._tip.enabled && e.eventInfo.nodesInfoList.length > 0 ){
                         _setXaxisYaxisToTipsInfo.apply(self,[e]);
                         self._tip.show( e );
                     }
                 });
                 spt.on( "panmove mousemove" ,function(e){
                     if( self._tip.enabled ){
-                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                        if( e.eventInfo.nodesInfoList.length > 0 ){
                             _setXaxisYaxisToTipsInfo.apply(self,[e]);
                             if( self._tip._isShow ){
                                 self._tip.move( e );
@@ -1082,12 +1082,12 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo : function( e ){
-                e.tipsInfo.xAxis = {
+                e.eventInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
-                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
+                    value : this.dataFrame.xAxis.org[0][ e.eventInfo.iNode ]
                 }
                 var me = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     node.field = me.dataFrame.yAxis.field[ node._groupInd ];
                 } );
             },

@@ -62,7 +62,7 @@ define(
                 this._isShow = false;
             },
             _getTipsPoint : function(e){
-                return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
+                return e.target.localToGlobal( e.eventInfo.nodesInfoList[e.eventInfo.iGroup] );
             },
             _resetStatus : function(e){
                 var tipsPoint = this._getTipsPoint(e);
@@ -109,7 +109,7 @@ define(
                     }
                 });
                 var self = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node ){
+                _.each( e.eventInfo.nodesInfoList , function( node ){
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y) 
@@ -137,12 +137,12 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
-                if( this._nodes.children.length != e.tipsInfo.nodesInfoList.length ){
+                if( this._nodes.children.length != e.eventInfo.nodesInfoList.length ){
                     this._nodes.removeAllChildren();
                     this._initNodes( e , tipsPoint );
                 }
                 this._nodes.context.x = parseInt(tipsPoint.x);
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;
                     csps.y           = e.target.context.height - Math.abs(node.y);
                 });
