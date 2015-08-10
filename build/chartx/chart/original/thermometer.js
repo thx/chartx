@@ -1,10 +1,10 @@
 define(
-    "chartx/chart/thermometer/index",
+    "chartx/chart/original/thermometer",
     [
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        './graphs',
+        'chartx/chart/original/thermometer/graphs',
         "chartx/components/tips/tip",
         'chartx/utils/simple-data-format'
     ],

@@ -1,5 +1,5 @@
 define(
-    "chartx/chart/thermometer/graphs",
+    "chartx/chart/original/thermometer/graphs",
     [
         "canvax/index",
         "canvax/shape/Rect",
@@ -211,8 +211,8 @@ define(
                 var me = this
                 var index = $index
                 var icon  = _.clone( me.icon );
-                icon.x = me.pos.x + parseInt(me.disX / 2) + (me.itemW + me.itemDis) * $index ,
-                icon.y = me.pos.y + me.h - parseInt(me.disY / 2);
+                
+                icon.right  = me.w - (me.itemW + me.itemDis) * $index + 5,
                 icon.fillStyle = me.fillStyle[index];
                 icon.content   = me.icon.content( {
                     value  : me.org[index],
@@ -274,7 +274,7 @@ define(
 
                 if(icon.enabled){
                     var domel = document.createElement("div");
-                    domel.style.cssText=";position:absolute;bottom:0;px;right:"+icon.x+"px;";
+                    domel.style.cssText=";position:absolute;bottom:0;px;right:"+icon.right+"px;";
                     if(icon.content){
                         domel.innerHTML = icon.content;
                     }
