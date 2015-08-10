@@ -61,7 +61,7 @@ define(
             },
             _initData  : dataFormat,
             _initModule:function(){
-                this._graphs = new Graphs(this.graphs)
+                this._graphs = new Graphs(this.graphs , this.canvax.getDomContainer());
             },
             _startDraw : function( opt ){
                 this.graphsW = this.width - this.dis.left - this.dis.right

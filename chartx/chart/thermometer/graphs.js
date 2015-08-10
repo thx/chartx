@@ -9,8 +9,9 @@ define(
     ],
     function(Canvax , Rect , Text , Tween , Tools ){
  
-        var Graphs = function(opt){
+        var Graphs = function(opt,domRoot){
 
+            this.domRoot = domRoot;
             this.w = 0;
             this.h = 0;
 
@@ -37,7 +38,11 @@ define(
                 fillStyle : '',
                 fontSize  : 20,
                 textAlign : 'center',
-            }
+            };
+            this.icon = {
+                enabled : true,
+                content : function(){}
+            };
 
             this.disX      = 0                             //左右预留总距离
             this.disY      = 0                             //上下预留总距离
@@ -104,10 +109,12 @@ define(
                     var text = me._getText(i)
 
                     me._add({
+                        domRoot: me.domRoot,
                         data   : o,
                         index  : i,
                         sprite : item,
                         text   : text,
+                        icon   : me._getIcon(i),
                         pos    : {x:(me.itemW + me.itemDis) * i, y:0}
                     })
                 })
@@ -195,19 +202,35 @@ define(
                 }else{
                     text = _.clone(this.text)
                     text.x = parseInt(me.itemW / 2),  text.y = me.turn[index].initY
-                    text.content = me.org[index] + '%'
+                    text.content = me.org[index] 
                     text.fillStyle = me.fillStyle[index]
                 }
                 return text
             },
+            _getIcon:function($index){
+                var me = this
+                var index = $index
+                var icon  = _.clone( me.icon );
+                icon.x = me.pos.x + parseInt(me.disX / 2) + (me.itemW + me.itemDis) * $index ,
+                icon.y = me.pos.y + me.h - parseInt(me.disY / 2);
+                icon.fillStyle = me.fillStyle[index];
+                icon.content   = me.icon.content( {
+                    value  : me.org[index],
+                    fillStyle : icon.fillStyle,
+                    index  : index
+                } );
+                return icon; 
+            },
 
             _add : function($o){                           //单个温度计
-                // var me      = this
+                //var me      = this
                 var data    = $o.data
                 var index   = $o.index
                 var sprite  = $o.sprite 
                 var text    = $o.text
                 var pos     = $o.pos
+                var icon    = $o.icon
+                var domRoot = $o.domRoot
 
                 _.each(data , function(o, i){              //矩形
                     var rect = new Rect({
@@ -228,6 +251,8 @@ define(
                     var content = text.content
                     if( _.isFunction(text.format) ){
                         content = text.format({index:index, content:content});
+                    } else {
+                        content += "%"
                     }
                     var txt = new Text( content ,
                        {
@@ -245,7 +270,18 @@ define(
                     }
             
                     sprite.addChild(txt)
-                }
+                };
+
+                if(icon.enabled){
+                    var domel = document.createElement("div");
+                    domel.style.cssText=";position:absolute;bottom:0;px;right:"+icon.x+"px;";
+                    if(icon.content){
+                        domel.innerHTML = icon.content;
+                    }
+                    domRoot.appendChild(domel);
+                };
+
+                
                 
                 sprite.context.x = pos.x;
                 sprite.context.y = pos.y;
