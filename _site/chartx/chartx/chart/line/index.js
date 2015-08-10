@@ -317,14 +317,14 @@ define(
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on( "panstart mouseover" ,function(e){
-                    if( self._tip.enabled && e.tipsInfo.nodesInfoList.length > 0 ){
+                    if( self._tip.enabled && e.eventInfo.nodesInfoList.length > 0 ){
                         _setXaxisYaxisToTipsInfo.apply(self,[e]);
                         self._tip.show( e );
                     }
                 });
                 spt.on( "panmove mousemove" ,function(e){
                     if( self._tip.enabled ){
-                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                        if( e.eventInfo.nodesInfoList.length > 0 ){
                             _setXaxisYaxisToTipsInfo.apply(self,[e]);
                             if( self._tip._isShow ){
                                 self._tip.move( e );
@@ -347,12 +347,12 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo : function( e ){
-                e.tipsInfo.xAxis = {
+                e.eventInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
-                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
+                    value : this.dataFrame.xAxis.org[0][ e.eventInfo.iNode ]
                 }
                 var me = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     node.field = me.dataFrame.yAxis.field[ node._groupInd ];
                 } );
             },

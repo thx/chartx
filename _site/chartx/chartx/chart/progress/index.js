@@ -49,9 +49,8 @@ define(
 
                 //legend;
                 var me = this;
-                if(this.field && this.field.length > 1){
+                if(this.field && this.field.length >= 1){
                     //重新计算dataCount
-                    
                     if( me.dataType == "absolute" ){
                         this.dataCount = 0;
                         for( var f in me.dataFrame.data ){
@@ -108,7 +107,6 @@ define(
             draw      : function(){
                 var me = this;
                 if( this.field ){
- 
                     _.each( this.field , function( field , i ){
                         me.drawGroup(i);
                         var s = me.dataFrame.data[field][0];
@@ -267,7 +265,7 @@ define(
                        
                        self._setRatio( this.r , i );
                        self._setCurrRatio( field , this.r );
-
+//console.log(this.r)
                        self.fire("ratioChange" , { currRatio : this.r } );
 
                        var txt = parseInt( this.r ) + "%";

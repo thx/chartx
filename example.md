@@ -620,6 +620,22 @@ title:  chart demos
 
 ## 自有原创图表
 
+<div class="charts">
+    <a target="_blank" href="./demo/original/thermometer/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/original/thermometer/index.png">
+        </dt>
+        <dd>
+            <h5>
+            基础温度计图，适用于男，女，家庭这样的数据
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 ### 标签星系图
 
 
