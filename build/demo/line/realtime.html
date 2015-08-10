@@ -55,7 +55,12 @@ var options = {
         field : "xfield"
     },
     markPoint : {
-        enabled : true
+        enabled : true,
+        filter  : function(  ){
+            if(this.markTarget != "uv"){
+                this.destroy();
+            }
+        }
     }
 };
 //Chartx.line开始初始化chart实例

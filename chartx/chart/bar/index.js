@@ -140,12 +140,12 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo : function( e ){
-                e.tipsInfo.xAxis = {
+                e.eventInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
-                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iGroup ]
+                    value : this.dataFrame.xAxis.org[0][ e.eventInfo.iGroup ]
                 }
                 var me = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     if(_.isArray(me.dataFrame.yAxis.field[node.iNode])){
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
                     }else{
@@ -209,12 +209,15 @@ define(
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.show( e );
                 });
-                this._graphs.sprite.on( "panstart mousemove" ,function(e){
+                this._graphs.sprite.on( "panmove mousemove" ,function(e){
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.move( e );
                 });
-                this._graphs.sprite.on( "panstart mouseout" ,function(e){
+                this._graphs.sprite.on( "panend mouseout" ,function(e){
                     me._tip.hide( e );
+                });
+                this._graphs.sprite.on( "tap click" ,function(e){
+                    me.fire("click" , e);
                 });
             }
         });

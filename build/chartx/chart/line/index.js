@@ -62,7 +62,7 @@ define(
                 this._isShow = false;
             },
             _getTipsPoint : function(e){
-                return e.target.localToGlobal( e.tipsInfo.nodesInfoList[e.tipsInfo.iGroup] );
+                return e.target.localToGlobal( e.eventInfo.nodesInfoList[e.eventInfo.iGroup] );
             },
             _resetStatus : function(e){
                 var tipsPoint = this._getTipsPoint(e);
@@ -109,7 +109,7 @@ define(
                     }
                 });
                 var self = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node ){
+                _.each( e.eventInfo.nodesInfoList , function( node ){
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y) 
@@ -137,12 +137,12 @@ define(
             },
             _resetNodesStatus : function(e , tipsPoint){
                 var self = this;
-                if( this._nodes.children.length != e.tipsInfo.nodesInfoList.length ){
+                if( this._nodes.children.length != e.eventInfo.nodesInfoList.length ){
                     this._nodes.removeAllChildren();
                     this._initNodes( e , tipsPoint );
                 }
                 this._nodes.context.x = parseInt(tipsPoint.x);
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;
                     csps.y           = e.target.context.height - Math.abs(node.y);
                 });
@@ -204,7 +204,8 @@ define(
     ], 
     function( Canvax, BrokenLine, Circle, Path, Tools , ColorFormat , Tween ){
         window.Canvax = Canvax
-        var Group = function( a , opt , ctx){
+        var Group = function( field , a , opt , ctx){
+            this.field      = field;//_groupInd在yAxis.field中对应的值
             this._groupInd  = a;
             this._nodeInd   = -1;
             this.ctx        = ctx;
@@ -219,8 +220,7 @@ define(
                 strokeStyle : this.colors[ this._groupInd ],
                 lineWidth   : 2,
                 smooth      : true
-            }
-
+            };
 
             this.node     = {//节点 
                 enabled     : 1,         //是否有
@@ -229,17 +229,16 @@ define(
                 fillStyle   : '#ffffff',
                 strokeStyle : null,
                 lineWidth   : 3
-            }
+            };
     
             this.fill    = {//填充
                 fillStyle   : null,
                 alpha       : 0.1
-            }
+            };
     
             this.dataOrg    = [];   //data的原始数据
             this.data       = [];   //data会在wight中过滤一遍，把两边的空节点剔除
             this.sprite     = null;                        
-           
 
             this._pointList = [];//brokenline最终的状态
             this._currPointList = [];//brokenline 动画中的当前状态
@@ -590,6 +589,10 @@ define(
                     g._grow( callback );
                 });
             },
+            _getYaxisField : function( i ){
+                //这里要兼容从折柱混合图过来的情况
+                return this.root.yAxis.field ? this.root.yAxis.field[i] : this.root.yAxis.line.field[i]
+            },
             /*
              *@params opt
              *@params ind 最新添加的数据所在的索引位置
@@ -598,6 +601,7 @@ define(
                 var self = this;
                 _.deepExtend( this , opt );
                 var group = new Group(
+                    self._getYaxisField(ind),
                     ind , //_groupInd
                     self.opt,
                     self.ctx
@@ -640,9 +644,10 @@ define(
             },
             _widget:function( opt ){
                 var self  = this;
-                
+    
                 for(var a = 0,al = self.data.length; a < al; a++){
                     var group = new Group(
+                        self._getYaxisField(a),
                         a , //_groupInd
                         self.opt,
                         self.ctx
@@ -671,20 +676,20 @@ define(
                 self.sprite.addChild(self.induce);
     
                 self.induce.on("panstart mouseover", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
                 self.induce.on("panmove mousemove", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
                 self.induce.on("panend mouseout", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                     self.iGroup = 0, self.iNode = -1
                 })
                 self.induce.on("tap click", function(e){
-                    e.tipsInfo = self._getInfoHandler(e);
+                    e.eventInfo = self._getInfoHandler(e);
                     self._fireHandler(e)
                 })
             },
@@ -715,8 +720,8 @@ define(
             _fireHandler : function(e){
 
                 e.params  = {
-                    iGroup : e.tipsInfo.iGroup,
-                    iNode  : e.tipsInfo.iNode
+                    iGroup : e.eventInfo.iGroup,
+                    iNode  : e.eventInfo.iNode
                 }
                 this.root.fire( e.type , e );
             }
@@ -1031,8 +1036,9 @@ define(
                 require(["chartx/components/markpoint/index"] , function( MarkPoint ){
                     var lastNode  = g._circles.children[ g._circles.children.length - 1 ];
                     var mpCtx     = { 
-                        point    : lastNode.localToGlobal(),
-                        r        : lastNode.context.r+1,
+                        markTarget  : g.field,
+                        point       : lastNode.localToGlobal(),
+                        r           : lastNode.context.r+1,
                         globalAlpha : 0.8,
                         realTime : true
                     };
@@ -1046,14 +1052,14 @@ define(
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on( "panstart mouseover" ,function(e){
-                    if( self._tip.enabled && e.tipsInfo.nodesInfoList.length > 0 ){
+                    if( self._tip.enabled && e.eventInfo.nodesInfoList.length > 0 ){
                         _setXaxisYaxisToTipsInfo.apply(self,[e]);
                         self._tip.show( e );
                     }
                 });
                 spt.on( "panmove mousemove" ,function(e){
                     if( self._tip.enabled ){
-                        if( e.tipsInfo.nodesInfoList.length > 0 ){
+                        if( e.eventInfo.nodesInfoList.length > 0 ){
                             _setXaxisYaxisToTipsInfo.apply(self,[e]);
                             if( self._tip._isShow ){
                                 self._tip.move( e );
@@ -1076,12 +1082,12 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo : function( e ){
-                e.tipsInfo.xAxis = {
+                e.eventInfo.xAxis = {
                     field : this.dataFrame.xAxis.field,
-                    value : this.dataFrame.xAxis.org[0][ e.tipsInfo.iNode ]
+                    value : this.dataFrame.xAxis.org[0][ e.eventInfo.iNode ]
                 }
                 var me = this;
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     node.field = me.dataFrame.yAxis.field[ node._groupInd ];
                 } );
             },

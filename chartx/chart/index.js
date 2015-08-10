@@ -49,7 +49,6 @@ define(
         CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
             init   : function(){},
             dataFrame : null, //每个图表的数据集合 都 存放在dataFrame中。
-            drawed : false, //如果有执行过drawed，则为true
             draw   : function(){},
             /*
              * chart的销毁 
@@ -57,6 +56,7 @@ define(
             destroy: function(){
                 this.clean();
                 this.el.innerHTML = "";
+                this._destroy && this._destroy();
             },
             /*
              * 清除整个图表

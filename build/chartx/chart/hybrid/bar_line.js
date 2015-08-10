@@ -161,7 +161,7 @@ define(
                         _nodesInfoList.push(o);
                     }
                 };
-                e.tipsInfo.nodesInfoList = e.tipsInfo.nodesInfoList.concat( _nodesInfoList );
+                e.eventInfo.nodesInfoList = e.eventInfo.nodesInfoList.concat( _nodesInfoList );
 
                 return { 
                     x     : this._xAxis.sprite.localToGlobal({x : this._xAxis.data[igroup].x , y:0}).x,
