@@ -21,10 +21,10 @@ define(
 
             this.turn = []                                 //记录文字坐标等信息的集合
 
-            this.fillStyle = ['#0098d8','#ff633d','#7867b4']
+            this.fillStyle = ['#0098d8','#ff633d','#7867b4','#f4c646' ]
 
             this.back = {
-                fillStyle : ['#f3f3f5','#f3f3f5','#f3f3f5']
+                fillStyle : ['#f3f3f5','#f3f3f5','#f3f3f5','#f3f3f5','#f3f3f5']
             }
             
             this.textData = []                             //文字集合
@@ -36,7 +36,7 @@ define(
                 y         : 0,
                 content   : '',
                 fillStyle : '',
-                fontSize  : 20,
+                fontSize  : 15,
                 textAlign : 'center',
             };
             this.icon = {
@@ -95,7 +95,7 @@ define(
 
                 if(me.data.length > 0 && _.isArray(me.data[0])){     //如果是直接数据传入
 
-                }else{                                               //如果传入的是比例集合
+                } else {                                               //如果传入的是比例集合
                     var o = me._counts()
                     me.disX = o.disX, me.disY = o.disY
                     me.data = o.data
