@@ -282,7 +282,6 @@ define(
                 };
 
                 
-                
                 sprite.context.x = pos.x;
                 sprite.context.y = pos.y;
             }
