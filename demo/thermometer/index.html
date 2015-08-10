@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- funnel</title>
+<title>xChart demo -- thermometer</title>
 <script type="text/javascript" src="../../lib/sea.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -34,22 +34,45 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["vv"    ,"uv" ,"pv"],
-    [ 1      , 100 , 80 ],
-    [ 2      , 80  , 60 ],
-    [ 3      , 60  , 40 ],
-    [ 4      , 40  , 20 ],
-    [ 5      , 20  , 10 ]
+    ["scale1","scale2"],
+    [70,60],
+    [20,30],
+    [10,10]//,
+    //[10,10],
+    //[10,10]
 ];
 
 //chart的配置信息
 var options = {
-    field : ["pv","uv"],
+    field : ["scale2"],
+
+    dis   :{
+        left : 50
+    },
+    
     graphs: {
+        //sDisXAndItemW : 1
+        //fillStyle : ['#0098d8','#ff633d','#7867b4'],
+        //back :{
+          //  fillStyle : ['#f3f3f5','#f3f3f5','#f3f3f5']
+        //},
+        //text : {
+          //  fillStyle : '#ff0000',
+          //  format : function(){
+          //      return '100%'
+          //  }
+        //}
     }
+    
 };
 //Chartx.funnel开始初始化chart实例
-var chartx = Chartx.funnel("canvasTest" , data , options);
+var chartx = Chartx.thermometer("canvasTest" , data , options);
+
+chartx.then(function( thermometer ){
+    thermometer.on( "complete" , function( e ){
+        console.log('aaa')
+    });
+});
 </textarea></form>
 
         </td>
@@ -58,13 +81,13 @@ var chartx = Chartx.funnel("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>漏斗图（line chart）- 基础漏斗图</h4>
+                <h4>温度计图（thermometer chart）- 基础温度计图</h4>
                 <p>
                     联系人：@释剑 @逢春 
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
+                <div id="canvasTest" style='width:300px;height:200px;'></div>
             </div>
 
             </div>
