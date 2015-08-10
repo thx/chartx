@@ -1,12 +1,12 @@
 window.Chartx || (Chartx = {
-    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'venn' , 'hybrid','funnel'],
+    _charts : ['bar' , 'force' , 'line' , 'map' , 'pie' , 'planet' , 'progress' , 'radar' , 'scat' , 'topo' , 'chord' , 'venn' , 'hybrid','funnel','thermometer'],
     canvax  : null,
     create  : {},
     _start   : function () {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.08.05";
+        var canvaxVersion = "2015.08.10";
 
         
 
