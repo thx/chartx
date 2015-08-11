@@ -121,6 +121,8 @@ define(
 
                 me.sprite.context.x = me.pos.x + parseInt(me.disX / 2)
                 me.sprite.context.y = me.pos.y + parseInt(me.disY / 2)
+
+                me._grow();
             },
 
             _counts:function(){                            //将多个比例集合实际对象集合
@@ -185,7 +187,8 @@ define(
                         y         : a * (singleH + signleDisY),
                         width     : w,
                         height    : singleH,
-                        fillStyle : fillStyle
+                        fillStyle : fillStyle,
+                        backStyle : this.back.fillStyle[index]
                     }
                     tmpData.push(o)
                 }
@@ -221,7 +224,39 @@ define(
                 } );
                 return icon; 
             },
+            _grow : function(){
+                var me  = this;
+                var preCount = 0;
+                _.each( this.sprite.children , function( group , i ){
+                    var childLen = group.children.length - 1;
+                    var activeLen = 0;
+                    _.each( group.children , function( c ){
+                        if( c.active ){
+                            activeLen ++;
+                        }
+                    } );
 
+                    var timer   = null;
+                    var currInd = 0;
+                                   
+                    setTimeout(function(){
+                        timer = setInterval(function(){
+                            currInd ++;
+                            if( currInd > activeLen ){
+                                clearInterval(timer);
+                                return
+                            };
+                            var index = Math.round( childLen - currInd );
+                            var rect  = group.getChildAt( index );
+                            rect.context.fillStyle = rect.fillStyle;
+                        } , 30);
+                    } , preCount*30 );
+
+                    preCount += activeLen;
+
+
+                } );
+            },
             _add : function($o){                           //单个温度计
                 //var me      = this
                 var data    = $o.data
@@ -240,12 +275,16 @@ define(
                             y           : o.y || 0,
                             width       : o.width  || 100,
                             height      : o.height || 20,
-                            fillStyle   : o.fillStyle || '#7471b0',
+                            fillStyle   : o.backStyle,//o.fillStyle || '#7471b0',
                             radius      : o.radius || [o.height / 2, o.height / 2]
                         }
                     });
+                    if( o.fillStyle != o.backStyle ){
+                        rect.active = true;
+                        rect.fillStyle = o.fillStyle;
+                    }   
                     sprite.addChild(rect)
-                })
+                });
 
                 if(text.enabled){
                     var content = text.content
