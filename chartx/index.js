@@ -84,7 +84,7 @@ window.Chartx || (Chartx = {
             _destroy : false,
             chart    : null,
             destroy  : function(){
-                console.log("chart destroy!");
+                //console.log("chart destroy!");
                 this._destroy = true;
                 if( this.chart ){
                     this.chart.destroy();

@@ -144,7 +144,7 @@ define(
                        animate();
                     };
                     function animate(){
-                        console.log(1)
+                        //console.log(1)
                         timer    = requestAnimationFrame( animate ); 
                         Tween.update();
                     };

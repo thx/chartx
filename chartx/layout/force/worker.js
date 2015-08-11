@@ -68,7 +68,7 @@ var PhysicsWorker = function(){
             _physicsInterval = setInterval(that.tick, _timeout);
         },
         stop:function(){
-            console.log("stop webWorker");
+            //console.log("stop webWorker");
             postMessage({type:'stopping'});
             if (_physicsInterval===null) return;
             clearInterval(_physicsInterval);
