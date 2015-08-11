@@ -71,11 +71,10 @@ window.Chartx || (Chartx = {
             _destroy : false,
             chart    : null,
             destroy  : function(){
-                return;
                 //console.log("chart destroy!");
                 this._destroy = true;
                 if( this.chart ){
-                    this.chart.destroy();
+                    //this.chart.destroy();
                     delete this.chart;
                     promise = null;
                 }
@@ -886,7 +885,7 @@ define(
                             y : me.tag.height / 2,
                             textAlign : "left",
                             textBaseline : "middle",
-                            fillStyle : obj.fillStyle
+                            fillStyle : "#333" //obj.fillStyle
                         }
                     } );
                     sprite.addChild(txt);
