@@ -61,7 +61,11 @@ define(
                     //设置legendOpt
                     var legendOpt = _.deepExtend({
                         label  : function( info ){
-                            return info.field+"："+parseInt(info.value / me.dataCount * 100)+"%";
+                            var value = info.value;
+                            if( me.dataType == "absolute" ){
+                                value = (info.value / me.dataCount * 100).toFixed(2);
+                            }
+                            return info.field+"："+ value +"%";
                         }
                     } , this._opts.legend);
                     
@@ -111,7 +115,7 @@ define(
                         me.drawGroup(i);
                         var s = me.dataFrame.data[field][0];
                         if( me.dataType == "absolute" ){
-                            s = s / me.dataCount * 1000 / 10;
+                            s = (s / me.dataCount * 1000 / 10).toFixed(2);
                         }
                         me.setRatio( s , field , i );
                     } );
@@ -219,7 +223,11 @@ define(
                 return info;
             },
             _getTipsDefaultContent : function( info ){
-                return info.field+"："+parseInt(info.value / info.dataCount * 100)+"%";
+                var value = info.value;
+                if( this.dataType == "absolute" ){
+                    value = (info.value / this.dataCount * 100).toFixed(2);
+                };
+                return info.field+"："+ value +"%";
             },
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;
@@ -268,7 +276,7 @@ define(
 //console.log(this.r)
                        self.fire("ratioChange" , { currRatio : this.r } );
 
-                       var txt = parseInt( this.r ) + "%";
+                       var txt = this.r + "%";
                        if( _.isFunction( self.text.format ) ){
                            txt = self.text.format( this.r );
                        }
