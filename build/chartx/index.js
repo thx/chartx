@@ -1483,7 +1483,7 @@ define(
                 this.dH = this._tipDom.offsetHeight;
             },
             _getContent : function(e){
-                _.deepExtend( this.tipsInfo , (e.tipsInfo || e.eventInfo || {}) );
+                _.extend( this.tipsInfo , (e.tipsInfo || e.eventInfo || {}) );
                 var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
                 if( !tipsContent && tipsContent != 0 ){
                     tipsContent = this._getDefaultContent( this.tipsInfo );
@@ -1807,9 +1807,17 @@ define(
                         //线条
                         var line = new Line({
                             context : {
+                                /*
                                 xStart      : x,
                                 yStart      : this.disY,
                                 xEnd        : x,
+                                yEnd        : this.line.height + this.disY,
+                                lineWidth   : this.line.width,
+                                strokeStyle : this.line.strokeStyle
+                                */
+                                x           : x,
+                                y           : this.disY,
+                                xEnd        : 0,
                                 yEnd        : this.line.height + this.disY,
                                 lineWidth   : this.line.width,
                                 strokeStyle : this.line.strokeStyle
