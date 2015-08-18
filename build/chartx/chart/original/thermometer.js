@@ -23,7 +23,7 @@ define(
                 this.dis = {                         //背景与容器上下左右距离
                     left  : 50,
                     right : 0,
-                    top   : 0,
+                    top   : 20,
                     bottom: 0
                 },
 

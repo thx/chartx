@@ -273,10 +273,9 @@ define(
                        
                        self._setRatio( this.r , i );
                        self._setCurrRatio( field , this.r );
-//console.log(this.r)
                        self.fire("ratioChange" , { currRatio : this.r } );
 
-                       var txt = this.r + "%";
+                       var txt = this.r.toFixed(2) + "%";
                        if( _.isFunction( self.text.format ) ){
                            txt = self.text.format( this.r );
                        }

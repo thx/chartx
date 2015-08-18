@@ -86,7 +86,6 @@ define(
                 }
             },
             draw : function(data , opt){
-                // console.log(data)
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
                     return;
@@ -249,7 +248,6 @@ define(
                 }
             },
             _getInfoHandler:function( target ){
-                // console.log(e.target.iLay)
                 var node = {
                     iGroup        : target.iGroup,
                     iNode         : target.iNode,
