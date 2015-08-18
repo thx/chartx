@@ -343,6 +343,9 @@ define(
                         self._tip.hide( e );
                     }
                 });
+                spt.on("click" , function( e ){
+                    self.fire("click" , e.eventInfo);
+                });
             },
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
