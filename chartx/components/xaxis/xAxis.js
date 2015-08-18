@@ -231,9 +231,17 @@ define(
                         //线条
                         var line = new Line({
                             context : {
+                                /*
                                 xStart      : x,
                                 yStart      : this.disY,
                                 xEnd        : x,
+                                yEnd        : this.line.height + this.disY,
+                                lineWidth   : this.line.width,
+                                strokeStyle : this.line.strokeStyle
+                                */
+                                x           : x,
+                                y           : this.disY,
+                                xEnd        : 0,
                                 yEnd        : this.line.height + this.disY,
                                 lineWidth   : this.line.width,
                                 strokeStyle : this.line.strokeStyle

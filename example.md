@@ -634,6 +634,17 @@ title:  chart demos
         </dd>
     </dl>
     </a>
+    
+    <a target="_blank" href="./demo/original/sector/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/original/sector/index.png">
+        </dt>
+        <dd>
+            <h5>扇形一维比例图</h5>
+        </dd>
+    </dl>
+    </a>
 
     <a target="_blank" href="./demo/planet/index.html">
     <dl class="chart">
