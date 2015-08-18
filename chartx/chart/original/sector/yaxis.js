@@ -1,5 +1,5 @@
 define(
-    "chartx/chart/original/sector/yAxis",
+    "chartx/chart/original/sector/yaxis",
     [
         "chartx/components/yaxis/yAxis"
     ],
