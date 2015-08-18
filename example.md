@@ -536,7 +536,7 @@ title:  chart demos
     <a target="_blank" href="./demo/progress/morebar.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/progress/morebae.png">
+        <img src="./assets/chart/progress/morebar.png">
         </dt>
         <dd>
             <h5>
@@ -627,19 +627,14 @@ title:  chart demos
         <img src="./assets/chart/original/thermometer/index.png">
         </dt>
         <dd>
-            <h5>
+            <h5>温度计图占比</h5>
+            <span>
             基础温度计图，适用于男，女，家庭这样的数据
-            </h5>
+            </span>
         </dd>
     </dl>
     </a>
 
-</div>
-
-### 标签星系图
-
-
-<div class="charts">
     <a target="_blank" href="./demo/planet/index.html">
     <dl class="chart">
         <dt>
@@ -652,9 +647,25 @@ title:  chart demos
         </dd>
     </dl>
     </a>
+    
+    <a target="_blank" href="./demo/original/rel-contrast/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/original/rel-contrast/index.png">
+        </dt>
+        <dd>
+            <h5>
+            多触点关联图
+            </h5>
+            <span>
+            分两组做关联，适合做流向示意图
+            </span>
+        </dd>
+    </dl>
+    </a>
+
 
 </div>
 
 
-### 充值+进度图表
 
