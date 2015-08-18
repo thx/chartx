@@ -87,7 +87,7 @@ define(
                             y : me.tag.height / 2,
                             textAlign : "left",
                             textBaseline : "middle",
-                            fillStyle : obj.fillStyle
+                            fillStyle : "#333" //obj.fillStyle
                         }
                     } );
                     sprite.addChild(txt);

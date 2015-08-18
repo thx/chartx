@@ -49,6 +49,7 @@ define(
             this.items     = 0                             //有几个温度计
             this.itemDis   = 0                             //温度计之间的距离
             this.itemW     = 0                             //每个温度计的宽
+            this.itemMaxW  = 50                            //每个温度计的最大宽
             this.itemTotal = 20                            //每个温度计的总刻度
 
             this.sDisXAndItemW   = 1                     //温度计之间的距离 几乎是温度计本身宽度的 80%
@@ -72,21 +73,6 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
-            getXYInfo:function(){
-                var me = this
-                var arr = []
-
-                _.each(me.data , function(o, i){
-                    var o = {
-                        x : me.sprite.context.x + (me.itemW + me.itemDis) * i,
-                        y : me.sprite.context.y,
-                        w : me.itemW,
-                        h : me.h - me.disY
-                    }
-                    arr.push(o)
-                })
-                return arr
-            },
             draw : function(opt){
                 var me    = this;
                 _.deepExtend(me , opt);
@@ -101,6 +87,9 @@ define(
                     me.data = o.data
                     me.turn = o.turn
                 }
+
+                me.sprite.context.x = me.pos.x + parseInt(me.disX / 2)
+                me.sprite.context.y = me.pos.y + parseInt(me.disY / 2)
 
                 _.each(me.data , function(o, i){                     //画多个温度计
                     var item = new Canvax.Display.Sprite({ id : 'item_' + i});
@@ -119,8 +108,7 @@ define(
                     })
                 })
 
-                me.sprite.context.x = me.pos.x + parseInt(me.disX / 2)
-                me.sprite.context.y = me.pos.y + parseInt(me.disY / 2)
+                me._grow();
             },
 
             _counts:function(){                            //将多个比例集合实际对象集合
@@ -131,8 +119,12 @@ define(
 
                 //温度计之间的距离 几乎是温度计本身宽度的 80%
                 me.itemW = parseInt(me.w / (me.items + (me.items - 1) * me.sDisXAndItemW ))
+
+                me.itemW = Math.min(me.itemW, me.itemMaxW)
                 
-                me.itemDis = parseInt((me.w - (me.itemW * me.items)) / (me.items - 1)) 
+                me.itemDis = parseInt((me.w - (me.itemW * me.items)) / (me.items - 1))
+                if(isNaN(me.itemDis))
+                    me.itemDis = 0
 
                 //左右两端预留距离
                 var disY = 0
@@ -169,13 +161,15 @@ define(
                 //上下两端预留距离
                 var disY = h - ((singleH * itemTotal) + (signleDisY * (itemTotal - 1)))
                 
-                var tmpData = [], initTurnY = 0
+                var tmpData = [], initTurnY = 0, isTurn = false
+
                 for(var a = 0, al = itemTotal; a < al; a++){
 
                     var fillStyle = this.back.fillStyle[index]
                     if(a >= (itemTotal - itemTurn)){
                         fillStyle = this.fillStyle[index]
-                        if(!initTurnY){
+                        if(!isTurn){
+                            isTurn = true
                             initTurnY = a * (singleH + signleDisY)
                         }
                     }
@@ -185,7 +179,8 @@ define(
                         y         : a * (singleH + signleDisY),
                         width     : w,
                         height    : singleH,
-                        fillStyle : fillStyle
+                        fillStyle : fillStyle,
+                        backStyle : this.back.fillStyle[index]
                     }
                     tmpData.push(o)
                 }
@@ -211,8 +206,10 @@ define(
                 var me = this
                 var index = $index
                 var icon  = _.clone( me.icon );
-                
-                icon.right  = me.w - (me.itemW + me.itemDis) * $index + 5,
+                // icon.right  = me.w - (me.itemW + me.itemDis) * $index + 5,
+                // debugger
+                // icon.right  = me.w - (me.pos.x + parseInt(me.disX / 2) + (me.itemW + me.itemDis) * $index) + me.itemW
+                icon.right = me.w - parseInt(me.disX / 2) - ((me.itemW + me.itemDis) * $index) + 3
                 icon.fillStyle = me.fillStyle[index];
                 icon.content   = me.icon.content( {
                     value  : me.org[index],
@@ -221,7 +218,39 @@ define(
                 } );
                 return icon; 
             },
+            _grow : function(){
+                var me  = this;
+                var preCount = 0;
+                _.each( this.sprite.children , function( group , i ){
+                    var childLen = group.children.length - 1;
+                    var activeLen = 0;
+                    _.each( group.children , function( c ){
+                        if( c.active ){
+                            activeLen ++;
+                        }
+                    } );
 
+                    var timer   = null;
+                    var currInd = 0;
+                                   
+                    setTimeout(function(){
+                        timer = setInterval(function(){
+                            currInd ++;
+                            if( currInd > activeLen ){
+                                clearInterval(timer);
+                                return
+                            };
+                            var index = Math.round( childLen - currInd );
+                            var rect  = group.getChildAt( index );
+                            rect.context.fillStyle = rect.fillStyle;
+                        } , 30);
+                    } , preCount*30 );
+
+                    preCount += activeLen;
+
+
+                } );
+            },
             _add : function($o){                           //单个温度计
                 //var me      = this
                 var data    = $o.data
@@ -240,12 +269,16 @@ define(
                             y           : o.y || 0,
                             width       : o.width  || 100,
                             height      : o.height || 20,
-                            fillStyle   : o.fillStyle || '#7471b0',
+                            fillStyle   : o.backStyle,//o.fillStyle || '#7471b0',
                             radius      : o.radius || [o.height / 2, o.height / 2]
                         }
                     });
+                    if( o.fillStyle != o.backStyle ){
+                        rect.active = true;
+                        rect.fillStyle = o.fillStyle;
+                    }   
                     sprite.addChild(rect)
-                })
+                });
 
                 if(text.enabled){
                     var content = text.content
@@ -265,9 +298,9 @@ define(
 
                     txt.context.x = text.x, txt.context.y = parseInt(text.y - txt.getTextHeight())
 
-                    if(text.y - txt.getTextHeight() / 2 < 4){
-                        txt.context.globalAlpha = 0
-                    }
+                    // if(text.y - txt.getTextHeight() / 2 < 4){
+                        // txt.context.globalAlpha = 0
+                    // }
             
                     sprite.addChild(txt)
                 };
@@ -281,7 +314,6 @@ define(
                     domRoot.appendChild(domel);
                 };
 
-                
                 sprite.context.x = pos.x;
                 sprite.context.y = pos.y;
             }

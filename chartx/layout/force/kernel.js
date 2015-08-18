@@ -217,7 +217,7 @@ define(
                                 _lastTick=new Date().valueOf()
                             }
                             if (new Date().valueOf()-_lastTick>1000){
-                                console.log('stop-nonWorker')
+                                //console.log('stop-nonWorker')
                                 clearInterval(_tickInterval);
                                 _tickInterval = null
                             } else {

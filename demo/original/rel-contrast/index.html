@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- thermometer</title>
+<title>xChart demo -- 对照关系图</title>
 <script type="text/javascript" src="../../../lib/sea.js"></script>
 <script type="text/javascript" src="../../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../../chartx/index.js"></script>
@@ -31,51 +31,46 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
+//link代表流向,比如a的link，代表a->f == 12,a->g==33..
+//该数据最终会转换为dataframe的结构为：
+//dataFrame = {
+//   org : data, //原始数据
+//   nodes  : {a:,b:,c:,...},节点对象
+//   edges  : {a_b: , a_e: , e_f: ...} 链接对象
+//}
 var data= [
-    ["scale1","scale2"],
-    [70,100],
-    [20,30],
-    [10,10]
+    ["node" , "value" ,"link"                         , "group"],
+    ["a"    , 352     ,{f:12,g:33,h:100,i:50,j:88}    , "pc"  ],
+    ["b"    , 300     ,{f:29,g:23,h:4,i:32,j:120}     , "pc"  ],
+    ["c"    , 235     ,{a:23,f:11,g:22,h:33,i:55,j:21}, "pc"  ],
+    ["d"    , 100     ,{f:29,g:23,h:4,i:32,j:120}     , "pc"  ],
+    ["e"    , 60      ,{f:90,g:38,h:8,i:42,j:103}     , "pc"  ],
+    ["f"    , 500     ,{a:93,b:8,c:88,d:20,e:32,h:66} , "mobile"  ],
+    ["g"    , 400     ,{a:33,b:2,c:48,d:50,e:12}      , "mobile"  ],
+    ["h"    , 300     ,{a:36,b:6,c:68,d:24,e:62}      , "mobile"  ],
+    ["i"    , 200     ,{a:56,b:2,c:83,d:26,e:56}      , "mobile"  ],
+    ["j"    , 100     ,{a:43,b:3,c:77,d:23,e:24}      , "mobile"  ]
 ];
 
 //chart的配置信息
 var options = {
-    type  : "thermometer",
-    field : ["scale2"],
-
-    dis   :{
-        left : 50
-    },
-    
-    graphs: {
-        icon : {
-            content : function(e){
-                var groups = [ "男" , "女" , "家庭" ]
-                return groups[e.index]
+    type  : "relcontrast",
+    graphs : {
+        node : {
+            text : {
+                format : function( n ){
+                    if( n == "j" ){
+                       return "jjjxxxooo"
+                    }
+                }
             }
         }
-        //sDisXAndItemW : 1
-        //fillStyle : ['#0098d8','#ff633d','#7867b4'],
-        //back :{
-          //  fillStyle : ['#f3f3f5','#f3f3f5','#f3f3f5']
-        //},
-        //text : {
-          //  fillStyle : '#ff0000',
-          //  format : function(){
-          //      return '100%'
-          //  }
-        //}
     }
-    
 };
-//Chartx.funnel开始初始化chart实例
-var chartx = Chartx.original("canvasTest" , data , options);
+Chartx.original("canvasTest" , data , options).then(function( chart ){
+    chart.on("click" , function(e){
+        //点击其中易个circle的事件
 
-chartx.then(function( thermometer ){
-    thermometer.on( "complete" , function( e ){
-        console.log('aaa')
     });
 });
 </textarea></form>
@@ -86,13 +81,13 @@ chartx.then(function( thermometer ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>温度计图（thermometer chart）- 基础温度计图</h4>
+                <h4>左右分布触点关联图（relcontrast chart)</h4>
                 <p>
-                    联系人：@逢春 
+                    联系人：@释剑 
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:300px;height:200px;'></div>
+                <div id="canvasTest" style='width:400px;height:400px;'></div>
             </div>
 
             </div>

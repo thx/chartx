@@ -405,7 +405,7 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.show();
                     };
-                    console.log(e.tipsInfo)
+                    //console.log(e.tipsInfo)
                     if( e.tipsInfo ){
                         self._setXaxisYaxisToTipsInfo(e);
                         self._tip.show( e );

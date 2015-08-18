@@ -6,7 +6,7 @@ window.Chartx || (Chartx = {
         //业务代码部分。
         //如果charts有被down下来使用。请修改下面的
 
-        var canvaxVersion = "2015.08.10";
+        var canvaxVersion = "2015.08.12";
 
         //BEGIN(develop)
         Chartx._site.local = true;
@@ -84,10 +84,10 @@ window.Chartx || (Chartx = {
             _destroy : false,
             chart    : null,
             destroy  : function(){
-                console.log("chart destroy!");
+                //console.log("chart destroy!");
                 this._destroy = true;
                 if( this.chart ){
-                    this.chart.destroy();
+                    //this.chart.destroy();
                     delete this.chart;
                     promise = null;
                 }

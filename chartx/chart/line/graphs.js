@@ -149,20 +149,16 @@ define(
     
                 self.induce.on("panstart mouseover", function(e){
                     e.eventInfo = self._getInfoHandler(e);
-                    self._fireHandler(e)
                 })
                 self.induce.on("panmove mousemove", function(e){
                     e.eventInfo = self._getInfoHandler(e);
-                    self._fireHandler(e)
                 })
                 self.induce.on("panend mouseout", function(e){
                     e.eventInfo = self._getInfoHandler(e);
-                    self._fireHandler(e)
                     self.iGroup = 0, self.iNode = -1
                 })
                 self.induce.on("tap click", function(e){
                     e.eventInfo = self._getInfoHandler(e);
-                    self._fireHandler(e)
                 })
             },
             _getInfoHandler:function(e){
@@ -188,14 +184,6 @@ define(
                     nodesInfoList : _.clone(_nodesInfoList)
                 };
                 return node;
-            },
-            _fireHandler : function(e){
-
-                e.params  = {
-                    iGroup : e.eventInfo.iGroup,
-                    iNode  : e.eventInfo.iNode
-                }
-                this.root.fire( e.type , e );
             }
         };
     

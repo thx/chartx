@@ -19,7 +19,7 @@ define(
                 this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
                 this.normalColor = '#E6E6E6';
-                this.progColor   = ['#58c4bc','#3399d5','#716fb4','#f4c646','#4fd2c4','#7270b1'];
+                this.progColor   = ['#58c4bc','#3399d5','#716fb4','#f4c646','#4fd2c4','#999','#7270b1'];
                 this.startAngle  = -90;
                 this.angleCount  = 360;
                 this.currRatio   = 0; //当前比率
@@ -61,7 +61,11 @@ define(
                     //设置legendOpt
                     var legendOpt = _.deepExtend({
                         label  : function( info ){
-                            return info.field+"："+parseInt(info.value / me.dataCount * 100)+"%";
+                            var value = info.value;
+                            if( me.dataType == "absolute" ){
+                                value = (info.value / me.dataCount * 100).toFixed(2);
+                            }
+                            return info.field+"："+ value +"%";
                         }
                     } , this._opts.legend);
                     
@@ -111,7 +115,7 @@ define(
                         me.drawGroup(i);
                         var s = me.dataFrame.data[field][0];
                         if( me.dataType == "absolute" ){
-                            s = s / me.dataCount * 1000 / 10;
+                            s = (s / me.dataCount * 1000 / 10).toFixed(2);
                         }
                         me.setRatio( s , field , i );
                     } );
@@ -219,7 +223,11 @@ define(
                 return info;
             },
             _getTipsDefaultContent : function( info ){
-                return info.field+"："+parseInt(info.value / info.dataCount * 100)+"%";
+                var value = info.value;
+                if( this.dataType == "absolute" ){
+                    value = (info.value / this.dataCount * 100).toFixed(2);
+                };
+                return info.field+"："+ value +"%";
             },
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;
@@ -265,10 +273,9 @@ define(
                        
                        self._setRatio( this.r , i );
                        self._setCurrRatio( field , this.r );
-//console.log(this.r)
                        self.fire("ratioChange" , { currRatio : this.r } );
 
-                       var txt = parseInt( this.r ) + "%";
+                       var txt = this.r.toFixed(2) + "%";
                        if( _.isFunction( self.text.format ) ){
                            txt = self.text.format( this.r );
                        }

@@ -115,7 +115,6 @@ define(
                     
                     o._groupInd   = self._groupInd;
                     // o.fillStyle = '#cc3300'
-                    // console.log(o.fillStyle)
                     return o
                 } else {
                     return null
