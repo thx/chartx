@@ -23,6 +23,7 @@ define(
                 dataFrame.max = Math.max( dataFrame.max , rowObj.value );
                 dataFrame.nodes[ rowObj.node ] = rowObj;
             } );
+    
             dataFrame.group = _.groupBy( arr , function(o){
                 return o.group
             } );
