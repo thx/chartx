@@ -673,6 +673,22 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>    
+
+    <a target="_blank" href="./demo/original/relcircle/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/original/relcircle/index.png">
+        </dt>
+        <dd>
+            <h5>
+            环形关联图
+            </h5>
+            <span>
+            圆环形布局的关联图
+            </span>
+        </dd>
+    </dl>
     </a>
 
 
