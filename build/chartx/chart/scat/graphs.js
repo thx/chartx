@@ -8,7 +8,8 @@ define(
     ],
     function( Canvax , Circle , Rect , Tween ){
  
-        var Graphs = function( opt , data ){
+        var Graphs = function( opt , zAxis ){
+            this.zAxis = zAxis;
             this.w = 0;
             this.h = 0;
            
@@ -18,7 +19,10 @@ define(
             };
 
             this.circle = {
-                r : 12  //圆圈默认半径
+                maxR : 20,  //圆圈默认最大半径
+                minR : 3,
+                r : null,
+                normalR : 10
             }
     
             this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
@@ -29,7 +33,7 @@ define(
     
             _.deepExtend(this , opt);
     
-            this.init( data );
+            this.init( );
     
         };
     
@@ -56,6 +60,14 @@ define(
                     fillStyle = this._colors[ii];
                 }
                 return fillStyle;
+            },
+            getR : function(d){
+                var r = this.circle.r;
+                if( _.isFunction(r) ){
+                    return r(d)
+                } else {
+                    return r;
+                };
             },
             draw : function(data , opt){
                 var self = this;
@@ -89,19 +101,27 @@ define(
     
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
-   
+
+                var zMax = 1;
+
+                if( this.zAxis.field && this.zAxis.field.length > 0 ){
+                    zMax = _.max( _.flatten(this.zAxis.org) );
+                }
+
                 for( var i = 0 ; i < barGroupLen ; i++ ){
                     var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
-                        var barData = data[ii][i];
-    
+                        var d = data[ii][i];
+                        var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
+                        var r       = this.getR(d) ||
+                                      (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circle = new Circle({
                             hoverClone : false,
                             context : {
-                                x           : barData.x,
-                                y           : barData.y,
-                                fillStyle   : this.getFillStyle( i , ii , barData.value ),
-                                r           : this.circle.r,
+                                x           : d.x,
+                                y           : d.y,
+                                fillStyle   : this.getFillStyle( i , ii , d.value ),
+                                r           : r,
                                 globalAlpha : 0,
                                 cursor      : "pointer"
                             }
@@ -110,6 +130,7 @@ define(
 
                         circle.iGroup = ii;
                         circle.iNode  = i;
+                        circle.r      = r;
 
                         circle.on("panstart mouseover", function(e){
                             e.tipsInfo = self._getInfoHandler(e);
@@ -163,8 +184,9 @@ define(
                    .to( { h : 100 }, 500 )
                    .onUpdate( function () {
                        for( var i=0 , l=self._circles.length ; i<l ; i++ ){
-                           self._circles[i].context.globalAlpha = this.h / 100 * 0.8;
-                           self._circles[i].context.r = this.h / 100 * self.circle.r;
+                           var _circle = self._circles[i];
+                           _circle.context.globalAlpha = this.h / 100 * 0.8;
+                           _circle.context.r = this.h / 100 * _circle.r;
                        }
                    } ).onComplete( function(){
                        cancelAnimationFrame( timer );
