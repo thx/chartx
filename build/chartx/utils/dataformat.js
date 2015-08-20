@@ -23,6 +23,10 @@ define(
                     xAxis      : {     //x轴
                         field  : [],   //字段 对应this.data
                         org    : []    //原始数据['星期一','星期二']
+                    },
+                    zAxis      : {     //z轴
+                        field  : [],   //字段 对应this.data
+                        org    : []    //原始数据['星期一','星期二']
                     }
                 }
 
@@ -36,9 +40,11 @@ define(
                 if( opt ){
                     opt.yAxis  && ( dataFrame.yAxis.field = opt.yAxis.field );
                     opt.xAxis  && ( dataFrame.xAxis.field = opt.xAxis.field );
+                    opt.zAxis  && ( dataFrame.zAxis.field = opt.zAxis.field );
                 } else {
                     this.yAxis && ( dataFrame.yAxis.field = this.yAxis.field );
                     this.xAxis && ( dataFrame.xAxis.field = this.xAxis.field );
+                    this.zAxis && ( dataFrame.zAxis.field = this.zAxis.field );
                 }
 
                 var total = [];
@@ -119,6 +125,20 @@ define(
                 };
                 dataFrame.xAxis.org = getDataOrg( xField , total );
                 dataFrame.yAxis.org = getDataOrg( yField , total , "yAxis");
+
+
+                /*
+                 * 然后设置对应的zAxis数据
+                 */
+                var zField = dataFrame.zAxis.field;
+                if( _.isString( zField ) ){
+                    zField = [ zField ];
+                }             
+                dataFrame.zAxis.field = zField;
+                var allZFields = _.flatten(dataFrame.zAxis.field);
+                if( allZFields.length > 0 ){
+                    dataFrame.zAxis.org = getDataOrg( zField , total );
+                };
 
                 return dataFrame;
             }
