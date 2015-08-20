@@ -57,15 +57,26 @@ var options = {
             if( m.data.pv > 100 ){
                 return "#3871BF"
             }
+        },
+        r : function( m ){
+            return 10
         }
     },
+    //补充系统里没有记录的城市pos
+    geoCoordSupply : {
+       "舟山":[122.207216,29.985295]
+    },
     tips : {
-        field  : ["pv"],//可选，默认为除开areaField外的所有字段
+        //field  : ["pv"],
         prefix : ["访问量"]
     } 
 };
 
-Chartx.map("canvasTest" , data , options)
+Chartx.map("canvasTest" , data , options).then(function( chart ){
+    chart.on("markpointclick" , function(e){
+        debugger;
+    });
+});
             </textarea></form>
 
         </td>
