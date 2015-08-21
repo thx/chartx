@@ -26,7 +26,7 @@ define(
                 left  : 10,
                 right : 10,
                 top   : 10,
-                bottom: 0
+                bottom: 10
             },
 
             graphs : {
@@ -108,7 +108,6 @@ define(
                 var w = (opt && opt.w) || this.width  - this.dis.left - this.dis.right
                 var h = (opt && opt.h) || this.height - this.dis.top  - this.dis.bottom
                 var y = parseInt( h - this._xAxis.h )
-
                  //绘制yAxis
                 this._yAxis.draw({
                     pos : {
@@ -133,8 +132,11 @@ define(
                 };
 
                 this.graphsw = Math.min(parseInt(w - _yAxisW), y)
-                this.graphsH = this.graphsW
-                
+                this.graphsH = this.graphsw
+
+                y = parseInt(this.dis.top + this.graphsH)
+                this._yAxis.setY(y), this._xAxis.setY(y)
+
                 var o = this._trimGraphs()
 
                 //绘制主图形区域

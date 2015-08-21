@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- sector</title>
+<title>xChart demo -- 流失图（all）</title>
 <script type="text/javascript" src="../../../lib/sea.js"></script>
 <script type="text/javascript" src="../../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../../chartx/index.js"></script>
@@ -31,33 +31,52 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
 var data= [
-    ["xfield0","xfield","yfield"],
-    [2,50,'b'],
-    [3,30,'c'],
-    [1,17,'d'],
-    [4,100,'a']
+    [ "node" , "label"         , "value" , "link" ],
+    [ "a"    , "本品"          , 500     , { "b":100,"c":100,"d":100,"e":100 } ],
+    [ "b"    , "继续买本品"    , 400     , null],
+    [ "c"    , "买本品也买竞品", 300     , null],
+    [ "d"    , "只买竞品"      , 200     , null],
+    [ "e"    , "买行业其他"    ,150     , null]
 ];
 
 //chart的配置信息
 var options = {
-    type : 'sector',
-
-    yAxis : {
-        field : 'yfield'
+    type  : "flowall",
+    graphs : {
+        node : {
+            fillStyle : function( arg ){
+               var color = {
+                   a  : "#60ADE4",
+                   b  : "#60ADE4",
+                   c  : "#5CC28F",
+                   d  : "#E45E75",
+                   e  : "#E6E6E6"
+               };
+               return color[ arg.node ]
+            } 
+        }
     },
-    xAxis : {
-        field : "xfield0"
-    }
-};
-//Chartx.funnel开始初始化chart实例
-var chartx = Chartx.original("canvasTest" , data , options);
+    tips : {
+        content : function( info ){
+            var node    = info.node;
+            var label   = node.label || node.node;
+            var str = label;
+            str += "<div>总人数：<span style='color:red'>"+node.value+"</span></div>";
+            
+            if( node.flowin ){
+                str += "<div>转化人数："+ node.flowin +"(" + (node.flowin/node.value*1000/10).toFixed(2)+"%)</div>"
+            }
+            return str;
 
-chartx.then(function( sector ){
-    sector.on( "complete" , function( e ){
-        console.log('aaa')
+        }
+    }
+
+};
+Chartx.original("canvasTest" , data , options).then(function( chart ){
+    chart.on("click" , function(e){
+        //点击其中易个circle的事件
+
     });
 });
 </textarea></form>
@@ -68,13 +87,13 @@ chartx.then(function( sector ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>扇形图（sector chart）- 基础扇形图</h4>
+                <h4>左右分布触点关联图（relcontrast chart)</h4>
                 <p>
-                    联系人：@逢春 
+                    联系人：@释剑 
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:400px;height:300px;'></div>
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
 
             </div>
