@@ -22,13 +22,13 @@ define(
                     }
                 };
                 //覆盖默认配置end
-
                 _.deepExtend( this , opts );
                 
                 this.dataFrame     = this._initData( data , {
                     yAxis : this.yAxis.bar,
                     xAxis : this.xAxis
                 } );
+
 
                 //附加折线部分
                 this._lineChart = {
@@ -67,7 +67,8 @@ define(
             },
             _startDraw : function(){
                 var me = this;
-                var y  = parseInt(me.height - me._xAxis.h)
+                var y  = parseInt(me.height - me._xAxis.h);
+
                 //绘制yAxis
                 me._yAxis.draw({
                     pos : {

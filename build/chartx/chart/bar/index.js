@@ -325,7 +325,7 @@ define(
     ],
     function( yAxisBase ){
         var yAxis = function( opt , data ){
-            yAxis.superclass.constructor.apply( this , arguments );
+            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data ] );
         };
         Chartx.extend( yAxis , yAxisBase , {
             _setDataSection : function( data ){

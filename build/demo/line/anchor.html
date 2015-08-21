@@ -58,17 +58,6 @@ var data = [
 ];
 var anchorXIndex = 9                              //瞄准器x轴索引
 var options = {
-    event : {
-        //enabled : 1,                              //是否开启手型
-        on : function(e){
-            if(e.eventType == 'click'){
-                //e.iGroup = 第几条线(从1开始)   e.iNode = 第几个节点(从1开始)
-                // console.log(e.iGroup, e.iNode)
-                console.log(data[e.iNode][0], data[e.iNode][1])
-            }
-            console.log(e.eventType, data[e.iNode][0], data[e.iNode][1])
-        }
-    },
     back  : {
         yAxis     :{
             enabled  : 1,
@@ -144,7 +133,17 @@ var options = {
     }
     };
 
-Chartx.line("canvasTest" , data , options);
+    Chartx.line("canvasTest" , data , options).then( function( chart ){
+        chart.on("click" , function( e ){
+            if(e.type == 'click'){
+                //e.iGroup = 第几条线(从1开始)   e.iNode = 第几个节点(从1开始)
+                // console.log(e.iGroup, e.iNode)
+                console.log(data[e.iNode][0], data[e.iNode][1])
+            }
+            console.log(e.type, data[e.iNode][0], data[e.iNode][1])
+
+        })
+    } );
 </textarea></form>
 
         </td>

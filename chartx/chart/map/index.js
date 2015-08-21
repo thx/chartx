@@ -33,6 +33,9 @@ define(
                     }
                 };
 
+                //城市坐标的补充。
+                this.geoCoordSupply    = {}
+
                 //默认的areaField字段
                 this.areaField = "area";
 
@@ -401,6 +404,7 @@ define(
                             }
                         };
                         e.area = this.mapData;
+                        e.areaData = me._getDataForArea( this.mapData );
                         me.fire("areaclick" , e ); 
                     });
 
@@ -448,42 +452,62 @@ define(
             _initMarkPoint : function(){
                 var me = this;
                 require(["chartx/chart/map/map-data/geo-json/china_city"] , function( citys ){
-                    _.each( me.dataFrame.xAxis.org[0] , function( city , i ){
-                        for( var g in citys ){
-                            if( city in citys[g] ){
-                                var cityPos = me.geo2pos( me.mapName ,  citys[g][city] );
-                                var md      = {
-                                    name : city
-                                };
-                                var mpCtx = {
-                                    point : {
-                                        x : cityPos[0],
-                                        y : cityPos[1]
-                                    }
-                                };
-
-                                new MarkPoint( me._opts , mpCtx , me._getDataForArea(md) ).done(function(){
-                                    var shape = this.shape;
-
-                                    shape.mapData = md;
-                                    shape.on("mouseover" , function(e){
-                                        me._tips.show( me._setTipsInfoHand( e , this.mapData) );
-                                        this.context.lineWidth += 2 ;
-                                    });
-
-                                    shape.on("mousemove" , function(e){
-                                        me._tips.move( me._setTipsInfoHand( e , this.mapData) );
-                                    });
-                                    shape.on("mouseout" , function(e){
-                                        me._tips.hide( );
-                                        this.context.lineWidth -= 2 
-                                    });
-                                    me.sprite.addChild( this.sprite );
-                                });
-                                break;
+                    _.each( me.dataFrame.xAxis.org[0] , function( c , i ){
+                        if( c in me.geoCoordSupply ){
+                            me._setMarkToPoint( c , me.geo2pos( me.mapName , me.geoCoordSupply[c] ) ); 
+                        } else {
+                            for( var g in citys ){
+                                if( c in citys[g] ){
+                                    var cityPos = me.geo2pos( me.mapName ,  citys[g][c] );
+                                    me._setMarkToPoint( c , cityPos );
+                                    break;
+                                }
                             }
                         }
                     } );
+                });
+            },
+            _setMarkToPoint : function( c , cityPos){
+                var me = this;
+                var md = {
+                    name : c
+                };
+
+                var mpCtx = {
+                    point : {
+                        x : cityPos[0],
+                        y : cityPos[1]
+                    }
+                };
+                
+                var areaData = me._getDataForArea(md);
+                if( me._opts.markPoint && me._opts.markPoint.r ){
+                    if( _.isFunction( me._opts.markPoint.r ) ){
+                        me._opts.markPoint.r = me._opts.markPoint.r( areaData )
+                    }
+                };
+
+                new MarkPoint( me._opts , mpCtx , areaData ).done(function(){
+                    var shape = this.shape;
+
+                    shape.mapData = md;
+                    shape.on("mouseover" , function(e){
+                        me._tips.show( me._setTipsInfoHand( e , this.mapData) );
+                        this.context.lineWidth += 2 ;
+                    });
+
+                    shape.on("mousemove" , function(e){
+                        me._tips.move( me._setTipsInfoHand( e , this.mapData) );
+                    });
+                    shape.on("mouseout" , function(e){
+                        me._tips.hide( );
+                        this.context.lineWidth -= 2 
+                    });
+                    shape.on("click" , function(e){
+                        e.areaData = me._getDataForArea(this.mapData);
+                        me.fire("markpointclick" , e ); 
+                    });
+                    me.sprite.addChild( this.sprite );
                 });
             },
             _initModule : function(){

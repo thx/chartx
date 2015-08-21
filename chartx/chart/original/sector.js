@@ -7,8 +7,8 @@ define(
         'chartx/utils/datasection',
         // "chartx/components/xaxis/xAxis",
         // "chartx/components/yaxis/yAxis",
-        "./sector/xAxis",
-        "./sector/yAxis",
+        "./sector/xaxis",
+        "./sector/yaxis",
         'chartx/chart/original/sector/graphs',
         "chartx/components/tips/tip",
         // 'chartx/utils/simple-data-format'
