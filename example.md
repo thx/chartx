@@ -691,6 +691,19 @@ title:  chart demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/original/flowall/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/original/flowall/index.png">
+        </dt>
+        <dd>
+            <h5>
+            等比流失图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
 
 </div>
 
