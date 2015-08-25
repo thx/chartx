@@ -269,11 +269,13 @@ define(
     
                 //执行生长动画
                 this._graphs.grow( function( g ){
+                    if("markLine" in me._opts){
+                        me._initMarkLine( g );
+                    }
                     if("markPoint" in me._opts){
                         me._initMarkPoint( g );
                     }
                 } );
-    
                 
                 this.bindEvent( this._graphs.sprite );
 
@@ -312,6 +314,35 @@ define(
                         me.core.addChild( this.sprite );
                     });
                 });
+            },
+            _initMarkLine:function(g){
+                var me = this
+                var pointList = _.clone(g._pointList)
+                var max = 0
+                var center
+                _.each(pointList, function(data, i){
+                    max += data[1]
+                })
+                center = parseInt(max / pointList.length)
+
+                require(['chartx/components/markline/index'], function(MarkLine){
+                    new MarkLine({
+                        origin:{
+                            x : me._back.pos.x,
+                            y : me._back.pos.y
+                        },
+
+                        line:{
+                            y    : center,
+                            list : [[0,0],[me._xAxis.xGraphsWidth,0]],
+                            strokeStyle : g.line.strokeStyle,
+                            lineType    : 'dashed'
+                        }
+
+                    }).done(function(){
+                        me.core.addChild(this.sprite)
+                    })
+                })
             },
             bindEvent : function( spt , _setXaxisYaxisToTipsInfo ){
                 var self = this;
