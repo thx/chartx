@@ -35,32 +35,27 @@
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , null, 20 , 33    ],
-    [ 2      , null, 51 , 26    ],
-    [ 3      , 22  , 45 , 43    ],
+    [ 1      , 3 , 20 , 33    ],
+    [ 2      , 0   , 51 , 26    ],
+    [ 3      , 32   , 45 , 43    ],
     [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 17 , 71    ],
-    [ 6      , 38  , null , 39  ],
-    [ 7      , 55  , null , 65  ],
-    [ 8      , null, null , 51  ]
+    [ 5      , 79  , 73 , 71    ],
+    [ 6      , 88  , 54 , 39    ],
+    [ 7      , 55  , 68 , 65    ],
+    [ 8      , 66   , 83 , 51    ]
 ];
 
 //chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["uv" , "pv" ]
+        field : ["click" ]
     },
     xAxis : {
         field : "xfield"
     },
-    markPoint : {
-        enabled : true,
-        filter  : function(  ){
-            if(this.markTarget != "uv"){
-                this.destroy();
-            }
-        }
+    markLine : {
+        enabled : true
     }
 };
 //Chartx.line开始初始化chart实例
