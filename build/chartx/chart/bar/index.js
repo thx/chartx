@@ -531,6 +531,9 @@ define(
                     _.each( yArr[b] , function( subv , v ){
                         !tmpData[b][v] && (tmpData[b][v] = []);
                         _.each( subv , function( val , i ){
+                            if( !xArr[i] ){
+                                return;
+                            }
                             var x = xArr[i].x - xDis1/2 + xDis2 * (b+1);
                             var y = -(val-_yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
                             if( v > 0 ){
