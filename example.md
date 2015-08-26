@@ -149,6 +149,22 @@ title:  chart demos
             </span>
         </dd>
     </dl>
+    </a>    
+
+    <a target="_blank" href="./demo/line/markline.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/line/markline.png">
+        </dt>
+        <dd>
+            <h5>
+            带均线的折线图
+            </h5>
+            <span>
+            给折线附加一条均线
+            </span>
+        </dd>
+    </dl>
     </a>
 
     <dl class="chart">
@@ -699,6 +715,19 @@ title:  chart demos
         <dd>
             <h5>
             等比流失图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/original/flowinout/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/original/flowinout/index.png">
+        </dt>
+        <dd>
+            <h5>
+            流入流出关系图
             </h5>
         </dd>
     </dl>
