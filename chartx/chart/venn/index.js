@@ -57,8 +57,7 @@ define(
                     } );
                     data.push( obj )
                 } );
-                debugger
-                return data
+                return data;
             },
             draw : function(){
                 this.stageTip = new Canvax.Display.Sprite({
