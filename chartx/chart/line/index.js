@@ -270,12 +270,7 @@ define(
 
                 //执行生长动画
                 this._graphs.grow(function(g) {
-                    if ("markLine" in me._opts) {
-                        me._initMarkLine(g);
-                    }
-                    if ("markPoint" in me._opts) {
-                        me._initMarkPoint(g);
-                    }
+                    me._initPlugs( me._opts , g );
                 });
 
                 this.bindEvent(this._graphs.sprite);
@@ -297,6 +292,14 @@ define(
                         }
                     });
                     //, this._anchor.setY(y)
+                }
+            },
+            _initPlugs : function( opts , g){
+                if ("markLine" in opts) {
+                    this._initMarkLine(g);
+                }
+                if ("markPoint" in opts) {
+                    this._initMarkPoint(g);
                 }
             },
             _initMarkPoint: function(g) {
