@@ -3,6 +3,7 @@ layout: post
 title:  Chartx Documentation 
 ---
 
+## 名字解释
 
 
 ## 图表
@@ -489,5 +490,7 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
      </table>
   
    + 地图(map)中的tips content 函数参数：
+
+
 
 
