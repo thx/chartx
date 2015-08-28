@@ -299,6 +299,7 @@ define(
     }
 )
 
+
 define(
     "chartx/chart/bar/xaxis",
     [
