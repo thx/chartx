@@ -21,6 +21,9 @@ define(
                         alpha : 0
                     }
                 };
+
+                this._opts = opts;
+
                 //覆盖默认配置end
                 _.deepExtend( this , opts );
                 
@@ -65,7 +68,7 @@ define(
                 this.core.addChild( this._lineChart._graphs.sprite );
 
             },
-            _startDraw : function(){
+            _startDraw : function(opt){
                 var me = this;
                 var y  = parseInt(me.height - me._xAxis.h);
 
@@ -125,8 +128,13 @@ define(
                     }
                 });
 
+                var o = this._trimGraphs();
+                this._yValueMaxs = o.yValueMaxs;
+                this._yLen = o.yLen;
+                this._yCenters = o.yCenters;
+
                 //绘制柱状图主图形区域
-                me._graphs.draw( me._trimGraphs() , {
+                me._graphs.draw( o.data , {
                     w    : _graphsW,
                     h    : _graphsH,
                     pos  : {
@@ -145,7 +153,12 @@ define(
                     smooth : me.smooth
                 });
                 me._lineChart._graphs.setX( _yAxisW ), me._lineChart._graphs.setY(y);
-                me._lineChart._graphs.grow();
+                me._lineChart._graphs.grow( function(g){
+                    if( "markLine" in me._opts ){
+                        Line.prototype._initMarkLine.apply(me , [g] );
+                    }
+                    //me._initMarkLine( me._opts , g );
+                } );
 
                 me._lineChart._graphs.sprite.getChildById("induce").context.visible = false;
             },

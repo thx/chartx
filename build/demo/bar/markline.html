@@ -36,36 +36,22 @@
 var data= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , 101 , 20 , 33    ],
-    [ 2      , 31  , 30 , 53    ],
-    [ 3      , 52  , 25 , 13    ],
-    [ 4      , 234 , 100, 133   ],
-    [ 5      , 11  , 89 , 55    ],
-    [ 6      , 89  , 52 , 88    ],
-    [ 7      , 19  , 29 , 36    ],
-    [ 8      , 101 , 20 , 77    ],
-    [ 9      , 67  , 51 , 26    ]
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100  , 500 , 500    ]
 
 ];
 var options = {
-    type : "bar_line",
     yAxis : {
-        bar  : {
-            field : ["uv","pv"]
-        },
-        line : {
-            field : ["click"]
-        }
+        field : ["uv","pv"]
     },
     xAxis : {
         field : ["xfield"]
     },
-    graphs : {
-        line : {
-            strokeStyle : "#D28D54"
-        }
+    markLine : {
+        enabled : true
     }
 }   
-Chartx.hybrid("canvasTest" , data , options);
+Chartx.bar("canvasTest" , data , options);
 </textarea></form>
 
         </td>
@@ -74,9 +60,9 @@ Chartx.hybrid("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>混合图 - 柱折混合图 </h4>
+                <h4>柱状图 - 基础柱状图</h4>
                 <p>
-                    联系人：@释剑
+                    联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">

@@ -318,6 +318,19 @@ title:  chart demos
             </h5>
         </dd>
     </dl>
+
+    </a>
+    <a target="_blank" href="./demo/bar/markline.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/markline.png">
+        </dt>
+        <dd>
+            <h5>
+            带有均线，支持多组，但是不支持纵向堆叠
+            </h5>
+        </dd>
+    </dl>
     </a>
 
 </div>
