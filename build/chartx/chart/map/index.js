@@ -405,6 +405,10 @@ define(
                         };
                         e.area = this.mapData;
                         e.areaData = me._getDataForArea( this.mapData );
+                        e.eventInfo = {
+                            area : e.mapData,
+                            areaData : e.areaData
+                        }
                         me.fire("areaclick" , e ); 
                     });
 
