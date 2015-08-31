@@ -403,12 +403,12 @@ define(
                                 me.mapName = mapParams.params[ this.mapData.name ] ? this.mapData.name : "china"
                             }
                         };
+                        //TODO: 下面两个为了像下兼容。以后的所有事件都要吧数据存放再eventInfo上
                         e.area = this.mapData;
                         e.areaData = me._getDataForArea( this.mapData );
-                        e.eventInfo = {
-                            area : e.mapData,
-                            areaData : e.areaData
-                        }
+
+                        e.eventInfo = me._getDataForArea( this.mapData );
+
                         me.fire("areaclick" , e ); 
                     });
 
