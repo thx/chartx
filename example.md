@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  chart demos 
+title:  Chartx demos 
 ---
 
 ## 折线图

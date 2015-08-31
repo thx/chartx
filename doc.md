@@ -3,14 +3,32 @@ layout: post
 title:  Chartx Documentation 
 ---
 
-## 名字解释
+## 简介
+
+Chartx，专业的数据可视化解决方案，一个纯Javascript的图表库，可以流畅的运行在PC和移动设备上，兼容当前绝大部分浏览器（IE6/7/8/9/10/11，chrome，firefox，Safari等），底层依赖自有Canvas渲染引擎<code>Canvax</code>。
+
+支持bar(柱状图)，line（折线图），map（地图），pie（饼图），progress（进度图），radar（雷达图），scat（散点图），topo（拓扑图，树状图），chord（和铉图），hybrid（混搭图表），venn（韦恩图），force（力布局图），还有丰富的原创original（自定义图表）
+
+## 简要名词解析
+
+ 这里列举几个高频使用的名词做给简要的解析
+
+ | 名词 | 解释 |
+ | ---- | ---- |
+ | axis | 直角坐标系中的一个坐标轴，坐标轴可分为类目型、数值型或时间型 |
+ | xAxis | 直角坐标系中的横轴，通常并默认为类目型 |
+ | yAxis | 直角坐标系中的纵轴，通常并默认为数值型 |
+ | zAxis | 直角坐标系中的z轴，通常并默认为数值型，比如在散点图上圆的大小维度 |
+ | field | 字段配置，在xAxis,yAxis,zAxis中都必选配置，用来定义该axis从data中取哪列数据 |
+ | tip   | 图表中的提示框，用来显示更加完整详细的数据 |
+   
 
 
 ## 图表
 
 ### 折线图(line)
 
-<div id="linelayout">折线图line，柱状图bar，散点图scat这三个图表的分布都包含xAxis，yAxis，graphs三个区域，如图： </div>
+<div id="linelayout">折线图line，柱状图bar，散点图scat等直角坐标系图表的分布都包含xAxis，yAxis，graphs三个区域，如图： </div>
 
 <img src="./assets/chart/line/line.png" style="width:300px;"></img>
 
@@ -46,14 +64,12 @@ var options = {
     graphs: {}  //折线图绘图配置
 }
 ```
- options配置：
+ options配置，其中graphs为折线图自身的配置，其他的分别参考对应组件配置：
 
-   + [xAxis](#xaxis)
-   + [yAxis](#yaxis)
-   + [back](#back)
-   + [anchor](#anchor)
-   + [tips](#tips)
-   + graphs
+
+ [<code>xAxis</code>](#xaxis) [<code>yAxis</code>](#yaxis) [<code>back</code>](#back) [<code>anchor</code>](#anchor) [<code>tips</code>](#tips)
+ 
+ + graphs
      - line --> 折线的配置
        * enabled --> 是否显示
        * lineWidth --> 线条大小，默认为2
