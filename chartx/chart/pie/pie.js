@@ -28,6 +28,7 @@
                 this.init(opt);
                 this.colorIndex = 0;
                 this.sectors = [];
+                this.sectorMap = [];
                 this.isMoving = false;
 
             };
@@ -371,13 +372,13 @@
                 },
                 _sectorFocus: function (e , index) {
                     if (this.sectorMap[index]) {
-                        if (this.focusCallback) {
+                        if (this.focusCallback && e) {
                             this.focusCallback.focus(e , index);
                         }
                     }
                 },
                 _sectorUnfocus: function (e , index) {
-                    if (this.focusCallback) {
+                    if (this.focusCallback && e) {
                         this.focusCallback.unfocus(e , index);
                     }
                 },
