@@ -160,21 +160,13 @@ var data= [
 
 ```js
 var options = {
-    type  : //可选，如果填写horizontal，则会渲染横向柱状图
-    xAxis : {}, //x轴组件配置
-    yAxis : {}, //y轴组件配置
-    back  : {}, //背景组件配置
-    tips  : {}, //tips组件配置
+    ...组件配置
     graphs: {}  //柱状图绘图配置
 }
 ```
  options配置：
 
  - type --> 可选，如果填写horizontal，则会渲染横向柱状图，默认不配则为纵向柱状图
- + [xAxis](#xaxis)
- + [yAxis](#yaxis)
- + [back](#back)
- + [tips](#tips)
  + graphs 
    - bar --> 单条bar柱状图形的样式
      *  width --> 单条bar宽度，默认12
@@ -196,6 +188,28 @@ var options = {
             }
             ```
 
+#### 柱状图事件：
+
+ + click --> 点击事件
+
+ ```js
+ bar.on("click" , function(e){
+     /*
+     *e.eventInfo.iGroup: 分组索引
+     *e.eventInfo.iLay:   堆叠索引，-1代表未选择bar
+     *e.eventInfo.iNode:  单个分组中，bar索引 -1代表未选择bar 
+     */
+
+     //nodesInfoList存放着该事件覆盖的对应节点集合。
+     //比如点击bar的分组区域，该nodesInfoList包含了该分组的所有bar矩形.
+     //如果点击了具体的某个bar矩形，nodesInfoList则仅包含对应的这个bar矩形
+     _.each( e.eventInfo.nodesInfoList , function( info ){
+         console.log( info.field+":"+info.value );
+     } );
+ });
+ ```
+
+ 
 
 ### 地图(map)
 
