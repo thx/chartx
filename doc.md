@@ -263,6 +263,21 @@ var options = {
 
      - dataIndex --> 和data一样，只是dataIndex返回的是该行，在整个data中的行的索引，那么”广东省“的dataIndex就是0（不包含title行）
 
+#### 地图事件
+
+ - areaclick ：点击单块地域触发
+
+ ```js
+ map.on("areaclick" , function(e){
+     //e.eventInfo 有两个属性
+     //e.eventInfo.area 点击的目标area地域对象
+     //e.eventInfo.data 该area对应再data中的数据（如果有的话）
+ });
+ ```
+
+
+
+
 ### 饼图(pie)
 
 <a target="_blank" href="./demo/pie/index.html">基础饼图demo</a>
