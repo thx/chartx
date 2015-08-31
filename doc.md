@@ -64,12 +64,18 @@ var options = {
     graphs: {}  //折线图绘图配置
 }
 ```
- options配置，其中graphs为折线图自身的配置，其他的分别参考对应组件配置：
+ options配置，从上面可以看出，一个图表的options，由一系列的组件配置xAxis,yAxis等，和自身的绘图配置组成。比如下面，组件配置部分会有标明。**注：（后续的文档里只会罗列自身绘图配置，组件配置不再说明，因为组件可以适用任何图表）**
 
-
- [<code>xAxis</code>](#xaxis) [<code>yAxis</code>](#yaxis) [<code>back</code>](#back) [<code>anchor</code>](#anchor) [<code>tips</code>](#tips)
  
+ + [xAxis（x轴组件配置）](#xaxis)
+ + [yAxis（y轴组件配置）](#yaxis)
+ + [back（背景组件配置）](#back)
+ + [tips（tips组件配置）](#tips)
+ + [anchor（十字瞄准组件器配置）](#anchor)
+ + [markPoint（标记点组件配置）](#markPoint)
+ + [markLine（标记线组件配置）](#markLine)
  + graphs
+     - biaxial --> 是否显示双Y轴（只适用yAxis配置了两个指标的情况）
      - line --> 折线的配置
        * enabled --> 是否显示
        * lineWidth --> 线条大小，默认为2
