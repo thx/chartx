@@ -71,8 +71,26 @@
                     }
                     return list;
                 },
-                show: function (index) {
-                    this._pie && this._pie.showHideSector(index);
+                //show: function (index) {
+                //    this._pie && this._pie.showHideSector(index);
+                //},
+                focusAt : function(index){
+                    if(this._pie){
+                        this._pie._sectorFocus( null , index);
+                        var sector = this.getByIndex(index).sector; 
+                        if( !sector.__isSelected ){
+                            this._pie.moveSector( sector );
+                        }
+                    }
+                },
+                blurAt  : function(index){
+                    if(this._pie){
+                        this._pie._sectorUnfocus( null , index);
+                        var sector = this.getByIndex(index).sector;
+                        if( sector.__isSelected ){
+                            this._pie.moveSector( sector );
+                        }
+                    }
                 },
                 slice: function (index) {
                     this._pie && this._pie.slice(index);

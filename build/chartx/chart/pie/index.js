@@ -28,6 +28,7 @@ define(
                 this.init(opt);
                 this.colorIndex = 0;
                 this.sectors = [];
+                this.sectorMap = [];
                 this.isMoving = false;
 
             };
@@ -371,13 +372,13 @@ define(
                 },
                 _sectorFocus: function (e , index) {
                     if (this.sectorMap[index]) {
-                        if (this.focusCallback) {
+                        if (this.focusCallback && e) {
                             this.focusCallback.focus(e , index);
                         }
                     }
                 },
                 _sectorUnfocus: function (e , index) {
-                    if (this.focusCallback) {
+                    if (this.focusCallback && e) {
                         this.focusCallback.unfocus(e , index);
                     }
                 },
@@ -797,8 +798,26 @@ define(
                     }
                     return list;
                 },
-                show: function (index) {
-                    this._pie && this._pie.showHideSector(index);
+                //show: function (index) {
+                //    this._pie && this._pie.showHideSector(index);
+                //},
+                focusAt : function(index){
+                    if(this._pie){
+                        this._pie._sectorFocus( null , index);
+                        var sector = this.getByIndex(index).sector; 
+                        if( !sector.__isSelected ){
+                            this._pie.moveSector( sector );
+                        }
+                    }
+                },
+                blurAt  : function(index){
+                    if(this._pie){
+                        this._pie._sectorUnfocus( null , index);
+                        var sector = this.getByIndex(index).sector;
+                        if( sector.__isSelected ){
+                            this._pie.moveSector( sector );
+                        }
+                    }
                 },
                 slice: function (index) {
                     this._pie && this._pie.slice(index);
