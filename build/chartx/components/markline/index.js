@@ -7,7 +7,8 @@ define(
     function(Canvax, BrokenLine){
         var markLine = function(opt){
 
-            this.origin      = {
+            this.field  = null;
+            this.origin = {
                 x : 0 , y : 0
             };
 
@@ -19,6 +20,10 @@ define(
                 smooth      : false,
                 lineType    : 'dashed'
             };
+
+            this.filter = function( ){
+                
+            }
 
             this._doneHandle = null;
             this.done   = function( fn ){
@@ -38,7 +43,6 @@ define(
                         y : this.origin.y
                     }
                 });
-
                 setTimeout( function(){
                     me.widget();
                 } , 10 );
@@ -57,6 +61,7 @@ define(
                 });
                 me.sprite.addChild(line)
                 me._done();
+                me.filter( me );
             },
             _done : function(){
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );

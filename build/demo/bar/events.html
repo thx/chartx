@@ -49,6 +49,14 @@ var options = {
 }   
 Chartx.bar("canvasTest" , data , options).then(function( bar ){
     bar.on("click" , function( e ){
+        /*
+        *e.eventInfo.iGroup: 分组索引
+        *e.eventInfo.iLay:   堆叠索引，-1代表未选择bar
+        *e.eventInfo.iNode:  单个分组中，bar索引 -1代表未选择bar 
+        */
+        console.log("e.eventInfo.iGroup："+e.eventInfo.iGroup);
+        console.log("e.eventInfo.iLay："+e.eventInfo.iLay);
+        console.log("e.eventInfo.iNode："+e.eventInfo.iNode);
         _.each( e.eventInfo.nodesInfoList , function( info ){
             console.log( info.field+":"+info.value );
         } );

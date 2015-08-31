@@ -48,7 +48,13 @@ var options = {
         field : ["xfield"]
     },
     markLine : {
-        enabled : true
+        enabled : true,
+        filter  : function( ml ){
+            if( ml.field == "pv" ){
+                //把pv的均线隐藏
+                ml.sprite.context.visible = false;
+            }
+        }
     }
 }   
 Chartx.bar("canvasTest" , data , options);

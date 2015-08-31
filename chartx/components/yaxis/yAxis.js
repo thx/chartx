@@ -125,8 +125,10 @@ define(
                 } else {
                     if( this.place == "left" ){
                         arr = data.org[0];
+                        this.field = this.field[0];
                     } else {
                         arr = data.org[1];
+                        this.field = this.field[1];
                     }
                 }
                 return arr;
@@ -172,8 +174,8 @@ define(
                     var x = 0, y = o.y;
                     var content = o.content
                     if( _.isFunction(self.text.format) ){
-                        content = self.text.format(content );
-                    }else{
+                        content = self.text.format(content , self);
+                    } else {
                         content = Tools.numAddSymbol(content);
                     }
                     var yNode = new Canvax.Display.Sprite({ id : "yNode"+a });
