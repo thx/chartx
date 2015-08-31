@@ -1042,6 +1042,7 @@ define(
                 });
             },
             _initMarkLine: function(g) {
+                
                 var me = this
                 var pointList = _.clone(g._pointList)
                 var max = 0
@@ -1057,7 +1058,6 @@ define(
                             x: me._back.pos.x,
                             y: me._back.pos.y
                         },
-
                         line: {
                             y: center,
                             list: [
@@ -1066,8 +1066,8 @@ define(
                             ],
                             strokeStyle: g.line.strokeStyle,
                             lineType: 'dashed'
-                        }
-
+                        },
+                        field : g.field
                     }).done(function() {
                         me.core.addChild(this.sprite)
                     })

@@ -50,7 +50,12 @@ var options = {
     biaxial : true,
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["uv" , "pv" ]
+        field : ["uv" , "pv" ],
+        text  : {
+            format: function( c , yaxis ){
+                return yaxis.field +"："+c 
+            }
+        }
     },
     xAxis : {
         field : "xfield"

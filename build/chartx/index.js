@@ -917,7 +917,8 @@ define(
     function(Canvax, BrokenLine){
         var markLine = function(opt){
 
-            this.origin      = {
+            this.field  = null;
+            this.origin = {
                 x : 0 , y : 0
             };
 
@@ -929,6 +930,10 @@ define(
                 smooth      : false,
                 lineType    : 'dashed'
             };
+
+            this.filter = function( ){
+                
+            }
 
             this._doneHandle = null;
             this.done   = function( fn ){
@@ -948,7 +953,6 @@ define(
                         y : this.origin.y
                     }
                 });
-
                 setTimeout( function(){
                     me.widget();
                 } , 10 );
@@ -967,6 +971,7 @@ define(
                 });
                 me.sprite.addChild(line)
                 me._done();
+                me.filter( me );
             },
             _done : function(){
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
@@ -2120,8 +2125,10 @@ define(
                 } else {
                     if( this.place == "left" ){
                         arr = data.org[0];
+                        this.field = this.field[0];
                     } else {
                         arr = data.org[1];
+                        this.field = this.field[1];
                     }
                 }
                 return arr;
@@ -2167,8 +2174,8 @@ define(
                     var x = 0, y = o.y;
                     var content = o.content
                     if( _.isFunction(self.text.format) ){
-                        content = self.text.format(content );
-                    }else{
+                        content = self.text.format(content , self);
+                    } else {
                         content = Tools.numAddSymbol(content);
                     }
                     var yNode = new Canvax.Display.Sprite({ id : "yNode"+a });

@@ -238,16 +238,17 @@ define(
             },
             _initMarkLine: function(g) {
                 var me = this
+            
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     for (var a = 0, al = me._yAxis.dataOrg.length; a < al; a++) {
                         var center = me._yCenters[a]
                         var fillStyle = g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
-                        new MarkLine({
+                        new MarkLine(_.extend({
                             origin: {
                                 x: me._back.pos.x,
                                 y: me._back.pos.y
                             },
-
+                            field : _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
                             line: {
                                 y: center,
                                 list: [
@@ -258,7 +259,7 @@ define(
                                 lineType: 'dashed'
                             }
 
-                        }).done(function() {
+                        } , me._opts.markLine)).done(function() {
                             me.core.addChild(this.sprite)
                         })
                     }
