@@ -810,7 +810,7 @@ define(
                         }
                     }
                 },
-                blurAt  : function(index){
+                unfocusAt  : function(index){
                     if(this._pie){
                         this._pie._sectorUnfocus( null , index);
                         var sector = this.getByIndex(index).sector;
@@ -918,15 +918,28 @@ define(
                         focusCallback: {
                             focus: function (e , index) {
                                 e.sectorIndex = index;
+                                e.eventInfo = {
+                                    sectorIndex : index
+                                }
+
+
                                 self.fire('focused' , e);
                             },
                             unfocus: function (e , index) {
                                 e.sectorIndex = index;
+                                e.eventInfo = {
+                                    sectorIndex : index
+                                }
+
                                 self.fire('unfocused' , e);
                             }
                         },
                         clickCallback : function( e , index ){
                             e.sectorIndex = index;
+                            e.eventInfo = {
+                                sectorIndex : index
+                            }
+
                             self.fire("click" , e);
                         }
                     };

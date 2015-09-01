@@ -270,19 +270,29 @@ define(
                         context : {
                             pointList : pointList,
                             lineWidth : 2,
+                            cursor    : "pointer",
                             strokeStyle : this.getFillStyle(i)//this._colors[i]
                         }
                     });
     
                     //最开始该poly是在的group的index，用来mouseout的时候还原到本来的位置。
                     polygonBorder.groupInd = i;
+                    polygonBorder.bg       = polygonBg
                     polygonBorder.hover(function(e){
                         e.groupInd = this.groupInd;
                         this.parent.toFront();
+                        this.bg.context.globalAlpha += 0.3 
                     },function(){
                         var backCount = this.parent.parent.getNumChildren();
                         this.parent.toBack( backCount - this.groupInd - 1 );
-                    })
+                        this.bg.context.globalAlpha -= 0.3 
+
+                    });
+
+                    
+                    polygonBorder.on("click" , function(e){    
+                        e.groupInd = this.groupInd
+                    });
     
                     group.addChild( polygonBg );
                     group.addChild( polygonBorder );
@@ -510,6 +520,12 @@ define(
                     if( !HitTestPoint.isInside( lastIsogon , origPoint )){
                         me._graphs.angOut( );
                     }
+                });
+                this.stage.on("click" , function(e){
+                    e.eventInfo = {
+                        field : _.isArray(me.yAxis.field) ? me.yAxis.field[e.groupInd] : me.yAxis.field
+                    };
+                    me.fire("click" , e);
                 });
             },
             _getCurrAng   : function(e){

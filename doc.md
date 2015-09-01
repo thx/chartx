@@ -346,6 +346,47 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
 
 雷达图的布局和折线图柱状图散点图这样的[xAxis，yAxis，graphs的很清晰的三国分立布局](#linelayout)不一样，但是它也其实也可以理解为是弯曲了的x轴和y轴，就好比一本书，它有着清晰的xy轴的坐标系，但是你把它握成一个圆筒的时候，这个时候它的x轴就成了一个环状。
 
+#### 雷达图的配置
+
+ - graphs 
+     + fillStyle  遵循[<a href="#color">颜色值的规则</a>]
+     + alpha
+     + lineWidth 
+    
+#### 雷达图的事件
+
+ | 事件名称 | 参数 | 描述 |
+ | -------  | -------  | --- |
+ | click | e.eventInfo.field(该分组对应的字段) | 点击雷达网触发 |
+
+
+
+
+
+### 散点图(scat)
+
+#### 散点图的配置
+
+ - zAxis --> 散点图中的大小维度
+    + field zAxis的字段配置，和xAxis,yAxis的field配置一样
+ - graphs 
+    + maxR --> 最大半径
+    + minR --> 最小半径
+    + normalR --> 默认半径  
+       
+### 拓扑图（topo）
+    
+
+### 进度图表（progress）
+
+### 和旋图（chrod）
+
+### 韦恩图（venn）
+
+### 混合图（hybird）
+
+### 自有原创图表
+
 ## 组件
 
 

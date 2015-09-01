@@ -80,6 +80,12 @@ define(
                         me._graphs.angOut( );
                     }
                 });
+                this.stage.on("click" , function(e){
+                    e.eventInfo = {
+                        field : _.isArray(me.yAxis.field) ? me.yAxis.field[e.groupInd] : me.yAxis.field
+                    };
+                    me.fire("click" , e);
+                });
             },
             _getCurrAng   : function(e){
                 var origPoint = this._getPointBack(e);
