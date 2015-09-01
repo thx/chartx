@@ -320,6 +320,24 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
     会得到这样的效果<img src="./assets/chart/pielabeltip.png" style="width:200px;" />  
 
 
+#### pie图方法
+
+ | 方法名称 | 参数 | 描述 |
+ | -------  | -------  | --- |
+ | focusAt(@index)  | @index   | 设置第@index位置的扇形为选中状态 |
+ | unfocusAt(@index)   | @index   | 和focusAt刚好相反，取消第@index位置扇形的选中状态 |
+
+#### pie图的事件 
+
+ | 事件名称 | 参数 | 描述 |
+ | -------  | -------  | --- |
+ | click | e.eventInfo.sectorIndex | 点击扇形区域触发事件 |
+ | focused | e.eventInfo.sectorIndex | hover到扇形区域触获得焦点发事件 |
+ | unfocused | e.eventInfo.sectorIndex | mouseout扇形区域市区焦点后触发事件 |
+
+ 
+
+
 ### 雷达图(radar)
 
 雷达图的基本布局：
