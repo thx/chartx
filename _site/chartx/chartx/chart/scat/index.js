@@ -157,18 +157,21 @@ define(
                 };
 
                 this._bindEvent();
-
               
             },
-            _setXaxisYaxisToTipsInfo : function( e ){
+            _setXaxisYaxisToeventInfo : function( e ){
                 var self = this;
-                e.tipsInfo.xAxis = {
-                    field : self.dataFrame.xAxis.field[ e.tipsInfo.iGroup ],
-                    value : self.dataFrame.xAxis.org[ e.tipsInfo.iGroup ][ e.tipsInfo.iNode ]
+                e.eventInfo.xAxis = {
+                    field : self.dataFrame.xAxis.field[ e.eventInfo.iGroup ],
+                    value : self.dataFrame.xAxis.org[ e.eventInfo.iGroup ][ e.eventInfo.iNode ]
                 };
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    node.field = self.dataFrame.yAxis.field[ e.tipsInfo.iGroup ]
+                if( e.target.zAxis ){
+                    e.eventInfo.zAxis = e.target.zAxis;
+                };
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
+                    node.field = self.dataFrame.yAxis.field[ e.eventInfo.iGroup ]
                 } );
+                
             },
             _bindEvent  : function(){
                 var self = this;
@@ -176,9 +179,9 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.show();
                     };
-                    //console.log(e.tipsInfo)
-                    if( e.tipsInfo ){
-                        self._setXaxisYaxisToTipsInfo(e);
+                    //console.log(e.eventInfo)
+                    if( e.eventInfo ){
+                        self._setXaxisYaxisToeventInfo(e);
                         self._tip.show( e );
                     }
                 });
@@ -192,8 +195,8 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.resetCross( cross );
                     }
-                    if( e.tipsInfo ){
-                        self._setXaxisYaxisToTipsInfo(e);
+                    if( e.eventInfo ){
+                        self._setXaxisYaxisToeventInfo(e);
                         self._tip.move( e );
                     }
 
@@ -202,7 +205,7 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.hide();
                     }
-                    if( e.tipsInfo ){
+                    if( e.eventInfo ){
                         self._tip.hide( e );
                     }
                 });
