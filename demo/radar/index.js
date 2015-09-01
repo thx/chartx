@@ -36,6 +36,9 @@ KISSY.ready(function(){
         }
     }
     Chartx.create.radar("canvasTest" , data1 , options).then(function( chart ){
+        chart.on("click" , function(){
+        
+        });
     })
 
 

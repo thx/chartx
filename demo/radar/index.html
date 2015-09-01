@@ -58,7 +58,12 @@ var options = {
         alpha : 0.2
     }
 }   
-Chartx.radar("canvasTest" , data , options);
+Chartx.radar("canvasTest" , data , options).then(function( chart ){
+    chart.on("click" , function(e){
+         //e.eventInfo = { field : "" }
+         console.log("当前点击了："+e.eventInfo.field)
+    });
+});
 </textarea></form>
 
         </td>
