@@ -61,6 +61,11 @@ var options = {
     },
     zAxis : {
         field : ["pv1"]
+    },
+    tips : {
+        content:function(e){
+        //e.event.zAxis={field,org,val}
+        }
     }
 };
 Chartx.scat("canvasTest" , data , options);

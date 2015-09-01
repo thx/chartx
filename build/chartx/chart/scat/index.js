@@ -136,10 +136,10 @@ define(
                 this.sprite.addChild(this.induce);
 
                 this.induce.on("panstart mouseover", function(e){
-                    e.tipsInfo = null;
+                    e.eventInfo = null;
                 });
                 this.induce.on("panmove mousemove", function(e){
-                    e.tipsInfo = null;
+                    e.eventInfo = null;
                 });
 
     
@@ -175,23 +175,30 @@ define(
                         circle.iGroup = ii;
                         circle.iNode  = i;
                         circle.r      = r;
+                        if( zAxisV ){
+                            circle.zAxis  = {
+                                field : this.zAxis.field,
+                                value : zAxisV,
+                                org   : this.zAxis.org
+                            }
+                        }
 
                         circle.on("panstart mouseover", function(e){
-                            e.tipsInfo = self._getInfoHandler(e);
+                            e.eventInfo = self._getInfoHandler(e);
                             this.context.globalAlpha = 0.9;
                             this.context.r ++;
                         });
                         circle.on("panmove mousemove", function(e){
-                            e.tipsInfo = self._getInfoHandler(e);
+                            e.eventInfo = self._getInfoHandler(e);
                             
                         });
                         circle.on("panend mouseout", function(e){
-                            e.tipsInfo = {};
+                            e.eventInfo = {};
                             this.context.globalAlpha = 0.8;
                             this.context.r --;
                         });
                         circle.on("tap click", function(e){
-                            e.tipsInfo = self._getInfoHandler(e);
+                            e.eventInfo = self._getInfoHandler(e);
                         });
 
                         this._circles.push( circle );
@@ -408,18 +415,21 @@ define(
                 };
 
                 this._bindEvent();
-
               
             },
-            _setXaxisYaxisToTipsInfo : function( e ){
+            _setXaxisYaxisToeventInfo : function( e ){
                 var self = this;
-                e.tipsInfo.xAxis = {
-                    field : self.dataFrame.xAxis.field[ e.tipsInfo.iGroup ],
-                    value : self.dataFrame.xAxis.org[ e.tipsInfo.iGroup ][ e.tipsInfo.iNode ]
+                e.eventInfo.xAxis = {
+                    field : self.dataFrame.xAxis.field[ e.eventInfo.iGroup ],
+                    value : self.dataFrame.xAxis.org[ e.eventInfo.iGroup ][ e.eventInfo.iNode ]
                 };
-                _.each( e.tipsInfo.nodesInfoList , function( node , i ){
-                    node.field = self.dataFrame.yAxis.field[ e.tipsInfo.iGroup ]
+                if( e.target.zAxis ){
+                    e.eventInfo.zAxis = e.target.zAxis;
+                };
+                _.each( e.eventInfo.nodesInfoList , function( node , i ){
+                    node.field = self.dataFrame.yAxis.field[ e.eventInfo.iGroup ]
                 } );
+                
             },
             _bindEvent  : function(){
                 var self = this;
@@ -427,9 +437,9 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.show();
                     };
-                    //console.log(e.tipsInfo)
-                    if( e.tipsInfo ){
-                        self._setXaxisYaxisToTipsInfo(e);
+                    //console.log(e.eventInfo)
+                    if( e.eventInfo ){
+                        self._setXaxisYaxisToeventInfo(e);
                         self._tip.show( e );
                     }
                 });
@@ -443,8 +453,8 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.resetCross( cross );
                     }
-                    if( e.tipsInfo ){
-                        self._setXaxisYaxisToTipsInfo(e);
+                    if( e.eventInfo ){
+                        self._setXaxisYaxisToeventInfo(e);
                         self._tip.move( e );
                     }
 
@@ -453,7 +463,7 @@ define(
                     if( self._anchor.enabled ){
                         self._anchor.hide();
                     }
-                    if( e.tipsInfo ){
+                    if( e.eventInfo ){
                         self._tip.hide( e );
                     }
                 });

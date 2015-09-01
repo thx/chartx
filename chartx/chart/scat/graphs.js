@@ -92,10 +92,10 @@ define(
                 this.sprite.addChild(this.induce);
 
                 this.induce.on("panstart mouseover", function(e){
-                    e.tipsInfo = null;
+                    e.eventInfo = null;
                 });
                 this.induce.on("panmove mousemove", function(e){
-                    e.tipsInfo = null;
+                    e.eventInfo = null;
                 });
 
     
@@ -131,23 +131,30 @@ define(
                         circle.iGroup = ii;
                         circle.iNode  = i;
                         circle.r      = r;
+                        if( zAxisV ){
+                            circle.zAxis  = {
+                                field : this.zAxis.field,
+                                value : zAxisV,
+                                org   : this.zAxis.org
+                            }
+                        }
 
                         circle.on("panstart mouseover", function(e){
-                            e.tipsInfo = self._getInfoHandler(e);
+                            e.eventInfo = self._getInfoHandler(e);
                             this.context.globalAlpha = 0.9;
                             this.context.r ++;
                         });
                         circle.on("panmove mousemove", function(e){
-                            e.tipsInfo = self._getInfoHandler(e);
+                            e.eventInfo = self._getInfoHandler(e);
                             
                         });
                         circle.on("panend mouseout", function(e){
-                            e.tipsInfo = {};
+                            e.eventInfo = {};
                             this.context.globalAlpha = 0.8;
                             this.context.r --;
                         });
                         circle.on("tap click", function(e){
-                            e.tipsInfo = self._getInfoHandler(e);
+                            e.eventInfo = self._getInfoHandler(e);
                         });
 
                         this._circles.push( circle );
