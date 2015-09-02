@@ -85,10 +85,15 @@ define(
                         field : _.isArray(me.yAxis.field) ? me.yAxis.field[e.groupInd] : me.yAxis.field
                     };
                     var itemInd = me._getCurrAng(e);
-                    e.eventInfo.role = {
-                        name : me._xAxis.dataSection[ itemInd ],
-                        value: me._yAxis.dataOrg[e.groupInd][itemInd]
-                    };
+
+                    if( e.eventInfo.field ){
+                        e.eventInfo.role = {
+                            name : me._xAxis.dataSection[ itemInd ],
+                            value: me._yAxis.dataOrg[e.groupInd][itemInd]
+                        };
+                    } else {
+                        e.eventInfo.role = null
+                    }
                     me.fire("click" , e);
                 });
             },
