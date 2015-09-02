@@ -60,8 +60,9 @@ var options = {
 }   
 Chartx.radar("canvasTest" , data , options).then(function( chart ){
     chart.on("click" , function(e){
-         //e.eventInfo = { field : "" }
-         console.log("当前点击了："+e.eventInfo.field)
+         //e.eventInfo = { field : "" ,fole:{name , value}}
+         console.log("当前点击了分组："+e.eventInfo.field);
+         console.log("当前点击了角色："+e.eventInfo.role.name+"，值为"+e.eventInfo.role.value);
     });
 });
 </textarea></form>
