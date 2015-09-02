@@ -401,12 +401,55 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
   - axisWidth --> 轴宽，默认等于barWidth
   - progColor --> bar的颜色
   - startAngle --> 起始角度
+  - angleCount --> 角度的总长
+  - currRatio --> 当前的进度比率
+  - barDis --> 如果有多组progress，则代表两bar之间的间距
+  - field --> 配置哪组数据做为数据源，可以是数组
+  - dataType --> 默认是占比，如果是绝对值"absolute"则需要自己另外计算占比
+  - text 
+     - enabled --> 是否显示文案
+     - fillStyle --> 文案背景色
+     - format --> 文案过滤函数
+     - fontSize --> 文案大小
+
+
 
 ### 和旋图（chrod）
 
+  和旋图的使用请参考[demo](demo/chord/index.html)
+
 ### 韦恩图（venn）
 
+#### venn图配置
+
+ - padding --> 绘图区域的边距，默认15
+ - nodeField --> 节点字段配置
+ - valueField --> 值字段配置
+ - labelField --> 文案字段配置
+ - text 
+   + enabled --> 是否出现文案
+   + fillStyle --> 文案颜色
+   + fontSize --> 文案大小
+   + textAlign --> 文案左右对齐配置
+   + textBaseline --> 文案垂直对齐配置
+   + format --> format格式函数
+ - circle 
+   + fillAlpha --> 圆透明度，默认0.25
+   + fillStyle --> 圆填充色
+   + strokeStyle --> 圆描边色
+   + lineWidth --> 圆边框大小，默认2
+
 ### 混合图（hybird）
+
+#### 柱折混合图
+
+  - type --> "bar_line" 所有的混合图表都采用配置type为“charType1_chartType2”的格式
+  - yAxis --> 
+    + bar --> bar的yAxis配置
+    + line --> line的yAxis配置
+
+  ...其他的配置都沿用bar和line的现有配置不变
+
 
 ### 自有原创图表
 
