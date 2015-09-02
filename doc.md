@@ -13,14 +13,34 @@ Chartx，专业的数据可视化解决方案，一个纯Javascript的图表库�
 
  这里列举几个高频使用的名词做给简要的解析
 
- | 名词 | 解释 |
- | ---- | ---- |
- | axis | 直角坐标系中的一个坐标轴，坐标轴可分为类目型、数值型或时间型 |
- | xAxis | 直角坐标系中的横轴，通常并默认为类目型 |
- | yAxis | 直角坐标系中的纵轴，通常并默认为数值型 |
- | zAxis | 直角坐标系中的z轴，通常并默认为数值型，比如在散点图上圆的大小维度 |
- | field | 字段配置，在xAxis,yAxis,zAxis中都必选配置，用来定义该axis从data中取哪列数据 |
- | tip   | 图表中的提示框，用来显示更加完整详细的数据 |
+
+ <table>
+    <tr><th>名词</th><th>解释</th></tr>
+    <tr>
+        <td>axis</td>
+        <td>直角坐标系中的一个坐标轴，坐标轴可分为类目型、数值型或时间型</td>
+    </tr>
+    <tr>
+        <td>xAxis</td>
+        <td>直角坐标系中的横轴，通常并默认为类目型</td>
+    </tr>
+    <tr>
+        <td>yAxis</td>
+        <td>直角坐标系中的纵轴，通常并默认为数值型</td>
+    </tr>
+    <tr>
+        <td>zAxis</td>
+        <td>直角坐标系中的z轴，通常并默认为数值型，比如在散点图上圆的大小维度</td>
+    </tr>
+    <tr>
+        <td>field</td>
+        <td>字段配置，在xAxis,yAxis,zAxis中都必选配置，用来定义该axis从data中取哪列数据</td>
+    </tr>
+    <tr>
+        <td>tip</td>
+        <td>图表中的提示框，用来显示更加完整详细的数据</td>
+    </tr>
+ </table>
    
 
 
@@ -322,18 +342,49 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
 
 #### pie图方法
 
- | 方法名称 | 参数 | 描述 |
- | -------  | -------  | --- |
- | focusAt(@index)  | @index   | 设置第@index位置的扇形为选中状态 |
- | unfocusAt(@index)   | @index   | 和focusAt刚好相反，取消第@index位置扇形的选中状态 |
+<table>
+    <tr>
+        <th>方法名称</th>   
+        <th>参数</th>   
+        <th>描述</th>   
+    </tr>
+    <tr>
+        <td>focusAt(@index)</td>
+        <td>@index</td>
+        <td>设置第@index位置的扇形为选中状态</td>
+    </tr>
+    <tr>
+        <td>unfocusAt(@index)</td>
+        <td>@index</td>
+        <td>和focusAt刚好相反，取消第@index位置扇形的选中状态</td>
+    </tr>
+</table>
 
-#### pie图的事件 
 
- | 事件名称 | 参数 | 描述 |
- | -------  | -------  | --- |
- | click | e.eventInfo.sectorIndex | 点击扇形区域触发事件 |
- | focused | e.eventInfo.sectorIndex | hover到扇形区域触获得焦点发事件 |
- | unfocused | e.eventInfo.sectorIndex | mouseout扇形区域市区焦点后触发事件 |
+#### pie图的事件
+
+ <table>
+    <tr>
+        <th>事件名称</th>   
+        <th>参数</th>   
+        <th>描述</th>   
+    </tr>
+    <tr>
+        <td>click</td>
+        <td>e.eventInfo.sectorIndex</td>
+        <td>点击扇形区域触发事件</td>
+    </tr>
+    <tr>
+        <td>focused</td>
+        <td>e.eventInfo.sectorIndex</td>
+        <td>hover到扇形区域触获得焦点发事件</td>
+    </tr>
+    <tr>
+        <td>unfocused</td>
+        <td>e.eventInfo.sectorIndex</td>
+        <td>mouseout扇形区域市区焦点后触发事件</td>
+    </tr>
+</table>
 
  
 
@@ -355,10 +406,18 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
     
 #### 雷达图的事件
 
- | 事件名称 | 参数 | 描述 |
- | -------  | -------  | --- |
- | click | e.eventInfo.field(该分组对应的字段) | 点击雷达网触发 |
-
+<table>
+    <tr>
+        <th>事件名称</th>   
+        <th>参数</th>   
+        <th>描述</th>   
+    </tr>
+    <tr>
+        <td>click</td>
+        <td>e.eventInfo.field(该分组对应的字段)</td>
+        <td>点击雷达网触发</td>
+    </tr>
+</table>
 
 
 
