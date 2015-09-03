@@ -320,7 +320,6 @@ define(
                 });
             },
             _initMarkLine: function(g) {
-                
                 var me = this
                 var pointList = _.clone(g._pointList)
                 var max = 0
@@ -331,7 +330,7 @@ define(
                 center = parseInt(max / pointList.length)
 
                 require(['chartx/components/markline/index'], function(MarkLine) {
-                    new MarkLine({
+                    new MarkLine(_.extend({
                         origin: {
                             x: me._back.pos.x,
                             y: me._back.pos.y
@@ -346,7 +345,7 @@ define(
                             lineType: 'dashed'
                         },
                         field : g.field
-                    }).done(function() {
+                    } , me._opts.markLine)).done(function() {
                         me.core.addChild(this.sprite)
                     })
                 })

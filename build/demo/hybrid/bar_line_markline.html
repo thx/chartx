@@ -65,7 +65,10 @@ var options = {
         }
     },
     markLine : {
-        enabled : true
+        enabled : true,
+        filter : function( e ){
+            debugger;
+        }
     }
 }   
 Chartx.hybrid("canvasTest" , data , options);

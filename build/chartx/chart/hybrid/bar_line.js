@@ -155,7 +155,7 @@ define(
                 me._lineChart._graphs.setX( _yAxisW ), me._lineChart._graphs.setY(y);
                 me._lineChart._graphs.grow( function(g){
                     if( "markLine" in me._opts ){
-                        Line.prototype._initMarkLine.apply(me , [g] );
+                        Line.prototype._initMarkLine.apply(me , [g , me._opts.markLine] );
                     }
                     //me._initMarkLine( me._opts , g );
                 } );
