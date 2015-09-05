@@ -675,7 +675,7 @@ title:  Chartx demos
     </dl>
     </a>
 
-    <a target="_blank" href="./demo/planet/index.html">
+    <a target="_blank" href="./demo/original/planet/index.html">
     <dl class="chart">
         <dt>
         <img src="./assets/chart/planet/index.png">

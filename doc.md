@@ -623,15 +623,102 @@ chartx.then(function( thermometer ){
 
 #### <span id="planet">planet标签星系图</span>，[demo](demo/original/)
 
+ - type --> "planet"
+ - cx --> 圆心坐标x
+ - event 
+   + enabled --> 是否有事件响应(tips)[1]
+   + on --> 事件处理函数，参数e ，e.ringID = 第几个环(从0开始 0 = 品牌)   e.ID = 第几个行星(从1开始)
+ - yAxis 
+   + field --> y轴
+ - xAxis 
+   + field --> x轴
+   + bar 色阶条
+     - enabled --> 是否显示
+     - y  
+     - x
+     - width
+     - fillStyle --> 色阶渐变的起始和结束颜色值
+     - text 
+       + contents --> 色阶条两边的文案
+ - graphs
+   + disY --> //行星与容器上、下之间的最小距离
+   + minR --> //行星圆最小半径
+   + size 
+     - field --> 大小维度的字段
+   + layout --> 布局
+     - mode --> 模式(0 = 根据yAxis.field计算比例  |  1 = 上下错开)
+   + info 
+     - field 
+     - content
+   + core --> 品牌
+     - r 
+       + normal --> 默认的品牌半径
+     - text 
+       + content --> 品牌文案
+   + text
+     - fillStyle
+       + normal --> 默认的文本颜色
 
 
-#### <span id="relcontrast">relcontrast多触点关联图</span>
 
-#### <span id="relcircle">relcircle环形关联图</span>
+#### <span id="relcontrast">relcontrast多触点关联图</span>，[demo](demo/original/rel-contrast/index.html)
 
-#### <span id="flowall">flowall等比流失图</span>
+ - type --> "relcircle",
+ - graphs 
+   + w --> 绘图区域的width
+   + h --> 绘图区域的height
+   + groupSort --> 是否做排序
+   + node
+     - maxR --> 节点最大半径
+     - minR --> 节点最小半径
+   + edge
+     - maxLineWidth --> 连接线最大LineWidth
+     - minLineWidth --> 连接线最小LineWidth
 
-#### <span id="flowinout">flowinout等量流失图</span>
+
+#### <span id="relcircle">relcircle环形关联图</span>，[demo](demo/original/relcircle/index.html)
+
+  - type --> "relcircle"
+  - graphs
+    + w  --> 绘图区域的width
+    + h  --> 绘图区域的height
+    + groupSort --> 是否做排序 
+    + node     
+      -  r --> 节点半径
+      -  fillStyle --> 节点颜色
+    - edge      
+      +  lineWidth --> 连接线lineWidth
+      +  fillStyle --> 连接线颜色
+
+
+
+#### <span id="flowall">flowall等比流失图</span>，[demo](demo/original/flowall/index.html)
+
+   - type --> "flowall"
+   - graphs 
+     + w --> 绘图区域的width
+     + h --> 绘图区域的height
+     + node 
+       - text
+         + format --> function( v ){ }
+         + formatVal --> function(v){return v}
+         + fillStyle --> 文本颜色
+         + fontSize --> 文本大小
+         + valFontSize --> val值的文本大小
+
+#### <span id="flowinout">flowinout等量流失图</span>，[demo](demo/original/flowinout/index.html)
+
+ - type --> "flowinout"
+ - graphs 
+   + w --> 绘图区域的width
+   + h --> 绘图区域的height
+   + node 
+     maxW --> 节点最大width
+     maxH --> 节点最大height
+     minH --> 节点最小height
+     marginTop --> node的上边距
+     fillStyle --> 节点的颜色，可以是个数据和处理函数，如果是函数的话，参数为一个node节点对象
+
 
 ## 组件
 
@@ -846,8 +933,39 @@ chartx.then(function( thermometer ){
      </table>
   
    + 地图(map)中的tips content 函数参数：
+     - area //目标地域对象
+     - data //目标地域在data中的数据，如果有的话，否则data属性不存在
+     - dataIndex //目标地域在data中索引值，如果有的话，否则dataIndex属性不存在
 
 
+   <h3 id="markpoint">markPoint</h3>
 
+   - markTarget --> markpoint标准的对应元素
+   - point --> markpoint的位置
+     + x
+     + y
+   - shapeType --> markpoint的图形类别，目前有支持circle圆形和droplet水滴型，默认为“circle”
+   - fillStyle --> 填充色
+   - strokeStyle
+   - lineWidth
+   - globalAlpha
+   - duration --> 如果有动画，则代表动画时长
+   - duration --> 动画类型
+   - hr --> 如果是水滴形的话，描述水滴型的横向半径
+   - vr --> 如果是水滴形的话，描述水滴型的纵向半径
+   - r  --> 如果是圆形的话，描述圆形半径
+   - realTime --> 是否是实时的一个点，如果是的话会有动画
+   - tween --> realTime为true的话，tween则为对应的一个缓动对象
+   - filter --> 过滤函数
 
-#### thermometer温度计占比图
+   <h3 id="markline">markLine</h3>
+
+   - field --> markLine对应的yAxis的field字段
+   - origin --> markLine的原点
+   - line 
+     + y --> line基于原点的y值
+     + list --> pointList集合
+     + strokeStyle
+     + lineWidth 
+     + lineType --> 默认为虚线“dashed”
+   - filter --> 过滤函数
