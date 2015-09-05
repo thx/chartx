@@ -507,10 +507,131 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
     + bar --> bar的yAxis配置
     + line --> line的yAxis配置
 
-  ...其他的配置都沿用bar和line的现有配置不变
+  ...其他的配置都沿用bar和line的现有配置不变，可以参考[配置了均线的demo](demo/hybrid/bar_line_markline.html)
 
 
 ### 自有原创图表
+ - [sector扇形一维比例图](#sector)
+ - [thermometer温度计占比图](#thermometer)
+ - [planet标签星系图](#planet)
+ - [relcontrast多触点关联图](#relcontrast)
+ - [relcircle环形关联图](#relcircle)
+ - [flowall等比流失图](#flowall)
+ - [flowinout等量流失图](#flowinout)
+
+
+#### <span id="sector">sector扇形一维比例图</span>，[demo](demo/original/sector/index.html)
+
+实例：
+
+```js
+var data= [
+    ["xfield0","xfield","yfield"],
+    [2,50,'b'],
+    [3,30,'c'],
+    [1,17,'d'],
+    [4,100,'a']
+];
+
+//chart的配置信息
+var options = {
+    type : 'sector',
+    yAxis : {
+        field : 'yfield'
+    },
+    xAxis : {
+        field : "xfield0"
+    }
+};
+//Chartx.funnel开始初始化chart实例
+var chartx = Chartx.original("canvasTest" , data , options);
+
+chartx.then(function( sector ){
+    sector.on( "complete" , function( e ){
+        console.log('aaa')
+    });
+});
+```
+
+#### <span id="thermometer">thermometer温度计占比图</span>，[demo](demo/original/sector/index.html)
+
+ 配置：
+
+ - type --> "thermometer"
+ - field --> 配置字段
+ - dis  --> 设置绘图区域的内边距（padding）
+ - graphs 
+   + icon 
+     - content --> icon的内容，函数。
+   + fillStyle 填充色
+   + back 
+     - fillStyle 背景色
+   + text 
+     - fillStyle 文本填充色
+     - format 文本格式化函数
+
+ 实例：
+
+```js
+var data= [
+    ["scale1","scale2"],
+    [70,100],
+    [20,30],
+    [10,10]
+];
+
+//chart的配置信息
+var options = {
+    type  : "thermometer",
+    field : ["scale2"],
+
+    dis   :{
+        left : 50
+    },
+    
+    graphs: {
+        icon : {
+            content : function(e){
+                var groups = [ "男" , "女" , "家庭" ]
+                return groups[e.index]
+            }
+        }
+        //sDisXAndItemW : 1
+        //fillStyle : ['#0098d8','#ff633d','#7867b4'],
+        //back :{
+          //  fillStyle : ['#f3f3f5','#f3f3f5','#f3f3f5']
+        //},
+        //text : {
+          //  fillStyle : '#ff0000',
+          //  format : function(){
+          //      return '100%'
+          //  }
+        //}
+    }
+    
+};
+//Chartx.funnel开始初始化chart实例
+var chartx = Chartx.original("canvasTest" , data , options);
+
+chartx.then(function( thermometer ){
+    thermometer.on( "complete" , function( e ){
+        console.log('aaa')
+    });
+});
+
+```
+
+#### <span id="planet">planet标签星系图</span>，[demo](demo/original/)
+
+
+
+#### <span id="relcontrast">relcontrast多触点关联图</span>
+
+#### <span id="relcircle">relcircle环形关联图</span>
+
+#### <span id="flowall">flowall等比流失图</span>
+
+#### <span id="flowinout">flowinout等量流失图</span>
 
 ## 组件
 
@@ -729,3 +850,4 @@ TODO：目前pie图的数据格式是唯一不同没有titles行的数据格式�
 
 
 
+#### thermometer温度计占比图
