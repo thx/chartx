@@ -45,6 +45,7 @@ define(
 
             this.dataOrg = []; //源数据
             this.dataSection = []; //默认就等于源数据
+            this._layoutDataSection = []; //dataSection的format后的数据
             this.data = []; //{x:100, content:'1000'}
             this.layoutData = []; //this.data(可能数据过多),重新编排过滤后的数据集合, 并根据此数组展现文字和线条
             this.sprite = null;
@@ -67,10 +68,6 @@ define(
                     _.deepExtend(this, opt);
                 }
 
-                if (this.dataSection.length == 0) {
-                    this.dataSection = this._initDataSection(this.dataOrg);
-                }
-
                 if (!this.line.enabled) {
                     this.line.height = 1
                 }
@@ -78,6 +75,18 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "xAxisSprite"
                 });
+
+
+                if (this.dataSection.length == 0) {
+                    this.dataSection = this._initDataSection(this.dataOrg);
+                };
+
+                //先计算出来显示文本
+                this._layoutDataSection = this._formatDataSectionText( this.dataSection );
+
+                //然后计算好最大的width 和 最大的height，外部组件需要用
+                this._setTextMaxWidth();
+                this._setXAxisHeight();
             },
             /**
              *return dataSection 默认为xAxis.dataOrg的的faltten
@@ -94,14 +103,14 @@ define(
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
+            
                 this._initConfig(opt);
                 this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
-                //先计算出来显示文本
-                this._formatDataText();
-
-                this._getTextMaxWidth();
-                this._getXAxisHeight();
-
+                var me = this;
+                _.each( this.data , function( obj , i){
+                    obj.layoutText = me._layoutDataSection[i];
+                } );
+                
                 this._trimLayoutData();
 
                 this.setX(this.pos.x);
@@ -147,15 +156,16 @@ define(
                 }
                 return tmpData;
             },
-            _formatDataText : function(arr){
-                //给[{content: x }]的数据格式添加一个layoutText属性，用于显示的文本
+            _formatDataSectionText : function(arr){
                 if( !arr ){
-                    arr = this.data;
+                    arr = this.dataSection;
                 };
                 var me = this;
-                _.each( arr  , function(obj){
-                    obj.layoutText = me._getFormatText( obj.content );
+                var currArr = [];
+                _.each( arr  , function( val ){
+                    currArr.push( me._getFormatText( val ) );
                 } );
+                return currArr;
             },
             _getXAxisDisLine: function() { //获取x轴两端预留的距离
                 var disMin = this.disXAxisLine
@@ -166,12 +176,12 @@ define(
                 dis = isNaN(dis) ? 0 : dis
                 return dis
             },
-            _getXAxisHeight: function() { //检测下文字的高等
+            _setXAxisHeight: function() { //检测下文字的高等
                 if (!this.enabled) { //this.display == "none"
                     this.dis = 0;
                     this.h = 3; //this.dis;//this.max.txtH;
                 } else {
-                    var txt = new Canvax.Display.Text(this.data[0].layoutText || "test", {
+                    var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
                         context: {
                             fontSize: this.text.fontSize
                         }
@@ -294,13 +304,13 @@ define(
                     }
                 }
             },
-            _getTextMaxWidth: function() {
-                var arr = this.data;
-                var maxLenText = arr[0].layoutText;
+            _setTextMaxWidth: function() {
+                var arr = this._layoutDataSection;
+                var maxLenText = arr[0];
 
                 for (var a = 0, l = arr.length; a < l; a++) {
                     if (arr[a].length > maxLenText.length) {
-                        maxLenText = arr[a].layoutText;
+                        maxLenText = arr[a];
                     }
                 };
 
