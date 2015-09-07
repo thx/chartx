@@ -52,7 +52,12 @@ var options = {
         field : ["uv" , "pv" ]
     },
     xAxis : {
-        field : "xfield"
+        field : "xfield",
+        text : {
+            format : function(){
+               return "xxoo"
+            }
+        }
     }
 };
 //Chartx.line开始初始化chart实例

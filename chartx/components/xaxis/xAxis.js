@@ -78,10 +78,6 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "xAxisSprite"
                 });
-
-                this._getTextMaxWidth();
-                this._checkText();
-
             },
             /**
              *return dataSection 默认为xAxis.dataOrg的的faltten
@@ -100,6 +96,12 @@ define(
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
                 this._initConfig(opt);
                 this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
+                //先计算出来显示文本
+                this._formatDataText();
+
+                this._getTextMaxWidth();
+                this._getXAxisHeight();
+
                 this._trimLayoutData();
 
                 this.setX(this.pos.x);
@@ -145,6 +147,16 @@ define(
                 }
                 return tmpData;
             },
+            _formatDataText : function(arr){
+                //给[{content: x }]的数据格式添加一个layoutText属性，用于显示的文本
+                if( !arr ){
+                    arr = this.data;
+                };
+                var me = this;
+                _.each( arr  , function(obj){
+                    obj.layoutText = me._getFormatText( obj.content );
+                } );
+            },
             _getXAxisDisLine: function() { //获取x轴两端预留的距离
                 var disMin = this.disXAxisLine
                 var disMax = 2 * disMin
@@ -154,16 +166,17 @@ define(
                 dis = isNaN(dis) ? 0 : dis
                 return dis
             },
-            _checkText: function() { //检测下文字的高等
+            _getXAxisHeight: function() { //检测下文字的高等
                 if (!this.enabled) { //this.display == "none"
                     this.dis = 0;
                     this.h = 3; //this.dis;//this.max.txtH;
                 } else {
-                    var txt = new Canvax.Display.Text(this.dataSection[0] || "test", {
+                    var txt = new Canvax.Display.Text(this.data[0].layoutText || "test", {
                         context: {
                             fontSize: this.text.fontSize
                         }
                     });
+
                     this.maxTxtH = txt.getTextHeight();
 
                     if (!!this.text.rotation) {
@@ -182,11 +195,16 @@ define(
                 }
             },
             _getFormatText: function(text) {
+                var res;
                 if (_.isFunction(this.text.format)) {
-                    return this.text.format(text);
+                    res = this.text.format(text);
                 } else {
-                    return text
+                    res = text
                 }
+                if( _.isArray( res ) ){
+                    res = Tools.numAddSymbol(res);
+                }
+                return res;
             },
             _widget: function() {
                 var arr = this.layoutData
@@ -201,15 +219,8 @@ define(
                     var x = o.x,
                         y = this.disY + this.line.height + this.dis
 
-                    var content = o.content;
-                    if (_.isFunction(this.text.format)) {
-                        content = this.text.format(content);
-                    } else {
-                        content = Tools.numAddSymbol(content);
-                    }
-
                     //文字
-                    var txt = new Canvax.Display.Text(content, {
+                    var txt = new Canvax.Display.Text( o.layoutText , {
                         context: {
                             x: x,
                             y: y,
@@ -230,14 +241,6 @@ define(
                         //线条
                         var line = new Line({
                             context: {
-                                /*
-                                xStart      : x,
-                                yStart      : this.disY,
-                                xEnd        : x,
-                                yEnd        : this.line.height + this.disY,
-                                lineWidth   : this.line.width,
-                                strokeStyle : this.line.strokeStyle
-                                */
                                 x: x,
                                 y: this.disY,
                                 xEnd: 0,
@@ -292,12 +295,12 @@ define(
                 }
             },
             _getTextMaxWidth: function() {
-                var arr = this.dataSection;
-                var maxLenText = arr[0];
+                var arr = this.data;
+                var maxLenText = arr[0].layoutText;
 
                 for (var a = 0, l = arr.length; a < l; a++) {
                     if (arr[a].length > maxLenText.length) {
-                        maxLenText = arr[a];
+                        maxLenText = arr[a].layoutText;
                     }
                 };
 
