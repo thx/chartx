@@ -231,17 +231,6 @@ define(
                     var x = o.x,
                         y = this.disY + this.line.height + this.dis
 
-<<<<<<< HEAD
-
-                    var content = o.content;
-                    if (_.isFunction(this.text.format)) {
-                        content = this.text.format(content);
-                    } else {
-                        content = Tools.numAddSymbol(content);
-                    }
-
-=======
->>>>>>> daily/1.9.18
                     //文字
                     var txt = new Canvax.Display.Text( (o.layoutText || o.content) , {
                         context: {
