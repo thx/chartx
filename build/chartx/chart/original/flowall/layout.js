@@ -102,7 +102,7 @@ define(
                     if( !node.link ){
                         node.h = ( opt.node.h || ( node.value/maxVal * opt.node.maxH ) );
                         node.h = Math.max( opt.node.minH , node.h );
-                        node.flowinH = Math.max(node.flowin / node.value * node.h , 1 );
+                        node.flowinH = parseInt(Math.max(node.flowin / node.value * node.h , 1 ));
                         
                         
                         if( !sourceNode.h ){
