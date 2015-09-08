@@ -1,21 +1,11 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name ="viewport" content ="initial-scale=1, maximum-scale=3, minimum-scale=1, minimal-ui">
-  <meta name="apple-mobile-web-app-title" content="THX">
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="format-detection" content="telephone=no" />
-  
-  <meta name="description" content="" /> <!-- 页面描述 -->
-  <meta name="keywords" content=""/> <!-- 页面关键词 -->
-
-  <title>Chartx Documentation -  THX</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no">
+  <title>Document</title>
 </head>
-<body >
-  
+<body>
 
 <style>
 /* reset */
@@ -41,10 +31,11 @@ input, /* 1 */
 select, /* 1 */
 textarea  /* 1 */
 {
-  font-family: 'helvetica neue',tahoma,'hiragino sans gb',stheiti,'wenquanyi micro hei',5FAE8F6F96C59ED1,5B8B4F53,sans-serif;
+  font-family: 'helvetica neue',tahoma,'hiragino sans gb',stheiti,'wenquanyi micro hei',\5FAE\8F6F\96C5\9ED1,\5B8B\4F53,sans-serif;
   -ms-text-autospace: ideograph-alpha ideograph-numeric ideograph-parenthesis; /* 5 */
   text-autospace: ideograph-alpha ideograph-numeric ideograph-parenthesis; /* 5 */
 }
+.page {}
 .container {
   width: 1000px;
   margin: 0 auto;
@@ -69,6 +60,13 @@ ul {
 .no-transform {
   transform: translate(0, 0) !important;
 }
+body {
+  margin-top: 46px;
+}
+.no-visual {
+  visibility: hidden;
+}
+
 
 /**
  * iconfont项目: chartx pid=35482;
@@ -92,6 +90,7 @@ ul {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
 header {
   position: fixed;
   top: 0;
@@ -120,46 +119,46 @@ header nav a:hover {
 header .home {
   width: 140px;
   height: 44px;
-  float:left;
   background: url("//gtms04.alicdn.com/tps/i4/TB1EsuWJpXXXXaeXFXXgfRT9VXX-100-33.png") no-repeat 0px 7px;
 }
 header .detail-link a {
   margin: 0 0 0 35px;
 }
 
+
 .show {
-  background-color: #0b1523;
+  background-color: #221217;
   position: relative;
-  background-image: url("//img.alicdn.com/tps/i2/TB11XK.JpXXXXaOXXXXU7PDLVXX-1920-800.png");
-  background-position:  -256px -27px;
-}
-.show .content {
-  height: 800px;
-  width: 1000px;
+  height: 749px;
+  max-width: 1920px;
   margin: 0 auto;
-  position: relative;
   overflow: hidden;
 }
-.show .content .background {
+.show .show-content {
+  width: 1000px;
   height: 800px;
-  width: auto;
-  position: absolute;
-  left: -100px;
-  top: 0;
-  background-color: transparent;
+  margin: 0 auto;
+  position: relative;
+  background: url("//gtms02.alicdn.com/tps/i2/TB11XK.JpXXXXaOXXXXU7PDLVXX-1920-800.png") no-repeat -452px -50px;
 }
-.show .content .circle {
+.show .left {
   position: absolute;
-  left: 140px;
+  left: -460px;
   top: 0;
+  width: 460px;
   height: 800px;
-  transition: left 0.5s ease-out;
-  background-color: transparent;
+  background: url("//gtms02.alicdn.com/tps/i2/TB11XK.JpXXXXaOXXXXU7PDLVXX-1920-800.png") no-repeat  0 -51px;
+}
+.show .right {
+  position: absolute;
+  right: -460px;
+  top: 0;
+  width: 460px;
+  height: 800px;
+  background: url("//gtms02.alicdn.com/tps/i2/TB11XK.JpXXXXaOXXXXU7PDLVXX-1920-800.png") no-repeat -1435px -51px;
+}
 
-}
-.show .content .center {
-  left: -200px;
-}
+
 .show .guide-container {
   position: absolute;
   width: 1000px;
@@ -184,7 +183,7 @@ header .detail-link a {
   font-size: 50px;
   font-weight: normal;
   position: absolute;
-  right: 186px;
+  right: 191px;
   top: 69px;
   opacity: 1;
   transition: top 0.5s ease-out, opacity 0.5s ease-out;
@@ -197,7 +196,7 @@ header .detail-link a {
 .show .guide-nav p {
   font-size: 24px;
   position: absolute;
-  right: 95px;
+  right: 88px;
   top: 134px;
   width: 270px;
   opacity: 1;
@@ -308,28 +307,28 @@ header .detail-link a {
   color: #0383da;
 }
 .detail .feature .html5::before {
-  content: "e601";
   content: "\e601";
+  /*content: "\\e601";*/
 }
 .detail .feature .canvas::before {
-  content: "e605";
   content: "\e605";
+  /*content: "\\e605";*/
 }
 .detail .feature .performance::before {
-  content: "e604";
   content: "\e604";
+  /*content: "\\e604";*/
 }
 .detail .feature .cross-platform::before {
-  content: "e603";
   content: "\e603";
+  /*content: "\\e603";*/
 }
 .detail .feature .cross-device::before {
-  content: "e602";
   content: "\e602";
+  /*content: "\\e602";*/
 }
 .detail .feature .open-source::before {
-  content: "e600";
   content: "\e600";
+  /*content: "\\e600";*/
 }
 .detail .feature .desc {
   position: absolute;
@@ -425,7 +424,7 @@ header .detail-link a {
   margin-left: 26px;
 }
 .quick-link .canvax h3 {
-  margin: 5px 0 13px 0px;
+  margin: 5px 0 23px 0px;
 }
 
 footer {
@@ -473,106 +472,121 @@ footer .out-link li {
 }
 
 </style>
+
+
 <header>
-<nav class="container">
-<a href="./index1.html" class="home"></a>
-<div class="detail-link">
-<a href="./example.html">DEMO中心</a>
-<a href="./doc.html">文档</a>
-</div>
-</nav>
+  <nav class="container">
+    <a href="./index1.html" class="home"></a>
+
+    <div class="detail-link">
+      <a href="./example.html">DEMO中心</a>
+      <a href="./doc.html">文档</a>
+    </div>
+  </nav>
 </header>
-<div class="show">
-<div class="content">
+
+<div class="show page">
+  <div class="show-content">
+
+    <div class="guide-container clearfix">
+      <div class="guide-nav">
+        <h3 class="hide nav-item">Chart <span>X</span></h3>
+        <p  class="hide nav-item">专业数据可视化解决方案</p>
+        <a  class="hide nav-item" href="./started.html">5分钟快速入门</a>
+      </div>
+    </div>
+
+    <div class="left"></div>
+    <div class="right"></div>
+  </div>
+
 </div>
-<div class="guide-container clearfix">
-<div class="guide-nav">
-<h3 class="hide nav-item">Chart <span>X</span></h3>
-<p class="hide nav-item">专业数据可视化解决方案</p>
-<a class="hide nav-item" href="./started.html">5分钟快速入门</a>
+
+<div class="detail page">
+  <div class="container">
+    <div class="intro">
+      <h3 class="text-info ">关于Chartx</h3>
+      <p class="text-info ">Chartx是一套数据可视化解决方案，其底层基于自有Canvas渲染引擎Canvax  （ Canvtax的基于心跳包的主动渲染机制在图表这样并不需要高帧率的场景中有着非常良好的性能 ）。
+      </p>
+    </div>
+
+    <ul class="feature">
+      <li class="html5">
+        HTML5
+        <span class="desc">基于原生浏览器技术无插件需要</span>
+      </li>
+      <li class="canvas">
+        Canvas
+        <span class="desc">绘图技术采用canvas</span>
+      </li>
+      <li class="performance">
+        高性能
+        <span class="desc">主动渲染机制大大节省CPU开销</span>
+      </li>
+      <li class="cross-platform">
+        跨平台
+        <span class="desc">兼容各大浏览器横跨ie6/7/8以及各个现代浏览器</span>
+      </li>
+      <li class="cross-device">
+        跨终端
+        <span class="desc">兼容PC、MOBILE等终端支持鼠标和手势操作</span>
+      </li>
+      <li class="open-source">
+        免费开源
+        <span class="desc">在github上开源托管欢迎共建</span>
+      </li>
+    </ul>
+  </div>
 </div>
+
+<div class="quick-link page">
+  <div class="container clearfix">
+    <div class="panel start">
+      <h3>5分钟快速入门</h3>
+      <p>在 DT时代里，数据可视化变得愈发的重要，在 Chartx 的世界里，创建一个图表是那样的简单，你只需要 5 分钟，就可以在数据可视化这个领域里游刃有余，准备好了吗？我们一起出发吧...</p>
+      <div class="demo"><img src="http://gtms02.alicdn.com/tps/i2/TB15_14JpXXXXbaXpXXWYnISXXX-410-250.png" alt=""></div>
+      <a href="./started.html">点击进入</a>
+    </div>
+    <div class="panel canvax">
+      <h3>Canvax</h3>
+      <p>Chartx底层依赖简单高效的Canvas渲染引擎，采用AS3的Display Object对象结构，独树一帜的创新使用虚拟context来主动驱动渲染机制，高效高性能，在移动端采用Hammer.js做为手势支持...</p>
+      <div class="demo"><img src="http://gtms03.alicdn.com/tps/i3/TB1ia9WJpXXXXaYXFXXWYnISXXX-410-250.png" alt=""></div>
+      <a href="http://canvax.org">点击进入</a>
+    </div>
+  </div>
 </div>
-</div>
-<div class="detail">
-<div class="container">
-<div class="intro">
-<h3 class="text-info ">关于Chartx</h3>
-<p class="text-info ">Chartx是一套数据可视化解决方案，其底层基于自有Canvas渲染引擎Canvax （ Canvtax的基于心跳包的主动渲染机制在图表这样并不需要高帧率的场景中有着非常良好的性能 ）。
-</p>
-</div>
-<ul class="feature">
-<li class="html5">
-HTML5
-<span class="desc">基于原生浏览器技术无插件需要</span>
-</li>
-<li class="canvas">
-Canvas
-<span class="desc">绘图技术采用canvas</span>
-</li>
-<li class="performance">
-高性能
-<span class="desc">主动渲染机制大大节省CPU开销</span>
-</li>
-<li class="cross-platform">
-跨平台
-<span class="desc">兼容各大浏览器横跨ie6/7/8以及各个现代浏览器</span>
-</li>
-<li class="cross-device">
-跨终端
-<span class="desc">兼容PC、MOBILE等终端支持鼠标和手势操作</span>
-</li>
-<li class="open-source">
-免费开源
-<span class="desc">在github上开源托管欢迎共建</span>
-</li>
-</ul>
-</div>
-</div>
-<div class="quick-link">
-<div class="container clearfix">
-<div class="panel start">
-<h3>5分钟快速入门</h3>
-<p>在 DT时代里，数据可视化变得愈发的重要，在 Chartx 的世界里，创建一个图表是那样的简单，你只需要 5 分钟，就可以在数据可视化这个领域里游刃有余，准备好了吗？我们一起出发吧...</p>
-<div class="demo"><img src="//img.alicdn.com/tps/i2/TB15_14JpXXXXbaXpXXWYnISXXX-410-250.png" alt=""></div>
-<a href="./started.html">点击进入</a>
-</div>
-<div class="panel canvax">
-<h3>Canvax</h3>
-<p>Chartx底层依赖简单高效的Canvas渲染引擎，采用AS3的Display Object对象结构，独树一帜的创新使用虚拟context来主动驱动渲染机制，高效高性能，在移动端采用Hammer.js做为手势支持...</p>
-<div class="demo"><img src="//img.alicdn.com/tps/i3/TB1ia9WJpXXXXaYXFXXWYnISXXX-410-250.png" alt=""></div>
-<a href="http://canvax.org">点击进入</a>
-</div>
-</div>
-</div>
+
 <!--
 <footer>
-<div class="container clearfix">
-<nav class="out-link">
-<h3>友情链接</h3>
-<ul class="clearfix">
-<li><a href="#">淘宝UED</a></li>
-<li><a href="#">优秀网页设计</a></li>
-<li><a href="#">腾讯CDC</a></li>
-<li><a href="#">Alibaba国际站UED</a></li>
-<li><a href="#1">Bootstrap中文网</a></li>
-<li><a href="#">CDC大社区</a></li>
-<li><a href="#">Alibaba中文站UED</a></li>
-<li><a href="#">微博UDC</a></li>
-</ul>
-</nav>
-</div>
+  <div class="container clearfix">
+    <nav class="out-link">
+      <h3>友情链接</h3>
+      <ul class="clearfix">
+        <li><a href="#">淘宝UED</a></li>
+        <li><a href="#">优秀网页设计</a></li>
+        <li><a href="#">腾讯CDC</a></li>
+        <li><a href="#">Alibaba国际站UED</a></li>
+        <li><a href="#1">Bootstrap中文网</a></li>
+        <li><a href="#">CDC大社区</a></li>
+        <li><a href="#">Alibaba中文站UED</a></li>
+        <li><a href="#">微博UDC</a></li>
+      </ul>
+    </nav>
+  </div>
 </footer>
--->
+ -->
+
 <ul class="page-nav">
-<li data-index="0" class="active"><a href="javascript:;"></a></li>
-<li data-index="1"><a href="javascript:;"></a></li>
-<li data-index="2"><a href="javascript:;"></a></li>
+  <li data-index="0" class="active"><a href="javascript:;"></a></li>
+  <li data-index="1"><a href="javascript:;"></a></li>
+  <li data-index="2"><a href="javascript:;"></a></li>
 </ul>
+
+
 <script src="//g.tbcdn.cn/mm/activity-assets/20150813.183131.653/underscore.min.js"></script>
 <script src="//g.tbcdn.cn/mm/activity-assets/0.2.3/common/jquery-2.1.3.min.js"></script>
 <script src="//g.tbcdn.cn/mm/activity-assets/20150901.105649.704/EventEmitter.min.js"></script>
-<script src="//g.tbcdn.cn/mm/activity-assets/0.2.1/common/es6-promise.js"></script>
-<script src="//g.alicdn.com/mm/activity-assets/20150906.094858.101/TweenLite.min.js"></script>
+<script src="//g.tbcdn.cn/mm/activity-assets/20150906.094858.101/TweenLite.min.js"></script>
 <script src="//g.tbcdn.cn/mm/activity-assets/20150906.094858.101/ScrollToPlugin.min.js"></script>
 <script>
 (function () {
@@ -591,122 +605,155 @@ Canvas
   // 第二屏动画控制
   var page1 = {};
   page1.show = function () {
-    $('.detail .intro .text-info').addClass('no-transform');
+    $('.detail .intro .text-info')
+      .addClass('no-transform')
+      .removeClass('no-visual');
     setTimeout(function () {
-      $('.detail .feature').addClass('no-transform');
+      $('.detail .feature')
+        .addClass('no-transform')
+        .removeClass('no-visual');
     }, 500);
   };
   page1.reset = function () {
-    $('.detail .intro .text-info').removeClass('no-transform');
-    $('.detail .feature').removeClass('no-transform');
+    $('.detail .intro .text-info')
+      .removeClass('no-transform')
+      .addClass('no-visual');
+    $('.detail .feature')
+      .removeClass('no-transform')
+      .addClass('no-visual');
   };
 
   // 第三屏控制
   var page2 = {};
   page2.show = function () {
-    $('.quick-link .start').addClass('no-transform');
-    $('.quick-link .canvax').addClass('no-transform');
+    $('.quick-link .start')
+      .addClass('no-transform')
+      .removeClass('no-visual');
+    $('.quick-link .canvax')
+      .addClass('no-transform')
+      .removeClass('no-visual');
   };
   page2.reset = function () {
-    $('.quick-link .start').removeClass('no-transform');
-    $('.quick-link .canvax').removeClass('no-transform');
+    $('.quick-link .start')
+      .removeClass('no-transform')
+      .addClass('no-visual');
+    $('.quick-link .canvax')
+      .removeClass('no-transform')
+      .addClass('no-visual');
   };
 
   var page = {
     current: 0,
     steps: [0, 800, 1600],
+    pages: $('.page'),
     duration: 0.5,
     nav: $('.page-nav'),
     reset: [page0.reset, page1.reset, page2.reset, $.noop],
-    show: [page0.show, page1.show, page2.show, $.noop],
-    up: function () {
-      this.go(this.current - 1, this.current);
-    },
-    down: function () {
-      this.go(this.current + 1, this.current);
-    },
-    go: function (index, prev) {
-      var me = this;
-      if (index < 0) {
-        index = 0;
-        prev = undefined;
-      } else if (index >= me.steps.length) {
-        index = me.steps.length - 1;
-      }
-      me.current = index;
-      me.nav.find('li')
-        .removeClass('active')
-        .filter(':nth-child(' + (index + 1) + ')')
-        .addClass('active');
-      TweenLite.to(window, me.duration, {
-        scrollTo: {y: me.steps[index]},
-        onComplete: function () {
-          me.show[index]();
-          if (prev !== undefined) {
-            me.reset[prev]();
-          }
-        }
-      });
-    }
+    show: [page0.show, page1.show, page2.show, $.noop]
   };
-  page.nav.on('click', 'li', function (e) {
-    var item = $(this);
-    var pageIndex = parseInt(item.data('index'), 10);
-    pageCtrl.emit('go', {index: pageIndex, prev: page.current});
-  });
+
+  page.init = function () {
+    page.addListeners();
 
 
-  var win = $(window);
-  win.on('keydown.chartx', function (e) {
-    switch (e.which) {
-      case 38:
-        e.preventDefault();
-        pageCtrl.emit('up');
-        e.preventDefault();
-        break;
-      case 40:
-        e.preventDefault();
-        pageCtrl.emit('down');
-        e.preventDefault();
-        break;
-    }
-  });
+    pageCtrl.on('up', function () {
+      page.up();
+    });
+    pageCtrl.on('down', function () {
+      page.down();
+    });
+    pageCtrl.on('go', function (data) {
+      page.go(data.index, data.prev);
+    });
 
-  document.addEventListener('wheel', function (e) {
-    e.preventDefault();
-  }, false);
-  document.addEventListener('wheel', _.throttle(function (e) {
-    if (e.deltaY < 0) {
-      pageCtrl.emit('up');
-    } else if (e.deltaY > 0) {
-      if( page.current >= page.steps.length-1 ){
-        return;
+    page.adjustPageHeight();
+    pageCtrl.emit('go', {
+      index: 0
+    });
+  };
+
+  page.addListeners = function () {
+    // 监听右侧导航
+    page.nav.on('click', 'li', function (e) {
+      var item = $(this);
+      var pageIndex = parseInt(item.data('index'), 10);
+      pageCtrl.emit('go', {index: pageIndex, prev: page.current});
+    });
+
+    // 监听键盘按键
+    var win = $(window);
+    win.on('keydown.chartx', function (e) {
+      switch (e.which) {
+        case 38:
+          e.preventDefault();
+          pageCtrl.emit('up');
+          e.preventDefault();
+          break;
+        case 40:
+          e.preventDefault();
+          pageCtrl.emit('down');
+          e.preventDefault();
+          break;
       }
+    });
 
-      pageCtrl.emit('down');
+    // 监听鼠标滚动
+    document.addEventListener('wheel', function (e) {
+      e.preventDefault();
+    }, false);
+    document.addEventListener('wheel', _.throttle(function (e) {
+      if (e.deltaY < 0) {
+        pageCtrl.emit('up');
+      } else if (e.deltaY > 0) {
+        pageCtrl.emit('down');
+      }
+    }, 1200, {trailing: false}), false);
+
+    // 监听浏览器窗口大小改变
+    win.on('resize', _.debounce(page.adjustPageHeight, 400));
+
+  };
+  page.adjustPageHeight = function () {
+    var height = $(window).height();
+    page.pages.height(height);
+    page.steps = [0, height, height * 2];
+  };
+  page.up = function () {
+    this.go(this.current - 1, this.current);
+  };
+  page.down = function () {
+    this.go(this.current + 1, this.current);
+  };
+  page.go = function (index, prev) {
+    var me = this;
+    if (index < 0) {
+      index = 0;
+      prev = null;
+    } else if (index >= me.steps.length) {
+      index = me.steps.length - 1;
+      prev = null;
     }
-  }, 1500, {trailing: false}), false);
+    me.current = index;
+    me.nav.find('li')
+      .removeClass('active')
+      .filter(':nth-child(' + (index + 1) + ')')
+      .addClass('active');
+    TweenLite.to(window, me.duration, {
+      scrollTo: {y: me.steps[index]},
+      onComplete: function () {
+        me.show[index]();
+        if (prev != null) {
+          me.reset[prev]();
+        }
+      }
+    });
+  };
 
 
+  page.init();
 
-  pageCtrl.on('up', function () {
-    page.up();
-  });
 
-  pageCtrl.on('down', function () {
-    page.down();
-  });
-
-  pageCtrl.on('go', function (data) {
-    page.go(data.index, data.prev);
-  });
-
-  pageCtrl.emit('go', {
-    index: 0
-  });
 }());
 </script>
 </body>
 </html>
-
-
