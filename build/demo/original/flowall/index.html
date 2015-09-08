@@ -39,7 +39,6 @@ var data= [
     [ "d"    , "只买竞品"      , 200     , null],
     [ "e"    , "买行业其他"    ,150     , null]
 ];
-
 //chart的配置信息
 var options = {
     type  : "flowall",
@@ -58,20 +57,20 @@ var options = {
         }
     },
     tips : {
-        content : function( info ){
+        content : function(info){
             var node    = info.node;
-            var label   = node.label || node.node;
-            var str = label;
-            str += "<div>总人数：<span style='color:red'>"+node.value+"</span></div>";
-            
-            if( node.flowin ){
-                str += "<div>转化人数："+ node.flowin +"(" + (node.flowin/node.value*1000/10).toFixed(2)+"%)</div>"
+            if( node ){
+                var label   = node.label || node.node;
+                return label+"总人数</br><span style='color:"+node.fillStyle+"'>"+node.value+"</span>";
             }
-            return str;
+            var edge    = info.edge
+            if( edge ){
+                var label   = edge.to.label || edge.to.node;
+                return label+"转化人数</br><span style='color:"+edge.to.fillStyle+"'>"+edge.to.flowin+"</span>("+ parseInt(edge.to.flowin/edge.to.value*100) +"%)";
+            }
 
         }
     }
-
 };
 Chartx.original("canvasTest" , data , options).then(function( chart ){
     chart.on("click" , function(e){

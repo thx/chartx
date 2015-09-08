@@ -76,8 +76,15 @@ define(
             },
             _getTipDefaultContent : function( info ){
                 var node    = info.node;
-                var label   = node.label || node.node;
-                return label+"："+node.value;
+                if( node ){
+                    var label   = node.label || node.node;
+                    return label+"总人数</br><span style='color:"+node.fillStyle+"'>"+node.value+"</span>";
+                }
+                var edge    = info.edge
+                if( edge ){
+                    var label   = edge.to.label || edge.to.node;
+                    return label+"转化人数</br><span style='color:"+edge.to.fillStyle+"'>"+edge.to.flowin+"</span>("+ parseInt(edge.to.flowin/edge.to.value*100) +"%)";
+                }
             },
             _initData : DataFormat,
             _widget   : function(){
@@ -153,6 +160,11 @@ define(
                         me.txtSprite.addChild( vtxt );
 
                     };
+                    if( node.h < txt.getTextHeight() ){
+                        txt.context.y = node.pos.y+node.h+2;
+                        txt.context.textBaseline = "top";
+                        txt.context.fillStyle = "#999";
+                    }
 
                     me.txtSprite.addChild( txt );
                 });
@@ -167,6 +179,21 @@ define(
                             globalAlpha : 0.3
                         }
                     });
+                    path.edge = edge;
+                    path.on("mouseover" , function(e){
+                        me._setEventInfo(e , this);
+                        me._tip.show( e );
+                    });
+
+                    path.on("mousemove" , function(e){
+                        me._setEventInfo(e , this);
+                        me._tip.move( e );
+                    });
+
+                    path.on("mouseout" , function(e){
+                        me._tip.hide( e );
+                    });
+
                     me.edgeSprite.addChild( path );
 
                 } );
@@ -175,7 +202,8 @@ define(
             _setEventInfo : function( e , el ){
                 e.eventInfo = {
                     el : el,
-                    node   : el.node
+                    node   : el.node,
+                    edge : el.edge
                 }
             }
         })

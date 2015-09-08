@@ -30,6 +30,7 @@ define(
                         y : pathY
                     }
                     path+= "C"+ qc.x +","+qc.y+","+qc.x+","+edge.to.pos.y+","+(edge.to.pos.x+1)+","+edge.to.pos.y;
+                    
                     path+= "v"+edge.to.flowinH;
                     //path+= "C"+qc.x+","+(qc.y+edge.to.flowinH)+","+qc.x+","+(pathY+edge.to.flowinH)+","+pathX+","+(pathY+edge.to.flowinH);
                     
@@ -98,7 +99,7 @@ define(
                     if( !node.link ){
                         node.h = ( opt.node.h || ( node.value/maxVal * opt.node.maxH ) );
                         node.h = Math.max( opt.node.minH , node.h );
-                        node.flowinH = node.flowin / node.value * node.h;
+                        node.flowinH = node.flowin == 0 ? 1 : (node.flowin / node.value * node.h);
                         
                         if( !sourceNode.h ){
                             sourceNode.h = node.flowinH

@@ -48,13 +48,15 @@ define(
             _.each( dataFrame.edges , function( edge , name ){
                 edge.from = dataFrame.nodes[name.split(/[_-]/)[0]];
                 edge.to   = dataFrame.nodes[name.split(/[_-]/)[1]];
+                edge.to.from = edge.from;
             } );
 
             //分组
             _.each( dataFrame.nodes , function( node , i ){
+                
                 if( !node.link ){
                     dataFrame.group.right.push( node );
-                } else if(_.keys(node.link).length == dataFrame.maxLinks) {
+                } else if( node.link && node.from ) {
                     dataFrame.group.middle = node;
                 } else {
                     dataFrame.group.left.push( node );
