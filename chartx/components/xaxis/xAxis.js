@@ -230,7 +230,7 @@ define(
                         y = this.disY + this.line.height + this.dis
 
                     //文字
-                    var txt = new Canvax.Display.Text( o.layoutText , {
+                    var txt = new Canvax.Display.Text( (o.layoutText || o.content) , {
                         context: {
                             x: x,
                             y: y,
