@@ -15,6 +15,7 @@ define(
                 this.padding = {
                     top:10,right:10,bottom:10,left:10
                 };
+                opts.padding && _.extend( this.padding , opts.padding );
                 this.graphs  = {
                     w : this.width  - this.padding.left - this.padding.right,
                     h : this.height - this.padding.top  - this.padding.bottom,
@@ -129,7 +130,7 @@ define(
                        }
                   	});
                     if( txt.getTextWidth() > node.r*2 ){
-                        txt.context.x = node.pos.x+node.r+3;
+                        txt.context.x = ( node.direction=="left"? node.pos.x-node.r-3 : node.pos.x+node.r+3);
                         txt.context.textAlign = (node.direction=="left"?"right":"left");
                         txt.context.fillStyle = node.fillStyle;
                     }
@@ -138,21 +139,22 @@ define(
                 });
 
                 _.each( me.layout.edges , function( edge , key ){
-                    //线条
-                    var line = new Line({
-                        id   : key,
-                        context : {
-                            xStart      : edge.from.pos.x,
-                            yStart      : edge.from.pos.y,
-                            xEnd        : edge.to.pos.x,
-                            yEnd        : edge.to.pos.y,
-                            lineWidth   : edge.lineWidth,
-                            strokeStyle : edge.from.fillStyle,
-                            globalAlpha : 0.6
-                        }
-                    });
-                    me.edgeSprite.addChild( line );
-
+                    if( edge.to ){
+                        //线条
+                        var line = new Line({
+                            id   : key,
+                            context : {
+                                xStart      : edge.from.pos.x,
+                                yStart      : edge.from.pos.y,
+                                xEnd        : edge.to.pos.x,
+                                yEnd        : edge.to.pos.y,
+                                lineWidth   : edge.lineWidth,
+                                strokeStyle : edge.from.fillStyle,
+                                globalAlpha : 0.6
+                            }
+                        });
+                        me.edgeSprite.addChild( line );
+                    }
                 } );
             },
             circleOver : function( circle ){
