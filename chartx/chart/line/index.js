@@ -381,6 +381,7 @@ define(
                     }
                 });
                 spt.on("click", function(e) {
+                    _setXaxisYaxisToTipsInfo.apply(self, [e]);
                     self.fire("click", e.eventInfo);
                 });
             },

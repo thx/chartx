@@ -651,6 +651,7 @@ define(
                     me._tip.hide(e);
                 });
                 this._graphs.sprite.on("tap click", function(e) {
+                    me._setXaxisYaxisToTipsInfo(e);
                     me.fire("click", e);
                 });
             }

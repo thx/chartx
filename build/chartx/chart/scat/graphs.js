@@ -47,14 +47,14 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
-            getFillStyle : function( i , ii , value){
+            getCircleFillStyle : function( i , ii , value){
                 var fillStyle = null;
                 
-                if( _.isArray( this.fillStyle ) ){
-                    fillStyle = this.fillStyle[ii]
+                if( _.isArray( this.circle.fillStyle ) ){
+                    fillStyle = this.circle.fillStyle[ii]
                 }
-                if( _.isFunction( this.fillStyle ) ){
-                    fillStyle = this.fillStyle( i , ii , value );
+                if( _.isFunction( this.circle.fillStyle ) ){
+                    fillStyle = this.circle.fillStyle( i , ii , value );
                 }
                 if( !fillStyle || fillStyle=="" ){
                     fillStyle = this._colors[ii];
@@ -120,7 +120,7 @@ define(
                             context : {
                                 x           : d.x,
                                 y           : d.y,
-                                fillStyle   : this.getFillStyle( i , ii , d.value ),
+                                fillStyle   : this.getCircleFillStyle( i , ii , d.value ),
                                 r           : r,
                                 globalAlpha : 0,
                                 cursor      : "pointer"
@@ -176,7 +176,7 @@ define(
             },
             _getNodeInfo : function( iGroup , iNode ){
                 var arr  = [];
-                arr.push( this.data[iGroup][iNode] );
+                arr.push( this.data[iGroup][iNode].y );
                 return arr;
             },
             /**

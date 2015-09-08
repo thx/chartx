@@ -61,7 +61,7 @@ define(
         };
 
         return function( dataFrame , opts ){
-            
+        
             var opt   = {
                 w         : 0,
                 h         : 0,
