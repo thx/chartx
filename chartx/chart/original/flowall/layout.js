@@ -24,6 +24,7 @@ define(
             _.each( dataFrame.edges , function( edge , en ){
                 var pathY = edge.from.pos.y+prePathBottom;
                 var pathX = edge.from.pos.x+edge.from.w-2;
+                
                 var path = "M"+pathX+"," + pathY;
                     var qc = {
                         x : ( edge.to.pos.x - pathX )/2 + pathX,
@@ -42,12 +43,14 @@ define(
             } );
         };
         function _getFillStyle( fillStyle , node ){
+            var fs
             if(_.isFunction( fillStyle )){
-                return fillStyle(node)
-            } else {
-                fillStyle;
+                fs = fillStyle(node)
             }
-        }
+            if( !fs ){
+                return "#60ADE4"
+            }
+        };
         return function( dataFrame , opts ){
             
             var opt   = {
@@ -58,7 +61,7 @@ define(
                     maxW  : 150,
                     h     : 0,
                     maxH  : 0,
-                    minH  : 20,
+                    minH  : 2,
                     marginTop : 20,
                     fillStyle : "#60ADE4"
                 },
@@ -99,7 +102,8 @@ define(
                     if( !node.link ){
                         node.h = ( opt.node.h || ( node.value/maxVal * opt.node.maxH ) );
                         node.h = Math.max( opt.node.minH , node.h );
-                        node.flowinH = node.flowin == 0 ? 1 : (node.flowin / node.value * node.h);
+                        node.flowinH = Math.max(node.flowin / node.value * node.h , 1 );
+                        
                         
                         if( !sourceNode.h ){
                             sourceNode.h = node.flowinH

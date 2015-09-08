@@ -161,7 +161,7 @@ define(
 
                     };
                     if( node.h < txt.getTextHeight() ){
-                        txt.context.y = node.pos.y+node.h+2;
+                        txt.context.y = node.pos.y+node.h;
                         txt.context.textBaseline = "top";
                         txt.context.fillStyle = "#999";
                     }
