@@ -31,6 +31,7 @@ define(
     
             this._circles = [];  //所有圆点的集合
     
+            
             _.deepExtend(this , opt);
     
             this.init( );
@@ -48,13 +49,13 @@ define(
                 this.sprite.context.y = $n
             },
             getCircleFillStyle : function( i , ii , value){
-                var fillStyle = null;
+                var fillStyle = this.circle.fillStyle;
                 
-                if( _.isArray( this.circle.fillStyle ) ){
-                    fillStyle = this.circle.fillStyle[ii]
+                if( _.isArray( fillStyle ) ){
+                    fillStyle = fillStyle[ii]
                 }
-                if( _.isFunction( this.circle.fillStyle ) ){
-                    fillStyle = this.circle.fillStyle( i , ii , value );
+                if( _.isFunction( fillStyle ) ){
+                    fillStyle = fillStyle( i , ii , value );
                 }
                 if( !fillStyle || fillStyle=="" ){
                     fillStyle = this._colors[ii];
@@ -113,6 +114,7 @@ define(
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var d = data[ii][i];
                         var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
+                        
                         var r       = this.getR(d) ||
                                       (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circle = new Circle({
@@ -176,7 +178,7 @@ define(
             },
             _getNodeInfo : function( iGroup , iNode ){
                 var arr  = [];
-                arr.push( this.data[iGroup][iNode].y );
+                arr.push( this.data[iGroup][iNode] );
                 return arr;
             },
             /**

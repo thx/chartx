@@ -28,7 +28,6 @@ define(
                 this._graphs  =  null;
                 this._anchor  =  null;
 
-
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
 
@@ -244,10 +243,11 @@ define(
                         var x = (xArr[i][ii] - xbaseNum) / (maxXAxis - xbaseNum) * this._xAxis.w;
     
                         tmpData[i][ii] = {
-                            value : {
-                                x : xArr[i][ii],
-                                y : yArr[i][ii]
-                            },
+                            //value : {
+                            //    x : xArr[i][ii],
+                            //    y : yArr[i][ii]
+                            //},
+                            value : yArr[i][ii],
                             x : x,
                             y : y
                         }
