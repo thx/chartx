@@ -306,14 +306,9 @@ define(
                     }
                 }
             },
-<<<<<<< HEAD
 
-            _getTextMaxWidth: function() {
-                var arr = this.dataSection;
-=======
             _setTextMaxWidth: function() {
                 var arr = this._layoutDataSection;
->>>>>>> daily/1.9.18
                 var maxLenText = arr[0];
 
                 for (var a = 0, l = arr.length; a < l; a++) {
