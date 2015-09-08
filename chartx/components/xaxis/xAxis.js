@@ -181,12 +181,8 @@ define(
                     this.dis = 0;
                     this.h = 3; //this.dis;//this.max.txtH;
                 } else {
-<<<<<<< HEAD
 
-                    var txt = new Canvax.Display.Text(this.dataSection[0] || "test", {
-=======
                     var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
->>>>>>> daily/1.9.18
                         context: {
                             fontSize: this.text.fontSize
                         }
