@@ -1,5 +1,5 @@
 
-<img src="https://img.alicdn.com/tps/TB14JPTJpXXXXbHXXXXXXXXXXXX-697-303.png" style="width:600px">
+![](https://img.alicdn.com/tps/TB14JPTJpXXXXbHXXXXXXXXXXXX-697-303.png)
 
 Chartx Gitlab：[http://gitlab.alibaba-inc.com/thx/charts](http://gitlab.alibaba-inc.com/thx/charts)
 
@@ -10,7 +10,7 @@ Chartx 官网：[http://thx.github.io/chartx](http://thx.github.io/chartx)
 经过两年多,多少个版本的积累，我们阿里妈妈UED的图表库Chartx不断在完善和成长，今天，Chartx已经覆盖了阿里妈妈所有产品，以及易传媒，数据平台等兄弟部门的产品。我们开发了多达12种类的常规图表，和7个从产品的实际需求中诞生的自有原创图表。
 
 
-### Chartx前传，底层渲染引擎Canvax
+### 基础底层渲染引擎Canvax
 
 说到chartx，不得不也搭车说下Canvax，又按照国际惯例先放出地址：[canvax.org](http://canvax.org)。
 
@@ -30,27 +30,28 @@ Chartx目前有12类常规图表类型：bar(柱状图)，line（折线图），
 
 7个自定义自有的图表：温度计图占比图，扇形一维比例图，
 
-<img src="https://img.alicdn.com/tps/TB165YGJpXXXXagXVXXXXXXXXXX-818-1374.jpg" style="width:600px">
+![](https://img.alicdn.com/tps/TB165YGJpXXXXagXVXXXXXXXXXX-818-1374.jpg)
 
 #### 图表扩展能力
 
 我们每一种图表，都可通过自由的配置来实现其强大的扩展能力。
 比如折线图：
 
-<img style="width:600px" src="https://img.alicdn.com/tps/TB11RLxJpXXXXXGaXXXXXXXXXXX-1078-1042.png" />
+![](https://img.alicdn.com/tps/TB11RLxJpXXXXXGaXXXXXXXXXXX-1078-1042.png)
+
 
 #### 自有创新图表开发能力
 
 我们拥有从底层建筑到上层树木的构建能力，这样可以拥有应对天马行空的需求场景的能力。
 
-<img style="width:600px" src="https://img.alicdn.com/tps/TB18SjCJpXXXXa2XVXXXXXXXXXX-808-492.png" />
+![](https://img.alicdn.com/tps/TB18SjCJpXXXXa2XVXXXXXXXXXX-808-492.png)
 
 
 ### chartx的使用
 
 先上一张图表玉照：
 
-<img src="https://img.alicdn.com/tps/TB1GHLrJpXXXXb4aXXXXXXXXXXX-602-310.png" style="width:600px;">
+![](https://img.alicdn.com/tps/TB1GHLrJpXXXXb4aXXXXXXXXXXX-602-310.png)
 
 #### 友好的数据格式，真正的数据驱动
 
