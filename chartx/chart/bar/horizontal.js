@@ -6,6 +6,7 @@ define(
     function( Bar ){
         return Bar.extend( {
             init:function(node , data , opts){
+                this._opts = opts;
                 _.deepExtend( this , opts );
                 _.deepExtend( this , {
                     xAxis : {
