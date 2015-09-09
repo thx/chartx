@@ -9,7 +9,7 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 
 能自动适配 AMD , CMD , KISSY 的模块加载环境。
 
-<code><a href="./demo/line-kissy.html" target="_blank">基于kissy的折线图</a></code>
+<code><a href="./demo/line-kissy.html?debug" target="_blank">基于kissy的折线图</a></code>
 <code><a href="./demo/line-requirejs.html" target="_blank">基于requirejs(AMD)的折线图</a></code>
 <code><a href="./demo/line-seajs.html" target="_blank">基于seajs(CMD)的折线图</a></code>
 
