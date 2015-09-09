@@ -3,16 +3,6 @@ window.Chartx || (Chartx = {
     canvax  : null,
     create  : {},
     _start   : function () {
-        //业务代码部分。
-        //如果charts有被down下来使用。请修改下面的
-
-        var canvaxVersion = "2015.09.09";
-
-        //BEGIN(develop)
-        Chartx._site.local = true;
-        Chartx._site.debug = true;
-        //END(develop)
-
         var __FILE__, scripts = document.getElementsByTagName("script");
         for( var i = scripts.length - 1; i>=0 ; i--  ){
             var __F__ = scripts[ i ].getAttribute("src");
@@ -20,43 +10,15 @@ window.Chartx || (Chartx = {
                 __FILE__ = __F__.substr(0 , __F__.indexOf("chartx/"));
                 break;
             }
-        }
-
-
-        Chartx.path = __FILE__.replace(/(^\s*)|(\s*$)/g, "");
-
-        if( (/daily.taobao.net/g).test( __FILE__ ) ){
-            Chartx._site.daily = true;
-            Chartx._site.debug = true;
         };
-
-        //配置canvax包
-        var canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
-        if( Chartx._site.daily || Chartx._site.local ){
-            canvaxUrl     = "http://g.assets.daily.taobao.net/thx/canvax/"+ canvaxVersion +"/";
-        }
-        //BEGIN(develop)
-        //下面这个是canvax开发者专用，因为我会在本地跑一个canvax，可以canvax和chartx实时调试
-        if( !! ~location.search.indexOf('localcanvax') ){
-            //本地环境测试
-            canvaxUrl     = "http://nick.daily.taobao.net/canvax/";
-        }
-        if( !! ~location.href.indexOf('github.io') ){
-            //本地环境测试
-            canvaxUrl     = "http://g.tbcdn.cn/thx/canvax/"+ canvaxVersion +"/";
-        }
-        //END(develop)
-
-
+        Chartx.path = __FILE__.replace(/(^\s*)|(\s*$)/g, "");
         Chartx._setPackages([{
             name: 'canvax',
-            path: canvaxUrl
+            path: Chartx.path+"chartx/lib/"
         }, {
             name: 'chartx',
             path: Chartx.path
-        }]
-
-        );
+        }]);
 
         //然后就可以Chartx.create.line("el" , data , options).then( function( chart ){  } ) 的方式接入图表
         for(var a = 0,l = Chartx._charts.length ; a < l ; a++){
@@ -126,10 +88,9 @@ window.Chartx || (Chartx = {
                 this.canvax = C;
                 getChart();
             });
-        }
+        };
 
         return promise;
-
     },
     _site: {
         local: !! ~location.search.indexOf('local'),
@@ -152,9 +113,7 @@ window.Chartx || (Chartx = {
         Author @释剑
         @packages 需要UMD重新定义的 包集合[{name:,path:},]
         */
-
         packages = packages || [];
-
         /**
          *检查包是否在集合中
          */
@@ -166,11 +125,11 @@ window.Chartx || (Chartx = {
                     }
                 }
             }
-        }
+        };
 
         function isArray(obj){
             return (obj.constructor.toString().indexOf("Array") != -1)
-        }
+        };
 
         if (!window.define) {
             if(KISSY){
@@ -259,14 +218,19 @@ window.Chartx || (Chartx = {
             if (window.seajs) {
                 packageObj[name] = path + name;
                 //BEGIN(develop)
+                //下面这段代码只会在开发环境存在，解决seajs配置包路径中是相对路径的bug
                 if (!window.location.origin) {
                     window.location.origin = window.location.protocol + "//" 
                         + window.location.hostname 
                         + (window.location.port ? ':' + window.location.port: '');
                 };
-                if( path.indexOf("../")>=0 && name == "chartx" ){
+                if( path.indexOf("../")>=0 ){
                     var si = path.split("../").length;
-                    packageObj[name] = window.location.origin+window.location.pathname.split("/").slice(0 , -si).join("/")+"/chartx"
+                    var pathUrl = window.location.origin+window.location.pathname.split("/").slice(0 , -si).join("/")+"/chartx"
+                    if( name == "canvax" ){
+                        pathUrl+="/lib/canvax"
+                    }
+                    packageObj[name] = pathUrl;
                 };
                 //END(develop)
                 seajs.config({ paths: packageObj });
