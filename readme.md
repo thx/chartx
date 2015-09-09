@@ -26,9 +26,8 @@ Chartx在ie9- 不支持canvas的浏览器中会自动输出flash文件来实现�
 
 #### 丰富的图表类型
 
-Chartx目前有12类常规图表类型：bar(柱状图)，line（折线图），map（地图），pie（饼图），progress（进度图），radar（雷达图），scat（散点图），topo（拓扑图，树状图），chord（和铉图），hybrid（混搭图表），venn（韦恩图），force（力布局图）
+Chartx目前有12类常规图表类型：bar(柱状图)，line（折线图），map（地图），pie（饼图），progress（进度图），radar（雷达图），scat（散点图），topo（拓扑图，树状图），chord（和铉图），hybrid（混搭图表），venn（韦恩图），force（力布局图），和7个自定义自有的图表。
 
-7个自定义自有的图表：温度计图占比图，扇形一维比例图，
 
 ![](https://img.alicdn.com/tps/TB165YGJpXXXXagXVXXXXXXXXXX-818-1374.jpg)
 
@@ -37,14 +36,14 @@ Chartx目前有12类常规图表类型：bar(柱状图)，line（折线图），
 我们每一种图表，都可通过自由的配置来实现其强大的扩展能力。
 比如折线图：
 
-![](https://img.alicdn.com/tps/TB11RLxJpXXXXXGaXXXXXXXXXXX-1078-1042.png)
+![](https://img.alicdn.com/tps/TB1EMfOJpXXXXbOXpXXXXXXXXXX-1074-974.jpg)
 
 
 #### 自有创新图表开发能力
 
 我们拥有从底层建筑到上层树木的构建能力，这样可以拥有应对天马行空的需求场景的能力。
 
-![](https://img.alicdn.com/tps/TB18SjCJpXXXXa2XVXXXXXXXXXX-808-492.png)
+![](https://img.alicdn.com/tps/TB19TDBJpXXXXc_XVXXXXXXXXXX-1066-580.jpg)
 
 
 ### chartx的使用
