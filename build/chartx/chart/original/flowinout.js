@@ -84,6 +84,9 @@ define(
                 var me = this;
                 
                 _.each(me.layout.nodes , function( node ){
+                    if( node.value == 0 ){
+                        return;
+                    }
                     var rect = new Rect({
                         id     : node.node,
                         hoverClone : false,
@@ -159,6 +162,9 @@ define(
                 });
                 
                 _.each( me.layout.edges , function( edge , key ){
+                    if( !edge.from.value || !edge.to.value ){
+                        return;
+                    }
                     //线条
                     var path = new Path({
                         id   : key,
