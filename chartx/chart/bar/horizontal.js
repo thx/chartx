@@ -6,6 +6,7 @@ define(
     function( Bar ){
         return Bar.extend( {
             init:function(node , data , opts){
+                this._opts = opts;
                 _.deepExtend( this , opts );
                 _.deepExtend( this , {
                     xAxis : {
@@ -26,7 +27,7 @@ define(
                 this._initModule();                        //初始化模块
                 this._startDraw({ w : this.height , h : this.width });                         //开始绘图
                 this._horizontal();
-                this._drawEnd();                           //绘制结束，添加到舞台
+                this._drawEnd();                         //绘制结束，添加到舞台
             },
             _horizontal : function(){
                 var me = this;

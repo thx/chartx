@@ -124,12 +124,9 @@ define(
                     me.nodeSprite.addChild( rect );
 
                 
-                    //label
                     var textOpt = me.graphs.node.text;
                     var label = textOpt.format( node.node ) || node.label || node.node;
-                    //if( node.h>30 ){
-                    //    label +=("\n"+textOpt.formatVal(node.value))
-                    //}
+
                     var txt = new Canvax.Display.Text( label ,
                        {
                         context : {
@@ -141,29 +138,42 @@ define(
                             textBaseline: "middle"
                        }
                   	});
-                    if( node.h>30 ){
-                        txt.context.textBaseline = "top";
-                        txt.context.y            = node.pos.y+3;
-                        txt.context.fontSize     = 12;
 
-                        var vtxt = new Canvax.Display.Text( textOpt.formatVal(node.value) ,
-                           {
-                            context : {
-                                x  : node.pos.x+10,
-                                y  : node.pos.y+Math.max(node.h*2/3 , 28),
-                                fillStyle   : textOpt.fillStyle,
-                                fontSize    : textOpt.valFontSize,
-                                textAlign   : "left",
-                                textBaseline: "middle"
-                           }
-                  	    });
-                        me.txtSprite.addChild( vtxt );
+                    var vtxt = new Canvax.Display.Text( textOpt.formatVal(node.value) ,
+                       {
+                        context : {
+                            x  : node.pos.x+10,
+                            y  : node.pos.y+Math.max(node.h*2/3 , 28),
+                            fillStyle   : textOpt.fillStyle,
+                            fontSize    : textOpt.valFontSize,
+                            textAlign   : "left",
+                            textBaseline: "middle"
+                       }
+                  	});
+                    me.txtSprite.addChild( vtxt );
 
-                    };
                     if( node.h < txt.getTextHeight() ){
-                        txt.context.y = node.pos.y+node.h+2;
+                        txt.context.y = node.pos.y+node.h;
                         txt.context.textBaseline = "top";
                         txt.context.fillStyle = "#999";
+                        
+                        vtxt.context.y = node.pos.y+node.h+1;
+                        vtxt.context.textBaseline = "top";
+                        vtxt.context.x = node.pos.x+txt.getTextWidth()+12;
+                        vtxt.context.fillStyle = node.fillStyle;
+                        vtxt.context.fontSize = 12
+                    } else {
+                        if( node.h>30 ){
+                            txt.context.textBaseline = "top";
+                            txt.context.y            = node.pos.y+3;
+                            txt.context.fontSize     = 12; 
+                        } else {
+                            vtxt.context.y = node.pos.y+node.h/2;
+                            vtxt.context.x = node.pos.x+txt.getTextWidth()+12;
+                            vtxt.context.textBaseline = "middle";
+                            vtxt.context.fillStyle = textOpt.fillStyle;
+                            vtxt.context.fontSize = 12
+                        }
                     }
 
                     me.txtSprite.addChild( txt );

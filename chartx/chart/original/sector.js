@@ -30,8 +30,8 @@ define(
 
             graphs: {
                 fillStyle: {
-                    first: '#28ADE5',
-                    last: '#87CCEA',
+                    first: '#2e99e5',
+                    last: '#cbe2f2',
                     end: '#F6F5F4'
                 }
             },
