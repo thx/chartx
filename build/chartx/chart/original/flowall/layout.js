@@ -48,8 +48,9 @@ define(
                 fs = fillStyle(node)
             }
             if( !fs ){
-                return "#60ADE4"
+                fs = "#60ADE4"
             }
+            return fs
         };
         return function( dataFrame , opts ){
             
