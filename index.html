@@ -41,6 +41,8 @@ textarea  /* 1 */
   width: 1000px;
   margin: 0 auto;
   overflow: hidden;
+  position: relative;
+  height: 100%;
 }
 .clearfix:before,
 .clearfix:after {
@@ -128,8 +130,7 @@ header .detail-link a {
 
 
 .show {
-  background-color: #0d1522;
-  background-image: url("http://gtms03.alicdn.com/tps/i3/TB1Y4TQJpXXXXXEXVXXU7PDLVXX-1920-800.png");
+  background: #201317 url("http://gtms03.alicdn.com/tps/i3/TB1Y4TQJpXXXXXEXVXXU7PDLVXX-1920-800.png") no-repeat;
   position: relative;
   height: 749px;
   max-width: 1920px;
@@ -141,7 +142,7 @@ header .detail-link a {
 }
 .show .show-content {
   width: 1000px;
-  height: 800px;
+  height: 100%;
   margin: 0 auto;
   position: absolute;
   left: 0;
@@ -225,10 +226,12 @@ header .detail-link a {
   color: #fff;
 }
 .detail .intro {
-  float: left;
+  position: absolute;
+  top: 10%;
+  left: 30px;
   width: 326px;
-  margin: 258px 0 0 0;
-  padding: 50px 0 0 0;
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
   overflow: hidden;
 }
 .detail .intro h3 {
@@ -261,9 +264,12 @@ header .detail-link a {
 }
 
 .detail .feature {
-  float: left;
+  position: absolute;
+  top: 10%;
+  left: 400px;
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
   width: 600px;
-  margin: 229px 0 0 73px;
   font-size: 18px;
   transition: transform 0.5s ease-out;
   transform: translate(0, -630px);
@@ -364,7 +370,7 @@ header .detail-link a {
   height: 600px;
   border: 2px solid #111c2c;
   float: left;
-  margin: 120px 33px 0 0;
+  margin: 50px 33px 0 0;
   box-sizing: border-box;
   padding: 32px 24px 0 32px;
   transition: transform 0.5s ease-out;
