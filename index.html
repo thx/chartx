@@ -127,35 +127,24 @@ header .detail-link a {
 
 
 .show {
-  background-color: #221217;
+  background-color: #0d1522;
   position: relative;
   height: 749px;
   max-width: 1920px;
   margin: 0 auto;
   overflow: hidden;
 }
+.show .chart {
+  height: 100%;
+}
 .show .show-content {
   width: 1000px;
   height: 800px;
   margin: 0 auto;
-  position: relative;
-  background: url("//gtms02.alicdn.com/tps/i2/TB11XK.JpXXXXaOXXXXU7PDLVXX-1920-800.png") no-repeat -452px -50px;
-}
-.show .left {
   position: absolute;
-  left: -460px;
+  left: 0;
+  right: 0;
   top: 0;
-  width: 460px;
-  height: 800px;
-  background: url("//gtms02.alicdn.com/tps/i2/TB11XK.JpXXXXaOXXXXU7PDLVXX-1920-800.png") no-repeat  0 -51px;
-}
-.show .right {
-  position: absolute;
-  right: -460px;
-  top: 0;
-  width: 460px;
-  height: 800px;
-  background: url("//gtms02.alicdn.com/tps/i2/TB11XK.JpXXXXaOXXXXU7PDLVXX-1920-800.png") no-repeat -1435px -51px;
 }
 
 
@@ -308,27 +297,21 @@ header .detail-link a {
 }
 .detail .feature .html5::before {
   content: "\e601";
-  /*content: "\\e601";*/
 }
 .detail .feature .canvas::before {
   content: "\e605";
-  /*content: "\\e605";*/
 }
 .detail .feature .performance::before {
   content: "\e604";
-  /*content: "\\e604";*/
 }
 .detail .feature .cross-platform::before {
   content: "\e603";
-  /*content: "\\e603";*/
 }
 .detail .feature .cross-device::before {
   content: "\e602";
-  /*content: "\\e602";*/
 }
 .detail .feature .open-source::before {
   content: "\e600";
-  /*content: "\\e600";*/
 }
 .detail .feature .desc {
   position: absolute;
@@ -486,7 +469,15 @@ footer .out-link li {
 </header>
 
 <div class="show page">
+
+      <div class="chart">
+        <!-- 图标放在这个div内, 宽高都是满屏的 -->
+      </div>
+
+
+
   <div class="show-content">
+
 
     <div class="guide-container clearfix">
       <div class="guide-nav">
@@ -495,9 +486,6 @@ footer .out-link li {
         <a  class="hide nav-item" href="./started.html" target="_blank">5分钟快速入门</a>
       </div>
     </div>
-
-    <div class="left"></div>
-    <div class="right"></div>
   </div>
 
 </div>
