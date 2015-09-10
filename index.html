@@ -15,6 +15,7 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #0d1522;
 }
 h2,
 h3,
@@ -703,6 +704,7 @@ footer .out-link li {
     var height = $(window).height();
     page.pages.height(height);
     page.steps = [0, height, height * 2];
+    window.scrollTo(0, page.steps[page.current]);
   };
   page.up = function () {
     this.go(this.current - 1, this.current);
