@@ -220,7 +220,7 @@ header .detail-link a {
 }
 .show .guide-nav a:hover {
   background-color: #09f;
-  color: #fff;
+  color: #111c2c;
 }
 .show .guide-nav .hide {
   top: -50px;
@@ -415,7 +415,7 @@ header .detail-link a {
 }
 .quick-link .panel a:hover {
   background-color: #09f;
-  color: #fff;
+  color: #111c2c;
 }
 
 
@@ -685,12 +685,10 @@ footer .out-link li {
     win.on('keydown.chartx', function (e) {
       switch (e.which) {
         case 38:
-          e.preventDefault();
           pageCtrl.emit('up');
           e.preventDefault();
           break;
         case 40:
-          e.preventDefault();
           pageCtrl.emit('down');
           e.preventDefault();
           break;
