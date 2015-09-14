@@ -16,7 +16,6 @@ define(
          *@node chart在dom里的目标容器节点。
          */
         var Canvax = Chart.Canvax;
-
         return Chart.extend({
             _xAxis: null,
             _yAxis: null,
