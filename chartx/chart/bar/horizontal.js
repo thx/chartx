@@ -44,6 +44,19 @@ define(
                     ctx.scaleX         = -1;
                 });
 
+                _.each( me._graphs.txtsSp.children , function(text){
+                    var ctx  = text.context;
+                    var rect = text.getRect();
+                    
+                    ctx.scaleOrigin.x = rect.x + rect.width/2;
+                    ctx.scaleOrigin.y = rect.y + rect.height/2 ;
+                    ctx.scaleX        = -1;
+                    ctx.rotation      = 90;
+                    ctx.rotateOrigin.x =  rect.x + rect.width/2;
+                    ctx.rotateOrigin.y =  rect.y + rect.height/2;
+                    //ctx.x            += rect.width
+                } );
+
             
                 //把x轴文案做一次镜像反转
                 _.each( this._xAxis.sprite.children , function( xnode ){

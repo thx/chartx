@@ -25,9 +25,8 @@ define(
             }
             this.text = {
                 enabled: 0,
-                fillStyle: '#999999',
+                fillStyle: '#999',
                 fontSize: 12,
-                textAlign: "left",
                 format: null
             }
 
@@ -200,14 +199,14 @@ define(
                                     content = me.text.format(content);
                                 } else {
                                     content = Tools.numAddSymbol(content);
-                                }
-                                var txt = new Canvax.Display.Text(content, {
-                                    context: {
-                                        fillStyle: me.text.fillStyle,
-                                        fontSize: me.text.fontSize,
-                                        textAlign: me.text.textAlign
-                                    }
-                                });
+                                };
+                                
+                                var context =  {
+                                    fillStyle: me.text.fillStyle,
+                                    fontSize: me.text.fontSize
+                                };
+
+                                var txt = new Canvax.Display.Text(content, context);
                                 txt.context.x = rectData.x - txt.getTextWidth() / 2;
                                 txt.context.y = rectCxt.y - txt.getTextHeight();
                                 if (txt.context.y + me.h < 0) {
