@@ -19,13 +19,7 @@ Chartx是一套数据可视化解决方案，其底层基于自有canvas渲染�
 能适配PC,Mobile终端。Mobile终端的事件系统采用了开源库[Hammer.js](http://hammerjs.github.io/)来提供触屏事件支持。
 
 
-## Chartx线上文件地址
 
-daily环境为：http:// <code>g-assets.daily.taobao.net/thx/charts/chartx/index[-min].js</code>
-
-cdn环境为 ： http://  <code>g.tbcdn.cn/thx/charts/{{"版本号"}}/chartx/index[-min].js</code>
-
-当前最新CDN版本号为<code>1.9.21</code>。
 
 
 ## 交流群
