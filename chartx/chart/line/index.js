@@ -356,6 +356,7 @@ define(
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on("panstart mouseover", function(e) {
                     if (self._tip.enabled && e.eventInfo.nodesInfoList.length > 0) {
+                        self._tip.hide(e);
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
                         self._tip.show(e);
                     }
@@ -379,6 +380,14 @@ define(
                 spt.on("panend mouseout", function(e) {
                     if (self._tip.enabled) {
                         self._tip.hide(e);
+                    }
+                });
+                spt.on("tap" , function(e){
+                    debugger
+                    if (self._tip.enabled && e.eventInfo.nodesInfoList.length > 0) {
+                        self._tip.hide(e);
+                        _setXaxisYaxisToTipsInfo.apply(self, [e]);
+                        self._tip.show(e);
                     }
                 });
                 spt.on("click", function(e) {

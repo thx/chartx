@@ -53,13 +53,13 @@ var options = {
     tips : {
         //enabled  : false,
         content : function(info){
-            return info.data[0]+"："+info.data[1]+"%"
+            return info.name+"："+info.percentage+"%"
         }
     },
     //周边tip
     dataLabel: {
         enabled: true,
-        format: '{point.name} : {point.percentage}'
+        format: '{point.name} : {point.y}'
     },
     
     //是否允许扇形选取

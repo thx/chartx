@@ -19,10 +19,10 @@
                         }
                     };
                     this.xAxis = {
-                        field  : null
+                        field: null
                     };
                     this.yAxis = {
-                        field  : null
+                        field: null
                     };
                     _.deepExtend(this, opts);
                     this.dataFrame = this._initData(data, this);
@@ -74,21 +74,21 @@
                 //show: function (index) {
                 //    this._pie && this._pie.showHideSector(index);
                 //},
-                focusAt : function(index){
-                    if(this._pie){
-                        this._pie._sectorFocus( null , index);
-                        var sector = this.getByIndex(index).sector; 
-                        if( !sector.__isSelected ){
-                            this._pie.moveSector( sector );
+                focusAt: function (index) {
+                    if (this._pie) {
+                        this._pie._sectorFocus(null, index);
+                        var sector = this.getByIndex(index).sector;
+                        if (!sector.__isSelected) {
+                            this._pie.moveSector(sector);
                         }
                     }
                 },
-                unfocusAt  : function(index){
-                    if(this._pie){
-                        this._pie._sectorUnfocus( null , index);
+                unfocusAt: function (index) {
+                    if (this._pie) {
+                        this._pie._sectorUnfocus(null, index);
                         var sector = this.getByIndex(index).sector;
-                        if( sector.__isSelected ){
-                            this._pie.moveSector( sector );
+                        if (sector.__isSelected) {
+                            this._pie.moveSector(sector);
                         }
                     }
                 },
@@ -99,33 +99,33 @@
                     var data = [];
 
                     /*
-                     * 用校正处理， 把pie的data入参规范和chartx数据格式一致
-                     **/
-                    if( !this.xAxis.field ){
+                    * 用校正处理， 把pie的data入参规范和chartx数据格式一致
+                    **/
+                    if (!this.xAxis.field) {
                         data = arr;
                     } else {
-                        
-                        var titles  = arr.shift();
-                        var xFieldInd = _.indexOf(titles , this.xAxis.field );
-                        var yFieldInd = xFieldInd++;
-                        if( yFieldInd >= titles.length ){
+
+                        var titles = arr.shift();
+                        var xFieldInd = _.indexOf(titles, this.xAxis.field);
+                        var yFieldInd = xFieldInd + 1;
+                        if (yFieldInd >= titles.length) {
                             yFieldInd = 0;
                         };
-                        if( this.yAxis.field ){
-                            yFieldInd = _.indexOf(titles , this.yAxis.field );
+                        if (this.yAxis.field) {
+                            yFieldInd = _.indexOf(titles, this.yAxis.field);
                         };
-                        _.each( arr , function( row ){
+                        _.each(arr, function (row) {
                             var rowData = [];
-                            rowData.push( row[xFieldInd] );
-                            rowData.push( row[yFieldInd] );
-                            data.push( rowData );
-                        } );
+                            rowData.push(row[xFieldInd]);
+                            rowData.push(row[yFieldInd]);
+                            data.push(rowData);
+                        });
                     };
                     //矫正结束
 
                     var dataFrame = {};
                     dataFrame.org = data;
-                    dataFrame.data = [];
+                    dataFrame.data = [];                    
                     if (_.isArray(data)) {
                         for (var i = 0; i < data.length; i++) {
                             var obj = {};
@@ -189,31 +189,31 @@
                         animation: self.animation,
                         colors: self.colors,
                         focusCallback: {
-                            focus: function (e , index) {
+                            focus: function (e, index) {
                                 e.sectorIndex = index;
                                 e.eventInfo = {
-                                    sectorIndex : index
+                                    sectorIndex: index
                                 }
 
 
-                                self.fire('focused' , e);
+                                self.fire('focused', e);
                             },
-                            unfocus: function (e , index) {
+                            unfocus: function (e, index) {
                                 e.sectorIndex = index;
                                 e.eventInfo = {
-                                    sectorIndex : index
+                                    sectorIndex: index
                                 }
 
-                                self.fire('unfocused' , e);
+                                self.fire('unfocused', e);
                             }
                         },
-                        clickCallback : function( e , index ){
+                        clickCallback: function (e, index) {
                             e.sectorIndex = index;
                             e.eventInfo = {
-                                sectorIndex : index
+                                sectorIndex: index
                             }
 
-                            self.fire("click" , e);
+                            self.fire("click", e);
                         }
                     };
 
