@@ -34,6 +34,9 @@ define(
                 this.graphs = {};
 
                 this.biaxial = false;
+                this.padding = {
+                    top:10,right:0,bottom:0,left:0   
+                }
 
                 //this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
 
@@ -184,6 +187,7 @@ define(
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
                 var y = this.height - this._xAxis.h;
+                var graphsH = y - this.padding.top
 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -191,7 +195,7 @@ define(
                         x: 0,
                         y: y
                     },
-                    yMaxHeight: y
+                    yMaxHeight: graphsH
                 });
 
                 var _yAxisW = this._yAxis.w;
@@ -204,7 +208,7 @@ define(
                             x: 0,
                             y: y
                         },
-                        yMaxHeight: y
+                        yMaxHeight: graphsH
                     });
                     _yAxisRW = this._yAxisR.w;
                     this._yAxisR.setX(this.width - _yAxisRW);
