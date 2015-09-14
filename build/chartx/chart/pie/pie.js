@@ -64,7 +64,7 @@
                     self.labelFontSize = adjustFontSize < 12 ? 12 : adjustFontSize;
 
                     var data = self.data.data;
-                    self.clickMoveDis = self.r / 11;
+                    self.clickMoveDis = self.r / 11;                    
                     if (data.length && data.length > 0) {
 
                         for (var i = 0; i < data.length; i++) {
@@ -670,7 +670,7 @@
                                     self._sectorClick( e , this.__dataIndex );
                                 });
 
-                                self.sprite.addChild(sector);
+                                self.sprite.addChild(sector);                                
                                 moreSecData = {
                                     name: data[i].name,
                                     value: data[i].y,
