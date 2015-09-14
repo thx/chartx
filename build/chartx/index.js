@@ -2189,7 +2189,7 @@ define(
                     var txt = new Canvax.Display.Text( content ,
                        {
                         context : {
-                            x  : x + ( self.place == "left" ? 0 : 5 ),
+                            x  : x + ( self.place == "left" ? -5 : 5 ),
                             y  : posy,
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
@@ -2201,6 +2201,9 @@ define(
                     yNode.addChild( txt );
     
                     maxW = Math.max(maxW, txt.getTextWidth());
+                    if( self.text.rotation == 90 || self.text.rotation == -90 ){
+                        maxW = Math.max(maxW, txt.getTextHeight());
+                    }
     
                     if( self.line.enabled ){
                         //线条
@@ -2228,6 +2231,7 @@ define(
                 };
 
                 maxW += self.dis;
+                
                 self.sprite.context.x = maxW;
                 if( self.line.enabled ){
                     self.w = maxW + self.dis + self.line.width

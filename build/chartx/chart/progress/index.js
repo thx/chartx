@@ -16,6 +16,7 @@ define(
             init : function( el ,  data , opts ){
                 this._opts       = opts;
 
+                var me = this;
                 this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
                 this.normalColor = '#E6E6E6';
@@ -49,14 +50,17 @@ define(
 
                 //legend;
                 var me = this;
+
+                //重新计算dataCount
+                if( me.dataType == "absolute" ){
+                    this.dataCount = 0;
+                    for( var f in me.dataFrame.data ){
+                        this.dataCount += me.dataFrame.data[f][0];
+                    } 
+                }; 
+
                 if(this.field && this.field.length >= 1){
-                    //重新计算dataCount
-                    if( me.dataType == "absolute" ){
-                        this.dataCount = 0;
-                        for( var f in me.dataFrame.data ){
-                            this.dataCount += me.dataFrame.data[f][0];
-                        } 
-                    }; 
+                    
 
                     //设置legendOpt
                     var legendOpt = _.deepExtend({
@@ -79,7 +83,9 @@ define(
                 };
 
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
-                this._tip._getDefaultContent = this._getTipsDefaultContent;
+                this._tip._getDefaultContent = function(e){
+                    return me._getTipsDefaultContent.apply( me , arguments );
+                };
                 this.stage.addChild( this._tip.sprite );
             },
             _destroy : function(){

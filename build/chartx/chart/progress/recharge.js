@@ -30,12 +30,8 @@ define(
                     btnColor  : 'white',
                     crossLineColor : '#666666',
                     rate      : 0  // 0 - 100
-                }
-     
+                };
                 opt && _.deepExtend( this.config , opt );
-     
-                
-     
             },
             draw : function( opt ){
                 this.stage.addChild( new Sector({
