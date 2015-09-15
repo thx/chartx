@@ -12,12 +12,17 @@ define(
             this.w = 0;
             this.enabled = 1;//true false 1,0都可以
             this.dis  = 6                                  //线到文本的距离
+
+            this.label = "";
+            this._label= null; //label的text对象
+    
             this.line = {
                     enabled : 1,                           //是否有line
                     width   : 4,
                     lineWidth  : 1,
                     strokeStyle   : '#BEBEBE'
             };
+
             this.text = {
                     fillStyle : '#999999',
                     fontSize  : 12,
@@ -48,12 +53,19 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter          =  null; //function(params){}; 
 
+            this.isH             =  false;
+
             this.init(opt , data);
         };
     
         yAxis.prototype = {
             init:function( opt , data ){
                 _.deepExtend( this , opt );
+
+                if( this.text.rotation != 0 && this.text.rotation % 90 == 0 ){
+                    this.isH = true;
+                }
+
                 this._initData( data );
                 this.sprite = new Canvax.Display.Sprite();
             },
@@ -83,9 +95,32 @@ define(
                 this._initData( data );
                 this.draw();
             },
+            _getLabel  : function(){
+                if( this.label && this.label!="" ){
+                    this._label = new Canvax.Display.Text(this.label, {
+                        context: {
+                            fontSize: this.text.fontSize,
+                            textAlign: "left",
+                            textBaseline: this.isH ? "top" : "bottom",
+                            fillStyle: this.text.fillStyle,
+                            rotation: this.isH ? -90 : 0
+                        }
+                    });
+                }
+            },
             draw:function( opt ){
-                opt && _.deepExtend( this , opt );            
+                opt && _.deepExtend( this , opt );   
+                this._getLabel();
                 this.yGraphsHeight = this.yMaxHeight  - this._getYAxisDisLine();
+                
+                if( this._label ){
+                    if (this.isH) {
+                        this.yGraphsHeight -= this._label.getTextWidth();
+                    } else {
+                        this.yGraphsHeight -= this._label.getTextHeight();
+                    }
+                    this._label.context.y = -this.yGraphsHeight-5;
+                };
                 this.setX( this.pos.x );
                 this.setY( this.pos.y );
                 this._trimYAxis();
@@ -169,6 +204,7 @@ define(
                 }
                 var arr = this.layoutData;
                 var maxW = 0;
+                self._label && self.sprite.addChild( self._label );
                 for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var x = 0, y = o.y;

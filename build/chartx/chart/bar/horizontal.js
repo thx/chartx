@@ -60,7 +60,8 @@ define(
             
                 //把x轴文案做一次镜像反转
                 _.each( this._xAxis.sprite.children , function( xnode ){
-                    var text = xnode.children[0];
+                    var text = xnode.children ? xnode.children[0] : xnode;
+                    debugger
                     var ctx  = text.context;
                     var rect = text.getRect();
                     ctx.scaleOrigin.x = rect.x + rect.width/2;
@@ -69,7 +70,7 @@ define(
                 } );
                 //把y轴文案做一次镜像反转
                 _.each( this._yAxis.sprite.children , function( ynode ){
-                    var text = ynode.children[0];
+                    var text = ynode.children ? ynode.children[0] : ynode;
                     var ctx  = text.context;
                     var rect = text.getRect();
                     ctx.scaleOrigin.x = rect.x + rect.width/2;
