@@ -60,8 +60,6 @@ define(
                 }; 
 
                 if(this.field && this.field.length >= 1){
-                    
-
                     //设置legendOpt
                     var legendOpt = _.deepExtend({
                         label  : function( info ){
@@ -224,7 +222,7 @@ define(
                     info.field = this.field[i];
                     info.value = this.dataFrame.data[ this.field[i] ][0]
                 } else {
-                    info.value 
+                    info.value = this.currRatio;
                 }
                 return info;
             },
@@ -233,7 +231,7 @@ define(
                 if( this.dataType == "absolute" ){
                     value = (info.value / this.dataCount * 100).toFixed(2);
                 };
-                return info.field+"："+ value +"%";
+                return info.field ? (info.field+"："+ value +"%") : ( value +"%" );
             },
             _getCircle : function( angle , r , cr , fillStyle){
                 var radian = Math.PI / 180 * angle;
@@ -316,17 +314,21 @@ define(
             },
             setRatio  : function( s , field ){
                 var self  = this;
-                _.each( self.field , function( _field , i ){
-                    if( field ){
-                        if( field == _field ){
-                            setTimeout(function(){
-                                self._animate( s , field , i );
-                            } , 200*i);    
+                if( !self.field ){
+                    self._animate(s , "" , 0);
+                } else {
+                    _.each( self.field , function( _field , i ){
+                        if( field ){
+                            if( field == _field ){
+                                setTimeout(function(){
+                                    self._animate( s , field , i );
+                                } , 200*i);    
+                            }
+                        } else {
+                            self._animate( _field , i );
                         }
-                    } else {
-                        self._animate( _field , i );
-                    }
-                } );
+                    } );
+                }
             },
             //只有field为多组数据的时候才需要legend
             _getLegendData : function(){
