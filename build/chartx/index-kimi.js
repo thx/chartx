@@ -1510,6 +1510,8 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter = null; //function(params){}; 
 
+            this.isH    = false; //是否为横向转向的x轴
+
             this.init(opt, data);
         };
 
@@ -1519,6 +1521,10 @@ define(
 
                 if (opt) {
                     _.deepExtend(this, opt);
+                }
+
+                if( this.text.rotation != 0 && this.text.rotation % 90 == 0 ){
+                    this.isH = true;
                 }
 
                 if (!this.line.enabled) {
@@ -1581,13 +1587,14 @@ define(
             },
             _getLabel  : function(){
                 if( this.label && this.label!="" ){
+                    
                     this._label = new Canvax.Display.Text(this.label, {
                         context: {
                             fontSize: this.text.fontSize,
-                            textAlign: this.text.rotation % 90 == 0 ? "center" : "left",
-                            textBaseline: this.text.rotation % 90 == 0 ? "top" : "middle", 
+                            textAlign: this.isH ? "center" : "left",
+                            textBaseline: this.isH ? "top" : "middle", 
                             fillStyle: this.text.fillStyle,
-                            rotation: this.text.rotation % 90 == 0 ? -90 : 0
+                            rotation: this.isH ? -90 : 0
                         }
                     });
                 }
@@ -1609,7 +1616,7 @@ define(
 
                 this.xGraphsWidth = this.w - this._getXAxisDisLine();
                 if( this._label ){
-                    if (this.text.rotation % 90 == 0) {
+                    if (this.isH) {
                         this.xGraphsWidth -= this._label.getTextHeight()+5
                     } else {
                         this.xGraphsWidth -= this._label.getTextWidth()+5
@@ -1895,12 +1902,19 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter          =  null; //function(params){}; 
 
+            this.isH             =  false;
+
             this.init(opt , data);
         };
     
         yAxis.prototype = {
             init:function( opt , data ){
                 _.deepExtend( this , opt );
+
+                if( this.text.rotation != 0 && this.text.rotation % 90 == 0 ){
+                    this.isH = true;
+                }
+
                 this._initData( data );
                 this.sprite = new Canvax.Display.Sprite();
             },
@@ -1936,9 +1950,9 @@ define(
                         context: {
                             fontSize: this.text.fontSize,
                             textAlign: "left",
-                            textBaseline: this.text.rotation % 90 == 0 ? "top" : "bottom",
+                            textBaseline: this.isH ? "top" : "bottom",
                             fillStyle: this.text.fillStyle,
-                            rotation: this.text.rotation % 90 == 0 ? -90 : 0
+                            rotation: this.isH ? -90 : 0
                         }
                     });
                 }
@@ -1949,7 +1963,7 @@ define(
                 this.yGraphsHeight = this.yMaxHeight  - this._getYAxisDisLine();
                 
                 if( this._label ){
-                    if (this.text.rotation % 90 == 0) {
+                    if (this.isH) {
                         this.yGraphsHeight -= this._label.getTextWidth();
                     } else {
                         this.yGraphsHeight -= this._label.getTextHeight();
