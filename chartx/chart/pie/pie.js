@@ -62,9 +62,10 @@
                     self.currentAngle = 0;
                     var adjustFontSize = 12 * self.boundWidth / 1000;
                     self.labelFontSize = adjustFontSize < 12 ? 12 : adjustFontSize;
+                    var percentFixedNum = 2;
 
                     var data = self.data.data;
-                    self.clickMoveDis = self.r / 11;                    
+                    self.clickMoveDis = self.r / 11;
                     if (data.length && data.length > 0) {
 
                         for (var i = 0; i < data.length; i++) {
@@ -72,11 +73,22 @@
                         }
                         if (self.total > 0) {
                             var maxIndex = 0;
-                            for (var j = 0; j < data.length; j++) {
-                                if (j > 0 && percentage * 100 > data[maxIndex].percentage) {
+                            var maxPercentageOffsetIndex = 0;
+                            var totalFixedPercent = 0;
+                            for (var j = 0; j < data.length; j++) {                                
+                                var percentage = data[j].y / self.total;
+                                var fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
+                                var percentageOffset = Math.abs(percentage * 100 - fixedPercentage);
+                                totalFixedPercent += fixedPercentage;
+
+                                if (j > 0 && percentage > data[maxIndex].orginPercentage) {
                                     maxIndex = j;
                                 }
-                                var percentage = data[j].y / self.total;
+
+                                if (j > 0 && percentageOffset > data[maxPercentageOffsetIndex].percentageOffset) {
+                                    maxPercentageOffsetIndex = j;
+                                }
+
                                 var angle = 360 * percentage;
                                 var endAngle = self.currentAngle + angle > 360 ? 360 : self.currentAngle + angle;
                                 var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
@@ -113,8 +125,10 @@
                                     outy: (self.r + self.clickMoveDis) * sinV,
                                     edgex: (self.r + 2 * self.clickMoveDis) * cosV,
                                     edgey: (self.r + 2 * self.clickMoveDis) * sinV,
-                                    percentage: (percentage * 100).toFixed(1),
-                                    txt: (percentage * 100).toFixed(1) + '%',
+                                    orginPercentage: percentage,
+                                    percentage: fixedPercentage,
+                                    percentageOffset: percentageOffset,
+                                    txt: fixedPercentage + '%',
                                     quadrant: quadrant,
                                     labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
                                     index: j,
@@ -123,8 +137,13 @@
 
                                 self.currentAngle += angle;
                                 if (self.currentAngle > 360) self.currentAngle = 360;
-                            }
+                            }                            
                             data[maxIndex].isMax = true;
+                            //处理保留小数后百分比总和不等于100的情况
+                            var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
+                            if (totalPercentOffset != 0) {
+                                data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
+                            }
                         }
                     }
                 },
@@ -197,7 +216,7 @@
                     return colors[index];
                 },
                 _configColors: function () {
-                    var defaultColors = ['#f05836','#7270b1','#359cde','#4fd2c4','#f4c646','#999','#FF7D00', '#516DCC', '#8ACC5F', '#A262CB', '#FFD202', '#CC3E3C', '#00A5FF', '#009964', '#CCB375', '#694C99'];
+                    var defaultColors = ['#f05836', '#7270b1', '#359cde', '#4fd2c4', '#f4c646', '#999', '#FF7D00', '#516DCC', '#8ACC5F', '#A262CB', '#FFD202', '#CC3E3C', '#00A5FF', '#009964', '#CCB375', '#694C99'];
                     this.colors = this.colors ? this.colors : defaultColors;
                 },
                 draw: function (opt) {
@@ -370,22 +389,22 @@
                         this._showLabel(index);
                     }
                 },
-                _sectorFocus: function (e , index) {
+                _sectorFocus: function (e, index) {
                     if (this.sectorMap[index]) {
                         if (this.focusCallback && e) {
-                            this.focusCallback.focus(e , index);
+                            this.focusCallback.focus(e, index);
                         }
                     }
                 },
-                _sectorUnfocus: function (e , index) {
+                _sectorUnfocus: function (e, index) {
                     if (this.focusCallback && e) {
-                        this.focusCallback.unfocus(e , index);
+                        this.focusCallback.unfocus(e, index);
                     }
                 },
-                _sectorClick : function(e , index){
+                _sectorClick: function (e, index) {
                     if (this.sectorMap[index]) {
                         if (this.clickCallback) {
-                            this.clickCallback(e , index );
+                            this.clickCallback(e, index);
                         }
                     }
                 },
@@ -648,7 +667,7 @@
                                     if (self.tips.enabled) {
                                         self._showTip(e, this.__dataIndex);
                                     }
-                                    self._sectorFocus( e , this.__dataIndex );
+                                    self._sectorFocus(e, this.__dataIndex);
                                     //}
                                     self.allowPointSelect && self.moveSector(this);
                                 }, function (e) {
@@ -656,7 +675,7 @@
                                     if (self.tips.enabled) {
                                         self._hideTip(e);
                                     }
-                                    self._sectorUnfocus(e , this.__dataIndex);
+                                    self._sectorUnfocus(e, this.__dataIndex);
                                     //}
                                     self.allowPointSelect && self.moveSector(this);
                                 });
@@ -666,11 +685,11 @@
                                     }
                                 });
 
-                                sector.on('click' , function(e){
-                                    self._sectorClick( e , this.__dataIndex );
+                                sector.on('click', function (e) {
+                                    self._sectorClick(e, this.__dataIndex);
                                 });
 
-                                self.sprite.addChild(sector);                                
+                                self.sprite.addChild(sector);
                                 moreSecData = {
                                     name: data[i].name,
                                     value: data[i].y,
