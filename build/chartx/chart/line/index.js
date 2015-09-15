@@ -1109,7 +1109,6 @@ define(
                     }
                 });
                 spt.on("tap" , function(e){
-                    debugger
                     if (self._tip.enabled && e.eventInfo.nodesInfoList.length > 0) {
                         self._tip.hide(e);
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
