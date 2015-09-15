@@ -61,7 +61,6 @@ define(
                 //把x轴文案做一次镜像反转
                 _.each( this._xAxis.sprite.children , function( xnode ){
                     var text = xnode.children ? xnode.children[0] : xnode;
-                    debugger
                     var ctx  = text.context;
                     var rect = text.getRect();
                     ctx.scaleOrigin.x = rect.x + rect.width/2;

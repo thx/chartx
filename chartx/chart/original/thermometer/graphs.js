@@ -207,7 +207,6 @@ define(
                 var index = $index
                 var icon  = _.clone( me.icon );
                 // icon.right  = me.w - (me.itemW + me.itemDis) * $index + 5,
-                // debugger
                 // icon.right  = me.w - (me.pos.x + parseInt(me.disX / 2) + (me.itemW + me.itemDis) * $index) + me.itemW
                 icon.right = me.w - parseInt(me.disX / 2) - ((me.itemW + me.itemDis) * $index) + 3
                 icon.fillStyle = me.fillStyle[index];
