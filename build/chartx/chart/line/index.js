@@ -725,12 +725,12 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        './xaxis',
+        'chartx/chart/line/xaxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         'chartx/components/anchor/Anchor',
         'chartx/chart/line/graphs',
-        './tips',
+        'chartx/chart/line/tips',
         'chartx/utils/dataformat'
     ],
     function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat) {
@@ -738,6 +738,7 @@ define(
          *@node chart在dom里的目标容器节点。
          */
         var Canvax = Chart.Canvax;
+
 
         return Chart.extend({
 

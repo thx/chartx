@@ -53,6 +53,16 @@ module.exports = function(grunt) {
              ],
              dest: bc+'index.js'
          },
+         kimi : {
+             src: [
+                //'chartx/index.js',
+                //'chartx/chart/index.js',
+                 bc+"index-kimi.js",
+                 bc+"chart/index.js",
+                 bc+"components/**/*.js"
+             ],
+             dest: bc+'index-kimi.js'
+         },
          bar : {
              src : [
                  bc+"chart/bar/graphs.js",

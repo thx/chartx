@@ -130,6 +130,7 @@ header .detail-link a {
 
 
 .show {
+
   background: #201317 url("http://gtms03.alicdn.com/tps/i3/TB1Y4TQJpXXXXXEXVXXU7PDLVXX-1920-800.png") no-repeat;
   position: relative;
   height: 749px;
@@ -560,7 +561,7 @@ footer .out-link li {
   <div class="container">
     <div class="intro">
       <h3 class="text-info ">关于Chartx</h3>
-      <p class="text-info ">Chartx是一套数据可视化解决方案，其底层基于自有Canvas渲染引擎Canvax  （ Canvtax的基于心跳包的主动渲染机制在图表这样并不需要高帧率的场景中有着非常良好的性能 ）。
+      <p class="text-info ">Chartx是一套数据可视化解决方案，其底层基于自有Canvas渲染引擎Canvax  （ Canvax的基于心跳包的主动渲染机制在图表这种并不需要高帧率的场景中有着非常良好的性能 ）。
       </p>
     </div>
 
@@ -579,11 +580,11 @@ footer .out-link li {
       </li>
       <li class="cross-platform">
         跨平台
-        <span class="desc">兼容各大浏览器横跨ie6/7/8以及各个现代浏览器</span>
+        <span class="desc">兼容各大浏览器，横跨ie6/7/8以及各个现代浏览器</span>
       </li>
       <li class="cross-device">
         跨终端
-        <span class="desc">兼容PC、MOBILE等终端支持鼠标和手势操作</span>
+        <span class="desc">兼容PC、MOBILE等终端，支持鼠标和手势操作</span>
       </li>
       <li class="open-source">
         免费开源
@@ -854,7 +855,7 @@ footer .out-link li {
 $( function() {
 
     var width, height, canvas, ctx, points, target, animateHeader = true;
-
+    
 
     // Main
     initHeader();
@@ -866,7 +867,7 @@ $( function() {
         height = window.innerHeight;
         target = {
             x: width / 3,
-            y: height / 2
+            y: 350//height / 2
         };
 
         canvas = document.getElementById( 'spiders' );
@@ -1037,7 +1038,7 @@ $( function() {
             ctx.beginPath();
             ctx.moveTo( p.x, p.y );
             ctx.lineTo( p.closest[ i ].x, p.closest[ i ].y );
-            ctx.strokeStyle = 'rgba(0,153,255,' + p.active + ')';//getLineColor(p.active);
+            ctx.strokeStyle = 'rgba(0,153,255,' + p.active + ')';//getLineColor(p.active); 
             ctx.stroke();
         }
     }
