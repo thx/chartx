@@ -419,6 +419,7 @@ header .detail-link a {
   color: #9eafc8;
   text-align: center;
   font-size: 18px;
+  background: #211418 url("http://gtms03.alicdn.com/tps/i3/TB1Wg4vJFXXXXXBXpXXU7PDLVXX-1920-800.png") no-repeat;
 }
 .page4 .content {
   position: absolute;
@@ -855,7 +856,7 @@ footer .out-link li {
 $( function() {
 
     var width, height, canvas, ctx, points, target, animateHeader = true;
-    
+
 
     // Main
     initHeader();
@@ -1038,7 +1039,7 @@ $( function() {
             ctx.beginPath();
             ctx.moveTo( p.x, p.y );
             ctx.lineTo( p.closest[ i ].x, p.closest[ i ].y );
-            ctx.strokeStyle = 'rgba(0,153,255,' + p.active + ')';//getLineColor(p.active); 
+            ctx.strokeStyle = 'rgba(0,153,255,' + p.active + ')';//getLineColor(p.active);
             ctx.stroke();
         }
     }
