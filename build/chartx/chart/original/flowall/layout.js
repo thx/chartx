@@ -82,7 +82,7 @@ define(
             var maxVal   = 0;
             var maxGroupLen = 0;
             
-            if( dataFrame.maxLinks > 1 ){
+            if( dataFrame.maxLinks >= 1 ){
                 //flowout布局
                 //先计算出最大的value
                 maxGroupLen = dataFrame.maxLinks;
