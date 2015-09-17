@@ -64,7 +64,7 @@ define(
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
                 this._anchor = new Anchor(this.anchor);
-                this._graphs = new Graphs(this.graphs , this.dataFrame.zAxis);
+                this._graphs = new Graphs(this.graphs , this.dataFrame);
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
                 this._tip._getDefaultContent = this._getTipDefaultContent;
 
