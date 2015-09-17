@@ -52,8 +52,10 @@ define(
     ],
     function( Canvax , Circle , Rect , Tween ){
  
-        var Graphs = function( opt , zAxis ){
-            this.zAxis = zAxis;
+        var Graphs = function( opt , dataFrame ){
+            this.zAxis = dataFrame.zAxis;
+            this.xAxis = dataFrame.xAxis;
+            this.yAxis = dataFrame.yAxis;
             this.w = 0;
             this.h = 0;
            
@@ -92,6 +94,28 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
+            _getCircleNode : function( iGroup , iNode , value ){
+                var node = {
+                    iGroup : iGroup,
+                    iNode  : iNode,
+                    xAxis  : {
+                        field : this.xAxis.field[iGroup],
+                        value : this.xAxis.org[iGroup][iNode]
+                    },
+                    yAxis  : {
+                        field : this.yAxis.field[iGroup],
+                        value : value
+                    },
+                    zAxis  : null
+                }
+                if( this.zAxis.field[iGroup] ){
+                    node.zAxis = {
+                        field : this.zAxis.field[iGroup],
+                        value : this.zAxis.org[iGroup][iNode]
+                    }
+                }
+                return node;
+            },
             getCircleFillStyle : function( i , ii , value){
                 var fillStyle = this.circle.fillStyle;
                 
@@ -99,7 +123,13 @@ define(
                     fillStyle = fillStyle[ii]
                 }
                 if( _.isFunction( fillStyle ) ){
-                    fillStyle = fillStyle( i , ii , value );
+                    //fillStyle = fillStyle( i , ii , value );
+                    //fillStyle = fillStyle( {
+                    //    iGroup : ii,
+                    //    iNode  : i,
+                    //    value  : value
+                    //} );
+                    fillStyle   = fillStyle(this._getCircleNode(ii , i , value));
                 }
                 if( !fillStyle || fillStyle=="" ){
                     fillStyle = this._colors[ii];
@@ -157,6 +187,7 @@ define(
                     var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var d = data[ii][i];
+                        
                         var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
                         
                         var r       = this.getR(d) ||
@@ -324,7 +355,7 @@ define(
                 this._yAxis  = new yAxis(this.yAxis , this.dataFrame.yAxis);
                 this._back   = new Back(this.back);
                 this._anchor = new Anchor(this.anchor);
-                this._graphs = new Graphs(this.graphs , this.dataFrame.zAxis);
+                this._graphs = new Graphs(this.graphs , this.dataFrame);
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
                 this._tip._getDefaultContent = this._getTipDefaultContent;
 
