@@ -3,10 +3,13 @@ define(
     [
          "canvax/index",
          "canvax/shape/BrokenLine",
+         "canvax/display/Sprite",
+         "canvax/display/Text"
     ],
-    function(Canvax, BrokenLine){
+    function(Canvax, BrokenLine, Sprite, Text){
         var markLine = function(opt){
-
+            this.w      = 0;
+            this.h      = 0
             this.field  = null;
             this.origin = {
                 x : 0 , y : 0
@@ -21,6 +24,15 @@ define(
                 lineType    : 'dashed'
             };
 
+            this.text = {
+                enabled  : false,
+                content  : '',
+                fillStyle: '#999999',
+                fontSize : 12,
+                format   : null,
+                lineType : 'dashed'
+            }
+
             this.filter = function( ){
                 
             }
@@ -29,15 +41,16 @@ define(
             this.done   = function( fn ){
                 this._doneHandle = fn;
             };
-
+            this.txt = null
+           
             opt && _.deepExtend(this, opt);
-
             this.init();
         }
         markLine.prototype = {
             init : function(){
                 var me = this;
-                this.sprite  = new Canvax.Display.Sprite({ 
+
+                this.sprite  = new Sprite({ 
                     context : {
                         x : this.origin.x,
                         y : this.origin.y
@@ -60,6 +73,23 @@ define(
                     }
                 });
                 me.sprite.addChild(line)
+
+
+                if(me.text.enabled){
+                    var txt = new Text(me.text.content, {           //文字
+                        context : me.text
+                    })
+                    this.txt = txt
+                    me.sprite.addChild(txt)
+
+                    if(_.isNumber(me.text.x)){
+                        txt.context.x = me.text.x, txt.context.y = me.text.y
+                    }else{
+                        txt.context.x = this.w - txt.getTextWidth() 
+                        txt.context.y = me.line.y - txt.getTextHeight()
+                    }
+                }
+
                 me._done();
                 me.filter( me );
             },

@@ -23,9 +23,6 @@ define(
             _graphs: null,
             _tip: null,
 
-            _yValueMaxs: [],
-            _yLen: 0,
-            _yCenters: [],
             init: function(node, data, opts) {
                 this._opts = opts;
                 _.deepExtend(this, opts);
@@ -129,10 +126,7 @@ define(
                 });
 
                 var o = this._trimGraphs()
-                this._yValueMaxs = o.yValueMaxs
-                this._yLen = o.yLen
-                this._yCenters = o.yCenters
-                    //绘制主图形区域
+                //绘制主图形区域
                 this._graphs.draw(o.data, {
                     w: this._xAxis.xGraphsWidth,
                     h: this._yAxis.yGraphsHeight,
@@ -166,9 +160,6 @@ define(
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
                 var hLen = yArr.length; //bar的横向分组length
-                var yValueMaxs = [],
-                    yCenters = []
-                var yLen = 0
 
                 var xDis1 = _xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
@@ -179,9 +170,11 @@ define(
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
+                var center  = [], yValueMaxs = [], yLen = []
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0
+                    center[b] = {}
                     _.each(yArr[b], function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
                         _.each(subv, function(val, i) {
@@ -198,7 +191,6 @@ define(
                                 x: x,
                                 y: y
                             });
-
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
                         });
@@ -206,14 +198,14 @@ define(
                 }
 
                 for (var a = 0, al = yValueMaxs.length; a < al; a++) {
-                    var center = -(yValueMaxs[a] / yLen - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
-                    yCenters.push(center)
+                    center[a].agValue = yValueMaxs[a] / yLen
+                    center[a].agPosition = -(yValueMaxs[a] / yLen - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
                 }
+                //均值
+                this.dataFrame.yAxis.center = center
+                console.log(this.dataFrame.yAxis.center)
                 return {
-                    data: tmpData,
-                    yValueMaxs: yValueMaxs,
-                    yLen: yLen,
-                    yCenters: yCenters
+                    data: tmpData
                 };
             },
             _drawEnd: function() {
@@ -237,12 +229,26 @@ define(
             },
             _initMarkLine: function(g) {
                 var me = this
-            
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     for (var a = 0, al = me._yAxis.dataOrg.length; a < al; a++) {
-                        var center = me._yCenters[a]
-                        var fillStyle = g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
-                        new MarkLine(_.extend({
+                        var index  = a
+                        var center = me.dataFrame.yAxis.center[a].agPosition
+                        var strokeStyle = g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
+                        
+                        var content = me.dataFrame.yAxis.field[a] + '均值'
+                        if(me.markLine.text && me.markLine.text.enabled){
+                            
+                            if(_.isFunction(me.markLine.text.format)){
+                                var o = {
+                                    iGroup : index,
+                                    value  : me.dataFrame.yAxis.center[index].agValue
+                                }
+                                content = me.markLine.text.format(o)
+                            }
+                        }
+                        var o = {
+                            w: me._xAxis.xGraphsWidth,
+                            h: me._yAxis.yGraphsHeight,
                             origin: {
                                 x: me._back.pos.x,
                                 y: me._back.pos.y
@@ -254,11 +260,15 @@ define(
                                     [0, 0],
                                     [me._xAxis.xGraphsWidth, 0]
                                 ],
-                                strokeStyle: fillStyle,
-                                lineType: 'dashed'
-                            }
+                                strokeStyle: strokeStyle
+                            },
+                            text: {
+                                content  : content,
+                                fillStyle: strokeStyle
+                            },
+                        }
 
-                        } , me._opts.markLine)).done(function() {
+                        new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
                             me.core.addChild(this.sprite)
                         })
                     }
