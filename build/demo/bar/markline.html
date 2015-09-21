@@ -52,8 +52,17 @@ var options = {
         filter  : function( ml ){
             if( ml.field == "pv" ){
                 //把pv的均线隐藏
-                ml.sprite.context.visible = false;
+                <!-- ml.sprite.context.visible = false; -->
             }
+        },
+        text : {
+            enabled : true,
+            format : function(info){
+                //info.iGroup    第几条线    从0开始
+                //info.value     平均值 
+                return options.yAxis.field[info.iGroup] + '平均值 ：' + parseInt(info.value)
+            },
+            fontSize : 14
         }
     }
 }   

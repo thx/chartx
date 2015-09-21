@@ -757,7 +757,10 @@ define(
 
                 this.biaxial = false;
                 this.padding = {
-                    top:10,right:0,bottom:0,left:0   
+                    top: 10,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
                 }
 
                 //this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
@@ -875,7 +878,6 @@ define(
             },
             _initData: dataFormat,
             _initModule: function() {
-
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
 
                 if (this.biaxial) {
@@ -997,7 +999,7 @@ define(
 
                 //执行生长动画
                 this._graphs.grow(function(g) {
-                    me._initPlugs( me._opts , g );
+                    me._initPlugs(me._opts, g);
                 });
 
                 this.bindEvent(this._graphs.sprite);
@@ -1008,7 +1010,7 @@ define(
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
                     this._anchor.draw({
                         w: this.width - _yAxisW - _yAxisRW,
-                        h: _graphsH,
+                        h: -_graphsH,
                         cross: {
                             x: pos.x,
                             y: _graphsH + pos.y
@@ -1021,7 +1023,7 @@ define(
                     //, this._anchor.setY(y)
                 }
             },
-            _initPlugs : function( opts , g){
+            _initPlugs: function(opts, g) {
                 if ("markLine" in opts) {
                     this._initMarkLine(g);
                 }
@@ -1048,16 +1050,24 @@ define(
             },
             _initMarkLine: function(g) {
                 var me = this
+                var index = g._groupInd
                 var pointList = _.clone(g._pointList)
-                var max = 0
-                var center
-                _.each(pointList, function(data, i) {
-                    max += data[1]
-                })
-                center = parseInt(max / pointList.length)
-
+                var center = parseInt(me.dataFrame.yAxis.center[index].agPosition)                             
                 require(['chartx/components/markline/index'], function(MarkLine) {
-                    new MarkLine(_.extend({
+                    var content = g.field + '均值', strokeStyle = g.line.strokeStyle
+                    if(me.markLine.text && me.markLine.text.enabled){
+                        
+                        if(_.isFunction(me.markLine.text.format)){
+                            var o = {
+                                iGroup : index,
+                                value  : me.dataFrame.yAxis.center[index].agValue
+                            }
+                            content = me.markLine.text.format(o)
+                        }
+                    }
+                    var o = {
+                        w: me._xAxis.xGraphsWidth,
+                        h: me._yAxis.yGraphsHeight,
                         origin: {
                             x: me._back.pos.x,
                             y: me._back.pos.y
@@ -1068,11 +1078,16 @@ define(
                                 [0, 0],
                                 [me._xAxis.xGraphsWidth, 0]
                             ],
-                            strokeStyle: g.line.strokeStyle,
-                            lineType: 'dashed'
+                            strokeStyle: strokeStyle
                         },
-                        field : g.field
-                    } , me._opts.markLine)).done(function() {
+                        text: {
+                            content  : content,
+                            fillStyle: strokeStyle
+                        },
+                        field: g.field
+                    }
+                    
+                    new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
                         me.core.addChild(this.sprite)
                     })
                 })
@@ -1108,7 +1123,7 @@ define(
                         self._tip.hide(e);
                     }
                 });
-                spt.on("tap" , function(e){
+                spt.on("tap", function(e) {
                     if (self._tip.enabled && e.eventInfo.nodesInfoList.length > 0) {
                         self._tip.hide(e);
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
@@ -1139,11 +1154,14 @@ define(
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var arr = dataFrame.yAxis.org;
                 var tmpData = [];
+                var center = []
                 for (var a = 0, al = arr.length; a < al; a++) {
                     if (this.biaxial && a > 0) {
                         _yAxis = this._yAxisR;
                         maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                     }
+                    var maxValue = 0
+                    center[a] = {}
                     for (var b = 0, bl = arr[a].length; b < bl; b++) {
                         !tmpData[a] ? tmpData[a] = [] : '';
                         if (b >= this._xAxis.data.length) {
@@ -1157,8 +1175,15 @@ define(
                             x: x,
                             y: y
                         };
+                        maxValue += arr[a][b]
                     }
+                    center[a].agValue = maxValue / bl
+
+                    center[a].agPosition = -(center[a].agValue - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
+                    
                 }
+                //均值
+                this.dataFrame.yAxis.center = center
                 return tmpData
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标

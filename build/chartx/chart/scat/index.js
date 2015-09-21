@@ -56,6 +56,8 @@ define(
             this.zAxis = dataFrame.zAxis;
             this.xAxis = dataFrame.xAxis;
             this.yAxis = dataFrame.yAxis;
+            this.dataFrame = dataFrame;
+            this.label     = []; //label的字段
             this.w = 0;
             this.h = 0;
            
@@ -65,23 +67,21 @@ define(
             };
 
             this.circle = {
-                maxR : 20,  //圆圈默认最大半径
-                minR : 3,
-                r : null,
+                maxR    : 20,  //圆圈默认最大半径
+                minR    : 3,
+                r       : null,
                 normalR : 10
-            }
+            };
     
-            this._colors = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors  = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
             
-            this.sprite = null;
+            this.sprite   = null;
     
             this._circles = [];  //所有圆点的集合
     
-            
-            _.deepExtend(this , opt);
+            _.deepExtend( this , opt );
     
             this.init( );
-    
         };
     
         Graphs.prototype = {
@@ -93,6 +93,18 @@ define(
             },
             setY:function($n){
                 this.sprite.context.y = $n
+            },
+            _getLabel      : function( iGroup , iNode ){
+                var labelField = this.label[ iGroup ];
+                if( labelField ) {
+                    var label = null;
+                    _.each( this.dataFrame.data , function( d , i ){
+                        if( d.field == labelField ){
+                            label = d.data[iNode];
+                        }
+                    } );
+                    return label;
+                }
             },
             _getCircleNode : function( iGroup , iNode , value ){
                 var node = {
@@ -106,6 +118,7 @@ define(
                         field : this.yAxis.field[iGroup],
                         value : value
                     },
+                    label  : this._getLabel( iGroup , iNode ),
                     zAxis  : null
                 }
                 if( this.zAxis.field[iGroup] ){
@@ -116,7 +129,7 @@ define(
                 }
                 return node;
             },
-            getCircleFillStyle : function( i , ii , value){
+            getCircleFillStyle : function( i , ii , value , circleNode ){
                 var fillStyle = this.circle.fillStyle;
                 
                 if( _.isArray( fillStyle ) ){
@@ -129,7 +142,8 @@ define(
                     //    iNode  : i,
                     //    value  : value
                     //} );
-                    fillStyle   = fillStyle(this._getCircleNode(ii , i , value));
+                    //fillStyle   = fillStyle(this._getCircleNode(ii , i , value));
+                    fillStyle   = fillStyle( circleNode );
                 }
                 if( !fillStyle || fillStyle=="" ){
                     fillStyle = this._colors[ii];
@@ -150,6 +164,7 @@ define(
                 if( data.length == 0 ){
                     return;
                 };
+
                 self.data = data;
 
                 this.induce = new Rect({
@@ -184,20 +199,23 @@ define(
                 }
 
                 for( var i = 0 ; i < barGroupLen ; i++ ){
-                    var sprite = new Canvax.Display.Sprite({ id : "barGroup"+i });
+                    var sprite = new Canvax.Display.Sprite();
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var d = data[ii][i];
                         
                         var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
                         
-                        var r       = this.getR(d) ||
-                                      (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
+                        var r = this.getR(d) || (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
+                        var circleNode = this._getCircleNode(ii , i , d.value);
+
+                        var fillStyle  = this.getCircleFillStyle( i , ii , d.value , circleNode )
+
                         var circle = new Circle({
                             hoverClone : false,
                             context : {
                                 x           : d.x,
                                 y           : d.y,
-                                fillStyle   : this.getCircleFillStyle( i , ii , d.value ),
+                                fillStyle   : fillStyle,
                                 r           : r,
                                 globalAlpha : 0,
                                 cursor      : "pointer"
@@ -208,6 +226,7 @@ define(
                         circle.iGroup = ii;
                         circle.iNode  = i;
                         circle.r      = r;
+                        circle.label  = circleNode.label;
                         if( zAxisV ){
                             circle.zAxis  = {
                                 field : this.zAxis.field,
@@ -227,7 +246,7 @@ define(
                         });
                         circle.on("panend mouseout", function(e){
                             e.eventInfo = {};
-                            this.context.globalAlpha = 0.8;
+                            this.context.globalAlpha = 0.7;
                             this.context.r --;
                         });
                         circle.on("tap click", function(e){
@@ -235,6 +254,23 @@ define(
                         });
 
                         this._circles.push( circle );
+
+                        if( circleNode.label && circleNode.label != "" ){
+                            var y = d.y-r;
+                            if( y + this.h <= 20 ){
+                                y = -(this.h - 20);
+                            }
+                            var label = new Canvax.Display.Text( circleNode.label , {
+                                context: {
+                                    x            : d.x,
+                                    y            : y,
+                                    fillStyle    : fillStyle,
+                                    textAlign    : "center",
+                                    textBaseline : "bottom"
+                                }
+                            });
+                            sprite.addChild( label );
+                        }
                     }
                     this.sprite.addChild( sprite );
                 };
@@ -247,6 +283,7 @@ define(
                 var node = {
                     iGroup        : target.iGroup,
                     iNode         : target.iNode,
+                    label         : target.label,
                     nodesInfoList : this._getNodeInfo(target.iGroup, target.iNode)
                 };
                 return node
@@ -269,7 +306,7 @@ define(
                    .onUpdate( function () {
                        for( var i=0 , l=self._circles.length ; i<l ; i++ ){
                            var _circle = self._circles[i];
-                           _circle.context.globalAlpha = this.h / 100 * 0.8;
+                           _circle.context.globalAlpha = this.h / 100 * 0.7;
                            _circle.context.r = this.h / 100 * _circle.r;
                        }
                    } ).onComplete( function(){
@@ -368,7 +405,13 @@ define(
 
             },
             _getTipDefaultContent : function( nodeInfo ){
-                return nodeInfo.xAxis.field+"："+nodeInfo.nodesInfoList[0].value;
+                var res;
+                if( nodeInfo.label ){
+                    res = nodeInfo.label+"："+nodeInfo.nodesInfoList[0].value;
+                } else {
+                    res = nodeInfo.xAxis.field + "："+nodeInfo.nodesInfoList[0].value;
+                }
+                return res;
             },
             _startDraw : function(opt){
                 var w = (opt && opt.w) || this.width;
