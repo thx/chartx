@@ -496,6 +496,19 @@ title:  Chartx demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/scat/index_label.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/scat/scat-label.png">
+        </dt>
+        <dd>
+            <h5>
+            显示scat的名称
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
 </div>
 
 
