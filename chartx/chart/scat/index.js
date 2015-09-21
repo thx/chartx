@@ -77,7 +77,13 @@ define(
 
             },
             _getTipDefaultContent : function( nodeInfo ){
-                return nodeInfo.xAxis.field+"："+nodeInfo.nodesInfoList[0].value;
+                var res;
+                if( nodeInfo.label ){
+                    res = nodeInfo.label+"："+nodeInfo.nodesInfoList[0].value;
+                } else {
+                    res = nodeInfo.xAxis.field + "："+nodeInfo.nodesInfoList[0].value;
+                }
+                return res;
             },
             _startDraw : function(opt){
                 var w = (opt && opt.w) || this.width;

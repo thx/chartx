@@ -35,27 +35,36 @@
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 3 , 20 , 33    ],
+    [ 1      , 113 , 20 , 33    ],
     [ 2      , 0   , 51 , 26    ],
-    [ 3      , 32   , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 39    ],
-    [ 7      , 55  , 68 , 65    ],
-    [ 8      , 66   , 83 , 51    ]
+    [ 3      , 132   , 45 , 43    ],
+    [ 4      , 258  , 35 , 31    ],
+    [ 5      , 379  , 73 , 71    ],
+    [ 6      , 488  , 54 , 39    ],
+    [ 7      , 155  , 68 , 65    ],
+    [ 8      , 266   , 83 , 51    ]
 ];
 
 //chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["click" ]
+        field : ["click",'uv']
     },
     xAxis : {
         field : "xfield"
     },
     markLine : {
-        enabled : true
+        enabled : true ,
+        text : {
+            enabled : true,
+            format : function(info){
+                //info.iGroup    第几条线    从0开始
+                //info.value     平均值 
+                return options.yAxis.field[info.iGroup] + '平均值 ：' + parseInt(info.value)
+            },
+            fontSize : 14
+        }
     }
 };
 //Chartx.line开始初始化chart实例
