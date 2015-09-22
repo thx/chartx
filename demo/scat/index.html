@@ -45,12 +45,17 @@ var data = [
     [ 199     , 388      , 288  , 530   ],
     [ 100     , 390      , 225  , 330   ] 
 ];
+var data = [
+                        ["基本型需求","兴奋型需求","期望型需求","scat1","scat2","scat3","tagname1","tagname2","tagname3"],
+                        [0.9266,0,0.8127,0   ,2.3522,2.0531,"保质期","控油效果","与描述"]
+
+                    ]
 var options = {
     yAxis : {
-        field   : ["pv1","pv2"]
+        field   :  ["scat1","scat2","scat3"]
     },
     xAxis : {
-        field : ["xfield1" , "xfield2"],
+        field : ["基本型需求" , "兴奋型需求","期望型需求"],
         disY: 6,
         dis : 6,
         line:{
@@ -59,9 +64,9 @@ var options = {
             strokeStyle   : '#cccccc'
         }
     },
-    zAxis : {
-        field : ["pv1"]
-    },
+    //zAxis : {
+    //    field : ["pv1"]
+    //},
     tips : {
         content:function(e){
         //e.eventInfo.zAxis={field,org,val}

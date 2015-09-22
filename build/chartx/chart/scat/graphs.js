@@ -165,7 +165,7 @@ define(
                         var circleNode = this._getCircleNode(ii , i , d.value);
 
                         var fillStyle  = this.getCircleFillStyle( i , ii , d.value , circleNode );
-                        if( d.value == null || d.value == undefined || d.value == "" ){
+                        if( d.value == null || d.value == undefined || d.value === "" ){
                             continue;
                         }
                         var circle = new Circle({
