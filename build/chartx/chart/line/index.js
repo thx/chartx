@@ -219,6 +219,7 @@ define(
                 enabled     : 1,
                 strokeStyle : this.colors[ this._groupInd ],
                 lineWidth   : 2,
+                lineType    : "solid",
                 smooth      : true
             };
 
@@ -420,6 +421,7 @@ define(
                         lineWidth   : self.line.lineWidth,
                         y           : self.y,
                         smooth      : self.line.smooth,
+                        lineType    : self._getProp( self.line.lineType ),
                         //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
                         smoothFilter    : function( rp ){
                             if( rp[1] > 0 ) {
