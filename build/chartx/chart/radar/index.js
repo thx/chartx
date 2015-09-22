@@ -38,6 +38,9 @@ define(
                 var r   = this.r;
                 var spt = this.sprite;
                 var ys  = this.yDataSection;
+                if( ys.length == 1 && ys[0]==0 ){
+                    ys.push(1)
+                }
                 var yMin = _.min(ys);
                 var yMax = _.max(ys);
                 for( var i=0 , l = ys.length ; i < l ; i++ ) {
@@ -210,6 +213,7 @@ define(
                 spc.y   = y;
             },
             _widget : function(){
+                
                 if( this.data.length == 0 ){
                     return;
                 }
@@ -238,7 +242,11 @@ define(
                     this._circlesSp.push(circles);
     
                     for (var ii = 0, end = n ; ii < end; ii ++) {
-                        var r  = this.r * ( this.data[i][ii] / mxYDataSection );
+                        var val = this.data[i][ii];
+                        if( val == null || val == undefined ){
+                            continue;
+                        };
+                        var r  = this.r * ( val / mxYDataSection );
                         var px = x + r * Math.cos(deg);
                         var py = y + r * Math.sin(deg);
                         pointList.push([ px , py ]);
@@ -249,13 +257,18 @@ define(
                                 x : px,
                                 y : py,
                                 r : 5,
-                                fillStyle   : this.getFillStyle(i , ii , this.data[i][ii]), //this._colors[i],
+                                fillStyle   : this.getFillStyle(i , ii , val), //this._colors[i],
                                 strokeStyle : "#ffffff",
                                 lineWidth   : 2
                             }
                         }));
-                    }
+                    };
                     deg = beginDeg;
+
+                    if( circles.children.length == 0 ){
+                        circles.destroy();
+                        continue;
+                    };
     
                     var polygonBg = new Polygon({
                         id : "radar_bg_"+i,
@@ -288,7 +301,6 @@ define(
                         this.bg.context.globalAlpha -= 0.3 
 
                     });
-
                     
                     polygonBorder.on("click" , function(e){    
                         e.groupInd = this.groupInd
@@ -514,10 +526,11 @@ define(
                     me._graphs.angMove( e , me._getCurrAng(e) );
                 });
                 this.stage.on("mouseout",function(e){
+                    
                     //找到最外围的那个
                     var lastIsogon = me._back.sprite.getChildById("isogon_" + (me._yAxis.dataSection.length-1));
                     var origPoint  = me._getPointBack(e);
-                    if( !HitTestPoint.isInside( lastIsogon , origPoint )){
+                    if( !lastIsogon || !HitTestPoint.isInside( lastIsogon , origPoint )){
                         me._graphs.angOut( );
                     }
                 });
@@ -579,8 +592,8 @@ define(
                     r    : r,
                     yDataSection : this._yAxis.dataSection,
                     xDataSection : this._xAxis.dataSection
-                }
-    
+                };
+                
                 //绘制背景网格
                 this._back.draw( backAndGraphsOpt );
             

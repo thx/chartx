@@ -38,6 +38,9 @@ define(
                 var r   = this.r;
                 var spt = this.sprite;
                 var ys  = this.yDataSection;
+                if( ys.length == 1 && ys[0]==0 ){
+                    ys.push(1)
+                }
                 var yMin = _.min(ys);
                 var yMax = _.max(ys);
                 for( var i=0 , l = ys.length ; i < l ; i++ ) {

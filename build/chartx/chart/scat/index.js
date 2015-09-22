@@ -271,6 +271,10 @@ define(
                                     textBaseline : "bottom"
                                 }
                             });
+                            if( circle.context.r * 2 > label.getTextWidth() ){
+                                label.context.y = d.y;
+                                label.context.textBaseline = "middle"
+                            }
                             sprite.addChild( label );
                         }
                     }
