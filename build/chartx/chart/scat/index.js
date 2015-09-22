@@ -208,8 +208,10 @@ define(
                         var r = this.getR(d) || (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circleNode = this._getCircleNode(ii , i , d.value);
 
-                        var fillStyle  = this.getCircleFillStyle( i , ii , d.value , circleNode )
-
+                        var fillStyle  = this.getCircleFillStyle( i , ii , d.value , circleNode );
+                        if( d.value == null && d.value == undefined && d.value == "" ){
+                            continue;
+                        }
                         var circle = new Circle({
                             hoverClone : false,
                             context : {
@@ -269,6 +271,10 @@ define(
                                     textBaseline : "bottom"
                                 }
                             });
+                            if( circle.context.r * 2 > label.getTextWidth() ){
+                                label.context.y = d.y;
+                                label.context.textBaseline = "middle"
+                            }
                             sprite.addChild( label );
                         }
                     }

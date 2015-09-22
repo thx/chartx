@@ -73,10 +73,11 @@ define(
                     me._graphs.angMove( e , me._getCurrAng(e) );
                 });
                 this.stage.on("mouseout",function(e){
+                    
                     //找到最外围的那个
                     var lastIsogon = me._back.sprite.getChildById("isogon_" + (me._yAxis.dataSection.length-1));
                     var origPoint  = me._getPointBack(e);
-                    if( !HitTestPoint.isInside( lastIsogon , origPoint )){
+                    if( !lastIsogon || !HitTestPoint.isInside( lastIsogon , origPoint )){
                         me._graphs.angOut( );
                     }
                 });
@@ -138,8 +139,8 @@ define(
                     r    : r,
                     yDataSection : this._yAxis.dataSection,
                     xDataSection : this._xAxis.dataSection
-                }
-    
+                };
+                
                 //绘制背景网格
                 this._back.draw( backAndGraphsOpt );
             
