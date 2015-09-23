@@ -24,9 +24,56 @@ define(
             _tip: null,
 
             init: function(node, data, opts) {
-                this._opts = opts;
-                _.deepExtend(this, opts);
+                if( opts.proportion ){
+                    this.proportion = opts.proportion;
+                    this._initProportion( node , data , opts );
+                } else {
+                    this._opts = opts;
+                    _.deepExtend(this, opts);
+                };
                 this.dataFrame = this._initData(data);
+            },
+            //如果为比例柱状图的话
+            _initProportion : function(node , data , opts){
+                this._opts = opts;
+                !opts.tips && ( opts.tips = {} );
+                opts.tips = _.deepExtend( opts.tips , {
+                    content : function( info ){
+                        var str  = "<table>";
+                        var self = this;
+                        _.each( info.nodesInfoList , function( node , i ){
+                            str+= "<tr style='color:"+ self.text.fillStyle +"'>";
+                            var prefixName = self.prefix[i];
+                            if( prefixName ) {
+                                str+="<td>"+ prefixName +"：</td>";
+                            } else {
+                                if( node.field ){
+                                    str+="<td>"+ node.field +"：</td>";
+                                }
+                            };
+                            str += "<td>"+ Tools.numAddSymbol(node.value) +"（"+ Math.round(node.value/node.vCount*100) +"%）</td></tr>";
+                        });
+                        str+="</table>";
+                        return str;
+                    }
+                } );
+
+                _.deepExtend( this , opts );
+                _.deepExtend( this.yAxis , {
+                    dataSection : [0,20,40,60,80,100],
+                    text : {
+                        format : function( n ){
+                            return n+"%"
+                        }
+                    }
+                } );
+                
+                !this.graphs && (this.graphs = {});
+                _.deepExtend( this.graphs , {
+                    bar : {
+                        radius : 0
+                    }
+                } );
             },
             _setStages: function() {
                 this.core = new Canvax.Display.Sprite({
@@ -169,8 +216,10 @@ define(
                 this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
-                var tmpData = [];
-                var center  = [], yValueMaxs = [], yLen = []
+                var tmpData  = [];
+                var center   = [], yValueMaxs = [], yLen = [];
+
+                var me       = this;
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0
@@ -180,17 +229,41 @@ define(
                         _.each(subv, function(val, i) {
                             if (!xArr[i]) {
                                 return;
-                            }
+                            };
+
+                            var vCount = 0;
+                            if( me.proportion ){
+                                //先计算总量
+                                _.each( yArr[b] , function( team , ti ){
+                                    vCount += team[i]
+                                } );
+                            };
+
                             var x = xArr[i].x - xDis1 / 2 + xDis2 * (b + 1);
-                            var y = -(val - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                            
+                            var y = 0;
+                            if( me.proportion ){
+                                y = -val/vCount * _yAxis.yGraphsHeight;
+                            } else {
+                                y = -(val - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                            };
+
                             if (v > 0) {
                                 y += tmpData[b][v - 1][i].y
                             };
-                            tmpData[b][v].push({
+
+                            var node = {
                                 value: val,
                                 x: x,
                                 y: y
-                            });
+                            };
+
+                            if( me.proportion ){
+                                node.vCount = vCount;
+                            };
+
+                            tmpData[b][v].push( node );
+
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
                         });

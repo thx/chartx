@@ -6,8 +6,17 @@ define(
     function( Bar ){
         return Bar.extend( {
             init:function(node , data , opts){
-                this._opts = opts;
-                _.deepExtend( this , opts );
+                //this._opts = opts;
+                //_.deepExtend( this , opts );
+
+                if( opts.proportion ){
+                    this.proportion = opts.proportion;
+                    this._initProportion( node , data , opts );
+                } else {
+                    this._opts = opts;
+                    _.deepExtend(this, opts);
+                };
+
                 _.deepExtend( this , {
                     xAxis : {
                         text : {
