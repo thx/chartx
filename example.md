@@ -341,7 +341,21 @@ title:  Chartx demos
         </dt>
         <dd>
             <h5>
-                等比折线图，比例图
+                比例柱状图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    </a>
+    <a target="_blank" href="./demo/bar/proportion_h.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/proportion_h.png">
+        </dt>
+        <dd>
+            <h5>
+                横向的比例柱状图
             </h5>
         </dd>
     </dl>
