@@ -333,6 +333,20 @@ title:  Chartx demos
     </dl>
     </a>
 
+    </a>
+    <a target="_blank" href="./demo/bar/proportion.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/proportion.png">
+        </dt>
+        <dd>
+            <h5>
+                等比折线图，比例图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
 </div>
 
 
