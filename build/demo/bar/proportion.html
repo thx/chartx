@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- scat</title>
+<title>xChart demo -- bar</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -24,58 +24,34 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
+<!--<script type="text/javascript" src="../bar_h/index.js"></script>-->
 </head>
 <body >
- 
+
 <table>
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-var data = [
-    ["xfield1","xfield2" ,"pv1" ,"pv2"  ],
-    [ 26      , 101      , 201  , 151   ],
-    [ 77      , 0        , 145  , 90    ],
-    [ 84      , 488      , 88   , 200   ],
-    [ 134     , 290      , 346  , 350   ],
-    [ 325     , 90       , 188  , 400   ],
-    [ 61      , 300      , 546  , 280   ],
-    [ 17      , 201      , 101  , 500   ],
-    [ 228     , 145      , 145  , 100   ],
-    [ 199     , 388      , 288  , 530   ],
-    [ 100     , 390      , 225  , 330   ] 
-];
-var data = [
-                        ["基本型需求","兴奋型需求","期望型需求","scat1","scat2","scat3","tagname1","tagname2","tagname3"],
-                        [0.9266,0,0.8127,0   ,2.3522,2.0531,"保质期","控油效果","与描述"]
+var data= [
+    ["xfield" ,"uv" ,"pv","click"],
+    ["星期一" , 101 , 20 , 33    ],
+    ["星期二" , 67  , 51 , 26    ],
+    ["星期三" , 97  , 21 , 126   ]
 
-                    ]
+];
 var options = {
+    type : "proportion",
     yAxis : {
-        field   :  ["scat1","scat2","scat3"]
+        field : [["uv","pv"]]
     },
     xAxis : {
-        field : ["基本型需求" , "兴奋型需求","期望型需求"],
-        disY: 6,
-        dis : 6,
-        line:{
-            width   : 2,
-            height  : 4,
-            strokeStyle   : '#cccccc'
-        }
-    },
-    //zAxis : {
-    //    field : ["pv1"]
-    //},
-    tips : {
-        content:function(e){
-        //e.eventInfo.zAxis={field,org,val}
-        }
+        field : ["xfield"]
     }
-};
-Chartx.scat("canvasTest" , data , options);
+}  
 
-</textarea></form>
+Chartx.bar("canvasTest" , data , options);  
+    
+            </textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -83,14 +59,15 @@ Chartx.scat("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>饼图（scat chart）- 基础散点图</h4>
+                <h4>柱状图- 横向柱状图</h4>
                 <p>
-                    联系人：@释剑
+                    联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
+
 
             </div>
         </td>
@@ -100,6 +77,4 @@ Chartx.scat("canvasTest" , data , options);
     
 </body> 
 </html>
-
-
 

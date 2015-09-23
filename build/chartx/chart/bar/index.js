@@ -573,7 +573,6 @@ define(
                 }
                 //均值
                 this.dataFrame.yAxis.center = center
-                console.log(this.dataFrame.yAxis.center)
                 return {
                     data: tmpData
                 };
