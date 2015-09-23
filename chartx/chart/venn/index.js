@@ -32,7 +32,7 @@ define(
                 };
 
                 _.deepExtend( this , opts );
-                this.data = this._initData(data);
+                this.data = this._initData(_.clone(data));
             },
             _initData : function( arr ){
                 var data = [];
