@@ -26,7 +26,8 @@ define(
                 maxR    : 20,  //圆圈默认最大半径
                 minR    : 3,
                 r       : null,
-                normalR : 10
+                normalR : 10,
+                fillStyle: function(){}
             };
     
             this._colors  = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];

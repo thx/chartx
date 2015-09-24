@@ -474,6 +474,7 @@
                         var point = data[currentIndex];
                         if (self.dataLabel.format) {
                             labelTxt = self.dataLabel.format.replace(formatReg, function (match, index) {
+                                debugger
                                 var matchStr = match.replace(/\{([\s\S]+?)\}/g, '$1');
                                 var vals = matchStr.split('.');
                                 var obj = eval(vals[0]);
