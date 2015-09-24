@@ -75,7 +75,7 @@ define(
                             var maxIndex = 0;
                             var maxPercentageOffsetIndex = 0;
                             var totalFixedPercent = 0;
-                            for (var j = 0; j < data.length; j++) {                                
+                            for (var j = 0; j < data.length; j++) {
                                 var percentage = data[j].y / self.total;
                                 var fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
                                 var percentageOffset = Math.abs(percentage * 100 - fixedPercentage);
@@ -137,7 +137,7 @@ define(
 
                                 self.currentAngle += angle;
                                 if (self.currentAngle > 360) self.currentAngle = 360;
-                            }                            
+                            }
                             data[maxIndex].isMax = true;
                             //处理保留小数后百分比总和不等于100的情况
                             var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
@@ -225,7 +225,7 @@ define(
                     self.setX(self.x);
                     self.setY(self.y);
                     self._widget();
-                    //this.sprite.context.globalAlpha = 0;      
+                    //this.sprite.context.globalAlpha = 0;
                     if (opt.animation) {
                         self.grow();
                     }
@@ -415,7 +415,7 @@ define(
                 _widgetLabel: function (quadrant, indexs, lmin, rmin) {
                     var self = this;
                     var data = self.data.data;
-                    debugger
+
                     var sectorMap = self.sectorMap;
                     var minTxtDis = 20;
                     var labelOffsetX = 5;
@@ -430,7 +430,7 @@ define(
 
                     for (i = 0; i < indexs.length; i++) {
                         currentIndex = indexs[i];
-                        //若Y值小于最小值，不画label    
+                        //若Y值小于最小值，不画label
                         if (data[currentIndex].y != 0 && data[currentIndex].percentage <= minPercent) continue
                         currentY = data[currentIndex].edgey;
                         adjustX = Math.abs(data[currentIndex].edgex);
@@ -485,7 +485,8 @@ define(
                         }
                         else {
                             labelTxt = data[currentIndex].name + ' : ' + data[currentIndex].txt;
-                        }
+                        };
+
                         branchTxt = new Canvax.Display.Text(labelTxt, {
                             context: {
                                 x: data[currentIndex].edgex,
@@ -520,6 +521,8 @@ define(
                         }
                         branchTxt.context.x = bx;
                         branchTxt.context.y = by;
+                        //console.log( labelTxt+"|"+bx )
+
                         self.branchSp.addChild(branchLine);
                         self.branchSp.addChild(brokenline);
                         self.branchTxtSp.addChild(branchTxt);
@@ -642,7 +645,7 @@ define(
                             if (self.colorIndex >= self.colors.length) self.colorIndex = 0;
                             var fillColor = self.getColorByIndex(self.colors, i);
                             if (data[i].end > data[i].start) {
-                                //扇形主体          
+                                //扇形主体
                                 var sector = new Sector({
                                     hoverClone: false,
                                     context: {

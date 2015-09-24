@@ -129,7 +129,11 @@ define(
                         var textCentres = computeTextCentres(circles, me.data);
                         var i = 0;
                         for( var c in circles ){
+                            
                             var obj         = circles[c];
+
+                            if( !obj.radius ) continue;
+
                             var fillStyle   = Color.colorRgb( me._getColor( me.circle.fillStyle , i , c ) );
                             var strokeStyle = me._getColor( me.circle.strokeStyle , i , c ) ;
                             var circle = new Circle({
@@ -171,7 +175,7 @@ define(
                         };
                         i = 0;
                         for( var t in textCentres ){
-                            if( t.indexOf(",") < 0 ){
+                            if( t.indexOf(",") < 0 && !isNaN(textCentres[t].x) ){
                                 var txtObj  = textCentres[t];
                                 var content = me.getLabel(t) || t;
                                 
