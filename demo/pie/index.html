@@ -43,6 +43,7 @@ var data= [
     ["其他1"  , 33     ],
     ["其他1"  , 60     ]
 ];
+var data =  [["node","value"],["android",8452053],["iphone",5824898],["未知",3934421]];
 var options = {
     xAxis : {
         field : "node"
@@ -59,7 +60,7 @@ var options = {
     //周边tip
     dataLabel: {
         enabled: true,
-        format: '{point.name} : {point.y}'
+        format: '{point.name} : {point.percentage}%'
     },
     
     //是否允许扇形选取

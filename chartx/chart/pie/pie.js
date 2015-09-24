@@ -133,7 +133,7 @@
                                     labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
                                     index: j,
                                     isMax: false
-                                })
+                                });
 
                                 self.currentAngle += angle;
                                 if (self.currentAngle > 360) self.currentAngle = 360;
