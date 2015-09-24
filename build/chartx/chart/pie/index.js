@@ -143,6 +143,7 @@ define(
                             var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
                             if (totalPercentOffset != 0) {
                                 data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
+                                data[maxPercentageOffsetIndex].percentage = data[maxPercentageOffsetIndex].percentage.toFixed(2)
                             }
                         }
                     }
@@ -414,6 +415,7 @@ define(
                 _widgetLabel: function (quadrant, indexs, lmin, rmin) {
                     var self = this;
                     var data = self.data.data;
+                    debugger
                     var sectorMap = self.sectorMap;
                     var minTxtDis = 20;
                     var labelOffsetX = 5;
@@ -474,7 +476,6 @@ define(
                         var point = data[currentIndex];
                         if (self.dataLabel.format) {
                             labelTxt = self.dataLabel.format.replace(formatReg, function (match, index) {
-                                debugger
                                 var matchStr = match.replace(/\{([\s\S]+?)\}/g, '$1');
                                 var vals = matchStr.split('.');
                                 var obj = eval(vals[0]);
