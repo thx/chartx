@@ -20,8 +20,8 @@ define(
             this._colors = ["#42a8d7", '#666666', "#6f8cb2", "#c77029", "#f15f60", "#ecb44f", "#ae833a", "#896149", "#4d7fff"];
 
             this.bar = {
-                width: 22,
-                radius: 4
+                width  : 22,
+                radius : 4
             }
             this.text = {
                 enabled: 0,
@@ -74,10 +74,10 @@ define(
                 }
                 if (_.isFunction(c)) {
                     style = c({
-                        iGroup: i,
-                        iNode: h,
-                        iLay: v,
-                        value: value
+                        iGroup : i,
+                        iNode  : h,
+                        iLay   : v,
+                        value  : value
                     });
                 }
                 if (!style || style == "") {
@@ -127,15 +127,15 @@ define(
                             //横向的分组区片感应区
                             var itemW = me.w / hLen;
                             var hoverRect = new Rect({
-                                id: "bhr_" + h,
+                                id      : "bhr_" + h,
                                 pointChkPriority: false,
-                                context: {
-                                    x: itemW * h,
-                                    y: -me.h,
-                                    width: itemW,
-                                    height: me.h,
-                                    fillStyle: "#ccc",
-                                    globalAlpha: 0
+                                context : {
+                                    x           : itemW * h,
+                                    y           : -me.h,
+                                    width       : itemW,
+                                    height      : me.h,
+                                    fillStyle   : "#ccc",
+                                    globalAlpha : 0
                                 }
                             });
                             groupH.addChild(hoverRect);
@@ -162,7 +162,7 @@ define(
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
                             }
                             var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value);
-                            var rectCxt = {
+                            var rectCxt   = {
                                 x: Math.round(rectData.x - me.bar.width / 2),
                                 y: parseInt(rectData.y),
                                 width: parseInt(me.bar.width),
@@ -170,8 +170,8 @@ define(
                                 fillStyle: fillStyle
                             };
                             if (!!me.bar.radius && v == vLen - 1) {
-                                var radiusR = Math.min(me.bar.width / 2, rectH);
-                                radiusR = Math.min(radiusR, me.bar.radius);
+                                var radiusR    = Math.min(me.bar.width / 2, rectH);
+                                radiusR        = Math.min(radiusR, me.bar.radius);
                                 rectCxt.radius = [radiusR, radiusR, 0, 0];
                             };
                             var rectEl = new Rect({
@@ -211,8 +211,8 @@ define(
                                 txt.context.y = rectCxt.y - txt.getTextHeight();
                                 if (txt.context.y + me.h < 0) {
                                     txt.context.y = -me.h;
-                                }
-                                me.txtsSp.addChild(txt)
+                                };
+                                me.txtsSp.addChild( txt )
                             }
                         };
                     }
@@ -251,8 +251,8 @@ define(
                 function animate() {
                     timer = requestAnimationFrame(animate);
                     Tween.update();
-
                 };
+
                 growAnima();
             },
             _growEnd: function() {
@@ -289,11 +289,10 @@ define(
                             }
                         }
                     }
-                })
+                });
                 return arr;
             }
         };
-
         return Graphs;
     }
 )

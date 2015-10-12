@@ -24,9 +24,9 @@ define(
             _tip: null,
 
             init: function(node, data, opts) {
-                if( opts.proportion ){
+                if (opts.proportion) {
                     this.proportion = opts.proportion;
-                    this._initProportion( node , data , opts );
+                    this._initProportion(node, data, opts);
                 } else {
                     this._opts = opts;
                     _.deepExtend(this, opts);
@@ -34,46 +34,46 @@ define(
                 this.dataFrame = this._initData(data);
             },
             //如果为比例柱状图的话
-            _initProportion : function(node , data , opts){
+            _initProportion: function(node, data, opts) {
                 this._opts = opts;
-                !opts.tips && ( opts.tips = {} );
-                opts.tips = _.deepExtend( opts.tips , {
-                    content : function( info ){
-                        var str  = "<table>";
+                !opts.tips && (opts.tips = {});
+                opts.tips = _.deepExtend(opts.tips, {
+                    content: function(info) {
+                        var str = "<table>";
                         var self = this;
-                        _.each( info.nodesInfoList , function( node , i ){
-                            str+= "<tr style='color:"+ self.text.fillStyle +"'>";
+                        _.each(info.nodesInfoList, function(node, i) {
+                            str += "<tr style='color:" + self.text.fillStyle + "'>";
                             var prefixName = self.prefix[i];
-                            if( prefixName ) {
-                                str+="<td>"+ prefixName +"：</td>";
+                            if (prefixName) {
+                                str += "<td>" + prefixName + "：</td>";
                             } else {
-                                if( node.field ){
-                                    str+="<td>"+ node.field +"：</td>";
+                                if (node.field) {
+                                    str += "<td>" + node.field + "：</td>";
                                 }
                             };
-                            str += "<td>"+ Tools.numAddSymbol(node.value) +"（"+ Math.round(node.value/node.vCount*100) +"%）</td></tr>";
+                            str += "<td>" + Tools.numAddSymbol(node.value) + "（" + Math.round(node.value / node.vCount * 100) + "%）</td></tr>";
                         });
-                        str+="</table>";
+                        str += "</table>";
                         return str;
                     }
-                } );
+                });
 
-                _.deepExtend( this , opts );
-                _.deepExtend( this.yAxis , {
-                    dataSection : [0,20,40,60,80,100],
-                    text : {
-                        format : function( n ){
-                            return n+"%"
+                _.deepExtend(this, opts);
+                _.deepExtend(this.yAxis, {
+                    dataSection: [0, 20, 40, 60, 80, 100],
+                    text: {
+                        format: function(n) {
+                            return n + "%"
                         }
                     }
-                } );
-                
+                });
+
                 !this.graphs && (this.graphs = {});
-                _.deepExtend( this.graphs , {
-                    bar : {
-                        radius : 0
+                _.deepExtend(this.graphs, {
+                    bar: {
+                        radius: 0
                     }
-                } );
+                });
             },
             _setStages: function() {
                 this.core = new Canvax.Display.Sprite({
@@ -131,6 +131,7 @@ define(
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
                 var y = parseInt(h - this._xAxis.h);
+                var graphsH = y - this.padding.top;
 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -138,7 +139,7 @@ define(
                         x: 0,
                         y: y
                     },
-                    yMaxHeight: y
+                    yMaxHeight :graphsH 
                 });
 
                 var _yAxisW = this._yAxis.w;
@@ -173,7 +174,7 @@ define(
                 });
 
                 var o = this._trimGraphs()
-                //绘制主图形区域
+                    //绘制主图形区域
                 this._graphs.draw(o.data, {
                     w: this._xAxis.xGraphsWidth,
                     h: this._yAxis.yGraphsHeight,
@@ -216,14 +217,16 @@ define(
                 this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
-                var tmpData  = [];
-                var center   = [], yValueMaxs = [], yLen = [];
+                var tmpData = [];
+                var center = [],
+                    yValueMaxs = [],
+                    yLen = [];
 
-                var me       = this;
+                var me = this;
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
-                    yValueMaxs[b] = 0
-                    center[b] = {}
+                    yValueMaxs[b] = 0;
+                    center[b] = {};
                     _.each(yArr[b], function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
                         _.each(subv, function(val, i) {
@@ -232,18 +235,18 @@ define(
                             };
 
                             var vCount = 0;
-                            if( me.proportion ){
+                            if (me.proportion) {
                                 //先计算总量
-                                _.each( yArr[b] , function( team , ti ){
+                                _.each(yArr[b], function(team, ti) {
                                     vCount += team[i]
-                                } );
+                                });
                             };
 
                             var x = xArr[i].x - xDis1 / 2 + xDis2 * (b + 1);
-                            
+
                             var y = 0;
-                            if( me.proportion ){
-                                y = -val/vCount * _yAxis.yGraphsHeight;
+                            if (me.proportion) {
+                                y = -val / vCount * _yAxis.yGraphsHeight;
                             } else {
                                 y = -(val - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
                             };
@@ -253,16 +256,17 @@ define(
                             };
 
                             var node = {
-                                value: val,
-                                x: x,
-                                y: y
+                                value : val,
+                                field : me._getTargetField( _yAxis.field , b , v , i ),
+                                x     : x,
+                                y     : y
                             };
 
-                            if( me.proportion ){
+                            if (me.proportion) {
                                 node.vCount = vCount;
                             };
 
-                            tmpData[b][v].push( node );
+                            tmpData[b][v].push(node);
 
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
@@ -280,6 +284,18 @@ define(
                     data: tmpData
                 };
             },
+            _getTargetField : function( field , b , v , i ){
+                if( _.isString( field ) ){
+                    return field;
+                } else if( _.isArray(field) ){
+                    var res = field[b];
+                    if( _.isString( res ) ){
+                        return res;
+                    } else if (_.isArray(res)) {
+                        return res[ v ];
+                    };
+                }
+            },
             _drawEnd: function() {
                 var me = this
                 this.stageBg.addChild(this._back.sprite)
@@ -292,8 +308,11 @@ define(
 
                 //执行生长动画
                 this._graphs.grow(function(g) {
-                    if ("markLine" in me._opts) {
+                    if (me._opts.markLine) {
                         me._initMarkLine(g);
+                    }
+                    if (me._opts.markPoint) {
+                        me._initMarkPoint(g);
                     }
                 });
 
@@ -303,17 +322,17 @@ define(
                 var me = this
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     for (var a = 0, al = me._yAxis.dataOrg.length; a < al; a++) {
-                        var index  = a
+                        var index = a
                         var center = me.dataFrame.yAxis.center[a].agPosition
                         var strokeStyle = g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
-                        
+
                         var content = me.dataFrame.yAxis.field[a] + '均值'
-                        if(me.markLine.text && me.markLine.text.enabled){
-                            
-                            if(_.isFunction(me.markLine.text.format)){
+                        if (me.markLine.text && me.markLine.text.enabled) {
+
+                            if (_.isFunction(me.markLine.text.format)) {
                                 var o = {
-                                    iGroup : index,
-                                    value  : me.dataFrame.yAxis.center[index].agValue
+                                    iGroup: index,
+                                    value: me.dataFrame.yAxis.center[index].agValue
                                 }
                                 content = me.markLine.text.format(o)
                             }
@@ -325,7 +344,7 @@ define(
                                 x: me._back.pos.x,
                                 y: me._back.pos.y
                             },
-                            field : _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
+                            field: _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
                             line: {
                                 y: center,
                                 list: [
@@ -335,7 +354,7 @@ define(
                                 strokeStyle: strokeStyle
                             },
                             text: {
-                                content  : content,
+                                content: content,
                                 fillStyle: strokeStyle
                             },
                         }
@@ -346,6 +365,69 @@ define(
                     }
                 })
 
+            },
+            _initMarkPoint: function(g) {
+                var me = this;
+                var gOrigin = {
+                    x: g.sprite.context.x,
+                    y: g.sprite.context.y
+                };
+
+                require(["chartx/components/markpoint/index"], function(MarkPoint) {
+                    _.each(g.data, function(group, i) {
+                        var vLen = group.length;
+
+                        _.each(group, function(hgroup) {
+                            _.each(hgroup, function(bar) {
+                                var barObj = _.clone(bar);
+                                barObj.x += gOrigin.x;
+                                barObj.y += gOrigin.y;
+                                var mpCtx = {
+                                    value: barObj.value,
+                                    shapeType : "droplet",
+                                    markTarget: barObj.field,
+                                    point: {
+                                        x: barObj.x,
+                                        y: barObj.y
+                                    }
+                                };
+                                new MarkPoint(me._opts, mpCtx).done(function() {
+                                    me.core.addChild(this.sprite);
+                                    this.shape.hover(function() {
+                                        this.context.hr++;
+                                    }, function() {
+                                        this.context.hr--;
+                                    })
+                                });
+                            });
+                        });
+
+                        
+
+                        return
+                        var circle = g._circles.children[i];
+                        var mpCtx = {
+                            value: node.value,
+                            markTarget: g.field,
+                            point: circle.localToGlobal(),
+                            r: circle.context.r + 2,
+                            groupLen: g.data.length,
+                            ind: i
+                        };
+                        if (me._opts.markPoint && me._opts.markPoint.shapeType == "droplet") {
+                            mpCtx.point.y -= circle.context.r + 3
+                        };
+                        new MarkPoint(me._opts, mpCtx).done(function() {
+                            me.core.addChild(this.sprite);
+                            this.shape.hover(function() {
+                                this.context.hr++;
+                            }, function() {
+                                this.context.hr--;
+                            })
+                        });
+                    });
+
+                });
             },
             bindEvent: function() {
                 var me = this;
