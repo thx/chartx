@@ -12,7 +12,7 @@ define(
                 x : 0 , y : 0
             };
             this.normalColor = "#6B95CF";
-            this.shapeType   = "circle";
+            this.shapeType   = "droplet";//"circle";
             this.fillStyle   = null;
             this.strokeStyle = null;
             this.lineWidth   = 1;

@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
-<script type="text/javascript" src="../../lib/sea.js"></script>
+<title>xChart demo -- bar</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -34,39 +34,23 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , null, 20 , 33    ],
-    [ 2      , null, 51 , 26    ],
-    [ 3      , 22  , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 17 , 71    ],
-    [ 6      , 38  , null , 39  ],
-    [ 7      , 55  , null , 65  ],
-    [ 8      , null, null , 51  ]
+    ["xfield","uv"   , "pv" ,"click"],
+    [ 1      , 501   , 220  , 1133  ],
+    [ 2      , 627   , 651  , 1026  ],
+    [ 3      , 1020  , 1500 , 500   ]
 ];
-
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
-        //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["uv" , "pv" ]
+        field : ["uv","pv"]
     },
     xAxis : {
-        field : "xfield"
+        field : ["xfield"]
     },
     markPoint : {
-        enabled : true,
-        realTime: true,
-        shapeType:"circle",
-        filter  : function(  ){
-            if(this.markTarget != "uv" && this.ind !== this.groupLen-1){
-                this.destroy();
-            }
-        }
+    
     }
-};
-//Chartx.line开始初始化chart实例
-var chartx = Chartx.line("canvasTest" , data , options);
+}   
+Chartx.bar("canvasTest" , data , options);
 </textarea></form>
 
         </td>
@@ -75,7 +59,7 @@ var chartx = Chartx.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>柱状图 - 基础柱状图</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>

@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
-<script type="text/javascript" src="../../lib/sea.js"></script>
+<title>xChart demo -- bar</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -35,38 +35,40 @@
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , null, 20 , 33    ],
-    [ 2      , null, 51 , 26    ],
-    [ 3      , 22  , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 17 , 71    ],
-    [ 6      , 38  , null , 39  ],
-    [ 7      , 55  , null , 65  ],
-    [ 8      , null, null , 51  ]
-];
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 31  , 30 , 53    ],
+    [ 3      , 52  , 25 , 13    ],
+    [ 4      , 234 , 100, 133   ],
+    [ 5      , 11  , 89 , 55    ],
+    [ 6      , 89  , 52 , 88    ],
+    [ 7      , 19  , 29 , 36    ],
+    [ 8      , 101 , 20 , 77    ],
+    [ 9      , 67  , 51 , 26    ]
 
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+];
 var options = {
+    type : "bar_line",
     yAxis : {
-        //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["uv" , "pv" ]
+        bar  : {
+            field : ["uv","pv"]
+        },
+        line : {
+            field : ["click"]
+        }
     },
     xAxis : {
-        field : "xfield"
+        field : ["xfield"]
+    },
+    graphs : {
+        line : {
+            strokeStyle : "#D28D54"
+        }
     },
     markPoint : {
-        enabled : true,
-        realTime: true,
-        shapeType:"circle",
-        filter  : function(  ){
-            if(this.markTarget != "uv" && this.ind !== this.groupLen-1){
-                this.destroy();
-            }
-        }
+
     }
-};
-//Chartx.line开始初始化chart实例
-var chartx = Chartx.line("canvasTest" , data , options);
+}   
+Chartx.hybrid("canvasTest" , data , options);
 </textarea></form>
 
         </td>
@@ -75,9 +77,9 @@ var chartx = Chartx.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>混合图 - 柱折混合图 </h4>
                 <p>
-                    联系人：@逢春 @释剑
+                    联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
