@@ -1021,10 +1021,10 @@ define(
                 }
             },
             _initPlugs: function(opts, g) {
-                if ( opts.markLine ) {
+                if (opts.markLine) {
                     this._initMarkLine(g);
                 };
-                if ( opts.markPoint ) {
+                if (opts.markPoint) {
                     this._initMarkPoint(g);
                 };
             },
@@ -1034,41 +1034,53 @@ define(
                     _.each(g.data, function(node, i) {
                         var circle = g._circles.children[i];
                         var mpCtx = {
-                            value      : node.value, 
-                            markTarget : g.field,
-                            point      : circle.localToGlobal(),
-                            r          : circle.context.r + 2,
-                            groupLen   : g.data.length,
-                            ind        : i
+                            value: node.value,
+                            markTarget: g.field,
+                            point: circle.localToGlobal(),
+                            r: circle.context.r + 2,
+                            groupLen: g.data.length,
+                            ind: i
                         };
-                        if( me._opts.markPoint &&  me._opts.markPoint.shapeType == "droplet" ){
-                            mpCtx.point.y -= circle.context.r+3
+                        if (me._opts.markPoint && me._opts.markPoint.shapeType != "circle") {
+                            mpCtx.point.y -= circle.context.r + 3
                         };
                         new MarkPoint(me._opts, mpCtx).done(function() {
-                            me.core.addChild( this.sprite );
-                            this.shape.hover(function(){
-                                this.context.hr ++;
-                            } , function(){
-                                this.context.hr --;
-                            })
+                            me.core.addChild(this.sprite);
+                            var mp = this;
+                            this.shape.hover(function(e) {
+                                this.context.hr++;
+                                this.context.cursor = "pointer";
+                                e.stopPropagation();
+                            }, function(e) {
+                                this.context.hr--;
+                                e.stopPropagation();
+                            });
+                            this.shape.on("mousemove", function(e) {
+                                e.stopPropagation();
+                            });
+                            this.shape.on("tap click", function(e) {
+                                e.stopPropagation();
+                                e.eventInfo = mp;
+                                me.fire("markpointclick", e);
+                            });
                         });
                     });
 
-/*
-                    var lastNode = g._circles.children[g._circles.children.length - 1];
-                    debugger
-                    var mpCtx = {
-                        markTarget: g.field,
-                        point: lastNode.localToGlobal(),
-                        r: lastNode.context.r + 1,
-                        globalAlpha: 0.8,
-                        realTime: true
-                    };
-                    new MarkPoint(me._opts, mpCtx).done(function() {
-                        //this.shape.context.visible = false;
-                        me.core.addChild(this.sprite);
-                    });
-*/
+                    /*
+                                        var lastNode = g._circles.children[g._circles.children.length - 1];
+                                        debugger
+                                        var mpCtx = {
+                                            markTarget: g.field,
+                                            point: lastNode.localToGlobal(),
+                                            r: lastNode.context.r + 1,
+                                            globalAlpha: 0.8,
+                                            realTime: true
+                                        };
+                                        new MarkPoint(me._opts, mpCtx).done(function() {
+                                            //this.shape.context.visible = false;
+                                            me.core.addChild(this.sprite);
+                                        });
+                    */
                 });
             },
             _initMarkLine: function(g) {

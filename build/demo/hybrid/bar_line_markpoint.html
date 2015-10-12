@@ -68,7 +68,11 @@ var options = {
 
     }
 }   
-Chartx.hybrid("canvasTest" , data , options);
+Chartx.hybrid("canvasTest" , data , options).then(function(chart){
+    chart.on("markpointclick" , function( e ){
+        debugger;
+    });
+});
 </textarea></form>
 
         </td>

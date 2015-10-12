@@ -981,7 +981,7 @@ define(
                         fillStyle   : me._fillStyle,
                         lineWidth   : me.lineWidth,
                         strokeStyle : me._strokeStyle,
-                        globalAhpla : me.globalAhpla,
+                        globalAlpha : me.globalAlpha,
                         cursor  : "point",
                         visible : false
                     };
