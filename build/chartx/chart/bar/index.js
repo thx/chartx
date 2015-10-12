@@ -758,6 +758,10 @@ define(
                                     value: barObj.value,
                                     shapeType : "droplet",
                                     markTarget: barObj.field,
+                                    //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 igroup 给出去的时候要反过来
+                                    iGroup    : barObj.iNode,
+                                    iNode     : barObj.iGroup,
+                                    iLay      : barObj.iLay,
                                     point: {
                                         x: barObj.x,
                                         y: barObj.y

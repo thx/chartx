@@ -849,6 +849,10 @@ define(
             this.sprite = null;
             this.shape  = null;
 
+            this.iGroup = null;
+            this.iNode  = null;
+            this.iLay   = null;
+
             this._doneHandle = null;
             this.done   = function( fn ){
                 this._doneHandle = fn;

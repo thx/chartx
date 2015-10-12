@@ -1033,13 +1033,15 @@ define(
                 require(["chartx/components/markpoint/index"], function(MarkPoint) {
                     _.each(g.data, function(node, i) {
                         var circle = g._circles.children[i];
+
                         var mpCtx = {
                             value: node.value,
                             markTarget: g.field,
                             point: circle.localToGlobal(),
                             r: circle.context.r + 2,
                             groupLen: g.data.length,
-                            ind: i
+                            iNode  : i,
+                            iGroup : g._groupInd
                         };
                         if (me._opts.markPoint && me._opts.markPoint.shapeType != "circle") {
                             mpCtx.point.y -= circle.context.r + 3
