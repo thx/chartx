@@ -260,7 +260,7 @@ define(
 
                             var node = {
                                 value : val,
-                                field : me._getTargetField( _yAxis.field , b , v , i ),
+                                field : me._getTargetField( b , v , i , _yAxis.field ),
                                 x     : x,
                                 y     : y
                             };
@@ -287,7 +287,10 @@ define(
                     data: tmpData
                 };
             },
-            _getTargetField : function( field , b , v , i ){
+            _getTargetField : function( b , v , i , field ){
+                if( !field ){
+                    field = this._yAxis.field;
+                };
                 if( _.isString( field ) ){
                     return field;
                 } else if( _.isArray(field) ){

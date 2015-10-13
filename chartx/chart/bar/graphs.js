@@ -60,7 +60,7 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
-            _getColor: function(c, groups, vLen, i, h, v, value) {
+            _getColor: function(c, groups, vLen, i, h, v, value , field) {
                 var style = null;
                 if (_.isString(c)) {
                     style = c
@@ -77,6 +77,7 @@ define(
                         iGroup : i,
                         iNode  : h,
                         iLay   : v,
+                        field  : field,
                         value  : value
                     });
                 }
@@ -95,7 +96,6 @@ define(
                 if (data.length == 0) {
                     return;
                 };
-
                 this.data = data;
                 var me = this;
                 var groups = data.length;
@@ -107,7 +107,7 @@ define(
                     */
 
                     //vLen 为一单元bar上面纵向堆叠的length
-                    //比如yAxis.field = [
+                    //比如yAxis.field = [?
                     //    ["uv","pv"],  vLen == 2
                     //    "click"       vLen == 1
                     //]
@@ -160,8 +160,9 @@ define(
                             var rectH = parseInt(Math.abs(rectData.y));
                             if (v > 0) {
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
-                            }
-                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value);
+                            };
+
+                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value , rectData.field);
                             var rectCxt   = {
                                 x: Math.round(rectData.x - me.bar.width / 2),
                                 y: parseInt(rectData.y),
@@ -283,7 +284,7 @@ define(
                             for (v = 0; v < vLen; v++) {
                                 if ((iNode == i || iNode == -1) && (iLay == v || iLay == -1)) {
                                     node = h_group[v][h]
-                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value);
+                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value , node.field);
                                     arr.push(node)
                                 }
                             }
