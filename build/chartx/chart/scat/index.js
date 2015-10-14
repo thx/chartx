@@ -51,7 +51,7 @@ define(
         "canvax/animation/Tween"
     ],
     function( Canvax , Circle , Rect , Tween ){
- 
+
         var Graphs = function( opt , dataFrame ){
             this.zAxis = dataFrame.zAxis;
             this.xAxis = dataFrame.xAxis;
@@ -60,7 +60,7 @@ define(
             this.label     = []; //label的字段
             this.w = 0;
             this.h = 0;
-           
+
             this.pos = {
                 x : 0,
                 y : 0
@@ -70,20 +70,21 @@ define(
                 maxR    : 20,  //圆圈默认最大半径
                 minR    : 3,
                 r       : null,
-                normalR : 10
+                normalR : 10,
+                fillStyle: function(){}
             };
-    
+
             this._colors  = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
-            
+
             this.sprite   = null;
-    
+
             this._circles = [];  //所有圆点的集合
-    
+
             _.deepExtend( this , opt );
-    
+
             this.init( );
         };
-    
+
         Graphs.prototype = {
             init : function(){
                 this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
@@ -131,7 +132,7 @@ define(
             },
             getCircleFillStyle : function( i , ii , value , circleNode ){
                 var fillStyle = this.circle.fillStyle;
-                
+
                 if( _.isArray( fillStyle ) ){
                     fillStyle = fillStyle[ii]
                 }
@@ -188,7 +189,7 @@ define(
                     e.eventInfo = null;
                 });
 
-    
+
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
 
@@ -202,9 +203,9 @@ define(
                     var sprite = new Canvax.Display.Sprite();
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var d = data[ii][i];
-                        
+
                         var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
-                        
+
                         var r = this.getR(d) || (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circleNode = this._getCircleNode(ii , i , d.value);
 
@@ -244,7 +245,7 @@ define(
                         });
                         circle.on("panmove mousemove", function(e){
                             e.eventInfo = self._getInfoHandler(e);
-                            
+
                         });
                         circle.on("panend mouseout", function(e){
                             e.eventInfo = {};
@@ -273,14 +274,15 @@ define(
                             });
                             if( circle.context.r * 2 > label.getTextWidth() ){
                                 label.context.y = d.y;
-                                label.context.textBaseline = "middle"
+                                label.context.textBaseline = "middle";
+                                label.context.fillStyle = "black"
                             }
                             sprite.addChild( label );
                         }
                     }
                     this.sprite.addChild( sprite );
                 };
-    
+
                 this.setX( this.pos.x );
                 this.setY( this.pos.y );
             },
@@ -305,7 +307,7 @@ define(
             grow : function(){
                 var self  = this;
                 var timer = null;
-    
+
                 var growAnima = function(){
                    var bezierT = new Tween.Tween( { h : 0 } )
                    .to( { h : 100 }, 500 )
@@ -321,12 +323,12 @@ define(
                    animate();
                 };
                 function animate(){
-                    timer    = requestAnimationFrame( animate ); 
+                    timer    = requestAnimationFrame( animate );
                     Tween.update();
                 };
                 growAnima();
             }
-        }; 
+        };
         return Graphs;
     }
 );

@@ -34,12 +34,7 @@ define(
                 this.graphs = {};
 
                 this.biaxial = false;
-                this.padding = {
-                    top: 10,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                }
+
 
                 //this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
 
@@ -302,43 +297,84 @@ define(
                 }
             },
             _initPlugs: function(opts, g) {
-                if ("markLine" in opts) {
+                if (opts.markLine) {
                     this._initMarkLine(g);
-                }
-                if ("markPoint" in opts) {
+                };
+                if (opts.markPoint) {
                     this._initMarkPoint(g);
-                }
+                };
             },
             _initMarkPoint: function(g) {
                 var me = this;
                 require(["chartx/components/markpoint/index"], function(MarkPoint) {
-                    var lastNode = g._circles.children[g._circles.children.length - 1];
-                    var mpCtx = {
-                        markTarget: g.field,
-                        point: lastNode.localToGlobal(),
-                        r: lastNode.context.r + 1,
-                        globalAlpha: 0.8,
-                        realTime: true
-                    };
-                    new MarkPoint(me._opts, mpCtx).done(function() {
-                        //this.shape.context.visible = false;
-                        me.core.addChild(this.sprite);
+                    _.each(g.data, function(node, i) {
+                        var circle = g._circles.children[i];
+
+                        var mpCtx = {
+                            value: node.value,
+                            markTarget: g.field,
+                            point: circle.localToGlobal(),
+                            r: circle.context.r + 2,
+                            groupLen: g.data.length,
+                            iNode  : i,
+                            iGroup : g._groupInd
+                        };
+                        if (me._opts.markPoint && me._opts.markPoint.shapeType != "circle") {
+                            mpCtx.point.y -= circle.context.r + 3
+                        };
+                        new MarkPoint(me._opts, mpCtx).done(function() {
+                            me.core.addChild(this.sprite);
+                            var mp = this;
+                            this.shape.hover(function(e) {
+                                this.context.hr++;
+                                this.context.cursor = "pointer";
+                                e.stopPropagation();
+                            }, function(e) {
+                                this.context.hr--;
+                                e.stopPropagation();
+                            });
+                            this.shape.on("mousemove", function(e) {
+                                e.stopPropagation();
+                            });
+                            this.shape.on("tap click", function(e) {
+                                e.stopPropagation();
+                                e.eventInfo = mp;
+                                me.fire("markpointclick", e);
+                            });
+                        });
                     });
+
+                    /*
+                                        var lastNode = g._circles.children[g._circles.children.length - 1];
+                                        debugger
+                                        var mpCtx = {
+                                            markTarget: g.field,
+                                            point: lastNode.localToGlobal(),
+                                            r: lastNode.context.r + 1,
+                                            globalAlpha: 0.8,
+                                            realTime: true
+                                        };
+                                        new MarkPoint(me._opts, mpCtx).done(function() {
+                                            //this.shape.context.visible = false;
+                                            me.core.addChild(this.sprite);
+                                        });
+                    */
                 });
             },
             _initMarkLine: function(g) {
                 var me = this
                 var index = g._groupInd
                 var pointList = _.clone(g._pointList)
-                var center = parseInt(me.dataFrame.yAxis.center[index].agPosition)                             
+                var center = parseInt(me.dataFrame.yAxis.center[index].agPosition)
                 require(['chartx/components/markline/index'], function(MarkLine) {
-                    var content = g.field + '均值', strokeStyle = g.line.strokeStyle
-                    if(me.markLine.text && me.markLine.text.enabled){
-                        
-                        if(_.isFunction(me.markLine.text.format)){
+                    var content = g.field + '均值',
+                        strokeStyle = g.line.strokeStyle
+                    if (me.markLine.text && me.markLine.text.enabled) {
+
+                        if (_.isFunction(me.markLine.text.format)) {
                             var o = {
-                                iGroup : index,
-                                value  : me.dataFrame.yAxis.center[index].agValue
+                                iGroup: index,
+                                value: me.dataFrame.yAxis.center[index].agValue
                             }
                             content = me.markLine.text.format(o)
                         }
@@ -359,12 +395,12 @@ define(
                             strokeStyle: strokeStyle
                         },
                         text: {
-                            content  : content,
+                            content: content,
                             fillStyle: strokeStyle
                         },
                         field: g.field
                     }
-                    
+
                     new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
                         me.core.addChild(this.sprite)
                     })
@@ -458,7 +494,7 @@ define(
                     center[a].agValue = maxValue / bl
 
                     center[a].agPosition = -(center[a].agValue - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
-                    
+
                 }
                 //均值
                 this.dataFrame.yAxis.center = center

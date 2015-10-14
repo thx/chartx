@@ -12,7 +12,7 @@ define(
                 x : 0 , y : 0
             };
             this.normalColor = "#6B95CF";
-            this.shapeType   = "circle";
+            this.shapeType   = "droplet";//"circle";
             this.fillStyle   = null;
             this.strokeStyle = null;
             this.lineWidth   = 1;
@@ -30,6 +30,10 @@ define(
             
             this.sprite = null;
             this.shape  = null;
+
+            this.iGroup = null;
+            this.iNode  = null;
+            this.iLay   = null;
 
             this._doneHandle = null;
             this.done   = function( fn ){
@@ -163,7 +167,7 @@ define(
                         fillStyle   : me._fillStyle,
                         lineWidth   : me.lineWidth,
                         strokeStyle : me._strokeStyle,
-                        globalAhpla : me.globalAhpla,
+                        globalAlpha : me.globalAlpha,
                         cursor  : "point",
                         visible : false
                     };

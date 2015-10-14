@@ -97,7 +97,8 @@ define(
                 if( _.isFunction( s ) ){
                     return s( {
                         iGroup : this._groupInd,
-                        iNode  : this._nodeInd
+                        iNode  : this._nodeInd,
+                        field  : this.field
                     } );
                 }
                 return s

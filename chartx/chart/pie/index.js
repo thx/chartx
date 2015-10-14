@@ -95,7 +95,7 @@
                 slice: function (index) {
                     this._pie && this._pie.slice(index);
                 },
-                _initData: function (arr, opt) {
+                _initData: function (arr, opt) {                    
                     var data = [];
 
                     /*
@@ -116,8 +116,14 @@
                         };
                         _.each(arr, function (row) {
                             var rowData = [];
-                            rowData.push(row[xFieldInd]);
-                            rowData.push(row[yFieldInd]);
+                            if (_.isArray(row)) {
+                                rowData.push(row[xFieldInd]);
+                                rowData.push(row[yFieldInd]);
+                            }
+                            else if (typeof row == 'object') {
+                                rowData.push(row['name']);
+                                rowData.push(row['y']);
+                            }
                             data.push(rowData);
                         });
                     };
@@ -125,27 +131,28 @@
 
                     var dataFrame = {};
                     dataFrame.org = data;
-                    dataFrame.data = [];                    
-                    if (_.isArray(data)) {
-                        for (var i = 0; i < data.length; i++) {
+                    dataFrame.data = [];
+                    if (_.isArray(arr)) {
+                        for (var i = 0; i < arr.length; i++) {
                             var obj = {};
-                            if (_.isArray(data[i])) {
-                                obj.name = data[i][0];
-                                obj.y = parseFloat(data[i][1]);
+                            if (_.isArray(arr[i])) {
+                                obj.name = arr[i][0];
+                                obj.y = parseFloat(arr[i][1]);
                                 obj.sliced = false;
                                 obj.selected = false;
                             }
-                            else if (typeof data[i] == 'object') {
-                                obj.name = data[i].name;
-                                obj.y = parseFloat(data[i].y);
-                                obj.sliced = data[i].sliced || false;
-                                obj.selected = data[i].selected || false;
+                            else if (typeof arr[i] == 'object') {
+                                obj.name = arr[i].name;
+                                obj.y = parseFloat(arr[i].y);
+                                obj.sliced = arr[i].sliced || false;
+                                obj.selected = arr[i].selected || false;
                             }
 
                             if (obj.name) dataFrame.data.push(obj);
                         }
-                    }
+                    }                    
                     return dataFrame;
+
                 },
                 clear: function () {
                     this.stageBg.removeAllChildren()
@@ -164,7 +171,7 @@
                     var h = self.height;
 
                     var r = Math.min(w, h) * 2 / 3 / 2;
-                    if (!self.dataLabel.enabled) {
+                    if (self.dataLabel.enabled == false) {
                         r = Math.min(w, h) / 2;
                         //要预留clickMoveDis位置来hover sector 的时候外扩
                         r -= r / 11;
@@ -185,7 +192,7 @@
                         boundHeight: h,
                         data: self.dataFrame,
                         //dataLabel: self.dataLabel, 
-                        allowPointSelect: self.allowPointSelect || true,
+                        allowPointSelect: self.allowPointSelect,
                         animation: self.animation,
                         colors: self.colors,
                         focusCallback: {

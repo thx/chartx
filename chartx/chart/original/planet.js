@@ -46,7 +46,7 @@ define(
                         maxR    :  0,                                //行星最大直径
                         rdata   :  [],                               //行星,所有行星半径集合(不算core),[60, 50, 50, 40]
                         maxRdata:  [],                               //行星,每个环上最大行星半径集合(不算core),[60, 50, 50]
-                        maxYdata:  []                                //行星,每个环上最大高度集合(不算core)(去除2个半径 最高和最低),[60, 50, 50]
+                        maxYData:  []                                //行星,每个环上最大高度集合(不算core)(去除2个半径 最高和最低),[60, 50, 50]
                     }
                 }
                 this.graphs        = {
@@ -246,8 +246,12 @@ define(
                 var rdata = []
                 for(var a = 0, al = scaleData.length; a < al; a++){
                     var scale = scaleData[a]
-                    var r = self.graphs.minR + (self.dataFrame.graphs.maxR - self.graphs.minR) * scale
+                    // var r = self.graphs.minR + Math.abs((self.dataFrame.graphs.maxR - self.graphs.minR)) * scale
+                    var r = self.graphs.minR + self.dataFrame.graphs.maxR * scale
                         r = Math.round(r)
+                        if(r > self.dataFrame.graphs.maxR){
+                            r = self.dataFrame.graphs.maxR
+                        }
                     rdata.push(r)
                 }
                 self.dataFrame.graphs.rdata = rdata             //完成环大小
@@ -292,6 +296,7 @@ define(
 
                     maxRdata.shift()                            //完成每个环上最大行星半径集合
                 }
+            
                 self.dataFrame.graphs.data  = graphsData
                 self.dataFrame.graphs.maxRdata = Tools.getChildsArr(maxRdata)
                                                                 //每个环上最大高度集合
@@ -478,7 +483,8 @@ define(
             _getPlanetMaxR:function(){                     //获取行星最大半径
                 var self = this
                 var r = 0
-                r = parseInt((self.dataFrame.back.ringAg - self.back.ringDis) / 2)
+                // r = parseInt((self.dataFrame.back.ringAg - self.back.ringDis) / 2)
+                r = parseInt((self.dataFrame.back.ringAg) / 2)
                 r = self.graphs.maxR < r ? self.graphs.maxR : r
                 return r
             },
