@@ -35,15 +35,16 @@
 var data= [
     ["node"   , "value"],
     ["ie"     , 1939   ],
-    ["chrome" , 865    ],
+    {
+        name:'chrome',        
+        sliced:false,
+        y:1939
+    },
     ["firefox", 2361   ],
     ["safari" , 2289   ],
-    ["其他"   , 1886   ],
-    ["其他1"  , 563    ],
-    ["其他1"  , 33     ],
-    ["其他1"  , 60     ]
+    ["其他"   , 1886   ]
 ];
-var data =  [["node","value"],["android",8452053],["iphone",5824898],["未知",3934421]];
+
 var options = {
     xAxis : {
         field : "node"
@@ -59,11 +60,13 @@ var options = {
     },
     //周边tip
     dataLabel: {
-        enabled: true,
-        format: '{point.name} : {point.percentage}%'
+        //enabled: false,
+        //是否绘制连接线(注意：此配置仅限于扇形块比较分散，若扇形比较紧密时，无连线会导致识别混淆)
+        //allowLine:false,
+        format: '{point.name} : {point.y}'
     },
     
-    //是否允许扇形选取
+    //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
     allowPointSelect: true,
     //是否允许动画
     animation: true,
@@ -72,14 +75,12 @@ var options = {
     //颜色序列,若不设置，会有默认的颜色序列
     //colors:['red', 'yellow', 'blue']
 };
-Chartx.pie("canvasTest" , data , options).then(function( pie ){    
+Chartx.pie("canvasTest" , data , options).then(function( pie ){
+    //pie.slice(3);
     pie.on('focused' , function (e) {
         console.log(e);
     });
     pie.on('unfocused' , function (e) {
-        console.log(e);
-    });
-    pie.on('complete', function (e) {
         console.log(e);
     });
     pie.on('click',function(e){
