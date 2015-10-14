@@ -1816,7 +1816,7 @@ define(
                         pc.x + popText.context.width > this.w) {
                         pc.x = this.w - popText.context.width
                     };
-                    if (this.sprite.getNumChildren() >= 2) {
+                    if (this.data.length > 2) {
                         //倒数第二个text
                         var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
 
@@ -2067,10 +2067,12 @@ define(
                     this.dataSection = [0]
                 }
                 this._bottomNumber = this.dataSection[0];
+                /*
                 if(arr.length == 1){
                     this.dataSection[0] = arr[0] * 2;
                     this._bottomNumber  = 0;
                 }
+                */
                 if( this.baseNumber == null ){
                     this.baseNumber = this._bottomNumber > 0 ? this._bottomNumber : 0;
                 }
