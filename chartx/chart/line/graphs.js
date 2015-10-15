@@ -63,7 +63,11 @@ define(
             },
             _getYaxisField : function( i ){
                 //这里要兼容从折柱混合图过来的情况
-                return this.root.type == "line" ? this.root.dataFrame.yAxis.field[i] : this.root._lineChart.dataFrame.yAxis.field[i]
+                if ( this.root.type && this.root.type.indexOf("line") >= 0 ) {
+                    return this.root._lineChart.dataFrame.yAxis.field[i];
+                } else {
+                    return this.root.dataFrame.yAxis.field[i];
+                };
             },
             /*
              *@params opt

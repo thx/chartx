@@ -3,7 +3,6 @@ define(
         'canvax/index',
         'chartx/chart/bar/index',
         'chartx/chart/line/index',
-
         'chartx/utils/dataformat',
         'chartx/components/yaxis/yAxis',
         'chartx/chart/line/graphs',
