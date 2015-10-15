@@ -593,7 +593,7 @@ define(
             },
             _getYaxisField : function( i ){
                 //这里要兼容从折柱混合图过来的情况
-                return this.root.dataFrame.yAxis.field ? this.root.dataFrame.yAxis.field[i] : this.root.yAxis.line.field[i]
+                return this.root.type == "line" ? this.root.dataFrame.yAxis.field[i] : this.root._lineChart.dataFrame.yAxis.field[i]
             },
             /*
              *@params opt
@@ -1087,7 +1087,7 @@ define(
                 });
             },
             _initMarkLine: function(g , dataFrame) {
-                
+
                 var me = this;
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);

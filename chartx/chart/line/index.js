@@ -362,7 +362,7 @@ define(
                 });
             },
             _initMarkLine: function(g , dataFrame) {
-                
+
                 var me = this;
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
