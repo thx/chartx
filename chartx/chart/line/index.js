@@ -184,7 +184,7 @@ define(
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
                 var y = this.height - this._xAxis.h;
-                var graphsH = y - this.padding.top
+                var graphsH = y - this.padding.top;
 
                 //绘制yAxis
                 this._yAxis.draw({
@@ -361,11 +361,13 @@ define(
                     */
                 });
             },
-            _initMarkLine: function(g) {
-                var me = this
-                var index = g._groupInd
-                var pointList = _.clone(g._pointList)
-                var center = parseInt(me.dataFrame.yAxis.center[index].agPosition)
+            _initMarkLine: function(g , dataFrame) {
+                
+                var me = this;
+                var index = g._groupInd;
+                var pointList = _.clone(g._pointList);
+                dataFrame || (dataFrame = me.dataFrame);
+                var center = parseInt(dataFrame.yAxis.center[index].agPosition)
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var content = g.field + '均值',
                         strokeStyle = g.line.strokeStyle
@@ -374,7 +376,7 @@ define(
                         if (_.isFunction(me.markLine.text.format)) {
                             var o = {
                                 iGroup: index,
-                                value: me.dataFrame.yAxis.center[index].agValue
+                                value: dataFrame.yAxis.center[index].agValue
                             }
                             content = me.markLine.text.format(o)
                         }
@@ -497,7 +499,7 @@ define(
 
                 }
                 //均值
-                this.dataFrame.yAxis.center = center
+                dataFrame.yAxis.center = center
                 return tmpData
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标

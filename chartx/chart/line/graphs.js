@@ -63,7 +63,7 @@ define(
             },
             _getYaxisField : function( i ){
                 //这里要兼容从折柱混合图过来的情况
-                return this.root.yAxis.field ? this.root.yAxis.field[i] : this.root.yAxis.line.field[i]
+                return this.root.dataFrame.yAxis.field ? this.root.dataFrame.yAxis.field[i] : this.root.yAxis.line.field[i]
             },
             /*
              *@params opt
