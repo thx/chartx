@@ -59,7 +59,7 @@ var options = {
         realTime: true,
         shapeType:"circle",
         filter  : function(  ){
-            if(this.markTarget != "uv" && this.ind !== this.groupLen-1){
+            if(this.markTarget != "uv" && this.iNode !== this.groupLen-1){
                 this.destroy();
             }
         }

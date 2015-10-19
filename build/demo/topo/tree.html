@@ -49,7 +49,18 @@ var data = [
 ];
 
 var options = {
-    type : "tree"
+    type : "tree",
+    node : {
+        //下面的widht和height配置可以强制设置节点的width 和 height
+        //width:60,
+        //height : 60,
+        strokeStyle : function( nodeData ){
+            //nodeData = {label: "英雄联盟", link: Array[3], id: "lol", width: 72, height: 31.900000000000002}
+            if( nodeData.label == "亚索" ){
+                return "#999"
+            }
+        }
+    }
 }
 
 

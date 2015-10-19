@@ -3,7 +3,6 @@ define(
         'canvax/index',
         'chartx/chart/bar/index',
         'chartx/chart/line/index',
-
         'chartx/utils/dataformat',
         'chartx/components/yaxis/yAxis',
         'chartx/chart/line/graphs',
@@ -72,6 +71,7 @@ define(
             _startDraw: function(opt) {
                 var me = this;
                 var y = parseInt(me.height - me._xAxis.h);
+                var graphsH = y - this.padding.top;
 
                 //绘制yAxis
                 me._yAxis.draw({
@@ -79,7 +79,7 @@ define(
                         x: 0,
                         y: y
                     },
-                    yMaxHeight: y
+                    yMaxHeight: graphsH
                 });
                 var _yAxisW = me._yAxis.w;
 
@@ -129,6 +129,7 @@ define(
                     }
                 });
 
+
                 var o = this._trimGraphs();
                 this._yValueMaxs = o.yValueMaxs;
                 this._yLen = o.yLen;
@@ -156,7 +157,7 @@ define(
                 me._lineChart._graphs.setX(_yAxisW), me._lineChart._graphs.setY(y);
                 me._lineChart._graphs.grow(function(g) {
                     if (me._opts.markLine) {
-                        Line.prototype._initMarkLine.apply(me, [g, me._opts.markLine]);
+                        Line.prototype._initMarkLine.apply(me, [g, me._lineChart.dataFrame]);
                     };
                     if (me._opts.markPoint) {
                         Line.prototype._initMarkPoint.apply(me, [g, me._opts.markPoint]);
