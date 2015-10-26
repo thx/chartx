@@ -206,6 +206,10 @@ define(
 
                         var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
 
+                        if (zAxisV == 0 ) {
+                            continue
+                        };
+
                         var r = this.getR(d) || (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circleNode = this._getCircleNode(ii , i , d.value);
 
