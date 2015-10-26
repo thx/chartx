@@ -19,7 +19,7 @@ define(
 
                 this.dataLabel = {
                     enabled: true,
-                    allowLine:true
+                    allowLine: true
                 };
 
                 this.tips = _.deepExtend({ enabled: true }, tipsOpt); //tip的confit
@@ -41,7 +41,7 @@ define(
 
                     this._tip = new Tip(this.tips, this.domContainer);
                     this._tip._getDefaultContent = this._getTipDefaultContent;
-                    this.sprite.addChild(this._tip.sprite);                    
+                    this.sprite.addChild(this._tip.sprite);
                     if (this.dataLabel.enabled) {
                         this.branchSp = new Canvax.Display.Sprite();
                         this.branchTxtSp = new Canvax.Display.Sprite();
@@ -143,6 +143,8 @@ define(
                             var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
                             if (totalPercentOffset != 0) {
                                 data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
+                                data[maxPercentageOffsetIndex].percentage = data[maxPercentageOffsetIndex].percentage.toFixed(percentFixedNum);
+                                data[maxPercentageOffsetIndex].txt = data[maxPercentageOffsetIndex].percentage.toFixed(percentFixedNum) + '%';
                             }
                         }
                     }
