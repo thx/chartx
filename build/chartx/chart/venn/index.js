@@ -243,7 +243,6 @@ define(
                         });
 
                         _.each(betweenPaths, function(path) {
-                            debugger
                             var bpath = new Path({
                                 context: {
                                     path: path,

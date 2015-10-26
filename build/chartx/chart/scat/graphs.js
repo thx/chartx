@@ -186,7 +186,7 @@ define(
                         circle.iNode  = i;
                         circle.r      = r;
                         circle.label  = circleNode.label;
-                        if( zAxisV ){
+                        if( zAxisV != undefined || zAxisV != null ){
                             circle.zAxis  = {
                                 field : this.zAxis.field,
                                 value : zAxisV,

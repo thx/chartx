@@ -136,7 +136,7 @@ define(
                 //绘制yAxis
                 this._yAxis.draw({
                     pos: {
-                        x: 0,
+                        x: this.padding.left,
                         y: y
                     },
                     yMaxHeight :graphsH 
@@ -147,7 +147,7 @@ define(
                 //绘制x轴
                 this._xAxis.draw({
                     graphh: h,
-                    graphw: w,
+                    graphw: w - this.padding.right,
                     yAxisW: _yAxisW
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {

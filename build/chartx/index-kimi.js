@@ -77,9 +77,9 @@ define(
 
             this.padding = {
                 top: 20,
-                right: 0,
+                right: 10,
                 bottom: 0,
-                left: 0
+                left: 10
             }
 
             //Canvax实例
@@ -1295,12 +1295,12 @@ define(
             this.dW      = 0;  //html的tips内容width
             this.dH      = 0;  //html的tips内容Height
 
-            this.backR   = 5;  //背景框的 圆角 
+            this.backR   = "5px";  //背景框的 圆角 
     
             this.sprite  = null;
             this.content = null; //tips的详细内容
 
-            this.fillStyle   = "#000000";
+            this.fillStyle   = "rgba(0,0,0,0.7)";//"#000000";
             this.text        = {
                 fillStyle    : "#ffffff"
             };
@@ -1309,7 +1309,7 @@ define(
             this.alpha       = 0.5;
             
             this._tipDom = null;
-            this._back   = null;
+            //this._back   = null;
 
             this.offset = 10; //tips内容到鼠标位置的偏移量
         
@@ -1375,7 +1375,7 @@ define(
             _initContent : function(e){
                 this._tipDom = document.createElement("div");
                 this._tipDom.className = "chart-tips";
-                this._tipDom.style.cssText += ";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;line-height:1.5"
+                this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;line-height:1.5"
                 this.tipDomContainer.appendChild( this._tipDom );
                 this._setContent(e);
             },
@@ -1425,6 +1425,7 @@ define(
              *Back相关-------------------------
              */
             _initBack : function(e){
+                return
                 var opt = {
                     x : 0,
                     y : 0,
@@ -1441,15 +1442,19 @@ define(
                     opt.strokeStyle = this.strokeStyle;
                 }
                
+                /*
                 this._back = new Rect({
                     id : "tipsBack",
                     context : opt
                 });
                 this.sprite.addChild( this._back );
+                */
             },
             _resetBackSize:function(e){
+                /*
                 this._back.context.width  = this.dW;
                 this._back.context.height = this.dH;
+                */
             },
     
             /**
@@ -1928,8 +1933,8 @@ define(
             this.dataOrg     = [];                           //源数据
 
             this.sprite      = null;
-            this.x           = 0;
-            this.y           = 0;
+            //this.x           = 0;
+            //this.y           = 0;
             this.disYAxisTopLine =  6;                       //y轴顶端预留的最小值
             this.yMaxHeight      =  0;                       //y轴最大高
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
@@ -2171,12 +2176,12 @@ define(
                 };
 
                 maxW += self.dis;
-                
-                self.sprite.context.x = maxW;
+                 
+                self.sprite.context.x = maxW + self.pos.x;
                 if( self.line.enabled ){
-                    self.w = maxW + self.dis + self.line.width
+                    self.w = maxW + self.dis + self.line.width + self.pos.x;
                 } else {
-                    self.w = maxW + self.dis;
+                    self.w = maxW + self.dis + self.pos.x;
                 }
             }
         };

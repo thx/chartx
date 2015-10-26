@@ -230,7 +230,7 @@ define(
                         circle.iNode  = i;
                         circle.r      = r;
                         circle.label  = circleNode.label;
-                        if( zAxisV ){
+                        if( zAxisV != undefined || zAxisV != null ){
                             circle.zAxis  = {
                                 field : this.zAxis.field,
                                 value : zAxisV,
@@ -423,16 +423,18 @@ define(
             },
             _startDraw : function(opt){
                 var w = (opt && opt.w) || this.width;
+                //w     -= (this.padding.right + this.padding.left); 
                 var h = (opt && opt.h) || this.height;
                 var y = parseInt( h - this._xAxis.h );
+                var graphsH = y - this.padding.top;
                 
                 //绘制yAxis
                 this._yAxis.draw({
                     pos : {
-                        x : 0,
+                        x : this.padding.left,
                         y : y
                     },
-                    yMaxHeight : y 
+                    yMaxHeight : graphsH 
                 });
                 
                 var _yAxisW = this._yAxis.w;
@@ -441,7 +443,7 @@ define(
                 //绘制x轴
                 this._xAxis.draw({
                     graphh :   h,
-                    graphw :   w,
+                    graphw :   w - this.padding.right,
                     yAxisW :   _yAxisW
                 });
                 if( this._xAxis.yAxisW != _yAxisW ){
@@ -506,6 +508,7 @@ define(
                     field : self.dataFrame.xAxis.field[ e.eventInfo.iGroup ],
                     value : self.dataFrame.xAxis.org[ e.eventInfo.iGroup ][ e.eventInfo.iNode ]
                 };
+                
                 if( e.target.zAxis ){
                     e.eventInfo.zAxis = e.target.zAxis;
                 };

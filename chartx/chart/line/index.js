@@ -189,7 +189,7 @@ define(
                 //绘制yAxis
                 this._yAxis.draw({
                     pos: {
-                        x: 0,
+                        x: this.padding.left,
                         y: y
                     },
                     yMaxHeight: graphsH
@@ -202,19 +202,19 @@ define(
                 if (this._yAxisR) {
                     this._yAxisR.draw({
                         pos: {
-                            x: 0,
+                            x: 0,//this.padding.right,
                             y: y
                         },
                         yMaxHeight: graphsH
                     });
                     _yAxisRW = this._yAxisR.w;
-                    this._yAxisR.setX(this.width - _yAxisRW);
+                    this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 }
 
                 //绘制x轴
                 this._xAxis.draw({
                     graphh: this.height,
-                    graphw: this.width - _yAxisRW,
+                    graphw: this.width - _yAxisRW - this.padding.right,
                     yAxisW: _yAxisW
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {

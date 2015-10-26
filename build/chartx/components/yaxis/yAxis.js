@@ -40,8 +40,8 @@ define(
             this.dataOrg     = [];                           //源数据
 
             this.sprite      = null;
-            this.x           = 0;
-            this.y           = 0;
+            //this.x           = 0;
+            //this.y           = 0;
             this.disYAxisTopLine =  6;                       //y轴顶端预留的最小值
             this.yMaxHeight      =  0;                       //y轴最大高
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
@@ -283,12 +283,12 @@ define(
                 };
 
                 maxW += self.dis;
-                
-                self.sprite.context.x = maxW;
+                 
+                self.sprite.context.x = maxW + self.pos.x;
                 if( self.line.enabled ){
-                    self.w = maxW + self.dis + self.line.width
+                    self.w = maxW + self.dis + self.line.width + self.pos.x;
                 } else {
-                    self.w = maxW + self.dis;
+                    self.w = maxW + self.dis + self.pos.x;
                 }
             }
         };

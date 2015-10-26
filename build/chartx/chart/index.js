@@ -17,9 +17,9 @@ define(
 
             this.padding = {
                 top: 20,
-                right: 0,
+                right: 10,
                 bottom: 0,
-                left: 0
+                left: 10
             }
 
             //Canvax实例

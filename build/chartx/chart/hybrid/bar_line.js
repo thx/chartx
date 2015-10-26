@@ -76,7 +76,7 @@ define(
                 //绘制yAxis
                 me._yAxis.draw({
                     pos: {
-                        x: 0,
+                        x: this.padding.left,
                         y: y
                     },
                     yMaxHeight: graphsH
@@ -94,13 +94,14 @@ define(
                         yMaxHeight: me._yAxis.yGraphsHeight
                     });
                     _yAxisRW = me._yAxisR.w;
-                    me._yAxisR.setX(me.width - _yAxisRW);
+                    //me._yAxisR.setX(me.width - _yAxisRW);
+                    me._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
 
                 //绘制x轴
                 me._xAxis.draw({
                     graphh: me.height,
-                    graphw: me.width - _yAxisRW,
+                    graphw: me.width - _yAxisRW - this.padding.right,
                     yAxisW: _yAxisW
                 });
                 if (me._xAxis.yAxisW != _yAxisW) {
