@@ -144,7 +144,8 @@ define(
                         x: _yAxisW,
                         y: y
                     },
-                    yDataSectionLen: me._yAxis.dataSection.length
+                    yDataSectionLen: me._yAxis.dataSection.length,
+                    sort : this._yAxis.sort
                 });
 
                 //绘制折线图主图形区域

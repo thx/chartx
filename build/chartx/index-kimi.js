@@ -1946,7 +1946,9 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter          =  null; //function(params){}; 
 
-            this.isH             =  false;
+            this.isH             =  false; //是否横向
+
+            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小
 
             this.init(opt , data);
         };
@@ -2070,7 +2072,27 @@ define(
                 //如果还是0
                 if( this.dataSection.length == 0 ){
                     this.dataSection = [0]
-                }
+                };
+
+                if( this.sort ){
+                    var sort = "asc";
+                    if( _.isString( this.sort )){
+                        sort = this.sort;
+                    }
+                    if (_.isArray( this.sort )) {
+                        var i = 0;
+                        if (this.place=="right") {
+                            i = 1;
+                        };
+                        if (this.sort[i]) {
+                            sort = this.sort[i];
+                        };
+                    };
+                    if (sort == "desc") {
+                        this.dataSection.reverse();
+                    };
+                };
+
                 this._bottomNumber = this.dataSection[0];
                 /*
                 if(arr.length == 1){
