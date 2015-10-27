@@ -182,7 +182,8 @@ define(
                         x: _yAxisW,
                         y: y
                     },
-                    yDataSectionLen: this._yAxis.dataSection.length
+                    yDataSectionLen: this._yAxis.dataSection.length,
+                    sort : this._yAxis.sort
                 });
             },
 
@@ -251,11 +252,15 @@ define(
                             if (me.proportion) {
                                 y = -val / vCount * _yAxis.yGraphsHeight;
                             } else {
-                                y = -(val - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                                y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                            };
+                            if (v > 0) {
+                                y += tmpData[b][v - 1][i].y;
                             };
 
-                            if (v > 0) {
-                                y += tmpData[b][v - 1][i].y
+                            //如果有排序的话
+                            if (me._yAxis.sort && me._yAxis.sort == "desc") {
+                                y = -(_yAxis.yGraphsHeight - Math.abs(y));
                             };
 
                             var node = {
