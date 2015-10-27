@@ -13,7 +13,10 @@ define(
             this.xAxis = dataFrame.xAxis;
             this.yAxis = dataFrame.yAxis;
             this.dataFrame = dataFrame;
-            this.label     = []; //label的字段
+            this.label     = {
+                field : [],
+                enabled : true
+            }; //label的字段
             this.w = 0;
             this.h = 0;
 
@@ -52,7 +55,7 @@ define(
                 this.sprite.context.y = $n
             },
             _getLabel      : function( iGroup , iNode ){
-                var labelField = this.label[ iGroup ];
+                var labelField = this.label.field[ iGroup ];
                 if( labelField ) {
                     var label = null;
                     _.each( this.dataFrame.data , function( d , i ){
@@ -218,7 +221,7 @@ define(
 
                         this._circles.push( circle );
 
-                        if( circleNode.label && circleNode.label != "" ){
+                        if( circleNode.label && circleNode.label != "" && this.label.enabled ){
                             var y = d.y-r;
                             if( y + this.h <= 20 ){
                                 y = -(this.h - 20);
