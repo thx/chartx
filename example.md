@@ -167,6 +167,22 @@ title:  Chartx demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/line/reset_data.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/line/reset_data.png">
+        </dt>
+        <dd>
+            <h5>
+            切换数据
+            </h5>
+            <span>
+            平滑的数据切换效果
+            </span>
+        </dd>
+    </dl>
+    </a>
+
     <dl class="chart">
         <dt>
         <img src="./assets/chart/line/event_touch.gif">

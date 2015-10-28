@@ -38,6 +38,7 @@ define(
             draw : function(){
                 this._initModule();
                 this._widget();
+                this.inited = true;
             },
             _initModule : function(){
                 this.edgeSprite = new Canvax.Display.Sprite({

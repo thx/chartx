@@ -77,9 +77,9 @@ define(
 
             this.padding = {
                 top: 20,
-                right: 0,
+                right: 10,
                 bottom: 0,
-                left: 0
+                left: 10
             }
 
             //Canvax实例
@@ -113,6 +113,7 @@ define(
         Chartx.extend = CanvaxBase.creatClass;
 
         CanvaxBase.creatClass(Chart, Canvax.Event.EventDispatcher, {
+            inited : false,
             init: function() {},
             dataFrame: null, //每个图表的数据集合 都 存放在dataFrame中。
             draw: function() {},
@@ -153,7 +154,11 @@ define(
                     return;
                 }
                 */
-                //如果要切换新的数据源
+                //如果只有数据的变化
+                if (obj && obj.data && !obj.options && this.resetData) {
+                    this.resetData( obj.data );
+                    return;
+                };
                 if (obj && obj.options) {
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
@@ -168,6 +173,7 @@ define(
                     this.dataFrame = this._initData(obj.data);
                 }
                 this.clean();
+                this.canvax.getDomContainer().innerHTML = "";
                 this.draw();
             },
 
@@ -1295,12 +1301,12 @@ define(
             this.dW      = 0;  //html的tips内容width
             this.dH      = 0;  //html的tips内容Height
 
-            this.backR   = 5;  //背景框的 圆角 
+            this.backR   = "5px";  //背景框的 圆角 
     
             this.sprite  = null;
             this.content = null; //tips的详细内容
 
-            this.fillStyle   = "#000000";
+            this.fillStyle   = "rgba(0,0,0,0.7)";//"#000000";
             this.text        = {
                 fillStyle    : "#ffffff"
             };
@@ -1309,7 +1315,7 @@ define(
             this.alpha       = 0.5;
             
             this._tipDom = null;
-            this._back   = null;
+            //this._back   = null;
 
             this.offset = 10; //tips内容到鼠标位置的偏移量
         
@@ -1375,7 +1381,7 @@ define(
             _initContent : function(e){
                 this._tipDom = document.createElement("div");
                 this._tipDom.className = "chart-tips";
-                this._tipDom.style.cssText += ";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;line-height:1.5"
+                this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;line-height:1.5"
                 this.tipDomContainer.appendChild( this._tipDom );
                 this._setContent(e);
             },
@@ -1425,6 +1431,7 @@ define(
              *Back相关-------------------------
              */
             _initBack : function(e){
+                return
                 var opt = {
                     x : 0,
                     y : 0,
@@ -1441,15 +1448,19 @@ define(
                     opt.strokeStyle = this.strokeStyle;
                 }
                
+                /*
                 this._back = new Rect({
                     id : "tipsBack",
                     context : opt
                 });
                 this.sprite.addChild( this._back );
+                */
             },
             _resetBackSize:function(e){
+                /*
                 this._back.context.width  = this.dW;
                 this._back.context.height = this.dH;
+                */
             },
     
             /**
@@ -1556,7 +1567,13 @@ define(
 
         xAxis.prototype = {
             init: function(opt, data) {
-                this.dataOrg = data.org;
+                this.sprite = new Canvax.Display.Sprite({
+                    id: "xAxisSprite"
+                });
+                this._initHandle(opt , data);
+            },
+            _initHandle : function( opt , data){
+                data && data.org && (this.dataOrg = data.org);
 
                 if (opt) {
                     _.deepExtend(this, opt);
@@ -1570,11 +1587,6 @@ define(
                     this.line.height = 1
                 }
 
-                this.sprite = new Canvax.Display.Sprite({
-                    id: "xAxisSprite"
-                });
-
-
                 if (this.dataSection.length == 0) {
                     this.dataSection = this._initDataSection(this.dataOrg);
                 };
@@ -1585,6 +1597,7 @@ define(
                 //然后计算好最大的width 和 最大的height，外部组件需要用
                 this._setTextMaxWidth();
                 this._setXAxisHeight();
+
             },
             /**
              *return dataSection 默认为xAxis.dataOrg的的faltten
@@ -1598,6 +1611,22 @@ define(
             },
             setY: function($n) {
                 this.sprite.context.y = $n
+            },
+            //数据变化，配置没变的情况
+            resetData : function( data ){
+                 //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+
+                this._initHandle( null , data );
+
+                this.draw();
+            },
+            //配置和数据变化
+            update : function( opt , data ){
+                //先在field里面删除一个字段，然后重新计算
+                _.deepExtend( this , opt );
+                this.resetData(data);
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
@@ -1928,8 +1957,8 @@ define(
             this.dataOrg     = [];                           //源数据
 
             this.sprite      = null;
-            this.x           = 0;
-            this.y           = 0;
+            //this.x           = 0;
+            //this.y           = 0;
             this.disYAxisTopLine =  6;                       //y轴顶端预留的最小值
             this.yMaxHeight      =  0;                       //y轴最大高
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
@@ -1941,7 +1970,9 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter          =  null; //function(params){}; 
 
-            this.isH             =  false;
+            this.isH             =  false; //是否横向
+
+            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小
 
             this.init(opt , data);
         };
@@ -1974,7 +2005,16 @@ define(
                     } );
                 });
             },
-            //删除一个字段
+            //数据变化，配置没变的情况
+            resetData : function( data ){
+                 //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+                //_.deepExtend( this , opt );
+                this._initData( data );
+                this.draw();
+            },
+            //配置和数据变化
             update : function( opt , data ){
                 //先在field里面删除一个字段，然后重新计算
                 this.sprite.removeAllChildren();
@@ -2062,10 +2102,31 @@ define(
                 if( this.dataSection.length == 0 ){
                     this.dataSection = DataSection.section( arr , 3 );
                 };
+
                 //如果还是0
                 if( this.dataSection.length == 0 ){
                     this.dataSection = [0]
-                }
+                };
+
+                if( this.sort ){
+                    var sort = "asc";
+                    if( _.isString( this.sort )){
+                        sort = this.sort;
+                    }
+                    if (_.isArray( this.sort )) {
+                        var i = 0;
+                        if (this.place=="right") {
+                            i = 1;
+                        };
+                        if (this.sort[i]) {
+                            sort = this.sort[i];
+                        };
+                    };
+                    if (sort == "desc") {
+                        this.dataSection.reverse();
+                    };
+                };
+
                 this._bottomNumber = this.dataSection[0];
                 /*
                 if(arr.length == 1){
@@ -2171,12 +2232,12 @@ define(
                 };
 
                 maxW += self.dis;
-                
-                self.sprite.context.x = maxW;
+                 
+                self.sprite.context.x = maxW + self.pos.x;
                 if( self.line.enabled ){
-                    self.w = maxW + self.dis + self.line.width
+                    self.w = maxW + self.dis + self.line.width + self.pos.x;
                 } else {
-                    self.w = maxW + self.dis;
+                    self.w = maxW + self.dis + self.pos.x;
                 }
             }
         };

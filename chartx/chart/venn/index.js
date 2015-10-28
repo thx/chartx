@@ -75,6 +75,8 @@ define(
                 this._startDraw();
 
                 this._drawEnd();
+
+                this.inited = true;
             },
             _initModule: function() {
                 this._tip = new Tip(this.tips, this.canvax.getDomContainer());
@@ -243,7 +245,6 @@ define(
                         });
 
                         _.each(betweenPaths, function(path) {
-                            debugger
                             var bpath = new Path({
                                 context: {
                                     path: path,

@@ -67,6 +67,8 @@ define(
                 //附加的lineChart._graphs 添加到core
                 this.core.addChild(this._lineChart._graphs.sprite);
 
+                this.inited = true;
+
             },
             _startDraw: function(opt) {
                 var me = this;
@@ -76,7 +78,7 @@ define(
                 //绘制yAxis
                 me._yAxis.draw({
                     pos: {
-                        x: 0,
+                        x: this.padding.left,
                         y: y
                     },
                     yMaxHeight: graphsH
@@ -94,13 +96,14 @@ define(
                         yMaxHeight: me._yAxis.yGraphsHeight
                     });
                     _yAxisRW = me._yAxisR.w;
-                    me._yAxisR.setX(me.width - _yAxisRW);
+                    //me._yAxisR.setX(me.width - _yAxisRW);
+                    me._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
 
                 //绘制x轴
                 me._xAxis.draw({
                     graphh: me.height,
-                    graphw: me.width - _yAxisRW,
+                    graphw: me.width - _yAxisRW - this.padding.right,
                     yAxisW: _yAxisW
                 });
                 if (me._xAxis.yAxisW != _yAxisW) {
@@ -143,7 +146,8 @@ define(
                         x: _yAxisW,
                         y: y
                     },
-                    yDataSectionLen: me._yAxis.dataSection.length
+                    yDataSectionLen: me._yAxis.dataSection.length,
+                    sort : this._yAxis.sort
                 });
 
                 //绘制折线图主图形区域

@@ -40,8 +40,8 @@ define(
             this.dataOrg     = [];                           //源数据
 
             this.sprite      = null;
-            this.x           = 0;
-            this.y           = 0;
+            //this.x           = 0;
+            //this.y           = 0;
             this.disYAxisTopLine =  6;                       //y轴顶端预留的最小值
             this.yMaxHeight      =  0;                       //y轴最大高
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
@@ -53,7 +53,9 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter          =  null; //function(params){}; 
 
-            this.isH             =  false;
+            this.isH             =  false; //是否横向
+
+            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小
 
             this.init(opt , data);
         };
@@ -86,7 +88,16 @@ define(
                     } );
                 });
             },
-            //删除一个字段
+            //数据变化，配置没变的情况
+            resetData : function( data ){
+                 //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+                //_.deepExtend( this , opt );
+                this._initData( data );
+                this.draw();
+            },
+            //配置和数据变化
             update : function( opt , data ){
                 //先在field里面删除一个字段，然后重新计算
                 this.sprite.removeAllChildren();
@@ -174,10 +185,31 @@ define(
                 if( this.dataSection.length == 0 ){
                     this.dataSection = DataSection.section( arr , 3 );
                 };
+
                 //如果还是0
                 if( this.dataSection.length == 0 ){
                     this.dataSection = [0]
-                }
+                };
+
+                if( this.sort ){
+                    var sort = "asc";
+                    if( _.isString( this.sort )){
+                        sort = this.sort;
+                    }
+                    if (_.isArray( this.sort )) {
+                        var i = 0;
+                        if (this.place=="right") {
+                            i = 1;
+                        };
+                        if (this.sort[i]) {
+                            sort = this.sort[i];
+                        };
+                    };
+                    if (sort == "desc") {
+                        this.dataSection.reverse();
+                    };
+                };
+
                 this._bottomNumber = this.dataSection[0];
                 /*
                 if(arr.length == 1){
@@ -283,12 +315,12 @@ define(
                 };
 
                 maxW += self.dis;
-                
-                self.sprite.context.x = maxW;
+                 
+                self.sprite.context.x = maxW + self.pos.x;
                 if( self.line.enabled ){
-                    self.w = maxW + self.dis + self.line.width
+                    self.w = maxW + self.dis + self.line.width + self.pos.x;
                 } else {
-                    self.w = maxW + self.dis;
+                    self.w = maxW + self.dis + self.pos.x;
                 }
             }
         };

@@ -36,34 +36,36 @@
 var data= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , 3 , 20 , 33    ],
-    [ 2      , 0   , 51 , 26    ],
-    [ 3      , 32   , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 39    ],
-    [ 7      , 55  , 68 , 65    ],
-    [ 8      , 66   , 83 , 51    ]
+    [ 2      , 0   , 151 , 26    ],
+    [ 3      , 32   , 145 , 43    ],
+    [ 4      , 58  , 135 , 31    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 88  , 154 , 39    ],
+    [ 7      , 55  , 168 , 65    ],
+    [ 8      , 66   , 183 , 51    ]
 ];
 
 //chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
+    biaxial : true,
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
         field : ["uv" , "pv" ],
-        label : "yaxis"
-    },
-    xAxis : {
-        field : "xfield",
-        text : {
-            format : function(){
-               return "xxoo"
+        text  : {
+            format: function( c , yaxis ){
+                return yaxis.field +"："+c 
             }
         },
-        label : "xaxis"
+        sort : ["asc" , "desc"] 
+        //sort : "asc"
+        //sort : "desc"
+    },
+    xAxis : {
+        field : "xfield"
     }
 };
 //Chartx.line开始初始化chart实例
-var chartx = Chartx.line("canvasTest" , data , options)
+var chartx = Chartx.line("canvasTest" , data , options);
 </textarea></form>
 
         </td>

@@ -19,7 +19,7 @@ define(
 
                 this.dataLabel = {
                     enabled: true,
-                    allowLine:true
+                    allowLine: true
                 };
 
                 this.tips = _.deepExtend({ enabled: true }, tipsOpt); //tip的confit
@@ -41,7 +41,7 @@ define(
 
                     this._tip = new Tip(this.tips, this.domContainer);
                     this._tip._getDefaultContent = this._getTipDefaultContent;
-                    this.sprite.addChild(this._tip.sprite);                    
+                    this.sprite.addChild(this._tip.sprite);
                     if (this.dataLabel.enabled) {
                         this.branchSp = new Canvax.Display.Sprite();
                         this.branchTxtSp = new Canvax.Display.Sprite();
@@ -143,6 +143,8 @@ define(
                             var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
                             if (totalPercentOffset != 0) {
                                 data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
+                                data[maxPercentageOffsetIndex].percentage = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum);
+                                data[maxPercentageOffsetIndex].txt = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum) + '%';
                             }
                         }
                     }
@@ -809,9 +811,10 @@ define(
                     this.stageTip.toFront();
                     this.stage.addChild(this.core);
 
-                    this._initModule();                      //初始化模块
+                    this._initModule();                        //初始化模块
                     this._startDraw();                         //开始绘图
-                    this._drawEnd();                           //绘制结束，添加到舞台      
+                    this._drawEnd();                           //绘制结束，添加到舞台  
+                    this.inited = true;    
                 },
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);

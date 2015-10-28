@@ -29,6 +29,7 @@ define(
                 },
                 draw : function(){
                     this._widget();
+                    this.inited = true;
                 },
                 _simpleRenderer : function(canvas){
                     

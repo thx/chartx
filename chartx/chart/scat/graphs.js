@@ -13,7 +13,10 @@ define(
             this.xAxis = dataFrame.xAxis;
             this.yAxis = dataFrame.yAxis;
             this.dataFrame = dataFrame;
-            this.label     = []; //label的字段
+            this.label     = {
+                field : [],
+                enabled : true
+            }; //label的字段
             this.w = 0;
             this.h = 0;
 
@@ -52,7 +55,7 @@ define(
                 this.sprite.context.y = $n
             },
             _getLabel      : function( iGroup , iNode ){
-                var labelField = this.label[ iGroup ];
+                var labelField = this.label.field[ iGroup ];
                 if( labelField ) {
                     var label = null;
                     _.each( this.dataFrame.data , function( d , i ){
@@ -162,6 +165,10 @@ define(
 
                         var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
 
+                        if (zAxisV == 0 ) {
+                            continue
+                        };
+
                         var r = this.getR(d) || (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circleNode = this._getCircleNode(ii , i , d.value);
 
@@ -186,7 +193,7 @@ define(
                         circle.iNode  = i;
                         circle.r      = r;
                         circle.label  = circleNode.label;
-                        if( zAxisV ){
+                        if( zAxisV != undefined || zAxisV != null ){
                             circle.zAxis  = {
                                 field : this.zAxis.field,
                                 value : zAxisV,
@@ -214,7 +221,7 @@ define(
 
                         this._circles.push( circle );
 
-                        if( circleNode.label && circleNode.label != "" ){
+                        if( circleNode.label && circleNode.label != "" && this.label.enabled ){
                             var y = d.y-r;
                             if( y + this.h <= 20 ){
                                 y = -(this.h - 20);

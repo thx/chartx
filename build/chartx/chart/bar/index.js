@@ -22,13 +22,14 @@ define(
             this.bar = {
                 width  : 22,
                 radius : 4
-            }
+            };
             this.text = {
                 enabled: 0,
                 fillStyle: '#999',
                 fontSize: 12,
                 format: null
-            }
+            };
+            this.sort = null;
 
             this.eventEnabled = true;
 
@@ -47,6 +48,7 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "graphsEl"
                 });
+                
                 this.txtsSp = new Canvax.Display.Sprite({
                     id: "txtsSp",
                     context: {
@@ -161,11 +163,12 @@ define(
                             if (v > 0) {
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
                             };
+                            var beginY = parseInt(rectData.y);
 
                             var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value , rectData.field);
                             var rectCxt   = {
                                 x: Math.round(rectData.x - me.bar.width / 2),
-                                y: parseInt(rectData.y),
+                                y: beginY,
                                 width: parseInt(me.bar.width),
                                 height: rectH,
                                 fillStyle: fillStyle
@@ -225,6 +228,10 @@ define(
 
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
+
+                if (this.sort && this.sort == "desc") {
+                    this.sprite.context.y -= this.h;
+                };
             },
             /**
              * 生长动画
@@ -232,6 +239,10 @@ define(
             grow: function(callback) {
                 var self = this;
                 var timer = null;
+                var i = 1;
+                if (this.sort && this.sort == "desc") {
+                    i = -1;
+                };
                 var growAnima = function() {
                     var bezierT = new Tween.Tween({
                             h: 0
@@ -240,7 +251,7 @@ define(
                             h: self.h
                         }, 500)
                         .onUpdate(function() {
-                            self.sprite.context.scaleY = this.h / self.h;
+                            self.sprite.context.scaleY = i * this.h / self.h;
                         }).onComplete(function() {
                             self._growEnd();
                             cancelAnimationFrame(timer);
@@ -474,6 +485,8 @@ define(
 
                 this._drawEnd(); //绘制结束，添加到舞台
 
+                this.inited = true;
+
             },
             _initData: function(data, opt) {
                 var d = dataFormat.apply(this, arguments);
@@ -506,7 +519,7 @@ define(
                 //绘制yAxis
                 this._yAxis.draw({
                     pos: {
-                        x: 0,
+                        x: this.padding.left,
                         y: y
                     },
                     yMaxHeight :graphsH 
@@ -517,7 +530,7 @@ define(
                 //绘制x轴
                 this._xAxis.draw({
                     graphh: h,
-                    graphw: w,
+                    graphw: w - this.padding.right,
                     yAxisW: _yAxisW
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {
@@ -552,7 +565,8 @@ define(
                         x: _yAxisW,
                         y: y
                     },
-                    yDataSectionLen: this._yAxis.dataSection.length
+                    yDataSectionLen: this._yAxis.dataSection.length,
+                    sort : this._yAxis.sort
                 });
             },
 
@@ -621,11 +635,15 @@ define(
                             if (me.proportion) {
                                 y = -val / vCount * _yAxis.yGraphsHeight;
                             } else {
-                                y = -(val - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                                y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                            };
+                            if (v > 0) {
+                                y += tmpData[b][v - 1][i].y;
                             };
 
-                            if (v > 0) {
-                                y += tmpData[b][v - 1][i].y
+                            //如果有排序的话
+                            if (me._yAxis.sort && me._yAxis.sort == "desc") {
+                                y = -(_yAxis.yGraphsHeight - Math.abs(y));
                             };
 
                             var node = {

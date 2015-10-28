@@ -22,13 +22,14 @@ define(
             this.bar = {
                 width  : 22,
                 radius : 4
-            }
+            };
             this.text = {
                 enabled: 0,
                 fillStyle: '#999',
                 fontSize: 12,
                 format: null
-            }
+            };
+            this.sort = null;
 
             this.eventEnabled = true;
 
@@ -47,6 +48,7 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "graphsEl"
                 });
+                
                 this.txtsSp = new Canvax.Display.Sprite({
                     id: "txtsSp",
                     context: {
@@ -161,11 +163,12 @@ define(
                             if (v > 0) {
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
                             };
+                            var beginY = parseInt(rectData.y);
 
                             var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value , rectData.field);
                             var rectCxt   = {
                                 x: Math.round(rectData.x - me.bar.width / 2),
-                                y: parseInt(rectData.y),
+                                y: beginY,
                                 width: parseInt(me.bar.width),
                                 height: rectH,
                                 fillStyle: fillStyle
@@ -225,6 +228,10 @@ define(
 
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
+
+                if (this.sort && this.sort == "desc") {
+                    this.sprite.context.y -= this.h;
+                };
             },
             /**
              * 生长动画
@@ -232,6 +239,10 @@ define(
             grow: function(callback) {
                 var self = this;
                 var timer = null;
+                var i = 1;
+                if (this.sort && this.sort == "desc") {
+                    i = -1;
+                };
                 var growAnima = function() {
                     var bezierT = new Tween.Tween({
                             h: 0
@@ -240,7 +251,7 @@ define(
                             h: self.h
                         }, 500)
                         .onUpdate(function() {
-                            self.sprite.context.scaleY = this.h / self.h;
+                            self.sprite.context.scaleY = i * this.h / self.h;
                         }).onComplete(function() {
                             self._growEnd();
                             cancelAnimationFrame(timer);
