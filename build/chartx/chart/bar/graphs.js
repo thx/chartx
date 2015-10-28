@@ -20,15 +20,16 @@ define(
             this._colors = ["#42a8d7", '#666666', "#6f8cb2", "#c77029", "#f15f60", "#ecb44f", "#ae833a", "#896149", "#4d7fff"];
 
             this.bar = {
-                width: 22,
-                radius: 4
-            }
+                width  : 22,
+                radius : 4
+            };
             this.text = {
                 enabled: 0,
                 fillStyle: '#999',
                 fontSize: 12,
                 format: null
-            }
+            };
+            this.sort = null;
 
             this.eventEnabled = true;
 
@@ -47,6 +48,7 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "graphsEl"
                 });
+                
                 this.txtsSp = new Canvax.Display.Sprite({
                     id: "txtsSp",
                     context: {
@@ -60,7 +62,7 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
-            _getColor: function(c, groups, vLen, i, h, v, value) {
+            _getColor: function(c, groups, vLen, i, h, v, value , field) {
                 var style = null;
                 if (_.isString(c)) {
                     style = c
@@ -74,10 +76,11 @@ define(
                 }
                 if (_.isFunction(c)) {
                     style = c({
-                        iGroup: i,
-                        iNode: h,
-                        iLay: v,
-                        value: value
+                        iGroup : i,
+                        iNode  : h,
+                        iLay   : v,
+                        field  : field,
+                        value  : value
                     });
                 }
                 if (!style || style == "") {
@@ -95,7 +98,6 @@ define(
                 if (data.length == 0) {
                     return;
                 };
-
                 this.data = data;
                 var me = this;
                 var groups = data.length;
@@ -107,7 +109,7 @@ define(
                     */
 
                     //vLen 为一单元bar上面纵向堆叠的length
-                    //比如yAxis.field = [
+                    //比如yAxis.field = [?
                     //    ["uv","pv"],  vLen == 2
                     //    "click"       vLen == 1
                     //]
@@ -127,15 +129,15 @@ define(
                             //横向的分组区片感应区
                             var itemW = me.w / hLen;
                             var hoverRect = new Rect({
-                                id: "bhr_" + h,
+                                id      : "bhr_" + h,
                                 pointChkPriority: false,
-                                context: {
-                                    x: itemW * h,
-                                    y: -me.h,
-                                    width: itemW,
-                                    height: me.h,
-                                    fillStyle: "#ccc",
-                                    globalAlpha: 0
+                                context : {
+                                    x           : itemW * h,
+                                    y           : -me.h,
+                                    width       : itemW,
+                                    height      : me.h,
+                                    fillStyle   : "#ccc",
+                                    globalAlpha : 0
                                 }
                             });
                             groupH.addChild(hoverRect);
@@ -160,18 +162,20 @@ define(
                             var rectH = parseInt(Math.abs(rectData.y));
                             if (v > 0) {
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
-                            }
-                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value);
-                            var rectCxt = {
+                            };
+                            var beginY = parseInt(rectData.y);
+
+                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value , rectData.field);
+                            var rectCxt   = {
                                 x: Math.round(rectData.x - me.bar.width / 2),
-                                y: parseInt(rectData.y),
+                                y: beginY,
                                 width: parseInt(me.bar.width),
                                 height: rectH,
                                 fillStyle: fillStyle
                             };
                             if (!!me.bar.radius && v == vLen - 1) {
-                                var radiusR = Math.min(me.bar.width / 2, rectH);
-                                radiusR = Math.min(radiusR, me.bar.radius);
+                                var radiusR    = Math.min(me.bar.width / 2, rectH);
+                                radiusR        = Math.min(radiusR, me.bar.radius);
                                 rectCxt.radius = [radiusR, radiusR, 0, 0];
                             };
                             var rectEl = new Rect({
@@ -211,8 +215,8 @@ define(
                                 txt.context.y = rectCxt.y - txt.getTextHeight();
                                 if (txt.context.y + me.h < 0) {
                                     txt.context.y = -me.h;
-                                }
-                                me.txtsSp.addChild(txt)
+                                };
+                                me.txtsSp.addChild( txt )
                             }
                         };
                     }
@@ -224,6 +228,10 @@ define(
 
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
+
+                if (this.sort && this.sort == "desc") {
+                    this.sprite.context.y -= this.h;
+                };
             },
             /**
              * 生长动画
@@ -231,6 +239,10 @@ define(
             grow: function(callback) {
                 var self = this;
                 var timer = null;
+                var i = 1;
+                if (this.sort && this.sort == "desc") {
+                    i = -1;
+                };
                 var growAnima = function() {
                     var bezierT = new Tween.Tween({
                             h: 0
@@ -239,7 +251,7 @@ define(
                             h: self.h
                         }, 500)
                         .onUpdate(function() {
-                            self.sprite.context.scaleY = this.h / self.h;
+                            self.sprite.context.scaleY = i * this.h / self.h;
                         }).onComplete(function() {
                             self._growEnd();
                             cancelAnimationFrame(timer);
@@ -251,8 +263,8 @@ define(
                 function animate() {
                     timer = requestAnimationFrame(animate);
                     Tween.update();
-
                 };
+
                 growAnima();
             },
             _growEnd: function() {
@@ -283,17 +295,16 @@ define(
                             for (v = 0; v < vLen; v++) {
                                 if ((iNode == i || iNode == -1) && (iLay == v || iLay == -1)) {
                                     node = h_group[v][h]
-                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value);
+                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value , node.field);
                                     arr.push(node)
                                 }
                             }
                         }
                     }
-                })
+                });
                 return arr;
             }
         };
-
         return Graphs;
     }
 )

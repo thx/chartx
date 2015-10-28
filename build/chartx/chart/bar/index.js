@@ -20,15 +20,16 @@ define(
             this._colors = ["#42a8d7", '#666666', "#6f8cb2", "#c77029", "#f15f60", "#ecb44f", "#ae833a", "#896149", "#4d7fff"];
 
             this.bar = {
-                width: 22,
-                radius: 4
-            }
+                width  : 22,
+                radius : 4
+            };
             this.text = {
                 enabled: 0,
                 fillStyle: '#999',
                 fontSize: 12,
                 format: null
-            }
+            };
+            this.sort = null;
 
             this.eventEnabled = true;
 
@@ -47,6 +48,7 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "graphsEl"
                 });
+                
                 this.txtsSp = new Canvax.Display.Sprite({
                     id: "txtsSp",
                     context: {
@@ -60,7 +62,7 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
-            _getColor: function(c, groups, vLen, i, h, v, value) {
+            _getColor: function(c, groups, vLen, i, h, v, value , field) {
                 var style = null;
                 if (_.isString(c)) {
                     style = c
@@ -74,10 +76,11 @@ define(
                 }
                 if (_.isFunction(c)) {
                     style = c({
-                        iGroup: i,
-                        iNode: h,
-                        iLay: v,
-                        value: value
+                        iGroup : i,
+                        iNode  : h,
+                        iLay   : v,
+                        field  : field,
+                        value  : value
                     });
                 }
                 if (!style || style == "") {
@@ -95,7 +98,6 @@ define(
                 if (data.length == 0) {
                     return;
                 };
-
                 this.data = data;
                 var me = this;
                 var groups = data.length;
@@ -107,7 +109,7 @@ define(
                     */
 
                     //vLen 为一单元bar上面纵向堆叠的length
-                    //比如yAxis.field = [
+                    //比如yAxis.field = [?
                     //    ["uv","pv"],  vLen == 2
                     //    "click"       vLen == 1
                     //]
@@ -127,15 +129,15 @@ define(
                             //横向的分组区片感应区
                             var itemW = me.w / hLen;
                             var hoverRect = new Rect({
-                                id: "bhr_" + h,
+                                id      : "bhr_" + h,
                                 pointChkPriority: false,
-                                context: {
-                                    x: itemW * h,
-                                    y: -me.h,
-                                    width: itemW,
-                                    height: me.h,
-                                    fillStyle: "#ccc",
-                                    globalAlpha: 0
+                                context : {
+                                    x           : itemW * h,
+                                    y           : -me.h,
+                                    width       : itemW,
+                                    height      : me.h,
+                                    fillStyle   : "#ccc",
+                                    globalAlpha : 0
                                 }
                             });
                             groupH.addChild(hoverRect);
@@ -160,18 +162,20 @@ define(
                             var rectH = parseInt(Math.abs(rectData.y));
                             if (v > 0) {
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
-                            }
-                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value);
-                            var rectCxt = {
+                            };
+                            var beginY = parseInt(rectData.y);
+
+                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value , rectData.field);
+                            var rectCxt   = {
                                 x: Math.round(rectData.x - me.bar.width / 2),
-                                y: parseInt(rectData.y),
+                                y: beginY,
                                 width: parseInt(me.bar.width),
                                 height: rectH,
                                 fillStyle: fillStyle
                             };
                             if (!!me.bar.radius && v == vLen - 1) {
-                                var radiusR = Math.min(me.bar.width / 2, rectH);
-                                radiusR = Math.min(radiusR, me.bar.radius);
+                                var radiusR    = Math.min(me.bar.width / 2, rectH);
+                                radiusR        = Math.min(radiusR, me.bar.radius);
                                 rectCxt.radius = [radiusR, radiusR, 0, 0];
                             };
                             var rectEl = new Rect({
@@ -211,8 +215,8 @@ define(
                                 txt.context.y = rectCxt.y - txt.getTextHeight();
                                 if (txt.context.y + me.h < 0) {
                                     txt.context.y = -me.h;
-                                }
-                                me.txtsSp.addChild(txt)
+                                };
+                                me.txtsSp.addChild( txt )
                             }
                         };
                     }
@@ -224,6 +228,10 @@ define(
 
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
+
+                if (this.sort && this.sort == "desc") {
+                    this.sprite.context.y -= this.h;
+                };
             },
             /**
              * 生长动画
@@ -231,6 +239,10 @@ define(
             grow: function(callback) {
                 var self = this;
                 var timer = null;
+                var i = 1;
+                if (this.sort && this.sort == "desc") {
+                    i = -1;
+                };
                 var growAnima = function() {
                     var bezierT = new Tween.Tween({
                             h: 0
@@ -239,7 +251,7 @@ define(
                             h: self.h
                         }, 500)
                         .onUpdate(function() {
-                            self.sprite.context.scaleY = this.h / self.h;
+                            self.sprite.context.scaleY = i * this.h / self.h;
                         }).onComplete(function() {
                             self._growEnd();
                             cancelAnimationFrame(timer);
@@ -251,8 +263,8 @@ define(
                 function animate() {
                     timer = requestAnimationFrame(animate);
                     Tween.update();
-
                 };
+
                 growAnima();
             },
             _growEnd: function() {
@@ -283,17 +295,16 @@ define(
                             for (v = 0; v < vLen; v++) {
                                 if ((iNode == i || iNode == -1) && (iLay == v || iLay == -1)) {
                                     node = h_group[v][h]
-                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value);
+                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value , node.field);
                                     arr.push(node)
                                 }
                             }
                         }
                     }
-                })
+                });
                 return arr;
             }
         };
-
         return Graphs;
     }
 )
@@ -394,9 +405,9 @@ define(
             _tip: null,
 
             init: function(node, data, opts) {
-                if( opts.proportion ){
+                if (opts.proportion) {
                     this.proportion = opts.proportion;
-                    this._initProportion( node , data , opts );
+                    this._initProportion(node, data, opts);
                 } else {
                     this._opts = opts;
                     _.deepExtend(this, opts);
@@ -404,46 +415,46 @@ define(
                 this.dataFrame = this._initData(data);
             },
             //如果为比例柱状图的话
-            _initProportion : function(node , data , opts){
+            _initProportion: function(node, data, opts) {
                 this._opts = opts;
-                !opts.tips && ( opts.tips = {} );
-                opts.tips = _.deepExtend( opts.tips , {
-                    content : function( info ){
-                        var str  = "<table>";
+                !opts.tips && (opts.tips = {});
+                opts.tips = _.deepExtend(opts.tips, {
+                    content: function(info) {
+                        var str = "<table>";
                         var self = this;
-                        _.each( info.nodesInfoList , function( node , i ){
-                            str+= "<tr style='color:"+ self.text.fillStyle +"'>";
+                        _.each(info.nodesInfoList, function(node, i) {
+                            str += "<tr style='color:" + self.text.fillStyle + "'>";
                             var prefixName = self.prefix[i];
-                            if( prefixName ) {
-                                str+="<td>"+ prefixName +"：</td>";
+                            if (prefixName) {
+                                str += "<td>" + prefixName + "：</td>";
                             } else {
-                                if( node.field ){
-                                    str+="<td>"+ node.field +"：</td>";
+                                if (node.field) {
+                                    str += "<td>" + node.field + "：</td>";
                                 }
                             };
-                            str += "<td>"+ Tools.numAddSymbol(node.value) +"（"+ Math.round(node.value/node.vCount*100) +"%）</td></tr>";
+                            str += "<td>" + Tools.numAddSymbol(node.value) + "（" + Math.round(node.value / node.vCount * 100) + "%）</td></tr>";
                         });
-                        str+="</table>";
+                        str += "</table>";
                         return str;
                     }
-                } );
+                });
 
-                _.deepExtend( this , opts );
-                _.deepExtend( this.yAxis , {
-                    dataSection : [0,20,40,60,80,100],
-                    text : {
-                        format : function( n ){
-                            return n+"%"
+                _.deepExtend(this, opts);
+                _.deepExtend(this.yAxis, {
+                    dataSection: [0, 20, 40, 60, 80, 100],
+                    text: {
+                        format: function(n) {
+                            return n + "%"
                         }
                     }
-                } );
-                
+                });
+
                 !this.graphs && (this.graphs = {});
-                _.deepExtend( this.graphs , {
-                    bar : {
-                        radius : 0
+                _.deepExtend(this.graphs, {
+                    bar: {
+                        radius: 0
                     }
-                } );
+                });
             },
             _setStages: function() {
                 this.core = new Canvax.Display.Sprite({
@@ -474,6 +485,8 @@ define(
 
                 this._drawEnd(); //绘制结束，添加到舞台
 
+                this.inited = true;
+
             },
             _initData: function(data, opt) {
                 var d = dataFormat.apply(this, arguments);
@@ -501,14 +514,15 @@ define(
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
                 var y = parseInt(h - this._xAxis.h);
+                var graphsH = y - this.padding.top;
 
                 //绘制yAxis
                 this._yAxis.draw({
                     pos: {
-                        x: 0,
+                        x: this.padding.left,
                         y: y
                     },
-                    yMaxHeight: y
+                    yMaxHeight :graphsH 
                 });
 
                 var _yAxisW = this._yAxis.w;
@@ -516,7 +530,7 @@ define(
                 //绘制x轴
                 this._xAxis.draw({
                     graphh: h,
-                    graphw: w,
+                    graphw: w - this.padding.right,
                     yAxisW: _yAxisW
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {
@@ -543,7 +557,7 @@ define(
                 });
 
                 var o = this._trimGraphs()
-                //绘制主图形区域
+                    //绘制主图形区域
                 this._graphs.draw(o.data, {
                     w: this._xAxis.xGraphsWidth,
                     h: this._yAxis.yGraphsHeight,
@@ -551,13 +565,17 @@ define(
                         x: _yAxisW,
                         y: y
                     },
-                    yDataSectionLen: this._yAxis.dataSection.length
+                    yDataSectionLen: this._yAxis.dataSection.length,
+                    sort : this._yAxis.sort
                 });
             },
 
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo: function(e) {
+                if(!e.eventInfo){
+                    return;
+                }
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iGroup]
@@ -586,14 +604,16 @@ define(
                 this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
-                var tmpData  = [];
-                var center   = [], yValueMaxs = [], yLen = [];
+                var tmpData = [];
+                var center = [],
+                    yValueMaxs = [],
+                    yLen = [];
 
-                var me       = this;
+                var me = this;
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
-                    yValueMaxs[b] = 0
-                    center[b] = {}
+                    yValueMaxs[b] = 0;
+                    center[b] = {};
                     _.each(yArr[b], function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
                         _.each(subv, function(val, i) {
@@ -602,37 +622,42 @@ define(
                             };
 
                             var vCount = 0;
-                            if( me.proportion ){
+                            if (me.proportion) {
                                 //先计算总量
-                                _.each( yArr[b] , function( team , ti ){
+                                _.each(yArr[b], function(team, ti) {
                                     vCount += team[i]
-                                } );
+                                });
                             };
 
                             var x = xArr[i].x - xDis1 / 2 + xDis2 * (b + 1);
-                            
+
                             var y = 0;
-                            if( me.proportion ){
-                                y = -val/vCount * _yAxis.yGraphsHeight;
+                            if (me.proportion) {
+                                y = -val / vCount * _yAxis.yGraphsHeight;
                             } else {
-                                y = -(val - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                                y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                            };
+                            if (v > 0) {
+                                y += tmpData[b][v - 1][i].y;
                             };
 
-                            if (v > 0) {
-                                y += tmpData[b][v - 1][i].y
+                            //如果有排序的话
+                            if (me._yAxis.sort && me._yAxis.sort == "desc") {
+                                y = -(_yAxis.yGraphsHeight - Math.abs(y));
                             };
 
                             var node = {
-                                value: val,
-                                x: x,
-                                y: y
+                                value : val,
+                                field : me._getTargetField( b , v , i , _yAxis.field ),
+                                x     : x,
+                                y     : y
                             };
 
-                            if( me.proportion ){
+                            if (me.proportion) {
                                 node.vCount = vCount;
                             };
 
-                            tmpData[b][v].push( node );
+                            tmpData[b][v].push(node);
 
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
@@ -650,6 +675,21 @@ define(
                     data: tmpData
                 };
             },
+            _getTargetField : function( b , v , i , field ){
+                if( !field ){
+                    field = this._yAxis.field;
+                };
+                if( _.isString( field ) ){
+                    return field;
+                } else if( _.isArray(field) ){
+                    var res = field[b];
+                    if( _.isString( res ) ){
+                        return res;
+                    } else if (_.isArray(res)) {
+                        return res[ v ];
+                    };
+                }
+            },
             _drawEnd: function() {
                 var me = this
                 this.stageBg.addChild(this._back.sprite)
@@ -662,8 +702,11 @@ define(
 
                 //执行生长动画
                 this._graphs.grow(function(g) {
-                    if ("markLine" in me._opts) {
+                    if (me._opts.markLine) {
                         me._initMarkLine(g);
+                    }
+                    if (me._opts.markPoint) {
+                        me._initMarkPoint(g);
                     }
                 });
 
@@ -673,17 +716,17 @@ define(
                 var me = this
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     for (var a = 0, al = me._yAxis.dataOrg.length; a < al; a++) {
-                        var index  = a
+                        var index = a
                         var center = me.dataFrame.yAxis.center[a].agPosition
                         var strokeStyle = g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
-                        
+
                         var content = me.dataFrame.yAxis.field[a] + '均值'
-                        if(me.markLine.text && me.markLine.text.enabled){
-                            
-                            if(_.isFunction(me.markLine.text.format)){
+                        if (me.markLine.text && me.markLine.text.enabled) {
+
+                            if (_.isFunction(me.markLine.text.format)) {
                                 var o = {
-                                    iGroup : index,
-                                    value  : me.dataFrame.yAxis.center[index].agValue
+                                    iGroup: index,
+                                    value: me.dataFrame.yAxis.center[index].agValue
                                 }
                                 content = me.markLine.text.format(o)
                             }
@@ -695,7 +738,7 @@ define(
                                 x: me._back.pos.x,
                                 y: me._back.pos.y
                             },
-                            field : _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
+                            field: _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
                             line: {
                                 y: center,
                                 list: [
@@ -705,7 +748,7 @@ define(
                                 strokeStyle: strokeStyle
                             },
                             text: {
-                                content  : content,
+                                content: content,
                                 fillStyle: strokeStyle
                             },
                         }
@@ -716,6 +759,61 @@ define(
                     }
                 })
 
+            },
+            _initMarkPoint: function(g) {
+                var me = this;
+                var gOrigin = {
+                    x: g.sprite.context.x,
+                    y: g.sprite.context.y
+                };
+
+                require(["chartx/components/markpoint/index"], function(MarkPoint) {
+                    _.each(g.data, function(group, i) {
+                        var vLen = group.length;
+
+                        _.each(group, function(hgroup) {
+                            _.each(hgroup, function(bar) {
+                                var barObj = _.clone(bar);
+                                barObj.x += gOrigin.x;
+                                barObj.y += gOrigin.y;
+                                var mpCtx = {
+                                    value: barObj.value,
+                                    shapeType : "droplet",
+                                    markTarget: barObj.field,
+                                    //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 igroup 给出去的时候要反过来
+                                    iGroup    : barObj.iNode,
+                                    iNode     : barObj.iGroup,
+                                    iLay      : barObj.iLay,
+                                    point: {
+                                        x: barObj.x,
+                                        y: barObj.y
+                                    }
+                                };
+                                new MarkPoint(me._opts, mpCtx).done(function() {
+                                    me.core.addChild(this.sprite);
+                                    var mp = this;
+                                    this.shape.hover(function(e) {
+                                        this.context.hr++;
+                                        this.context.cursor = "pointer";
+                                        e.stopPropagation();
+                                    }, function(e) {
+                                        this.context.hr--;
+                                        e.stopPropagation();
+                                    });
+                                    this.shape.on("mousemove" , function(e){
+                                        e.stopPropagation();
+                                    });
+                                    this.shape.on("tap click" , function(e){
+                                        e.stopPropagation();
+                                        e.eventInfo = mp;
+                                        me.fire("markpointclick" , e);
+                                    });
+                                });
+                            });
+                        });
+                    });
+
+                });
             },
             bindEvent: function() {
                 var me = this;

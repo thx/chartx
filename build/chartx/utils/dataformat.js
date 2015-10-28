@@ -17,7 +17,7 @@ define(
                     org        : [],   //最原始的数据  
                     data       : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
                     yAxis      : {     //y轴
-                        field  : [],   //字段集合 对应this.data
+                        field  : null, //[],   //字段集合 对应this.data
                         org    : []    //二维 原始数据[[100,200],[1000,2000]]
                     },
                     xAxis      : {     //x轴
@@ -105,12 +105,14 @@ define(
                  * 然后设置对应的yAxis数据
                  */
                 var yField = dataFrame.yAxis.field;
-                if( !yField || yField=="" || (_.isArray(yField) && yField.length == 0) ){
+                if( yField == "" || (_.isArray(yField) && yField.length == 0) ){
+                    yField = [];
+                } else if( !yField ){
                     //如果yField没有，那么就自动获取除开xField 的所有字段    
                     yField = _.difference( fileds , xField );
                 } else if( _.isString( yField ) ){
                     yField = [ yField ];
-                }             
+                };             
                 dataFrame.yAxis.field = yField;
 
                 var allYFields = _.flatten(dataFrame.yAxis.field);
@@ -121,11 +123,10 @@ define(
                             val = (isNaN(Number( val )) ? val : Number( val ));
                         }
                         total[b].data.push( val );
-                    }     
+                    }
                 };
                 dataFrame.xAxis.org = getDataOrg( xField , total );
                 dataFrame.yAxis.org = getDataOrg( yField , total , "yAxis");
-
 
                 /*
                  * 然后设置对应的zAxis数据

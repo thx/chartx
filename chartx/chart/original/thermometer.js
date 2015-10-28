@@ -57,6 +57,8 @@ define(
                 this._startDraw();                         //开始绘图
                 
                 this._drawEnd();                           //绘制结束，添加到舞台
+
+                this.inited = true;
                 
             },
             _initData  : dataFormat,

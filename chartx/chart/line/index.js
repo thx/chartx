@@ -34,12 +34,7 @@ define(
                 this.graphs = {};
 
                 this.biaxial = false;
-                this.padding = {
-                    top: 10,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                }
+
 
                 //this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
 
@@ -67,6 +62,21 @@ define(
                 this._initModule(); //初始化模块  
 
                 this._startDraw(); //开始绘图
+
+                this.inited = true;
+
+            },
+            /*
+             * 如果只有数据改动的情况
+            */
+            resetData : function( data ){
+                this.dataFrame = this._initData(data, this);
+
+                this._xAxis.resetData( this.dataFrame.xAxis );
+                this._yAxis.resetData( this.dataFrame.yAxis );
+                this._graphs.resetData( this._trimGraphs() , {
+                    disX: this._getGraphsDisX()
+                });
 
             },
             /*
@@ -189,12 +199,12 @@ define(
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
                 var y = this.height - this._xAxis.h;
-                var graphsH = y - this.padding.top
+                var graphsH = y - this.padding.top;
 
                 //绘制yAxis
                 this._yAxis.draw({
                     pos: {
-                        x: 0,
+                        x: this.padding.left,
                         y: y
                     },
                     yMaxHeight: graphsH
@@ -207,19 +217,19 @@ define(
                 if (this._yAxisR) {
                     this._yAxisR.draw({
                         pos: {
-                            x: 0,
+                            x: 0, //this.padding.right,
                             y: y
                         },
                         yMaxHeight: graphsH
                     });
                     _yAxisRW = this._yAxisR.w;
-                    this._yAxisR.setX(this.width - _yAxisRW);
+                    this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 }
 
                 //绘制x轴
                 this._xAxis.draw({
                     graphh: this.height,
-                    graphw: this.width - _yAxisRW,
+                    graphw: this.width - _yAxisRW - this.padding.right,
                     yAxisW: _yAxisW
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {
@@ -255,7 +265,8 @@ define(
                     h: this._yAxis.yGraphsHeight,
                     data: this._trimGraphs(),
                     disX: this._getGraphsDisX(),
-                    smooth: this.smooth
+                    smooth: this.smooth,
+                    inited : this.inited
                 });
 
                 this._graphs.setX(_yAxisW), this._graphs.setY(y);
@@ -276,9 +287,11 @@ define(
                 }
 
                 //执行生长动画
-                this._graphs.grow(function(g) {
-                    me._initPlugs(me._opts, g);
-                });
+                if (!this.inited) {
+                    this._graphs.grow(function(g) {
+                        me._initPlugs(me._opts, g);
+                    });
+                };
 
                 this.bindEvent(this._graphs.sprite);
 
@@ -302,43 +315,86 @@ define(
                 }
             },
             _initPlugs: function(opts, g) {
-                if ("markLine" in opts) {
+                if (opts.markLine) {
                     this._initMarkLine(g);
-                }
-                if ("markPoint" in opts) {
+                };
+                if (opts.markPoint) {
                     this._initMarkPoint(g);
-                }
+                };
             },
             _initMarkPoint: function(g) {
                 var me = this;
                 require(["chartx/components/markpoint/index"], function(MarkPoint) {
-                    var lastNode = g._circles.children[g._circles.children.length - 1];
-                    var mpCtx = {
-                        markTarget: g.field,
-                        point: lastNode.localToGlobal(),
-                        r: lastNode.context.r + 1,
-                        globalAlpha: 0.8,
-                        realTime: true
-                    };
-                    new MarkPoint(me._opts, mpCtx).done(function() {
-                        //this.shape.context.visible = false;
-                        me.core.addChild(this.sprite);
+                    _.each(g.data, function(node, i) {
+                        var circle = g._circles.children[i];
+
+                        var mpCtx = {
+                            value: node.value,
+                            markTarget: g.field,
+                            point: circle.localToGlobal(),
+                            r: circle.context.r + 2,
+                            groupLen: g.data.length,
+                            iNode: i,
+                            iGroup: g._groupInd
+                        };
+                        if (me._opts.markPoint && me._opts.markPoint.shapeType != "circle") {
+                            mpCtx.point.y -= circle.context.r + 3
+                        };
+                        new MarkPoint(me._opts, mpCtx).done(function() {
+                            me.core.addChild(this.sprite);
+                            var mp = this;
+                            this.shape.hover(function(e) {
+                                this.context.hr++;
+                                this.context.cursor = "pointer";
+                                e.stopPropagation();
+                            }, function(e) {
+                                this.context.hr--;
+                                e.stopPropagation();
+                            });
+                            this.shape.on("mousemove", function(e) {
+                                e.stopPropagation();
+                            });
+                            this.shape.on("tap click", function(e) {
+                                e.stopPropagation();
+                                e.eventInfo = mp;
+                                me.fire("markpointclick", e);
+                            });
+                        });
                     });
+
+                    /*
+                                        var lastNode = g._circles.children[g._circles.children.length - 1];
+                                        debugger
+                                        var mpCtx = {
+                                            markTarget: g.field,
+                                            point: lastNode.localToGlobal(),
+                                            r: lastNode.context.r + 1,
+                                            globalAlpha: 0.8,
+                                            realTime: true
+                                        };
+                                        new MarkPoint(me._opts, mpCtx).done(function() {
+                                            //this.shape.context.visible = false;
+                                            me.core.addChild(this.sprite);
+                                        });
+                    */
                 });
             },
-            _initMarkLine: function(g) {
-                var me = this
-                var index = g._groupInd
-                var pointList = _.clone(g._pointList)
-                var center = parseInt(me.dataFrame.yAxis.center[index].agPosition)                             
+            _initMarkLine: function(g, dataFrame) {
+
+                var me = this;
+                var index = g._groupInd;
+                var pointList = _.clone(g._pointList);
+                dataFrame || (dataFrame = me.dataFrame);
+                var center = parseInt(dataFrame.yAxis.center[index].agPosition)
                 require(['chartx/components/markline/index'], function(MarkLine) {
-                    var content = g.field + '均值', strokeStyle = g.line.strokeStyle
-                    if(me.markLine.text && me.markLine.text.enabled){
-                        
-                        if(_.isFunction(me.markLine.text.format)){
+                    var content = g.field + '均值',
+                        strokeStyle = g.line.strokeStyle
+                    if (me.markLine.text && me.markLine.text.enabled) {
+
+                        if (_.isFunction(me.markLine.text.format)) {
                             var o = {
-                                iGroup : index,
-                                value  : me.dataFrame.yAxis.center[index].agValue
+                                iGroup: index,
+                                value: dataFrame.yAxis.center[index].agValue
                             }
                             content = me.markLine.text.format(o)
                         }
@@ -359,12 +415,12 @@ define(
                             strokeStyle: strokeStyle
                         },
                         text: {
-                            content  : content,
+                            content: content,
                             fillStyle: strokeStyle
                         },
                         field: g.field
                     }
-                    
+
                     new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
                         me.core.addChild(this.sprite)
                     })
@@ -458,10 +514,10 @@ define(
                     center[a].agValue = maxValue / bl
 
                     center[a].agPosition = -(center[a].agValue - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
-                    
+
                 }
                 //均值
-                this.dataFrame.yAxis.center = center
+                dataFrame.yAxis.center = center
                 return tmpData
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标

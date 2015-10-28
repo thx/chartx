@@ -56,8 +56,10 @@ var options = {
     },
     markPoint : {
         enabled : true,
+        realTime: true,
+        shapeType:"circle",
         filter  : function(  ){
-            if(this.markTarget != "uv"){
+            if(this.markTarget != "uv" && this.iNode !== this.groupLen-1){
                 this.destroy();
             }
         }

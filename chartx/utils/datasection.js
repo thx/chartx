@@ -55,13 +55,15 @@ define(
     
             if(min==max){
             	if(max > 0){
-            		min = 0
+            		min = 0;
+                    return [ min , max ];
             		// min= Math.round(max/2);
             	} else if(max < 0){
-            		min = max*2;
+                    return [ max , 0 ];
+            		//min = max*2;
             	} else {
                     max = 1;
-                    return [0]
+                    return [0 , max];
                 }
             }
 

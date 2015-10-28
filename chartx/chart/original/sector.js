@@ -69,6 +69,8 @@ define(
 
                 this._drawEnd(); //绘制结束，添加到舞台
 
+                this.inited = true;
+
             },
             _initData: function(data, opts) {
                 var d = dataFormat.apply(this, arguments);

@@ -53,6 +53,17 @@ define(
                 _.deepExtend( this , opt );
                 this._widget( opt );
             },
+            resetData : function( data , opt){
+                var self  = this;
+                self.data = data;
+                opt && _.deepExtend( self , opt );
+                for(var a = 0,al = self.data.length; a < al; a++){
+                    var group = self.groups[a];
+                    group.resetData({
+                        data : self.data[a]
+                    });
+                }
+            },
             /**
              * 生长动画
              */
@@ -63,7 +74,11 @@ define(
             },
             _getYaxisField : function( i ){
                 //这里要兼容从折柱混合图过来的情况
-                return this.root.yAxis.field ? this.root.yAxis.field[i] : this.root.yAxis.line.field[i]
+                if ( this.root.type && this.root.type.indexOf("line") >= 0 ) {
+                    return this.root._lineChart.dataFrame.yAxis.field[i];
+                } else {
+                    return this.root.dataFrame.yAxis.field[i];
+                };
             },
             /*
              *@params opt
@@ -92,7 +107,6 @@ define(
                         data : self.data[i]
                     });
                 });
-
             },
             /*
              *删除 ind
@@ -130,8 +144,7 @@ define(
                     })
                     self.sprite.addChild(group.sprite);
                     self.groups.push(group);
-                    
-                }
+                };
                 
                 self.induce = new Rect({
                     id    : "induce",

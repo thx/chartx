@@ -9,14 +9,21 @@ define(
     function( Canvax , Line , Circle , Tip ){
         var Tips = function(opt , data , tipDomContainer){
             this.line      = {
-                enabled      : 1
+                enabled      : 1,
+                 //strokeStyle : null
+            };
+            this.node      = {
+                //strokeStyle : null
+                //backFillStyle : null
             }
+
             this.sprite    = null;
             this._line     = null;
             this._nodes    = null;
             this._tip      = null;
             this._isShow   = false;
             this.enabled   = true;
+
             this.init(opt , data , tipDomContainer);
         };
     
@@ -84,7 +91,7 @@ define(
                     xEnd    : 0,
                     yEnd    : 0,
                     lineWidth   : 1,
-                    strokeStyle : "#0088cf"//"#cccccc" 
+                    strokeStyle : this.line.strokeStyle || "#0088cf"//"#cccccc" 
                 } , this.line);
                 if(this.line.enabled){
                     this._line = new Line({
@@ -110,6 +117,7 @@ define(
                 });
                 var self = this;
                 _.each( e.eventInfo.nodesInfoList , function( node ){
+                    
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y) 
@@ -118,8 +126,8 @@ define(
                     csp.addChild( new Circle({
                         context : {
                             r : node.r + 2 + 1 ,
-                            fillStyle   : "white",//node.fillStyle,
-                            strokeStyle : node.strokeStyle,
+                            fillStyle   : self.node.backFillStyle || "white",//node.fillStyle,
+                            strokeStyle : self.node.strokeStyle || node.strokeStyle,
                             lineWidth   : node.lineWidth
                         }
                     }) );
@@ -127,7 +135,7 @@ define(
                     csp.addChild( new Circle({
                         context : {
                             r : node.r + 1,
-                            fillStyle   : node.strokeStyle
+                            fillStyle   : self.node.fillStyle || node.strokeStyle
                         }
                     }) );
 

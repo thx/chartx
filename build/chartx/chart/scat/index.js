@@ -51,16 +51,19 @@ define(
         "canvax/animation/Tween"
     ],
     function( Canvax , Circle , Rect , Tween ){
- 
+
         var Graphs = function( opt , dataFrame ){
             this.zAxis = dataFrame.zAxis;
             this.xAxis = dataFrame.xAxis;
             this.yAxis = dataFrame.yAxis;
             this.dataFrame = dataFrame;
-            this.label     = []; //label的字段
+            this.label     = {
+                field : [],
+                enabled : true
+            }; //label的字段
             this.w = 0;
             this.h = 0;
-           
+
             this.pos = {
                 x : 0,
                 y : 0
@@ -70,20 +73,21 @@ define(
                 maxR    : 20,  //圆圈默认最大半径
                 minR    : 3,
                 r       : null,
-                normalR : 10
+                normalR : 10,
+                fillStyle: function(){}
             };
-    
+
             this._colors  = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
-            
+
             this.sprite   = null;
-    
+
             this._circles = [];  //所有圆点的集合
-    
+
             _.deepExtend( this , opt );
-    
+
             this.init( );
         };
-    
+
         Graphs.prototype = {
             init : function(){
                 this.sprite = new Canvax.Display.Sprite({ id : "graphsEl" });
@@ -95,7 +99,7 @@ define(
                 this.sprite.context.y = $n
             },
             _getLabel      : function( iGroup , iNode ){
-                var labelField = this.label[ iGroup ];
+                var labelField = this.label.field[ iGroup ];
                 if( labelField ) {
                     var label = null;
                     _.each( this.dataFrame.data , function( d , i ){
@@ -131,7 +135,7 @@ define(
             },
             getCircleFillStyle : function( i , ii , value , circleNode ){
                 var fillStyle = this.circle.fillStyle;
-                
+
                 if( _.isArray( fillStyle ) ){
                     fillStyle = fillStyle[ii]
                 }
@@ -188,7 +192,7 @@ define(
                     e.eventInfo = null;
                 });
 
-    
+
                 //这个分组是只x方向的一维分组
                 var barGroupLen = data[0].length;
 
@@ -202,9 +206,13 @@ define(
                     var sprite = new Canvax.Display.Sprite();
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var d = data[ii][i];
-                        
+
                         var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
-                        
+
+                        if (zAxisV == 0 ) {
+                            continue
+                        };
+
                         var r = this.getR(d) || (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circleNode = this._getCircleNode(ii , i , d.value);
 
@@ -229,7 +237,7 @@ define(
                         circle.iNode  = i;
                         circle.r      = r;
                         circle.label  = circleNode.label;
-                        if( zAxisV ){
+                        if( zAxisV != undefined || zAxisV != null ){
                             circle.zAxis  = {
                                 field : this.zAxis.field,
                                 value : zAxisV,
@@ -244,7 +252,7 @@ define(
                         });
                         circle.on("panmove mousemove", function(e){
                             e.eventInfo = self._getInfoHandler(e);
-                            
+
                         });
                         circle.on("panend mouseout", function(e){
                             e.eventInfo = {};
@@ -257,7 +265,7 @@ define(
 
                         this._circles.push( circle );
 
-                        if( circleNode.label && circleNode.label != "" ){
+                        if( circleNode.label && circleNode.label != "" && this.label.enabled ){
                             var y = d.y-r;
                             if( y + this.h <= 20 ){
                                 y = -(this.h - 20);
@@ -273,14 +281,15 @@ define(
                             });
                             if( circle.context.r * 2 > label.getTextWidth() ){
                                 label.context.y = d.y;
-                                label.context.textBaseline = "middle"
+                                label.context.textBaseline = "middle";
+                                label.context.fillStyle = "black"
                             }
                             sprite.addChild( label );
                         }
                     }
                     this.sprite.addChild( sprite );
                 };
-    
+
                 this.setX( this.pos.x );
                 this.setY( this.pos.y );
             },
@@ -305,7 +314,7 @@ define(
             grow : function(){
                 var self  = this;
                 var timer = null;
-    
+
                 var growAnima = function(){
                    var bezierT = new Tween.Tween( { h : 0 } )
                    .to( { h : 100 }, 500 )
@@ -321,12 +330,12 @@ define(
                    animate();
                 };
                 function animate(){
-                    timer    = requestAnimationFrame( animate ); 
+                    timer    = requestAnimationFrame( animate );
                     Tween.update();
                 };
                 growAnima();
             }
-        }; 
+        };
         return Graphs;
     }
 );
@@ -391,6 +400,8 @@ define(
                 this._startDraw();                         //开始绘图
     
                 this._drawEnd();                           //绘制结束，添加到舞台
+
+                this.inited = true;
             },
             _initData  : dataFormat,
             _initModule:function(){
@@ -421,16 +432,18 @@ define(
             },
             _startDraw : function(opt){
                 var w = (opt && opt.w) || this.width;
+                //w     -= (this.padding.right + this.padding.left); 
                 var h = (opt && opt.h) || this.height;
                 var y = parseInt( h - this._xAxis.h );
+                var graphsH = y - this.padding.top;
                 
                 //绘制yAxis
                 this._yAxis.draw({
                     pos : {
-                        x : 0,
+                        x : this.padding.left,
                         y : y
                     },
-                    yMaxHeight : y 
+                    yMaxHeight : graphsH 
                 });
                 
                 var _yAxisW = this._yAxis.w;
@@ -439,7 +452,7 @@ define(
                 //绘制x轴
                 this._xAxis.draw({
                     graphh :   h,
-                    graphw :   w,
+                    graphw :   w - this.padding.right,
                     yAxisW :   _yAxisW
                 });
                 if( this._xAxis.yAxisW != _yAxisW ){
@@ -504,6 +517,7 @@ define(
                     field : self.dataFrame.xAxis.field[ e.eventInfo.iGroup ],
                     value : self.dataFrame.xAxis.org[ e.eventInfo.iGroup ][ e.eventInfo.iNode ]
                 };
+                
                 if( e.target.zAxis ){
                     e.eventInfo.zAxis = e.target.zAxis;
                 };

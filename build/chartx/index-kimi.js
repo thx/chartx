@@ -59,44 +59,50 @@ Chartx._start && Chartx._start();
 
 
 define(
-    "chartx/chart/index",
-    [
+    "chartx/chart/index", [
         "canvax/index",
         "canvax/core/Base"
     ],
-    function( Canvax , CanvaxBase ){
-        var Chart = function(node , data , opts){
+    function(Canvax, CanvaxBase) {
+        var Chart = function(node, data, opts) {
             //为了防止用户在canvax加载了并且给underscore添加了deepExtend扩展后又加载了一遍underscore
             //检测一遍然后重新自己添加一遍扩展
-            if( _ && !_.deepExtend ){
-               CanvaxBase.setDeepExtend();            
+            if (_ && !_.deepExtend) {
+                CanvaxBase.setDeepExtend();
             }
 
-            this.el     =  CanvaxBase.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-            this.width  =  parseInt( this.el.offsetWidth )  //图表区域宽
-            this.height =  parseInt( this.el.offsetHeight ) //图表区域高
+            this.el = CanvaxBase.getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+            this.width = parseInt(this.el.offsetWidth) //图表区域宽
+            this.height = parseInt(this.el.offsetHeight) //图表区域高
+
+            this.padding = {
+                top: 20,
+                right: 10,
+                bottom: 0,
+                left: 10
+            }
 
             //Canvax实例
-            this.canvax =  new Canvax({
-                el : this.el
+            this.canvax = new Canvax({
+                el: this.el
             });
-            this.stage  =  new Canvax.Display.Stage({
-                id : "main-chart-stage" + new Date().getTime()
+            this.stage = new Canvax.Display.Stage({
+                id: "main-chart-stage" + new Date().getTime()
             });
-            this.canvax.addChild( this.stage );
-    
+            this.canvax.addChild(this.stage);
+
             //为所有的chart添加注册事件的能力
             arguments.callee.superclass.constructor.apply(this, arguments);
-            this.init.apply(this , arguments);
+            this.init.apply(this, arguments);
         };
-    
+
         Chart.Canvax = Canvax;
-    
+
         Chart.extend = function(props, statics, ctor) {
             var me = this;
             var BaseChart = function() {
-                me.apply(this , arguments);
-                if ( ctor ) {
+                me.apply(this, arguments);
+                if (ctor) {
                     ctor.apply(this, arguments);
                 }
             };
@@ -105,15 +111,16 @@ define(
         };
 
         Chartx.extend = CanvaxBase.creatClass;
-        
-        CanvaxBase.creatClass( Chart , Canvax.Event.EventDispatcher , {
-            init   : function(){},
-            dataFrame : null, //每个图表的数据集合 都 存放在dataFrame中。
-            draw   : function(){},
+
+        CanvaxBase.creatClass(Chart, Canvax.Event.EventDispatcher, {
+            inited : false,
+            init: function() {},
+            dataFrame: null, //每个图表的数据集合 都 存放在dataFrame中。
+            draw: function() {},
             /*
              * chart的销毁 
-            */
-            destroy: function(){
+             */
+            destroy: function() {
                 this.clean();
                 this.el.innerHTML = "";
                 this._destroy && this._destroy();
@@ -121,18 +128,18 @@ define(
             /*
              * 清除整个图表
              **/
-            clean : function(){
-                _.each( this.canvax.children , function( stage , i ){
+            clean: function() {
+                _.each(this.canvax.children, function(stage, i) {
                     stage.removeAllChildren();
-                } );
+                });
             },
             /**
              * 容器的尺寸改变重新绘制
              */
-            resize : function(){
+            resize: function() {
                 this.clean();
-                this.width   = parseInt( this.el.offsetWidth );
-                this.height  = parseInt( this.el.offsetHeight );
+                this.width = parseInt(this.el.offsetWidth);
+                this.height = parseInt(this.el.offsetHeight);
                 this.canvax.resize();
                 this.draw();
             },
@@ -140,58 +147,62 @@ define(
              * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
              * @param obj {data , options}
              */
-            reset : function( obj ){
+            reset: function(obj) {
                 /*如果用户有调用reset就说明用户是有想要绘制的 
                  *还是把这个权利交给使用者自己来控制吧
                 if( !obj || _.isEmpty(obj)){
                     return;
                 }
                 */
-                //如果要切换新的数据源
-                if( obj && obj.options ){
+                //如果只有数据的变化
+                if (obj && obj.data && !obj.options && this.resetData) {
+                    this.resetData( obj.data );
+                    return;
+                };
+                if (obj && obj.options) {
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
 
-                    _.deepExtend( this , obj.options );
+                    _.deepExtend(this, obj.options);
 
                     //配置的变化有可能也会导致data的改变
-                    this.dataFrame && (this.dataFrame = this._initData( this.dataFrame.org ));
+                    this.dataFrame && (this.dataFrame = this._initData(this.dataFrame.org));
                 }
-                if( obj && obj.data ){
+                if (obj && obj.data) {
                     //数据集合，由_initData 初始化
-                    this.dataFrame = this._initData( obj.data );
+                    this.dataFrame = this._initData(obj.data);
                 }
                 this.clean();
+                this.canvax.getDomContainer().innerHTML = "";
                 this.draw();
             },
-            
-            _rotate : function( angle ){
+
+            _rotate: function(angle) {
                 var currW = this.width;
                 var currH = this.height;
-                this.width  = currH;
+                this.width = currH;
                 this.height = currW;
-    
+
                 var self = this;
-                _.each( self.stage.children , function( sprite ){
-                    sprite.context.rotation       = angle || -90;
-                    sprite.context.x              = ( currW - currH ) / 2 ;
-                    sprite.context.y              = ( currH - currW ) / 2 ;
-                    sprite.context.rotateOrigin.x = self.width  * sprite.context.$model.scaleX / 2;
+                _.each(self.stage.children, function(sprite) {
+                    sprite.context.rotation = angle || -90;
+                    sprite.context.x = (currW - currH) / 2;
+                    sprite.context.y = (currH - currW) / 2;
+                    sprite.context.rotateOrigin.x = self.width * sprite.context.$model.scaleX / 2;
                     sprite.context.rotateOrigin.y = self.height * sprite.context.$model.scaleY / 2;
                 });
             },
 
             //默认每个chart都要内部实现一个_initData
-            _initData  : function( data ){
+            _initData: function(data) {
                 return data;
             }
         });
-    
+
         return Chart;
-    
+
     }
 );
-
 
 define(
     "chartx/components/anchor/Anchor" , 
@@ -825,7 +836,7 @@ define(
                 x : 0 , y : 0
             };
             this.normalColor = "#6B95CF";
-            this.shapeType   = "circle";
+            this.shapeType   = "droplet";//"circle";
             this.fillStyle   = null;
             this.strokeStyle = null;
             this.lineWidth   = 1;
@@ -843,6 +854,10 @@ define(
             
             this.sprite = null;
             this.shape  = null;
+
+            this.iGroup = null;
+            this.iNode  = null;
+            this.iLay   = null;
 
             this._doneHandle = null;
             this.done   = function( fn ){
@@ -976,7 +991,7 @@ define(
                         fillStyle   : me._fillStyle,
                         lineWidth   : me.lineWidth,
                         strokeStyle : me._strokeStyle,
-                        globalAhpla : me.globalAhpla,
+                        globalAlpha : me.globalAlpha,
                         cursor  : "point",
                         visible : false
                     };
@@ -1286,12 +1301,12 @@ define(
             this.dW      = 0;  //html的tips内容width
             this.dH      = 0;  //html的tips内容Height
 
-            this.backR   = 5;  //背景框的 圆角 
+            this.backR   = "5px";  //背景框的 圆角 
     
             this.sprite  = null;
             this.content = null; //tips的详细内容
 
-            this.fillStyle   = "#000000";
+            this.fillStyle   = "rgba(0,0,0,0.7)";//"#000000";
             this.text        = {
                 fillStyle    : "#ffffff"
             };
@@ -1300,7 +1315,7 @@ define(
             this.alpha       = 0.5;
             
             this._tipDom = null;
-            this._back   = null;
+            //this._back   = null;
 
             this.offset = 10; //tips内容到鼠标位置的偏移量
         
@@ -1366,7 +1381,7 @@ define(
             _initContent : function(e){
                 this._tipDom = document.createElement("div");
                 this._tipDom.className = "chart-tips";
-                this._tipDom.style.cssText += ";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;line-height:1.5"
+                this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;line-height:1.5"
                 this.tipDomContainer.appendChild( this._tipDom );
                 this._setContent(e);
             },
@@ -1416,6 +1431,7 @@ define(
              *Back相关-------------------------
              */
             _initBack : function(e){
+                return
                 var opt = {
                     x : 0,
                     y : 0,
@@ -1432,15 +1448,19 @@ define(
                     opt.strokeStyle = this.strokeStyle;
                 }
                
+                /*
                 this._back = new Rect({
                     id : "tipsBack",
                     context : opt
                 });
                 this.sprite.addChild( this._back );
+                */
             },
             _resetBackSize:function(e){
+                /*
                 this._back.context.width  = this.dW;
                 this._back.context.height = this.dH;
+                */
             },
     
             /**
@@ -1547,7 +1567,13 @@ define(
 
         xAxis.prototype = {
             init: function(opt, data) {
-                this.dataOrg = data.org;
+                this.sprite = new Canvax.Display.Sprite({
+                    id: "xAxisSprite"
+                });
+                this._initHandle(opt , data);
+            },
+            _initHandle : function( opt , data){
+                data && data.org && (this.dataOrg = data.org);
 
                 if (opt) {
                     _.deepExtend(this, opt);
@@ -1561,11 +1587,6 @@ define(
                     this.line.height = 1
                 }
 
-                this.sprite = new Canvax.Display.Sprite({
-                    id: "xAxisSprite"
-                });
-
-
                 if (this.dataSection.length == 0) {
                     this.dataSection = this._initDataSection(this.dataOrg);
                 };
@@ -1576,6 +1597,7 @@ define(
                 //然后计算好最大的width 和 最大的height，外部组件需要用
                 this._setTextMaxWidth();
                 this._setXAxisHeight();
+
             },
             /**
              *return dataSection 默认为xAxis.dataOrg的的faltten
@@ -1589,6 +1611,22 @@ define(
             },
             setY: function($n) {
                 this.sprite.context.y = $n
+            },
+            //数据变化，配置没变的情况
+            resetData : function( data ){
+                 //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+
+                this._initHandle( null , data );
+
+                this.draw();
+            },
+            //配置和数据变化
+            update : function( opt , data ){
+                //先在field里面删除一个字段，然后重新计算
+                _.deepExtend( this , opt );
+                this.resetData(data);
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
@@ -1807,7 +1845,7 @@ define(
                         pc.x + popText.context.width > this.w) {
                         pc.x = this.w - popText.context.width
                     };
-                    if (this.sprite.getNumChildren() >= 2) {
+                    if (this.data.length > 2) {
                         //倒数第二个text
                         var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
 
@@ -1919,8 +1957,8 @@ define(
             this.dataOrg     = [];                           //源数据
 
             this.sprite      = null;
-            this.x           = 0;
-            this.y           = 0;
+            //this.x           = 0;
+            //this.y           = 0;
             this.disYAxisTopLine =  6;                       //y轴顶端预留的最小值
             this.yMaxHeight      =  0;                       //y轴最大高
             this.yGraphsHeight   =  0;                       //y轴第一条线到原点的高
@@ -1932,7 +1970,9 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter          =  null; //function(params){}; 
 
-            this.isH             =  false;
+            this.isH             =  false; //是否横向
+
+            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小
 
             this.init(opt , data);
         };
@@ -1965,7 +2005,16 @@ define(
                     } );
                 });
             },
-            //删除一个字段
+            //数据变化，配置没变的情况
+            resetData : function( data ){
+                 //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+                //_.deepExtend( this , opt );
+                this._initData( data );
+                this.draw();
+            },
+            //配置和数据变化
             update : function( opt , data ){
                 //先在field里面删除一个字段，然后重新计算
                 this.sprite.removeAllChildren();
@@ -2053,15 +2102,38 @@ define(
                 if( this.dataSection.length == 0 ){
                     this.dataSection = DataSection.section( arr , 3 );
                 };
+
                 //如果还是0
                 if( this.dataSection.length == 0 ){
                     this.dataSection = [0]
-                }
+                };
+
+                if( this.sort ){
+                    var sort = "asc";
+                    if( _.isString( this.sort )){
+                        sort = this.sort;
+                    }
+                    if (_.isArray( this.sort )) {
+                        var i = 0;
+                        if (this.place=="right") {
+                            i = 1;
+                        };
+                        if (this.sort[i]) {
+                            sort = this.sort[i];
+                        };
+                    };
+                    if (sort == "desc") {
+                        this.dataSection.reverse();
+                    };
+                };
+
                 this._bottomNumber = this.dataSection[0];
+                /*
                 if(arr.length == 1){
                     this.dataSection[0] = arr[0] * 2;
                     this._bottomNumber  = 0;
                 }
+                */
                 if( this.baseNumber == null ){
                     this.baseNumber = this._bottomNumber > 0 ? this._bottomNumber : 0;
                 }
@@ -2160,12 +2232,12 @@ define(
                 };
 
                 maxW += self.dis;
-                
-                self.sprite.context.x = maxW;
+                 
+                self.sprite.context.x = maxW + self.pos.x;
                 if( self.line.enabled ){
-                    self.w = maxW + self.dis + self.line.width
+                    self.w = maxW + self.dis + self.line.width + self.pos.x;
                 } else {
-                    self.w = maxW + self.dis;
+                    self.w = maxW + self.dis + self.pos.x;
                 }
             }
         };

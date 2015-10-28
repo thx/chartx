@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- 标签行星图</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+    var data = [
+        ["name","index","value"],
+        [{"name":"内衣"},1,308],
+        [{"name":"女装"},2,304],
+        [{"name":"男装"},3,258],
+        [{"name":"女鞋"},4,252],
+        [{"name":"童装"},5,249],
+        [{"name":"食品"},6,236],
+        [{"name":"奶粉用品"},7,200],
+        [{"name":"个护家清"},8,199],
+        [{"name":"饰品"},9,170],
+        [{"name":"箱包"},10,169],
+        [{"name":"护肤"},11,167],
+        [{"name":"童鞋"},12,163],
+        [{"name":"童鞋"},12,163],
+        [{"name":"百货"},13,156],
+        [{"name":"家纺家饰"},14,139],
+        [{"name":"小家电"},15,121],
+        [{"name":"汽车"},16,119]  
+    ]
+   
+options = {
+    type  : 'planet',
+    cx    : 30,                              //圆心坐标x
+    event : {
+        enabled : 1,                              //是否有事件响应(tips)[1]
+        on : function(o){
+            //e.ringID = 第几个环(从0开始 0 = 品牌)   e.ID = 第几个行星(从1开始)
+            console.log(o)
+        }
+    },
+
+    yAxis : {                                //Y轴
+        field : ["index"]
+    },
+    xAxis : {
+        field : "index",
+        bar   : {
+            enabled   : 1,
+            y         : 428,
+            x         : 50 / 2,
+            width     : 1000 - 50,
+            fillStyle : {
+                normal : ['#70649a', '#b28fce']
+            },
+            text      : {
+                contents : ['极力推荐','一般推荐']
+            }
+        }
+    },
+    graphs: {
+        disY  : 10,                               //行星与容器上、下之间的最小距离
+        //minR  : 10,
+        maxR  : 8,
+        size  : {                                 //行星大小
+            field : 'value'
+        },
+        layout: {                                 //布局
+            mode  : 1                             //模式(0 = 根据yAxis.field计算比例  |  1 = 上下错开)
+        },
+        info  : {
+            field : 'name',
+            content : 'name'
+        },
+        core  : {                                 //品牌
+            r     : {                                  //半径
+                normal  : 60
+            },
+            text  : {
+                content : '聚划算'
+            }
+        },
+        text  : {
+            fillStyle : {
+                normal : '#0000ff'
+            }
+        }
+    },
+    back:{
+        space  : 150
+    }
+};
+
+    Chartx.original("canvasTest" , data, options); 
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>标签行星图（planet chart）</h4>
+                <p>
+                    联系人：@逢春
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:480px;height:400px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
+

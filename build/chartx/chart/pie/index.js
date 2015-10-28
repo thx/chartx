@@ -18,7 +18,8 @@ define(
                 this.branchTxtSp = null;
 
                 this.dataLabel = {
-                    enabled: true
+                    enabled: true,
+                    allowLine: true
                 };
 
                 this.tips = _.deepExtend({ enabled: true }, tipsOpt); //tip的confit
@@ -41,7 +42,6 @@ define(
                     this._tip = new Tip(this.tips, this.domContainer);
                     this._tip._getDefaultContent = this._getTipDefaultContent;
                     this.sprite.addChild(this._tip.sprite);
-
                     if (this.dataLabel.enabled) {
                         this.branchSp = new Canvax.Display.Sprite();
                         this.branchTxtSp = new Canvax.Display.Sprite();
@@ -75,7 +75,7 @@ define(
                             var maxIndex = 0;
                             var maxPercentageOffsetIndex = 0;
                             var totalFixedPercent = 0;
-                            for (var j = 0; j < data.length; j++) {                                
+                            for (var j = 0; j < data.length; j++) {
                                 var percentage = data[j].y / self.total;
                                 var fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
                                 var percentageOffset = Math.abs(percentage * 100 - fixedPercentage);
@@ -137,12 +137,14 @@ define(
 
                                 self.currentAngle += angle;
                                 if (self.currentAngle > 360) self.currentAngle = 360;
-                            }                            
+                            }
                             data[maxIndex].isMax = true;
                             //处理保留小数后百分比总和不等于100的情况
                             var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
                             if (totalPercentOffset != 0) {
                                 data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
+                                data[maxPercentageOffsetIndex].percentage = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum);
+                                data[maxPercentageOffsetIndex].txt = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum) + '%';
                             }
                         }
                     }
@@ -170,7 +172,7 @@ define(
                 slice: function (index) {
                     var self = this;
                     var sectorMap = self.sectorMap;
-                    if (sectorMap[index] && !self.isMoving) {
+                    if (sectorMap[index]) {
                         self.moveSector(sectorMap[index].sector);
                     }
                 },
@@ -411,21 +413,21 @@ define(
                 _getByIndex: function (index) {
                     return this.sectorMap[index];
                 },
-                _widgetLabel: function (quadrant, indexs, lmin, rmin) {
+                _widgetLabel: function (quadrant, indexs, lmin, rmin, isEnd, ySpaceInfo) {
                     var self = this;
                     var data = self.data.data;
                     var sectorMap = self.sectorMap;
-                    var minTxtDis = 20;
+                    var minTxtDis = 15;
                     var labelOffsetX = 5;
                     var outCircleRadius = self.r + 2 * self.clickMoveDis;
                     var currentIndex, baseY, clockwise, isleft, minPercent;
                     var currentY, adjustX, txtDis, bkLineStartPoint, bklineMidPoint, bklineEndPoint, branchLine, brokenline, branchTxt, bwidth, bheight, bx, by;
+                    var isMixed, yBound, remainingNum, remainingY, adjustY;
 
                     clockwise = quadrant == 2 || quadrant == 4;
                     isleft = quadrant == 2 || quadrant == 3;
                     isup = quadrant == 3 || quadrant == 4;
                     minPercent = isleft ? lmin : rmin;
-
                     for (i = 0; i < indexs.length; i++) {
                         currentIndex = indexs[i];
                         //若Y值小于最小值，不画label    
@@ -433,6 +435,7 @@ define(
                         currentY = data[currentIndex].edgey;
                         adjustX = Math.abs(data[currentIndex].edgex);
                         txtDis = currentY - baseY;
+
                         if (i != 0 && ((Math.abs(txtDis) < minTxtDis) || (isup && txtDis < 0) || (!isup && txtDis > 0))) {
                             currentY = isup ? baseY + minTxtDis : baseY - minTxtDis;
                             if (outCircleRadius - Math.abs(currentY) > 0) {
@@ -443,10 +446,28 @@ define(
                                 adjustX = Math.abs(data[currentIndex].edgex);
                             }
                         }
+
+                        if (isEnd) {
+                            yBound = isleft ? ySpaceInfo.left : ySpaceInfo.right;
+                            remainingNum = indexs.length - i;
+                            remainingY = isup ? yBound - remainingNum * minTxtDis : yBound + remainingNum * minTxtDis;
+                            if ((isup && currentY > remainingY) || !isup && currentY < remainingY) {
+                                currentY = remainingY;
+                            }
+                        }
+
                         bkLineStartPoint = [data[currentIndex].outx, data[currentIndex].outy];
                         bklineMidPoint = [isleft ? -adjustX : adjustX, currentY];
                         bklineEndPoint = [isleft ? -adjustX - labelOffsetX : adjustX + labelOffsetX, currentY];
                         baseY = currentY;
+                        if (!isEnd) {
+                            if (isleft) {
+                                ySpaceInfo.left = baseY;
+                            }
+                            else {
+                                ySpaceInfo.right = baseY;
+                            }
+                        }
                         //指示线
                         branchLine = new Line({
                             context: {
@@ -518,8 +539,10 @@ define(
                         }
                         branchTxt.context.x = bx;
                         branchTxt.context.y = by;
-                        self.branchSp.addChild(branchLine);
-                        self.branchSp.addChild(brokenline);
+                        if (self.dataLabel.allowLine) {
+                            self.branchSp.addChild(branchLine);
+                            self.branchSp.addChild(brokenline);
+                        }
                         self.branchTxtSp.addChild(branchTxt);
                         self.sectorMap[currentIndex].label = {
                             line1: branchLine,
@@ -621,12 +644,15 @@ define(
                     }
 
                     quadrantsOrder.push(widgetInfo.right.startQuadrant);
-                    quadrantsOrder.push(widgetInfo.left.startQuadrant);
                     quadrantsOrder.push(widgetInfo.right.endQuadrant);
+                    quadrantsOrder.push(widgetInfo.left.startQuadrant);
                     quadrantsOrder.push(widgetInfo.left.endQuadrant);
 
+                    var ySpaceInfo = {}
+
                     for (i = 0; i < quadrantsOrder.length; i++) {
-                        self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinPercentage, rMinPercentage)
+                        var isEnd = i == 1 || i == 3;
+                        self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinPercentage, rMinPercentage, isEnd, ySpaceInfo)
                     }
                 },
                 _widget: function () {
@@ -644,8 +670,8 @@ define(
                                 var sector = new Sector({
                                     hoverClone: false,
                                     context: {
-                                        x: data[i].selected ? data[i].outOffsetx : 0,
-                                        y: data[i].selected ? data[i].outOffsety : 0,
+                                        x: data[i].sliced ? data[i].outOffsetx : 0,
+                                        y: data[i].sliced ? data[i].outOffsety : 0,
                                         r0: self.r0,
                                         r: self.r,
                                         startAngle: data[i].start,
@@ -659,24 +685,20 @@ define(
                                 sector.__data = data[i];
                                 sector.__colorIndex = i;
                                 sector.__dataIndex = i;
-                                sector.__isSelected = data[i].selected;
+                                sector.__isSliced = data[i].sliced;
                                 //扇形事件
                                 sector.hover(function (e) {
                                     var me = this;
-                                    //if (!self.isMoving) {
                                     if (self.tips.enabled) {
                                         self._showTip(e, this.__dataIndex);
                                     }
                                     self._sectorFocus(e, this.__dataIndex);
-                                    //}
                                     self.allowPointSelect && self.moveSector(this);
                                 }, function (e) {
-                                    //if (!self.isMoving) {
                                     if (self.tips.enabled) {
                                         self._hideTip(e);
                                     }
                                     self._sectorUnfocus(e, this.__dataIndex);
-                                    //}
                                     self.allowPointSelect && self.moveSector(this);
                                 });
                                 sector.on('mousemove', function (e) {
@@ -687,6 +709,7 @@ define(
 
                                 sector.on('click', function (e) {
                                     self._sectorClick(e, this.__dataIndex);
+                                    !self.allowPointSelect && self.moveSector(this);
                                 });
 
                                 self.sprite.addChild(sector);
@@ -788,9 +811,10 @@ define(
                     this.stageTip.toFront();
                     this.stage.addChild(this.core);
 
-                    this._initModule();                      //初始化模块
+                    this._initModule();                        //初始化模块
                     this._startDraw();                         //开始绘图
-                    this._drawEnd();                           //绘制结束，添加到舞台      
+                    this._drawEnd();                           //绘制结束，添加到舞台  
+                    this.inited = true;    
                 },
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);
@@ -841,7 +865,7 @@ define(
                 slice: function (index) {
                     this._pie && this._pie.slice(index);
                 },
-                _initData: function (arr, opt) {
+                _initData: function (arr, opt) {                    
                     var data = [];
 
                     /*
@@ -862,8 +886,14 @@ define(
                         };
                         _.each(arr, function (row) {
                             var rowData = [];
-                            rowData.push(row[xFieldInd]);
-                            rowData.push(row[yFieldInd]);
+                            if (_.isArray(row)) {
+                                rowData.push(row[xFieldInd]);
+                                rowData.push(row[yFieldInd]);
+                            }
+                            else if (typeof row == 'object') {
+                                rowData.push(row['name']);
+                                rowData.push(row['y']);
+                            }
                             data.push(rowData);
                         });
                     };
@@ -871,27 +901,28 @@ define(
 
                     var dataFrame = {};
                     dataFrame.org = data;
-                    dataFrame.data = [];                    
-                    if (_.isArray(data)) {
-                        for (var i = 0; i < data.length; i++) {
+                    dataFrame.data = [];
+                    if (_.isArray(arr)) {
+                        for (var i = 0; i < arr.length; i++) {
                             var obj = {};
-                            if (_.isArray(data[i])) {
-                                obj.name = data[i][0];
-                                obj.y = parseFloat(data[i][1]);
+                            if (_.isArray(arr[i])) {
+                                obj.name = arr[i][0];
+                                obj.y = parseFloat(arr[i][1]);
                                 obj.sliced = false;
                                 obj.selected = false;
                             }
-                            else if (typeof data[i] == 'object') {
-                                obj.name = data[i].name;
-                                obj.y = parseFloat(data[i].y);
-                                obj.sliced = data[i].sliced || false;
-                                obj.selected = data[i].selected || false;
+                            else if (typeof arr[i] == 'object') {
+                                obj.name = arr[i].name;
+                                obj.y = parseFloat(arr[i].y);
+                                obj.sliced = arr[i].sliced || false;
+                                obj.selected = arr[i].selected || false;
                             }
 
                             if (obj.name) dataFrame.data.push(obj);
                         }
-                    }
+                    }                    
                     return dataFrame;
+
                 },
                 clear: function () {
                     this.stageBg.removeAllChildren()
@@ -910,7 +941,7 @@ define(
                     var h = self.height;
 
                     var r = Math.min(w, h) * 2 / 3 / 2;
-                    if (!self.dataLabel.enabled) {
+                    if (self.dataLabel.enabled == false) {
                         r = Math.min(w, h) / 2;
                         //要预留clickMoveDis位置来hover sector 的时候外扩
                         r -= r / 11;
@@ -931,7 +962,7 @@ define(
                         boundHeight: h,
                         data: self.dataFrame,
                         //dataLabel: self.dataLabel, 
-                        allowPointSelect: self.allowPointSelect || true,
+                        allowPointSelect: self.allowPointSelect,
                         animation: self.animation,
                         colors: self.colors,
                         focusCallback: {
