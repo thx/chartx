@@ -38,7 +38,7 @@ Chartx做了AMD(requirejs) , CMD(seajs) , KISSY 模块加载环境的自动适�
     <!-- 准备requirejs来做模块加载器 -->
     <script src="http://requirejs.org/docs/release/2.1.20/minified/require.js"></script>
     <!-- Chartx图表库文件引入，这里已1.9.21的cdn版本为例 -->
-    <script src="http://g.tbcdn.cn/thx/charts/1.9.21/chartx/index-min.js"></script>
+    <script src="http://g.tbcdn.cn/thx/charts/1.9.33/chartx/index-min.js"></script>
 </head>
 <body>
 </body>
@@ -54,7 +54,7 @@ Chartx做了AMD(requirejs) , CMD(seajs) , KISSY 模块加载环境的自动适�
     <!-- 准备requirejs来做模块加载器 -->
     <script src="http://requirejs.org/docs/release/2.1.20/minified/require.js"></script>
     <!-- Chartx图表库文件引入，这里已1.9.21的cdn版本为例 -->
-    <script src="http://g.tbcdn.cn/thx/charts/1.9.21/chartx/index-min.js"></script>
+    <script src="http://g.tbcdn.cn/thx/charts/1.9.33/chartx/index-min.js"></script>
 </head>
 <body>
     <!-- 为Chartx准备一个具备大小（宽高）的Dom -->
@@ -147,7 +147,7 @@ Chartx.bar(柱状图) ， Chartx.line（折线图） ， Chartx.map（地图） 
 <!-- 准备requirejs来做模块加载器 -->
 <script src="http://requirejs.org/docs/release/2.1.20/minified/require.js"></script>
 <!-- Chartx图表库文件引入，这里已1.9.21的cdn版本为例 -->
-<script src="http://g.tbcdn.cn/thx/charts/1.9.21/chartx/index-min.js"></script>
+<script src="http://g.tbcdn.cn/thx/charts/1.9.33/chartx/index-min.js"></script>
 <!-- 为Chartx准备一个具备大小（宽高）的Dom -->
 <div class="highlight" style="padding:10px 0;background-color:#F8F8F8;border:1px solid #DDD;border-radius: 3px;">
     <div id="chartTest" style="width:600px;height:300px;"></div>
@@ -196,7 +196,7 @@ Chartx.bar(柱状图) ， Chartx.line（折线图） ， Chartx.map（地图） 
     <!-- 准备requirejs来做模块加载器 -->
     <script src="http://requirejs.org/docs/release/2.1.20/minified/require.js"></script>
     <!-- Chartx图表库文件引入，这里已1.9.21的cdn版本为例 -->
-    <script src="http://g.tbcdn.cn/thx/charts/1.9.21/chartx/index-min.js"></script>
+    <script src="http://g.tbcdn.cn/thx/charts/1.9.33/chartx/index-min.js"></script>
 </head>
 <body>
     <!-- 为Chartx准备一个具备大小（宽高）的Dom -->
