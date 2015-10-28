@@ -22,9 +22,10 @@ define(
         "canvax/shape/Circle",
         "chartx/layout/tree/dagre",
         "canvax/animation/Tween",
-        "canvax/shape/Isogon"
+        "canvax/shape/Isogon",
+        "chartx/components/tips/tip"
     ],
-    function(Chart, Rect, Line, Path, Circle, Dagre, Tween, Isogon) {
+    function(Chart, Rect, Line, Path, Circle, Dagre, Tween, Isogon , Tip) {
         var Canvax = Chart.Canvax;
         return Chart.extend({
             init: function(node, data, opts) {
@@ -34,7 +35,7 @@ define(
                     nodesep: 20,//同级node之间的距离
                     edgesep: 20,
                     ranksep: 30 //排与排之间的距离
-                }
+                };
                 this.node = {
                     //width: 60,
                     //height: 60,
@@ -45,15 +46,15 @@ define(
                     strokeStyleHover: "#58c592",
                     labelColor: "#666",
                     labelNormalColor:"#666"
-                }
+                };
                 this.link = {
                     r: 4,
                     strokeStyle : "#e5e5e5"
-                }
+                };
 
                 this.arrow = {
                     enabled: true
-                }
+                };
 
                 _.deepExtend(this, opts);
 
@@ -102,7 +103,10 @@ define(
                 });
                 this.sprite.addChild(this.linksSp);
 
-                
+
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
+                this._tip._getDefaultContent = this._getTipDefaultContent;
+                this.sprite.addChild( this._tip.sprite );
 
 
                 this.g = new Dagre.graphlib.Graph();
@@ -123,6 +127,13 @@ define(
                 this._initEventHand();
 
                 this.inited = true;
+            },
+            _getTipDefaultContent : function( nodeInfo ){
+                var res;
+                if( nodeInfo.label ){
+                    res = "label"+"："+nodeInfo.label;
+                } 
+                return res;
             },
             /*
              * @data 为 
@@ -442,9 +453,16 @@ define(
                         me.fire("nodeMouseover", e);
                         //在fire的时候已经把 e 的type 修改为了nodeMouseover 所以要修正
                         e.type = "mouseover";
+                        e.eventInfo  = this.node;
+                        me._tip.show(e);
                     }, function(e) {
                         me.fire("nodeMouseout", e);
                         e.type = "mouseout";
+                        me._tip.hide();
+                    });
+                    rect.on("mousemove" , function(e){
+                        e.eventInfo  = this.node;
+                        me._tip.move(e);
                     });
                     rect.on("click", function(e) {
                         me.fire("nodeClick", e);
