@@ -97,6 +97,8 @@ define(
                     }
                     me.fire("click" , e);
                 });
+
+                this.inited = true;
             },
             _getCurrAng   : function(e){
                 var origPoint = this._getPointBack(e);

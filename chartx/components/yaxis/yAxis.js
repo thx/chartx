@@ -88,7 +88,16 @@ define(
                     } );
                 });
             },
-            //删除一个字段
+            //数据变化，配置没变的情况
+            resetData : function( data ){
+                 //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+                //_.deepExtend( this , opt );
+                this._initData( data );
+                this.draw();
+            },
+            //配置和数据变化
             update : function( opt , data ){
                 //先在field里面删除一个字段，然后重新计算
                 this.sprite.removeAllChildren();
@@ -176,6 +185,7 @@ define(
                 if( this.dataSection.length == 0 ){
                     this.dataSection = DataSection.section( arr , 3 );
                 };
+
                 //如果还是0
                 if( this.dataSection.length == 0 ){
                     this.dataSection = [0]

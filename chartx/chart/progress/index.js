@@ -126,6 +126,7 @@ define(
                 } else {
                     this.drawGroup(0); 
                 }
+                this.inited = true;
             },
             getColor  : function( colors , i ){
                 if(_.isString(colors)){

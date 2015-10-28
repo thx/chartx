@@ -53,6 +53,17 @@ define(
                 _.deepExtend( this , opt );
                 this._widget( opt );
             },
+            resetData : function( data , opt){
+                var self  = this;
+                self.data = data;
+                opt && _.deepExtend( self , opt );
+                for(var a = 0,al = self.data.length; a < al; a++){
+                    var group = self.groups[a];
+                    group.resetData({
+                        data : self.data[a]
+                    });
+                }
+            },
             /**
              * 生长动画
              */
@@ -134,8 +145,7 @@ define(
                     })
                     self.sprite.addChild(group.sprite);
                     self.groups.push(group);
-                    
-                }
+                };
                 
                 self.induce = new Rect({
                     id    : "induce",

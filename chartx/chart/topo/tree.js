@@ -121,6 +121,8 @@ define(
                 this._initNodesSpritePos();
 
                 this._initEventHand();
+
+                this.inited = true;
             },
             /*
              * @data 为 

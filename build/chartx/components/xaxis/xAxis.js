@@ -67,7 +67,13 @@ define(
 
         xAxis.prototype = {
             init: function(opt, data) {
-                this.dataOrg = data.org;
+                this.sprite = new Canvax.Display.Sprite({
+                    id: "xAxisSprite"
+                });
+                this._initHandle(opt , data);
+            },
+            _initHandle : function( opt , data){
+                data && data.org && (this.dataOrg = data.org);
 
                 if (opt) {
                     _.deepExtend(this, opt);
@@ -81,11 +87,6 @@ define(
                     this.line.height = 1
                 }
 
-                this.sprite = new Canvax.Display.Sprite({
-                    id: "xAxisSprite"
-                });
-
-
                 if (this.dataSection.length == 0) {
                     this.dataSection = this._initDataSection(this.dataOrg);
                 };
@@ -96,6 +97,7 @@ define(
                 //然后计算好最大的width 和 最大的height，外部组件需要用
                 this._setTextMaxWidth();
                 this._setXAxisHeight();
+
             },
             /**
              *return dataSection 默认为xAxis.dataOrg的的faltten
@@ -109,6 +111,22 @@ define(
             },
             setY: function($n) {
                 this.sprite.context.y = $n
+            },
+            //数据变化，配置没变的情况
+            resetData : function( data ){
+                 //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+
+                this._initHandle( null , data );
+
+                this.draw();
+            },
+            //配置和数据变化
+            update : function( opt , data ){
+                //先在field里面删除一个字段，然后重新计算
+                _.deepExtend( this , opt );
+                this.resetData(data);
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]

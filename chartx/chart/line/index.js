@@ -63,6 +63,21 @@ define(
 
                 this._startDraw(); //开始绘图
 
+                this.inited = true;
+
+            },
+            /*
+             * 如果只有数据改动的情况
+            */
+            resetData : function( data ){
+                this.dataFrame = this._initData(data, this);
+
+                this._xAxis.resetData( this.dataFrame.xAxis );
+                this._yAxis.resetData( this.dataFrame.yAxis );
+                this._graphs.resetData( this._trimGraphs() , {
+                    disX: this._getGraphsDisX()
+                });
+
             },
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线
@@ -202,7 +217,7 @@ define(
                 if (this._yAxisR) {
                     this._yAxisR.draw({
                         pos: {
-                            x: 0,//this.padding.right,
+                            x: 0, //this.padding.right,
                             y: y
                         },
                         yMaxHeight: graphsH
@@ -250,7 +265,8 @@ define(
                     h: this._yAxis.yGraphsHeight,
                     data: this._trimGraphs(),
                     disX: this._getGraphsDisX(),
-                    smooth: this.smooth
+                    smooth: this.smooth,
+                    inited : this.inited
                 });
 
                 this._graphs.setX(_yAxisW), this._graphs.setY(y);
@@ -271,9 +287,11 @@ define(
                 }
 
                 //执行生长动画
-                this._graphs.grow(function(g) {
-                    me._initPlugs(me._opts, g);
-                });
+                if (!this.inited) {
+                    this._graphs.grow(function(g) {
+                        me._initPlugs(me._opts, g);
+                    });
+                };
 
                 this.bindEvent(this._graphs.sprite);
 
@@ -316,8 +334,8 @@ define(
                             point: circle.localToGlobal(),
                             r: circle.context.r + 2,
                             groupLen: g.data.length,
-                            iNode  : i,
-                            iGroup : g._groupInd
+                            iNode: i,
+                            iGroup: g._groupInd
                         };
                         if (me._opts.markPoint && me._opts.markPoint.shapeType != "circle") {
                             mpCtx.point.y -= circle.context.r + 3
@@ -361,7 +379,7 @@ define(
                     */
                 });
             },
-            _initMarkLine: function(g , dataFrame) {
+            _initMarkLine: function(g, dataFrame) {
 
                 var me = this;
                 var index = g._groupInd;

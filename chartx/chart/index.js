@@ -53,6 +53,7 @@ define(
         Chartx.extend = CanvaxBase.creatClass;
 
         CanvaxBase.creatClass(Chart, Canvax.Event.EventDispatcher, {
+            inited : false,
             init: function() {},
             dataFrame: null, //每个图表的数据集合 都 存放在dataFrame中。
             draw: function() {},
@@ -93,7 +94,11 @@ define(
                     return;
                 }
                 */
-                //如果要切换新的数据源
+                //如果只有数据的变化
+                if (obj && obj.data && !obj.options && this.resetData) {
+                    this.resetData( obj.data );
+                    return;
+                };
                 if (obj && obj.options) {
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
