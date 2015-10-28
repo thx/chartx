@@ -50,11 +50,13 @@ define(
             },
             gradient:function(){
                 var self = this
-                var rect = self.rect
-                var gradient = self.sprite.getStage().context2D.createLinearGradient(rect.context.x, rect.context.y, rect.context.x + rect.context.width, rect.context.y)
-                gradient.addColorStop(0, self.fillStyle.normal[0]) 
-                gradient.addColorStop(1, self.fillStyle.normal[1]) 
-                rect.context.fillStyle = gradient
+                if(self.enabled){
+                    var rect = self.rect
+                    var gradient = self.sprite.getStage().context2D.createLinearGradient(rect.context.x, rect.context.y, rect.context.x + rect.context.width, rect.context.y)
+                    gradient.addColorStop(0, self.fillStyle.normal[0]) 
+                    gradient.addColorStop(1, self.fillStyle.normal[1]) 
+                    rect.context.fillStyle = gradient
+                }
             },
             _widget:function(){
                 var self = this

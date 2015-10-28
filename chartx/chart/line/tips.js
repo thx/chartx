@@ -117,6 +117,7 @@ define(
                 });
                 var self = this;
                 _.each( e.eventInfo.nodesInfoList , function( node ){
+                    
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y) 

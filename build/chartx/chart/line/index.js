@@ -117,6 +117,7 @@ define(
                 });
                 var self = this;
                 _.each( e.eventInfo.nodesInfoList , function( node ){
+                    
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y) 
@@ -219,15 +220,15 @@ define(
             this.h = 0;
             this.y = 0;
 
-            this.colors = ["#42a8d7", '#666666', '#26b471', '#7aa1ff', '#fa8529', '#ff7c4d', '#2494ed', '#7aa1ff', '#fa8529', '#ff7c4d'],
+            this.colors = ["#42a8d7", '#666666', '#26b471', '#7aa1ff', '#fa8529', '#ff7c4d', '#2494ed', '#7aa1ff', '#fa8529', '#ff7c4d'];
 
-                this.line = { //线
-                    enabled: 1,
-                    strokeStyle: this.colors[this._groupInd],
-                    lineWidth: 2,
-                    lineType: "solid",
-                    smooth: true
-                };
+            this.line = { //线
+                enabled: 1,
+                strokeStyle: this.colors[this._groupInd],
+                lineWidth: 2,
+                lineType: "solid",
+                smooth: true
+            };
 
             this.node = { //节点 
                 enabled: 1, //是否有
@@ -258,8 +259,8 @@ define(
                 _.deepExtend(this, opt);
 
                 //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
-                !this.node.strokeStyle && (this.node.strokeStyle = this.line.strokeStyle);
-                !this.fill.fillStyle && (this.fill.fillStyle = this.line.strokeStyle);
+                !this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
+                !this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
                 this.sprite = new Canvax.Display.Sprite();
             },
             draw: function(opt) {
@@ -268,12 +269,15 @@ define(
             },
             update: function(opt) {
                 _.deepExtend(this, opt);
+                this._pointList = this._getPointList( this.data );
+                /*
                 var list = [];
                 for (var a = 0, al = this.data.length; a < al; a++) {
                     var o = this.data[a];
                     list.push([o.x, o.y]);
                 };
                 this._pointList = list;
+                */
                 this._grow();
             },
             //自我销毁
@@ -293,6 +297,7 @@ define(
                     return s[this._groupInd]
                 }
                 if (_.isFunction(s)) {
+
                     return s({
                         iGroup: this._groupInd,
                         iNode: this._nodeInd,
@@ -300,6 +305,13 @@ define(
                     });
                 }
                 return s
+            },
+            _getLineStrokeStyle : function(){
+                if (this.__lineStyleStyle) {
+                    return this.__lineStyleStyle;
+                };
+                this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
+                return this.__lineStyleStyle;
             },
             //这个是tips需要用到的 
             getNodeInfoAt: function($index) {
@@ -309,8 +321,8 @@ define(
                 if (o && o.value != null && o.value != undefined && o.value !== "") {
                     o.r = self._getProp(self.node.r);
                     o.fillStyle = self._getProp(self.node.fillStyle) || "#ffffff";
-                    o.strokeStyle = self._getProp(self.node.strokeStyle) || self._getColor(self.line.strokeStyle);
-                    o.color = self._getProp(self.node.strokeStyle) || self._getColor(self.line.strokeStyle); //这个给tips里面的文本用
+                    o.strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
+                    o.color = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); //这个给tips里面的文本用
                     o.lineWidth = self._getProp(self.node.lineWidth) || 2;
                     o.alpha = self._getProp(self.fill.alpha);
 
@@ -443,7 +455,7 @@ define(
             _widget: function() {
                 var self = this;
 
-                self._pointList = this._getPointList(self.data);
+                self._pointList = this._getPointList( self.data );
 
                 if (self._pointList.length == 0) {
                     //filter后，data可能length==0
@@ -465,7 +477,7 @@ define(
                     id: "brokenline_" + self._groupInd,
                     context: {
                         pointList: list,
-                        strokeStyle: self._getColor(self.line.strokeStyle),
+                        strokeStyle: self._getLineStrokeStyle(),
                         lineWidth: self.line.lineWidth,
                         y: self.y,
                         smooth: self.line.smooth,
@@ -537,7 +549,7 @@ define(
                     this.sprite.addChild(this._circles);
                     for (var a = 0, al = list.length; a < al; a++) {
                         self._nodeInd = a;
-                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getColor(self.line.strokeStyle);
+                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
                         var circle = new Circle({
                             id: "circle_" + a,
                             context: {
@@ -690,7 +702,6 @@ define(
                         data : self.data[i]
                     });
                 });
-
             },
             /*
              *删除 ind

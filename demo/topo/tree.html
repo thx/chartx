@@ -60,6 +60,12 @@ var options = {
                 return "#999"
             }
         }
+    },
+    tips : {
+        content : function(e){
+            //e = {id:"lol"  , label:"英雄联盟" , link:[ "dmhz" , "jfjh" , "hbss" ] , ...},
+            return "label提示:"+e.label
+        }
     }
 }
 

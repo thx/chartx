@@ -125,6 +125,9 @@ define(
                 $o.on("mouseover", function(e){
                     self._mouseoverHandler(e)
                 })
+                $o.on("mousemove", function(e){
+                    self._mousemoveHandler(e)
+                })
                 $o.on("mouseout", function(e){
                     self._mouseoutHandler(e)
                 })
@@ -134,21 +137,30 @@ define(
             },
             _mouseoverHandler:function($e){
                 var self = this
-                self.sprite.parent.toFront()
+                // self.sprite.parent.toFront()
+                self.fire.target = $e
                 self.fire.eventType = 'mouseover'
-                self.root.event.onClick(self.fire)
+                self.root.event.listener(self.fire)
                 self._induce(true)
+            },
+            _mousemoveHandler:function($e){
+                var self = this
+                self.fire.target = $e
+                self.fire.eventType = 'mousemove'
+                self.root.event.listener(self.fire)
             },
             _mouseoutHandler:function($e){
                 var self = this
+                self.fire.target = $e
                 self.fire.eventType = 'mouseout'
-                self.root.event.onClick(self.fire)
+                self.root.event.listener(self.fire)
                 self._induce(false)
             },
             _clickHandler:function($e){
                 var self = this
+                self.fire.target = $e
                 self.fire.eventType = 'click'
-                self.root.event.onClick(self.fire)
+                self.root.event.listener(self.fire)
             },
             _induce:function($b){
                 var self = this

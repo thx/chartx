@@ -118,7 +118,24 @@ var options = {
     }
 };
 //Chartx.line开始初始化chart实例
-Chartx.line("canvasTest" , data , options);
+var line1 = Chartx.line("canvasTest" , data , options).then(function(chart){
+   setInterval(function(){        
+        chart.reset({data:[
+        ["xfield","val"],
+        [ 1      , Math.random() * 100],
+        [ 2      , Math.random() * 100],
+        [ 3      , Math.random() * 100],
+        [ 4      , Math.random() * 100],
+        [ 5      , Math.random() * 100],
+        [ 6      , Math.random() * 100],
+        [ 7      , Math.random() * 100],
+        [ 8      , Math.random() * 100]
+        ]});
+    }, 5000)
+});
+
+
+
 </textarea></form>
 
         </td>
