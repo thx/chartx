@@ -8,10 +8,10 @@ define(
         'chartx/utils/datasection',
         'chartx/utils/dataformat',
         'chartx/chart/original/planet/graphs',
-        // './tips',
-        'chartx/chart/original/planet/xaxis'
+        'chartx/chart/original/planet/xaxis',
+        'chartx/components/tips/tip',
     ],
-    function(Chart, Rect,Tools, GradientColor, DataSection, DataFormat, Graphs, XAxis){
+    function(Chart, Rect,Tools, GradientColor, DataSection, DataFormat, Graphs, XAxis, Tip){
         /*
          *@node chart在dom里的目标容器节点。
         */
@@ -23,7 +23,7 @@ define(
                 this.event         = {
                     This    : this,
                     enabled : 1,
-                    onClick   : this._click
+                    listener   : this._listener
                 }
 
                 this.cx            = '';                    //圆心
@@ -100,7 +100,7 @@ define(
                 this._back         =  null;
                 this._xAxis        =  null;
                 this._graphs       =  null;
-                this._tips         =  null;
+                this._tip          =  null;
 
                 _.deepExtend(this, opts);
 
@@ -116,19 +116,19 @@ define(
                 this._countData()
             },
             draw:function(){
-                // this.stageTip = new Canvax.Display.Sprite({
-                //     id      : 'tip'
-                // });
                 this.stageCore   = new Canvax.Display.Sprite({
                     id      : 'core'
                 });
                 this.stageBg     = new Canvax.Display.Sprite({
                     id      : 'bg'
                 });
+                this.stageTip = new Canvax.Display.Sprite({
+                    id      : 'tip'
+                });
     
                 this.stage.addChild(this.stageBg);
                 this.stage.addChild(this.stageCore);
-                // this.stage.addChild(this.stageTip);
+                this.stage.addChild(this.stageTip);
 
                 if( this.rotate ) {
                     this._rotate( this.rotate );
@@ -146,7 +146,7 @@ define(
                 this._back   = new Graphs(this.back, this);
                 this._xAxis  = new XAxis(this.xAxis.bar, this)
                 this._graphs = new Graphs(this.graphs, this);
-                // this._tips   = new Tips(this.tips , this.dataFrame , this.canvax.getDomContainer());
+                this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
             },
             _trimData:function(data){                      //调整数据
                 var self = this
@@ -155,8 +155,9 @@ define(
                 var n = _.indexOf(data[0], self.xAxis.field)
                 for(var a = 0, al = data.length; a < al; a++){
                     if(!isNaN(data[a][n])){
-                        !arr[data[a][n]] ? arr[data[a][n]] = [] : -1
-                        arr[data[a][n]].push(data[a])
+                        var index = parseInt(data[a][n])
+                        !arr[index] ? arr[index] = [] : -1
+                        arr[index].push(data[a])
                     }
                 }
                 arr = _.flatten(arr,true)
@@ -164,7 +165,7 @@ define(
                 var index = 0
                 var curIndex = 0
                 for(var a = 0, al = arr.length; a < al; a++){
-                    var orgIndex = arr[a][n]
+                    var orgIndex = parseInt(arr[a][n])
                     if(curIndex != orgIndex){
                         curIndex = orgIndex
                         index++ 
@@ -462,7 +463,7 @@ define(
                 this.stageBg.addChild(this._back.sprite)
                 this.stageBg.addChild(this._xAxis.sprite), this._xAxis.gradient()
                 this.stageCore.addChild(this._graphs.sprite);
-                // this.stageTip.addChild(this._tips.sprite);
+                this.stageTip.addChild(this._tip.sprite);
             },
 
             _getDataFromOrg:function(field,index){         //从原始数据中获取数据 该原始数据是_initData之后的(返回：具体值 | 数组)
@@ -496,12 +497,27 @@ define(
                 return Math.sin( Math.acos( h/r ) ) * r 
             },
 
-            _click:function(o){
+            _listener:function(o){
                 var self = this.This                            //this = this.event
                 if(o.ringID != 0){
                     o.orgData = self._getOrgData(o.ringID, o.ID)
                 }
                 this.on(o)
+                var e = o.target
+                e.tipsInfo = {
+                    ringID : o.ringID,
+                    ID     : o.ID,
+                    orgData: o.orgData
+                }
+                if(_.isObject(self.tips)){
+                    if(o.eventType == 'mouseover'){
+                        self._tip.show(e);
+                    }else if(o.eventType == 'mousemove'){
+                        self._tip.move(e);
+                    }else if(o.eventType == 'mouseout'){
+                        self._tip.hide(e);
+                    }
+                }
             },
             _getOrgData:function(ringID, ID){              //根据ringID,ID获取原始数据
                 var self = this

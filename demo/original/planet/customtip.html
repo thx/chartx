@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- 标签行星图</title>
+<script type="text/javascript" src="../../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+    var data = [
+        ["tagId","recommend","num","info"],
+        [10022  ,4.2          ,39 ,{"name":"4.2","tagId":10022}],
+        [10022  ,4          ,3939 ,{"name":"4","tagId":10022}],
+        [10012  ,12         ,1    ,{"name":"12","tagId":10012}],
+        [10019  ,16         ,6612 ,{"name":"16","tagId":10019}],
+        [10014  ,23         ,3909 ,{"name":"23","tagId":10014}],
+        [10035  ,26         ,8733 ,{"name":"26","tagId":10035}],
+        [10016  ,27         ,9161 ,{"name":"27","tagId":10016}],
+        [10031  ,32         ,7427 ,{"name":"32","tagId":10031}],
+        [10018  ,33         ,6292 ,{"name":"33","tagId":10018}],
+        [10023  ,35         ,82   ,{"name":"35","tagId":10020}],
+        [10021  ,71         ,3333 ,{"name":"71","tagId":10021}],
+        [10015  ,73.2         ,222  ,{"name":"73.2","tagId":10015}],
+        [10024  ,82         ,4379 ,{"name":"82","tagId":10024}],
+        [10024  ,82.1         ,4379 ,{"name":"82.1","tagId":10024}],
+        [10033  ,84         ,2714 ,{"name":"84","tagId":10033}]
+    ];
+    var options = {
+        type  : "planet",
+        cx    : 30,                              //圆心坐标x
+        event : {
+            enabled : 1,                              //是否有事件响应(tips)[1]
+            on : function(o){
+                //e.ringID = 第几个环(从0开始 0 = 品牌)   e.ID = 第几个行星(从1开始)
+                if(o.eventType == 'mouseover'){
+                    <!-- console.log(o) -->
+                }
+            }
+        },
+
+        yAxis : {                                //Y轴
+            field : ["tagId"]
+        },
+        xAxis : {
+            field : "recommend",
+            bar   : {
+                enabled   : 0,
+                y         : 228,
+                x         : 50 / 2,
+                width     : 500,
+                fillStyle : {
+                    normal : ['#70649a', '#b28fce']
+                },
+                text      : {
+                    contents : ['极力推荐','一般推荐']
+                }
+            }
+        },
+        graphs: {
+            disY  : 10,                               //行星与容器上、下之间的最小距离
+            minR  : 10,
+            size  : {                                 //行星大小
+                field : 'num'
+            },
+            layout: {                                 //布局
+                mode  : 1                             //模式(0 = 根据yAxis.field计算比例  |  1 = 上下错开)
+            },
+            info  : {
+                field : 'info',
+                content : 'name'
+            },             
+            core  : {                                 //品牌
+                r     : {                                  //半径
+                    normal  : 60
+                },
+                text  : {
+                    content : '阿里妈妈'
+                }
+            },
+            // fillStyle:{
+            //     normals:function(o){
+            //         return '#ff0000'
+            //     }
+            // }
+            text  : {
+                fillStyle : {
+                    normal : '#0000ff'
+                }
+            }
+        },
+        back:{
+            space  : 150
+        },
+        tips  : {
+            fillStyle : "white",
+            strokeStyle : "#999",
+            alpha:1,
+
+            //自定义tip内容
+            content : function(e){
+                //e.ringID = 第几个环(从0开始 0 = 品牌)   e.ID = 第几个行星(从1开始)   e.orgData = 原始数据(配置data中的数据)
+                var data = e.orgData
+                var info = data[3]
+
+
+                var str  = "<table>";
+                var color = '#000000'
+
+                str += '<tr style="color:' + color +'"><td>' + 'tagId:' + info.tagId + '</td></tr>'
+                str += '<tr style="color:' + color +'"><td>' + 'name :' + info.name + '</td></tr>'
+
+                str+="</table>"
+                return str
+            }
+        }
+    };
+
+    Chartx.original("canvasTest" , data, options);
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>标签行星图（planet chart）</h4>
+                <p>
+                    联系人：@逢春
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
