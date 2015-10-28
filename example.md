@@ -170,7 +170,7 @@ title:  Chartx demos
     <a target="_blank" href="./demo/line/reset_data.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/line/reset_data.png">
+        <img src="./assets/chart/line/reset_data.gif">
         </dt>
         <dd>
             <h5>
