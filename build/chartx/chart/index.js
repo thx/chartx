@@ -113,6 +113,7 @@ define(
                     this.dataFrame = this._initData(obj.data);
                 }
                 this.clean();
+                this.canvax.getDomContainer().innerHTML = "";
                 this.draw();
             },
 

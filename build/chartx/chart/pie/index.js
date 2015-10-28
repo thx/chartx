@@ -143,8 +143,8 @@ define(
                             var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
                             if (totalPercentOffset != 0) {
                                 data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
-                                data[maxPercentageOffsetIndex].percentage = data[maxPercentageOffsetIndex].percentage.toFixed(percentFixedNum);
-                                data[maxPercentageOffsetIndex].txt = data[maxPercentageOffsetIndex].percentage.toFixed(percentFixedNum) + '%';
+                                data[maxPercentageOffsetIndex].percentage = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum);
+                                data[maxPercentageOffsetIndex].txt = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum) + '%';
                             }
                         }
                     }
