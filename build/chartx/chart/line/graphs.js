@@ -107,7 +107,6 @@ define(
                         data : self.data[i]
                     });
                 });
-
             },
             /*
              *删除 ind

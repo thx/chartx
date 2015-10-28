@@ -68,12 +68,15 @@ define(
             },
             update: function(opt) {
                 _.deepExtend(this, opt);
+                this._pointList = this._getPointList( this.data );
+                /*
                 var list = [];
                 for (var a = 0, al = this.data.length; a < al; a++) {
                     var o = this.data[a];
                     list.push([o.x, o.y]);
                 };
                 this._pointList = list;
+                */
                 this._grow();
             },
             //自我销毁
@@ -93,7 +96,7 @@ define(
                     return s[this._groupInd]
                 }
                 if (_.isFunction(s)) {
-                    
+
                     return s({
                         iGroup: this._groupInd,
                         iNode: this._nodeInd,
@@ -251,7 +254,7 @@ define(
             _widget: function() {
                 var self = this;
 
-                self._pointList = this._getPointList(self.data);
+                self._pointList = this._getPointList( self.data );
 
                 if (self._pointList.length == 0) {
                     //filter后，data可能length==0
