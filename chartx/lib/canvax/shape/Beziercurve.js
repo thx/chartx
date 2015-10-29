@@ -91,7 +91,7 @@ define(
                     height : _maxY - _minY + lineWidth
               };
           },
-          //下面为Beziercurve匀速曲线运动相关，来自@墨川的 天猫欢乐城
+          //下面为Beziercurve 均分为n个节点
           /**
            * @param  {number} -- t {0, 1}
            * @return {number} -- length of the bezier arc from 0 to t

@@ -4,8 +4,8 @@
 
 define(
     "canvax/library/stats",
-    ["canvax/event/CanvaxEvent" ],
-    function( CanvaxEvent ){
+    ["canvax/core/Base" ],
+    function( CanvaxBase ){
 
 
 var Stats = function () {
@@ -17,7 +17,7 @@ var Stats = function () {
 
 	var container = document.createElement( 'div' );
 	container.id = 'stats';
-    CanvaxEvent.addEvent(container , "mousedown" , function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ) } )
+    CanvaxBase.addEvent(container , "mousedown" , function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ) } )
 	container.style.cssText = 'width:80px;opacity:0.9;cursor:pointer';
 
 	var fpsDiv = document.createElement( 'div' );

@@ -46,7 +46,6 @@ define(
             }
             var zoneType = shape.type;
     
-    
             //数学运算，主要是line，brokenLine
             var _mathReturn = _mathMethod(zoneType, shape, x, y);
     
@@ -177,7 +176,8 @@ define(
                 var inverseMatrix = _transformStage.clone();
     
                 var originPos = [x, y];
-                inverseMatrix.mulVector( originPos , [ x , y , 1 ] );
+                //inverseMatrix.mulVector( originPos , [ x , y , 1 ] );
+                originPos = inverseMatrix.mulVector( originPos );
     
                 x = originPos[0];
                 y = originPos[1];
