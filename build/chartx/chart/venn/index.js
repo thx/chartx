@@ -16,6 +16,7 @@ define(
                 this.nodeField = "sets";
                 this.valueField = "size";
                 this.labelField = "label";
+                this._hasLabel = false;
                 this.text = {
                     enabled: 0,
                     fillStyle: null,
@@ -32,14 +33,16 @@ define(
                 };
 
                 _.deepExtend(this, opts);
-                this.data = this._initData(_.clone(data));
+                this._initData(_.clone(data));
             },
             _initData: function(arr) {
                 var data = [];
                 var me = this;
                 var titles = arr.shift(0);
-                _.each(arr, function(row) {
-                    var obj = {};
+                _.each(arr, function(row, iNode) {
+                    var obj = {
+                        iNode: iNode
+                    };
                     _.each(titles, function(title, i) {
                         if (title == me.nodeField) {
                             var val = row[i];
@@ -51,13 +54,38 @@ define(
                             obj.size = row[i];
                         } else if (title == me.labelField) {
                             obj.label = row[i];
-                        } else {
-                            obj[title] = row[i];
-                        }
+                            me._hasLabel = true;
+                        };
+                        obj[title] = row[i];
                     });
-                    data.push(obj)
+                    data.push(obj);
                 });
+                
+                me.dataFrame = data;
+
+                if (me._hasLabel) {
+                    _.each(data, function(obj) {
+                        if ( obj.sets.length > 1 && !obj.label) {
+                            var label = [];
+                            _.each(obj.sets, function(set) {
+                                label.push( me._getNodeDataFromNode(set).label );
+                            });
+                            obj.label = label
+                        };
+                    });
+                };
+
                 return data;
+            },
+            _getNodeDataFromNode: function(node) {
+                var n = null;
+                _.each(this.dataFrame, function(d, i) {
+                    if (d.sets == node) {
+                        n = d;
+                        return false;
+                    };
+                });
+                return n;
             },
             draw: function() {
                 this.stageTip = new Canvax.Display.Sprite({
@@ -97,23 +125,25 @@ define(
                 }
                 return this.colors[i]
             },
+            /*
             _getValue: function(name) {
                 var val = null;
-                _.each(this.data, function(obj) {
+                _.each(this.dataFrame, function(obj) {
                     if (obj.sets.length == 1 && obj.sets[0] == name) {
                         val = obj.size;
                     }
                 });
                 return val
             },
+            */
             getLabel: function(name) {
                 var label = null;
-                _.each(this.data, function(obj) {
+                _.each(this.dataFrame, function(obj) {
                     if (obj.sets.join(",") == name && obj.label) {
                         label = obj.label;
                     }
                 });
-                return label
+                return label;
             },
             _startDraw: function() {
                 var me = this;
@@ -124,13 +154,13 @@ define(
 
                         var orientation = Math.PI / 2;
                         var normalize = true;
-                        var solution = Venn.venn(me.data);
+                        var solution = Venn.venn(me.dataFrame);
                         if (normalize) {
                             solution = Venn.normalizeSolution(solution, orientation);
                         };
                         var circles = Venn.scaleSolution(solution, me.width, me.height, me.padding);
 
-                        var textCentres = computeTextCentres(circles, me.data);
+                        var textCentres = computeTextCentres(circles, me.dataFrame);
                         var i = 0;
                         for (var c in circles) {
 
@@ -141,6 +171,7 @@ define(
                             var fillStyle = Color.colorRgb(me._getColor(me.circle.fillStyle, i, c));
                             var strokeStyle = me._getColor(me.circle.strokeStyle, i, c);
                             var circle = new Circle({
+                                pointChkPriority: false,
                                 context: {
                                     x: obj.x,
                                     y: obj.y,
@@ -152,6 +183,7 @@ define(
                             });
                             circle.index = i;
                             circle.name = c;
+                            circle.data = me._getNodeDataFromNode(c);
                             me.core.addChild(circle);
 
                             circle.hover(function(e) {
@@ -237,25 +269,38 @@ define(
 
 
                         var betweenPaths = [];
-                        _.each(me.data, function(c) {
+                        _.each(me.dataFrame, function(c) {
                             if (c.sets.length > 1) {
                                 var path = pathtween(c)(1);
-                                betweenPaths.push(path);
+                                betweenPaths.push({
+                                    path: path,
+                                    data: c
+                                });
                             }
                         });
 
-                        _.each(betweenPaths, function(path) {
-                            var bpath = new Path({
+                        _.each(betweenPaths, function(bd, i) {
+                            var path = bd.path;
+                            window.bpath = new Path({
+                                hoverClone: false,
                                 context: {
                                     path: path,
                                     lineWidth: 2,
-                                    strokeStyle: "RGBA(0,0,0,0)"
+                                    strokeStyle: "RGBA(255,255,255,0)"
                                 }
                             });
-                            bpath.hover(function(){
-                                this.context.strokeStyle = "RGBA(0,0,0,1)";
-                            } , function(){
-                                this.context.strokeStyle = "RGBA(0,0,0,0)";
+                            bpath.data = bd.data;
+                            bpath.hover(function(e) {
+                                this.context.strokeStyle = "RGBA(255,255,255,1)";
+                                e.tipsInfo = me._getInfoHandler(this, e);
+                                me._tip.show(e);
+                            }, function() {
+                                this.context.strokeStyle = "RGBA(255,255,255,0)";
+                                me._tip.hide();
+                            });
+                            bpath.on("mousemove", function(e) {
+                                e.tipsInfo = me._getInfoHandler(this, e);
+                                me._tip.move(e);
                             });
                             me.core.addChild(bpath);
                         });
@@ -450,10 +495,8 @@ define(
                             }
                         }
                         return ret;
-                    }
+                    };
                     venn.computeTextCentres = computeTextCentres;
-
-
 
                 })(Venn);
 
@@ -461,15 +504,18 @@ define(
 
             },
             _getTipDefaultContent: function(info) {
-                return "<div style='color:#ffffff'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div></div>";
+                return "<div style='color:#ffffff'><div style='padding-bottom:3px;'>" + info.label.toString() + "：" + info.value + "</div></div>";
             },
             _getInfoHandler: function(target) {
+
                 var node = {
-                    iNode: target.index,
-                    name: target.name,
-                    value: this._getValue(target.name),
+                    iNode: target.data.iNode,
+                    name: target.data.sets,
+                    label: target.data.label,
+                    value: target.data.value,
                     fillStyle: target.context.strokeStyle
                 };
+
                 return node
             },
             _drawEnd: function() {

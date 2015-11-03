@@ -17,7 +17,6 @@ define(
          */
         var Canvax = Chart.Canvax;
 
-
         return Chart.extend({
 
             init: function(node, data, opts) {
@@ -298,10 +297,11 @@ define(
 
                 if (this._anchor.enabled) {
                     //绘制点位线
-                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
+
                     this._anchor.draw({
-                        w: this.width - _yAxisW - _yAxisRW,
-                        h: -_graphsH,
+                        w: this._xAxis.xGraphsWidth,//this.width - _yAxisW - _yAxisRW,
+                        h: _graphsH,
                         cross: {
                             x: pos.x,
                             y: _graphsH + pos.y

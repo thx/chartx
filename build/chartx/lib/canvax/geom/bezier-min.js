@@ -1,0 +1,1 @@
+define("canvax/geom/bezier",[],function(){return{getPointByTime:function(a,b){var c=1-a,d=c*c,e=d*c,f=a*a,g=f*a,h=b[0],i=b[1],j=b[2],k=b[3],l=0,m=0,n=0,o=0;return b.length>6?(l=b[4],m=b[5],n=b[6],o=b[7],{x:e*h+3*d*a*j+3*c*f*l+g*n,y:e*i+3*d*a*k+3*c*f*m+g*o}):(n=b[4],o=b[5],{x:d*h+2*a*c*j+f*n,y:d*i+2*a*c*k+f*o})}}});

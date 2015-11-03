@@ -1,14 +1,8 @@
 /**
  * Canvax
- *
  * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
- *
- * 碰撞检测 类
- *
- * 目前只支持点 和 shape 的检测， 暂时不支持shape的碰撞检测
+ * 点击检测 类
  * */
-
-
 define(
     "canvax/geom/HitTestPoint",
     [
@@ -20,207 +14,57 @@ define(
          * 图形空间辅助类
          * isInside：是否在区域内部
          * isOutside：是否在区域外部
-         * getTextWidth：测算单行文本宽度
          * TODO:本检测只为进一步的 详细 检测。也就是说 进过了基本的矩形范围检测后才会
-         * 使用本检测方法
          */
         var HitTestPoint={};
-    
         /**
          * 包含判断
-         * @param {string} shape : 图形
-         * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
+         * shape : 图形
+         * x ： 横坐标
+         * y ： 纵坐标
          */
         function isInside(shape , point) {
             var x = point.x;
             var y = point.y;
-            if( shape.type == "bitmap" ){
-                //如果是bitmap
-                return true;
-            }
-    
             if (!shape || !shape.type) {
                 // 无参数或不支持类型
                 return false;
-            }
-            var zoneType = shape.type;
-    
+            };
             //数学运算，主要是line，brokenLine
-            var _mathReturn = _mathMethod(zoneType, shape, x, y);
-    
-            if (typeof _mathReturn != 'undefined') {
-                return _mathReturn;
-            }
-    
-            if (zoneType != 'beziercurve'&& shape.buildPath && Base._pixelCtx.isPointInPath) {
-                   return _buildPathMethod(shape, Base._pixelCtx, x, y);
-            } else if (Base._pixelCtx.getImageData) {
-                return _pixelMethod(shape, x, y);
-            }
-    
-            // 上面的方法都行不通时
-            switch (zoneType) {
-                    //水滴----------------------11
-                case 'droplet':
-                    return true;    // Todo，不精确
-                case 'ellipse':
-                    return true;     // Todo，不精确
-                    //路径，椭圆，曲线等-----------------13
-                default:
-                    return false;   // Todo，暂不支持
-            }
-        }
+            return _mathMethod( shape, x, y);
+        };
     
         /**
-         * 用数学方法判断，三个方法中最快，但是支持的shape少
-         *
-         * @param {string} zoneType ： 图形类型
-         * * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
-         * @return {boolean=} true表示坐标处在图形中
+         * zoneType ： 图形类型
+         * x ： 横坐标
+         * y ： 纵坐标
+         * true表示坐标处在图形中
          */
-        function _mathMethod(zoneType,shape,x, y) {
+        function _mathMethod(shape,x, y) {
             // 在矩形内则部分图形需要进一步判断
-            switch (zoneType) {
-                //线-----------------------1
+            switch (shape.type) {
                 case 'line':
                     return _isInsideLine(shape.context, x, y);
-                    //折线----------------------2
-                case 'brokenLine':
+                case 'brokenline':
                     return _isInsideBrokenLine(shape, x, y);
-                    //文本----------------------3
                 case 'text':
                     return true;
-                    //矩形----------------------4
                 case 'rect':
                     return true;
-                    //圆形----------------------5
                 case 'circle':
                     return _isInsideCircle(shape , x, y);
-                    //椭圆
                 case 'ellipse':
                     return _isPointInElipse(shape , x , y);
-                    //扇形----------------------6
                 case 'sector':
                     return _isInsideSector(shape , x, y);
-                    //path---------------------7
                 case 'path':
+                case 'droplet':
                     return _isInsidePath(shape , x, y);
-                    //多边形-------------------8
                 case 'polygon':
                 case 'isogon':
                     return _isInsidePolygon(shape , x, y);
-                    //图片----------------------10
-                case 'image':
-                    return true;
             }
-        }
-    
-        /**
-         * 通过buildPath方法来判断，三个方法中较快，但是不支持线条类型的shape，
-         * 而且excanvas不支持isPointInPath方法
-         *
-         * @param {Object} shapeClazz ： shape类
-         * @param {Object} context : 上下文
-         * @param {Object} context ：目标区域
-         * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
-         * @return {boolean} true表示坐标处在图形中
-         */
-        function _buildPathMethod(shape, context, x, y) {
-            var context = shape.context;
-            // 图形类实现路径创建了则用类的path
-            context.beginPath();
-            shape.buildPath(context, context);
-            context.closePath();
-            return context.isPointInPath(x, y);
-        }
-    
-        /**
-         * 通过像素值来判断，三个方法中最慢，但是支持广,不足之处是excanvas不支持像素处理,flashCanvas支持还好
-         *
-         * @param {Object} shapeClazz ： shape类
-         * @param {Object} context ：目标区域
-         * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
-         * @return {boolean} true表示坐标处在图形中
-         */
-        function _pixelMethod(shape, x, y) {
-            var context  = shape.context;
-            
-            var _context = Base._pixelCtx;
-                
-            _context.save();
-            _context.beginPath();
-            Base.setContextStyle( _context , context.$model );
-           
-            _context.transform.apply( _context , shape.getConcatenatedMatrix().toArray() );
-    
-            //这个时候肯定是做过矩形范围检测过来的
-            //所以，shape._rect 肯定都是已经有值的
-            _context.clearRect( shape._rect.x-10 , shape._rect.y-10 , shape._rect.width+20 , shape._rect.height+20 );
-    
-    
-            shape.draw( _context,  context );
-
-            _context.globalAlpha = 1;
-
-            shape.drawEnd(_context);
-            _context.closePath();
-            _context.restore();
-    
-            //对鼠标的坐标也做相同的变换
-            var _transformStage = shape.getConcatenatedMatrix()
-            if( _transformStage ){
-                var inverseMatrix = _transformStage.clone();
-    
-                var originPos = [x, y];
-                //inverseMatrix.mulVector( originPos , [ x , y , 1 ] );
-                originPos = inverseMatrix.mulVector( originPos );
-    
-                x = originPos[0];
-                y = originPos[1];
-            }
-    
-            return _isPainted(_context, x , y);
         };
-    
-        /**
-         * 坐标像素值，判断坐标是否被作色
-         *
-         * @param {Object} context : 上下文
-         * @param {number} x : 横坐标
-         * @param {number} y : 纵坐标
-         * @param {number=} unit : 触发的精度，越大越容易触发，可选，缺省是为1
-         * @return {boolean} 已经被画过返回true
-         */
-        function _isPainted(context, x, y, unit) {
-            var pixelsData;
-    
-            if (typeof unit != 'undefined') {
-                unit = Math.floor((unit || 1 )/ 2);
-                pixelsData = context.getImageData(
-                        x - unit,
-                        y - unit,
-                        unit + unit,
-                        unit + unit
-                        ).data;
-            }
-            else {
-                pixelsData = context.getImageData(x, y, 1, 1).data;
-            }
-    
-            var len = pixelsData.length;
-            while (len--) {
-                if (pixelsData[len] !== 0) {
-                    return true;
-                }
-            }
-    
-            return false;
-        };
-    
         /**
          * !isInside
          */
@@ -295,7 +139,6 @@ define(
          * 矩形包含判断
          */
         function _isInsideRectangle(shape, x, y) {
-    
             if (x >= shape.x
                     && x <= (shape.x + shape.width)
                     && y >= shape.y
@@ -383,7 +226,6 @@ define(
     
         /**
          * 多边形包含判断
-         * 警告：下面这段代码会很难看，建议跳过~
          */
         function _isInsidePolygon(shape, x, y) {
             /**
@@ -450,7 +292,6 @@ define(
             }
             return inside;
         };
-    
         /**
          * 路径包含判断，依赖多边形判断
          */
@@ -460,8 +301,8 @@ define(
             var insideCatch = false;
             for (var i = 0, l = pointList.length; i < l; i++) {
                 insideCatch = _isInsidePolygon(
-                        { pointList : pointList[i] }, x, y
-                        );
+                    { pointList : pointList[i] }, x, y
+                );
                 if (insideCatch) {
                     break;
                 }

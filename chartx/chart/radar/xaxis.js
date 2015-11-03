@@ -39,7 +39,7 @@ define(
                     context  : {
                         x : r,
                         y : r,
-                        r : r + 6,
+                        r : r + 2,
                         n : this.dataSection.length
                     }
                 });

@@ -3,8 +3,7 @@
  *
  * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
  *
- * path 类
- *
+ * Path 类
  *
  * 对应context的属性有
  * @path path串
@@ -13,21 +12,19 @@ define(
     "canvax/shape/Path", [
         "canvax/display/Shape",
         "canvax/core/Base",
-        "canvax/geom/Matrix"
+        "canvax/geom/Matrix",
+        "canvax/geom/bezier"
     ],
-    function(Shape, Base, Matrix) {
-
+    function(Shape, Base, Matrix , Bezier) {
         var Path = function(opt) {
             var self = this;
             self.type = "path";
-
             opt = Base.checkOpt(opt);
-
             if ("drawTypeOnly" in opt) {
                 self.drawTypeOnly = opt.drawTypeOnly;
-            }
-
-            self._context = {
+            };
+            self.__parsePathData = null;
+            var _context = {
                 pointList: [], //从下面的path中计算得到的边界点的集合
                 path: opt.context.path || "" //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
                     //M = moveto
@@ -39,23 +36,27 @@ define(
                     //Q = quadratic Belzier curve
                     //T = smooth quadratic Belzier curveto
                     //Z = closepath
-            }
-            arguments.callee.superclass.constructor.apply(this, arguments);
+            };
+            self._context = _.deepExtend(_context , (self._context || {}));
+            arguments.callee.superclass.constructor.apply(self, arguments);
         };
 
         Base.creatClass(Path, Shape, {
+            $watch : function( name , value , preValue ){
+                if( name == "path" ){//如果path有变动，需要自动计算新的pointList
+                    this.__parsePathData = null;
+                    this.context.pointList = [];
+                }
+            },
             _parsePathData: function(data) {
                 if (this.__parsePathData) {
                     return this.__parsePathData;
-                }
+                };
                 if (!data) {
                     return [];
-                }
-
-
+                };
                 // command string
                 var cs = data;
-
                 // command chars
                 var cc = [
                     'm', 'M', 'l', 'L', 'v', 'V', 'h', 'H', 'z', 'Z',
@@ -85,9 +86,7 @@ define(
 
                     //有的时候，比如“22，-22” 数据可能会经常的被写成22-22，那么需要手动修改
                     //str = str.replace(new RegExp('-', 'g'), ',-');
-
                     //str = str.replace(/(.)-/g, "$1,-")
-
 
                     var p = str.split(',');
 
@@ -367,6 +366,20 @@ define(
                 return [cx, cy, rx, ry, theta, dTheta, psi, fs];
             },
             /*
+            * 获取bezier上面的点列表
+            * */
+            _getBezierPoints : function(p){
+                var steps = Math.abs( Math.sqrt( Math.pow( p.slice(-1)[0] - p[1] , 2) + Math.pow(p.slice(-2,-1 )[0] - p[0] , 2)) );
+                var parr  = [];
+                for(var i = 0;i<steps;i++){
+                    var t = i / steps;
+                    var tp = Bezier.getPointByTime( t , p );
+                    parr.push( tp.x );
+                    parr.push( tp.y );
+                }
+                return parr;
+            },
+            /*
              * 如果path中有A a ，要导出对应的points
              */
             _getArcPoints: function(p) {
@@ -403,16 +416,16 @@ define(
                 return cps;
             },
 
+            draw : function(ctx,style){
+                this._draw(ctx , style);
+            },
             /**
-             * 创建路径
-             * @param {Context2D} ctx Canvas 2D上下文
-             * @param {Object} style 样式
+             *  ctx Canvas 2D上下文
+             *  style 样式
              */
-            draw: function(ctx, style) {
+            _draw: function(ctx, style) {
                 var path = style.path;
-
                 var pathArray = this._parsePathData(path);
-
                 this._setPointList(pathArray, style);
 
                 for (var i = 0, l = pathArray.length; i < l; i++) {
@@ -460,7 +473,6 @@ define(
                             break;
                     }
                 }
-
                 return;
             },
             _setPointList: function(pathArray, style) {
@@ -473,18 +485,35 @@ define(
                 var pointList = style.pointList = [];
                 var singlePointList = [];
                 for (var i = 0, l = pathArray.length; i < l; i++) {
+                    //debugger
                     if (pathArray[i].command.toUpperCase() == 'M') {
                         singlePointList.length > 0 && pointList.push(singlePointList);
                         singlePointList = [];
-                    }
+                    };
+
                     p = pathArray[i].points;
 
                     if (pathArray[i].command.toUpperCase() == 'A') {
-
                         p = this._getArcPoints(p);
                         //A命令的话，外接矩形的检测必须转换为_points
                         pathArray[i]._points = p;
-                    }
+                    };
+
+                    if( pathArray[i].command.toUpperCase() == "C" || pathArray[i].command.toUpperCase() == "Q" ){
+                        var cStart = [0,0];
+                        if( singlePointList.length > 0 ){
+                            cStart = singlePointList.slice(-1)[0];
+                        } else if(i>0){
+                            var prePoints = ( pathArray[i-1]._points || pathArray[i-1].points );
+                            if( prePoints.length >= 2 ){
+                                cStart = prePoints.slice(-2);
+                            }
+                        }
+
+                        p = this._getBezierPoints( cStart.concat( p ));
+                        pathArray[i]._points = p;
+                    };
+
                     for (var j = 0, k = p.length; j < k; j += 2) {
                         var px = p[j];
                         var py = p[j + 1];
@@ -493,14 +522,12 @@ define(
                         };
                         singlePointList.push([px, py]);
                     }
-                }
-
+                };
                 singlePointList.length > 0 && pointList.push(singlePointList);
-
             },
             /**
              * 返回矩形区域，用于局部刷新和文字定位
-             * @param {Object} style 样式
+             * style 样式
              */
             getRect: function(style) {
                 var lineWidth;
@@ -522,8 +549,8 @@ define(
                 var y = 0;
 
                 var pathArray = this._parsePathData(style.path);
-
                 this._setPointList(pathArray, style);
+
                 for (var i = 0; i < pathArray.length; i++) {
                     var p = pathArray[i]._points || pathArray[i].points;
 

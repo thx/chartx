@@ -11,7 +11,7 @@ define(
         };
         Chartx.extend( xAxis , xAxisBase , {
             _initDataSection  : function( arr ){ 
-                var arr = _.flatten( arr ); //Tools.getChildsArr( data.org );
+                var arr = _.flatten( arr ); //_.flatten( data.org );
                 var dataSection = DataSection.section(arr);
                 this._baseNumber = dataSection[0];
                 if( dataSection.length == 1 ){

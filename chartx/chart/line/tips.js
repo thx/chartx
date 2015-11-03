@@ -91,7 +91,7 @@ define(
                     xEnd    : 0,
                     yEnd    : 0,
                     lineWidth   : 1,
-                    strokeStyle : this.line.strokeStyle || "#0088cf"//"#cccccc" 
+                    strokeStyle : this.line.strokeStyle || "#cccccc" 
                 } , this.line);
                 if(this.line.enabled){
                     this._line = new Line({

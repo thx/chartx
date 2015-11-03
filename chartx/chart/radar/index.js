@@ -25,21 +25,25 @@ define(
                 this._yAxis        = null;
                 this._back         = null;
                 this._graphs       = null;
+
+                this._labelH       = 20; //预留给label的height
                 
                 _.deepExtend( this , opts );
                 this.dataFrame = this._initData( data , this );
-
             },
             _initData : dataFormat,
             _getR : function(){
-                var minWorH = Math.min( this.width , this.height );
+                var minWorH = Math.min( 
+                    this.width - this.padding.left - this.padding.right,
+                    this.height - this.padding.top - this.padding.bottom
+                );
                 if( !this.r ) {
                     this.r = minWorH / 2
                 };
                 if( this.r > minWorH / 2 ){
                      this.r = minWorH / 2
                 };
-                this.r -= 20;
+                this.r -= this._labelH;
             },
             draw:function(){
                 this.stageBg       = new Canvax.Display.Sprite({
@@ -147,8 +151,9 @@ define(
                 this._back.draw( backAndGraphsOpt );
             
                 var backSpc = this._back.sprite.context;
+
                 var backX   = ( this.width  - backSpc.width ) / 2;
-                var backY   = ( this.height - backSpc.height) / 2;
+                var backY   = this.padding.top + this._labelH;//( this.height - backSpc.height ) / 2;
     
                 this._back.setPosition(backX , backY);
     

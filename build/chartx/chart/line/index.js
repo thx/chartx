@@ -91,7 +91,7 @@ define(
                     xEnd    : 0,
                     yEnd    : 0,
                     lineWidth   : 1,
-                    strokeStyle : this.line.strokeStyle || "#0088cf"//"#cccccc" 
+                    strokeStyle : this.line.strokeStyle || "#cccccc" 
                 } , this.line);
                 if(this.line.enabled){
                     this._line = new Line({
@@ -208,8 +208,9 @@ define(
         "chartx/utils/tools",
         "chartx/utils/colorformat",
         "canvax/animation/Tween",
+        "chartx/chart/theme"
     ],
-    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween) {
+    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween , Theme) {
         window.Canvax = Canvax
         var Group = function(field, a, opt, ctx) {
             this.field = field; //_groupInd在yAxis.field中对应的值
@@ -220,7 +221,7 @@ define(
             this.h = 0;
             this.y = 0;
 
-            this.colors = ["#42a8d7", '#666666', '#26b471', '#7aa1ff', '#fa8529', '#ff7c4d', '#2494ed', '#7aa1ff', '#fa8529', '#ff7c4d'];
+            this.colors = Theme.colors;
 
             this.line = { //线
                 enabled: 1,
@@ -241,7 +242,7 @@ define(
 
             this.fill = { //填充
                 fillStyle: null,
-                alpha: 0.1
+                alpha: 0.05
             };
 
             this.dataOrg = []; //data的原始数据
@@ -820,7 +821,6 @@ define(
          */
         var Canvax = Chart.Canvax;
 
-
         return Chart.extend({
 
             init: function(node, data, opts) {
@@ -1101,10 +1101,11 @@ define(
 
                 if (this._anchor.enabled) {
                     //绘制点位线
-                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
+
                     this._anchor.draw({
-                        w: this.width - _yAxisW - _yAxisRW,
-                        h: -_graphsH,
+                        w: this._xAxis.xGraphsWidth,//this.width - _yAxisW - _yAxisRW,
+                        h: _graphsH,
                         cross: {
                             x: pos.x,
                             y: _graphsH + pos.y
