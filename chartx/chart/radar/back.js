@@ -14,8 +14,7 @@ define(
             this.xDataSection = [];
             this.strokeStyle  = "#e5e5e5";
             this.lineWidth    = 1;
-            this.sprite       = null ;
-    
+            this.sprite       = null;
             this.init(opt);
         };
         Back.prototype = {
@@ -56,7 +55,8 @@ define(
                             r : this.r * rScale,
                             n : this.xDataSection.length,
                             strokeStyle : this.strokeStyle,
-                            lineWidth   : this.lineWidth
+                            lineWidth   : this.lineWidth,
+                            fillStyle   : "RGBA(0,0,0,0)"
                         }
                     });
                     //给最外面的蜘蛛网添加事件，让它冒泡到外面去

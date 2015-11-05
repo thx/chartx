@@ -14,8 +14,7 @@ define(
             this.xDataSection = [];
             this.strokeStyle  = "#e5e5e5";
             this.lineWidth    = 1;
-            this.sprite       = null ;
-    
+            this.sprite       = null;
             this.init(opt);
         };
         Back.prototype = {

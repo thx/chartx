@@ -5,9 +5,10 @@ define(
         "canvax/shape/Polygon",
         "canvax/shape/Circle",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip"
+        "chartx/components/tips/tip",
+        "chartx/chart/theme"
     ],
-    function( Canvax , Polygon , Circle , Tween , Tip ){
+    function( Canvax , Polygon , Circle , Tween , Tip , Theme){
  
         var Graphs = function( opt , tipsOpt , domContainer ){
             this.pos    = {x : 0 , y : 0};
@@ -15,7 +16,7 @@ define(
             this.data       = [];
             this.yDataSection  = [];
             this.xDataSection  = [];
-            this._colors       = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors       = Theme.colors;
             this.fillStyle     = null;
             this.alpha         = 0.5;
             this.lineWidth     = 1;
