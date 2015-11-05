@@ -11,7 +11,6 @@ window.Chartx || (Chartx = {
                 break;
             }
         };
-        
         Chartx.path = __FILE__.replace(/(^\s*)|(\s*$)/g, "");
         Chartx._setPackages([{
             name: 'canvax',
