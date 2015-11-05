@@ -55,7 +55,8 @@ define(
                             r : this.r * rScale,
                             n : this.xDataSection.length,
                             strokeStyle : this.strokeStyle,
-                            lineWidth   : this.lineWidth
+                            lineWidth   : this.lineWidth,
+                            fillStyle   : "RGBA(0,0,0,0)"
                         }
                     });
                     //给最外面的蜘蛛网添加事件，让它冒泡到外面去
@@ -284,6 +285,7 @@ define(
                             pointList : pointList,
                             lineWidth : 2,
                             cursor    : "pointer",
+                            fillStyle : "RGBA(0,0,0,0)",
                             strokeStyle : this.getFillStyle(i)//this._colors[i]
                         }
                     });

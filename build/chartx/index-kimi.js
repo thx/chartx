@@ -129,9 +129,11 @@ define(
              * 清除整个图表
              **/
             clean: function() {
-                _.each(this.canvax.children, function(stage, i) {
-                    stage.removeAllChildren();
-                });
+                for (var i=0,l=this.canvax.children.length;i<l;i++){
+                    this.canvax.getChildAt(i).destroy();
+                    i--;
+                    l--;
+                };
             },
             /**
              * 容器的尺寸改变重新绘制
@@ -865,7 +867,7 @@ define(
             };
 
             this.realTime = false; //是否是实时的一个点，如果是的话会有动画
-            this.tween    = null;  //realTime为true的话，tween则为对应的一个缓动对象
+            this.tween    = null;  // realTime 为true的话，tween则为对应的一个缓动对象
             this.filter  = function(){};//过滤函数
 
             if( "markPoint" in userOpts ){
@@ -884,6 +886,15 @@ define(
                     context : {
                         x : this.point.x,
                         y : this.point.y
+                    }
+                });
+                this.sprite.on("destroy" , function( e ){
+                    if (me.tween) {
+                        me.tween.stop();
+                        Tween.remove( me.tween );
+                    };
+                    if(me.timer){
+                        cancelAnimationFrame(me.timer);
                     }
                 });
                 setTimeout( function(){
@@ -959,7 +970,7 @@ define(
                         me.sprite.addChildAt( me.shapeBg , 0 );
                     };
                 
-                    var timer = null;
+                    me.timer = null;
                     var growAnima = function(){
                        me.tween = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
                        .to( { r : me.r * 3 , alpha : 0 }, me.duration )
@@ -972,8 +983,8 @@ define(
                        animate();
                     };
                     function animate(){
-                        //console.log(1)
-                        timer    = requestAnimationFrame( animate ); 
+                        console.log(1);
+                        me.timer    = requestAnimationFrame( animate ); 
                         Tween.update();
                     };
                     growAnima();

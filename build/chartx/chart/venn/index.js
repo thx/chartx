@@ -286,7 +286,8 @@ define(
                                 context: {
                                     path: path,
                                     lineWidth: 2,
-                                    strokeStyle: "RGBA(255,255,255,0)"
+                                    strokeStyle: "RGBA(255,255,255,0)",
+                                    fillStyle : "RGBA(255,255,255,0)"
                                 }
                             });
                             bpath.data = bd.data;

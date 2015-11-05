@@ -188,6 +188,7 @@ define(
                             pointList : pointList,
                             lineWidth : 2,
                             cursor    : "pointer",
+                            fillStyle : "RGBA(0,0,0,0)",
                             strokeStyle : this.getFillStyle(i)//this._colors[i]
                         }
                     });
