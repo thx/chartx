@@ -501,12 +501,13 @@ define(
             remove : function(){
                 if( this.parent ){
                     this.parent.removeChild(this);
+                    this.parent = null;
                 }
             },
             //元素的自我销毁
-            destroy : function(){ 
-                this.fire("destroy");
+            destroy : function(){
                 this.remove();
+                this.fire("destroy");
                 //把自己从父节点中删除了后做自我清除，释放内存
                 this.context = null;
                 delete this.context;
