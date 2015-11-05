@@ -77,8 +77,6 @@ define(
                     this.ty = ct*this.ty - st*tx;
                 }
                 return this;
-    
-    
             },
             scale : function(sx, sy){
                 this.a *= sx;
@@ -124,16 +122,16 @@ define(
             /**
              * 矩阵左乘向量
              */
-            mulVector : function(out , v) {
+            mulVector : function(v) {
                 var aa = this.a, ac = this.c, atx = this.tx;
                 var ab = this.b, ad = this.d, aty = this.ty;
     
+                var out = [0,0];
                 out[0] = v[0] * aa + v[1] * ac + atx;
                 out[1] = v[0] * ab + v[1] * ad + aty;
     
                 return out;
-            }
-    
+            }    
         } );
     
         return Matrix;

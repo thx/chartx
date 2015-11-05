@@ -13,7 +13,6 @@
 define(
     "canvax/shape/Shapes",
     [
-        "canvax/shape/Beziercurve",
         "canvax/shape/BrokenLine",
         "canvax/shape/Circle",
         "canvax/shape/Droplet",
@@ -26,7 +25,6 @@ define(
         "canvax/shape/Rect"
     ],
     function(
-            Beziercurve,
             BrokenLine,
             Circle,
             Droplet,
@@ -40,7 +38,6 @@ define(
 ){
 
     var Shapes = {
-        Beziercurve : Beziercurve, //贝塞尔曲线
         BrokenLine  : BrokenLine,  //折线
         Circle      : Circle,      //圆形
         Droplet     : Droplet,     //水滴型

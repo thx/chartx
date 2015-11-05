@@ -26,7 +26,7 @@ define(
             }
 
             this.text = {
-                fillStyle: '#999999',
+                fillStyle: '#333333',
                 fontSize: 12,
                 rotation: 0,
                 format: null,
@@ -263,6 +263,9 @@ define(
                 if( _.isArray( res ) ){
                     res = Tools.numAddSymbol(res);
                 }
+                if (!res) {
+                    res = text;
+                };
                 return res;
             },
 

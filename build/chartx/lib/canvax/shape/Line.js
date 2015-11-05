@@ -41,8 +41,8 @@ define(
         Base.creatClass( Line , Shape , {
             /**
              * 创建线条路径
-             * @param {Context2D} ctx Canvas 2D上下文
-             * @param {Object} style 样式
+             * ctx Canvas 2D上下文
+             * style 样式
              */
             draw : function(ctx, style) {
                 if (!style.lineType || style.lineType == 'solid') {
@@ -61,7 +61,7 @@ define(
       
             /**
              * 返回矩形区域，用于局部刷新和文字定位
-             * @param {Object} style
+             * style
              */
             getRect:function(style) {
                 var lineWidth = style.lineWidth || 1;

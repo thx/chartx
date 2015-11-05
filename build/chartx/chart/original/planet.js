@@ -216,7 +216,7 @@ define(
                     self.dataFrame.back.rings = backData.length
                 }
                                                                 //转一维数组
-                self.dataFrame.back.data   = Tools.getChildsArr(backData)
+                self.dataFrame.back.data   = _.flatten(backData)
                                                                 //计算环与环之间距离的平均值
                 self.dataFrame.back.ringAg = self._getBackRingAverage()
 
@@ -301,7 +301,7 @@ define(
                 }
             
                 self.dataFrame.graphs.data  = graphsData
-                self.dataFrame.graphs.maxRdata = Tools.getChildsArr(maxRdata)
+                self.dataFrame.graphs.maxRdata = _.flatten(maxRdata)
                                                                 //每个环上最大高度集合
                 var maxYData = [], rdata = self.dataFrame.back.rdata, maxRdata = self.dataFrame.graphs.maxRdata
                

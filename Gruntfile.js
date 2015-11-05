@@ -49,6 +49,7 @@ module.exports = function(grunt) {
                 //'chartx/chart/index.js',
                  bc+"index.js",
                  bc+"chart/index.js",
+                 bc+"chart/theme.js",
                  bc+"components/**/*.js"
              ],
              dest: bc+'index.js'

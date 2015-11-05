@@ -46,8 +46,12 @@ define(
             },
             fire : function(eventType , event){
                 //因为需要在event上面冒泡传递信息，所以还是不用clone了
-                var e       = event;//_.clone( event );
+                var e       = event || {};//_.clone( event );
                 var me      = this;
+                if( _.isObject(eventType) && eventType.type ){
+                    e         = _.extend( e , eventType );
+                    eventType = eventType.type;
+                };
                 var preCurr = e ? e.currentTarget : null;
                 _.each( eventType.split(" ") , function(evt){
                     var preEventType = null;

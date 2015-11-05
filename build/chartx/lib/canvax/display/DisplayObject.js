@@ -436,7 +436,7 @@ define(
                     var inverseMatrix = this._transform.clone().invert();
     
                     var originPos = [x, y];
-                    inverseMatrix.mulVector( originPos , [ x , y ] );
+                    originPos = inverseMatrix.mulVector( originPos );
     
                     x = originPos[0];
                     y = originPos[1];
@@ -457,10 +457,13 @@ define(
                     return false;
                 };
                 //正式开始第一步的矩形范围判断
-                if (x    >= _rect.x
-                    && x <= (_rect.x + _rect.width)
-                    && y >= _rect.y
-                    && y <= (_rect.y + _rect.height)
+                if (
+                    this.type == "path" || 
+                    (x    >= _rect.x
+                    &&  x <= (_rect.x + _rect.width)
+                    &&  y >= _rect.y
+                    &&  y <= (_rect.y + _rect.height)
+                    )
                 ) {
                    //那么就在这个元素的矩形范围内
                    result = HitTestPoint.isInside( this , {
@@ -498,11 +501,13 @@ define(
             remove : function(){
                 if( this.parent ){
                     this.parent.removeChild(this);
+                    this.parent = null;
                 }
             },
             //元素的自我销毁
-            destroy : function(){ 
+            destroy : function(){
                 this.remove();
+                this.fire("destroy");
                 //把自己从父节点中删除了后做自我清除，释放内存
                 this.context = null;
                 delete this.context;

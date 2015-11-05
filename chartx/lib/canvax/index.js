@@ -873,8 +873,12 @@ define(
             },
             fire : function(eventType , event){
                 //因为需要在event上面冒泡传递信息，所以还是不用clone了
-                var e       = event;//_.clone( event );
+                var e       = event || {};//_.clone( event );
                 var me      = this;
+                if( _.isObject(eventType) && eventType.type ){
+                    e         = _.extend( e , eventType );
+                    eventType = eventType.type;
+                };
                 var preCurr = e ? e.currentTarget : null;
                 _.each( eventType.split(" ") , function(evt){
                     var preEventType = null;
@@ -1165,278 +1169,121 @@ define(
     }
 )
 ;define(
-    "canvax/geom/HitTestPoint",
-    [
+    "canvax/geom/HitTestPoint", [
         "canvax/core/Base",
         "canvax/geom/Math"
     ],
-    function(Base , myMath){
+    function(Base, myMath) {
         /**
-         * 图形空间辅助类
-         * isInside：是否在区域内部
-         * isOutside：是否在区域外部
-         * getTextWidth：测算单行文本宽度
          * TODO:本检测只为进一步的 详细 检测。也就是说 进过了基本的矩形范围检测后才会
-         * 使用本检测方法
          */
-        var HitTestPoint={};
-    
+        var HitTestPoint = {};
         /**
          * 包含判断
-         * @param {string} shape : 图形
-         * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
+         * shape : 图形
+         * x : 横坐标
+         * y : 纵坐标
          */
-        function isInside(shape , point) {
+        function isInside(shape, point) {
             var x = point.x;
             var y = point.y;
-            if( shape.type == "bitmap" ){
-                //如果是bitmap
-                return true;
-            }
-    
             if (!shape || !shape.type) {
                 // 无参数或不支持类型
                 return false;
-            }
-            var zoneType = shape.type;
-    
-    
+            };
             //数学运算，主要是line，brokenLine
-            var _mathReturn = _mathMethod(zoneType, shape, x, y);
-    
-            if (typeof _mathReturn != 'undefined') {
-                return _mathReturn;
-            }
-    
-            if (zoneType != 'beziercurve'&& shape.buildPath && Base._pixelCtx.isPointInPath) {
-                   return _buildPathMethod(shape, Base._pixelCtx, x, y);
-            } else if (Base._pixelCtx.getImageData) {
-                return _pixelMethod(shape, x, y);
-            }
-    
-            // 上面的方法都行不通时
-            switch (zoneType) {
-                    //水滴----------------------11
-                case 'droplet':
-                    return true;    // Todo，不精确
-                case 'ellipse':
-                    return true;     // Todo，不精确
-                    //路径，椭圆，曲线等-----------------13
-                default:
-                    return false;   // Todo，暂不支持
-            }
-        }
-    
-        /**
-         * 用数学方法判断，三个方法中最快，但是支持的shape少
-         *
-         * @param {string} zoneType ： 图形类型
-         * * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
-         * @return {boolean=} true表示坐标处在图形中
-         */
-        function _mathMethod(zoneType,shape,x, y) {
+            return _pointInShape(shape, x, y);
+        };
+
+        function _pointInShape(shape, x, y) {
             // 在矩形内则部分图形需要进一步判断
-            switch (zoneType) {
-                //线-----------------------1
+            switch (shape.type) {
                 case 'line':
                     return _isInsideLine(shape.context, x, y);
-                    //折线----------------------2
-                case 'brokenLine':
+                case 'brokenline':
                     return _isInsideBrokenLine(shape, x, y);
-                    //文本----------------------3
                 case 'text':
                     return true;
-                    //矩形----------------------4
                 case 'rect':
                     return true;
-                    //圆形----------------------5
                 case 'circle':
-                    return _isInsideCircle(shape , x, y);
-                    //椭圆
+                    return _isInsideCircle(shape, x, y);
                 case 'ellipse':
-                    return _isPointInElipse(shape , x , y);
-                    //扇形----------------------6
+                    return _isPointInElipse(shape, x, y);
                 case 'sector':
-                    return _isInsideSector(shape , x, y);
-                    //path---------------------7
+                    return _isInsideSector(shape, x, y);
                 case 'path':
-                    return _isInsidePath(shape , x, y);
-                    //多边形-------------------8
+                case 'droplet':
+                    return _isInsidePath(shape, x, y);
                 case 'polygon':
                 case 'isogon':
-                    return _isInsidePolygon(shape , x, y);
-                    //图片----------------------10
-                case 'image':
-                    return true;
+                    return _isInsidePolygon_WindingNumber(shape, x, y);
+                    //return _isInsidePolygon_CrossingNumber(shape, x, y);
             }
-        }
-    
-        /**
-         * 通过buildPath方法来判断，三个方法中较快，但是不支持线条类型的shape，
-         * 而且excanvas不支持isPointInPath方法
-         *
-         * @param {Object} shapeClazz ： shape类
-         * @param {Object} context : 上下文
-         * @param {Object} context ：目标区域
-         * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
-         * @return {boolean} true表示坐标处在图形中
-         */
-        function _buildPathMethod(shape, context, x, y) {
-            var context = shape.context;
-            // 图形类实现路径创建了则用类的path
-            context.beginPath();
-            shape.buildPath(context, context);
-            context.closePath();
-            return context.isPointInPath(x, y);
-        }
-    
-        /**
-         * 通过像素值来判断，三个方法中最慢，但是支持广,不足之处是excanvas不支持像素处理,flashCanvas支持还好
-         *
-         * @param {Object} shapeClazz ： shape类
-         * @param {Object} context ：目标区域
-         * @param {number} x ： 横坐标
-         * @param {number} y ： 纵坐标
-         * @return {boolean} true表示坐标处在图形中
-         */
-        function _pixelMethod(shape, x, y) {
-            var context  = shape.context;
-            
-            var _context = Base._pixelCtx;
-                
-            _context.save();
-            _context.beginPath();
-            Base.setContextStyle( _context , context.$model );
-           
-            _context.transform.apply( _context , shape.getConcatenatedMatrix().toArray() );
-    
-            //这个时候肯定是做过矩形范围检测过来的
-            //所以，shape._rect 肯定都是已经有值的
-            _context.clearRect( shape._rect.x-10 , shape._rect.y-10 , shape._rect.width+20 , shape._rect.height+20 );
-    
-    
-            shape.draw( _context,  context );
-
-            _context.globalAlpha = 1;
-
-            shape.drawEnd(_context);
-            _context.closePath();
-            _context.restore();
-    
-            //对鼠标的坐标也做相同的变换
-            var _transformStage = shape.getConcatenatedMatrix()
-            if( _transformStage ){
-                var inverseMatrix = _transformStage.clone();
-    
-                var originPos = [x, y];
-                inverseMatrix.mulVector( originPos , [ x , y , 1 ] );
-    
-                x = originPos[0];
-                y = originPos[1];
-            }
-    
-            return _isPainted(_context, x , y);
         };
-    
-        /**
-         * 坐标像素值，判断坐标是否被作色
-         *
-         * @param {Object} context : 上下文
-         * @param {number} x : 横坐标
-         * @param {number} y : 纵坐标
-         * @param {number=} unit : 触发的精度，越大越容易触发，可选，缺省是为1
-         * @return {boolean} 已经被画过返回true
-         */
-        function _isPainted(context, x, y, unit) {
-            var pixelsData;
-    
-            if (typeof unit != 'undefined') {
-                unit = Math.floor((unit || 1 )/ 2);
-                pixelsData = context.getImageData(
-                        x - unit,
-                        y - unit,
-                        unit + unit,
-                        unit + unit
-                        ).data;
-            }
-            else {
-                pixelsData = context.getImageData(x, y, 1, 1).data;
-            }
-    
-            var len = pixelsData.length;
-            while (len--) {
-                if (pixelsData[len] !== 0) {
-                    return true;
-                }
-            }
-    
-            return false;
-        };
-    
         /**
          * !isInside
          */
         function isOutside(shape, x, y) {
             return !isInside(shape, x, y);
         };
-    
+
         /**
          * 线段包含判断
          */
-        function _isInsideLine( context , x , y ) {
-            var _x1 = context.xStart;
-            var _y1 = context.yStart;
-            var _x2 = context.xEnd;
-            var _y2 = context.yEnd;
-            var _l  = context.lineWidth;
+        function _isInsideLine(context, x, y) {
+            var x0 = context.xStart;
+            var y0 = context.yStart;
+            var x1 = context.xEnd;
+            var y1 = context.yEnd;
+            var _l = Math.max(context.lineWidth , 3);
             var _a = 0;
-            var _b = _x1;
-    
-            if (_x1 !== _x2) {
-                _a = (_y1 - _y2) / (_x1 - _x2);
-                _b = (_x1 * _y2 - _x2 * _y1) / (_x1 - _x2) ;
+            var _b = x0;
+
+            if(
+                (y > y0 + _l && y > y1 + _l) 
+                || (y < y0 - _l && y < y1 - _l) 
+                || (x > x0 + _l && x > x1 + _l) 
+                || (x < x0 - _l && x < x1 - _l) 
+            ){
+                return false;
             }
-            else {
-                return Math.abs(x - _x1) <= _l / 2;
+
+            if (x0 !== x1) {
+                _a = (y0 - y1) / (x0 - x1);
+                _b = (x0 * y1 - x1 * y0) / (x0 - x1);
+            } else {
+                return Math.abs(x - x0) <= _l / 2;
             }
-    
+
             var _s = (_a * x - y + _b) * (_a * x - y + _b) / (_a * _a + 1);
-            return  _s <= _l / 2 * _l / 2;
+            return _s <= _l / 2 * _l / 2;
         };
-    
+
         function _isInsideBrokenLine(shape, x, y) {
-            var context   = shape.context;
+            var context = shape.context;
             var pointList = context.pointList;
             var lineArea;
             var insideCatch = false;
             for (var i = 0, l = pointList.length - 1; i < l; i++) {
                 lineArea = {
-                    xStart : pointList[i][0],
-                    yStart : pointList[i][1],
-                    xEnd   : pointList[i + 1][0],
-                    yEnd   : pointList[i + 1][1],
-                    lineWidth : context.lineWidth
+                    xStart: pointList[i][0],
+                    yStart: pointList[i][1],
+                    xEnd: pointList[i + 1][0],
+                    yEnd: pointList[i + 1][1],
+                    lineWidth: context.lineWidth
                 };
-                if (!_isInsideRectangle(
-                            {
-                                x : Math.min(lineArea.xStart, lineArea.xEnd)
-                    - lineArea.lineWidth,
-                   y : Math.min(lineArea.yStart, lineArea.yEnd)
-                    - lineArea.lineWidth,
-                   width : Math.abs(lineArea.xStart - lineArea.xEnd)
-                    + lineArea.lineWidth,
-                   height : Math.abs(lineArea.yStart - lineArea.yEnd)
-                    + lineArea.lineWidth
-                            },
-                            x,y
-                            )
-                   ) {
-                       // 不在矩形区内跳过
-                       continue;
-                   }
+                if (!_isInsideRectangle({
+                            x: Math.min(lineArea.xStart, lineArea.xEnd) - lineArea.lineWidth,
+                            y: Math.min(lineArea.yStart, lineArea.yEnd) - lineArea.lineWidth,
+                            width: Math.abs(lineArea.xStart - lineArea.xEnd) + lineArea.lineWidth,
+                            height: Math.abs(lineArea.yStart - lineArea.yEnd) + lineArea.lineWidth
+                        },
+                        x, y
+                    )) {
+                    // 不在矩形区内跳过
+                    continue;
+                }
                 insideCatch = _isInsideLine(lineArea, x, y);
                 if (insideCatch) {
                     break;
@@ -1445,167 +1292,241 @@ define(
             return insideCatch;
         };
 
-    
+
         /**
          * 矩形包含判断
          */
         function _isInsideRectangle(shape, x, y) {
-    
-            if (x >= shape.x
-                    && x <= (shape.x + shape.width)
-                    && y >= shape.y
-                    && y <= (shape.y + shape.height)
-               ) {
-                   return true;
-               }
+            if (x >= shape.x && x <= (shape.x + shape.width) && y >= shape.y && y <= (shape.y + shape.height)) {
+                return true;
+            }
             return false;
         };
-    
+
         /**
          * 圆形包含判断
          */
-        function _isInsideCircle(shape, x, y , r) {
+        function _isInsideCircle(shape, x, y, r) {
             var context = shape.context;
-            !r && ( r = context.r );
+            !r && (r = context.r);
             return (x * x + y * y) < r * r;
         };
-    
+
         /**
          * 扇形包含判断
          */
         function _isInsideSector(shape, x, y) {
             var context = shape.context
-            if (!_isInsideCircle(shape, x, y)
-                    || ( context.r0 > 0 && _isInsideCircle( shape ,x, y , context.r0))
-               ){
-                   // 大圆外或者小圆内直接false
-                   return false;
-               }
-            else {
+            if (!_isInsideCircle(shape, x, y) || (context.r0 > 0 && _isInsideCircle(shape, x, y, context.r0))) {
+                // 大圆外或者小圆内直接false
+                return false;
+            } else {
                 // 判断夹角
-                var startAngle = myMath.degreeTo360(context.startAngle);            // 起始角度[0,360)
-                var endAngle   = myMath.degreeTo360(context.endAngle);              // 结束角度(0,360]
-    
+                var startAngle = myMath.degreeTo360(context.startAngle); // 起始角度[0,360)
+                var endAngle = myMath.degreeTo360(context.endAngle); // 结束角度(0,360]
+
                 //计算该点所在的角度
-                var angle      = myMath.degreeTo360( (Math.atan2(y , x ) / Math.PI * 180) % 360 );
-                
-                var regIn      = true;  //如果在start和end的数值中，end大于start而且是顺时针则regIn为true
-                if ( (startAngle > endAngle && !context.clockwise ) || (startAngle < endAngle && context.clockwise ) ) {
-                    regIn      = false; //out
+                var angle = myMath.degreeTo360((Math.atan2(y, x) / Math.PI * 180) % 360);
+
+                var regIn = true; //如果在start和end的数值中，end大于start而且是顺时针则regIn为true
+                if ((startAngle > endAngle && !context.clockwise) || (startAngle < endAngle && context.clockwise)) {
+                    regIn = false; //out
                 }
                 //度的范围，从小到大
-                var regAngle   = [ 
-                    Math.min( startAngle , endAngle ) , 
-                    Math.max( startAngle , endAngle ) 
+                var regAngle = [
+                    Math.min(startAngle, endAngle),
+                    Math.max(startAngle, endAngle)
                 ];
-    
-    
+
                 var inAngleReg = angle > regAngle[0] && angle < regAngle[1];
                 return (inAngleReg && regIn) || (!inAngleReg && !regIn);
             }
         };
-    
+
         /*
          *椭圆包含判断
          * */
-        function _isPointInElipse(shape , x , y) {
+        function _isPointInElipse(shape, x, y) {
             var context = shape.context;
-            var center  = { x:0 , y:0 };
+            var center = {
+                x: 0,
+                y: 0
+            };
             //x半径
             var XRadius = context.hr;
             var YRadius = context.vr;
-    
+
             var p = {
-                x : x,
-                y : y
-            }
-            
+                x: x,
+                y: y
+            };
+
             var iRes;
-    
+
             p.x -= center.x;
             p.y -= center.y;
-    
+
             p.x *= p.x;
             p.y *= p.y;
-    
+
             XRadius *= XRadius;
             YRadius *= YRadius;
-    
+
             iRes = YRadius * p.x + XRadius * p.y - XRadius * YRadius;
-    
+
             return (iRes < 0);
         };
-    
+
         /**
-         * 多边形包含判断
-         * 警告：下面这段代码会很难看，建议跳过~
+         * 多边形包含判断 Nonzero Winding Number Rule
          */
-        function _isInsidePolygon(shape, x, y) {
-            /**
-             * 射线判别法
-             * 如果一个点在多边形内部，任意角度做射线肯定会与多边形要么有一个交点，要么有与多边形边界线重叠
-             * 如果一个点在多边形外部，任意角度做射线要么与多边形有一个交点，
-             * 要么有两个交点，要么没有交点，要么有与多边形边界线重叠。
-             */
+
+        /*  第一版的非零环绕算法，用到了 反三角函数。比下面的优化版本要慢，代码也要多
+        function _isInsidePolygon_WindingNumber(shape, x, y) {
+            //非零环绕法之——回转数法，回转数是拓扑学中的一个基本概念，具有很重要的性质和用途。
+            //这需要具备相当的数学知识，否则会非常乏味和难以理解。我们暂时只需要记住回转数的一个特性就行了：
+            //当回转数为 0 时，点在闭合曲线外部。
             var context = shape.context ? shape.context : shape;
-            var polygon = context.pointList ;
+            var poly = context.pointList; //poly 多边形顶点，数组成员的格式同 p
+            var sum = 0;
+            for (var i = 0, l = poly.length, j = l - 1; i < l; j = i, i++) {
+                var sx = poly[i][0],
+                    sy = poly[i][1],
+                    tx = poly[j][0],
+                    ty = poly[j][1]
+
+                //点与多边形顶点重合或在多边形的边上
+                if ((sx - x) * (x - tx) >= 0 && (sy - y) * (y - ty) >= 0 && (x - sx) * (ty - sy) === (y - sy) * (tx - sx)) {
+                    return true;
+                };
+
+                //点与相邻顶点连线的夹角
+                var angle = Math.atan2(sy - y, sx - x) - Math.atan2(ty - y, tx - x);
+
+                //确保夹角不超出取值范围（-π 到 π）
+                if (angle >= Math.PI) {
+                    angle = angle - Math.PI * 2
+                } else if (angle <= -Math.PI) {
+                    angle = angle + Math.PI * 2
+                };
+                sum += angle;
+            };
+            // 计算回转数并判断点和多边形的几何关系
+            return Math.round(sum / Math.PI) === 0 ? false : true;
+        };
+        */
+
+        //http://geomalgorithms.com/a03-_inclusion.html
+        //winding优化方案，这样就不需要用到反三角函数，就会快很多。
+        //非零环绕数规则（Nonzero Winding Number Rule）：若环绕数为0表示在多边形内，非零表示在多边形外
+        //首先使多边形的边变为矢量。将环绕数初始化为零。再从任意位置p作一条射线。
+        //当从p点沿射线方向移动时，对在每个方向上穿过射线的边计数，每当多边形的边从右到左穿过射线时，环绕数加1，从左到右时，环绕数减1。
+        //处理完多边形的所有相关边之后，若环绕数为非零，则p为内部点，否则，p是外部点。
+        function _isInsidePolygon_WindingNumber(shape, x, y) {
+            var context = shape.context ? shape.context : shape;
+            var poly = _.clone(context.pointList); //poly 多边形顶点，数组成员的格式同 p
+            poly.push(poly[0]); //记得要闭合
+            var wn = 0;
+            for (var shiftP, shift = poly[0][1] > y, i = 1; i < poly.length; i++) {
+                //先做线的检测，如果是在两点的线上，就肯定是在认为在图形上
+                var inLine = _isInsideLine({
+                    xStart : poly[i-1][0],
+                    yStart : poly[i-1][1],
+                    xEnd   : poly[i][0],
+                    yEnd   : poly[i][1],
+                    lineWidth : (context.lineWidth || 1)
+                } , x , y);
+                if ( inLine ){
+                    return true;
+                };
+                //如果有fillStyle ， 那么肯定需要做面的检测
+                if (context.fillStyle) {
+                    shiftP = shift;
+                    shift = poly[i][1] > y;
+                    if (shiftP != shift) {
+                        var n = (shiftP ? 1 : 0) - (shift ? 1 : 0);
+                        if (n * ((poly[i - 1][0] - x) * (poly[i][1] - y) - (poly[i - 1][1] - y) * (poly[i][0] - x)) > 0) {
+                            wn += n;
+                        }
+                    };
+                }
+            };
+            /*
+            var coords = _.flatten(poly);
+            var wn = 0;
+            for (var shiftP, shift = coords[1] > y, i = 3; i < coords.length; i += 2) {
+                shiftP = shift;
+                shift = coords[i] > y;
+                if (shiftP != shift) {
+                    var n = (shiftP ? 1 : 0) - (shift ? 1 : 0);
+                    if (n * ((coords[i - 3] - x) * (coords[i - 0] - y) - (coords[i - 2] - y) * (coords[i - 1] - x)) > 0) {
+                        wn += n;
+                    }
+                };
+            };
+            */
+            return wn;
+        };
+
+        /**
+         * 多边形包含判断 even odd rule
+         * 射线判别法
+         * 如果一个点在多边形内部，任意角度做射线肯定会与多边形要么有一个交点，要么有与多边形边界线重叠
+         * 如果一个点在多边形外部，任意角度做射线要么与多边形有一个交点，
+         * 要么有两个交点，要么没有交点，要么有与多边形边界线重叠。
+         * 但是因为射线判断法 在 有自我交集的 path中 会有问题，所以决定该用非零环绕法，同时因为canvas的fill api 也是用到非零环绕来渲染
+         */
+        /*
+        function _isInsidePolygon_CrossingNumber(shape, x, y) {
+            var context = shape.context ? shape.context : shape;
+            var polygon = context.pointList;
             var i;
             var j;
             var N = polygon.length;
             var inside = false;
             var redo = true;
             var v;
-    
+
             for (i = 0; i < N; ++i) {
                 // 是否在顶点上
-                if (polygon[i][0] == x && polygon[i][1] == y ) {
+                if (polygon[i][0] == x && polygon[i][1] == y) {
                     redo = false;
                     inside = true;
                     break;
                 }
-            }
-    
+            };
+
             if (redo) {
                 redo = false;
                 inside = false;
-                for (i = 0,j = N - 1;i < N;j = i++) {
-                    if ((polygon[i][1] < y && y < polygon[j][1])
-                            || (polygon[j][1] < y && y < polygon[i][1])
-                       ) {
-                           if (x <= polygon[i][0] || x <= polygon[j][0]) {
-                               v = (y - polygon[i][1])
-                                   * (polygon[j][0] - polygon[i][0])
-                                   / (polygon[j][1] - polygon[i][1])
-                                   + polygon[i][0];
-                               if (x < v) {          // 在线的左侧
-                                   inside = !inside;
-                               }
-                               else if (x == v) {   // 在线上
-                                   inside = true;
-                                   break;
-                               }
-                           }
-                       }
-                    else if (y == polygon[i][1]) {
-                        if (x < polygon[i][0]) {    // 交点在顶点上
+                for (i = 0, j = N - 1; i < N; j = i++) {
+                    if ((polygon[i][1] < y && y < polygon[j][1]) || (polygon[j][1] < y && y < polygon[i][1])) {
+                        if (x <= polygon[i][0] || x <= polygon[j][0]) {
+                            v = (y - polygon[i][1]) * (polygon[j][0] - polygon[i][0]) / (polygon[j][1] - polygon[i][1]) + polygon[i][0];
+                            if (x < v) { // 在线的左侧
+                                inside = !inside;
+                            } else if (x == v) { // 在线上
+                                inside = true;
+                                break;
+                            }
+                        }
+                    } else if (y == polygon[i][1]) {
+                        if (x < polygon[i][0]) { // 交点在顶点上
                             polygon[i][1] > polygon[j][1] ? --y : ++y;
                             //redo = true;
                             break;
                         }
+                    } else if (polygon[i][1] == polygon[j][1] // 在水平的边界线上
+                        && y == polygon[i][1] && ((polygon[i][0] < x && x < polygon[j][0]) || (polygon[j][0] < x && x < polygon[i][0]))
+                    ) {
+                        inside = true;
+                        break;
                     }
-                    else if (polygon[i][1] == polygon[j][1] // 在水平的边界线上
-                            && y == polygon[i][1]
-                            && ((polygon[i][0] < x && x < polygon[j][0])
-                                || (polygon[j][0] < x && x < polygon[i][0]))
-                            ) {
-                                inside = true;
-                                break;
-                            }
                 }
             }
             return inside;
         };
-    
+        */
         /**
          * 路径包含判断，依赖多边形判断
          */
@@ -1614,9 +1535,11 @@ define(
             var pointList = context.pointList;
             var insideCatch = false;
             for (var i = 0, l = pointList.length; i < l; i++) {
-                insideCatch = _isInsidePolygon(
-                        { pointList : pointList[i] }, x, y
-                        );
+                insideCatch = _isInsidePolygon_WindingNumber({
+                    pointList: pointList[i],
+                    lineWidth: context.lineWidth,
+                    fillStyle: context.fillStyle
+                }, x, y);
                 if (insideCatch) {
                     break;
                 }
@@ -1624,13 +1547,12 @@ define(
             return insideCatch;
         };
         HitTestPoint = {
-            isInside : isInside,
-            isOutside : isOutside
+            isInside: isInside,
+            isOutside: isOutside
         };
         return HitTestPoint;
     }
-);
-;define(
+);;define(
     "canvax/geom/Matrix",
     [
         "canvax/core/Base"
@@ -1700,8 +1622,6 @@ define(
                     this.ty = ct*this.ty - st*tx;
                 }
                 return this;
-    
-    
             },
             scale : function(sx, sy){
                 this.a *= sx;
@@ -1747,16 +1667,16 @@ define(
             /**
              * 矩阵左乘向量
              */
-            mulVector : function(out , v) {
+            mulVector : function(v) {
                 var aa = this.a, ac = this.c, atx = this.tx;
                 var ab = this.b, ad = this.d, aty = this.ty;
     
+                var out = [0,0];
                 out[0] = v[0] * aa + v[1] * ac + atx;
                 out[1] = v[0] * ab + v[1] * ad + aty;
     
                 return out;
-            }
-    
+            }    
         } );
     
         return Matrix;
@@ -2304,7 +2224,7 @@ define(
                     var inverseMatrix = this._transform.clone().invert();
     
                     var originPos = [x, y];
-                    inverseMatrix.mulVector( originPos , [ x , y ] );
+                    originPos = inverseMatrix.mulVector( originPos );
     
                     x = originPos[0];
                     y = originPos[1];
@@ -2325,10 +2245,13 @@ define(
                     return false;
                 };
                 //正式开始第一步的矩形范围判断
-                if (x    >= _rect.x
-                    && x <= (_rect.x + _rect.width)
-                    && y >= _rect.y
-                    && y <= (_rect.y + _rect.height)
+                if (
+                    this.type == "path" || 
+                    (x    >= _rect.x
+                    &&  x <= (_rect.x + _rect.width)
+                    &&  y >= _rect.y
+                    &&  y <= (_rect.y + _rect.height)
+                    )
                 ) {
                    //那么就在这个元素的矩形范围内
                    result = HitTestPoint.isInside( this , {
@@ -2366,11 +2289,13 @@ define(
             remove : function(){
                 if( this.parent ){
                     this.parent.removeChild(this);
+                    this.parent = null;
                 }
             },
             //元素的自我销毁
-            destroy : function(){ 
+            destroy : function(){
                 this.remove();
+                this.fire("destroy");
                 //把自己从父节点中删除了后做自我清除，释放内存
                 this.context = null;
                 delete this.context;
@@ -2460,10 +2385,9 @@ define(
                 return this.removeChildAt(_.indexOf( this.children , child ));
             },
             removeChildAt : function(index) {
-    
                 if (index < 0 || index > this.children.length - 1) {
                     return false;
-                }
+                };
                 var child = this.children[index];
                 if (child != null) {
                     child.parent = null;
@@ -2501,12 +2425,15 @@ define(
             destroy : function(){
                 if( this.parent ){
                     this.parent.removeChild(this);
-                }
+                    this.parent = null;
+                };
+                this.fire("destroy");
                 //依次销毁所有子元素
-                //TODO：这个到底有没有必要。还有待商榷
-                _.each( this.children , function( child ){
-                    child.destroy();
-                } );
+                for (var i=0,l=this.children.length ; i<l ; i++){
+                    this.getChildAt(i).destroy();
+                    i--;
+                    l--;
+                };
             },
             /*
              *@id 元素的id
@@ -3194,6 +3121,9 @@ define(
      
     }
 )
+
+
+
 ;define(
     "canvax/shape/Circle",
     [
@@ -3280,8 +3210,8 @@ define(
         Base.creatClass( Line , Shape , {
             /**
              * 创建线条路径
-             * @param {Context2D} ctx Canvas 2D上下文
-             * @param {Object} style 样式
+             * ctx Canvas 2D上下文
+             * style 样式
              */
             draw : function(ctx, style) {
                 if (!style.lineType || style.lineType == 'solid') {
@@ -3300,7 +3230,7 @@ define(
       
             /**
              * 返回矩形区域，用于局部刷新和文字定位
-             * @param {Object} style
+             * style
              */
             getRect:function(style) {
                 var lineWidth = style.lineWidth || 1;
@@ -3321,521 +3251,600 @@ define(
     } 
 );
 ;define(
-    "canvax/shape/Path",
-    [
+    "canvax/shape/Path", [
         "canvax/display/Shape",
-        "canvax/core/Base"
+        "canvax/core/Base",
+        "canvax/geom/Matrix",
+        "canvax/geom/bezier"
     ],
-    function(Shape , Base){
-
-        var Path=function(opt){
+    function(Shape, Base, Matrix, Bezier) {
+        var Path = function(opt) {
             var self = this;
             self.type = "path";
-     
-            opt = Base.checkOpt( opt );
-     
-            if( "drawTypeOnly" in opt ){
+            opt = Base.checkOpt(opt);
+            if ("drawTypeOnly" in opt) {
                 self.drawTypeOnly = opt.drawTypeOnly;
-            }
-     
-            self._context = {
-                pointList : [], //从下面的path中计算得到的边界点的集合
-                path : opt.context.path || ""  //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
-                                         //M = moveto
-                                         //L = lineto
-                                         //H = horizontal lineto
-                                         //V = vertical lineto
-                                         //C = curveto
-                                         //S = smooth curveto
-                                         //Q = quadratic Belzier curve
-                                         //T = smooth quadratic Belzier curveto
-                                         //Z = closepath
-            }
-            arguments.callee.superclass.constructor.apply(this , arguments);
+            };
+            self.__parsePathData = null;
+            var _context = {
+                pointList: [], //从下面的path中计算得到的边界点的集合
+                path: opt.context.path || "" //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
+                    //M = moveto
+                    //L = lineto
+                    //H = horizontal lineto
+                    //V = vertical lineto
+                    //C = curveto
+                    //S = smooth curveto
+                    //Q = quadratic Belzier curve
+                    //T = smooth quadratic Belzier curveto
+                    //Z = closepath
+            };
+            self._context = _.deepExtend(_context, (self._context || {}));
+            arguments.callee.superclass.constructor.apply(self, arguments);
         };
-      
-        Base.creatClass( Path , Shape , {
-             _parsePathData : function(data) {
-                 if (!data) {
-                     return [];
-                 }
-     
-                
-                 // command string
-                 var cs = data;
-     
-                 // command chars
-                 var cc = [
-                     'm', 'M', 'l', 'L', 'v', 'V', 'h', 'H', 'z', 'Z',
-                     'c', 'C', 'q', 'Q', 't', 'T', 's', 'S', 'a', 'A'
-                 ];
-                 cs = cs.replace(/  /g, ' ');
-                 cs = cs.replace(/ /g, ',');
-                 //cs = cs.replace(/(.)-/g, "$1,-");
-                 cs = cs.replace(/(\d)-/g,'$1,-');
-                 cs = cs.replace(/,,/g, ',');
-                 var n;
-                 // create pipes so that we can split the data
-                 for (n = 0; n < cc.length; n++) {
-                     cs = cs.replace(new RegExp(cc[n], 'g'), '|' + cc[n]);
-                 }
-                 // create array
-                 var arr = cs.split('|');
-                 var ca = [];
-                 // init context point
-                 var cpx = 0;
-                 var cpy = 0;
-                 for (n = 1; n < arr.length; n++) {
-                     var str = arr[n];
-                     var c = str.charAt(0);
-                     str = str.slice(1);
-                     str = str.replace(new RegExp('e,-', 'g'), 'e-');
-                     
-                     //有的时候，比如“22，-22” 数据可能会经常的被写成22-22，那么需要手动修改
-                     //str = str.replace(new RegExp('-', 'g'), ',-');
-     
-                     //str = str.replace(/(.)-/g, "$1,-")
-     
-     
-                     var p = str.split(',');
-                     
-                     if (p.length > 0 && p[0] === '') {
-                         p.shift();
-                     }
-     
-                     for (var i = 0; i < p.length; i++) {
-                         p[i] = parseFloat(p[i]);
-                     }
-                     while (p.length > 0) {
-                         if (isNaN(p[0])) {
-                             break;
-                         }
-                         var cmd = null;
-                         var points = [];
-     
-                         var ctlPtx;
-                         var ctlPty;
-                         var prevCmd;
-     
-                         var rx;
-                         var ry;
-                         var psi;
-                         var fa;
-                         var fs;
-     
-                         var x1 = cpx;
-                         var y1 = cpy;
-     
-                         // convert l, H, h, V, and v to L
-                         switch (c) {
-                         case 'l':
-                             cpx += p.shift();
-                             cpy += p.shift();
-                             cmd = 'L';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'L':
-                             cpx = p.shift();
-                             cpy = p.shift();
-                             points.push(cpx, cpy);
-                             break;
-                         case 'm':
-                             cpx += p.shift();
-                             cpy += p.shift();
-                             cmd = 'M';
-                             points.push(cpx, cpy);
-                             c = 'l';
-                             break;
-                         case 'M':
-                             cpx = p.shift();
-                             cpy = p.shift();
-                             cmd = 'M';
-                             points.push(cpx, cpy);
-                             c = 'L';
-                             break;
-     
-                         case 'h':
-                             cpx += p.shift();
-                             cmd = 'L';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'H':
-                             cpx = p.shift();
-                             cmd = 'L';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'v':
-                             cpy += p.shift();
-                             cmd = 'L';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'V':
-                             cpy = p.shift();
-                             cmd = 'L';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'C':
-                             points.push(p.shift(), p.shift(), p.shift(), p.shift());
-                             cpx = p.shift();
-                             cpy = p.shift();
-                             points.push(cpx, cpy);
-                             break;
-                         case 'c':
-                             points.push(
-                                 cpx + p.shift(), cpy + p.shift(),
-                                 cpx + p.shift(), cpy + p.shift()
-                             );
-                             cpx += p.shift();
-                             cpy += p.shift();
-                             cmd = 'C';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'S':
-                             ctlPtx = cpx;
-                             ctlPty = cpy;
-                             prevCmd = ca[ca.length - 1];
-                             if (prevCmd.command === 'C') {
-                                 ctlPtx = cpx + (cpx - prevCmd.points[2]);
-                                 ctlPty = cpy + (cpy - prevCmd.points[3]);
-                             }
-                             points.push(ctlPtx, ctlPty, p.shift(), p.shift());
-                             cpx = p.shift();
-                             cpy = p.shift();
-                             cmd = 'C';
-                             points.push(cpx, cpy);
-                             break;
-                         case 's':
-                             ctlPtx = cpx, ctlPty = cpy;
-                             prevCmd = ca[ca.length - 1];
-                             if (prevCmd.command === 'C') {
-                                 ctlPtx = cpx + (cpx - prevCmd.points[2]);
-                                 ctlPty = cpy + (cpy - prevCmd.points[3]);
-                             }
-                             points.push(
-                                 ctlPtx, ctlPty,
-                                 cpx + p.shift(), cpy + p.shift()
-                             );
-                             cpx += p.shift();
-                             cpy += p.shift();
-                             cmd = 'C';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'Q':
-                             points.push(p.shift(), p.shift());
-                             cpx = p.shift();
-                             cpy = p.shift();
-                             points.push(cpx, cpy);
-                             break;
-                         case 'q':
-                             points.push(cpx + p.shift(), cpy + p.shift());
-                             cpx += p.shift();
-                             cpy += p.shift();
-                             cmd = 'Q';
-                             points.push(cpx, cpy);
-                             break;
-                         case 'T':
-                             ctlPtx = cpx, ctlPty = cpy;
-                             prevCmd = ca[ca.length - 1];
-                             if (prevCmd.command === 'Q') {
-                                 ctlPtx = cpx + (cpx - prevCmd.points[0]);
-                                 ctlPty = cpy + (cpy - prevCmd.points[1]);
-                             }
-                             cpx = p.shift();
-                             cpy = p.shift();
-                             cmd = 'Q';
-                             points.push(ctlPtx, ctlPty, cpx, cpy);
-                             break;
-                         case 't':
-                             ctlPtx = cpx, ctlPty = cpy;
-                             prevCmd = ca[ca.length - 1];
-                             if (prevCmd.command === 'Q') {
-                                 ctlPtx = cpx + (cpx - prevCmd.points[0]);
-                                 ctlPty = cpy + (cpy - prevCmd.points[1]);
-                             }
-                             cpx += p.shift();
-                             cpy += p.shift();
-                             cmd = 'Q';
-                             points.push(ctlPtx, ctlPty, cpx, cpy);
-                             break;
-                         case 'A':
-                             rx = p.shift();
-                             ry = p.shift();
-                             psi = p.shift();
-                             fa = p.shift();
-                             fs = p.shift();
-     
-                             x1 = cpx, y1 = cpy;
-                             cpx = p.shift(), cpy = p.shift();
-                             cmd = 'A';
-                             points = this._convertPoint(
-                                 x1, y1, cpx, cpy, fa, fs, rx, ry, psi
-                             );
-                             break;
-                         case 'a':
-                             rx = p.shift();
-                             ry = p.shift();
-                             psi = p.shift();
-                             fa = p.shift();
-                             fs = p.shift();
-     
-                             x1 = cpx, y1 = cpy;
-                             cpx += p.shift();
-                             cpy += p.shift();
-                             cmd = 'A';
-                             points = this._convertPoint(
-                                 x1, y1, cpx, cpy, fa, fs, rx, ry, psi
-                             );
-                             break;
-     
-                         }
-     
-                         ca.push({
-                             command : cmd || c,
-                             points : points
-                         });
-                     }
-     
-                     if (c === 'z' || c === 'Z') {
-                         ca.push({
-                             command : 'z',
-                             points : []
-                         });
-                     }
-                 }
-     
-                 return ca;
-     
-             },
-     
-             _convertPoint : function(x1, y1, x2, y2, fa, fs, rx, ry, psiDeg) {
-                 var psi = psiDeg * (Math.PI / 180.0);
-                 var xp = Math.cos(psi) * (x1 - x2) / 2.0
-                          + Math.sin(psi) * (y1 - y2) / 2.0;
-                 var yp = -1 * Math.sin(psi) * (x1 - x2) / 2.0
-                          + Math.cos(psi) * (y1 - y2) / 2.0;
-     
-                 var lambda = (xp * xp) / (rx * rx) + (yp * yp) / (ry * ry);
-     
-                 if (lambda > 1) {
-                     rx *= Math.sqrt(lambda);
-                     ry *= Math.sqrt(lambda);
-                 }
-     
-                 var f = Math.sqrt((((rx * rx) * (ry * ry))
-                         - ((rx * rx) * (yp * yp))
-                         - ((ry * ry) * (xp * xp))) / ((rx * rx) * (yp * yp)
-                         + (ry * ry) * (xp * xp))
-                     );
-     
-                 if (fa === fs) {
-                     f *= -1;
-                 }
-                 if (isNaN(f)) {
-                     f = 0;
-                 }
-     
-                 var cxp = f * rx * yp / ry;
-                 var cyp = f * -ry * xp / rx;
-     
-                 var cx = (x1 + x2) / 2.0
-                          + Math.cos(psi) * cxp
-                          - Math.sin(psi) * cyp;
-                 var cy = (y1 + y2) / 2.0
-                         + Math.sin(psi) * cxp
-                         + Math.cos(psi) * cyp;
-     
-                 var vMag = function(v) {
-                     return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-                 };
-                 var vRatio = function(u, v) {
-                     return (u[0] * v[0] + u[1] * v[1]) / (vMag(u) * vMag(v));
-                 };
-                 var vAngle = function(u, v) {
-                     return (u[0] * v[1] < u[1] * v[0] ? -1 : 1)
-                             * Math.acos(vRatio(u, v));
-                 };
-                 var theta = vAngle([ 1, 0 ], [ (xp - cxp) / rx, (yp - cyp) / ry ]);
-                 var u = [ (xp - cxp) / rx, (yp - cyp) / ry ];
-                 var v = [ (-1 * xp - cxp) / rx, (-1 * yp - cyp) / ry ];
-                 var dTheta = vAngle(u, v);
-     
-                 if (vRatio(u, v) <= -1) {
-                     dTheta = Math.PI;
-                 }
-                 if (vRatio(u, v) >= 1) {
-                     dTheta = 0;
-                 }
-                 if (fs === 0 && dTheta > 0) {
-                     dTheta = dTheta - 2 * Math.PI;
-                 }
-                 if (fs === 1 && dTheta < 0) {
-                     dTheta = dTheta + 2 * Math.PI;
-                 }
-                 return [ cx, cy, rx, ry, theta, dTheta, psi, fs ];
-             },
-     
-             /**
-              * 创建路径
-              * @param {Context2D} ctx Canvas 2D上下文
-              * @param {Object} style 样式
-              */
-             draw : function(ctx, style) {
-                 var path = style.path;
-     
-                 var pathArray = this._parsePathData(path);
-     
-                 // 平移坐标
-                 var x =  0;
-                 var y =  0;
-     
-                 var p;
-                 // 记录边界点，用于判断inside
-                 var pointList = style.pointList = [];
-                 var singlePointList = [];
-                 for (var i = 0, l = pathArray.length; i < l; i++) {
-                     if (pathArray[i].command.toUpperCase() == 'M') {
-                         singlePointList.length > 0 
-                         && pointList.push(singlePointList);
-                         singlePointList = [];
-                     }
-                     p = pathArray[i].points;
-                     for (var j = 0, k = p.length; j < k; j += 2) {
-                         singlePointList.push([p[j] + x, p[j+1] + y]);
-                     }
-                 }
-                 singlePointList.length > 0 && pointList.push(singlePointList);
-                 
-                 var c;
-                 for (var i = 0, l = pathArray.length; i < l; i++) {
-                     c = pathArray[i].command;
-                     p = pathArray[i].points;
-                     // 平移变换
-                     for (var j = 0, k = p.length; j < k; j++) {
-                         if (j % 2 === 0) {
-                             p[j] += x;
-                         } else {
-                             p[j] += y;
-                         }
-                     }
-                     switch (c) {
-                         case 'L':
-                             ctx.lineTo(p[0], p[1]);
-                             break;
-                         case 'M':
-                             ctx.moveTo(p[0], p[1]);
-                             break;
-                         case 'C':
-                             ctx.bezierCurveTo(p[0], p[1], p[2], p[3], p[4], p[5]);
-                             break;
-                         case 'Q':
-                             ctx.quadraticCurveTo(p[0], p[1], p[2], p[3]);
-                             break;
-                         case 'A':
-                             var cx = p[0];
-                             var cy = p[1];
-                             var rx = p[2];
-                             var ry = p[3];
-                             var theta = p[4];
-                             var dTheta = p[5];
-                             var psi = p[6];
-                             var fs = p[7];
-                             var r = (rx > ry) ? rx : ry;
-                             var scaleX = (rx > ry) ? 1 : rx / ry;
-                             var scaleY = (rx > ry) ? ry / rx : 1;
-     
-                             ctx.translate(cx, cy);
-                             ctx.rotate(psi);
-                             ctx.scale(scaleX, scaleY);
-                             ctx.arc(0, 0, r, theta, theta + dTheta, 1 - fs);
-                             ctx.scale(1 / scaleX, 1 / scaleY);
-                             ctx.rotate(-psi);
-                             ctx.translate(-cx, -cy);
-                             break;
-                         case 'z':
-                             ctx.closePath();
-                             break;
-                     }
-                 }
-     
-                 return;
-             },
-     
-             /**
-              * 返回矩形区域，用于局部刷新和文字定位
-              * @param {Object} style 样式
-              */
-             getRect : function(style) {
-                 var lineWidth;
-                 var style = style ? style : this.context;
-                 if (style.strokeStyle || style.fillStyle) {
-                     lineWidth = style.lineWidth || 1;
-                 }
-                 else {
-                     lineWidth = 0;
-                 }
-     
-                 var minX = Number.MAX_VALUE;
-                 var maxX = Number.MIN_VALUE;
-     
-                 var minY = Number.MAX_VALUE;
-                 var maxY = Number.MIN_VALUE;
-     
-                 // 平移坐标
-                 var x = 0;
-                 var y = 0;
-     
-                 var pathArray = this._parsePathData(style.path);
-                 for (var i = 0; i < pathArray.length; i++) {
-                     var p = pathArray[i].points;
-     
-                     for (var j = 0; j < p.length; j++) {
-                         if (j % 2 === 0) {
-                             if (p[j] + x < minX) {
-                                 minX = p[j] + x;
-                             }
-                             if (p[j] + x > maxX) {
-                                 maxX = p[j] + x;
-                             }
-                         } else {
-                             if (p[j] + y < minY) {
-                                 minY = p[j] + y;
-                             }
-                             if (p[j] + y > maxY) {
-                                 maxY = p[j] + y;
-                             }
-                         }
-                     }
-                 }
-     
-                 var rect;
-                 if (minX === Number.MAX_VALUE
-                     || maxX === Number.MIN_VALUE
-                     || minY === Number.MAX_VALUE
-                     || maxY === Number.MIN_VALUE
-                 ) {
-                     rect = {
-                         x : 0,
-                         y : 0,
-                         width : 0,
-                         height : 0
-                     };
-                 }
-                 else {
-                     rect = {
-                         x : Math.round(minX - lineWidth / 2),
-                         y : Math.round(minY - lineWidth / 2),
-                         width : maxX - minX + lineWidth,
-                         height : maxY - minY + lineWidth
-                     };
-                 }
-                 return rect;
-             }
-          
-        } );
+
+        Base.creatClass(Path, Shape, {
+            $watch: function(name, value, preValue) {
+                if (name == "path") { //如果path有变动，需要自动计算新的pointList
+                    this.__parsePathData = null;
+                    this.context.pointList = [];
+                }
+            },
+            _parsePathData: function(data) {
+                if (this.__parsePathData) {
+                    return this.__parsePathData;
+                };
+                if (!data) {
+                    return [];
+                };
+                //分拆子分组
+                this.__parsePathData = [];
+                var paths = _.compact(data.replace(/[Mm]/g, "\\r$&").split('\\r'));
+                var me = this;
+                _.each(paths, function(pathStr) {
+                    me.__parsePathData.push(me._parseChildPathData(pathStr));
+                });
+                return this.__parsePathData;
+            },
+            _parseChildPathData: function(data) {
+                // command string
+                var cs = data;
+                // command chars
+                var cc = [
+                    'm', 'M', 'l', 'L', 'v', 'V', 'h', 'H', 'z', 'Z',
+                    'c', 'C', 'q', 'Q', 't', 'T', 's', 'S', 'a', 'A'
+                ];
+                cs = cs.replace(/  /g, ' ');
+                cs = cs.replace(/ /g, ',');
+                //cs = cs.replace(/(.)-/g, "$1,-");
+                cs = cs.replace(/(\d)-/g, '$1,-');
+                cs = cs.replace(/,,/g, ',');
+                var n;
+                // create pipes so that we can split the data
+                for (n = 0; n < cc.length; n++) {
+                    cs = cs.replace(new RegExp(cc[n], 'g'), '|' + cc[n]);
+                }
+                // create array
+                var arr = cs.split('|');
+                var ca = [];
+                // init context point
+                var cpx = 0;
+                var cpy = 0;
+                for (n = 1; n < arr.length; n++) {
+                    var str = arr[n];
+                    var c = str.charAt(0);
+                    str = str.slice(1);
+                    str = str.replace(new RegExp('e,-', 'g'), 'e-');
+
+                    //有的时候，比如“22，-22” 数据可能会经常的被写成22-22，那么需要手动修改
+                    //str = str.replace(new RegExp('-', 'g'), ',-');
+                    //str = str.replace(/(.)-/g, "$1,-")
+
+                    var p = str.split(',');
+
+                    if (p.length > 0 && p[0] === '') {
+                        p.shift();
+                    }
+
+                    for (var i = 0; i < p.length; i++) {
+                        p[i] = parseFloat(p[i]);
+                    }
+                    while (p.length > 0) {
+                        if (isNaN(p[0])) {
+                            break;
+                        }
+                        var cmd = null;
+                        var points = [];
+
+                        var ctlPtx;
+                        var ctlPty;
+                        var prevCmd;
+
+                        var rx;
+                        var ry;
+                        var psi;
+                        var fa;
+                        var fs;
+
+                        var x1 = cpx;
+                        var y1 = cpy;
+
+                        // convert l, H, h, V, and v to L
+                        switch (c) {
+                            case 'l':
+                                cpx += p.shift();
+                                cpy += p.shift();
+                                cmd = 'L';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'L':
+                                cpx = p.shift();
+                                cpy = p.shift();
+                                points.push(cpx, cpy);
+                                break;
+                            case 'm':
+                                cpx += p.shift();
+                                cpy += p.shift();
+                                cmd = 'M';
+                                points.push(cpx, cpy);
+                                c = 'l';
+                                break;
+                            case 'M':
+                                cpx = p.shift();
+                                cpy = p.shift();
+                                cmd = 'M';
+                                points.push(cpx, cpy);
+                                c = 'L';
+                                break;
+
+                            case 'h':
+                                cpx += p.shift();
+                                cmd = 'L';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'H':
+                                cpx = p.shift();
+                                cmd = 'L';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'v':
+                                cpy += p.shift();
+                                cmd = 'L';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'V':
+                                cpy = p.shift();
+                                cmd = 'L';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'C':
+                                points.push(p.shift(), p.shift(), p.shift(), p.shift());
+                                cpx = p.shift();
+                                cpy = p.shift();
+                                points.push(cpx, cpy);
+                                break;
+                            case 'c':
+                                points.push(
+                                    cpx + p.shift(), cpy + p.shift(),
+                                    cpx + p.shift(), cpy + p.shift()
+                                );
+                                cpx += p.shift();
+                                cpy += p.shift();
+                                cmd = 'C';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'S':
+                                ctlPtx = cpx;
+                                ctlPty = cpy;
+                                prevCmd = ca[ca.length - 1];
+                                if (prevCmd.command === 'C') {
+                                    ctlPtx = cpx + (cpx - prevCmd.points[2]);
+                                    ctlPty = cpy + (cpy - prevCmd.points[3]);
+                                }
+                                points.push(ctlPtx, ctlPty, p.shift(), p.shift());
+                                cpx = p.shift();
+                                cpy = p.shift();
+                                cmd = 'C';
+                                points.push(cpx, cpy);
+                                break;
+                            case 's':
+                                ctlPtx = cpx, ctlPty = cpy;
+                                prevCmd = ca[ca.length - 1];
+                                if (prevCmd.command === 'C') {
+                                    ctlPtx = cpx + (cpx - prevCmd.points[2]);
+                                    ctlPty = cpy + (cpy - prevCmd.points[3]);
+                                }
+                                points.push(
+                                    ctlPtx, ctlPty,
+                                    cpx + p.shift(), cpy + p.shift()
+                                );
+                                cpx += p.shift();
+                                cpy += p.shift();
+                                cmd = 'C';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'Q':
+                                points.push(p.shift(), p.shift());
+                                cpx = p.shift();
+                                cpy = p.shift();
+                                points.push(cpx, cpy);
+                                break;
+                            case 'q':
+                                points.push(cpx + p.shift(), cpy + p.shift());
+                                cpx += p.shift();
+                                cpy += p.shift();
+                                cmd = 'Q';
+                                points.push(cpx, cpy);
+                                break;
+                            case 'T':
+                                ctlPtx = cpx, ctlPty = cpy;
+                                prevCmd = ca[ca.length - 1];
+                                if (prevCmd.command === 'Q') {
+                                    ctlPtx = cpx + (cpx - prevCmd.points[0]);
+                                    ctlPty = cpy + (cpy - prevCmd.points[1]);
+                                }
+                                cpx = p.shift();
+                                cpy = p.shift();
+                                cmd = 'Q';
+                                points.push(ctlPtx, ctlPty, cpx, cpy);
+                                break;
+                            case 't':
+                                ctlPtx = cpx, ctlPty = cpy;
+                                prevCmd = ca[ca.length - 1];
+                                if (prevCmd.command === 'Q') {
+                                    ctlPtx = cpx + (cpx - prevCmd.points[0]);
+                                    ctlPty = cpy + (cpy - prevCmd.points[1]);
+                                }
+                                cpx += p.shift();
+                                cpy += p.shift();
+                                cmd = 'Q';
+                                points.push(ctlPtx, ctlPty, cpx, cpy);
+                                break;
+                            case 'A':
+                                rx = p.shift(); //x半径
+                                ry = p.shift(); //y半径
+                                psi = p.shift(); //旋转角度
+                                fa = p.shift(); //角度大小 
+                                fs = p.shift(); //时针方向
+
+                                x1 = cpx, y1 = cpy;
+                                cpx = p.shift(), cpy = p.shift();
+                                cmd = 'A';
+                                points = this._convertPoint(
+                                    x1, y1, cpx, cpy, fa, fs, rx, ry, psi
+                                );
+                                break;
+                            case 'a':
+                                rx = p.shift();
+                                ry = p.shift();
+                                psi = p.shift();
+                                fa = p.shift();
+                                fs = p.shift();
+
+                                x1 = cpx, y1 = cpy;
+                                cpx += p.shift();
+                                cpy += p.shift();
+                                cmd = 'A';
+                                points = this._convertPoint(
+                                    x1, y1, cpx, cpy, fa, fs, rx, ry, psi
+                                );
+                                break;
+
+                        }
+
+                        ca.push({
+                            command: cmd || c,
+                            points: points
+                        });
+                    }
+
+                    if (c === 'z' || c === 'Z') {
+                        ca.push({
+                            command: 'z',
+                            points: []
+                        });
+                    }
+                };
+                return ca;
+            },
+
+            /*
+             * @param x1 原点x
+             * @param y1 原点y
+             * @param x2 终点坐标 x
+             * @param y2 终点坐标 y
+             * @param fa 角度大小
+             * @param fs 时针方向
+             * @param rx x半径
+             * @param ry y半径
+             * @param psiDeg 旋转角度
+             */
+            _convertPoint: function(x1, y1, x2, y2, fa, fs, rx, ry, psiDeg) {
+
+                var psi = psiDeg * (Math.PI / 180.0);
+                var xp = Math.cos(psi) * (x1 - x2) / 2.0 + Math.sin(psi) * (y1 - y2) / 2.0;
+                var yp = -1 * Math.sin(psi) * (x1 - x2) / 2.0 + Math.cos(psi) * (y1 - y2) / 2.0;
+
+                var lambda = (xp * xp) / (rx * rx) + (yp * yp) / (ry * ry);
+
+                if (lambda > 1) {
+                    rx *= Math.sqrt(lambda);
+                    ry *= Math.sqrt(lambda);
+                }
+
+                var f = Math.sqrt((((rx * rx) * (ry * ry)) - ((rx * rx) * (yp * yp)) - ((ry * ry) * (xp * xp))) / ((rx * rx) * (yp * yp) + (ry * ry) * (xp * xp)));
+
+                if (fa === fs) {
+                    f *= -1;
+                }
+                if (isNaN(f)) {
+                    f = 0;
+                }
+
+                var cxp = f * rx * yp / ry;
+                var cyp = f * -ry * xp / rx;
+
+                var cx = (x1 + x2) / 2.0 + Math.cos(psi) * cxp - Math.sin(psi) * cyp;
+                var cy = (y1 + y2) / 2.0 + Math.sin(psi) * cxp + Math.cos(psi) * cyp;
+
+                var vMag = function(v) {
+                    return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+                };
+                var vRatio = function(u, v) {
+                    return (u[0] * v[0] + u[1] * v[1]) / (vMag(u) * vMag(v));
+                };
+                var vAngle = function(u, v) {
+                    return (u[0] * v[1] < u[1] * v[0] ? -1 : 1) * Math.acos(vRatio(u, v));
+                };
+                var theta = vAngle([1, 0], [(xp - cxp) / rx, (yp - cyp) / ry]);
+                var u = [(xp - cxp) / rx, (yp - cyp) / ry];
+                var v = [(-1 * xp - cxp) / rx, (-1 * yp - cyp) / ry];
+                var dTheta = vAngle(u, v);
+
+                if (vRatio(u, v) <= -1) {
+                    dTheta = Math.PI;
+                }
+                if (vRatio(u, v) >= 1) {
+                    dTheta = 0;
+                }
+                if (fs === 0 && dTheta > 0) {
+                    dTheta = dTheta - 2 * Math.PI;
+                }
+                if (fs === 1 && dTheta < 0) {
+                    dTheta = dTheta + 2 * Math.PI;
+                }
+                return [cx, cy, rx, ry, theta, dTheta, psi, fs];
+            },
+            /*
+             * 获取bezier上面的点列表
+             * */
+            _getBezierPoints: function(p) {
+                var steps = Math.abs(Math.sqrt(Math.pow(p.slice(-1)[0] - p[1], 2) + Math.pow(p.slice(-2, -1)[0] - p[0], 2)));
+                steps = Math.ceil(steps / 5);
+                var parr = [];
+                for (var i = 0; i <= steps; i++) {
+                    var t = i / steps;
+                    var tp = Bezier.getPointByTime(t, p);
+                    parr.push(tp.x);
+                    parr.push(tp.y);
+                };
+                return parr;
+            },
+            /*
+             * 如果path中有A a ，要导出对应的points
+             */
+            _getArcPoints: function(p) {
+
+                var cx = p[0];
+                var cy = p[1];
+                var rx = p[2];
+                var ry = p[3];
+                var theta = p[4];
+                var dTheta = p[5];
+                var psi = p[6];
+                var fs = p[7];
+                var r = (rx > ry) ? rx : ry;
+                var scaleX = (rx > ry) ? 1 : rx / ry;
+                var scaleY = (rx > ry) ? ry / rx : 1;
+
+                var _transform = new Matrix();
+                _transform.identity();
+                _transform.scale(scaleX, scaleY);
+                _transform.rotate(psi);
+                _transform.translate(cx, cy);
+
+                var cps = [];
+                var steps = (360 - (!fs ? 1 : -1) * dTheta * 180 / Math.PI) % 360;
+
+                steps = Math.ceil(Math.min(Math.abs(dTheta) * 180 / Math.PI, r * Math.abs(dTheta) / 8)); //间隔一个像素 所以 /2
+
+                for (var i = 0; i <= steps; i++) {
+                    var point = [Math.cos(theta + dTheta / steps * i) * r, Math.sin(theta + dTheta / steps * i) * r];
+                    point = _transform.mulVector(point);
+                    cps.push(point[0]);
+                    cps.push(point[1]);
+                };
+                return cps;
+            },
+
+            draw: function(ctx, style) {
+                this._draw(ctx, style);
+            },
+            /**
+             *  ctx Canvas 2D上下文
+             *  style 样式
+             */
+            _draw: function(ctx, style) {
+                var path = style.path;
+                var pathArray = this._parsePathData(path);
+                this._setPointList(pathArray, style);
+                for (var g = 0, gl = pathArray.length; g < gl; g++) {
+                    for (var i = 0, l = pathArray[g].length; i < l; i++) {
+                        var c = pathArray[g][i].command, p = pathArray[g][i].points;
+                        switch (c) {
+                            case 'L':
+                                ctx.lineTo(p[0], p[1]);
+                                break;
+                            case 'M':
+                                ctx.moveTo(p[0], p[1]);
+                                break;
+                            case 'C':
+                                ctx.bezierCurveTo(p[0], p[1], p[2], p[3], p[4], p[5]);
+                                break;
+                            case 'Q':
+                                ctx.quadraticCurveTo(p[0], p[1], p[2], p[3]);
+                                break;
+                            case 'A':
+                                var cx = p[0];
+                                var cy = p[1];
+                                var rx = p[2];
+                                var ry = p[3];
+                                var theta = p[4];
+                                var dTheta = p[5];
+                                var psi = p[6];
+                                var fs = p[7];
+                                var r = (rx > ry) ? rx : ry;
+                                var scaleX = (rx > ry) ? 1 : rx / ry;
+                                var scaleY = (rx > ry) ? ry / rx : 1;
+                                var _transform = new Matrix();
+                                _transform.identity();
+                                _transform.scale(scaleX, scaleY);
+                                _transform.rotate(psi);
+                                _transform.translate(cx, cy);
+                                //运用矩阵开始变形
+                                ctx.transform.apply(ctx, _transform.toArray());
+                                ctx.arc(0, 0, r, theta, theta + dTheta, 1 - fs);
+                                //_transform.invert();
+                                ctx.transform.apply(ctx, _transform.invert().toArray());
+                                break;
+                            case 'z':
+                                ctx.closePath();
+                                break;
+                        }
+                    }
+                };
+                return this;
+            },
+            _setPointList: function(pathArray, style) {
+                if (style.pointList.length > 0) {
+                    return;
+                };
+
+                // 记录边界点，用于判断inside
+                var pointList = style.pointList = [];
+                for (var g = 0, gl = pathArray.length; g < gl; g++) {
+
+                    var singlePointList = [];
+
+                    for (var i = 0, l = pathArray[g].length; i < l; i++) {
+                        var p = pathArray[g][i].points;
+                        var cmd = pathArray[g][i].command;
+
+                        if (cmd.toUpperCase() == 'A') {
+                            p = this._getArcPoints(p);
+                            //A命令的话，外接矩形的检测必须转换为_points
+                            pathArray[g][i]._points = p;
+                        };
+
+                        if (cmd.toUpperCase() == "C" || cmd.toUpperCase() == "Q") {
+                            var cStart = [0, 0];
+                            if (singlePointList.length > 0) {
+                                cStart = singlePointList.slice(-1)[0];
+                            } else if (i > 0) {
+                                var prePoints = (pathArray[g][i - 1]._points || pathArray[g][i - 1].points);
+                                if (prePoints.length >= 2) {
+                                    cStart = prePoints.slice(-2);
+                                }
+                            };
+                            p = this._getBezierPoints(cStart.concat(p));
+                            pathArray[g][i]._points = p;
+                        };
+
+                        for (var j = 0, k = p.length; j < k; j += 2) {
+                            var px = p[j];
+                            var py = p[j + 1];
+                            if (!px || !py) {
+                                continue;
+                            };
+                            singlePointList.push([px, py]);
+                        }
+                    };
+                    singlePointList.length > 0 && pointList.push(singlePointList);
+                };
+            },
+            /**
+             * 返回矩形区域，用于局部刷新和文字定位
+             * style 样式
+             */
+            getRect: function(style) {
+                var lineWidth;
+                var style = style ? style : this.context;
+                if (style.strokeStyle || style.fillStyle) {
+                    lineWidth = style.lineWidth || 1;
+                } else {
+                    lineWidth = 0;
+                }
+
+                var minX = Number.MAX_VALUE;
+                var maxX = Number.MIN_VALUE;
+
+                var minY = Number.MAX_VALUE;
+                var maxY = Number.MIN_VALUE;
+
+                // 平移坐标
+                var x = 0;
+                var y = 0;
+
+                var pathArray = this._parsePathData(style.path);
+                this._setPointList(pathArray, style);
+
+                for (var g = 0, gl = pathArray.length; g < gl; g++) {
+                    for (var i = 0; i < pathArray[g].length; i++) {
+                        var p = pathArray[g][i]._points || pathArray[g][i].points;
+
+                        for (var j = 0; j < p.length; j++) {
+                            if (j % 2 === 0) {
+                                if (p[j] + x < minX) {
+                                    minX = p[j] + x;
+                                }
+                                if (p[j] + x > maxX) {
+                                    maxX = p[j] + x;
+                                }
+                            } else {
+                                if (p[j] + y < minY) {
+                                    minY = p[j] + y;
+                                }
+                                if (p[j] + y > maxY) {
+                                    maxY = p[j] + y;
+                                }
+                            }
+                        }
+                    }
+                };
+
+                var rect;
+                if (minX === Number.MAX_VALUE || maxX === Number.MIN_VALUE || minY === Number.MAX_VALUE || maxY === Number.MIN_VALUE) {
+                    rect = {
+                        x: 0,
+                        y: 0,
+                        width: 0,
+                        height: 0
+                    };
+                } else {
+                    rect = {
+                        x: Math.round(minX - lineWidth / 2),
+                        y: Math.round(minY - lineWidth / 2),
+                        width: maxX - minX + lineWidth,
+                        height: maxY - minY + lineWidth
+                    };
+                }
+                return rect;
+            }
+
+        });
         return Path;
-    } 
-);
-;define(
+    }
+);;define(
     "canvax/shape/Polygon",
     [
         "canvax/display/Shape",
@@ -4367,7 +4376,10 @@ define(
             
             var _pixelCanvas = Base.getEl("_pixelCanvas");
             if(!_pixelCanvas){
-                _pixelCanvas = Base._createCanvas("_pixelCanvas" , this.context.width , this.context.height); 
+                _pixelCanvas = Base._createCanvas("_pixelCanvas" , 0 , 0); 
+                //var clientH = window.innerHeight || ( document.documentElement && document.documentElement.clientHeight  ) || document.body.clientHeight;
+                //var clientW = window.innerWidth  || ( document.documentElement && document.documentElement.clientWidth   ) || document.body.clientWidth;
+                //_pixelCanvas = Base._createCanvas("_pixelCanvas" , clientW , clientH ); 
             } else {
                 //如果又的话 就不需要在创建了
                 return;

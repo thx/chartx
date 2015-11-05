@@ -8,12 +8,13 @@
 
 
 define(
-    "canvax/display/Moveclip",
+    "canvax/display/Movieclip",
     [
         "canvax/display/DisplayObjectContainer",
         "canvax/core/Base"
     ],
-    function(S , DisplayObjectContainer , Base){
+    function(DisplayObjectContainer , Base){
+      
         var Movieclip = function( opt ){
       
             var self = this;

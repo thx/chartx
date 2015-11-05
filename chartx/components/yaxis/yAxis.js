@@ -20,11 +20,11 @@ define(
                     enabled : 1,                           //是否有line
                     width   : 4,
                     lineWidth  : 1,
-                    strokeStyle   : '#BEBEBE'
+                    strokeStyle   : '#cccccc'
             };
 
             this.text = {
-                    fillStyle : '#999999',
+                    fillStyle : '#333333',
                     fontSize  : 12,
                     format    : null,
                     rotation  : 0
@@ -167,7 +167,7 @@ define(
             _setDataSection : function( data ){
                 var arr = [];
                 if( !this.biaxial ){
-                    arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
+                    arr = _.flatten( data.org ); //_.flatten( data.org );
                 } else {
                     if( this.place == "left" ){
                         arr = data.org[0];

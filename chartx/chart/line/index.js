@@ -17,7 +17,6 @@ define(
          */
         var Canvax = Chart.Canvax;
 
-
         return Chart.extend({
 
             init: function(node, data, opts) {
@@ -170,7 +169,7 @@ define(
 
                 if (this.biaxial) {
                     this.yAxis.biaxial = true;
-                }
+                };
 
                 this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
                 //再折线图中会有双轴图表
@@ -178,7 +177,7 @@ define(
                     this._yAxisR = new yAxis(_.extend(_.clone(this.yAxis), {
                         place: "right"
                     }), this.dataFrame.yAxis);
-                }
+                };
 
                 this._back = new Back(this.back);
                 this._anchor = new Anchor(this.anchor);
@@ -298,10 +297,11 @@ define(
 
                 if (this._anchor.enabled) {
                     //绘制点位线
-                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num)
+                    var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
+
                     this._anchor.draw({
-                        w: this.width - _yAxisW - _yAxisRW,
-                        h: -_graphsH,
+                        w: this._xAxis.xGraphsWidth,//this.width - _yAxisW - _yAxisRW,
+                        h: _graphsH,
                         cross: {
                             x: pos.x,
                             y: _graphsH + pos.y

@@ -79,7 +79,7 @@ window.Chartx || (Chartx = {
 
                 }
             });
-        }
+        };
 
         //首次使用，需要预加载好canvax。
         if (this.canvax) {
@@ -92,6 +92,11 @@ window.Chartx || (Chartx = {
         };
 
         return promise;
+    },
+    setTheme : function( colors ){
+        require(["chartx/chart/theme.js"] , function( theme ){
+            theme.colors = colors;
+        })
     },
     _site: {
         local: !!~location.search.indexOf('local'),

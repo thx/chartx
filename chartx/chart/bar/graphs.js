@@ -3,9 +3,10 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "canvax/animation/Tween",
-        "chartx/utils/tools"
+        "chartx/utils/tools",
+        "chartx/chart/theme"
     ],
-    function(Canvax, Rect, Tween, Tools) {
+    function(Canvax, Rect, Tween, Tools , Theme) {
 
         var Graphs = function(opt, root) {
             this.w = 0;
@@ -17,7 +18,7 @@ define(
                 y: 0
             };
 
-            this._colors = ["#42a8d7", '#666666', "#6f8cb2", "#c77029", "#f15f60", "#ecb44f", "#ae833a", "#896149", "#4d7fff"];
+            this._colors = Theme.colors;
 
             this.bar = {
                 width  : 22,

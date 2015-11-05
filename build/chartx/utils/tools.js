@@ -3,63 +3,13 @@ define(
     [],
     function(){
         return {
-            ////自动检测一个中文字符的高宽和一个英文字符的高宽
-            probOneStrSize:function(){ 
-                S.all("body").append("<span style='line-height:1;visibility:hidden;position:absolute;left:0;top:0;' id='off-the-cuff-str'>8</span>");
-                var oneStrNode = S.all("#off-the-cuff-str");
-                var oneStrSize={
-                    en : {
-                        width : oneStrNode.width(),
-                        height: oneStrNode.height()
-                    }
-                };
-                oneStrNode.html("国");
-                oneStrSize.cn={
-                    width : oneStrNode.width(),
-                    height: oneStrNode.height()
-                };
-                oneStrNode.remove();
-                oneStrNode = null;
-                //中英文字符的高宽探测结束
-         
-                return oneStrSize;
-     
-     
-            },
-            /**
-     		 * 将二维数组转换成一维数组
-     		 * @param  {[Array]} $arr [二维数组]
-     		 * @return {[Array]}      [一维数组]
-     	    */
-     	    getChildsArr:function($arr){
-     			var arr = []
-     			for (var i = 0, l = $arr.length; i < l; i++){
-     				var tmp = $arr[i]
-     				arr = arr.concat(tmp);
-     			}
-     			return arr;
-     	    },
+
             /**
              * 从一个数组中获取出该数组中最大一个值
              * @param  {[Array]}  $arr [数组]
              * @return {[Number]}      [最大值]
             */  
             getMaxAtArr:function($arr){
-                /*        
-                var index = -1        
-                for(var a = 0, al = $arr.length; a < al; a++){
-                    var pre  = $arr[a]
-                    var next = $arr[a + 1]
-                    if(!isNaN(pre) && !isNaN(next)){
-                        if(pre > next){
-                            index = a 
-                        }else{
-                            index = a + 1
-                        }
-                    }
-                }
-                return index
-                */
                 $arr.sort(function(a1,a2){
                     return a2 - a1
                 });
@@ -218,7 +168,7 @@ define(
                     return String($n);
                 }   
      		},
-            	/**
+            /**
      		 * 获取一个path路径
      		 * @param  {[Array]} $arr    [数组]
      		 * @return {[String]}        [path字符串]

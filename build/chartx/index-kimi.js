@@ -129,9 +129,11 @@ define(
              * 清除整个图表
              **/
             clean: function() {
-                _.each(this.canvax.children, function(stage, i) {
-                    stage.removeAllChildren();
-                });
+                for (var i=0,l=this.canvax.children.length;i<l;i++){
+                    this.canvax.getChildAt(i).destroy();
+                    i--;
+                    l--;
+                };
             },
             /**
              * 容器的尺寸改变重新绘制
@@ -425,13 +427,13 @@ define(
     
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
-                    lineWidth   : 2,
-                    strokeStyle : '#0088cf'//'#e5e5e5'
+                    lineWidth   : 1,
+                    strokeStyle : '#f0f0f0'//'#e5e5e5'
             } 
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
-                    lineWidth   : 2,
-                    strokeStyle : '#0088cf',//'#e5e5e5',
+                    lineWidth   : 1,
+                    strokeStyle : '#f0f0f0',//'#e5e5e5',
                     biaxial     : false
             }
             this.xAxis   = {                                //x轴上的线
@@ -441,7 +443,7 @@ define(
                     // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                     lineWidth   : 1,
-                    strokeStyle : '#f5f5f5', //'#e5e5e5',
+                    strokeStyle : '#fafafa', //'#e5e5e5',
                     filter      : null 
             }
     
@@ -452,7 +454,7 @@ define(
                     // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     lineWidth   : 1,
-                    strokeStyle : '#f5f5f5',//'#e5e5e5',
+                    strokeStyle : '#fafafa',//'#e5e5e5',
                     filter      : null
             } 
     
@@ -865,7 +867,7 @@ define(
             };
 
             this.realTime = false; //是否是实时的一个点，如果是的话会有动画
-            this.tween    = null;  //realTime为true的话，tween则为对应的一个缓动对象
+            this.tween    = null;  // realTime 为true的话，tween则为对应的一个缓动对象
             this.filter  = function(){};//过滤函数
 
             if( "markPoint" in userOpts ){
@@ -884,6 +886,15 @@ define(
                     context : {
                         x : this.point.x,
                         y : this.point.y
+                    }
+                });
+                this.sprite.on("destroy" , function( e ){
+                    if (me.tween) {
+                        me.tween.stop();
+                        Tween.remove( me.tween );
+                    };
+                    if(me.timer){
+                        cancelAnimationFrame(me.timer);
                     }
                 });
                 setTimeout( function(){
@@ -959,7 +970,7 @@ define(
                         me.sprite.addChildAt( me.shapeBg , 0 );
                     };
                 
-                    var timer = null;
+                    me.timer = null;
                     var growAnima = function(){
                        me.tween = new Tween.Tween( { r : me.r , alpha : me.globalAlpha } )
                        .to( { r : me.r * 3 , alpha : 0 }, me.duration )
@@ -972,8 +983,8 @@ define(
                        animate();
                     };
                     function animate(){
-                        //console.log(1)
-                        timer    = requestAnimationFrame( animate ); 
+                        console.log(1);
+                        me.timer    = requestAnimationFrame( animate ); 
                         Tween.update();
                     };
                     growAnima();
@@ -1253,7 +1264,7 @@ define(
             }
 
             this.text = {
-                fillStyle: '#999999',
+                fillStyle: '#333333',
                 fontSize: 12,
                 rotation: 0,
                 format: null,
@@ -1489,6 +1500,9 @@ define(
                 if( _.isArray( res ) ){
                     res = Tools.numAddSymbol(res);
                 }
+                if (!res) {
+                    res = text;
+                };
                 return res;
             },
             _widget: function() {
@@ -1664,11 +1678,11 @@ define(
                     enabled : 1,                           //是否有line
                     width   : 4,
                     lineWidth  : 1,
-                    strokeStyle   : '#BEBEBE'
+                    strokeStyle   : '#cccccc'
             };
 
             this.text = {
-                    fillStyle : '#999999',
+                    fillStyle : '#333333',
                     fontSize  : 12,
                     format    : null,
                     rotation  : 0
@@ -1811,7 +1825,7 @@ define(
             _setDataSection : function( data ){
                 var arr = [];
                 if( !this.biaxial ){
-                    arr = _.flatten( data.org ); //Tools.getChildsArr( data.org );
+                    arr = _.flatten( data.org ); //_.flatten( data.org );
                 } else {
                     if( this.place == "left" ){
                         arr = data.org[0];

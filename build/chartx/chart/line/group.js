@@ -7,8 +7,9 @@ define(
         "chartx/utils/tools",
         "chartx/utils/colorformat",
         "canvax/animation/Tween",
+        "chartx/chart/theme"
     ],
-    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween) {
+    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween , Theme) {
         window.Canvax = Canvax
         var Group = function(field, a, opt, ctx) {
             this.field = field; //_groupInd在yAxis.field中对应的值
@@ -19,7 +20,7 @@ define(
             this.h = 0;
             this.y = 0;
 
-            this.colors = ["#42a8d7", '#666666', '#26b471', '#7aa1ff', '#fa8529', '#ff7c4d', '#2494ed', '#7aa1ff', '#fa8529', '#ff7c4d'];
+            this.colors = Theme.colors;
 
             this.line = { //线
                 enabled: 1,
@@ -41,7 +42,7 @@ define(
 
             this.fill = { //填充
                 fillStyle: null,
-                alpha: 0.1
+                alpha: 0.05
             };
 
             this.dataOrg = []; //data的原始数据

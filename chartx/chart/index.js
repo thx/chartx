@@ -69,9 +69,11 @@ define(
              * 清除整个图表
              **/
             clean: function() {
-                _.each(this.canvax.children, function(stage, i) {
-                    stage.removeAllChildren();
-                });
+                for (var i=0,l=this.canvax.children.length;i<l;i++){
+                    this.canvax.getChildAt(i).destroy();
+                    i--;
+                    l--;
+                };
             },
             /**
              * 容器的尺寸改变重新绘制
