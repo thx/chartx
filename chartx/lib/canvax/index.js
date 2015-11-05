@@ -2293,6 +2293,7 @@ define(
             },
             //元素的自我销毁
             destroy : function(){ 
+                this.fire("destroy");
                 this.remove();
                 //把自己从父节点中删除了后做自我清除，释放内存
                 this.context = null;
@@ -2422,9 +2423,10 @@ define(
             },
             //集合类的自我销毁
             destroy : function(){
+                this.fire("destroy");
                 if( this.parent ){
                     this.parent.removeChild(this);
-                }
+                };
                 //依次销毁所有子元素
                 //TODO：这个到底有没有必要。还有待商榷
                 _.each( this.children , function( child ){
