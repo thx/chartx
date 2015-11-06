@@ -16,6 +16,7 @@
                 this.sprite = null;
                 this.branchSp = null;
                 this.branchTxtSp = null;
+                //this.angleOffset = -90; //正常情况下，饼图的扇形0度是从3点钟开始，-90表示从12点开始；改值只能是90的倍数
 
                 this.dataLabel = {
                     enabled: true,
@@ -58,12 +59,14 @@
                 //配置数据
                 _configData: function () {
                     var self = this;
-                    self.total = 0;
-                    self.currentAngle = 0;
+                    self.total = 0;                    
+                    self.angleOffset = Number.isNaN(self.startAngle) ? 0 : self.startAngle;
+                    self.angleOffset = self.angleOffset % 360;
+                    self.currentAngle = 0 + self.angleOffset;
+                    var limitAngle = 360 + self.angleOffset;
                     var adjustFontSize = 12 * self.boundWidth / 1000;
                     self.labelFontSize = adjustFontSize < 12 ? 12 : adjustFontSize;
                     var percentFixedNum = 2;
-
                     var data = self.data.data;
                     self.clickMoveDis = self.r / 11;
                     if (data.length && data.length > 0) {
@@ -90,27 +93,36 @@
                                 }
 
                                 var angle = 360 * percentage;
-                                var endAngle = self.currentAngle + angle > 360 ? 360 : self.currentAngle + angle;
+                                var endAngle = self.currentAngle + angle > limitAngle ? limitAngle : self.currentAngle + angle;
                                 var cosV = Math.cos((self.currentAngle + angle / 2) / 180 * Math.PI);
                                 var sinV = Math.sin((self.currentAngle + angle / 2) / 180 * Math.PI);
                                 var midAngle = self.currentAngle + angle / 2;
                                 cosV = cosV.toFixed(5);
                                 sinV = sinV.toFixed(5);
                                 var quadrant = function (ang) {
-                                    if (ang > 360) {
-                                        ang = 360;
+                                    if (ang > limitAngle) {
+                                        ang = limitAngle;
                                     }
-                                    if (0 <= ang && ang <= 90) {
-                                        return 1;
+
+                                    ang = ang % 360;
+                                    var angleRatio = parseInt(ang / 90);
+                                    if (ang >= 0) {
+                                        switch (angleRatio) {
+                                            case 0: return 1; break;
+                                            case 1: return 2; break;
+                                            case 2: return 3; break;
+                                            case 3:
+                                            case 4: return 4; break;
+                                        }
                                     }
-                                    else if (90 < ang && ang <= 180) {
-                                        return 2;
-                                    }
-                                    else if (180 < ang && ang <= 270) {
-                                        return 3;
-                                    }
-                                    else if (270 < ang && ang <= 360) {
-                                        return 4;
+                                    else if (ang < 0) {
+                                        switch (angleRatio) {
+                                            case 0: return 4; break;
+                                            case -1: return 3; break;
+                                            case -2: return 2; break;
+                                            case -3:
+                                            case -4: return 1; break;
+                                        }
                                     }
                                 } (midAngle);
                                 _.extend(data[j], {
@@ -136,7 +148,7 @@
                                 })
 
                                 self.currentAngle += angle;
-                                if (self.currentAngle > 360) self.currentAngle = 360;
+                                if (self.currentAngle > limitAngle) self.currentAngle = limitAngle;
                             }
                             data[maxIndex].isMax = true;
                             //处理保留小数后百分比总和不等于100的情况
@@ -287,8 +299,8 @@
                         if (sec.context) {
                             sec.context.r0 = 0;
                             sec.context.r = 0;
-                            sec.context.startAngle = 0;
-                            sec.context.endAngle = 0;
+                            sec.context.startAngle = self.angleOffset;
+                            sec.context.endAngle = self.angleOffset;
                         }
                     })
                     self._hideDataLabel();
@@ -304,7 +316,7 @@
                                         self.sectors[i].context.globalAlpha = me.process;
                                         if (i == 0) {
                                             self.sectors[i].context.startAngle = self.sectors[i].startAngle;
-                                            self.sectors[i].context.endAngle = self.sectors[i].endAngle * me.process;
+                                            self.sectors[i].context.endAngle = self.sectors[i].startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.process;
                                         }
                                         else {
                                             var lastEndAngle = function (index) {

@@ -45,7 +45,7 @@
                     this._initModule();                        //初始化模块
                     this._startDraw();                         //开始绘图
                     this._drawEnd();                           //绘制结束，添加到舞台  
-                    this.inited = true;    
+                    this.inited = true;
                 },
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);
@@ -96,9 +96,8 @@
                 slice: function (index) {
                     this._pie && this._pie.slice(index);
                 },
-                _initData: function (arr, opt) {                    
+                _initData: function (arr, opt) {
                     var data = [];
-
                     /*
                     * 用校正处理， 把pie的data入参规范和chartx数据格式一致
                     **/
@@ -127,9 +126,9 @@
                             }
                             data.push(rowData);
                         });
-                    };
-                    //矫正结束
+                    };                    
 
+                    //矫正结束                    
                     var dataFrame = {};
                     dataFrame.org = data;
                     dataFrame.data = [];
@@ -152,6 +151,25 @@
                             if (obj.name) dataFrame.data.push(obj);
                         }
                     }                    
+                    if (data.length > 0 && opt.sort == 'asc' || opt.sort == 'desc') {
+                        dataFrame.org.sort(function (a, b) {
+                            if (opt.sort == 'desc') {
+                                return a[1] - b[1];
+                            }
+                            else if (opt.sort == 'asc') {
+                                return b[1] - a[1];
+                            }
+                        });
+                        dataFrame.data.sort(function (a, b) {
+                            if (opt.sort == 'desc') {
+                                return a.y - b.y;
+                            }
+                            else if (opt.sort == 'asc') {
+                                return b.y - a.y;
+                            }
+                        });
+                    }      
+
                     return dataFrame;
 
                 },
@@ -195,6 +213,7 @@
                         //dataLabel: self.dataLabel, 
                         allowPointSelect: self.allowPointSelect,
                         animation: self.animation,
+                        startAngle: parseInt(self.startAngle),
                         colors: self.colors,
                         focusCallback: {
                             focus: function (e, index) {
