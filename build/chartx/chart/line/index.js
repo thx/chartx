@@ -973,7 +973,7 @@ define(
 
                 if (this.biaxial) {
                     this.yAxis.biaxial = true;
-                }
+                };
 
                 this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
                 //再折线图中会有双轴图表
@@ -981,7 +981,7 @@ define(
                     this._yAxisR = new yAxis(_.extend(_.clone(this.yAxis), {
                         place: "right"
                     }), this.dataFrame.yAxis);
-                }
+                };
 
                 this._back = new Back(this.back);
                 this._anchor = new Anchor(this.anchor);

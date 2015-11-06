@@ -14,8 +14,7 @@ define(
             this.xDataSection = [];
             this.strokeStyle  = "#e5e5e5";
             this.lineWidth    = 1;
-            this.sprite       = null ;
-    
+            this.sprite       = null;
             this.init(opt);
         };
         Back.prototype = {
@@ -56,7 +55,8 @@ define(
                             r : this.r * rScale,
                             n : this.xDataSection.length,
                             strokeStyle : this.strokeStyle,
-                            lineWidth   : this.lineWidth
+                            lineWidth   : this.lineWidth,
+                            fillStyle   : "RGBA(0,0,0,0)"
                         }
                     });
                     //给最外面的蜘蛛网添加事件，让它冒泡到外面去
@@ -102,9 +102,10 @@ define(
         "canvax/shape/Polygon",
         "canvax/shape/Circle",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip"
+        "chartx/components/tips/tip",
+        "chartx/chart/theme"
     ],
-    function( Canvax , Polygon , Circle , Tween , Tip ){
+    function( Canvax , Polygon , Circle , Tween , Tip , Theme){
  
         var Graphs = function( opt , tipsOpt , domContainer ){
             this.pos    = {x : 0 , y : 0};
@@ -112,7 +113,7 @@ define(
             this.data       = [];
             this.yDataSection  = [];
             this.xDataSection  = [];
-            this._colors       = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors       = Theme.colors;
             this.fillStyle     = null;
             this.alpha         = 0.5;
             this.lineWidth     = 1;
@@ -284,6 +285,7 @@ define(
                             pointList : pointList,
                             lineWidth : 2,
                             cursor    : "pointer",
+                            fillStyle : "RGBA(0,0,0,0)",
                             strokeStyle : this.getFillStyle(i)//this._colors[i]
                         }
                     });

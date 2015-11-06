@@ -15,7 +15,7 @@ define(
         "canvax/geom/Matrix",
         "canvax/geom/bezier"
     ],
-    function(Shape, Base, Matrix , Bezier) {
+    function(Shape, Base, Matrix, Bezier) {
         var Path = function(opt) {
             var self = this;
             self.type = "path";
@@ -37,13 +37,13 @@ define(
                     //T = smooth quadratic Belzier curveto
                     //Z = closepath
             };
-            self._context = _.deepExtend(_context , (self._context || {}));
+            self._context = _.deepExtend(_context, (self._context || {}));
             arguments.callee.superclass.constructor.apply(self, arguments);
         };
 
         Base.creatClass(Path, Shape, {
-            $watch : function( name , value , preValue ){
-                if( name == "path" ){//如果path有变动，需要自动计算新的pointList
+            $watch: function(name, value, preValue) {
+                if (name == "path") { //如果path有变动，需要自动计算新的pointList
                     this.__parsePathData = null;
                     this.context.pointList = [];
                 }
@@ -55,6 +55,16 @@ define(
                 if (!data) {
                     return [];
                 };
+                //分拆子分组
+                this.__parsePathData = [];
+                var paths = _.compact(data.replace(/[Mm]/g, "\\r$&").split('\\r'));
+                var me = this;
+                _.each(paths, function(pathStr) {
+                    me.__parsePathData.push(me._parseChildPathData(pathStr));
+                });
+                return this.__parsePathData;
+            },
+            _parseChildPathData: function(data) {
                 // command string
                 var cs = data;
                 // command chars
@@ -292,9 +302,7 @@ define(
                             points: []
                         });
                     }
-                }
-
-                this.__parsePathData = ca;
+                };
                 return ca;
             },
 
@@ -366,17 +374,18 @@ define(
                 return [cx, cy, rx, ry, theta, dTheta, psi, fs];
             },
             /*
-            * 获取bezier上面的点列表
-            * */
-            _getBezierPoints : function(p){
-                var steps = Math.abs( Math.sqrt( Math.pow( p.slice(-1)[0] - p[1] , 2) + Math.pow(p.slice(-2,-1 )[0] - p[0] , 2)) );
-                var parr  = [];
-                for(var i = 0;i<steps;i++){
+             * 获取bezier上面的点列表
+             * */
+            _getBezierPoints: function(p) {
+                var steps = Math.abs(Math.sqrt(Math.pow(p.slice(-1)[0] - p[1], 2) + Math.pow(p.slice(-2, -1)[0] - p[0], 2)));
+                steps = Math.ceil(steps / 5);
+                var parr = [];
+                for (var i = 0; i <= steps; i++) {
                     var t = i / steps;
-                    var tp = Bezier.getPointByTime( t , p );
-                    parr.push( tp.x );
-                    parr.push( tp.y );
-                }
+                    var tp = Bezier.getPointByTime(t, p);
+                    parr.push(tp.x);
+                    parr.push(tp.y);
+                };
                 return parr;
             },
             /*
@@ -405,7 +414,7 @@ define(
                 var cps = [];
                 var steps = (360 - (!fs ? 1 : -1) * dTheta * 180 / Math.PI) % 360;
 
-                steps = 10;
+                steps = Math.ceil(Math.min(Math.abs(dTheta) * 180 / Math.PI, r * Math.abs(dTheta) / 8)); //间隔一个像素 所以 /2
 
                 for (var i = 0; i <= steps; i++) {
                     var point = [Math.cos(theta + dTheta / steps * i) * r, Math.sin(theta + dTheta / steps * i) * r];
@@ -416,8 +425,8 @@ define(
                 return cps;
             },
 
-            draw : function(ctx,style){
-                this._draw(ctx , style);
+            draw: function(ctx, style) {
+                this._draw(ctx, style);
             },
             /**
              *  ctx Canvas 2D上下文
@@ -427,103 +436,99 @@ define(
                 var path = style.path;
                 var pathArray = this._parsePathData(path);
                 this._setPointList(pathArray, style);
-
-                for (var i = 0, l = pathArray.length; i < l; i++) {
-                    var c = pathArray[i].command,
-                        p = pathArray[i].points;
-
-                    switch (c) {
-                        case 'L':
-                            ctx.lineTo(p[0], p[1]);
-                            break;
-                        case 'M':
-                            ctx.moveTo(p[0], p[1]);
-                            break;
-                        case 'C':
-                            ctx.bezierCurveTo(p[0], p[1], p[2], p[3], p[4], p[5]);
-                            break;
-                        case 'Q':
-                            ctx.quadraticCurveTo(p[0], p[1], p[2], p[3]);
-                            break;
-                        case 'A':
-                            var cx = p[0];
-                            var cy = p[1];
-                            var rx = p[2];
-                            var ry = p[3];
-                            var theta = p[4];
-                            var dTheta = p[5];
-                            var psi = p[6];
-                            var fs = p[7];
-                            var r = (rx > ry) ? rx : ry;
-                            var scaleX = (rx > ry) ? 1 : rx / ry;
-                            var scaleY = (rx > ry) ? ry / rx : 1;
-                            var _transform = new Matrix();
-                            _transform.identity();
-                            _transform.scale(scaleX, scaleY);
-                            _transform.rotate(psi);
-                            _transform.translate(cx, cy);
-                            //运用矩阵开始变形
-                            ctx.transform.apply( ctx , _transform.toArray() );
-                            ctx.arc(0, 0, r, theta, theta + dTheta, 1 - fs);
-                            //_transform.invert();
-                            ctx.transform.apply( ctx , _transform.invert().toArray() );
-                            break;
-                        case 'z':
-                            ctx.closePath();
-                            break;
+                for (var g = 0, gl = pathArray.length; g < gl; g++) {
+                    for (var i = 0, l = pathArray[g].length; i < l; i++) {
+                        var c = pathArray[g][i].command, p = pathArray[g][i].points;
+                        switch (c) {
+                            case 'L':
+                                ctx.lineTo(p[0], p[1]);
+                                break;
+                            case 'M':
+                                ctx.moveTo(p[0], p[1]);
+                                break;
+                            case 'C':
+                                ctx.bezierCurveTo(p[0], p[1], p[2], p[3], p[4], p[5]);
+                                break;
+                            case 'Q':
+                                ctx.quadraticCurveTo(p[0], p[1], p[2], p[3]);
+                                break;
+                            case 'A':
+                                var cx = p[0];
+                                var cy = p[1];
+                                var rx = p[2];
+                                var ry = p[3];
+                                var theta = p[4];
+                                var dTheta = p[5];
+                                var psi = p[6];
+                                var fs = p[7];
+                                var r = (rx > ry) ? rx : ry;
+                                var scaleX = (rx > ry) ? 1 : rx / ry;
+                                var scaleY = (rx > ry) ? ry / rx : 1;
+                                var _transform = new Matrix();
+                                _transform.identity();
+                                _transform.scale(scaleX, scaleY);
+                                _transform.rotate(psi);
+                                _transform.translate(cx, cy);
+                                //运用矩阵开始变形
+                                ctx.transform.apply(ctx, _transform.toArray());
+                                ctx.arc(0, 0, r, theta, theta + dTheta, 1 - fs);
+                                //_transform.invert();
+                                ctx.transform.apply(ctx, _transform.invert().toArray());
+                                break;
+                            case 'z':
+                                ctx.closePath();
+                                break;
+                        }
                     }
-                }
-                return;
+                };
+                return this;
             },
             _setPointList: function(pathArray, style) {
                 if (style.pointList.length > 0) {
                     return;
                 };
 
-                var p;
                 // 记录边界点，用于判断inside
                 var pointList = style.pointList = [];
-                var singlePointList = [];
-                for (var i = 0, l = pathArray.length; i < l; i++) {
-                    //debugger
-                    if (pathArray[i].command.toUpperCase() == 'M') {
-                        singlePointList.length > 0 && pointList.push(singlePointList);
-                        singlePointList = [];
-                    };
+                for (var g = 0, gl = pathArray.length; g < gl; g++) {
 
-                    p = pathArray[i].points;
+                    var singlePointList = [];
 
-                    if (pathArray[i].command.toUpperCase() == 'A') {
-                        p = this._getArcPoints(p);
-                        //A命令的话，外接矩形的检测必须转换为_points
-                        pathArray[i]._points = p;
-                    };
+                    for (var i = 0, l = pathArray[g].length; i < l; i++) {
+                        var p = pathArray[g][i].points;
+                        var cmd = pathArray[g][i].command;
 
-                    if( pathArray[i].command.toUpperCase() == "C" || pathArray[i].command.toUpperCase() == "Q" ){
-                        var cStart = [0,0];
-                        if( singlePointList.length > 0 ){
-                            cStart = singlePointList.slice(-1)[0];
-                        } else if(i>0){
-                            var prePoints = ( pathArray[i-1]._points || pathArray[i-1].points );
-                            if( prePoints.length >= 2 ){
-                                cStart = prePoints.slice(-2);
-                            }
-                        }
-
-                        p = this._getBezierPoints( cStart.concat( p ));
-                        pathArray[i]._points = p;
-                    };
-
-                    for (var j = 0, k = p.length; j < k; j += 2) {
-                        var px = p[j];
-                        var py = p[j + 1];
-                        if (!px || !py) {
-                            continue;
+                        if (cmd.toUpperCase() == 'A') {
+                            p = this._getArcPoints(p);
+                            //A命令的话，外接矩形的检测必须转换为_points
+                            pathArray[g][i]._points = p;
                         };
-                        singlePointList.push([px, py]);
-                    }
+
+                        if (cmd.toUpperCase() == "C" || cmd.toUpperCase() == "Q") {
+                            var cStart = [0, 0];
+                            if (singlePointList.length > 0) {
+                                cStart = singlePointList.slice(-1)[0];
+                            } else if (i > 0) {
+                                var prePoints = (pathArray[g][i - 1]._points || pathArray[g][i - 1].points);
+                                if (prePoints.length >= 2) {
+                                    cStart = prePoints.slice(-2);
+                                }
+                            };
+                            p = this._getBezierPoints(cStart.concat(p));
+                            pathArray[g][i]._points = p;
+                        };
+
+                        for (var j = 0, k = p.length; j < k; j += 2) {
+                            var px = p[j];
+                            var py = p[j + 1];
+                            if (!px || !py) {
+                                continue;
+                            };
+                            singlePointList.push([px, py]);
+                        }
+                    };
+                    singlePointList.length > 0 && pointList.push(singlePointList);
                 };
-                singlePointList.length > 0 && pointList.push(singlePointList);
             },
             /**
              * 返回矩形区域，用于局部刷新和文字定位
@@ -551,27 +556,30 @@ define(
                 var pathArray = this._parsePathData(style.path);
                 this._setPointList(pathArray, style);
 
-                for (var i = 0; i < pathArray.length; i++) {
-                    var p = pathArray[i]._points || pathArray[i].points;
+                for (var g = 0, gl = pathArray.length; g < gl; g++) {
+                    for (var i = 0; i < pathArray[g].length; i++) {
+                        var p = pathArray[g][i]._points || pathArray[g][i].points;
 
-                    for (var j = 0; j < p.length; j++) {
-                        if (j % 2 === 0) {
-                            if (p[j] + x < minX) {
-                                minX = p[j] + x;
-                            }
-                            if (p[j] + x > maxX) {
-                                maxX = p[j] + x;
-                            }
-                        } else {
-                            if (p[j] + y < minY) {
-                                minY = p[j] + y;
-                            }
-                            if (p[j] + y > maxY) {
-                                maxY = p[j] + y;
+                        for (var j = 0; j < p.length; j++) {
+                            if (j % 2 === 0) {
+                                if (p[j] + x < minX) {
+                                    minX = p[j] + x;
+                                }
+                                if (p[j] + x > maxX) {
+                                    maxX = p[j] + x;
+                                }
+                            } else {
+                                if (p[j] + y < minY) {
+                                    minY = p[j] + y;
+                                }
+                                if (p[j] + y > maxY) {
+                                    maxY = p[j] + y;
+                                }
                             }
                         }
                     }
-                }
+                };
+
                 var rect;
                 if (minX === Number.MAX_VALUE || maxX === Number.MIN_VALUE || minY === Number.MAX_VALUE || maxY === Number.MIN_VALUE) {
                     rect = {
