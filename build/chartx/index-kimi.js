@@ -983,7 +983,7 @@ define(
                        animate();
                     };
                     function animate(){
-                        console.log(1);
+                        //console.log(1);
                         me.timer    = requestAnimationFrame( animate ); 
                         Tween.update();
                     };
