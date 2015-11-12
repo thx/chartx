@@ -409,10 +409,10 @@ define(
     "chartx/chart/theme",[],
     function(){
         return {
-            colors : ["#ff6600" , "#17a1e6"]
+            colors : ["#ff6600" , "#17a1e6" , "#41d9b3" , "#f23555" , "#c746c7"]
         }
     }
-)
+);
 
 define(
     "chartx/components/anchor/Anchor" , 
@@ -1056,8 +1056,8 @@ define(
             this.easing      = Tween.Easing.Linear.None;//动画类型
 
             //droplet opts
-            this.hr = 5;
-            this.vr = 8;
+            this.hr = 8;
+            this.vr = 10;
 
             //circle opts
             this.r  = 5;

@@ -22,8 +22,8 @@ define(
             this.easing      = Tween.Easing.Linear.None;//动画类型
 
             //droplet opts
-            this.hr = 5;
-            this.vr = 8;
+            this.hr = 8;
+            this.vr = 10;
 
             //circle opts
             this.r  = 5;

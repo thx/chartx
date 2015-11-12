@@ -12,6 +12,8 @@ define(
             this.w = 0;
             this.h = 0;
             this.root = root;
+            this._yAxisFieldsMap = {};
+            this._setyAxisFieldsMap();
 
             this.pos = {
                 x: 0,
@@ -21,7 +23,7 @@ define(
             this._colors = Theme.colors;
 
             this.bar = {
-                width  : 22,
+                width  : 20,
                 radius : 4
             };
             this.text = {
@@ -63,18 +65,20 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
+            _setyAxisFieldsMap : function(){
+                var me = this;
+                _.each( _.flatten(this.root.dataFrame.yAxis.field) , function( field , i ){
+                     me._yAxisFieldsMap[ field ] = i;
+                });
+            },
             _getColor: function(c, groups, vLen, i, h, v, value , field) {
                 var style = null;
                 if (_.isString(c)) {
                     style = c
-                }
+                };
                 if (_.isArray(c)) {
-                    var cl = c[i];
-                    if (!_.isArray(cl)) {
-                        cl = [cl];
-                    }
-                    style = cl[v];
-                }
+                    style = _.flatten( c )[this._yAxisFieldsMap[field]];
+                };
                 if (_.isFunction(c)) {
                     style = c({
                         iGroup : i,
@@ -83,10 +87,10 @@ define(
                         field  : field,
                         value  : value
                     });
-                }
+                };
                 if (!style || style == "") {
-                    style = this._colors[vLen > 1 ? v + i * groups % (vLen * (i + 1)) : i];
-                }
+                    style = this._colors[ this._yAxisFieldsMap[field] ];
+                };
                 return style;
             },
             checkBarW: function(xDis) {
