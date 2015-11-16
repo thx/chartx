@@ -9,15 +9,17 @@ define(
         "canvax/animation/Tween",
         "chartx/chart/theme"
     ],
-    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween , Theme) {
+    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween, Theme) {
         window.Canvax = Canvax
-        var Group = function(field, a, opt, ctx) {
+        var Group = function(field, a, opt, ctx, sort, yAxis, h, w) {
             this.field = field; //_groupInd在yAxis.field中对应的值
             this._groupInd = a;
             this._nodeInd = -1;
+            this._yAxis = yAxis;
+            this.sort = sort;
             this.ctx = ctx;
-            this.w = 0;
-            this.h = 0;
+            this.w = w;
+            this.h = h;
             this.y = 0;
 
             this.colors = Theme.colors;
@@ -50,6 +52,7 @@ define(
 
             this._pointList = []; //brokenline最终的状态
             this._currPointList = []; //brokenline 动画中的当前状态
+            this._bline = null;
 
             this.init(opt)
         };
@@ -69,7 +72,7 @@ define(
             },
             update: function(opt) {
                 _.deepExtend(this, opt);
-                this._pointList = this._getPointList( this.data );
+                this._pointList = this._getPointList(this.data);
                 /*
                 var list = [];
                 for (var a = 0, al = this.data.length; a < al; a++) {
@@ -106,7 +109,7 @@ define(
                 }
                 return s
             },
-            _getLineStrokeStyle : function(){
+            _getLineStrokeStyle: function() {
                 if (this.__lineStyleStyle) {
                     return this.__lineStyleStyle;
                 };
@@ -125,7 +128,7 @@ define(
                     o.color = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); //这个给tips里面的文本用
                     o.lineWidth = self._getProp(self.node.lineWidth) || 2;
                     o.alpha = self._getProp(self.fill.alpha);
-
+                    o.field = self.field;
                     o._groupInd = self._groupInd;
                     // o.fillStyle = '#cc3300'
                     return o
@@ -255,7 +258,7 @@ define(
             _widget: function() {
                 var self = this;
 
-                self._pointList = this._getPointList( self.data );
+                self._pointList = this._getPointList(self.data);
 
                 if (self._pointList.length == 0) {
                     //filter后，data可能length==0
@@ -266,9 +269,14 @@ define(
 
                 for (var a = 0, al = self.data.length; a < al; a++) {
                     var o = self.data[a];
+                    var sourceInd = 0;
+                    //如果是属于双轴中的右轴。
+                    if (self._yAxis.place == "right") {
+                        sourceInd = al - 1;
+                    }
                     list.push([
                         o.x,
-                        self.data[0].y
+                        self.data[sourceInd].y
                     ]);
                 };
                 self._currPointList = list;
@@ -350,18 +358,29 @@ define(
                     for (var a = 0, al = list.length; a < al; a++) {
                         self._nodeInd = a;
                         var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
+                        var context = {
+                            x: self._currPointList[a][0],
+                            y: self._currPointList[a][1],
+                            r: self._getProp(self.node.r),
+                            fillStyle: list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff",
+                            strokeStyle: strokeStyle,
+                            lineWidth: self._getProp(self.node.lineWidth) || 2
+                        };
+
+                        var sourceInd = 0;
+                        if (self._yAxis.place == "right"){
+                            sourceInd = al-1;
+                        };
+
+                        if( a == sourceInd ){
+                            context.fillStyle = context.strokeStyle;
+                            context.r ++;
+                        }
+
                         var circle = new Circle({
                             id: "circle_" + a,
-                            context: {
-                                x: self._currPointList[a][0],
-                                y: self._currPointList[a][1],
-                                r: self._getProp(self.node.r),
-                                fillStyle: list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff",
-                                strokeStyle: strokeStyle,
-                                lineWidth: self._getProp(self.node.lineWidth) || 2
-                            }
+                            context: context
                         });
-
 
                         if (self.node.corner) { //拐角才有节点
                             var y = self._pointList[a][1];
@@ -379,14 +398,15 @@ define(
                 }
             },
             _fillLine: function(bline) { //填充直线
-
                 var fillPath = _.clone(bline.context.pointList);
+                var baseY = 0;
+                if (this.sort == "desc") {
+                    baseY = -this.h;
+                }
                 fillPath.push(
-                    [fillPath[fillPath.length - 1][0], 0], [fillPath[0][0], 0], [fillPath[0][0], fillPath[0][1]]
+                    [fillPath[fillPath.length - 1][0], baseY], [fillPath[0][0], baseY], [fillPath[0][0], fillPath[0][1]]
                 );
-
                 return Tools.getPath(fillPath);
-
             }
         };
         return Group;

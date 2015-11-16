@@ -8,9 +8,10 @@ define(
         "canvax/animation/Tween",
         "chartx/utils/simple-data-format",
         "chartx/components/legend/index",
-        'chartx/components/tips/tip'
+        "chartx/components/tips/tip",
+        "chartx/chart/theme"
     ],
-    function( Canvax , Chart ,Sector , Circle , Tween , DataFormat , Legend , Tip ){
+    function( Canvax , Chart ,Sector , Circle , Tween , DataFormat , Legend , Tip , Theme ){
      
         return Chart.extend({
             init : function( el ,  data , opts ){
@@ -20,7 +21,7 @@ define(
                 this.barWidth    = 12;
                 this.axisWidth   = null;//背景轴的width，默认等于barWidth
                 this.normalColor = '#E6E6E6';
-                this.progColor   = ['#58c4bc','#3399d5','#716fb4','#f4c646','#4fd2c4','#999','#7270b1'];
+                this.progColor   = Theme.colors;//['#58c4bc','#3399d5','#716fb4','#f4c646','#4fd2c4','#999','#7270b1'];
                 this.startAngle  = -90;
                 this.angleCount  = 360;
                 this.currRatio   = 0; //当前比率

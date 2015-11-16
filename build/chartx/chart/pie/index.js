@@ -8,9 +8,10 @@ define(
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "canvax/animation/Tween",
-        "chartx/components/tips/tip"
+        "chartx/components/tips/tip",
+        "chartx/chart/theme"
         ],
-        function (Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween, Tip) {
+        function (Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween, Tip , Theme) {
             var Pie = function (opt, tipsOpt, domContainer) {
                 this.data = null;
                 this.sprite = null;
@@ -230,8 +231,8 @@ define(
                     return colors[index];
                 },
                 _configColors: function () {
-                    var defaultColors = ['#f05836', '#7270b1', '#359cde', '#4fd2c4', '#f4c646', '#999', '#FF7D00', '#516DCC', '#8ACC5F', '#A262CB', '#FFD202', '#CC3E3C', '#00A5FF', '#009964', '#CCB375', '#694C99'];
-                    this.colors = this.colors ? this.colors : defaultColors;
+                    //var defaultColors = ['#f05836', '#7270b1', '#359cde', '#4fd2c4', '#f4c646', '#999', '#FF7D00', '#516DCC', '#8ACC5F', '#A262CB', '#FFD202', '#CC3E3C', '#00A5FF', '#009964', '#CCB375', '#694C99'];
+                    this.colors = this.colors ? this.colors : Theme.colors;
                 },
                 draw: function (opt) {
                     var self = this;

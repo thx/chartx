@@ -1,11 +1,10 @@
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- tree图</title>
-<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<title>xChart demo -- line</title>
+<script type="text/javascript" src="../../lib/sea.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -32,57 +31,39 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-//topology图 的 key 一定 至少要包含有id ，label ， link 
-var data = [
-    [ "id"   , "label"   , "link"                      ],
-    [ "lol"  , "英雄联盟" , [ "dmhz" , "jfjh" , "hbss" ]],
-    [ 'dmhz' , "德玛皇子" , [ "ms" , "gl"  ]            ],
-    [ 'jfjh' , "亚索"    , [ "wqds" , "js" , "zzzw" ]  ],
-    [ 'hbss' , "艾希"    , [ "mgn" , "jj" ]            ],
-    [ 'ms'   , "盲僧"    , [  ]                        ],
-    [ 'wqds' , "武器大师" , [  ]                        ],
-    [ 'zzzw' , "潘神"    , [  ]                        ],
-    [ 'js'   , "剑圣"    , [  ]                        ],
-    [ 'jj'   , "剑姬"    , [  ]                        ],
-    [ 'mgn'  , "莫甘娜"   , [  ]                        ],
-    [ 'gl'   , "盖伦"    , [  ]                        ]
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 3 , 20 , 33    ],
+    [ 2      , 0   , 151 , 26    ],
+    [ 3      , 32   , 145 , 43    ],
+    [ 4      , 58  , 135 , 31    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 88  , 154 , 39    ],
+    [ 7      , 55  , 168 , 65    ],
+    [ 8      , 66   , 183 , 51    ]
 ];
 
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
-    type : "tree",
-    node : {
-        //下面的widht和height配置可以强制设置节点的width 和 height
-        //width:60,
-        //height : 60,
-        strokeStyle : function( nodeData ){
-            //nodeData = {label: "英雄联盟", link: Array[3], id: "lol", width: 72, height: 31.900000000000002}
-            if( nodeData.label == "亚索" ){
-                return "#ff6600"
+    biaxial : true,
+    yAxis : {
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : [ ["uv" , "pv"] , "click" ],
+        text  : {
+            format: function( c , yaxis ){
+                return yaxis.field +"："+c 
             }
-        }
+        },
+        sort : ["asc" , "desc"] 
     },
-    tips : {
-        content : function(e){
-            //e = {id:"lol"  , label:"英雄联盟" , link:[ "dmhz" , "jfjh" , "hbss" ] , ...},
-            return "label提示:"+e.label
-        }
+    xAxis : {
+        field : "xfield"
     }
-}
-
-
-Chartx.topo("canvasTest" , data , options).then(function( tree ){
-    tree.on("nodeMouseover" , function(){
-        console.log( "nodeMouseover" );
-    });
-
-    tree.on("nodeMouseout" , function(){
-        console.log( "nodeMouseOut" );
-    });
-
-    tree.on("nodeClick" , function(e){
-        console.log( "nodeClick" );
-    });
-})
+};
+//Chartx.line开始初始化chart实例
+var chartx = Chartx.line("canvasTest" , data , options);
 </textarea></form>
 
         </td>
@@ -91,9 +72,9 @@ Chartx.topo("canvasTest" , data , options).then(function( tree ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>topology图(tree)</h4>
+                <h4>折线图（line chart）- 双柱折线图，可以支持多组，倒序</h4>
                 <p>
-                    联系人：@释剑
+                    联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
@@ -108,7 +89,3 @@ Chartx.topo("canvasTest" , data , options).then(function( tree ){
     
 </body> 
 </html>
-
-
-
-

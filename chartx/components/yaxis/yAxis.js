@@ -11,7 +11,8 @@ define(
             
             this.w = 0;
             this.enabled = 1;//true false 1,0都可以
-            this.dis  = 6                                  //线到文本的距离
+            this.dis  = 6;                                  //线到文本的距离
+            this.field = null; //这个 轴 上面的 field
 
             this.label = "";
             this._label= null; //label的text对象
@@ -55,7 +56,7 @@ define(
 
             this.isH             =  false; //是否横向
 
-            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小
+            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
             this.init(opt , data);
         };
@@ -170,11 +171,11 @@ define(
                     arr = _.flatten( data.org ); //_.flatten( data.org );
                 } else {
                     if( this.place == "left" ){
-                        arr = data.org[0];
-                        this.field = this.field[0];
+                        arr = _.flatten( data.org[0] );
+                        this.field = _.flatten( [this.field[0]] );
                     } else {
-                        arr = data.org[1];
-                        this.field = this.field[1];
+                        arr = _.flatten( data.org[1] );
+                        this.field = _.flatten( [this.field[1]] );
                     }
                 }
                 return arr;

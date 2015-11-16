@@ -4,9 +4,10 @@ define(
         "canvax/index",
         "canvax/shape/Circle",
         "canvax/shape/Rect",
-        "canvax/animation/Tween"
+        "canvax/animation/Tween",
+        "chartx/chart/theme"
     ],
-    function( Canvax , Circle , Rect , Tween ){
+    function( Canvax , Circle , Rect , Tween , Theme ){
 
         var Graphs = function( opt , dataFrame ){
             this.zAxis = dataFrame.zAxis;
@@ -33,7 +34,7 @@ define(
                 fillStyle: function(){}
             };
 
-            this._colors  = ["#6f8cb2" , "#c77029" , "#f15f60" , "#ecb44f" , "#ae833a" , "#896149"];
+            this._colors  = Theme.colors;
 
             this.sprite   = null;
 

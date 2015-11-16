@@ -1044,11 +1044,11 @@ define(
             this.sprite  = null;
             this.content = null; //tips的详细内容
 
-            this.fillStyle   = "rgba(0,0,0,0.7)";//"#000000";
+            this.fillStyle   = "rgba(255,255,255,0.95)";//"#000000";
             this.text        = {
-                fillStyle    : "#ffffff"
+                fillStyle    : "#999"
             };
-            this.strokeStyle = null;
+            this.strokeStyle = "#ccc";
             this.lineWidth   = 1;
             this.alpha       = 0.5;
             
@@ -1119,7 +1119,8 @@ define(
             _initContent : function(e){
                 this._tipDom = document.createElement("div");
                 this._tipDom.className = "chart-tips";
-                this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:white;line-height:1.5"
+                this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";border:1px solid "+this.strokeStyle+";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:"+this.text.fillStyle+";line-height:1.5"
+                this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px "+this.strokeStyle+"; -webkit-box-shadow:1px 1px 3px "+this.strokeStyle+"; box-shadow:1px 1px 3px "+this.strokeStyle+";"
                 this.tipDomContainer.appendChild( this._tipDom );
                 this._setContent(e);
             },
@@ -1150,7 +1151,8 @@ define(
                 var str  = "<table>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
-                    str+= "<tr style='color:"+ self.text.fillStyle +"'>";
+
+                    str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
                         str+="<td>"+ prefixName +"：</td>";
@@ -1669,7 +1671,8 @@ define(
             
             this.w = 0;
             this.enabled = 1;//true false 1,0都可以
-            this.dis  = 6                                  //线到文本的距离
+            this.dis  = 6;                                  //线到文本的距离
+            this.field = null; //这个 轴 上面的 field
 
             this.label = "";
             this._label= null; //label的text对象
@@ -1713,7 +1716,7 @@ define(
 
             this.isH             =  false; //是否横向
 
-            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小
+            this.sort            =  null;//"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
             this.init(opt , data);
         };
@@ -1828,11 +1831,11 @@ define(
                     arr = _.flatten( data.org ); //_.flatten( data.org );
                 } else {
                     if( this.place == "left" ){
-                        arr = data.org[0];
-                        this.field = this.field[0];
+                        arr = _.flatten( data.org[0] );
+                        this.field = _.flatten( [this.field[0]] );
                     } else {
-                        arr = data.org[1];
-                        this.field = this.field[1];
+                        arr = _.flatten( data.org[1] );
+                        this.field = _.flatten( [this.field[1]] );
                     }
                 }
                 return arr;
