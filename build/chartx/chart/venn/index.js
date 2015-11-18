@@ -509,15 +509,13 @@ define(
                 return "<div><div style='padding-bottom:3px;'>" + (info.label || info.name) + "：" + info.value + "</div></div>";
             },
             _getInfoHandler: function(target) {
-
                 var node = {
                     iNode: target.data.iNode,
                     name: target.data.sets,
-                    label: target.data.label,
-                    value: target.data.value,
+                    label: target.data[ this.labelField ],
+                    value: target.data[ this.valueField ],
                     fillStyle: target.context.strokeStyle
                 };
-
                 return node
             },
             _drawEnd: function() {
