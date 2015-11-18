@@ -70,9 +70,12 @@ define(
              **/
             clean: function() {
                 for (var i=0,l=this.canvax.children.length;i<l;i++){
-                    this.canvax.getChildAt(i).destroy();
-                    i--;
-                    l--;
+                    var stage = this.canvax.getChildAt(i);
+                    for( var s = 0 , sl=stage.children.length ; s<sl ; s++){
+                        stage.getChildAt(s).destroy();
+                        s--;
+                        sl--;
+                    }
                 };
             },
             /**

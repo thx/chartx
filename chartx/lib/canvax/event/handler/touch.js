@@ -78,7 +78,7 @@ define(
                             }
                         } )
                     }
-                }
+                };
  
                 //drag结束
                 if( e.type == "panend"){

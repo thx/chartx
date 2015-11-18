@@ -521,7 +521,7 @@ define(
                         for (var j = 0, k = p.length; j < k; j += 2) {
                             var px = p[j];
                             var py = p[j + 1];
-                            if (!px || !py) {
+                            if ((!px && px!=0) || (!py && py!=0)) {
                                 continue;
                             };
                             singlePointList.push([px, py]);

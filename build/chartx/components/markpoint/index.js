@@ -23,7 +23,7 @@ define(
 
             //droplet opts
             this.hr = 8;
-            this.vr = 10;
+            this.vr = 12;
 
             //circle opts
             this.r  = 5;
@@ -107,6 +107,7 @@ define(
             _done : function(){
                 this.shape.context.visible   = true;
                 this.shapeBg && (this.shapeBg.context.visible = true);
+                this.shapeCircle && ( this.shapeCircle.context.visible = true );
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
                 _.isFunction(this.filter) && this.filter( this );
             },
@@ -167,7 +168,7 @@ define(
             },
             _initDropletMark : function(){
                 var me = this;
-                require(["canvax/shape/Droplet"] , function( Droplet ){
+                require(["canvax/shape/Droplet","canvax/shape/Circle"] , function( Droplet , Circle){
                     var ctx = {
                         y      : -me.vr,
                         scaleY : -1,
@@ -180,12 +181,28 @@ define(
                         cursor  : "point",
                         visible : false
                     };
-                    
                     me.shape = new Droplet({
+                        hoverClone : false,
                         context : ctx
                     });
-
                     me.sprite.addChild( me.shape );
+
+                    var circleCtx = {
+                        y : -me.vr,
+                        x : 1,
+                        r : Math.max(me.hr-6 , 2) ,
+                        fillStyle   : "#fff",//me._fillStyle,
+                        //lineWidth   : 0,
+                        //strokeStyle : me._strokeStyle,
+                        //globalAlpha : me.globalAlpha,
+                        visible     : false
+                    };
+                    me.shapeCircle = new Circle({
+                        context : circleCtx
+                    });
+                    me.sprite.addChild( me.shapeCircle );
+
+
                     me._done();
                     
                 });
