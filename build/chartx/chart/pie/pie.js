@@ -551,9 +551,12 @@
                                 var pro = vals[1];
                                 return obj[pro];
                             });
+                            if (labelTxt) {
+                                labelTxt = "<span>"+ labelTxt +"</span>"
+                            };
                         }
                     }; 
-                    labelTxt || ( labelTxt = data[currentIndex].name + ' : ' + data[currentIndex].txt );
+                    labelTxt || ( labelTxt = "<span>"+data[currentIndex].name + ' : ' + data[currentIndex].txt +"</span>");
 
                     branchTxt = document.createElement("div");
                     branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + sectorMap[currentIndex].color + ""
@@ -561,7 +564,7 @@
                     self.domContainer.appendChild(branchTxt);
                     bwidth = branchTxt.offsetWidth;
                     bheight = branchTxt.offsetHeight;
-                    branchTxt.style.display = "none"
+                    //branchTxt.style.display = "none"
 
                     bx = isleft ? -adjustX : adjustX;
                     by = currentY;
