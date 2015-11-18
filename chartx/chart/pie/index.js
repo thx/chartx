@@ -50,6 +50,9 @@
                 getByIndex: function (index) {
                     return this._pie._getByIndex(index);
                 },
+                getLabelList : function(){
+                    return this._pie.getLabelList();
+                },
                 getList: function () {
                     var self = this;
                     var list = [];
@@ -69,7 +72,7 @@
                                 });
                             }
                         }
-                    }
+                    };
                     return list;
                 },
                 //show: function (index) {

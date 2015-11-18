@@ -63,7 +63,11 @@ var options = {
         //enabled: false,
         //是否绘制连接线(注意：此配置仅限于扇形块比较分散，若扇形比较紧密时，无连线会导致识别混淆)
         //allowLine:false,
-        format: '{point.name} : {point.y}'
+        //format: '{point.name} : {point.y}' //和下面等价
+        format : function( data ){
+            return "<div><span>"+data.name+"</span>：<span>"+data.y+"（"+ data.percentage +"%）</span></div>"
+        }
+
     },
     //饼图的起始角度[有效值范围0-360度，默认值0度,可以为负值,建议为90的倍数，其他角度可能导致label效果不理想]，
     //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
@@ -80,6 +84,7 @@ var options = {
     //colors:['red', 'yellow', 'blue']
 };
 Chartx.pie("canvasTest" , data , options).then(function( pie ){
+    window.pie = pie;
     //pie.slice(3);
     pie.on('focused' , function (e) {
         console.log(e);
@@ -90,6 +95,12 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
     pie.on('click',function(e){
         console.log(e);
     });
+
+    /*
+    _.each( pie.getLabelList() , function( pos ){
+    $("#canvasTest").append("<div style='position:absolute;width:"+pos.width+"px;height:"+pos.height+"px;left:"+pos.x+"px;top:"+pos.y+"px;border:1px solid red;'></div>");
+    } );
+    */
 });
 </textarea></form>
 
@@ -105,7 +116,7 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
+                <div id="canvasTest" style='width:600px;height:300px;position:relative;'></div>
             </div>
 
             </div>

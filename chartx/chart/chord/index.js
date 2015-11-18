@@ -6,9 +6,10 @@ define(
         "canvax/shape/Sector",
         "canvax/shape/Path",
         "canvax/animation/Tween",
-        "chartx/layout/chord"
+        "chartx/layout/chord",
+        "chartx/chart/theme"
     ],
-    function( Canvax , Chart , Sector , Path , Tween , Layout ){
+    function( Canvax , Chart , Sector , Path , Tween , Layout , Theme ){
      
         return Chart.extend({
             chord  : null,
@@ -16,7 +17,7 @@ define(
                 this.barWidth = 15;
                 this.r        = 0;
                 this.matrix   = [];
-                this.color    = ["#42a8d7",'#666666','#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'];
+                this.color    = Theme.colors; //["#42a8d7",'#666666','#26b471', '#7aa1ff', '#fa8529', '#ff7c4d','#2494ed','#7aa1ff','#fa8529', '#ff7c4d'];
 
                 _.deepExtend(this, opts);
                 

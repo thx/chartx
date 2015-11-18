@@ -34,8 +34,7 @@ define(
 
                 this.biaxial = false;
 
-
-                //this._preTipsInode =  null; //如果有tips的话，最近的一次tip是在iNode
+                this._lineField = null;
 
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
@@ -67,13 +66,13 @@ define(
             },
             /*
              * 如果只有数据改动的情况
-            */
-            resetData : function( data ){
+             */
+            resetData: function(data) {
                 this.dataFrame = this._initData(data, this);
 
-                this._xAxis.resetData( this.dataFrame.xAxis );
-                this._yAxis.resetData( this.dataFrame.yAxis );
-                this._graphs.resetData( this._trimGraphs() , {
+                this._xAxis.resetData(this.dataFrame.xAxis);
+                this._yAxis.resetData(this.dataFrame.yAxis);
+                this._graphs.resetData(this._trimGraphs(), {
                     disX: this._getGraphsDisX()
                 });
 
@@ -135,13 +134,12 @@ define(
                 } else {
                     //说明是名字，转换为索引
                     ind = _.indexOf(this.yAxis.field, target);
-                }
+                };
                 if (ind != null && ind != undefined && ind != -1) {
                     this._remove(ind);
-                }
+                };
             },
             _remove: function(ind) {
-
                 //首先，yAxis要重新计算
                 //先在dataFrame中更新yAxis的数据
                 this.dataFrame.yAxis.field.splice(ind, 1);
@@ -156,7 +154,6 @@ define(
                         data: this._yAxis.layoutData
                     }
                 });
-
                 //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
                 this._graphs.remove(ind);
                 this._graphs.update({
@@ -166,7 +163,6 @@ define(
             _initData: dataFormat,
             _initModule: function() {
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
-
                 if (this.biaxial) {
                     this.yAxis.biaxial = true;
                 };
@@ -223,7 +219,7 @@ define(
                     });
                     _yAxisRW = this._yAxisR.w;
                     this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
-                }
+                };
 
                 //绘制x轴
                 this._xAxis.draw({
@@ -265,7 +261,7 @@ define(
                     data: this._trimGraphs(),
                     disX: this._getGraphsDisX(),
                     smooth: this.smooth,
-                    inited : this.inited
+                    inited: this.inited
                 });
 
                 this._graphs.setX(_yAxisW), this._graphs.setY(y);
@@ -274,6 +270,7 @@ define(
 
 
                 //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
+                /*
                 if (this.biaxial) {
                     _.each(this._graphs.groups, function(group, i) {
                         var color = group._bline.context.strokeStyle;
@@ -284,6 +281,7 @@ define(
                         }
                     });
                 }
+                */
 
                 //执行生长动画
                 if (!this.inited) {
@@ -300,7 +298,7 @@ define(
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
 
                     this._anchor.draw({
-                        w: this._xAxis.xGraphsWidth,//this.width - _yAxisW - _yAxisRW,
+                        w: this._xAxis.xGraphsWidth, //this.width - _yAxisW - _yAxisRW,
                         h: _graphsH,
                         cross: {
                             x: pos.x,
@@ -361,26 +359,9 @@ define(
                             });
                         });
                     });
-
-                    /*
-                                        var lastNode = g._circles.children[g._circles.children.length - 1];
-                                        debugger
-                                        var mpCtx = {
-                                            markTarget: g.field,
-                                            point: lastNode.localToGlobal(),
-                                            r: lastNode.context.r + 1,
-                                            globalAlpha: 0.8,
-                                            realTime: true
-                                        };
-                                        new MarkPoint(me._opts, mpCtx).done(function() {
-                                            //this.shape.context.visible = false;
-                                            me.core.addChild(this.sprite);
-                                        });
-                    */
                 });
             },
             _initMarkLine: function(g, dataFrame) {
-
                 var me = this;
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
@@ -388,7 +369,7 @@ define(
                 var center = parseInt(dataFrame.yAxis.center[index].agPosition)
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var content = g.field + '均值',
-                        strokeStyle = g.line.strokeStyle
+                        strokeStyle = g.line.strokeStyle;
                     if (me.markLine.text && me.markLine.text.enabled) {
 
                         if (_.isFunction(me.markLine.text.format)) {
@@ -398,7 +379,7 @@ define(
                             }
                             content = me.markLine.text.format(o)
                         }
-                    }
+                    };
                     var o = {
                         w: me._xAxis.xGraphsWidth,
                         h: me._yAxis.yGraphsHeight,
@@ -419,11 +400,11 @@ define(
                             fillStyle: strokeStyle
                         },
                         field: g.field
-                    }
+                    };
 
                     new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
                         me.core.addChild(this.sprite)
-                    })
+                    });
                 })
             },
             bindEvent: function(spt, _setXaxisYaxisToTipsInfo) {
@@ -475,50 +456,78 @@ define(
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
-                }
-                var me = this;
-                _.each(e.eventInfo.nodesInfoList, function(node, i) {
-                    node.field = me.dataFrame.yAxis.field[node._groupInd];
-                });
+                };
             },
             _trimGraphs: function(_yAxis, dataFrame) {
+
                 _yAxis || (_yAxis = this._yAxis);
                 dataFrame || (dataFrame = this.dataFrame);
+                var self = this;
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var arr = dataFrame.yAxis.org;
                 var tmpData = [];
-                var center = []
-                for (var a = 0, al = arr.length; a < al; a++) {
-                    if (this.biaxial && a > 0) {
-                        _yAxis = this._yAxisR;
-                        maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
-                    }
-                    var maxValue = 0
-                    center[a] = {}
-                    for (var b = 0, bl = arr[a].length; b < bl; b++) {
-                        !tmpData[a] ? tmpData[a] = [] : '';
-                        if (b >= this._xAxis.data.length) {
-                            break;
-                        }
-                        var x = this._xAxis.data[b].x;
-                        var y = -(arr[a][b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
-                        y = isNaN(y) ? 0 : y
-                        tmpData[a][b] = {
-                            value: arr[a][b],
-                            x: x,
-                            y: y
+                var center = [];
+
+                function _trimGraphs(_fields, _arr, _tmpData, _center, _firstLay) {
+                    for (var i = 0, l = _fields.length; i < l; i++) {
+                        var __tmpData = [];
+                        _tmpData.push(__tmpData);
+
+                        //单条line的全部data数据
+                        var _lineData = _arr[i];
+
+                        if (_firstLay && self.biaxial && i > 0) {
+                            _yAxis = self._yAxisR;
+                            maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                         };
-                        maxValue += arr[a][b]
+
+                        if (_.isArray(_fields[i])) {
+                            var __center = [];
+                            _center.push(__center);
+                            _trimGraphs(_fields[i], _lineData, __tmpData, __center);
+                        } else {
+                            var maxValue = 0;
+                            _center[i] = {};
+                            for (var b = 0, bl = _lineData.length; b < bl; b++) {
+                                if (b >= self._xAxis.data.length) {
+                                    //如果发现数据节点已经超过了x轴的节点，就扔掉
+                                    break;
+                                }
+                                var x = self._xAxis.data[b].x;
+                                var y = -(_lineData[b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
+                                y = isNaN(y) ? 0 : y
+                                __tmpData[b] = {
+                                    value: _lineData[b],
+                                    x: x,
+                                    y: y
+                                };
+                                maxValue += _lineData[b]
+                            };
+                            _center[i].agValue = maxValue / bl;
+                            _center[i].agPosition = -(_center[i].agValue - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                        }
                     }
-                    center[a].agValue = maxValue / bl
+                };
 
-                    center[a].agPosition = -(center[a].agValue - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
+                function _getYaxisField(i) {
+                    //这里要兼容从折柱混合图过来的情况
+                    if (self._lineField) {
+                        return self._lineField;
+                    };
+                    if (self.type && self.type.indexOf("line") >= 0) {
+                        self._lineField = self._lineChart.dataFrame.yAxis.field;
+                    } else {
+                        self._lineField = self.dataFrame.yAxis.field;
+                    };
+                    return self._lineField;
+                };
 
-                }
+                _trimGraphs( _getYaxisField(), arr, tmpData, center, true);
+
                 //均值
-                dataFrame.yAxis.center = center
-                return tmpData
+                dataFrame.yAxis.center = center;
+                return tmpData;
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs: function(index, num) {

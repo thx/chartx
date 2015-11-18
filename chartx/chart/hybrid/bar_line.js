@@ -6,9 +6,10 @@ define(
         'chartx/utils/dataformat',
         'chartx/components/yaxis/yAxis',
         'chartx/chart/line/graphs',
-        'chartx/chart/line/tips'
+        'chartx/chart/line/tips',
+        'chartx/chart/theme'
     ],
-    function(Canvax, Bar, Line, dataFormat, yAxis, lineGraphs, Tips) {
+    function(Canvax, Bar, Line, dataFormat, yAxis, lineGraphs, Tips , Theme) {
         //再柱状图的基础上开发柱折混合图表
         return Bar.extend({
             _yAxisR: null,
@@ -46,7 +47,19 @@ define(
                 //柱状图初始化模块
                 this._initModule();
                 //附加折线的graphs module
-                this._lineChart._graphs = new lineGraphs(this.graphs, this);
+
+                var barFL = _.flatten( this.yAxis.bar.field ).length;
+                var themeColor = _.clone(Theme.colors);
+                themeColor.splice(0,barFL);
+                this._lineChart._graphs = new lineGraphs(
+                    _.deepExtend( {
+                        line : {
+                            strokeStyle : themeColor
+                        }
+                    } , this.graphs ) 
+                    , 
+                    this
+                );
 
                 //覆盖掉bar中的tip组件
                 this._tip = new Tips(this.tips, this._lineChart.dataFrame, this.canvax.getDomContainer());
@@ -149,6 +162,7 @@ define(
                     yDataSectionLen: me._yAxis.dataSection.length,
                     sort : this._yAxis.sort
                 });
+
 
                 //绘制折线图主图形区域
                 me._lineChart._graphs.draw({

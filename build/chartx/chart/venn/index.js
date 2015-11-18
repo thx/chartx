@@ -5,13 +5,14 @@ define(
         'canvax/shape/Path',
         'chartx/layout/venn/index',
         'chartx/utils/colorformat',
-        "chartx/components/tips/tip"
+        'chartx/components/tips/tip',
+        'chartx/chart/theme'
     ],
-    function(Chart, Circle, Path, Venn, Color, Tip) {
+    function(Chart, Circle, Path, Venn, Color, Tip , Theme ) {
         var Canvax = Chart.Canvax;
         return Chart.extend({
             init: function(node, data, opts) {
-                this.colors = ['#fa8529', '#2494ed', '#7aa1ff', "#42a8d7", '#666666', '#7aa1ff'];
+                this.colors = Theme.colors;//['#fa8529', '#2494ed', '#7aa1ff', "#42a8d7", '#666666', '#7aa1ff'];
                 this.padding = 15;
                 this.nodeField = "sets";
                 this.valueField = "size";
@@ -505,18 +506,16 @@ define(
 
             },
             _getTipDefaultContent: function(info) {
-                return "<div style='color:#ffffff'><div style='padding-bottom:3px;'>" + info.label.toString() + "：" + info.value + "</div></div>";
+                return "<div><div style='padding-bottom:3px;'>" + (info.label || info.name) + "：" + info.value + "</div></div>";
             },
             _getInfoHandler: function(target) {
-
                 var node = {
                     iNode: target.data.iNode,
                     name: target.data.sets,
-                    label: target.data.label,
-                    value: target.data.value,
+                    label: target.data[ this.labelField ],
+                    value: target.data[ this.valueField ],
                     fillStyle: target.context.strokeStyle
                 };
-
                 return node
             },
             _drawEnd: function() {
