@@ -49,6 +49,10 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id : "TipSprite"
                 });
+                var self = this;
+                this.sprite.on("destroy" , function(){
+                    self._tipDom = null;
+                });
             },
             show : function(e){
                 if( !this.enabled ) return;
@@ -103,7 +107,7 @@ define(
             _removeContent : function(){
                 if(!this._tipDom){
                     return;
-                }
+                };
                 this.tipDomContainer.removeChild( this._tipDom );
                 this._tipDom = null;
             },

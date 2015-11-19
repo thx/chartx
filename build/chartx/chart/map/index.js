@@ -20,15 +20,16 @@ define(
                 this._opts       = opts;
                 this.mapName     = "china";//map类型 默认为中国地图
                 this._mapDataMap = {};
+                this._nameMap    = {};
                 this.tips = {};
-                this.normalColor = "#c9bbe6";
+                this.normalColor = "#f0f0f0";
                 this.area = {
-                    strokeStyle : "white",
+                    strokeStyle : "#fff",
                     fillStyle   : this.normalColor,
                     lineWidth   : 1,
                     linkage     : false, //是否开启省市联动，目前只支持中国地图
                     text        : {
-                        fillStyle : "#000",
+                        fillStyle : "#999",
                         enabled   : true
                     }
                 };
@@ -122,6 +123,9 @@ define(
                     _.isFunction(callback) && callback( d );
                 };
             },
+            _nameChange : function (mapType, name) {
+                return (this._nameMap[mapType] && this._nameMap[mapType][name]) || name;
+            },
             /**
              * 按需加载相关地图 
              */
@@ -175,10 +179,10 @@ define(
                 }
                 
                 // 中国地图加入南海诸岛
-                if (mapName == 'china' && false) {
+                if (mapName == 'china') {
                     var leftTop = this.geo2pos(
                         mapName, 
-                        GeoCoord['南海诸岛'] || _mapParams['南海诸岛'].textCoord
+                        GeoCoord['南海诸岛'] || mapParams.params['南海诸岛'].textCoord
                     );
                     // scale.x : width  = 10.51 : 64
                     var scale = transform.scale.x / 10.5;
@@ -192,7 +196,7 @@ define(
                     }
                     province.push({
                         name : this._nameChange(mapName, '南海诸岛'),
-                        path : _mapParams['南海诸岛'].getPath(leftTop, scale),
+                        path : mapParams.params['南海诸岛'].getPath(leftTop, scale),
                         position : position,
                         textX : textPosition[0],
                         textY : textPosition[1]
@@ -368,6 +372,7 @@ define(
 
                     var area   = new Path({
                         hoverClone : false, 
+                        pointChkPriority : false,
                         context : shapeCtx
                     });
 
@@ -376,7 +381,9 @@ define(
                     area.defInd  = i;
                     area.mapData = md
                     area.on("mouseover" , function(e){
+
                         this.toFront();
+                        this.context.lineWidth ++;
                         if( e.fromTarget && e.fromTarget.type == "text" &&  e.fromTarget.text == this.mapData.name ){
                             return;
                         };
@@ -388,6 +395,7 @@ define(
                     });
 
                     area.on("mouseout" , function(e){
+                        this.context.lineWidth --;
                         this.toBack( mapLen - this.defInd );
                         if( e.toTarget && e.toTarget.type == "text" &&  e.toTarget.text == this.mapData.name ){
                             return;
@@ -431,7 +439,10 @@ define(
                         );
                         txt.area = area;
                         txt.on("mouseover" , function(e){
+                            //debugger
                             if( e.fromTarget && e.fromTarget == this.area ){
+                                this.area.context.lineWidth ++;
+                                this.area.toFront();
                                 return;
                             };
                             this.area.fire("mouseover" , e);
@@ -441,6 +452,8 @@ define(
                         });
                         txt.on("mouseout" , function(e){
                             if( e.toTarget && e.toTarget == this.area ){
+                                this.area.context.lineWidth --;
+                                this.area.toBack( mapLen - this.area.defInd );
                                 return;
                             };
                             this.area.fire("mouseout release" , e); 

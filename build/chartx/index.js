@@ -329,9 +329,12 @@ define(
              **/
             clean: function() {
                 for (var i=0,l=this.canvax.children.length;i<l;i++){
-                    this.canvax.getChildAt(i).destroy();
-                    i--;
-                    l--;
+                    var stage = this.canvax.getChildAt(i);
+                    for( var s = 0 , sl=stage.children.length ; s<sl ; s++){
+                        stage.getChildAt(s).destroy();
+                        s--;
+                        sl--;
+                    }
                 };
             },
             /**
@@ -409,7 +412,9 @@ define(
     "chartx/chart/theme",[],
     function(){
         return {
-            colors : ["#ff6600" , "#17a1e6" , "#41d9b3" , "#f23555" , "#c746c7"]
+            //colors : ["#ff6600" , "#17a1e6" , "#41d9b3" , "#f23555" , "#c746c7"]
+            //colors : ["#ff6600" , "#67bbe6" , "#f26179" , "#62d9bb" , "#c763c7"],
+            colors : ["#67bbe6" , "#ff9c59" , "#57d9b8" , "#f26d83","#cc70cc"]
         }
     }
 );
@@ -1057,7 +1062,7 @@ define(
 
             //droplet opts
             this.hr = 8;
-            this.vr = 10;
+            this.vr = 12;
 
             //circle opts
             this.r  = 5;
@@ -1141,6 +1146,7 @@ define(
             _done : function(){
                 this.shape.context.visible   = true;
                 this.shapeBg && (this.shapeBg.context.visible = true);
+                this.shapeCircle && ( this.shapeCircle.context.visible = true );
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
                 _.isFunction(this.filter) && this.filter( this );
             },
@@ -1201,7 +1207,7 @@ define(
             },
             _initDropletMark : function(){
                 var me = this;
-                require(["canvax/shape/Droplet"] , function( Droplet ){
+                require(["canvax/shape/Droplet","canvax/shape/Circle"] , function( Droplet , Circle){
                     var ctx = {
                         y      : -me.vr,
                         scaleY : -1,
@@ -1214,12 +1220,28 @@ define(
                         cursor  : "point",
                         visible : false
                     };
-                    
                     me.shape = new Droplet({
+                        hoverClone : false,
                         context : ctx
                     });
-
                     me.sprite.addChild( me.shape );
+
+                    var circleCtx = {
+                        y : -me.vr,
+                        x : 1,
+                        r : Math.max(me.hr-6 , 2) ,
+                        fillStyle   : "#fff",//me._fillStyle,
+                        //lineWidth   : 0,
+                        //strokeStyle : me._strokeStyle,
+                        //globalAlpha : me.globalAlpha,
+                        visible     : false
+                    };
+                    me.shapeCircle = new Circle({
+                        context : circleCtx
+                    });
+                    me.sprite.addChild( me.shapeCircle );
+
+
                     me._done();
                     
                 });
@@ -1281,6 +1303,10 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id : "TipSprite"
                 });
+                var self = this;
+                this.sprite.on("destroy" , function(){
+                    self._tipDom = null;
+                });
             },
             show : function(e){
                 if( !this.enabled ) return;
@@ -1335,7 +1361,7 @@ define(
             _removeContent : function(){
                 if(!this._tipDom){
                     return;
-                }
+                };
                 this.tipDomContainer.removeChild( this._tipDom );
                 this._tipDom = null;
             },

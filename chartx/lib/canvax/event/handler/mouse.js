@@ -216,7 +216,7 @@ define(
                 if(!obj && !oldObj ){
                     this._setCursor("default");
                 }
-                if(obj && oldObj != obj){
+                if(obj && oldObj != obj && obj.context){
                     this._setCursor(obj.context.cursor);
                 }
             },

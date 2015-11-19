@@ -46,13 +46,15 @@ var data = [
     [ "江西省" , 500     , "#BBCFED"]
 ];
 
+
 //测试 可以 试试 点击广东，就reset这个数据
 var data_guandong = [
     [ "area" , "click" , "color"  ],
-    [ "东莞" , 101     , "red"    ],
-    [ "深圳" , 88      , "#faab56"],
-    [ "广州" , 88      , "#e75b59"]
+    [ "东莞" , 101     , "#3871BF"],
+    [ "深圳" , 88      , "#5182C7"],
+    [ "广州" , 88      , "#88AAD9"]
 ]
+
 
 var options = {
     mapName : "china", //默认便是中国地图
@@ -80,6 +82,10 @@ var options = {
 };
 
 Chartx.map("canvasTest" , data , options).then(function(map){
+<<<<<<< HEAD
+=======
+
+>>>>>>> daily/1.9.39
     map.on("areaclick" , function( e ){
         //TODO: 要实现联动，需要开发者，在这里手动重置map
         var obj = {};
