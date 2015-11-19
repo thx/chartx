@@ -1,1 +1,1 @@
-define("chartx/chart/theme",[],function(){return{colors:["#ff6600","#67bbe6","#f26179","#62d9bb","#c763c7"]}});
+define("chartx/chart/theme",[],function(){return{colors:["#67bbe6","#ff9c59","#57d9b8","#f26d83","#cc70cc"]}});
