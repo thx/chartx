@@ -185,6 +185,7 @@ define(
                             self._bline.context.pointList = _.clone(self._currPointList);
 
                             self._fill.context.path = self._fillLine(self._bline);
+                            self._fill.context.fillStyle = self._getFillStyle();
 
                             self._circles && _.each(self._circles.children, function(circle, i) {
                                 var ind = parseInt(circle.id.split("_")[1]);
@@ -304,7 +305,21 @@ define(
                 self.sprite.addChild(bline);
                 self._bline = bline;
 
+                var fill = new Path({ //填充
+                    context: {
+                        path: self._fillLine(bline),
+                        fillStyle: self._getFillStyle(), //fill_gradient || self._getColor(self.fill.fillStyle),
+                        globalAlpha: _.isArray(self.fill.alpha) ? 1 : self.fill.alpha //self._getProp( self.fill.alpha )
+                    }
+                });
+                self.sprite.addChild(fill);
+                self._fill = fill;
 
+                self._createNodes();
+
+            },
+            _getFillStyle: function(){
+                var self = this;
                 var fill_gradient = null;
                 if (_.isArray(self.fill.alpha)) {
 
@@ -318,7 +333,7 @@ define(
                     };
 
                     //从bline中找到最高的点
-                    var topP = _.min(bline.context.pointList, function(p) {
+                    var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
                     //创建一个线性渐变
@@ -330,20 +345,9 @@ define(
 
                     var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
                     fill_gradient.addColorStop(1, rgba1);
-                }
+                };
 
-                var fill = new Path({ //填充
-                    context: {
-                        path: self._fillLine(bline),
-                        fillStyle: fill_gradient || self._getColor(self.fill.fillStyle),
-                        globalAlpha: fill_gradient ? 1 : self.fill.alpha //self._getProp( self.fill.alpha )
-                    }
-                });
-                self.sprite.addChild(fill);
-                self._fill = fill;
-
-                self._createNodes();
-
+                return fill_gradient || self._getColor(self.fill.fillStyle);
             },
             _createNodes: function() {
                 var self = this;

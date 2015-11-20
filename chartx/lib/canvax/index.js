@@ -1,36 +1,72 @@
 define(
-    "canvax/animation/AnimationFrame",
-    [],
-    function(){
+    "canvax/animation/AnimationFrame", [],
+    function() {
         /**
          * 设置 AnimationFrame begin
          */
         var lastTime = 0;
         var vendors = ['ms', 'moz', 'webkit', 'o'];
-        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-            window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-            window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
-            || window[vendors[x]+'CancelRequestAnimationFrame'];
-        }
-
-        if (!window.requestAnimationFrame){
+        for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+            window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+            window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+        };
+        if (!window.requestAnimationFrame) {
             window.requestAnimationFrame = function(callback, element) {
                 var currTime = new Date().getTime();
                 var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+                var id = window.setTimeout(function() {
+                        callback(currTime + timeToCall);
+                    },
                     timeToCall);
                 lastTime = currTime + timeToCall;
                 return id;
             };
-        }
-        if (!window.cancelAnimationFrame){
+        };
+        if (!window.cancelAnimationFrame) {
             window.cancelAnimationFrame = function(id) {
                 clearTimeout(id);
             };
-        }
+        };
+
+        //管理所有图表的渲染任务
+        var _taskList = [];
+        var _requestAid = null;
+
+        function registTask(task) {
+            if (!_requestAid && _taskList.length == 0 && task) {
+                _requestAid = requestAnimationFrame(function() {
+                    for( var i=0,l=_taskList.length ; i<l ; i++){
+                        var task = _taskList.shift();
+                        task();
+                        i--;
+                        l--;
+                    };
+                    _requestAid = null;
+                });
+            };
+            _taskList.push(task);
+            return _requestAid;
+        };
+
+        function destroyTask(task) {
+            for(var i=0,l=_taskList.length ; i<l ; i++){
+                if(_taskList[i] === task){
+                    _taskList.splice( i , 1 );
+                }
+            };
+            if( _taskList.length == 0 ){
+                cancelAnimationFrame( _requestAid );
+                _requestAid = null;
+            };
+            return _requestAid;
+        };
+
+        return {
+            registTask: registTask,
+            destroyTask: destroyTask
+        };
     }
-);
-;window.FlashCanvasOptions = {
+);;window.FlashCanvasOptions = {
     swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
 define(
@@ -4211,6 +4247,7 @@ define(
     "canvax/index",
     [
         "canvax/core/Base",
+        "canvax/animation/AnimationFrame",
         "canvax/event/EventHandler",
         "canvax/event/EventDispatcher",
         "canvax/event/EventManager",
@@ -4224,7 +4261,7 @@ define(
     ]
     , 
     function( 
-        Base , EventHandler ,  EventDispatcher , EventManager , 
+        Base , AnimationFrame , EventHandler ,  EventDispatcher , EventManager , 
         DisplayObjectContainer , 
         Stage , Sprite , Shape , Point , Text   
     ) {
@@ -4274,11 +4311,6 @@ define(
         //设置帧率
         this._speedTime = parseInt(1000/Base.mainFrameRate);
         this._preRenderTime = 0;
- 
-        //任务列表, 如果_taskList 不为空，那么主引擎就一直跑
-        //为 含有__enterFrame 方法 DisplayObject 的对象列表
-        //比如Movieclip的__enterFrame方法。
-        this._taskList = [];
         
         this._hoverStage = null;
         
@@ -4287,7 +4319,6 @@ define(
         this.evt = null;
  
         arguments.callee.superclass.constructor.apply(this, arguments);
-        
     };
     
     Base.creatClass(Canvax , DisplayObjectContainer , {
@@ -4369,26 +4400,19 @@ define(
             this.addChild( this._hoverStage );
         },
         /**
-         * 获取像素拾取专用的上下文
+         * 用来检测文本width height 
          * @return {Object} 上下文
         */
         _createPixelContext : function() {
-            
             var _pixelCanvas = Base.getEl("_pixelCanvas");
             if(!_pixelCanvas){
                 _pixelCanvas = Base._createCanvas("_pixelCanvas" , 0 , 0); 
-                //var clientH = window.innerHeight || ( document.documentElement && document.documentElement.clientHeight  ) || document.body.clientHeight;
-                //var clientW = window.innerWidth  || ( document.documentElement && document.documentElement.clientWidth   ) || document.body.clientWidth;
-                //_pixelCanvas = Base._createCanvas("_pixelCanvas" , clientW , clientH ); 
             } else {
                 //如果又的话 就不需要在创建了
                 return;
-            }
-
+            };
             document.body.appendChild( _pixelCanvas );
- 
             Base.initElement( _pixelCanvas );
- 
             if( Base.canvasSupport() ){
                 //canvas的话，哪怕是display:none的页可以用来左像素检测和measureText文本width检测
                 _pixelCanvas.style.display    = "none";
@@ -4427,7 +4451,8 @@ define(
         __startEnter : function(){
            var self = this;
            if( !self.requestAid ){
-               self.requestAid = requestAnimationFrame( _.bind( self.__enterFrame , self) );
+               self.requestAid = AnimationFrame.registTask( _.bind( self.__enterFrame , self) );
+               //self.requestAid = requestAnimationFrame( _.bind( self.__enterFrame , self) );
            }
         },
         __enterFrame : function(){
@@ -4462,23 +4487,6 @@ define(
  
                 //渲染结束
                 self.fire("afterRender");
-            }
-            
-            //先跑任务队列,因为有可能再具体的hander中会把自己清除掉
-            //所以跑任务和下面的length检测分开来
-            if(self._taskList.length > 0){
-               for(var i=0,l = self._taskList.length ; i < l ; i++ ){
-                  var obj = self._taskList[i];
-                  if(obj.__enterFrame){
-                     obj.__enterFrame();
-                  } else {
-                     self.__taskList.splice(i-- , 1);
-                  }
-               }  
-            }
-            //如果依然还有任务。 就继续enterFrame.
-            if(self._taskList.length > 0){
-               self.__startEnter();
             }
         },
         _afterAddChild : function( stage , index ){
@@ -4603,7 +4611,6 @@ define(
                //如果发现引擎在静默状态，那么就唤醒引擎
                self._heartBeat = true;
                self.__startEnter();
-               //self.requestAid = requestAnimationFrame( _.bind(self.__enterFrame,self) );
             } else {
                //否则智慧继续确认心跳
                self._heartBeat = true;
