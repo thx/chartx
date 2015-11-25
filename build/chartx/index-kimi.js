@@ -210,13 +210,17 @@ define(
 );
 
 define(
-    "chartx/chart/theme",[],
-    function(){
-        return {
-            //colors : ["#ff6600" , "#17a1e6" , "#41d9b3" , "#f23555" , "#c746c7"]
-            //colors : ["#ff6600" , "#67bbe6" , "#f26179" , "#62d9bb" , "#c763c7"],
-            colors : ["#67bbe6" , "#ff9c59" , "#57d9b8" , "#f26d83","#cc70cc"]
-        }
+    "chartx/chart/theme",[
+        "chartx/utils/colorformat"
+    ],
+    function( ColorFormat ){
+    	var brandColor = "#ff6600";
+        var colors = ["#ff8533","#73ace6","#82d982","#e673ac","#cd6bed","#8282d9","#c0e650","#e6ac73","#6bcded","#73e6ac","#ed6bcd","#9966cc"]
+        var Theme = {
+            colors : colors,
+            brandColor : brandColor
+        };
+        return Theme;
     }
 );
 
@@ -442,12 +446,12 @@ define(
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
                     lineWidth   : 1,
-                    strokeStyle : '#f0f0f0'//'#e5e5e5'
-            } 
+                    strokeStyle : '#e6e6e6'
+            }
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
                     lineWidth   : 1,
-                    strokeStyle : '#f0f0f0',//'#e5e5e5',
+                    strokeStyle : '#e6e6e6',
                     biaxial     : false
             }
             this.xAxis   = {                                //x轴上的线
@@ -457,10 +461,9 @@ define(
                     // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                     lineWidth   : 1,
-                    strokeStyle : '#fafafa', //'#e5e5e5',
+                    strokeStyle : '#f0f0f0', //'#e5e5e5',
                     filter      : null 
             }
-    
             this.yAxis   = {                                //y轴上的线
                     enabled     : 0,
                     data        : [],                      //[{x:100},{}]
@@ -468,7 +471,7 @@ define(
                     // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     lineWidth   : 1,
-                    strokeStyle : '#fafafa',//'#e5e5e5',
+                    strokeStyle : '#f0f0f0',//'#e5e5e5',
                     filter      : null
             } 
     
@@ -993,6 +996,9 @@ define(
                            me.shapeBg.context.r = this.r;
                            me.shapeBg.context.globalAlpha = this.alpha;
                        } ).repeat(Infinity).delay(800)
+                       .onComplete(function(){
+                           debugger;
+                       })
                        .easing( me.easing )
                        .start();
                        animate();
@@ -1301,7 +1307,7 @@ define(
             }
 
             this.text = {
-                fillStyle: '#333333',
+                fillStyle: '#999',
                 fontSize: 12,
                 rotation: 0,
                 format: null,
@@ -1720,7 +1726,7 @@ define(
             };
 
             this.text = {
-                    fillStyle : '#333333',
+                    fillStyle : '#999',
                     fontSize  : 12,
                     format    : null,
                     rotation  : 0

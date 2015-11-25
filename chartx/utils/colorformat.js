@@ -19,17 +19,21 @@ define(
                     sColor = sColorNew;  
                 }  
                 //处理六位的颜色值  
-                var sColorChange = [];  
+                var sColorChange = [];
                 for(var i=1; i<7; i+=2){  
                     sColorChange.push(parseInt("0x"+sColor.slice(i,i+2)));    
                 }  
                 return "RGB(" + sColorChange.join(",") + ")";  
-            }else{  
+            } else {  
                 return sColor;    
             }  
         };
 
-        /*RGB颜色转换为16进制*/  
+        var colorRgba = function(hex , a){
+            return colorRgb( hex ).replace(')', ','+a+')').replace('RGB', 'RGBA');
+        };
+
+        /*RGB颜色转换为16进制*/
         var colorHex = function( rgb ){  
             var that = rgb;  
             if(/^(rgb|RGB)/.test(that)){  
@@ -64,6 +68,7 @@ define(
 
         return {
             colorRgb : colorRgb,
+            colorRgba: colorRgba,
             colorHex : colorHex
         }
 

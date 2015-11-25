@@ -21,18 +21,17 @@ define(
 
             //做一次简单的opt参数校验，保证在用户不传opt的时候 或者传了opt但是里面没有context的时候报错
             opt = Base.checkOpt( opt );
-            var optc = opt.context;
             
-            self._context = {
-                fontSize            : optc.fontSize       || 13 , //字体大小默认13
-                fontWeight          : optc.fontWeight     || "normal",
-                fontFamily          : optc.fontFamily     || "微软雅黑",
-                textDecoration      : optc.textDecoration,  
-                fillStyle           : optc.fontColor      || opt.context.fillStyle   || 'blank',
-                lineHeight          : optc.lineHeight     || 1.3,
-                backgroundColor     : optc.backgroundColor ,
-                textBackgroundColor : optc.textBackgroundColor
-            };
+            self._context = _.deepExtend({
+                fontSize            : 13 , //字体大小默认13
+                fontWeight          : "normal",
+                fontFamily          : "微软雅黑",
+                textDecoration      : null,  
+                fillStyle           : 'blank',
+                lineHeight          : 1.3,
+                backgroundColor     : null ,
+                textBackgroundColor : null
+            } , opt.context);
 
             self._context.font = self._getFontDeclaration();
 
@@ -67,10 +66,10 @@ define(
                    if(p in ctx){
                        if ( p != "textBaseline" && this.context.$model[p] ) {
                            ctx[p] = this.context.$model[p];
-                       }
-                   }
-               }
-               this._renderText(ctx, this._getTextLines());
+                       };
+                   };
+               };
+               this._renderText( ctx , this._getTextLines() );
             },
             resetText     : function( text ){
                this.text  = text.toString();

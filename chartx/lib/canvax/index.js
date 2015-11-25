@@ -1,6 +1,9 @@
 define(
-    "canvax/animation/AnimationFrame", [],
-    function() {
+    "canvax/animation/AnimationFrame", 
+    [
+        "canvax/animation/Tween"
+    ],
+    function(Tween) {
         /**
          * 设置 AnimationFrame begin
          */
@@ -32,41 +35,565 @@ define(
         var _taskList = [];
         var _requestAid = null;
 
-        function registTask(task) {
-            if (!_requestAid && _taskList.length == 0 && task) {
-                _requestAid = requestAnimationFrame(function() {
-                    for( var i=0,l=_taskList.length ; i<l ; i++){
-                        var task = _taskList.shift();
-                        task();
-                        i--;
-                        l--;
-                    };
-                    _requestAid = null;
-                });
+        /*
+        * @param task 要加入到渲染帧队列中的任务
+        * @result frameid
+        */
+        function registFrame(task) {
+            if( !task ){
+                return;
             };
             _taskList.push(task);
+            if (!_requestAid) {
+                _requestAid = requestAnimationFrame(function() {
+                    //console.log("frame__"+_taskList.length);
+                    var currTaskList = _taskList;
+                    _taskList = [];
+                    _requestAid = null;
+                    while( currTaskList.length>0 ){
+                        currTaskList.shift()();
+                    };
+                });
+            };
             return _requestAid;
         };
 
-        function destroyTask(task) {
-            for(var i=0,l=_taskList.length ; i<l ; i++){
-                if(_taskList[i] === task){
-                    _taskList.splice( i , 1 );
+        /*
+        *  @param task 要从渲染帧队列中删除的任务
+        */
+        function destroyFrame(task) {
+            for (var i = 0, l = _taskList.length; i < l; i++) {
+                if (_taskList[i] === task) {
+                    _taskList.splice(i, 1);
                 }
             };
-            if( _taskList.length == 0 ){
-                cancelAnimationFrame( _requestAid );
+            if (_taskList.length == 0) {
+                cancelAnimationFrame(_requestAid);
                 _requestAid = null;
             };
             return _requestAid;
         };
 
+        /* 
+         * @param opt {from , to , onUpdate , onComplete , ......}
+         * @result tween
+         */
+        function registTween(options) {
+            var opt = _.extend({
+                from: null,
+                to: null,
+                duration : 500,
+                onUpdate: function() {},
+                onComplete: function() {},
+                repeat : 0,
+                delay : 0,
+                easing : null
+            }, options);
+            var tween = {};
+            if (opt.from && opt.to) {
+                tween = new Tween.Tween(opt.from).to(opt.to , opt.duration).onUpdate(opt.onUpdate);
+
+                opt.repeat && tween.repeat( opt.repeat );
+                opt.delay && tween.delay( opt.delay );
+                opt.easing && tween.easing( Tween.Easing[ opt.easing.split(".")[0] ][opt.easing.split(".")[1]] );
+
+                function animate(){
+                    if( !tween ){
+                        return;
+                    };
+                    Tween.update();
+                    registFrame( animate );
+                };
+
+                tween.onComplete(function() {
+                    destroyFrame( animate );
+                    tween.stop();
+                    Tween.remove( tween );
+                    tween = null;
+                    animate = null;
+                    //执行用户的conComplete
+                    opt.onComplete();
+                });
+
+                tween.start();
+                animate();
+                tween._animate = animate;
+            };
+            return tween;
+        };
+
+        /*
+         * @param tween
+         * @result void(0)
+         */
+        function destroyTween(tween) {
+            tween.stop();
+            Tween.remove( tween );
+            destroyFrame( tween._animate );
+            tween = null;
+        };
+
         return {
-            registTask: registTask,
-            destroyTask: destroyTask
+            registFrame: registFrame,
+            destroyFrame: destroyFrame,
+            registTween: registTween,
+            destroyTween: destroyTween
         };
     }
-);;window.FlashCanvasOptions = {
+);;define(
+    "canvax/animation/Tween", [],
+    function() {
+        /**
+         * Tween.js - Licensed under the MIT license
+         * https://github.com/sole/tween.js
+         * ----------------------------------------------
+         * See https://github.com/sole/tween.js/graphs/contributors for the full list of contributors.
+         * Thank you all, you're awesome!
+         */
+        // Date.now shim for (ahem) Internet Explo(d|r)er
+        if (Date.now === undefined) {
+            Date.now = function() {
+                return new Date().valueOf();
+            };
+        };
+        var TWEEN = TWEEN || (function() {
+            var _tweens = [];
+            return {
+                REVISION: '14',
+                getAll: function() {
+                    return _tweens;
+                },
+                removeAll: function() {
+                    _tweens = [];
+                },
+                add: function(tween) {
+                    _tweens.push(tween);
+                },
+                remove: function(tween) {
+                    var i = _tweens.indexOf(tween);
+                    if (i !== -1) {
+                        _tweens.splice(i, 1);
+                    }
+                },
+                update: function(time) {
+                    if (_tweens.length === 0) return false;
+                    var i = 0;
+                    time = time !== undefined ? time : (typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined ? window.performance.now() : Date.now());
+                    while (i < _tweens.length) {
+                        if (_tweens[i].update(time)) {
+                            i++;
+                        } else {
+                            _tweens.splice(i, 1);
+                        }
+                    }
+                    return true;
+                }
+            };
+        })();
+        TWEEN.Tween = function(object) {
+            var _object = object;
+            var _valuesStart = {};
+            var _valuesEnd = {};
+            var _valuesStartRepeat = {};
+            var _duration = 1000;
+            var _repeat = 0;
+            var _yoyo = false;
+            var _isPlaying = false;
+            var _reversed = false;
+            var _delayTime = 0;
+            var _startTime = null;
+            var _easingFunction = TWEEN.Easing.Linear.None;
+            var _interpolationFunction = TWEEN.Interpolation.Linear;
+            var _chainedTweens = [];
+            var _onStartCallback = null;
+            var _onStartCallbackFired = false;
+            var _onUpdateCallback = null;
+            var _onCompleteCallback = null;
+            var _onStopCallback = null;
+            // Set all starting values present on the target object
+            for (var field in object) {
+                _valuesStart[field] = parseFloat(object[field], 10);
+            };
+            this.to = function(properties, duration) {
+                if (duration !== undefined) {
+                    _duration = duration;
+                };
+                _valuesEnd = properties;
+                return this;
+            };
+            this.start = function(time) {
+                TWEEN.add(this);
+                _isPlaying = true;
+                _onStartCallbackFired = false;
+                _startTime = time !== undefined ? time : (typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined ? window.performance.now() : Date.now());
+                _startTime += _delayTime;
+                for (var property in _valuesEnd) {
+                    // check if an Array was provided as property value
+                    if (_valuesEnd[property] instanceof Array) {
+                        if (_valuesEnd[property].length === 0) {
+                            continue;
+                        }
+                        _valuesEnd[property] = [_object[property]].concat(_valuesEnd[property]);
+                    }
+                    _valuesStart[property] = _object[property];
+                    if ((_valuesStart[property] instanceof Array) === false) {
+                        _valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+                    }
+                    _valuesStartRepeat[property] = _valuesStart[property] || 0;
+                }
+                return this;
+            };
+            this.stop = function() {
+                if (!_isPlaying) {
+                    return this;
+                }
+                TWEEN.remove(this);
+                _isPlaying = false;
+                if (_onStopCallback !== null) {
+                    _onStopCallback.call(_object);
+                }
+                this.stopChainedTweens();
+                return this;
+            };
+            this.stopChainedTweens = function() {
+                for (var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++) {
+                    _chainedTweens[i].stop();
+                }
+            };
+            this.delay = function(amount) {
+                _delayTime = amount;
+                return this;
+            };
+            this.repeat = function(times) {
+                _repeat = times;
+                return this;
+            };
+            this.yoyo = function(yoyo) {
+                _yoyo = yoyo;
+                return this;
+            };
+            this.easing = function(easing) {
+                _easingFunction = easing;
+                return this;
+            };
+            this.interpolation = function(interpolation) {
+                _interpolationFunction = interpolation;
+                return this;
+            };
+            this.chain = function() {
+                _chainedTweens = arguments;
+                return this;
+            };
+            this.onStart = function(callback) {
+                _onStartCallback = callback;
+                return this;
+            };
+            this.onUpdate = function(callback) {
+                _onUpdateCallback = callback;
+                return this;
+            };
+            this.onComplete = function(callback) {
+                _onCompleteCallback = callback;
+                return this;
+            };
+            this.onStop = function(callback) {
+                _onStopCallback = callback;
+                return this;
+            };
+            this.update = function(time) {
+                var property;
+                if (time < _startTime) {
+                    return true;
+                }
+                if (_onStartCallbackFired === false) {
+                    if (_onStartCallback !== null) {
+                        _onStartCallback.call(_object);
+                    }
+                    _onStartCallbackFired = true;
+                }
+                var elapsed = (time - _startTime) / _duration;
+                elapsed = elapsed > 1 ? 1 : elapsed;
+                var value = _easingFunction(elapsed);
+                for (property in _valuesEnd) {
+                    var start = _valuesStart[property] || 0;
+                    var end = _valuesEnd[property];
+                    if (end instanceof Array) {
+                        _object[property] = _interpolationFunction(end, value);
+                    } else {
+                        if (typeof(end) === "string") {
+                            end = start + parseFloat(end, 10);
+                        }
+                        if (typeof(end) === "number") {
+                            _object[property] = start + (end - start) * value;
+                        }
+                    }
+                }
+                if (_onUpdateCallback !== null) {
+                    _onUpdateCallback.call(_object, value);
+                }
+                if (elapsed == 1) {
+                    if (_repeat > 0) {
+                        if (isFinite(_repeat)) {
+                            _repeat--;
+                        }
+                        // reassign starting values, restart by making startTime = now
+                        for (property in _valuesStartRepeat) {
+                            if (typeof(_valuesEnd[property]) === "string") {
+                                _valuesStartRepeat[property] = _valuesStartRepeat[property] + parseFloat(_valuesEnd[property], 10);
+                            }
+                            if (_yoyo) {
+                                var tmp = _valuesStartRepeat[property];
+                                _valuesStartRepeat[property] = _valuesEnd[property];
+                                _valuesEnd[property] = tmp;
+                            }
+                            _valuesStart[property] = _valuesStartRepeat[property];
+                        }
+                        if (_yoyo) {
+                            _reversed = !_reversed;
+                        }
+                        _startTime = time + _delayTime;
+                        return true;
+                    } else {
+                        if (_onCompleteCallback !== null) {
+                            _onCompleteCallback.call(_object);
+                        }
+                        for (var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++) {
+                            _chainedTweens[i].start(time);
+                        }
+                        return false;
+                    }
+                }
+                return true;
+            };
+        };
+        TWEEN.Easing = {
+            Linear: {
+                None: function(k) {
+                    return k;
+                }
+            },
+            Quadratic: {
+                In: function(k) {
+                    return k * k;
+                },
+                Out: function(k) {
+                    return k * (2 - k);
+                },
+                InOut: function(k) {
+                    if ((k *= 2) < 1) return 0.5 * k * k;
+                    return -0.5 * (--k * (k - 2) - 1);
+                }
+            },
+            Cubic: {
+                In: function(k) {
+                    return k * k * k;
+                },
+                Out: function(k) {
+                    return --k * k * k + 1;
+                },
+                InOut: function(k) {
+                    if ((k *= 2) < 1) return 0.5 * k * k * k;
+                    return 0.5 * ((k -= 2) * k * k + 2);
+                }
+            },
+            Quartic: {
+                In: function(k) {
+                    return k * k * k * k;
+                },
+                Out: function(k) {
+                    return 1 - (--k * k * k * k);
+                },
+                InOut: function(k) {
+                    if ((k *= 2) < 1) return 0.5 * k * k * k * k;
+                    return -0.5 * ((k -= 2) * k * k * k - 2);
+                }
+            },
+            Quintic: {
+                In: function(k) {
+                    return k * k * k * k * k;
+                },
+                Out: function(k) {
+                    return --k * k * k * k * k + 1;
+                },
+                InOut: function(k) {
+                    if ((k *= 2) < 1) return 0.5 * k * k * k * k * k;
+                    return 0.5 * ((k -= 2) * k * k * k * k + 2);
+                }
+            },
+            Sinusoidal: {
+                In: function(k) {
+                    return 1 - Math.cos(k * Math.PI / 2);
+                },
+                Out: function(k) {
+                    return Math.sin(k * Math.PI / 2);
+                },
+                InOut: function(k) {
+                    return 0.5 * (1 - Math.cos(Math.PI * k));
+                }
+            },
+            Exponential: {
+                In: function(k) {
+                    return k === 0 ? 0 : Math.pow(1024, k - 1);
+                },
+                Out: function(k) {
+                    return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+                },
+                InOut: function(k) {
+                    if (k === 0) return 0;
+                    if (k === 1) return 1;
+                    if ((k *= 2) < 1) return 0.5 * Math.pow(1024, k - 1);
+                    return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+                }
+            },
+            Circular: {
+                In: function(k) {
+                    return 1 - Math.sqrt(1 - k * k);
+                },
+                Out: function(k) {
+                    return Math.sqrt(1 - (--k * k));
+                },
+                InOut: function(k) {
+                    if ((k *= 2) < 1) return -0.5 * (Math.sqrt(1 - k * k) - 1);
+                    return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+                }
+            },
+            Elastic: {
+                In: function(k) {
+                    var s, a = 0.1,
+                        p = 0.4;
+                    if (k === 0) return 0;
+                    if (k === 1) return 1;
+                    if (!a || a < 1) {
+                        a = 1;
+                        s = p / 4;
+                    } else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                    return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+                },
+                Out: function(k) {
+                    var s, a = 0.1,
+                        p = 0.4;
+                    if (k === 0) return 0;
+                    if (k === 1) return 1;
+                    if (!a || a < 1) {
+                        a = 1;
+                        s = p / 4;
+                    } else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                    return (a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
+                },
+                InOut: function(k) {
+                    var s, a = 0.1,
+                        p = 0.4;
+                    if (k === 0) return 0;
+                    if (k === 1) return 1;
+                    if (!a || a < 1) {
+                        a = 1;
+                        s = p / 4;
+                    } else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                    if ((k *= 2) < 1) return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+                    return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
+                }
+            },
+            Back: {
+                In: function(k) {
+                    var s = 1.70158;
+                    return k * k * ((s + 1) * k - s);
+                },
+                Out: function(k) {
+                    var s = 1.70158;
+                    return --k * k * ((s + 1) * k + s) + 1;
+                },
+                InOut: function(k) {
+                    var s = 1.70158 * 1.525;
+                    if ((k *= 2) < 1) return 0.5 * (k * k * ((s + 1) * k - s));
+                    return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+                }
+            },
+            Bounce: {
+                In: function(k) {
+                    return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+                },
+                Out: function(k) {
+                    if (k < (1 / 2.75)) {
+                        return 7.5625 * k * k;
+                    } else if (k < (2 / 2.75)) {
+                        return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+                    } else if (k < (2.5 / 2.75)) {
+                        return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
+                    } else {
+                        return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
+                    }
+                },
+                InOut: function(k) {
+                    if (k < 0.5) return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
+                    return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+                }
+            }
+        };
+        TWEEN.Interpolation = {
+            Linear: function(v, k) {
+                var m = v.length - 1,
+                    f = m * k,
+                    i = Math.floor(f),
+                    fn = TWEEN.Interpolation.Utils.Linear;
+
+                if (k < 0) return fn(v[0], v[1], f);
+                if (k > 1) return fn(v[m], v[m - 1], m - f);
+                return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+            },
+            Bezier: function(v, k) {
+                var b = 0,
+                    n = v.length - 1,
+                    pw = Math.pow,
+                    bn = TWEEN.Interpolation.Utils.Bernstein,
+                    i;
+                for (i = 0; i <= n; i++) {
+                    b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+                }
+                return b;
+            },
+            CatmullRom: function(v, k) {
+                var m = v.length - 1,
+                    f = m * k,
+                    i = Math.floor(f),
+                    fn = TWEEN.Interpolation.Utils.CatmullRom;
+                if (v[0] === v[m]) {
+                    if (k < 0) i = Math.floor(f = m * (1 + k));
+                    return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+                } else {
+                    if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+                    if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+                    return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+                }
+            },
+            Utils: {
+                Linear: function(p0, p1, t) {
+                    return (p1 - p0) * t + p0;
+                },
+                Bernstein: function(n, i) {
+                    var fc = TWEEN.Interpolation.Utils.Factorial;
+                    return fc(n) / fc(i) / fc(n - i);
+                },
+                Factorial: (function() {
+                    var a = [1];
+                    return function(n) {
+                        var s = 1,
+                            i;
+                        if (a[n]) return a[n];
+                        for (i = n; i > 1; i--) s *= i;
+                        return a[n] = s;
+                    };
+                })(),
+                CatmullRom: function(p0, p1, p2, p3, t) {
+                    var v0 = (p2 - p0) * 0.5,
+                        v1 = (p3 - p1) * 0.5,
+                        t2 = t * t,
+                        t3 = t * t2;
+                    return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+                }
+            }
+        };
+        return TWEEN;
+    });;window.FlashCanvasOptions = {
     swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
 define(
@@ -953,18 +1480,6 @@ define(
                     if( preHeartBeat != this._heartBeatNum ){
                         this._hoverClass = true;
 
-                        /*
-                        //如果前后心跳不一致，说明有mouseover 属性的修改，也就是有hover态
-                        //那么该该心跳包肯定已经 巴shape添加到了canvax引擎的convertStages队列中
-                        //把该shape从convertStages中干掉，重新添加到专门渲染hover态shape的_hoverStage中
-                        if(_.values(canvax.convertStages[this.getStage().id].convertShapes).length > 1){
-                            //如果还有其他元素也上报的心跳，那么该画的还是得画，不管了
-                        } else {
-                            delete canvax.convertStages[ this.getStage().id ];
-                            this._heart = false;
-                        }
-                        */
-
                         if( this.hoverClone ){
                             var canvax = this.getStage().parent;
                             //然后clone一份obj，添加到_hoverStage 中
@@ -1038,18 +1553,12 @@ define(
             //当前激活的点对应的obj，在touch下可以是个数组,和上面的curPoints对应
             this.curPointsTarget = [];
             
-            /**
-             *交互相关属性
-             * */
-            //接触canvas
             this._touching = false;
             //正在拖动，前提是_touching=true
             this._draging =false;
  
             //当前的鼠标状态
             this._cursor  = "default";
-
-            //this.initEvent = function(){};
         };
         Base.creatClass( EventHandler , Handler , {
             /*
@@ -1416,42 +1925,6 @@ define(
         /**
          * 多边形包含判断 Nonzero Winding Number Rule
          */
-
-        /*  第一版的非零环绕算法，用到了 反三角函数。比下面的优化版本要慢，代码也要多
-        function _isInsidePolygon_WindingNumber(shape, x, y) {
-            //非零环绕法之——回转数法，回转数是拓扑学中的一个基本概念，具有很重要的性质和用途。
-            //这需要具备相当的数学知识，否则会非常乏味和难以理解。我们暂时只需要记住回转数的一个特性就行了：
-            //当回转数为 0 时，点在闭合曲线外部。
-            var context = shape.context ? shape.context : shape;
-            var poly = context.pointList; //poly 多边形顶点，数组成员的格式同 p
-            var sum = 0;
-            for (var i = 0, l = poly.length, j = l - 1; i < l; j = i, i++) {
-                var sx = poly[i][0],
-                    sy = poly[i][1],
-                    tx = poly[j][0],
-                    ty = poly[j][1]
-
-                //点与多边形顶点重合或在多边形的边上
-                if ((sx - x) * (x - tx) >= 0 && (sy - y) * (y - ty) >= 0 && (x - sx) * (ty - sy) === (y - sy) * (tx - sx)) {
-                    return true;
-                };
-
-                //点与相邻顶点连线的夹角
-                var angle = Math.atan2(sy - y, sx - x) - Math.atan2(ty - y, tx - x);
-
-                //确保夹角不超出取值范围（-π 到 π）
-                if (angle >= Math.PI) {
-                    angle = angle - Math.PI * 2
-                } else if (angle <= -Math.PI) {
-                    angle = angle + Math.PI * 2
-                };
-                sum += angle;
-            };
-            // 计算回转数并判断点和多边形的几何关系
-            return Math.round(sum / Math.PI) === 0 ? false : true;
-        };
-        */
-
         //http://geomalgorithms.com/a03-_inclusion.html
         //winding优化方案，这样就不需要用到反三角函数，就会快很多。
         //非零环绕数规则（Nonzero Winding Number Rule）：若环绕数为0表示在多边形内，非零表示在多边形外
@@ -1487,82 +1960,9 @@ define(
                     };
                 }
             };
-            /*
-            var coords = _.flatten(poly);
-            var wn = 0;
-            for (var shiftP, shift = coords[1] > y, i = 3; i < coords.length; i += 2) {
-                shiftP = shift;
-                shift = coords[i] > y;
-                if (shiftP != shift) {
-                    var n = (shiftP ? 1 : 0) - (shift ? 1 : 0);
-                    if (n * ((coords[i - 3] - x) * (coords[i - 0] - y) - (coords[i - 2] - y) * (coords[i - 1] - x)) > 0) {
-                        wn += n;
-                    }
-                };
-            };
-            */
             return wn;
         };
 
-        /**
-         * 多边形包含判断 even odd rule
-         * 射线判别法
-         * 如果一个点在多边形内部，任意角度做射线肯定会与多边形要么有一个交点，要么有与多边形边界线重叠
-         * 如果一个点在多边形外部，任意角度做射线要么与多边形有一个交点，
-         * 要么有两个交点，要么没有交点，要么有与多边形边界线重叠。
-         * 但是因为射线判断法 在 有自我交集的 path中 会有问题，所以决定该用非零环绕法，同时因为canvas的fill api 也是用到非零环绕来渲染
-         */
-        /*
-        function _isInsidePolygon_CrossingNumber(shape, x, y) {
-            var context = shape.context ? shape.context : shape;
-            var polygon = context.pointList;
-            var i;
-            var j;
-            var N = polygon.length;
-            var inside = false;
-            var redo = true;
-            var v;
-
-            for (i = 0; i < N; ++i) {
-                // 是否在顶点上
-                if (polygon[i][0] == x && polygon[i][1] == y) {
-                    redo = false;
-                    inside = true;
-                    break;
-                }
-            };
-
-            if (redo) {
-                redo = false;
-                inside = false;
-                for (i = 0, j = N - 1; i < N; j = i++) {
-                    if ((polygon[i][1] < y && y < polygon[j][1]) || (polygon[j][1] < y && y < polygon[i][1])) {
-                        if (x <= polygon[i][0] || x <= polygon[j][0]) {
-                            v = (y - polygon[i][1]) * (polygon[j][0] - polygon[i][0]) / (polygon[j][1] - polygon[i][1]) + polygon[i][0];
-                            if (x < v) { // 在线的左侧
-                                inside = !inside;
-                            } else if (x == v) { // 在线上
-                                inside = true;
-                                break;
-                            }
-                        }
-                    } else if (y == polygon[i][1]) {
-                        if (x < polygon[i][0]) { // 交点在顶点上
-                            polygon[i][1] > polygon[j][1] ? --y : ++y;
-                            //redo = true;
-                            break;
-                        }
-                    } else if (polygon[i][1] == polygon[j][1] // 在水平的边界线上
-                        && y == polygon[i][1] && ((polygon[i][0] < x && x < polygon[j][0]) || (polygon[j][0] < x && x < polygon[i][0]))
-                    ) {
-                        inside = true;
-                        break;
-                    }
-                }
-            }
-            return inside;
-        };
-        */
         /**
          * 路径包含判断，依赖多边形判断
          */
@@ -1839,11 +2239,10 @@ define(
         "canvax/display/Point",
         "canvax/core/Base",
         "canvax/geom/HitTestPoint",
-        !window.PropertyFactory ? "canvax/core/PropertyFactory" : ""
+        "canvax/animation/AnimationFrame",
+        "canvax/core/PropertyFactory"
     ],
-    function(EventDispatcher , Matrix , Point , Base , HitTestPoint , PropertyFactory){
-
-        PropertyFactory || (PropertyFactory = window.PropertyFactory);
+    function(EventDispatcher , Matrix , Point , Base , HitTestPoint , AnimationFrame , PropertyFactory){
 
         var DisplayObject = function(opt){
             arguments.callee.superclass.constructor.apply(this, arguments);
@@ -1873,7 +2272,6 @@ define(
 
             self.xyToInt         = "xyToInt" in opt ? opt.xyToInt : true;    //是否对xy坐标统一int处理，默认为true，但是有的时候可以由外界用户手动指定是否需要计算为int，因为有的时候不计算比较好，比如，进度图表中，再sector的两端添加两个圆来做圆角的进度条的时候，圆circle不做int计算，才能和sector更好的衔接
 
-    
             //创建好context
             self._createContext( opt );
     
@@ -1882,7 +2280,7 @@ define(
             //如果没有id 则 沿用uid
             if(self.id == null){
                 self.id = UID ;
-            }
+            };
     
             self.init.apply(self , arguments);
     
@@ -1899,6 +2297,7 @@ define(
                 self.context = null;
     
                 //提供给Coer.PropertyFactory() 来 给 self.context 设置 propertys
+                //这里不能用_.extend， 因为要保证_contextATTRS的纯粹，只覆盖下面已有的属性
                 var _contextATTRS = Base.copy( {
                     width         : 0,
                     height        : 0,
@@ -1954,7 +2353,7 @@ define(
     
                     if( _.indexOf( transFormProps , name ) >= 0 ) {
                         this.$owner._updateTransform();
-                    }
+                    };
     
                     if( this.$owner._notWatch ){
                         return;
@@ -1962,7 +2361,7 @@ define(
     
                     if( this.$owner.$watch ){
                         this.$owner.$watch( name , value , preValue );
-                    }
+                    };
     
                     this.$owner.heartBeat( {
                         convertType:"context",
@@ -2014,7 +2413,7 @@ define(
             getStage : function(){
                 if( this.stage ) {
                     return this.stage;
-                }
+                };
                 var p = this;
                 if (p.type != "stage"){
                   while(p.parent) {
@@ -2023,7 +2422,6 @@ define(
                       break;
                     }
                   };
-      
                   if (p.type !== "stage") {
                     //如果得到的顶点display 的type不是Stage,也就是说不是stage元素
                     //那么只能说明这个p所代表的顶端display 还没有添加到displayList中，也就是没有没添加到
@@ -2122,7 +2520,6 @@ define(
              *@num 移动的层数量 默认到顶端
              */
             toFront : function( num ){
-    
                 if(!this.parent) {
                   return;
                 }
@@ -2144,26 +2541,18 @@ define(
                 this.parent.addChildAt( me , toIndex-1 );
             },
             _transformHander : function( ctx ){
-    
                 var transForm = this._transform;
                 if( !transForm ) {
                     transForm = this._updateTransform();
-                }
-    
+                };
                 //运用矩阵开始变形
                 ctx.transform.apply( ctx , transForm.toArray() );
-     
-                //设置透明度
                 //ctx.globalAlpha *= this.context.globalAlpha;
             },
             _updateTransform : function() {
-            
                 var _transform = new Matrix();
-    
                 _transform.identity();
-    
                 var ctx = this.context;
-    
                 //是否需要Transform
                 if(ctx.scaleX !== 1 || ctx.scaleY !==1 ){
                     //如果有缩放
@@ -2177,7 +2566,6 @@ define(
                         _transform.translate( origin.x , origin.y );
                     };
                 };
-    
     
                 var rotation = ctx.rotation;
                 if( rotation ){
@@ -2215,41 +2603,17 @@ define(
     
                 return _transform;
             },
-            getRect:function(style){
-                return {
-                   x      : 0,
-                   y      : 0,
-                   width  : style.width,
-                   height : style.height
-                }
-            },
             //显示对象的选取检测处理函数
             getChildInPoint : function( point ){
                 var result; //检测的结果
-                
-                //先把鼠标转换到stage下面来
-                /*
-                var stage = this.getStage();
-                if( stage._transform ){
-                    var inverseMatrixStage = stage._transform.clone();
-                    inverseMatrixStage.scale( 1 / stage.context.$model.scaleX , 1 / stage.context.$model.scaleY );
-                    inverseMatrixStage     = inverseMatrixStage.invert();
-                    var originPosStage     = [ point.x , point.y ];
-                    inverseMatrixStage.mulVector( originPosStage , [ point.x , point.y ] );
-    
-                    point.x = originPosStage[0] ;
-                    point.y = originPosStage[1] ;
-                }
-                */
-                
     
                 //第一步，吧glob的point转换到对应的obj的层级内的坐标系统
                 if( this.type != "stage" && this.parent && this.parent.type != "stage" ) {
                     point = this.parent.globalToLocal( point );
                 };
     
-                var x = point.x ;
-                var y = point.y ;
+                var x = point.x;
+                var y = point.y;
     
                 //这个时候如果有对context的set，告诉引擎不需要watch，因为这个是引擎触发的，不是用户
                 //用户set context 才需要触发watch
@@ -2258,13 +2622,12 @@ define(
                 //对鼠标的坐标也做相同的变换
                 if( this._transform ){
                     var inverseMatrix = this._transform.clone().invert();
-    
                     var originPos = [x, y];
                     originPos = inverseMatrix.mulVector( originPos );
     
                     x = originPos[0];
                     y = originPos[1];
-                }
+                };
     
                 var _rect = this._rect = this.getRect(this.context);
     
@@ -2281,13 +2644,10 @@ define(
                     return false;
                 };
                 //正式开始第一步的矩形范围判断
-                if (
-                    this.type == "path" || 
-                    (x    >= _rect.x
+                if ( x    >= _rect.x
                     &&  x <= (_rect.x + _rect.width)
                     &&  y >= _rect.y
                     &&  y <= (_rect.y + _rect.height)
-                    )
                 ) {
                    //那么就在这个元素的矩形范围内
                    result = HitTestPoint.isInside( this , {
@@ -2299,9 +2659,30 @@ define(
                    result = false;
                 }
                 this._notWatch = false;
-    
                 return result;
-    
+            },
+            /*
+            * animate
+            * @param toContent 要动画变形到的属性集合
+            * @param options tween 动画参数
+            */
+            animate : function( toContent , options ){
+                var to = toContent;
+                var from = {};
+                for( var p in to ){
+                    from[ p ] = this.context[p];
+                };
+                !options && (options = {});
+                options.from = from;
+                options.to = to;
+
+                var self = this;
+                options.onUpdate = function(){
+                    for( var p in this ){
+                        self.context[p] = this[p];
+                    };
+                };
+                AnimationFrame.registTween( options );
             },
             _render : function( ctx ){	
                 if( !this.context.visible || this.context.globalAlpha <= 0 ){
@@ -2365,15 +2746,15 @@ define(
             addChild : function(child){
                 if( !child ) {
                     return;
-                } 
+                };
                 if(this.getChildIndex(child) != -1) {
                     child.parent = this;
                     return child;
-                }
+                };
                 //如果他在别的子元素中，那么就从别人那里删除了
                 if(child.parent) {
                     child.parent.removeChild(child);
-                }
+                };
                 this.children.push( child );
                 child.parent = this;
                 if(this.heartBeat){
@@ -2382,11 +2763,11 @@ define(
                      target      : child,
                      src         : this
                    });
-                }
+                };
     
                 if(this._afterAddChild){
                    this._afterAddChild(child);
-                }
+                };
     
                 return child;
             },
@@ -2394,11 +2775,10 @@ define(
                 if(this.getChildIndex(child) != -1) {
                     child.parent = this;
                     return child;
-                }
-    
+                };
                 if(child.parent) {
                     child.parent.removeChild(child);
-                }
+                };
                 this.children.splice(index, 0, child);
                 child.parent = this;
                 
@@ -2409,11 +2789,11 @@ define(
                      target       : child,
                      src      : this
                    });
-                }
+                };
                 
                 if(this._afterAddChild){
                    this._afterAddChild(child,index);
-                }
+                };
     
                 return child;
             },
@@ -2427,7 +2807,7 @@ define(
                 var child = this.children[index];
                 if (child != null) {
                     child.parent = null;
-                }
+                };
                 this.children.splice(index, 1);
                 
                 if(this.heartBeat){
@@ -2503,9 +2883,6 @@ define(
                 this.children.splice(oldIndex, 1);
                 this.children.splice(index, 0, child);
             },
-            contains : function(child) {
-                return this.getChildIndex(child) != -1;
-            },
             getNumChildren : function() {
                 return this.children.length;
             },
@@ -2552,8 +2929,7 @@ define(
         });
         return DisplayObjectContainer;
     }
-)
-;define(
+);;define(
     "canvax/display/Shape",
     [
         "canvax/display/DisplayObject",
@@ -2794,14 +3170,9 @@ define(
                 if(arguments.length >= 4) {
                     this.context2D.clearRect(x, y, width, height);
                 } else {
-                    //直接width = width的方式会导致绘图模糊 
-                    //this.context2D.canvas.width  = this.context2D.canvas.offsetWidth;
-                    //this.context2D.canvas.height = this.context2D.canvas.offsetHeight;
-                    this.context2D.clearRect(
-                            0, 
-                            0,
-                            this.context2D.canvas.width * Base._devicePixelRatio,
-                            this.context2D.canvas.height* Base._devicePixelRatio
+                    this.context2D.clearRect( 0, 0,
+                            this.context2D.canvas.width * Math.max(Base._devicePixelRatio,1),
+                            this.context2D.canvas.height* Math.max(Base._devicePixelRatio,1)
                     );
                 }
             }
@@ -2825,18 +3196,17 @@ define(
 
             //做一次简单的opt参数校验，保证在用户不传opt的时候 或者传了opt但是里面没有context的时候报错
             opt = Base.checkOpt( opt );
-            var optc = opt.context;
             
-            self._context = {
-                fontSize            : optc.fontSize       || 13 , //字体大小默认13
-                fontWeight          : optc.fontWeight     || "normal",
-                fontFamily          : optc.fontFamily     || "微软雅黑",
-                textDecoration      : optc.textDecoration,  
-                fillStyle           : optc.fontColor      || opt.context.fillStyle   || 'blank',
-                lineHeight          : optc.lineHeight     || 1.3,
-                backgroundColor     : optc.backgroundColor ,
-                textBackgroundColor : optc.textBackgroundColor
-            };
+            self._context = _.deepExtend({
+                fontSize            : 13 , //字体大小默认13
+                fontWeight          : "normal",
+                fontFamily          : "微软雅黑",
+                textDecoration      : null,  
+                fillStyle           : 'blank',
+                lineHeight          : 1.3,
+                backgroundColor     : null ,
+                textBackgroundColor : null
+            } , opt.context);
 
             self._context.font = self._getFontDeclaration();
 
@@ -2871,10 +3241,10 @@ define(
                    if(p in ctx){
                        if ( p != "textBaseline" && this.context.$model[p] ) {
                            ctx[p] = this.context.$model[p];
-                       }
-                   }
-               }
-               this._renderText(ctx, this._getTextLines());
+                       };
+                   };
+               };
+               this._renderText( ctx , this._getTextLines() );
             },
             resetText     : function( text ){
                this.text  = text.toString();
@@ -3060,107 +3430,105 @@ define(
         });
         return Text;
     }
-);
-;define(
-    "canvax/shape/BrokenLine",
-    [
+);;define(
+    "canvax/shape/BrokenLine", [
         "canvax/display/Shape",
         "canvax/core/Base",
         "canvax/geom/SmoothSpline"
     ],
-    function(Shape , Base , SmoothSpline){
-        var BrokenLine = function(opt){
+    function(Shape, Base, SmoothSpline) {
+        var BrokenLine = function(opt) {
             var self = this;
             self.type = "brokenline";
             self._drawTypeOnly = "stroke";
-     
-            opt = Base.checkOpt( opt );
-            
-            self._initPointList( opt.context );
+            opt = Base.checkOpt(opt);
+            self._initPointList(opt.context);
+            self._context = _.deepExtend({
+                lineType: null,
+                smooth: false,
+                pointList: [], //{Array}  // 必须，各个顶角坐标
+                smoothFilter: null
+            }, opt.context );
 
-            self._context = {
-                lineType     : opt.context.lineType  || null,
-                smooth       : opt.context.smooth    || false,
-                pointList    : opt.context.pointList || [], //{Array}  // 必须，各个顶角坐标
-                smoothFilter : opt.context.smoothFilter || null
-            }
-     
-            //self.pointsLen = self._context.pointList.length;去掉该属性，直接自己pointList.length
-            self.originPointList = null; //context.pointList 的备份，如果有smooth，则为SmoothSpline后的备份
-            
             arguments.callee.superclass.constructor.apply(this, arguments);
-        }
-     
-        Base.creatClass(BrokenLine , Shape , {
-            $watch : function( name , value , preValue ){
-                if( name == "pointList" ){
-                    this._initPointList( this.context , value , preValue );
+        };
+
+        Base.creatClass(BrokenLine, Shape, {
+            $watch: function(name, value, preValue) {
+                if (name == "pointList") {
+                    this._initPointList(this.context, value, preValue);
                 }
             },
-            _initPointList : function( context , value , preValue ){
+            _initPointList: function(context, value, preValue) {
                 var myC = context;
-                if( myC.smooth ){
+                if (myC.smooth) {
                     //smoothFilter -- 比如在折线图中。会传一个smoothFilter过来做point的纠正。
                     //让y不能超过底部的原点
                     var obj = {
-                        points : myC.pointList
+                        points: myC.pointList
                     }
-                    if( _.isFunction( myC.smoothFilter ) ){
+                    if (_.isFunction(myC.smoothFilter)) {
                         obj.smoothFilter = myC.smoothFilter;
                     }
                     this._notWatch = true; //本次转换不出发心跳
-                    var currL      = SmoothSpline( obj );
+                    var currL = SmoothSpline(obj);
 
-                    if( value ){
-                        currL[currL.length-1][0] = value[value.length-1][0];
-                    }
-                    myC.pointList  = currL;
+                    if (value) {
+                        currL[currL.length - 1][0] = value[value.length - 1][0];
+                    };
+                    myC.pointList = currL;
                     this._notWatch = false;
                 };
-                this.originPointList = myC.pointList;
-                
             },
-            draw : function(ctx, context) {
+            //polygon需要覆盖draw方法，所以要把具体的绘制代码作为_draw抽离出来
+            draw: function(ctx, context) {
+                this._draw(ctx, context);
+            },
+            _draw: function(ctx, context) {
                 var pointList = context.pointList;
                 if (pointList.length < 2) {
                     // 少于2个点就不画了~
                     return;
-                }
-                if (!context.lineType || context.lineType == 'solid' || context.smooth) {
+                };
+                if (!context.lineType || context.lineType == 'solid') {
                     //默认为实线
                     //TODO:目前如果 有设置smooth 的情况下是不支持虚线的
-                    ctx.moveTo( pointList[0][0] , pointList[0][1] );
+                    ctx.moveTo(pointList[0][0], pointList[0][1]);
                     for (var i = 1, l = pointList.length; i < l; i++) {
-                        ctx.lineTo( pointList[i][0] , pointList[i][1] );
-                    }
+                        ctx.lineTo(pointList[i][0], pointList[i][1]);
+                    };
                 } else if (context.lineType == 'dashed' || context.lineType == 'dotted') {
-                    //画虚线的方法  
-                    ctx.moveTo( pointList[0][0] , pointList[0][1] );
-                    for (var i = 1, l = pointList.length; i < l; i++) {
-                        var fromX = pointList[i - 1][0];
-                        var toX   = pointList[i][0];
-                        var fromY = pointList[i - 1][1];
-                        var toY   = pointList[i][1];
-     
-                        this.dashedLineTo( ctx , fromX , fromY , toX , toY , 5 );
+                    if (context.smooth) {
+                        for (var si = 0, sl = pointList.length; si < sl; si++) {
+                            if (si == sl-1) {
+                                break;
+                            };
+                            ctx.moveTo( pointList[si][0] , pointList[si][1] );
+                            ctx.lineTo( pointList[si+1][0] , pointList[si+1][1] );
+                            si+=1;
+                        };
+                    } else {
+                        //画虚线的方法  
+                        ctx.moveTo(pointList[0][0], pointList[0][1]);
+                        for (var i = 1, l = pointList.length; i < l; i++) {
+                            var fromX = pointList[i - 1][0];
+                            var toX = pointList[i][0];
+                            var fromY = pointList[i - 1][1];
+                            var toY = pointList[i][1];
+                            this.dashedLineTo(ctx, fromX, fromY, toX, toY, 5);
+                        };
                     }
-                }
+                };
                 return;
             },
-            getRect :  function(context) {
+            getRect: function(context) {
                 var context = context ? context : this.context;
-                return this.getRectFormPointList( context );
+                return this.getRectFormPointList(context);
             }
         });
-     
         return BrokenLine;
-     
     }
-)
-
-
-
-;define(
+);;define(
     "canvax/shape/Circle",
     [
         "canvax/display/Shape",
@@ -3220,36 +3588,35 @@ define(
     }
 )
 ;define(
-    "canvax/shape/Line",
-    [
+    "canvax/shape/Line", [
         "canvax/display/Shape",
         "canvax/core/Base"
     ],
-    function(Shape,Base){
-        var Line = function(opt){
+    function(Shape, Base) {
+        var Line = function(opt) {
             var self = this;
             this.type = "line";
             this.drawTypeOnly = "stroke";
-            opt = Base.checkOpt( opt );
+            opt = Base.checkOpt(opt);
             self._context = {
-                 lineType      : opt.context.lineType || null, //可选 虚线 实现 的 类型
-                 xStart        : opt.context.xStart   || 0 ,//{number},  // 必须，起点横坐标
-                 yStart        : opt.context.yStart   || 0 ,//{number},  // 必须，起点纵坐标
-                 xEnd          : opt.context.xEnd     || 0 ,//{number},  // 必须，终点横坐标
-                 yEnd          : opt.context.yEnd     || 0 ,//{number},  // 必须，终点纵坐标
-                 dashLength    : opt.context.dashLength
+                lineType: opt.context.lineType || null, //可选 虚线 实现 的 类型
+                xStart: opt.context.xStart || 0, //{number},  // 必须，起点横坐标
+                yStart: opt.context.yStart || 0, //{number},  // 必须，起点纵坐标
+                xEnd: opt.context.xEnd || 0, //{number},  // 必须，终点横坐标
+                yEnd: opt.context.yEnd || 0, //{number},  // 必须，终点纵坐标
+                dashLength: opt.context.dashLength
             }
             arguments.callee.superclass.constructor.apply(this, arguments);
         };
-      
-        
-        Base.creatClass( Line , Shape , {
+
+
+        Base.creatClass(Line, Shape, {
             /**
              * 创建线条路径
              * ctx Canvas 2D上下文
              * style 样式
              */
-            draw : function(ctx, style) {
+            draw: function(ctx, style) {
                 if (!style.lineType || style.lineType == 'solid') {
                     //默认为实线
                     ctx.moveTo(parseInt(style.xStart), parseInt(style.yStart));
@@ -3263,30 +3630,27 @@ define(
                     );
                 }
             },
-      
+
             /**
              * 返回矩形区域，用于局部刷新和文字定位
              * style
              */
-            getRect:function(style) {
+            getRect: function(style) {
                 var lineWidth = style.lineWidth || 1;
                 var style = style ? style : this.context;
                 return {
-                    x : Math.min(style.xStart, style.xEnd) - lineWidth,
-                      y : Math.min(style.yStart, style.yEnd) - lineWidth,
-                      width : Math.abs(style.xStart - style.xEnd)
-                          + lineWidth,
-                      height : Math.abs(style.yStart - style.yEnd)
-                          + lineWidth
+                    x: Math.min(style.xStart, style.xEnd) - lineWidth,
+                    y: Math.min(style.yStart, style.yEnd) - lineWidth,
+                    width: Math.abs(style.xStart - style.xEnd) + lineWidth,
+                    height: Math.abs(style.yStart - style.yEnd) + lineWidth
                 };
             }
-      
-        } );
-      
+
+        });
+
         return Line;
-    } 
-);
-;define(
+    }
+);;define(
     "canvax/shape/Path", [
         "canvax/display/Shape",
         "canvax/core/Base",
@@ -3813,6 +4177,7 @@ define(
              * style 样式
              */
             getRect: function(style) {
+                
                 var lineWidth;
                 var style = style ? style : this.context;
                 if (style.strokeStyle || style.fillStyle) {
@@ -3833,7 +4198,7 @@ define(
 
                 var pathArray = this._parsePathData(style.path);
                 this._setPointList(pathArray, style);
-
+ 
                 for (var g = 0, gl = pathArray.length; g < gl; g++) {
                     for (var i = 0; i < pathArray[g].length; i++) {
                         var p = pathArray[g][i]._points || pathArray[g][i].points;
@@ -3881,117 +4246,50 @@ define(
         return Path;
     }
 );;define(
-    "canvax/shape/Polygon",
-    [
-        "canvax/display/Shape",
-        "canvax/core/Base"
+    "canvax/shape/Polygon", [
+        "canvax/core/Base",
+        "canvax/shape/BrokenLine"
     ],
-    function(Shape , Base){
-
-        var Polygon=function(opt){
+    function(Base, BrokenLine) {
+        var Polygon = function(opt) {
             var self = this;
-            self.type = "polygon";
-            self._hasFillAndStroke = true;
-            opt = Base.checkOpt( opt );
-            self._context = {
-                lineType      : opt.context.lineType  || null,
-                pointList     : opt.context.pointList || []  //{Array},   // 必须，多边形各个顶角坐标
-            }
+            opt = Base.checkOpt(opt);
+            var start = opt.context.pointList[0];
+            opt.context.pointList.push([start[0], start[1]]);
             arguments.callee.superclass.constructor.apply(this, arguments);
-     
+            self._drawTypeOnly = null;
+            self.type = "polygon";
         };
-     
-       
-        Base.creatClass( Polygon , Shape , {
-            draw : function(ctx, style) {
+        Base.creatClass(Polygon, BrokenLine, {
+            draw: function(ctx, context) {
+                if (context.fillStyle) {
+                    if (context.lineType == 'dashed' || context.lineType == 'dotted') {
+                        var pointList = context.pointList;
+                        //特殊处理，虚线围不成path，实线再build一次
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(pointList[0][0], pointList[0][1]);
+                        for (var i = 1, l = pointList.length; i < l; i++) {
+                            ctx.lineTo(pointList[i][0], pointList[i][1]);
+                        };
+                        ctx.closePath();
+                        ctx.restore();
+                        ctx.fill();
+                        this._drawTypeOnly = "stroke";
+                    };
+                };
+
+                //如果下面不加save restore，canvas会把下面的path和上面的path一起算作一条path。就会绘制了一条实现边框和一虚线边框。
                 ctx.save();
                 ctx.beginPath();
-                this.buildPath(ctx, style);
+                this._draw(ctx, context);
                 ctx.closePath();
-     
-                if ( style.strokeStyle || style.lineWidth ) {
-                    ctx.stroke();
-                }
-     
-                if (style.fillStyle) {
-                    if (style.lineType == 'dashed' || style.lineType == 'dotted') {
-                           // 特殊处理，虚线围不成path，实线再build一次
-                           ctx.beginPath();
-                           this.buildPath(
-                               ctx, 
-                               {
-                                lineType  :  "solid",
-                                lineWidth : style.lineWidth,
-                                pointList : style.pointList
-                               }
-                               );
-                           ctx.closePath();
-                       }
-                    ctx.fill();
-                }
-     
                 ctx.restore();
-     
-                return true;
-         
-            },
-            buildPath : function(ctx, style) {
-                var pointList = style.pointList;
-                // 开始点和结束点重复
-                var start = pointList[0];
-                var end = pointList[pointList.length-1];
-                if (start && end) {
-                    if (start[0] == end[0] &&
-                        start[1] == end[1]) {
-                            // 移除最后一个点
-                            pointList.pop();
-                        }
-                }
-                if (pointList.length < 2) {
-                    return;
-                }
-             
-                if (!style.lineType || style.lineType == 'solid') {
-                    //默认为实线
-                    ctx.moveTo(pointList[0][0],pointList[0][1]);
-                    for (var i = 1, l = pointList.length; i < l; i++) {
-                        ctx.lineTo(pointList[i][0],pointList[i][1]);
-                    }
-                    ctx.lineTo(pointList[0][0], pointList[0][1]);
-                } else if (style.lineType == 'dashed' || style.lineType == 'dotted') {
-                    var dashLength= (style.lineWidth || 1)*(style.lineType == 'dashed'? 5 : 1 );
-                    ctx.moveTo(pointList[0][0],pointList[0][1]);
-                    for (var i = 1, l = pointList.length; i < l; i++) {
-                        this.dashedLineTo(
-                                ctx,
-                                pointList[i - 1][0], pointList[i - 1][1],
-                                pointList[i][0], pointList[i][1],
-                                dashLength
-                                );
-                    }
-                    this.dashedLineTo(
-                            ctx,
-                            pointList[pointList.length - 1][0], 
-                            pointList[pointList.length - 1][1],
-                            pointList[0][0],
-                            pointList[0][1],
-                            dashLength
-                            );
-                }
-                
-                return;
-            },
-            getRect : function(context) {
-                var context = context ? context : this.context;
-                return this.getRectFormPointList( context );
             }
-     
-        } );
-     
+        });
         return Polygon;
     }
-);
-;define(
+);;define(
     "canvax/shape/Rect",
     [
         "canvax/display/Shape",
@@ -4278,7 +4576,7 @@ define(
         this.preventDefault = true;
         if( opt.preventDefault === false ){
             this.preventDefault = false
-        }
+        };
  
         //如果这个时候el里面已经有东西了。嗯，也许曾经这个el被canvax干过一次了。
         //那么要先清除这个el的所有内容。
@@ -4301,16 +4599,18 @@ define(
         this.rootOffset      = Base.getOffset(this.el); //this.el.offset();
         this.lastGetRO       = 0;//最后一次获取rootOffset的时间
  
-        
- 
         //每帧 由 心跳 上报的 需要重绘的stages 列表
         this.convertStages = {};
  
         this._heartBeat = false;//心跳，默认为false，即false的时候引擎处于静默状态 true则启动渲染
         
         //设置帧率
-        this._speedTime = parseInt(1000/Base.mainFrameRate);
         this._preRenderTime = 0;
+
+        //任务列表, 如果_taskList 不为空，那么主引擎就一直跑
+        //为 含有__enterFrame 方法 DisplayObject 的对象列表
+        //比如Movieclip的__enterFrame方法。
+        this._taskList = [];
         
         this._hoverStage = null;
         
@@ -4433,61 +4733,45 @@ define(
                 this.rootOffset      = Base.getOffset(this.el);
                 this.lastGetRO       = now;
             }
-        },    
-        setFrameRate : function(frameRate) {
-           if(Base.mainFrameRate == frameRate) {
-               return;
-           }
-           Base.mainFrameRate = frameRate;
- 
-           //根据最新的帧率，来计算最新的间隔刷新时间
-           this._speedTime = parseInt(1000/Base.mainFrameRate);
         },
-        getFrameRate : function(){
-           return  Base.mainFrameRate;
-        },
- 
         //如果引擎处于静默状态的话，就会启动
         __startEnter : function(){
            var self = this;
            if( !self.requestAid ){
-               self.requestAid = AnimationFrame.registTask( _.bind( self.__enterFrame , self) );
-               //self.requestAid = requestAnimationFrame( _.bind( self.__enterFrame , self) );
+               self.requestAid = AnimationFrame.registFrame( _.bind( self.__enterFrame , self) );
            }
         },
         __enterFrame : function(){
-            
             var self = this;
             //不管怎么样，__enterFrame执行了就要把
             //requestAid null 掉
             self.requestAid = null;
             Base.now = new Date().getTime();
- 
             if( self._heartBeat ){
- 
-                if(( Base.now - self._preRenderTime ) < self._speedTime ){
-                    //事件speed不够，下一帧再来
-                    self.__startEnter();
-                    return;
-                }
- 
-                //开始渲染的事件
-                self.fire("beginRender");
- 
                 _.each(_.values( self.convertStages ) , function(convertStage){
                    convertStage.stage._render( convertStage.stage.context2D );
                 });
- 
                 self._heartBeat = false;
-                
                 self.convertStages = {};
- 
                 //渲染完了，打上最新时间挫
                 self._preRenderTime = new Date().getTime();
- 
-                //渲染结束
-                self.fire("afterRender");
-            }
+            };
+            //先跑任务队列,因为有可能再具体的hander中会把自己清除掉
+            //所以跑任务和下面的length检测分开来
+            if(self._taskList.length > 0){
+               for(var i=0,l = self._taskList.length ; i < l ; i++ ){
+                  var obj = self._taskList[i];
+                  if(obj.__enterFrame){
+                     obj.__enterFrame();
+                  } else {
+                     self.__taskList.splice(i-- , 1);
+                  }
+               }  
+            };
+            //如果依然还有任务。 就继续enterFrame.
+            if(self._taskList.length > 0){
+               self.__startEnter();
+            };
         },
         _afterAddChild : function( stage , index ){
             var canvas;
@@ -4545,7 +4829,7 @@ define(
                     if (!self._isReady) {
                         //在还没初始化完毕的情况下，无需做任何处理
                         return;
-                    }
+                    };
  
                     if( shape.type == "canvax" ){
                         self._convertCanvax(opt)
@@ -4556,7 +4840,6 @@ define(
                                 convertShapes : {}
                             }
                         };
- 
                         if(shape){
                             if (!self.convertStages[ stage.id ].convertShapes[ shape.id ]){
                                 self.convertStages[ stage.id ].convertShapes[ shape.id ]={
@@ -4568,8 +4851,8 @@ define(
                                 return;
                             }
                         }
-                    }
-                }
+                    };
+                };
  
                 if (opt.convertType == "children"){
                     //元素结构变化，比如addchild removeChild等
@@ -4605,7 +4888,8 @@ define(
                         convertShapes : {}
                     }
                 } );
-            } 
+            };
+            
             
             if (!self._heartBeat){
                //如果发现引擎在静默状态，那么就唤醒引擎

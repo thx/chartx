@@ -12,17 +12,14 @@
 define(
     "canvax/shape/Droplet",
     [
-        "canvax/display/Shape",
         "canvax/core/Base",
         "canvax/shape/Path"
     ],
-    function(Shape,Base,Path){
+    function(Base,Path){
         var Droplet = function(opt){
             var self = this;
             opt = Base.checkOpt( opt );
             self._context = {
-                //pointList : [],
-                //path     : null,
                 hr : opt.context.hr || 0 , //{number},  // 必须，水滴横宽（中心到水平边缘最宽处距离）
                 vr : opt.context.vr || 0   //{number},  // 必须，水滴纵高（中心到尖端距离）
             };

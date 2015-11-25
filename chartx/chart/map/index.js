@@ -11,9 +11,11 @@ define(
         'chartx/utils/projection/normal',
         'chartx/components/tips/tip',//'./tips',
         'chartx/utils/dataformat',
-        "chartx/components/markpoint/index"
+        "chartx/components/markpoint/index",
+        "chartx/chart/theme",
+        "chartx/utils/colorformat"
     ],
-    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat , MarkPoint ){
+    function( Canvax , Chart , Path , Polygon , mapParams , GeoCoord , TextFixed , Projection , Tips , DataFormat , MarkPoint , Theme , ColorFormat){
     
         return Chart.extend({
             init : function( node , data , opts){
@@ -22,34 +24,35 @@ define(
                 this._mapDataMap = {};
                 this._nameMap    = {};
                 this.tips = {};
-                this.normalColor = "#f0f0f0";
                 this.area = {
-                    strokeStyle : "#fff",
-                    fillStyle   : this.normalColor,
+                    strokeStyle : "#ccc",
+                    fillStyle   : "#fff",
                     lineWidth   : 1,
                     linkage     : false, //是否开启省市联动，目前只支持中国地图
                     text        : {
                         fillStyle : "#999",
-                        enabled   : true
+                        enabled   : false
                     }
                 };
 
                 //城市坐标的补充。
-                this.geoCoordSupply    = {}
+                this.geoCoordSupply    = {};
 
-                //默认的areaField字段
-                this.areaField = "area";
+                //默认的areaField，和valueField字段，对应直角坐标系中的x,y
+                this.areaField  = "area";
+                this.valueField = "value";
 
                 this.tips = {
-                    field : []
+                    //field : []
                 };
 
                 _.deepExtend( this , opts );
 
+                this.maxValue = 1; //在_initData中会计算maxValue
                 this._initData( data );
 
                 //DataFormat后会重新计算出来最后的field
-                this.tips.field = this.dataFrame.yAxis.field;
+                this.valueField = this.dataFrame.yAxis.field;
 
                 this._mapScale  = 1; //Math.min( this.width / 560 , this.height / 470 );
                 
@@ -63,8 +66,14 @@ define(
             _initData : function( data ){
                 this.dataFrame = DataFormat(data , {
                      xAxis : { field : [ this.areaField ] },
-                     yAxis : { field : this.tips.field }
+                     yAxis : { field : this.valueField }
                 });
+                var me = this;
+                _.each( this.dataFrame.data , function( g ){
+                    if( g.field == me.valueField ){
+                        me.maxValue = _.max( g.data );
+                    };
+                } );
                 return this.dataFrame;
             },
             draw : function(){
@@ -176,7 +185,7 @@ define(
                     province.push(this._getSingleProvince(
                         mapName, pathArray[i], position
                     ));
-                }
+                };
                 
                 // 中国地图加入南海诸岛
                 if (mapName == 'china') {
@@ -325,20 +334,24 @@ define(
                 } );
                 return data;
             },
-            _getColor : function( c , area , normalColor ){
+            _getColor : function( c , areaData , colorType ){
                 var color = c;
                 if( _.isFunction( c ) ){
-                    color = c.apply(this , [ this._getDataForArea(area ) , this.dataFrame]);
-                } 
+                    color = c.apply(this , [ areaData , this.dataFrame]);
+                }; 
                 //缺省颜色
                 if( (!color || color == "") ){
                     //如果有传normal进来，就不管normalColor参数是什么，都直接用
-                    if( arguments.length >= 3 ){
-                        color = normalColor;
+                    var ad = areaData.data;
+                    if( ad && ad.color  ){
+                        color = ad.color;
                     } else {
-                        color = this.normalColor;
-                    }
-                }
+                        if( colorType == "fillStyle" ){
+                            var val = ad ? ad[ this.valueField ] : 0;
+                            color = ColorFormat.colorRgba( Theme.brandColor , parseFloat((val * 0.9/ this.maxValue ).toFixed(2)) );
+                        };
+                    };
+                };
                 return color;
             },
             _widget : function( features ){
@@ -357,7 +370,9 @@ define(
                 });
 
                 _.each(mapDataList , function( md , i ){
-
+                    var aread = me._getDataForArea( md );
+                    var fillStyle = me._getColor( me.area.fillStyle   , aread , "fillStyle");
+                    var strokeStyle = (me._getColor( me.area.strokeStyle , aread , "strokeStyle") || "#ccc");
                     var shapeCtx = {
                         x:0,
                         y:0,
@@ -365,8 +380,8 @@ define(
                         scaleY      : me._mapScale,
                         path        : md.path,
                         lineWidth   : me.area.lineWidth,
-                        fillStyle   : me._getColor( me.area.fillStyle   , md ),
-                        strokeStyle : me._getColor( me.area.strokeStyle , md ),
+                        fillStyle   : fillStyle,
+                        strokeStyle : strokeStyle,
                         cursor      : "pointer"
                     };
 
@@ -379,11 +394,15 @@ define(
                     area_sp.addChild( area );
                     
                     area.defInd  = i;
-                    area.mapData = md
+                    area.mapData = md;
+                    area._strokeStyle = strokeStyle;
+                    area._fillStyle = fillStyle;
+                    area._hoverFillStyle = fillStyle;
                     area.on("mouseover" , function(e){
-
                         this.toFront();
-                        this.context.lineWidth ++;
+                        //this.context.lineWidth ++;
+                        this.context.strokeStyle = Theme.brandColor;
+                        this.context.fillStyle   = this._hoverFillStyle;
                         if( e.fromTarget && e.fromTarget.type == "text" &&  e.fromTarget.text == this.mapData.name ){
                             return;
                         };
@@ -395,7 +414,9 @@ define(
                     });
 
                     area.on("mouseout" , function(e){
-                        this.context.lineWidth --;
+                        //this.context.lineWidth --;
+                        this.context.strokeStyle = this._strokeStyle;
+                        this.context.fillStyle   = this._fillStyle;
                         this.toBack( mapLen - this.defInd );
                         if( e.toTarget && e.toTarget.type == "text" &&  e.toTarget.text == this.mapData.name ){
                             return;
@@ -569,11 +590,11 @@ define(
                 var areaData = this._getDataForArea( mapData );
 
                 if( areaData.data ){
-                    _.each( this.tips.field , function( field , i ){
+                    _.each( this.valueField , function( field , i ){
                         var val = areaData.data[ field ];
                         if( val !== undefined && val !== null ){
                             tipsInfo.nodesInfoList.push({
-                                field  : field ,
+                                field  : field,
                                 value  : areaData.data[ field ]
                             });
                         }

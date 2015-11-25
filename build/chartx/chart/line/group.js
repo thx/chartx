@@ -7,9 +7,10 @@ define(
         "chartx/utils/tools",
         "chartx/utils/colorformat",
         "canvax/animation/Tween",
-        "chartx/chart/theme"
+        "chartx/chart/theme",
+        "canvax/animation/AnimationFrame"
     ],
-    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween, Theme) {
+    function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween, Theme, AnimationFrame) {
         window.Canvax = Canvax
         var Group = function(field, a, opt, ctx, sort, yAxis, h, w) {
             this.field = field; //_groupInd在yAxis.field中对应的值
@@ -163,48 +164,31 @@ define(
             },
             _grow: function(callback) {
                 var self = this;
-                var timer = null;
                 if (self._currPointList.length == 0) {
                     return;
-                }
-                var growAnima = function() {
-                    var fromObj = self._getPointPosStr(self._currPointList);
-                    var toObj = self._getPointPosStr(self._pointList);
-
-                    var bezierT = new Tween.Tween(fromObj)
-                        .to(toObj, 1500)
-                        .easing(Tween.Easing.Quintic.Out)
-                        .onUpdate(function() {
-
-                            for (var p in this) {
-                                var ind = parseInt(p.split("_")[2]);
-                                var xory = parseInt(p.split("_")[1]);
-                                self._currPointList[ind] && (self._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
-                            };
-
-                            self._bline.context.pointList = _.clone(self._currPointList);
-
-                            self._fill.context.path = self._fillLine(self._bline);
-
-                            self._circles && _.each(self._circles.children, function(circle, i) {
-                                var ind = parseInt(circle.id.split("_")[1]);
-                                circle.context.y = self._currPointList[ind][1];
-                                circle.context.x = self._currPointList[ind][0];
-                            });
-
-                        }).onComplete(function() {
-                            cancelAnimationFrame(timer);
-                            callback && callback(self);
-                        }).start();
-                    animate();
                 };
-
-                function animate() {
-                    timer = requestAnimationFrame(animate);
-                    Tween.update();
-                };
-                growAnima();
-
+                AnimationFrame.registTween({
+                    from: self._getPointPosStr(self._currPointList),
+                    to: self._getPointPosStr(self._pointList),
+                    onUpdate: function() {
+                        for (var p in this) {
+                            var ind = parseInt(p.split("_")[2]);
+                            var xory = parseInt(p.split("_")[1]);
+                            self._currPointList[ind] && (self._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
+                        };
+                        self._bline.context.pointList = _.clone(self._currPointList);
+                        self._fill.context.path = self._fillLine(self._bline);
+                        self._fill.context.fillStyle = self._getFillStyle();
+                        self._circles && _.each(self._circles.children, function(circle, i) {
+                            var ind = parseInt(circle.id.split("_")[1]);
+                            circle.context.y = self._currPointList[ind][1];
+                            circle.context.x = self._currPointList[ind][0];
+                        });
+                    },
+                    onComplete : function(){
+                        callback && callback(self);
+                    }
+                });
             },
             _getPointPosStr: function(list) {
                 var obj = {};
@@ -304,7 +288,21 @@ define(
                 self.sprite.addChild(bline);
                 self._bline = bline;
 
+                var fill = new Path({ //填充
+                    context: {
+                        path: self._fillLine(bline),
+                        fillStyle: self._getFillStyle(), //fill_gradient || self._getColor(self.fill.fillStyle),
+                        globalAlpha: _.isArray(self.fill.alpha) ? 1 : self.fill.alpha //self._getProp( self.fill.alpha )
+                    }
+                });
+                self.sprite.addChild(fill);
+                self._fill = fill;
 
+                self._createNodes();
+
+            },
+            _getFillStyle: function() {
+                var self = this;
                 var fill_gradient = null;
                 if (_.isArray(self.fill.alpha)) {
 
@@ -318,7 +316,7 @@ define(
                     };
 
                     //从bline中找到最高的点
-                    var topP = _.min(bline.context.pointList, function(p) {
+                    var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
                     //创建一个线性渐变
@@ -330,20 +328,9 @@ define(
 
                     var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
                     fill_gradient.addColorStop(1, rgba1);
-                }
+                };
 
-                var fill = new Path({ //填充
-                    context: {
-                        path: self._fillLine(bline),
-                        fillStyle: fill_gradient || self._getColor(self.fill.fillStyle),
-                        globalAlpha: fill_gradient ? 1 : self.fill.alpha //self._getProp( self.fill.alpha )
-                    }
-                });
-                self.sprite.addChild(fill);
-                self._fill = fill;
-
-                self._createNodes();
-
+                return fill_gradient || self._getColor(self.fill.fillStyle);
             },
             _createNodes: function() {
                 var self = this;
@@ -368,13 +355,13 @@ define(
                         };
 
                         var sourceInd = 0;
-                        if (self._yAxis.place == "right"){
-                            sourceInd = al-1;
+                        if (self._yAxis.place == "right") {
+                            sourceInd = al - 1;
                         };
 
-                        if( a == sourceInd ){
+                        if (a == sourceInd) {
                             context.fillStyle = context.strokeStyle;
-                            context.r ++;
+                            context.r++;
                         }
 
                         var circle = new Circle({

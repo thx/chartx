@@ -122,10 +122,6 @@ define(
                 } );
                 return touchesTarget;
             }
-            /*
-             *触屏类处理结束
-             * */
-
         };
         return touchHandler;
     } 

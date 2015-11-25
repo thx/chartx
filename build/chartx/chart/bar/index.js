@@ -2,11 +2,11 @@ define(
     "chartx/chart/bar/graphs", [
         "canvax/index",
         "canvax/shape/Rect",
-        "canvax/animation/Tween",
         "chartx/utils/tools",
-        "chartx/chart/theme"
+        "chartx/chart/theme",
+        "canvax/animation/AnimationFrame"
     ],
-    function(Canvax, Rect, Tween, Tools , Theme) {
+    function(Canvax, Rect, Tools , Theme , AnimationFrame) {
 
         var Graphs = function(opt, root) {
             this.w = 0;
@@ -243,34 +243,22 @@ define(
              */
             grow: function(callback) {
                 var self = this;
-                var timer = null;
+                //var timer = null;
                 var i = 1;
                 if (this.sort && this.sort == "desc") {
                     i = -1;
                 };
-                var growAnima = function() {
-                    var bezierT = new Tween.Tween({
-                            h: 0
-                        })
-                        .to({
-                            h: self.h
-                        }, 500)
-                        .onUpdate(function() {
-                            self.sprite.context.scaleY = i * this.h / self.h;
-                        }).onComplete(function() {
-                            self._growEnd();
-                            cancelAnimationFrame(timer);
-                            callback && callback(self);
-                        }).start();
-                    animate();
-                };
-
-                function animate() {
-                    timer = requestAnimationFrame(animate);
-                    Tween.update();
-                };
-
-                growAnima();
+                AnimationFrame.registTween({
+                    from : {h:0},
+                    to   : {h:self.h},
+                    onUpdate : function(){
+                        self.sprite.context.scaleY = i * this.h / self.h;
+                    },
+                    onComplete : function(){
+                        self._growEnd();
+                        callback && callback(self);
+                    }
+                });
             },
             _growEnd: function() {
                 if (this.text.enabled) {
