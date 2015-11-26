@@ -25,8 +25,8 @@ define(
                 this._nameMap    = {};
                 this.tips = {};
                 this.area = {
-                    strokeStyle : "#ccc",
-                    fillStyle   : "#fff",
+                    strokeStyle : null,
+                    fillStyle   : null,
                     lineWidth   : 1,
                     linkage     : false, //是否开启省市联动，目前只支持中国地图
                     text        : {
@@ -74,6 +74,7 @@ define(
                         me.maxValue = _.max( g.data );
                     };
                 } );
+
                 return this.dataFrame;
             },
             draw : function(){
@@ -371,7 +372,8 @@ define(
 
                 _.each(mapDataList , function( md , i ){
                     var aread = me._getDataForArea( md );
-                    var fillStyle = me._getColor( me.area.fillStyle   , aread , "fillStyle");
+
+                    var fillStyle = (me._getColor( me.area.fillStyle   , aread , "fillStyle") || "#fff");
                     var strokeStyle = (me._getColor( me.area.strokeStyle , aread , "strokeStyle") || "#ccc");
                     var shapeCtx = {
                         x:0,

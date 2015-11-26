@@ -275,14 +275,6 @@ define(
             update: function(opt) {
                 _.deepExtend(this, opt);
                 this._pointList = this._getPointList(this.data);
-                /*
-                var list = [];
-                for (var a = 0, al = this.data.length; a < al; a++) {
-                    var o = this.data[a];
-                    list.push([o.x, o.y]);
-                };
-                this._pointList = list;
-                */
                 this._grow();
             },
             //自我销毁
@@ -368,6 +360,7 @@ define(
                 if (self._currPointList.length == 0) {
                     return;
                 };
+
                 AnimationFrame.registTween({
                     from: self._getPointPosStr(self._currPointList),
                     to: self._getPointPosStr(self._pointList),
@@ -449,16 +442,14 @@ define(
                     //filter后，data可能length==0
                     return;
                 };
-
                 var list = [];
-
                 for (var a = 0, al = self.data.length; a < al; a++) {
                     var o = self.data[a];
                     var sourceInd = 0;
                     //如果是属于双轴中的右轴。
                     if (self._yAxis.place == "right") {
                         sourceInd = al - 1;
-                    }
+                    };
                     list.push([
                         o.x,
                         self.data[sourceInd].y
@@ -498,9 +489,7 @@ define(
                 });
                 self.sprite.addChild(fill);
                 self._fill = fill;
-
                 self._createNodes();
-
             },
             _getFillStyle: function() {
                 var self = this;
@@ -620,6 +609,8 @@ define(
             this.ctx = root.stage.context2D;
             this.field = null;
 
+            //一个记录了原始yAxis.field 一些基本信息的map
+            //{ "uv" : {ind : 0 , _yAxis : } ...}
             this._yAxisFieldsMap = {};
             this._setyAxisFieldsMap();
 
@@ -679,7 +670,7 @@ define(
             _setyAxisFieldsMap : function(){
                 var me = this;
                 _.each( _.flatten( this._getYaxisField() ) , function( field , i ){
-                     me._yAxisFieldsMap[ field ] = i;
+                     me._yAxisFieldsMap[ field ] = { ind : i };
                 });
             },
             _getYaxisField: function(i) {
@@ -694,23 +685,25 @@ define(
                 };
                 return this.field;
             },
-            /*
-             *@params opt
-             *@params ind 最新添加的数据所在的索引位置
-             **/
-            add: function(opt, ind) {
+            add: function(opt, field) {
                 var self = this;
                 _.deepExtend(this, opt);
                 var group = new Group(
-                    self._getYaxisField()[ind],
-                    ind, //_groupInd
+                    field,
+                    self._yAxisFieldsMap[field]._groupInd, //_groupInd
                     self.opt,
-                    self.ctx
+                    self.ctx,
+                    self._yAxisFieldsMap[field]._sort,
+                    self._yAxisFieldsMap[field]._yAxis,
+                    self.h,
+                    self.w
                 );
 
+                var ind = _.indexOf( self.field , field );
                 group.draw({
-                    data: ind > self.data.length - 1 ? self.data[self.data.length - 1] : self.data[ind]
+                    data: self.data[ind]
                 });
+
                 self.sprite.addChildAt(group.sprite, ind);
                 self.groups.splice(ind, 0, group);
 
@@ -763,9 +756,16 @@ define(
                                 _yAxis = self.root._yAxisR
                             };
                         };
+
+                        //记录起来该字段对应的应该是哪个_yAxis
+                        var yfm = self._yAxisFieldsMap[ fields[i] ];
+                        yfm._yAxis = _yAxis;
+                        yfm._sort  = _sort;
+                        yfm._groupInd = _groupInd;
+
                         var group = new Group(
                             fields[i],
-                            self._yAxisFieldsMap[fields[i]],
+                            _groupInd,
                             self.opt,
                             self.ctx,
                             _sort,
@@ -925,32 +925,20 @@ define(
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线
              *@params field 添加的字段
-             *@params ind 添加到哪个位置 默认在最后面
              **/
-            add: function(field, ind) {
+            add: function( field ) {
+                var ind = 0;
+                var self = this;
 
-                if (_.indexOf(this.yAxis.field, field) >= 0) {
-                    return;
-                }
+                //这代码有必要注释下，从_graphs._yAxisFieldsMap去查询field对应的原始索引，查出所有索引比自己低的总和，然后把自己插入对应的位置
+                _.each( _.flatten(this.yAxis.field) , function(f,i){
+                    if( self._graphs._yAxisFieldsMap[ f ].ind < self._graphs._yAxisFieldsMap[ field ].ind ){
+                        ind++;
+                    }
+                } );
 
-                var i = 0;
-                _.each(this._graphs.groups, function(g, gi) {
-                    i = Math.max(i, g._groupInd);
-                });
-                if (ind != undefined && ind != null) {
-                    i = ind;
-                };
-
-
-                //首先，yAxis要重新计算
-                if (ind == undefined) {
-                    this.yAxis.field.push(field);
-                    ind = this.yAxis.field.length - 1;
-                } else {
-                    this.yAxis.field.splice(ind, 0, field);
-                }
+                this.yAxis.field.splice(ind, 0, field);    
                 this.dataFrame = this._initData(this.dataFrame.org, this);
-
                 this._yAxis.update(this.yAxis, this.dataFrame.yAxis);
 
                 //然后yAxis更新后，对应的背景也要更新
@@ -962,10 +950,7 @@ define(
 
                 this._graphs.add({
                     data: this._trimGraphs()
-                }, ind);
-                //this._graphs.update();
-
-
+                }, field);
             },
             /*
              *删除一个yaxis字段，也就是删除一条brokenline线
@@ -985,6 +970,7 @@ define(
                 };
             },
             _remove: function(ind) {
+
                 //首先，yAxis要重新计算
                 //先在dataFrame中更新yAxis的数据
                 this.dataFrame.yAxis.field.splice(ind, 1);

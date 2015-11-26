@@ -17,6 +17,8 @@ define(
             this.ctx = root.stage.context2D;
             this.field = null;
 
+            //一个记录了原始yAxis.field 一些基本信息的map
+            //{ "uv" : {ind : 0 , _yAxis : } ...}
             this._yAxisFieldsMap = {};
             this._setyAxisFieldsMap();
 
@@ -76,7 +78,7 @@ define(
             _setyAxisFieldsMap : function(){
                 var me = this;
                 _.each( _.flatten( this._getYaxisField() ) , function( field , i ){
-                     me._yAxisFieldsMap[ field ] = i;
+                     me._yAxisFieldsMap[ field ] = { ind : i };
                 });
             },
             _getYaxisField: function(i) {
@@ -91,23 +93,25 @@ define(
                 };
                 return this.field;
             },
-            /*
-             *@params opt
-             *@params ind 最新添加的数据所在的索引位置
-             **/
-            add: function(opt, ind) {
+            add: function(opt, field) {
                 var self = this;
                 _.deepExtend(this, opt);
                 var group = new Group(
-                    self._getYaxisField()[ind],
-                    ind, //_groupInd
+                    field,
+                    self._yAxisFieldsMap[field]._groupInd, //_groupInd
                     self.opt,
-                    self.ctx
+                    self.ctx,
+                    self._yAxisFieldsMap[field]._sort,
+                    self._yAxisFieldsMap[field]._yAxis,
+                    self.h,
+                    self.w
                 );
 
+                var ind = _.indexOf( self.field , field );
                 group.draw({
-                    data: ind > self.data.length - 1 ? self.data[self.data.length - 1] : self.data[ind]
+                    data: self.data[ind]
                 });
+
                 self.sprite.addChildAt(group.sprite, ind);
                 self.groups.splice(ind, 0, group);
 
@@ -160,9 +164,16 @@ define(
                                 _yAxis = self.root._yAxisR
                             };
                         };
+
+                        //记录起来该字段对应的应该是哪个_yAxis
+                        var yfm = self._yAxisFieldsMap[ fields[i] ];
+                        yfm._yAxis = _yAxis;
+                        yfm._sort  = _sort;
+                        yfm._groupInd = _groupInd;
+
                         var group = new Group(
                             fields[i],
-                            self._yAxisFieldsMap[fields[i]],
+                            _groupInd,
                             self.opt,
                             self.ctx,
                             _sort,

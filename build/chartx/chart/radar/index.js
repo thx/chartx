@@ -117,6 +117,7 @@ define(
             this.fillStyle     = null;
             this.alpha         = 0.5;
             this.lineWidth     = 1;
+            this.smooth        = false;
             this.sprite = null ;
             this.currentAngInd = null;
 
@@ -276,6 +277,7 @@ define(
                         context : {
                             pointList   : pointList,
                             globalAlpha : this.alpha,//0.5,
+                            smooth : this.smooth,
                             fillStyle   : this.getFillStyle(i)//this._colors[i]
                         }
                     });
@@ -286,13 +288,14 @@ define(
                             lineWidth : 2,
                             cursor    : "pointer",
                             fillStyle : "RGBA(0,0,0,0)",
+                            smooth    : this.smooth,
                             strokeStyle : this.getFillStyle(i)//this._colors[i]
                         }
                     });
     
                     //最开始该poly是在的group的index，用来mouseout的时候还原到本来的位置。
                     polygonBorder.groupInd = i;
-                    polygonBorder.bg       = polygonBg
+                    polygonBorder.bg       = polygonBg;
                     polygonBorder.hover(function(e){
                         e.groupInd = this.groupInd;
                         this.parent.toFront();

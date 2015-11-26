@@ -74,14 +74,6 @@ define(
             update: function(opt) {
                 _.deepExtend(this, opt);
                 this._pointList = this._getPointList(this.data);
-                /*
-                var list = [];
-                for (var a = 0, al = this.data.length; a < al; a++) {
-                    var o = this.data[a];
-                    list.push([o.x, o.y]);
-                };
-                this._pointList = list;
-                */
                 this._grow();
             },
             //自我销毁
@@ -167,6 +159,7 @@ define(
                 if (self._currPointList.length == 0) {
                     return;
                 };
+
                 AnimationFrame.registTween({
                     from: self._getPointPosStr(self._currPointList),
                     to: self._getPointPosStr(self._pointList),
@@ -248,16 +241,14 @@ define(
                     //filter后，data可能length==0
                     return;
                 };
-
                 var list = [];
-
                 for (var a = 0, al = self.data.length; a < al; a++) {
                     var o = self.data[a];
                     var sourceInd = 0;
                     //如果是属于双轴中的右轴。
                     if (self._yAxis.place == "right") {
                         sourceInd = al - 1;
-                    }
+                    };
                     list.push([
                         o.x,
                         self.data[sourceInd].y
@@ -297,9 +288,7 @@ define(
                 });
                 self.sprite.addChild(fill);
                 self._fill = fill;
-
                 self._createNodes();
-
             },
             _getFillStyle: function() {
                 var self = this;

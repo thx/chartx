@@ -114,7 +114,7 @@ define(
                     //执行用户的conComplete
                     opt.onComplete();
                 });
-
+                Tween.add(tween);
                 tween.start();
                 animate();
                 tween._animate = animate;
