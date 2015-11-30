@@ -32,15 +32,15 @@ define(
             addChild : function(child){
                 if( !child ) {
                     return;
-                } 
+                };
                 if(this.getChildIndex(child) != -1) {
                     child.parent = this;
                     return child;
-                }
+                };
                 //如果他在别的子元素中，那么就从别人那里删除了
                 if(child.parent) {
                     child.parent.removeChild(child);
-                }
+                };
                 this.children.push( child );
                 child.parent = this;
                 if(this.heartBeat){
@@ -49,11 +49,11 @@ define(
                      target      : child,
                      src         : this
                    });
-                }
+                };
     
                 if(this._afterAddChild){
                    this._afterAddChild(child);
-                }
+                };
     
                 return child;
             },
@@ -61,11 +61,10 @@ define(
                 if(this.getChildIndex(child) != -1) {
                     child.parent = this;
                     return child;
-                }
-    
+                };
                 if(child.parent) {
                     child.parent.removeChild(child);
-                }
+                };
                 this.children.splice(index, 0, child);
                 child.parent = this;
                 
@@ -76,11 +75,11 @@ define(
                      target       : child,
                      src      : this
                    });
-                }
+                };
                 
                 if(this._afterAddChild){
                    this._afterAddChild(child,index);
-                }
+                };
     
                 return child;
             },
@@ -94,7 +93,7 @@ define(
                 var child = this.children[index];
                 if (child != null) {
                     child.parent = null;
-                }
+                };
                 this.children.splice(index, 1);
                 
                 if(this.heartBeat){
@@ -170,9 +169,6 @@ define(
                 this.children.splice(oldIndex, 1);
                 this.children.splice(index, 0, child);
             },
-            contains : function(child) {
-                return this.getChildIndex(child) != -1;
-            },
             getNumChildren : function() {
                 return this.children.length;
             },
@@ -219,4 +215,4 @@ define(
         });
         return DisplayObjectContainer;
     }
-)
+);

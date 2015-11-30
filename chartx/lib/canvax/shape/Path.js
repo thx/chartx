@@ -535,6 +535,7 @@ define(
              * style 样式
              */
             getRect: function(style) {
+                
                 var lineWidth;
                 var style = style ? style : this.context;
                 if (style.strokeStyle || style.fillStyle) {
@@ -555,7 +556,7 @@ define(
 
                 var pathArray = this._parsePathData(style.path);
                 this._setPointList(pathArray, style);
-
+ 
                 for (var g = 0, gl = pathArray.length; g < gl; g++) {
                     for (var i = 0; i < pathArray[g].length; i++) {
                         var p = pathArray[g][i]._points || pathArray[g][i].points;

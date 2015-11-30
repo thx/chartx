@@ -5,121 +5,53 @@
  *
  * 多边形 类  （不规则）
  *
- *
  * 对应context的属性有
- * @lineType 边框类型 可以是 dashed or solid
  * @pointList 多边形各个顶角坐标
  **/
 
 
 define(
-    "canvax/shape/Polygon",
-    [
-        "canvax/display/Shape",
-        "canvax/core/Base"
+    "canvax/shape/Polygon", [
+        "canvax/core/Base",
+        "canvax/shape/BrokenLine"
     ],
-    function(Shape , Base){
-
-        var Polygon=function(opt){
+    function(Base, BrokenLine) {
+        var Polygon = function(opt) {
             var self = this;
-            self.type = "polygon";
-            self._hasFillAndStroke = true;
-            opt = Base.checkOpt( opt );
-            self._context = {
-                lineType      : opt.context.lineType  || null,
-                pointList     : opt.context.pointList || []  //{Array},   // 必须，多边形各个顶角坐标
-            }
+            opt = Base.checkOpt(opt);
+            var start = opt.context.pointList[0];
+            opt.context.pointList.push([start[0], start[1]]);
             arguments.callee.superclass.constructor.apply(this, arguments);
-     
+            self._drawTypeOnly = null;
+            self.type = "polygon";
         };
-     
-       
-        Base.creatClass( Polygon , Shape , {
-            draw : function(ctx, style) {
+        Base.creatClass(Polygon, BrokenLine, {
+            draw: function(ctx, context) {
+                if (context.fillStyle) {
+                    if (context.lineType == 'dashed' || context.lineType == 'dotted') {
+                        var pointList = context.pointList;
+                        //特殊处理，虚线围不成path，实线再build一次
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(pointList[0][0], pointList[0][1]);
+                        for (var i = 1, l = pointList.length; i < l; i++) {
+                            ctx.lineTo(pointList[i][0], pointList[i][1]);
+                        };
+                        ctx.closePath();
+                        ctx.restore();
+                        ctx.fill();
+                        this._drawTypeOnly = "stroke";
+                    };
+                };
+
+                //如果下面不加save restore，canvas会把下面的path和上面的path一起算作一条path。就会绘制了一条实现边框和一虚线边框。
                 ctx.save();
                 ctx.beginPath();
-                this.buildPath(ctx, style);
+                this._draw(ctx, context);
                 ctx.closePath();
-     
-                if ( style.strokeStyle || style.lineWidth ) {
-                    ctx.stroke();
-                }
-     
-                if (style.fillStyle) {
-                    if (style.lineType == 'dashed' || style.lineType == 'dotted') {
-                           // 特殊处理，虚线围不成path，实线再build一次
-                           ctx.beginPath();
-                           this.buildPath(
-                               ctx, 
-                               {
-                                lineType  :  "solid",
-                                lineWidth : style.lineWidth,
-                                pointList : style.pointList
-                               }
-                               );
-                           ctx.closePath();
-                       }
-                    ctx.fill();
-                }
-     
                 ctx.restore();
-     
-                return true;
-         
-            },
-            buildPath : function(ctx, style) {
-                var pointList = style.pointList;
-                // 开始点和结束点重复
-                var start = pointList[0];
-                var end = pointList[pointList.length-1];
-                if (start && end) {
-                    if (start[0] == end[0] &&
-                        start[1] == end[1]) {
-                            // 移除最后一个点
-                            pointList.pop();
-                        }
-                }
-                if (pointList.length < 2) {
-                    return;
-                }
-             
-                if (!style.lineType || style.lineType == 'solid') {
-                    //默认为实线
-                    ctx.moveTo(pointList[0][0],pointList[0][1]);
-                    for (var i = 1, l = pointList.length; i < l; i++) {
-                        ctx.lineTo(pointList[i][0],pointList[i][1]);
-                    }
-                    ctx.lineTo(pointList[0][0], pointList[0][1]);
-                } else if (style.lineType == 'dashed' || style.lineType == 'dotted') {
-                    var dashLength= (style.lineWidth || 1)*(style.lineType == 'dashed'? 5 : 1 );
-                    ctx.moveTo(pointList[0][0],pointList[0][1]);
-                    for (var i = 1, l = pointList.length; i < l; i++) {
-                        this.dashedLineTo(
-                                ctx,
-                                pointList[i - 1][0], pointList[i - 1][1],
-                                pointList[i][0], pointList[i][1],
-                                dashLength
-                                );
-                    }
-                    this.dashedLineTo(
-                            ctx,
-                            pointList[pointList.length - 1][0], 
-                            pointList[pointList.length - 1][1],
-                            pointList[0][0],
-                            pointList[0][1],
-                            dashLength
-                            );
-                }
-                
-                return;
-            },
-            getRect : function(context) {
-                var context = context ? context : this.context;
-                return this.getRectFormPointList( context );
             }
-     
-        } );
-     
+        });
         return Polygon;
     }
 );

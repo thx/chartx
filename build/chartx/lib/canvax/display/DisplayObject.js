@@ -15,11 +15,10 @@ define(
         "canvax/display/Point",
         "canvax/core/Base",
         "canvax/geom/HitTestPoint",
-        !window.PropertyFactory ? "canvax/core/PropertyFactory" : ""
+        "canvax/animation/AnimationFrame",
+        "canvax/core/PropertyFactory"
     ],
-    function(EventDispatcher , Matrix , Point , Base , HitTestPoint , PropertyFactory){
-
-        PropertyFactory || (PropertyFactory = window.PropertyFactory);
+    function(EventDispatcher , Matrix , Point , Base , HitTestPoint , AnimationFrame , PropertyFactory){
 
         var DisplayObject = function(opt){
             arguments.callee.superclass.constructor.apply(this, arguments);
@@ -49,7 +48,6 @@ define(
 
             self.xyToInt         = "xyToInt" in opt ? opt.xyToInt : true;    //是否对xy坐标统一int处理，默认为true，但是有的时候可以由外界用户手动指定是否需要计算为int，因为有的时候不计算比较好，比如，进度图表中，再sector的两端添加两个圆来做圆角的进度条的时候，圆circle不做int计算，才能和sector更好的衔接
 
-    
             //创建好context
             self._createContext( opt );
     
@@ -58,7 +56,7 @@ define(
             //如果没有id 则 沿用uid
             if(self.id == null){
                 self.id = UID ;
-            }
+            };
     
             self.init.apply(self , arguments);
     
@@ -75,6 +73,7 @@ define(
                 self.context = null;
     
                 //提供给Coer.PropertyFactory() 来 给 self.context 设置 propertys
+                //这里不能用_.extend， 因为要保证_contextATTRS的纯粹，只覆盖下面已有的属性
                 var _contextATTRS = Base.copy( {
                     width         : 0,
                     height        : 0,
@@ -130,7 +129,7 @@ define(
     
                     if( _.indexOf( transFormProps , name ) >= 0 ) {
                         this.$owner._updateTransform();
-                    }
+                    };
     
                     if( this.$owner._notWatch ){
                         return;
@@ -138,7 +137,7 @@ define(
     
                     if( this.$owner.$watch ){
                         this.$owner.$watch( name , value , preValue );
-                    }
+                    };
     
                     this.$owner.heartBeat( {
                         convertType:"context",
@@ -190,7 +189,7 @@ define(
             getStage : function(){
                 if( this.stage ) {
                     return this.stage;
-                }
+                };
                 var p = this;
                 if (p.type != "stage"){
                   while(p.parent) {
@@ -199,7 +198,6 @@ define(
                       break;
                     }
                   };
-      
                   if (p.type !== "stage") {
                     //如果得到的顶点display 的type不是Stage,也就是说不是stage元素
                     //那么只能说明这个p所代表的顶端display 还没有添加到displayList中，也就是没有没添加到
@@ -298,7 +296,6 @@ define(
              *@num 移动的层数量 默认到顶端
              */
             toFront : function( num ){
-    
                 if(!this.parent) {
                   return;
                 }
@@ -320,26 +317,18 @@ define(
                 this.parent.addChildAt( me , toIndex-1 );
             },
             _transformHander : function( ctx ){
-    
                 var transForm = this._transform;
                 if( !transForm ) {
                     transForm = this._updateTransform();
-                }
-    
+                };
                 //运用矩阵开始变形
                 ctx.transform.apply( ctx , transForm.toArray() );
-     
-                //设置透明度
                 //ctx.globalAlpha *= this.context.globalAlpha;
             },
             _updateTransform : function() {
-            
                 var _transform = new Matrix();
-    
                 _transform.identity();
-    
                 var ctx = this.context;
-    
                 //是否需要Transform
                 if(ctx.scaleX !== 1 || ctx.scaleY !==1 ){
                     //如果有缩放
@@ -353,7 +342,6 @@ define(
                         _transform.translate( origin.x , origin.y );
                     };
                 };
-    
     
                 var rotation = ctx.rotation;
                 if( rotation ){
@@ -391,41 +379,17 @@ define(
     
                 return _transform;
             },
-            getRect:function(style){
-                return {
-                   x      : 0,
-                   y      : 0,
-                   width  : style.width,
-                   height : style.height
-                }
-            },
             //显示对象的选取检测处理函数
             getChildInPoint : function( point ){
                 var result; //检测的结果
-                
-                //先把鼠标转换到stage下面来
-                /*
-                var stage = this.getStage();
-                if( stage._transform ){
-                    var inverseMatrixStage = stage._transform.clone();
-                    inverseMatrixStage.scale( 1 / stage.context.$model.scaleX , 1 / stage.context.$model.scaleY );
-                    inverseMatrixStage     = inverseMatrixStage.invert();
-                    var originPosStage     = [ point.x , point.y ];
-                    inverseMatrixStage.mulVector( originPosStage , [ point.x , point.y ] );
-    
-                    point.x = originPosStage[0] ;
-                    point.y = originPosStage[1] ;
-                }
-                */
-                
     
                 //第一步，吧glob的point转换到对应的obj的层级内的坐标系统
                 if( this.type != "stage" && this.parent && this.parent.type != "stage" ) {
                     point = this.parent.globalToLocal( point );
                 };
     
-                var x = point.x ;
-                var y = point.y ;
+                var x = point.x;
+                var y = point.y;
     
                 //这个时候如果有对context的set，告诉引擎不需要watch，因为这个是引擎触发的，不是用户
                 //用户set context 才需要触发watch
@@ -434,13 +398,12 @@ define(
                 //对鼠标的坐标也做相同的变换
                 if( this._transform ){
                     var inverseMatrix = this._transform.clone().invert();
-    
                     var originPos = [x, y];
                     originPos = inverseMatrix.mulVector( originPos );
     
                     x = originPos[0];
                     y = originPos[1];
-                }
+                };
     
                 var _rect = this._rect = this.getRect(this.context);
     
@@ -457,13 +420,10 @@ define(
                     return false;
                 };
                 //正式开始第一步的矩形范围判断
-                if (
-                    this.type == "path" || 
-                    (x    >= _rect.x
+                if ( x    >= _rect.x
                     &&  x <= (_rect.x + _rect.width)
                     &&  y >= _rect.y
                     &&  y <= (_rect.y + _rect.height)
-                    )
                 ) {
                    //那么就在这个元素的矩形范围内
                    result = HitTestPoint.isInside( this , {
@@ -475,9 +435,30 @@ define(
                    result = false;
                 }
                 this._notWatch = false;
-    
                 return result;
-    
+            },
+            /*
+            * animate
+            * @param toContent 要动画变形到的属性集合
+            * @param options tween 动画参数
+            */
+            animate : function( toContent , options ){
+                var to = toContent;
+                var from = {};
+                for( var p in to ){
+                    from[ p ] = this.context[p];
+                };
+                !options && (options = {});
+                options.from = from;
+                options.to = to;
+
+                var self = this;
+                options.onUpdate = function(){
+                    for( var p in this ){
+                        self.context[p] = this[p];
+                    };
+                };
+                AnimationFrame.registTween( options );
             },
             _render : function( ctx ){	
                 if( !this.context.visible || this.context.globalAlpha <= 0 ){

@@ -153,6 +153,9 @@ define(
                            me.shapeBg.context.r = this.r;
                            me.shapeBg.context.globalAlpha = this.alpha;
                        } ).repeat(Infinity).delay(800)
+                       .onComplete(function(){
+                           debugger;
+                       })
                        .easing( me.easing )
                        .start();
                        animate();

@@ -1,1 +1,1 @@
-define("chartx/chart/theme",[],function(){return{colors:["#67bbe6","#ff9c59","#57d9b8","#f26d83","#cc70cc"]}});
+define("chartx/chart/theme",["chartx/utils/colorformat"],function(a){var b="#ff6600",c=["#ff8533","#73ace6","#82d982","#e673ac","#cd6bed","#8282d9","#c0e650","#e6ac73","#6bcded","#73e6ac","#ed6bcd","#9966cc"],d={colors:c,brandColor:b};return d});

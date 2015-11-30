@@ -80,32 +80,20 @@ define(
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线
              *@params field 添加的字段
-             *@params ind 添加到哪个位置 默认在最后面
              **/
-            add: function(field, ind) {
+            add: function( field ) {
+                var ind = 0;
+                var self = this;
 
-                if (_.indexOf(this.yAxis.field, field) >= 0) {
-                    return;
-                }
+                //这代码有必要注释下，从_graphs._yAxisFieldsMap去查询field对应的原始索引，查出所有索引比自己低的总和，然后把自己插入对应的位置
+                _.each( _.flatten(this.yAxis.field) , function(f,i){
+                    if( self._graphs._yAxisFieldsMap[ f ].ind < self._graphs._yAxisFieldsMap[ field ].ind ){
+                        ind++;
+                    }
+                } );
 
-                var i = 0;
-                _.each(this._graphs.groups, function(g, gi) {
-                    i = Math.max(i, g._groupInd);
-                });
-                if (ind != undefined && ind != null) {
-                    i = ind;
-                };
-
-
-                //首先，yAxis要重新计算
-                if (ind == undefined) {
-                    this.yAxis.field.push(field);
-                    ind = this.yAxis.field.length - 1;
-                } else {
-                    this.yAxis.field.splice(ind, 0, field);
-                }
+                this.yAxis.field.splice(ind, 0, field);    
                 this.dataFrame = this._initData(this.dataFrame.org, this);
-
                 this._yAxis.update(this.yAxis, this.dataFrame.yAxis);
 
                 //然后yAxis更新后，对应的背景也要更新
@@ -117,10 +105,7 @@ define(
 
                 this._graphs.add({
                     data: this._trimGraphs()
-                }, ind);
-                //this._graphs.update();
-
-
+                }, field);
             },
             /*
              *删除一个yaxis字段，也就是删除一条brokenline线
@@ -140,6 +125,7 @@ define(
                 };
             },
             _remove: function(ind) {
+
                 //首先，yAxis要重新计算
                 //先在dataFrame中更新yAxis的数据
                 this.dataFrame.yAxis.field.splice(ind, 1);

@@ -20,18 +20,12 @@ define(
             //当前激活的点对应的obj，在touch下可以是个数组,和上面的curPoints对应
             this.curPointsTarget = [];
             
-            /**
-             *交互相关属性
-             * */
-            //接触canvas
             this._touching = false;
             //正在拖动，前提是_touching=true
             this._draging =false;
  
             //当前的鼠标状态
             this._cursor  = "default";
-
-            //this.initEvent = function(){};
         };
         Base.creatClass( EventHandler , Handler , {
             /*

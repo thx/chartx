@@ -20,12 +20,12 @@ define(
             this.xOrigin = {                                //原点开始的x轴线
                     enabled     : 1,
                     lineWidth   : 1,
-                    strokeStyle : '#f0f0f0'//'#e5e5e5'
-            } 
+                    strokeStyle : '#e6e6e6'
+            }
             this.yOrigin = {                                //原点开始的y轴线               
                     enabled     : 1,
                     lineWidth   : 1,
-                    strokeStyle : '#f0f0f0',//'#e5e5e5',
+                    strokeStyle : '#e6e6e6',
                     biaxial     : false
             }
             this.xAxis   = {                                //x轴上的线
@@ -35,10 +35,9 @@ define(
                     // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                     lineWidth   : 1,
-                    strokeStyle : '#fafafa', //'#e5e5e5',
+                    strokeStyle : '#f0f0f0', //'#e5e5e5',
                     filter      : null 
             }
-    
             this.yAxis   = {                                //y轴上的线
                     enabled     : 0,
                     data        : [],                      //[{x:100},{}]
@@ -46,7 +45,7 @@ define(
                     // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
                     lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
                     lineWidth   : 1,
-                    strokeStyle : '#fafafa',//'#e5e5e5',
+                    strokeStyle : '#f0f0f0',//'#e5e5e5',
                     filter      : null
             } 
     

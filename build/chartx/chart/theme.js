@@ -1,10 +1,14 @@
 define(
-    "chartx/chart/theme",[],
-    function(){
-        return {
-            //colors : ["#ff6600" , "#17a1e6" , "#41d9b3" , "#f23555" , "#c746c7"]
-            //colors : ["#ff6600" , "#67bbe6" , "#f26179" , "#62d9bb" , "#c763c7"],
-            colors : ["#67bbe6" , "#ff9c59" , "#57d9b8" , "#f26d83","#cc70cc"]
-        }
+    "chartx/chart/theme",[
+        "chartx/utils/colorformat"
+    ],
+    function( ColorFormat ){
+    	var brandColor = "#ff6600";
+        var colors = ["#ff8533","#73ace6","#82d982","#e673ac","#cd6bed","#8282d9","#c0e650","#e6ac73","#6bcded","#73e6ac","#ed6bcd","#9966cc"]
+        var Theme = {
+            colors : colors,
+            brandColor : brandColor
+        };
+        return Theme;
     }
 );

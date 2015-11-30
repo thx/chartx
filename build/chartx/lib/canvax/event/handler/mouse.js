@@ -208,9 +208,7 @@ define(
                     e.point  = oldObj.globalToLocal( point );
                     oldObj.dispatchEvent( e );
                 };
-
                 me._cursorHander( obj , oldObj );
- 
             },
             _cursorHander    : function( obj , oldObj ){
                 if(!obj && !oldObj ){

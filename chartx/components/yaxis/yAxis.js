@@ -25,7 +25,7 @@ define(
             };
 
             this.text = {
-                    fillStyle : '#333333',
+                    fillStyle : '#999',
                     fontSize  : 12,
                     format    : null,
                     rotation  : 0
