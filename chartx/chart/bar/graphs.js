@@ -15,6 +15,8 @@ define(
             this._yAxisFieldsMap = {};
             this._setyAxisFieldsMap();
 
+            this.animation = true;
+
             this.pos = {
                 x: 0,
                 y: 0
@@ -135,6 +137,7 @@ define(
 
                             //横向的分组区片感应区
                             var itemW = me.w / hLen;
+
                             var hoverRect = new Rect({
                                 id: "bhr_" + h,
                                 pointChkPriority: false,
@@ -194,6 +197,12 @@ define(
                                 radiusR = Math.min(radiusR, me.bar.radius);
                                 rectCxt.radius = [radiusR, radiusR, 0, 0];
                             };
+ 
+                            if( !me.animation ){
+                                delete rectCxt.scaleY;
+                                rectCxt.y = finalPos.y;
+                            };
+
                             var rectEl = new Rect({
                                 id: "bar_" + i + "_" + h + "_" + v,
                                 context: rectCxt
@@ -259,6 +268,10 @@ define(
              */
             grow: function(callback) {
                 var self = this;
+                if( !this.animation ){
+                    callback && callback(self);
+                    return;
+                };
                 var sy = 1;
                 if (this.sort && this.sort == "desc") {
                     sy = -1;

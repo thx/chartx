@@ -15,7 +15,7 @@ define(
          *@node chart在dom里的目标容器节点。
          */
         var Canvax = Chart.Canvax;
-        return Chart.extend({
+        var Bar = Chart.extend({
             _xAxis: null,
             _yAxis: null,
             _back: null,
@@ -24,22 +24,29 @@ define(
 
             init: function(node, data, opts) {
 
+                this._node = node;
+                this._data = data;
+                this._opts = opts;
+
+                if( opts.dataZoom ){
+                    this.padding.bottom += 46;
+                    this.dataZoom = {
+                        start : 0,
+                        end   : data.length - 2 //因为第一行是title
+                    }
+                };
+
                 if (opts.proportion) {
                     this.proportion = opts.proportion;
                     this._initProportion(node, data, opts);
                 } else {
-                    this._opts = opts;
                     _.deepExtend(this, opts);
                 };
 
-                if( opts.dataZoom ){
-                    this.padding.bottom += 45;
-                };
                 this.dataFrame = this._initData(data);
             },
             //如果为比例柱状图的话
-            _initProportion: function(node, data, opts) {
-                this._opts = opts;
+            _initProportion : function(node, data, opts) {
                 !opts.tips && (opts.tips = {});
                 opts.tips = _.deepExtend(opts.tips, {
                     content: function(info) {
@@ -112,7 +119,15 @@ define(
 
             },
             _initData: function(data, opt) {
-                var d = dataFormat.apply(this, arguments);
+                var d;
+                var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
+                if(dataZoom){
+                    var datas = [ data[0] ];
+                    datas = datas.concat( data.slice( dataZoom.start+1 , dataZoom.end+1 ) );
+                    d = dataFormat.apply(this, [ datas , opt ]);
+                } else {
+                    d = dataFormat.apply(this, arguments);
+                }
                 _.each(d.yAxis.field, function(field, i) {
                     if (!_.isArray(field)) {
                         field = [field];
@@ -145,7 +160,7 @@ define(
                         x: this.padding.left,
                         y: y - this.padding.bottom
                     },
-                    yMaxHeight :graphsH 
+                    yMaxHeight : graphsH 
                 });
 
                 var _yAxisW = this._yAxis.w;
@@ -179,7 +194,7 @@ define(
                     }
                 });
 
-                var o = this._trimGraphs()
+                var o = this._trimGraphs();
                     //绘制主图形区域
                 this._graphs.draw(o.data, {
                     w: this._xAxis.xGraphsWidth,
@@ -344,8 +359,48 @@ define(
                 var me = this;
                 require(["chartx/components/datazoom/index"] , function( DataZoom ){
                     //初始化datazoom模块
-                    me._dataZoom = new DataZoom( me.dataZoom ).done(function(){
+                    var dataZoomOpt = _.deepExtend( {
+                        w : me._xAxis.xGraphsWidth,
+                        //h : me._xAxis.h,
+                        pos : {
+                            x : me._xAxis.pos.x,
+                            y : me._xAxis.pos.y+me._xAxis.h
+                        }
+                    } , me.dataZoom);
+
+                    var cloneEl = me.el.cloneNode();
+                    cloneEl.innerHTML = "";
+                    cloneEl.id = me.el.id+"_currclone";
+                    cloneEl.style.position = "absolute";
+                    cloneEl.style.top = "10000px";
+                    document.body.appendChild( cloneEl );
+                    
+                    var opts = _.deepExtend( {} , me._opts );
+                    _.deepExtend(opts , {
+                        graphs : {
+                            bar : {
+                                fillStyle : "#ececec"
+                            },
+                            animation : false
+                        },
+                        dataZoom : null
+                    });
+
+                    var thumbBar = new Bar( cloneEl , me._data , opts );
+                    thumbBar.draw();
+
+                    me._dataZoom = new DataZoom( dataZoomOpt , thumbBar._graphs ).done(function(){
+                        
+                        var graphssp = thumbBar._graphs.sprite;
+                        graphssp.context.x = 0;
+                        graphssp.context.y = this.h - this.barY;
+                        graphssp.context.scaleY = this.barH / thumbBar._graphs.h;
+                        this.sprite.addChild( graphssp );
+                        
+                        debugger
+                        
                         me.core.addChild( this.sprite );
+                        //thumbBar.destroy();
                     });
                 });
             },
@@ -471,5 +526,6 @@ define(
                 });
             }
         });
+        return Bar;
     }
 );
