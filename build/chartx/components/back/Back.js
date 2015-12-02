@@ -94,16 +94,17 @@ define(
                 for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var line = new Line({
+                        id : "back_line_"+a,
                         context : {
                             xStart      : 0,
                             yStart      : o.y,
-                            xEnd        : self.w,
+                            xEnd        : 0,//self.w,
                             yEnd        : o.y,
                             lineType    : self.xAxis.lineType,
                             lineWidth   : self.xAxis.lineWidth,
                             strokeStyle : self.xAxis.strokeStyle  
                         }
-                    })
+                    });
                     if(self.xAxis.enabled){
                         _.isFunction( self.xAxis.filter ) && self.xAxis.filter({
                             layoutData : self.yAxis.data,
@@ -111,7 +112,18 @@ define(
                             line       : line
                         });
                         self.xAxisSp.addChild(line);
-                    }
+                        
+                        line.animate({
+                            xStart : 0,
+                            xEnd : self.w
+                        } , {
+                            duration : 500,
+                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                            delay : (al-a) * 80,
+                            id : line.id
+                        });
+
+                    };
                 };
 
                 //y轴方向的线集合

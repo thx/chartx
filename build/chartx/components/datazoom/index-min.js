@@ -1,0 +1,1 @@
+define("chartx/components/datazoom/index",["canvax/index","canvax/shape/Rect"],function(a,b){var c=function(a){this.range={start:0,end:0},this._doneHandle=null,this.done=function(a){this._doneHandle=a},this.init()};return c.prototype={init:function(){this.sprite=new a.Display.Sprite({})}},c});

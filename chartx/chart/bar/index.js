@@ -24,12 +24,17 @@ define(
             _tip: null,
 
             init: function(node, data, opts) {
+
                 if (opts.proportion) {
                     this.proportion = opts.proportion;
                     this._initProportion(node, data, opts);
                 } else {
                     this._opts = opts;
                     _.deepExtend(this, opts);
+                };
+
+                if( opts.dataZoom ){
+                    this.padding.bottom += 45;
                 };
                 this.dataFrame = this._initData(data);
             },
@@ -133,13 +138,13 @@ define(
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
                 var y = parseInt(h - this._xAxis.h);
-                var graphsH = y - this.padding.top;
+                var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
                 this._yAxis.draw({
                     pos: {
                         x: this.padding.left,
-                        y: y
+                        y: y - this.padding.bottom
                     },
                     yMaxHeight :graphsH 
                 });
@@ -148,7 +153,7 @@ define(
 
                 //绘制x轴
                 this._xAxis.draw({
-                    graphh: h,
+                    graphh: h - this.padding.bottom,
                     graphw: w - this.padding.right,
                     yAxisW: _yAxisW
                 });
@@ -171,7 +176,7 @@ define(
                     },
                     pos: {
                         x: _yAxisW,
-                        y: y
+                        y: y - this.padding.bottom
                     }
                 });
 
@@ -182,11 +187,16 @@ define(
                     h: this._yAxis.yGraphsHeight,
                     pos: {
                         x: _yAxisW,
-                        y: y
+                        y: y - this.padding.bottom
                     },
                     yDataSectionLen: this._yAxis.dataSection.length,
                     sort : this._yAxis.sort
                 });
+
+                
+                if( this.dataZoom ){
+                    this._initDataZoom();
+                }
             },
 
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
@@ -330,6 +340,15 @@ define(
                 });
 
                 this.bindEvent();
+            },
+            _initDataZoom: function(g){
+                var me = this;
+                require(["chartx/components/datazoom/index"] , function( DataZoom ){
+                    //初始化datazoom模块
+                    me._dataZoom = new DataZoom( me.dataZoom ).done(function(){
+                        me.core.addChild( this.sprite );
+                    });
+                });
             },
             _initMarkLine: function(g) {
                 var me = this

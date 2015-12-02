@@ -2,11 +2,12 @@ define(
     "chartx/components/yaxis/yAxis" , 
     [
         "canvax/index",
+        "canvax/core/Base",
         "canvax/shape/Line",
         "chartx/utils/tools",
         'chartx/utils/datasection'
     ],
-    function( Canvax , Line , Tools , DataSection){
+    function( Canvax , CanvaxBase , Line , Tools , DataSection){
         var yAxis = function(opt , data ){
             
             this.w = 0;
@@ -273,14 +274,16 @@ define(
                     //文字
                     var txt = new Canvax.Display.Text( content ,
                        {
+                        id : "yAxis_txt_"+CanvaxBase.getUID(),
                         context : {
                             x  : x + ( self.place == "left" ? -5 : 5 ),
-                            y  : posy,
+                            y  : posy + 20,
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
                             rotation     : -Math.abs(this.text.rotation),
                             textAlign    : textAlign,
-                            textBaseline : "middle"
+                            textBaseline : "middle",
+                            globalAlpha  : 0
                        }
                     });
                     yNode.addChild( txt );
@@ -313,6 +316,17 @@ define(
                     });
 
                     self.sprite.addChild( yNode );
+
+                    txt.animate({
+                        globalAlpha : 1,
+                        y : txt.context.y - 20
+                    } , {
+                        duration : 500,
+                        easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                        delay : a * 80,
+                        id : txt.id
+                    
+                    });
                 };
 
                 maxW += self.dis;
