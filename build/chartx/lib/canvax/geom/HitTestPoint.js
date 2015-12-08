@@ -2,11 +2,6 @@
  * Canvax
  * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
  * 点击检测 类
- 
- * 下面是关于射线判断和非零环绕 两算法的资料
- * http://www.zhihu.com/question/28416085 
- * http://geomalgorithms.com/a03-_inclusion.html
- * http://alienryderflex.com/polygon/
  * */
 define(
     "canvax/geom/HitTestPoint", [
@@ -220,12 +215,7 @@ define(
         /**
          * 多边形包含判断 Nonzero Winding Number Rule
          */
-        //http://geomalgorithms.com/a03-_inclusion.html
-        //winding优化方案，这样就不需要用到反三角函数，就会快很多。
-        //非零环绕数规则（Nonzero Winding Number Rule）：若环绕数为0表示在多边形内，非零表示在多边形外
-        //首先使多边形的边变为矢量。将环绕数初始化为零。再从任意位置p作一条射线。
-        //当从p点沿射线方向移动时，对在每个方向上穿过射线的边计数，每当多边形的边从右到左穿过射线时，环绕数加1，从左到右时，环绕数减1。
-        //处理完多边形的所有相关边之后，若环绕数为非零，则p为内部点，否则，p是外部点。
+
         function _isInsidePolygon_WindingNumber(shape, x, y) {
             var context = shape.context ? shape.context : shape;
             var poly = _.clone(context.pointList); //poly 多边形顶点，数组成员的格式同 p

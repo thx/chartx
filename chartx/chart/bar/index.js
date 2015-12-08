@@ -28,11 +28,13 @@ define(
                 this._data = data;
                 this._opts = opts;
 
-                if( opts.dataZoom ){
+                if (opts.dataZoom) {
                     this.padding.bottom += 46;
                     this.dataZoom = {
-                        start : 0,
-                        end   : data.length - 2 //因为第一行是title
+                        range: {
+                            start: 0,
+                            end: data.length - 2 //因为第一行是title
+                        }
                     }
                 };
 
@@ -45,8 +47,26 @@ define(
 
                 this.dataFrame = this._initData(data);
             },
+            /*
+             * 如果只有数据改动的情况
+             */
+            resetData: function(data) {
+                this.dataFrame = this._initData(data, this);
+                this._xAxis.resetData(this.dataFrame.xAxis, {
+                    animation: false
+                });
+                this._yAxis.resetData(this.dataFrame.yAxis, {
+                    animation: false
+                });
+                this._graphs.resetData(this._trimGraphs());
+                this._graphs.grow(function() {
+                    //callback
+                }, {
+                    delay: 0
+                });
+            },
             //如果为比例柱状图的话
-            _initProportion : function(node, data, opts) {
+            _initProportion: function(node, data, opts) {
                 !opts.tips && (opts.tips = {});
                 opts.tips = _.deepExtend(opts.tips, {
                     content: function(info) {
@@ -121,10 +141,10 @@ define(
             _initData: function(data, opt) {
                 var d;
                 var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
-                if(dataZoom){
-                    var datas = [ data[0] ];
-                    datas = datas.concat( data.slice( dataZoom.start+1 , dataZoom.end+1 ) );
-                    d = dataFormat.apply(this, [ datas , opt ]);
+                if (dataZoom) {
+                    var datas = [data[0]];
+                    datas = datas.concat( data.slice( dataZoom.range.start + 1, dataZoom.range.end + 1) );
+                    d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
                 }
@@ -160,7 +180,7 @@ define(
                         x: this.padding.left,
                         y: y - this.padding.bottom
                     },
-                    yMaxHeight : graphsH 
+                    yMaxHeight: graphsH
                 });
 
                 var _yAxisW = this._yAxis.w;
@@ -195,7 +215,7 @@ define(
                 });
 
                 var o = this._trimGraphs();
-                    //绘制主图形区域
+                //绘制主图形区域
                 this._graphs.draw(o.data, {
                     w: this._xAxis.xGraphsWidth,
                     h: this._yAxis.yGraphsHeight,
@@ -204,11 +224,11 @@ define(
                         y: y - this.padding.bottom
                     },
                     yDataSectionLen: this._yAxis.dataSection.length,
-                    sort : this._yAxis.sort
+                    sort: this._yAxis.sort
                 });
 
-                
-                if( this.dataZoom ){
+
+                if (this.dataZoom) {
                     this._initDataZoom();
                 }
             },
@@ -216,7 +236,7 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo: function(e) {
-                if(!e.eventInfo){
+                if (!e.eventInfo) {
                     return;
                 }
                 e.eventInfo.xAxis = {
@@ -290,10 +310,10 @@ define(
                             };
 
                             var node = {
-                                value : val,
-                                field : me._getTargetField( b , v , i , _yAxis.field ),
-                                x     : x,
-                                y     : y
+                                value: val,
+                                field: me._getTargetField(b, v, i, _yAxis.field),
+                                x: x,
+                                y: y
                             };
 
                             if (me.proportion) {
@@ -306,30 +326,31 @@ define(
                             yLen = subv.length
                         });
                     });
-                }
+                };
 
                 for (var a = 0, al = yValueMaxs.length; a < al; a++) {
                     center[a].agValue = yValueMaxs[a] / yLen
                     center[a].agPosition = -(yValueMaxs[a] / yLen - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
-                }
+                };
                 //均值
-                this.dataFrame.yAxis.center = center
+                this.dataFrame.yAxis.center = center;
+
                 return {
                     data: tmpData
                 };
             },
-            _getTargetField : function( b , v , i , field ){
-                if( !field ){
+            _getTargetField: function(b, v, i, field) {
+                if (!field) {
                     field = this._yAxis.field;
                 };
-                if( _.isString( field ) ){
+                if (_.isString(field)) {
                     return field;
-                } else if( _.isArray(field) ){
+                } else if (_.isArray(field)) {
                     var res = field[b];
-                    if( _.isString( res ) ){
+                    if (_.isString(res)) {
                         return res;
                     } else if (_.isArray(res)) {
-                        return res[ v ];
+                        return res[v];
                     };
                 }
             },
@@ -347,61 +368,74 @@ define(
                 this._graphs.grow(function(g) {
                     if (me._opts.markLine) {
                         me._initMarkLine(g);
-                    }
+                    };
                     if (me._opts.markPoint) {
                         me._initMarkPoint(g);
-                    }
+                    };
                 });
 
                 this.bindEvent();
             },
-            _initDataZoom: function(g){
+            _initDataZoom: function() {
                 var me = this;
-                require(["chartx/components/datazoom/index"] , function( DataZoom ){
+                require(["chartx/components/datazoom/index"], function(DataZoom) {
                     //初始化datazoom模块
-                    var dataZoomOpt = _.deepExtend( {
-                        w : me._xAxis.xGraphsWidth,
+
+                    var dataZoomOpt = _.deepExtend({
+                        w: me._xAxis.xGraphsWidth,
+                        count: me._data.length - 1,
                         //h : me._xAxis.h,
-                        pos : {
-                            x : me._xAxis.pos.x,
-                            y : me._xAxis.pos.y+me._xAxis.h
+                        pos: {
+                            x: me._xAxis.pos.x,
+                            y: me._xAxis.pos.y + me._xAxis.h
+                        },
+                        getRange: function(range) {
+                            me.dataZoom.range = range;
+                            me.resetData(me._data);
                         }
                     } , me.dataZoom);
 
                     var cloneEl = me.el.cloneNode();
                     cloneEl.innerHTML = "";
-                    cloneEl.id = me.el.id+"_currclone";
+                    cloneEl.id = me.el.id + "_currclone";
                     cloneEl.style.position = "absolute";
                     cloneEl.style.top = "10000px";
-                    document.body.appendChild( cloneEl );
-                    
-                    var opts = _.deepExtend( {} , me._opts );
-                    _.deepExtend(opts , {
-                        graphs : {
-                            bar : {
-                                fillStyle : "#ececec"
+                    document.body.appendChild(cloneEl);
+
+                    var opts = _.deepExtend({}, me._opts);
+                    _.deepExtend(opts, {
+                        graphs: {
+                            bar: {
+                                fillStyle: "#ececec"
                             },
-                            animation : false
+                            animation: false,
+                            eventEnabled: false
                         },
-                        dataZoom : null
+                        dataZoom: null,
+                        xAxis: {
+                            //enabled: false
+                        },
+                        yAxis: {
+                            //enabled: false
+                        }
                     });
 
-                    var thumbBar = new Bar( cloneEl , me._data , opts );
+                    var thumbBar = new Bar(cloneEl, me._data, opts);
                     thumbBar.draw();
 
-                    me._dataZoom = new DataZoom( dataZoomOpt , thumbBar._graphs ).done(function(){
-                        
-                        var graphssp = thumbBar._graphs.sprite;
-                        graphssp.context.x = 0;
-                        graphssp.context.y = this.h - this.barY;
-                        graphssp.context.scaleY = this.barH / thumbBar._graphs.h;
-                        this.sprite.addChild( graphssp );
-                        
-                        debugger
-                        
-                        me.core.addChild( this.sprite );
-                        //thumbBar.destroy();
-                    });
+                    me._dataZoom = new DataZoom(dataZoomOpt);
+
+                    var graphssp = thumbBar._graphs.sprite;
+                    graphssp.id = graphssp.id + "_datazoomthumbbarbg"
+                    graphssp.context.x = 0;
+                    graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
+                    graphssp.context.scaleY = me._dataZoom.barH / thumbBar._graphs.h;
+
+                    me._dataZoom.dataZoomBg.addChild(graphssp);
+
+                    me.core.addChild(me._dataZoom.sprite);
+                    thumbBar.destroy();
+                    cloneEl.parentNode.removeChild(cloneEl);
                 });
             },
             _initMarkLine: function(g) {
@@ -470,12 +504,12 @@ define(
                                 barObj.y += gOrigin.y;
                                 var mpCtx = {
                                     value: barObj.value,
-                                    shapeType : "droplet",
+                                    shapeType: "droplet",
                                     markTarget: barObj.field,
                                     //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 igroup 给出去的时候要反过来
-                                    iGroup    : barObj.iNode,
-                                    iNode     : barObj.iGroup,
-                                    iLay      : barObj.iLay,
+                                    iGroup: barObj.iNode,
+                                    iNode: barObj.iGroup,
+                                    iLay: barObj.iLay,
                                     point: {
                                         x: barObj.x,
                                         y: barObj.y
@@ -492,13 +526,13 @@ define(
                                         this.context.hr--;
                                         e.stopPropagation();
                                     });
-                                    this.shape.on("mousemove" , function(e){
+                                    this.shape.on("mousemove", function(e) {
                                         e.stopPropagation();
                                     });
-                                    this.shape.on("tap click" , function(e){
+                                    this.shape.on("tap click", function(e) {
                                         e.stopPropagation();
                                         e.eventInfo = mp;
-                                        me.fire("markpointclick" , e);
+                                        me.fire("markpointclick", e);
                                     });
                                 });
                             });

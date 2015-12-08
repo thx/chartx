@@ -19,17 +19,23 @@ define(
         var Polygon = function(opt , atype) {
             var self = this;
             opt = Base.checkOpt(opt);
-debugger
+
             if(atype !== "clone"){
                 var start = opt.context.pointList[0];
                 var end   = opt.context.pointList[ opt.context.pointList.length - 1 ];
-                opt.context.pointList.push( start );
                 if( opt.context.smooth ){
                     opt.context.pointList.unshift( end );
-                };
+                } else {
+                    opt.context.pointList.push( start );
+                }
             };
             
             arguments.callee.superclass.constructor.apply(this, arguments);
+
+            if(atype !== "clone" && opt.context.smooth && end){
+
+            };
+
             self._drawTypeOnly = null;
             self.type = "polygon";
         };

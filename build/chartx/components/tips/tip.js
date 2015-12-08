@@ -89,8 +89,8 @@ define(
                 var y   = this._checkY( pos.y + this.offset );
 
                 var _backPos = this.sprite.parent.globalToLocal( { x : x , y : y} );
-                this.sprite.context.x = _backPos.x;
-                this.sprite.context.y = _backPos.y;
+                //this.sprite.context.x = _backPos.x;
+                //this.sprite.context.y = _backPos.y;
                 this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;";
             },
             /**

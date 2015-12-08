@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- radar</title>
-<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<title>xChart demo -- line</title>
+<script type="text/javascript" src="../../lib/sea.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -26,59 +26,53 @@
 <link rel="stylesheet" href="../../lib/demo.css">
 </head>
 <body >
- 
+
 <table>
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
+
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    [ "英雄"     , "攻击力" ,"操作难度"] ,
-    [ "德玛皇子" , 65       , 38   ] ,
-    [ "疾风剑豪" , 59       , 48   ] ,
-    [ "盖伦"     , 90       , 40   ] ,
-    [ "寒冰射手" , 81       , 69   ] ,
-    [ "武器大师" , 56       , 96   ] ,
-    [ "战争之王" , 55       , 77   ] ,
-    [ "瑞文"     , 40       , 50  ] 
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ]
 ];
-/*
-var data= [ 
-  [ "英雄" , "攻击力" ,"操作难度"] ,
-  [ "德玛皇子" , null , null ] , 
-  [ "疾风剑豪" , null , null ] ,
-  [ "盖伦" , null , null ] , 
-  [ "寒冰射手" , null , null ] , 
-  [ "武器大师" , null , null ] , 
-  [ "战争之王" , null , null ] , 
-  [ "瑞文" , null , null ] 
-];
-*/
-
 var options = {
     yAxis : {
-        field : ["攻击力","操作难度"],
-        //dataSection : [0,40,80,100]
+        field : ["uv","pv"]
     },
     xAxis : {
-        field : ["英雄"],
+        field : ["xfield"]
     },
-    tips : {
-        prefix : ["攻击力","操作难度"]
-    },
-    graphs : {
-        alpha : 0.2,
-        smooth:true
+    dataZoom : {
+        start : 1,
+        end   : 8
     }
 }   
-Chartx.radar("canvasTest" , data , options).then(function( chart ){
-    chart.on("click" , function(e){
-         //e.eventInfo = { field : "" ,fole:{name , value}}
-         e.eventInfo.field && console.log("当前点击了分组："+e.eventInfo.field);
-         e.eventInfo.role && console.log("当前点击了角色："+e.eventInfo.role.name+"，值为"+e.eventInfo.role.value);
-    });
-});
+Chartx.line("canvasTest" , data , options);
 </textarea></form>
 
         </td>
@@ -87,9 +81,9 @@ Chartx.radar("canvasTest" , data , options).then(function( chart ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4> 雷达图</h4>
+                <h4>折线图（line chart）- 基础折线图</h4>
                 <p>
-                    联系人：@释剑
+                    联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
@@ -104,4 +98,3 @@ Chartx.radar("canvasTest" , data , options).then(function( chart ){
     
 </body> 
 </html>
- 

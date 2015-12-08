@@ -98,7 +98,7 @@ define(
                 opt.easing && tween.easing( Tween.Easing[ opt.easing.split(".")[0] ][opt.easing.split(".")[1]] );
 
                 function animate(){
-                    if( !tween ){
+                    if( !tween || !tween._animate ){
                         return;
                     };
                     registFrame( animate );
@@ -114,8 +114,8 @@ define(
                 });
                 Tween.add(tween);
                 tween.start();
-                animate();
                 tween._animate = animate;
+                animate();
             };
             return tween;
         };
@@ -128,6 +128,7 @@ define(
             tween.stop();
             Tween.remove( tween );
             destroyFrame( tween._animate );
+            tween._animate = null;
             tween = null;
         };
 

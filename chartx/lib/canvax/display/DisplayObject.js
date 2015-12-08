@@ -161,14 +161,17 @@ define(
                 var conf   = {
                     id      : this.id,
                     context : _.clone(this.context.$model)
-                }
+                };
                 if( this.img ){
                     conf.img = this.img;
-                }
+                };
                 var newObj = new this.constructor( conf , "clone");
+                if( this.children ){
+                    newObj.children = this.children;
+                }
                 if (!myself){
                     newObj.id       = Base.createId(newObj.type);
-                }
+                };
                 return newObj;
             },
             heartBeat : function(opt){
@@ -360,8 +363,8 @@ define(
                 //如果有位移
                 var x,y;
                 if( this.xyToInt ){
-                    var x = Math.round(ctx.x);
-                    var y = Math.round(ctx.y);
+                    var x = parseInt( ctx.x );//Math.round(ctx.x);
+                    var y = parseInt( ctx.y );//Math.round(ctx.y);
     
                     if( parseInt(ctx.lineWidth , 10) % 2 == 1 && ctx.strokeStyle ){
                         x += 0.5;
@@ -370,12 +373,13 @@ define(
                 } else {
                     x = ctx.x;
                     y = ctx.y;
-                }
+                };
     
                 if( x != 0 || y != 0 ){
                     _transform.translate( x , y );
-                }
+                };
                 this._transform = _transform;
+                //console.log(this.id+":tx_"+_transform.tx+":cx_"+this.context.x);
     
                 return _transform;
             },
@@ -457,13 +461,21 @@ define(
                 if( options.onUpdate ){
                     upFun = options.onUpdate;
                 };
+                var tween;
                 options.onUpdate = function(){
+                    //如果context不存在说明该obj已经被destroy了，那么要把他的tween给destroy
+                    if (!self.context && tween) {
+                        AnimationFrame.destroyTween(tween);
+                        tween = null;
+                        return
+                    };
                     for( var p in this ){
                         self.context[p] = this[p];
                     };
                     upFun(this);
                 };
-                AnimationFrame.registTween( options );
+                tween = AnimationFrame.registTween( options );
+                return tween;
             },
             _render : function( ctx ){	
                 if( !this.context.visible || this.context.globalAlpha <= 0 ){

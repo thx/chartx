@@ -98,7 +98,7 @@ define(
                 opt.easing && tween.easing( Tween.Easing[ opt.easing.split(".")[0] ][opt.easing.split(".")[1]] );
 
                 function animate(){
-                    if( !tween ){
+                    if( !tween || !tween._animate ){
                         return;
                     };
                     registFrame( animate );
@@ -114,8 +114,8 @@ define(
                 });
                 Tween.add(tween);
                 tween.start();
-                animate();
                 tween._animate = animate;
+                animate();
             };
             return tween;
         };
@@ -128,6 +128,7 @@ define(
             tween.stop();
             Tween.remove( tween );
             destroyFrame( tween._animate );
+            tween._animate = null;
             tween = null;
         };
 
@@ -1015,7 +1016,7 @@ define(
                         target.dispatchEvent( event );
                     }
                     return;
-                }
+                };
                 
                 if(this.context && event.type == "mouseover"){
                     //记录dispatchEvent之前的心跳
@@ -1024,7 +1025,6 @@ define(
                     this._dispatchEvent( event );
                     if( preHeartBeat != this._heartBeatNum ){
                         this._hoverClass = true;
-
                         if( this.hoverClone ){
                             var canvax = this.getStage().parent;
                             //然后clone一份obj，添加到_hoverStage 中
@@ -1035,10 +1035,9 @@ define(
                             this._globalAlpha = pregAlpha;
                             this.context.globalAlpha = 0;
                         }
-
                     }
                     return;
-                }
+                };
       
                 this._dispatchEvent( event );
       
@@ -1145,7 +1144,7 @@ define(
                     
                     root._hoverStage.addChildAt( _dragDuplicate , 0 );
                 }
-                _dragDuplicate.context.visible = true;
+                _dragDuplicate.context.globalAlpha = target._globalAlpha;
                 _dragDuplicate._dragPoint = target.globalToLocal( me.curPoints[ i ] );
                 return _dragDuplicate;
             },
@@ -1174,13 +1173,12 @@ define(
             _dragEnd  : function( e , target , i ){
                 var me   = this;
                 var root = me.canvax;
+                
                 //_dragDuplicate 复制在_hoverStage 中的副本
-                var _dragDuplicate     = root._hoverStage.getChildById( target.id );
- 
-                target.context.visible = true;
-                //if( e.type == "mouseout" || e.type == "dragend"){
-                    _dragDuplicate.destroy();
-                //}
+                var _dragDuplicate = root._hoverStage.getChildById( target.id );
+                _dragDuplicate.destroy();
+
+                target.context.globalAlpha = target._globalAlpha;
             }
         } );
         return EventHandler;
@@ -1470,12 +1468,7 @@ define(
         /**
          * 多边形包含判断 Nonzero Winding Number Rule
          */
-        //http://geomalgorithms.com/a03-_inclusion.html
-        //winding优化方案，这样就不需要用到反三角函数，就会快很多。
-        //非零环绕数规则（Nonzero Winding Number Rule）：若环绕数为0表示在多边形内，非零表示在多边形外
-        //首先使多边形的边变为矢量。将环绕数初始化为零。再从任意位置p作一条射线。
-        //当从p点沿射线方向移动时，对在每个方向上穿过射线的边计数，每当多边形的边从右到左穿过射线时，环绕数加1，从左到右时，环绕数减1。
-        //处理完多边形的所有相关边之后，若环绕数为非零，则p为内部点，否则，p是外部点。
+
         function _isInsidePolygon_WindingNumber(shape, x, y) {
             var context = shape.context ? shape.context : shape;
             var poly = _.clone(context.pointList); //poly 多边形顶点，数组成员的格式同 p
@@ -1930,14 +1923,17 @@ define(
                 var conf   = {
                     id      : this.id,
                     context : _.clone(this.context.$model)
-                }
+                };
                 if( this.img ){
                     conf.img = this.img;
-                }
+                };
                 var newObj = new this.constructor( conf , "clone");
+                if( this.children ){
+                    newObj.children = this.children;
+                }
                 if (!myself){
                     newObj.id       = Base.createId(newObj.type);
-                }
+                };
                 return newObj;
             },
             heartBeat : function(opt){
@@ -2129,8 +2125,8 @@ define(
                 //如果有位移
                 var x,y;
                 if( this.xyToInt ){
-                    var x = Math.round(ctx.x);
-                    var y = Math.round(ctx.y);
+                    var x = parseInt( ctx.x );//Math.round(ctx.x);
+                    var y = parseInt( ctx.y );//Math.round(ctx.y);
     
                     if( parseInt(ctx.lineWidth , 10) % 2 == 1 && ctx.strokeStyle ){
                         x += 0.5;
@@ -2139,12 +2135,13 @@ define(
                 } else {
                     x = ctx.x;
                     y = ctx.y;
-                }
+                };
     
                 if( x != 0 || y != 0 ){
                     _transform.translate( x , y );
-                }
+                };
                 this._transform = _transform;
+                //console.log(this.id+":tx_"+_transform.tx+":cx_"+this.context.x);
     
                 return _transform;
             },
@@ -2226,13 +2223,21 @@ define(
                 if( options.onUpdate ){
                     upFun = options.onUpdate;
                 };
+                var tween;
                 options.onUpdate = function(){
+                    //如果context不存在说明该obj已经被destroy了，那么要把他的tween给destroy
+                    if (!self.context && tween) {
+                        AnimationFrame.destroyTween(tween);
+                        tween = null;
+                        return
+                    };
                     for( var p in this ){
                         self.context[p] = this[p];
                     };
                     upFun(this);
                 };
-                AnimationFrame.registTween( options );
+                tween = AnimationFrame.registTween( options );
+                return tween;
             },
             _render : function( ctx ){	
                 if( !this.context.visible || this.context.globalAlpha <= 0 ){
@@ -3806,17 +3811,23 @@ define(
         var Polygon = function(opt , atype) {
             var self = this;
             opt = Base.checkOpt(opt);
-debugger
+
             if(atype !== "clone"){
                 var start = opt.context.pointList[0];
                 var end   = opt.context.pointList[ opt.context.pointList.length - 1 ];
-                opt.context.pointList.push( start );
                 if( opt.context.smooth ){
                     opt.context.pointList.unshift( end );
-                };
+                } else {
+                    opt.context.pointList.push( start );
+                }
             };
             
             arguments.callee.superclass.constructor.apply(this, arguments);
+
+            if(atype !== "clone" && opt.context.smooth && end){
+
+            };
+
             self._drawTypeOnly = null;
             self.type = "polygon";
         };
