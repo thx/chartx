@@ -991,14 +991,14 @@ define(
                     me.btnRight.context.x = this.context.x + this.context.width;
                     me.setRange();
                 });
-                this.btnRight.on("dragend" , function(){
+                this.rangeRect.on("dragend" , function(){
                     me.dragEnd( me.range );
                 });
                 this.dataZoomBtns.addChild( this.rangeRect );
             },
             setRange : function(){
-                var start = parseInt((this.btnLeft.context.x / this.w)*this.count) ;
-                var end = parseInt(( (this.btnRight.context.x + this.btnW) / this.w)*this.count);
+                var start = (this.btnLeft.context.x / this.w)*this.count ;
+                var end = ( (this.btnRight.context.x + this.btnW) / this.w)*this.count;
                 if( this.range.start == start && this.range.end == end ){
                     return;
                 };
