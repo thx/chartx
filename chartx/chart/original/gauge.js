@@ -103,7 +103,7 @@ define(
                             y: me._graphs.h, 
                         },
                         dragIng: function(range){
-                            console.log(range)
+                            // console.log(range)
                         },
                         dragEnd:function(range){
                             console.log(range)
