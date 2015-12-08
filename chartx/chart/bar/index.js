@@ -391,7 +391,8 @@ define(
                         },
                         dragIng: function(range) {
                             me.dataZoom.range = range;
-                            me.resetData(me._data);
+                            me.dataZoomChange();
+                            //me.resetData(me._data);
                         }
                     } , me.dataZoom);
 
