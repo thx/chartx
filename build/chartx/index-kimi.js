@@ -657,7 +657,9 @@ define(
             };
             this.w = 0;
             this.h = dataZoom.height;
-            this.getRange = function(){};
+
+            this.dragIng = function(){};
+            this.dragEnd = function(){};
 
             opt && _.deepExtend(this, opt);
             this.barH = this.h - 6;
@@ -728,6 +730,9 @@ define(
                    me.rangeRect.context.x = this.context.x + me.btnW;
                    me.setRange();
                 });
+                this.btnLeft.on("dragend" , function(){
+                   me.dragEnd( me.range );
+                });
 
 
                 this.btnRight = new Rect({
@@ -742,6 +747,7 @@ define(
                     }
                 });
 
+
                 this.btnRight.on("draging" , function(){
                     this.context.y = me.barY+1;
                     if( this.context.x < (me.btnLeft.context.x + me.btnW + 2) ){
@@ -752,6 +758,9 @@ define(
                     };
                     me.rangeRect.context.width = this.context.x - me.btnLeft.context.x;
                     me.setRange();
+                });
+                this.btnRight.on("dragend" , function(){
+                    me.dragEnd( me.range );
                 });
 
 
@@ -783,6 +792,9 @@ define(
                     me.btnRight.context.x = this.context.x + this.context.width;
                     me.setRange();
                 });
+                this.btnRight.on("dragend" , function(){
+                    me.dragEnd( me.range );
+                });
                 this.dataZoomBtns.addChild( this.rangeRect );
             },
             setRange : function(){
@@ -794,7 +806,7 @@ define(
                 //console.log("start:"+start+"_____end:"+end);
                 this.range.start = start;
                 this.range.end = end;
-                this.getRange( this.range );
+                this.dragIng( this.range );
             }
         };
 
