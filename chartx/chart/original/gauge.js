@@ -67,8 +67,19 @@ define(
 
                 this._drawEnd();                 //绘制结束，添加到舞台
 
+                this._initDataZoom()
+
                 this.inited = true;
 
+                // this.aaa.on = function(o){
+                //     fire()
+                //     _graphs.updateRange(o)
+                // }
+            },
+            updateTitle : function(num){
+                this._graphs.updateTitle({
+                    title : num
+                })
             },
             _initData: function(data, opts) {
                 var d = dataFormat.apply(this, arguments);
@@ -78,6 +89,31 @@ define(
             },
             _initModule: function() {
                 this._graphs = new Graphs(this.graphs, this.canvax.getDomContainer());
+            },
+            _initDataZoom : function(){
+                var me = this
+                require(["chartx/components/datazoom/index"], function(DataZoom) {
+                    console.log(me.height - me.padding.bottom)
+                    var dataZoomOpt = _.deepExtend({
+                        w: me.width - me.padding.left - me.padding.right,
+                        // count: me._data.length - 1,
+                        // h : me._xAxis.h,
+                        pos: {
+                            x: 0,
+                            y: me._graphs.h, 
+                        },
+                        getRange: function(range) {
+                            // me.dataZoom.range = range;
+
+                            // me.resetData(me._data);
+                        }
+                    } , me.dataZoom); 
+
+                    me._dataZoom = new DataZoom(dataZoomOpt); 
+
+                    me.core.addChild(me._dataZoom.sprite)
+
+                })
             },
             _startDraw: function(opt) {
                 var me = this

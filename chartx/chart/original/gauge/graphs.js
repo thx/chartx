@@ -8,8 +8,9 @@ define(
         "canvax/shape/Circle",
         "canvax/shape/BrokenLine",
         "canvax/display/Text",
+        "canvax/animation/AnimationFrame"
     ],
-    function(Canvax, Sector, Tween , Tools, Circle, BrokenLine, Text){
+    function(Canvax, Sector, Tween , Tools, Circle, BrokenLine, Text, AnimationFrame){
  
         var Graphs = function(opt,domRoot){
 
@@ -49,7 +50,7 @@ define(
 
             this.center   = {                    //中心区域
                 title : {
-                    content : '28654',
+                    content : 0,
                     context : {
                         x       : 0,
                         y       : -25,
@@ -127,7 +128,9 @@ define(
                 // }
                 // me.sprite.addChild(me._test({}))
 
-                me.updateTitle({})
+                // me.updateTitle({
+                //     title : 28888
+                // })
             },
 
             updateTitle:function($o){
@@ -135,11 +138,23 @@ define(
                 var center = me.sprite.getChildById('center')
                 var title  = center.getChildAt(0)
                 var subtitle = center.getChildAt(1)
-                var context = $o.title || ''
-                title.resetText(context)
+                var content = $o.title || 0
+                // title.resetText(context)
 
-                context = $o.subtitle || ''
-                subtitle.resetText(context)
+                AnimationFrame.registTween({
+                    from : {num:title.text},
+                    to   : {num:content},
+                    onUpdate : function(){
+                        title.resetText(parseInt(this.num))
+                    },
+                    // duration:3000
+                })
+            },
+
+            updateRange:function($o){
+                var center = me.sprite.getChildById('center') 
+                var content = $o.subtitle || ''
+                subtitle.resetText(content)
             },
 
             _drawDescribe:function(){

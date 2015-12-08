@@ -67,7 +67,9 @@ var options = {
     }
 };
 //Chartx.funnel开始初始化chart实例
-var chartx = Chartx.original("canvasTest" , data , options);
+var chartx = Chartx.original("canvasTest" , data , options).then(function(chart){
+    window.c = chart;
+});
 
 chartx.then(function( gauge ){
     gauge.on( "complete" , function( e ){

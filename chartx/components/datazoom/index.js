@@ -52,7 +52,7 @@ define(
                 }, 10);
             },
             widget: function() {
-
+                debugger
                 var bgRect = new Rect({
                     context: {
                         x: 0,
