@@ -857,7 +857,7 @@ define(
                             x: me._xAxis.pos.x,
                             y: me._xAxis.pos.y + me._xAxis.h
                         },
-                        getRange: function(range) {
+                        dragIng: function(range) {
                             me.dataZoom.range = range;
                             me.resetData(me._data);
                         }
