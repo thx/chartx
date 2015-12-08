@@ -62,7 +62,7 @@ define(
                            //然后克隆一个副本到activeStage
                            me._clone2hoverStage( child , i );
                            //先把本尊给隐藏了
-                           child.context.visible = false;
+                           child.context.globalAlpha = 0;
  
                            return false;
                         }

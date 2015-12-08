@@ -102,17 +102,17 @@ define(
                             x: 0,
                             y: me._graphs.h, 
                         },
-                        getRange: function(range) {
-                            // me.dataZoom.range = range;
-
-                            // me.resetData(me._data);
+                        dragIng: function(range){
+                            console.log(range)
+                        },
+                        dragEnd:function(range){
+                            console.log(range)
                         }
                     } , me.dataZoom); 
 
-                    me._dataZoom = new DataZoom(dataZoomOpt); 
+                    me._dataZoom = new DataZoom(dataZoomOpt);
 
                     me.core.addChild(me._dataZoom.sprite)
-
                 })
             },
             _startDraw: function(opt) {

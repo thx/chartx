@@ -9,11 +9,14 @@ define(
     function(Canvax, Rect, Tools, Theme, AnimationFrame) {
 
         var Graphs = function(opt, root) {
+            this.data = [];
             this.w = 0;
             this.h = 0;
             this.root = root;
             this._yAxisFieldsMap = {};
             this._setyAxisFieldsMap();
+
+            this.animation = true;
 
             this.pos = {
                 x: 0,
@@ -96,18 +99,25 @@ define(
                 return style;
             },
             checkBarW: function(xDis) {
-                if (this.bar.width >= xDis) {
-                    this.bar.width = xDis - 1 > 1 ? xDis - 1 : 1;
-                }
+                this.bar.width = parseInt( xDis ) - ( parseInt(Math.max( 1 , xDis*0.3 )) );
+                this.bar.width < 1 && (this.bar.width=1);
+            },
+            resetData: function(data, opt) {
+                this.draw(data.data, opt);
             },
             draw: function(data, opt) {
                 _.deepExtend(this, opt);
                 if (data.length == 0) {
                     return;
                 };
+
+                var preLen = 0;
+                this.data[0] && (preLen = this.data[0][0].length);
+
                 this.data = data;
                 var me = this;
                 var groups = data.length;
+
                 _.each(data, function(h_group, i) {
                     /*
                     //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
@@ -120,6 +130,9 @@ define(
                     //    ["uv","pv"],  vLen == 2
                     //    "click"       vLen == 1
                     //]
+
+                    //if (h <= preLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
+
                     var vLen = h_group.length;
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
@@ -128,35 +141,50 @@ define(
                         var groupH;
                         if (i == 0) {
                             //横向的分组
-                            groupH = new Canvax.Display.Sprite({
-                                id: "barGroup_" + h
-                            });
-                            me.barsSp.addChild(groupH);
+                            if (h <= preLen - 1) {
+                                groupH = me.barsSp.getChildById("barGroup_" + h);
+                            } else {
+                                groupH = new Canvax.Display.Sprite({
+                                    id: "barGroup_" + h
+                                });
+                                me.barsSp.addChild(groupH);
+                            };
 
                             //横向的分组区片感应区
                             var itemW = me.w / hLen;
-                            var hoverRect = new Rect({
-                                id: "bhr_" + h,
-                                pointChkPriority: false,
-                                context: {
-                                    x: itemW * h,
-                                    y: -me.h,
-                                    width: itemW,
-                                    height: me.h,
-                                    fillStyle: "#ccc",
-                                    globalAlpha: 0
+                            //console.log(itemW+":")
+
+                            if (me.eventEnabled) {
+                                var hoverRect;
+                                if (h <= preLen - 1) {
+                                    hoverRect = groupH.getChildById("bhr_" + h);
+                                    hoverRect.context.width = itemW;
+                                    hoverRect.context.x = itemW * h;
+                                } else {
+                                    hoverRect = new Rect({
+                                        id: "bhr_" + h,
+                                        pointChkPriority: false,
+                                        context: {
+                                            x: itemW * h,
+                                            y: -me.h,
+                                            width: itemW,
+                                            height: me.h,
+                                            fillStyle: "#ccc",
+                                            globalAlpha: 0
+                                        }
+                                    });
+                                    groupH.addChild(hoverRect);
+                                    hoverRect.hover(function(e) {
+                                        this.context.globalAlpha = 0.1;
+                                    }, function(e) {
+                                        this.context.globalAlpha = 0;
+                                    });
+                                    hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
+                                    hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
+                                        e.eventInfo = me._getInfoHandler(this, e);
+                                    });
                                 }
-                            });
-                            groupH.addChild(hoverRect);
-                            hoverRect.hover(function(e) {
-                                this.context.globalAlpha = 0.1;
-                            }, function(e) {
-                                this.context.globalAlpha = 0;
-                            });
-                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
-                            hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
-                                e.eventInfo = me._getInfoHandler(this, e);
-                            });
+                            };
                         } else {
                             groupH = me.barsSp.getChildById("barGroup_" + h);
                         };
@@ -172,7 +200,7 @@ define(
                             var beginY = parseInt(rectData.y);
 
                             var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
-                            
+
                             var finalPos = {
                                 x: Math.round(rectData.x - me.bar.width / 2),
                                 y: beginY,
@@ -194,25 +222,38 @@ define(
                                 radiusR = Math.min(radiusR, me.bar.radius);
                                 rectCxt.radius = [radiusR, radiusR, 0, 0];
                             };
-                            var rectEl = new Rect({
-                                id: "bar_" + i + "_" + h + "_" + v,
-                                context: rectCxt
-                            });
+
+                            if (!me.animation) {
+                                delete rectCxt.scaleY;
+                                rectCxt.y = finalPos.y;
+                            };
+
+                            var rectEl;
+                            if (h <= preLen - 1) {
+                                rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                            } else {
+                                rectEl = new Rect({
+                                    id: "bar_" + i + "_" + h + "_" + v,
+                                    context: rectCxt
+                                });
+                                groupH.addChild(rectEl);
+                            };
 
                             rectEl.finalPos = finalPos;
 
-                            groupH.addChild(rectEl);
-
                             rectEl.iGroup = h, rectEl.iNode = i, rectEl.iLay = v;
-                            rectEl.on("panstart mouseover mousemove mouseout click", function(e) {
-                                e.eventInfo = me._getInfoHandler(this, e);
-                                if (e.type == "mouseover") {
-                                    this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0.1;
-                                }
-                                if (e.type == "mouseout") {
-                                    this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0;
-                                }
-                            });
+
+                            if (me.eventEnabled) {
+                                rectEl.on("panstart mouseover mousemove mouseout click", function(e) {
+                                    e.eventInfo = me._getInfoHandler(this, e);
+                                    if (e.type == "mouseover") {
+                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0.1;
+                                    }
+                                    if (e.type == "mouseout") {
+                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0;
+                                    }
+                                });
+                            };
 
                             //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
                             if (vLen == 1) {
@@ -257,33 +298,59 @@ define(
             /**
              * 生长动画
              */
-            grow: function(callback) {
+            grow: function(callback, opt) {
                 var self = this;
+                if (!this.animation) {
+                    callback && callback(self);
+                    return;
+                };
                 var sy = 1;
                 if (this.sort && this.sort == "desc") {
                     sy = -1;
                 };
+                if (self.barsSp.children.length > self.data[0][0].length) {
+                    for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
+                        self.barsSp.getChildAt(i).destroy();
+                        i--;
+                        l--;
+                    };
+                };
+
+                var options = _.extend({
+                    delay : 80
+                } , opt);
+
                 _.each(self.data, function(h_group, g) {
                     var vLen = h_group.length;
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
                     for (h = 0; h < hLen; h++) {
                         for (v = 0; v < vLen; v++) {
+
                             var group = self.barsSp.getChildById("barGroup_" + h);
+
                             var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
                             //console.log("finalPos"+bar.finalPos.y)
-                            bar.animate({
+                            if (bar._tweenObj) {
+                                AnimationFrame.destroyTween(bar._tweenObj);
+                            };
+
+                            bar._tweenObj = bar.animate({
                                 scaleY: sy,
-                                y: sy * bar.finalPos.y
+                                y: sy * bar.finalPos.y,
+                                x: bar.finalPos.x,
+                                width: bar.finalPos.width,
+                                height: bar.finalPos.height
                             }, {
                                 duration: 500,
                                 easing: 'Back.Out',
-                                delay: h * 80,
-                                onUpdate : function( arg ){
+                                delay: h * options.delay,
+                                onUpdate: function(arg) {
                                     //console.log( arg.y )
                                 },
-                                id : bar.id
+                                id: bar.id
                             });
+
                         };
                     };
                 });

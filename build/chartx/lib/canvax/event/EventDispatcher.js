@@ -80,7 +80,7 @@ define(
                         target.dispatchEvent( event );
                     }
                     return;
-                }
+                };
                 
                 if(this.context && event.type == "mouseover"){
                     //记录dispatchEvent之前的心跳
@@ -89,7 +89,6 @@ define(
                     this._dispatchEvent( event );
                     if( preHeartBeat != this._heartBeatNum ){
                         this._hoverClass = true;
-
                         if( this.hoverClone ){
                             var canvax = this.getStage().parent;
                             //然后clone一份obj，添加到_hoverStage 中
@@ -100,10 +99,9 @@ define(
                             this._globalAlpha = pregAlpha;
                             this.context.globalAlpha = 0;
                         }
-
                     }
                     return;
-                }
+                };
       
                 this._dispatchEvent( event );
       
