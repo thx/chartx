@@ -164,7 +164,8 @@ define(
                                 r : 5,
                                 fillStyle   : this.getFillStyle(i , ii , val), //this._colors[i],
                                 strokeStyle : "#ffffff",
-                                lineWidth   : 2
+                                lineWidth   : 2,
+                                globalAlpha: 0
                             }
                         }));
                     };
@@ -178,16 +179,17 @@ define(
                     var polygonBg = new Polygon({
                         id : "radar_bg_"+i,
                         context : {
-                            pointList   : pointList,
+                            pointList   : _.clone( pointList ),
                             globalAlpha : this.alpha,//0.5,
                             smooth : this.smooth,
                             fillStyle   : this.getFillStyle(i)//this._colors[i]
                         }
                     });
+                    
                     var polygonBorder = new Polygon({
                         id : "radar_Border_"+i,
                         context : {
-                            pointList : pointList,
+                            pointList : _.clone( pointList ),
                             lineWidth : 2,
                             cursor    : "pointer",
                             fillStyle : "RGBA(0,0,0,0)",

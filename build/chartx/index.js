@@ -719,16 +719,17 @@ define(
                 for(var a = 0, al = arr.length; a < al; a++){
                     var o = arr[a];
                     var line = new Line({
+                        id : "back_line_"+a,
                         context : {
                             xStart      : 0,
                             yStart      : o.y,
-                            xEnd        : self.w,
+                            xEnd        : 0,//self.w,
                             yEnd        : o.y,
                             lineType    : self.xAxis.lineType,
                             lineWidth   : self.xAxis.lineWidth,
                             strokeStyle : self.xAxis.strokeStyle  
                         }
-                    })
+                    });
                     if(self.xAxis.enabled){
                         _.isFunction( self.xAxis.filter ) && self.xAxis.filter({
                             layoutData : self.yAxis.data,
@@ -736,7 +737,18 @@ define(
                             line       : line
                         });
                         self.xAxisSp.addChild(line);
-                    }
+                        
+                        line.animate({
+                            xStart : 0,
+                            xEnd : self.w
+                        } , {
+                            duration : 500,
+                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                            delay : (al-a) * 80,
+                            id : line.id
+                        });
+
+                    };
                 };
 
                 //y轴方向的线集合
@@ -822,6 +834,38 @@ define(
     
     }
 )
+
+
+define(
+    "chartx/components/datazoom/index", 
+    [
+        "canvax/index",
+        "canvax/shape/Rect"
+    ],
+    function( Canvax , Rect ) {
+        
+        var dataZoom = function( opt ){
+            this.range = {
+                start : 0,
+                end   : 0
+            };
+            this._doneHandle = null;
+            this.done   = function( fn ){
+                this._doneHandle = fn;
+            };
+            this.init();
+        };
+
+        dataZoom.prototype = {
+            init : function(){
+                var me = this;
+                this.sprite  = new Canvax.Display.Sprite({ });
+            }
+        };
+
+        return dataZoom;
+    }
+);
 
 
 /*
@@ -1196,7 +1240,7 @@ define(
                            me.shapeBg.context.globalAlpha = this.alpha;
                        } ).repeat(Infinity).delay(800)
                        .onComplete(function(){
-                           debugger;
+                           //debugger;
                        })
                        .easing( me.easing )
                        .start();
@@ -1481,10 +1525,11 @@ define(
 define(
     "chartx/components/xaxis/xAxis", [
         "canvax/index",
+        "canvax/core/Base",
         "canvax/shape/Line",
         "chartx/utils/tools"
     ],
-    function(Canvax, Line, Tools) {
+    function(Canvax, CanvaxBase, Line, Tools) {
         var xAxis = function(opt, data) {
             this.graphw = 0;
             this.graphh = 0;
@@ -1503,7 +1548,7 @@ define(
                 width: 1,
                 height: 4,
                 strokeStyle: '#cccccc'
-            }
+            };
 
             this.text = {
                 fillStyle: '#999',
@@ -1511,13 +1556,13 @@ define(
                 rotation: 0,
                 format: null,
                 textAlign: null
-            }
+            };
             this.maxTxtH = 0;
 
             this.pos = {
                 x: null,
                 y: null
-            }
+            };
 
             //this.display = "block";
             this.enabled = 1; //1,0 true ,false 
@@ -1753,10 +1798,9 @@ define(
                 if(this._label) {
                     this._label.context.x = this.xGraphsWidth+5;
                     this.sprite.addChild( this._label );
-                }
+                };
 
                 for (var a = 0, al = arr.length; a < al; a++) {
-
                     var xNode = new Canvax.Display.Sprite({
                         id: "xNode" + a
                     });
@@ -1767,21 +1811,24 @@ define(
 
                     //文字
                     var txt = new Canvax.Display.Text( (o.layoutText || o.content) , {
+                        id : "xAxis_txt_"+CanvaxBase.getUID(),
                         context: {
                             x: x,
-                            y: y,
+                            y: y + 20,
                             fillStyle: this.text.fillStyle,
                             fontSize: this.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
                             textAlign: this.text.textAlign || (!!this.text.rotation ? "right" : "center"),
-                            textBaseline: !!this.text.rotation ? "middle" : "top"
+                            textBaseline: !!this.text.rotation ? "middle" : "top",
+                            globalAlpha : 0
                         }
                     });
                     xNode.addChild(txt);
+
                     if (!!this.text.rotation && this.text.rotation != 90) {
                         txt.context.x += 5;
                         txt.context.y += 3;
-                    }
+                    };
 
                     if (this.line.enabled) {
                         //线条
@@ -1796,7 +1843,7 @@ define(
                             }
                         });
                         xNode.addChild(line);
-                    }
+                    };
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
                     _.isFunction(this.filter) && this.filter({
@@ -1807,6 +1854,16 @@ define(
                     });
 
                     this.sprite.addChild(xNode);
+
+                    txt.animate({
+                        globalAlpha : 1,
+                        y : txt.context.y - 20
+                    } , {
+                        duration : 500,
+                        easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                        delay : a * 80,
+                        id : txt.id
+                    });
                 };
                 
 
@@ -1902,11 +1959,12 @@ define(
     "chartx/components/yaxis/yAxis" , 
     [
         "canvax/index",
+        "canvax/core/Base",
         "canvax/shape/Line",
         "chartx/utils/tools",
         'chartx/utils/datasection'
     ],
-    function( Canvax , Line , Tools , DataSection){
+    function( Canvax , CanvaxBase , Line , Tools , DataSection){
         var yAxis = function(opt , data ){
             
             this.w = 0;
@@ -2173,14 +2231,16 @@ define(
                     //文字
                     var txt = new Canvax.Display.Text( content ,
                        {
+                        id : "yAxis_txt_"+CanvaxBase.getUID(),
                         context : {
                             x  : x + ( self.place == "left" ? -5 : 5 ),
-                            y  : posy,
+                            y  : posy + 20,
                             fillStyle    : self.text.fillStyle,
                             fontSize     : self.text.fontSize,
                             rotation     : -Math.abs(this.text.rotation),
                             textAlign    : textAlign,
-                            textBaseline : "middle"
+                            textBaseline : "middle",
+                            globalAlpha  : 0
                        }
                     });
                     yNode.addChild( txt );
@@ -2213,6 +2273,17 @@ define(
                     });
 
                     self.sprite.addChild( yNode );
+
+                    txt.animate({
+                        globalAlpha : 1,
+                        y : txt.context.y - 20
+                    } , {
+                        duration : 500,
+                        easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                        delay : a * 80,
+                        id : txt.id
+                    
+                    });
                 };
 
                 maxW += self.dis;

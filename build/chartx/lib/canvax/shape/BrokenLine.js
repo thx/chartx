@@ -16,12 +16,14 @@ define(
         "canvax/geom/SmoothSpline"
     ],
     function(Shape, Base, SmoothSpline) {
-        var BrokenLine = function(opt) {
+        var BrokenLine = function(opt , atype) {
             var self = this;
             self.type = "brokenline";
             self._drawTypeOnly = "stroke";
             opt = Base.checkOpt(opt);
-            self._initPointList(opt.context);
+            if( atype !== "clone" ){
+                self._initPointList(opt.context);
+            };
             self._context = _.deepExtend({
                 lineType: null,
                 smooth: false,
