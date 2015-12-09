@@ -173,7 +173,7 @@ define(
                         inSideSector.context.endAngle = this.num 
                     },
                     onComplete : function(){
-                        // console.log('onComplete')
+                        console.log('onComplete')
                        _.isFunction($o.onInSideComplete) && $o.onInSideComplete()
                     },
                     duration:me.inSide.duration
@@ -220,7 +220,10 @@ define(
                     onUpdate : function(){
                         outSideRangeSector.context.endAngle = this.num             
                     },
+                    onComplete : function(){
+                    },
                     duration:me.outSideRange.duration
+                    // duration:me.inSide.duration
                 })               
 
                 me.sprite.addChild(rings)
@@ -259,6 +262,8 @@ define(
                             lines.addChild(bline)
                             bline.animate({
                                 globalAlpha : 1
+                            },{
+                                duration : a * 200
                             })
                         }
 
@@ -282,6 +287,8 @@ define(
                         txts.addChild(txt)
                         txt.animate({
                             globalAlpha : 1
+                        },{
+                            duration : a * 200
                         })
                     }
                 }
