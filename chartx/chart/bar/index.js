@@ -8,9 +8,10 @@ define(
         'chartx/components/back/Back',
         'chartx/chart/bar/graphs',
         'chartx/components/tips/tip',
-        'chartx/utils/dataformat'
+        'chartx/utils/dataformat',
+        'chartx/components/datazoom/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat, DataZoom) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -143,7 +144,7 @@ define(
                 var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
                 if (dataZoom) {
                     var datas = [data[0]];
-                    datas = datas.concat( data.slice( dataZoom.range.start + 1, dataZoom.range.end + 1) );
+                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -182,6 +183,13 @@ define(
                     },
                     yMaxHeight: graphsH
                 });
+
+                if (this.dataZoom) {
+                    this.__cloneBar = this._getCloneBar();
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                        animation: false
+                    });
+                };
 
                 var _yAxisW = this._yAxis.w;
 
@@ -257,6 +265,7 @@ define(
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
+
                 var hLen = yArr.length; //bar的横向分组length
 
                 var xDis1 = _xAxis.xDis1;
@@ -277,9 +286,17 @@ define(
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0;
                     center[b] = {};
-                    _.each(yArr[b], function(subv, v) {
+                    var yArrList = yArr[b];
+
+                    _.each(yArrList, function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
+
+                        if (me.dataZoom) {
+                            subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end);
+                        };
+
                         _.each(subv, function(val, i) {
+
                             if (!xArr[i]) {
                                 return;
                             };
@@ -287,7 +304,7 @@ define(
                             var vCount = 0;
                             if (me.proportion) {
                                 //先计算总量
-                                _.each(yArr[b], function(team, ti) {
+                                _.each(yArrList, function(team, ti) {
                                     vCount += team[i]
                                 });
                             };
@@ -378,66 +395,94 @@ define(
             },
             _initDataZoom: function() {
                 var me = this;
-                require(["chartx/components/datazoom/index"], function(DataZoom) {
-                    //初始化datazoom模块
+                //require(["chartx/components/datazoom/index"], function(DataZoom) {
+                //初始化datazoom模块
 
-                    var dataZoomOpt = _.deepExtend({
-                        w: me._xAxis.xGraphsWidth,
-                        count: me._data.length - 1,
-                        //h : me._xAxis.h,
-                        pos: {
-                            x: me._xAxis.pos.x,
-                            y: me._xAxis.pos.y + me._xAxis.h
+                var dataZoomOpt = _.deepExtend({
+                    w: me._xAxis.xGraphsWidth,
+                    count: me._data.length - 1,
+                    //h : me._xAxis.h,
+                    pos: {
+                        x: me._xAxis.pos.x,
+                        y: me._xAxis.pos.y + me._xAxis.h
+                    },
+                    dragIng: function(range) {
+
+                        if( parseInt(range.start) == parseInt(me.dataZoom.range.start) &&  parseInt(range.end) == parseInt(me.dataZoom.range.end) ){
+                            return;
+                        };
+
+                        me.dataZoom.range.start = parseInt(range.start);
+                        me.dataZoom.range.end = parseInt(range.end);
+
+                        me.dataFrame = me._initData(data, this);
+                        me._xAxis.resetData(me.dataFrame.xAxis, {
+                            animation: false
+                        });
+
+                        me._graphs.resetData(me._trimGraphs());
+                        me._graphs.grow(function() {
+                            //callback
+                        }, {
+                            delay: 0,
+                            easing: "Quadratic.Out",
+                            duration : 300
+                        });
+                    }
+                }, me.dataZoom);
+
+                //me._getCloneBar();
+
+                me._dataZoom = new DataZoom(dataZoomOpt);
+
+                var graphssp = this.__cloneBar.thumbBar._graphs.sprite;
+                graphssp.id = graphssp.id + "_datazoomthumbbarbg"
+                graphssp.context.x = 0;
+                graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
+                graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
+
+
+                me._dataZoom.dataZoomBg.addChild(graphssp);
+                me.core.addChild(me._dataZoom.sprite);
+
+
+                this.__cloneBar.thumbBar.destroy();
+                this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
+                //});
+            },
+            _getCloneBar: function() {
+                var me = this;
+                var cloneEl = me.el.cloneNode();
+                cloneEl.innerHTML = "";
+                cloneEl.id = me.el.id + "_currclone";
+                cloneEl.style.position = "absolute";
+                cloneEl.style.top = "10000px";
+                document.body.appendChild(cloneEl);
+
+                var opts = _.deepExtend({}, me._opts);
+                _.deepExtend(opts, {
+                    graphs: {
+                        bar: {
+                            fillStyle: "#ececec"
                         },
-                        dragIng: function(range) {
-                            me.dataZoom.range = range;
-                            me.dataZoomChange();
-                            //me.resetData(me._data);
-                        }
-                    } , me.dataZoom);
-
-                    var cloneEl = me.el.cloneNode();
-                    cloneEl.innerHTML = "";
-                    cloneEl.id = me.el.id + "_currclone";
-                    cloneEl.style.position = "absolute";
-                    cloneEl.style.top = "10000px";
-                    document.body.appendChild(cloneEl);
-
-                    var opts = _.deepExtend({}, me._opts);
-                    _.deepExtend(opts, {
-                        graphs: {
-                            bar: {
-                                fillStyle: "#ececec"
-                            },
-                            animation: false,
-                            eventEnabled: false
-                        },
-                        dataZoom: null,
-                        xAxis: {
-                            //enabled: false
-                        },
-                        yAxis: {
-                            //enabled: false
-                        }
-                    });
-
-                    var thumbBar = new Bar(cloneEl, me._data, opts);
-                    thumbBar.draw();
-
-                    me._dataZoom = new DataZoom(dataZoomOpt);
-
-                    var graphssp = thumbBar._graphs.sprite;
-                    graphssp.id = graphssp.id + "_datazoomthumbbarbg"
-                    graphssp.context.x = 0;
-                    graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
-                    graphssp.context.scaleY = me._dataZoom.barH / thumbBar._graphs.h;
-
-                    me._dataZoom.dataZoomBg.addChild(graphssp);
-
-                    me.core.addChild(me._dataZoom.sprite);
-                    thumbBar.destroy();
-                    cloneEl.parentNode.removeChild(cloneEl);
+                        animation: false,
+                        eventEnabled: false
+                    },
+                    dataZoom: null,
+                    xAxis: {
+                        //enabled: false
+                    },
+                    yAxis: {
+                        //enabled: false
+                    }
                 });
+
+                var thumbBar = new Bar(cloneEl, me._data, opts);
+                thumbBar.draw();
+                return {
+                    thumbBar: thumbBar,
+                    cloneEl: cloneEl
+                }
             },
             _initMarkLine: function(g) {
                 var me = this

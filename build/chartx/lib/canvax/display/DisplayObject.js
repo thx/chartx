@@ -467,12 +467,19 @@ define(
                     if (!self.context && tween) {
                         AnimationFrame.destroyTween(tween);
                         tween = null;
-                        return
+                        return;
                     };
                     for( var p in this ){
                         self.context[p] = this[p];
                     };
-                    upFun(this);
+                    upFun.apply(self , [this]);
+                };
+                var compFun = function(){};
+                if( options.onComplete ){
+                    compFun = options.onComplete;
+                };
+                options.onComplete = function( opt ){
+                    compFun.apply(self , arguments)
                 };
                 tween = AnimationFrame.registTween( options );
                 return tween;

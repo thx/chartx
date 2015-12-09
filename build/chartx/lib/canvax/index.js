@@ -106,11 +106,9 @@ define(
                 };
 
                 tween.onComplete(function() {
-                    Tween.remove( tween );
-                    tween = null;
-                    animate = null;
+                    destroyTween( tween );
                     //执行用户的conComplete
-                    opt.onComplete();
+                    opt.onComplete( this );
                 });
                 Tween.add(tween);
                 tween.start();
@@ -146,7 +144,6 @@ define(
     "canvax/core/Base",
     [
         !document.createElement('canvas').getContext ? "canvax/library/flashCanvas/flashcanvas" : "",
-        "canvax/animation/AnimationFrame",
         !window._ ? "canvax/library/underscore" : ""
     ],
     function( FlashCanvas ){
@@ -2229,12 +2226,19 @@ define(
                     if (!self.context && tween) {
                         AnimationFrame.destroyTween(tween);
                         tween = null;
-                        return
+                        return;
                     };
                     for( var p in this ){
                         self.context[p] = this[p];
                     };
-                    upFun(this);
+                    upFun.apply(self , [this]);
+                };
+                var compFun = function(){};
+                if( options.onComplete ){
+                    compFun = options.onComplete;
+                };
+                options.onComplete = function( opt ){
+                    compFun.apply(self , arguments)
                 };
                 tween = AnimationFrame.registTween( options );
                 return tween;
@@ -3872,8 +3876,6 @@ define(
       
             opt = Base.checkOpt( opt );
             self._context = {
-                 //x             : 0,//{number},  // 必须，左上角横坐标
-                 //y             : 0,//{number},  // 必须，左上角纵坐标
                  width         : opt.context.width || 0,//{number},  // 必须，宽度
                  height        : opt.context.height|| 0,//{number},  // 必须，高度
                  radius        : opt.context.radius|| []     //{array},   // 默认为[0]，圆角 
@@ -3916,7 +3918,6 @@ define(
                 ctx.lineTo( parseInt(x), parseInt(y + r[0]));
                 r[0] !== 0 && ctx.quadraticCurveTo(x, y, x + r[0], y);
             },
-      
             /**
              * 创建矩形路径
              * @param {Context2D} ctx Canvas 2D上下文
@@ -4125,13 +4126,16 @@ define(
         "canvax/display/Sprite",
         "canvax/display/Shape",
         "canvax/display/Point",
-        "canvax/display/Text"
+        "canvax/display/Text",
+
+        "canvax/animation/AnimationFrame"
     ]
     , 
     function( 
         Base , AnimationFrame , EventHandler ,  EventDispatcher , EventManager , 
         DisplayObjectContainer , 
-        Stage , Sprite , Shape , Point , Text   
+        Stage , Sprite , Shape , Point , Text,
+        AnimationFrame   
     ) {
 
     var Canvax = function( opt ){
