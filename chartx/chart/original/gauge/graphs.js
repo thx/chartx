@@ -104,11 +104,11 @@ define(
                 me._drawRing({
                     onInSideComplete : function(){
 
-                        // me._drawDescribe()
+                        me._drawDescribe()
                     }
                 })
                 
-                me._drawDescribe()
+                // me._drawDescribe()
 
                 // me._drawTitle()
 
@@ -174,7 +174,7 @@ define(
                     },
                     onComplete : function(){
                         // console.log('onComplete')
-                       // _.isFunction($o.onInSideComplete) && $o.onInSideComplete()
+                       _.isFunction($o.onInSideComplete) && $o.onInSideComplete()
                     },
                     duration:me.inSide.duration
                 })
@@ -259,8 +259,6 @@ define(
                             lines.addChild(bline)
                             bline.animate({
                                 globalAlpha : 1
-                            },{
-                                duration: a * 300,
                             })
                         }
 
@@ -284,8 +282,6 @@ define(
                         txts.addChild(txt)
                         txt.animate({
                             globalAlpha : 1
-                        },{
-                            duration: a * 200,
                         })
                     }
                 }
