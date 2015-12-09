@@ -26,22 +26,28 @@ define(
                 textAndIn : 15                   //内圈与文字距离
             }
 
-            this.outSide = {
-                totalValue : 100,
-                totalAngle : 0,
+            this.outSideRange = {
                 thickness  : 3,
                 startAngle : 165,
-                endAngle   : 15,
-                fillStyle  : '#86A2AF'
+                endAngle   : 375,
+                fillStyle  : '#ffffff',
+                duration   : 1200
+            }
+            this.outSide = {
+                thickness  : 3,
+                startAngle : 165,
+                endAngle   : 375,
+                fillStyle  : '#1ba9e3',
+                duration   : 600
             }
             this.inSide = {
-                totalValue : 100,
                 totalAngle : 0,
                 thickness  : 10,
                 startAngle : 165,
-                endAngle   : 15,
-                fillStyle  : '#454B54',
-                globalAlpha:0.5,
+                endAngle   : 375,
+                fillStyle  : '#ffffff',
+                globalAlpha:0.2,
+                duration   : 600
             }
 
             this.describe = {                    //描述
@@ -53,20 +59,21 @@ define(
                     content : 0,
                     context : {
                         x       : 0,
-                        y       : -25,
-                        fillStyle : '#86A2AF',
-                        fontSize : 50,
-                        fontWeight : 'bold',
+                        y       : -20,
+                        fillStyle : '#ffffff',
+                        fontSize : 30,
+                        fontWeight : 'normal',
                         fontFamily : 'Tahoma'
                     }
                 },
                 subtitle : {
-                    content : '0-100 用户数',
+                    content : '',
                     context : {
                         x       : 0,
                         y       : 20,
-                        fillStyle : '#86A2AF',
-                        fontSize : 14
+                        fillStyle : '#ffffff',
+                        fontSize : 13,
+                        fontWeight : 'normal'
                     }
                 }
 
@@ -94,31 +101,16 @@ define(
                 var me    = this;
                 _.deepExtend(me , opt);
 
-                me.maxR = Math.min(me.pos.y, parseInt(me.w / 2)) 
+                me._drawRing({
+                    onInSideComplete : function(){
 
-                //外圈
-                var item = new Canvax.Display.Sprite({ id : 'item_' + 1});
-                me.sprite.addChild(item)
-                me.outSide.r = me.maxR
-                me.outSide.r0= me.maxR - me.outSide.thickness
-                me._add({
-                    config : me.outSide,
-                    sprite : item
+                        // me._drawDescribe()
+                    }
                 })
-
-                //内圈
-                var item = new Canvax.Display.Sprite({ id : 'item_' + 2});
-                me.sprite.addChild(item)
-                me.inSide.r = me.maxR - me.dis.outAndIn
-                me.inSide.r0= me.maxR - me.dis.outAndIn - me.inSide.thickness
-                me._add({
-                    config : me.inSide,
-                    sprite : item
-                })
-
+                
                 me._drawDescribe()
 
-                me._drawTitle()
+                // me._drawTitle()
 
                 me.sprite.context.x = me.pos.x, me.sprite.context.y = me.pos.y
 
@@ -127,34 +119,111 @@ define(
                     // me.sprite.context.y = (me.h - (me.maxR + 30) ) / 2 + me.maxR
                 // }
                 // me.sprite.addChild(me._test({}))
-
-                // me.updateTitle({
-                //     title : 28888
-                // })
             },
 
             updateTitle:function($o){
                 var me = this
                 var center = me.sprite.getChildById('center')
                 var title  = center.getChildAt(0)
-                var subtitle = center.getChildAt(1)
                 var content = $o.title || 0
-                // title.resetText(context)
 
                 AnimationFrame.registTween({
                     from : {num:title.text},
                     to   : {num:content},
                     onUpdate : function(){
-                        title.resetText(parseInt(this.num))
+                        title.resetText(Tools.numAddSymbol(parseInt(this.num)))
                     },
                     // duration:3000
                 })
             },
 
             updateRange:function($o){
-                var center = me.sprite.getChildById('center') 
+                var me = this
+                var center = me.sprite.getChildById('center')
+                var subtitle= center.getChildAt(1) 
                 var content = $o.subtitle || ''
                 subtitle.resetText(content)
+            },
+
+            _drawRing:function($o){
+                var me = this
+                me.maxR = Math.min(me.pos.y, parseInt(me.w / 2)) 
+
+                var rings = new Canvax.Display.Sprite({ id : 'rings'});
+               
+                //内圈
+                var item = new Canvax.Display.Sprite({ id : 'inSide'});
+                rings.addChild(item)
+                me.inSide.r = me.maxR - me.dis.outAndIn, me.inSide.r0 = me.maxR - me.dis.outAndIn - me.inSide.thickness
+                var inSideSector = me._add({
+                    config : {
+                        r  : me.inSide.r,
+                        r0 : me.inSide.r0,
+                        startAngle : me.inSide.startAngle,
+                        endAngle   : me.inSide.startAngle,
+                        fillStyle  : me.inSide.fillStyle,
+                        globalAlpha: me.inSide.globalAlpha
+                    },
+                    sprite : item
+                })
+                AnimationFrame.registTween({
+                    from : {num:me.inSide.startAngle},
+                    to   : {num:me.inSide.endAngle},
+                    onUpdate : function(){
+                        inSideSector.context.endAngle = this.num 
+                    },
+                    onComplete : function(){
+                        // console.log('onComplete')
+                       // _.isFunction($o.onInSideComplete) && $o.onInSideComplete()
+                    },
+                    duration:me.inSide.duration
+                })
+
+                //外圈
+                var item = new Canvax.Display.Sprite({ id : 'outSide'});
+                rings.addChild(item)
+                var outSideSector = me._add({
+                    config : {
+                        r  : me.maxR,
+                        r0 : me.maxR - me.outSide.thickness,
+                        startAngle : me.outSide.startAngle,
+                        endAngle   : me.outSide.startAngle,
+                        fillStyle  : me.outSide.fillStyle
+                    },
+                    sprite : item
+                })  
+                AnimationFrame.registTween({
+                    from : {num:me.outSide.startAngle},
+                    to   : {num:me.outSide.endAngle},
+                    onUpdate : function(){
+                        outSideSector.context.endAngle = this.num 
+                    },
+                    duration:me.outSide.duration
+                })
+
+                //外圈比例
+                var item = new Canvax.Display.Sprite({ id : 'outSideRange'});
+                rings.addChild(item)
+                var outSideRangeSector = me._add({
+                    config : {
+                        r  : me.maxR,
+                        r0 : me.maxR - me.outSideRange.thickness,
+                        startAngle : me.outSideRange.startAngle,
+                        endAngle   : me.outSideRange.startAngle,
+                        fillStyle  : me.outSideRange.fillStyle
+                    },
+                    sprite : item
+                })  
+                AnimationFrame.registTween({
+                    from : {num:me.outSideRange.startAngle},
+                    to   : {num:me.outSideRange.endAngle},
+                    onUpdate : function(){
+                        outSideRangeSector.context.endAngle = this.num             
+                    },
+                    duration:me.outSideRange.duration
+                })               
+
+                me.sprite.addChild(rings)
             },
 
             _drawDescribe:function(){
@@ -162,18 +231,19 @@ define(
                 var describe = new Canvax.Display.Sprite({ id : 'describe'});
                 var lines = new Canvax.Display.Sprite({ id : 'lines'});
                 var txts  = new Canvax.Display.Sprite({ id : 'txts'});
-                // me.outSide.totalAngle = (360 - me.outSide.startAngle) + me.outSide.endAngle
-                me.inSide.totalAngle = (360 - me.inSide.startAngle) + me.inSide.endAngle
+                var startAngle = me.inSide.startAngle
+                var endAngle = me.inSide.endAngle > 360 ? me.inSide.endAngle - 360 : me.inSide.endAngle
+                var totalAngle = (360 - startAngle) + endAngle
+
                 for(var a = 0,al = me.describe.count; a < al; a++){
                     var o = _.isFunction(me.describe.format) ? me.describe.format(a) : null
                     if(o){
                         var scale = _.isNumber(o.scale) ? o.scale : (a / describe_data.length)
-                        var angle = scale * me.inSide.totalAngle + me.inSide.startAngle
+                        var angle = scale * totalAngle + startAngle
                         // angle = angle >= 360 ? angle - 360 : angle
                         if(o.line && o.line.enabled){
                             var p1 = me._getRPoint(0,0,me.inSide.r,me.inSide.r,angle)
                             var p2 = me._getRPoint(0,0,me.inSide.r0,me.inSide.r0,angle)
-
                             // me.sprite.addChild(me._test(p1))
                             // me.sprite.addChild(me._test(p2))
                             //线条
@@ -182,10 +252,16 @@ define(
                                 context: {
                                     pointList: [[p1.x, p1.y], [p2.x, p2.y]],
                                     strokeStyle : o.line.strokeStyle || '#ffffff',
-                                    lineWidth : o.line.lineWidth || 2
+                                    lineWidth : o.line.lineWidth || 2,
+                                    globalAlpha : 0
                                 }
                             });
                             lines.addChild(bline)
+                            bline.animate({
+                                globalAlpha : 1
+                            },{
+                                duration: a * 300,
+                            })
                         }
 
                         var r = me.inSide.r0 - me.dis.textAndIn
@@ -200,17 +276,22 @@ define(
                                 fontSize: o.context.fontSize || 10,
                                 rotation: angle + 90,
                                 textAlign: 'center',
-                                textBaseline: 'middle'
+                                textBaseline: 'middle',
+                                globalAlpha : 0
                             }
                         });
                         // me.sprite.addChild(me._test({x:p.x, y:p.y, fillStyle:'#00ffff'}))
                         txts.addChild(txt)
+                        txt.animate({
+                            globalAlpha : 1
+                        },{
+                            duration: a * 200,
+                        })
                     }
                 }
 
                 describe.addChild(lines)
                 describe.addChild(txts)
-
                 me.sprite.addChild(describe)
             },
 
@@ -225,7 +306,7 @@ define(
                         y: o.context.y || 0,
                         fillStyle: o.context.fillStyle || '#ff0000',
                         fontSize: o.context.fontSize || 12,
-                        fontWeight : o.context.fontWeight || 'bold',
+                        fontWeight : o.context.fontWeight || 'normal',
                         fontFamily : o.context.fontFamily || 'Tahoma',
                         textAlign: 'center',
                         textBaseline: 'middle'
@@ -240,7 +321,7 @@ define(
                         y: o.context.y || 0,
                         fillStyle: o.context.fillStyle || '#ff0000',
                         fontSize: o.context.fontSize || 12,
-                        fontWeight : o.context.fontWeight || 'bold',
+                        fontWeight : o.context.fontWeight || 'normal',
                         fontFamily : o.context.fontFamily || '微软雅黑',
                         textAlign: 'center',
                         textBaseline: 'middle'
@@ -273,7 +354,7 @@ define(
                 var me      = this
                 var sprite  = $o.sprite 
                 var o       = $o.config
-                var gauge = new Sector({
+                var sector = new Sector({
                     context : {
                         x : o.x || 0,
                         y : o.y || 0,
@@ -288,7 +369,8 @@ define(
                         globalAlpha: o.globalAlpha|| 1,
                     }
                 })
-                sprite.addChild(gauge)
+                sprite.addChild(sector)
+                return sector
             }
         }; 
     

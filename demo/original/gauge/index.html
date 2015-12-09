@@ -36,25 +36,26 @@
 var data= [
     ["xfield0"]
 ];
-var describe_data = ['低分', '25', '中低分', '50', '中高分', '75', '高分', '1']
+var describe_data = ['0','低分', '250', '中低分', '500', '中高分', '750', '高分', '999']
 //chart的配置信息
 var options = {
     type : 'gauge',
+
     graphs : {
         describe : {
             count : describe_data.length,
             format : function(i){
                 var o = {
-                    scale : (i + 1) / describe_data.length,
+                    scale : i / (describe_data.length - 1),
                     line  : {
-                        enabled : (i < describe_data.length && i % 2 != 0 )? true : false,
+                        enabled : (i < describe_data.length && i % 2 == 0 )? true : false,
                         strokeStyle : '#ffffff',
                         lineWidth : 2
                     },
                     content  : describe_data[i],
 
                     context: {
-                        fillStyle : i % 2 ? '#86A2AF' : '#454B54',
+                        fillStyle : i % 2 ? '#606364' : '#ffffff',
                         fontSize  : 4
                     }
                 }
@@ -63,18 +64,19 @@ var options = {
         }
     },
     dataZoom:{
-        
+        range : {
+            start : 0,
+            end   : 999
+        },
+        count : 999
     }
 };
 //Chartx.funnel开始初始化chart实例
 var chartx = Chartx.original("canvasTest" , data , options).then(function(chart){
-    window.c = chart;
-});
-
-chartx.then(function( gauge ){
-    gauge.on( "complete" , function( e ){
-        console.log('aaa')
-    });
+    chart.on('datazoomRange',function(o){
+        var num = Math.floor(Math.random()*99999)
+        chart.updateTitle(num)
+    })
 });
 </textarea></form>
         </td>
@@ -88,8 +90,8 @@ chartx.then(function( gauge ){
                     联系人：@逢春 
                 </p>
             </div>
-            <div  class="test-c">
-                <div id="canvasTest" style='width:360px;height:270px;'></div>
+            <div  class="test-c"> 
+                <div id="canvasTest" style='width:360px;height:270px;background:#252c34'></div>
             </div>
 
             </div>

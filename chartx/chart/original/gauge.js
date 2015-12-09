@@ -93,7 +93,6 @@ define(
             _initDataZoom : function(){
                 var me = this
                 require(["chartx/components/datazoom/index"], function(DataZoom) {
-                    console.log(me.height - me.padding.bottom)
                     var dataZoomOpt = _.deepExtend({
                         w: me.width - me.padding.left - me.padding.right,
                         // count: me._data.length - 1,
@@ -102,11 +101,11 @@ define(
                             x: 0,
                             y: me._graphs.h, 
                         },
-                        dragIng: function(range){
-                            // console.log(range)
+                        dragIng:function(o){
+                            me._updateRange(o)
                         },
-                        dragEnd:function(range){
-                            console.log(range)
+                        dragEnd:function(o){
+                            me.fire("datazoomRange", o);
                         }
                     } , me.dataZoom); 
 
@@ -145,6 +144,14 @@ define(
                 return o
             },
 
+            _updateRange:function($o){
+                var me = this
+                var start = parseInt($o.start), end = parseInt($o.end)
+                var content = start + ' - ' + end + ' 用户人数'
+                me._graphs.updateRange({
+                    subtitle : content
+                })
+            },
             _drawEnd: function() {
                 // this.stageBg.addChild(this._back.sprite)
                 this.core.context.y = this.padding.top
