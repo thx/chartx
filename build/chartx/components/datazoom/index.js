@@ -161,10 +161,6 @@ define(
             setRange : function(){
                 var start = (this.btnLeft.context.x / this.w)*this.count ;
                 var end = ( (this.btnRight.context.x + this.btnW) / this.w)*this.count;
-                if( this.range.start == start && this.range.end == end ){
-                    return;
-                };
-                //console.log("start:"+start+"_____end:"+end);
                 this.range.start = start;
                 this.range.end = end;
                 this.dragIng( this.range );

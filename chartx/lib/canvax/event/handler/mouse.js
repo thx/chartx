@@ -17,21 +17,12 @@ define(
         };
         mouseHandler.prototype = {
             init : function(){
-                var _moveStep = 0; //move的时候的频率设置
                 //依次添加上浏览器的自带事件侦听
                 var me   = this;
                 var root = this.canvax;
                 _.each( ["click","dblclick","mousedown","mousemove","mouseup","mouseout"] , function( type ){
                     Base.addEvent( root.el , type , function( e ){
                         root.updateRootOffset();
-                        //如果发现是mousemove的话，要做mousemove的频率控制
-                        if( e.type == "mousemove" ){
-                            if(_moveStep<1){
-                                _moveStep++;
-                                return;
-                            }
-                            _moveStep = 0;
-                        }
                         me.__mouseHandler( e );
                     } ); 
                 } );   
@@ -222,7 +213,7 @@ define(
                 if(this._cursor == cursor){
                   //如果两次要设置的鼠标状态是一样的
                   return;
-                }
+                };
                 this.canvax.el.style.cursor = cursor;
                 this._cursor = cursor;
             }

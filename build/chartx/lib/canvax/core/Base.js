@@ -10,7 +10,6 @@ define(
     "canvax/core/Base",
     [
         !document.createElement('canvas').getContext ? "canvax/library/flashCanvas/flashcanvas" : "",
-        "canvax/animation/AnimationFrame",
         !window._ ? "canvax/library/underscore" : ""
     ],
     function( FlashCanvas ){

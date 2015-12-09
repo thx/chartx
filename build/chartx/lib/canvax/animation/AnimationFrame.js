@@ -106,11 +106,9 @@ define(
                 };
 
                 tween.onComplete(function() {
-                    Tween.remove( tween );
-                    tween = null;
-                    animate = null;
+                    destroyTween( tween );
                     //执行用户的conComplete
-                    opt.onComplete();
+                    opt.onComplete( this );
                 });
                 Tween.add(tween);
                 tween.start();

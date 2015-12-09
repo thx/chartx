@@ -99,8 +99,8 @@ define(
                 return style;
             },
             checkBarW: function(xDis) {
-                this.bar.width = parseInt( xDis ) - ( parseInt(Math.max( 1 , xDis*0.3 )) );
-                this.bar.width < 1 && (this.bar.width=1);
+                this.bar.width = parseInt(xDis) - (parseInt(Math.max(1, xDis * 0.3)));
+                this.bar.width < 1 && (this.bar.width = 1);
             },
             resetData: function(data, opt) {
                 this.draw(data.data, opt);
@@ -317,8 +317,10 @@ define(
                 };
 
                 var options = _.extend({
-                    delay : 80
-                } , opt);
+                    delay: 80,
+                    easing: "Back.Out",
+                    duration: 500
+                }, opt);
 
                 _.each(self.data, function(h_group, g) {
                     var vLen = h_group.length;
@@ -331,25 +333,39 @@ define(
 
                             var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
                             //console.log("finalPos"+bar.finalPos.y)
-                            if (bar._tweenObj) {
-                                AnimationFrame.destroyTween(bar._tweenObj);
-                            };
 
-                            bar._tweenObj = bar.animate({
-                                scaleY: sy,
-                                y: sy * bar.finalPos.y,
-                                x: bar.finalPos.x,
-                                width: bar.finalPos.width,
-                                height: bar.finalPos.height
-                            }, {
-                                duration: 500,
-                                easing: 'Back.Out',
-                                delay: h * options.delay,
-                                onUpdate: function(arg) {
-                                    //console.log( arg.y )
-                                },
-                                id: bar.id
-                            });
+                            if (options.duration == 0) {
+                                bar.context.scaleY = sy;
+                                bar.context.y = sy * sy * bar.finalPos.y;
+                                bar.context.x = bar.finalPos.x;
+                                bar.context.width = bar.finalPos.width;
+                                bar.context.height = bar.finalPos.height;
+                            } else {
+                                if (bar._tweenObj) {
+                                    AnimationFrame.destroyTween(bar._tweenObj);
+                                };
+                                bar._tweenObj = bar.animate({
+                                    scaleY: sy,
+                                    y: sy * bar.finalPos.y,
+                                    x: bar.finalPos.x,
+                                    width: bar.finalPos.width,
+                                    height: bar.finalPos.height
+                                }, {
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    delay: h * options.delay,
+                                    onUpdate: function(arg) {
+
+                                    },
+                                    onComplete: function(arg) {
+                                        
+                                        if (arg.width < 3) {
+                                            this.context.radius = 0;
+                                        }
+                                    },
+                                    id: bar.id
+                                });
+                            }
 
                         };
                     };
