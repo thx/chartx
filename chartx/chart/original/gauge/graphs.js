@@ -279,7 +279,7 @@ define(
                 var startAngle = me.outSide.startAngle
                 var p = me._getRPoint(0, 0, me.outSide.cR, me.outSide.cR, startAngle)
 
-                var item = new Canvax.Display.Sprite({ id : 'leftNode'});
+                var item = new Canvax.Display.Sprite({ id : 'leftNode', xyToInt:false});
                 item.context.x = p.x, item.context.y = p.y
                 rings.addChild(item)
                 me.leftNode.sprite = item
@@ -306,7 +306,7 @@ define(
                     sprite : item
                 })
 
-                var item = new Canvax.Display.Sprite({ id : 'rightNode'});
+                var item = new Canvax.Display.Sprite({ id : 'rightNode', xyToInt:false});
                 item.context.x = p.x, item.context.y = p.y
                 rings.addChild(item)
                 me.rightNode.sprite = item
