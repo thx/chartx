@@ -26,20 +26,6 @@ define(
                 textAndIn : 15                   //内圈与文字距离
             }
 
-            this.outSideRange = {
-                thickness  : 3,
-                startAngle : 165,
-                endAngle   : 375,
-                fillStyle  : '#ffffff',
-                duration   : 1200
-            }
-            this.outSide = {
-                thickness  : 3,
-                startAngle : 165,
-                endAngle   : 375,
-                fillStyle  : '#1ba9e3',
-                duration   : 600
-            }
             this.inSide = {
                 totalAngle : 0,
                 thickness  : 10,
@@ -48,6 +34,48 @@ define(
                 fillStyle  : '#ffffff',
                 globalAlpha:0.2,
                 duration   : 600
+            }
+            this.outSide = {
+                thickness  : 4,
+                cR         : 0,                       //外径内径的一半
+                startAngle : 165,
+                endAngle   : 375,
+                fillStyle  : '#ffffff',
+                duration   : 900
+            }
+            this.outSideRange = {
+                sprite      : null,
+                thickness  : 4,
+                startAngle : 165,
+                endAngle   : 375,
+                fillStyle  : '#00a8e6 ',
+                duration   : 1200
+            }
+            this.leftNode = {
+                sprite : null,
+                inNode : {                            //内圆
+                    r     : this.outSide.thickness / 2 + 0.5,
+                    fillStyle : '#00a8e6'
+                },
+                outNode: {                            //外圆
+                    r     : 6,
+                    globalAlpha : 0.2,
+                    fillStyle   : '#00a8e6'
+                }
+
+            }
+            this.rightNode = {
+                shape  : null,
+                inNode : {                            //内圆
+                    r     : this.outSide.thickness / 2 + 0.5,
+                    fillStyle : '#00a8e6'
+                },
+                outNode: {                            //外圆
+                    r     : 6,
+                    globalAlpha : 0.2,
+                    fillStyle   : '#00a8e6'
+                }
+
             }
 
             this.describe = {                    //描述
@@ -103,14 +131,13 @@ define(
 
                 me._drawRing({
                     onInSideComplete : function(){
-
                         me._drawDescribe()
                     }
                 })
                 
                 // me._drawDescribe()
 
-                // me._drawTitle()
+                me._drawTitle()
 
                 me.sprite.context.x = me.pos.x, me.sprite.context.y = me.pos.y
 
@@ -118,7 +145,7 @@ define(
                 // if(me.autoCenter){
                     // me.sprite.context.y = (me.h - (me.maxR + 30) ) / 2 + me.maxR
                 // }
-                // me.sprite.addChild(me._test({}))
+                // me.sprite.addChild(me._addCircle({}))
             },
 
             updateTitle:function($o){
@@ -133,7 +160,7 @@ define(
                     onUpdate : function(){
                         title.resetText(Tools.numAddSymbol(parseInt(this.num)))
                     },
-                    // duration:3000
+                    duration:$o.duration || this.outSideRange.duration
                 })
             },
 
@@ -143,6 +170,22 @@ define(
                 var subtitle= center.getChildAt(1) 
                 var content = $o.subtitle || ''
                 subtitle.resetText(content)
+
+                var startAngle = me.outSideRange.startAngle, totalAngle = me.outSideRange.endAngle - me.outSideRange.startAngle
+                var start = parseInt(startAngle + totalAngle * $o.scale.start)
+                var end   = parseInt(startAngle + totalAngle * $o.scale.end) 
+
+                if(me.outSideRange.shape){
+                    me.outSideRange.shape.context.startAngle = start
+                    me.outSideRange.shape.context.endAngle   = end
+                }
+
+                var p1 = me._getRPoint(0, 0, me.outSide.cR, me.outSide.cR, start)
+                var p2 = me._getRPoint(0, 0, me.outSide.cR, me.outSide.cR, end)
+                if(me.leftNode.sprite && me.rightNode.sprite){
+                    me.leftNode.sprite.context.x = p1.x, me.leftNode.sprite.context.y = p1.y
+                    me.rightNode.sprite.context.x = p2.x, me.rightNode.sprite.context.y = p2.y   
+                } 
             },
 
             _drawRing:function($o){
@@ -150,12 +193,12 @@ define(
                 me.maxR = Math.min(me.pos.y, parseInt(me.w / 2)) 
 
                 var rings = new Canvax.Display.Sprite({ id : 'rings'});
-               
+
                 //内圈
                 var item = new Canvax.Display.Sprite({ id : 'inSide'});
                 rings.addChild(item)
                 me.inSide.r = me.maxR - me.dis.outAndIn, me.inSide.r0 = me.maxR - me.dis.outAndIn - me.inSide.thickness
-                var inSideSector = me._add({
+                var inSideSector = me._addSector({
                     config : {
                         r  : me.inSide.r,
                         r0 : me.inSide.r0,
@@ -173,7 +216,6 @@ define(
                         inSideSector.context.endAngle = this.num 
                     },
                     onComplete : function(){
-                        console.log('onComplete')
                        _.isFunction($o.onInSideComplete) && $o.onInSideComplete()
                     },
                     duration:me.inSide.duration
@@ -182,7 +224,10 @@ define(
                 //外圈
                 var item = new Canvax.Display.Sprite({ id : 'outSide'});
                 rings.addChild(item)
-                var outSideSector = me._add({
+                me.outSide.r = me.maxR, me.outSide.r0 = me.maxR - me.outSide.thickness
+                me.outSide.cR = me.outSide.r0 + me.outSide.thickness / 2
+
+                var outSideSector = me._addSector({
                     config : {
                         r  : me.maxR,
                         r0 : me.maxR - me.outSide.thickness,
@@ -204,7 +249,7 @@ define(
                 //外圈比例
                 var item = new Canvax.Display.Sprite({ id : 'outSideRange'});
                 rings.addChild(item)
-                var outSideRangeSector = me._add({
+                var outSideRangeSector = me._addSector({
                     config : {
                         r  : me.maxR,
                         r0 : me.maxR - me.outSideRange.thickness,
@@ -213,18 +258,80 @@ define(
                         fillStyle  : me.outSideRange.fillStyle
                     },
                     sprite : item
-                })  
+                })
+                me.outSideRange.shape = outSideRangeSector
                 AnimationFrame.registTween({
                     from : {num:me.outSideRange.startAngle},
                     to   : {num:me.outSideRange.endAngle},
                     onUpdate : function(){
-                        outSideRangeSector.context.endAngle = this.num             
-                    },
-                    onComplete : function(){
+                        outSideRangeSector.context.endAngle = this.num  
+
+                        var p = me._getRPoint(0, 0, me.outSide.cR, me.outSide.cR, this.num)
+                        if(me.rightNode.sprite){
+                            me.rightNode.sprite.context.x = p.x, me.rightNode.sprite.context.y = p.y  
+                        }       
                     },
                     duration:me.outSideRange.duration
-                    // duration:me.inSide.duration
                 })               
+
+
+                //圆
+                var startAngle = me.outSide.startAngle
+                var p = me._getRPoint(0, 0, me.outSide.cR, me.outSide.cR, startAngle)
+
+                var item = new Canvax.Display.Sprite({ id : 'leftNode'});
+                item.context.x = p.x, item.context.y = p.y
+                rings.addChild(item)
+                me.leftNode.sprite = item
+                me._addCircle({
+                    config : {
+                        r  : me.leftNode.inNode.r + 1.5,
+                        globalAlpha : 0.5
+                    },
+                    sprite : item
+                })
+                me._addCircle({
+                    config : {
+                        r  : me.leftNode.inNode.r,
+                        fillStyle : me.leftNode.inNode.fillStyle
+                    },
+                    sprite : item
+                })
+                me._addCircle({
+                    config : {
+                        r  : me.leftNode.outNode.r,
+                        fillStyle : me.leftNode.outNode.fillStyle,
+                        globalAlpha : me.leftNode.outNode.globalAlpha
+                    },
+                    sprite : item
+                })
+
+                var item = new Canvax.Display.Sprite({ id : 'rightNode'});
+                item.context.x = p.x, item.context.y = p.y
+                rings.addChild(item)
+                me.rightNode.sprite = item
+                me._addCircle({
+                    config : {
+                        r  : me.rightNode.inNode.r + 1.5,
+                        globalAlpha : 0.5
+                    },
+                    sprite : item
+                })
+                me._addCircle({
+                    config : {
+                        r  : me.rightNode.inNode.r,
+                        fillStyle : me.rightNode.inNode.fillStyle
+                    },
+                    sprite : item
+                })
+                me._addCircle({
+                    config : {
+                        r  : me.rightNode.outNode.r,
+                        fillStyle : me.rightNode.outNode.fillStyle,
+                        globalAlpha : me.rightNode.outNode.globalAlpha
+                    },
+                    sprite : item
+                })
 
                 me.sprite.addChild(rings)
             },
@@ -247,8 +354,8 @@ define(
                         if(o.line && o.line.enabled){
                             var p1 = me._getRPoint(0,0,me.inSide.r,me.inSide.r,angle)
                             var p2 = me._getRPoint(0,0,me.inSide.r0,me.inSide.r0,angle)
-                            // me.sprite.addChild(me._test(p1))
-                            // me.sprite.addChild(me._test(p2))
+                            // me.sprite.addChild(me._addCircle(p1))
+                            // me.sprite.addChild(me._addCircle(p2))
                             //线条
                             var bline = new BrokenLine({ 
                                 id: "brokenline",
@@ -280,15 +387,19 @@ define(
                                 rotation: angle + 90,
                                 textAlign: 'center',
                                 textBaseline: 'middle',
-                                globalAlpha : 0
+                                globalAlpha : 0,
+                                scaleX      : 0.1,
+                                scaleY      : 0.1
                             }
                         });
-                        // me.sprite.addChild(me._test({x:p.x, y:p.y, fillStyle:'#00ffff'}))
+                        // me.sprite.addChild(me._addCircle({x:p.x, y:p.y, fillStyle:'#00ffff'}))
                         txts.addChild(txt)
                         txt.animate({
-                            globalAlpha : 1
+                            globalAlpha : 1,
+                            scaleX : 1,
+                            scaleY : 1
                         },{
-                            duration : a * 200
+                            duration : me.outSide.duration / ( al - a )
                         })
                     }
                 }
@@ -335,25 +446,11 @@ define(
                 me.sprite.addChild(center)
             },
 
-            _getRPoint:function(x0, y0, xr, yr, r){
-                r = r * Math.PI / 180
+            _getRPoint:function(x0, y0, xr, yr, angle){
+                var r = angle * Math.PI / 180
                 return {x:Math.cos(r) * xr + x0, y:Math.sin(r) * yr + y0}
             },
-            _test:function(o){
-                var circle = new Circle({                  //圆
-                    id : "circle",
-                    context : {
-                        x           : o.x || 0,
-                        y           : o.y || 0,
-                        r           : 2,
-                        fillStyle   : o.fillStyle || '#ff0000',
-                    }
-                });
-                return circle
-            },
-            _grow : function(){
-            },
-            _add : function($o){                           //单个扇形区
+            _addSector:function($o){                       //单个扇形区
                 var me      = this
                 var sprite  = $o.sprite 
                 var o       = $o.config
@@ -374,7 +471,25 @@ define(
                 })
                 sprite.addChild(sector)
                 return sector
-            }
+            },
+            _addCircle:function($o){
+                var me      = this
+                var sprite  = $o.sprite 
+                var o       = $o.config
+                var circle = new Circle({                  //圆
+                    id : "circle",
+                    xyToInt : false,
+                    context : {
+                        x           : o.x || 0,
+                        y           : o.y || 0,
+                        r           : o.r || 1,
+                        fillStyle   : o.fillStyle || '#ffffff',
+                        globalAlpha : o.globalAlpha || 1
+                    }
+                });
+                sprite.addChild(circle)
+                return circle
+            },
         }; 
     
         return Graphs;

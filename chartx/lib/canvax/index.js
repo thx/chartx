@@ -47,7 +47,7 @@ define(
             _taskList.push(task);
             if (!_requestAid) {
                 _requestAid = requestAnimationFrame(function() {
-                    console.log("frame__" + _taskList.length);
+                    //console.log("frame__" + _taskList.length);
                     if (_tweenLen) {
                         Tween.update();
                     };
