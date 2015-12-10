@@ -1,10 +1,9 @@
 define(
-    "canvax/animation/AnimationFrame", 
-    [
+    "canvax/animation/AnimationFrame", [
         "canvax/animation/Tween",
         "canvax/core/Base"
     ],
-    function(Tween,Base) {
+    function(Tween, Base) {
         window.Tween = Tween;
         /**
          * 设置 AnimationFrame begin
@@ -38,25 +37,24 @@ define(
         var _requestAid = null;
 
         /*
-        * @param task 要加入到渲染帧队列中的任务
-        * @result frameid
-        */
+         * @param task 要加入到渲染帧队列中的任务
+         * @result frameid
+         */
         function registFrame(task) {
-            if( !task ){
+            if (!task) {
                 return;
             };
             _taskList.push(task);
             if (!_requestAid) {
                 _requestAid = requestAnimationFrame(function() {
-                    //console.log("frame__"+_taskList.length);
-                    //console.log("tweenlen:"+_tweenLen);
-                    if( _tweenLen ){
+                    console.log("frame__" + _taskList.length);
+                    if (_tweenLen) {
                         Tween.update();
                     };
                     var currTaskList = _taskList;
                     _taskList = [];
                     _requestAid = null;
-                    while( currTaskList.length>0 ){
+                    while (currTaskList.length > 0) {
                         currTaskList.shift().task();
                     };
                 });
@@ -67,11 +65,11 @@ define(
 
 
         /*
-        *  @param task 要从渲染帧队列中删除的任务
-        */
+         *  @param task 要从渲染帧队列中删除的任务
+         */
         function destroyFrame(task) {
             for (var i = 0, l = _taskList.length; i < l; i++) {
-                if ( _taskList[i].id === task.id ) {
+                if (_taskList[i].id === task.id) {
                     _taskList.splice(i, 1);
                     i--;
                     l--;
@@ -94,50 +92,54 @@ define(
             var opt = _.extend({
                 from: null,
                 to: null,
-                duration : 500,
+                duration: 500,
                 onUpdate: function() {},
                 onComplete: function() {},
-                repeat : 0,
-                delay : 0,
-                easing : null
+                repeat: 0,
+                delay: 0,
+                easing: null
             }, options);
             var tween = {};
             if (opt.from && opt.to) {
-                tween = new Tween.Tween(opt.from).to(opt.to , opt.duration).onUpdate(opt.onUpdate);
+                tween = new Tween.Tween(opt.from).to(opt.to, opt.duration).onUpdate(opt.onUpdate);
 
-                opt.repeat && tween.repeat( opt.repeat );
-                opt.delay && tween.delay( opt.delay );
-                opt.easing && tween.easing( Tween.Easing[ opt.easing.split(".")[0] ][opt.easing.split(".")[1]] );
+                opt.repeat && tween.repeat(opt.repeat);
+                opt.delay && tween.delay(opt.delay);
+                opt.easing && tween.easing(Tween.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
 
-                var tid = "tween_"+Base.getUID();
+                var tid = "tween_" + Base.getUID();
 
-                function animate(){
-                    if( !tween || !tween.animate ){
+                function animate() {
+                    if (!tween || !tween.animate) {
                         return;
                     };
-                    registFrame( {
-                        id : tid,
-                        task : animate
-                    } );
+                    registFrame({
+                        id: tid,
+                        task: animate
+                    });
                 };
-                
+
                 tween.onComplete(function() {
+                    
                     _tweenLen--;
-                    destroyTween( tween );
+
+                    destroyFrame({
+                        task: animate,
+                        id: tid
+                    });
+                    tween.animate = null;
+                    tween = null;
+
                     var t = this;
-                    setTimeout( function(){
-                        opt.onComplete( t );//执行用户的conComplete
-                    } , 10);
+                    setTimeout(function() {
+                        opt.onComplete(t); //执行用户的conComplete
+                    }, 10);
                 });
 
-                if( !_tweenLen ){
-                    tween.start();
-                } else {
-                    Tween.add(tween);
-                };
+                tween.start();
 
-                _tweenLen ++;
-                
+                _tweenLen++;
+
                 tween.animate = animate;
                 tween.id = tid;
                 animate();
@@ -150,14 +152,17 @@ define(
          * @result void(0)
          */
         function destroyTween(tween) {
+
             tween.stop();
-            //Tween.remove( tween );
-            destroyFrame( {
-                task : tween.animate,
-                id   : tween.id
-            } );
+            _tweenLen--;
+            
+            destroyFrame({
+                task: tween.animate,
+                id: tween.id
+            });
             tween.animate = null;
             tween = null;
+
         };
 
         return {
