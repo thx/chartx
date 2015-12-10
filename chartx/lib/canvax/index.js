@@ -1,9 +1,11 @@
 define(
     "canvax/animation/AnimationFrame", 
     [
-        "canvax/animation/Tween"
+        "canvax/animation/Tween",
+        "canvax/core/Base"
     ],
-    function(Tween) {
+    function(Tween,Base) {
+        window.Tween = Tween;
         /**
          * 设置 AnimationFrame begin
          */
@@ -32,7 +34,7 @@ define(
         };
 
         //管理所有图表的渲染任务
-        var _taskList = [];
+        var _taskList = []; //[{ id : task: }...]
         var _requestAid = null;
 
         /*
@@ -47,25 +49,33 @@ define(
             if (!_requestAid) {
                 _requestAid = requestAnimationFrame(function() {
                     //console.log("frame__"+_taskList.length);
+                    //console.log("tweenlen:"+_tweenLen);
+                    if( _tweenLen ){
+                        Tween.update();
+                    };
                     var currTaskList = _taskList;
                     _taskList = [];
                     _requestAid = null;
                     while( currTaskList.length>0 ){
-                        currTaskList.shift()();
+                        currTaskList.shift().task();
                     };
                 });
             };
             return _requestAid;
         };
 
+
+
         /*
         *  @param task 要从渲染帧队列中删除的任务
         */
         function destroyFrame(task) {
             for (var i = 0, l = _taskList.length; i < l; i++) {
-                if (_taskList[i] === task) {
+                if ( _taskList[i].id === task.id ) {
                     _taskList.splice(i, 1);
-                }
+                    i--;
+                    l--;
+                };
             };
             if (_taskList.length == 0) {
                 cancelAnimationFrame(_requestAid);
@@ -73,6 +83,8 @@ define(
             };
             return _requestAid;
         };
+
+        var _tweenLen = 0;
 
         /* 
          * @param opt {from , to , onUpdate , onComplete , ......}
@@ -97,22 +109,38 @@ define(
                 opt.delay && tween.delay( opt.delay );
                 opt.easing && tween.easing( Tween.Easing[ opt.easing.split(".")[0] ][opt.easing.split(".")[1]] );
 
+                var tid = "tween_"+Base.getUID();
+
                 function animate(){
-                    if( !tween || !tween._animate ){
+                    if( !tween || !tween.animate ){
                         return;
                     };
-                    registFrame( animate );
-                    Tween.update();
+                    registFrame( {
+                        id : tid,
+                        task : animate
+                    } );
+                };
+                
+                tween.onComplete(function() {
+                    _tweenLen--;
+                    destroyTween( tween );
+                    var t = this;
+                    var args = arguments;
+                    setTimeout( function(){
+                        opt.onComplete.apply(t , args);//执行用户的conComplete
+                    } , 10);
+                });
+
+                if( !_tweenLen ){
+                    tween.start();
+                } else {
+                    Tween.add(tween);
                 };
 
-                tween.onComplete(function() {
-                    destroyTween( tween );
-                    //执行用户的conComplete
-                    opt.onComplete( this );
-                });
-                Tween.add(tween);
-                tween.start();
-                tween._animate = animate;
+                _tweenLen ++;
+                
+                tween.animate = animate;
+                tween.id = tid;
                 animate();
             };
             return tween;
@@ -124,9 +152,12 @@ define(
          */
         function destroyTween(tween) {
             tween.stop();
-            Tween.remove( tween );
-            destroyFrame( tween._animate );
-            tween._animate = null;
+            //Tween.remove( tween );
+            destroyFrame( {
+                task : tween.animate,
+                id   : tween.id
+            } );
+            tween.animate = null;
             tween = null;
         };
 
@@ -4312,7 +4343,10 @@ define(
         __startEnter : function(){
            var self = this;
            if( !self.requestAid ){
-               self.requestAid = AnimationFrame.registFrame( _.bind( self.__enterFrame , self) );
+               self.requestAid = AnimationFrame.registFrame( {
+                   id : "enterFrame", //同时肯定只有一个enterFrame的task
+                   task : _.bind( self.__enterFrame , self)
+               } );
            }
         },
         __enterFrame : function(){
