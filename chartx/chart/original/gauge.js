@@ -70,15 +70,15 @@ define(
                 this._initDataZoom()
 
                 this.inited = true;
-
                 // this.aaa.on = function(o){
                 //     fire()
                 //     _graphs.updateRange(o)
                 // }
             },
-            updateTitle : function(num){
+            updateTitle : function($o){
                 this._graphs.updateTitle({
-                    title : num
+                    title : $o.num,
+                    duration : $o.duration
                 })
             },
             _initData: function(data, opts) {
@@ -95,7 +95,7 @@ define(
                 require(["chartx/components/datazoom/index"], function(DataZoom) {
                     var dataZoomOpt = _.deepExtend({
                         w: me.width - me.padding.left - me.padding.right,
-                        // count: me._data.length - 1,
+                        // count: 1,
                         // h : me._xAxis.h,
                         pos: {
                             x: 0,
@@ -110,6 +110,8 @@ define(
                     } , me.dataZoom); 
 
                     me._dataZoom = new DataZoom(dataZoomOpt);
+
+                    me._updateRange(me._dataZoom.range)
 
                     me.core.addChild(me._dataZoom.sprite)
                 })
@@ -149,6 +151,10 @@ define(
                 var start = parseInt($o.start), end = parseInt($o.end)
                 var content = start + ' - ' + end + ' 用户人数'
                 me._graphs.updateRange({
+                    scale    : {
+                        start  : start / me.dataZoom.count,
+                        end    : end / me.dataZoom.count
+                    },
                     subtitle : content
                 })
             },

@@ -73,10 +73,17 @@ var options = {
 };
 //Chartx.funnel开始初始化chart实例
 var chartx = Chartx.original("canvasTest" , data , options).then(function(chart){
+    updateTitle(1200)
     chart.on('datazoomRange',function(o){
-        var num = Math.floor(Math.random()*99999)
-        chart.updateTitle(num)
+        updateTitle(500)
     })
+    function updateTitle(duration){
+        var num = Math.floor(Math.random()*99999)
+        chart.updateTitle({
+            num : num,
+            duration : duration
+        })
+    }
 });
 </textarea></form>
         </td>
