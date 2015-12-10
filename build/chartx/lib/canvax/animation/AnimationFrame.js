@@ -125,9 +125,8 @@ define(
                     _tweenLen--;
                     destroyTween( tween );
                     var t = this;
-                    var args = arguments;
                     setTimeout( function(){
-                        opt.onComplete.apply(t , args);//执行用户的conComplete
+                        opt.onComplete( t );//执行用户的conComplete
                     } , 10);
                 });
 
