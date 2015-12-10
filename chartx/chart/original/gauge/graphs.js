@@ -54,7 +54,7 @@ define(
             this.leftNode = {
                 sprite : null,
                 inNode : {                            //内圆
-                    r     : this.outSide.thickness / 2,
+                    r     : this.outSide.thickness / 2 + 0.5,
                     fillStyle : '#00a8e6'
                 },
                 outNode: {                            //外圆
@@ -67,7 +67,7 @@ define(
             this.rightNode = {
                 shape  : null,
                 inNode : {                            //内圆
-                    r     : this.outSide.thickness / 2,
+                    r     : this.outSide.thickness / 2 + 0.5,
                     fillStyle : '#00a8e6'
                 },
                 outNode: {                            //外圆
@@ -131,11 +131,11 @@ define(
 
                 me._drawRing({
                     onInSideComplete : function(){
-                        // me._drawDescribe()
+                        me._drawDescribe()
                     }
                 })
                 
-                me._drawDescribe()
+                // me._drawDescribe()
 
                 me._drawTitle()
 
@@ -478,6 +478,7 @@ define(
                 var o       = $o.config
                 var circle = new Circle({                  //圆
                     id : "circle",
+                    xyToInt : false,
                     context : {
                         x           : o.x || 0,
                         y           : o.y || 0,
