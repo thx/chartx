@@ -658,6 +658,14 @@ define(
             this.w = 0;
             this.h = dataZoom.height;
 
+            this.color = "#70aae8";
+
+            this.bg = {
+                fillStyle : "#999",
+                strokeStyle: "#999",
+                lineWidth : 0
+            }
+
             this.dragIng = function(){};
             this.dragEnd = function(){};
 
@@ -665,7 +673,7 @@ define(
             this.barH = this.h - 6;
             this.barY = 6 / 2;
             this.btnW = 8;
-            this.btnFillStyle = "blue";
+            this.btnFillStyle = this.color;
             this.btnLeft = null;
             this.btnRgiht = null;
 
@@ -699,13 +707,21 @@ define(
                         y: this.barY,
                         width: this.w,
                         height: this.barH,
-                        lineWidth: 1,
-                        strokeStyle: "#e6e6e6"
+                        lineWidth: this.bg.lineWidth,
+                        strokeStyle: this.bg.strokeStyle,
+                        fillStyle: this.bg.fillStyle,
+                        globalAlpha: 0.05
                     }
                 });
                 var me = this;
 
                 this.sprite.addChild(bgRect);
+
+                
+
+
+
+                this.btnsLeft = new Canvax.Display.Sprite({});
                 this.btnLeft = new Rect({
                     dragEnabled : true,
                     context: {
@@ -726,7 +742,7 @@ define(
                    if(this.context.x > (me.btnRight.context.x-me.btnW-2)){
                        this.context.x = me.btnRight.context.x-me.btnW-2
                    };
-                   me.rangeRect.context.width = me.btnRight.context.x - this.context.x;
+                   me.rangeRect.context.width = me.btnRight.context.x - this.context.x - me.btnW;
                    me.rangeRect.context.x = this.context.x + me.btnW;
                    me.setRange();
                 });
@@ -756,7 +772,7 @@ define(
                     if( this.context.x > me.w - me.btnW ){
                         this.context.x = me.w - me.btnW;
                     };
-                    me.rangeRect.context.width = this.context.x - me.btnLeft.context.x;
+                    me.rangeRect.context.width = this.context.x - me.btnLeft.context.x - me.btnW;
                     me.setRange();
                 });
                 this.btnRight.on("dragend" , function(){
@@ -764,9 +780,10 @@ define(
                 });
 
 
-                this.dataZoomBtns.addChild( this.btnLeft );
-                this.dataZoomBtns.addChild( this.btnRight );
+                
 
+
+                //中间矩形拖拽区域
                 this.rangeRect = new Rect({
                     dragEnabled : true,
                     context : {
@@ -775,7 +792,7 @@ define(
                         width : this.btnRight.context.x - this.btnLeft.context.x - me.btnW,
                         height : this.barH - 1,
                         fillStyle : this.btnFillStyle,
-                        globalAlpha : 0.1,
+                        globalAlpha : 0.3,
                         cursor : "move"
                     }
                 });
@@ -795,7 +812,14 @@ define(
                 this.rangeRect.on("dragend" , function(){
                     me.dragEnd( me.range );
                 });
+
+
+
                 this.dataZoomBtns.addChild( this.rangeRect );
+                this.dataZoomBtns.addChild( this.btnLeft );
+                this.dataZoomBtns.addChild( this.btnRight );
+
+                
             },
             setRange : function(){
                 var start = (this.btnLeft.context.x / this.w)*this.count ;
@@ -810,6 +834,8 @@ define(
         return dataZoom;
     }
 );
+
+
 
 /*
  * legendData :

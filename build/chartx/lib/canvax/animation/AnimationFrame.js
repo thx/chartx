@@ -68,8 +68,10 @@ define(
          *  @param task 要从渲染帧队列中删除的任务
          */
         function destroyFrame(task) {
+            var d_result = false;
             for (var i = 0, l = _taskList.length; i < l; i++) {
                 if (_taskList[i].id === task.id) {
+                    d_result = true;
                     _taskList.splice(i, 1);
                     i--;
                     l--;
@@ -79,7 +81,7 @@ define(
                 cancelAnimationFrame(_requestAid);
                 _requestAid = null;
             };
-            return _requestAid;
+            return d_result;
         };
 
         var _tweenLen = 0;
@@ -120,7 +122,7 @@ define(
                 };
 
                 tween.onComplete(function() {
-                    
+
                     _tweenLen--;
 
                     destroyFrame({
@@ -154,12 +156,13 @@ define(
         function destroyTween(tween) {
 
             tween.stop();
-            _tweenLen--;
-            
-            destroyFrame({
-                task: tween.animate,
-                id: tween.id
-            });
+
+            if (destroyFrame({
+                    task: tween.animate,
+                    id: tween.id
+                })) {
+                _tweenLen--;
+            };
             tween.animate = null;
             tween = null;
 
