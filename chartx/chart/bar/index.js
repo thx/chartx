@@ -148,26 +148,60 @@ define(
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
-                }
+                };
+
                 _.each(d.yAxis.field, function(field, i) {
                     if (!_.isArray(field)) {
                         field = [field];
                         d.yAxis.org[i] = [d.yAxis.org[i]];
                     }
                 });
+
                 return d;
             },
+            _getTgiData: function() {
+                var tgiData = [];
+                var me = this;
+                if (this._graphs && this._graphs.tgi && this._graphs.tgi.data) {
+                    return this._graphs.tgi.data
+                };
+                if (this._graphs.tgi.enabled) {
+                    _.each(this.dataFrame.data, function(fd, i) {
+                        if (fd.field == me._graphs.tgi.field) {
+                            tgiData = fd.data;
+                        }
+                    });
+                };
+                this._graphs.tgi.data = tgiData;
+                return tgiData;
+            },
+            _setTgiLayoutData: function() {
+                var layoutData = [];
+                var me = this;
+                if (this._graphs.tgi.enabled) {
+                    var maxYAxis = this._yAxis.dataSection[this._yAxis.dataSection.length - 1];
+                    _.each(this._graphs.tgi.data, function(fd, i) {
+                        layoutData.push({
+                            value: fd,
+                            y: -(fd - me._yAxis._bottomNumber) / Math.abs(maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
+                        });
+                    });
+                    this._graphs.tgi.layoutData = layoutData;
+                };
+            },
             _initModule: function() {
-                this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
-                this._back = new Back(this.back);
-                this._tip = new Tip(this.tips, this.canvax.getDomContainer());
-
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
                 this._graphs = new Graphs(
                     this.graphs,
                     this
                 );
+
+                this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
+
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getTgiData());
+
+                this._back = new Back(this.back);
+                this._tip = new Tip(this.tips, this.canvax.getDomContainer());
             },
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
@@ -221,6 +255,8 @@ define(
                         y: y - this.padding.bottom
                     }
                 });
+
+                this._setTgiLayoutData();
 
                 var o = this._trimGraphs();
                 //绘制主图形区域
@@ -408,7 +444,7 @@ define(
                     },
                     dragIng: function(range) {
 
-                        if( parseInt(range.start) == parseInt(me.dataZoom.range.start) &&  parseInt(range.end) == parseInt(me.dataZoom.range.end) ){
+                        if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
                             return;
                         };
 
@@ -426,7 +462,7 @@ define(
                         }, {
                             delay: 0,
                             easing: "Quadratic.Out",
-                            duration : 300
+                            duration: 300
                         });
                     }
                 }, me.dataZoom);
@@ -592,20 +628,20 @@ define(
                 this._graphs.sprite.on("panstart mouseover", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.show(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("panmove mousemove", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.move(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("panend mouseout", function(e) {
                     me._tip.hide(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
             }
         });

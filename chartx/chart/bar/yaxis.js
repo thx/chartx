@@ -4,11 +4,11 @@ define(
         "chartx/components/yaxis/yAxis"
     ],
     function( yAxisBase ){
-        var yAxis = function( opt , data ){
-            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data ] );
+        var yAxis = function( opt , data , data1){
+            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
         };
         Chartx.extend( yAxis , yAxisBase , {
-            _setDataSection : function( data ){
+            _setDataSection : function( data , data1 ){
                 var arr = [];
                 _.each( data.org , function( d , i ){
                     var varr = [];
@@ -22,11 +22,14 @@ define(
                             min = Math.min( d[ii][i], min );
                         }
                         varr.push( count );
-                    }
+                    };
                     varr.push(min);
                     arr.push( varr );
                 } );
-                return _.flatten(arr);
+                if( !data1 ){
+                    data1 = [];
+                }
+                return _.flatten(arr).concat( data1 );
             }
         } );
     

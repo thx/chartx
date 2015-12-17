@@ -29,12 +29,22 @@ define(
                 width: 20,
                 radius: 4
             };
+
             this.text = {
                 enabled: false,
                 fillStyle: '#999',
                 fontSize: 12,
                 format: null
             };
+
+            this.tgi = {
+                enabled: false,
+                field: "tgi",
+                fieldInd: -1,
+                fillStyle: "#c4c9d6",
+                data: null
+            };
+
             this.sort = null;
 
             this.eventEnabled = true;
@@ -45,6 +55,8 @@ define(
             this.yDataSectionLen = 0; //y轴方向有多少个section
 
             _.deepExtend(this, opt);
+
+            this._initTgi();
 
             this.init();
         };
@@ -76,6 +88,15 @@ define(
                     me._yAxisFieldsMap[field] = i;
                 });
             },
+            _initTgi: function() {
+                if (this.tgi.enabled) {
+                    _.each(this.root.dataFraem, function(fd, i) {
+                        if (fd.field == this.tgi.field) {
+                            this.tgi.fieldInd = i;
+                        }
+                    });
+                }
+            },
             _getColor: function(c, groups, vLen, i, h, v, value, field) {
                 var style = null;
                 if (_.isString(c)) {
@@ -85,13 +106,13 @@ define(
                     style = _.flatten(c)[this._yAxisFieldsMap[field]];
                 };
                 if (_.isFunction(c)) {
-                    style = c({
+                    style = c.apply(this, [{
                         iGroup: i,
                         iNode: h,
                         iLay: v,
                         field: field,
                         value: value
-                    });
+                    }]);
                 };
                 if (!style || style == "") {
                     style = this._colors[this._yAxisFieldsMap[field]];
@@ -117,6 +138,7 @@ define(
                 this.data = data;
                 var me = this;
                 var groups = data.length;
+                var itemW = 0;
 
                 _.each(data, function(h_group, i) {
                     /*
@@ -136,6 +158,7 @@ define(
                     var vLen = h_group.length;
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
+                    itemW = me.w / hLen;
 
                     for (h = 0; h < hLen; h++) {
                         var groupH;
@@ -149,16 +172,12 @@ define(
                                 });
                                 me.barsSp.addChild(groupH);
                                 groupH.iGroup = h;
-                                groupH.on("click mousedown mousemove mouseup" , function(e){
-                                    if( !e.eventInfo ){
+                                groupH.on("click mousedown mousemove mouseup", function(e) {
+                                    if (!e.eventInfo) {
                                         e.eventInfo = me._getInfoHandler(this);
                                     };
                                 });
                             };
-
-                            //横向的分组区片感应区
-                            var itemW = me.w / hLen;
-                            //console.log(itemW+":")
 
                             if (me.eventEnabled) {
                                 var hoverRect;
@@ -337,6 +356,25 @@ define(
                     this.sprite.addChild(this.txtsSp);
                 };
 
+                //如果有tgi模块配置。
+                if (this.tgi.enabled && this.tgi.data) {
+                    this.tgiSp = new Canvax.Display.Sprite({});
+                    _.each(this.tgi.layoutData, function(tgi, i) {
+                        var tgiRectC = {
+                            x : itemW * i ,
+                            y : tgi.y,
+                            fillStyle : me.tgi.fillStyle,
+                            width : itemW,
+                            height : 2
+                        };
+                        me.tgiSp.addChild( new Rect({
+                            id : "tgi_"+i,
+                            context : tgiRectC
+                        }) );
+                    });
+                    this.sprite.addChild( me.tgiSp );
+                };
+
                 this.sprite.context.x = this.pos.x;
                 this.sprite.context.y = this.pos.y;
 
@@ -344,8 +382,8 @@ define(
                     this.sprite.context.y -= this.h;
                 };
             },
-            _updateInfoTextPos: function( el ) {
-                
+            _updateInfoTextPos: function(el) {
+
                 var infoWidth = 0;
                 var cl = el.children.length;
                 _.each(el.children, function(c, i) {
@@ -416,7 +454,7 @@ define(
                                     easing: options.easing,
                                     delay: h * options.delay,
                                     onUpdate: function(arg) {
-                                        
+
                                     },
                                     onComplete: function(arg) {
                                         if (arg.width < 3) {
@@ -463,10 +501,10 @@ define(
                                                 if (_.isFunction(self.text.format)) {
                                                     content = self.text.format(content);
                                                 } else if (_.isNumber(content)) {
-                                                    content = Tools.numAddSymbol( parseInt(content));
+                                                    content = Tools.numAddSymbol(parseInt(content));
                                                 };
                                                 txt.resetText(content);
-                                                self._updateInfoTextPos( txt.parent );
+                                                self._updateInfoTextPos(txt.parent);
                                             }
                                         })
                                     };
@@ -476,8 +514,6 @@ define(
                         };
                     };
                 });
-
-
                 window.setTimeout(function() {
                     callback && callback(self);
                 }, 300 * (this.barsSp.children.length - 1));
@@ -495,10 +531,10 @@ define(
                 var arr = [];
                 var me = this;
                 var groups = me.data.length;
-                
-                iGroup == undefined && ( iGroup = 0 );
-                iNode  == undefined && ( iNode = -1 );
-                iLay == undefined && ( iLay = -1 );
+
+                iGroup == undefined && (iGroup = 0);
+                iNode == undefined && (iNode = -1);
+                iLay == undefined && (iLay = -1);
 
                 _.each(me.data, function(h_group, i) {
                     var node;
@@ -562,11 +598,11 @@ define(
         "chartx/components/yaxis/yAxis"
     ],
     function( yAxisBase ){
-        var yAxis = function( opt , data ){
-            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data ] );
+        var yAxis = function( opt , data , data1){
+            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
         };
         Chartx.extend( yAxis , yAxisBase , {
-            _setDataSection : function( data ){
+            _setDataSection : function( data , data1 ){
                 var arr = [];
                 _.each( data.org , function( d , i ){
                     var varr = [];
@@ -580,11 +616,14 @@ define(
                             min = Math.min( d[ii][i], min );
                         }
                         varr.push( count );
-                    }
+                    };
                     varr.push(min);
                     arr.push( varr );
                 } );
-                return _.flatten(arr);
+                if( !data1 ){
+                    data1 = [];
+                }
+                return _.flatten(arr).concat( data1 );
             }
         } );
     
@@ -743,26 +782,60 @@ define(
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
-                }
+                };
+
                 _.each(d.yAxis.field, function(field, i) {
                     if (!_.isArray(field)) {
                         field = [field];
                         d.yAxis.org[i] = [d.yAxis.org[i]];
                     }
                 });
+
                 return d;
             },
+            _getTgiData: function() {
+                var tgiData = [];
+                var me = this;
+                if (this._graphs && this._graphs.tgi && this._graphs.tgi.data) {
+                    return this._graphs.tgi.data
+                };
+                if (this._graphs.tgi.enabled) {
+                    _.each(this.dataFrame.data, function(fd, i) {
+                        if (fd.field == me._graphs.tgi.field) {
+                            tgiData = fd.data;
+                        }
+                    });
+                };
+                this._graphs.tgi.data = tgiData;
+                return tgiData;
+            },
+            _setTgiLayoutData: function() {
+                var layoutData = [];
+                var me = this;
+                if (this._graphs.tgi.enabled) {
+                    var maxYAxis = this._yAxis.dataSection[this._yAxis.dataSection.length - 1];
+                    _.each(this._graphs.tgi.data, function(fd, i) {
+                        layoutData.push({
+                            value: fd,
+                            y: -(fd - me._yAxis._bottomNumber) / Math.abs(maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
+                        });
+                    });
+                    this._graphs.tgi.layoutData = layoutData;
+                };
+            },
             _initModule: function() {
-                this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
-                this._back = new Back(this.back);
-                this._tip = new Tip(this.tips, this.canvax.getDomContainer());
-
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
                 this._graphs = new Graphs(
                     this.graphs,
                     this
                 );
+
+                this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
+
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getTgiData());
+
+                this._back = new Back(this.back);
+                this._tip = new Tip(this.tips, this.canvax.getDomContainer());
             },
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
@@ -816,6 +889,8 @@ define(
                         y: y - this.padding.bottom
                     }
                 });
+
+                this._setTgiLayoutData();
 
                 var o = this._trimGraphs();
                 //绘制主图形区域
@@ -1003,7 +1078,7 @@ define(
                     },
                     dragIng: function(range) {
 
-                        if( parseInt(range.start) == parseInt(me.dataZoom.range.start) &&  parseInt(range.end) == parseInt(me.dataZoom.range.end) ){
+                        if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
                             return;
                         };
 
@@ -1021,7 +1096,7 @@ define(
                         }, {
                             delay: 0,
                             easing: "Quadratic.Out",
-                            duration : 300
+                            duration: 300
                         });
                     }
                 }, me.dataZoom);
@@ -1187,20 +1262,20 @@ define(
                 this._graphs.sprite.on("panstart mouseover", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.show(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("panmove mousemove", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.move(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("panend mouseout", function(e) {
                     me._tip.hide(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
-                    me.fire( e.type , e);
+                    me.fire(e.type, e);
                 });
             }
         });

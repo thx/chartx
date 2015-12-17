@@ -2139,7 +2139,7 @@ define(
         'chartx/utils/datasection'
     ],
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
-        var yAxis = function(opt, data) {
+        var yAxis = function(opt, data , data1) {
 
             this.w = 0;
             this.enabled = 1; //true false 1,0都可以
@@ -2193,18 +2193,18 @@ define(
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
-            this.init(opt, data);
+            this.init(opt, data , data1);
         };
 
         yAxis.prototype = {
-            init: function(opt, data) {
+            init: function(opt, data , data1) {
                 _.deepExtend(this, opt);
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
                 }
 
-                this._initData(data);
+                this._initData(data , data1);
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
@@ -2321,8 +2321,9 @@ define(
                 }
                 return arr;
             },
-            _initData: function(data) {
-                var arr = this._setDataSection(data);
+            //data1 == [1,2,3,4]
+            _initData: function(data , data1) {
+                var arr = this._setDataSection(data , data1);
                 this.dataOrg = data.org; //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);
