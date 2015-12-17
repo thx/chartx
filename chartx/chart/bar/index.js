@@ -592,17 +592,20 @@ define(
                 this._graphs.sprite.on("panstart mouseover", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.show(e);
+                    me.fire( e.type , e);
                 });
                 this._graphs.sprite.on("panmove mousemove", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.move(e);
+                    me.fire( e.type , e);
                 });
                 this._graphs.sprite.on("panend mouseout", function(e) {
                     me._tip.hide(e);
+                    me.fire( e.type , e);
                 });
-                this._graphs.sprite.on("tap click", function(e) {
+                this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
-                    me.fire("click", e);
+                    me.fire( e.type , e);
                 });
             }
         });

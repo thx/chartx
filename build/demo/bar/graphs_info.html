@@ -46,21 +46,22 @@ var data= [
 ];
 var options = {
     yAxis : {
-        field : ["uv","pv"],
+        field : [ [ "uv","pv" ] , "click"],
     },
     xAxis : {
         field : ["time"]
     },
-    graphs:{
-        bar : {
-            fillStyle   : ['#f8ab5e','#E55C5C'] 
-        },
-        text: {
-            enabled : 1
+    graphs : {
+        text : {
+            enabled : true
         }
     }
 }   
-Chartx.bar("canvasTest" , data , options);
+Chartx.bar("canvasTest" , data , options).then(function( chart ){
+    chart.on("click" , function(e){
+        debugger
+    });
+});
 </textarea></form>
 
         </td>
