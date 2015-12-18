@@ -286,9 +286,8 @@ define(
                                     }
                                 });
                             };
-
-                            //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
-                            if (v == vLen - 1) {
+                            
+                            if (v == vLen - 1 && me.text.enabled) {
                                 //文字
                                 var contents = [rectData];
 
@@ -302,6 +301,8 @@ define(
                                             visible: false
                                         }
                                     });
+                                    infosp._hGroup = h;
+                                    me.txtsSp.addChild(infosp);
                                 };
 
                                 if (vLen > 1) {
@@ -314,10 +315,10 @@ define(
                                 var infoHeight = 0;
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
-                                    if (me.animation && _.isFunction(me.text.format)) {
+                                    if (!me.animation && _.isFunction(me.text.format)) {
                                         content = me.text.format(cdata.value);
                                     };
-                                    if (me.animation && _.isNumber(content)) {
+                                    if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
                                     };
 
@@ -332,12 +333,10 @@ define(
                                                 fillStyle: cdata.fillStyle
                                             }
                                         });
+                                        infosp.addChild(txt);
                                     };
-
                                     txt._text = content;
-                                    infosp.addChild(txt);
                                     infoWidth += txt.getTextWidth() + 2;
-
                                     infoHeight = Math.max(infoHeight, txt.getTextHeight());
 
                                     if (ci <= vLen - 2) {
@@ -349,19 +348,20 @@ define(
                                         });
                                         infoWidth += txt.getTextWidth() + 2;
                                         infosp.addChild(txt);
-                                    }
+                                    };
                                 });
 
                                 infosp._finalX = rectData.x - infoWidth / 2;
                                 infosp._finalY = finalPos.y - infoHeight;
                                 infosp._centerX = rectData.x;
+                                infosp.context.width = infoWidth;
+                                infosp.context.height = infoHeight;
 
                                 if (!me.animation) {
                                     infosp.context.y = finalPos.y - infoHeight;
                                     infosp.context.x = rectData.x - infoWidth / 2;
                                     infosp.context.visible = true;
                                 };
-                                me.txtsSp.addChild(infosp);
                             }
                         };
                     }
@@ -393,14 +393,13 @@ define(
                             averageLine.context.y = averageRectC.y;
                             averageLine.context.width = averageRectC.width;
                         } else {
-
                             averageLine = new Rect({
                                 id: "average_" + i,
                                 context: averageRectC
                             });
-                            me.averageSp.addChild( averageLine );
+                            me.averageSp.addChild(averageLine);
                         };
-                        
+
                     });
                     this.sprite.addChild(me.averageSp);
                 };
@@ -413,15 +412,22 @@ define(
                 };
             },
             _updateInfoTextPos: function(el) {
+                if (this.root.type == "horizontal") {
+                    return;
+                };
                 var infoWidth = 0;
+                var infoHeight = 0;
                 var cl = el.children.length;
                 _.each(el.children, function(c, i) {
                     if (c.getTextWidth) {
                         c.context.x = infoWidth;
                         infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
-                    }
+                        infoHeight = Math.max(infoHeight, c.getTextHeight());
+                    };
                 });
-                el.context.x = el._centerX - infoWidth / 2 + 1
+                el.context.x = el._centerX - infoWidth / 2 + 1;
+                el.context.width = infoWidth;
+                el.context.height = infoHeight;
             },
             /**
              * 生长动画
@@ -441,8 +447,15 @@ define(
                 if (self.barsSp.children.length > self.data[0][0].length) {
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
-                        self.txtsSp.getChildAt(i).destroy();
-                        self.averageSp.getChildAt(i).destroy();
+
+                        for( var t=0,tl=self.txtsSp.children.length ; t<tl ; t++ ){
+                            if( self.txtsSp.children[t]._hGroup == i ){
+                                self.txtsSp.children[t].destroy();
+                                t--,tl--;
+                            }
+                        };
+
+                        self.averageSp && self.averageSp.getChildAt(i).destroy();
                         i--;
                         l--;
                     };
@@ -500,6 +513,10 @@ define(
 
                             if (self.text.enabled) {
                                 var infosp = self.txtsSp.getChildById("infosp_" + g + "_" + h);
+                                
+                                if(self.root.type == "horizontal") {
+                                    infosp.context.x = infosp._finalX;
+                                };
                                 infosp.animate({
                                     y: infosp._finalY,
                                     x: infosp._finalX
@@ -507,13 +524,13 @@ define(
                                     duration: options.duration,
                                     easing: options.easing,
                                     delay: h * options.delay,
-                                    onUpdate: function() {
+                                    onUpdate: function(){
                                         this.context.visible = true;
                                     },
-                                    onComplete: function() {}
+                                    onComplete: function(){}
                                 });
 
-                                _.each(infosp.children, function(txt) {
+                                _.each(infosp.children , function(txt) {
                                     if (txt._text) {
                                         AnimationFrame.registTween({
                                             from: {
@@ -557,7 +574,7 @@ define(
                     iLay: target.iLay,
                     nodesInfoList: this._getNodeInfo(target.iGroup, target.iNode, target.iLay)
                 };
-                return node
+                return node;
             },
             _getNodeInfo: function(iGroup, iNode, iLay) {
                 var arr = [];

@@ -286,8 +286,8 @@ define(
                                     }
                                 });
                             };
-
-                            if (v == vLen - 1 && me.text.enable) {
+                            
+                            if (v == vLen - 1 && me.text.enabled) {
                                 //文字
                                 var contents = [rectData];
 
