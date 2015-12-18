@@ -37,9 +37,9 @@ define(
                 format: null
             };
 
-            this.tgi = {
+            this.average = {
                 enabled: false,
-                field: "tgi",
+                field: "average",
                 fieldInd: -1,
                 fillStyle: "#c4c9d6",
                 data: null
@@ -56,7 +56,7 @@ define(
 
             _.deepExtend(this, opt);
 
-            this._initTgi();
+            this._initaverage();
 
             this.init();
         };
@@ -88,11 +88,11 @@ define(
                     me._yAxisFieldsMap[field] = i;
                 });
             },
-            _initTgi: function() {
-                if (this.tgi.enabled) {
+            _initaverage: function() {
+                if (this.average.enabled) {
                     _.each(this.root.dataFraem, function(fd, i) {
-                        if (fd.field == this.tgi.field) {
-                            this.tgi.fieldInd = i;
+                        if (fd.field == this.average.field) {
+                            this.average.fieldInd = i;
                         }
                     });
                 }
@@ -159,6 +159,11 @@ define(
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
                     itemW = me.w / hLen;
+
+                    //如果itemW过小的话，就不用显示text的info信息
+                    if (itemW < 15) {
+                        me.text.enabled = false;
+                    };
 
                     for (h = 0; h < hLen; h++) {
                         var groupH;
@@ -287,12 +292,17 @@ define(
                                 //文字
                                 var contents = [rectData];
 
-                                var infosp = new Canvax.Display.Sprite({
-                                    id: "infosp_" + i + "_" + h,
-                                    context: {
-                                        visible: false
-                                    }
-                                });
+                                var infosp;
+                                if (h <= preLen - 1) {
+                                    infosp = me.txtsSp.getChildById("infosp_" + i + "_" + h);
+                                } else {
+                                    infosp = new Canvax.Display.Sprite({
+                                        id: "infosp_" + i + "_" + h,
+                                        context: {
+                                            visible: false
+                                        }
+                                    });
+                                };
 
                                 if (vLen > 1) {
                                     for (var c = vLen - 2; c >= 0; c--) {
@@ -311,13 +321,19 @@ define(
                                         content = Tools.numAddSymbol(content);
                                     };
 
-                                    var txt = new Canvax.Display.Text(me.animation ? 0 : content, {
-                                        id: "info_txt_" + i + "_" + h + "_" + ci,
-                                        context: {
-                                            x: infoWidth + 2,
-                                            fillStyle: cdata.fillStyle
-                                        }
-                                    });
+                                    var txt;
+                                    if (h <= preLen - 1) {
+                                        txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                    } else {
+                                        txt = new Canvax.Display.Text(me.animation ? 0 : content, {
+                                            id: "info_txt_" + i + "_" + h + "_" + ci,
+                                            context: {
+                                                x: infoWidth + 2,
+                                                fillStyle: cdata.fillStyle
+                                            }
+                                        });
+                                    };
+
                                     txt._text = content;
                                     infosp.addChild(txt);
                                     infoWidth += txt.getTextWidth() + 2;
@@ -336,12 +352,13 @@ define(
                                     }
                                 });
 
-                                infosp.context.x = rectData.x - infoWidth / 2;
+                                infosp._finalX = rectData.x - infoWidth / 2;
                                 infosp._finalY = finalPos.y - infoHeight;
                                 infosp._centerX = rectData.x;
 
                                 if (!me.animation) {
                                     infosp.context.y = finalPos.y - infoHeight;
+                                    infosp.context.x = rectData.x - infoWidth / 2;
                                     infosp.context.visible = true;
                                 };
                                 me.txtsSp.addChild(infosp);
@@ -356,23 +373,36 @@ define(
                     this.sprite.addChild(this.txtsSp);
                 };
 
-                //如果有tgi模块配置。
-                if (this.tgi.enabled && this.tgi.data) {
-                    this.tgiSp = new Canvax.Display.Sprite({});
-                    _.each(this.tgi.layoutData, function(tgi, i) {
-                        var tgiRectC = {
-                            x : itemW * i ,
-                            y : tgi.y,
-                            fillStyle : me.tgi.fillStyle,
-                            width : itemW,
-                            height : 2
+                //如果有average模块配置。
+                if (this.average.enabled && this.average.data) {
+                    !this.averageSp && (this.averageSp = new Canvax.Display.Sprite({
+                        id: "averageSp"
+                    }));
+                    _.each(this.average.layoutData, function(average, i) {
+                        var averageRectC = {
+                            x: itemW * i,
+                            y: average.y,
+                            fillStyle: me.average.fillStyle,
+                            width: itemW,
+                            height: 2
                         };
-                        me.tgiSp.addChild( new Rect({
-                            id : "tgi_"+i,
-                            context : tgiRectC
-                        }) );
+                        var averageLine;
+                        if (i <= preLen - 1) {
+                            averageLine = me.averageSp.getChildById("average_" + i);
+                            averageLine.context.x = averageRectC.x;
+                            averageLine.context.y = averageRectC.y;
+                            averageLine.context.width = averageRectC.width;
+                        } else {
+
+                            averageLine = new Rect({
+                                id: "average_" + i,
+                                context: averageRectC
+                            });
+                            me.averageSp.addChild( averageLine );
+                        };
+                        
                     });
-                    this.sprite.addChild( me.tgiSp );
+                    this.sprite.addChild(me.averageSp);
                 };
 
                 this.sprite.context.x = this.pos.x;
@@ -383,7 +413,6 @@ define(
                 };
             },
             _updateInfoTextPos: function(el) {
-
                 var infoWidth = 0;
                 var cl = el.children.length;
                 _.each(el.children, function(c, i) {
@@ -407,9 +436,13 @@ define(
                 if (this.sort && this.sort == "desc") {
                     sy = -1;
                 };
+
+                //先把已经不在当前range范围内的元素destroy掉
                 if (self.barsSp.children.length > self.data[0][0].length) {
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
+                        self.txtsSp.getChildAt(i).destroy();
+                        self.averageSp.getChildAt(i).destroy();
                         i--;
                         l--;
                     };
@@ -466,23 +499,18 @@ define(
                             };
 
                             if (self.text.enabled) {
-
                                 var infosp = self.txtsSp.getChildById("infosp_" + g + "_" + h);
-
-
                                 infosp.animate({
-                                    y: infosp._finalY
+                                    y: infosp._finalY,
+                                    x: infosp._finalX
                                 }, {
                                     duration: options.duration,
                                     easing: options.easing,
                                     delay: h * options.delay,
                                     onUpdate: function() {
-                                        //self._updateInfoTextPos(this);
                                         this.context.visible = true;
                                     },
-                                    onComplete: function() {
-                                        //self._updateInfoTextPos(this);
-                                    }
+                                    onComplete: function() {}
                                 });
 
                                 _.each(infosp.children, function(txt) {
@@ -504,7 +532,11 @@ define(
                                                     content = Tools.numAddSymbol(parseInt(content));
                                                 };
                                                 txt.resetText(content);
-                                                self._updateInfoTextPos(txt.parent);
+                                                if (txt.parent) {
+                                                    self._updateInfoTextPos(txt.parent);
+                                                } else {
+                                                    txt.destroy();
+                                                }
                                             }
                                         })
                                     };
@@ -558,4 +590,4 @@ define(
         };
         return Graphs;
     }
-)
+);

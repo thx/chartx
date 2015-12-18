@@ -61,6 +61,12 @@ var options = {
                 }
                 return o
             }
+        },
+
+        subtitle : {
+            format : function(o){
+                return o.start + ' - ' + o.end + ' 用户人数'
+            }
         }
     },
     dataZoom:{

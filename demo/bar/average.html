@@ -34,7 +34,7 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["time"       ,"uv" ,"pv","tgi"  ],
+    ["time"       ,"uv" ,"pv","average"  ],
     ["2015-11-12" , 101 , 20 , 33    ],
     ["2015-11-13" , 67  , 51 , 76    ],
     ["2015-11-14" , 76  , 45 , 43    ],
@@ -55,15 +55,15 @@ var options = {
         text : {
             enabled : true
         },
-        tgi : {
+        average : {
             enabled : true,
-            field : "tgi",
+            field : "average",
             fillStyle : "#82d982"
         },
         bar : {
             fillStyle : function( obj ){
-                var tgi = this.tgi.data[ obj.iNode ];  
-                if( obj.value >= tgi ){
+                var average = this.average.data[ obj.iNode ];  
+                if( obj.value >= average ){
                     return "#ff8521";
                 } else {
                     return "#7aaee5";
@@ -84,7 +84,7 @@ Chartx.bar("canvasTest" , data , options).then(function( chart ){
             <div id="chartdemo-r">
                 <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
-                    <h4>柱状图 - 柱条上面有文本信息</h4>
+                    <h4>柱状图 - 均值配置，大于均值则变为橙色，小于均值为蓝色</h4>
                     <p>
                         联系人：@逢春 @释剑
                     </p>
