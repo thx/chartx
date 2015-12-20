@@ -74,29 +74,25 @@
                 };
                 return list;
             },
-            //show: function (index) {
-            //    this._pie && this._pie.showHideSector(index);
-            //},
             focusAt: function(index) {
                 if (this._pie) {
-                    this._pie._sectorFocus(null, index);
-                    var sector = this.getByIndex(index).sector;
-                    if (!sector.__isSelected) {
-                        this._pie.moveSector(sector);
-                    }
+                    this._pie.focus( index );
                 }
             },
             unfocusAt: function(index) {
                 if (this._pie) {
-                    this._pie._sectorUnfocus(null, index);
-                    var sector = this.getByIndex(index).sector;
-                    if (sector.__isSelected) {
-                        this._pie.moveSector(sector);
-                    }
+                    this._pie.unfocus( index );
                 }
             },
-            slice: function(index) {
-                this._pie && this._pie.slice(index);
+            check: function(index) {
+                if (this._pie) {
+                    this._pie.check( index );
+                }
+            },
+            uncheck: function(index) {
+                if (this._pie) {
+                    this._pie.uncheck( index );
+                }
             },
             _initData: function(arr, opt) {
                 var data = [];

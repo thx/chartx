@@ -257,31 +257,65 @@
                     opt.complete.call(self);
                 }
             },
-            focus: function(index) {
+            focus: function(index , callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
+                var secData = self.data.data[index];
+                secData._selected = true;
                 sec.animate({
-                    x: self.data.data[sec.__dataIndex].outOffsetx,
-                    y: self.data.data[sec.__dataIndex].outOffsety
+                    x: secData.outOffsetx,
+                    y: secData.outOffsety
                 }, {
                     duration: 100,
-                    complete: function() {
-                        sec.checked = true;
+                    onComplete: function() {
+                        //secData.checked = true;
+                        callback && callback();
                     }
                 });
             },
-            unfocus: function(index) {
+            unfocus: function(index , callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
+                var secData = self.data.data[index];
+                secData._selected = false;
                 sec.animate({
                     x: 0,
                     y: 0
                 }, {
                     duration: 100,
-                    complete: function() {
-                        sec.checked = false;
+                    onComplete: function() {
+                        callback && callback();
+                        //secData.checked = false;
                     }
                 });
+            },
+            check : function( index ){
+                var sec = this.sectorMap[index].sector;
+                var secData = this.data.data[index];
+                if(secData.checked){
+                    return
+                }; 
+                var me = this;
+                if( !secData._selected ){
+                    this.focus( index , function(){
+                        me.addCheckedSec( sec );
+                    } );
+                } else {
+                    this.addCheckedSec( sec );
+                };                
+                secData.checked = true;
+            },
+            uncheck : function( index ){
+                var sec = this.sectorMap[index].sector;
+                var secData = this.data.data[index];
+                if(!secData.checked){
+                    return
+                }; 
+                var me = this;
+                me.delCheckedSec( sec , function(){
+                    me.unfocus( index );
+                });
+                secData.checked = false;
             },
             grow: function() {
                 var self = this;
@@ -670,10 +704,10 @@
                     self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinPercentage, rMinPercentage, isEnd, ySpaceInfo)
                 }
             },
-            _getAngleTime : function( secc ){
+            _getAngleTime: function(secc) {
                 return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
             },
-            addCheckedSec: function(sec, secData) {
+            addCheckedSec: function(sec) {
                 var secc = sec.context;
                 var sector = new Sector({
                     context: {
@@ -682,7 +716,7 @@
                         r0: secc.r,
                         r: secc.r + 8,
                         startAngle: secc.startAngle,
-                        endAngle: secc.startAngle+0.5,//secc.endAngle,
+                        endAngle: secc.startAngle + 0.5, //secc.endAngle,
                         fillStyle: secc.fillStyle,
                         globalAlpha: 0.5
                     },
@@ -690,20 +724,22 @@
                 });
                 this.checkedSp.addChild(sector);
                 sector.animate({
-                    endAngle : secc.endAngle
+                    endAngle: secc.endAngle
                 } , {
-                    duration : this._getAngleTime( secc )
+                    duration: this._getAngleTime(secc)
                 });
             },
-            delCheckedSec: function(sec, secData) {
+            delCheckedSec: function(sec , callback) {
                 var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
                 checkedSec.animate({
-                    endAngle : checkedSec.context.startAngle+0.5
-                } , {
-                    onComplete : function(){
+                    //endAngle : checkedSec.context.startAngle+0.5
+                    startAngle: checkedSec.context.endAngle - 0.3
+                }, {
+                    onComplete: function() {
                         checkedSec.destroy();
+                        callback && callback();
                     },
-                    duration : 150
+                    duration: 150
                 });
             },
             _widget: function() {
@@ -765,13 +801,7 @@
 
                             sector.on('click', function(e) {
                                 self._sectorClick(e, this.__dataIndex);
-                                var secData = self.data.data[this.__dataIndex];
-                                if (!secData.checked) {
-                                    self.addCheckedSec(this, secData);
-                                } else {
-                                    self.delCheckedSec(this, secData);
-                                };
-                                secData.checked = !secData.checked;
+                                self.secClick( this );
                             });
 
                             self.sectorsSp.addChildAt(sector, 0);
@@ -820,6 +850,15 @@
                         self._startWidgetLabel();
                     }
                 }
+            },
+            secClick: function( sectorEl ) {
+                var secData = this.data.data[sectorEl.__dataIndex];
+                if (!secData.checked) {
+                    this.addCheckedSec( sectorEl );
+                } else {
+                    this.delCheckedSec( sectorEl );
+                };
+                secData.checked = !secData.checked;
             }
         };
 
