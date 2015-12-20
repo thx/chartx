@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- 饼图</title>
+<title>xChart demo -- bar</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -32,43 +32,43 @@
         <td id="td-vl">
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
 var data= [
-    ["node"   , "value"],
-    ["ie"     , 30],
-    ["chrome" , 35],
-    ["firefox", 20],
-    ["safari" , 10],
-    ["其他"   , 5]
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ]
+
 ];
 var options = {
-    xAxis : {
-        field : "node"
-    },
     yAxis : {
-        field : "value"
+        field : ["uv"]
     },
-    tips : {
-        //enabled  : false,
-        content : function(info){
-            return info.name+"："+info.value+"<br/>占比:"+info.percentage+"%";
+    xAxis : {
+        field : ["xfield"]
+    },
+    graphs : {
+        bar : {
+            width : function( dis1 , dis2 ){
+                return dis1 - 1;
+            }
         }
-    },
-    //周边tip
-    dataLabel: {
-        enabled: false,
-        format: '{point.name} : {point.y}'
-    },
-    //是否允许扇形选取
-    allowPointSelect: true,
-    //是否允许动画
-    animation: true,
-    //内圆半径
-    innerRadius: 50
-    //颜色序列,若不设置，会有默认的颜色序列
-    //colors:['red', 'yellow', 'blue']
-};
-Chartx.pie("canvasTest" , data , options).then(function( pie ){
-});
+    }
+}   
+Chartx.bar("canvasTest" , data , options);
+
+
 </textarea></form>
 
         </td>
@@ -77,9 +77,9 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>饼图（pie chart）- 基础饼图</h4>
+                <h4>柱状图 - 基础柱状图</h4>
                 <p>
-                    联系人：@自勉
+                    联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
@@ -94,5 +94,3 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
     
 </body> 
 </html>
-
-

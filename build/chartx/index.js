@@ -1935,19 +1935,18 @@ define(
                 this.w = this.graphw - this.yAxisW;
                 if (this.pos.x == null) {
                     this.pos.x = this.yAxisW + this.disOriginX;
-                }
+                };
                 if (this.pos.y == null) {
                     this.pos.y = this.graphh - this.h;
-                }
-
-                this.xGraphsWidth = this.w - this._getXAxisDisLine();
+                };
+                this.xGraphsWidth = this.w - this._getXAxisDisLine() - this.xGraphsWidth % _.flatten(this.dataOrg).length;
                 if (this._label) {
                     if (this.isH) {
                         this.xGraphsWidth -= this._label.getTextHeight() + 5
                     } else {
                         this.xGraphsWidth -= this._label.getTextWidth() + 5
                     }
-                }
+                };
                 this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
             },
             _trimXAxis: function(data, xGraphsWidth) {
@@ -1959,7 +1958,7 @@ define(
                         'x': parseInt(dis * (a + 1))
                     }
                     tmpData.push(o);
-                }
+                };
                 return tmpData;
             },
             _formatDataSectionText: function(arr) {
@@ -1977,7 +1976,7 @@ define(
                 var disMin = this.disXAxisLine
                 var disMax = 2 * disMin
                 var dis = disMin
-                dis = disMin + this.w % this.dataOrg.length
+                dis = disMin + this.w % _.flatten(this.dataOrg).length
                 dis = dis > disMax ? disMax : dis
                 dis = isNaN(dis) ? 0 : dis
                 return dis

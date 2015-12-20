@@ -309,7 +309,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -374,6 +374,7 @@ define(
                             };
 
                             tmpData[b][v].push(node);
+
 
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length

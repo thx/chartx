@@ -26,7 +26,7 @@ define(
             this._colors = Theme.colors;
 
             this.bar = {
-                width: 20,
+                width: 0,
                 radius: 4
             };
 
@@ -119,8 +119,15 @@ define(
                 };
                 return style;
             },
-            checkBarW: function(xDis) {
-                this.bar.width = parseInt(xDis) - (parseInt(Math.max(1, xDis * 0.3)));
+            checkBarW: function(xDis1,xDis2) {
+                if (this.bar.width) {
+                    if (_.isFunction(this.bar.width)) {
+                        this.bar.width = this.bar.width(xDis1);
+                    }
+                };
+                if (!this.bar.width) {
+                    this.bar.width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
+                };
                 this.bar.width < 1 && (this.bar.width = 1);
             },
             resetData: function(data, opt) {
@@ -286,7 +293,7 @@ define(
                                     }
                                 });
                             };
-                            
+
                             if (v == vLen - 1 && me.text.enabled) {
                                 //文字
                                 var contents = [rectData];
@@ -448,10 +455,10 @@ define(
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
 
-                        for( var t=0,tl=self.txtsSp.children.length ; t<tl ; t++ ){
-                            if( self.txtsSp.children[t]._hGroup == i ){
+                        for (var t = 0, tl = self.txtsSp.children.length; t < tl; t++) {
+                            if (self.txtsSp.children[t]._hGroup == i) {
                                 self.txtsSp.children[t].destroy();
-                                t--,tl--;
+                                t--, tl--;
                             }
                         };
 
@@ -513,8 +520,8 @@ define(
 
                             if (self.text.enabled) {
                                 var infosp = self.txtsSp.getChildById("infosp_" + g + "_" + h);
-                                
-                                if(self.root.type == "horizontal") {
+
+                                if (self.root.type == "horizontal") {
                                     infosp.context.x = infosp._finalX;
                                 };
                                 infosp.animate({
@@ -524,13 +531,13 @@ define(
                                     duration: options.duration,
                                     easing: options.easing,
                                     delay: h * options.delay,
-                                    onUpdate: function(){
+                                    onUpdate: function() {
                                         this.context.visible = true;
                                     },
-                                    onComplete: function(){}
+                                    onComplete: function() {}
                                 });
 
-                                _.each(infosp.children , function(txt) {
+                                _.each(infosp.children, function(txt) {
                                     if (txt._text) {
                                         AnimationFrame.registTween({
                                             from: {
@@ -631,7 +638,7 @@ define(
                     }
                     tmpData.push( o );
                 }
-                
+                debugger
                 return tmpData;
             } 
         } );
@@ -992,7 +999,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -1057,6 +1064,7 @@ define(
                             };
 
                             tmpData[b][v].push(node);
+
 
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
