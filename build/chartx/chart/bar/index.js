@@ -1139,8 +1139,8 @@ define(
                         if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
                             return;
                         };
-                        if( me.dataZoom.end <= me.dataZoom.start ){
-                            me.dataZoom.end = me.dataZoom.start+1;
+                        if( me.dataZoom.range.end <= me.dataZoom.range.start ){
+                            me.dataZoom.range.end = me.dataZoom.range.start+1;
                         };
 
                         me.dataZoom.range.start = parseInt(range.start);
