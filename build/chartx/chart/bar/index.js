@@ -1142,8 +1142,8 @@ define(
 
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
-
-                        me.dataFrame = me._initData(data, this);
+                        
+                        me.dataFrame = me._initData(me._data, this);
                         me._xAxis.resetData(me.dataFrame.xAxis, {
                             animation: false
                         });
