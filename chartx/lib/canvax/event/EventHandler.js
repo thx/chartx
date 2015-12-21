@@ -67,7 +67,7 @@ define(
                     
                     root._hoverStage.addChildAt( _dragDuplicate , 0 );
                 }
-                _dragDuplicate.context.visible = true;
+                _dragDuplicate.context.globalAlpha = target._globalAlpha;
                 _dragDuplicate._dragPoint = target.globalToLocal( me.curPoints[ i ] );
                 return _dragDuplicate;
             },
@@ -96,13 +96,12 @@ define(
             _dragEnd  : function( e , target , i ){
                 var me   = this;
                 var root = me.canvax;
+                
                 //_dragDuplicate 复制在_hoverStage 中的副本
-                var _dragDuplicate     = root._hoverStage.getChildById( target.id );
- 
-                target.context.visible = true;
-                //if( e.type == "mouseout" || e.type == "dragend"){
-                    _dragDuplicate.destroy();
-                //}
+                var _dragDuplicate = root._hoverStage.getChildById( target.id );
+                _dragDuplicate.destroy();
+
+                target.context.globalAlpha = target._globalAlpha;
             }
         } );
         return EventHandler;

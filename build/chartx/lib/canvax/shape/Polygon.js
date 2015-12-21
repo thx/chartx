@@ -16,12 +16,26 @@ define(
         "canvax/shape/BrokenLine"
     ],
     function(Base, BrokenLine) {
-        var Polygon = function(opt) {
+        var Polygon = function(opt , atype) {
             var self = this;
             opt = Base.checkOpt(opt);
-            var start = opt.context.pointList[0];
-            opt.context.pointList.push([start[0], start[1]]);
+
+            if(atype !== "clone"){
+                var start = opt.context.pointList[0];
+                var end   = opt.context.pointList[ opt.context.pointList.length - 1 ];
+                if( opt.context.smooth ){
+                    opt.context.pointList.unshift( end );
+                } else {
+                    opt.context.pointList.push( start );
+                }
+            };
+            
             arguments.callee.superclass.constructor.apply(this, arguments);
+
+            if(atype !== "clone" && opt.context.smooth && end){
+
+            };
+
             self._drawTypeOnly = null;
             self.type = "polygon";
         };
@@ -43,7 +57,6 @@ define(
                         this._drawTypeOnly = "stroke";
                     };
                 };
-
                 //如果下面不加save restore，canvas会把下面的path和上面的path一起算作一条path。就会绘制了一条实现边框和一虚线边框。
                 ctx.save();
                 ctx.beginPath();

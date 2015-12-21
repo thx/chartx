@@ -32,6 +32,8 @@ define(
             this.sprite = null;
             this.induce = null;
 
+            this.eventEnabled = (opt.eventEnabled || true);
+
             this.init(opt);
         };
         Graphs.prototype = {
@@ -75,15 +77,17 @@ define(
                     g._grow(callback);
                 });
             },
-            _setyAxisFieldsMap : function(){
+            _setyAxisFieldsMap: function() {
                 var me = this;
-                _.each( _.flatten( this._getYaxisField() ) , function( field , i ){
-                     me._yAxisFieldsMap[ field ] = { ind : i };
+                _.each(_.flatten(this._getYaxisField()), function(field, i) {
+                    me._yAxisFieldsMap[field] = {
+                        ind: i
+                    };
                 });
             },
             _getYaxisField: function(i) {
                 //这里要兼容从折柱混合图过来的情况
-                if( this.field ){
+                if (this.field) {
                     return this.field;
                 }
                 if (this.root.type && this.root.type.indexOf("line") >= 0) {
@@ -107,7 +111,7 @@ define(
                     self.w
                 );
 
-                var ind = _.indexOf( self.field , field );
+                var ind = _.indexOf(self.field, field);
                 group.draw({
                     data: self.data[ind]
                 });
@@ -150,7 +154,7 @@ define(
                     var _biaxial = self.root.biaxial;
                     var _yAxis = self.root._yAxis;
 
-                    var _groupInd = ((!groupInd && groupInd!==0) ? i : groupInd );
+                    var _groupInd = ((!groupInd && groupInd !== 0) ? i : groupInd);
 
                     //只有biaxial的情况才会有双轴，才会有 下面isArray(fields[i])的情况发生
                     if (_.isArray(fields[i])) {
@@ -166,9 +170,9 @@ define(
                         };
 
                         //记录起来该字段对应的应该是哪个_yAxis
-                        var yfm = self._yAxisFieldsMap[ fields[i] ];
+                        var yfm = self._yAxisFieldsMap[fields[i]];
                         yfm._yAxis = _yAxis;
-                        yfm._sort  = _sort;
+                        yfm._sort = _sort;
                         yfm._groupInd = _groupInd;
 
                         var group = new Group(
@@ -191,34 +195,36 @@ define(
             },
             _widget: function(opt) {
                 var self = this;
-                self._setGroupsForYfield( self._getYaxisField() , self.data);
-                self.induce = new Rect({
-                    id: "induce",
-                    context: {
-                        y: -self.h,
-                        width: self.w,
-                        height: self.h,
-                        fillStyle: '#000000',
-                        globalAlpha: 0,
-                        cursor: 'pointer'
-                    }
-                });
+                if (self.eventEnabled) {
+                    self._setGroupsForYfield(self._getYaxisField(), self.data);
+                    self.induce = new Rect({
+                        id: "induce",
+                        context: {
+                            y: -self.h,
+                            width: self.w,
+                            height: self.h,
+                            fillStyle: '#000000',
+                            globalAlpha: 0,
+                            cursor: 'pointer'
+                        }
+                    });
 
-                self.sprite.addChild(self.induce);
+                    self.sprite.addChild(self.induce);
 
-                self.induce.on("panstart mouseover", function(e) {
-                    e.eventInfo = self._getInfoHandler(e);
-                })
-                self.induce.on("panmove mousemove", function(e) {
-                    e.eventInfo = self._getInfoHandler(e);
-                })
-                self.induce.on("panend mouseout", function(e) {
-                    e.eventInfo = self._getInfoHandler(e);
-                    self.iGroup = 0, self.iNode = -1
-                })
-                self.induce.on("tap click", function(e) {
-                    e.eventInfo = self._getInfoHandler(e);
-                })
+                    self.induce.on("panstart mouseover", function(e) {
+                        e.eventInfo = self._getInfoHandler(e);
+                    })
+                    self.induce.on("panmove mousemove", function(e) {
+                        e.eventInfo = self._getInfoHandler(e);
+                    })
+                    self.induce.on("panend mouseout", function(e) {
+                        e.eventInfo = self._getInfoHandler(e);
+                        self.iGroup = 0, self.iNode = -1
+                    })
+                    self.induce.on("tap click", function(e) {
+                        e.eventInfo = self._getInfoHandler(e);
+                    })
+                }
             },
             _getInfoHandler: function(e) {
                 var x = e.point.x,
@@ -249,4 +255,4 @@ define(
         };
         return Graphs;
     }
-)
+);

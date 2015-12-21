@@ -6,15 +6,17 @@
         "canvax/shape/BrokenLine",
         "canvax/shape/Rect",
         "chartx/utils/tools",
-        "canvax/animation/Tween",
+        "canvax/animation/AnimationFrame",
         "chartx/components/tips/tip",
         "chartx/chart/theme"
     ],
-    function(Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween, Tip, Theme) {
+    function(Canvax, Sector, Line, BrokenLine, Rect, Tools, AnimationFrame, Tip, Theme) {
         var Pie = function(opt, tipsOpt, domContainer) {
             this.data = null;
             this.sprite = null;
             this.branchSp = null;
+            this.sectorsSp = null;
+            this.checkedSp = null;
             //this.angleOffset = -90; //正常情况下，饼图的扇形0度是从3点钟开始，-90表示从12点开始；改值只能是90的倍数
 
             this.dataLabel = {
@@ -43,6 +45,12 @@
             init: function(opt) {
                 _.deepExtend(this, opt);
                 this.sprite = new Canvax.Display.Sprite();
+
+                this.sectorsSp = new Canvax.Display.Sprite();
+                this.sprite.addChild(this.sectorsSp);
+
+                this.checkedSp = new Canvax.Display.Sprite();
+                this.sprite.addChild(this.checkedSp);
 
                 this._tip = new Tip(this.tips, this.domContainer);
                 this._tip._getDefaultContent = this._getTipDefaultContent;
@@ -162,12 +170,13 @@
                                 quadrant: quadrant,
                                 labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
                                 index: j,
-                                isMax: false
-                            })
+                                isMax: false,
+                                checked: false //是否点击选中
+                            });
 
                             self.currentAngle += angle;
                             if (self.currentAngle > limitAngle) self.currentAngle = limitAngle;
-                        }
+                        };
                         data[maxIndex].isMax = true;
                         //处理保留小数后百分比总和不等于100的情况
                         var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
@@ -175,7 +184,7 @@
                             data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
                             data[maxPercentageOffsetIndex].percentage = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum);
                             data[maxPercentageOffsetIndex].txt = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum) + '%';
-                        }
+                        };
                     }
                 }
             },
@@ -189,24 +198,6 @@
             },
             getLabelList: function() {
                 return this.labelList;
-            },
-            showHideSector: function(index) {
-                var self = this;
-                var sectorMap = self.sectorMap;
-                if (sectorMap[index]) {
-                    if (sectorMap[index].visible) {
-                        self._hideSector(index);
-                    } else {
-                        self._showSector(index);
-                    }
-                }
-            },
-            slice: function(index) {
-                var self = this;
-                var sectorMap = self.sectorMap;
-                if (sectorMap[index]) {
-                    self.moveSector(sectorMap[index].sector);
-                }
             },
             getTopAndBottomIndex: function() {
                 var me = this;
@@ -251,7 +242,6 @@
                 return colors[index];
             },
             _configColors: function() {
-                //var defaultColors = ['#f05836', '#7270b1', '#359cde', '#4fd2c4', '#f4c646', '#999', '#FF7D00', '#516DCC', '#8ACC5F', '#A262CB', '#FFD202', '#CC3E3C', '#00A5FF', '#009964', '#CCB375', '#694C99'];
                 this.colors = this.colors ? this.colors : Theme.colors;
             },
             draw: function(opt) {
@@ -267,54 +257,65 @@
                     opt.complete.call(self);
                 }
             },
-            moveSector: function(clickSec) {
-                if (!clickSec) return;
+            focus: function(index , callback) {
                 var self = this;
-                var data = self.data.data;
-                var moveTimer = null;
-                var move = new Tween.Tween({
-                        percent: 0
-                    })
-                    .to({
-                        percent: 1
-                    }, 100)
-                    .easing(Tween.Easing.Quadratic.InOut)
-                    .onUpdate(function() {
-                        var me = this;
-                        _.each(self.sectors, function(sec) {
-                            if (sec.context) {
-                                if (sec.index == clickSec.__dataIndex && !sec.sector.__isSelected) {
-                                    sec.context.x = data[sec.sector.__dataIndex].outOffsetx * me.percent;
-                                    sec.context.y = data[sec.sector.__dataIndex].outOffsety * me.percent;
-                                } else if (sec.sector.__isSelected) {
-                                    sec.context.x = data[sec.sector.__dataIndex].outOffsetx * (1 - me.percent);
-                                    sec.context.y = data[sec.sector.__dataIndex].outOffsety * (1 - me.percent);
-                                }
-                            }
-                        })
-                    })
-                    .onComplete(function() {
-                        cancelAnimationFrame(moveTimer);
-                        _.each(self.sectors, function(sec) {
-                            if (sec.sector) {
-                                sec = sec.sector;
-                                if (sec.__dataIndex == clickSec.__dataIndex && !sec.__isSelected) {
-                                    sec.__isSelected = true;
-                                } else if (sec.__isSelected) {
-                                    sec.__isSelected = false;
-                                }
-                            }
-                        })
-                        self.isMoving = false;
-                    })
-                    .start();
-
-                function moveAni() {
-                    moveTimer = requestAnimationFrame(moveAni);
-                    Tween.update();
-                }
-                self.isMoving = true;
-                moveAni();
+                var sec = self.sectorMap[index].sector;
+                var secData = self.data.data[index];
+                secData._selected = true;
+                sec.animate({
+                    x: secData.outOffsetx,
+                    y: secData.outOffsety
+                }, {
+                    duration: 100,
+                    onComplete: function() {
+                        //secData.checked = true;
+                        callback && callback();
+                    }
+                });
+            },
+            unfocus: function(index , callback) {
+                var self = this;
+                var sec = self.sectorMap[index].sector;
+                var secData = self.data.data[index];
+                secData._selected = false;
+                sec.animate({
+                    x: 0,
+                    y: 0
+                }, {
+                    duration: 100,
+                    onComplete: function() {
+                        callback && callback();
+                        //secData.checked = false;
+                    }
+                });
+            },
+            check : function( index ){
+                var sec = this.sectorMap[index].sector;
+                var secData = this.data.data[index];
+                if(secData.checked){
+                    return
+                }; 
+                var me = this;
+                if( !secData._selected ){
+                    this.focus( index , function(){
+                        me.addCheckedSec( sec );
+                    } );
+                } else {
+                    this.addCheckedSec( sec );
+                };                
+                secData.checked = true;
+            },
+            uncheck : function( index ){
+                var sec = this.sectorMap[index].sector;
+                var secData = this.data.data[index];
+                if(!secData.checked){
+                    return
+                }; 
+                var me = this;
+                me.delCheckedSec( sec , function(){
+                    me.unfocus( index );
+                });
+                secData.checked = false;
             },
             grow: function() {
                 var self = this;
@@ -328,73 +329,69 @@
                     }
                 })
                 self._hideDataLabel();
-                var growAnima = function() {
-                    var pieOpen = new Tween.Tween({
-                            process: 0,
-                            r: 0,
-                            r0: 0
-                        })
-                        .to({
-                            process: 1,
-                            r: self.r,
-                            r0: self.r0
-                        }, 800)
-                        .onUpdate(function() {
-                            var me = this;
-                            for (var i = 0; i < self.sectors.length; i++) {
-                                if (self.sectors[i].context) {
-                                    self.sectors[i].context.r = me.r;
-                                    self.sectors[i].context.r0 = me.r0;
-                                    self.sectors[i].context.globalAlpha = me.process;
-                                    if (i == 0) {
-                                        self.sectors[i].context.startAngle = self.sectors[i].startAngle;
-                                        self.sectors[i].context.endAngle = self.sectors[i].startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.process;
-                                    } else {
-                                        var lastEndAngle = function(index) {
-                                            var lastIndex = index - 1;
-                                            if (lastIndex == 0) {
-                                                return self.sectors[lastIndex].context ? self.sectors[lastIndex].context.endAngle : 0;
-                                            }
-                                            if (self.sectors[lastIndex].context) {
-                                                return self.sectors[lastIndex].context.endAngle;
-                                            } else {
-                                                return arguments.callee(lastIndex);
-                                            }
-                                        }(i);
-                                        self.sectors[i].context.startAngle = lastEndAngle;
-                                        self.sectors[i].context.endAngle = self.sectors[i].context.startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.process;
-                                    }
+
+                AnimationFrame.registTween({
+                    from: {
+                        process: 0,
+                        r: 0,
+                        r0: 0
+                    },
+                    to: {
+                        process: 1,
+                        r: self.r,
+                        r0: self.r0
+                    },
+                    duration: 800,
+                    easing: "Back.Out",
+                    onUpdate: function() {
+                        for (var i = 0; i < self.sectors.length; i++) {
+                            var sec = self.sectors[i];
+                            var secc = sec.context;
+                            if (secc) {
+                                secc.r = this.r;
+                                secc.r0 = this.r0;
+                                secc.globalAlpha = this.process;
+                                if (i == 0) {
+                                    secc.startAngle = sec.startAngle;
+                                    secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * this.process;
+                                } else {
+                                    var lastEndAngle = function(index) {
+                                        var lastIndex = index - 1;
+                                        var lastSecc = self.sectors[lastIndex].context;
+                                        if (lastIndex == 0) {
+                                            return lastSecc ? lastSecc.endAngle : 0;
+                                        }
+                                        if (lastSecc) {
+                                            return lastSecc.endAngle;
+                                        } else {
+                                            return arguments.callee(lastIndex);
+                                        }
+                                    }(i);
+                                    secc.startAngle = lastEndAngle;
+                                    secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * this.process;
                                 }
                             }
-                        }).onComplete(function() {
-                            cancelAnimationFrame(timer);
-                            self.isMoving = false;
-                            self._showDataLabel();
-                        }).start();
-                    animate();
-                };
-
-                function animate() {
-                    timer = requestAnimationFrame(animate);
-                    Tween.update();
-                };
-                self.isMoving = true;
-                growAnima();
+                        }
+                    },
+                    onComplete: function() {
+                        self._showDataLabel();
+                    }
+                });
             },
             _showDataLabel: function() {
                 if (this.branchSp) {
                     this.branchSp.context.globalAlpha = 1;
-                    _.each( this.labelList , function( lab ){
+                    _.each(this.labelList, function(lab) {
                         lab.labelEle.style.display = "block"
-                    } );
+                    });
                 }
             },
             _hideDataLabel: function() {
                 if (this.branchSp) {
                     this.branchSp.context.globalAlpha = 0;
-                    _.each( this.labelList , function( lab ){
+                    _.each(this.labelList, function(lab) {
                         lab.labelEle.style.display = "none"
-                    } );
+                    });
                 }
             },
             _showTip: function(e, ind) {
@@ -424,20 +421,6 @@
                 };
 
                 return e;
-            },
-            _hideSector: function(index) {
-                if (this.sectorMap[index]) {
-                    this.sectorMap[index].context.visible = false;
-                    this.sectorMap[index].visible = false;
-                    this._hideLabel(index);
-                }
-            },
-            _showSector: function(index) {
-                if (this.sectorMap[index]) {
-                    this.sectorMap[index].context.visible = true;
-                    this.sectorMap[index].visible = true;
-                    this._showLabel(index);
-                }
             },
             _sectorFocus: function(e, index) {
                 if (this.sectorMap[index]) {
@@ -552,11 +535,11 @@
                                 return obj[pro];
                             });
                             if (labelTxt) {
-                                labelTxt = "<span>"+ labelTxt +"</span>"
+                                labelTxt = "<span>" + labelTxt + "</span>"
                             };
                         }
-                    }; 
-                    labelTxt || ( labelTxt = "<span>"+data[currentIndex].name + ' : ' + data[currentIndex].txt +"</span>");
+                    };
+                    labelTxt || (labelTxt = "<span>" + data[currentIndex].name + ' : ' + data[currentIndex].txt + "</span>");
 
                     branchTxt = document.createElement("div");
                     branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + sectorMap[currentIndex].color + ""
@@ -721,6 +704,44 @@
                     self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinPercentage, rMinPercentage, isEnd, ySpaceInfo)
                 }
             },
+            _getAngleTime: function(secc) {
+                return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
+            },
+            addCheckedSec: function(sec) {
+                var secc = sec.context;
+                var sector = new Sector({
+                    context: {
+                        x: secc.x,
+                        y: secc.y,
+                        r0: secc.r,
+                        r: secc.r + 8,
+                        startAngle: secc.startAngle,
+                        endAngle: secc.startAngle + 0.5, //secc.endAngle,
+                        fillStyle: secc.fillStyle,
+                        globalAlpha: 0.5
+                    },
+                    id: 'checked_' + sec.id
+                });
+                this.checkedSp.addChild(sector);
+                sector.animate({
+                    endAngle: secc.endAngle
+                } , {
+                    duration: this._getAngleTime(secc)
+                });
+            },
+            delCheckedSec: function(sec , callback) {
+                var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
+                checkedSec.animate({
+                    //endAngle : checkedSec.context.startAngle+0.5
+                    startAngle: checkedSec.context.endAngle - 0.3
+                }, {
+                    onComplete: function() {
+                        checkedSec.destroy();
+                        callback && callback();
+                    },
+                    duration: 150
+                });
+            },
             _widget: function() {
                 var self = this;
                 var data = self.data.data;
@@ -756,15 +777,21 @@
                                 var me = this;
                                 if (self.tips.enabled) {
                                     self._showTip(e, this.__dataIndex);
+                                };
+                                var secData = self.data.data[this.__dataIndex];
+                                if (!secData.checked) {
+                                    self._sectorFocus(e, this.__dataIndex);
+                                    self.focus(this.__dataIndex);
                                 }
-                                self._sectorFocus(e, this.__dataIndex);
-                                self.allowPointSelect && self.moveSector(this);
                             }, function(e) {
                                 if (self.tips.enabled) {
                                     self._hideTip(e);
+                                };
+                                var secData = self.data.data[this.__dataIndex];
+                                if (!secData.checked) {
+                                    self._sectorUnfocus(e, this.__dataIndex);
+                                    self.unfocus(this.__dataIndex);
                                 }
-                                self._sectorUnfocus(e, this.__dataIndex);
-                                self.allowPointSelect && self.moveSector(this);
                             });
                             sector.on('mousemove', function(e) {
                                 if (self.tips.enabled) {
@@ -774,10 +801,10 @@
 
                             sector.on('click', function(e) {
                                 self._sectorClick(e, this.__dataIndex);
-                                !self.allowPointSelect && self.moveSector(this);
+                                self.secClick( this );
                             });
 
-                            self.sprite.addChild(sector);
+                            self.sectorsSp.addChildAt(sector, 0);
                             moreSecData = {
                                 name: data[i].name,
                                 value: data[i].y,
@@ -823,6 +850,15 @@
                         self._startWidgetLabel();
                     }
                 }
+            },
+            secClick: function( sectorEl ) {
+                var secData = this.data.data[sectorEl.__dataIndex];
+                if (!secData.checked) {
+                    this.addCheckedSec( sectorEl );
+                } else {
+                    this.delCheckedSec( sectorEl );
+                };
+                secData.checked = !secData.checked;
             }
         };
 

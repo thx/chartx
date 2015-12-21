@@ -6,14 +6,17 @@ define(
         "chartx/chart/theme",
         "canvax/animation/AnimationFrame"
     ],
-    function(Canvax, Rect, Tools , Theme , AnimationFrame) {
+    function(Canvax, Rect, Tools, Theme, AnimationFrame) {
 
         var Graphs = function(opt, root) {
+            this.data = [];
             this.w = 0;
             this.h = 0;
             this.root = root;
             this._yAxisFieldsMap = {};
             this._setyAxisFieldsMap();
+
+            this.animation = true;
 
             this.pos = {
                 x: 0,
@@ -23,15 +26,26 @@ define(
             this._colors = Theme.colors;
 
             this.bar = {
-                width  : 20,
-                radius : 4
+                width: 0,
+                _width: 0,
+                radius: 4
             };
+
             this.text = {
-                enabled: 0,
+                enabled: false,
                 fillStyle: '#999',
                 fontSize: 12,
                 format: null
             };
+
+            this.average = {
+                enabled: false,
+                field: "average",
+                fieldInd: -1,
+                fillStyle: "#c4c9d6",
+                data: null
+            };
+
             this.sort = null;
 
             this.eventEnabled = true;
@@ -43,6 +57,8 @@ define(
 
             _.deepExtend(this, opt);
 
+            this._initaverage();
+
             this.init();
         };
 
@@ -51,11 +67,13 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "graphsEl"
                 });
-                
+                this.barsSp = new Canvax.Display.Sprite({
+                    id: "barsSp"
+                });
                 this.txtsSp = new Canvax.Display.Sprite({
                     id: "txtsSp",
                     context: {
-                        visible: false
+                        //visible: false
                     }
                 });
             },
@@ -65,47 +83,71 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
-            _setyAxisFieldsMap : function(){
+            _setyAxisFieldsMap: function() {
                 var me = this;
-                _.each( _.flatten(this.root.dataFrame.yAxis.field) , function( field , i ){
-                     me._yAxisFieldsMap[ field ] = i;
+                _.each(_.flatten(this.root.dataFrame.yAxis.field), function(field, i) {
+                    me._yAxisFieldsMap[field] = i;
                 });
             },
-            _getColor: function(c, groups, vLen, i, h, v, value , field) {
+            _initaverage: function() {
+                if (this.average.enabled) {
+                    _.each(this.root.dataFraem, function(fd, i) {
+                        if (fd.field == this.average.field) {
+                            this.average.fieldInd = i;
+                        }
+                    });
+                }
+            },
+            _getColor: function(c, groups, vLen, i, h, v, value, field) {
                 var style = null;
                 if (_.isString(c)) {
                     style = c
                 };
                 if (_.isArray(c)) {
-                    style = _.flatten( c )[this._yAxisFieldsMap[field]];
+                    style = _.flatten(c)[this._yAxisFieldsMap[field]];
                 };
                 if (_.isFunction(c)) {
-                    style = c({
-                        iGroup : i,
-                        iNode  : h,
-                        iLay   : v,
-                        field  : field,
-                        value  : value
-                    });
+                    style = c.apply(this, [{
+                        iGroup: i,
+                        iNode: h,
+                        iLay: v,
+                        field: field,
+                        value: value
+                    }]);
                 };
                 if (!style || style == "") {
-                    style = this._colors[ this._yAxisFieldsMap[field] ];
+                    style = this._colors[this._yAxisFieldsMap[field]];
                 };
                 return style;
             },
-            checkBarW: function(xDis) {
-                if (this.bar.width >= xDis) {
-                    this.bar.width = xDis - 1 > 1 ? xDis - 1 : 1;
-                }
+            checkBarW: function(xDis1,xDis2) {
+                if (this.bar.width) {
+                    if (_.isFunction(this.bar.width)) {
+                        this.bar._width = this.bar.width(xDis1);
+                    }
+                };
+                if (!this.bar.width) {
+                    this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
+                };
+                this.bar._width < 1 && (this.bar._width = 1);
+            },
+            resetData: function(data, opt) {
+                this.draw(data.data, opt);
             },
             draw: function(data, opt) {
                 _.deepExtend(this, opt);
                 if (data.length == 0) {
                     return;
                 };
+
+                var preLen = 0;
+                this.data[0] && (preLen = this.data[0][0].length);
+
                 this.data = data;
                 var me = this;
                 var groups = data.length;
+                var itemW = 0;
+
                 _.each(data, function(h_group, i) {
                     /*
                     //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
@@ -118,46 +160,71 @@ define(
                     //    ["uv","pv"],  vLen == 2
                     //    "click"       vLen == 1
                     //]
+
+                    //if (h <= preLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
+
                     var vLen = h_group.length;
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
+                    itemW = me.w / hLen;
+
+                    //如果itemW过小的话，就不用显示text的info信息
+                    if (itemW < 15) {
+                        me.text.enabled = false;
+                    };
 
                     for (h = 0; h < hLen; h++) {
                         var groupH;
                         if (i == 0) {
                             //横向的分组
-                            groupH = new Canvax.Display.Sprite({
-                                id: "barGroup_" + h
-                            });
-                            me.sprite.addChild(groupH);
+                            if (h <= preLen - 1) {
+                                groupH = me.barsSp.getChildById("barGroup_" + h);
+                            } else {
+                                groupH = new Canvax.Display.Sprite({
+                                    id: "barGroup_" + h
+                                });
+                                me.barsSp.addChild(groupH);
+                                groupH.iGroup = h;
+                                groupH.on("click mousedown mousemove mouseup", function(e) {
+                                    if (!e.eventInfo) {
+                                        e.eventInfo = me._getInfoHandler(this);
+                                    };
+                                });
+                            };
 
-                            //横向的分组区片感应区
-                            var itemW = me.w / hLen;
-                            var hoverRect = new Rect({
-                                id      : "bhr_" + h,
-                                pointChkPriority: false,
-                                context : {
-                                    x           : itemW * h,
-                                    y           : -me.h,
-                                    width       : itemW,
-                                    height      : me.h,
-                                    fillStyle   : "#ccc",
-                                    globalAlpha : 0
+                            if (me.eventEnabled) {
+                                var hoverRect;
+                                if (h <= preLen - 1) {
+                                    hoverRect = groupH.getChildById("bhr_" + h);
+                                    hoverRect.context.width = itemW;
+                                    hoverRect.context.x = itemW * h;
+                                } else {
+                                    hoverRect = new Rect({
+                                        id: "bhr_" + h,
+                                        pointChkPriority: false,
+                                        context: {
+                                            x: itemW * h,
+                                            y: -me.h,
+                                            width: itemW,
+                                            height: me.h,
+                                            fillStyle: "#ccc",
+                                            globalAlpha: 0
+                                        }
+                                    });
+                                    groupH.addChild(hoverRect);
+                                    hoverRect.hover(function(e) {
+                                        this.context.globalAlpha = 0.1;
+                                    }, function(e) {
+                                        this.context.globalAlpha = 0;
+                                    });
+                                    hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
+                                    hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
+                                        e.eventInfo = me._getInfoHandler(this, e);
+                                    });
                                 }
-                            });
-                            groupH.addChild(hoverRect);
-                            hoverRect.hover(function(e) {
-                                this.context.globalAlpha = 0.1;
-                            }, function(e) {
-                                this.context.globalAlpha = 0;
-                            });
-                            hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
-                            hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
-                                e.eventInfo = me._getInfoHandler(this, e);
-                            });
-
+                            };
                         } else {
-                            groupH = me.sprite.getChildById("barGroup_" + h)
+                            groupH = me.barsSp.getChildById("barGroup_" + h);
                         };
 
                         for (v = 0; v < vLen; v++) {
@@ -170,65 +237,179 @@ define(
                             };
                             var beginY = parseInt(rectData.y);
 
-                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value , rectData.field);
-                            var rectCxt   = {
-                                x: Math.round(rectData.x - me.bar.width / 2),
+                            var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
+
+                            rectData.fillStyle = fillStyle;
+
+                            var finalPos = {
+                                x: Math.round(rectData.x - me.bar._width / 2),
                                 y: beginY,
-                                width: parseInt(me.bar.width),
+                                width: parseInt(me.bar._width),
                                 height: rectH,
-                                fillStyle: fillStyle
+                                fillStyle: fillStyle,
+                                scaleY: 1
+                            };
+                            var rectCxt = {
+                                x: finalPos.x,
+                                y: 0,
+                                width: finalPos.width,
+                                height: finalPos.height,
+                                fillStyle: finalPos.fillStyle,
+                                scaleY: 0
                             };
                             if (!!me.bar.radius && v == vLen - 1) {
-                                var radiusR    = Math.min(me.bar.width / 2, rectH);
-                                radiusR        = Math.min(radiusR, me.bar.radius);
+                                var radiusR = Math.min(me.bar._width / 2, rectH);
+                                radiusR = Math.min(radiusR, me.bar.radius);
                                 rectCxt.radius = [radiusR, radiusR, 0, 0];
                             };
-                            var rectEl = new Rect({
-                                context: rectCxt
-                            });
 
-                            groupH.addChild(rectEl);
+                            if (!me.animation) {
+                                delete rectCxt.scaleY;
+                                rectCxt.y = finalPos.y;
+                            };
+
+                            var rectEl;
+                            if (h <= preLen - 1) {
+                                rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                            } else {
+                                rectEl = new Rect({
+                                    id: "bar_" + i + "_" + h + "_" + v,
+                                    context: rectCxt
+                                });
+                                groupH.addChild(rectEl);
+                            };
+
+                            rectEl.finalPos = finalPos;
 
                             rectEl.iGroup = h, rectEl.iNode = i, rectEl.iLay = v;
-                            rectEl.on("panstart mouseover mousemove mouseout click", function(e) {
-                                e.eventInfo = me._getInfoHandler(this, e);
-                                if (e.type == "mouseover") {
-                                    this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0.1;
-                                }
-                                if (e.type == "mouseout") {
-                                    this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0;
-                                }
-                            });
 
-                            //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
-                            if (vLen == 1) {
+                            if (me.eventEnabled) {
+                                rectEl.on("panstart mouseover mousemove mouseout click", function(e) {
+                                    e.eventInfo = me._getInfoHandler(this, e);
+                                    if (e.type == "mouseover") {
+                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0.1;
+                                    }
+                                    if (e.type == "mouseout") {
+                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0;
+                                    }
+                                });
+                            };
+
+                            if (v == vLen - 1 && me.text.enabled) {
                                 //文字
-                                var content = rectData.value
-                                if (_.isFunction(me.text.format)) {
-                                    content = me.text.format(content);
+                                var contents = [rectData];
+
+                                var infosp;
+                                if (h <= preLen - 1) {
+                                    infosp = me.txtsSp.getChildById("infosp_" + i + "_" + h);
                                 } else {
-                                    content = Tools.numAddSymbol(content);
-                                };
-                                
-                                var context =  {
-                                    fillStyle: me.text.fillStyle,
-                                    fontSize: me.text.fontSize
+                                    infosp = new Canvax.Display.Sprite({
+                                        id: "infosp_" + i + "_" + h,
+                                        context: {
+                                            visible: false
+                                        }
+                                    });
+                                    infosp._hGroup = h;
+                                    me.txtsSp.addChild(infosp);
                                 };
 
-                                var txt = new Canvax.Display.Text(content, context);
-                                txt.context.x = rectData.x - txt.getTextWidth() / 2;
-                                txt.context.y = rectCxt.y - txt.getTextHeight();
-                                if (txt.context.y + me.h < 0) {
-                                    txt.context.y = -me.h;
+                                if (vLen > 1) {
+                                    for (var c = vLen - 2; c >= 0; c--) {
+                                        contents.unshift(h_group[c][h]);
+                                    }
                                 };
-                                me.txtsSp.addChild( txt )
+
+                                var infoWidth = 0;
+                                var infoHeight = 0;
+                                _.each(contents, function(cdata, ci) {
+                                    var content = cdata.value;
+                                    if (!me.animation && _.isFunction(me.text.format)) {
+                                        content = me.text.format(cdata.value);
+                                    };
+                                    if (!me.animation && _.isNumber(content)) {
+                                        content = Tools.numAddSymbol(content);
+                                    };
+
+                                    var txt;
+                                    if (h <= preLen - 1) {
+                                        txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                    } else {
+                                        txt = new Canvax.Display.Text(me.animation ? 0 : content, {
+                                            id: "info_txt_" + i + "_" + h + "_" + ci,
+                                            context: {
+                                                x: infoWidth + 2,
+                                                fillStyle: cdata.fillStyle
+                                            }
+                                        });
+                                        infosp.addChild(txt);
+                                    };
+                                    txt._text = content;
+                                    infoWidth += txt.getTextWidth() + 2;
+                                    infoHeight = Math.max(infoHeight, txt.getTextHeight());
+
+                                    if (ci <= vLen - 2) {
+                                        txt = new Canvax.Display.Text("/", {
+                                            context: {
+                                                x: infoWidth + 2,
+                                                fillStyle: "#999"
+                                            }
+                                        });
+                                        infoWidth += txt.getTextWidth() + 2;
+                                        infosp.addChild(txt);
+                                    };
+                                });
+
+                                infosp._finalX = rectData.x - infoWidth / 2;
+                                infosp._finalY = finalPos.y - infoHeight;
+                                infosp._centerX = rectData.x;
+                                infosp.context.width = infoWidth;
+                                infosp.context.height = infoHeight;
+
+                                if (!me.animation) {
+                                    infosp.context.y = finalPos.y - infoHeight;
+                                    infosp.context.x = rectData.x - infoWidth / 2;
+                                    infosp.context.visible = true;
+                                };
                             }
                         };
                     }
                 });
 
-                if (this.txtsSp.children.length > 0) {
+                this.sprite.addChild(this.barsSp);
+
+                if (this.text.enabled) {
                     this.sprite.addChild(this.txtsSp);
+                };
+
+                //如果有average模块配置。
+                if (this.average.enabled && this.average.data) {
+                    !this.averageSp && (this.averageSp = new Canvax.Display.Sprite({
+                        id: "averageSp"
+                    }));
+                    _.each(this.average.layoutData, function(average, i) {
+                        var averageRectC = {
+                            x: itemW * i,
+                            y: average.y,
+                            fillStyle: me.average.fillStyle,
+                            width: itemW,
+                            height: 2
+                        };
+                        var averageLine;
+                        if (i <= preLen - 1) {
+                            averageLine = me.averageSp.getChildById("average_" + i);
+                            averageLine.context.x = averageRectC.x;
+                            averageLine.context.y = averageRectC.y;
+                            averageLine.context.width = averageRectC.width;
+                        } else {
+                            averageLine = new Rect({
+                                id: "average_" + i,
+                                context: averageRectC
+                            });
+                            me.averageSp.addChild(averageLine);
+                        };
+
+                    });
+                    this.sprite.addChild(me.averageSp);
                 };
 
                 this.sprite.context.x = this.pos.x;
@@ -238,32 +419,161 @@ define(
                     this.sprite.context.y -= this.h;
                 };
             },
+            _updateInfoTextPos: function(el) {
+                if (this.root.type == "horizontal") {
+                    return;
+                };
+                var infoWidth = 0;
+                var infoHeight = 0;
+                var cl = el.children.length;
+                _.each(el.children, function(c, i) {
+                    if (c.getTextWidth) {
+                        c.context.x = infoWidth;
+                        infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
+                        infoHeight = Math.max(infoHeight, c.getTextHeight());
+                    };
+                });
+                el.context.x = el._centerX - infoWidth / 2 + 1;
+                el.context.width = infoWidth;
+                el.context.height = infoHeight;
+            },
             /**
              * 生长动画
              */
-            grow: function(callback) {
+            grow: function(callback, opt) {
                 var self = this;
-                //var timer = null;
-                var i = 1;
-                if (this.sort && this.sort == "desc") {
-                    i = -1;
+                if (!this.animation) {
+                    callback && callback(self);
+                    return;
                 };
-                AnimationFrame.registTween({
-                    from : {h:0},
-                    to   : {h:self.h},
-                    onUpdate : function(){
-                        self.sprite.context.scaleY = i * this.h / self.h;
-                    },
-                    onComplete : function(){
-                        self._growEnd();
-                        callback && callback(self);
-                    }
+                var sy = 1;
+                if (this.sort && this.sort == "desc") {
+                    sy = -1;
+                };
+
+                //先把已经不在当前range范围内的元素destroy掉
+                if (self.barsSp.children.length > self.data[0][0].length) {
+                    for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
+                        self.barsSp.getChildAt(i).destroy();
+
+                        for (var t = 0, tl = self.txtsSp.children.length; t < tl; t++) {
+                            if (self.txtsSp.children[t]._hGroup == i) {
+                                self.txtsSp.children[t].destroy();
+                                t--, tl--;
+                            }
+                        };
+
+                        self.averageSp && self.averageSp.getChildAt(i).destroy();
+                        i--;
+                        l--;
+                    };
+                };
+
+                var options = _.extend({
+                    delay: 80,
+                    easing: "Back.Out",
+                    duration: 500
+                }, opt);
+
+                _.each(self.data, function(h_group, g) {
+                    var vLen = h_group.length;
+                    if (vLen == 0) return;
+                    var hLen = h_group[0].length;
+                    for (h = 0; h < hLen; h++) {
+                        for (v = 0; v < vLen; v++) {
+
+                            var group = self.barsSp.getChildById("barGroup_" + h);
+
+                            var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
+                            //console.log("finalPos"+bar.finalPos.y)
+
+                            if (options.duration == 0) {
+                                bar.context.scaleY = sy;
+                                bar.context.y = sy * sy * bar.finalPos.y;
+                                bar.context.x = bar.finalPos.x;
+                                bar.context.width = bar.finalPos.width;
+                                bar.context.height = bar.finalPos.height;
+                            } else {
+                                if (bar._tweenObj) {
+                                    AnimationFrame.destroyTween(bar._tweenObj);
+                                };
+                                bar._tweenObj = bar.animate({
+                                    scaleY: sy,
+                                    y: sy * bar.finalPos.y,
+                                    x: bar.finalPos.x,
+                                    width: bar.finalPos.width,
+                                    height: bar.finalPos.height
+                                }, {
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    delay: h * options.delay,
+                                    onUpdate: function(arg) {
+
+                                    },
+                                    onComplete: function(arg) {
+                                        if (arg.width < 3) {
+                                            this.context.radius = 0;
+                                        }
+                                    },
+                                    id: bar.id
+                                });
+                            };
+
+                            if (self.text.enabled) {
+                                var infosp = self.txtsSp.getChildById("infosp_" + g + "_" + h);
+
+                                if (self.root.type == "horizontal") {
+                                    infosp.context.x = infosp._finalX;
+                                };
+                                infosp.animate({
+                                    y: infosp._finalY,
+                                    x: infosp._finalX
+                                }, {
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    delay: h * options.delay,
+                                    onUpdate: function() {
+                                        this.context.visible = true;
+                                    },
+                                    onComplete: function() {}
+                                });
+
+                                _.each(infosp.children, function(txt) {
+                                    if (txt._text) {
+                                        AnimationFrame.registTween({
+                                            from: {
+                                                v: txt.text
+                                            },
+                                            to: {
+                                                v: txt._text
+                                            },
+                                            duration: options.duration + 300,
+                                            delay: h * options.delay,
+                                            onUpdate: function() {
+                                                var content = this.v;
+                                                if (_.isFunction(self.text.format)) {
+                                                    content = self.text.format(content);
+                                                } else if (_.isNumber(content)) {
+                                                    content = Tools.numAddSymbol(parseInt(content));
+                                                };
+                                                txt.resetText(content);
+                                                if (txt.parent) {
+                                                    self._updateInfoTextPos(txt.parent);
+                                                } else {
+                                                    txt.destroy();
+                                                }
+                                            }
+                                        })
+                                    };
+                                });
+                            }
+
+                        };
+                    };
                 });
-            },
-            _growEnd: function() {
-                if (this.text.enabled) {
-                    this.txtsSp.context.visible = true
-                }
+                window.setTimeout(function() {
+                    callback && callback(self);
+                }, 300 * (this.barsSp.children.length - 1));
             },
             _getInfoHandler: function(target) {
                 var node = {
@@ -272,12 +582,17 @@ define(
                     iLay: target.iLay,
                     nodesInfoList: this._getNodeInfo(target.iGroup, target.iNode, target.iLay)
                 };
-                return node
+                return node;
             },
             _getNodeInfo: function(iGroup, iNode, iLay) {
                 var arr = [];
                 var me = this;
                 var groups = me.data.length;
+
+                iGroup == undefined && (iGroup = 0);
+                iNode == undefined && (iNode = -1);
+                iLay == undefined && (iLay = -1);
+
                 _.each(me.data, function(h_group, i) {
                     var node;
                     var vLen = h_group.length;
@@ -288,7 +603,7 @@ define(
                             for (v = 0; v < vLen; v++) {
                                 if ((iNode == i || iNode == -1) && (iLay == v || iLay == -1)) {
                                     node = h_group[v][h]
-                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value , node.field);
+                                    node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value, node.field);
                                     arr.push(node)
                                 }
                             }
@@ -300,8 +615,7 @@ define(
         };
         return Graphs;
     }
-)
-
+);
 
 define(
     "chartx/chart/bar/xaxis",
@@ -324,8 +638,7 @@ define(
                         'x'       : this.xDis1 * (a+1) - this.xDis1/2
                     }
                     tmpData.push( o );
-                }
-                
+                };
                 return tmpData;
             } 
         } );
@@ -341,11 +654,11 @@ define(
         "chartx/components/yaxis/yAxis"
     ],
     function( yAxisBase ){
-        var yAxis = function( opt , data ){
-            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data ] );
+        var yAxis = function( opt , data , data1){
+            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
         };
         Chartx.extend( yAxis , yAxisBase , {
-            _setDataSection : function( data ){
+            _setDataSection : function( data , data1 ){
                 var arr = [];
                 _.each( data.org , function( d , i ){
                     var varr = [];
@@ -359,11 +672,14 @@ define(
                             min = Math.min( d[ii][i], min );
                         }
                         varr.push( count );
-                    }
+                    };
                     varr.push(min);
                     arr.push( varr );
                 } );
-                return _.flatten(arr);
+                if( !data1 ){
+                    data1 = [];
+                }
+                return _.flatten(arr).concat( data1 );
             }
         } );
     
@@ -377,20 +693,20 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        './xaxis',
-        './yaxis',
-        //'chartx/components/yaxis/yAxis',
+        'chartx/chart/bar/xaxis',
+        'chartx/chart/bar/yaxis',
         'chartx/components/back/Back',
-        './graphs',
+        'chartx/chart/bar/graphs',
         'chartx/components/tips/tip',
-        'chartx/utils/dataformat'
+        'chartx/utils/dataformat',
+        'chartx/components/datazoom/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat, DataZoom) {
         /*
          *@node chart在dom里的目标容器节点。
          */
         var Canvax = Chart.Canvax;
-        return Chart.extend({
+        var Bar = Chart.extend({
             _xAxis: null,
             _yAxis: null,
             _back: null,
@@ -398,18 +714,50 @@ define(
             _tip: null,
 
             init: function(node, data, opts) {
+
+                this._node = node;
+                this._data = data;
+                this._opts = opts;
+
+                if (opts.dataZoom) {
+                    this.padding.bottom += 46;
+                    this.dataZoom = {
+                        range: {
+                            start: 0,
+                            end: data.length - 2 //因为第一行是title
+                        }
+                    }
+                };
+
                 if (opts.proportion) {
                     this.proportion = opts.proportion;
                     this._initProportion(node, data, opts);
                 } else {
-                    this._opts = opts;
                     _.deepExtend(this, opts);
                 };
+
                 this.dataFrame = this._initData(data);
+            },
+            /*
+             * 如果只有数据改动的情况
+             */
+            resetData: function(data) {
+                this.dataFrame = this._initData(data, this);
+                this._xAxis.resetData(this.dataFrame.xAxis, {
+                    animation: false
+                });
+                this._yAxis.resetData(this.dataFrame.yAxis, {
+                    animation: false
+                });
+                this._graphs.resetData(this._trimGraphs());
+                this._graphs.grow(function() {
+                    //callback
+                }, {
+                    delay: 0
+                });
             },
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
-                this._opts = opts;
                 !opts.tips && (opts.tips = {});
                 opts.tips = _.deepExtend(opts.tips, {
                     content: function(info) {
@@ -482,47 +830,96 @@ define(
 
             },
             _initData: function(data, opt) {
-                var d = dataFormat.apply(this, arguments);
+                var d;
+                var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
+                if (dataZoom) {
+                    var datas = [data[0]];
+                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
+                    d = dataFormat.apply(this, [datas, opt]);
+                } else {
+                    d = dataFormat.apply(this, arguments);
+                };
+
                 _.each(d.yAxis.field, function(field, i) {
                     if (!_.isArray(field)) {
                         field = [field];
                         d.yAxis.org[i] = [d.yAxis.org[i]];
                     }
                 });
+
                 return d;
             },
+            _getaverageData: function() {
+                var averageData = [];
+                var me = this;
+                if (this._graphs && this._graphs.average && this._graphs.average.data) {
+                    return this._graphs.average.data
+                };
+                if (this._graphs.average.enabled) {
+                    _.each(this.dataFrame.data, function(fd, i) {
+                        if (fd.field == me._graphs.average.field) {
+                            averageData = fd.data;
+                        }
+                    });
+                };
+                this._graphs.average.data = averageData;
+                return averageData;
+            },
+            _setaverageLayoutData: function() {
+                var layoutData = [];
+                var me = this;
+                if (this._graphs.average.enabled) {
+                    var maxYAxis = this._yAxis.dataSection[this._yAxis.dataSection.length - 1];
+                    _.each(this._graphs.average.data, function(fd, i) {
+                        layoutData.push({
+                            value: fd,
+                            y: -(fd - me._yAxis._bottomNumber) / Math.abs(maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
+                        });
+                    });
+                    this._graphs.average.layoutData = layoutData;
+                };
+            },
             _initModule: function() {
-                this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
-                this._back = new Back(this.back);
-                this._tip = new Tip(this.tips, this.canvax.getDomContainer());
-
                 //因为tips放在graphs中，so 要吧tips的conf传到graphs中
                 this._graphs = new Graphs(
                     this.graphs,
                     this
                 );
+
+                this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
+
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getaverageData());
+
+                this._back = new Back(this.back);
+                this._tip = new Tip(this.tips, this.canvax.getDomContainer());
             },
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
                 var y = parseInt(h - this._xAxis.h);
-                var graphsH = y - this.padding.top;
+                var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
                 this._yAxis.draw({
                     pos: {
                         x: this.padding.left,
-                        y: y
+                        y: y - this.padding.bottom
                     },
-                    yMaxHeight :graphsH 
+                    yMaxHeight: graphsH
                 });
+
+                if (this.dataZoom) {
+                    this.__cloneBar = this._getCloneBar();
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                        animation: false
+                    });
+                };
 
                 var _yAxisW = this._yAxis.w;
 
                 //绘制x轴
                 this._xAxis.draw({
-                    graphh: h,
+                    graphh: h - this.padding.bottom,
                     graphw: w - this.padding.right,
                     yAxisW: _yAxisW
                 });
@@ -545,28 +942,35 @@ define(
                     },
                     pos: {
                         x: _yAxisW,
-                        y: y
+                        y: y - this.padding.bottom
                     }
                 });
 
-                var o = this._trimGraphs()
-                    //绘制主图形区域
+                this._setaverageLayoutData();
+
+                var o = this._trimGraphs();
+                //绘制主图形区域
                 this._graphs.draw(o.data, {
                     w: this._xAxis.xGraphsWidth,
                     h: this._yAxis.yGraphsHeight,
                     pos: {
                         x: _yAxisW,
-                        y: y
+                        y: y - this.padding.bottom
                     },
                     yDataSectionLen: this._yAxis.dataSection.length,
-                    sort : this._yAxis.sort
+                    sort: this._yAxis.sort
                 });
+
+
+                if (this.dataZoom) {
+                    this._initDataZoom();
+                }
             },
 
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo: function(e) {
-                if(!e.eventInfo){
+                if (!e.eventInfo) {
                     return;
                 }
                 e.eventInfo.xAxis = {
@@ -587,6 +991,7 @@ define(
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
+
                 var hLen = yArr.length; //bar的横向分组length
 
                 var xDis1 = _xAxis.xDis1;
@@ -594,7 +999,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -607,9 +1012,17 @@ define(
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0;
                     center[b] = {};
-                    _.each(yArr[b], function(subv, v) {
+                    var yArrList = yArr[b];
+
+                    _.each(yArrList, function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
+
+                        if (me.dataZoom) {
+                            subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end);
+                        };
+
                         _.each(subv, function(val, i) {
+
                             if (!xArr[i]) {
                                 return;
                             };
@@ -617,7 +1030,7 @@ define(
                             var vCount = 0;
                             if (me.proportion) {
                                 //先计算总量
-                                _.each(yArr[b], function(team, ti) {
+                                _.each(yArrList, function(team, ti) {
                                     vCount += team[i]
                                 });
                             };
@@ -640,10 +1053,10 @@ define(
                             };
 
                             var node = {
-                                value : val,
-                                field : me._getTargetField( b , v , i , _yAxis.field ),
-                                x     : x,
-                                y     : y
+                                value: val,
+                                field: me._getTargetField(b, v, i, _yAxis.field),
+                                x: x,
+                                y: y
                             };
 
                             if (me.proportion) {
@@ -652,34 +1065,36 @@ define(
 
                             tmpData[b][v].push(node);
 
+
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
                         });
                     });
-                }
+                };
 
                 for (var a = 0, al = yValueMaxs.length; a < al; a++) {
                     center[a].agValue = yValueMaxs[a] / yLen
                     center[a].agPosition = -(yValueMaxs[a] / yLen - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
-                }
+                };
                 //均值
-                this.dataFrame.yAxis.center = center
+                this.dataFrame.yAxis.center = center;
+
                 return {
                     data: tmpData
                 };
             },
-            _getTargetField : function( b , v , i , field ){
-                if( !field ){
+            _getTargetField: function(b, v, i, field) {
+                if (!field) {
                     field = this._yAxis.field;
                 };
-                if( _.isString( field ) ){
+                if (_.isString(field)) {
                     return field;
-                } else if( _.isArray(field) ){
+                } else if (_.isArray(field)) {
                     var res = field[b];
-                    if( _.isString( res ) ){
+                    if (_.isString(res)) {
                         return res;
                     } else if (_.isArray(res)) {
-                        return res[ v ];
+                        return res[v];
                     };
                 }
             },
@@ -697,13 +1112,114 @@ define(
                 this._graphs.grow(function(g) {
                     if (me._opts.markLine) {
                         me._initMarkLine(g);
-                    }
+                    };
                     if (me._opts.markPoint) {
                         me._initMarkPoint(g);
-                    }
+                    };
                 });
 
                 this.bindEvent();
+            },
+            _initDataZoom: function() {
+                var me = this;
+                //require(["chartx/components/datazoom/index"], function(DataZoom) {
+                //初始化datazoom模块
+
+                var dataZoomOpt = _.deepExtend({
+                    w: me._xAxis.xGraphsWidth,
+                    count: me._data.length - 1,
+                    //h : me._xAxis.h,
+                    pos: {
+                        x: me._xAxis.pos.x,
+                        y: me._xAxis.pos.y + me._xAxis.h
+                    },
+                    dragIng: function(range) {
+
+                        if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
+                            return;
+                        };
+
+                        me.dataZoom.range.start = parseInt(range.start);
+                        me.dataZoom.range.end = parseInt(range.end);
+
+                        me.dataFrame = me._initData(data, this);
+                        me._xAxis.resetData(me.dataFrame.xAxis, {
+                            animation: false
+                        });
+
+                        me._graphs.average.data = null;
+                        me._getaverageData();
+                        me._setaverageLayoutData();
+
+                        me._graphs.resetData(me._trimGraphs());
+                        me._graphs.grow(function() {
+                            //callback
+                        }, {
+                            delay: 0,
+                            easing: "Quadratic.Out",
+                            duration: 300
+                        });
+                    }
+                }, me.dataZoom);
+
+                //me._getCloneBar();
+
+                me._dataZoom = new DataZoom(dataZoomOpt);
+
+                var graphssp = this.__cloneBar.thumbBar._graphs.sprite;
+                graphssp.id = graphssp.id + "_datazoomthumbbarbg"
+                graphssp.context.x = 0;
+                graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
+                graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
+
+
+                me._dataZoom.dataZoomBg.addChild(graphssp);
+                me.core.addChild(me._dataZoom.sprite);
+
+
+                this.__cloneBar.thumbBar.destroy();
+                this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
+                //});
+            },
+            _getCloneBar: function() {
+                var me = this;
+                var cloneEl = me.el.cloneNode();
+                cloneEl.innerHTML = "";
+                cloneEl.id = me.el.id + "_currclone";
+                cloneEl.style.position = "absolute";
+                cloneEl.style.top = "10000px";
+                document.body.appendChild(cloneEl);
+
+                var opts = _.deepExtend({}, me._opts);
+                _.deepExtend(opts, {
+                    graphs: {
+                        bar: {
+                            fillStyle: "#ececec"
+                        },
+                        animation: false,
+                        eventEnabled: false,
+                        text: {
+                            enabled: false
+                        },
+                        average: {
+                            enabled: false
+                        }
+                    },
+                    dataZoom: null,
+                    xAxis: {
+                        //enabled: false
+                    },
+                    yAxis: {
+                        //enabled: false
+                    }
+                });
+
+                var thumbBar = new Bar(cloneEl, me._data, opts);
+                thumbBar.draw();
+                return {
+                    thumbBar: thumbBar,
+                    cloneEl: cloneEl
+                }
             },
             _initMarkLine: function(g) {
                 var me = this
@@ -771,12 +1287,12 @@ define(
                                 barObj.y += gOrigin.y;
                                 var mpCtx = {
                                     value: barObj.value,
-                                    shapeType : "droplet",
+                                    shapeType: "droplet",
                                     markTarget: barObj.field,
                                     //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 igroup 给出去的时候要反过来
-                                    iGroup    : barObj.iNode,
-                                    iNode     : barObj.iGroup,
-                                    iLay      : barObj.iLay,
+                                    iGroup: barObj.iNode,
+                                    iNode: barObj.iGroup,
+                                    iLay: barObj.iLay,
                                     point: {
                                         x: barObj.x,
                                         y: barObj.y
@@ -793,19 +1309,18 @@ define(
                                         this.context.hr--;
                                         e.stopPropagation();
                                     });
-                                    this.shape.on("mousemove" , function(e){
+                                    this.shape.on("mousemove", function(e) {
                                         e.stopPropagation();
                                     });
-                                    this.shape.on("tap click" , function(e){
+                                    this.shape.on("tap click", function(e) {
                                         e.stopPropagation();
                                         e.eventInfo = mp;
-                                        me.fire("markpointclick" , e);
+                                        me.fire("markpointclick", e);
                                     });
                                 });
                             });
                         });
                     });
-
                 });
             },
             bindEvent: function() {
@@ -813,19 +1328,23 @@ define(
                 this._graphs.sprite.on("panstart mouseover", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.show(e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("panmove mousemove", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
                     me._tip.move(e);
+                    me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("panend mouseout", function(e) {
                     me._tip.hide(e);
+                    me.fire(e.type, e);
                 });
-                this._graphs.sprite.on("tap click", function(e) {
+                this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
                     me._setXaxisYaxisToTipsInfo(e);
-                    me.fire("click", e);
+                    me.fire(e.type, e);
                 });
             }
         });
+        return Bar;
     }
 );

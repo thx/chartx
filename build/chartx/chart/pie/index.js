@@ -6,15 +6,17 @@ define(
         "canvax/shape/BrokenLine",
         "canvax/shape/Rect",
         "chartx/utils/tools",
-        "canvax/animation/Tween",
+        "canvax/animation/AnimationFrame",
         "chartx/components/tips/tip",
         "chartx/chart/theme"
     ],
-    function(Canvax, Sector, Line, BrokenLine, Rect, Tools, Tween, Tip, Theme) {
+    function(Canvax, Sector, Line, BrokenLine, Rect, Tools, AnimationFrame, Tip, Theme) {
         var Pie = function(opt, tipsOpt, domContainer) {
             this.data = null;
             this.sprite = null;
             this.branchSp = null;
+            this.sectorsSp = null;
+            this.checkedSp = null;
             //this.angleOffset = -90; //正常情况下，饼图的扇形0度是从3点钟开始，-90表示从12点开始；改值只能是90的倍数
 
             this.dataLabel = {
@@ -43,6 +45,12 @@ define(
             init: function(opt) {
                 _.deepExtend(this, opt);
                 this.sprite = new Canvax.Display.Sprite();
+
+                this.sectorsSp = new Canvax.Display.Sprite();
+                this.sprite.addChild(this.sectorsSp);
+
+                this.checkedSp = new Canvax.Display.Sprite();
+                this.sprite.addChild(this.checkedSp);
 
                 this._tip = new Tip(this.tips, this.domContainer);
                 this._tip._getDefaultContent = this._getTipDefaultContent;
@@ -162,12 +170,13 @@ define(
                                 quadrant: quadrant,
                                 labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
                                 index: j,
-                                isMax: false
-                            })
+                                isMax: false,
+                                checked: false //是否点击选中
+                            });
 
                             self.currentAngle += angle;
                             if (self.currentAngle > limitAngle) self.currentAngle = limitAngle;
-                        }
+                        };
                         data[maxIndex].isMax = true;
                         //处理保留小数后百分比总和不等于100的情况
                         var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
@@ -175,7 +184,7 @@ define(
                             data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
                             data[maxPercentageOffsetIndex].percentage = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum);
                             data[maxPercentageOffsetIndex].txt = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum) + '%';
-                        }
+                        };
                     }
                 }
             },
@@ -189,24 +198,6 @@ define(
             },
             getLabelList: function() {
                 return this.labelList;
-            },
-            showHideSector: function(index) {
-                var self = this;
-                var sectorMap = self.sectorMap;
-                if (sectorMap[index]) {
-                    if (sectorMap[index].visible) {
-                        self._hideSector(index);
-                    } else {
-                        self._showSector(index);
-                    }
-                }
-            },
-            slice: function(index) {
-                var self = this;
-                var sectorMap = self.sectorMap;
-                if (sectorMap[index]) {
-                    self.moveSector(sectorMap[index].sector);
-                }
             },
             getTopAndBottomIndex: function() {
                 var me = this;
@@ -251,7 +242,6 @@ define(
                 return colors[index];
             },
             _configColors: function() {
-                //var defaultColors = ['#f05836', '#7270b1', '#359cde', '#4fd2c4', '#f4c646', '#999', '#FF7D00', '#516DCC', '#8ACC5F', '#A262CB', '#FFD202', '#CC3E3C', '#00A5FF', '#009964', '#CCB375', '#694C99'];
                 this.colors = this.colors ? this.colors : Theme.colors;
             },
             draw: function(opt) {
@@ -267,54 +257,65 @@ define(
                     opt.complete.call(self);
                 }
             },
-            moveSector: function(clickSec) {
-                if (!clickSec) return;
+            focus: function(index , callback) {
                 var self = this;
-                var data = self.data.data;
-                var moveTimer = null;
-                var move = new Tween.Tween({
-                        percent: 0
-                    })
-                    .to({
-                        percent: 1
-                    }, 100)
-                    .easing(Tween.Easing.Quadratic.InOut)
-                    .onUpdate(function() {
-                        var me = this;
-                        _.each(self.sectors, function(sec) {
-                            if (sec.context) {
-                                if (sec.index == clickSec.__dataIndex && !sec.sector.__isSelected) {
-                                    sec.context.x = data[sec.sector.__dataIndex].outOffsetx * me.percent;
-                                    sec.context.y = data[sec.sector.__dataIndex].outOffsety * me.percent;
-                                } else if (sec.sector.__isSelected) {
-                                    sec.context.x = data[sec.sector.__dataIndex].outOffsetx * (1 - me.percent);
-                                    sec.context.y = data[sec.sector.__dataIndex].outOffsety * (1 - me.percent);
-                                }
-                            }
-                        })
-                    })
-                    .onComplete(function() {
-                        cancelAnimationFrame(moveTimer);
-                        _.each(self.sectors, function(sec) {
-                            if (sec.sector) {
-                                sec = sec.sector;
-                                if (sec.__dataIndex == clickSec.__dataIndex && !sec.__isSelected) {
-                                    sec.__isSelected = true;
-                                } else if (sec.__isSelected) {
-                                    sec.__isSelected = false;
-                                }
-                            }
-                        })
-                        self.isMoving = false;
-                    })
-                    .start();
-
-                function moveAni() {
-                    moveTimer = requestAnimationFrame(moveAni);
-                    Tween.update();
-                }
-                self.isMoving = true;
-                moveAni();
+                var sec = self.sectorMap[index].sector;
+                var secData = self.data.data[index];
+                secData._selected = true;
+                sec.animate({
+                    x: secData.outOffsetx,
+                    y: secData.outOffsety
+                }, {
+                    duration: 100,
+                    onComplete: function() {
+                        //secData.checked = true;
+                        callback && callback();
+                    }
+                });
+            },
+            unfocus: function(index , callback) {
+                var self = this;
+                var sec = self.sectorMap[index].sector;
+                var secData = self.data.data[index];
+                secData._selected = false;
+                sec.animate({
+                    x: 0,
+                    y: 0
+                }, {
+                    duration: 100,
+                    onComplete: function() {
+                        callback && callback();
+                        //secData.checked = false;
+                    }
+                });
+            },
+            check : function( index ){
+                var sec = this.sectorMap[index].sector;
+                var secData = this.data.data[index];
+                if(secData.checked){
+                    return
+                }; 
+                var me = this;
+                if( !secData._selected ){
+                    this.focus( index , function(){
+                        me.addCheckedSec( sec );
+                    } );
+                } else {
+                    this.addCheckedSec( sec );
+                };                
+                secData.checked = true;
+            },
+            uncheck : function( index ){
+                var sec = this.sectorMap[index].sector;
+                var secData = this.data.data[index];
+                if(!secData.checked){
+                    return
+                }; 
+                var me = this;
+                me.delCheckedSec( sec , function(){
+                    me.unfocus( index );
+                });
+                secData.checked = false;
             },
             grow: function() {
                 var self = this;
@@ -328,73 +329,69 @@ define(
                     }
                 })
                 self._hideDataLabel();
-                var growAnima = function() {
-                    var pieOpen = new Tween.Tween({
-                            process: 0,
-                            r: 0,
-                            r0: 0
-                        })
-                        .to({
-                            process: 1,
-                            r: self.r,
-                            r0: self.r0
-                        }, 800)
-                        .onUpdate(function() {
-                            var me = this;
-                            for (var i = 0; i < self.sectors.length; i++) {
-                                if (self.sectors[i].context) {
-                                    self.sectors[i].context.r = me.r;
-                                    self.sectors[i].context.r0 = me.r0;
-                                    self.sectors[i].context.globalAlpha = me.process;
-                                    if (i == 0) {
-                                        self.sectors[i].context.startAngle = self.sectors[i].startAngle;
-                                        self.sectors[i].context.endAngle = self.sectors[i].startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.process;
-                                    } else {
-                                        var lastEndAngle = function(index) {
-                                            var lastIndex = index - 1;
-                                            if (lastIndex == 0) {
-                                                return self.sectors[lastIndex].context ? self.sectors[lastIndex].context.endAngle : 0;
-                                            }
-                                            if (self.sectors[lastIndex].context) {
-                                                return self.sectors[lastIndex].context.endAngle;
-                                            } else {
-                                                return arguments.callee(lastIndex);
-                                            }
-                                        }(i);
-                                        self.sectors[i].context.startAngle = lastEndAngle;
-                                        self.sectors[i].context.endAngle = self.sectors[i].context.startAngle + (self.sectors[i].endAngle - self.sectors[i].startAngle) * me.process;
-                                    }
+
+                AnimationFrame.registTween({
+                    from: {
+                        process: 0,
+                        r: 0,
+                        r0: 0
+                    },
+                    to: {
+                        process: 1,
+                        r: self.r,
+                        r0: self.r0
+                    },
+                    duration: 800,
+                    easing: "Back.Out",
+                    onUpdate: function() {
+                        for (var i = 0; i < self.sectors.length; i++) {
+                            var sec = self.sectors[i];
+                            var secc = sec.context;
+                            if (secc) {
+                                secc.r = this.r;
+                                secc.r0 = this.r0;
+                                secc.globalAlpha = this.process;
+                                if (i == 0) {
+                                    secc.startAngle = sec.startAngle;
+                                    secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * this.process;
+                                } else {
+                                    var lastEndAngle = function(index) {
+                                        var lastIndex = index - 1;
+                                        var lastSecc = self.sectors[lastIndex].context;
+                                        if (lastIndex == 0) {
+                                            return lastSecc ? lastSecc.endAngle : 0;
+                                        }
+                                        if (lastSecc) {
+                                            return lastSecc.endAngle;
+                                        } else {
+                                            return arguments.callee(lastIndex);
+                                        }
+                                    }(i);
+                                    secc.startAngle = lastEndAngle;
+                                    secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * this.process;
                                 }
                             }
-                        }).onComplete(function() {
-                            cancelAnimationFrame(timer);
-                            self.isMoving = false;
-                            self._showDataLabel();
-                        }).start();
-                    animate();
-                };
-
-                function animate() {
-                    timer = requestAnimationFrame(animate);
-                    Tween.update();
-                };
-                self.isMoving = true;
-                growAnima();
+                        }
+                    },
+                    onComplete: function() {
+                        self._showDataLabel();
+                    }
+                });
             },
             _showDataLabel: function() {
                 if (this.branchSp) {
                     this.branchSp.context.globalAlpha = 1;
-                    _.each( this.labelList , function( lab ){
+                    _.each(this.labelList, function(lab) {
                         lab.labelEle.style.display = "block"
-                    } );
+                    });
                 }
             },
             _hideDataLabel: function() {
                 if (this.branchSp) {
                     this.branchSp.context.globalAlpha = 0;
-                    _.each( this.labelList , function( lab ){
+                    _.each(this.labelList, function(lab) {
                         lab.labelEle.style.display = "none"
-                    } );
+                    });
                 }
             },
             _showTip: function(e, ind) {
@@ -424,20 +421,6 @@ define(
                 };
 
                 return e;
-            },
-            _hideSector: function(index) {
-                if (this.sectorMap[index]) {
-                    this.sectorMap[index].context.visible = false;
-                    this.sectorMap[index].visible = false;
-                    this._hideLabel(index);
-                }
-            },
-            _showSector: function(index) {
-                if (this.sectorMap[index]) {
-                    this.sectorMap[index].context.visible = true;
-                    this.sectorMap[index].visible = true;
-                    this._showLabel(index);
-                }
             },
             _sectorFocus: function(e, index) {
                 if (this.sectorMap[index]) {
@@ -552,11 +535,11 @@ define(
                                 return obj[pro];
                             });
                             if (labelTxt) {
-                                labelTxt = "<span>"+ labelTxt +"</span>"
+                                labelTxt = "<span>" + labelTxt + "</span>"
                             };
                         }
-                    }; 
-                    labelTxt || ( labelTxt = "<span>"+data[currentIndex].name + ' : ' + data[currentIndex].txt +"</span>");
+                    };
+                    labelTxt || (labelTxt = "<span>" + data[currentIndex].name + ' : ' + data[currentIndex].txt + "</span>");
 
                     branchTxt = document.createElement("div");
                     branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + sectorMap[currentIndex].color + ""
@@ -721,6 +704,44 @@ define(
                     self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinPercentage, rMinPercentage, isEnd, ySpaceInfo)
                 }
             },
+            _getAngleTime: function(secc) {
+                return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
+            },
+            addCheckedSec: function(sec) {
+                var secc = sec.context;
+                var sector = new Sector({
+                    context: {
+                        x: secc.x,
+                        y: secc.y,
+                        r0: secc.r,
+                        r: secc.r + 8,
+                        startAngle: secc.startAngle,
+                        endAngle: secc.startAngle + 0.5, //secc.endAngle,
+                        fillStyle: secc.fillStyle,
+                        globalAlpha: 0.5
+                    },
+                    id: 'checked_' + sec.id
+                });
+                this.checkedSp.addChild(sector);
+                sector.animate({
+                    endAngle: secc.endAngle
+                } , {
+                    duration: this._getAngleTime(secc)
+                });
+            },
+            delCheckedSec: function(sec , callback) {
+                var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
+                checkedSec.animate({
+                    //endAngle : checkedSec.context.startAngle+0.5
+                    startAngle: checkedSec.context.endAngle - 0.3
+                }, {
+                    onComplete: function() {
+                        checkedSec.destroy();
+                        callback && callback();
+                    },
+                    duration: 150
+                });
+            },
             _widget: function() {
                 var self = this;
                 var data = self.data.data;
@@ -756,15 +777,21 @@ define(
                                 var me = this;
                                 if (self.tips.enabled) {
                                     self._showTip(e, this.__dataIndex);
+                                };
+                                var secData = self.data.data[this.__dataIndex];
+                                if (!secData.checked) {
+                                    self._sectorFocus(e, this.__dataIndex);
+                                    self.focus(this.__dataIndex);
                                 }
-                                self._sectorFocus(e, this.__dataIndex);
-                                self.allowPointSelect && self.moveSector(this);
                             }, function(e) {
                                 if (self.tips.enabled) {
                                     self._hideTip(e);
+                                };
+                                var secData = self.data.data[this.__dataIndex];
+                                if (!secData.checked) {
+                                    self._sectorUnfocus(e, this.__dataIndex);
+                                    self.unfocus(this.__dataIndex);
                                 }
-                                self._sectorUnfocus(e, this.__dataIndex);
-                                self.allowPointSelect && self.moveSector(this);
                             });
                             sector.on('mousemove', function(e) {
                                 if (self.tips.enabled) {
@@ -774,10 +801,10 @@ define(
 
                             sector.on('click', function(e) {
                                 self._sectorClick(e, this.__dataIndex);
-                                !self.allowPointSelect && self.moveSector(this);
+                                self.secClick( this );
                             });
 
-                            self.sprite.addChild(sector);
+                            self.sectorsSp.addChildAt(sector, 0);
                             moreSecData = {
                                 name: data[i].name,
                                 value: data[i].y,
@@ -823,6 +850,15 @@ define(
                         self._startWidgetLabel();
                     }
                 }
+            },
+            secClick: function( sectorEl ) {
+                var secData = this.data.data[sectorEl.__dataIndex];
+                if (!secData.checked) {
+                    this.addCheckedSec( sectorEl );
+                } else {
+                    this.delCheckedSec( sectorEl );
+                };
+                secData.checked = !secData.checked;
             }
         };
 
@@ -830,268 +866,256 @@ define(
     })
 
 define(
-        'chartx/chart/pie/index',
-        [
+    'chartx/chart/pie/index', [
         'chartx/chart/index',
         'chartx/chart/pie/pie'
-        ],
-        function (Chart, Pie) {
-            /*
-            *@node chart在dom里的目标容器节点。
-            */
-            var Canvax = Chart.Canvax;
+    ],
+    function(Chart, Pie) {
+        /*
+         *@node chart在dom里的目标容器节点。
+         */
+        var Canvax = Chart.Canvax;
 
-            return Chart.extend({
-                init: function (node, data, opts) {
-                    this.config = {
-                        mode: 1,
-                        event: {
-                            enabled: 1
-                        }
-                    };
-                    this.xAxis = {
-                        field: null
-                    };
-                    this.yAxis = {
-                        field: null
-                    };
-                    _.deepExtend(this, opts);
-                    this.dataFrame = this._initData(data, this);
-                },
-                draw: function () {
-                    //console.log("pie draw");
-                    this.stageBg = new Canvax.Display.Sprite({
-                        id: 'bg'
-                    });
-                    this.core = new Canvax.Display.Sprite({
-                        id: 'core'
-                    });
-                    this.stageTip = new Canvax.Display.Stage({
-                        id: 'stageTip'
-                    });
-                    this.canvax.addChild(this.stageTip);
-                    this.stageTip.toFront();
-                    this.stage.addChild(this.core);
+        return Chart.extend({
+            init: function(node, data, opts) {
+                this.config = {
+                    mode: 1,
+                    event: {
+                        enabled: 1
+                    }
+                };
+                this.xAxis = {
+                    field: null
+                };
+                this.yAxis = {
+                    field: null
+                };
+                _.deepExtend(this, opts);
+                this.dataFrame = this._initData(data, this);
+            },
+            draw: function() {
+                //console.log("pie draw");
+                this.stageBg = new Canvax.Display.Sprite({
+                    id: 'bg'
+                });
+                this.core = new Canvax.Display.Sprite({
+                    id: 'core'
+                });
+                this.stageTip = new Canvax.Display.Stage({
+                    id: 'stageTip'
+                });
+                this.canvax.addChild(this.stageTip);
+                this.stageTip.toFront();
+                this.stage.addChild(this.core);
 
-                    this._initModule();                        //初始化模块
-                    this._startDraw();                         //开始绘图
-                    this._drawEnd();                           //绘制结束，添加到舞台  
-                    this.inited = true;
-                },
-                getByIndex: function (index) {
-                    return this._pie._getByIndex(index);
-                },
-                getLabelList : function(){
-                    return this._pie.getLabelList();
-                },
-                getList: function () {
-                    var self = this;
-                    var list = [];
-                    var item;
-                    if (self._pie) {
-                        var sectorList = self._pie.getList();
-                        if (sectorList.length > 0) {
-                            for (var i = 0; i < sectorList.length; i++) {
-                                item = sectorList[i];
-                                list.push({
-                                    name: item.name,
-                                    index: item.index,
-                                    color: item.color,
-                                    r: item.r,
-                                    value: item.value,
-                                    percentage: item.percentage
-                                });
-                            }
-                        }
-                    };
-                    return list;
-                },
-                //show: function (index) {
-                //    this._pie && this._pie.showHideSector(index);
-                //},
-                focusAt: function (index) {
-                    if (this._pie) {
-                        this._pie._sectorFocus(null, index);
-                        var sector = this.getByIndex(index).sector;
-                        if (!sector.__isSelected) {
-                            this._pie.moveSector(sector);
+                this._initModule(); //初始化模块
+                this._startDraw(); //开始绘图
+                this._drawEnd(); //绘制结束，添加到舞台  
+                this.inited = true;
+            },
+            getByIndex: function(index) {
+                return this._pie._getByIndex(index);
+            },
+            getLabelList: function() {
+                return this._pie.getLabelList();
+            },
+            getList: function() {
+                var self = this;
+                var list = [];
+                var item;
+                if (self._pie) {
+                    var sectorList = self._pie.getList();
+                    if (sectorList.length > 0) {
+                        for (var i = 0; i < sectorList.length; i++) {
+                            item = sectorList[i];
+                            list.push({
+                                name: item.name,
+                                index: item.index,
+                                color: item.color,
+                                r: item.r,
+                                value: item.value,
+                                percentage: item.percentage
+                            });
                         }
                     }
-                },
-                unfocusAt: function (index) {
-                    if (this._pie) {
-                        this._pie._sectorUnfocus(null, index);
-                        var sector = this.getByIndex(index).sector;
-                        if (sector.__isSelected) {
-                            this._pie.moveSector(sector);
+                };
+                return list;
+            },
+            focusAt: function(index) {
+                if (this._pie) {
+                    this._pie.focus( index );
+                }
+            },
+            unfocusAt: function(index) {
+                if (this._pie) {
+                    this._pie.unfocus( index );
+                }
+            },
+            check: function(index) {
+                if (this._pie) {
+                    this._pie.check( index );
+                }
+            },
+            uncheck: function(index) {
+                if (this._pie) {
+                    this._pie.uncheck( index );
+                }
+            },
+            _initData: function(arr, opt) {
+                var data = [];
+                /*
+                 * @释剑
+                 * 用校正处理， 把pie的data入参规范和chartx数据格式一致
+                 **/
+                if (!this.xAxis.field) {
+                    data = arr;
+                } else {
+
+                    var titles = arr.shift();
+                    var xFieldInd = _.indexOf(titles, this.xAxis.field);
+                    var yFieldInd = xFieldInd + 1;
+                    if (yFieldInd >= titles.length) {
+                        yFieldInd = 0;
+                    };
+                    if (this.yAxis.field) {
+                        yFieldInd = _.indexOf(titles, this.yAxis.field);
+                    };
+                    _.each(arr, function(row) {
+                        var rowData = [];
+                        if (_.isArray(row)) {
+                            rowData.push(row[xFieldInd]);
+                            rowData.push(row[yFieldInd]);
+                        } else if (typeof row == 'object') {
+                            rowData.push(row['name']);
+                            rowData.push(row['y']);
                         }
-                    }
-                },
-                slice: function (index) {
-                    this._pie && this._pie.slice(index);
-                },
-                _initData: function (arr, opt) {
-                    var data = [];
-                    /*
-                    * 用校正处理， 把pie的data入参规范和chartx数据格式一致
-                    **/
-                    if (!this.xAxis.field) {
-                        data = arr;
-                    } else {
+                        data.push(rowData);
+                    });
+                };
 
-                        var titles = arr.shift();
-                        var xFieldInd = _.indexOf(titles, this.xAxis.field);
-                        var yFieldInd = xFieldInd + 1;
-                        if (yFieldInd >= titles.length) {
-                            yFieldInd = 0;
-                        };
-                        if (this.yAxis.field) {
-                            yFieldInd = _.indexOf(titles, this.yAxis.field);
-                        };
-                        _.each(arr, function (row) {
-                            var rowData = [];
-                            if (_.isArray(row)) {
-                                rowData.push(row[xFieldInd]);
-                                rowData.push(row[yFieldInd]);
-                            }
-                            else if (typeof row == 'object') {
-                                rowData.push(row['name']);
-                                rowData.push(row['y']);
-                            }
-                            data.push(rowData);
-                        });
-                    };                    
-
-                    //矫正结束                    
-                    var dataFrame = {};
-                    dataFrame.org = data;
-                    dataFrame.data = [];
-                    if (_.isArray(arr)) {
-                        for (var i = 0; i < arr.length; i++) {
-                            var obj = {};
-                            if (_.isArray(arr[i])) {
-                                obj.name = arr[i][0];
-                                obj.y = parseFloat(arr[i][1]);
-                                obj.sliced = false;
-                                obj.selected = false;
-                            }
-                            else if (typeof arr[i] == 'object') {
-                                obj.name = arr[i].name;
-                                obj.y = parseFloat(arr[i].y);
-                                obj.sliced = arr[i].sliced || false;
-                                obj.selected = arr[i].selected || false;
-                            }
-
-                            if (obj.name) dataFrame.data.push(obj);
+                //矫正结束                    
+                var dataFrame = {};
+                dataFrame.org = data;
+                dataFrame.data = [];
+                if (_.isArray(arr)) {
+                    for (var i = 0; i < arr.length; i++) {
+                        var obj = {};
+                        if (_.isArray(arr[i])) {
+                            obj.name = arr[i][0];
+                            obj.y = parseFloat(arr[i][1]);
+                            obj.sliced = false;
+                            obj.selected = false;
+                        } else if (typeof arr[i] == 'object') {
+                            obj.name = arr[i].name;
+                            obj.y = parseFloat(arr[i].y);
+                            obj.sliced = arr[i].sliced || false;
+                            obj.selected = arr[i].selected || false;
                         }
-                    }                    
-                    if (data.length > 0 && opt.sort == 'asc' || opt.sort == 'desc') {
-                        dataFrame.org.sort(function (a, b) {
-                            if (opt.sort == 'desc') {
-                                return a[1] - b[1];
-                            }
-                            else if (opt.sort == 'asc') {
-                                return b[1] - a[1];
-                            }
-                        });
-                        dataFrame.data.sort(function (a, b) {
-                            if (opt.sort == 'desc') {
-                                return a.y - b.y;
-                            }
-                            else if (opt.sort == 'asc') {
-                                return b.y - a.y;
-                            }
-                        });
-                    }      
 
-                    return dataFrame;
-
-                },
-                clear: function () {
-                    this.stageBg.removeAllChildren()
-                    this.core.removeAllChildren()
-                    this.stageTip.removeAllChildren();
-                },
-                reset: function (data, opt) {
-                    this.clear()
-                    this.width = parseInt(this.element.width());
-                    this.height = parseInt(this.element.height());
-                    this.draw(data, opt)
-                },
-                _initModule: function () {
-                    var self = this;
-                    var w = self.width;
-                    var h = self.height;
-
-                    var r = Math.min(w, h) * 2 / 3 / 2;
-                    if (self.dataLabel.enabled == false) {
-                        r = Math.min(w, h) / 2;
-                        //要预留clickMoveDis位置来hover sector 的时候外扩
-                        r -= r / 11;
+                        if (obj.name) dataFrame.data.push(obj);
                     }
+                }
+                if (data.length > 0 && opt.sort == 'asc' || opt.sort == 'desc') {
+                    dataFrame.org.sort(function(a, b) {
+                        if (opt.sort == 'desc') {
+                            return a[1] - b[1];
+                        } else if (opt.sort == 'asc') {
+                            return b[1] - a[1];
+                        }
+                    });
+                    dataFrame.data.sort(function(a, b) {
+                        if (opt.sort == 'desc') {
+                            return a.y - b.y;
+                        } else if (opt.sort == 'asc') {
+                            return b.y - a.y;
+                        }
+                    });
+                }
 
-                    var r0 = parseInt(self.innerRadius || 0);
-                    var maxInnerRadius = r * 2 / 3;
-                    r0 = r0 >= 0 ? r0 : 0;
-                    r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
-                    var pieX = w / 2;
-                    var pieY = h / 2;
-                    self.pie = {
-                        x: pieX,
-                        y: pieY,
-                        r0: r0,
-                        r: r,
-                        boundWidth: w,
-                        boundHeight: h,
-                        data: self.dataFrame,
-                        //dataLabel: self.dataLabel, 
-                        allowPointSelect: self.allowPointSelect,
-                        animation: self.animation,
-                        startAngle: parseInt(self.startAngle),
-                        colors: self.colors,
-                        focusCallback: {
-                            focus: function (e, index) {
-                                e.sectorIndex = index;
-                                e.eventInfo = {
-                                    sectorIndex: index
-                                }
+                return dataFrame;
 
+            },
+            clear: function() {
+                this.stageBg.removeAllChildren()
+                this.core.removeAllChildren()
+                this.stageTip.removeAllChildren();
+            },
+            reset: function(data, opt) {
+                this.clear()
+                this.width = parseInt(this.element.width());
+                this.height = parseInt(this.element.height());
+                this.draw(data, opt)
+            },
+            _initModule: function() {
+                var self = this;
+                var w = self.width;
+                var h = self.height;
 
-                                self.fire('focused', e);
-                            },
-                            unfocus: function (e, index) {
-                                e.sectorIndex = index;
-                                e.eventInfo = {
-                                    sectorIndex: index
-                                }
+                var r = Math.min(w, h) * 2 / 3 / 2;
+                if (self.dataLabel.enabled == false) {
+                    r = Math.min(w, h) / 2;
+                    //要预留clickMoveDis位置来hover sector 的时候外扩
+                    r -= r / 11;
+                }
 
-                                self.fire('unfocused', e);
-                            }
-                        },
-                        clickCallback: function (e, index) {
+                var r0 = parseInt(self.innerRadius || 0);
+                var maxInnerRadius = r * 2 / 3;
+                r0 = r0 >= 0 ? r0 : 0;
+                r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
+                var pieX = w / 2;
+                var pieY = h / 2;
+                self.pie = {
+                    x: pieX,
+                    y: pieY,
+                    r0: r0,
+                    r: r,
+                    boundWidth: w,
+                    boundHeight: h,
+                    data: self.dataFrame,
+                    //dataLabel: self.dataLabel, 
+                    animation: self.animation,
+                    startAngle: parseInt(self.startAngle),
+                    colors: self.colors,
+                    focusCallback: {
+                        focus: function(e, index) {
                             e.sectorIndex = index;
                             e.eventInfo = {
                                 sectorIndex: index
-                            }
-
-                            self.fire("click", e);
+                            };
+                            self.fire('focus', e);
+                        },
+                        unfocus: function(e, index) {
+                            e.sectorIndex = index;
+                            e.eventInfo = {
+                                sectorIndex: index
+                            };
+                            self.fire('unfocus', e);
                         }
-                    };
-
-                    if (self.dataLabel) {
-                        self.pie.dataLabel = self.dataLabel;
+                    },
+                    clickCallback: function(e, index) {
+                        e.sectorIndex = index;
+                        e.eventInfo = {
+                            sectorIndex: index
+                        };
+                        self.fire("click", e);
                     }
+                };
 
-                    self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
-                },
-                _startDraw: function () {
-                    this._pie.draw(this);
-                },
-                _drawEnd: function () {
-                    this.core.addChild(this._pie.sprite);
-                    if (this._tip) this.stageTip.addChild(this._tip.sprite);
-                    this.fire('complete', { data: this.getList() });
-                }
-            });
+                if (self.dataLabel) {
+                    self.pie.dataLabel = self.dataLabel;
+                };
+
+                self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
+            },
+            _startDraw: function() {
+                this._pie.draw(this);
+            },
+            _drawEnd: function() {
+                this.core.addChild(this._pie.sprite);
+                if (this._tip) this.stageTip.addChild(this._tip.sprite);
+                this.fire('complete', {
+                    data: this.getList()
+                });
+            }
         });
-
+    });

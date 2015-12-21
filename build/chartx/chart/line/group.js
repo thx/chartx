@@ -23,6 +23,8 @@ define(
             this.h = h;
             this.y = 0;
 
+            this.animation = true;
+
             this.colors = Theme.colors;
 
             this.line = { //线
@@ -157,6 +159,9 @@ define(
             },
             _grow: function(callback) {
                 var self = this;
+                if (!self.animation) {
+                    callback && callback(self);
+                }
                 if (self._currPointList.length == 0) {
                     return;
                 };
@@ -179,7 +184,7 @@ define(
                             circle.context.x = self._currPointList[ind][0];
                         });
                     },
-                    onComplete : function(){
+                    onComplete: function() {
                         callback && callback(self);
                     }
                 });
@@ -243,18 +248,23 @@ define(
                     return;
                 };
                 var list = [];
-                for (var a = 0, al = self.data.length; a < al; a++) {
-                    var o = self.data[a];
-                    var sourceInd = 0;
-                    //如果是属于双轴中的右轴。
-                    if (self._yAxis.place == "right") {
-                        sourceInd = al - 1;
+                if (self.animation) {
+                    for (var a = 0, al = self.data.length; a < al; a++) {
+                        var o = self.data[a];
+                        var sourceInd = 0;
+                        //如果是属于双轴中的右轴。
+                        if (self._yAxis.place == "right") {
+                            sourceInd = al - 1;
+                        };
+                        list.push([
+                            o.x,
+                            self.data[sourceInd].y
+                        ]);
                     };
-                    list.push([
-                        o.x,
-                        self.data[sourceInd].y
-                    ]);
+                } else {
+                    list = self._pointList;
                 };
+                
                 self._currPointList = list;
 
                 var bline = new BrokenLine({ //线条

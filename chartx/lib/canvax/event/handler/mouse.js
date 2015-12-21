@@ -17,21 +17,12 @@ define(
         };
         mouseHandler.prototype = {
             init : function(){
-                var _moveStep = 0; //move的时候的频率设置
                 //依次添加上浏览器的自带事件侦听
                 var me   = this;
                 var root = this.canvax;
                 _.each( ["click","dblclick","mousedown","mousemove","mouseup","mouseout"] , function( type ){
                     Base.addEvent( root.el , type , function( e ){
                         root.updateRootOffset();
-                        //如果发现是mousemove的话，要做mousemove的频率控制
-                        if( e.type == "mousemove" ){
-                            if(_moveStep<1){
-                                _moveStep++;
-                                return;
-                            }
-                            _moveStep = 0;
-                        }
                         me.__mouseHandler( e );
                     } ); 
                 } );   
@@ -44,9 +35,9 @@ define(
                 var root = me.canvax;
             
                 me.curPoints = [ new Point( 
-                        CanvaxEvent.pageX( e ) - root.rootOffset.left , 
-                        CanvaxEvent.pageY( e ) - root.rootOffset.top
-                        )];
+                    CanvaxEvent.pageX( e ) - root.rootOffset.left , 
+                    CanvaxEvent.pageY( e ) - root.rootOffset.top
+                    )];
  
                 var curMousePoint  = me.curPoints[0]; 
                 var curMouseTarget = me.curPointsTarget[0];
@@ -82,14 +73,13 @@ define(
                     if(me._draging == true){
                         //说明刚刚在拖动
                         me._dragEnd( e , curMouseTarget , 0 );
-
-                        curMouseTarget.fire("dragEnd" , {
+                        curMouseTarget.fire("dragend" , {
                             point : curMousePoint
                         });
-                    }
+                    };
                     me._draging  = false;
                     me._touching = false;
-                }
+                };
  
                 if( e.type == "mouseout" ){
                     if( !contains(root.el , (e.toElement || e.relatedTarget) ) ){
@@ -100,24 +90,31 @@ define(
                     if(me._touching && e.type == "mousemove" && curMouseTarget){
                         //说明正在拖动啊
                         if(!me._draging){
-                            //begin drag
-                            curMouseTarget.dragBegin && curMouseTarget.dragBegin(e);
                             
-                            //先把本尊给隐藏了
-                            curMouseTarget.context.visible = false;
-                                                 
-                            //然后克隆一个副本到activeStage
-                            me._clone2hoverStage( curMouseTarget , 0 );
+                            //begin drag
+                            //curMouseTarget.dragBegin && curMouseTarget.dragBegin(e);
 
-                            curMouseTarget.fire("dragBegin" , {
+                            curMouseTarget.fire("dragbegin" , {
                                 point : curMousePoint
                             });
+                            
+                            curMouseTarget._globalAlpha = curMouseTarget.context.globalAlpha;
+
+                            //先把本尊给隐藏了
+                            curMouseTarget.context.globalAlpha = 0;
+                                                 
+                            //然后克隆一个副本到activeStage
+                            var cloneObject = me._clone2hoverStage( curMouseTarget , 0 );
+
+                            cloneObject.context.globalAlpha = curMouseTarget._globalAlpha;
+                            
                         } else {
+                            
                             //drag ing
                             me._dragHander( e , curMouseTarget , 0 );
 
                             curMouseTarget._notWatch = true;
-                            curMouseTarget.fire("dragIng" , {
+                            curMouseTarget.fire("draging" , {
                                 point : curMousePoint
                             });
                             curMouseTarget._notWatch = false;
@@ -125,9 +122,10 @@ define(
                             //拖动中可能会限定其x,y轨迹。必须拖动的时候，x或者y轴恒定
                             //比如在kanga中的rect调整框的上下左右改变大小的时候x或者y有一个会是恒定的
                             var _dragDuplicate = root._hoverStage.getChildById( curMouseTarget.id );
-                            _dragDuplicate.context.x = curMouseTarget.context.x;
-                            _dragDuplicate.context.y = curMouseTarget.context.y;
-
+                            var _dmt = curMouseTarget.getConcatenatedMatrix();
+ 
+                            _dragDuplicate.context.x = _dmt.tx;//curMouseTarget.context.x;
+                            _dragDuplicate.context.y = _dmt.ty;//curMouseTarget.context.y;
                         }
                         me._draging = true;
                     } else {
@@ -183,13 +181,6 @@ define(
                         e.toTarget = obj; 
                         e.target   = e.currentTarget = oldObj;
                         e.point    = oldObj.globalToLocal( point );
-
-                        //之所以放在dispatchEvent(e)之前，是因为有可能用户的mouseout处理函数
-                        //会有修改visible的意愿
-                        if(!oldObj.context.visible){
-                           oldObj.context.visible = true;
-                        };
-                   
                         oldObj.dispatchEvent( e );
                     }
                 };
@@ -222,7 +213,7 @@ define(
                 if(this._cursor == cursor){
                   //如果两次要设置的鼠标状态是一样的
                   return;
-                }
+                };
                 this.canvax.el.style.cursor = cursor;
                 this._cursor = cursor;
             }

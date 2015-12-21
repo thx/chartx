@@ -1,10 +1,11 @@
 define(
     "chartx/components/xaxis/xAxis", [
         "canvax/index",
+        "canvax/core/Base",
         "canvax/shape/Line",
         "chartx/utils/tools"
     ],
-    function(Canvax, Line, Tools) {
+    function(Canvax, CanvaxBase, Line, Tools) {
         var xAxis = function(opt, data) {
             this.graphw = 0;
             this.graphh = 0;
@@ -23,7 +24,7 @@ define(
                 width: 1,
                 height: 4,
                 strokeStyle: '#cccccc'
-            }
+            };
 
             this.text = {
                 fillStyle: '#999',
@@ -31,13 +32,13 @@ define(
                 rotation: 0,
                 format: null,
                 textAlign: null
-            }
+            };
             this.maxTxtH = 0;
 
             this.pos = {
                 x: null,
                 y: null
-            }
+            };
 
             //this.display = "block";
             this.enabled = 1; //1,0 true ,false 
@@ -60,7 +61,9 @@ define(
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter = null; //function(params){}; 
 
-            this.isH    = false; //是否为横向转向的x轴
+            this.isH = false; //是否为横向转向的x轴
+
+            this.animation = true;
 
             this.init(opt, data);
         };
@@ -70,16 +73,16 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id: "xAxisSprite"
                 });
-                this._initHandle(opt , data);
+                this._initHandle(opt, data);
             },
-            _initHandle : function( opt , data){
+            _initHandle: function(opt, data) {
                 data && data.org && (this.dataOrg = data.org);
 
                 if (opt) {
                     _.deepExtend(this, opt);
                 }
 
-                if( this.text.rotation != 0 && this.text.rotation % 90 == 0 ){
+                if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
                 }
 
@@ -92,7 +95,7 @@ define(
                 };
 
                 //先计算出来显示文本
-                this._layoutDataSection = this._formatDataSectionText( this.dataSection );
+                this._layoutDataSection = this._formatDataSectionText(this.dataSection);
 
                 //然后计算好最大的width 和 最大的height，外部组件需要用
                 this._setTextMaxWidth();
@@ -113,32 +116,35 @@ define(
                 this.sprite.context.y = $n
             },
             //数据变化，配置没变的情况
-            resetData : function( data ){
-                 //先在field里面删除一个字段，然后重新计算
+            resetData: function(data , opt) {
+                //先在field里面删除一个字段，然后重新计算
+                if (opt) {
+                    _.deepExtend(this, opt);
+                };
                 this.sprite.removeAllChildren();
                 this.dataSection = [];
 
-                this._initHandle( null , data );
+                this._initHandle(null, data);
 
                 this.draw();
             },
             //配置和数据变化
-            update : function( opt , data ){
+            update: function(opt, data) {
                 //先在field里面删除一个字段，然后重新计算
-                _.deepExtend( this , opt );
+                _.deepExtend(this, opt);
                 this.resetData(data);
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
-            
+
                 this._getLabel();
                 this._initConfig(opt);
                 this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
                 var me = this;
-                _.each( this.data , function( obj , i){
+                _.each(this.data, function(obj, i) {
                     obj.layoutText = me._layoutDataSection[i];
-                } );
-                
+                });
+
                 this._trimLayoutData();
 
                 this.setX(this.pos.x);
@@ -153,14 +159,14 @@ define(
                 }
                 // this.data = this.layoutData
             },
-            _getLabel  : function(){
-                if( this.label && this.label!="" ){
-                    
+            _getLabel: function() {
+                if (this.label && this.label != "") {
+
                     this._label = new Canvax.Display.Text(this.label, {
                         context: {
                             fontSize: this.text.fontSize,
                             textAlign: this.isH ? "center" : "left",
-                            textBaseline: this.isH ? "top" : "middle", 
+                            textBaseline: this.isH ? "top" : "middle",
                             fillStyle: this.text.fillStyle,
                             rotation: this.isH ? -90 : 0
                         }
@@ -177,19 +183,18 @@ define(
                 this.w = this.graphw - this.yAxisW;
                 if (this.pos.x == null) {
                     this.pos.x = this.yAxisW + this.disOriginX;
-                }
+                };
                 if (this.pos.y == null) {
                     this.pos.y = this.graphh - this.h;
-                }
-
-                this.xGraphsWidth = this.w - this._getXAxisDisLine();
-                if( this._label ){
+                };
+                this.xGraphsWidth = this.w - this._getXAxisDisLine() - this.xGraphsWidth % _.flatten(this.dataOrg).length;
+                if (this._label) {
                     if (this.isH) {
-                        this.xGraphsWidth -= this._label.getTextHeight()+5
+                        this.xGraphsWidth -= this._label.getTextHeight() + 5
                     } else {
-                        this.xGraphsWidth -= this._label.getTextWidth()+5
-                    } 
-                }
+                        this.xGraphsWidth -= this._label.getTextWidth() + 5
+                    }
+                };
                 this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
             },
             _trimXAxis: function(data, xGraphsWidth) {
@@ -201,25 +206,25 @@ define(
                         'x': parseInt(dis * (a + 1))
                     }
                     tmpData.push(o);
-                }
+                };
                 return tmpData;
             },
-            _formatDataSectionText : function(arr){
-                if( !arr ){
+            _formatDataSectionText: function(arr) {
+                if (!arr) {
                     arr = this.dataSection;
                 };
                 var me = this;
                 var currArr = [];
-                _.each( arr  , function( val ){
-                    currArr.push( me._getFormatText( val ) );
-                } );
+                _.each(arr, function(val) {
+                    currArr.push(me._getFormatText(val));
+                });
                 return currArr;
             },
             _getXAxisDisLine: function() { //获取x轴两端预留的距离
                 var disMin = this.disXAxisLine
                 var disMax = 2 * disMin
                 var dis = disMin
-                dis = disMin + this.w % this.dataOrg.length
+                dis = disMin + this.w % _.flatten(this.dataOrg).length
                 dis = dis > disMax ? disMax : dis
                 dis = isNaN(dis) ? 0 : dis
                 return dis
@@ -260,7 +265,7 @@ define(
                 } else {
                     res = text
                 }
-                if( _.isArray( res ) ){
+                if (_.isArray(res)) {
                     res = Tools.numAddSymbol(res);
                 }
                 if (!res) {
@@ -272,13 +277,12 @@ define(
             _widget: function() {
                 var arr = this.layoutData
 
-                if(this._label) {
-                    this._label.context.x = this.xGraphsWidth+5;
-                    this.sprite.addChild( this._label );
-                }
+                if (this._label) {
+                    this._label.context.x = this.xGraphsWidth + 5;
+                    this.sprite.addChild(this._label);
+                };
 
                 for (var a = 0, al = arr.length; a < al; a++) {
-
                     var xNode = new Canvax.Display.Sprite({
                         id: "xNode" + a
                     });
@@ -288,22 +292,25 @@ define(
                         y = this.disY + this.line.height + this.dis
 
                     //文字
-                    var txt = new Canvax.Display.Text( (o.layoutText || o.content) , {
+                    var txt = new Canvax.Display.Text((o.layoutText || o.content), {
+                        id: "xAxis_txt_" + CanvaxBase.getUID(),
                         context: {
                             x: x,
-                            y: y,
+                            y: y + 20,
                             fillStyle: this.text.fillStyle,
                             fontSize: this.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
                             textAlign: this.text.textAlign || (!!this.text.rotation ? "right" : "center"),
-                            textBaseline: !!this.text.rotation ? "middle" : "top"
+                            textBaseline: !!this.text.rotation ? "middle" : "top",
+                            globalAlpha: 0
                         }
                     });
                     xNode.addChild(txt);
+
                     if (!!this.text.rotation && this.text.rotation != 90) {
                         txt.context.x += 5;
                         txt.context.y += 3;
-                    }
+                    };
 
                     if (this.line.enabled) {
                         //线条
@@ -318,7 +325,7 @@ define(
                             }
                         });
                         xNode.addChild(line);
-                    }
+                    };
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
                     _.isFunction(this.filter) && this.filter({
@@ -329,9 +336,22 @@ define(
                     });
 
                     this.sprite.addChild(xNode);
-                };
-                
 
+                    if (this.animation) {
+                        txt.animate({
+                            globalAlpha: 1,
+                            y: txt.context.y - 20
+                        }, {
+                            duration: 500,
+                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                            delay: a * 80,
+                            id: txt.id
+                        });
+                    } else {
+                        txt.context.y = txt.context.y - 20;
+                        txt.context.globalAlpha = 1;
+                    };
+                };
             },
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {

@@ -26,8 +26,6 @@ define(
       
             opt = Base.checkOpt( opt );
             self._context = {
-                 //x             : 0,//{number},  // 必须，左上角横坐标
-                 //y             : 0,//{number},  // 必须，左上角纵坐标
                  width         : opt.context.width || 0,//{number},  // 必须，宽度
                  height        : opt.context.height|| 0,//{number},  // 必须，高度
                  radius        : opt.context.radius|| []     //{array},   // 默认为[0]，圆角 
@@ -70,7 +68,6 @@ define(
                 ctx.lineTo( parseInt(x), parseInt(y + r[0]));
                 r[0] !== 0 && ctx.quadraticCurveTo(x, y, x + r[0], y);
             },
-      
             /**
              * 创建矩形路径
              * @param {Context2D} ctx Canvas 2D上下文

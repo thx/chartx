@@ -19,7 +19,7 @@ define(
         return Chart.extend( {
     
             init:function(node , data , opts){
-                this.r             = 0 
+                this.r             = 0; 
     
                 this._xAxis        = null;
                 this._yAxis        = null;

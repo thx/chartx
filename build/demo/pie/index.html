@@ -86,10 +86,10 @@ var options = {
 Chartx.pie("canvasTest" , data , options).then(function( pie ){
     window.pie = pie;
     //pie.slice(3);
-    pie.on('focused' , function (e) {
+    pie.on('focus' , function (e) {
         console.log(e);
     });
-    pie.on('unfocused' , function (e) {
+    pie.on('unfocus' , function (e) {
         console.log(e);
     });
     pie.on('click',function(e){

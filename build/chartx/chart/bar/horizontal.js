@@ -6,14 +6,13 @@ define(
     function( Bar ){
         return Bar.extend( {
             init:function(node , data , opts){
-                //this._opts = opts;
+                this._opts = opts;
                 //_.deepExtend( this , opts );
 
                 if( opts.proportion ){
                     this.proportion = opts.proportion;
                     this._initProportion( node , data , opts );
                 } else {
-                    this._opts = opts;
                     _.deepExtend(this, opts);
                 };
 
@@ -53,17 +52,21 @@ define(
                     ctx.scaleX         = -1;
                 });
 
-                _.each( me._graphs.txtsSp.children , function(text){
-                    var ctx  = text.context;
-                    var rect = text.getRect();
-                    
-                    ctx.scaleOrigin.x = rect.x + rect.width/2;
-                    ctx.scaleOrigin.y = rect.y + rect.height/2 ;
+                _.each( me._graphs.txtsSp.children , function( childSp ){
+                    var ctx  = childSp.context;
+                    var w = ctx.width;
+                    var h = ctx.height;
+                    //return
+                    ctx.scaleOrigin.x = w/2;
+                    ctx.scaleOrigin.y = h/2 ;
                     ctx.scaleX        = -1;
+                    
                     ctx.rotation      = 90;
-                    ctx.rotateOrigin.x =  rect.x + rect.width/2;
-                    ctx.rotateOrigin.y =  rect.y + rect.height/2;
-                    //ctx.x            += rect.width
+                    ctx.rotateOrigin.x =  w/2;
+                    ctx.rotateOrigin.y =  h/2;
+
+                    ctx.y -= w/2-h/2;
+                    
                 } );
 
             
