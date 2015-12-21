@@ -1142,7 +1142,7 @@ define(
 
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
-                        
+
                         me.dataFrame = me._initData(me._data, this);
                         me._xAxis.resetData(me.dataFrame.xAxis, {
                             animation: false
@@ -1188,6 +1188,8 @@ define(
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
                 cloneEl.style.position = "absolute";
+                cloneEl.style.width = me.el.offsetWidth;
+                cloneEl.style.height = me.el.offsetHeight;
                 cloneEl.style.top = "10000px";
                 document.body.appendChild(cloneEl);
 
