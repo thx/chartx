@@ -1197,7 +1197,7 @@ define(
                 _.deepExtend(opts, {
                     graphs: {
                         bar: {
-                            fillStyle: "#ececec"
+                            fillStyle: me.dataZoom.normalColor || "#ececec"
                         },
                         animation: false,
                         eventEnabled: false,
