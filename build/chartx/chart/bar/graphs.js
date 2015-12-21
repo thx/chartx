@@ -27,6 +27,7 @@ define(
 
             this.bar = {
                 width: 0,
+                _width: 0,
                 radius: 4
             };
 
@@ -122,13 +123,13 @@ define(
             checkBarW: function(xDis1,xDis2) {
                 if (this.bar.width) {
                     if (_.isFunction(this.bar.width)) {
-                        this.bar.width = this.bar.width(xDis1);
+                        this.bar._width = this.bar.width(xDis1);
                     }
                 };
                 if (!this.bar.width) {
-                    this.bar.width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
+                    this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
                 };
-                this.bar.width < 1 && (this.bar.width = 1);
+                this.bar._width < 1 && (this.bar._width = 1);
             },
             resetData: function(data, opt) {
                 this.draw(data.data, opt);
@@ -241,9 +242,9 @@ define(
                             rectData.fillStyle = fillStyle;
 
                             var finalPos = {
-                                x: Math.round(rectData.x - me.bar.width / 2),
+                                x: Math.round(rectData.x - me.bar._width / 2),
                                 y: beginY,
-                                width: parseInt(me.bar.width),
+                                width: parseInt(me.bar._width),
                                 height: rectH,
                                 fillStyle: fillStyle,
                                 scaleY: 1
@@ -257,7 +258,7 @@ define(
                                 scaleY: 0
                             };
                             if (!!me.bar.radius && v == vLen - 1) {
-                                var radiusR = Math.min(me.bar.width / 2, rectH);
+                                var radiusR = Math.min(me.bar._width / 2, rectH);
                                 radiusR = Math.min(radiusR, me.bar.radius);
                                 rectCxt.radius = [radiusR, radiusR, 0, 0];
                             };
