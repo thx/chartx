@@ -338,7 +338,8 @@ define(
                                             id: "info_txt_" + i + "_" + h + "_" + ci,
                                             context: {
                                                 x: infoWidth + 2,
-                                                fillStyle: cdata.fillStyle
+                                                fillStyle: cdata.fillStyle,
+                                                fontSize : me.text.fontSize
                                             }
                                         });
                                         infosp.addChild(txt);
