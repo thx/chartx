@@ -19,8 +19,7 @@ define(
                         'x'       : this.xDis1 * (a+1) - this.xDis1/2
                     }
                     tmpData.push( o );
-                }
-                debugger
+                };
                 return tmpData;
             } 
         } );
