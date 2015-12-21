@@ -1188,8 +1188,8 @@ define(
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
                 cloneEl.style.position = "absolute";
-                cloneEl.style.width = me.el.offsetWidth;
-                cloneEl.style.height = me.el.offsetHeight;
+                cloneEl.style.width = me.el.offsetWidth+"px";
+                cloneEl.style.height = me.el.offsetHeight+"px";
                 cloneEl.style.top = "10000px";
                 document.body.appendChild(cloneEl);
 
