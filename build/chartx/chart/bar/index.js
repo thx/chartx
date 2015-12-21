@@ -725,7 +725,7 @@ define(
                     this.dataZoom = {
                         range: {
                             start: 0,
-                            end: data.length - 2 //因为第一行是title
+                            end: data.length - 1 //因为第一行是title
                         }
                     }
                 };
