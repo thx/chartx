@@ -159,34 +159,34 @@ define(
 
                 return d;
             },
-            _getTgiData: function() {
-                var tgiData = [];
+            _getaverageData: function() {
+                var averageData = [];
                 var me = this;
-                if (this._graphs && this._graphs.tgi && this._graphs.tgi.data) {
-                    return this._graphs.tgi.data
+                if (this._graphs && this._graphs.average && this._graphs.average.data) {
+                    return this._graphs.average.data
                 };
-                if (this._graphs.tgi.enabled) {
+                if (this._graphs.average.enabled) {
                     _.each(this.dataFrame.data, function(fd, i) {
-                        if (fd.field == me._graphs.tgi.field) {
-                            tgiData = fd.data;
+                        if (fd.field == me._graphs.average.field) {
+                            averageData = fd.data;
                         }
                     });
                 };
-                this._graphs.tgi.data = tgiData;
-                return tgiData;
+                this._graphs.average.data = averageData;
+                return averageData;
             },
-            _setTgiLayoutData: function() {
+            _setaverageLayoutData: function() {
                 var layoutData = [];
                 var me = this;
-                if (this._graphs.tgi.enabled) {
+                if (this._graphs.average.enabled) {
                     var maxYAxis = this._yAxis.dataSection[this._yAxis.dataSection.length - 1];
-                    _.each(this._graphs.tgi.data, function(fd, i) {
+                    _.each(this._graphs.average.data, function(fd, i) {
                         layoutData.push({
                             value: fd,
                             y: -(fd - me._yAxis._bottomNumber) / Math.abs(maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
                         });
                     });
-                    this._graphs.tgi.layoutData = layoutData;
+                    this._graphs.average.layoutData = layoutData;
                 };
             },
             _initModule: function() {
@@ -198,7 +198,7 @@ define(
 
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getTgiData());
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getaverageData());
 
                 this._back = new Back(this.back);
                 this._tip = new Tip(this.tips, this.canvax.getDomContainer());
@@ -256,7 +256,7 @@ define(
                     }
                 });
 
-                this._setTgiLayoutData();
+                this._setaverageLayoutData();
 
                 var o = this._trimGraphs();
                 //绘制主图形区域
@@ -309,7 +309,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -374,6 +374,7 @@ define(
                             };
 
                             tmpData[b][v].push(node);
+
 
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
@@ -456,6 +457,10 @@ define(
                             animation: false
                         });
 
+                        me._graphs.average.data = null;
+                        me._getaverageData();
+                        me._setaverageLayoutData();
+
                         me._graphs.resetData(me._trimGraphs());
                         me._graphs.grow(function() {
                             //callback
@@ -502,7 +507,13 @@ define(
                             fillStyle: "#ececec"
                         },
                         animation: false,
-                        eventEnabled: false
+                        eventEnabled: false,
+                        text: {
+                            enabled: false
+                        },
+                        average: {
+                            enabled: false
+                        }
                     },
                     dataZoom: null,
                     xAxis: {
@@ -620,7 +631,6 @@ define(
                             });
                         });
                     });
-
                 });
             },
             bindEvent: function() {

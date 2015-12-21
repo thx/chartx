@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar info</title>
+<title>xChart demo -- bar</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -30,68 +30,62 @@
 <table>
     <tr>
         <td id="td-vl">
-<form><textarea id="code" name="code">
+            <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["time"       ,"uv" ,"pv","tgi"  ],
-    ["2015-11-12" , 101 , 20 , 33    ],
-    ["2015-11-13" , 67  , 51 , 76    ],
-    ["2015-11-14" , 76  , 45 , 43    ],
-    ["2015-11-15" , 58  , 35 , 31    ],
-    ["2015-11-16" , 79  , 73 , 71    ],
-    ["2015-11-17" , 88  , 54 , 99    ],
-    ["2015-11-18" , 56  , 68 , 65    ],
-    ["2015-11-19" , 99  , 83 , 125   ]
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ]
+
 ];
 var options = {
     yAxis : {
-        field : [ "uv" ],
+        field : ["uv"]
     },
     xAxis : {
-        field : ["time"]
+        field : ["xfield"]
     },
     graphs : {
-        text : {
-            enabled : true
-        },
-        tgi : {
-            enabled : true,
-            field : "tgi",
-            fillStyle : "#82d982"
-        },
         bar : {
-            fillStyle : function( obj ){
-                var tgi = this.tgi.data[ obj.iNode ];  
-                if( obj.value >= tgi ){
-                    return "#ff8521";
-                } else {
-                    return "#7aaee5";
-                }
+            width : function( dis1 , dis2 ){
+                return dis1 - 1;
             }
         }
     }
 }   
-Chartx.bar("canvasTest" , data , options).then(function( chart ){
-    chart.on("click" , function(e){
-        //debugger
-    });
-});
+Chartx.bar("canvasTest" , data , options);
+
+
 </textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
             <div id="chartdemo-r">
-                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
-                    <h4>柱状图 - 柱条上面有文本信息</h4>
-                    <p>
-                        联系人：@逢春 @释剑
-                    </p>
-                </div>
-                <div  class="test-c">
-                    <div id="canvasTest" style='width:600px;height:300px;'></div>
-                </div>
+
+                <h4>柱状图 - 基础柱状图</h4>
+                <p>
+                    联系人：@逢春 @释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+
             </div>
         </td>
     </tr>

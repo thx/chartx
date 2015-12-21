@@ -26,7 +26,7 @@ define(
             this._colors = Theme.colors;
 
             this.bar = {
-                width: 20,
+                width: 0,
                 radius: 4
             };
 
@@ -37,9 +37,9 @@ define(
                 format: null
             };
 
-            this.tgi = {
+            this.average = {
                 enabled: false,
-                field: "tgi",
+                field: "average",
                 fieldInd: -1,
                 fillStyle: "#c4c9d6",
                 data: null
@@ -56,7 +56,7 @@ define(
 
             _.deepExtend(this, opt);
 
-            this._initTgi();
+            this._initaverage();
 
             this.init();
         };
@@ -88,11 +88,11 @@ define(
                     me._yAxisFieldsMap[field] = i;
                 });
             },
-            _initTgi: function() {
-                if (this.tgi.enabled) {
+            _initaverage: function() {
+                if (this.average.enabled) {
                     _.each(this.root.dataFraem, function(fd, i) {
-                        if (fd.field == this.tgi.field) {
-                            this.tgi.fieldInd = i;
+                        if (fd.field == this.average.field) {
+                            this.average.fieldInd = i;
                         }
                     });
                 }
@@ -119,8 +119,15 @@ define(
                 };
                 return style;
             },
-            checkBarW: function(xDis) {
-                this.bar.width = parseInt(xDis) - (parseInt(Math.max(1, xDis * 0.3)));
+            checkBarW: function(xDis1,xDis2) {
+                if (this.bar.width) {
+                    if (_.isFunction(this.bar.width)) {
+                        this.bar.width = this.bar.width(xDis1);
+                    }
+                };
+                if (!this.bar.width) {
+                    this.bar.width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
+                };
                 this.bar.width < 1 && (this.bar.width = 1);
             },
             resetData: function(data, opt) {
@@ -159,6 +166,11 @@ define(
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
                     itemW = me.w / hLen;
+
+                    //如果itemW过小的话，就不用显示text的info信息
+                    if (itemW < 15) {
+                        me.text.enabled = false;
+                    };
 
                     for (h = 0; h < hLen; h++) {
                         var groupH;
@@ -282,17 +294,23 @@ define(
                                 });
                             };
 
-                            //目前，只有再非堆叠柱状图的情况下才有柱子顶部的txt
-                            if (v == vLen - 1) {
+                            if (v == vLen - 1 && me.text.enabled) {
                                 //文字
                                 var contents = [rectData];
 
-                                var infosp = new Canvax.Display.Sprite({
-                                    id: "infosp_" + i + "_" + h,
-                                    context: {
-                                        visible: false
-                                    }
-                                });
+                                var infosp;
+                                if (h <= preLen - 1) {
+                                    infosp = me.txtsSp.getChildById("infosp_" + i + "_" + h);
+                                } else {
+                                    infosp = new Canvax.Display.Sprite({
+                                        id: "infosp_" + i + "_" + h,
+                                        context: {
+                                            visible: false
+                                        }
+                                    });
+                                    infosp._hGroup = h;
+                                    me.txtsSp.addChild(infosp);
+                                };
 
                                 if (vLen > 1) {
                                     for (var c = vLen - 2; c >= 0; c--) {
@@ -304,24 +322,28 @@ define(
                                 var infoHeight = 0;
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
-                                    if (me.animation && _.isFunction(me.text.format)) {
+                                    if (!me.animation && _.isFunction(me.text.format)) {
                                         content = me.text.format(cdata.value);
                                     };
-                                    if (me.animation && _.isNumber(content)) {
+                                    if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
                                     };
 
-                                    var txt = new Canvax.Display.Text(me.animation ? 0 : content, {
-                                        id: "info_txt_" + i + "_" + h + "_" + ci,
-                                        context: {
-                                            x: infoWidth + 2,
-                                            fillStyle: cdata.fillStyle
-                                        }
-                                    });
+                                    var txt;
+                                    if (h <= preLen - 1) {
+                                        txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                    } else {
+                                        txt = new Canvax.Display.Text(me.animation ? 0 : content, {
+                                            id: "info_txt_" + i + "_" + h + "_" + ci,
+                                            context: {
+                                                x: infoWidth + 2,
+                                                fillStyle: cdata.fillStyle
+                                            }
+                                        });
+                                        infosp.addChild(txt);
+                                    };
                                     txt._text = content;
-                                    infosp.addChild(txt);
                                     infoWidth += txt.getTextWidth() + 2;
-
                                     infoHeight = Math.max(infoHeight, txt.getTextHeight());
 
                                     if (ci <= vLen - 2) {
@@ -333,18 +355,20 @@ define(
                                         });
                                         infoWidth += txt.getTextWidth() + 2;
                                         infosp.addChild(txt);
-                                    }
+                                    };
                                 });
 
-                                infosp.context.x = rectData.x - infoWidth / 2;
+                                infosp._finalX = rectData.x - infoWidth / 2;
                                 infosp._finalY = finalPos.y - infoHeight;
                                 infosp._centerX = rectData.x;
+                                infosp.context.width = infoWidth;
+                                infosp.context.height = infoHeight;
 
                                 if (!me.animation) {
                                     infosp.context.y = finalPos.y - infoHeight;
+                                    infosp.context.x = rectData.x - infoWidth / 2;
                                     infosp.context.visible = true;
                                 };
-                                me.txtsSp.addChild(infosp);
                             }
                         };
                     }
@@ -356,23 +380,35 @@ define(
                     this.sprite.addChild(this.txtsSp);
                 };
 
-                //如果有tgi模块配置。
-                if (this.tgi.enabled && this.tgi.data) {
-                    this.tgiSp = new Canvax.Display.Sprite({});
-                    _.each(this.tgi.layoutData, function(tgi, i) {
-                        var tgiRectC = {
-                            x : itemW * i ,
-                            y : tgi.y,
-                            fillStyle : me.tgi.fillStyle,
-                            width : itemW,
-                            height : 2
+                //如果有average模块配置。
+                if (this.average.enabled && this.average.data) {
+                    !this.averageSp && (this.averageSp = new Canvax.Display.Sprite({
+                        id: "averageSp"
+                    }));
+                    _.each(this.average.layoutData, function(average, i) {
+                        var averageRectC = {
+                            x: itemW * i,
+                            y: average.y,
+                            fillStyle: me.average.fillStyle,
+                            width: itemW,
+                            height: 2
                         };
-                        me.tgiSp.addChild( new Rect({
-                            id : "tgi_"+i,
-                            context : tgiRectC
-                        }) );
+                        var averageLine;
+                        if (i <= preLen - 1) {
+                            averageLine = me.averageSp.getChildById("average_" + i);
+                            averageLine.context.x = averageRectC.x;
+                            averageLine.context.y = averageRectC.y;
+                            averageLine.context.width = averageRectC.width;
+                        } else {
+                            averageLine = new Rect({
+                                id: "average_" + i,
+                                context: averageRectC
+                            });
+                            me.averageSp.addChild(averageLine);
+                        };
+
                     });
-                    this.sprite.addChild( me.tgiSp );
+                    this.sprite.addChild(me.averageSp);
                 };
 
                 this.sprite.context.x = this.pos.x;
@@ -383,16 +419,22 @@ define(
                 };
             },
             _updateInfoTextPos: function(el) {
-
+                if (this.root.type == "horizontal") {
+                    return;
+                };
                 var infoWidth = 0;
+                var infoHeight = 0;
                 var cl = el.children.length;
                 _.each(el.children, function(c, i) {
                     if (c.getTextWidth) {
                         c.context.x = infoWidth;
                         infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
-                    }
+                        infoHeight = Math.max(infoHeight, c.getTextHeight());
+                    };
                 });
-                el.context.x = el._centerX - infoWidth / 2 + 1
+                el.context.x = el._centerX - infoWidth / 2 + 1;
+                el.context.width = infoWidth;
+                el.context.height = infoHeight;
             },
             /**
              * 生长动画
@@ -407,9 +449,20 @@ define(
                 if (this.sort && this.sort == "desc") {
                     sy = -1;
                 };
+
+                //先把已经不在当前range范围内的元素destroy掉
                 if (self.barsSp.children.length > self.data[0][0].length) {
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
+
+                        for (var t = 0, tl = self.txtsSp.children.length; t < tl; t++) {
+                            if (self.txtsSp.children[t]._hGroup == i) {
+                                self.txtsSp.children[t].destroy();
+                                t--, tl--;
+                            }
+                        };
+
+                        self.averageSp && self.averageSp.getChildAt(i).destroy();
                         i--;
                         l--;
                     };
@@ -466,23 +519,22 @@ define(
                             };
 
                             if (self.text.enabled) {
-
                                 var infosp = self.txtsSp.getChildById("infosp_" + g + "_" + h);
 
-
+                                if (self.root.type == "horizontal") {
+                                    infosp.context.x = infosp._finalX;
+                                };
                                 infosp.animate({
-                                    y: infosp._finalY
+                                    y: infosp._finalY,
+                                    x: infosp._finalX
                                 }, {
                                     duration: options.duration,
                                     easing: options.easing,
                                     delay: h * options.delay,
                                     onUpdate: function() {
-                                        //self._updateInfoTextPos(this);
                                         this.context.visible = true;
                                     },
-                                    onComplete: function() {
-                                        //self._updateInfoTextPos(this);
-                                    }
+                                    onComplete: function() {}
                                 });
 
                                 _.each(infosp.children, function(txt) {
@@ -504,7 +556,11 @@ define(
                                                     content = Tools.numAddSymbol(parseInt(content));
                                                 };
                                                 txt.resetText(content);
-                                                self._updateInfoTextPos(txt.parent);
+                                                if (txt.parent) {
+                                                    self._updateInfoTextPos(txt.parent);
+                                                } else {
+                                                    txt.destroy();
+                                                }
                                             }
                                         })
                                     };
@@ -525,7 +581,7 @@ define(
                     iLay: target.iLay,
                     nodesInfoList: this._getNodeInfo(target.iGroup, target.iNode, target.iLay)
                 };
-                return node
+                return node;
             },
             _getNodeInfo: function(iGroup, iNode, iLay) {
                 var arr = [];
@@ -558,7 +614,7 @@ define(
         };
         return Graphs;
     }
-)
+);
 
 define(
     "chartx/chart/bar/xaxis",
@@ -582,7 +638,7 @@ define(
                     }
                     tmpData.push( o );
                 }
-                
+                debugger
                 return tmpData;
             } 
         } );
@@ -793,34 +849,34 @@ define(
 
                 return d;
             },
-            _getTgiData: function() {
-                var tgiData = [];
+            _getaverageData: function() {
+                var averageData = [];
                 var me = this;
-                if (this._graphs && this._graphs.tgi && this._graphs.tgi.data) {
-                    return this._graphs.tgi.data
+                if (this._graphs && this._graphs.average && this._graphs.average.data) {
+                    return this._graphs.average.data
                 };
-                if (this._graphs.tgi.enabled) {
+                if (this._graphs.average.enabled) {
                     _.each(this.dataFrame.data, function(fd, i) {
-                        if (fd.field == me._graphs.tgi.field) {
-                            tgiData = fd.data;
+                        if (fd.field == me._graphs.average.field) {
+                            averageData = fd.data;
                         }
                     });
                 };
-                this._graphs.tgi.data = tgiData;
-                return tgiData;
+                this._graphs.average.data = averageData;
+                return averageData;
             },
-            _setTgiLayoutData: function() {
+            _setaverageLayoutData: function() {
                 var layoutData = [];
                 var me = this;
-                if (this._graphs.tgi.enabled) {
+                if (this._graphs.average.enabled) {
                     var maxYAxis = this._yAxis.dataSection[this._yAxis.dataSection.length - 1];
-                    _.each(this._graphs.tgi.data, function(fd, i) {
+                    _.each(this._graphs.average.data, function(fd, i) {
                         layoutData.push({
                             value: fd,
                             y: -(fd - me._yAxis._bottomNumber) / Math.abs(maxYAxis - me._yAxis._bottomNumber) * me._yAxis.yGraphsHeight
                         });
                     });
-                    this._graphs.tgi.layoutData = layoutData;
+                    this._graphs.average.layoutData = layoutData;
                 };
             },
             _initModule: function() {
@@ -832,7 +888,7 @@ define(
 
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getTgiData());
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getaverageData());
 
                 this._back = new Back(this.back);
                 this._tip = new Tip(this.tips, this.canvax.getDomContainer());
@@ -890,7 +946,7 @@ define(
                     }
                 });
 
-                this._setTgiLayoutData();
+                this._setaverageLayoutData();
 
                 var o = this._trimGraphs();
                 //绘制主图形区域
@@ -943,7 +999,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -1008,6 +1064,7 @@ define(
                             };
 
                             tmpData[b][v].push(node);
+
 
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
@@ -1090,6 +1147,10 @@ define(
                             animation: false
                         });
 
+                        me._graphs.average.data = null;
+                        me._getaverageData();
+                        me._setaverageLayoutData();
+
                         me._graphs.resetData(me._trimGraphs());
                         me._graphs.grow(function() {
                             //callback
@@ -1136,7 +1197,13 @@ define(
                             fillStyle: "#ececec"
                         },
                         animation: false,
-                        eventEnabled: false
+                        eventEnabled: false,
+                        text: {
+                            enabled: false
+                        },
+                        average: {
+                            enabled: false
+                        }
                     },
                     dataZoom: null,
                     xAxis: {
@@ -1254,7 +1321,6 @@ define(
                             });
                         });
                     });
-
                 });
             },
             bindEvent: function() {

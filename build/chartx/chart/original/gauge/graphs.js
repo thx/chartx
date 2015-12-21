@@ -23,7 +23,8 @@ define(
 
             this.dis  = {
                 outAndIn  : 10,                  //外圈与内圈距离
-                textAndIn : 15                   //内圈与文字距离
+                textAndIn : 15,                   //内圈与文字距离
+                outSideAndOY : 0                 //圆心的Y 与 外圈最大角度上的点的距离差
             }
 
             this.inSide = {
@@ -48,7 +49,7 @@ define(
                 thickness  : 4,
                 startAngle : 165,
                 endAngle   : 375,
-                fillStyle  : '#00a8e6 ',
+                fillStyle  : '#00a8e6',
                 duration   : 1200
             }
             this.leftNode = {
@@ -143,9 +144,12 @@ define(
 
                 //自动居中
                 // if(me.autoCenter){
-                    // me.sprite.context.y = (me.h - (me.maxR + 30) ) / 2 + me.maxR
+                //     me.sprite.context.y = (me.h - (me.maxR + 30) ) / 2 + me.maxR
                 // }
-                // me.sprite.addChild(me._addCircle({}))
+                // me._addCircle({
+                //     sprite : me.sprite,
+                //     config : {}
+                // })
             },
 
             updateTitle:function($o){
@@ -168,12 +172,14 @@ define(
                 var me = this
                 var center = me.sprite.getChildById('center')
                 var subtitle= center.getChildAt(1) 
-                var content = $o.subtitle || ''
-                subtitle.resetText(content)
-
+                // _.isFunction(me.subtitle.format) ? me.subtitle.format(a) : null
                 var startAngle = me.outSideRange.startAngle, totalAngle = me.outSideRange.endAngle - me.outSideRange.startAngle
                 var start = parseInt(startAngle + totalAngle * $o.scale.start)
                 var end   = parseInt(startAngle + totalAngle * $o.scale.end) 
+
+                var content = $o.subtitle.start + ' - ' + $o.subtitle.end
+                content = _.isFunction(me.subtitle.format) ? me.subtitle.format($o.subtitle) : content
+                subtitle.resetText(content)
 
                 if(me.outSideRange.shape){
                     me.outSideRange.shape.context.startAngle = start
@@ -226,6 +232,10 @@ define(
                 rings.addChild(item)
                 me.outSide.r = me.maxR, me.outSide.r0 = me.maxR - me.outSide.thickness
                 me.outSide.cR = me.outSide.r0 + me.outSide.thickness / 2
+
+                var p = me._getRPoint(0, 0, me.outSide.r, me.outSide.r, me.outSide.endAngle)
+                me.dis.outSideAndOY = p.y
+                me.h = p.y + me.maxR
 
                 var outSideSector = me._addSector({
                     config : {

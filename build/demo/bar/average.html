@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- horizontal_graphs_info</title>
+<title>xChart demo -- bar info</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -24,7 +24,6 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
-<!--<script type="text/javascript" src="../bar_h/index.js"></script>-->
 </head>
 <body >
 
@@ -32,49 +31,67 @@
     <tr>
         <td id="td-vl">
 <form><textarea id="code" name="code">
-var data = [
-    ["xfield","line1","line2","line3"],
-    [ '1-2K' , 101   , 201   , 0 ] ,
-    [ '2-3K' , 88    , 145   , 0 ] ,
-    [ '3-4k' , 488   , 88    , 0 ] ,
-    [ '4-5k' , 390   , 546   , 0 ] ,
-    [ '5-6k' , 1300  , 88    , 0 ] 
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["time"       ,"uv" ,"pv","average"  ],
+    ["2015-11-12" , 101 , 20 , 33    ],
+    ["2015-11-13" , 67  , 51 , 76    ],
+    ["2015-11-14" , 76  , 45 , 43    ],
+    ["2015-11-15" , 58  , 35 , 31    ],
+    ["2015-11-16" , 79  , 73 , 71    ],
+    ["2015-11-17" , 88  , 54 , 99    ],
+    ["2015-11-18" , 56  , 68 , 65    ],
+    ["2015-11-19" , 99  , 83 , 125   ]
 ];
 var options = {
-    type  : 'horizontal',
     yAxis : {
-        field : ["line1",'line2']
+        field : [ "uv" ],
     },
     xAxis : {
-        field : ["xfield"]
+        field : ["time"]
     },
-
-    graphs:{
-        text: {
-            enabled : 1
+    graphs : {
+        text : {
+            enabled : true
+        },
+        average : {
+            enabled : true,
+            field : "average",
+            fillStyle : "#82d982"
+        },
+        bar : {
+            fillStyle : function( obj ){
+                var average = this.average.data[ obj.iNode ];  
+                if( obj.value >= average ){
+                    return "#ff8521";
+                } else {
+                    return "#7aaee5";
+                }
+            }
         }
     }
-}       
-
-Chartx.bar("canvasTest" , data , options);  
+}   
+Chartx.bar("canvasTest" , data , options).then(function( chart ){
+    chart.on("click" , function(e){
+        //debugger
+    });
+});
 </textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
             <div id="chartdemo-r">
-            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
-
-                <h4>柱状图- 横向柱状图，有柱形条上有信息</h4>
-                <p>
-                    联系人：@逢春 @释剑
-                </p>
-            </div>
-            <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
-            </div>
-
-
+                    <h4>柱状图 - 均值配置，大于均值则变为橙色，小于均值为蓝色</h4>
+                    <p>
+                        联系人：@逢春 @释剑
+                    </p>
+                </div>
+                <div  class="test-c">
+                    <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
             </div>
         </td>
     </tr>
@@ -83,4 +100,3 @@ Chartx.bar("canvasTest" , data , options);
     
 </body> 
 </html>
-

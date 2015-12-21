@@ -839,9 +839,10 @@ define(
 define(
     "chartx/components/datazoom/index", [
         "canvax/index",
-        "canvax/shape/Rect"
+        "canvax/shape/Rect",
+        "canvax/shape/Line"
     ],
-    function(Canvax, Rect) {
+    function(Canvax, Rect, Line) {
 
         var dataZoom = function(opt) {
             //0-1
@@ -898,8 +899,10 @@ define(
                 this.sprite.addChild( this.dataZoomBg );
                 this.sprite.addChild( this.dataZoomBtns );
                 me.widget();
+                me._setLines()
             },
             widget: function() {
+                var me = this;
                 var bgRect = new Rect({
                     context: {
                         x: 0,
@@ -912,16 +915,11 @@ define(
                         globalAlpha: 0.05
                     }
                 });
-                var me = this;
-
                 this.sprite.addChild(bgRect);
 
-                
 
-
-
-                this.btnsLeft = new Canvax.Display.Sprite({});
                 this.btnLeft = new Rect({
+                    id          : 'btnLeft',
                     dragEnabled : true,
                     context: {
                         x: this.range.start/this.count * this.w,
@@ -932,7 +930,6 @@ define(
                         cursor: "move"
                     }
                 });
-
                 this.btnLeft.on("draging" , function(){
                    this.context.y = me.barY+1;
                    if(this.context.x<0){
@@ -951,6 +948,7 @@ define(
 
 
                 this.btnRight = new Rect({
+                    id          : 'btnRight',
                     dragEnabled : true,
                     context: {
                         x: this.range.end / this.count * this.w - this.btnW,
@@ -961,8 +959,6 @@ define(
                         cursor : "move"
                     }
                 });
-
-
                 this.btnRight.on("draging" , function(){
                     this.context.y = me.barY+1;
                     if( this.context.x < (me.btnLeft.context.x + me.btnW + 2) ){
@@ -979,11 +975,9 @@ define(
                 });
 
 
-                
-
-
                 //中间矩形拖拽区域
                 this.rangeRect = new Rect({
+                    id          : 'btnCenter',
                     dragEnabled : true,
                     context : {
                         x : this.btnLeft.context.x + me.btnW,
@@ -995,7 +989,6 @@ define(
                         cursor : "move"
                     }
                 });
-
                 this.rangeRect.on("draging" , function(e){
                     this.context.y = me.barY + 1;
                     if( this.context.x < me.btnW ){
@@ -1012,13 +1005,29 @@ define(
                     me.dragEnd( me.range );
                 });
 
-
+                this.linesLeft = new Canvax.Display.Sprite({ id : "linesLeft" });
+                this._addLines({
+                    sprite : this.linesLeft,
+                })
+                this.linesRight = new Canvax.Display.Sprite({ id : "linesRight" });
+                this._addLines({
+                    sprite : this.linesRight,
+                })
+                this.linesCenter = new Canvax.Display.Sprite({ id : "linesCenter" });
+                this._addLines({
+                    count  : 6,
+                    // dis    : 1,
+                    sprite : this.linesCenter,
+                })
 
                 this.dataZoomBtns.addChild( this.rangeRect );
+                this.dataZoomBtns.addChild( this.linesCenter );
+
                 this.dataZoomBtns.addChild( this.btnLeft );
                 this.dataZoomBtns.addChild( this.btnRight );
 
-                
+                this.dataZoomBtns.addChild( this.linesLeft );
+                this.dataZoomBtns.addChild( this.linesRight );
             },
             setRange : function(){
                 var start = (this.btnLeft.context.x / this.w)*this.count ;
@@ -1026,6 +1035,57 @@ define(
                 this.range.start = start;
                 this.range.end = end;
                 this.dragIng( this.range );
+
+                this._setLines()
+            },
+
+            _setLines : function(){
+                var me = this
+                var linesLeft  = me.dataZoomBtns.getChildById('linesLeft')
+                var linesRight = me.dataZoomBtns.getChildById('linesRight')
+                var linesCenter = me.dataZoomBtns.getChildById('linesCenter')
+                
+                var btnLeft    = me.dataZoomBtns.getChildById('btnLeft')
+                var btnRight   = me.dataZoomBtns.getChildById('btnRight')
+                var btnCenter  = me.dataZoomBtns.getChildById('btnCenter')
+                
+                linesLeft.context.x = btnLeft.context.x + (btnLeft.context.width - linesLeft.context.width ) / 2
+                linesLeft.context.y = btnLeft.context.y + (btnLeft.context.height - linesLeft.context.height ) / 2
+
+                linesRight.context.x = btnRight.context.x + (btnRight.context.width - linesRight.context.width ) / 2
+                linesRight.context.y = btnRight.context.y + (btnRight.context.height - linesRight.context.height ) / 2
+
+                linesCenter.context.x = btnCenter.context.x + (btnCenter.context.width - linesCenter.context.width ) / 2
+                linesCenter.context.y = btnCenter.context.y + (btnCenter.context.height - linesCenter.context.height ) / 2
+            },
+
+            _addLines:function($o){
+                var me = this
+                var count  = $o.count || 2
+                var sprite = $o.sprite
+                var dis    = $o.dis || 2
+                for(var a = 0, al = count; a < al; a++){
+                    sprite.addChild(me._addLine({
+                        x : a * dis
+                    }))
+                }
+                sprite.context.width = a * dis - 1, sprite.context.height = 6
+            },
+
+            _addLine:function($o){
+                var o = $o || {}
+                var line = new Line({
+                    id     : o.id || '',
+                    context: {
+                        x: o.x || 0,
+                        y: o.y || 0,
+                        xEnd: o.xEnd || 0,
+                        yEnd: o.yEnd || 6,
+                        lineWidth: o.lineWidth || 1,
+                        strokeStyle: o.strokeStyle || '#ffffff'
+                    }
+                });
+                return line
             }
         };
 
@@ -1875,19 +1935,18 @@ define(
                 this.w = this.graphw - this.yAxisW;
                 if (this.pos.x == null) {
                     this.pos.x = this.yAxisW + this.disOriginX;
-                }
+                };
                 if (this.pos.y == null) {
                     this.pos.y = this.graphh - this.h;
-                }
-
-                this.xGraphsWidth = this.w - this._getXAxisDisLine();
+                };
+                this.xGraphsWidth = this.w - this._getXAxisDisLine() - this.xGraphsWidth % _.flatten(this.dataOrg).length;
                 if (this._label) {
                     if (this.isH) {
                         this.xGraphsWidth -= this._label.getTextHeight() + 5
                     } else {
                         this.xGraphsWidth -= this._label.getTextWidth() + 5
                     }
-                }
+                };
                 this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
             },
             _trimXAxis: function(data, xGraphsWidth) {
@@ -1899,7 +1958,7 @@ define(
                         'x': parseInt(dis * (a + 1))
                     }
                     tmpData.push(o);
-                }
+                };
                 return tmpData;
             },
             _formatDataSectionText: function(arr) {
@@ -1917,7 +1976,7 @@ define(
                 var disMin = this.disXAxisLine
                 var disMax = 2 * disMin
                 var dis = disMin
-                dis = disMin + this.w % this.dataOrg.length
+                dis = disMin + this.w % _.flatten(this.dataOrg).length
                 dis = dis > disMax ? disMax : dis
                 dis = isNaN(dis) ? 0 : dis
                 return dis
