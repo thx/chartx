@@ -377,6 +377,18 @@ title:  Chartx demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/bar/index_datazoom.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/bar/index_datazoom.gif">
+        </dt>
+        <dd>
+            <h5>
+                区间选择器
+            </h5>
+        </dd>
+    </dl>
+    </a>
 </div>
 
 
@@ -442,7 +454,7 @@ title:  Chartx demos
     <a target="_blank" href="./demo/pie/index.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/pie/index.gif">
+        <img src="./assets/chart/pie/index.png">
         </dt>
         <dd>
             <h5>
@@ -455,7 +467,7 @@ title:  Chartx demos
     <a target="_blank" href="./demo/pie/nodatalabel.html">
     <dl class="chart">
         <dt>
-        <img src="./assets/chart/pie/nodatalabel.gif">
+        <img src="./assets/chart/pie/nodatalabel.png">
         </dt>
         <dd>
             <h5>
@@ -473,6 +485,19 @@ title:  Chartx demos
         <dd>
             <h5>
             实心饼图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/pie/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/pie/checked.gif">
+        </dt>
+        <dd>
+            <h5>
+            可点击选中
             </h5>
         </dd>
     </dl>
@@ -503,6 +528,19 @@ title:  Chartx demos
         <dd>
             <h5>
             雷达图，可以自定义y轴维度
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+    <a target="_blank" href="./demo/radar/smooth.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/radar/smooth.png">
+        </dt>
+        <dd>
+            <h5>
+            平滑的雷达图
             </h5>
         </dd>
     </dl>
@@ -707,6 +745,17 @@ title:  Chartx demos
 ## 自有原创图表
 
 <div class="charts">
+    <a target="_blank" href="./demo/original/gauge/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/original/gauge/index.gif">
+        </dt>
+        <dd>
+            <h5>油表+区间选择器</h5>
+        </dd>
+    </dl>
+    </a>
+
     <a target="_blank" href="./demo/original/thermometer/index.html">
     <dl class="chart">
         <dt>
