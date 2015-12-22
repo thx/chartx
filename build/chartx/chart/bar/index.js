@@ -28,7 +28,8 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4
+                radius: 4,
+                uniform: false //柱子是否需要均匀分布
             };
 
             this.text = {
@@ -54,6 +55,8 @@ define(
             this.txtsSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
+
+
 
             _.deepExtend(this, opt);
 
@@ -922,7 +925,8 @@ define(
                 this._xAxis.draw({
                     graphh: h - this.padding.bottom,
                     graphw: w - this.padding.right,
-                    yAxisW: _yAxisW
+                    yAxisW: _yAxisW,
+                    uniform: this._graphs.bar.uniform
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
@@ -1152,6 +1156,7 @@ define(
                         });
 
                         me._graphs.average.data = null;
+                        me._graphs.w = me._xAxis.xGraphsWidth;
                         me._getaverageData();
                         me._setaverageLayoutData();
 

@@ -1796,6 +1796,7 @@ define(
             this.enabled = 1; //1,0 true ,false 
 
             this.disXAxisLine = 6; //x轴两端预留的最小值
+            this.disOriginX = 0; //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
             this.xGraphsWidth = 0; //x轴宽(去掉两端)
 
             this.dataOrg = []; //源数据
@@ -1815,6 +1816,8 @@ define(
             this.isH = false; //是否为横向转向的x轴
 
             this.animation = true;
+
+            this.uniform = false;
 
             this.init(opt, data);
         };
@@ -1932,8 +1935,13 @@ define(
 
                 this.yAxisW = Math.max(this.yAxisW, this.leftDisX);
                 this.w = this.graphw - this.yAxisW;
-
-                this.xGraphsWidth = this.w - this._getXAxisDisLine() - this.xGraphsWidth % (_.flatten(this.dataOrg).length || 1);
+                if (this.pos.x == null) {
+                    this.pos.x = this.yAxisW + this.disOriginX;
+                };
+                if (this.pos.y == null) {
+                    this.pos.y = this.graphh - this.h;
+                };
+                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine() - (this.uniform ? this.xGraphsWidth % (_.flatten(this.dataOrg).length || 1) : 0) );
 
                 if (this._label) {
                     if (this.isH) {
@@ -1942,6 +1950,7 @@ define(
                         this.xGraphsWidth -= this._label.getTextWidth() + 5
                     }
                 };
+                this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
             },
             _trimXAxis: function(data, xGraphsWidth) {
                 var tmpData = [];
