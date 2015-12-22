@@ -257,7 +257,7 @@ define(
                     opt.complete.call(self);
                 }
             },
-            focus: function(index , callback) {
+            focus: function(index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
                 var secData = self.data.data[index];
@@ -273,7 +273,7 @@ define(
                     }
                 });
             },
-            unfocus: function(index , callback) {
+            unfocus: function(index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
                 var secData = self.data.data[index];
@@ -289,31 +289,31 @@ define(
                     }
                 });
             },
-            check : function( index ){
+            check: function(index) {
                 var sec = this.sectorMap[index].sector;
                 var secData = this.data.data[index];
-                if(secData.checked){
+                if (secData.checked) {
                     return
-                }; 
+                };
                 var me = this;
-                if( !secData._selected ){
-                    this.focus( index , function(){
-                        me.addCheckedSec( sec );
-                    } );
+                if (!secData._selected) {
+                    this.focus(index, function() {
+                        me.addCheckedSec(sec);
+                    });
                 } else {
-                    this.addCheckedSec( sec );
-                };                
+                    this.addCheckedSec(sec);
+                };
                 secData.checked = true;
             },
-            uncheck : function( index ){
+            uncheck: function(index) {
                 var sec = this.sectorMap[index].sector;
                 var secData = this.data.data[index];
-                if(!secData.checked){
+                if (!secData.checked) {
                     return
-                }; 
+                };
                 var me = this;
-                me.delCheckedSec( sec , function(){
-                    me.unfocus( index );
+                me.delCheckedSec(sec, function() {
+                    me.unfocus(index);
                 });
                 secData.checked = false;
             },
@@ -395,23 +395,21 @@ define(
                 }
             },
             _showTip: function(e, ind) {
-                this._tip.show(this._getTipsInfo(e, ind));
+                this._tip.show(this._geteventInfo(e, ind));
             },
             _hideTip: function(e) {
                 this._tip.hide(e);
             },
             _moveTip: function(e, ind) {
-                this._tip.move(this._getTipsInfo(e, ind))
+                this._tip.move(this._geteventInfo(e, ind))
             },
             _getTipDefaultContent: function(info) {
                 return "<div style='color:" + info.fillStyle + "'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div>" + parseInt(info.percentage) + "%</div>";
             },
-            _getTipsInfo: function(e, ind) {
+            _geteventInfo: function(e, ind) {
                 var data = this.data.data[ind];
-
                 var fillColor = this.getColorByIndex(this.colors, ind);
-
-                e.tipsInfo = {
+                e.eventInfo = {
                     iNode: ind,
                     name: data.name,
                     percentage: data.percentage,
@@ -419,7 +417,6 @@ define(
                     fillStyle: fillColor,
                     data: this.data.org[ind]
                 };
-
                 return e;
             },
             _sectorFocus: function(e, index) {
@@ -432,13 +429,6 @@ define(
             _sectorUnfocus: function(e, index) {
                 if (this.focusCallback && e) {
                     this.focusCallback.unfocus(e, index);
-                }
-            },
-            _sectorClick: function(e, index) {
-                if (this.sectorMap[index]) {
-                    if (this.clickCallback) {
-                        this.clickCallback(e, index);
-                    }
                 }
             },
             _getByIndex: function(index) {
@@ -725,11 +715,11 @@ define(
                 this.checkedSp.addChild(sector);
                 sector.animate({
                     endAngle: secc.endAngle
-                } , {
+                }, {
                     duration: this._getAngleTime(secc)
                 });
             },
-            delCheckedSec: function(sec , callback) {
+            delCheckedSec: function(sec, callback) {
                 var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
                 checkedSec.animate({
                     //endAngle : checkedSec.context.startAngle+0.5
@@ -793,15 +783,17 @@ define(
                                     self.unfocus(this.__dataIndex);
                                 }
                             });
-                            sector.on('mousemove', function(e) {
-                                if (self.tips.enabled) {
-                                    self._moveTip(e, this.__dataIndex);
-                                }
-                            });
 
-                            sector.on('click', function(e) {
-                                self._sectorClick(e, this.__dataIndex);
-                                self.secClick( this );
+                            sector.on('mousedown mouseup click mousemove', function(e) {
+                                self._geteventInfo(e, this.__dataIndex);
+                                if (e.type == "click") {
+                                    self.secClick(this);
+                                };
+                                if (e.type == "mousemove") {
+                                    if (self.tips.enabled) {
+                                        self._moveTip(e, this.__dataIndex);
+                                    }
+                                };
                             });
 
                             self.sectorsSp.addChildAt(sector, 0);
@@ -851,12 +843,12 @@ define(
                     }
                 }
             },
-            secClick: function( sectorEl ) {
+            secClick: function(sectorEl) {
                 var secData = this.data.data[sectorEl.__dataIndex];
                 if (!secData.checked) {
-                    this.addCheckedSec( sectorEl );
+                    this.addCheckedSec(sectorEl);
                 } else {
-                    this.delCheckedSec( sectorEl );
+                    this.delCheckedSec(sectorEl);
                 };
                 secData.checked = !secData.checked;
             }
@@ -1078,26 +1070,11 @@ define(
                     colors: self.colors,
                     focusCallback: {
                         focus: function(e, index) {
-                            e.sectorIndex = index;
-                            e.eventInfo = {
-                                sectorIndex: index
-                            };
                             self.fire('focus', e);
                         },
                         unfocus: function(e, index) {
-                            e.sectorIndex = index;
-                            e.eventInfo = {
-                                sectorIndex: index
-                            };
                             self.fire('unfocus', e);
                         }
-                    },
-                    clickCallback: function(e, index) {
-                        e.sectorIndex = index;
-                        e.eventInfo = {
-                            sectorIndex: index
-                        };
-                        self.fire("click", e);
                     }
                 };
 
@@ -1106,6 +1083,10 @@ define(
                 };
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
+
+                self._pie.sprite.on("mousedown mousemove mouseup click" , function(e){
+                    self.fire( e.type , e );
+                });
             },
             _startDraw: function() {
                 this._pie.draw(this);

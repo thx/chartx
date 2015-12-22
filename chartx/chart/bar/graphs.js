@@ -29,7 +29,8 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4
+                radius: 4,
+                uniform: false //柱子是否需要均匀分布
             };
 
             this.text = {
@@ -64,6 +65,8 @@ define(
             this.checkedSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
+
+
 
             _.deepExtend(this, opt);
 
@@ -405,7 +408,8 @@ define(
                                             id: "info_txt_" + i + "_" + h + "_" + ci,
                                             context: {
                                                 x: infoWidth + 2,
-                                                fillStyle: cdata.fillStyle
+                                                fillStyle: cdata.fillStyle,
+                                                fontSize : me.text.fontSize
                                             }
                                         });
                                         infosp.addChild(txt);

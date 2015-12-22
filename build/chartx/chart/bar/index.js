@@ -28,7 +28,8 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4
+                radius: 4,
+                uniform: false //柱子是否需要均匀分布
             };
 
             this.text = {
@@ -54,6 +55,8 @@ define(
             this.txtsSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
+
+
 
             _.deepExtend(this, opt);
 
@@ -338,7 +341,8 @@ define(
                                             id: "info_txt_" + i + "_" + h + "_" + ci,
                                             context: {
                                                 x: infoWidth + 2,
-                                                fillStyle: cdata.fillStyle
+                                                fillStyle: cdata.fillStyle,
+                                                fontSize : me.text.fontSize
                                             }
                                         });
                                         infosp.addChild(txt);
@@ -724,7 +728,7 @@ define(
                     this.dataZoom = {
                         range: {
                             start: 0,
-                            end: data.length - 2 //因为第一行是title
+                            end: data.length - 1 //因为第一行是title
                         }
                     }
                 };
@@ -921,7 +925,8 @@ define(
                 this._xAxis.draw({
                     graphh: h - this.padding.bottom,
                     graphw: w - this.padding.right,
-                    yAxisW: _yAxisW
+                    yAxisW: _yAxisW,
+                    uniform: this._graphs.bar.uniform
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
@@ -1138,16 +1143,20 @@ define(
                         if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
                             return;
                         };
+                        if( me.dataZoom.range.end <= me.dataZoom.range.start ){
+                            me.dataZoom.range.end = me.dataZoom.range.start+1;
+                        };
 
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
 
-                        me.dataFrame = me._initData(data, this);
+                        me.dataFrame = me._initData(me._data, this);
                         me._xAxis.resetData(me.dataFrame.xAxis, {
                             animation: false
                         });
 
                         me._graphs.average.data = null;
+                        me._graphs.w = me._xAxis.xGraphsWidth;
                         me._getaverageData();
                         me._setaverageLayoutData();
 
@@ -1187,6 +1196,8 @@ define(
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
                 cloneEl.style.position = "absolute";
+                cloneEl.style.width = me.el.offsetWidth+"px";
+                cloneEl.style.height = me.el.offsetHeight+"px";
                 cloneEl.style.top = "10000px";
                 document.body.appendChild(cloneEl);
 
@@ -1194,7 +1205,7 @@ define(
                 _.deepExtend(opts, {
                     graphs: {
                         bar: {
-                            fillStyle: "#ececec"
+                            fillStyle: me.dataZoom.normalColor || "#ececec"
                         },
                         animation: false,
                         eventEnabled: false,

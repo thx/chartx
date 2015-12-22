@@ -211,26 +211,11 @@
                     colors: self.colors,
                     focusCallback: {
                         focus: function(e, index) {
-                            e.sectorIndex = index;
-                            e.eventInfo = {
-                                sectorIndex: index
-                            };
                             self.fire('focus', e);
                         },
                         unfocus: function(e, index) {
-                            e.sectorIndex = index;
-                            e.eventInfo = {
-                                sectorIndex: index
-                            };
                             self.fire('unfocus', e);
                         }
-                    },
-                    clickCallback: function(e, index) {
-                        e.sectorIndex = index;
-                        e.eventInfo = {
-                            sectorIndex: index
-                        };
-                        self.fire("click", e);
                     }
                 };
 
@@ -239,6 +224,10 @@
                 };
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
+
+                self._pie.sprite.on("mousedown mousemove mouseup click" , function(e){
+                    self.fire( e.type , e );
+                });
             },
             _startDraw: function() {
                 this._pie.draw(this);
