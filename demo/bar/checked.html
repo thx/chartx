@@ -88,14 +88,28 @@ var options = {
     xAxis : {
         field : ["xfield"]
     },
+    graphs:{
+        checked : {
+            enabled   : true,
+            fillStyle : '#00A8E6',
+            strokeStyle : '#00A8E6',
+            globalAlpha : 0.1
+        }
+    },
     dataZoom : {
         range : {
             start : 1,
             end   : 8
+        },
+        checked : {
+            fillStyle : '#00A8E6'
         }
     }
 }   
-Chartx.bar("canvasTest" , data , options);
+var chart = null
+Chartx.bar("canvasTest" , data , options).then(function(Chart){
+    chart = Chart
+});
 
 </textarea></form>
 

@@ -4,9 +4,10 @@ define(
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "chartx/chart/theme",
-        "canvax/animation/AnimationFrame"
+        "canvax/animation/AnimationFrame",
+        "canvax/shape/BrokenLine"
     ],
-    function(Canvax, Rect, Tools, Theme, AnimationFrame) {
+    function(Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine) {
 
         var Graphs = function(opt, root) {
             this.data = [];
@@ -46,12 +47,21 @@ define(
                 data: null
             };
 
+            this.checked = {
+                enabled     : false,
+                fillStyle   : '#00A8E6',
+                strokeStyle : '#00A8E6',
+                globalAlpha : 0.1,
+                lineWidth   : 2
+            }
+
             this.sort = null;
 
             this.eventEnabled = true;
 
             this.sprite = null;
             this.txtsSp = null;
+            this.checkedSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
 
@@ -76,6 +86,9 @@ define(
                         //visible: false
                     }
                 });
+                this.checkedSp = new Canvax.Display.Sprite({
+                    id: "checkedSp"
+                });
             },
             setX: function($n) {
                 this.sprite.context.x = $n
@@ -83,6 +96,60 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
+            _checked : function($o){
+                var me = this
+                var index = $o.iGroup
+                var group = me.barsSp.getChildById('barGroup_' + index)
+                if(!group){
+                    return
+                }
+
+                me.checkedSp.removeChildById('line_' + index)
+                me.checkedSp.removeChildById('rect_' + index)
+                var hoverRect = group.getChildAt(0)
+                var x0 = hoverRect.context.x + 1
+                var x1 = hoverRect.context.x + hoverRect.context.width - 1, y = -me.h
+
+                if($o.checked){
+                    var rect = new Rect({
+                        id: "rect_" + index,
+                        pointChkPriority: false,
+                        context: {
+                            x: x0,
+                            y: y,
+                            width: hoverRect.context.width,
+                            height: hoverRect.context.height,
+                            fillStyle: me.checked.fillStyle,
+                            globalAlpha: me.checked.globalAlpha
+                        }
+                    });
+                    me.checkedSp.addChild(rect) 
+
+                    var line = new BrokenLine({ 
+                        id: "line_" + index,
+                        context: {
+                            pointList: [[x0, y], [x1, y]],
+                            strokeStyle : me.checked.strokeStyle,
+                            lineWidth : me.checked.lineWidth
+                        }
+                    });
+                    me.checkedSp.addChild(line)
+                }
+            },
+            removeAllChecked:function(){
+                var me = this
+                me.checkedSp.removeAllChildren()
+            },
+            setBarStyle : function($o){
+                var me = this
+                var index = $o.iGroup
+                var group = me.barsSp.getChildById('barGroup_' + index)
+                var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
+                for(var a = 0, al = group.getNumChildren(); a < al; a++){
+                    var rectEl = group.getChildAt(a)
+                    rectEl.context.fillStyle = fillStyle
+                }
+            },  
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this.root.dataFrame.yAxis.field), function(field, i) {
@@ -376,6 +443,8 @@ define(
                 });
 
                 this.sprite.addChild(this.barsSp);
+
+                this.sprite.addChild(this.checkedSp)
 
                 if (this.text.enabled) {
                     this.sprite.addChild(this.txtsSp);
