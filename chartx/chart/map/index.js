@@ -537,7 +537,6 @@ define(
                     }
                 });
                 _.each(mapDataList, function(md, i) {
-
                     if (md.checked) {
                         var area = area_sp.getChildById("area_" + md.id);
                         area.toFront();

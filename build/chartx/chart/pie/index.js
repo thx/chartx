@@ -1044,7 +1044,7 @@ define(
                 var h = self.height;
 
                 var r = Math.min(w, h) * 2 / 3 / 2;
-                if (self.dataLabel.enabled == false) {
+                if (self.dataLabel && self.dataLabel.enabled == false) {
                     r = Math.min(w, h) / 2;
                     //要预留clickMoveDis位置来hover sector 的时候外扩
                     r -= r / 11;
