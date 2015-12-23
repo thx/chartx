@@ -68,9 +68,20 @@ define(
                     delay: 0
                 });
             },
-            getCheckedList : function(){
+            getCheckedCurrList : function(){
                 var me = this
-                return _.filter(me._getCurrCheckedList(), function(o){ return o })           
+                return _.filter(me._getCurrCheckedList(), function(o){ return o })  
+            },
+            getCheckedList : function(){                   //获取选择之后的对象列表 列表中不含空对象 [eventInfo,evnetInfo,....]
+                var me = this
+                return _.filter(me._checkedList, function(o){ return o })         
+            },
+            cancelChecked : function(eventInfo){           //取消选择某个对象
+                var me = this
+                if(eventInfo){
+                    eventInfo.iGroup -= me.dataZoom.range.start
+                    me._checked(eventInfo)
+                }
             },
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
@@ -653,7 +664,6 @@ define(
             _updateChecked : function(){
                 var me = this 
                 me._currCheckedList = me._getCurrCheckedList()
-
                 for(var a = 0, al = me._currCheckedList.length; a < al; a++){
                     var o = me._currCheckedList[a]
                     me._checkedBar({
@@ -728,6 +738,7 @@ define(
                 });
                 this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
                     if(e.type == 'click'){
+                        me.fire('checkedBefor')
                         me._checked(_.clone(e.eventInfo))
                     }
                     me._setXaxisYaxisToTipsInfo(e);
