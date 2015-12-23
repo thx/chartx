@@ -128,7 +128,7 @@ define(
                     });
                     me.checkedSp.addChild(rect) 
 
-                    var line = new BrokenLine({ 
+                    var line = new BrokenLine({  
                         id: "line_" + index,
                         context: {
                             pointList: [[x0, y], [x1, y]],
