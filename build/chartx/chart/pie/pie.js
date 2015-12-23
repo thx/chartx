@@ -697,7 +697,7 @@
             _getAngleTime: function(secc) {
                 return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
             },
-            addCheckedSec: function(sec) {
+            addCheckedSec: function(sec , callback) {
                 var secc = sec.context;
                 var sector = new Sector({
                     context: {
@@ -716,7 +716,10 @@
                 sector.animate({
                     endAngle: secc.endAngle
                 }, {
-                    duration: this._getAngleTime(secc)
+                    duration: this._getAngleTime(secc),
+                    onComplete : function(){
+                        callback && callback();
+                    }
                 });
             },
             delCheckedSec: function(sec, callback) {
@@ -845,12 +848,21 @@
             },
             secClick: function(sectorEl) {
                 var secData = this.data.data[sectorEl.__dataIndex];
+                if( sectorEl.clickIng ){
+                    return;
+                }
+                sectorEl.clickIng = true;
                 if (!secData.checked) {
-                    this.addCheckedSec(sectorEl);
+                    this.addCheckedSec(sectorEl , function(){
+                        secData.checked = true;
+                        sectorEl.clickIng = false;
+                    });
                 } else {
-                    this.delCheckedSec(sectorEl);
+                    this.delCheckedSec(sectorEl , function(){
+                        secData.checked = false;
+                        sectorEl.clickIng = false;
+                    });
                 };
-                secData.checked = !secData.checked;
             }
         };
 
