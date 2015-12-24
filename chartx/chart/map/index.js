@@ -491,6 +491,9 @@ define(
                                 //已经存在了。取消选中态度
                                 mapData.checked = false;
                                 delete me.checkedList[mapData.id];
+                                if( areaEl._fillStyle == me.area.normalFillStyle ){
+                                    areaEl.context.fillStyle = me.area.normalFillStyle;
+                                }
                             } else {
                                 me.checkedList[mapData.id] = mapData;
                                 mapData.checked = true;
