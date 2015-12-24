@@ -574,6 +574,7 @@ define(
                         areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
                         var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
                         areaEl.context.strokeStyle = hoverStrokeStyle;
+                        areaEl.toFront();
                     }
                 };
             },
