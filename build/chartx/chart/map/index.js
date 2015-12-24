@@ -34,7 +34,7 @@ define(
                     linkage: false, //是否开启省市联动，目前只支持中国地图
                     text: {
                         fillStyle: "#999",
-                        enabled: false
+                        enabled: true
                     }
                 };
 
@@ -415,7 +415,6 @@ define(
 
                     area_sp.addChild(area);
 
-                    area.defInd = i;
                     area.mapData = md;
                     area._strokeStyle = strokeStyle;
                     area._fillStyle = fillStyle;
@@ -444,7 +443,6 @@ define(
                         if (!this.mapData.checked) {
                             this.context.strokeStyle = this._strokeStyle;
                             this.context.fillStyle = this._fillStyle;
-                            //this.toBack( mapLen - this.defInd );
                             this.toBack();
                         };
 
@@ -483,9 +481,12 @@ define(
                             return;
                         };
 
+                        var currentTarget = e.currentTarget;
+
                         areaEl._clickTime = new Date().getTime();
                         areaEl._clickTimer = setTimeout(function() {
-                            var mapData = e.target.mapData;
+                            e.currentTarget = currentTarget;
+                            var mapData = e.currentTarget.mapData;
                             if (me.checkedList[mapData.id]) {
                                 //已经存在了。取消选中态度
                                 mapData.checked = false;
@@ -495,13 +496,18 @@ define(
                                 mapData.checked = true;
                                 if (areaEl.context.fillStyle == me.area.normalFillStyle) {
                                     areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
-                                }
+                                };
                                 delete areaEl._clickTime;
                                 delete areaEl._clickTimer;
                             };
+                            e.eventInfo = {
+                                mapData : mapData
+                            };
                             me.fire("click", e);
                         }, 135);
-                        me.fire("mousedown", e)
+                        
+                        me.fire("mousedown", e);
+                        
                     });
 
                     area.on("mouseup", function(e) {
@@ -539,13 +545,12 @@ define(
                         txt.on("mouseout", function(e) {
                             if (e.toTarget && e.toTarget == this.area) {
                                 this.area.context.lineWidth--;
-                                this.area.toBack(mapLen - this.area.defInd);
                                 return;
                             };
                             this.area.fire("mouseout release", e);
                         });
                         txt.on("click", function(e) {
-                            this.area.fire("click", e);
+                            this.area.fire("mousedown", e); //click
                         });
                         area_txt_sp.addChild(txt);
                     }
@@ -595,7 +600,6 @@ define(
                     delete me.checkedList[mapData.id];
                     areaEl.context.strokeStyle = areaEl._strokeStyle;
                     areaEl.context.fillStyle = areaEl._fillStyle;
-                    //this.toBack( mapLen - this.defInd );
                     areaEl.toBack();
                 };
             },

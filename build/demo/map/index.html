@@ -76,7 +76,8 @@ var options = {
 Chartx.map("canvasTest" , data , options).then(function( map ){
 
     map.on("mousedown mousemove mouseup click" , function(e){
-        console.log(e.type+"|"+e.target.mapData.id)
+        var mapData = (e.target.mapData || e.target.area.mapData);
+        console.log(e.type+"|"+mapData.id)
     });
 
 });
