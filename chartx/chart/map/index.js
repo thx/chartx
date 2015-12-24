@@ -564,6 +564,7 @@ define(
 
             },
             checkAt: function(index) {
+                var me = this;
                 var areaEl = me.sprite.getChildById("areas").getChildAt(index);
                 var mapData = this.mapDataList[ index ];
                 if (!me.checkedList[mapData.id]) {
@@ -575,6 +576,7 @@ define(
                 };
             },
             uncheckAt : function(index){
+                var me = this;
                 var areaEl = me.sprite.getChildById("areas").getChildAt(index);
                 var mapData = this.mapDataList[ index ];
                 if (me.checkedList[mapData.id]) {
