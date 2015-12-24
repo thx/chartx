@@ -360,10 +360,22 @@ define(
                 };
                 return color;
             },
+            getList : function(){
+                return this.mapDataList;
+            },
+            getCheckedList : function(){
+                var list = [];
+                for( var m in this.checkedList ){
+                    list.push( this.checkedList[m] );
+                };
+                return list;
+            },
             _widget: function(features) {
                 var me = this;
                 var mapDataList = features;
                 var mapLen = mapDataList.length;
+
+                this.mapDataList = mapDataList;
 
                 var area_txt_sp;
                 if (me.area.text.enabled) {
