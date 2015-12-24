@@ -389,6 +389,7 @@ define(
                 });
 
                 _.each(mapDataList, function(md, i) {
+                    md.ind = i;
                     var aread = me._getDataForArea(md);
 
                     var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
@@ -561,12 +562,16 @@ define(
                 });
                 me.sprite.addChild(area_sp);
                 area_txt_sp && me.sprite.addChild(area_txt_sp);
-
             },
+
             checkAt: function(index) {
                 var me = this;
-                var areaEl = me.sprite.getChildById("areas").getChildAt(index);
-                var mapData = this.mapDataList[index];
+                
+                var mapData = _.find(this.mapDataList , function( d ){
+                    return d.ind == index;
+                }); 
+                var areaEl = me.sprite.getChildById("areas").getChildById("area_"+mapData.id);
+
                 if (!me.checkedList[mapData.id]) {
                     me.checkedList[mapData.id] = mapData;
                     mapData.checked = true;
@@ -580,8 +585,10 @@ define(
             },
             uncheckAt: function(index) {
                 var me = this;
-                var areaEl = me.sprite.getChildById("areas").getChildAt(index);
-                var mapData = this.mapDataList[index];
+                var mapData = _.find(this.mapDataList , function( d ){
+                    return d.ind == index;
+                }); 
+                var areaEl = me.sprite.getChildById("areas").getChildById("area_"+mapData.id);
                 if (me.checkedList[mapData.id]) {
                     //已经存在了。取消选中态度
                     mapData.checked = false;
