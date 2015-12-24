@@ -854,15 +854,14 @@
                 sectorEl.clickIng = true;
                 if (!secData.checked) {
                     this.addCheckedSec(sectorEl , function(){
-                        secData.checked = true;
                         sectorEl.clickIng = false;
                     });
                 } else {
                     this.delCheckedSec(sectorEl , function(){
-                        secData.checked = false;
                         sectorEl.clickIng = false;
                     });
                 };
+                secData.checked = !secData.checked;
             }
         };
 
