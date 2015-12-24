@@ -376,6 +376,7 @@ define(
                 var mapLen = mapDataList.length;
 
                 this.mapDataList = mapDataList;
+                this.fire("begindraw");
 
                 var area_txt_sp;
                 if (me.area.text.enabled) {
