@@ -360,13 +360,13 @@ define(
                 };
                 return color;
             },
-            getList : function(){
+            getList: function() {
                 return this.mapDataList;
             },
-            getCheckedList : function(){
+            getCheckedList: function() {
                 var list = [];
-                for( var m in this.checkedList ){
-                    list.push( this.checkedList[m] );
+                for (var m in this.checkedList) {
+                    list.push(this.checkedList[m]);
                 };
                 return list;
             },
@@ -498,7 +498,7 @@ define(
                                 delete areaEl._clickTime;
                                 delete areaEl._clickTimer;
                             };
-                            me.fire("click" , e);
+                            me.fire("click", e);
                         }, 135);
                         me.fire("mousedown", e)
                     });
@@ -562,6 +562,26 @@ define(
                 me.sprite.addChild(area_sp);
                 area_txt_sp && me.sprite.addChild(area_txt_sp);
 
+            },
+            checkAt: function(index) {
+                var areaEl = me.sprite.getChildById("areas").getChildAt(index);
+                var mapData = this.mapDataList[ index ];
+                if (!me.checkedList[mapData.id]) {
+                    me.checkedList[mapData.id] = mapData;
+                    mapData.checked = true;
+                    if (areaEl.context.fillStyle == me.area.normalFillStyle) {
+                        areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                    }
+                };
+            },
+            uncheckAt : function(index){
+                var areaEl = me.sprite.getChildById("areas").getChildAt(index);
+                var mapData = this.mapDataList[ index ];
+                if (me.checkedList[mapData.id]) {
+                    //已经存在了。取消选中态度
+                    mapData.checked = false;
+                    delete me.checkedList[mapData.id];
+                };
             },
             _initMarkPoint: function() {
                 var me = this;
