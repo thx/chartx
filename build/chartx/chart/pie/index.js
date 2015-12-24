@@ -966,12 +966,12 @@ define(
                     this._pie.unfocus( index );
                 }
             },
-            check: function(index) {
+            checkAt: function(index) {
                 if (this._pie) {
                     this._pie.check( index );
                 }
             },
-            uncheck: function(index) {
+            uncheckAt: function(index) {
                 if (this._pie) {
                     this._pie.uncheck( index );
                 }
