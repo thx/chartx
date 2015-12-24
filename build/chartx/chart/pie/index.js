@@ -790,9 +790,10 @@ define(
                             });
 
                             sector.on('mousedown mouseup click mousemove', function(e) {
+
                                 self._geteventInfo(e, this.__dataIndex);
                                 if (e.type == "click") {
-                                    self.secClick(this);
+                                    self.secClick(this , e);
                                 };
                                 if (e.type == "mousemove") {
                                     if (self.tips.enabled) {
@@ -848,7 +849,7 @@ define(
                     }
                 }
             },
-            secClick: function(sectorEl) {
+            secClick: function(sectorEl , e) {
                 var secData = this.data.data[sectorEl.__dataIndex];
                 if( sectorEl.clickIng ){
                     return;
@@ -864,6 +865,7 @@ define(
                     });
                 };
                 secData.checked = !secData.checked;
+                e.eventInfo.checked = secData.checked;
             }
         };
 
@@ -1110,6 +1112,7 @@ define(
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
                 self._pie.sprite.on("mousedown mousemove mouseup click" , function(e){
+                    
                     self.fire( e.type , e );
                 });
             },

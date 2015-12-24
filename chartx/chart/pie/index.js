@@ -238,6 +238,7 @@
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
                 self._pie.sprite.on("mousedown mousemove mouseup click" , function(e){
+                    
                     self.fire( e.type , e );
                 });
             },
