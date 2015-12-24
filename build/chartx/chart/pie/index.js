@@ -415,7 +415,8 @@ define(
                     percentage: data.percentage,
                     value: data.y,
                     fillStyle: fillColor,
-                    data: this.data.org[ind]
+                    data: this.data.org[ind],
+                    checked: data.checked
                 };
                 return e;
             },
@@ -698,6 +699,7 @@ define(
                 return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
             },
             addCheckedSec: function(sec , callback) {
+
                 var secc = sec.context;
                 var sector = new Sector({
                     context: {
