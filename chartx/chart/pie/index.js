@@ -61,18 +61,30 @@
                     if (sectorList.length > 0) {
                         for (var i = 0; i < sectorList.length; i++) {
                             item = sectorList[i];
+                            var idata = self._pie.data.data[i];
+                            
                             list.push({
                                 name: item.name,
                                 index: item.index,
                                 color: item.color,
                                 r: item.r,
                                 value: item.value,
-                                percentage: item.percentage
+                                percentage: item.percentage,
+                                checked : idata.checked
                             });
                         }
                     }
                 };
                 return list;
+            },
+            getCheckedList : function(){
+                var cl = [];
+                _.each( this.getList() , function( item ){
+                    if( item.checked ){
+                        cl.push( item );
+                    }
+                } );
+                return cl;
             },
             focusAt: function(index) {
                 if (this._pie) {

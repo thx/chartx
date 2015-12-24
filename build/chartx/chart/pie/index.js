@@ -238,7 +238,7 @@ define(
                     } else {
                         index = index % colors.length;
                     }
-                }
+                };
                 return colors[index];
             },
             _configColors: function() {
@@ -327,7 +327,7 @@ define(
                         sec.context.startAngle = self.angleOffset;
                         sec.context.endAngle = self.angleOffset;
                     }
-                })
+                });
                 self._hideDataLabel();
 
                 AnimationFrame.registTween({
@@ -850,7 +850,7 @@ define(
                 var secData = this.data.data[sectorEl.__dataIndex];
                 if( sectorEl.clickIng ){
                     return;
-                }
+                };
                 sectorEl.clickIng = true;
                 if (!secData.checked) {
                     this.addCheckedSec(sectorEl , function(){
@@ -932,18 +932,30 @@ define(
                     if (sectorList.length > 0) {
                         for (var i = 0; i < sectorList.length; i++) {
                             item = sectorList[i];
+                            var idata = self._pie.data.data[i];
+                            
                             list.push({
                                 name: item.name,
                                 index: item.index,
                                 color: item.color,
                                 r: item.r,
                                 value: item.value,
-                                percentage: item.percentage
+                                percentage: item.percentage,
+                                checked : idata.checked
                             });
                         }
                     }
                 };
                 return list;
+            },
+            getCheckedList : function(){
+                var cl = [];
+                _.each( this.getList() , function( item ){
+                    if( item.checked ){
+                        cl.push( item );
+                    }
+                } );
+                return cl;
             },
             focusAt: function(index) {
                 if (this._pie) {

@@ -238,7 +238,7 @@
                     } else {
                         index = index % colors.length;
                     }
-                }
+                };
                 return colors[index];
             },
             _configColors: function() {
@@ -327,7 +327,7 @@
                         sec.context.startAngle = self.angleOffset;
                         sec.context.endAngle = self.angleOffset;
                     }
-                })
+                });
                 self._hideDataLabel();
 
                 AnimationFrame.registTween({
@@ -850,7 +850,7 @@
                 var secData = this.data.data[sectorEl.__dataIndex];
                 if( sectorEl.clickIng ){
                     return;
-                }
+                };
                 sectorEl.clickIng = true;
                 if (!secData.checked) {
                     this.addCheckedSec(sectorEl , function(){
