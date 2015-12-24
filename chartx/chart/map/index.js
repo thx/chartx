@@ -566,7 +566,7 @@ define(
             checkAt: function(index) {
                 var me = this;
                 var areaEl = me.sprite.getChildById("areas").getChildAt(index);
-                var mapData = this.mapDataList[ index ];
+                var mapData = this.mapDataList[index];
                 if (!me.checkedList[mapData.id]) {
                     me.checkedList[mapData.id] = mapData;
                     mapData.checked = true;
@@ -575,14 +575,18 @@ define(
                     }
                 };
             },
-            uncheckAt : function(index){
+            uncheckAt: function(index) {
                 var me = this;
                 var areaEl = me.sprite.getChildById("areas").getChildAt(index);
-                var mapData = this.mapDataList[ index ];
+                var mapData = this.mapDataList[index];
                 if (me.checkedList[mapData.id]) {
                     //已经存在了。取消选中态度
                     mapData.checked = false;
                     delete me.checkedList[mapData.id];
+                    areaEl.context.strokeStyle = areaEl._strokeStyle;
+                    areaEl.context.fillStyle = areaEl._fillStyle;
+                    //this.toBack( mapLen - this.defInd );
+                    areaEl.toBack();
                 };
             },
             _initMarkPoint: function() {
