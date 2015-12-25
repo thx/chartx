@@ -22,8 +22,8 @@ define(
             _back: null,
             _graphs: null,
             _tip: null,
-            _checkedList : [],                             //所有的选择对象
-            _currCheckedList : [],                         //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
+            _checkedList: [], //所有的选择对象
+            _currCheckedList: [], //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
             init: function(node, data, opts) {
 
@@ -68,20 +68,33 @@ define(
                     delay: 0
                 });
             },
-            getCheckedCurrList : function(){
+            getCheckedCurrList: function() {
                 var me = this
-                return _.filter(me._getCurrCheckedList(), function(o){ return o })  
+                return _.filter(me._getCurrCheckedList(), function(o) {
+                    return o
+                })
             },
-            getCheckedList : function(){                   //获取选择之后的对象列表 列表中不含空对象 [eventInfo,evnetInfo,....]
+            getCheckedList: function() { //获取选择之后的对象列表 列表中不含空对象 [eventInfo,evnetInfo,....]
                 var me = this
-                return _.filter(me._checkedList, function(o){ return o })         
+                return _.filter(me._checkedList, function(o) {
+                    return o
+                })
             },
-            cancelChecked : function(eventInfo){           //取消选择某个对象
+            cancelChecked: function(eventInfo) { //取消选择某个对象
                 var me = this
-                if(eventInfo){
+                if (eventInfo) {
                     eventInfo.iGroup -= me.dataZoom.range.start
                     me._checked(eventInfo)
                 }
+            },
+            getGroupChecked: function( e ) {
+                var checked = false;
+                _.each(this.getCheckedList(), function(obj) {
+                    if (obj && obj.iGroup == e.eventInfo.iGroup) {
+                        checked = true;
+                    }
+                });
+                return checked
             },
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
@@ -326,7 +339,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1, xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -464,8 +477,8 @@ define(
                         if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
                             return;
                         };
-                        if( me.dataZoom.range.end <= me.dataZoom.range.start ){
-                            me.dataZoom.range.end = me.dataZoom.range.start+1;
+                        if (me.dataZoom.range.end <= me.dataZoom.range.start) {
+                            me.dataZoom.range.end = me.dataZoom.range.start + 1;
                         };
 
                         me.dataZoom.range.start = parseInt(range.start);
@@ -492,8 +505,8 @@ define(
 
                         me._removeChecked()
                     },
-                    dragEnd:function(range){
-                       me._updateChecked()
+                    dragEnd: function(range) {
+                        me._updateChecked()
                     }
                 }, me.dataZoom);
 
@@ -520,8 +533,8 @@ define(
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
                 cloneEl.style.position = "absolute";
-                cloneEl.style.width = me.el.offsetWidth+"px";
-                cloneEl.style.height = me.el.offsetHeight+"px";
+                cloneEl.style.width = me.el.offsetWidth + "px";
+                cloneEl.style.height = me.el.offsetHeight + "px";
                 cloneEl.style.top = "10000px";
                 document.body.appendChild(cloneEl);
 
@@ -658,65 +671,71 @@ define(
                 });
             },
 
-            _removeChecked : function(){
+            _removeChecked: function() {
                 this._graphs.removeAllChecked()
             },
-            _updateChecked : function(){
-                var me = this 
+            _updateChecked: function() {
+                var me = this
                 me._currCheckedList = me._getCurrCheckedList()
-                for(var a = 0, al = me._currCheckedList.length; a < al; a++){
+                for (var a = 0, al = me._currCheckedList.length; a < al; a++) {
                     var o = me._currCheckedList[a]
                     me._checkedBar({
-                        iGroup : o.iGroup - me.dataZoom.range.start,
-                        checked : true,
+                        iGroup: o.iGroup - me.dataZoom.range.start,
+                        checked: true,
                     })
                 }
             },
 
-            _getCurrCheckedList : function(){
+            _getCurrCheckedList: function() {
                 var me = this
-                return _.filter(me._checkedList, function(o){
-                    if(o){
-                        if(o.iGroup >= me.dataZoom.range.start && o.iGroup <= me.dataZoom.range.end){
+                return _.filter(me._checkedList, function(o) {
+                    if (o) {
+                        if (o.iGroup >= me.dataZoom.range.start && o.iGroup <= me.dataZoom.range.end) {
                             return o
                         }
                     }
                 })
             },
-            _checked : function(eventInfo){                //当点击graphs时 触发选中状态
+            _checked: function(eventInfo) { //当点击graphs时 触发选中状态
                 var me = this
-                if(!me._graphs.checked.enabled){
+                if (!me._graphs.checked.enabled) {
                     return
                 }
                 var i = eventInfo.iGroup + me.dataZoom.range.start
-                
+
                 var checked = true
-                if(me._checkedList[i]){                          //如果已经选中
+                if (me._checkedList[i]) { //如果已经选中
                     me._checkedList[i] = null
                     checked = false
-                }else{                                           //如果没选中                           
+                } else { //如果没选中                           
                     me._checkedList[i] = eventInfo
                 }
-                me._checkedBar({iGroup : eventInfo.iGroup, checked : checked})
-                me._checkedMiniBar({iGroup : i, checked : checked})
+                me._checkedBar({
+                    iGroup: eventInfo.iGroup,
+                    checked: checked
+                })
+                me._checkedMiniBar({
+                    iGroup: i,
+                    checked: checked
+                })
 
                 eventInfo.iGroup = i
             },
-            _checkedBar : function($o){                    //选择bar
+            _checkedBar: function($o) { //选择bar
                 var me = this
                 var graphs = me._graphs
                 graphs._checked($o)
             },
-            _checkedMiniBar : function($o){               //选择缩略的bar
+            _checkedMiniBar: function($o) { //选择缩略的bar
                 var me = this
                 var graphs = me.__cloneBar.thumbBar._graphs
                 var fillStyle = ''
-                if($o.checked){
+                if ($o.checked) {
                     fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
                 }
                 graphs.setBarStyle({
-                    iGroup : $o.iGroup,
-                    fillStyle : fillStyle
+                    iGroup: $o.iGroup,
+                    fillStyle: fillStyle
                 })
             },
 
@@ -737,9 +756,9 @@ define(
                     me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
-                    if(e.type == 'click'){
-                        me.fire('checkedBefor')
-                        me._checked(_.clone(e.eventInfo))
+                    if (e.type == 'click') {
+                        me.fire('checkedBefor');
+                        me._checked(_.clone(e.eventInfo));
                     }
                     me._setXaxisYaxisToTipsInfo(e);
                     me.fire(e.type, e);
