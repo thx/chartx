@@ -1049,7 +1049,7 @@ define(
 
                 this._back = new Back(this.back);
                 this.stageBg.addChild(this._back.sprite);
-                
+
                 this._anchor = new Anchor(this.anchor);
                 this.stageBg.addChild(this._anchor.sprite);
 
@@ -1096,7 +1096,7 @@ define(
                     graphw: this.width - _yAxisRW - this.padding.right,
                     yAxisW: _yAxisW
                 });
-                if (this._xAxis.yAxisW != _yAxisW) {
+                if (this._xAxis.yAxisW != _yAxisW && _yAxisW) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
                     this._yAxis.resetWidth(this._xAxis.yAxisW);
                     _yAxisW = this._xAxis.yAxisW;

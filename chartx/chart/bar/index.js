@@ -264,7 +264,7 @@ define(
                     yAxisW: _yAxisW,
                     uniform: this._graphs.bar.uniform
                 });
-                if (this._xAxis.yAxisW != _yAxisW) {
+                if ( this._xAxis.yAxisW != _yAxisW && _yAxisW ) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
                     this._yAxis.resetWidth(this._xAxis.yAxisW);
                     _yAxisW = this._xAxis.yAxisW;
