@@ -1596,7 +1596,7 @@ define(
             //this.display = "block";
             this.enabled = 1; //1,0 true ,false 
 
-            this.disXAxisLine = 0; //x轴两端预留的最小值
+            this.disXAxisLine = 6; //x轴两端预留的最小值
             this.disOriginX = 0; //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
             this.xGraphsWidth = 0; //x轴宽(去掉两端)
 
@@ -1617,8 +1617,6 @@ define(
             this.isH = false; //是否为横向转向的x轴
 
             this.animation = true;
-
-            this.uniform = false;
 
             this.init(opt, data);
         };
@@ -1742,7 +1740,7 @@ define(
                 if (this.pos.y == null) {
                     this.pos.y = this.graphh - this.h;
                 };
-                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine() - (this.uniform ? this.xGraphsWidth % (_.flatten(this.dataOrg).length || 1) : 0) );
+                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine());
 
                 if (this._label) {
                     if (this.isH) {

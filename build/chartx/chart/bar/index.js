@@ -29,8 +29,7 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4,
-                uniform: false //柱子是否需要均匀分布
+                radius: 4
             };
 
             this.text = {
@@ -1024,8 +1023,7 @@ define(
                 this._xAxis.draw({
                     graphh: h - this.padding.bottom,
                     graphw: w - this.padding.right,
-                    yAxisW: _yAxisW,
-                    uniform: this._graphs.bar.uniform
+                    yAxisW: _yAxisW
                 });
                 if ( this._xAxis.yAxisW != _yAxisW && _yAxisW ) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
