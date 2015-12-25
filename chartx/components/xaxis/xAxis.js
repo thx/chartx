@@ -43,7 +43,7 @@ define(
             //this.display = "block";
             this.enabled = 1; //1,0 true ,false 
 
-            this.disXAxisLine = 6; //x轴两端预留的最小值
+            this.disXAxisLine = 0; //x轴两端预留的最小值
             this.disOriginX = 0; //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
             this.xGraphsWidth = 0; //x轴宽(去掉两端)
 
