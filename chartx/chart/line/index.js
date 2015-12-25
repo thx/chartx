@@ -187,7 +187,11 @@ define(
                 };
 
                 this._back = new Back(this.back);
+                this.stageBg.addChild(this._back.sprite);
+                
                 this._anchor = new Anchor(this.anchor);
+                this.stageBg.addChild(this._anchor.sprite);
+
                 this._graphs = new Graphs(this.graphs, this);
                 this._tip = new Tips(this.tips, this.dataFrame, this.canvax.getDomContainer());
             },
@@ -321,8 +325,8 @@ define(
                 };
             },
             _endDraw : function(){
-                this.stageBg.addChild(this._back.sprite);
-                this.stageBg.addChild(this._anchor.sprite);
+                //this.stageBg.addChild(this._back.sprite);
+                //this.stageBg.addChild(this._anchor.sprite);
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._yAxis.sprite);
                 if (this._yAxisR) {
