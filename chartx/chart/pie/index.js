@@ -61,18 +61,30 @@
                     if (sectorList.length > 0) {
                         for (var i = 0; i < sectorList.length; i++) {
                             item = sectorList[i];
+                            var idata = self._pie.data.data[i];
+                            
                             list.push({
                                 name: item.name,
                                 index: item.index,
                                 color: item.color,
                                 r: item.r,
                                 value: item.value,
-                                percentage: item.percentage
+                                percentage: item.percentage,
+                                checked : idata.checked
                             });
                         }
                     }
                 };
                 return list;
+            },
+            getCheckedList : function(){
+                var cl = [];
+                _.each( this.getList() , function( item ){
+                    if( item.checked ){
+                        cl.push( item );
+                    }
+                } );
+                return cl;
             },
             focusAt: function(index) {
                 if (this._pie) {
@@ -84,12 +96,12 @@
                     this._pie.unfocus( index );
                 }
             },
-            check: function(index) {
+            checkAt: function(index) {
                 if (this._pie) {
                     this._pie.check( index );
                 }
             },
-            uncheck: function(index) {
+            uncheckAt: function(index) {
                 if (this._pie) {
                     this._pie.uncheck( index );
                 }
@@ -185,7 +197,7 @@
                 var h = self.height;
 
                 var r = Math.min(w, h) * 2 / 3 / 2;
-                if (self.dataLabel.enabled == false) {
+                if (self.dataLabel && self.dataLabel.enabled == false) {
                     r = Math.min(w, h) / 2;
                     //要预留clickMoveDis位置来hover sector 的时候外扩
                     r -= r / 11;
@@ -226,6 +238,7 @@
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
                 self._pie.sprite.on("mousedown mousemove mouseup click" , function(e){
+                    
                     self.fire( e.type , e );
                 });
             },

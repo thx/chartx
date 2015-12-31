@@ -29,8 +29,7 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4,
-                uniform: false //柱子是否需要均匀分布
+                radius: 4
             };
 
             this.text = {

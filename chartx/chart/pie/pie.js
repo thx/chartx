@@ -238,7 +238,7 @@
                     } else {
                         index = index % colors.length;
                     }
-                }
+                };
                 return colors[index];
             },
             _configColors: function() {
@@ -327,7 +327,7 @@
                         sec.context.startAngle = self.angleOffset;
                         sec.context.endAngle = self.angleOffset;
                     }
-                })
+                });
                 self._hideDataLabel();
 
                 AnimationFrame.registTween({
@@ -415,7 +415,8 @@
                     percentage: data.percentage,
                     value: data.y,
                     fillStyle: fillColor,
-                    data: this.data.org[ind]
+                    data: this.data.org[ind],
+                    checked: data.checked
                 };
                 return e;
             },
@@ -697,7 +698,8 @@
             _getAngleTime: function(secc) {
                 return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
             },
-            addCheckedSec: function(sec) {
+            addCheckedSec: function(sec , callback) {
+
                 var secc = sec.context;
                 var sector = new Sector({
                     context: {
@@ -716,7 +718,10 @@
                 sector.animate({
                     endAngle: secc.endAngle
                 }, {
-                    duration: this._getAngleTime(secc)
+                    duration: this._getAngleTime(secc),
+                    onComplete : function(){
+                        callback && callback();
+                    }
                 });
             },
             delCheckedSec: function(sec, callback) {
@@ -785,9 +790,10 @@
                             });
 
                             sector.on('mousedown mouseup click mousemove', function(e) {
+
                                 self._geteventInfo(e, this.__dataIndex);
                                 if (e.type == "click") {
-                                    self.secClick(this);
+                                    self.secClick(this , e);
                                 };
                                 if (e.type == "mousemove") {
                                     if (self.tips.enabled) {
@@ -843,14 +849,23 @@
                     }
                 }
             },
-            secClick: function(sectorEl) {
+            secClick: function(sectorEl , e) {
                 var secData = this.data.data[sectorEl.__dataIndex];
+                if( sectorEl.clickIng ){
+                    return;
+                };
+                sectorEl.clickIng = true;
                 if (!secData.checked) {
-                    this.addCheckedSec(sectorEl);
+                    this.addCheckedSec(sectorEl , function(){
+                        sectorEl.clickIng = false;
+                    });
                 } else {
-                    this.delCheckedSec(sectorEl);
+                    this.delCheckedSec(sectorEl , function(){
+                        sectorEl.clickIng = false;
+                    });
                 };
                 secData.checked = !secData.checked;
+                e.eventInfo.checked = secData.checked;
             }
         };
 

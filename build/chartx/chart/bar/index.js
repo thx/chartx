@@ -4,9 +4,10 @@ define(
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "chartx/chart/theme",
-        "canvax/animation/AnimationFrame"
+        "canvax/animation/AnimationFrame",
+        "canvax/shape/BrokenLine"
     ],
-    function(Canvax, Rect, Tools, Theme, AnimationFrame) {
+    function(Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine) {
 
         var Graphs = function(opt, root) {
             this.data = [];
@@ -28,8 +29,7 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4,
-                uniform: false //柱子是否需要均匀分布
+                radius: 4
             };
 
             this.text = {
@@ -47,12 +47,21 @@ define(
                 data: null
             };
 
+            this.checked = {
+                enabled     : false,
+                fillStyle   : '#00A8E6',
+                strokeStyle : '#00A8E6',
+                globalAlpha : 0.1,
+                lineWidth   : 2
+            }
+
             this.sort = null;
 
             this.eventEnabled = true;
 
             this.sprite = null;
             this.txtsSp = null;
+            this.checkedSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
 
@@ -79,6 +88,9 @@ define(
                         //visible: false
                     }
                 });
+                this.checkedSp = new Canvax.Display.Sprite({
+                    id: "checkedSp"
+                });
             },
             setX: function($n) {
                 this.sprite.context.x = $n
@@ -86,6 +98,60 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
+            _checked : function($o){
+                var me = this
+                var index = $o.iGroup
+                var group = me.barsSp.getChildById('barGroup_' + index)
+                if(!group){
+                    return
+                }
+
+                me.checkedSp.removeChildById('line_' + index)
+                me.checkedSp.removeChildById('rect_' + index)
+                var hoverRect = group.getChildAt(0)
+                var x0 = hoverRect.context.x + 1
+                var x1 = hoverRect.context.x + hoverRect.context.width - 1, y = -me.h
+
+                if($o.checked){
+                    var rect = new Rect({
+                        id: "rect_" + index,
+                        pointChkPriority: false,
+                        context: {
+                            x: x0,
+                            y: y,
+                            width: hoverRect.context.width,
+                            height: hoverRect.context.height,
+                            fillStyle: me.checked.fillStyle,
+                            globalAlpha: me.checked.globalAlpha
+                        }
+                    });
+                    me.checkedSp.addChild(rect) 
+
+                    var line = new BrokenLine({  
+                        id: "line_" + index,
+                        context: {
+                            pointList: [[x0, y], [x1, y]],
+                            strokeStyle : me.checked.strokeStyle,
+                            lineWidth : me.checked.lineWidth
+                        }
+                    });
+                    me.checkedSp.addChild(line)
+                }
+            },
+            removeAllChecked:function(){
+                var me = this
+                me.checkedSp.removeAllChildren()
+            },
+            setBarStyle : function($o){
+                var me = this
+                var index = $o.iGroup
+                var group = me.barsSp.getChildById('barGroup_' + index)
+                var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
+                for(var a = 0, al = group.getNumChildren(); a < al; a++){
+                    var rectEl = group.getChildAt(a)
+                    rectEl.context.fillStyle = fillStyle
+                }
+            },  
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this.root.dataFrame.yAxis.field), function(field, i) {
@@ -380,6 +446,8 @@ define(
                 });
 
                 this.sprite.addChild(this.barsSp);
+
+                this.sprite.addChild(this.checkedSp)
 
                 if (this.text.enabled) {
                     this.sprite.addChild(this.txtsSp);
@@ -716,6 +784,8 @@ define(
             _back: null,
             _graphs: null,
             _tip: null,
+            _checkedList: [], //所有的选择对象
+            _currCheckedList: [], //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
             init: function(node, data, opts) {
 
@@ -759,6 +829,34 @@ define(
                 }, {
                     delay: 0
                 });
+            },
+            getCheckedCurrList: function() {
+                var me = this
+                return _.filter(me._getCurrCheckedList(), function(o) {
+                    return o
+                })
+            },
+            getCheckedList: function() { //获取选择之后的对象列表 列表中不含空对象 [eventInfo,evnetInfo,....]
+                var me = this
+                return _.filter(me._checkedList, function(o) {
+                    return o
+                })
+            },
+            cancelChecked: function(eventInfo) { //取消选择某个对象
+                var me = this
+                if (eventInfo) {
+                    eventInfo.iGroup -= me.dataZoom.range.start
+                    me._checked(eventInfo)
+                }
+            },
+            getGroupChecked: function( e ) {
+                var checked = false;
+                _.each(this.getCheckedList(), function(obj) {
+                    if (obj && obj.iGroup == e.eventInfo.iGroup) {
+                        checked = true;
+                    }
+                });
+                return checked
             },
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
@@ -925,10 +1023,9 @@ define(
                 this._xAxis.draw({
                     graphh: h - this.padding.bottom,
                     graphw: w - this.padding.right,
-                    yAxisW: _yAxisW,
-                    uniform: this._graphs.bar.uniform
+                    yAxisW: _yAxisW
                 });
-                if (this._xAxis.yAxisW != _yAxisW) {
+                if ( this._xAxis.yAxisW != _yAxisW ) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
                     this._yAxis.resetWidth(this._xAxis.yAxisW);
                     _yAxisW = this._xAxis.yAxisW;
@@ -996,7 +1093,6 @@ define(
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
-
                 var hLen = yArr.length; //bar的横向分组length
 
                 var xDis1 = _xAxis.xDis1;
@@ -1004,7 +1100,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1, xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -1139,12 +1235,11 @@ define(
                         y: me._xAxis.pos.y + me._xAxis.h
                     },
                     dragIng: function(range) {
-
                         if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
                             return;
                         };
-                        if( me.dataZoom.range.end <= me.dataZoom.range.start ){
-                            me.dataZoom.range.end = me.dataZoom.range.start+1;
+                        if (me.dataZoom.range.end <= me.dataZoom.range.start) {
+                            me.dataZoom.range.end = me.dataZoom.range.start + 1;
                         };
 
                         me.dataZoom.range.start = parseInt(range.start);
@@ -1168,6 +1263,11 @@ define(
                             easing: "Quadratic.Out",
                             duration: 300
                         });
+
+                        me._removeChecked()
+                    },
+                    dragEnd: function(range) {
+                        me._updateChecked()
                     }
                 }, me.dataZoom);
 
@@ -1181,10 +1281,8 @@ define(
                 graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
 
-
                 me._dataZoom.dataZoomBg.addChild(graphssp);
                 me.core.addChild(me._dataZoom.sprite);
-
 
                 this.__cloneBar.thumbBar.destroy();
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
@@ -1196,8 +1294,8 @@ define(
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
                 cloneEl.style.position = "absolute";
-                cloneEl.style.width = me.el.offsetWidth+"px";
-                cloneEl.style.height = me.el.offsetHeight+"px";
+                cloneEl.style.width = me.el.offsetWidth + "px";
+                cloneEl.style.height = me.el.offsetHeight + "px";
                 cloneEl.style.top = "10000px";
                 document.body.appendChild(cloneEl);
 
@@ -1278,7 +1376,6 @@ define(
                         })
                     }
                 })
-
             },
             _initMarkPoint: function(g) {
                 var me = this;
@@ -1334,6 +1431,75 @@ define(
                     });
                 });
             },
+
+            _removeChecked: function() {
+                this._graphs.removeAllChecked()
+            },
+            _updateChecked: function() {
+                var me = this
+                me._currCheckedList = me._getCurrCheckedList()
+                for (var a = 0, al = me._currCheckedList.length; a < al; a++) {
+                    var o = me._currCheckedList[a]
+                    me._checkedBar({
+                        iGroup: o.iGroup - me.dataZoom.range.start,
+                        checked: true,
+                    })
+                }
+            },
+
+            _getCurrCheckedList: function() {
+                var me = this
+                return _.filter(me._checkedList, function(o) {
+                    if (o) {
+                        if (o.iGroup >= me.dataZoom.range.start && o.iGroup <= me.dataZoom.range.end) {
+                            return o
+                        }
+                    }
+                })
+            },
+            _checked: function(eventInfo) { //当点击graphs时 触发选中状态
+                var me = this
+                if (!me._graphs.checked.enabled) {
+                    return
+                }
+                var i = eventInfo.iGroup + me.dataZoom.range.start
+
+                var checked = true
+                if (me._checkedList[i]) { //如果已经选中
+                    me._checkedList[i] = null
+                    checked = false
+                } else { //如果没选中                           
+                    me._checkedList[i] = eventInfo
+                }
+                me._checkedBar({
+                    iGroup: eventInfo.iGroup,
+                    checked: checked
+                })
+                me._checkedMiniBar({
+                    iGroup: i,
+                    checked: checked
+                })
+
+                eventInfo.iGroup = i
+            },
+            _checkedBar: function($o) { //选择bar
+                var me = this
+                var graphs = me._graphs
+                graphs._checked($o)
+            },
+            _checkedMiniBar: function($o) { //选择缩略的bar
+                var me = this
+                var graphs = me.__cloneBar.thumbBar._graphs
+                var fillStyle = ''
+                if ($o.checked) {
+                    fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                }
+                graphs.setBarStyle({
+                    iGroup: $o.iGroup,
+                    fillStyle: fillStyle
+                })
+            },
+
             bindEvent: function() {
                 var me = this;
                 this._graphs.sprite.on("panstart mouseover", function(e) {
@@ -1351,6 +1517,10 @@ define(
                     me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
+                    if (e.type == 'click') {
+                        me.fire('checkedBefor');
+                        me._checked(_.clone(e.eventInfo));
+                    }
                     me._setXaxisYaxisToTipsInfo(e);
                     me.fire(e.type, e);
                 });

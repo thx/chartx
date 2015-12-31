@@ -106,7 +106,9 @@ var options = {
         }
     }
 }   
-Chartx.bar("canvasTest" , data , options).then(function(chart){
+var chart = null
+Chartx.bar("canvasTest" , data , options).then(function(Chart){
+    chart = Chart
     chart.on("checkedBefor" , function(){
         _.each(chart.getCheckedList() , function(o){
             chart.cancelChecked(o);

@@ -65,8 +65,6 @@ define(
 
             this.animation = true;
 
-            this.uniform = false;
-
             this.init(opt, data);
         };
 
@@ -189,7 +187,7 @@ define(
                 if (this.pos.y == null) {
                     this.pos.y = this.graphh - this.h;
                 };
-                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine() - (this.uniform ? this.xGraphsWidth % (_.flatten(this.dataOrg).length || 1) : 0) );
+                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine());
 
                 if (this._label) {
                     if (this.isH) {
