@@ -891,9 +891,12 @@ define(
         var Canvax = Chart.Canvax;
 
         return Chart.extend({
-            element : null,
+            // element : null,
+            // opts    : null,
             init: function(node, data, opts) {
-                this.element = node
+                // this.element = node;
+                this.data    = data;
+                this.options = opts;
                 this.config = {
                     mode: 1,
                     event: {
@@ -1077,7 +1080,11 @@ define(
                 // this.width = parseInt(this.el.offsetWidth);
                 // this.height = parseInt(this.el.offsetHeight)
 
-                this.dataFrame = this._initData(obj.data, obj.options);
+                var data = obj.data || this.data
+                // var opt = obj.options || this.opts
+                // _.deepExtend(this, obj.data);
+                _.deepExtend(this, obj.options);
+                this.dataFrame = this._initData(data, this.options);
                 this.draw()
             },
             _initModule: function() {
