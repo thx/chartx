@@ -31,91 +31,47 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , 101 , 20 , 33    ],
-    [ 2      , 167 , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 4      , 51  , 40 , 33    ],
-    [ 5      , 67  , 51 , 26    ],
-    [ 6      , 100 , 20 , 150   ],
-    [ 7      , 11  , 60 , 33    ],
-    [ 8      , 67  , 71 , 26    ],
-    [ 9      , 60  , 230, 150   ],
-    [ 10     , 101 , 28 , 33    ],
-    [ 11     , 67  , 91 , 26    ],
-    [ 12     , 120 , 56 , 150   ],
-    [ 13     , 167 , 23 , 26    ],
-    [ 14     , 40  , 50 , 150   ],
-    [ 15     , 101 , 50 , 33    ],
-    [ 16     , 67  , 33 , 26    ],
-    [ 17     , 100 , 150, 150   ],
-    [ 18     , 11 , 120 , 33    ],
-    [ 19     , 67  , 31 , 26    ],
-    [ 20     , 100 , 88 , 150   ],
-    [ 21     , 101 , 60 , 33    ],
-    [ 22     , 67  , 91 , 26    ],
-    [ 23     , 100 , 30 , 150   ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 4      , 51  , 40 , 33    ],
-    [ 5      , 67  , 51 , 26    ],
-    [ 6      , 100 , 20 , 150   ],
-    [ 7      , 11  , 60 , 33    ],
-    [ 8      , 67  , 71 , 26    ],
-    [ 9      , 60  , 230, 150   ],
-    [ 10     , 101 , 28 , 33    ],
-    [ 11     , 67  , 91 , 26    ],
-    [ 12     , 120 , 56 , 150   ],
-    [ 13     , 167 , 23 , 26    ],
-    [ 14     , 40  , 50 , 150   ],
-    [ 15     , 101 , 50 , 33    ],
-    [ 16     , 67  , 33 , 26    ],
-    [ 17     , 100 , 150, 150   ],
-    [ 18     , 11 , 120 , 33    ],
-    [ 19     , 67  , 31 , 26    ],
-    [ 20     , 100 , 88 , 150   ],
-    [ 21     , 101 , 60 , 33    ],
-    [ 22     , 67  , 91 , 26    ],
-    [ 23     , 100 , 30 , 150   ]
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ]
+
+];
+
+
+var data1= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ]
+
 ];
 var options = {
     yAxis : {
-        field : ["uv"]
+        field : ["uv","pv"],
+        //enabled : false
     },
     xAxis : {
         field : ["xfield"]
-    },
-    graphs:{
-        checked : {
-            enabled   : true,
-            fillStyle : '#00A8E6',
-            strokeStyle : '#00A8E6',
-            globalAlpha : 0.1
-        }
-    },
-    dataZoom : {
-        range : {
-            start : 1,
-            end   : 8
-        },
-        checked : {
-            fillStyle : '#00A8E6'
-        }
     }
 }   
-Chartx.bar("canvasTest" , data , options).then(function(chart){
-    chart.on("checkedBefor" , function(){
-        _.each(chart.getCheckedList() , function(o){
-            chart.cancelChecked(o);
-        })
-    });
-    chart.on("click" , function(e){
+Chartx.bar("canvasTest" , data , options).then(function( bar ){
+    window.bar = bar
 
-    });
-});
+})
+$("body").click(function(){
+    $("#canvasTest").width(400)
+    $("#canvasTest").height(300)
+
+    bar.reset({
+        data : data1,
+        options:options
+    })
+
+    bar.resize()
+})
 
 </textarea></form>
 

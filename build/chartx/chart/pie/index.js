@@ -17,6 +17,7 @@ define(
             this.branchSp = null;
             this.sectorsSp = null;
             this.checkedSp = null;
+            this.branchTxt = null;
             //this.angleOffset = -90; //正常情况下，饼图的扇形0度是从3点钟开始，-90表示从12点开始；改值只能是90的倍数
 
             this.dataLabel = {
@@ -60,6 +61,10 @@ define(
                 };
                 this._configData();
                 this._configColors();
+            },
+            clear : function(){
+                // this.domContainer.removeChildren()
+                this.domContainer.innerHTML = ''
             },
             setX: function($n) {
                 this.sprite.context.x = $n
@@ -538,6 +543,8 @@ define(
                     self.domContainer.appendChild(branchTxt);
                     bwidth = branchTxt.offsetWidth;
                     bheight = branchTxt.offsetHeight;
+
+                    this.branchTxt = branchTxt
                     //branchTxt.style.display = "none"
 
                     bx = isleft ? -adjustX : adjustX;
@@ -884,7 +891,9 @@ define(
         var Canvax = Chart.Canvax;
 
         return Chart.extend({
+            element : null,
             init: function(node, data, opts) {
+                this.element = node
                 this.config = {
                     mode: 1,
                     event: {
@@ -901,7 +910,6 @@ define(
                 this.dataFrame = this._initData(data, this);
             },
             draw: function() {
-                //console.log("pie draw");
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
                 });
@@ -982,6 +990,7 @@ define(
             },
             _initData: function(arr, opt) {
                 var data = [];
+                var arr = _.clone(arr)
                 /*
                  * @释剑
                  * 用校正处理， 把pie的data入参规范和chartx数据格式一致
@@ -1059,11 +1068,17 @@ define(
                 this.core.removeAllChildren()
                 this.stageTip.removeAllChildren();
             },
-            reset: function(data, opt) {
+            reset: function(obj) {
                 this.clear()
-                this.width = parseInt(this.element.width());
-                this.height = parseInt(this.element.height());
-                this.draw(data, opt)
+                this._pie.clear()
+                // var element = $('#' + this.element)
+                // this.width = parseInt(element.width);
+                // this.height = parseInt(element.height);
+                // this.width = parseInt(this.el.offsetWidth);
+                // this.height = parseInt(this.el.offsetHeight)
+
+                this.dataFrame = this._initData(obj.data, obj.options);
+                this.draw()
             },
             _initModule: function() {
                 var self = this;
