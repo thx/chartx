@@ -17,6 +17,7 @@
             this.branchSp = null;
             this.sectorsSp = null;
             this.checkedSp = null;
+            this.branchTxt = null;
             //this.angleOffset = -90; //正常情况下，饼图的扇形0度是从3点钟开始，-90表示从12点开始；改值只能是90的倍数
 
             this.dataLabel = {
@@ -60,6 +61,10 @@
                 };
                 this._configData();
                 this._configColors();
+            },
+            clear : function(){
+                // this.domContainer.removeChildren()
+                this.domContainer.innerHTML = ''
             },
             setX: function($n) {
                 this.sprite.context.x = $n
@@ -538,6 +543,8 @@
                     self.domContainer.appendChild(branchTxt);
                     bwidth = branchTxt.offsetWidth;
                     bheight = branchTxt.offsetHeight;
+
+                    this.branchTxt = branchTxt
                     //branchTxt.style.display = "none"
 
                     bx = isleft ? -adjustX : adjustX;

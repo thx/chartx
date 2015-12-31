@@ -10,7 +10,9 @@
         var Canvax = Chart.Canvax;
 
         return Chart.extend({
+            element : null,
             init: function(node, data, opts) {
+                this.element = node
                 this.config = {
                     mode: 1,
                     event: {
@@ -27,6 +29,7 @@
                 this.dataFrame = this._initData(data, this);
             },
             draw: function() {
+                console.log(this.dataFrame)
                 //console.log("pie draw");
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
@@ -108,6 +111,7 @@
             },
             _initData: function(arr, opt) {
                 var data = [];
+                var arr = _.clone(arr)
                 /*
                  * @释剑
                  * 用校正处理， 把pie的data入参规范和chartx数据格式一致
@@ -185,11 +189,17 @@
                 this.core.removeAllChildren()
                 this.stageTip.removeAllChildren();
             },
-            reset: function(data, opt) {
+            reset: function(obj) {
                 this.clear()
-                this.width = parseInt(this.element.width());
-                this.height = parseInt(this.element.height());
-                this.draw(data, opt)
+                this._pie.clear()
+                // var element = $('#' + this.element)
+                // this.width = parseInt(element.width);
+                // this.height = parseInt(element.height);
+                this.width = parseInt(this.el.offsetWidth);
+                this.height = parseInt(this.el.offsetHeight)
+
+                this.dataFrame = this._initData(obj.data, obj.options);
+                this.draw()
             },
             _initModule: function() {
                 var self = this;
