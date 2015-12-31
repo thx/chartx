@@ -29,8 +29,6 @@
                 this.dataFrame = this._initData(data, this);
             },
             draw: function() {
-                console.log(this.dataFrame)
-                //console.log("pie draw");
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
                 });
@@ -195,8 +193,8 @@
                 // var element = $('#' + this.element)
                 // this.width = parseInt(element.width);
                 // this.height = parseInt(element.height);
-                this.width = parseInt(this.el.offsetWidth);
-                this.height = parseInt(this.el.offsetHeight)
+                // this.width = parseInt(this.el.offsetWidth);
+                // this.height = parseInt(this.el.offsetHeight)
 
                 this.dataFrame = this._initData(obj.data, obj.options);
                 this.draw()
