@@ -215,15 +215,18 @@
                 if (self.dataLabel && self.dataLabel.enabled == false) {
                     r = Math.min(w, h) / 2;
                     //要预留clickMoveDis位置来hover sector 的时候外扩
-                    r -= r / 11;
-                }
+                    //r -= r / 11;
+                };
+
+                w -= (this.padding.left+this.padding.right);
+                h -= (this.padding.top+this.padding.bottom);
 
                 var r0 = parseInt(self.innerRadius || 0);
                 var maxInnerRadius = r * 2 / 3;
                 r0 = r0 >= 0 ? r0 : 0;
                 r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
-                var pieX = w / 2;
-                var pieY = h / 2;
+                var pieX = w / 2 + this.padding.left;
+                var pieY = h / 2 + this.padding.top;
                 self.pie = {
                     x: pieX,
                     y: pieY,
