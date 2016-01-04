@@ -16,9 +16,9 @@ define(
             this.height = parseInt(this.el.offsetHeight) //图表区域高
 
             this.padding = {
-                top: 20,
+                top: 10,
                 right: 10,
-                bottom: 0,
+                bottom: 10,
                 left: 10
             }
 
