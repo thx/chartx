@@ -14,7 +14,7 @@
             // opts    : null,
             init: function(node, data, opts) {
                 // this.element = node;
-                this.data    = data;
+                this.data = data;
                 this.options = opts;
                 this.config = {
                     mode: 1,
@@ -66,7 +66,7 @@
                         for (var i = 0; i < sectorList.length; i++) {
                             item = sectorList[i];
                             var idata = self._pie.data.data[i];
-                            
+
                             list.push({
                                 name: item.name,
                                 index: item.index,
@@ -74,49 +74,49 @@
                                 r: item.r,
                                 value: item.value,
                                 percentage: item.percentage,
-                                checked : idata.checked
+                                checked: idata.checked
                             });
                         }
                     }
                 };
                 return list;
             },
-            getCheckedList : function(){
+            getCheckedList: function() {
                 var cl = [];
-                _.each( this.getList() , function( item ){
-                    if( item.checked ){
-                        cl.push( item );
+                _.each(this.getList(), function(item) {
+                    if (item.checked) {
+                        cl.push(item);
                     }
-                } );
+                });
                 return cl;
             },
             focusAt: function(index) {
                 if (this._pie) {
-                    this._pie.focus( index );
+                    this._pie.focus(index);
                 }
             },
             unfocusAt: function(index) {
                 if (this._pie) {
-                    this._pie.unfocus( index );
+                    this._pie.unfocus(index);
                 }
             },
             checkAt: function(index) {
                 if (this._pie) {
-                    this._pie.check( index );
+                    this._pie.check(index);
                 }
             },
             uncheckAt: function(index) {
                 if (this._pie) {
-                    this._pie.uncheck( index );
+                    this._pie.uncheck(index);
                 }
             },
             _initData: function(arr, opt) {
                 var data = [];
                 var arr = _.clone(arr)
-                /*
-                 * @释剑
-                 * 用校正处理， 把pie的data入参规范和chartx数据格式一致
-                 **/
+                    /*
+                     * @释剑
+                     * 用校正处理， 把pie的data入参规范和chartx数据格式一致
+                     **/
                 if (!this.xAxis.field) {
                     data = arr;
                 } else {
@@ -193,15 +193,15 @@
             reset: function(obj) {
                 this.clear()
                 this._pie.clear()
-                // var element = $('#' + this.element)
-                // this.width = parseInt(element.width);
-                // this.height = parseInt(element.height);
-                // this.width = parseInt(this.el.offsetWidth);
-                // this.height = parseInt(this.el.offsetHeight)
+                    // var element = $('#' + this.element)
+                    // this.width = parseInt(element.width);
+                    // this.height = parseInt(element.height);
+                    // this.width = parseInt(this.el.offsetWidth);
+                    // this.height = parseInt(this.el.offsetHeight)
 
                 var data = obj.data || this.data
-                // var opt = obj.options || this.opts
-                // _.deepExtend(this, obj.data);
+                    // var opt = obj.options || this.opts
+                    // _.deepExtend(this, obj.data);
                 _.deepExtend(this, obj.options);
                 this.dataFrame = this._initData(data, this.options);
                 this.draw()
@@ -210,16 +210,15 @@
                 var self = this;
                 var w = self.width;
                 var h = self.height;
+                w -= (this.padding.left + this.padding.right);
+                h -= (this.padding.top + this.padding.bottom);
 
                 var r = Math.min(w, h) * 2 / 3 / 2;
                 if (self.dataLabel && self.dataLabel.enabled == false) {
                     r = Math.min(w, h) / 2;
                     //要预留clickMoveDis位置来hover sector 的时候外扩
-                    //r -= r / 11;
+                    r -= r / 11;
                 };
-
-                w -= (this.padding.left+this.padding.right);
-                h -= (this.padding.top+this.padding.bottom);
 
                 var r0 = parseInt(self.innerRadius || 0);
                 var maxInnerRadius = r * 2 / 3;
@@ -255,9 +254,9 @@
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
-                self._pie.sprite.on("mousedown mousemove mouseup click" , function(e){
-                    
-                    self.fire( e.type , e );
+                self._pie.sprite.on("mousedown mousemove mouseup click", function(e) {
+
+                    self.fire(e.type, e);
                 });
             },
             _startDraw: function() {
