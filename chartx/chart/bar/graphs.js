@@ -98,6 +98,10 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
+            getInfo:function(index){
+                //该index指当前
+                return this._getInfoHandler({iGroup:index})
+            },
             _checked : function($o){
                 var me = this
                 var index = $o.iGroup
@@ -241,7 +245,6 @@ define(
                     if (itemW < 15) {
                         me.text.enabled = false;
                     };
-
                     for (h = 0; h < hLen; h++) {
                         var groupH;
                         if (i == 0) {
