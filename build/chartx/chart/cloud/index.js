@@ -24,8 +24,8 @@
                 this.core = new Canvax.Display.Sprite({
                     id: 'core'
                 });
-
-                this.stage.addChild(this.core);
+                
+                this.stage.addChild( this.core );
 
                 this._getLayoutData();
 
@@ -60,20 +60,16 @@
                 function draw(words) {
                     debugger;
 
-                    _.each(words, function(tag) {
-                        var tagTxt = new Canvax.Display.Text(tag.text, {
-                            context: {
-                                x: tag.x + me.width / 2,
-                                y: tag.y + me.height / 2,
-                                fontSize : tag.size,
-                                rotation : tag.rotate
-                            }
-                        });
-                        me.core.addChild(tagTxt);
+                    _.each( words , function(tag){
+                        var tagTxt = new Canvax.Display.Text( tag.text , {
+                            x : tag.x + me.width / 2,
+                            y : tag.y + me.height / 2
+                        } );
+                        me.core.addChild( tagTxt );
                     });
+                    
 
-
-                    return;
+                    return;                    
                     d3.select("body").append("svg")
                         .attr("width", layout.size()[0])
                         .attr("height", layout.size()[1])

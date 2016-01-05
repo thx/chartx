@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'original'],
+    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original'],
     canvax: null,
     create: {},
     _start: function() {

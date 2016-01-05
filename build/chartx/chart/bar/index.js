@@ -98,6 +98,10 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
+            getInfo:function(index){
+                //该index指当前
+                return this._getInfoHandler({iGroup:index})
+            },
             _checked : function($o){
                 var me = this
                 var index = $o.iGroup
@@ -241,7 +245,6 @@ define(
                     if (itemW < 15) {
                         me.text.enabled = false;
                     };
-
                     for (h = 0; h < hLen; h++) {
                         var groupH;
                         if (i == 0) {
@@ -842,12 +845,28 @@ define(
                     return o
                 })
             },
-            cancelChecked: function(eventInfo) { //取消选择某个对象
+            checkAt : function(index){
                 var me = this
-                if (eventInfo) {
-                    eventInfo.iGroup -= me.dataZoom.range.start
-                    me._checked(eventInfo)
-                }
+                var i = index - me.dataZoom.range.start
+                var o = me._graphs.getInfo(i)
+
+                me._checkedList[index] = o
+
+                me._checkedBar({
+                    iGroup: i,
+                    checked: true
+                })
+                me._checkedMiniBar({
+                    iGroup: index,
+                    checked: true
+                })
+
+                o.iGroup = index
+            },
+            uncheckAt: function(index) { //取消选择某个对象 index是全局index
+                var me = this
+                var i = index - me.dataZoom.range.start 
+                me._checked(me._graphs.getInfo(i))
             },
             getGroupChecked: function( e ) {
                 var checked = false;
