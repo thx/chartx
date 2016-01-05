@@ -22,10 +22,14 @@
             draw: function() {
 
                 this.core = new Canvax.Display.Sprite({
-                    id: 'core'
+                    id: 'core',
+                    context : {
+                        x : this.width / 2,
+                        y : this.height / 2
+                    }
                 });
-                
-                this.stage.addChild( this.core );
+
+                this.stage.addChild(this.core);
 
                 this._getLayoutData();
 
@@ -34,22 +38,23 @@
             _getLayoutData: function() {
                 var me = this;
                 var layout = Layout()
-                    .size([300, 600])
+                    .size([me.width, me.height])
                     .words([
                         "Hello", "world", "normally", "you", "want", "more", "words",
+                        "than", "this", "world", "normally", "you", "want", "more", "words",
+                        "than", "this", "world", "normally", "you", "want", "more", "words",
                         "than", "this"
                     ].map(function(d) {
                         return {
                             text: d,
-                            size: 10 + Math.random() * 90,
-                            //test: "haha"
+                            size: 12 + Math.random() * 50
                         };
                     }))
                     .padding(5)
                     .rotate(function() {
-                        return ~~(Math.random() * 2) * 90;
+                        return (~~(Math.random() * 6) - 3) * 30;
                     })
-                    .font("Impact")
+                    //.font("Impact")
                     .fontSize(function(d) {
                         return d.size;
                     })
@@ -58,18 +63,28 @@
                 layout.start();
 
                 function draw(words) {
-                    debugger;
-
-                    _.each( words , function(tag){
-                        var tagTxt = new Canvax.Display.Text( tag.text , {
-                            x : tag.x + me.width / 2,
-                            y : tag.y + me.height / 2
-                        } );
-                        me.core.addChild( tagTxt );
+                    _.each(words, function(tag) {
+                        console.log(tag.height/ 2)
+                        var tagTxt = new Canvax.Display.Text(tag.text, {
+                            context: {
+                                x: tag.x ,
+                                y: tag.y ,
+                                fontSize : tag.size,
+                                fontFamily : tag.font,
+                                rotation : tag.rotate,
+                                rotateOrigin : {
+                                    x : 0,
+                                    y : 0
+                                },
+                                textBaseline : "middle",
+                                textAlign : "center"
+                            }
+                        });
+                        me.core.addChild(tagTxt);
                     });
-                    
 
-                    return;                    
+
+                    return;
                     d3.select("body").append("svg")
                         .attr("width", layout.size()[0])
                         .attr("height", layout.size()[1])
