@@ -421,6 +421,9 @@ define(
                     area._hoverFillStyle = fillStyle;
 
                     area.on("mouseover", function(e) {
+                        if (e.fromTarget && e.fromTarget.type == "text" && e.fromTarget.text == this.mapData.name) {
+                            return;
+                        };
                         if (!this.mapData.checked) {
                             this.toFront();
                             //this.context.lineWidth ++;
@@ -428,9 +431,7 @@ define(
                             this.context.strokeStyle = hoverStrokeStyle;
                             this.context.fillStyle = this._hoverFillStyle;
                         };
-                        if (e.fromTarget && e.fromTarget.type == "text" && e.fromTarget.text == this.mapData.name) {
-                            return;
-                        };
+                        
                         me.fire("areaover", e);
                         me._tips.show(me._setTipsInfoHand(e, this.mapData));
                     });
@@ -439,6 +440,9 @@ define(
                         me.fire("mousemove", e);
                     });
                     area.on("mouseout", function(e) {
+                        if (e.toTarget && e.toTarget.type == "text" && e.toTarget.text == this.mapData.name) {
+                            return;
+                        };
                         //this.context.lineWidth --;
                         if (!this.mapData.checked) {
                             this.context.strokeStyle = this._strokeStyle;
@@ -446,9 +450,7 @@ define(
                             this.toBack();
                         };
 
-                        if (e.toTarget && e.toTarget.type == "text" && e.toTarget.text == this.mapData.name) {
-                            return;
-                        };
+                        
                         me.fire("areaout", e);
                         me._tips.hide(e);
                     });
@@ -534,9 +536,7 @@ define(
                         );
                         txt.area = area;
                         txt.on("mouseover", function(e) {
-                            //debugger
                             if (e.fromTarget && e.fromTarget == this.area) {
-                                this.area.context.lineWidth++;
                                 this.area.toFront();
                                 return;
                             };
@@ -547,10 +547,9 @@ define(
                         });
                         txt.on("mouseout", function(e) {
                             if (e.toTarget && e.toTarget == this.area) {
-                                this.area.context.lineWidth--;
                                 return;
                             };
-                            this.area.fire("mouseout release", e);
+                            this.area.fire("mouseout", e);
                         });
                         txt.on("click", function(e) {
                             this.area.fire("mousedown", e); //click
