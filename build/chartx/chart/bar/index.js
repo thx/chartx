@@ -194,7 +194,6 @@ define(
                 return style;
             },
             checkBarW: function(xDis1,xDis2) {
-                debugger
                 if (this.bar.width) {
                     if (_.isFunction(this.bar.width)) {
                         this.bar._width = this.bar.width(xDis1);
