@@ -1552,7 +1552,7 @@ define(
                     me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
-                    if (e.type == 'mousedown') {
+                    if (e.type == 'click') {
                         me.fire('checkedBefor');
                         me._checked(_.clone(e.eventInfo));
                     }
