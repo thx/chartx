@@ -107,7 +107,7 @@ define(
              *nodes相关-------------------------
              */
             _initNodes : function(e , tipsPoint){
-                
+                var self = this
                 this._nodes = new Canvax.Display.Sprite({
                     id : "line-tipsNodes",
                     context : {
@@ -116,6 +116,7 @@ define(
                     }
                 });
                 var self = this;
+
                 _.each( e.eventInfo.nodesInfoList , function( node ){
                     
                     var csp = new Canvax.Display.Sprite({
@@ -123,14 +124,24 @@ define(
                             y : e.target.context.height - Math.abs(node.y) 
                         }
                     });
-                    csp.addChild( new Circle({
+
+                    var bigCircle = new Circle({
                         context : {
                             r : node.r + 2 + 1 ,
                             fillStyle   : self.node.backFillStyle || "white",//node.fillStyle,
                             strokeStyle : self.node.strokeStyle || node.strokeStyle,
-                            lineWidth   : node.lineWidth
+                            lineWidth   : node.lineWidth,
+                            cursor      : 'pointer'
                         }
-                    }) );
+                    })
+                    bigCircle.name = 'node', 
+                    bigCircle.eventInfo = {
+                        iGroup: node._groupInd,
+                        iNode : e.eventInfo.iNode,
+                        nodesInfoList : [node]
+                    }
+
+                    csp.addChild(bigCircle);
 
                     csp.addChild( new Circle({
                         context : {
@@ -140,6 +151,20 @@ define(
                     }) );
 
                     self._nodes.addChild( csp );
+                    bigCircle.on("mousemove", function(e) {
+                        e.eventInfo = e.target.eventInfo
+                        self._tip.move(e);
+                    })
+                    bigCircle.on("click", function(e) {
+                        e.target.eventInfo.nodeInfo = e.target.eventInfo.nodesInfoList[0]
+                        var eventInfo = _.clone(e.target.eventInfo)
+                        delete eventInfo.nodesInfoList
+                        var o = {
+                            eventInfo : eventInfo
+                        }
+                        self.sprite.fire("nodeclick", o);
+                    })
+
                 } );
                 this.sprite.addChild( this._nodes );
             },
@@ -153,6 +178,13 @@ define(
                 _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;
                     csps.y           = e.target.context.height - Math.abs(node.y);
+
+                    var bigCircle = self._nodes.getChildAt(i).getChildAt(0)
+                    bigCircle.eventInfo = {
+                        iGroup: node._groupInd,
+                        iNode : e.eventInfo.iNode,
+                        nodesInfoList : [node]
+                    }
                 });
             }
         };
