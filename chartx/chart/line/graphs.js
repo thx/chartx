@@ -227,6 +227,7 @@ define(
                 }
             },
             _getInfoHandler: function(e) {
+                // console.log(e)
                 var x = e.point.x,
                     y = e.point.y - this.h;
                 //todo:底层加判断
