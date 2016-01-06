@@ -3683,8 +3683,9 @@ define(
             init : function(text , opt){
                var self = this;
                var c = this.context;
-               c.width  = this.getTextWidth();
-               c.height = this.getTextHeight();
+
+               !c.width && (c.width  = this.getTextWidth());
+               !c.height && (c.height = this.getTextHeight());
 
             },
             render : function( ctx ){
@@ -3815,6 +3816,7 @@ define(
                 }
             },
             _renderChars: function(method, ctx, chars, left, top) {
+            	debugger
                 ctx[method]( chars , 0 , top );
             },
             _getHeightOfLine: function() {
