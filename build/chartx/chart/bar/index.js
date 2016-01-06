@@ -57,6 +57,8 @@ define(
 
             this.sort = null;
 
+            this._barsLen = 0;
+
             this.eventEnabled = true;
 
             this.sprite = null;
@@ -64,8 +66,6 @@ define(
             this.checkedSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
-
-
 
             _.deepExtend(this, opt);
 
@@ -97,6 +97,10 @@ define(
             },
             setY: function($n) {
                 this.sprite.context.y = $n
+            },
+            getInfo:function(index){
+                //该index指当前
+                return this._getInfoHandler({iGroup:index})
             },
             _checked : function($o){
                 var me = this
@@ -199,6 +203,9 @@ define(
                     this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
                 };
                 this.bar._width < 1 && (this.bar._width = 1);
+                if( this.bar._width == 1 && xDis1 > 3 ){
+                    this.bar._width = parseInt(xDis1)-2;
+                };
             },
             resetData: function(data, opt) {
                 this.draw(data.data, opt);
@@ -237,11 +244,12 @@ define(
                     var hLen = h_group[0].length;
                     itemW = me.w / hLen;
 
+                    me._barsLen = hLen * groups;
+
                     //如果itemW过小的话，就不用显示text的info信息
                     if (itemW < 15) {
                         me.text.enabled = false;
                     };
-
                     for (h = 0; h < hLen; h++) {
                         var groupH;
                         if (i == 0) {
@@ -540,9 +548,9 @@ define(
                         l--;
                     };
                 };
-
+ 
                 var options = _.extend({
-                    delay: 80,
+                    delay: Math.min(1000 / this._barsLen , 80),
                     easing: "Back.Out",
                     duration: 500
                 }, opt);
@@ -779,15 +787,15 @@ define(
          */
         var Canvax = Chart.Canvax;
         var Bar = Chart.extend({
-            _xAxis: null,
-            _yAxis: null,
-            _back: null,
-            _graphs: null,
-            _tip: null,
-            _checkedList: [], //所有的选择对象
-            _currCheckedList: [], //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
-
             init: function(node, data, opts) {
+
+                this._xAxis = null;
+                this._yAxis = null;
+                this._back = null;
+                this._graphs = null;
+                this._tip = null;
+                this._checkedList = []; //所有的选择对象
+                this._currCheckedList = []; //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
                 this._node = node;
                 this._data = data;
@@ -842,14 +850,30 @@ define(
                     return o
                 })
             },
-            cancelChecked: function(eventInfo) { //取消选择某个对象
+            checkAt: function(index) {
                 var me = this
-                if (eventInfo) {
-                    eventInfo.iGroup -= me.dataZoom.range.start
-                    me._checked(eventInfo)
-                }
+                var i = index - me.dataZoom.range.start
+                var o = me._graphs.getInfo(i)
+
+                me._checkedList[index] = o
+
+                me._checkedBar({
+                    iGroup: i,
+                    checked: true
+                })
+                me._checkedMiniBar({
+                    iGroup: index,
+                    checked: true
+                })
+
+                o.iGroup = index
             },
-            getGroupChecked: function( e ) {
+            uncheckAt: function(index) { //取消选择某个对象 index是全局index
+                var me = this
+                var i = index - me.dataZoom.range.start
+                me._checked(me._graphs.getInfo(i))
+            },
+            getGroupChecked: function(e) {
                 var checked = false;
                 _.each(this.getCheckedList(), function(obj) {
                     if (obj && obj.iGroup == e.eventInfo.iGroup) {
@@ -1025,7 +1049,7 @@ define(
                     graphw: w - this.padding.right,
                     yAxisW: _yAxisW
                 });
-                if ( this._xAxis.yAxisW != _yAxisW ) {
+                if (this._xAxis.yAxisW != _yAxisW) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
                     this._yAxis.resetWidth(this._xAxis.yAxisW);
                     _yAxisW = this._xAxis.yAxisW;
@@ -1085,6 +1109,13 @@ define(
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
                     } else {
                         node.field = me.dataFrame.yAxis.field[node.iNode]
+                    };
+
+                    //把这个group当前是否选中状态记录
+                    if( me._checkedList[ node.iGroup ] ){
+                        node.checked = true;
+                    } else {
+                        node.checked = false;
                     }
                 });
             },

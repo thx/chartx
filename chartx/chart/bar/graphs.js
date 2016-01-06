@@ -57,6 +57,8 @@ define(
 
             this.sort = null;
 
+            this._barsLen = 0;
+
             this.eventEnabled = true;
 
             this.sprite = null;
@@ -64,8 +66,6 @@ define(
             this.checkedSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
-
-
 
             _.deepExtend(this, opt);
 
@@ -203,6 +203,9 @@ define(
                     this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
                 };
                 this.bar._width < 1 && (this.bar._width = 1);
+                if( this.bar._width == 1 && xDis1 > 3 ){
+                    this.bar._width = parseInt(xDis1)-2;
+                };
             },
             resetData: function(data, opt) {
                 this.draw(data.data, opt);
@@ -240,6 +243,8 @@ define(
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
                     itemW = me.w / hLen;
+
+                    me._barsLen = hLen * groups;
 
                     //如果itemW过小的话，就不用显示text的info信息
                     if (itemW < 15) {
@@ -543,9 +548,9 @@ define(
                         l--;
                     };
                 };
-
+ 
                 var options = _.extend({
-                    delay: 80,
+                    delay: Math.min(1000 / this._barsLen , 80),
                     easing: "Back.Out",
                     duration: 500
                 }, opt);

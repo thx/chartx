@@ -369,12 +369,10 @@ define(
                         pc.x + popText.context.width > this.w) {
                         pc.x = this.w - popText.context.width
                     };
-                    if (this.data.length > 2) {
+                    if (this.sprite.getNumChildren() > 2) {
                         //倒数第二个text
                         var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
-
                         var ppc = popPreText.context;
-
                         //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
                         if (ppc.visible && pc.x < ppc.x + ppc.width) {
                             pc.visible = false;

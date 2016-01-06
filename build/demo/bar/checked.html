@@ -106,14 +106,11 @@ var options = {
         }
     }
 }   
-Chartx.bar("canvasTest" , data , options).then(function(chart){
-    chart.on("checkedBefor" , function(){
-        _.each(chart.getCheckedList() , function(o){
-            chart.cancelChecked(o);
+Chartx.bar("canvasTest" , data , options).then(function(bar){
+    bar.on("checkedBefor" , function(){
+        _.each(bar.getCheckedList() , function(o){
+            bar.uncheckAt(o.iGroup);
         })
-    });
-    chart.on("click" , function(e){
-
     });
 });
 

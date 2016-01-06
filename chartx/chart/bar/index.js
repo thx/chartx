@@ -17,15 +17,15 @@ define(
          */
         var Canvax = Chart.Canvax;
         var Bar = Chart.extend({
-            _xAxis: null,
-            _yAxis: null,
-            _back: null,
-            _graphs: null,
-            _tip: null,
-            _checkedList: [], //所有的选择对象
-            _currCheckedList: [], //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
-
             init: function(node, data, opts) {
+
+                this._xAxis = null;
+                this._yAxis = null;
+                this._back = null;
+                this._graphs = null;
+                this._tip = null;
+                this._checkedList = []; //所有的选择对象
+                this._currCheckedList = []; //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
                 this._node = node;
                 this._data = data;
@@ -80,7 +80,7 @@ define(
                     return o
                 })
             },
-            checkAt : function(index){
+            checkAt: function(index) {
                 var me = this
                 var i = index - me.dataZoom.range.start
                 var o = me._graphs.getInfo(i)
@@ -100,10 +100,10 @@ define(
             },
             uncheckAt: function(index) { //取消选择某个对象 index是全局index
                 var me = this
-                var i = index - me.dataZoom.range.start 
+                var i = index - me.dataZoom.range.start
                 me._checked(me._graphs.getInfo(i))
             },
-            getGroupChecked: function( e ) {
+            getGroupChecked: function(e) {
                 var checked = false;
                 _.each(this.getCheckedList(), function(obj) {
                     if (obj && obj.iGroup == e.eventInfo.iGroup) {
@@ -279,7 +279,7 @@ define(
                     graphw: w - this.padding.right,
                     yAxisW: _yAxisW
                 });
-                if ( this._xAxis.yAxisW != _yAxisW ) {
+                if (this._xAxis.yAxisW != _yAxisW) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
                     this._yAxis.resetWidth(this._xAxis.yAxisW);
                     _yAxisW = this._xAxis.yAxisW;
@@ -339,6 +339,13 @@ define(
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
                     } else {
                         node.field = me.dataFrame.yAxis.field[node.iNode]
+                    };
+
+                    //把这个group当前是否选中状态记录
+                    if( me._checkedList[ node.iGroup ] ){
+                        node.checked = true;
+                    } else {
+                        node.checked = false;
                     }
                 });
             },
