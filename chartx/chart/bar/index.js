@@ -32,7 +32,7 @@ define(
                 this._opts = opts;
 
                 this.dataZoom = {
-                    enabled : false,
+                    enabled: false,
                     range: {
                         start: 0,
                         end: data.length - 1 //因为第一行是title
@@ -578,7 +578,7 @@ define(
                         }
                     },
                     dataZoom: {
-                        enabled : false
+                        enabled: false
                     },
                     xAxis: {
                         //enabled: false
@@ -753,16 +753,18 @@ define(
                 graphs._checked($o)
             },
             _checkedMiniBar: function($o) { //选择缩略的bar
-                var me = this
-                var graphs = me.__cloneBar.thumbBar._graphs
-                var fillStyle = ''
-                if ($o.checked) {
-                    fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                if (this.dataZoom.enabled) {
+                    var me = this
+                    var graphs = me.__cloneBar.thumbBar._graphs
+                    var fillStyle = ''
+                    if ($o.checked) {
+                        fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                    }
+                    graphs.setBarStyle({
+                        iGroup: $o.iGroup,
+                        fillStyle: fillStyle
+                    })
                 }
-                graphs.setBarStyle({
-                    iGroup: $o.iGroup,
-                    fillStyle: fillStyle
-                })
             },
 
             bindEvent: function() {

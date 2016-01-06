@@ -3816,7 +3816,6 @@ define(
                 }
             },
             _renderChars: function(method, ctx, chars, left, top) {
-            	debugger
                 ctx[method]( chars , 0 , top );
             },
             _getHeightOfLine: function() {
