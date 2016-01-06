@@ -697,6 +697,7 @@ define(
             _setTipsInfoHand: function(e, mapData) {
 
                 var tipsInfo = {
+                    checked : !!this.checkedList[ mapData.id ],
                     area: {
                         field: this.areaField,
                         value: mapData.name
@@ -704,7 +705,6 @@ define(
                     nodesInfoList: []
                 };
                 var me = this;
-
 
                 //先计算好这个area是否在data中有传入数据
                 var areaData = this._getDataForArea(mapData);

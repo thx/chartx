@@ -339,6 +339,13 @@ define(
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
                     } else {
                         node.field = me.dataFrame.yAxis.field[node.iNode]
+                    };
+
+                    //把这个group当前是否选中状态记录
+                    if( me._checkedList[ node.iGroup ] ){
+                        node.checked = true;
+                    } else {
+                        node.checked = false;
                     }
                 });
             },
