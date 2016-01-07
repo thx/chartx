@@ -93,7 +93,7 @@ window.Chartx || (Chartx = {
         return promise;
     },
     setTheme : function( brandColor , colors ){
-        require(["chartx/chart/theme.js"] , function( theme ){
+        require(["chartx/chart/theme"] , function( theme ){
             colors && (theme.colors = colors);
             brandColor && (theme.brandColor = brandColor);
         })
