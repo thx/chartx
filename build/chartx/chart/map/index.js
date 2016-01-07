@@ -34,7 +34,7 @@ define(
                     linkage: false, //是否开启省市联动，目前只支持中国地图
                     text: {
                         fillStyle: "#999",
-                        enabled: true
+                        enabled: false
                     }
                 };
 
@@ -391,6 +391,10 @@ define(
                 _.each(mapDataList, function(md, i) {
                     md.ind = i;
                     var aread = me._getDataForArea(md);
+
+                    if( aread.data ){
+                        md.data = aread.data
+                    };
 
                     var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
                     var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area.normalStrokeStyle);

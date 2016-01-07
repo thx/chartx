@@ -797,7 +797,6 @@
                             });
 
                             sector.on('mousedown mouseup click mousemove', function(e) {
-
                                 self._geteventInfo(e, this.__dataIndex);
                                 if (e.type == "click") {
                                     self.secClick(this , e);
