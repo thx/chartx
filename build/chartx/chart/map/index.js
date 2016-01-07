@@ -376,9 +376,9 @@ define(
 
                 this.mapDataList = mapDataList;
 
-                _.each(mapDataList , function( md ){
+                _.each(mapDataList, function(md) {
                     var aread = me._getDataForArea(md);
-                    if( aread.data ){
+                    if (aread.data) {
                         md.data = aread.data
                     };
                 });
@@ -396,7 +396,7 @@ define(
 
                 _.each(mapDataList, function(md, i) {
                     md.ind = i;
-                    var aread = md;//me._getDataForArea(md);
+                    var aread = md; //me._getDataForArea(md);
 
                     var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
                     var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area.normalStrokeStyle);
@@ -437,7 +437,7 @@ define(
                             this.context.strokeStyle = hoverStrokeStyle;
                             this.context.fillStyle = this._hoverFillStyle;
                         };
-                        
+
                         me.fire("areaover", e);
                         me._tips.show(me._setTipsInfoHand(e, this.mapData));
                     });
@@ -456,7 +456,7 @@ define(
                             this.toBack();
                         };
 
-                        
+
                         me.fire("areaout", e);
                         me._tips.hide(e);
                     });
@@ -499,7 +499,7 @@ define(
                                 //已经存在了。取消选中态度
                                 mapData.checked = false;
                                 delete me.checkedList[mapData.id];
-                                if( areaEl._fillStyle == me.area.normalFillStyle ){
+                                if (areaEl._fillStyle == me.area.normalFillStyle) {
                                     areaEl.context.fillStyle = me.area.normalFillStyle;
                                 }
                             } else {
@@ -512,13 +512,13 @@ define(
                                 delete areaEl._clickTimer;
                             };
                             e.eventInfo = {
-                                mapData : mapData
+                                mapData: mapData
                             };
                             me.fire("click", e);
                         }, 135);
-                        
+
                         me.fire("mousedown", e);
-                        
+
                     });
 
                     area.on("mouseup", function(e) {
@@ -579,29 +579,29 @@ define(
 
             checkAt: function(index) {
                 var me = this;
-                
-                var mapData = _.find(this.mapDataList , function( d ){
+
+                var mapData = _.find(this.mapDataList, function(d) {
                     return d.ind == index;
-                }); 
-                var areaEl = me.sprite.getChildById("areas").getChildById("area_"+mapData.id);
+                });
+                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
 
                 if (!me.checkedList[mapData.id]) {
                     me.checkedList[mapData.id] = mapData;
                     mapData.checked = true;
                     if (areaEl.context.fillStyle == me.area.normalFillStyle) {
                         areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
-                        var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
-                        areaEl.context.strokeStyle = hoverStrokeStyle;
-                        areaEl.toFront();
-                    }
+                    };
+                    var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
+                    areaEl.context.strokeStyle = hoverStrokeStyle;
+                    areaEl.toFront();
                 };
             },
             uncheckAt: function(index) {
                 var me = this;
-                var mapData = _.find(this.mapDataList , function( d ){
+                var mapData = _.find(this.mapDataList, function(d) {
                     return d.ind == index;
-                }); 
-                var areaEl = me.sprite.getChildById("areas").getChildById("area_"+mapData.id);
+                });
+                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
                 if (me.checkedList[mapData.id]) {
                     //已经存在了。取消选中态度
                     mapData.checked = false;
@@ -702,7 +702,7 @@ define(
             _setTipsInfoHand: function(e, mapData) {
 
                 var tipsInfo = {
-                    checked : !!this.checkedList[ mapData.id ],
+                    checked: !!this.checkedList[mapData.id],
                     area: {
                         field: this.areaField,
                         value: mapData.name
