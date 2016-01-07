@@ -1447,8 +1447,13 @@ define(
             _setContent : function(e){
                 if (!this._tipDom){
                     return;
-                } 
-                this._tipDom.innerHTML = this._getContent(e);
+                };
+                var tipxContent = this._getContent(e);
+                if( tipxContent === "_hide_" ){
+                    this.hide();
+                    return;
+                }
+                this._tipDom.innerHTML = tipxContent;
                 this.dW = this._tipDom.offsetWidth;
                 this.dH = this._tipDom.offsetHeight;
             },
