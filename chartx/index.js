@@ -92,9 +92,10 @@ window.Chartx || (Chartx = {
 
         return promise;
     },
-    setTheme : function( colors ){
+    setTheme : function( brandColor , colors ){
         require(["chartx/chart/theme.js"] , function( theme ){
-            theme.colors = colors;
+            colors && (theme.colors = colors);
+            brandColor && (theme.brandColor = brandColor);
         })
     },
     _site: {
