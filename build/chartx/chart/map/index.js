@@ -327,7 +327,6 @@ define(
                     area: area
                 };
                 var me = this;
-
                 _.each(this.dataFrame.xAxis.org[0], function(areaData, i) {
                     if (areaData.indexOf(area.name) >= 0 || area.name.indexOf(areaData) >= 0) {
                         data.data = me._createDataObj(me.dataFrame.org[i + 1], me.dataFrame.org[0]);
@@ -376,6 +375,13 @@ define(
                 var mapLen = mapDataList.length;
 
                 this.mapDataList = mapDataList;
+
+                _.each(mapDataList , function( md ){
+                    var aread = me._getDataForArea(md);
+                    if( aread.data ){
+                        md.data = aread.data
+                    };
+                });
                 this.fire("begindraw");
 
                 var area_txt_sp;
@@ -390,11 +396,7 @@ define(
 
                 _.each(mapDataList, function(md, i) {
                     md.ind = i;
-                    var aread = me._getDataForArea(md);
-
-                    if( aread.data ){
-                        md.data = aread.data
-                    };
+                    var aread = md;//me._getDataForArea(md);
 
                     var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
                     var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area.normalStrokeStyle);
