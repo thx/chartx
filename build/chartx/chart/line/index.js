@@ -156,11 +156,11 @@ define(
                         self._tip.move(e);
                     })
                     bigCircle.on("click", function(e) {
-                        e.target.eventInfo.nodeInfo = e.target.eventInfo.nodesInfoList[0]
-                        var eventInfo = _.clone(e.target.eventInfo)
-                        delete eventInfo.nodesInfoList
+                        // e.target.eventInfo.nodeInfo = e.target.eventInfo.nodesInfoList[0]
+                        // var eventInfo = _.clone(e.target.eventInfo)
+                        // delete eventInfo.nodesInfoList
                         var o = {
-                            eventInfo : eventInfo
+                            eventInfo : _.clone(e.target.eventInfo)
                         }
                         self.sprite.fire("nodeclick", o);
                     })
@@ -301,6 +301,11 @@ define(
                 !this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
                 !this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
                 this.sprite = new Canvax.Display.Sprite();
+                this.sprite.on("destroy" , function(){
+                    if(this._growTween){
+                        AnimationFrame.destroyTween( this._growTween );
+                    }
+                });
             },
             draw: function(opt) {
                 _.deepExtend(this, opt);
@@ -398,7 +403,7 @@ define(
                     return;
                 };
 
-                AnimationFrame.registTween({
+                this._growTween = AnimationFrame.registTween({
                     from: self._getPointPosStr(self._currPointList),
                     to: self._getPointPosStr(self._pointList),
                     onUpdate: function() {
@@ -417,6 +422,7 @@ define(
                         });
                     },
                     onComplete: function() {
+                        self._growTween = null;
                         callback && callback(self);
                     }
                 });

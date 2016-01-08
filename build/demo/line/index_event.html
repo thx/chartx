@@ -59,6 +59,7 @@ var options = {
 var chartx = Chartx.line("canvasTest" , data , options);
 
 var eventHandler = function( e ){
+    console.log(e)
     var log = "<div>type："+ e.type + " iGroup：" + e.iGroup + " iNode：" + e.iNode+"</div>";
     <!-- console.log(log) -->
     <!-- $("#chart-event-log").prepend( $(log) ); -->
