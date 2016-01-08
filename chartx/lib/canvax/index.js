@@ -175,7 +175,8 @@ define(
             destroyTween: destroyTween
         };
     }
-);;define("canvax/animation/Tween", [], function() {
+);
+;define("canvax/animation/Tween", [], function() {
 
 	/**
 	 * Tween.js - Licensed under the MIT license
