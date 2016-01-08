@@ -69,6 +69,12 @@ define(
                 !this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
                 !this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
                 this.sprite = new Canvax.Display.Sprite();
+                var me = this;
+                this.sprite.on("destroy" , function(){
+                    if(me._growTween){
+                        AnimationFrame.destroyTween( me._growTween );
+                    }
+                });
             },
             draw: function(opt) {
                 _.deepExtend(this, opt);
@@ -166,7 +172,7 @@ define(
                     return;
                 };
 
-                AnimationFrame.registTween({
+                this._growTween = AnimationFrame.registTween({
                     from: self._getPointPosStr(self._currPointList),
                     to: self._getPointPosStr(self._pointList),
                     onUpdate: function() {
@@ -185,6 +191,7 @@ define(
                         });
                     },
                     onComplete: function() {
+                        self._growTween = null;
                         callback && callback(self);
                     }
                 });

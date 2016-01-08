@@ -5,10 +5,9 @@
  * */
 define(
     "canvax/geom/HitTestPoint", [
-        "canvax/core/Base",
         "canvax/geom/Math"
     ],
-    function(Base, myMath) {
+    function(myMath) {
         /**
          * TODO:本检测只为进一步的 详细 检测。也就是说 进过了基本的矩形范围检测后才会
          */

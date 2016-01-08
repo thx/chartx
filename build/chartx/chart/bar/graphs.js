@@ -4,9 +4,10 @@ define(
         "canvax/shape/Rect",
         "chartx/utils/tools",
         "chartx/chart/theme",
-        "canvax/animation/AnimationFrame"
+        "canvax/animation/AnimationFrame",
+        "canvax/shape/BrokenLine"
     ],
-    function(Canvax, Rect, Tools, Theme, AnimationFrame) {
+    function(Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine) {
 
         var Graphs = function(opt, root) {
             this.data = [];
@@ -46,12 +47,23 @@ define(
                 data: null
             };
 
+            this.checked = {
+                enabled: false,
+                fillStyle: '#00A8E6',
+                strokeStyle: '#00A8E6',
+                globalAlpha: 0.1,
+                lineWidth: 2
+            }
+
             this.sort = null;
+
+            this._barsLen = 0;
 
             this.eventEnabled = true;
 
             this.sprite = null;
             this.txtsSp = null;
+            this.checkedSp = null;
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
 
@@ -76,12 +88,79 @@ define(
                         //visible: false
                     }
                 });
+                this.checkedSp = new Canvax.Display.Sprite({
+                    id: "checkedSp"
+                });
             },
             setX: function($n) {
                 this.sprite.context.x = $n
             },
             setY: function($n) {
                 this.sprite.context.y = $n
+            },
+            getInfo: function(index) {
+                //该index指当前
+                return this._getInfoHandler({
+                    iGroup: index
+                })
+            },
+            _checked: function($o) {
+                var me = this
+                var index = $o.iGroup
+                var group = me.barsSp.getChildById('barGroup_' + index)
+                if (!group) {
+                    return
+                }
+
+                me.checkedSp.removeChildById('line_' + index)
+                me.checkedSp.removeChildById('rect_' + index)
+                var hoverRect = group.getChildAt(0)
+                var x0 = hoverRect.context.x + 1
+                var x1 = hoverRect.context.x + hoverRect.context.width - 1,
+                    y = -me.h
+
+                if ($o.checked) {
+                    var rect = new Rect({
+                        id: "rect_" + index,
+                        pointChkPriority: false,
+                        context: {
+                            x: x0,
+                            y: y,
+                            width: hoverRect.context.width,
+                            height: hoverRect.context.height,
+                            fillStyle: me.checked.fillStyle,
+                            globalAlpha: me.checked.globalAlpha
+                        }
+                    });
+                    me.checkedSp.addChild(rect)
+
+                    var line = new BrokenLine({
+                        id: "line_" + index,
+                        context: {
+                            pointList: [
+                                [x0, y],
+                                [x1, y]
+                            ],
+                            strokeStyle: me.checked.strokeStyle,
+                            lineWidth: me.checked.lineWidth
+                        }
+                    });
+                    me.checkedSp.addChild(line)
+                }
+            },
+            removeAllChecked: function() {
+                var me = this
+                me.checkedSp.removeAllChildren()
+            },
+            setBarStyle: function($o) {
+                var me = this
+                var index = $o.iGroup
+                var group = me.barsSp.getChildById('barGroup_' + index)
+                var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
+                for (var a = 0, al = group.getNumChildren(); a < al; a++) {
+                    var rectEl = group.getChildAt(a)
+                    rectEl.context.fillStyle = fillStyle
+                }
             },
             _setyAxisFieldsMap: function() {
                 var me = this;
@@ -120,7 +199,7 @@ define(
                 };
                 return style;
             },
-            checkBarW: function(xDis1,xDis2) {
+            checkBarW: function(xDis1, xDis2) {
                 if (this.bar.width) {
                     if (_.isFunction(this.bar.width)) {
                         this.bar._width = this.bar.width(xDis1);
@@ -130,6 +209,9 @@ define(
                     this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
                 };
                 this.bar._width < 1 && (this.bar._width = 1);
+                if (this.bar._width == 1 && xDis1 > 3) {
+                    this.bar._width = parseInt(xDis1) - 2;
+                };
             },
             resetData: function(data, opt) {
                 this.draw(data.data, opt);
@@ -168,10 +250,7 @@ define(
                     var hLen = h_group[0].length;
                     itemW = me.w / hLen;
 
-                    //如果itemW过小的话，就不用显示text的info信息
-                    if (itemW < 15) {
-                        me.text.enabled = false;
-                    };
+                    me._barsLen = hLen * groups;
 
                     for (h = 0; h < hLen; h++) {
                         var groupH;
@@ -225,6 +304,22 @@ define(
                             };
                         } else {
                             groupH = me.barsSp.getChildById("barGroup_" + h);
+                        };
+
+                        //同上面，给txt做好分组
+                        var txtGroupH;
+                        if (i == 0) {
+                            if (h <= preLen - 1) {
+                                txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+                            } else {
+                                txtGroupH = new Canvax.Display.Sprite({
+                                    id: "txtGroup_" + h
+                                });
+                                me.txtsSp.addChild(txtGroupH);
+                                txtGroupH.iGroup = h;
+                            };
+                        } else {
+                            txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
                         };
 
                         for (v = 0; v < vLen; v++) {
@@ -301,7 +396,7 @@ define(
 
                                 var infosp;
                                 if (h <= preLen - 1) {
-                                    infosp = me.txtsSp.getChildById("infosp_" + i + "_" + h);
+                                    infosp = txtGroupH.getChildById("infosp_" + i + "_" + h);
                                 } else {
                                     infosp = new Canvax.Display.Sprite({
                                         id: "infosp_" + i + "_" + h,
@@ -310,7 +405,7 @@ define(
                                         }
                                     });
                                     infosp._hGroup = h;
-                                    me.txtsSp.addChild(infosp);
+                                    txtGroupH.addChild(infosp);
                                 };
 
                                 if (vLen > 1) {
@@ -338,7 +433,8 @@ define(
                                             id: "info_txt_" + i + "_" + h + "_" + ci,
                                             context: {
                                                 x: infoWidth + 2,
-                                                fillStyle: cdata.fillStyle
+                                                fillStyle: cdata.fillStyle,
+                                                fontSize: me.text.fontSize
                                             }
                                         });
                                         infosp.addChild(txt);
@@ -376,6 +472,8 @@ define(
                 });
 
                 this.sprite.addChild(this.barsSp);
+
+                this.sprite.addChild(this.checkedSp)
 
                 if (this.text.enabled) {
                     this.sprite.addChild(this.txtsSp);
@@ -455,14 +553,7 @@ define(
                 if (self.barsSp.children.length > self.data[0][0].length) {
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
-
-                        for (var t = 0, tl = self.txtsSp.children.length; t < tl; t++) {
-                            if (self.txtsSp.children[t]._hGroup == i) {
-                                self.txtsSp.children[t].destroy();
-                                t--, tl--;
-                            }
-                        };
-
+                        self.text.enabled && self.txtsSp.getChildAt(i).destroy();
                         self.averageSp && self.averageSp.getChildAt(i).destroy();
                         i--;
                         l--;
@@ -470,7 +561,7 @@ define(
                 };
 
                 var options = _.extend({
-                    delay: 80,
+                    delay: Math.min(1000 / this._barsLen, 80),
                     easing: "Back.Out",
                     duration: 500
                 }, opt);
@@ -519,56 +610,64 @@ define(
                                 });
                             };
 
-                            if (self.text.enabled) {
-                                var infosp = self.txtsSp.getChildById("infosp_" + g + "_" + h);
-
-                                if (self.root.type == "horizontal") {
-                                    infosp.context.x = infosp._finalX;
-                                };
-                                infosp.animate({
-                                    y: infosp._finalY,
-                                    x: infosp._finalX
-                                }, {
-                                    duration: options.duration,
-                                    easing: options.easing,
-                                    delay: h * options.delay,
-                                    onUpdate: function() {
-                                        this.context.visible = true;
-                                    },
-                                    onComplete: function() {}
-                                });
-
-                                _.each(infosp.children, function(txt) {
-                                    if (txt._text) {
-                                        AnimationFrame.registTween({
-                                            from: {
-                                                v: txt.text
-                                            },
-                                            to: {
-                                                v: txt._text
-                                            },
-                                            duration: options.duration + 300,
-                                            delay: h * options.delay,
-                                            onUpdate: function() {
-                                                var content = this.v;
-                                                if (_.isFunction(self.text.format)) {
-                                                    content = self.text.format(content);
-                                                } else if (_.isNumber(content)) {
-                                                    content = Tools.numAddSymbol(parseInt(content));
-                                                };
-                                                txt.resetText(content);
-                                                if (txt.parent) {
-                                                    self._updateInfoTextPos(txt.parent);
-                                                } else {
-                                                    txt.destroy();
-                                                }
-                                            }
-                                        })
-                                    };
-                                });
-                            }
-
                         };
+
+                        //txt grow
+
+                        if (self.text.enabled) {
+                            var txtGroupH = self.txtsSp.getChildById("txtGroup_" + h);
+
+                            var infosp = txtGroupH.getChildById("infosp_" + g + "_" + h);
+
+                            if (self.root.type == "horizontal") {
+                                infosp.context.x = infosp._finalX;
+                            };
+
+                            infosp.animate({
+                                y: infosp._finalY,
+                                x: infosp._finalX
+                            }, {
+                                duration: options.duration,
+                                easing: options.easing,
+                                delay: h * options.delay,
+                                onUpdate: function() {
+                                    this.context.visible = true;
+                                },
+                                onComplete: function() {}
+                            });
+
+                            _.each(infosp.children, function(txt) {
+                                if (txt._text) {
+                                    if (txt._tweenObj) {
+                                        AnimationFrame.destroyTween(txt._tweenObj);
+                                    };
+                                    txt._tweenObj = AnimationFrame.registTween({
+                                        from: {
+                                            v: txt.text
+                                        },
+                                        to: {
+                                            v: txt._text
+                                        },
+                                        duration: options.duration + 300,
+                                        delay: h * options.delay,
+                                        onUpdate: function() {
+                                            var content = this.v;
+                                            if (_.isFunction(self.text.format)) {
+                                                content = self.text.format(content);
+                                            } else if (_.isNumber(content)) {
+                                                content = Tools.numAddSymbol(parseInt(content));
+                                            };
+                                            txt.resetText(content);
+                                            if (txt.parent) {
+                                                self._updateInfoTextPos(txt.parent);
+                                            } else {
+                                                txt.destroy();
+                                            }
+                                        }
+                                    })
+                                };
+                            });
+                        }
                     };
                 });
                 window.setTimeout(function() {

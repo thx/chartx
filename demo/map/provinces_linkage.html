@@ -70,8 +70,7 @@ var options = {
 
 Chartx.map("canvasTest" , data , options).then(function(map){
 
-
-    map.on("areaclick" , function( e ){
+    map.on("areadblclick" , function( e ){
         //TODO: 要实现联动，需要开发者，在这里手动重置map
         var obj = {};
         if( map.mapName == "广东" ){

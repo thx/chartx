@@ -17,26 +17,31 @@ define(
          */
         var Canvax = Chart.Canvax;
         var Bar = Chart.extend({
-            _xAxis: null,
-            _yAxis: null,
-            _back: null,
-            _graphs: null,
-            _tip: null,
-
             init: function(node, data, opts) {
+
+                this._xAxis = null;
+                this._yAxis = null;
+                this._back = null;
+                this._graphs = null;
+                this._tip = null;
+                this._checkedList = []; //所有的选择对象
+                this._currCheckedList = []; //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
                 this._node = node;
                 this._data = data;
                 this._opts = opts;
 
-                if (opts.dataZoom) {
-                    this.padding.bottom += 46;
-                    this.dataZoom = {
-                        range: {
-                            start: 0,
-                            end: data.length - 2 //因为第一行是title
-                        }
+                this.dataZoom = {
+                    enabled: false,
+                    range: {
+                        start: 0,
+                        end: data.length - 1 //因为第一行是title
                     }
+                };
+
+                if (opts.dataZoom) {
+                    this.dataZoom.enabled = true;
+                    this.padding.bottom += 46;
                 };
 
                 if (opts.proportion) {
@@ -52,19 +57,75 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data) {
+                this._data = data;
+
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis, {
                     animation: false
                 });
-                this._yAxis.resetData(this.dataFrame.yAxis, {
-                    animation: false
-                });
+
+                if (this.dataZoom.enabled) {
+                    this.__cloneBar = this._getCloneBar();
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                        animation: false
+                    });
+                    this._dataZoom.sprite.destroy();
+                    this._initDataZoom();
+                } else {
+                    this._yAxis.resetData(this.dataFrame.yAxis, {
+                        animation: false
+                    });
+                };
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function() {
                     //callback
                 }, {
                     delay: 0
                 });
+            },
+            getCheckedCurrList: function() {
+                var me = this
+                return _.filter(me._getCurrCheckedList(), function(o) {
+                    return o
+                })
+            },
+            getCheckedList: function() { //获取选择之后的对象列表 列表中不含空对象 [eventInfo,evnetInfo,....]
+                var me = this
+                return _.filter(me._checkedList, function(o) {
+                    return o
+                })
+            },
+            checkAt: function(index) {
+                var me = this
+                var i = index - me.dataZoom.range.start
+                var o = me._graphs.getInfo(i)
+
+                me._checkedList[index] = o
+
+                me._checkedBar({
+                    iGroup: i,
+                    checked: true
+                })
+                me._checkedMiniBar({
+                    iGroup: index,
+                    checked: true
+                })
+
+                o.iGroup = index
+            },
+            uncheckAt: function(index) { //取消选择某个对象 index是全局index
+                var me = this
+                var i = index - me.dataZoom.range.start
+                me._checked(me._graphs.getInfo(i))
+            },
+            getGroupChecked: function(e) {
+                var checked = false;
+                _.each(this.getCheckedList(), function(obj) {
+                    if (obj && obj.iGroup == e.eventInfo.iGroup) {
+                        checked = true;
+                    }
+                });
+                return checked
             },
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
@@ -141,10 +202,9 @@ define(
             },
             _initData: function(data, opt) {
                 var d;
-                var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
-                if (dataZoom) {
+                if (this.dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -218,7 +278,7 @@ define(
                     yMaxHeight: graphsH
                 });
 
-                if (this.dataZoom) {
+                if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
@@ -272,7 +332,7 @@ define(
                 });
 
 
-                if (this.dataZoom) {
+                if (this.dataZoom.enabled) {
                     this._initDataZoom();
                 }
             },
@@ -293,15 +353,22 @@ define(
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
                     } else {
                         node.field = me.dataFrame.yAxis.field[node.iNode]
+                    };
+
+                    //把这个group当前是否选中状态记录
+                    if (me._checkedList[node.iGroup]) {
+                        node.checked = true;
+                    } else {
+                        node.checked = false;
                     }
                 });
             },
             _trimGraphs: function(_xAxis, _yAxis) {
+
                 _xAxis || (_xAxis = this._xAxis);
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
-
                 var hLen = yArr.length; //bar的横向分组length
 
                 var xDis1 = _xAxis.xDis1;
@@ -309,7 +376,7 @@ define(
                 var xDis2 = xDis1 / (hLen + 1);
 
                 //知道了xDis2 后 检测下 barW是否需要调整
-                this._graphs.checkBarW && this._graphs.checkBarW(xDis1,xDis2);
+                this._graphs.checkBarW && this._graphs.checkBarW(xDis1, xDis2);
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = [];
@@ -327,7 +394,7 @@ define(
                     _.each(yArrList, function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
 
-                        if (me.dataZoom) {
+                        if (me.dataZoom.enabled) {
                             subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end);
                         };
 
@@ -433,7 +500,7 @@ define(
             _initDataZoom: function() {
                 var me = this;
                 //require(["chartx/components/datazoom/index"], function(DataZoom) {
-                //初始化datazoom模块
+                //初始化 datazoom 模块
 
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
@@ -444,20 +511,23 @@ define(
                         y: me._xAxis.pos.y + me._xAxis.h
                     },
                     dragIng: function(range) {
-
                         if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
                             return;
+                        };
+                        if (me.dataZoom.range.end <= me.dataZoom.range.start) {
+                            me.dataZoom.range.end = me.dataZoom.range.start + 1;
                         };
 
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
 
-                        me.dataFrame = me._initData(data, this);
+                        me.dataFrame = me._initData(me._data, this);
                         me._xAxis.resetData(me.dataFrame.xAxis, {
                             animation: false
                         });
 
                         me._graphs.average.data = null;
+                        me._graphs.w = me._xAxis.xGraphsWidth;
                         me._getaverageData();
                         me._setaverageLayoutData();
 
@@ -469,6 +539,11 @@ define(
                             easing: "Quadratic.Out",
                             duration: 300
                         });
+
+                        me._removeChecked()
+                    },
+                    dragEnd: function(range) {
+                        me._updateChecked()
                     }
                 }, me.dataZoom);
 
@@ -482,10 +557,8 @@ define(
                 graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
 
-
                 me._dataZoom.dataZoomBg.addChild(graphssp);
                 me.core.addChild(me._dataZoom.sprite);
-
 
                 this.__cloneBar.thumbBar.destroy();
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
@@ -497,6 +570,8 @@ define(
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
                 cloneEl.style.position = "absolute";
+                cloneEl.style.width = me.el.offsetWidth + "px";
+                cloneEl.style.height = me.el.offsetHeight + "px";
                 cloneEl.style.top = "10000px";
                 document.body.appendChild(cloneEl);
 
@@ -504,7 +579,7 @@ define(
                 _.deepExtend(opts, {
                     graphs: {
                         bar: {
-                            fillStyle: "#ececec"
+                            fillStyle: me.dataZoom.normalColor || "#ececec"
                         },
                         animation: false,
                         eventEnabled: false,
@@ -515,7 +590,9 @@ define(
                             enabled: false
                         }
                     },
-                    dataZoom: null,
+                    dataZoom: {
+                        enabled: false
+                    },
                     xAxis: {
                         //enabled: false
                     },
@@ -577,7 +654,6 @@ define(
                         })
                     }
                 })
-
             },
             _initMarkPoint: function(g) {
                 var me = this;
@@ -633,6 +709,77 @@ define(
                     });
                 });
             },
+
+            _removeChecked: function() {
+                this._graphs.removeAllChecked()
+            },
+            _updateChecked: function() {
+                var me = this
+                me._currCheckedList = me._getCurrCheckedList()
+                for (var a = 0, al = me._currCheckedList.length; a < al; a++) {
+                    var o = me._currCheckedList[a]
+                    me._checkedBar({
+                        iGroup: o.iGroup - me.dataZoom.range.start,
+                        checked: true,
+                    })
+                }
+            },
+
+            _getCurrCheckedList: function() {
+                var me = this
+                return _.filter(me._checkedList, function(o) {
+                    if (o) {
+                        if (o.iGroup >= me.dataZoom.range.start && o.iGroup <= me.dataZoom.range.end) {
+                            return o
+                        }
+                    }
+                })
+            },
+            _checked: function(eventInfo) { //当点击graphs时 触发选中状态
+                var me = this
+                if (!me._graphs.checked.enabled) {
+                    return
+                }
+                var i = eventInfo.iGroup + me.dataZoom.range.start
+
+                var checked = true
+                if (me._checkedList[i]) { //如果已经选中
+                    me._checkedList[i] = null
+                    checked = false
+                } else { //如果没选中                           
+                    me._checkedList[i] = eventInfo
+                }
+                me._checkedBar({
+                    iGroup: eventInfo.iGroup,
+                    checked: checked
+                })
+                me._checkedMiniBar({
+                    iGroup: i,
+                    checked: checked
+                })
+
+                eventInfo.iGroup = i
+            },
+            _checkedBar: function($o) { //选择bar
+                var me = this
+                var graphs = me._graphs
+                graphs._checked($o)
+            },
+            _checkedMiniBar: function($o) { //选择缩略的bar
+                if (this.dataZoom.enabled) {
+                    var me = this
+                    var graphs = me.__cloneBar.thumbBar._graphs
+                    var fillStyle = ''
+                    if ($o.checked) {
+                        fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                    }
+                    graphs.setBarStyle({
+                        iGroup: $o.iGroup,
+                        fillStyle: fillStyle
+                    })
+                }
+            },
+
             bindEvent: function() {
                 var me = this;
                 this._graphs.sprite.on("panstart mouseover", function(e) {
@@ -650,6 +797,10 @@ define(
                     me.fire(e.type, e);
                 });
                 this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
+                    if (e.type == 'click') {
+                        me.fire('checkedBefor');
+                        me._checked(_.clone(e.eventInfo));
+                    }
                     me._setXaxisYaxisToTipsInfo(e);
                     me.fire(e.type, e);
                 });

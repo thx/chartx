@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'original'],
+    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original'],
     canvax: null,
     create: {},
     _start: function() {
@@ -92,9 +92,10 @@ window.Chartx || (Chartx = {
 
         return promise;
     },
-    setTheme : function( colors ){
-        require(["chartx/chart/theme.js"] , function( theme ){
-            theme.colors = colors;
+    setTheme : function( brandColor , colors ){
+        require(["chartx/chart/theme"] , function( theme ){
+            colors && (theme.colors = colors);
+            brandColor && (theme.brandColor = brandColor);
         })
     },
     _site: {

@@ -38,7 +38,7 @@ define(
             this.place = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
             this.biaxial = false; //是否是双轴中的一份
             this.layoutData = []; //dataSection对应的layout数据{y:-100, content:'1000'}
-            this.dataSection = []; //从原数据dataOrg 中 结果datasection重新计算后的数据
+            this.dataSection = []; //从原数据 dataOrg 中 结果datasection重新计算后的数据
             this.dataOrg = []; //源数据
 
             this.sprite = null;

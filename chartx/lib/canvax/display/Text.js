@@ -59,7 +59,6 @@ define(
                var c = this.context;
                c.width  = this.getTextWidth();
                c.height = this.getTextHeight();
-
             },
             render : function( ctx ){
                for (p in this.context.$model){

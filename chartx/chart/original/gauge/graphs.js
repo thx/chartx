@@ -378,7 +378,7 @@ define(
                             });
                             lines.addChild(bline)
                             bline.animate({
-                                globalAlpha : 1
+                                globalAlpha : 0.6
                             },{
                                 duration : a * 200
                             })

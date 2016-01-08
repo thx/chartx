@@ -107,7 +107,7 @@ define(
              *nodes相关-------------------------
              */
             _initNodes : function(e , tipsPoint){
-                
+                var self = this
                 this._nodes = new Canvax.Display.Sprite({
                     id : "line-tipsNodes",
                     context : {
@@ -116,6 +116,7 @@ define(
                     }
                 });
                 var self = this;
+
                 _.each( e.eventInfo.nodesInfoList , function( node ){
                     
                     var csp = new Canvax.Display.Sprite({
@@ -123,14 +124,24 @@ define(
                             y : e.target.context.height - Math.abs(node.y) 
                         }
                     });
-                    csp.addChild( new Circle({
+
+                    var bigCircle = new Circle({
                         context : {
                             r : node.r + 2 + 1 ,
                             fillStyle   : self.node.backFillStyle || "white",//node.fillStyle,
                             strokeStyle : self.node.strokeStyle || node.strokeStyle,
-                            lineWidth   : node.lineWidth
+                            lineWidth   : node.lineWidth,
+                            cursor      : 'pointer'
                         }
-                    }) );
+                    })
+                    bigCircle.name = 'node', 
+                    bigCircle.eventInfo = {
+                        iGroup: node._groupInd,
+                        iNode : e.eventInfo.iNode,
+                        nodesInfoList : [node]
+                    }
+
+                    csp.addChild(bigCircle);
 
                     csp.addChild( new Circle({
                         context : {
@@ -140,6 +151,20 @@ define(
                     }) );
 
                     self._nodes.addChild( csp );
+                    bigCircle.on("mousemove", function(e) {
+                        e.eventInfo = e.target.eventInfo
+                        self._tip.move(e);
+                    })
+                    bigCircle.on("click", function(e) {
+                        // e.target.eventInfo.nodeInfo = e.target.eventInfo.nodesInfoList[0]
+                        // var eventInfo = _.clone(e.target.eventInfo)
+                        // delete eventInfo.nodesInfoList
+                        var o = {
+                            eventInfo : _.clone(e.target.eventInfo)
+                        }
+                        self.sprite.fire("nodeclick", o);
+                    })
+
                 } );
                 this.sprite.addChild( this._nodes );
             },
@@ -153,6 +178,13 @@ define(
                 _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     var csps         = self._nodes.getChildAt(i).context;
                     csps.y           = e.target.context.height - Math.abs(node.y);
+
+                    var bigCircle = self._nodes.getChildAt(i).getChildAt(0)
+                    bigCircle.eventInfo = {
+                        iGroup: node._groupInd,
+                        iNode : e.eventInfo.iNode,
+                        nodesInfoList : [node]
+                    }
                 });
             }
         };
@@ -269,6 +301,12 @@ define(
                 !this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
                 !this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
                 this.sprite = new Canvax.Display.Sprite();
+                var me = this;
+                this.sprite.on("destroy" , function(){
+                    if(me._growTween){
+                        AnimationFrame.destroyTween( me._growTween );
+                    }
+                });
             },
             draw: function(opt) {
                 _.deepExtend(this, opt);
@@ -366,7 +404,7 @@ define(
                     return;
                 };
 
-                AnimationFrame.registTween({
+                this._growTween = AnimationFrame.registTween({
                     from: self._getPointPosStr(self._currPointList),
                     to: self._getPointPosStr(self._pointList),
                     onUpdate: function() {
@@ -385,6 +423,7 @@ define(
                         });
                     },
                     onComplete: function() {
+                        self._growTween = null;
                         callback && callback(self);
                     }
                 });
@@ -829,6 +868,7 @@ define(
                 }
             },
             _getInfoHandler: function(e) {
+                // console.log(e)
                 var x = e.point.x,
                     y = e.point.y - this.h;
                 //todo:底层加判断
@@ -1048,13 +1088,18 @@ define(
                 };
 
                 this._back = new Back(this.back);
+                this.stageBg.addChild(this._back.sprite);
+
                 this._anchor = new Anchor(this.anchor);
+                this.stageBg.addChild(this._anchor.sprite);
+
                 this._graphs = new Graphs(this.graphs, this);
                 this._tip = new Tips(this.tips, this.dataFrame, this.canvax.getDomContainer());
             },
             _startDraw: function( opt ) {
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
+                var self = this
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
 
@@ -1156,7 +1201,10 @@ define(
                 };
 
                 this.bindEvent(this._graphs.sprite);
-
+                this._tip.sprite.on('nodeclick', function(e){
+                    self._setXaxisYaxisToTipsInfo(e);
+                    self.fire("nodeclick", e.eventInfo);
+                })
 
                 if (this._anchor.enabled) {
                     //绘制点位线
@@ -1182,8 +1230,8 @@ define(
                 };
             },
             _endDraw : function(){
-                this.stageBg.addChild(this._back.sprite);
-                this.stageBg.addChild(this._anchor.sprite);
+                //this.stageBg.addChild(this._back.sprite);
+                //this.stageBg.addChild(this._anchor.sprite);
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._yAxis.sprite);
                 if (this._yAxisR) {
@@ -1371,6 +1419,9 @@ define(
                     }
                 });
                 spt.on("panend mouseout", function(e) {
+                    if(e.toTarget && e.toTarget.name == 'node'){
+                            return
+                    }
                     if (self._tip.enabled) {
                         self._tip.hide(e);
                     }

@@ -10,7 +10,12 @@
         var Canvax = Chart.Canvax;
 
         return Chart.extend({
+            // element : null,
+            // opts    : null,
             init: function(node, data, opts) {
+                // this.element = node;
+                this.data = data;
+                this.options = opts;
                 this.config = {
                     mode: 1,
                     event: {
@@ -27,7 +32,6 @@
                 this.dataFrame = this._initData(data, this);
             },
             draw: function() {
-                //console.log("pie draw");
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
                 });
@@ -61,45 +65,58 @@
                     if (sectorList.length > 0) {
                         for (var i = 0; i < sectorList.length; i++) {
                             item = sectorList[i];
+                            var idata = self._pie.data.data[i];
+
                             list.push({
                                 name: item.name,
                                 index: item.index,
                                 color: item.color,
                                 r: item.r,
                                 value: item.value,
-                                percentage: item.percentage
+                                percentage: item.percentage,
+                                checked: idata.checked
                             });
                         }
                     }
                 };
                 return list;
             },
+            getCheckedList: function() {
+                var cl = [];
+                _.each(this.getList(), function(item) {
+                    if (item.checked) {
+                        cl.push(item);
+                    }
+                });
+                return cl;
+            },
             focusAt: function(index) {
                 if (this._pie) {
-                    this._pie.focus( index );
+                    this._pie.focus(index);
                 }
             },
             unfocusAt: function(index) {
                 if (this._pie) {
-                    this._pie.unfocus( index );
+                    this._pie.unfocus(index);
                 }
             },
-            check: function(index) {
+            checkAt: function(index) {
                 if (this._pie) {
-                    this._pie.check( index );
+                    this._pie.check(index);
                 }
             },
-            uncheck: function(index) {
+            uncheckAt: function(index) {
                 if (this._pie) {
-                    this._pie.uncheck( index );
+                    this._pie.uncheck(index);
                 }
             },
             _initData: function(arr, opt) {
                 var data = [];
-                /*
-                 * @释剑
-                 * 用校正处理， 把pie的data入参规范和chartx数据格式一致
-                 **/
+                var arr = _.clone(arr)
+                    /*
+                     * @释剑
+                     * 用校正处理， 把pie的data入参规范和chartx数据格式一致
+                     **/
                 if (!this.xAxis.field) {
                     data = arr;
                 } else {
@@ -173,30 +190,42 @@
                 this.core.removeAllChildren()
                 this.stageTip.removeAllChildren();
             },
-            reset: function(data, opt) {
+            reset: function(obj) {
                 this.clear()
-                this.width = parseInt(this.element.width());
-                this.height = parseInt(this.element.height());
-                this.draw(data, opt)
+                this._pie.clear()
+                    // var element = $('#' + this.element)
+                    // this.width = parseInt(element.width);
+                    // this.height = parseInt(element.height);
+                    // this.width = parseInt(this.el.offsetWidth);
+                    // this.height = parseInt(this.el.offsetHeight)
+
+                var data = obj.data || this.data
+                    // var opt = obj.options || this.opts
+                    // _.deepExtend(this, obj.data);
+                _.deepExtend(this, obj.options);
+                this.dataFrame = this._initData(data, this.options);
+                this.draw()
             },
             _initModule: function() {
                 var self = this;
                 var w = self.width;
                 var h = self.height;
+                w -= (this.padding.left + this.padding.right);
+                h -= (this.padding.top + this.padding.bottom);
 
                 var r = Math.min(w, h) * 2 / 3 / 2;
-                if (self.dataLabel.enabled == false) {
+                if (self.dataLabel && self.dataLabel.enabled == false) {
                     r = Math.min(w, h) / 2;
                     //要预留clickMoveDis位置来hover sector 的时候外扩
                     r -= r / 11;
-                }
+                };
 
                 var r0 = parseInt(self.innerRadius || 0);
                 var maxInnerRadius = r * 2 / 3;
                 r0 = r0 >= 0 ? r0 : 0;
                 r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
-                var pieX = w / 2;
-                var pieY = h / 2;
+                var pieX = w / 2 + this.padding.left;
+                var pieY = h / 2 + this.padding.top;
                 self.pie = {
                     x: pieX,
                     y: pieY,
@@ -211,26 +240,11 @@
                     colors: self.colors,
                     focusCallback: {
                         focus: function(e, index) {
-                            e.sectorIndex = index;
-                            e.eventInfo = {
-                                sectorIndex: index
-                            };
                             self.fire('focus', e);
                         },
                         unfocus: function(e, index) {
-                            e.sectorIndex = index;
-                            e.eventInfo = {
-                                sectorIndex: index
-                            };
                             self.fire('unfocus', e);
                         }
-                    },
-                    clickCallback: function(e, index) {
-                        e.sectorIndex = index;
-                        e.eventInfo = {
-                            sectorIndex: index
-                        };
-                        self.fire("click", e);
                     }
                 };
 
@@ -239,6 +253,10 @@
                 };
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
+
+                self._pie.sprite.on("mousedown mousemove mouseup click", function(e) {
+                    self.fire(e.type, e);
+                });
             },
             _startDraw: function() {
                 this._pie.draw(this);

@@ -75,6 +75,10 @@ var options = {
 
 Chartx.map("canvasTest" , data , options).then(function( map ){
 
+    map.on("mousedown mousemove mouseup click" , function(e){
+        var mapData = (e.target.mapData || e.target.area.mapData);
+        console.log(e.type+"|"+mapData.id)
+    });
 
 });
             </textarea></form>

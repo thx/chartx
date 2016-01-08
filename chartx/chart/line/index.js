@@ -187,13 +187,18 @@ define(
                 };
 
                 this._back = new Back(this.back);
+                this.stageBg.addChild(this._back.sprite);
+
                 this._anchor = new Anchor(this.anchor);
+                this.stageBg.addChild(this._anchor.sprite);
+
                 this._graphs = new Graphs(this.graphs, this);
                 this._tip = new Tips(this.tips, this.dataFrame, this.canvax.getDomContainer());
             },
             _startDraw: function( opt ) {
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
+                var self = this
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
 
@@ -295,7 +300,10 @@ define(
                 };
 
                 this.bindEvent(this._graphs.sprite);
-
+                this._tip.sprite.on('nodeclick', function(e){
+                    self._setXaxisYaxisToTipsInfo(e);
+                    self.fire("nodeclick", e.eventInfo);
+                })
 
                 if (this._anchor.enabled) {
                     //绘制点位线
@@ -321,8 +329,8 @@ define(
                 };
             },
             _endDraw : function(){
-                this.stageBg.addChild(this._back.sprite);
-                this.stageBg.addChild(this._anchor.sprite);
+                //this.stageBg.addChild(this._back.sprite);
+                //this.stageBg.addChild(this._anchor.sprite);
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._yAxis.sprite);
                 if (this._yAxisR) {
@@ -510,6 +518,9 @@ define(
                     }
                 });
                 spt.on("panend mouseout", function(e) {
+                    if(e.toTarget && e.toTarget.name == 'node'){
+                            return
+                    }
                     if (self._tip.enabled) {
                         self._tip.hide(e);
                     }

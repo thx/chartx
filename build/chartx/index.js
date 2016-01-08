@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'original'],
+    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original'],
     canvax: null,
     create: {},
     _start: function() {
@@ -92,9 +92,10 @@ window.Chartx || (Chartx = {
 
         return promise;
     },
-    setTheme : function( colors ){
-        require(["chartx/chart/theme.js"] , function( theme ){
-            theme.colors = colors;
+    setTheme : function( brandColor , colors ){
+        require(["chartx/chart/theme"] , function( theme ){
+            colors && (theme.colors = colors);
+            brandColor && (theme.brandColor = brandColor);
         })
     },
     _site: {
@@ -275,9 +276,9 @@ define(
             this.height = parseInt(this.el.offsetHeight) //图表区域高
 
             this.padding = {
-                top: 20,
+                top: 10,
                 right: 10,
-                bottom: 0,
+                bottom: 10,
                 left: 10
             }
 
@@ -345,7 +346,9 @@ define(
                 this.width = parseInt(this.el.offsetWidth);
                 this.height = parseInt(this.el.offsetHeight);
                 this.canvax.resize();
+                this.inited = false;
                 this.draw();
+                this.inited = true;
             },
             /**
              * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
@@ -1646,8 +1649,13 @@ define(
             _setContent : function(e){
                 if (!this._tipDom){
                     return;
-                } 
-                this._tipDom.innerHTML = this._getContent(e);
+                };
+                var tipxContent = this._getContent(e);
+                if( tipxContent === "_hide_" ){
+                    this.hide();
+                    return;
+                }
+                this._tipDom.innerHTML = tipxContent;
                 this.dW = this._tipDom.offsetWidth;
                 this.dH = this._tipDom.offsetHeight;
             },
@@ -1939,7 +1947,8 @@ define(
                 if (this.pos.y == null) {
                     this.pos.y = this.graphh - this.h;
                 };
-                this.xGraphsWidth = this.w - this._getXAxisDisLine() - this.xGraphsWidth % _.flatten(this.dataOrg).length;
+                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine());
+
                 if (this._label) {
                     if (this.isH) {
                         this.xGraphsWidth -= this._label.getTextHeight() + 5
@@ -2120,12 +2129,10 @@ define(
                         pc.x + popText.context.width > this.w) {
                         pc.x = this.w - popText.context.width
                     };
-                    if (this.data.length > 2) {
+                    if (this.sprite.getNumChildren() > 2) {
                         //倒数第二个text
                         var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
-
                         var ppc = popPreText.context;
-
                         //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
                         if (ppc.visible && pc.x < ppc.x + ppc.width) {
                             pc.visible = false;
@@ -2229,7 +2236,7 @@ define(
             this.place = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
             this.biaxial = false; //是否是双轴中的一份
             this.layoutData = []; //dataSection对应的layout数据{y:-100, content:'1000'}
-            this.dataSection = []; //从原数据dataOrg 中 结果datasection重新计算后的数据
+            this.dataSection = []; //从原数据 dataOrg 中 结果datasection重新计算后的数据
             this.dataOrg = []; //源数据
 
             this.sprite = null;

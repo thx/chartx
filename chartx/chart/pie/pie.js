@@ -17,6 +17,7 @@
             this.branchSp = null;
             this.sectorsSp = null;
             this.checkedSp = null;
+            this.branchTxt = null;
             //this.angleOffset = -90; //正常情况下，饼图的扇形0度是从3点钟开始，-90表示从12点开始；改值只能是90的倍数
 
             this.dataLabel = {
@@ -60,6 +61,10 @@
                 };
                 this._configData();
                 this._configColors();
+            },
+            clear : function(){
+                // this.domContainer.removeChildren()
+                this.domContainer.innerHTML = ''
             },
             setX: function($n) {
                 this.sprite.context.x = $n
@@ -238,7 +243,7 @@
                     } else {
                         index = index % colors.length;
                     }
-                }
+                };
                 return colors[index];
             },
             _configColors: function() {
@@ -257,7 +262,7 @@
                     opt.complete.call(self);
                 }
             },
-            focus: function(index , callback) {
+            focus: function(index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
                 var secData = self.data.data[index];
@@ -273,7 +278,7 @@
                     }
                 });
             },
-            unfocus: function(index , callback) {
+            unfocus: function(index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
                 var secData = self.data.data[index];
@@ -289,31 +294,31 @@
                     }
                 });
             },
-            check : function( index ){
+            check: function(index) {
                 var sec = this.sectorMap[index].sector;
                 var secData = this.data.data[index];
-                if(secData.checked){
+                if (secData.checked) {
                     return
-                }; 
+                };
                 var me = this;
-                if( !secData._selected ){
-                    this.focus( index , function(){
-                        me.addCheckedSec( sec );
-                    } );
+                if (!secData._selected) {
+                    this.focus(index, function() {
+                        me.addCheckedSec(sec);
+                    });
                 } else {
-                    this.addCheckedSec( sec );
-                };                
+                    this.addCheckedSec(sec);
+                };
                 secData.checked = true;
             },
-            uncheck : function( index ){
+            uncheck: function(index) {
                 var sec = this.sectorMap[index].sector;
                 var secData = this.data.data[index];
-                if(!secData.checked){
+                if (!secData.checked) {
                     return
-                }; 
+                };
                 var me = this;
-                me.delCheckedSec( sec , function(){
-                    me.unfocus( index );
+                me.delCheckedSec(sec, function() {
+                    me.unfocus(index);
                 });
                 secData.checked = false;
             },
@@ -327,7 +332,7 @@
                         sec.context.startAngle = self.angleOffset;
                         sec.context.endAngle = self.angleOffset;
                     }
-                })
+                });
                 self._hideDataLabel();
 
                 AnimationFrame.registTween({
@@ -395,31 +400,29 @@
                 }
             },
             _showTip: function(e, ind) {
-                this._tip.show(this._getTipsInfo(e, ind));
+                this._tip.show(this._geteventInfo(e, ind));
             },
             _hideTip: function(e) {
                 this._tip.hide(e);
             },
             _moveTip: function(e, ind) {
-                this._tip.move(this._getTipsInfo(e, ind))
+                this._tip.move(this._geteventInfo(e, ind))
             },
             _getTipDefaultContent: function(info) {
                 return "<div style='color:" + info.fillStyle + "'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div>" + parseInt(info.percentage) + "%</div>";
             },
-            _getTipsInfo: function(e, ind) {
+            _geteventInfo: function(e, ind) {
                 var data = this.data.data[ind];
-
                 var fillColor = this.getColorByIndex(this.colors, ind);
-
-                e.tipsInfo = {
+                e.eventInfo = {
                     iNode: ind,
                     name: data.name,
                     percentage: data.percentage,
                     value: data.y,
                     fillStyle: fillColor,
-                    data: this.data.org[ind]
+                    data: this.data.org[ind],
+                    checked: data.checked
                 };
-
                 return e;
             },
             _sectorFocus: function(e, index) {
@@ -432,13 +435,6 @@
             _sectorUnfocus: function(e, index) {
                 if (this.focusCallback && e) {
                     this.focusCallback.unfocus(e, index);
-                }
-            },
-            _sectorClick: function(e, index) {
-                if (this.sectorMap[index]) {
-                    if (this.clickCallback) {
-                        this.clickCallback(e, index);
-                    }
                 }
             },
             _getByIndex: function(index) {
@@ -547,6 +543,8 @@
                     self.domContainer.appendChild(branchTxt);
                     bwidth = branchTxt.offsetWidth;
                     bheight = branchTxt.offsetHeight;
+
+                    this.branchTxt = branchTxt
                     //branchTxt.style.display = "none"
 
                     bx = isleft ? -adjustX : adjustX;
@@ -707,7 +705,8 @@
             _getAngleTime: function(secc) {
                 return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
             },
-            addCheckedSec: function(sec) {
+            addCheckedSec: function(sec , callback) {
+
                 var secc = sec.context;
                 var sector = new Sector({
                     context: {
@@ -725,11 +724,14 @@
                 this.checkedSp.addChild(sector);
                 sector.animate({
                     endAngle: secc.endAngle
-                } , {
-                    duration: this._getAngleTime(secc)
+                }, {
+                    duration: this._getAngleTime(secc),
+                    onComplete : function(){
+                        callback && callback();
+                    }
                 });
             },
-            delCheckedSec: function(sec , callback) {
+            delCheckedSec: function(sec, callback) {
                 var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
                 checkedSec.animate({
                     //endAngle : checkedSec.context.startAngle+0.5
@@ -793,15 +795,17 @@
                                     self.unfocus(this.__dataIndex);
                                 }
                             });
-                            sector.on('mousemove', function(e) {
-                                if (self.tips.enabled) {
-                                    self._moveTip(e, this.__dataIndex);
-                                }
-                            });
 
-                            sector.on('click', function(e) {
-                                self._sectorClick(e, this.__dataIndex);
-                                self.secClick( this );
+                            sector.on('mousedown mouseup click mousemove', function(e) {
+                                self._geteventInfo(e, this.__dataIndex);
+                                if (e.type == "click") {
+                                    self.secClick(this , e);
+                                };
+                                if (e.type == "mousemove") {
+                                    if (self.tips.enabled) {
+                                        self._moveTip(e, this.__dataIndex);
+                                    }
+                                };
                             });
 
                             self.sectorsSp.addChildAt(sector, 0);
@@ -851,14 +855,23 @@
                     }
                 }
             },
-            secClick: function( sectorEl ) {
+            secClick: function(sectorEl , e) {
                 var secData = this.data.data[sectorEl.__dataIndex];
+                if( sectorEl.clickIng ){
+                    return;
+                };
+                sectorEl.clickIng = true;
                 if (!secData.checked) {
-                    this.addCheckedSec( sectorEl );
+                    this.addCheckedSec(sectorEl , function(){
+                        sectorEl.clickIng = false;
+                    });
                 } else {
-                    this.delCheckedSec( sectorEl );
+                    this.delCheckedSec(sectorEl , function(){
+                        sectorEl.clickIng = false;
+                    });
                 };
                 secData.checked = !secData.checked;
+                e.eventInfo.checked = secData.checked;
             }
         };
 

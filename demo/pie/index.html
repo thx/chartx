@@ -87,13 +87,22 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
     window.pie = pie;
     //pie.slice(3);
     pie.on('focus' , function (e) {
-        console.log(e);
+        console.log(e.type);
     });
     pie.on('unfocus' , function (e) {
-        console.log(e);
+        console.log(e.type);
     });
     pie.on('click',function(e){
-        console.log(e);
+        console.log(e.type);
+    });
+    pie.on('mousedown',function(e){
+        console.log(e.type);
+    });
+    pie.on('mouseup',function(e){
+        console.log(e.type);
+    });
+    pie.on('mousemove',function(e){
+        console.log(e.type);
     });
 
     /*

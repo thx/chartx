@@ -16,9 +16,9 @@ define(
             this.height = parseInt(this.el.offsetHeight) //图表区域高
 
             this.padding = {
-                top: 20,
+                top: 10,
                 right: 10,
-                bottom: 0,
+                bottom: 10,
                 left: 10
             }
 
@@ -86,7 +86,9 @@ define(
                 this.width = parseInt(this.el.offsetWidth);
                 this.height = parseInt(this.el.offsetHeight);
                 this.canvax.resize();
+                this.inited = false;
                 this.draw();
+                this.inited = true;
             },
             /**
              * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。

@@ -88,6 +88,11 @@ var options = {
     xAxis : {
         field : ["xfield"]
     },
+    graphs : {
+        text : {
+            enabled : true
+        }
+    },
     dataZoom : {
         range : {
             start : 1,
@@ -95,7 +100,17 @@ var options = {
         }
     }
 }   
-Chartx.bar("canvasTest" , data , options);
+Chartx.bar("canvasTest" , data , options).then(function( chart ){
+    window.bar = chart;
+
+    setTimeout(function(){
+        var newData = _.clone(data);
+        var titles  = newData.shift();
+        newData = newData.reverse();
+        newData.unshift(titles);
+        bar.resetData( newData );
+    } , 2000)
+});
 
 </textarea></form>
 
