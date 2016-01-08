@@ -156,11 +156,11 @@ define(
                         self._tip.move(e);
                     })
                     bigCircle.on("click", function(e) {
-                        e.target.eventInfo.nodeInfo = e.target.eventInfo.nodesInfoList[0]
-                        var eventInfo = _.clone(e.target.eventInfo)
-                        delete eventInfo.nodesInfoList
+                        // e.target.eventInfo.nodeInfo = e.target.eventInfo.nodesInfoList[0]
+                        // var eventInfo = _.clone(e.target.eventInfo)
+                        // delete eventInfo.nodesInfoList
                         var o = {
-                            eventInfo : eventInfo
+                            eventInfo : _.clone(e.target.eventInfo)
                         }
                         self.sprite.fire("nodeclick", o);
                     })
