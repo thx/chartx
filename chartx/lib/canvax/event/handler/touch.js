@@ -31,6 +31,8 @@ define(
                     me._hammer.on(et , function( e ){
                         root.updateRootOffset();
                         me.__touchHandler( e );
+                        me._stopBubble(e);
+                        me._stopDefault(e);
                     });
                 } );
             },

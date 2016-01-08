@@ -24,6 +24,8 @@ define(
                     Base.addEvent( root.el , type , function( e ){
                         root.updateRootOffset();
                         me.__mouseHandler( e );
+                        me._stopBubble(e);
+                        me._stopDefault(e);
                     } ); 
                 } );   
             },
