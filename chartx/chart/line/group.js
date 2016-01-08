@@ -68,9 +68,10 @@ define(
                 !this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
                 !this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
                 this.sprite = new Canvax.Display.Sprite();
+                var me = this;
                 this.sprite.on("destroy" , function(){
-                    if(this._growTween){
-                        AnimationFrame.destroyTween( this._growTween );
+                    if(me._growTween){
+                        AnimationFrame.destroyTween( me._growTween );
                     }
                 });
             },
