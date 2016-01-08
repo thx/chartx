@@ -48,11 +48,11 @@ define(
             };
 
             this.checked = {
-                enabled     : false,
-                fillStyle   : '#00A8E6',
-                strokeStyle : '#00A8E6',
-                globalAlpha : 0.1,
-                lineWidth   : 2
+                enabled: false,
+                fillStyle: '#00A8E6',
+                strokeStyle: '#00A8E6',
+                globalAlpha: 0.1,
+                lineWidth: 2
             }
 
             this.sort = null;
@@ -98,15 +98,17 @@ define(
             setY: function($n) {
                 this.sprite.context.y = $n
             },
-            getInfo:function(index){
+            getInfo: function(index) {
                 //该index指当前
-                return this._getInfoHandler({iGroup:index})
+                return this._getInfoHandler({
+                    iGroup: index
+                })
             },
-            _checked : function($o){
+            _checked: function($o) {
                 var me = this
                 var index = $o.iGroup
                 var group = me.barsSp.getChildById('barGroup_' + index)
-                if(!group){
+                if (!group) {
                     return
                 }
 
@@ -114,9 +116,10 @@ define(
                 me.checkedSp.removeChildById('rect_' + index)
                 var hoverRect = group.getChildAt(0)
                 var x0 = hoverRect.context.x + 1
-                var x1 = hoverRect.context.x + hoverRect.context.width - 1, y = -me.h
+                var x1 = hoverRect.context.x + hoverRect.context.width - 1,
+                    y = -me.h
 
-                if($o.checked){
+                if ($o.checked) {
                     var rect = new Rect({
                         id: "rect_" + index,
                         pointChkPriority: false,
@@ -129,33 +132,36 @@ define(
                             globalAlpha: me.checked.globalAlpha
                         }
                     });
-                    me.checkedSp.addChild(rect) 
+                    me.checkedSp.addChild(rect)
 
-                    var line = new BrokenLine({  
+                    var line = new BrokenLine({
                         id: "line_" + index,
                         context: {
-                            pointList: [[x0, y], [x1, y]],
-                            strokeStyle : me.checked.strokeStyle,
-                            lineWidth : me.checked.lineWidth
+                            pointList: [
+                                [x0, y],
+                                [x1, y]
+                            ],
+                            strokeStyle: me.checked.strokeStyle,
+                            lineWidth: me.checked.lineWidth
                         }
                     });
                     me.checkedSp.addChild(line)
                 }
             },
-            removeAllChecked:function(){
+            removeAllChecked: function() {
                 var me = this
                 me.checkedSp.removeAllChildren()
             },
-            setBarStyle : function($o){
+            setBarStyle: function($o) {
                 var me = this
                 var index = $o.iGroup
                 var group = me.barsSp.getChildById('barGroup_' + index)
                 var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
-                for(var a = 0, al = group.getNumChildren(); a < al; a++){
+                for (var a = 0, al = group.getNumChildren(); a < al; a++) {
                     var rectEl = group.getChildAt(a)
                     rectEl.context.fillStyle = fillStyle
                 }
-            },  
+            },
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this.root.dataFrame.yAxis.field), function(field, i) {
@@ -193,7 +199,7 @@ define(
                 };
                 return style;
             },
-            checkBarW: function(xDis1,xDis2) {
+            checkBarW: function(xDis1, xDis2) {
                 if (this.bar.width) {
                     if (_.isFunction(this.bar.width)) {
                         this.bar._width = this.bar.width(xDis1);
@@ -203,8 +209,8 @@ define(
                     this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
                 };
                 this.bar._width < 1 && (this.bar._width = 1);
-                if( this.bar._width == 1 && xDis1 > 3 ){
-                    this.bar._width = parseInt(xDis1)-2;
+                if (this.bar._width == 1 && xDis1 > 3) {
+                    this.bar._width = parseInt(xDis1) - 2;
                 };
             },
             resetData: function(data, opt) {
@@ -246,10 +252,6 @@ define(
 
                     me._barsLen = hLen * groups;
 
-                    //如果itemW过小的话，就不用显示text的info信息
-                    if (itemW < 15) {
-                        me.text.enabled = false;
-                    };
                     for (h = 0; h < hLen; h++) {
                         var groupH;
                         if (i == 0) {
@@ -302,6 +304,22 @@ define(
                             };
                         } else {
                             groupH = me.barsSp.getChildById("barGroup_" + h);
+                        };
+
+                        //同上面，给txt做好分组
+                        var txtGroupH;
+                        if (i == 0) {
+                            if (h <= preLen - 1) {
+                                txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+                            } else {
+                                txtGroupH = new Canvax.Display.Sprite({
+                                    id: "txtGroup_" + h
+                                });
+                                me.txtsSp.addChild(txtGroupH);
+                                txtGroupH.iGroup = h;
+                            };
+                        } else {
+                            txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
                         };
 
                         for (v = 0; v < vLen; v++) {
@@ -378,7 +396,7 @@ define(
 
                                 var infosp;
                                 if (h <= preLen - 1) {
-                                    infosp = me.txtsSp.getChildById("infosp_" + i + "_" + h);
+                                    infosp = txtGroupH.getChildById("infosp_" + i + "_" + h);
                                 } else {
                                     infosp = new Canvax.Display.Sprite({
                                         id: "infosp_" + i + "_" + h,
@@ -387,7 +405,7 @@ define(
                                         }
                                     });
                                     infosp._hGroup = h;
-                                    me.txtsSp.addChild(infosp);
+                                    txtGroupH.addChild(infosp);
                                 };
 
                                 if (vLen > 1) {
@@ -416,7 +434,7 @@ define(
                                             context: {
                                                 x: infoWidth + 2,
                                                 fillStyle: cdata.fillStyle,
-                                                fontSize : me.text.fontSize
+                                                fontSize: me.text.fontSize
                                             }
                                         });
                                         infosp.addChild(txt);
@@ -535,22 +553,15 @@ define(
                 if (self.barsSp.children.length > self.data[0][0].length) {
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
-
-                        for (var t = 0, tl = self.txtsSp.children.length; t < tl; t++) {
-                            if (self.txtsSp.children[t]._hGroup == i) {
-                                self.txtsSp.children[t].destroy();
-                                t--, tl--;
-                            }
-                        };
-
+                        self.text.enabled && self.txtsSp.getChildAt(i).destroy();
                         self.averageSp && self.averageSp.getChildAt(i).destroy();
                         i--;
                         l--;
                     };
                 };
- 
+
                 var options = _.extend({
-                    delay: Math.min(1000 / this._barsLen , 80),
+                    delay: Math.min(1000 / this._barsLen, 80),
                     easing: "Back.Out",
                     duration: 500
                 }, opt);
@@ -599,56 +610,64 @@ define(
                                 });
                             };
 
-                            if (self.text.enabled) {
-                                var infosp = self.txtsSp.getChildById("infosp_" + g + "_" + h);
-
-                                if (self.root.type == "horizontal") {
-                                    infosp.context.x = infosp._finalX;
-                                };
-                                infosp.animate({
-                                    y: infosp._finalY,
-                                    x: infosp._finalX
-                                }, {
-                                    duration: options.duration,
-                                    easing: options.easing,
-                                    delay: h * options.delay,
-                                    onUpdate: function() {
-                                        this.context.visible = true;
-                                    },
-                                    onComplete: function() {}
-                                });
-
-                                _.each(infosp.children, function(txt) {
-                                    if (txt._text) {
-                                        AnimationFrame.registTween({
-                                            from: {
-                                                v: txt.text
-                                            },
-                                            to: {
-                                                v: txt._text
-                                            },
-                                            duration: options.duration + 300,
-                                            delay: h * options.delay,
-                                            onUpdate: function() {
-                                                var content = this.v;
-                                                if (_.isFunction(self.text.format)) {
-                                                    content = self.text.format(content);
-                                                } else if (_.isNumber(content)) {
-                                                    content = Tools.numAddSymbol(parseInt(content));
-                                                };
-                                                txt.resetText(content);
-                                                if (txt.parent) {
-                                                    self._updateInfoTextPos(txt.parent);
-                                                } else {
-                                                    txt.destroy();
-                                                }
-                                            }
-                                        })
-                                    };
-                                });
-                            }
-
                         };
+
+                        //txt grow
+
+                        if (self.text.enabled) {
+                            var txtGroupH = self.txtsSp.getChildById("txtGroup_" + h);
+
+                            var infosp = txtGroupH.getChildById("infosp_" + g + "_" + h);
+
+                            if (self.root.type == "horizontal") {
+                                infosp.context.x = infosp._finalX;
+                            };
+
+                            infosp.animate({
+                                y: infosp._finalY,
+                                x: infosp._finalX
+                            }, {
+                                duration: options.duration,
+                                easing: options.easing,
+                                delay: h * options.delay,
+                                onUpdate: function() {
+                                    this.context.visible = true;
+                                },
+                                onComplete: function() {}
+                            });
+
+                            _.each(infosp.children, function(txt) {
+                                if (txt._text) {
+                                    if (txt._tweenObj) {
+                                        AnimationFrame.destroyTween(txt._tweenObj);
+                                    };
+                                    txt._tweenObj = AnimationFrame.registTween({
+                                        from: {
+                                            v: txt.text
+                                        },
+                                        to: {
+                                            v: txt._text
+                                        },
+                                        duration: options.duration + 300,
+                                        delay: h * options.delay,
+                                        onUpdate: function() {
+                                            var content = this.v;
+                                            if (_.isFunction(self.text.format)) {
+                                                content = self.text.format(content);
+                                            } else if (_.isNumber(content)) {
+                                                content = Tools.numAddSymbol(parseInt(content));
+                                            };
+                                            txt.resetText(content);
+                                            if (txt.parent) {
+                                                self._updateInfoTextPos(txt.parent);
+                                            } else {
+                                                txt.destroy();
+                                            }
+                                        }
+                                    })
+                                };
+                            });
+                        }
                     };
                 });
                 window.setTimeout(function() {
@@ -801,14 +820,17 @@ define(
                 this._data = data;
                 this._opts = opts;
 
-                if (opts.dataZoom) {
-                    this.padding.bottom += 46;
-                    this.dataZoom = {
-                        range: {
-                            start: 0,
-                            end: data.length - 1 //因为第一行是title
-                        }
+                this.dataZoom = {
+                    enabled: false,
+                    range: {
+                        start: 0,
+                        end: data.length - 1 //因为第一行是title
                     }
+                };
+
+                if (opts.dataZoom) {
+                    this.dataZoom.enabled = true;
+                    this.padding.bottom += 46;
                 };
 
                 if (opts.proportion) {
@@ -824,13 +846,25 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data) {
+                this._data = data;
+
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis, {
                     animation: false
                 });
-                this._yAxis.resetData(this.dataFrame.yAxis, {
-                    animation: false
-                });
+
+                if (this.dataZoom.enabled) {
+                    this.__cloneBar = this._getCloneBar();
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                        animation: false
+                    });
+                    this._dataZoom.sprite.destroy();
+                    this._initDataZoom();
+                } else {
+                    this._yAxis.resetData(this.dataFrame.yAxis, {
+                        animation: false
+                    });
+                };
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function() {
                     //callback
@@ -957,10 +991,9 @@ define(
             },
             _initData: function(data, opt) {
                 var d;
-                var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
-                if (dataZoom) {
+                if (this.dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -1034,7 +1067,7 @@ define(
                     yMaxHeight: graphsH
                 });
 
-                if (this.dataZoom) {
+                if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
@@ -1088,7 +1121,7 @@ define(
                 });
 
 
-                if (this.dataZoom) {
+                if (this.dataZoom.enabled) {
                     this._initDataZoom();
                 }
             },
@@ -1112,7 +1145,7 @@ define(
                     };
 
                     //把这个group当前是否选中状态记录
-                    if( me._checkedList[ node.iGroup ] ){
+                    if (me._checkedList[node.iGroup]) {
                         node.checked = true;
                     } else {
                         node.checked = false;
@@ -1120,6 +1153,7 @@ define(
                 });
             },
             _trimGraphs: function(_xAxis, _yAxis) {
+
                 _xAxis || (_xAxis = this._xAxis);
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
@@ -1149,7 +1183,7 @@ define(
                     _.each(yArrList, function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
 
-                        if (me.dataZoom) {
+                        if (me.dataZoom.enabled) {
                             subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end);
                         };
 
@@ -1255,7 +1289,7 @@ define(
             _initDataZoom: function() {
                 var me = this;
                 //require(["chartx/components/datazoom/index"], function(DataZoom) {
-                //初始化datazoom模块
+                //初始化 datazoom 模块
 
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
@@ -1345,7 +1379,9 @@ define(
                             enabled: false
                         }
                     },
-                    dataZoom: null,
+                    dataZoom: {
+                        enabled: false
+                    },
                     xAxis: {
                         //enabled: false
                     },
@@ -1519,16 +1555,18 @@ define(
                 graphs._checked($o)
             },
             _checkedMiniBar: function($o) { //选择缩略的bar
-                var me = this
-                var graphs = me.__cloneBar.thumbBar._graphs
-                var fillStyle = ''
-                if ($o.checked) {
-                    fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                if (this.dataZoom.enabled) {
+                    var me = this
+                    var graphs = me.__cloneBar.thumbBar._graphs
+                    var fillStyle = ''
+                    if ($o.checked) {
+                        fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                    }
+                    graphs.setBarStyle({
+                        iGroup: $o.iGroup,
+                        fillStyle: fillStyle
+                    })
                 }
-                graphs.setBarStyle({
-                    iGroup: $o.iGroup,
-                    fillStyle: fillStyle
-                })
             },
 
             bindEvent: function() {

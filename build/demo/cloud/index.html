@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
 <title>xChart demo -- 饼图</title>
+<script type="text/javascript" src="../../lib/d3.js"></script>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -24,6 +25,8 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
+
+
 </head>
 <body >
 
@@ -31,29 +34,8 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-var data= [
-    ["node"   , "value"],
-    ["ie"     , 500   ],
-    {
-        name:'chrome',        
-        sliced:false,
-        y:2000
-    },
-    ["firefox", 300   ],
-    ["safari" , 100   ],
-    ["其他"   , 200   ]    
-];
 
-var options = {
-    xAxis : {
-        field : "node"
-    },
-    yAxis : {
-        field : "value"
-    }
-};
-Chartx.cloud("canvasTest" , data , options).then(function( pie ){
+Chartx.cloud("canvasTest" , {} , {}).then(function( pie ){
 
 });
 </textarea></form>
@@ -70,7 +52,7 @@ Chartx.cloud("canvasTest" , data , options).then(function( pie ){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:960px;height:600px;position:relative;'></div>
             </div>
 
             </div>

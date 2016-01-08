@@ -3683,8 +3683,9 @@ define(
             init : function(text , opt){
                var self = this;
                var c = this.context;
-               c.width  = this.getTextWidth();
-               c.height = this.getTextHeight();
+
+               !c.width && (c.width  = this.getTextWidth());
+               !c.height && (c.height = this.getTextHeight());
 
             },
             render : function( ctx ){

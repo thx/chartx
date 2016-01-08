@@ -31,14 +31,17 @@ define(
                 this._data = data;
                 this._opts = opts;
 
-                if (opts.dataZoom) {
-                    this.padding.bottom += 46;
-                    this.dataZoom = {
-                        range: {
-                            start: 0,
-                            end: data.length - 1 //因为第一行是title
-                        }
+                this.dataZoom = {
+                    enabled: false,
+                    range: {
+                        start: 0,
+                        end: data.length - 1 //因为第一行是title
                     }
+                };
+
+                if (opts.dataZoom) {
+                    this.dataZoom.enabled = true;
+                    this.padding.bottom += 46;
                 };
 
                 if (opts.proportion) {
@@ -54,13 +57,25 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data) {
+                this._data = data;
+
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis, {
                     animation: false
                 });
-                this._yAxis.resetData(this.dataFrame.yAxis, {
-                    animation: false
-                });
+
+                if (this.dataZoom.enabled) {
+                    this.__cloneBar = this._getCloneBar();
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                        animation: false
+                    });
+                    this._dataZoom.sprite.destroy();
+                    this._initDataZoom();
+                } else {
+                    this._yAxis.resetData(this.dataFrame.yAxis, {
+                        animation: false
+                    });
+                };
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function() {
                     //callback
@@ -187,10 +202,9 @@ define(
             },
             _initData: function(data, opt) {
                 var d;
-                var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
-                if (dataZoom) {
+                if (this.dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -264,7 +278,7 @@ define(
                     yMaxHeight: graphsH
                 });
 
-                if (this.dataZoom) {
+                if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
@@ -318,7 +332,7 @@ define(
                 });
 
 
-                if (this.dataZoom) {
+                if (this.dataZoom.enabled) {
                     this._initDataZoom();
                 }
             },
@@ -342,7 +356,7 @@ define(
                     };
 
                     //把这个group当前是否选中状态记录
-                    if( me._checkedList[ node.iGroup ] ){
+                    if (me._checkedList[node.iGroup]) {
                         node.checked = true;
                     } else {
                         node.checked = false;
@@ -350,6 +364,7 @@ define(
                 });
             },
             _trimGraphs: function(_xAxis, _yAxis) {
+
                 _xAxis || (_xAxis = this._xAxis);
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
@@ -379,7 +394,7 @@ define(
                     _.each(yArrList, function(subv, v) {
                         !tmpData[b][v] && (tmpData[b][v] = []);
 
-                        if (me.dataZoom) {
+                        if (me.dataZoom.enabled) {
                             subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end);
                         };
 
@@ -485,7 +500,7 @@ define(
             _initDataZoom: function() {
                 var me = this;
                 //require(["chartx/components/datazoom/index"], function(DataZoom) {
-                //初始化datazoom模块
+                //初始化 datazoom 模块
 
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
@@ -575,7 +590,9 @@ define(
                             enabled: false
                         }
                     },
-                    dataZoom: null,
+                    dataZoom: {
+                        enabled: false
+                    },
                     xAxis: {
                         //enabled: false
                     },
@@ -749,16 +766,18 @@ define(
                 graphs._checked($o)
             },
             _checkedMiniBar: function($o) { //选择缩略的bar
-                var me = this
-                var graphs = me.__cloneBar.thumbBar._graphs
-                var fillStyle = ''
-                if ($o.checked) {
-                    fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                if (this.dataZoom.enabled) {
+                    var me = this
+                    var graphs = me.__cloneBar.thumbBar._graphs
+                    var fillStyle = ''
+                    if ($o.checked) {
+                        fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
+                    }
+                    graphs.setBarStyle({
+                        iGroup: $o.iGroup,
+                        fillStyle: fillStyle
+                    })
                 }
-                graphs.setBarStyle({
-                    iGroup: $o.iGroup,
-                    fillStyle: fillStyle
-                })
             },
 
             bindEvent: function() {
