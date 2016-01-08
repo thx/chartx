@@ -58,7 +58,11 @@ var options = {
     }
 };
 //Chartx.line开始初始化chart实例
-var chartx = Chartx.line("canvasTest" , data , options)
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
+    setTimeout(function(){
+        chart.resize();
+    } , 200);
+});
 </textarea></form>
 
         </td>

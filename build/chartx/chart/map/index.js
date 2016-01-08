@@ -480,44 +480,31 @@ define(
                     });
 
                     area.on("mousedown", function(e) {
+                        me.fire("mousedown", e);
+                    });
+
+                    area.on("click", function(e) {
                         var areaEl = this;
 
-                        if (areaEl._clickTime && areaEl._clickTimer && (new Date().getTime() - areaEl._clickTime) <= 135) {
-                            clearTimeout(areaEl._clickTimer);
-                            delete areaEl._clickTime;
-                            delete areaEl._clickTimer;
-                            return;
+                        var mapData = e.currentTarget.mapData;
+                        if (me.checkedList[mapData.id]) {
+                            //已经存在了。取消选中态度
+                            mapData.checked = false;
+                            delete me.checkedList[mapData.id];
+                            if (areaEl._fillStyle == me.area.normalFillStyle) {
+                                areaEl.context.fillStyle = me.area.normalFillStyle;
+                            }
+                        } else {
+                            me.checkedList[mapData.id] = mapData;
+                            mapData.checked = true;
+                            if (areaEl.context.fillStyle == me.area.normalFillStyle) {
+                                areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                            };
                         };
-
-                        var currentTarget = e.currentTarget;
-
-                        areaEl._clickTime = new Date().getTime();
-                        areaEl._clickTimer = setTimeout(function() {
-                            e.currentTarget = currentTarget;
-                            var mapData = e.currentTarget.mapData;
-                            if (me.checkedList[mapData.id]) {
-                                //已经存在了。取消选中态度
-                                mapData.checked = false;
-                                delete me.checkedList[mapData.id];
-                                if (areaEl._fillStyle == me.area.normalFillStyle) {
-                                    areaEl.context.fillStyle = me.area.normalFillStyle;
-                                }
-                            } else {
-                                me.checkedList[mapData.id] = mapData;
-                                mapData.checked = true;
-                                if (areaEl.context.fillStyle == me.area.normalFillStyle) {
-                                    areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
-                                };
-                                delete areaEl._clickTime;
-                                delete areaEl._clickTimer;
-                            };
-                            e.eventInfo = {
-                                mapData: mapData
-                            };
-                            me.fire("click", e);
-                        }, 135);
-
-                        me.fire("mousedown", e);
+                        e.eventInfo = {
+                            mapData: mapData
+                        };
+                        me.fire("click", e);
 
                     });
 

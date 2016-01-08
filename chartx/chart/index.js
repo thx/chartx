@@ -86,7 +86,9 @@ define(
                 this.width = parseInt(this.el.offsetWidth);
                 this.height = parseInt(this.el.offsetHeight);
                 this.canvax.resize();
+                this.inited = false;
                 this.draw();
+                this.inited = true;
             },
             /**
              * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
