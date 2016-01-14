@@ -26,6 +26,10 @@ define(
                 format: null
             };
 
+            this.checked = {
+                enabled : false
+            }
+
             this.tips = _.deepExtend({
                 enabled: true
             }, tipsOpt); //tip的confit
@@ -856,6 +860,7 @@ define(
                 }
             },
             secClick: function(sectorEl , e) {
+                if( !this.checked.enabled ) return;
                 var secData = this.data.data[sectorEl.__dataIndex];
                 if( sectorEl.clickIng ){
                     return;

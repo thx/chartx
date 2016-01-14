@@ -1030,17 +1030,18 @@ define(
 
 	return TWEEN;
 
-});;window.FlashCanvasOptions = {
+});;/* 
+window.FlashCanvasOptions = {
     swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
+*/
 define(
     "canvax/core/Base",
     [
-        !document.createElement('canvas').getContext ? "canvax/library/flashCanvas/flashcanvas" : "",
-        !window._ ? "canvax/library/underscore" : ""
+        "canvax/library/underscore",
+        !document.createElement('canvas').getContext ? "canvax/library/flashCanvas/flashcanvas" : "" 
     ],
-    function( FlashCanvas ){
-
+    function( _ , FlashCanvas ){
         var addOrRmoveEventHand = function( domHand , ieHand ){
             if( document[ domHand ] ){
                 return function( el , type , fn ){
@@ -1389,7 +1390,7 @@ define(
     "canvax/core/PropertyFactory",
     [
     ],
-    function(Base){
+    function(){
     //定义封装好的兼容大部分浏览器的defineProperties 的 属性工厂
         var unwatchOne = {
             "$skipArray" : 0,
@@ -1662,7 +1663,7 @@ define(
     [
          "canvax/core/Base"
     ],
-    function(EventBase,Base){
+    function(EventBase){
         var CanvaxEvent = function( e ) {
             this.target = null;
             this.currentTarget = null;	
@@ -1973,7 +1974,8 @@ define(
 );
 ;define(
     "canvax/event/EventHandler", [
-        "canvax/core/Base", ('ontouchstart' in window) ? "canvax/event/handler/touch" : "canvax/event/handler/mouse",
+        "canvax/core/Base", 
+        ('ontouchstart' in window) ? "canvax/event/handler/touch" : "canvax/event/handler/mouse",
         "canvax/display/Point",
         "canvax/event/CanvaxEvent"
     ],

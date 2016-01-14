@@ -41,7 +41,7 @@ define(
 
                 if (opts.dataZoom) {
                     this.dataZoom.enabled = true;
-                    this.padding.bottom += 46;
+                    this.padding.bottom += (opts.dataZoom.height || 46);
                 };
 
                 if (opts.proportion) {
@@ -52,6 +52,9 @@ define(
                 };
 
                 this.dataFrame = this._initData(data);
+
+                //一些继承自该类的constructor 会拥有_init来做一些覆盖，比如横向柱状图
+                this._init && this._init(node, data, opts);
             },
             /*
              * 如果只有数据改动的情况

@@ -3,17 +3,18 @@
  *
  * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
  */
+/* 
 window.FlashCanvasOptions = {
     swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
+*/
 define(
     "canvax/core/Base",
     [
-        !document.createElement('canvas').getContext ? "canvax/library/flashCanvas/flashcanvas" : "",
-        !window._ ? "canvax/library/underscore" : ""
+        "canvax/library/underscore",
+        !document.createElement('canvas').getContext ? "canvax/library/flashCanvas/flashcanvas" : "" 
     ],
-    function( FlashCanvas ){
-
+    function( _ , FlashCanvas ){
         var addOrRmoveEventHand = function( domHand , ieHand ){
             if( document[ domHand ] ){
                 return function( el , type , fn ){

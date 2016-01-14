@@ -62,7 +62,7 @@ define(
             },
             _load    : function( i , src , callback ){
                 //必须先在src赋值前注册事件
-                this._loadHand( i , callback ).src = src+"?t="+new Date().getTime();
+                this._loadHand( i , callback ).src = src;
             },
             start   : function(){
                 //开始加载
