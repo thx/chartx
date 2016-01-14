@@ -76,7 +76,7 @@
             _configData: function() {
                 var self = this;
                 self.total = 0;
-                self.angleOffset = Number.isNaN(self.startAngle) ? 0 : self.startAngle;
+                self.angleOffset = _.isNaN(self.startAngle) ? 0 : self.startAngle;
                 self.angleOffset = self.angleOffset % 360;
                 self.currentAngle = 0 + self.angleOffset;
                 var limitAngle = 360 + self.angleOffset;
