@@ -365,6 +365,8 @@ define(
                         node.checked = false;
                     }
                 });
+
+                e.eventInfo.dataZoom = me.dataZoom;
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
@@ -557,7 +559,7 @@ define(
                 var graphssp = this.__cloneBar.thumbBar._graphs.sprite;
                 graphssp.id = graphssp.id + "_datazoomthumbbarbg"
                 graphssp.context.x = 0;
-                graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
+                graphssp.context.y = me._dataZoom.height - me._dataZoom.barY;
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
 
                 me._dataZoom.dataZoomBg.addChild(graphssp);
@@ -812,3 +814,5 @@ define(
         return Bar;
     }
 );
+
+

@@ -49,6 +49,10 @@ define(
                     //field : []
                 };
 
+                this.checked = {
+                    enabled: false
+                }
+
                 _.deepExtend(this, opts);
 
                 this.maxValue = 1; //在_initData中会计算maxValue
@@ -396,7 +400,7 @@ define(
 
                 _.each(mapDataList, function(md, i) {
                     md.ind = i;
-                    var aread = md; //me._getDataForArea(md);
+                    var aread = me._getDataForArea(md);
 
                     var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
                     var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area.normalStrokeStyle);
@@ -487,18 +491,20 @@ define(
                         var areaEl = this;
 
                         var mapData = e.currentTarget.mapData;
-                        if (me.checkedList[mapData.id]) {
-                            //已经存在了。取消选中态度
-                            mapData.checked = false;
-                            delete me.checkedList[mapData.id];
-                            if (areaEl._fillStyle == me.area.normalFillStyle) {
-                                areaEl.context.fillStyle = me.area.normalFillStyle;
-                            }
-                        } else {
-                            me.checkedList[mapData.id] = mapData;
-                            mapData.checked = true;
-                            if (areaEl.context.fillStyle == me.area.normalFillStyle) {
-                                areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                        if (me.checked.enabled) {
+                            if (me.checkedList[mapData.id]) {
+                                //已经存在了。取消选中态度
+                                mapData.checked = false;
+                                delete me.checkedList[mapData.id];
+                                if (areaEl._fillStyle == me.area.normalFillStyle) {
+                                    areaEl.context.fillStyle = me.area.normalFillStyle;
+                                }
+                            } else {
+                                me.checkedList[mapData.id] = mapData;
+                                mapData.checked = true;
+                                if (areaEl.context.fillStyle == me.area.normalFillStyle) {
+                                    areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                                };
                             };
                         };
                         e.eventInfo = {

@@ -659,7 +659,7 @@ define(
                 y: 0
             };
             this.w = 0;
-            this.h = dataZoom.height;
+            this.height = 46;
 
             this.color = "#70aae8";
 
@@ -673,7 +673,8 @@ define(
             this.dragEnd = function(){};
 
             opt && _.deepExtend(this, opt);
-            this.barH = this.h - 6;
+            
+            this.barH = this.height - 6;
             this.barY = 6 / 2;
             this.btnW = 8;
             this.btnFillStyle = this.color;
@@ -891,8 +892,6 @@ define(
                 return line
             }
         };
-
-        dataZoom.height = 46;
         return dataZoom;
     }
 );
