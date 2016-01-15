@@ -1042,6 +1042,7 @@ define(
         !document.createElement('canvas').getContext ? "canvax/library/flashCanvas/flashcanvas" : "" 
     ],
     function( _ , FlashCanvas ){
+        _ = ( _ || window._ );
         var addOrRmoveEventHand = function( domHand , ieHand ){
             if( document[ domHand ] ){
                 return function( el , type , fn ){
