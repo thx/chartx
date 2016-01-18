@@ -1130,7 +1130,8 @@ define(
                         unfocus: function(e, index) {
                             self.fire('unfocus', e);
                         }
-                    }
+                    },
+                    checked : self.checked
                 };
 
                 if (self.dataLabel) {

@@ -2373,14 +2373,15 @@ define(
             },
             _setDataSection: function(data) {
                 var arr = [];
+                var d = (data.org || data.data);
                 if (!this.biaxial) {
-                    arr = _.flatten(data.org); //_.flatten( data.org );
+                    arr = _.flatten( d ); //_.flatten( data.org );
                 } else {
                     if (this.place == "left") {
-                        arr = _.flatten(data.org[0]);
+                        arr = _.flatten(d[0]);
                         this.field = _.flatten([this.field[0]]);
                     } else {
-                        arr = _.flatten(data.org[1]);
+                        arr = _.flatten(d[1]);
                         this.field = _.flatten([this.field[1]]);
                     }
                 }
@@ -2389,7 +2390,7 @@ define(
             //data1 == [1,2,3,4]
             _initData: function(data , data1) {
                 var arr = this._setDataSection(data , data1);
-                this.dataOrg = data.org; //这里必须是data.org
+                this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);
                 };

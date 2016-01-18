@@ -13,7 +13,7 @@ define(
         //再柱状图的基础上开发柱折混合图表
         return Bar.extend({
             _yAxisR: null,
-            init: function(node, data, opts) {
+            _init: function(node, data, opts) {
                 //覆盖默认配置begin
                 this.graphs = {
                     fill: {

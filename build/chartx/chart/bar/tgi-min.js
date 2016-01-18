@@ -1,1 +1,0 @@
-define("chartx/chart/bar/tgi",["chartx/chart/bar/index"],function(a){return a.extend({_init:function(a,b,c){},draw:function(){this._setStages(),this._initModule(),this._startDraw(),this._drawEnd()}})});
