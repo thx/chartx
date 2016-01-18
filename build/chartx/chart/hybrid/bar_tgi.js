@@ -6,15 +6,16 @@ define(
     function(Bar , yAxis) {
         return Bar.extend({
             _init: function(node, data, opts) {
+                var me = this;
                 this.tgi = {
                     yAxis: {
                         field: "tgi",
                         text : {
                             format : function(num){
                                 if( num == 200 ){
-debugger
-                                }
-                                return num
+                                    return me.maxOrgYaxis;
+                                };
+                                return num;
                             }
                         }
                     }
@@ -51,6 +52,21 @@ debugger
                 if (this._yAxisR) {
                     this.core.addChild(this._yAxisR.sprite);
                 };
+
+                this._tgiBg = new new Canvax.Display.Sprite({
+                    id: 'tgiBg',
+                    context : {
+                        x : this._back.context.x,
+                        y : this._back.context.y
+                    }
+                });
+                this._tgiGraphs = new new Canvax.Display.Sprite({
+                    id: 'tgiGraphs',
+                    context : {
+                        x : this._graphs.context.x,
+                        y : this._graphs.context.y
+                    }
+                });
             },
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
@@ -134,10 +150,9 @@ debugger
                     sort: this._yAxis.sort
                 });
 
-
                 if (this.dataZoom.enabled) {
                     this._initDataZoom();
-                }
+                };
             }
         });
     }

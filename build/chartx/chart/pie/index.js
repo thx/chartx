@@ -49,6 +49,7 @@ define(
         Pie.prototype = {
             init: function(opt) {
                 _.deepExtend(this, opt);
+                
                 this.sprite = new Canvax.Display.Sprite();
 
                 this.sectorsSp = new Canvax.Display.Sprite();
@@ -1131,7 +1132,7 @@ define(
                             self.fire('unfocus', e);
                         }
                     },
-                    checked : self.checked
+                    checked : (self.checked ? self.checked : { enabled : false })
                 };
 
                 if (self.dataLabel) {

@@ -482,7 +482,7 @@ define(
             },
             _drawEnd: function() {
                 var me = this
-                this.stageBg.addChild(this._back.sprite)
+                this.stageBg.addChild(this._back.sprite);
 
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._graphs.sprite);

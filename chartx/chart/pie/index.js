@@ -246,7 +246,7 @@
                             self.fire('unfocus', e);
                         }
                     },
-                    checked : self.checked
+                    checked : (self.checked ? self.checked : { enabled : false })
                 };
 
                 if (self.dataLabel) {
