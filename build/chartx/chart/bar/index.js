@@ -191,7 +191,11 @@ define(
                         iNode: h,
                         iLay: v,
                         field: field,
-                        value: value
+                        value: value,
+                        xAxis: {
+                            field : this.root._xAxis.field,
+                            value : this.root._xAxis.data[ h ].content
+                        }
                     }]);
                 };
                 if (!style || style == "") {

@@ -102,11 +102,29 @@ define(
                 this._tgiGraphsDraw();
             },
             _tgiGraphsDraw: function() {
-
-                _.each( this._tgiData , function(){
-
-                } );
-
+                var me = this;
+                var dLen = this._tgiData.data.length;
+                var itemW = this._graphs.w / dLen;
+                _.each(this._tgiData.data, function(num, i) {
+                    var x = itemW * i;
+                    var y = 0;
+                    if (num <= 100) {
+                        y = -me._graphs.h / 2 * num / 100;
+                    } else {
+                        y = -(me._graphs.h / 2 + (me._graphs.h / 2 * (num - 100) / (me.maxOrgYaxis - 100)))
+                    };
+                    var tgiLine = new Line({
+                        context: {
+                            xStart: x,
+                            yStart: y,
+                            xEnd: x+itemW,
+                            yEnd: y,
+                            lineWidth: 2,
+                            strokeStyle: "red"
+                        }
+                    });
+                    me._tgiGraphs.addChild( tgiLine );
+                });
             },
             //继承覆盖了bar的_sartDraw方法
             _startDraw: function(opt) {

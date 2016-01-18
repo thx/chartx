@@ -460,7 +460,6 @@ define(
                             this.toBack();
                         };
 
-
                         me.fire("areaout", e);
                         me._tips.hide(e);
                     });
@@ -481,6 +480,7 @@ define(
                         e.eventInfo = me._getDataForArea(this.mapData);
 
                         me.fire("areadblclick", e);
+                        me.fire("dblclick" , e);
                     });
 
                     area.on("mousedown", function(e) {
