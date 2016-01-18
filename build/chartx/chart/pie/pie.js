@@ -49,7 +49,7 @@
         Pie.prototype = {
             init: function(opt) {
                 _.deepExtend(this, opt);
-                
+
                 this.sprite = new Canvax.Display.Sprite();
 
                 this.sectorsSp = new Canvax.Display.Sprite();
@@ -801,7 +801,7 @@
                                 }
                             });
 
-                            sector.on('mousedown mouseup click mousemove', function(e) {
+                            sector.on('mousedown mouseup click mousemove dblclick', function(e) {
                                 self._geteventInfo(e, this.__dataIndex);
                                 if (e.type == "click") {
                                     self.secClick(this , e);

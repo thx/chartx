@@ -264,7 +264,7 @@ define(
                                 });
                                 me.barsSp.addChild(groupH);
                                 groupH.iGroup = h;
-                                groupH.on("click mousedown mousemove mouseup", function(e) {
+                                groupH.on("click dblclick mousedown mousemove mouseup", function(e) {
                                     if (!e.eventInfo) {
                                         e.eventInfo = me._getInfoHandler(this);
                                     };
@@ -379,7 +379,7 @@ define(
                             rectEl.iGroup = h, rectEl.iNode = i, rectEl.iLay = v;
 
                             if (me.eventEnabled) {
-                                rectEl.on("panstart mouseover mousemove mouseout click", function(e) {
+                                rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {
                                     e.eventInfo = me._getInfoHandler(this, e);
                                     if (e.type == "mouseover") {
                                         this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0.1;

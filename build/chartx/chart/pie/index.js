@@ -49,7 +49,7 @@ define(
         Pie.prototype = {
             init: function(opt) {
                 _.deepExtend(this, opt);
-                
+
                 this.sprite = new Canvax.Display.Sprite();
 
                 this.sectorsSp = new Canvax.Display.Sprite();
@@ -801,7 +801,7 @@ define(
                                 }
                             });
 
-                            sector.on('mousedown mouseup click mousemove', function(e) {
+                            sector.on('mousedown mouseup click mousemove dblclick', function(e) {
                                 self._geteventInfo(e, this.__dataIndex);
                                 if (e.type == "click") {
                                     self.secClick(this , e);
@@ -1141,7 +1141,7 @@ define(
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
-                self._pie.sprite.on("mousedown mousemove mouseup click", function(e) {
+                self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function(e) {
                     self.fire(e.type, e);
                 });
             },

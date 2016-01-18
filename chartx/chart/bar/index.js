@@ -801,7 +801,7 @@ define(
                     me._tip.hide(e);
                     me.fire(e.type, e);
                 });
-                this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
+                this._graphs.sprite.on("tap click dblclick mousedown mouseup", function(e) {
                     if (e.type == 'click') {
                         me.fire('checkedBefor');
                         me._checked(_.clone(e.eventInfo));
