@@ -1338,7 +1338,9 @@ define(
                             duration: 300
                         });
 
-                        me._removeChecked()
+                        me._removeChecked();
+
+                        me.fire("_dataZoomDragIng");
                     },
                     dragEnd: function(range) {
                         me._updateChecked()
@@ -1362,8 +1364,9 @@ define(
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
                 //});
             },
-            _getCloneBar: function() {
+            _getCloneBar: function( barConstructor ) {
                 var me = this;
+                barConstructor = (barConstructor || Bar);
                 var cloneEl = me.el.cloneNode();
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
@@ -1399,7 +1402,7 @@ define(
                     }
                 });
 
-                var thumbBar = new Bar(cloneEl, me._data, opts);
+                var thumbBar = new barConstructor(cloneEl, me._data, opts);
                 thumbBar.draw();
                 return {
                     thumbBar: thumbBar,
