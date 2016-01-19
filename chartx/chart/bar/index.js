@@ -41,7 +41,7 @@ define(
 
                 if (opts.dataZoom) {
                     this.dataZoom.enabled = true;
-                    this.padding.bottom += 46;
+                    this.padding.bottom += (opts.dataZoom.height || 46);
                 };
 
                 if (opts.proportion) {
@@ -52,6 +52,9 @@ define(
                 };
 
                 this.dataFrame = this._initData(data);
+
+                //一些继承自该类的constructor 会拥有_init来做一些覆盖，比如横向柱状图
+                this._init && this._init(node, data, opts);
             },
             /*
              * 如果只有数据改动的情况
@@ -362,6 +365,8 @@ define(
                         node.checked = false;
                     }
                 });
+
+                e.eventInfo.dataZoom = me.dataZoom;
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
@@ -477,7 +482,7 @@ define(
             },
             _drawEnd: function() {
                 var me = this
-                this.stageBg.addChild(this._back.sprite)
+                this.stageBg.addChild(this._back.sprite);
 
                 this.core.addChild(this._xAxis.sprite);
                 this.core.addChild(this._graphs.sprite);
@@ -540,7 +545,9 @@ define(
                             duration: 300
                         });
 
-                        me._removeChecked()
+                        me._removeChecked();
+
+                        me.fire("_dataZoomDragIng");
                     },
                     dragEnd: function(range) {
                         me._updateChecked()
@@ -554,7 +561,7 @@ define(
                 var graphssp = this.__cloneBar.thumbBar._graphs.sprite;
                 graphssp.id = graphssp.id + "_datazoomthumbbarbg"
                 graphssp.context.x = 0;
-                graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
+                graphssp.context.y = me._dataZoom.height - me._dataZoom.barY;
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
 
                 me._dataZoom.dataZoomBg.addChild(graphssp);
@@ -564,8 +571,9 @@ define(
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
                 //});
             },
-            _getCloneBar: function() {
+            _getCloneBar: function( barConstructor ) {
                 var me = this;
+                barConstructor = (barConstructor || Bar);
                 var cloneEl = me.el.cloneNode();
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
@@ -601,7 +609,7 @@ define(
                     }
                 });
 
-                var thumbBar = new Bar(cloneEl, me._data, opts);
+                var thumbBar = new barConstructor(cloneEl, me._data, opts);
                 thumbBar.draw();
                 return {
                     thumbBar: thumbBar,
@@ -796,7 +804,7 @@ define(
                     me._tip.hide(e);
                     me.fire(e.type, e);
                 });
-                this._graphs.sprite.on("tap click mousedown mouseup", function(e) {
+                this._graphs.sprite.on("tap click dblclick mousedown mouseup", function(e) {
                     if (e.type == 'click') {
                         me.fire('checkedBefor');
                         me._checked(_.clone(e.eventInfo));
@@ -809,3 +817,5 @@ define(
         return Bar;
     }
 );
+
+

@@ -12,7 +12,7 @@ define(
     "canvax/core/PropertyFactory",
     [
     ],
-    function(Base){
+    function(){
     //定义封装好的兼容大部分浏览器的defineProperties 的 属性工厂
         var unwatchOne = {
             "$skipArray" : 0,

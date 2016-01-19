@@ -35,11 +35,6 @@
 var data= [
     ["node"   , "value"],
     ["ie"     , 500   ],
-    {
-        name:'chrome',        
-        sliced:false,
-        y:2000
-    },
     ["firefox", 300   ],
     ["safari" , 100   ],
     ["其他"   , 200   ]    
@@ -102,6 +97,9 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
         console.log(e.type);
     });
     pie.on('mousemove',function(e){
+        console.log(e.type);
+    });
+    pie.on('dblclick',function(e){
         console.log(e.type);
     });
 

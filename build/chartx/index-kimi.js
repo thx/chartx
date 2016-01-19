@@ -659,7 +659,7 @@ define(
                 y: 0
             };
             this.w = 0;
-            this.h = dataZoom.height;
+            this.height = 46;
 
             this.color = "#70aae8";
 
@@ -673,7 +673,8 @@ define(
             this.dragEnd = function(){};
 
             opt && _.deepExtend(this, opt);
-            this.barH = this.h - 6;
+            
+            this.barH = this.height - 6;
             this.barY = 6 / 2;
             this.btnW = 8;
             this.btnFillStyle = this.color;
@@ -891,8 +892,6 @@ define(
                 return line
             }
         };
-
-        dataZoom.height = 46;
         return dataZoom;
     }
 );
@@ -2002,7 +2001,7 @@ define(
         "canvax/core/Base",
         "canvax/shape/Line",
         "chartx/utils/tools",
-        'chartx/utils/datasection'
+        "chartx/utils/datasection"
     ],
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
         var yAxis = function(opt, data , data1) {
@@ -2010,6 +2009,7 @@ define(
             this.w = 0;
             this.enabled = 1; //true false 1,0都可以
             this.dis = 6; //线到文本的距离
+            this.maxW = 0; //最大文本的width
             this.field = null; //这个 轴 上面的 field
 
             this.label = "";
@@ -2027,7 +2027,6 @@ define(
                 fontSize: 12,
                 format: null,
                 rotation: 0
-
             };
             this.pos = {
                 x: 0,
@@ -2035,8 +2034,8 @@ define(
             };
             this.place = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
             this.biaxial = false; //是否是双轴中的一份
-            this.layoutData = []; //dataSection对应的layout数据{y:-100, content:'1000'}
-            this.dataSection = []; //从原数据 dataOrg 中 结果datasection重新计算后的数据
+            this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
+            this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
             this.dataOrg = []; //源数据
 
             this.sprite = null;
@@ -2074,10 +2073,12 @@ define(
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
-                this.sprite.context.x = $n
+                this.sprite.context.x = $n + (this.place == "left" ? this.maxW : 0);
+                this.pos.x = $n;
             },
             setY: function($n) {
-                this.sprite.context.y = $n
+                this.sprite.context.y = $n;
+                this.pos.y = $n;
             },
             setAllStyle: function(sty) {
                 _.each(this.sprite.children, function(s) {
@@ -2100,7 +2101,9 @@ define(
                 this.dataSection = [];
                 //_.deepExtend( this , opt );
                 this._initData(data);
-                this.draw();
+                this._trimYAxis();
+                this._widget();
+                //this.draw();
             },
             //配置和数据变化
             update: function(opt, data) {
@@ -2109,7 +2112,9 @@ define(
                 this.dataSection = [];
                 _.deepExtend(this, opt);
                 this._initData(data);
-                this.draw();
+                this._trimYAxis();
+                this._widget();
+                //this.draw();
             },
             _getLabel: function() {
                 if (this.label && this.label != "") {
@@ -2125,6 +2130,7 @@ define(
                 }
             },
             draw: function(opt) {
+                this.sprite.removeAllChildren();
                 opt && _.deepExtend(this, opt);
                 this._getLabel();
                 this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine();
@@ -2137,10 +2143,12 @@ define(
                     }
                     this._label.context.y = -this.yGraphsHeight - 5;
                 };
-                this.setX(this.pos.x);
-                this.setY(this.pos.y);
+                
                 this._trimYAxis();
                 this._widget();
+
+                this.setX(this.pos.x);
+                this.setY(this.pos.y);
             },
             _trimYAxis: function() {
                 var max = this.dataSection[this.dataSection.length - 1];
@@ -2174,14 +2182,15 @@ define(
             },
             _setDataSection: function(data) {
                 var arr = [];
+                var d = (data.org || data.data);
                 if (!this.biaxial) {
-                    arr = _.flatten(data.org); //_.flatten( data.org );
+                    arr = _.flatten( d ); //_.flatten( data.org );
                 } else {
                     if (this.place == "left") {
-                        arr = _.flatten(data.org[0]);
+                        arr = _.flatten(d[0]);
                         this.field = _.flatten([this.field[0]]);
                     } else {
-                        arr = _.flatten(data.org[1]);
+                        arr = _.flatten(d[1]);
                         this.field = _.flatten([this.field[1]]);
                     }
                 }
@@ -2190,7 +2199,7 @@ define(
             //data1 == [1,2,3,4]
             _initData: function(data , data1) {
                 var arr = this._setDataSection(data , data1);
-                this.dataOrg = data.org; //这里必须是data.org
+                this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);
                 };
@@ -2246,7 +2255,7 @@ define(
                     return;
                 }
                 var arr = this.layoutData;
-                var maxW = 0;
+                self.maxW = 0;
                 self._label && self.sprite.addChild(self._label);
                 for (var a = 0, al = arr.length; a < al; a++) {
                     var o = arr[a];
@@ -2298,9 +2307,9 @@ define(
                     });
                     yNode.addChild(txt);
 
-                    maxW = Math.max(maxW, txt.getTextWidth());
+                    self.maxW = Math.max(self.maxW, txt.getTextWidth());
                     if (self.text.rotation == 90 || self.text.rotation == -90) {
-                        maxW = Math.max(maxW, txt.getTextHeight());
+                        self.maxW = Math.max(self.maxW, txt.getTextHeight());
                     }
 
                     if (self.line.enabled) {
@@ -2343,13 +2352,14 @@ define(
                     }
                 };
 
-                maxW += self.dis;
+                self.maxW += self.dis;
 
-                self.sprite.context.x = maxW + self.pos.x;
+                //self.sprite.context.x = self.maxW + self.pos.x;
+                //self.pos.x = self.maxW + self.pos.x;
                 if (self.line.enabled) {
-                    self.w = maxW + self.dis + self.line.width + self.pos.x;
+                    self.w = self.maxW + self.dis + self.line.width + self.pos.x;
                 } else {
-                    self.w = maxW + self.dis + self.pos.x;
+                    self.w = self.maxW + self.dis + self.pos.x;
                 }
             }
         };

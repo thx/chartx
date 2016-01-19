@@ -26,6 +26,10 @@
                 format: null
             };
 
+            this.checked = {
+                enabled : false
+            }
+
             this.tips = _.deepExtend({
                 enabled: true
             }, tipsOpt); //tip的confit
@@ -45,6 +49,7 @@
         Pie.prototype = {
             init: function(opt) {
                 _.deepExtend(this, opt);
+
                 this.sprite = new Canvax.Display.Sprite();
 
                 this.sectorsSp = new Canvax.Display.Sprite();
@@ -76,7 +81,7 @@
             _configData: function() {
                 var self = this;
                 self.total = 0;
-                self.angleOffset = Number.isNaN(self.startAngle) ? 0 : self.startAngle;
+                self.angleOffset = _.isNaN(self.startAngle) ? 0 : self.startAngle;
                 self.angleOffset = self.angleOffset % 360;
                 self.currentAngle = 0 + self.angleOffset;
                 var limitAngle = 360 + self.angleOffset;
@@ -796,7 +801,7 @@
                                 }
                             });
 
-                            sector.on('mousedown mouseup click mousemove', function(e) {
+                            sector.on('mousedown mouseup click mousemove dblclick', function(e) {
                                 self._geteventInfo(e, this.__dataIndex);
                                 if (e.type == "click") {
                                     self.secClick(this , e);
@@ -856,6 +861,7 @@
                 }
             },
             secClick: function(sectorEl , e) {
+                if( !this.checked.enabled ) return;
                 var secData = this.data.data[sectorEl.__dataIndex];
                 if( sectorEl.clickIng ){
                     return;

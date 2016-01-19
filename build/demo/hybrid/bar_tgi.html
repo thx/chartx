@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -24,6 +24,7 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
+<!--<script type="text/javascript" src="../bar_h/index.js"></script>-->
 </head>
 <body >
 
@@ -31,89 +32,38 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 167 , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 4      , 51  , 40 , 33    ],
-    [ 5      , 67  , 51 , 26    ],
-    [ 6      , 100 , 20 , 150   ],
-    [ 7      , 11  , 60 , 33    ],
-    [ 8      , 67  , 71 , 26    ],
-    [ 9      , 60  , 230, 150   ],
-    [ 10     , 101 , 28 , 33    ],
-    [ 11     , 67  , 91 , 26    ],
-    [ 12     , 120 , 56 , 150   ],
-    [ 13     , 167 , 23 , 26    ],
-    [ 14     , 40  , 50 , 150   ],
-    [ 15     , 101 , 50 , 33    ],
-    [ 16     , 67  , 33 , 26    ],
-    [ 17     , 100 , 150, 150   ],
-    [ 18     , 11 , 120 , 33    ],
-    [ 19     , 67  , 31 , 26    ],
-    [ 20     , 100 , 88 , 150   ],
-    [ 21     , 101 , 60 , 33    ],
-    [ 22     , 67  , 91 , 26    ],
-    [ 23     , 100 , 30 , 150   ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 4      , 51  , 40 , 33    ],
-    [ 5      , 67  , 51 , 26    ],
-    [ 6      , 100 , 20 , 150   ],
-    [ 7      , 11  , 60 , 33    ],
-    [ 8      , 67  , 71 , 26    ],
-    [ 9      , 60  , 230, 150   ],
-    [ 10     , 101 , 28 , 33    ],
-    [ 11     , 67  , 91 , 26    ],
-    [ 12     , 120 , 56 , 150   ],
-    [ 13     , 167 , 23 , 26    ],
-    [ 14     , 40  , 50 , 150   ],
-    [ 15     , 101 , 50 , 33    ],
-    [ 16     , 67  , 33 , 26    ],
-    [ 17     , 100 , 150, 150   ],
-    [ 18     , 11 , 120 , 33    ],
-    [ 19     , 67  , 31 , 26    ],
-    [ 20     , 100 , 88 , 150   ],
-    [ 21     , 101 , 60 , 33    ],
-    [ 22     , 67  , 91 , 26    ],
-    [ 23     , 100 , 30 , 150   ]
+    ["xfield"     ,"uv" ,"pv", "tgi"   ],
+    ["科鲁兹"      , 11  , 20 , 1133    ],
+    ["迈锐宝"      , 67  , 51 , 56     ],
+    ["帕萨特"      , 201 , 20 , 323     ],
+    ["天籁"        , 17  , 51 , 261     ],
+    ["蒙迪欧"      , 51  , 20 , 33      ],
+    ["君威"        , 267 , 51 , 26      ]
 ];
 var options = {
+    type : "bar_tgi",
     yAxis : {
         field : ["uv","pv"]
     },
     xAxis : {
         field : ["xfield"]
     },
-    graphs : {
-        text : {
-            enabled : true
-        }
+    tgi : {
+        field : "tgi"
     },
     dataZoom : {
         range : {
-            start : 1,
-            end   : 8
+            start : 0,
+            end   : 4
         },
         height : 30
     }
-}   
-Chartx.bar("canvasTest" , data , options).then(function( chart ){
-    window.bar = chart;
+}  
 
-    setTimeout(function(){
-        var newData = _.clone(data);
-        var titles  = newData.shift();
-        newData = newData.reverse();
-        newData.unshift(titles);
-        bar.resetData( newData );
-    } , 2000)
-});
-
-</textarea></form>
+Chartx.hybrid("canvasTest" , data , options);  
+    
+            </textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -121,7 +71,7 @@ Chartx.bar("canvasTest" , data , options).then(function( chart ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>柱状图 - 基础柱状图</h4>
+                <h4>柱状图- 横向柱状图</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>
@@ -129,6 +79,7 @@ Chartx.bar("canvasTest" , data , options).then(function( chart ){
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
+
 
             </div>
         </td>
@@ -138,3 +89,4 @@ Chartx.bar("canvasTest" , data , options).then(function( chart ){
     
 </body> 
 </html>
+

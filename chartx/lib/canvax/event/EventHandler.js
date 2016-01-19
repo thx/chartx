@@ -6,7 +6,8 @@
  */
 define(
     "canvax/event/EventHandler", [
-        "canvax/core/Base", ('ontouchstart' in window) ? "canvax/event/handler/touch" : "canvax/event/handler/mouse",
+        "canvax/core/Base", 
+        ('ontouchstart' in window) ? "canvax/event/handler/touch" : "canvax/event/handler/mouse",
         "canvax/display/Point",
         "canvax/event/CanvaxEvent"
     ],

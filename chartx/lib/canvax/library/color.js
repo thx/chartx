@@ -37,7 +37,7 @@ define(
     [
         "canvax/core/Base"
     ],
-    function(S,Base){
+    function(Base){
 
 
         var _ctx;

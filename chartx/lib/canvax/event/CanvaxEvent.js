@@ -10,7 +10,7 @@ define(
     [
          "canvax/core/Base"
     ],
-    function(EventBase,Base){
+    function(EventBase){
         var CanvaxEvent = function( e ) {
             this.target = null;
             this.currentTarget = null;	
