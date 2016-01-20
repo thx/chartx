@@ -121,6 +121,16 @@ define(
                 var i = index - me.dataZoom.range.start
                 me._checked(me._graphs.getInfo(i))
             },
+            uncheckAll: function(){
+                for( var i = 0, l = this._checkedList.length  ; i<l ; i++ ){
+                    var obj= this._checkedList[i];
+                    if( obj ){
+                        this.uncheckAt(i);
+                    }
+                };
+                this._checkedList = [];
+                this._currCheckedList = [];
+            },
             getGroupChecked: function(e) {
                 var checked = false;
                 _.each(this.getCheckedList(), function(obj) {

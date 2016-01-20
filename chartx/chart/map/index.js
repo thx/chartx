@@ -604,6 +604,13 @@ define(
                     areaEl.toBack();
                 };
             },
+            uncheckAll: function(){
+                var me =this;
+                for( var i in me.checkedList ){
+                    this.uncheckAt( me.checkedList[i].ind );
+                };
+                me.checkedList = {};
+            },
             _initMarkPoint: function() {
                 var me = this;
                 require(["chartx/chart/map/map-data/geo-json/china_city"], function(citys) {

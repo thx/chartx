@@ -107,6 +107,7 @@ var options = {
     }
 }   
 Chartx.bar("canvasTest" , data , options).then(function(bar){
+    window.bar = bar;
     bar.on("checkedBefor" , function(){
         _.each(bar.getCheckedList() , function(o){
             bar.uncheckAt(o.iGroup);
