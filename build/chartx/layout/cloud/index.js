@@ -152,9 +152,12 @@ define(
                         d.size = ~~fontSize.call(this, d, i);
                         d.padding = padding.call(this, d, i);
                         return d;
-                    }).sort(function(a, b) {
+                    })
+                    /*
+                    .sort(function(a, b) {
                         return b.size - a.size;
                     });
+                    */
 
                 if (timer) clearInterval(timer);
                 timer = setInterval(step, 0);
@@ -166,6 +169,7 @@ define(
                     var start = Date.now();
                     while (Date.now() - start < timeInterval && ++i < n && timer) {
                         var d = data[i];
+                        d.index = i
                         d.x = (size[0] * (random() + .5)) >> 1;
                         d.y = (size[1] * (random() + .5)) >> 1;
                         cloudSprite(contextAndRatio, d, data, i);
