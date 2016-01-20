@@ -322,10 +322,21 @@ define(
                     return
                 };
                 var me = this;
-                me.delCheckedSec(sec, function() {
+                me.cancelCheckedSec(sec, function() {
                     me.unfocus(index);
                 });
                 secData.checked = false;
+            },
+            uncheckAll: function(){
+                var me = this;
+                _.each( this.sectorMap , function( sm , i ){
+                    var sec = sm.sector;
+                    var secData = me.data.data[i];
+                    if( secData.checked ){
+                        me.cancelCheckedSec( sec );
+                        secData.checked = false;
+                    }
+                } );
             },
             grow: function() {
                 var self = this;
@@ -736,7 +747,7 @@ define(
                     }
                 });
             },
-            delCheckedSec: function(sec, callback) {
+            cancelCheckedSec: function(sec, callback) {
                 var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
                 checkedSec.animate({
                     //endAngle : checkedSec.context.startAngle+0.5
@@ -872,7 +883,7 @@ define(
                         sectorEl.clickIng = false;
                     });
                 } else {
-                    this.delCheckedSec(sectorEl , function(){
+                    this.cancelCheckedSec(sectorEl , function(){
                         sectorEl.clickIng = false;
                     });
                 };
@@ -995,6 +1006,28 @@ define(
                 if (this._pie) {
                     this._pie.uncheck(index);
                 }
+            },
+            uncheckAll: function(){
+                if (this._pie) {
+                    this._pie.uncheckAll();
+                }
+            },
+            checkOf: function( xvalue ){
+                this.checkAt( this._getIndexOfxName(xvalue) );
+            },
+            uncheckOf: function( xvalue ){
+                this.uncheckAt( this._getIndexOfxName(xvalue) );
+            },
+            _getIndexOfxName: function( xvalue ){
+                var i;
+                var list = this.getList();
+                for( var ii=0,il=list.length ; ii<il ; ii++ ){
+                    if( list[ii].name == xvalue ){
+                        i = ii;
+                        break;
+                    }
+                }
+                return i;
             },
             _initData: function(arr, opt) {
                 var data = [];

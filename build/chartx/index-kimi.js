@@ -1687,6 +1687,19 @@ define(
 
                 this.draw();
             },
+            getIndexOfVal : function(xvalue){
+                var i;
+
+                for( var ii=0,il=this.data.length ; ii<il ; ii++ ){
+                    var obj = this.data[ii];
+                    if(obj.content == xvalue){
+                        i = ii;
+                        break;
+                    }
+                };
+
+                return i;
+            },
             //配置和数据变化
             update: function(opt, data) {
                 //先在field里面删除一个字段，然后重新计算

@@ -74,9 +74,13 @@ var options = {
     //是否允许动画
     animation: true,
     //内圆半径
-    innerRadius: 50
+    innerRadius: 50,
     //颜色序列,若不设置，会有默认的颜色序列
     //colors:['red', 'yellow', 'blue']
+
+    checked : {
+        enabled : true
+    }
 };
 Chartx.pie("canvasTest" , data , options).then(function( pie ){
     window.pie = pie;

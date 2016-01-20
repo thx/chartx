@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- 饼图</title>
+<title>xChart demo -- 标签云图</title>
 <script type="text/javascript" src="../../lib/d3.js"></script>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
@@ -34,9 +34,56 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
+//chart的配置信息
+var data = [
+    ['tag', 'info'],
+    ['Hello1',{name : 'name1', value : 170}], 
+    ['Hello2',{name : 'name2', value : 8194}], 
+    ['Hello3',{name : 'name3', value : 6909}], ['Hello4',{name : 'name4', value : 1161}], ['Hello5',{name : 'name5', value : 8528}], ['Hello6',{name : 'name6', value : 6383}], ['Hello7',{name : 'name7', value : 4638}], ['Hello8',{name : 'name8', value : 3508}], ['Hello9',{name : 'name9', value : 5389}], ['Hello10',{name : 'name10', value : 4775}], ['Hello11',{name : 'name11', value : 7768}], ['Hello12',{name : 'name12', value : 8484}], ['Hello13',{name : 'name13', value : 8291}], ['Hello14',{name : 'name14', value : 6689}], ['Hello15',{name : 'name15', value : 6374}], ['Hello16',{name : 'name16', value : 7241}], ['Hello17',{name : 'name17', value : 598}], ['Hello18',{name : 'name18', value : 8386}], ['Hello19',{name : 'name19', value : 6028}], ['Hello20',{name : 'name20', value : 5638}], ['Hello21',{name : 'name21', value : 7652}], ['Hello22',{name : 'name22', value : 4108}], ['Hello23',{name : 'name23', value : 3310}], ['Hello24',{name : 'name24', value : 521}], ['Hello25',{name : 'name25', value : 4089}], ['Hello26',{name : 'name26', value : 731}], ['Hello27',{name : 'name27', value : 5771}], ['Hello28',{name : 'name28', value : 3100}], ['Hello29',{name : 'name29', value : 9937}], ['Hello30',{name : 'name30', value : 3859}], ['Hello31',{name : 'name31', value : 5732}], ['Hello32',{name : 'name32', value : 9432}], ['Hello33',{name : 'name33', value : 7482}], ['Hello34',{name : 'name34', value : 350}], ['Hello35',{name : 'name35', value : 2664}], ['Hello36',{name : 'name36', value : 549}], ['Hello37',{name : 'name37', value : 8288}], ['Hello38',{name : 'name38', value : 2634}], ['Hello39',{name : 'name39', value : 6667}], ['Hello40',{name : 'name40', value : 7665}], ['Hello41',{name : 'name41', value : 4637}], ['Hello42',{name : 'name42', value : 1450}], ['Hello43',{name : 'name43', value : 1012}], ['Hello44',{name : 'name44', value : 3496}], ['Hello45',{name : 'name45', value : 1334}], ['Hello46',{name : 'name46', value : 3599}], ['Hello47',{name : 'name47', value : 9762}], ['Hello48',{name : 'name48', value : 1527}], ['Hello49',{name : 'name49', value : 4166}], ['Hello50',{name : 'name50', value : 5316}], ['Hello51',{name : 'name51', value : 3670}], ['Hello52',{name : 'name52', value : 5967}], ['Hello53',{name : 'name53', value : 1485}], ['Hello54',{name : 'name54', value : 8175}], ['Hello55',{name : 'name55', value : 5521}], ['Hello56',{name : 'name56', value : 9082}], ['Hello57',{name : 'name57', value : 2425}], ['Hello58',{name : 'name58', value : 6480}], ['Hello59',{name : 'name59', value : 8069}], ['Hello60',{name : 'name60', value : 1779}], ['Hello61',{name : 'name61', value : 6631}], ['Hello62',{name : 'name62', value : 6682}], ['Hello63',{name : 'name63', value : 4438}], ['Hello64',{name : 'name64', value : 4036}], ['Hello65',{name : 'name65', value : 7869}], ['Hello66',{name : 'name66', value : 8153}], ['Hello67',{name : 'name67', value : 8074}], ['Hello68',{name : 'name68', value : 3864}], ['Hello69',{name : 'name69', value : 3307}], ['Hello70',{name : 'name70', value : 5544}], ['Hello71',{name : 'name71', value : 8636}], ['Hello72',{name : 'name72', value : 6205}], ['Hello73',{name : 'name73', value : 5012}], ['Hello74',{name : 'name74', value : 2891}], ['Hello75',{name : 'name75', value : 578}], ['Hello76',{name : 'name76', value : 8897}], ['Hello77',{name : 'name77', value : 1456}], ['Hello78',{name : 'name78', value : 6192}], ['Hello79',{name : 'name79', value : 2725}], ['Hello80',{name : 'name80', value : 8082}], ['Hello81',{name : 'name81', value : 9666}], ['Hello82',{name : 'name82', value : 801}], ['Hello83',{name : 'name83', value : 4011}], ['Hello84',{name : 'name84', value : 6658}], ['Hello85',{name : 'name85', value : 2454}], ['Hello86',{name : 'name86', value : 8848}], ['Hello87',{name : 'name87', value : 5810}], ['Hello88',{name : 'name88', value : 9588}], ['Hello89',{name : 'name89', value : 9538}], ['Hello90',{name : 'name90', value : 1709}], ['Hello91',{name : 'name91', value : 871}], ['Hello92',{name : 'name92', value : 7411}], ['Hello93',{name : 'name93', value : 2897}], ['Hello94',{name : 'name94', value : 9481}], ['Hello95',{name : 'name95', value : 2329}], ['Hello96',{name : 'name96', value : 6953}], ['Hello97',{name : 'name97', value : 9158}], ['Hello98',{name : 'name98', value : 9071}], ['Hello99',{name : 'name99', value : 3711}]
+]
+var options = {
+    yAxis : {
+        field : ["tag"]
+    },
+    xAxis : {
+        field : ["info"]
+    },
+    graphs : {
+        text : {
+            fillStyle : function(e){
+                return ['#00a8e6', '#666666', '#999999'][e.iGroup % 3]
+            }
+        }
+    },
+    dataZoom:{
+        range : {
+            start : 0,
+            end   : 29 
+        },
+        count : data.length - 1
+    },
+    tips  : {
+        content : function(info){
+            var str  = "<table>", index = info.iGroup
+    
+            var tag = data[index + 1][1]
+            str += "<tr style='color:"+ "#ff0000" +"'>"
+            str += "<td>"+ tag.name + ' ：' + tag.value +"</td></tr>";
 
-Chartx.cloud("canvasTest" , {} , {}).then(function( pie ){
-
+            _.each( info.nodesInfoList , function( node , i ){
+                var prefix = node.field
+                var lastfix = node.value
+                str += "<tr style='color:"+ node.fillStyle +"'>"
+                str += "<td>"+ prefix + ' ：' + lastfix+"</td></tr>";
+            });
+            return str;
+        }
+    }
+};
+Chartx.cloud("canvasTest" , data , options).then(function( cloud ){
+    cloud.on('click', function(e){
+        console.log(e.eventInfo)
+    })
 });
 </textarea></form>
 
@@ -52,7 +99,7 @@ Chartx.cloud("canvasTest" , {} , {}).then(function( pie ){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:960px;height:600px;position:relative;'></div>
+                <div id="canvasTest" style='width:760px;height:400px;position:relative;'></div>
             </div>
 
             </div>
