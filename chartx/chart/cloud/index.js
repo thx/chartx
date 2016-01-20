@@ -173,11 +173,7 @@ define(
                     .padding(7)
                     .rotate(function() {
                         return 0;
-<<<<<<< HEAD
                         // return (~~(Math.random() * 6) - 3) * 30;
-=======
-                        //return (~~(Math.random() * 6) - 3) * 30;
->>>>>>> 1d0d4b63928510c575039e9034ede07430c8154b
                     })
                     //.font("Impact")
                     .fontSize(function(d) {
@@ -201,15 +197,8 @@ define(
                     _.each( words, function(tag, i) {
                         var tagTxt = new Canvax.Display.Text(tag.text, {
                             context: {
-<<<<<<< HEAD
                             	x: tag.x,
                                 y: tag.y,
-=======
-                                x: tag.x,
-                                y: tag.y,
-                                //width : tag.width,
-                                //height: tag.height,
->>>>>>> 1d0d4b63928510c575039e9034ede07430c8154b
                                 fontSize : tag.size,
                                 fontFamily : tag.font,
                                 rotation : tag.rotate,
