@@ -110,6 +110,11 @@
                     this._pie.uncheck(index);
                 }
             },
+            uncheckAll: function(){
+                if (this._pie) {
+                    this._pie.uncheckAll();
+                }
+            },
             _initData: function(arr, opt) {
                 var data = [];
                 var arr = _.clone(arr)

@@ -322,10 +322,21 @@ define(
                     return
                 };
                 var me = this;
-                me.delCheckedSec(sec, function() {
+                me.cancelCheckedSec(sec, function() {
                     me.unfocus(index);
                 });
                 secData.checked = false;
+            },
+            uncheckAll: function(){
+                var me = this;
+                _.each( this.sectorMap , function( sm , i ){
+                    var sec = sm.sector;
+                    var secData = me.data.data[i];
+                    if( secData.checked ){
+                        me.cancelCheckedSec( sec );
+                        secData.checked = false;
+                    }
+                } );
             },
             grow: function() {
                 var self = this;
@@ -736,7 +747,7 @@ define(
                     }
                 });
             },
-            delCheckedSec: function(sec, callback) {
+            cancelCheckedSec: function(sec, callback) {
                 var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
                 checkedSec.animate({
                     //endAngle : checkedSec.context.startAngle+0.5
@@ -872,7 +883,7 @@ define(
                         sectorEl.clickIng = false;
                     });
                 } else {
-                    this.delCheckedSec(sectorEl , function(){
+                    this.cancelCheckedSec(sectorEl , function(){
                         sectorEl.clickIng = false;
                     });
                 };
@@ -994,6 +1005,11 @@ define(
             uncheckAt: function(index) {
                 if (this._pie) {
                     this._pie.uncheck(index);
+                }
+            },
+            uncheckAll: function(){
+                if (this._pie) {
+                    this._pie.uncheckAll();
                 }
             },
             _initData: function(arr, opt) {

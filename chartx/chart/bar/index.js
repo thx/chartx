@@ -121,6 +121,16 @@ define(
                 var i = index - me.dataZoom.range.start
                 me._checked(me._graphs.getInfo(i))
             },
+            uncheckAll: function(){
+                for( var i = 0, l = this._checkedList.length  ; i<l ; i++ ){
+                    var obj= this._checkedList[i];
+                    if( obj ){
+                        this.uncheckAt(i);
+                    }
+                };
+                this._checkedList = [];
+                this._currCheckedList = [];
+            },
             getGroupChecked: function(e) {
                 var checked = false;
                 _.each(this.getCheckedList(), function(obj) {
@@ -545,7 +555,9 @@ define(
                             duration: 300
                         });
 
-                        me._removeChecked()
+                        me._removeChecked();
+
+                        me.fire("_dataZoomDragIng");
                     },
                     dragEnd: function(range) {
                         me._updateChecked()
@@ -569,8 +581,9 @@ define(
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
                 //});
             },
-            _getCloneBar: function() {
+            _getCloneBar: function( barConstructor ) {
                 var me = this;
+                barConstructor = (barConstructor || Bar);
                 var cloneEl = me.el.cloneNode();
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
@@ -606,7 +619,7 @@ define(
                     }
                 });
 
-                var thumbBar = new Bar(cloneEl, me._data, opts);
+                var thumbBar = new barConstructor(cloneEl, me._data, opts);
                 thumbBar.draw();
                 return {
                     thumbBar: thumbBar,

@@ -51,8 +51,8 @@ define(
                     }))
                     .padding(5)
                     .rotate(function() {
-                        //return 0;
-                        return (~~(Math.random() * 6) - 3) * 30;
+                        return 0;
+                        //return (~~(Math.random() * 6) - 3) * 30;
                     })
                     //.font("Impact")
                     .fontSize(function(d) {
@@ -72,8 +72,8 @@ define(
                     _.each( words, function(tag) {
                         var tagTxt = new Canvax.Display.Text(tag.text, {
                             context: {
-                                x: tag.x ,
-                                y: tag.y ,
+                                x: tag.x,
+                                y: tag.y,
                                 //width : tag.width,
                                 //height: tag.height,
                                 fontSize : tag.size,
@@ -157,3 +157,4 @@ define(
             }
         });
     });
+
