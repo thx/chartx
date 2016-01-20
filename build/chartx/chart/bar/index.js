@@ -924,6 +924,12 @@ define(
                 this._checkedList = [];
                 this._currCheckedList = [];
             },
+            checkOf: function( xvalue ){
+                this.checkAt( this._xAxis.getIndexOfVal( xvalue ) + this.dataZoom.range.start);
+            },
+            uncheckOf: function(xvalue){
+                this.uncheckAt( this._xAxis.getIndexOfVal( xvalue ) + this.dataZoom.range.start );
+            },
             getGroupChecked: function(e) {
                 var checked = false;
                 _.each(this.getCheckedList(), function(obj) {

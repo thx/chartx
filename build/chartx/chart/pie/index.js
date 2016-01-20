@@ -1012,6 +1012,23 @@ define(
                     this._pie.uncheckAll();
                 }
             },
+            checkOf: function( xvalue ){
+                this.checkAt( this._getIndexOfxName(xvalue) );
+            },
+            uncheckOf: function( xvalue ){
+                this.uncheckAt( this._getIndexOfxName(xvalue) );
+            },
+            _getIndexOfxName: function( xvalue ){
+                var i;
+                var list = this.getList();
+                for( var ii=0,il=list.length ; ii<il ; ii++ ){
+                    if( list[ii].name == xvalue ){
+                        i = ii;
+                        break;
+                    }
+                }
+                return i;
+            },
             _initData: function(arr, opt) {
                 var data = [];
                 var arr = _.clone(arr)

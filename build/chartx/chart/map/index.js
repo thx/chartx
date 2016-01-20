@@ -581,11 +581,12 @@ define(
                 if (!me.checkedList[mapData.id]) {
                     me.checkedList[mapData.id] = mapData;
                     mapData.checked = true;
+
+                    var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
+                    areaEl.context.strokeStyle = hoverStrokeStyle;
                     if (areaEl.context.fillStyle == me.area.normalFillStyle) {
                         areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
                     };
-                    var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
-                    areaEl.context.strokeStyle = hoverStrokeStyle;
                     areaEl.toFront();
                 };
             },
@@ -610,6 +611,23 @@ define(
                     this.uncheckAt( me.checkedList[i].ind );
                 };
                 me.checkedList = {};
+            },
+            checkOf: function( areaName ){
+                this.checkAt( this._getAreaIndexOfName(areaName) );
+            },
+            uncheckOf: function( areaName ){
+                this.uncheckAt( this._getAreaIndexOfName(areaName) );
+            },
+            _getAreaIndexOfName : function( areaName ){
+                var i;
+                for( var ii=0,il=this.mapDataList.length ; ii<il ; ii++ ){
+                    var mapData = this.mapDataList[ii];
+                    if( mapData.name.indexOf( areaName ) >= 0 || areaName.indexOf( mapData.name ) >= 0 ){
+                        i = ii;
+                        break;
+                    }
+                }
+                return i;
             },
             _initMarkPoint: function() {
                 var me = this;
