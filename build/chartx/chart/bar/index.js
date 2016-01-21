@@ -1015,6 +1015,7 @@ define(
 
             },
             _initData: function(data, opt) {
+                
                 var d;
                 if (this.dataZoom.enabled) {
                     var datas = [data[0]];
@@ -1023,6 +1024,8 @@ define(
                 } else {
                     d = dataFormat.apply(this, arguments);
                 };
+                
+                //var d = dataFormat.apply(this, arguments);
 
                 _.each(d.yAxis.field, function(field, i) {
                     if (!_.isArray(field)) {
@@ -1164,8 +1167,6 @@ define(
                 };
                 var me = this;
 
-                e.eventInfo.iGroup += this.dataZoom.range.start;
-
                 _.each(e.eventInfo.nodesInfoList, function(node, i) {
                     if (_.isArray(me.dataFrame.yAxis.field[node.iNode])) {
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
@@ -1181,7 +1182,10 @@ define(
                 });
 
                 e.eventInfo.dataZoom = me.dataZoom;
+
                 e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iGroup);
+
+                e.eventInfo.iGroup += this.dataZoom.range.start;
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
