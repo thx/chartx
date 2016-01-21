@@ -22,6 +22,19 @@ title:  Chartx demos
     </dl>
     </a>
 
+    <a target="_blank" href="./demo/line/index_datazoom.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/line/index_datazoom.gif">
+        </dt>
+        <dd>
+            <h5>
+            带datazoom区间选择器
+            </h5>
+        </dd>
+    </dl>
+    </a>
+    
     <a target="_blank" href="./demo/line/add_remove_line.html">
     <dl class="chart">
         <dt>
@@ -35,18 +48,6 @@ title:  Chartx demos
     </dl>
     </a>
 
-    <a target="_blank" href="./demo/line/index_datazoom.html">
-    <dl class="chart">
-        <dt>
-        <img src="./assets/chart/line/add_datazoom.gif">
-        </dt>
-        <dd>
-            <h5>
-            添加，删除折线
-            </h5>
-        </dd>
-    </dl>
-    </a>
 
     <a target="_blank" href="./demo/line/xAxis_rotate.html">
     <dl class="chart">
