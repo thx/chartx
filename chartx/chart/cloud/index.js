@@ -126,7 +126,6 @@
                 })
             },
             _updateRange : function($o){
-            	console.log($o)
             	this.replayGraphs($o)
             },
 
