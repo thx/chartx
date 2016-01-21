@@ -420,6 +420,15 @@ define(
                     pos: {
                         x: me._xAxis.pos.x,
                         y: me._xAxis.pos.y + me._xAxis.h
+                    },
+                    count : me._data.length-1,
+                    dragIng : function( range ){
+                        if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
+                            return;
+                        };
+                        me.dataZoom.range.start = parseInt(range.start);
+                        me.dataZoom.range.end = parseInt(range.end);
+                        me.resetData( me._data );
                     }
                 }, me.dataZoom);
 
@@ -448,7 +457,6 @@ define(
                     },
                     dataZoom: null
                 });
-debugger
                 me._dataZoom = new DataZoom(dataZoomOpt);
 
                 var graphssp = this.__cloneChart.thumbBar._graphs.sprite;
