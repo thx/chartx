@@ -38,7 +38,6 @@ define(
                         end: data.length - 1 //因为第一行是title
                     }
                 };
-
                 if (opts.dataZoom) {
                     this.dataZoom.enabled = true;
                     this.padding.bottom += (opts.dataZoom.height || 46);
@@ -532,9 +531,7 @@ define(
                         y: me._xAxis.pos.y + me._xAxis.h
                     },
                     dragIng: function(range) {
-                        if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
-                            return;
-                        };
+
                         if (me.dataZoom.range.end <= me.dataZoom.range.start) {
                             me.dataZoom.range.end = me.dataZoom.range.start + 1;
                         };
