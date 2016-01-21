@@ -31,50 +31,51 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150   ]
+    [ 1      , 33 , 20 , 33    ],
+    [ 2      , 10   , 251 , 26    ],
+    [ 3      , 32   , 45 , 43    ],
+    [ 4      , 58  , 135 , 31    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 188  , 84 , 39    ],
+    [ 7      , 115  , 68 , 65    ],
+    [ 8      , 66   , 83 , 51    ]
 ];
+
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
-        field : ["uv","pv"]
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : ["uv" , "pv" ],
+        label : "yaxis"
     },
     xAxis : {
-        field : ["xfield"]
+        field : "xfield",
+        label : "xaxis"
     },
-    dataZoom : {
-        range : {
-            start : 1,
-            end   : 8
+    graphs : {
+        line : {
+            strokeStyle : {
+                lineargradient : [
+                    {position : 0   , color:"#c6623b"},
+                    {position : 0.2 , color:"#1aa1e6"},
+                    {position : 0.8 , color:"#1aa1e6"},
+                    {position : 1.0 , color:"#5345cd"}
+                ]
+            }
+        },
+        node: {
+            enabled : false
         }
     }
-}   
-Chartx.line("canvasTest" , data , options);
+};
+//Chartx.line开始初始化chart实例
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
+
+});
 </textarea></form>
 
         </td>

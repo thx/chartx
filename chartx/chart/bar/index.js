@@ -38,7 +38,6 @@ define(
                         end: data.length - 1 //因为第一行是title
                     }
                 };
-
                 if (opts.dataZoom) {
                     this.dataZoom.enabled = true;
                     this.padding.bottom += (opts.dataZoom.height || 46);
