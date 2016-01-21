@@ -2283,7 +2283,7 @@ define(
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
-                }
+                };
 
                 this._initData(data , data1);
                 this.sprite = new Canvax.Display.Sprite();
@@ -2409,7 +2409,10 @@ define(
                         arr = _.flatten(d[1]);
                         this.field = _.flatten([this.field[1]]);
                     }
-                }
+                };
+                for( var i = 0, il=arr.length; i<il ; i++ ){
+                    arr[i] = Number( arr[i] );
+                };
                 return arr;
             },
             //data1 == [1,2,3,4]
