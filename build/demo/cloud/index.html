@@ -45,9 +45,6 @@ var options = {
     yAxis : {
         field : ["tag"]
     },
-    xAxis : {
-        field : ["info"]
-    },
     graphs : {
         text : {
             fillStyle : function(e){
@@ -64,15 +61,14 @@ var options = {
     },
     tips  : {
         content : function(info){
-            var str  = "<table>", index = info.iGroup
+            var str  = "<table>", data = info.data
     
-            var tag = data[index + 1][1]
-            str += "<tr style='color:"+ "#ff0000" +"'>"
-            str += "<td>"+ tag.name + ' ：' + tag.value +"</td></tr>";
+            str += "<tr style='color:"+ "#666666" +"'>"
+            str += "<td>"+ 'tag' + ' ：' + data['tag'] +"</td></tr>";
 
             _.each( info.nodesInfoList , function( node , i ){
-                var prefix = node.field
-                var lastfix = node.value
+                var prefix = data['info'].name
+                var lastfix = data['info'].value
                 str += "<tr style='color:"+ node.fillStyle +"'>"
                 str += "<td>"+ prefix + ' ：' + lastfix+"</td></tr>";
             });

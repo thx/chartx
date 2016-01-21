@@ -19,9 +19,7 @@ define(
         var Canvax = Chart.Canvax;
 
         var Line = Chart.extend({
-
             init: function(node, data, opts) {
-
                 this._node = node;
                 this._data = data;
                 this._opts = opts;
@@ -73,15 +71,11 @@ define(
 
                 if (this.rotate) {
                     this._rotate(this.rotate);
-                }
+                };
                 this._initModule(); //初始化模块  
-
                 this._startDraw(); //开始绘图
-
                 this._endDraw();
-
                 this.inited = true;
-
             },
             /*
              * 如果只有数据改动的情况
@@ -457,7 +451,6 @@ define(
                     },
                     dataZoom: null
                 });
-debugger
                 me._dataZoom = new DataZoom(dataZoomOpt);
 
                 var graphssp = this.__cloneChart.thumbBar._graphs.sprite;

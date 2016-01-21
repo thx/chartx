@@ -1175,6 +1175,7 @@ define(
                 });
 
                 e.eventInfo.dataZoom = me.dataZoom;
+                e.eventInfo.rowData  = this.dataFrame.getRowData( e.eventInfo.iGroup );
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
@@ -1324,9 +1325,7 @@ define(
                         y: me._xAxis.pos.y + me._xAxis.h
                     },
                     dragIng: function(range) {
-                        if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
-                            return;
-                        };
+
                         if (me.dataZoom.range.end <= me.dataZoom.range.start) {
                             me.dataZoom.range.end = me.dataZoom.range.start + 1;
                         };

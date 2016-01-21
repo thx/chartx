@@ -382,6 +382,7 @@ define(
                 });
 
                 e.eventInfo.dataZoom = me.dataZoom;
+                e.eventInfo.rowData  = this.dataFrame.getRowData( e.eventInfo.iGroup );
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
