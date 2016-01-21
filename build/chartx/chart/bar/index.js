@@ -1157,21 +1157,23 @@ define(
                 if (!e.eventInfo) {
                     return;
                 };
-                e.eventInfo.iGroup += this.dataZoom.range.start;
+                
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iGroup]
-                }
+                };
                 var me = this;
+
+                e.eventInfo.iGroup += this.dataZoom.range.start;
+
                 _.each(e.eventInfo.nodesInfoList, function(node, i) {
                     if (_.isArray(me.dataFrame.yAxis.field[node.iNode])) {
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
                     } else {
                         node.field = me.dataFrame.yAxis.field[node.iNode]
                     };
-
                     //把这个group当前是否选中状态记录
-                    if (me._checkedList[node.iGroup]) {
+                    if (me._checkedList[node.iGroup+me.dataZoom.range.start]) {
                         node.checked = true;
                     } else {
                         node.checked = false;
