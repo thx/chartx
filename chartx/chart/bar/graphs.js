@@ -370,6 +370,7 @@ define(
                             var rectEl;
                             if (h <= preLen - 1) {
                                 rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                                rectEl.context.fillStyle = fillStyle;
                             } else {
                                 rectEl = new Rect({
                                     id: "bar_" + i + "_" + h + "_" + v,
