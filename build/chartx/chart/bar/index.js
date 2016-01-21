@@ -901,34 +901,36 @@ define(
                 me._checkedBar({
                     iGroup: i,
                     checked: true
-                })
+                });
                 me._checkedMiniBar({
                     iGroup: index,
                     checked: true
-                })
+                });
 
                 o.iGroup = index
             },
             uncheckAt: function(index) { //取消选择某个对象 index是全局index
                 var me = this
                 var i = index - me.dataZoom.range.start
-                me._checked(me._graphs.getInfo(i))
+                if (me._checkedList[ index ]) {
+                    me._checked(me._graphs.getInfo(i))
+                };
             },
-            uncheckAll: function(){
-                for( var i = 0, l = this._checkedList.length  ; i<l ; i++ ){
-                    var obj= this._checkedList[i];
-                    if( obj ){
+            uncheckAll: function() {
+                for (var i = 0, l = this._checkedList.length; i < l; i++) {
+                    var obj = this._checkedList[i];
+                    if (obj) {
                         this.uncheckAt(i);
                     }
                 };
                 this._checkedList = [];
                 this._currCheckedList = [];
             },
-            checkOf: function( xvalue ){
-                this.checkAt( this._xAxis.getIndexOfVal( xvalue ) + this.dataZoom.range.start);
+            checkOf: function(xvalue) {
+                this.checkAt(this._xAxis.getIndexOfVal(xvalue) + this.dataZoom.range.start);
             },
-            uncheckOf: function(xvalue){
-                this.uncheckAt( this._xAxis.getIndexOfVal( xvalue ) + this.dataZoom.range.start );
+            uncheckOf: function(xvalue) {
+                this.uncheckAt(this._xAxis.getIndexOfVal(xvalue) + this.dataZoom.range.start);
             },
             getGroupChecked: function(e) {
                 var checked = false;
@@ -1154,7 +1156,8 @@ define(
             _setXaxisYaxisToTipsInfo: function(e) {
                 if (!e.eventInfo) {
                     return;
-                }
+                };
+                e.eventInfo.iGroup += this.dataZoom.range.start;
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iGroup]
@@ -1172,11 +1175,11 @@ define(
                         node.checked = true;
                     } else {
                         node.checked = false;
-                    }
+                    };
                 });
 
                 e.eventInfo.dataZoom = me.dataZoom;
-                e.eventInfo.rowData  = this.dataFrame.getRowData( e.eventInfo.iGroup );
+                e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iGroup);
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
@@ -1379,7 +1382,7 @@ define(
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
                 //});
             },
-            _getCloneBar: function( barConstructor ) {
+            _getCloneBar: function(barConstructor) {
                 var me = this;
                 barConstructor = (barConstructor || Bar);
                 var cloneEl = me.el.cloneNode();
@@ -1625,5 +1628,3 @@ define(
         return Bar;
     }
 );
-
-

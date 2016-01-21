@@ -109,12 +109,17 @@ var options = {
 Chartx.bar("canvasTest" , data , options).then(function(bar){
     window.bar = bar;
     bar.on("checkedBefor" , function(){
-        _.each(bar.getCheckedList() , function(o){
+        var cl = bar.getCheckedList();
+        _.each( cl , function(o){
+
             bar.uncheckAt(o.iGroup);
         })
     });
     bar.on("dblclick" , function(e){
         debugger;
+    });
+    bar.on("click" , function(e){
+        //bar.uncheckAt( e.eventInfo.iGroup )
     });
 });
 
