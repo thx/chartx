@@ -878,6 +878,7 @@ define(
                 }, {
                     delay: 0
                 });
+                this.fire("_resetData");
             },
             getCheckedCurrList: function() {
                 var me = this

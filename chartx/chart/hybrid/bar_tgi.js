@@ -40,7 +40,7 @@ define(
                     return item.field == me.tgi.yAxis.field
                 });
 
-                this.on("_dataZoomDragIng", function(e) {
+                this.on("_dataZoomDragIng _resetData", function(e) {
                     me.redraw();
                 });
 
@@ -147,7 +147,7 @@ define(
                         context: {
                             xStart: x,
                             yStart: y,
-                            xEnd: x + me._graphs.bar._width + 4,
+                            xEnd: x + me._graphs.bar._width + 6,
                             yEnd: y,
                             lineWidth: 2,
                             strokeStyle: (num > 100 ? "#43cbb5" : "#ff6060")

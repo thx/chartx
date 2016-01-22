@@ -44,7 +44,7 @@ var data= [
 var options = {
     type : "bar_tgi",
     yAxis : {
-        field : ["uv","pv"]
+        field : ["uv"]
     },
     xAxis : {
         field : ["xfield"]
@@ -52,7 +52,13 @@ var options = {
     tgi : {
         field : "tgi"
     },
+    tips : {
+        content : function(e){
+            //debugger
+        }
+    },
     dataZoom : {
+        enabled : false,
         range : {
             start : 0,
             end   : 4
@@ -61,7 +67,19 @@ var options = {
     }
 }  
 
-Chartx.hybrid("canvasTest" , data , options);  
+Chartx.hybrid("canvasTest" , data , options).then(function( chart ){
+    var data1= [
+        ["xfield"     ,"uv" ,"pv", "tgi"   ],
+        ["迈锐宝"      , 67  , 51 , 56     ],
+        ["科鲁兹"      , 11  , 20 , 1133    ],
+        ["帕萨特"      , 201 , 20 , 323     ],
+        ["蒙迪欧"      , 51  , 20 , 33      ],
+        ["天籁"        , 17  , 51 , 261     ]
+    ];
+    setTimeout( function(){
+        chart.resetData(data1)
+    } , 1000 );
+});  
     
             </textarea></form>
 
