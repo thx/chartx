@@ -127,8 +127,9 @@ define(
             },
             _getMapData: function(mt, callback) {
                 var me = this;
-                this._mapDataMap[mt] = this._mapDataMap[mt] || {};
-                mapParams.params[mt].getGeoJson(this._mapDataCallback(mt, callback));
+                this._mapDataMap[mt] = (this._mapDataMap[mt] || {});
+                var mapObj = mapParams.params[mt.replace("省","").replace("市","")]
+                mapObj && mapObj.getGeoJson(this._mapDataCallback(mt, callback));
             },
             /**
              * @param {string} mt mapName
