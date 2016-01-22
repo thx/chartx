@@ -83,7 +83,7 @@ var data= [
 ];
 var options = {
     yAxis : {
-        field : ["uv"]
+        field : [ ["uv","pv"] ]
     },
     xAxis : {
         field : ["xfield"]
@@ -111,7 +111,6 @@ Chartx.bar("canvasTest" , data , options).then(function(bar){
     bar.on("checkedBefor" , function(){
         var cl = bar.getCheckedList();
         _.each( cl , function(o){
-
             bar.uncheckAt(o.iGroup);
         })
     });
@@ -119,8 +118,7 @@ Chartx.bar("canvasTest" , data , options).then(function(bar){
         debugger;
     });
     bar.on("click" , function(e){
-        debugger
-        bar.uncheckAt( e.eventInfo.iGroup )
+        //bar.uncheckAt( e.eventInfo.iGroup )
     });
 });
 
