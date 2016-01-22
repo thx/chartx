@@ -42,6 +42,7 @@ define(
     
             },
             show : function(e , tipsPoint){
+
                 if( !this.enabled ) return;
                 tipsPoint || ( tipsPoint = {} );
                 tipsPoint = _.extend( this._getTipsPoint(e) , tipsPoint );
@@ -121,7 +122,7 @@ define(
                     
                     var csp = new Canvax.Display.Sprite({
                         context : {
-                            y : e.target.context.height - Math.abs(node.y) 
+                            y : e.target.context.height - Math.abs(node.y)
                         }
                     });
 
@@ -133,7 +134,8 @@ define(
                             lineWidth   : node.lineWidth,
                             cursor      : 'pointer'
                         }
-                    })
+                    });
+
                     bigCircle.name = 'node', 
                     bigCircle.eventInfo = {
                         iGroup: node._groupInd,
@@ -584,8 +586,11 @@ define(
                     var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
+                    var bottomP = _.max(self._bline.context.pointList, function(p) {
+                        return p[1]
+                    });
                     //创建一个线性渐变
-                    this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+                    this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
                     if( !_.isArray( this.line.strokeStyle.lineargradient ) ){
                         this.line.strokeStyle.lineargradient = [this.line.strokeStyle.lineargradient];
@@ -958,9 +963,7 @@ define(
         var Canvax = Chart.Canvax;
 
         var Line = Chart.extend({
-
             init: function(node, data, opts) {
-
                 this._node = node;
                 this._data = data;
                 this._opts = opts;
@@ -1012,15 +1015,11 @@ define(
 
                 if (this.rotate) {
                     this._rotate(this.rotate);
-                }
+                };
                 this._initModule(); //初始化模块  
-
                 this._startDraw(); //开始绘图
-
                 this._endDraw();
-
                 this.inited = true;
-
             },
             /*
              * 如果只有数据改动的情况
@@ -1359,6 +1358,15 @@ define(
                     pos: {
                         x: me._xAxis.pos.x,
                         y: me._xAxis.pos.y + me._xAxis.h
+                    },
+                    count : me._data.length-1,
+                    dragIng : function( range ){
+                        if (parseInt(range.start) == parseInt(me.dataZoom.range.start) && parseInt(range.end) == parseInt(me.dataZoom.range.end)) {
+                            return;
+                        };
+                        me.dataZoom.range.start = parseInt(range.start);
+                        me.dataZoom.range.end = parseInt(range.end);
+                        me.resetData( me._data );
                     }
                 }, me.dataZoom);
 
@@ -1387,7 +1395,6 @@ define(
                     },
                     dataZoom: null
                 });
-debugger
                 me._dataZoom = new DataZoom(dataZoomOpt);
 
                 var graphssp = this.__cloneChart.thumbBar._graphs.sprite;

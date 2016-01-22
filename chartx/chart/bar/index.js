@@ -84,6 +84,7 @@ define(
                 }, {
                     delay: 0
                 });
+                this.fire("_resetData");
             },
             getCheckedCurrList: function() {
                 var me = this
@@ -107,34 +108,36 @@ define(
                 me._checkedBar({
                     iGroup: i,
                     checked: true
-                })
+                });
                 me._checkedMiniBar({
                     iGroup: index,
                     checked: true
-                })
+                });
 
                 o.iGroup = index
             },
             uncheckAt: function(index) { //取消选择某个对象 index是全局index
                 var me = this
                 var i = index - me.dataZoom.range.start
-                me._checked(me._graphs.getInfo(i))
+                if (me._checkedList[ index ]) {
+                    me._checked(me._graphs.getInfo(i))
+                };
             },
-            uncheckAll: function(){
-                for( var i = 0, l = this._checkedList.length  ; i<l ; i++ ){
-                    var obj= this._checkedList[i];
-                    if( obj ){
+            uncheckAll: function() {
+                for (var i = 0, l = this._checkedList.length; i < l; i++) {
+                    var obj = this._checkedList[i];
+                    if (obj) {
                         this.uncheckAt(i);
                     }
                 };
                 this._checkedList = [];
                 this._currCheckedList = [];
             },
-            checkOf: function( xvalue ){
-                this.checkAt( this._xAxis.getIndexOfVal( xvalue ) + this.dataZoom.range.start);
+            checkOf: function(xvalue) {
+                this.checkAt(this._xAxis.getIndexOfVal(xvalue) + this.dataZoom.range.start);
             },
-            uncheckOf: function(xvalue){
-                this.uncheckAt( this._xAxis.getIndexOfVal( xvalue ) + this.dataZoom.range.start );
+            uncheckOf: function(xvalue) {
+                this.uncheckAt(this._xAxis.getIndexOfVal(xvalue) + this.dataZoom.range.start);
             },
             getGroupChecked: function(e) {
                 var checked = false;
@@ -219,6 +222,7 @@ define(
 
             },
             _initData: function(data, opt) {
+                
                 var d;
                 if (this.dataZoom.enabled) {
                     var datas = [data[0]];
@@ -227,6 +231,8 @@ define(
                 } else {
                     d = dataFormat.apply(this, arguments);
                 };
+                
+                //var d = dataFormat.apply(this, arguments);
 
                 _.each(d.yAxis.field, function(field, i) {
                     if (!_.isArray(field)) {
@@ -301,6 +307,7 @@ define(
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
                     });
+                    this._yAxis.setX( this._yAxis.pos.x );
                 };
 
                 var _yAxisW = this._yAxis.w;
@@ -360,28 +367,37 @@ define(
             _setXaxisYaxisToTipsInfo: function(e) {
                 if (!e.eventInfo) {
                     return;
-                }
+                };
+                
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iGroup]
-                }
+                };
                 var me = this;
+
                 _.each(e.eventInfo.nodesInfoList, function(node, i) {
+                    
+                    /*
                     if (_.isArray(me.dataFrame.yAxis.field[node.iNode])) {
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
                     } else {
                         node.field = me.dataFrame.yAxis.field[node.iNode]
                     };
+                    */
 
                     //把这个group当前是否选中状态记录
-                    if (me._checkedList[node.iGroup]) {
+                    if (me._checkedList[node.iGroup+me.dataZoom.range.start]) {
                         node.checked = true;
                     } else {
                         node.checked = false;
-                    }
+                    };
                 });
 
                 e.eventInfo.dataZoom = me.dataZoom;
+
+                e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iGroup);
+
+                e.eventInfo.iGroup += this.dataZoom.range.start;
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
@@ -584,7 +600,7 @@ define(
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
                 //});
             },
-            _getCloneBar: function( barConstructor ) {
+            _getCloneBar: function(barConstructor) {
                 var me = this;
                 barConstructor = (barConstructor || Bar);
                 var cloneEl = me.el.cloneNode();
@@ -821,7 +837,7 @@ define(
                     if (e.type == 'click') {
                         me.fire('checkedBefor');
                         me._checked(_.clone(e.eventInfo));
-                    }
+                    };
                     me._setXaxisYaxisToTipsInfo(e);
                     me.fire(e.type, e);
                 });
@@ -830,5 +846,4 @@ define(
         return Bar;
     }
 );
-
 

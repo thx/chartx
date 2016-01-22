@@ -115,8 +115,8 @@ define(
                 me.checkedSp.removeChildById('line_' + index)
                 me.checkedSp.removeChildById('rect_' + index)
                 var hoverRect = group.getChildAt(0)
-                var x0 = hoverRect.context.x + 1
-                var x1 = hoverRect.context.x + hoverRect.context.width - 1,
+                var x0 = hoverRect.context.x
+                var x1 = hoverRect.context.x + hoverRect.context.width,
                     y = -me.h
 
                 if ($o.checked) {
@@ -370,6 +370,7 @@ define(
                             var rectEl;
                             if (h <= preLen - 1) {
                                 rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                                rectEl.context.fillStyle = fillStyle;
                             } else {
                                 rectEl = new Rect({
                                     id: "bar_" + i + "_" + h + "_" + v,

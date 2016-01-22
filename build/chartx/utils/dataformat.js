@@ -27,7 +27,8 @@ define(
                     zAxis      : {     //z轴
                         field  : [],   //字段 对应this.data
                         org    : []    //原始数据['星期一','星期二']
-                    }
+                    },
+                    getRowData : _getRowData
                 }
 
                 if( !data || data.length == 0 ){
@@ -140,6 +141,20 @@ define(
                 if( allZFields.length > 0 ){
                     dataFrame.zAxis.org = getDataOrg( zField , total );
                 };
+
+                /*
+                 * 获取一行数据
+                */ 
+                function _getRowData(index){
+                    var o = {}
+                    var data = dataFrame.data
+                    for(var a = 0, al = data.length; a < al; a++){
+                        if(data[a]){
+                            o[data[a].field] = data[a].data[index]
+                        }
+                    }
+                    return o
+                }
 
                 return dataFrame;
             }
