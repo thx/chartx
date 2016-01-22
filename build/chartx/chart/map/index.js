@@ -513,11 +513,13 @@ define(
                                 };
                             };
                         };
+                        /*
                         e.eventInfo = {
                             mapData: mapData
                         };
+                        */
+                        e.eventInfo = me._getDataForArea(mapData);
                         me.fire("click", e);
-
                     });
 
                     area.on("mouseup", function(e) {
