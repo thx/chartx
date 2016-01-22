@@ -204,11 +204,8 @@ title:  Chartx demos
         </dt>
         <dd>
             <h5>
-            切换数据
+            折线顶部和底部有渐变色差
             </h5>
-            <span>
-            平滑的数据切换效果
-            </span>
         </dd>
     </dl>
     </a>
