@@ -307,6 +307,7 @@ define(
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
                     });
+                    this._yAxis.setX( this._yAxis.pos.x );
                 };
 
                 var _yAxisW = this._yAxis.w;
