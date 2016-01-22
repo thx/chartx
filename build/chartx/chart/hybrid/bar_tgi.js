@@ -147,7 +147,7 @@ define(
                         context: {
                             xStart: x,
                             yStart: y,
-                            xEnd: x + me._graphs.bar._width + 6,
+                            xEnd: x + me._graphs.bar._width + 4,
                             yEnd: y,
                             lineWidth: 2,
                             strokeStyle: (num > 100 ? "#43cbb5" : "#ff6060")

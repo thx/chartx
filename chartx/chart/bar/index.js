@@ -836,7 +836,7 @@ define(
                     if (e.type == 'click') {
                         me.fire('checkedBefor');
                         me._checked(_.clone(e.eventInfo));
-                    }
+                    };
                     me._setXaxisYaxisToTipsInfo(e);
                     me.fire(e.type, e);
                 });
@@ -845,3 +845,4 @@ define(
         return Bar;
     }
 );
+
