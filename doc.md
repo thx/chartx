@@ -12,9 +12,9 @@ Chartx，专业的数据可视化解决方案，一个纯Javascript的图表库�
 
 Chartx线上文件地址：
 
-daily环境为：http:// <code>g-assets.daily.taobao.net/thx/charts/1.9.44/chartx/index[-min].js</code>
+daily环境为：http:// <code>g-assets.daily.taobao.net/thx/charts/1.9.49/chartx/index[-min].js</code>
 
-cdn环境为 ： http://  <code>g.tbcdn.cn/thx/charts/1.9.43/chartx/index[-min].js</code>
+cdn环境为 ： http://  <code>g.tbcdn.cn/thx/charts/1.9.48/chartx/index[-min].js</code>
 
 
 交流群：
