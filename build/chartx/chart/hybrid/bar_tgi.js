@@ -17,7 +17,7 @@ define(
                         field: "tgi",
                         text: {
                             format: function(num) {
-                                if (num == 200) {
+                                if (num == 200 && (me.maxOrgYaxis > 100)) {
                                     return me.maxOrgYaxis;
                                 };
                                 return num;
