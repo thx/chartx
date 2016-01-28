@@ -591,7 +591,8 @@ define(
                 var graphssp = this.__cloneBar.thumbBar._graphs.sprite;
                 graphssp.id = graphssp.id + "_datazoomthumbbarbg"
                 graphssp.context.x = 0;
-                graphssp.context.y = me._dataZoom.height - me._dataZoom.barY;
+                graphssp.context.y = me._dataZoom.barH + me._dataZoom.barY;
+
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
 
                 me._dataZoom.dataZoomBg.addChild(graphssp);
