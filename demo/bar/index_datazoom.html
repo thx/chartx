@@ -98,12 +98,12 @@ var options = {
             start : 1,
             end   : 8
         },
-        height : 30
+        h : 26
     }
 }   
 Chartx.bar("canvasTest" , data , options).then(function( chart ){
     window.bar = chart;
-
+    return
     setTimeout(function(){
         var newData = _.clone(data);
         var titles  = newData.shift();
