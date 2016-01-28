@@ -136,7 +136,7 @@ define(
                 var itemW = this._graphs.w / dLen;
                 _.each(this._tgiData.data, function(num, i) {
 
-                    var x = itemW * i + (itemW-me._graphs.bar._width) / 2 - 2;
+                    var x = itemW * i + (itemW-me._graphs.bar._width) / 2 ;
                     var y = 0;
                     if (num <= 100) {
                         y = -me._graphs.h / 2 * num / 100;
@@ -147,7 +147,7 @@ define(
                         context: {
                             xStart: x,
                             yStart: y,
-                            xEnd: x + me._graphs.bar._width + 4,
+                            xEnd: x + me._graphs.bar._width + 2 ,
                             yEnd: y,
                             lineWidth: 2,
                             strokeStyle: (num > 100 ? "#43cbb5" : "#ff6060")

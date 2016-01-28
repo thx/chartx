@@ -72,6 +72,7 @@ define(
                         animation: false
                     });
                     this._dataZoom.sprite.destroy();
+
                     this._initDataZoom();
                 } else {
                     this._yAxis.resetData(this.dataFrame.yAxis, {
@@ -119,7 +120,7 @@ define(
             uncheckAt: function(index) { //取消选择某个对象 index是全局index
                 var me = this
                 var i = index - me.dataZoom.range.start
-                if (me._checkedList[ index ]) {
+                if (me._checkedList[index]) {
                     me._checked(me._graphs.getInfo(i))
                 };
             },
@@ -222,7 +223,7 @@ define(
 
             },
             _initData: function(data, opt) {
-                
+
                 var d;
                 if (this.dataZoom.enabled) {
                     var datas = [data[0]];
@@ -231,7 +232,7 @@ define(
                 } else {
                     d = dataFormat.apply(this, arguments);
                 };
-                
+
                 //var d = dataFormat.apply(this, arguments);
 
                 _.each(d.yAxis.field, function(field, i) {
@@ -307,7 +308,7 @@ define(
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
                     });
-                    this._yAxis.setX( this._yAxis.pos.x );
+                    this._yAxis.setX(this._yAxis.pos.x);
                 };
 
                 var _yAxisW = this._yAxis.w;
@@ -368,7 +369,7 @@ define(
                 if (!e.eventInfo) {
                     return;
                 };
-                
+
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iGroup]
@@ -376,7 +377,7 @@ define(
                 var me = this;
 
                 _.each(e.eventInfo.nodesInfoList, function(node, i) {
-                    
+
                     /*
                     if (_.isArray(me.dataFrame.yAxis.field[node.iNode])) {
                         node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
@@ -386,7 +387,7 @@ define(
                     */
 
                     //把这个group当前是否选中状态记录
-                    if (me._checkedList[node.iGroup+me.dataZoom.range.start]) {
+                    if (me._checkedList[node.iGroup + me.dataZoom.range.start]) {
                         node.checked = true;
                     } else {
                         node.checked = false;
@@ -846,4 +847,3 @@ define(
         return Bar;
     }
 );
-
