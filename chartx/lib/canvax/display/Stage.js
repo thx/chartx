@@ -62,10 +62,7 @@ define(
                 if(arguments.length >= 4) {
                     this.context2D.clearRect(x, y, width, height);
                 } else {
-                    this.context2D.clearRect( 0, 0,
-                            this.context2D.canvas.width * Math.max(Base._devicePixelRatio,1),
-                            this.context2D.canvas.height* Math.max(Base._devicePixelRatio,1)
-                    );
+                    this.context2D.clearRect( 0, 0, this.context2D.canvas.offsetWidth, this.context2D.canvas.offsetHeight );
                 }
             }
         });

@@ -127,8 +127,14 @@ define(
             },
             _getMapData: function(mt, callback) {
                 var me = this;
-                this._mapDataMap[mt] = this._mapDataMap[mt] || {};
-                mapParams.params[mt].getGeoJson(this._mapDataCallback(mt, callback));
+                this._mapDataMap[mt] = (this._mapDataMap[mt] || {});
+                //var mapObj = mapParams.params[mt.replace("省","").replace("市","")];
+                for( var name in mapParams.params ){
+                    if( name.indexOf( mt ) >= 0 || mt.indexOf( name ) >= 0 ){
+                        mapObj = mapParams.params[name];
+                    }
+                };
+                mapObj && mapObj.getGeoJson(this._mapDataCallback(mt, callback));
             },
             /**
              * @param {string} mt mapName
@@ -477,7 +483,7 @@ define(
                         e.area = this.mapData;
                         e.areaData = me._getDataForArea(this.mapData);
 
-                        e.eventInfo = me._getDataForArea(this.mapData);
+                        e.eventInfo = e.areaData; //me._getDataForArea(this.mapData);
 
                         me.fire("areadblclick", e);
                         me.fire("dblclick" , e);
@@ -507,11 +513,13 @@ define(
                                 };
                             };
                         };
+                        /*
                         e.eventInfo = {
                             mapData: mapData
                         };
+                        */
+                        e.eventInfo = me._getDataForArea(mapData);
                         me.fire("click", e);
-
                     });
 
                     area.on("mouseup", function(e) {

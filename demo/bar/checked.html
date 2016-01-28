@@ -36,7 +36,7 @@
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
+    [ 1      , 121 , 20 , 33    ],
     [ 2      , 167 , 51 , 26    ],
     [ 3      , 100 , 50 , 150   ],
     [ 4      , 51  , 40 , 33    ],
@@ -83,7 +83,7 @@ var data= [
 ];
 var options = {
     yAxis : {
-        field : ["uv"]
+        field : [ ["uv","pv"] ]
     },
     xAxis : {
         field : ["xfield"]
@@ -109,12 +109,16 @@ var options = {
 Chartx.bar("canvasTest" , data , options).then(function(bar){
     window.bar = bar;
     bar.on("checkedBefor" , function(){
-        _.each(bar.getCheckedList() , function(o){
+        var cl = bar.getCheckedList();
+        _.each( cl , function(o){
             bar.uncheckAt(o.iGroup);
         })
     });
     bar.on("dblclick" , function(e){
         debugger;
+    });
+    bar.on("click" , function(e){
+        //bar.uncheckAt( e.eventInfo.iGroup )
     });
 });
 

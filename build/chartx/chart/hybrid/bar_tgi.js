@@ -17,7 +17,7 @@ define(
                         field: "tgi",
                         text: {
                             format: function(num) {
-                                if (num == 200) {
+                                if (num == 200 && (me.maxOrgYaxis > 100)) {
                                     return me.maxOrgYaxis;
                                 };
                                 return num;
@@ -40,7 +40,7 @@ define(
                     return item.field == me.tgi.yAxis.field
                 });
 
-                this.on("_dataZoomDragIng", function(e) {
+                this.on("_dataZoomDragIng _resetData", function(e) {
                     me.redraw();
                 });
 
@@ -135,7 +135,8 @@ define(
                 var dLen = this._tgiData.data.length;
                 var itemW = this._graphs.w / dLen;
                 _.each(this._tgiData.data, function(num, i) {
-                    var x = itemW * i;
+
+                    var x = itemW * i + (itemW-me._graphs.bar._width) / 2 - 2;
                     var y = 0;
                     if (num <= 100) {
                         y = -me._graphs.h / 2 * num / 100;
@@ -146,7 +147,7 @@ define(
                         context: {
                             xStart: x,
                             yStart: y,
-                            xEnd: x + itemW,
+                            xEnd: x + me._graphs.bar._width + 4,
                             yEnd: y,
                             lineWidth: 2,
                             strokeStyle: (num > 100 ? "#43cbb5" : "#ff6060")

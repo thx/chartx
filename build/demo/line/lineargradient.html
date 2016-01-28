@@ -31,50 +31,51 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 637  , 51 , 26    ],
-    [ 3      , 500 , 50 , 150   ],
-    [ 4      , 101 , 20 , 33    ],
-    [ 5      , 267  , 51 , 26    ],
-    [ 6      , 160 , 50 , 150   ],
-    [ 7      , 101 , 20 , 33    ],
-    [ 8      , 267  , 51 , 26    ],
-    [ 9      , 170 , 50 , 150   ],
-    [ 10     , 181 , 20 , 33    ],
-    [ 11     , 672  , 51 , 26    ],
-    [ 12     , 100 , 50 , 150   ],
-    [ 13     , 267  , 51 , 26    ],
-    [ 14     , 140 , 50 , 150   ],
-    [ 15     , 191 , 20 , 33    ],
-    [ 16     , 367  , 51 , 26    ],
-    [ 17     , 800 , 50 , 150   ],
-    [ 18     , 121 , 20 , 33    ],
-    [ 19     , 367  , 51 , 26    ],
-    [ 20     , 100 , 50 , 150   ],
-    [ 21     , 301 , 20 , 33    ],
-    [ 22     , 167  , 51 , 26    ],
-    [ 23     , 100 , 50 , 150   ]
+    [ 1      , 33 , 120 , 33    ],
+    [ 2      , 10   , 251 , 26    ],
+    [ 3      , 32   , 45 , 43    ],
+    [ 4      , 58  , 135 , 31    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 188  , 84 , 39    ],
+    [ 7      , 115  , 68 , 65    ],
+    [ 8      , 66   , 83 , 51    ]
 ];
+
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
-        field : ["uv"]
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : ["pv" ],
+        label : "yaxis"
     },
     xAxis : {
-        field : ["xfield"]
+        field : "xfield",
+        label : "xaxis"
     },
-    dataZoom : {
-        range : {
-            start : 1,
-            end   : 8
+    graphs : {
+        line : {
+            strokeStyle : {
+                lineargradient : [
+                    {position : 0   , color:"#c6623b"},
+                    {position : 0.2 , color:"#2898cb"},
+                    {position : 0.8 , color:"#2898cb"},
+                    {position : 1.0 , color:"#5345cd"}
+                ]
+            }
+        },
+        node: {
+            enabled : false
         }
     }
-}   
-Chartx.line("canvasTest" , data , options);
+};
+//Chartx.line开始初始化chart实例
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
+
+});
 </textarea></form>
 
         </td>
@@ -83,7 +84,7 @@ Chartx.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>折线图（line chart）- 折线顶部和底部带渐变色差</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>

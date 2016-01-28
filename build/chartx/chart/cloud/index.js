@@ -132,10 +132,11 @@
             _getInfoHandler: function(target) {
             	var me = this
                 return {
-                	iGroup: target.index  + me.dataZoom.range.start,
+                	iGroup: target.index,
                     iNode: -1,
                     iLay: -1,
                     dataZoom : me.dataZoom,
+                    data : me.dataFrame.getRowData(target.index  + me.dataZoom.range.start),
                     nodesInfoList: [{
                     	field : me.dataFrame.yAxis.field[0],
                     	x     : target.context.x,

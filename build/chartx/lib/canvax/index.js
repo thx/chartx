@@ -1387,6 +1387,8 @@ define(
         return Base
     }
 );
+
+
 ;define(
     "canvax/core/PropertyFactory",
     [
@@ -1442,7 +1444,10 @@ define(
                                 return //阻止重复赋值
                             }
                             if (value !== neo) {
-                                if( neo && neoType === "object" && !(neo instanceof Array) ){
+                                if( neo && neoType === "object" && 
+                                    !(neo instanceof Array) &&
+                                    !neo.addColorStop // neo instanceof CanvasGradient
+                                 ){
                                     value = neo.$model ? neo : PropertyFactory(neo , neo);
                                     complexValue = value.$model;
                                 } else {//如果是其他数据类型
@@ -1479,7 +1484,8 @@ define(
                             //那么就临时defineProperty一次
                             if ( value && (valueType === "object") 
                                && !(value instanceof Array) 
-                               && !value.$model) {
+                               && !value.$model
+                               && !value.addColorStop) {
                                 //建立和父数据节点的关系
                                 value.$parent = pmodel;
                                 value = PropertyFactory(value , value);
@@ -3640,10 +3646,7 @@ define(
                 if(arguments.length >= 4) {
                     this.context2D.clearRect(x, y, width, height);
                 } else {
-                    this.context2D.clearRect( 0, 0,
-                            this.context2D.canvas.width * Math.max(Base._devicePixelRatio,1),
-                            this.context2D.canvas.height* Math.max(Base._devicePixelRatio,1)
-                    );
+                    this.context2D.clearRect( 0, 0, this.context2D.canvas.offsetWidth, this.context2D.canvas.offsetHeight );
                 }
             }
         });

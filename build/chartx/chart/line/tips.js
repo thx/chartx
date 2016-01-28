@@ -42,6 +42,7 @@ define(
     
             },
             show : function(e , tipsPoint){
+
                 if( !this.enabled ) return;
                 tipsPoint || ( tipsPoint = {} );
                 tipsPoint = _.extend( this._getTipsPoint(e) , tipsPoint );
@@ -121,7 +122,7 @@ define(
                     
                     var csp = new Canvax.Display.Sprite({
                         context : {
-                            y : e.target.context.height - Math.abs(node.y) 
+                            y : e.target.context.height - Math.abs(node.y)
                         }
                     });
 
@@ -133,7 +134,8 @@ define(
                             lineWidth   : node.lineWidth,
                             cursor      : 'pointer'
                         }
-                    })
+                    });
+
                     bigCircle.name = 'node', 
                     bigCircle.eventInfo = {
                         iGroup: node._groupInd,

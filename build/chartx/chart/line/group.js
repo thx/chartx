@@ -65,8 +65,9 @@ define(
                 _.deepExtend(this, opt);
 
                 //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
-                !this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
-                !this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
+                //!this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
+                //!this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
+
                 this.sprite = new Canvax.Display.Sprite();
                 var me = this;
                 this.sprite.on("destroy" , function(){
@@ -110,13 +111,7 @@ define(
                 }
                 return s
             },
-            _getLineStrokeStyle: function() {
-                if (this.__lineStyleStyle) {
-                    return this.__lineStyleStyle;
-                };
-                this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
-                return this.__lineStyleStyle;
-            },
+
             //这个是tips需要用到的 
             getNodeInfoAt: function($index) {
                 var self = this;
@@ -181,6 +176,8 @@ define(
                             self._currPointList[ind] && (self._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
                         };
                         self._bline.context.pointList = _.clone(self._currPointList);
+                        self._bline.context.strokeStyle = self._getLineStrokeStyle();
+
                         self._fill.context.path = self._fillLine(self._bline);
                         self._fill.context.fillStyle = self._getFillStyle();
                         self._circles && _.each(self._circles.children, function(circle, i) {
@@ -277,7 +274,7 @@ define(
                     id: "brokenline_" + self._groupInd,
                     context: {
                         pointList: list,
-                        strokeStyle: self._getLineStrokeStyle(),
+                        //strokeStyle: self._getLineStrokeStyle(),
                         lineWidth: self.line.lineWidth,
                         y: self.y,
                         smooth: self.line.smooth,
@@ -295,6 +292,8 @@ define(
                 }
                 self.sprite.addChild(bline);
                 self._bline = bline;
+                
+                bline.context.strokeStyle = self._getLineStrokeStyle();
 
                 var fill = new Path({ //填充
                     context: {
@@ -337,6 +336,48 @@ define(
                 };
 
                 return fill_gradient || self._getColor(self.fill.fillStyle);
+            },
+            _getLineStrokeStyle: function() {
+                var self = this;
+                /*
+                if (this.__lineStyleStyle) {
+                    return this.__lineStyleStyle;
+                };
+                */
+                
+                if( this.line.strokeStyle.lineargradient ){
+                    //如果填充是一个线性渐变
+                    //从bline中找到最高的点
+                    var topP = _.min(self._bline.context.pointList, function(p) {
+                        return p[1]
+                    });
+                    var bottomP = _.max(self._bline.context.pointList, function(p) {
+                        return p[1]
+                    });
+                    //创建一个线性渐变
+                    this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+
+                    if( !_.isArray( this.line.strokeStyle.lineargradient ) ){
+                        this.line.strokeStyle.lineargradient = [this.line.strokeStyle.lineargradient];
+                    };
+
+                    _.each(this.line.strokeStyle.lineargradient , function( item , i ){
+                        self.__lineStyleStyle.addColorStop( item.position , item.color);
+                    });
+                
+                    /*
+                    var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
+                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                    this.__lineStyleStyle.addColorStop(0, rgba0);
+
+                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                    this.__lineStyleStyle.addColorStop(1, rgba1);
+                    */
+
+                } else {
+                    this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
+                }
+                return this.__lineStyleStyle;
             },
             _createNodes: function() {
                 var self = this;
