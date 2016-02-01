@@ -72,7 +72,6 @@ define(
                         animation: false
                     });
                     this._dataZoom.sprite.destroy();
-
                     this._initDataZoom();
                 } else {
                     this._yAxis.resetData(this.dataFrame.yAxis, {
@@ -641,6 +640,7 @@ define(
                 });
 
                 var thumbBar = new barConstructor(cloneEl, me._data, opts);
+                debugger
                 thumbBar.draw();
                 return {
                     thumbBar: thumbBar,

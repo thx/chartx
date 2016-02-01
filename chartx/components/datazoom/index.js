@@ -12,7 +12,7 @@ define(
                 start: 0,
                 end: 1,
                 max : '',
-                min : 2,
+                min : 2
             };
             this.count = 1;
             this.pos = {
@@ -21,17 +21,17 @@ define(
             };
             this.left = {
                 eventEnabled : true
-            },
+            };
             this.right = {
                 eventEnabled : true
-            },
+            };
             this.center = {
                 fillStyle : '#ffffff',
                 globalAlpha : 0
-            }
+            };
 
             this.w = 0;
-            this.h = 46;
+            this.h = 40;
 
             this.color = "#008ae6";
 
@@ -55,8 +55,10 @@ define(
 
             if(!this.range.max)
                 this.range.max = this.count;
-            this.disPart = this._getDisPart()
-            this.barAddH = 8
+            if( this.range.end > this.count )
+                this.range.end = this.count;
+            this.disPart = this._getDisPart();
+            this.barAddH = 8;
             this.barH = this.h - this.barAddH;
             this.barY = 6 / 2;
             this.btnW = 8;

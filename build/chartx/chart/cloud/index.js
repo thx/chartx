@@ -28,7 +28,7 @@
 	                enabled: false,
 	                range: {
 	                    start: 0,
-	                    end: data.length - 1 //因为第一行是title
+	                    end: data.length - 1     //因为第一行是title
 	                }
 	            },
 
@@ -105,9 +105,9 @@
                     var w = me.width - me.padding.left - me.padding.right
                     var x = me.padding.left
                     var options = _.deepExtend({
-                        w: w,
+                        w : w,
                         h : 30,
-                        color : '#00a8e6',
+                        count : data.length - 1,
                         pos: {
                             x: x,
                             y: me.height - me.padding.bottom 
