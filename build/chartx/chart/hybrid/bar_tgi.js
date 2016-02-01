@@ -69,37 +69,6 @@ define(
                 this._tgiGraphsDraw();
 
             },
-            /*
-             * 如果只有数据改动的情况
-             */
-            resetData: function(data) {
-                this._data = data;
-
-                this.dataFrame = this._initData(data, this);
-                this._xAxis.resetData(this.dataFrame.xAxis, {
-                    animation: false
-                });
-
-                if (this.dataZoom.enabled) {
-                    this.__cloneBar = this._getCloneBar( barTgi );
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
-                        animation: false
-                    });
-                    this._dataZoom.sprite.destroy();
-                    this._initDataZoom();
-                } else {
-                    this._yAxis.resetData(this.dataFrame.yAxis, {
-                        animation: false
-                    });
-                };
-                this._graphs.resetData(this._trimGraphs());
-                this._graphs.grow(function() {
-                    //callback
-                }, {
-                    delay: 0
-                });
-                this.fire("_resetData");
-            },
             _setTgiYaxis: function() {
                 var me = this;
                 this._yAxisR = new yAxis(_.extend(_.clone(this.tgi.yAxis), {
@@ -220,7 +189,7 @@ define(
                 };
 
                 if (this.dataZoom.enabled) {
-                    this.__cloneBar = this._getCloneBar( barTgi );
+                    this.__cloneBar = this._getCloneBar();
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
                     });

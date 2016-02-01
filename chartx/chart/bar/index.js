@@ -601,9 +601,9 @@ define(
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
                 //});
             },
-            _getCloneBar: function(barConstructor) {
+            _getCloneBar: function() {
                 var me = this;
-                barConstructor = (barConstructor || Bar);
+                barConstructor = this.constructor;//(barConstructor || Bar);
                 var cloneEl = me.el.cloneNode();
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
@@ -640,7 +640,6 @@ define(
                 });
 
                 var thumbBar = new barConstructor(cloneEl, me._data, opts);
-                debugger
                 thumbBar.draw();
                 return {
                     thumbBar: thumbBar,
