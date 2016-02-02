@@ -603,10 +603,20 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo: function(e) {
+                if (!e.eventInfo) {
+                    return;
+                };
+                var me = this;
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
                 };
+
+                e.eventInfo.dataZoom = me.dataZoom;
+
+                e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
+
+                e.eventInfo.iNode += this.dataZoom.range.start;
             },
             _trimGraphs: function(_yAxis, dataFrame) {
 
