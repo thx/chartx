@@ -549,7 +549,6 @@ define(
 //console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
-                        console.log(me.dataZoom.range)
                         me.dataFrame = me._initData(me._data, this);
                         me._xAxis.resetData(me.dataFrame.xAxis, {
                             animation: false
