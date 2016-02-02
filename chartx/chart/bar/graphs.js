@@ -106,7 +106,7 @@ define(
             },
             _checked: function($o) {
                 var me = this
-                var index = $o.iGroup
+                var index = $o.iNode
                 var group = me.barsSp.getChildById('barGroup_' + index)
                 if (!group) {
                     return
@@ -154,7 +154,7 @@ define(
             },
             setBarStyle: function($o) {
                 var me = this
-                var index = $o.iGroup
+                var index = $o.iNode
                 var group = me.barsSp.getChildById('barGroup_' + index)
                 var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
                 for (var a = 0, al = group.getNumChildren(); a < al; a++) {
@@ -267,7 +267,7 @@ define(
                                     id: "barGroup_" + h
                                 });
                                 me.barsSp.addChild(groupH);
-                                groupH.iGroup = h;
+                                groupH.iNode = h;
                                 groupH.on("click dblclick mousedown mousemove mouseup", function(e) {
                                     if (!e.eventInfo) {
                                         e.eventInfo = me._getInfoHandler(this);
@@ -300,7 +300,7 @@ define(
                                     }, function(e) {
                                         this.context.globalAlpha = 0;
                                     });
-                                    hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
+                                    hoverRect.iGroup = -1, hoverRect.iNode = h , hoverRect.iLay = -1;
                                     hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
                                         e.eventInfo = me._getInfoHandler(this, e);
                                     });
@@ -320,7 +320,7 @@ define(
                                     id: "txtGroup_" + h
                                 });
                                 me.txtsSp.addChild(txtGroupH);
-                                txtGroupH.iGroup = h;
+                                txtGroupH.iGroup = i;
                             };
                         } else {
                             txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
@@ -329,7 +329,7 @@ define(
                         for (v = 0; v < vLen; v++) {
                             //单个的bar，从纵向的底部开始堆叠矩形
                             var rectData = h_group[v][h];
-                            rectData.iGroup = h, rectData.iNode = i, rectData.iLay = v
+                            rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v
                             var rectH = parseInt(Math.abs(rectData.y));
                             if (v > 0) {
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
@@ -381,16 +381,16 @@ define(
 
                             rectEl.finalPos = finalPos;
 
-                            rectEl.iGroup = h, rectEl.iNode = i, rectEl.iLay = v;
+                            rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
 
                             if (me.eventEnabled) {
                                 rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {
                                     e.eventInfo = me._getInfoHandler(this, e);
                                     if (e.type == "mouseover") {
-                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0.1;
+                                        this.parent.getChildById("bhr_" + this.iNode).context.globalAlpha = 0.1;
                                     }
                                     if (e.type == "mouseout") {
-                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0;
+                                        this.parent.getChildById("bhr_" + this.iNode).context.globalAlpha = 0;
                                     }
                                 });
                             };
@@ -693,8 +693,8 @@ define(
                 var me = this;
                 var groups = me.data.length;
 
-                iGroup == undefined && (iGroup = 0);
-                iNode == undefined && (iNode = -1);
+                iGroup == undefined && (iGroup = -1);
+                iNode == undefined && (iNode = 0);
                 iLay == undefined && (iLay = -1);
 
                 _.each(me.data, function(h_group, i) {
@@ -703,9 +703,9 @@ define(
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
                     for (h = 0; h < hLen; h++) {
-                        if (h == iGroup) {
+                        if (h == iNode) {
                             for (v = 0; v < vLen; v++) {
-                                if ((iNode == i || iNode == -1) && (iLay == v || iLay == -1)) {
+                                if ((iGroup == i || iGroup == -1) && (iLay == v || iLay == -1)) {
                                     node = h_group[v][h]
                                     node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value, node.field);
                                     arr.push(node)
