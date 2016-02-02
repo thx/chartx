@@ -226,7 +226,7 @@ define(
                 var d;
                 if (this.dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1 + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -240,7 +240,6 @@ define(
                         d.yAxis.org[i] = [d.yAxis.org[i]];
                     }
                 });
-
                 return d;
             },
             _getaverageData: function() {
@@ -431,7 +430,7 @@ define(
                         !tmpData[b][v] && (tmpData[b][v] = []);
 
                         if (me.dataZoom.enabled) {
-                            subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end);
+                            subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end + 1);
                         };
 
                         _.each(subv, function(val, i) {
@@ -559,7 +558,7 @@ define(
 //console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
-
+                        console.log(me.dataZoom.range)
                         me.dataFrame = me._initData(me._data, this);
                         me._xAxis.resetData(me.dataFrame.xAxis, {
                             animation: false
