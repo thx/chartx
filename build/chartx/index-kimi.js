@@ -902,8 +902,8 @@ define(
                 var end = ( (me._btnRight.context.x + me.btnW) / me.w) * me.count;
                 me.range.start = start;
                 me.range.end = end;
+                debugger
                 me.dragIng( me.range );
-
                 me._setLines()
             },
 

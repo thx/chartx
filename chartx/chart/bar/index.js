@@ -547,11 +547,16 @@ define(
                         y: me._xAxis.pos.y + me._xAxis.h
                     },
                     dragIng: function(range) {
-
-                        if (me.dataZoom.range.end <= me.dataZoom.range.start) {
-                            me.dataZoom.range.end = me.dataZoom.range.start + 1;
+                        //if (me.dataZoom.range.end <= me.dataZoom.range.start) {
+                        //    me.dataZoom.range.end = me.dataZoom.range.start + 1;
+                        //};
+                        if(
+                         parseInt(me.dataZoom.range.start) == parseInt(range.start) 
+                         && parseInt(me.dataZoom.range.end) == parseInt(range.end)
+                        ) {
+                            return;
                         };
-
+//console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
 
