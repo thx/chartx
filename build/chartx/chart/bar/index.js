@@ -900,15 +900,15 @@ define(
                 me._checkedList[index] = o
 
                 me._checkedBar({
-                    iGroup: i,
+                    iNode: i,
                     checked: true
                 });
                 me._checkedMiniBar({
-                    iGroup: index,
+                    iNode: index,
                     checked: true
                 });
 
-                o.iGroup = index
+                o.iNode = index
             },
             uncheckAt: function(index) { //取消选择某个对象 index是全局index
                 var me = this
@@ -936,7 +936,7 @@ define(
             getGroupChecked: function(e) {
                 var checked = false;
                 _.each(this.getCheckedList(), function(obj) {
-                    if (obj && obj.iGroup == e.eventInfo.iGroup) {
+                    if (obj && obj.iNode == e.eventInfo.iNode) {
                         checked = true;
                     }
                 });
@@ -1165,22 +1165,13 @@ define(
 
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
-                    value: this.dataFrame.xAxis.org[0][e.eventInfo.iGroup]
+                    value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
                 };
                 var me = this;
 
                 _.each(e.eventInfo.nodesInfoList, function(node, i) {
-
-                    /*
-                    if (_.isArray(me.dataFrame.yAxis.field[node.iNode])) {
-                        node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
-                    } else {
-                        node.field = me.dataFrame.yAxis.field[node.iNode]
-                    };
-                    */
-
                     //把这个group当前是否选中状态记录
-                    if (me._checkedList[node.iGroup + me.dataZoom.range.start]) {
+                    if (me._checkedList[node.iNode + me.dataZoom.range.start]) {
                         node.checked = true;
                     } else {
                         node.checked = false;
@@ -1189,9 +1180,9 @@ define(
 
                 e.eventInfo.dataZoom = me.dataZoom;
 
-                e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iGroup);
+                e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
 
-                e.eventInfo.iGroup += this.dataZoom.range.start;
+                e.eventInfo.iNode += this.dataZoom.range.start;
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
@@ -1458,7 +1449,7 @@ define(
 
                             if (_.isFunction(me.markLine.text.format)) {
                                 var o = {
-                                    iGroup: index,
+                                    iNode: index,
                                     value: me.dataFrame.yAxis.center[index].agValue
                                 }
                                 content = me.markLine.text.format(o)
@@ -1512,9 +1503,9 @@ define(
                                     value: barObj.value,
                                     shapeType: "droplet",
                                     markTarget: barObj.field,
-                                    //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 igroup 给出去的时候要反过来
-                                    iGroup: barObj.iNode,
-                                    iNode: barObj.iGroup,
+                                    //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 iNode 给出去的时候要反过来
+                                    iGroup: barObj.iGroup,
+                                    iNode: barObj.iNode,
                                     iLay: barObj.iLay,
                                     point: {
                                         x: barObj.x,
@@ -1556,7 +1547,7 @@ define(
                 for (var a = 0, al = me._currCheckedList.length; a < al; a++) {
                     var o = me._currCheckedList[a]
                     me._checkedBar({
-                        iGroup: o.iGroup - me.dataZoom.range.start,
+                        iNode: o.iNode - me.dataZoom.range.start,
                         checked: true,
                     })
                 }
@@ -1566,7 +1557,7 @@ define(
                 var me = this
                 return _.filter(me._checkedList, function(o) {
                     if (o) {
-                        if (o.iGroup >= me.dataZoom.range.start && o.iGroup <= me.dataZoom.range.end) {
+                        if (o.iNode >= me.dataZoom.range.start && o.iNode <= me.dataZoom.range.end) {
                             return o
                         }
                     }
@@ -1577,7 +1568,7 @@ define(
                 if (!me._graphs.checked.enabled) {
                     return
                 }
-                var i = eventInfo.iGroup + me.dataZoom.range.start
+                var i = eventInfo.iNode + me.dataZoom.range.start
 
                 var checked = true
                 if (me._checkedList[i]) { //如果已经选中
@@ -1587,15 +1578,15 @@ define(
                     me._checkedList[i] = eventInfo
                 }
                 me._checkedBar({
-                    iGroup: eventInfo.iGroup,
+                    iNode: eventInfo.iNode,
                     checked: checked
                 })
                 me._checkedMiniBar({
-                    iGroup: i,
+                    iNode: i,
                     checked: checked
                 })
 
-                eventInfo.iGroup = i
+                eventInfo.iNode = i
             },
             _checkedBar: function($o) { //选择bar
                 var me = this
@@ -1611,7 +1602,7 @@ define(
                         fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
                     }
                     graphs.setBarStyle({
-                        iGroup: $o.iGroup,
+                        iNode: $o.iNode,
                         fillStyle: fillStyle
                     })
                 }
