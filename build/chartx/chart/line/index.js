@@ -1107,7 +1107,7 @@ define(
                 var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
                 if (dataZoom && dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1 + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
