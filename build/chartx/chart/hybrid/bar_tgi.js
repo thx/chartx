@@ -17,7 +17,7 @@ define(
                         field: "tgi",
                         text: {
                             format: function(num) {
-                                if (num == 200) {
+                                if (num == 200 && (me.maxOrgYaxis > 100)) {
                                     return me.maxOrgYaxis;
                                 };
                                 return num;
@@ -136,7 +136,7 @@ define(
                 var itemW = this._graphs.w / dLen;
                 _.each(this._tgiData.data, function(num, i) {
 
-                    var x = itemW * i + (itemW-me._graphs.bar._width) / 2 - 2;
+                    var x = itemW * i + (itemW-me._graphs.bar._width) / 2 ;
                     var y = 0;
                     if (num <= 100) {
                         y = -me._graphs.h / 2 * num / 100;
@@ -147,7 +147,7 @@ define(
                         context: {
                             xStart: x,
                             yStart: y,
-                            xEnd: x + me._graphs.bar._width + 4,
+                            xEnd: x + me._graphs.bar._width + 2 ,
                             yEnd: y,
                             lineWidth: 2,
                             strokeStyle: (num > 100 ? "#43cbb5" : "#ff6060")
@@ -156,7 +156,7 @@ define(
                     me._tgiGraphs.addChild(tgiLine);
                 });
             },
-            //继承覆盖了bar的_sartDraw方法
+            //继承覆盖了 bar 的_sartDraw方法
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
@@ -189,7 +189,7 @@ define(
                 };
 
                 if (this.dataZoom.enabled) {
-                    this.__cloneBar = this._getCloneBar( barTgi );
+                    this.__cloneBar = this._getCloneBar();
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
                     });
@@ -248,3 +248,4 @@ define(
         return barTgi;
     }
 );
+

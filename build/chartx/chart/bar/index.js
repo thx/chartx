@@ -14,7 +14,7 @@ define(
             this.w = 0;
             this.h = 0;
             this.root = root;
-            this._yAxisFieldsMap = {};
+            this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
             this._setyAxisFieldsMap();
 
             this.animation = true;
@@ -36,7 +36,9 @@ define(
                 enabled: false,
                 fillStyle: '#999',
                 fontSize: 12,
-                format: null
+                format: null,
+                lineWidth:1,
+                strokeStyle: 'white'
             };
 
             this.average = {
@@ -106,7 +108,7 @@ define(
             },
             _checked: function($o) {
                 var me = this
-                var index = $o.iGroup
+                var index = $o.iNode
                 var group = me.barsSp.getChildById('barGroup_' + index)
                 if (!group) {
                     return
@@ -154,7 +156,7 @@ define(
             },
             setBarStyle: function($o) {
                 var me = this
-                var index = $o.iGroup
+                var index = $o.iNode
                 var group = me.barsSp.getChildById('barGroup_' + index)
                 var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
                 for (var a = 0, al = group.getNumChildren(); a < al; a++) {
@@ -165,7 +167,9 @@ define(
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this.root.dataFrame.yAxis.field), function(field, i) {
-                    me._yAxisFieldsMap[field] = i;
+                    me._yAxisFieldsMap[field] = {
+                        index: i
+                    };
                 });
             },
             _initaverage: function() {
@@ -183,7 +187,7 @@ define(
                     style = c
                 };
                 if (_.isArray(c)) {
-                    style = _.flatten(c)[this._yAxisFieldsMap[field]];
+                    style = _.flatten(c)[this._yAxisFieldsMap[field].index];
                 };
                 if (_.isFunction(c)) {
                     style = c.apply(this, [{
@@ -193,15 +197,26 @@ define(
                         field: field,
                         value: value,
                         xAxis: {
-                            field : this.root._xAxis.field,
-                            value : this.root._xAxis.data[ h ].content
+                            field: this.root._xAxis.field,
+                            value: this.root._xAxis.data[h].content
                         }
                     }]);
                 };
                 if (!style || style == "") {
-                    style = this._colors[this._yAxisFieldsMap[field]];
+                    style = this._colors[this._yAxisFieldsMap[field].index];
                 };
                 return style;
+            },
+            //只用到了i v。 i＝＝ 一级分组， v 二级分组
+            _getFieldFromIHV : function( i , h , v ){
+                var yField = this.root._yAxis.field;
+                var field = null;
+                if( _.isString(yField[i]) ){
+                    field = yField[i];
+                } else if( _.isArray(yField[i]) ){
+                    field = yField[i][v];
+                }
+                return field;
             },
             checkBarW: function(xDis1, xDis2) {
                 if (this.bar.width) {
@@ -267,7 +282,7 @@ define(
                                     id: "barGroup_" + h
                                 });
                                 me.barsSp.addChild(groupH);
-                                groupH.iGroup = h;
+                                groupH.iNode = h;
                                 groupH.on("click dblclick mousedown mousemove mouseup", function(e) {
                                     if (!e.eventInfo) {
                                         e.eventInfo = me._getInfoHandler(this);
@@ -287,7 +302,7 @@ define(
                                         pointChkPriority: false,
                                         context: {
                                             x: itemW * h,
-                                            y: -me.h,
+                                            y: (me.sort && me.sort == "desc") ? 0 : -me.h,
                                             width: itemW,
                                             height: me.h,
                                             fillStyle: "#ccc",
@@ -300,7 +315,7 @@ define(
                                     }, function(e) {
                                         this.context.globalAlpha = 0;
                                     });
-                                    hoverRect.iGroup = h, hoverRect.iNode = -1, hoverRect.iLay = -1;
+                                    hoverRect.iGroup = -1, hoverRect.iNode = h, hoverRect.iLay = -1;
                                     hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
                                         e.eventInfo = me._getInfoHandler(this, e);
                                     });
@@ -320,7 +335,7 @@ define(
                                     id: "txtGroup_" + h
                                 });
                                 me.txtsSp.addChild(txtGroupH);
-                                txtGroupH.iGroup = h;
+                                txtGroupH.iGroup = i;
                             };
                         } else {
                             txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
@@ -329,7 +344,7 @@ define(
                         for (v = 0; v < vLen; v++) {
                             //单个的bar，从纵向的底部开始堆叠矩形
                             var rectData = h_group[v][h];
-                            rectData.iGroup = h, rectData.iNode = i, rectData.iLay = v
+                            rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v
                             var rectH = parseInt(Math.abs(rectData.y));
                             if (v > 0) {
                                 rectH = rectH - parseInt(Math.abs(h_group[v - 1][h].y));
@@ -337,6 +352,14 @@ define(
                             var beginY = parseInt(rectData.y);
 
                             var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
+
+                            //根据第一行数据来配置下_yAxisFieldsMap中对应field的fillStyle
+                            if (h == 0) {
+                                var _yMap = me._yAxisFieldsMap[ me._getFieldFromIHV( i , h , v ) ];
+                                if (!_yMap.fillStyle) {
+                                    _yMap.fillStyle = fillStyle;
+                                };
+                            }
 
                             rectData.fillStyle = fillStyle;
 
@@ -381,16 +404,16 @@ define(
 
                             rectEl.finalPos = finalPos;
 
-                            rectEl.iGroup = h, rectEl.iNode = i, rectEl.iLay = v;
+                            rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
 
                             if (me.eventEnabled) {
                                 rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {
                                     e.eventInfo = me._getInfoHandler(this, e);
                                     if (e.type == "mouseover") {
-                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0.1;
+                                        this.parent.getChildById("bhr_" + this.iNode).context.globalAlpha = 0.1;
                                     }
                                     if (e.type == "mouseout") {
-                                        this.parent.getChildById("bhr_" + this.iGroup).context.globalAlpha = 0;
+                                        this.parent.getChildById("bhr_" + this.iNode).context.globalAlpha = 0;
                                     }
                                 });
                             };
@@ -421,6 +444,7 @@ define(
 
                                 var infoWidth = 0;
                                 var infoHeight = 0;
+                                
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
                                     if (!me.animation && _.isFunction(me.text.format)) {
@@ -434,12 +458,14 @@ define(
                                     if (h <= preLen - 1) {
                                         txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
                                     } else {
-                                        txt = new Canvax.Display.Text(me.animation ? 0 : content, {
+                                        txt = new Canvax.Display.Text( content , {
                                             id: "info_txt_" + i + "_" + h + "_" + ci,
                                             context: {
                                                 x: infoWidth + 2,
                                                 fillStyle: cdata.fillStyle,
-                                                fontSize: me.text.fontSize
+                                                fontSize: me.text.fontSize,
+                                                lineWidth: me.text.lineWidth,
+                                                strokeStyle: me.text.strokeStyle
                                             }
                                         });
                                         infosp.addChild(txt);
@@ -447,6 +473,10 @@ define(
                                     txt._text = content;
                                     infoWidth += txt.getTextWidth() + 2;
                                     infoHeight = Math.max(infoHeight, txt.getTextHeight());
+
+                                    if( me.animation ){
+                                        txt.resetText(0);
+                                    }
 
                                     if (ci <= vLen - 2) {
                                         txt = new Canvax.Display.Text("/", {
@@ -618,7 +648,6 @@ define(
                         };
 
                         //txt grow
-
                         if (self.text.enabled) {
                             var txtGroupH = self.txtsSp.getChildById("txtGroup_" + h);
 
@@ -693,8 +722,8 @@ define(
                 var me = this;
                 var groups = me.data.length;
 
-                iGroup == undefined && (iGroup = 0);
-                iNode == undefined && (iNode = -1);
+                iGroup == undefined && (iGroup = -1);
+                iNode == undefined && (iNode = 0);
                 iLay == undefined && (iLay = -1);
 
                 _.each(me.data, function(h_group, i) {
@@ -703,9 +732,9 @@ define(
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
                     for (h = 0; h < hLen; h++) {
-                        if (h == iGroup) {
+                        if (h == iNode) {
                             for (v = 0; v < vLen; v++) {
-                                if ((iNode == i || iNode == -1) && (iLay == v || iLay == -1)) {
+                                if ((iGroup == i || iGroup == -1) && (iLay == v || iLay == -1)) {
                                     node = h_group[v][h]
                                     node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value, node.field);
                                     arr.push(node)
@@ -900,20 +929,20 @@ define(
                 me._checkedList[index] = o
 
                 me._checkedBar({
-                    iGroup: i,
+                    iNode: i,
                     checked: true
                 });
                 me._checkedMiniBar({
-                    iGroup: index,
+                    iNode: index,
                     checked: true
                 });
 
-                o.iGroup = index
+                o.iNode = index
             },
             uncheckAt: function(index) { //取消选择某个对象 index是全局index
                 var me = this
                 var i = index - me.dataZoom.range.start
-                if (me._checkedList[ index ]) {
+                if (me._checkedList[index]) {
                     me._checked(me._graphs.getInfo(i))
                 };
             },
@@ -936,7 +965,7 @@ define(
             getGroupChecked: function(e) {
                 var checked = false;
                 _.each(this.getCheckedList(), function(obj) {
-                    if (obj && obj.iGroup == e.eventInfo.iGroup) {
+                    if (obj && obj.iNode == e.eventInfo.iNode) {
                         checked = true;
                     }
                 });
@@ -950,7 +979,7 @@ define(
                         var str = "<table>";
                         var self = this;
                         _.each(info.nodesInfoList, function(node, i) {
-                            str += "<tr style='color:" + self.text.fillStyle + "'>";
+                            str += "<tr style='color:" + node.fillStyle + "'>";
                             var prefixName = self.prefix[i];
                             if (prefixName) {
                                 str += "<td>" + prefixName + "：</td>";
@@ -1016,16 +1045,16 @@ define(
 
             },
             _initData: function(data, opt) {
-                
+
                 var d;
                 if (this.dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1 + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
                 };
-                
+
                 //var d = dataFormat.apply(this, arguments);
 
                 _.each(d.yAxis.field, function(field, i) {
@@ -1034,7 +1063,6 @@ define(
                         d.yAxis.org[i] = [d.yAxis.org[i]];
                     }
                 });
-
                 return d;
             },
             _getaverageData: function() {
@@ -1101,7 +1129,7 @@ define(
                     this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
                         animation: false
                     });
-                    this._yAxis.setX( this._yAxis.pos.x );
+                    this._yAxis.setX(this._yAxis.pos.x);
                 };
 
                 var _yAxisW = this._yAxis.w;
@@ -1162,25 +1190,16 @@ define(
                 if (!e.eventInfo) {
                     return;
                 };
-                
+
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
-                    value: this.dataFrame.xAxis.org[0][e.eventInfo.iGroup]
+                    value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
                 };
                 var me = this;
 
                 _.each(e.eventInfo.nodesInfoList, function(node, i) {
-                    
-                    /*
-                    if (_.isArray(me.dataFrame.yAxis.field[node.iNode])) {
-                        node.field = me.dataFrame.yAxis.field[node.iNode][node.iLay];
-                    } else {
-                        node.field = me.dataFrame.yAxis.field[node.iNode]
-                    };
-                    */
-
                     //把这个group当前是否选中状态记录
-                    if (me._checkedList[node.iGroup+me.dataZoom.range.start]) {
+                    if (me._checkedList[node.iNode + me.dataZoom.range.start]) {
                         node.checked = true;
                     } else {
                         node.checked = false;
@@ -1189,9 +1208,9 @@ define(
 
                 e.eventInfo.dataZoom = me.dataZoom;
 
-                e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iGroup);
+                e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
 
-                e.eventInfo.iGroup += this.dataZoom.range.start;
+                e.eventInfo.iNode += this.dataZoom.range.start;
             },
             _trimGraphs: function(_xAxis, _yAxis) {
 
@@ -1225,7 +1244,7 @@ define(
                         !tmpData[b][v] && (tmpData[b][v] = []);
 
                         if (me.dataZoom.enabled) {
-                            subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end);
+                            subv = subv.slice(me.dataZoom.range.start, me.dataZoom.range.end + 1);
                         };
 
                         _.each(subv, function(val, i) {
@@ -1341,14 +1360,18 @@ define(
                         y: me._xAxis.pos.y + me._xAxis.h
                     },
                     dragIng: function(range) {
-
-                        if (me.dataZoom.range.end <= me.dataZoom.range.start) {
-                            me.dataZoom.range.end = me.dataZoom.range.start + 1;
+                        //if (me.dataZoom.range.end <= me.dataZoom.range.start) {
+                        //    me.dataZoom.range.end = me.dataZoom.range.start + 1;
+                        //};
+                        if(
+                         parseInt(me.dataZoom.range.start) == parseInt(range.start) 
+                         && parseInt(me.dataZoom.range.end) == parseInt(range.end)
+                        ) {
+                            return;
                         };
-
+//console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
-
                         me.dataFrame = me._initData(me._data, this);
                         me._xAxis.resetData(me.dataFrame.xAxis, {
                             animation: false
@@ -1384,7 +1407,8 @@ define(
                 var graphssp = this.__cloneBar.thumbBar._graphs.sprite;
                 graphssp.id = graphssp.id + "_datazoomthumbbarbg"
                 graphssp.context.x = 0;
-                graphssp.context.y = me._dataZoom.height - me._dataZoom.barY;
+                graphssp.context.y = me._dataZoom.barH + me._dataZoom.barY;
+
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
 
                 me._dataZoom.dataZoomBg.addChild(graphssp);
@@ -1394,9 +1418,9 @@ define(
                 this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
                 //});
             },
-            _getCloneBar: function(barConstructor) {
+            _getCloneBar: function() {
                 var me = this;
-                barConstructor = (barConstructor || Bar);
+                barConstructor = this.constructor;//(barConstructor || Bar);
                 var cloneEl = me.el.cloneNode();
                 cloneEl.innerHTML = "";
                 cloneEl.id = me.el.id + "_currclone";
@@ -1442,10 +1466,18 @@ define(
             _initMarkLine: function(g) {
                 var me = this
                 require(['chartx/components/markline/index'], function(MarkLine) {
-                    for (var a = 0, al = me._yAxis.dataOrg.length; a < al; a++) {
-                        var index = a
-                        var center = me.dataFrame.yAxis.center[a].agPosition
-                        var strokeStyle = g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
+                    var yfieldFlat = _.flatten(me._yAxis.field);
+                    for (var a = 0, al = yfieldFlat.length; a < al; a++) {
+                        var index = a;
+                        var center = null;
+                        
+                        if(!me.dataFrame.yAxis.center[a]){
+                            continue
+                        } else {
+                            center = me.dataFrame.yAxis.center[a].agPosition
+                        };
+
+                        var strokeStyle = g._yAxisFieldsMap[ yfieldFlat[a] ].fillStyle; //g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
 
                         var content = me.dataFrame.yAxis.field[a] + '均值'
                         if (me.markLine.text && me.markLine.text.enabled) {
@@ -1453,7 +1485,7 @@ define(
                             if (_.isFunction(me.markLine.text.format)) {
                                 var o = {
                                     iGroup: index,
-                                    value: me.dataFrame.yAxis.center[index].agValue
+                                    value : me.dataFrame.yAxis.center[index].agValue
                                 }
                                 content = me.markLine.text.format(o)
                             }
@@ -1506,9 +1538,9 @@ define(
                                     value: barObj.value,
                                     shapeType: "droplet",
                                     markTarget: barObj.field,
-                                    //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 igroup 给出去的时候要反过来
-                                    iGroup: barObj.iNode,
-                                    iNode: barObj.iGroup,
+                                    //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 iNode 给出去的时候要反过来
+                                    iGroup: barObj.iGroup,
+                                    iNode: barObj.iNode,
                                     iLay: barObj.iLay,
                                     point: {
                                         x: barObj.x,
@@ -1550,7 +1582,7 @@ define(
                 for (var a = 0, al = me._currCheckedList.length; a < al; a++) {
                     var o = me._currCheckedList[a]
                     me._checkedBar({
-                        iGroup: o.iGroup - me.dataZoom.range.start,
+                        iNode: o.iNode - me.dataZoom.range.start,
                         checked: true,
                     })
                 }
@@ -1560,7 +1592,7 @@ define(
                 var me = this
                 return _.filter(me._checkedList, function(o) {
                     if (o) {
-                        if (o.iGroup >= me.dataZoom.range.start && o.iGroup <= me.dataZoom.range.end) {
+                        if (o.iNode >= me.dataZoom.range.start && o.iNode <= me.dataZoom.range.end) {
                             return o
                         }
                     }
@@ -1571,7 +1603,7 @@ define(
                 if (!me._graphs.checked.enabled) {
                     return
                 }
-                var i = eventInfo.iGroup + me.dataZoom.range.start
+                var i = eventInfo.iNode + me.dataZoom.range.start
 
                 var checked = true
                 if (me._checkedList[i]) { //如果已经选中
@@ -1581,15 +1613,15 @@ define(
                     me._checkedList[i] = eventInfo
                 }
                 me._checkedBar({
-                    iGroup: eventInfo.iGroup,
+                    iNode: eventInfo.iNode,
                     checked: checked
                 })
                 me._checkedMiniBar({
-                    iGroup: i,
+                    iNode: i,
                     checked: checked
                 })
 
-                eventInfo.iGroup = i
+                eventInfo.iNode = i
             },
             _checkedBar: function($o) { //选择bar
                 var me = this
@@ -1605,7 +1637,7 @@ define(
                         fillStyle = (me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle) || fillStyle
                     }
                     graphs.setBarStyle({
-                        iGroup: $o.iGroup,
+                        iNode: $o.iNode,
                         fillStyle: fillStyle
                     })
                 }
@@ -1640,4 +1672,3 @@ define(
         return Bar;
     }
 );
-

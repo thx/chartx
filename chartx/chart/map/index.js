@@ -127,8 +127,14 @@ define(
             },
             _getMapData: function(mt, callback) {
                 var me = this;
-                this._mapDataMap[mt] = this._mapDataMap[mt] || {};
-                mapParams.params[mt].getGeoJson(this._mapDataCallback(mt, callback));
+                this._mapDataMap[mt] = (this._mapDataMap[mt] || {});
+                //var mapObj = mapParams.params[mt.replace("省","").replace("市","")];
+                for( var name in mapParams.params ){
+                    if( name.indexOf( mt ) >= 0 || mt.indexOf( name ) >= 0 ){
+                        mapObj = mapParams.params[name];
+                    }
+                };
+                mapObj && mapObj.getGeoJson(this._mapDataCallback(mt, callback));
             },
             /**
              * @param {string} mt mapName
@@ -477,7 +483,7 @@ define(
                         e.area = this.mapData;
                         e.areaData = me._getDataForArea(this.mapData);
 
-                        e.eventInfo = me._getDataForArea(this.mapData);
+                        e.eventInfo = e.areaData; //me._getDataForArea(this.mapData);
 
                         me.fire("areadblclick", e);
                         me.fire("dblclick" , e);
@@ -507,11 +513,13 @@ define(
                                 };
                             };
                         };
+                        /*
                         e.eventInfo = {
                             mapData: mapData
                         };
+                        */
+                        e.eventInfo = me._getDataForArea(mapData);
                         me.fire("click", e);
-
                     });
 
                     area.on("mouseup", function(e) {
@@ -569,8 +577,7 @@ define(
                 me.sprite.addChild(area_sp);
                 area_txt_sp && me.sprite.addChild(area_txt_sp);
             },
-
-            checkAt: function(index) {
+            _checkAt: function(index) {
                 var me = this;
 
                 var mapData = _.find(this.mapDataList, function(d) {
@@ -590,7 +597,16 @@ define(
                     areaEl.toFront();
                 };
             },
-            uncheckAt: function(index) {
+            checkAt: function( indexs ){
+                if( !_.isArray(indexs) ){
+                    indexs = [ indexs ]
+                };
+                var me = this;
+                _.each( indexs , function(index){
+                    me._checkAt(index);
+                } );
+            },
+            _uncheckAt: function(index) {
                 var me = this;
                 var mapData = _.find(this.mapDataList, function(d) {
                     return d.ind == index;
@@ -605,18 +621,45 @@ define(
                     areaEl.toBack();
                 };
             },
+            uncheckAt: function(indexs){
+                if( !_.isArray(indexs) ){
+                    indexs = [indexs]
+                }
+                var me = this;
+                _.each( indexs , function(index){
+                    me._uncheckAt(index);
+                } );
+            },
+            checkAll: function(){
+                var me =this;
+                for( var i in me.mapDataList ){
+                    this._checkAt( me.mapDataList[i].ind );
+                };
+            },
             uncheckAll: function(){
                 var me =this;
                 for( var i in me.checkedList ){
-                    this.uncheckAt( me.checkedList[i].ind );
+                    this._uncheckAt( me.checkedList[i].ind );
                 };
                 me.checkedList = {};
             },
             checkOf: function( areaName ){
-                this.checkAt( this._getAreaIndexOfName(areaName) );
+                var me = this;
+                if( _.isString( areaName ) ){
+                    areaName = [ areaName ];
+                };
+                _.each( areaName , function( an ){
+                    me._checkAt( me._getAreaIndexOfName( an ) );
+                } );
             },
             uncheckOf: function( areaName ){
-                this.uncheckAt( this._getAreaIndexOfName(areaName) );
+                var me = this;
+                if( _.isString( areaName ) ){
+                    areaName = [ areaName ];
+                };
+                _.each( areaName , function( an ){
+                    me._uncheckAt( me._getAreaIndexOfName( an ) );
+                } );
             },
             _getAreaIndexOfName : function( areaName ){
                 var i;

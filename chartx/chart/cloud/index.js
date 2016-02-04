@@ -28,7 +28,7 @@
 	                enabled: false,
 	                range: {
 	                    start: 0,
-	                    end: data.length - 1 //因为第一行是title
+	                    end: data.length - 1     //因为第一行是title
 	                }
 	            },
 
@@ -59,7 +59,7 @@
                 if (me.dataZoom.enabled) {
                 	me._initDataZoom()
                 	var range = me.options.dataZoom.range
-                	me.layoutData = me._getLayoutData(me.dataFrame.yAxis.org[0], range.start, range.end)
+                	me.layoutData = me.dataFrame.yAxis.org[0].slice(range.start, range.end + 1)
                 }else{
                 	me.layoutData = me.dataFrame.yAxis.org[0]
                 }
@@ -82,21 +82,13 @@
 
                 me.layoutRange.start = start, me.layoutRange.end = end
 
-            	me.layoutData = me._getLayoutData(me.dataFrame.yAxis.org[0], start, end)
+            	me.layoutData = me.dataFrame.yAxis.org[0].slice(start, end + 1)
 
             	me._drawGraphs()
             },
 
             _initData: function(data, opts) {
                 return dataFormat.apply(this, arguments);
-            },
-            _getLayoutData : function(arr, start, end){
-            	return _.filter(arr, function(o, i) {
-                    // return o
-                    if(i >= start && i <= end){
-                    	return o
-                    }
-                })
             },
 
             _initDataZoom : function(){
@@ -105,9 +97,9 @@
                     var w = me.width - me.padding.left - me.padding.right
                     var x = me.padding.left
                     var options = _.deepExtend({
-                        w: w,
+                        w : w,
                         h : 30,
-                        color : '#00a8e6',
+                        count : data.length - 1,
                         pos: {
                             x: x,
                             y: me.height - me.padding.bottom 

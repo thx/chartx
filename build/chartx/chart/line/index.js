@@ -1107,7 +1107,7 @@ define(
                 var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
                 if (dataZoom && dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1 + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -1400,7 +1400,7 @@ define(
                 var graphssp = this.__cloneChart.thumbBar._graphs.sprite;
                 graphssp.id = graphssp.id + "_datazoomthumbbarbg"
                 graphssp.context.x = 0;
-                graphssp.context.y = me._dataZoom.height - me._dataZoom.barY;
+                graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneChart.thumbBar._graphs.h;
 
                 me._dataZoom.dataZoomBg.addChild(graphssp);
@@ -1547,10 +1547,20 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo: function(e) {
+                if (!e.eventInfo) {
+                    return;
+                };
+                var me = this;
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
                 };
+
+                e.eventInfo.dataZoom = me.dataZoom;
+
+                e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
+
+                e.eventInfo.iNode += this.dataZoom.range.start;
             },
             _trimGraphs: function(_yAxis, dataFrame) {
 
