@@ -14,7 +14,7 @@ define(
             this.w = 0;
             this.h = 0;
             this.root = root;
-            this._yAxisFieldsMap = {};
+            this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
             this._setyAxisFieldsMap();
 
             this.animation = true;
@@ -36,7 +36,9 @@ define(
                 enabled: false,
                 fillStyle: '#999',
                 fontSize: 12,
-                format: null
+                format: null,
+                lineWidth:1,
+                strokeStyle: 'white'
             };
 
             this.average = {
@@ -165,7 +167,9 @@ define(
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this.root.dataFrame.yAxis.field), function(field, i) {
-                    me._yAxisFieldsMap[field] = i;
+                    me._yAxisFieldsMap[field] = {
+                        index: i
+                    };
                 });
             },
             _initaverage: function() {
@@ -183,7 +187,7 @@ define(
                     style = c
                 };
                 if (_.isArray(c)) {
-                    style = _.flatten(c)[this._yAxisFieldsMap[field]];
+                    style = _.flatten(c)[this._yAxisFieldsMap[field].index];
                 };
                 if (_.isFunction(c)) {
                     style = c.apply(this, [{
@@ -193,15 +197,26 @@ define(
                         field: field,
                         value: value,
                         xAxis: {
-                            field : this.root._xAxis.field,
-                            value : this.root._xAxis.data[ h ].content
+                            field: this.root._xAxis.field,
+                            value: this.root._xAxis.data[h].content
                         }
                     }]);
                 };
                 if (!style || style == "") {
-                    style = this._colors[this._yAxisFieldsMap[field]];
+                    style = this._colors[this._yAxisFieldsMap[field].index];
                 };
                 return style;
+            },
+            //只用到了i v。 i＝＝ 一级分组， v 二级分组
+            _getFieldFromIHV : function( i , h , v ){
+                var yField = this.root._yAxis.field;
+                var field = null;
+                if( _.isString(yField[i]) ){
+                    field = yField[i];
+                } else if( _.isArray(yField[i]) ){
+                    field = yField[i][v];
+                }
+                return field;
             },
             checkBarW: function(xDis1, xDis2) {
                 if (this.bar.width) {
@@ -287,7 +302,7 @@ define(
                                         pointChkPriority: false,
                                         context: {
                                             x: itemW * h,
-                                            y: -me.h,
+                                            y: (me.sort && me.sort == "desc") ? 0 : -me.h,
                                             width: itemW,
                                             height: me.h,
                                             fillStyle: "#ccc",
@@ -300,7 +315,7 @@ define(
                                     }, function(e) {
                                         this.context.globalAlpha = 0;
                                     });
-                                    hoverRect.iGroup = -1, hoverRect.iNode = h , hoverRect.iLay = -1;
+                                    hoverRect.iGroup = -1, hoverRect.iNode = h, hoverRect.iLay = -1;
                                     hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
                                         e.eventInfo = me._getInfoHandler(this, e);
                                     });
@@ -337,6 +352,14 @@ define(
                             var beginY = parseInt(rectData.y);
 
                             var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
+
+                            //根据第一行数据来配置下_yAxisFieldsMap中对应field的fillStyle
+                            if (h == 0) {
+                                var _yMap = me._yAxisFieldsMap[ me._getFieldFromIHV( i , h , v ) ];
+                                if (!_yMap.fillStyle) {
+                                    _yMap.fillStyle = fillStyle;
+                                };
+                            }
 
                             rectData.fillStyle = fillStyle;
 
@@ -421,6 +444,7 @@ define(
 
                                 var infoWidth = 0;
                                 var infoHeight = 0;
+                                
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
                                     if (!me.animation && _.isFunction(me.text.format)) {
@@ -434,12 +458,14 @@ define(
                                     if (h <= preLen - 1) {
                                         txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
                                     } else {
-                                        txt = new Canvax.Display.Text(me.animation ? 0 : content, {
+                                        txt = new Canvax.Display.Text( content , {
                                             id: "info_txt_" + i + "_" + h + "_" + ci,
                                             context: {
                                                 x: infoWidth + 2,
                                                 fillStyle: cdata.fillStyle,
-                                                fontSize: me.text.fontSize
+                                                fontSize: me.text.fontSize,
+                                                lineWidth: me.text.lineWidth,
+                                                strokeStyle: me.text.strokeStyle
                                             }
                                         });
                                         infosp.addChild(txt);
@@ -447,6 +473,10 @@ define(
                                     txt._text = content;
                                     infoWidth += txt.getTextWidth() + 2;
                                     infoHeight = Math.max(infoHeight, txt.getTextHeight());
+
+                                    if( me.animation ){
+                                        txt.resetText(0);
+                                    }
 
                                     if (ci <= vLen - 2) {
                                         txt = new Canvax.Display.Text("/", {
@@ -618,7 +648,6 @@ define(
                         };
 
                         //txt grow
-
                         if (self.text.enabled) {
                             var txtGroupH = self.txtsSp.getChildById("txtGroup_" + h);
 

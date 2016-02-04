@@ -577,8 +577,7 @@ define(
                 me.sprite.addChild(area_sp);
                 area_txt_sp && me.sprite.addChild(area_txt_sp);
             },
-
-            checkAt: function(index) {
+            _checkAt: function(index) {
                 var me = this;
 
                 var mapData = _.find(this.mapDataList, function(d) {
@@ -598,7 +597,16 @@ define(
                     areaEl.toFront();
                 };
             },
-            uncheckAt: function(index) {
+            checkAt: function( indexs ){
+                if( !_.isArray(indexs) ){
+                    indexs = [ indexs ]
+                };
+                var me = this;
+                _.each( indexs , function(index){
+                    me._checkAt(index);
+                } );
+            },
+            _uncheckAt: function(index) {
                 var me = this;
                 var mapData = _.find(this.mapDataList, function(d) {
                     return d.ind == index;
@@ -613,18 +621,45 @@ define(
                     areaEl.toBack();
                 };
             },
+            uncheckAt: function(indexs){
+                if( !_.isArray(indexs) ){
+                    indexs = [indexs]
+                }
+                var me = this;
+                _.each( indexs , function(index){
+                    me._uncheckAt(index);
+                } );
+            },
+            checkAll: function(){
+                var me =this;
+                for( var i in me.mapDataList ){
+                    this._checkAt( me.mapDataList[i].ind );
+                };
+            },
             uncheckAll: function(){
                 var me =this;
                 for( var i in me.checkedList ){
-                    this.uncheckAt( me.checkedList[i].ind );
+                    this._uncheckAt( me.checkedList[i].ind );
                 };
                 me.checkedList = {};
             },
             checkOf: function( areaName ){
-                this.checkAt( this._getAreaIndexOfName(areaName) );
+                var me = this;
+                if( _.isString( areaName ) ){
+                    areaName = [ areaName ];
+                };
+                _.each( areaName , function( an ){
+                    me._checkAt( me._getAreaIndexOfName( an ) );
+                } );
             },
             uncheckOf: function( areaName ){
-                this.uncheckAt( this._getAreaIndexOfName(areaName) );
+                var me = this;
+                if( _.isString( areaName ) ){
+                    areaName = [ areaName ];
+                };
+                _.each( areaName , function( an ){
+                    me._uncheckAt( me._getAreaIndexOfName( an ) );
+                } );
             },
             _getAreaIndexOfName : function( areaName ){
                 var i;

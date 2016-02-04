@@ -28,6 +28,8 @@ define(
                 fontFamily          : "微软雅黑",
                 textDecoration      : null,  
                 fillStyle           : 'blank',
+                strokeStyle         : null,
+                lineWidth           : 0,
                 lineHeight          : 1.3,
                 backgroundColor     : null ,
                 textBackgroundColor : null
@@ -90,8 +92,8 @@ define(
             },
             _renderText: function(ctx, textLines) {
                 ctx.save();
-                this._renderTextFill(ctx, textLines);
                 this._renderTextStroke(ctx, textLines);
+                this._renderTextFill(ctx, textLines);
                 ctx.restore();
             },
             _getFontDeclaration: function() {
@@ -130,7 +132,7 @@ define(
                 }
             },
             _renderTextStroke: function(ctx, textLines) {
-                if ( (!this.context.strokeStyle || !this.context.lineWidth ) && !this._skipFillStrokeCheck) return;
+                if ( !this.context.strokeStyle || !this.context.lineWidth ) return;
 
                 var lineHeights = 0;
 

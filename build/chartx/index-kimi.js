@@ -1113,7 +1113,9 @@ define(
                 fillStyle: '#999999',
                 fontSize : 12,
                 format   : null,
-                lineType : 'dashed'
+                lineType : 'dashed',
+                lineWidth: 1,
+                strokeStyle : "white"
             }
 
             this.filter = function( ){
@@ -1144,7 +1146,8 @@ define(
                 } , 10 );
             },
             widget : function(){
-                var me = this
+                var me = this;
+
                 var line = new BrokenLine({               //线条
                     id : "line",
                     context : {
