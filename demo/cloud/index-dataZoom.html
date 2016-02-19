@@ -52,6 +52,21 @@ var options = {
             }
         }
     },
+    dataZoom:{
+        left : {
+            eventEnabled : false
+        },
+        right : {
+            eventEnabled : false
+        },
+        range : {
+            start : 10,
+            end   : 29,
+            <!-- max   : 50, -->
+            <!-- min   : 10, -->
+        },
+        <!-- count : data.length - 1 -->
+    },
     tips  : {
         content : function(info){
             var str  = "<table>", data = info.data
