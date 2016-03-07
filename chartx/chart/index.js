@@ -101,6 +101,9 @@ define(
                     return;
                 }
                 */
+
+                this._reset && this._reset( obj );
+
                 //如果只有数据的变化
                 if (obj && obj.data && !obj.options && this.resetData) {
                     this.resetData( obj.data );
@@ -109,16 +112,15 @@ define(
                 if (obj && obj.options) {
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
-
                     _.deepExtend(this, obj.options);
-
                     //配置的变化有可能也会导致data的改变
                     this.dataFrame && (this.dataFrame = this._initData(this.dataFrame.org));
-                }
+                };
                 if (obj && obj.data) {
                     //数据集合，由_initData 初始化
                     this.dataFrame = this._initData(obj.data);
-                }
+                };
+                
                 this.clean();
                 this.canvax.getDomContainer().innerHTML = "";
                 this.draw();

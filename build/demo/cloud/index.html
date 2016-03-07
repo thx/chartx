@@ -52,21 +52,6 @@ var options = {
             }
         }
     },
-    dataZoom:{
-        left : {
-            eventEnabled : false
-        },
-        right : {
-            eventEnabled : false
-        },
-        range : {
-            start : 10,
-            end   : 29,
-            <!-- max   : 50, -->
-            <!-- min   : 10, -->
-        },
-        <!-- count : data.length - 1 -->
-    },
     tips  : {
         content : function(info){
             var str  = "<table>", data = info.data
@@ -103,7 +88,7 @@ Chartx.cloud("canvasTest" , data , options).then(function( cloud ){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:760px;height:400px;position:relative;background:#333333'></div>
+                <div id="canvasTest" style='width:760px;height:400px;position:relative;'></div>
             </div>
 
             </div>

@@ -156,7 +156,7 @@ define(
                         var str = "<table>";
                         var self = this;
                         _.each(info.nodesInfoList, function(node, i) {
-                            str += "<tr style='color:" + self.text.fillStyle + "'>";
+                            str += "<tr style='color:" + node.fillStyle + "'>";
                             var prefixName = self.prefix[i];
                             if (prefixName) {
                                 str += "<td>" + prefixName + "：</td>";
@@ -643,18 +643,26 @@ define(
             _initMarkLine: function(g) {
                 var me = this
                 require(['chartx/components/markline/index'], function(MarkLine) {
-                    for (var a = 0, al = me._yAxis.dataOrg.length; a < al; a++) {
-                        var index = a
-                        var center = me.dataFrame.yAxis.center[a].agPosition
-                        var strokeStyle = g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
+                    var yfieldFlat = _.flatten(me._yAxis.field);
+                    for (var a = 0, al = yfieldFlat.length; a < al; a++) {
+                        var index = a;
+                        var center = null;
+                        
+                        if(!me.dataFrame.yAxis.center[a]){
+                            continue
+                        } else {
+                            center = me.dataFrame.yAxis.center[a].agPosition
+                        };
+
+                        var strokeStyle = g._yAxisFieldsMap[ yfieldFlat[a] ].fillStyle; //g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
 
                         var content = me.dataFrame.yAxis.field[a] + '均值'
                         if (me.markLine.text && me.markLine.text.enabled) {
 
                             if (_.isFunction(me.markLine.text.format)) {
                                 var o = {
-                                    iNode: index,
-                                    value: me.dataFrame.yAxis.center[index].agValue
+                                    iGroup: index,
+                                    value : me.dataFrame.yAxis.center[index].agValue
                                 }
                                 content = me.markLine.text.format(o)
                             }

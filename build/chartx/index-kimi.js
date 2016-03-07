@@ -161,6 +161,9 @@ define(
                     return;
                 }
                 */
+
+                this._reset && this._reset( obj );
+
                 //如果只有数据的变化
                 if (obj && obj.data && !obj.options && this.resetData) {
                     this.resetData( obj.data );
@@ -169,16 +172,15 @@ define(
                 if (obj && obj.options) {
                     //注意，options的覆盖用的是deepExtend
                     //所以只需要传入要修改的 option部分
-
                     _.deepExtend(this, obj.options);
-
                     //配置的变化有可能也会导致data的改变
                     this.dataFrame && (this.dataFrame = this._initData(this.dataFrame.org));
-                }
+                };
                 if (obj && obj.data) {
                     //数据集合，由_initData 初始化
                     this.dataFrame = this._initData(obj.data);
-                }
+                };
+                
                 this.clean();
                 this.canvax.getDomContainer().innerHTML = "";
                 this.draw();
@@ -696,8 +698,8 @@ define(
 
             if(!this.range.max)
                 this.range.max = this.count;
-            if( this.range.end > this.count )
-                this.range.end = this.count;
+            if( this.range.end > this.count - 1)
+                this.range.end = this.count - 1;
             this.disPart = this._getDisPart();
             this.barAddH = 8;
             this.barH = this.h - this.barAddH;
@@ -751,9 +753,9 @@ define(
 
                 if(me.underline.enabled){
                     me._underline = me._addLine({
-                        xStart : me.range.start/me.count * me.w + me.btnW / 2,
+                        xStart : me.range.start / (me.count - 1) * me.w + me.btnW / 2,
                         yStart : me.barY + me.barH + 2,
-                        xEnd   : me.range.end/me.count * me.w - me.btnW / 2,
+                        xEnd   : me.range.end / (me.count - 1) * me.w - me.btnW / 2,
                         yEnd   : me.barY + me.barH + 2,
                         lineWidth : me.underline.lineWidth,
                         strokeStyle : me.underline.strokeStyle,
@@ -765,7 +767,7 @@ define(
                     id          : 'btnLeft',
                     dragEnabled : this.left.eventEnabled,
                     context: {
-                        x: this.range.start/this.count * this.w,
+                        x: this.range.start / (this.count - 1)* this.w,
                         y: this.barY - this.barAddH / 2 + 1,
                         width: this.btnW,
                         height: this.barH + this.barAddH,
@@ -801,7 +803,7 @@ define(
                     id          : 'btnRight',
                     dragEnabled : this.right.eventEnabled,
                     context: {
-                        x: this.range.end / this.count * this.w - this.btnW,
+                        x: this.range.end / (this.count - 1) * this.w - this.btnW,
                         y: this.barY - this.barAddH / 2 + 1,
                         width: this.btnW,
                         height: this.barH + this.barAddH ,
@@ -898,11 +900,10 @@ define(
             },
             _setRange : function(){
                 var me = this
-                var start = (me._btnLeft.context.x / me.w) * me.count ;
-                var end = ( (me._btnRight.context.x + me.btnW) / me.w) * me.count;
+                var start = (me._btnLeft.context.x / me.w) * (me.count - 1) ;
+                var end = ( (me._btnRight.context.x + me.btnW) / me.w) * (me.count - 1);
                 me.range.start = start;
                 me.range.end = end;
-                debugger
                 me.dragIng( me.range );
                 me._setLines()
             },
@@ -927,8 +928,8 @@ define(
                 linesCenter.context.y = btnCenter.context.y + (btnCenter.context.height - linesCenter.context.height ) / 2
 
                 if(me.underline.enabled){
-                    me._underline.context.xStart = me.range.start/me.count * me.w + me.btnW / 2
-                    me._underline.context.xEnd   = me.range.end/me.count * me.w - me.btnW / 2
+                    me._underline.context.xStart = me.range.start / (me.count - 1) * me.w + me.btnW / 2
+                    me._underline.context.xEnd   = me.range.end / (me.count - 1) * me.w - me.btnW / 2
                 }
             },
 
@@ -1114,7 +1115,9 @@ define(
                 fillStyle: '#999999',
                 fontSize : 12,
                 format   : null,
-                lineType : 'dashed'
+                lineType : 'dashed',
+                lineWidth: 1,
+                strokeStyle : "white"
             }
 
             this.filter = function( ){
@@ -1145,7 +1148,8 @@ define(
                 } , 10 );
             },
             widget : function(){
-                var me = this
+                var me = this;
+
                 var line = new BrokenLine({               //线条
                     id : "line",
                     context : {
