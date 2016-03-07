@@ -20,6 +20,7 @@ define(
             init: function(node, data, opts) {
                 this._opts = opts;
                 this.mapName = "china"; //map类型 默认为中国地图
+                this.administrativeCode = null; //如果是查询的行政编码地图，上面的mapName 犹这个查询出来
                 this._mapDataMap = {};
                 this._nameMap = {};
                 this.checkedList = {};
@@ -89,7 +90,6 @@ define(
                 return this.dataFrame;
             },
             draw: function() {
-
                 //因为draw的时候可能是 reset触发的。这个时候要先清除了sprite的所有子节点
                 //然后把它重新add入stage
                 this.sprite.removeAllChildren();
@@ -111,6 +111,12 @@ define(
                     this.inited = true;
                 });
             },
+            _reset: function(obj){
+                if( obj.options ){
+                    _.deepExtend(this, obj.options);
+                    _.deepExtend(this._opts, obj.options);
+                }
+            },
             _setSpPos: function() {
                 var tf = this._mapDataMap[this.mapName].transform;
                 var spc = this.sprite.context;
@@ -128,13 +134,18 @@ define(
             _getMapData: function(mt, callback) {
                 var me = this;
                 this._mapDataMap[mt] = (this._mapDataMap[mt] || {});
-                //var mapObj = mapParams.params[mt.replace("省","").replace("市","")];
-                for( var name in mapParams.params ){
-                    if( name.indexOf( mt ) >= 0 || mt.indexOf( name ) >= 0 ){
-                        mapObj = mapParams.params[name];
-                    }
-                };
-                mapObj && mapObj.getGeoJson(this._mapDataCallback(mt, callback));
+                if( me.administrativeCode ){
+                    mapParams.params.administrative.getGeoJson( me.administrativeCode , me._mapDataCallback(mt, callback) );
+                } else {
+                    var mapObj;
+                    for( var name in mapParams.params ){
+                        if( name.indexOf( mt ) >= 0 || mt.indexOf( name ) >= 0 ){
+                            mapObj = mapParams.params[name];
+                            break;
+                        }
+                    };
+                    mapObj && mapObj.getGeoJson(me._mapDataCallback(mt, callback));
+                }
             },
             /**
              * @param {string} mt mapName
@@ -186,16 +197,6 @@ define(
 
                 var position = [transform.left, transform.top];
                 for (var i = 0, l = pathArray.length; i < l; i++) {
-                    /* for test
-                    console.log(
-                        mapData.features[i].properties.cp, // 经纬度度
-                        pathArray[i].cp                    // 平面坐标
-                    );
-                    console.log(
-                        this.pos2geo(mapName, pathArray[i].cp),  // 平面坐标转经纬度
-                        this.geo2pos(mapName, mapData.features[i].properties.cp)
-                    )
-                    */
                     province.push(this._getSingleProvince(
                         mapName, pathArray[i], position
                     ));
@@ -675,6 +676,7 @@ define(
             _initMarkPoint: function() {
                 var me = this;
                 require(["chartx/chart/map/map-data/geo-json/china_city"], function(citys) {
+
                     _.each(me.dataFrame.xAxis.org[0], function(c, i) {
                         if (c in me.geoCoordSupply) {
                             me._setMarkToPoint(c, me.geo2pos(me.mapName, me.geoCoordSupply[c]));

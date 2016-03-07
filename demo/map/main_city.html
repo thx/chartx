@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- china map</title>
+<title>xChart demo -- provinces_linkage</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -31,53 +31,54 @@
     <tr>
         <td id="td-vl">
 <form><textarea id="code" name="code">
-var data = [
-    [ "area"     , "pv" ],
-    //[ "海门"     , 9       ],
-    //[ "鄂尔多斯" , 12      ],
-    //[ "招远"     , 12      ],
-    [ "舟山"     , 101     ],
-    //[ "齐齐哈尔" , 15      ],
-    //[ "盐城"     , 16      ],
-    //[ "赤峰"     , 18      ],
-    //[ "青岛"     , 20      ]
-];
 
+var md = [
+    [ "area"      , "click" ],
+    [ "湘江世纪城"  , 9  ]
+]
 
 var options = {
-    mapName     : "china", //默认便是中国地图
-    //areaField : "area", //可选，默认为第一个字段
-    valueField : "pv",
+    mapName : "湖南", //默认便是中国地图
+    areaField : "area", //可选，默认为第一个字段
+    valueField : "click",
     area : {
+        linkage : true, //开启地图联动功能，目前只支持省市联动
         text : {
-            enabled : false
+            enabled : true
         }
-    },
-    markPoint : {
-        fillStyle : function( m ){
-            if( m.data.pv > 100 ){
-                return "#3871BF"
-            }
-        },
-        r : function( m ){
-            return 10
-        }
-    },
-    //补充系统里没有记录的城市pos
-    geoCoordSupply : {
-       "舟山":[122.207216,29.985295]
     },
     tips : {
-        prefix : ["访问量"]
+        prefix : ["点击量"]
     } 
 };
 
-Chartx.map("canvasTest" , data , options).then(function( chart ){
-    chart.on("markpointclick" , function(e){
-        debugger;
+Chartx.map("canvasTest" , md , options).then(function(map){
+    map.on("areadblclick" , function( e ){
+        if( e.area.name == "长沙市" ){
+            map.reset( {
+                options : {
+                    administrativeCode : 430100,
+                    //补充系统里没有记录的城市pos
+                    geoCoordSupply : {
+                       "湘江世纪城":[ 112.9853250000 , 28.2646760000  ]
+                    },
+                    markPoint : {
+                        fillStyle : function( m ){
+                            return "#3871BF"
+                        },
+                        hr : 10,vr: 16
+                    }
+                },
+                data : md
+            } );
+
+            map.on("markpointclick" , function(e){
+                
+            });
+        }
     });
 });
-            </textarea></form>
+</textarea></form>
 
         </td>
         <td style="padding:0 10px;" id="td-vr">
@@ -85,7 +86,7 @@ Chartx.map("canvasTest" , data , options).then(function( chart ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>中国地图 - 带markpoint标注点</h4>
+                <h4>中国地图- 省市地图联动</h4>
                 <p>
                     联系人：@释剑
                 </p>
@@ -103,3 +104,5 @@ Chartx.map("canvasTest" , data , options).then(function( chart ){
     
 </body> 
 </html>
+
+

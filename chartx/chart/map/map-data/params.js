@@ -401,6 +401,13 @@ define(
                             callback(decode(md));
                         });
                     }
+                },
+                administrative : {
+                    getGeoJson: function( code , callback ){
+                        require([pathPackage+'/reg-code-geo/'+code], function (md){
+                            callback(decode(md));
+                        });
+                    }
                 }
             };
 
