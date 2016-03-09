@@ -77,12 +77,22 @@ define(
                 this._endDraw();
                 this.inited = true;
             },
+            reset: function(obj) {
+                this._reset && this._reset( obj );
+                var d = ( this.dataFrame.org || [] );
+                if (obj && obj.options) {
+                    _.deepExtend(this, obj.options);
+                };
+                if (obj && obj.data) {
+                    d = obj.data;
+                };
+                d && this.resetData(d);
+            },
             /*
              * 如果只有数据改动的情况
              */
             resetData: function(data) {
                 this.dataFrame = this._initData(data, this);
-
                 this._xAxis.resetData(this.dataFrame.xAxis);
                 this._yAxis.resetData(this.dataFrame.yAxis);
                 this._graphs.resetData(this._trimGraphs(), {
