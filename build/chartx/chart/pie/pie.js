@@ -10,8 +10,8 @@
         "chartx/components/tips/tip",
         "chartx/chart/theme"
     ],
-    function(Canvax, Sector, Line, BrokenLine, Rect, Tools, AnimationFrame, Tip, Theme) {
-        var Pie = function(opt, tipsOpt, domContainer) {
+    function (Canvax, Sector, Line, BrokenLine, Rect, Tools, AnimationFrame, Tip, Theme) {
+        var Pie = function (opt, tipsOpt, domContainer) {
             this.data = null;
             this.sprite = null;
             this.branchSp = null;
@@ -27,7 +27,7 @@
             };
 
             this.checked = {
-                enabled : false
+                enabled: false
             }
 
             this.tips = _.deepExtend({
@@ -47,7 +47,7 @@
         };
 
         Pie.prototype = {
-            init: function(opt) {
+            init: function (opt) {
                 _.deepExtend(this, opt);
 
                 this.sprite = new Canvax.Display.Sprite();
@@ -67,18 +67,18 @@
                 this._configData();
                 this._configColors();
             },
-            clear : function(){
+            clear: function () {
                 // this.domContainer.removeChildren()
                 this.domContainer.innerHTML = ''
             },
-            setX: function($n) {
+            setX: function ($n) {
                 this.sprite.context.x = $n
             },
-            setY: function($n) {
+            setY: function ($n) {
                 this.sprite.context.y = $n
             },
             //配置数据
-            _configData: function() {
+            _configData: function () {
                 var self = this;
                 self.total = 0;
                 self.angleOffset = _.isNaN(self.startAngle) ? 0 : self.startAngle;
@@ -120,7 +120,7 @@
                             var midAngle = self.currentAngle + angle / 2;
                             cosV = cosV.toFixed(5);
                             sinV = sinV.toFixed(5);
-                            var quadrant = function(ang) {
+                            var quadrant = function (ang) {
                                 if (ang > limitAngle) {
                                     ang = limitAngle;
                                 }
@@ -160,7 +160,7 @@
                                             break;
                                     }
                                 }
-                            }(midAngle);
+                            } (midAngle);
                             _.extend(data[j], {
                                 start: self.currentAngle,
                                 end: endAngle,
@@ -189,16 +189,17 @@
                         };
                         data[maxIndex].isMax = true;
                         //处理保留小数后百分比总和不等于100的情况
-                        var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
-                        if (totalPercentOffset != 0) {
-                            data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
-                            data[maxPercentageOffsetIndex].percentage = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum);
-                            data[maxPercentageOffsetIndex].txt = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum) + '%';
-                        };
+                        //总会有除不尽的情况（如1，1，1，每份都是33.33333...，没必要做修正）
+                        //var totalPercentOffset = (100 - totalFixedPercent).toFixed(percentFixedNum);
+                        //if (totalPercentOffset != 0) {
+                        //    data[maxPercentageOffsetIndex].percentage += +totalPercentOffset;
+                        //    data[maxPercentageOffsetIndex].percentage = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum);
+                        //    data[maxPercentageOffsetIndex].txt = parseFloat(data[maxPercentageOffsetIndex].percentage).toFixed(percentFixedNum) + '%';
+                        //};
                     }
                 }
             },
-            getList: function() {
+            getList: function () {
                 var self = this;
                 var list = [];
                 if (self.sectors && self.sectors.length > 0) {
@@ -206,10 +207,10 @@
                 };
                 return list;
             },
-            getLabelList: function() {
+            getLabelList: function () {
                 return this.labelList;
             },
-            getTopAndBottomIndex: function() {
+            getTopAndBottomIndex: function () {
                 var me = this;
                 var data = self.data;
                 var indexs = {};
@@ -219,7 +220,7 @@
                     preBottomDis = 90,
                     currentTopDis, currentBottomDis;
                 if (data.length > 0) {
-                    _.each(self.data, function() {
+                    _.each(self.data, function () {
                         //bottom
                         if (data.quadrant == 1 || data.quadrant == 2) {
                             currentBottomDis = Math.abs(data.middleAngle - bottomBase);
@@ -240,7 +241,7 @@
                 }
                 return indexs;
             },
-            getColorByIndex: function(colors, index) {
+            getColorByIndex: function (colors, index) {
                 if (index >= colors.length) {
                     //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
                     if ((this.data.data.length - 1) % colors.length == 0 && (index % colors.length == 0)) {
@@ -251,10 +252,10 @@
                 };
                 return colors[index];
             },
-            _configColors: function() {
+            _configColors: function () {
                 this.colors = this.colors ? this.colors : Theme.colors;
             },
-            draw: function(opt) {
+            draw: function (opt) {
                 var self = this;
                 self.setX(self.x);
                 self.setY(self.y);
@@ -267,7 +268,7 @@
                     opt.complete.call(self);
                 }
             },
-            focus: function(index, callback) {
+            focus: function (index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
                 var secData = self.data.data[index];
@@ -277,13 +278,13 @@
                     y: secData.outOffsety
                 }, {
                     duration: 100,
-                    onComplete: function() {
+                    onComplete: function () {
                         //secData.checked = true;
                         callback && callback();
                     }
                 });
             },
-            unfocus: function(index, callback) {
+            unfocus: function (index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
                 var secData = self.data.data[index];
@@ -293,13 +294,13 @@
                     y: 0
                 }, {
                     duration: 100,
-                    onComplete: function() {
+                    onComplete: function () {
                         callback && callback();
                         //secData.checked = false;
                     }
                 });
             },
-            check: function(index) {
+            check: function (index) {
                 var sec = this.sectorMap[index].sector;
                 var secData = this.data.data[index];
                 if (secData.checked) {
@@ -307,7 +308,7 @@
                 };
                 var me = this;
                 if (!secData._selected) {
-                    this.focus(index, function() {
+                    this.focus(index, function () {
                         me.addCheckedSec(sec);
                     });
                 } else {
@@ -315,33 +316,33 @@
                 };
                 secData.checked = true;
             },
-            uncheck: function(index) {
+            uncheck: function (index) {
                 var sec = this.sectorMap[index].sector;
                 var secData = this.data.data[index];
                 if (!secData.checked) {
                     return
                 };
                 var me = this;
-                me.cancelCheckedSec(sec, function() {
+                me.cancelCheckedSec(sec, function () {
                     me.unfocus(index);
                 });
                 secData.checked = false;
             },
-            uncheckAll: function(){
+            uncheckAll: function () {
                 var me = this;
-                _.each( this.sectorMap , function( sm , i ){
+                _.each(this.sectorMap, function (sm, i) {
                     var sec = sm.sector;
                     var secData = me.data.data[i];
-                    if( secData.checked ){
-                        me.cancelCheckedSec( sec );
+                    if (secData.checked) {
+                        me.cancelCheckedSec(sec);
                         secData.checked = false;
                     }
-                } );
+                });
             },
-            grow: function() {
+            grow: function () {
                 var self = this;
                 var timer = null;
-                _.each(self.sectors, function(sec, index) {
+                _.each(self.sectors, function (sec, index) {
                     if (sec.context) {
                         sec.context.r0 = 0;
                         sec.context.r = 0;
@@ -364,7 +365,7 @@
                     },
                     duration: 800,
                     easing: "Back.Out",
-                    onUpdate: function() {
+                    onUpdate: function () {
                         for (var i = 0; i < self.sectors.length; i++) {
                             var sec = self.sectors[i];
                             var secc = sec.context;
@@ -376,7 +377,7 @@
                                     secc.startAngle = sec.startAngle;
                                     secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * this.process;
                                 } else {
-                                    var lastEndAngle = function(index) {
+                                    var lastEndAngle = function (index) {
                                         var lastIndex = index - 1;
                                         var lastSecc = self.sectors[lastIndex].context;
                                         if (lastIndex == 0) {
@@ -387,47 +388,47 @@
                                         } else {
                                             return arguments.callee(lastIndex);
                                         }
-                                    }(i);
+                                    } (i);
                                     secc.startAngle = lastEndAngle;
                                     secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * this.process;
                                 }
                             }
                         }
                     },
-                    onComplete: function() {
+                    onComplete: function () {
                         self._showDataLabel();
                     }
                 });
             },
-            _showDataLabel: function() {
+            _showDataLabel: function () {
                 if (this.branchSp) {
                     this.branchSp.context.globalAlpha = 1;
-                    _.each(this.labelList, function(lab) {
+                    _.each(this.labelList, function (lab) {
                         lab.labelEle.style.display = "block"
                     });
                 }
             },
-            _hideDataLabel: function() {
+            _hideDataLabel: function () {
                 if (this.branchSp) {
                     this.branchSp.context.globalAlpha = 0;
-                    _.each(this.labelList, function(lab) {
+                    _.each(this.labelList, function (lab) {
                         lab.labelEle.style.display = "none"
                     });
                 }
             },
-            _showTip: function(e, ind) {
+            _showTip: function (e, ind) {                
                 this._tip.show(this._geteventInfo(e, ind));
             },
-            _hideTip: function(e) {
+            _hideTip: function (e) {
                 this._tip.hide(e);
             },
-            _moveTip: function(e, ind) {
+            _moveTip: function (e, ind) {
                 this._tip.move(this._geteventInfo(e, ind))
             },
-            _getTipDefaultContent: function(info) {
+            _getTipDefaultContent: function (info) {
                 return "<div style='color:" + info.fillStyle + "'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div>" + parseInt(info.percentage) + "%</div>";
             },
-            _geteventInfo: function(e, ind) {
+            _geteventInfo: function (e, ind) {
                 var data = this.data.data[ind];
                 var fillColor = this.getColorByIndex(this.colors, ind);
                 e.eventInfo = {
@@ -436,27 +437,27 @@
                     percentage: data.percentage,
                     value: data.y,
                     fillStyle: fillColor,
-                    data: this.data.org[ind],
+                    data: this.data.data[ind],
                     checked: data.checked
                 };
                 return e;
             },
-            _sectorFocus: function(e, index) {
+            _sectorFocus: function (e, index) {
                 if (this.sectorMap[index]) {
                     if (this.focusCallback && e) {
                         this.focusCallback.focus(e, index);
                     }
                 }
             },
-            _sectorUnfocus: function(e, index) {
+            _sectorUnfocus: function (e, index) {
                 if (this.focusCallback && e) {
                     this.focusCallback.unfocus(e, index);
                 }
             },
-            _getByIndex: function(index) {
+            _getByIndex: function (index) {
                 return this.sectorMap[index];
             },
-            _widgetLabel: function(quadrant, indexs, lmin, rmin, isEnd, ySpaceInfo) {
+            _widgetLabel: function (quadrant, indexs, lmin, rmin, isEnd, ySpaceInfo) {
                 var self = this;
                 var data = self.data.data;
                 var sectorMap = self.sectorMap;
@@ -539,7 +540,7 @@
                         if (_.isFunction(self.dataLabel.format)) {
                             labelTxt = this.dataLabel.format(data[currentIndex]);
                         } else {
-                            labelTxt = self.dataLabel.format.replace(formatReg, function(match, index) {
+                            labelTxt = self.dataLabel.format.replace(formatReg, function (match, index) {
                                 var matchStr = match.replace(/\{([\s\S]+?)\}/g, '$1');
                                 var vals = matchStr.split('.');
                                 var obj = eval(vals[0]);
@@ -613,7 +614,7 @@
                     });
                 }
             },
-            _hideLabel: function(index) {
+            _hideLabel: function (index) {
                 if (this.sectorMap[index]) {
                     var label = this.sectorMap[index].label;
                     label.line1.context.visible = false;
@@ -621,7 +622,7 @@
                     label.label.style.display = "none";
                 }
             },
-            _showLabel: function(index) {
+            _showLabel: function (index) {
                 if (this.sectorMap[index]) {
                     var label = this.sectorMap[index].label;
                     label.line1.context.visible = true;
@@ -629,7 +630,7 @@
                     label.label.style.display = "block";
                 }
             },
-            _startWidgetLabel: function() {
+            _startWidgetLabel: function () {
                 var self = this;
                 var data = self.data.data;
                 var rMinPercentage = 0,
@@ -691,7 +692,7 @@
                 var overflowIndexs, sortedIndexs;
                 if (widgetInfo.right.indexs.length > 15) {
                     sortedIndexs = widgetInfo.right.indexs.slice(0);
-                    sortedIndexs.sort(function(a, b) {
+                    sortedIndexs.sort(function (a, b) {
                         return data[b].percentage - data[a].percentage;
                     });
                     overflowIndexs = sortedIndexs.slice(15);
@@ -699,7 +700,7 @@
                 }
                 if (widgetInfo.left.indexs.length > 15) {
                     sortedIndexs = widgetInfo.left.indexs.slice(0);
-                    sortedIndexs.sort(function(a, b) {
+                    sortedIndexs.sort(function (a, b) {
                         return data[b].percentage - data[a].percentage;
                     });
                     overflowIndexs = sortedIndexs.slice(15);
@@ -718,10 +719,10 @@
                     self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinPercentage, rMinPercentage, isEnd, ySpaceInfo)
                 }
             },
-            _getAngleTime: function(secc) {
+            _getAngleTime: function (secc) {
                 return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
             },
-            addCheckedSec: function(sec , callback) {
+            addCheckedSec: function (sec, callback) {
 
                 var secc = sec.context;
                 var sector = new Sector({
@@ -742,25 +743,25 @@
                     endAngle: secc.endAngle
                 }, {
                     duration: this._getAngleTime(secc),
-                    onComplete : function(){
+                    onComplete: function () {
                         callback && callback();
                     }
                 });
             },
-            cancelCheckedSec: function(sec, callback) {
+            cancelCheckedSec: function (sec, callback) {
                 var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
                 checkedSec.animate({
                     //endAngle : checkedSec.context.startAngle+0.5
                     startAngle: checkedSec.context.endAngle - 0.3
                 }, {
-                    onComplete: function() {
+                    onComplete: function () {
                         checkedSec.destroy();
                         callback && callback();
                     },
                     duration: 150
                 });
             },
-            _widget: function() {
+            _widget: function () {
                 var self = this;
                 var data = self.data.data;
                 var moreSecData;
@@ -791,7 +792,7 @@
                             sector.__dataIndex = i;
                             sector.__isSliced = data[i].sliced;
                             //扇形事件
-                            sector.hover(function(e) {
+                            sector.hover(function (e) {
                                 var me = this;
                                 if (self.tips.enabled) {
                                     self._showTip(e, this.__dataIndex);
@@ -801,7 +802,7 @@
                                     self._sectorFocus(e, this.__dataIndex);
                                     self.focus(this.__dataIndex);
                                 }
-                            }, function(e) {
+                            }, function (e) {
                                 if (self.tips.enabled) {
                                     self._hideTip(e);
                                 };
@@ -812,10 +813,10 @@
                                 }
                             });
 
-                            sector.on('mousedown mouseup click mousemove dblclick', function(e) {
+                            sector.on('mousedown mouseup click mousemove dblclick', function (e) {
                                 self._geteventInfo(e, this.__dataIndex);
                                 if (e.type == "click") {
-                                    self.secClick(this , e);
+                                    self.secClick(this, e);
                                 };
                                 if (e.type == "mousemove") {
                                     if (self.tips.enabled) {
@@ -871,19 +872,19 @@
                     }
                 }
             },
-            secClick: function(sectorEl , e) {
-                if( !this.checked.enabled ) return;
+            secClick: function (sectorEl, e) {
+                if (!this.checked.enabled) return;
                 var secData = this.data.data[sectorEl.__dataIndex];
-                if( sectorEl.clickIng ){
+                if (sectorEl.clickIng) {
                     return;
                 };
                 sectorEl.clickIng = true;
                 if (!secData.checked) {
-                    this.addCheckedSec(sectorEl , function(){
+                    this.addCheckedSec(sectorEl, function () {
                         sectorEl.clickIng = false;
                     });
                 } else {
-                    this.cancelCheckedSec(sectorEl , function(){
+                    this.cancelCheckedSec(sectorEl, function () {
                         sectorEl.clickIng = false;
                     });
                 };
