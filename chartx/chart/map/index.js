@@ -10,9 +10,9 @@ define(
         'chartx/utils/projection/normal',
         'chartx/components/tips/tip', //'./tips',
         'chartx/utils/dataformat',
-        "chartx/components/markpoint/index",
-        "chartx/chart/theme",
-        "chartx/utils/colorformat"
+        'chartx/components/markpoint/index',
+        'chartx/chart/theme',
+        'chartx/utils/colorformat'
     ],
     function(Canvax, Chart, Path, Polygon, mapParams, GeoCoord, TextFixed, Projection, Tips, DataFormat, MarkPoint, Theme, ColorFormat) {
 
