@@ -46,13 +46,11 @@ var data = [
     [ "广西"    , 700     ]
 ];
 
-var data = [["area","cost"],["海外",0.85],["上海",0.59],["河南",0.43],["内蒙古",0.34],["贵州",0.34],["宁夏",0],["海南",0],["陕西",0],["台湾",0],["天津",0],["其它",0]] 
-
 
 var options = {
     mapName : "china", //默认便是中国地图
     areaField : "area", //可选，默认为第一个字段
-    valueField: "cost",
+    valueField: "click",
     area : {
         /*
         * @params arg  至少包含一个area属性
@@ -68,7 +66,9 @@ var options = {
                 }
             }
             return c;
-        }
+        },
+        checkedStrokeStyle : "#223311",
+        checkedFillStyle: "#eeeccc"
     },
     tips : {
         prefix : ["点击量"]
@@ -85,9 +85,11 @@ Chartx.map("canvasTest" , data , options).then(function( map ){
         console.log(e.type+"|"+mapData.id)
     });
     setTimeout(function(){
-        map.setAreaStyle("西藏" , {
-            fillStyle : "red"
-        })
+        map.checkOf("河南");
+        setTimeout(function(){
+            map.uncheckOf("河南");
+            
+        } , 1000)
     } , 1000)
 
 });

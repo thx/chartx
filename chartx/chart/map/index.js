@@ -30,6 +30,10 @@ define(
                     fillStyle: null,
                     hoverStrokeStyle: null,
                     hoverFillStyle:null,
+
+                    checkedStrokeStyle: null,
+                    checkedFillStyle:null,
+
                     normalFillStyle: "#fff",
                     normalStrokeStyle: "#ccc",
                     lineWidth: 1,
@@ -53,7 +57,9 @@ define(
 
                 this.checked = {
                     enabled: false
-                }
+                };
+
+                this.themeColor = Theme.brandColor;
 
                 _.deepExtend(this, opts);
 
@@ -367,7 +373,7 @@ define(
                             if (!val) {
                                 color = null;
                             } else {
-                                color = ColorFormat.colorRgba(Theme.brandColor, parseFloat((val * 0.85 / this.maxValue).toFixed(2)));
+                                color = ColorFormat.colorRgba( this.themeColor , parseFloat((val * 0.85 / this.maxValue).toFixed(2)));
                             }
                         };
                     };
@@ -415,6 +421,7 @@ define(
 
                     var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
                     var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area.normalStrokeStyle);
+
                     var shapeCtx = {
                         x: 0,
                         y: 0,
@@ -439,7 +446,8 @@ define(
                     area.mapData = md;
                     area._strokeStyle = strokeStyle;
                     area._fillStyle = fillStyle;
-                    area._hoverFillStyle = me.area.hoverStrokeStyle || fillStyle;
+                    area._hoverFillStyle = me.area.hoverFillStyle || fillStyle;
+                    area._hoverStrokeStyle = me.area.hoverStrokeStyle || me.themeColor
 
                     area.on("mouseover", function(e) {
                         if (e.fromTarget && e.fromTarget.type == "text" && e.fromTarget.text == this.mapData.name) {
@@ -448,8 +456,7 @@ define(
                         if (!this.mapData.checked) {
                             this.toFront();
                             //this.context.lineWidth ++;
-                            var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
-                            this.context.strokeStyle = hoverStrokeStyle;
+                            this.context.strokeStyle = this._hoverStrokeStyle;
                             this.context.fillStyle = this._hoverFillStyle;
                         };
 
@@ -505,24 +512,11 @@ define(
                         if (me.checked.enabled) {
                             if (me.checkedList[mapData.id]) {
                                 //已经存在了。取消选中态度
-                                mapData.checked = false;
-                                delete me.checkedList[mapData.id];
-                                if (areaEl._fillStyle == me.area.normalFillStyle) {
-                                    areaEl.context.fillStyle = me.area.normalFillStyle;
-                                }
+                                me._uncheckAt( this , e );
                             } else {
-                                me.checkedList[mapData.id] = mapData;
-                                mapData.checked = true;
-                                if (areaEl.context.fillStyle == me.area.normalFillStyle) {
-                                    areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
-                                };
+                                me._checkAt( this , e );
                             };
                         };
-                        /*
-                        e.eventInfo = {
-                            mapData: mapData
-                        };
-                        */
                         e.eventInfo = me._getDataForArea(mapData);
                         me.fire("click", e);
                     });
@@ -573,7 +567,7 @@ define(
                     if (md.checked) {
                         var area = area_sp.getChildById("area_" + md.id);
                         area.toFront();
-                        area.context.strokeStyle = me.area.hoverStrokeStyle || Theme.brandColor;
+                        area.context.strokeStyle = me.area.hoverStrokeStyle || me.themeColor;
                         if (area.context.fillStyle == me.area.normalFillStyle) {
                             area.context.fillStyle = ColorFormat.colorRgba(area.context.strokeStyle, 0.05);
                         }
@@ -582,23 +576,36 @@ define(
                 me.sprite.addChild(area_sp);
                 area_txt_sp && me.sprite.addChild(area_txt_sp);
             },
-            _checkAt: function(index) {
-                var me = this;
+            _checkAt: function(target , e) {
+                var me = this,mapData,areaEl;
 
-                var mapData = _.find(this.mapDataList, function(d) {
-                    return d.ind == index;
-                });
-                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                if( _.isNumber( target ) ){
+                    mapData = _.find(this.mapDataList, function(d) {
+                        return d.ind == target;
+                    });
+                    areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                } else {
+                    areaEl = target;
+                    mapData = e.currentTarget.mapData;
+                };
 
+                
                 if (!me.checkedList[mapData.id]) {
                     me.checkedList[mapData.id] = mapData;
                     mapData.checked = true;
 
-                    var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
-                    areaEl.context.strokeStyle = hoverStrokeStyle;
-                    if (areaEl.context.fillStyle == me.area.normalFillStyle) {
-                        areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                    //如果有设置checked的Style
+                    if( me.area.checkedStrokeStyle ){
+                        areaEl.context.strokeStyle = me.area.checkedStrokeStyle;
                     };
+                    if( me.area.checkedFillStyle ){
+                        areaEl.context.fillStyle = me.area.checkedFillStyle;
+                    } else {
+                        if (areaEl.context.fillStyle == me.area.normalFillStyle) {
+                            areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                        };
+                    };
+
                     areaEl.toFront();
                 };
             },
@@ -611,19 +618,42 @@ define(
                     me._checkAt(index);
                 } );
             },
-            _uncheckAt: function(index) {
+            _uncheckAt: function( target , e ) {
                 var me = this;
-                var mapData = _.find(this.mapDataList, function(d) {
-                    return d.ind == index;
-                });
-                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                var me = this,mapData,areaEl;
+
+                if( _.isNumber( target ) ){
+                    mapData = _.find(this.mapDataList, function(d) {
+                        return d.ind == target;
+                    });
+                    areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                } else {
+                    areaEl = target;
+                    mapData = e.currentTarget.mapData;
+                };
+
                 if (me.checkedList[mapData.id]) {
                     //已经存在了。取消选中态度
                     mapData.checked = false;
                     delete me.checkedList[mapData.id];
+
+                    if( me.area.checkedStrokeStyle ){
+                        areaEl.context.strokeStyle = e ? areaEl._hoverStrokeStyle : areaEl._strokeStyle;
+                    };
+                    if( me.area.checkedFillStyle ){
+                        areaEl.context.fillStyle = e ? areaEl._hoverFillStyle : areaEl._fillStyle;
+                    } else {
+                        if (areaEl._fillStyle == me.area.normalFillStyle) {
+                            areaEl.context.fillStyle = me.area.normalFillStyle;
+                        };
+                    };
+                    
+                    /*
                     areaEl.context.strokeStyle = areaEl._strokeStyle;
                     areaEl.context.fillStyle = areaEl._fillStyle;
-                    areaEl.toBack();
+                    */
+
+                    !e && areaEl.toBack();
                 };
             },
             uncheckAt: function(indexs){
@@ -670,7 +700,14 @@ define(
                 var areaEl = this._getAreaOf( areaName );
                 for( var p in style ){
                     areaEl.context[p] = style[p]
-                }
+                };
+                if( style.strokeStyle ) {
+                    areaEl._strokeStyle = style.strokeStyle;
+                };
+                if( style.fillStyle )  {
+                    areaEl._fillStyle = style.fillStyle;
+                    areaEl._hoverFillStyle = this.area.hoverFillStyle || style.fillStyle;
+                };
             },
             _getAreaOf: function( areaName ){
                 var me = this;
