@@ -74,8 +74,12 @@ window.Chartx || (Chartx = {
                         promise.path = path;
                     };
 
-                    if( promise.chart._drawEnd ){
-                        promise.chart._drawEnd( _drawEnd );
+                    if( promise.chart.drawEnd ){
+                        var __drawEnd = promise.chart.drawEnd;
+                        promise.chart.drawEnd = function(){
+                            __drawEnd.apply( promise.chart , arguments );
+                            _drawEnd();
+                        };
                     } else {
                         _drawEnd();
                     };

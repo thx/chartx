@@ -29,6 +29,7 @@ define(
                     strokeStyle: null,
                     fillStyle: null,
                     hoverStrokeStyle: null,
+                    hoverFillStyle:null,
                     normalFillStyle: "#fff",
                     normalStrokeStyle: "#ccc",
                     lineWidth: 1,
@@ -104,12 +105,15 @@ define(
                     me._widget(md);
                     if ("markPoint" in me._opts) {
                         me._initMarkPoint();
-                    }
+                    };
                     //绘制完了后调整当前sprite的尺寸和位置
                     me._setSpPos();
-
+                    me.drawEnd();
                     this.inited = true;
                 });
+            },
+            drawEnd : function(){
+
             },
             _reset: function(obj){
                 if( obj.options ){
@@ -117,7 +121,7 @@ define(
                     _.deepExtend(this._opts, obj.options);
                 }
             },
-            _setSpPos: function() {
+            _setSpPos: function(){
                 var tf = this._mapDataMap[this.mapName].transform;
                 var spc = this.sprite.context;
                 spc.width = tf.width;
@@ -435,7 +439,7 @@ define(
                     area.mapData = md;
                     area._strokeStyle = strokeStyle;
                     area._fillStyle = fillStyle;
-                    area._hoverFillStyle = fillStyle;
+                    area._hoverFillStyle = me.area.hoverStrokeStyle || fillStyle;
 
                     area.on("mouseover", function(e) {
                         if (e.fromTarget && e.fromTarget.type == "text" && e.fromTarget.text == this.mapData.name) {
@@ -661,6 +665,21 @@ define(
                 _.each( areaName , function( an ){
                     me._uncheckAt( me._getAreaIndexOfName( an ) );
                 } );
+            },
+            setAreaStyle: function( areaName , style ){
+                var areaEl = this._getAreaOf( areaName );
+                for( var p in style ){
+                    areaEl.context[p] = style[p]
+                }
+            },
+            _getAreaOf: function( areaName ){
+                var me = this;
+                var index = me._getAreaIndexOfName( areaName );
+                var mapData = _.find(this.mapDataList, function(d) {
+                    return d.ind == index;
+                });
+                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                return areaEl;
             },
             _getAreaIndexOfName : function( areaName ){
                 var i;

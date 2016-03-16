@@ -58,7 +58,7 @@ define(
             dataFrame: null, //每个图表的数据集合 都 存放在dataFrame中。
             draw: function() {},
             /*
-             * chart的销毁 
+             * chart的销毁
              */
             destroy: function() {
                 this.clean();

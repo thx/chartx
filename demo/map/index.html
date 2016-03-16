@@ -84,6 +84,11 @@ Chartx.map("canvasTest" , data , options).then(function( map ){
         var mapData = (e.target.mapData || e.target.area.mapData);
         console.log(e.type+"|"+mapData.id)
     });
+    setTimeout(function(){
+        map.setAreaStyle("西藏" , {
+            fillStyle : "red"
+        })
+    } , 1000)
 
 });
             </textarea></form>

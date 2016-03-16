@@ -74,8 +74,12 @@ window.Chartx || (Chartx = {
                         promise.path = path;
                     };
 
-                    if( promise.chart._drawEnd ){
-                        promise.chart._drawEnd( _drawEnd );
+                    if( promise.chart.drawEnd ){
+                        var __drawEnd = promise.chart.drawEnd;
+                        promise.chart.drawEnd = function(){
+                            __drawEnd.apply( promise.chart , arguments );
+                            _drawEnd();
+                        };
                     } else {
                         _drawEnd();
                     };
@@ -326,7 +330,7 @@ define(
             dataFrame: null, //每个图表的数据集合 都 存放在dataFrame中。
             draw: function() {},
             /*
-             * chart的销毁 
+             * chart的销毁
              */
             destroy: function() {
                 this.clean();

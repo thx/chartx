@@ -222,15 +222,18 @@ define(
                 if (this.bar.width) {
                     if (_.isFunction(this.bar.width)) {
                         this.bar._width = this.bar.width(xDis1);
+                    } else {
+                        this.bar._width = this.bar.width;
                     }
-                };
-                if (!this.bar.width) {
+                } else {
                     this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
+
+                    //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
+                    if (this.bar._width == 1 && xDis1 > 3) {
+                        this.bar._width = parseInt(xDis1) - 2;
+                    };
                 };
                 this.bar._width < 1 && (this.bar._width = 1);
-                if (this.bar._width == 1 && xDis1 > 3) {
-                    this.bar._width = parseInt(xDis1) - 2;
-                };
             },
             resetData: function(data, opt) {
                 this.draw(data.data, opt);
