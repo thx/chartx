@@ -82,14 +82,8 @@ Chartx.map("canvasTest" , data , options).then(function( map ){
         var mapData = (e.target.mapData || e.target.area.mapData);
         console.log(e.type+"|"+mapData.id)
     });
-    setTimeout(function(){
-        map.checkOf("河南");
-        setTimeout(function(){
-            map.uncheckOf("河南");
-            
-        } , 1000)
-    } , 1000)
 
+    map.checkOf(["澳门", "其他"] )
 });
             </textarea></form>
 
