@@ -576,7 +576,7 @@ define(
             },
             _checkAt: function(target , e) {
                 var me = this,mapData,areaEl;
-
+                if(target === undefined) return;
                 if( _.isNumber( target ) ){
                     mapData = _.find(this.mapDataList, function(d) {
                         return d.ind == target;
@@ -597,9 +597,9 @@ define(
                     if( me.area.checkedFillStyle ){
                         areaEl.context.fillStyle = me.area.checkedFillStyle;
                     } else {
-                        //if (areaEl.context.fillStyle == me.area._normalFillStyle) {
+                        if (areaEl._fillStyle == me.area._normalFillStyle) {
                             areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
-                        //};
+                        };
                     };
 
                     areaEl.toFront();
