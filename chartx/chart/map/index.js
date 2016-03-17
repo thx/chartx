@@ -11,10 +11,9 @@ define(
         'chartx/components/tips/tip', //'./tips',
         'chartx/utils/dataformat',
         'chartx/components/markpoint/index',
-        'chartx/chart/theme',
         'chartx/utils/colorformat'
     ],
-    function(Canvax, Chart, Path, Polygon, mapParams, GeoCoord, TextFixed, Projection, Tips, DataFormat, MarkPoint, Theme, ColorFormat) {
+    function(Canvax, Chart, Path, Polygon, mapParams, GeoCoord, TextFixed, Projection, Tips, DataFormat, MarkPoint, ColorFormat) {
 
         return Chart.extend({
             init: function(node, data, opts) {
@@ -25,17 +24,18 @@ define(
                 this._nameMap = {};
                 this.checkedList = {};
                 this.tips = {};
+                this.themeColor = "#6E7586"; //没人的主题色彩，所有的有数据的area都是在这个颜色的基础上做透明度变化，同时也是默认的hover色  
                 this.area = {
                     strokeStyle: null,
                     fillStyle: null,
-                    hoverStrokeStyle: null,
+                    hoverStrokeStyle: this.themeColor,
                     hoverFillStyle:null,
 
                     checkedStrokeStyle: null,
                     checkedFillStyle:null,
 
-                    normalFillStyle: "#fff",
-                    normalStrokeStyle: "#ccc",
+                    _normalFillStyle: "#fff",
+                    _normalStrokeStyle: "#ccc",
                     lineWidth: 1,
                     linkage: false, //是否开启省市联动，目前只支持中国地图
                     text: {
@@ -58,8 +58,6 @@ define(
                 this.checked = {
                     enabled: false
                 };
-
-                this.themeColor = Theme.brandColor;
 
                 _.deepExtend(this, opts);
 
@@ -419,8 +417,8 @@ define(
                     md.ind = i;
                     var aread = me._getDataForArea(md);
 
-                    var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
-                    var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area.normalStrokeStyle);
+                    var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area._normalFillStyle);
+                    var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area._normalStrokeStyle);
 
                     var shapeCtx = {
                         x: 0,
@@ -447,7 +445,7 @@ define(
                     area._strokeStyle = strokeStyle;
                     area._fillStyle = fillStyle;
                     area._hoverFillStyle = me.area.hoverFillStyle || fillStyle;
-                    area._hoverStrokeStyle = me.area.hoverStrokeStyle || me.themeColor
+                    area._hoverStrokeStyle = me.area.hoverStrokeStyle
 
                     area.on("mouseover", function(e) {
                         if (e.fromTarget && e.fromTarget.type == "text" && e.fromTarget.text == this.mapData.name) {
@@ -567,8 +565,8 @@ define(
                     if (md.checked) {
                         var area = area_sp.getChildById("area_" + md.id);
                         area.toFront();
-                        area.context.strokeStyle = me.area.hoverStrokeStyle || me.themeColor;
-                        if (area.context.fillStyle == me.area.normalFillStyle) {
+                        area.context.strokeStyle = me.area.hoverStrokeStyle;
+                        if (area.context.fillStyle == me.area._normalFillStyle) {
                             area.context.fillStyle = ColorFormat.colorRgba(area.context.strokeStyle, 0.05);
                         }
                     }
@@ -595,15 +593,13 @@ define(
                     mapData.checked = true;
 
                     //如果有设置checked的Style
-                    if( me.area.checkedStrokeStyle ){
-                        areaEl.context.strokeStyle = me.area.checkedStrokeStyle;
-                    };
+                    areaEl.context.strokeStyle = me.area.checkedStrokeStyle || me.area.hoverStrokeStyle;
                     if( me.area.checkedFillStyle ){
                         areaEl.context.fillStyle = me.area.checkedFillStyle;
                     } else {
-                        if (areaEl.context.fillStyle == me.area.normalFillStyle) {
+                        //if (areaEl.context.fillStyle == me.area._normalFillStyle) {
                             areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
-                        };
+                        //};
                     };
 
                     areaEl.toFront();
@@ -637,16 +633,8 @@ define(
                     mapData.checked = false;
                     delete me.checkedList[mapData.id];
 
-                    if( me.area.checkedStrokeStyle ){
-                        areaEl.context.strokeStyle = e ? areaEl._hoverStrokeStyle : areaEl._strokeStyle;
-                    };
-                    if( me.area.checkedFillStyle ){
-                        areaEl.context.fillStyle = e ? areaEl._hoverFillStyle : areaEl._fillStyle;
-                    } else {
-                        if (areaEl._fillStyle == me.area.normalFillStyle) {
-                            areaEl.context.fillStyle = me.area.normalFillStyle;
-                        };
-                    };
+                    areaEl.context.strokeStyle = e ? areaEl._hoverStrokeStyle : areaEl._strokeStyle;
+                    areaEl.context.fillStyle = e ? areaEl._hoverFillStyle : areaEl._fillStyle;
                     
                     /*
                     areaEl.context.strokeStyle = areaEl._strokeStyle;
