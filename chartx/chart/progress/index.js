@@ -79,6 +79,7 @@ define(
                         y : this.height/2 - this._legend.h/2
                     } );
                     this.width -= this._legend.w;
+                    
                 };
 
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
@@ -217,6 +218,7 @@ define(
                     ));
                 };
             },
+            
             _setTipsInfo : function( el , e ){
                 var i = el.ind;
                 var info = { dataCount : this.dataCount };
