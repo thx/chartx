@@ -49,7 +49,6 @@ define(
         Pie.prototype = {
             init: function (opt) {
                 _.deepExtend(this, opt);
-
                 this.sprite = new Canvax.Display.Sprite();
 
                 this.sectorsSp = new Canvax.Display.Sprite();
@@ -91,7 +90,6 @@ define(
                 var data = self.data.data;
                 self.clickMoveDis = self.r / 11;
                 if (data.length && data.length > 0) {
-
                     for (var i = 0; i < data.length; i++) {
                         self.total += data[i].y;
                     }
@@ -121,10 +119,9 @@ define(
                             cosV = cosV.toFixed(5);
                             sinV = sinV.toFixed(5);
                             var quadrant = function (ang) {
-                                if (ang > limitAngle) {
+                                if (ang >= limitAngle) {
                                     ang = limitAngle;
                                 }
-
                                 ang = ang % 360;
                                 var angleRatio = parseInt(ang / 90);
                                 if (ang >= 0) {
@@ -183,7 +180,6 @@ define(
                                 isMax: false,
                                 checked: false //是否点击选中
                             });
-
                             self.currentAngle += angle;
                             if (self.currentAngle > limitAngle) self.currentAngle = limitAngle;
                         };
@@ -416,7 +412,7 @@ define(
                     });
                 }
             },
-            _showTip: function (e, ind) {                
+            _showTip: function (e, ind) {
                 this._tip.show(this._geteventInfo(e, ind));
             },
             _hideTip: function (e) {
@@ -472,6 +468,14 @@ define(
                 isleft = quadrant == 2 || quadrant == 3;
                 isup = quadrant == 3 || quadrant == 4;
                 minPercent = isleft ? lmin : rmin;
+
+                //label的绘制顺序做修正，label的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
+                if (indexs.length > 0) {
+                    indexs.sort(function (a, b) {
+                        return isup ? data[a].edgey - data[b].edgey : data[b].edgey - data[a].edgey;
+                    })
+                }
+
                 for (i = 0; i < indexs.length; i++) {
                     currentIndex = indexs[i];
                     //若Y值小于最小值，不画label    
@@ -770,94 +774,78 @@ define(
                     for (var i = 0; i < data.length; i++) {
                         if (self.colorIndex >= self.colors.length) self.colorIndex = 0;
                         var fillColor = self.getColorByIndex(self.colors, i);
-                        if (data[i].end > data[i].start) {
-                            //扇形主体          
-                            var sector = new Sector({
-                                hoverClone: false,
-                                context: {
-                                    x: data[i].sliced ? data[i].outOffsetx : 0,
-                                    y: data[i].sliced ? data[i].outOffsety : 0,
-                                    r0: self.r0,
-                                    r: self.r,
-                                    startAngle: data[i].start,
-                                    endAngle: data[i].end,
-                                    fillStyle: fillColor,
-                                    index: data[i].index,
-                                    cursor: "pointer"
-                                },
-                                id: 'sector' + i
-                            });
-                            sector.__data = data[i];
-                            sector.__colorIndex = i;
-                            sector.__dataIndex = i;
-                            sector.__isSliced = data[i].sliced;
-                            //扇形事件
-                            sector.hover(function (e) {
-                                var me = this;
-                                if (self.tips.enabled) {
-                                    self._showTip(e, this.__dataIndex);
-                                };
-                                var secData = self.data.data[this.__dataIndex];
-                                if (!secData.checked) {
-                                    self._sectorFocus(e, this.__dataIndex);
-                                    self.focus(this.__dataIndex);
-                                }
-                            }, function (e) {
-                                if (self.tips.enabled) {
-                                    self._hideTip(e);
-                                };
-                                var secData = self.data.data[this.__dataIndex];
-                                if (!secData.checked) {
-                                    self._sectorUnfocus(e, this.__dataIndex);
-                                    self.unfocus(this.__dataIndex);
-                                }
-                            });
-
-                            sector.on('mousedown mouseup click mousemove dblclick', function (e) {
-                                self._geteventInfo(e, this.__dataIndex);
-                                if (e.type == "click") {
-                                    self.secClick(this, e);
-                                };
-                                if (e.type == "mousemove") {
-                                    if (self.tips.enabled) {
-                                        self._moveTip(e, this.__dataIndex);
-                                    }
-                                };
-                            });
-
-                            self.sectorsSp.addChildAt(sector, 0);
-                            moreSecData = {
-                                name: data[i].name,
-                                value: data[i].y,
-                                sector: sector,
-                                context: sector.context,
-                                originx: sector.context.x,
-                                originy: sector.context.y,
-                                r: self.r,
-                                startAngle: sector.context.startAngle,
-                                endAngle: sector.context.endAngle,
-                                color: fillColor,
-                                index: i,
-                                percentage: data[i].percentage,
-                                visible: true
-                            };
-                            self.sectors.push(moreSecData);
-                        } else if (data[i].end == data[i].start) {
-                            self.sectors.push({
-                                name: data[i].name,
-                                sector: null,
-                                context: null,
-                                originx: 0,
-                                originy: 0,
+                        //扇形主体          
+                        var sector = new Sector({
+                            hoverClone: false,
+                            context: {
+                                x: data[i].sliced ? data[i].outOffsetx : 0,
+                                y: data[i].sliced ? data[i].outOffsety : 0,
+                                r0: self.r0,
                                 r: self.r,
                                 startAngle: data[i].start,
                                 endAngle: data[i].end,
-                                color: fillColor,
-                                index: i,
-                                percentage: 0,
-                                visible: true
-                            });
-                        }
+                                fillStyle: fillColor,
+                                index: data[i].index,
+                                cursor: "pointer"
+                            },
+                            id: 'sector' + i
+                        });
+                        sector.__data = data[i];
+                        sector.__colorIndex = i;
+                        sector.__dataIndex = i;
+                        sector.__isSliced = data[i].sliced;
+                        //扇形事件
+                        sector.hover(function (e) {
+                            var me = this;
+                            if (self.tips.enabled) {
+                                self._showTip(e, this.__dataIndex);
+                            };
+                            var secData = self.data.data[this.__dataIndex];
+                            if (!secData.checked) {
+                                self._sectorFocus(e, this.__dataIndex);
+                                self.focus(this.__dataIndex);
+                            }
+                        }, function (e) {
+                            if (self.tips.enabled) {
+                                self._hideTip(e);
+                            };
+                            var secData = self.data.data[this.__dataIndex];
+                            if (!secData.checked) {
+                                self._sectorUnfocus(e, this.__dataIndex);
+                                self.unfocus(this.__dataIndex);
+                            }
+                        });
+
+                        sector.on('mousedown mouseup click mousemove dblclick', function (e) {
+                            self._geteventInfo(e, this.__dataIndex);
+                            if (e.type == "click") {
+                                self.secClick(this, e);
+                            };
+                            if (e.type == "mousemove") {
+                                if (self.tips.enabled) {
+                                    self._moveTip(e, this.__dataIndex);
+                                }
+                            };
+                        });
+
+                        self.sectorsSp.addChildAt(sector, 0);
+                        moreSecData = {
+                            name: data[i].name,
+                            value: data[i].y,
+                            sector: sector,
+                            context: sector.context,
+                            originx: sector.context.x,
+                            originy: sector.context.y,
+                            r: self.r,
+                            startAngle: sector.context.startAngle,
+                            endAngle: sector.context.endAngle,
+                            color: fillColor,
+                            index: i,
+                            percentage: data[i].percentage,
+                            visible: true
+                        };
+
+                        self.sectors.push(moreSecData);
                     }
 
                     if (self.sectors.length > 0) {

@@ -158,6 +158,7 @@ define(
                 var me = this
                 var index = $o.iNode
                 var group = me.barsSp.getChildById('barGroup_' + index)
+                
                 var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
                 for (var a = 0, al = group.getNumChildren(); a < al; a++) {
                     var rectEl = group.getChildAt(a)
@@ -588,7 +589,7 @@ define(
                 };
 
                 //先把已经不在当前range范围内的元素destroy掉
-                if (self.barsSp.children.length > self.data[0][0].length) {
+                if ( self.data[0] && self.barsSp.children.length > self.data[0][0].length) {
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
                         self.text.enabled && self.txtsSp.getChildAt(i).destroy();

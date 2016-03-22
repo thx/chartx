@@ -10,9 +10,10 @@ define(
         'chartx/chart/line/graphs',
         'chartx/chart/line/tips',
         'chartx/utils/dataformat',
-        'chartx/components/datazoom/index'
+        'chartx/components/datazoom/index',
+        'chartx/components/legend/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom , Legend) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -53,6 +54,8 @@ define(
 
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
+
+                this._setLengend();
             },
             draw: function() {
                 this.stageTip = new Canvax.Display.Sprite({
@@ -344,6 +347,17 @@ define(
                 if (this.dataZoom.enabled) {
                     this._initDataZoom();
                 };
+
+                //如果有legend，调整下位置,和设置下颜色
+                if(this._legend && !this._legend.inited){
+                    this._legend.pos( { x : _yAxisW } );
+
+                    for( var f in this._graphs._yAxisFieldsMap ){
+                        var ffill = this._graphs._yAxisFieldsMap[f].line.strokeStyle;
+                        this._legend.setStyle( f , {fillStyle : ffill} );
+                    };
+                    this._legend.inited = true;
+                };
             },
             _endDraw: function() {
                 //this.stageBg.addChild(this._back.sprite);
@@ -356,6 +370,49 @@ define(
                 this.core.addChild(this._graphs.sprite);
                 this.stageTip.addChild(this._tip.sprite);
             },
+
+            //设置图例 begin
+            _setLengend: function(){
+                var me = this;
+                if( this.legend && "enabled" in this.legend && !this.legend.enabled ) return;
+                //设置legendOpt
+                var legendOpt = _.deepExtend({
+                    label  : function( info ){
+                       return info.field
+                    },
+                    onChecked : function( field ){
+                       //me._resetOfLengend( field );
+                       me.add( field );
+                    },
+                    onUnChecked : function( field ){
+                       //me._resetOfLengend( field );
+                       me.remove( field );
+                    }
+                } , this._opts.legend);
+                
+                this._legend = new Legend( this._getLegendData() , legendOpt );
+                this.stage.addChild( this._legend.sprite );
+                this._legend.pos( {
+                    x : 0,
+                    y : this.padding.top
+                } );
+
+                this.padding.top += this._legend.height;
+            },
+            //只有field为多组数据的时候才需要legend
+            _getLegendData : function(){
+                var me   = this;
+                var data = [];
+                _.each( _.flatten(me.dataFrame.yAxis.field) , function( f , i ){
+                    data.push({
+                        field : f,
+                        value : null,
+                        fillStyle : null
+                    });
+                });
+                return data;
+            },
+            ////设置图例end
             _initPlugs: function(opts, g) {
                 if (opts.markLine) {
                     this._initMarkLine(g);
