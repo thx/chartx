@@ -297,21 +297,6 @@ define(
 
                 var me = this;
 
-
-                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
-                /*
-                if (this.biaxial) {
-                    _.each(this._graphs.groups, function(group, i) {
-                        var color = group._bline.context.strokeStyle;
-                        if (i == 0) {
-                            me._yAxis.setAllStyle(color);
-                        } else {
-                            me._yAxisR.setAllStyle(color);
-                        }
-                    });
-                }
-                */
-
                 //执行生长动画
                 if (!this.inited) {
                     this._graphs.grow(function(g) {
@@ -328,7 +313,6 @@ define(
                 if (this._anchor.enabled) {
                     //绘制点位线
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
-
                     this._anchor.draw({
                         w: this._xAxis.xGraphsWidth, //this.width - _yAxisW - _yAxisRW,
                         h: _graphsH,

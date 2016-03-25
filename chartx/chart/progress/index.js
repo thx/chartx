@@ -49,7 +49,6 @@ define(
 
                 this._initFieldAndData(data);
 
-                //legend;
                 var me = this;
 
                 //重新计算dataCount
@@ -69,17 +68,18 @@ define(
                                 value = (info.value / me.dataCount * 100).toFixed(2);
                             }
                             return info.field+"："+ value +"%";
-                        }
+                        },
+                        layoutType : "v"
                     } , this._opts.legend);
                     
                     this._legend = new Legend( this._getLegendData() , legendOpt );
                     this.stage.addChild( this._legend.sprite );
-                    this._legend.pos( {
-                        x : this.width-this._legend.w,
-                        y : this.height/2 - this._legend.h/2
-                    } );
-                    this.width -= this._legend.w;
                     
+                    this._legend.pos( {
+                        x : this.width-this._legend.width,
+                        y : (this.height-this.padding.top-this.padding.bottom)/2 - this._legend.height/2 - this.padding.top
+                    } );
+                    this.width -= this._legend.width;
                 };
 
                 this._tip    = new Tip(this.tips, this.canvax.getDomContainer());
@@ -218,7 +218,7 @@ define(
                     ));
                 };
             },
-            
+
             _setTipsInfo : function( el , e ){
                 var i = el.ind;
                 var info = { dataCount : this.dataCount };

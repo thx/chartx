@@ -1,9 +1,10 @@
 ﻿define(
     'chartx/chart/pie/index', [
         'chartx/chart/index',
-        'chartx/chart/pie/pie'
+        'chartx/chart/pie/pie',
+        'chartx/components/legend/index'
     ],
-    function(Chart, Pie) {
+    function(Chart, Pie, Legend) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -15,6 +16,7 @@
             init: function(node, data, opts) {
                 // this.element = node;
                 this.data = data;
+                this._opts = opts;
                 this.options = opts;
                 this.config = {
                     mode: 1,
@@ -30,6 +32,7 @@
                 };
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
+                this._setLengend();
             },
             draw: function() {
                 this.stageBg = new Canvax.Display.Sprite({
@@ -213,20 +216,12 @@
                 this.stageTip.removeAllChildren();
             },
             reset: function(obj) {
-                this.clear()
-                this._pie.clear()
-                    // var element = $('#' + this.element)
-                    // this.width = parseInt(element.width);
-                    // this.height = parseInt(element.height);
-                    // this.width = parseInt(this.el.offsetWidth);
-                    // this.height = parseInt(this.el.offsetHeight)
-
-                var data = obj.data || this.data
-                    // var opt = obj.options || this.opts
-                    // _.deepExtend(this, obj.data);
+                this.clear();
+                this._pie.clear();
+                var data = obj.data || this.data;
                 _.deepExtend(this, obj.options);
                 this.dataFrame = this._initData(data, this.options);
-                this.draw()
+                this.draw();
             },
             _initModule: function() {
                 var self = this;
@@ -283,6 +278,16 @@
             },
             _startDraw: function() {
                 this._pie.draw(this);
+                var me = this;
+
+                //如果有legend，调整下位置,和设置下颜色
+                if(this._legend && !this._legend.inited){
+                    _.each( this.getList() , function( item , i ){
+                        var ffill = item.color;
+                        me._legend.setStyle( item.name , {fillStyle : ffill} );
+                    } );
+                    this._legend.inited = true;
+                };
             },
             _drawEnd: function() {
                 this.core.addChild(this._pie.sprite);
@@ -290,6 +295,45 @@
                 this.fire('complete', {
                     data: this.getList()
                 });
-            }
+            },
+            //设置图例 begin
+            _setLengend: function(){
+                var me = this;
+                if( this.legend && "enabled" in this.legend && !this.legend.enabled ) return;
+                //设置legendOpt
+                var legendOpt = _.deepExtend({
+                    label  : function( info ){
+                       return info.field
+                    },
+                    onChecked : function( field ){
+                    },
+                    onUnChecked : function( field ){
+                    },
+                    layoutType : "v"
+                } , this._opts.legend);
+                
+                this._legend = new Legend( this._getLegendData() , legendOpt );
+                this.stage.addChild( this._legend.sprite );
+                this._legend.pos( {
+                    x : this.width-this._legend.width,
+                    y : this.height/2 - this._legend.h/2
+                } );
+
+                this.padding.right += this._legend.width;
+            },
+            _getLegendData : function(){
+                var me   = this;
+                var data = [];
+                _.each( this.dataFrame.data , function( obj , i ){
+                    data.push({
+                        field : obj.name,
+                        value : obj.y,
+                        fillStyle : null
+                    });
+                });
+
+                return data;
+            },
+            ////设置图例end
         });
     });
