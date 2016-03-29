@@ -748,6 +748,41 @@ title:  Chartx demos
 
 </div>
 
+## 标签云
+
+<div class="charts">
+    <a target="_blank" href="./demo/cloud/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/cloud/index.png">
+        </dt>
+        <dd>
+            <h5>
+            标签云
+            </h5>
+        </dd>
+    </dl>
+    </a>
+</div>
+
+## 桑基图
+
+<div class="charts">
+    <a target="_blank" href="./demo/sankey/index.html">
+    <dl class="chart">
+        <dt>
+        <img src="./assets/chart/sankey/index.png">
+        </dt>
+        <dd>
+            <h5>
+            桑基图
+            </h5>
+        </dd>
+    </dl>
+    </a>
+
+</div>
+
 ## 混合图
 
 <div class="charts">
