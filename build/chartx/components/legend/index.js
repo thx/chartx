@@ -122,7 +122,7 @@ define(
             _widget:function(){
                 var me = this;
  
-                var width = 0,height = me.tag.height;
+                var width = 0,height = 0;
                 _.each( this.data , function( obj , i ){
 
                     //如果外面没有设置过，就默认为激活状态
@@ -181,11 +181,13 @@ define(
                     var spItemC = {
                         height : me.tag.height
                     };
+
                     if( me.layoutType == "v" ){
+                        height += me.tag.height;
                         spItemC.y = height;
                         width = Math.max( width , itemW );
-                        height = me.tag.height*i;
                     } else {
+                        height = me.tag.height
                         spItemC.x = width ;
                         width += itemW;
                     };

@@ -1248,21 +1248,6 @@ define(
 
                 var me = this;
 
-
-                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
-                /*
-                if (this.biaxial) {
-                    _.each(this._graphs.groups, function(group, i) {
-                        var color = group._bline.context.strokeStyle;
-                        if (i == 0) {
-                            me._yAxis.setAllStyle(color);
-                        } else {
-                            me._yAxisR.setAllStyle(color);
-                        }
-                    });
-                }
-                */
-
                 //执行生长动画
                 if (!this.inited) {
                     this._graphs.grow(function(g) {
@@ -1279,7 +1264,6 @@ define(
                 if (this._anchor.enabled) {
                     //绘制点位线
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
-
                     this._anchor.draw({
                         w: this._xAxis.xGraphsWidth, //this.width - _yAxisW - _yAxisRW,
                         h: _graphsH,
@@ -1531,12 +1515,11 @@ define(
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
-                var center = parseInt(dataFrame.yAxis.center[index].agPosition)
+                var center = parseInt(dataFrame.yAxis.center[index].agPosition);
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var content = g.field + '均值',
                         strokeStyle = g.line.strokeStyle;
                     if (me.markLine.text && me.markLine.text.enabled) {
-
                         if (_.isFunction(me.markLine.text.format)) {
                             var o = {
                                 iGroup: index,
@@ -1545,6 +1528,21 @@ define(
                             content = me.markLine.text.format(o)
                         }
                     };
+
+                    var _y = center;
+                    
+                    //如果markline有自己预设的y值
+                    if( me.markLine.y != undefined ){
+                        var _y = me.markLine.y;
+                        if(_.isFunction(_y)){
+                            _y = _y( g.field );
+                        };
+
+                        if( _y != undefined ){
+                            _y = g._yAxis.tansValToPos(_y);
+                        }
+                    };
+
                     var o = {
                         w: me._xAxis.xGraphsWidth,
                         h: me._yAxis.yGraphsHeight,
@@ -1553,7 +1551,7 @@ define(
                             y: me._back.pos.y
                         },
                         line: {
-                            y: center,
+                            y: _y,
                             list: [
                                 [0, 0],
                                 [me._xAxis.xGraphsWidth, 0]

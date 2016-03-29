@@ -298,16 +298,15 @@ define(
                    animate();
                 };
                 function animate(){
-                    timer    = requestAnimationFrame( animate ); 
+                    timer = requestAnimationFrame( animate ); 
                     Tween.update();
                 };
                 growAnima();
-
             },
             _getCurrRatio : function( field ){
                 if( this.field ){
                     return this.currRatio[field];
-                }
+                };
                 return this.currRatio;
             },
             _setCurrRatio : function( field , ratio ){

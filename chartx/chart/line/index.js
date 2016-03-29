@@ -564,12 +564,11 @@ define(
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
-                var center = parseInt(dataFrame.yAxis.center[index].agPosition)
+                var center = parseInt(dataFrame.yAxis.center[index].agPosition);
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var content = g.field + '均值',
                         strokeStyle = g.line.strokeStyle;
                     if (me.markLine.text && me.markLine.text.enabled) {
-
                         if (_.isFunction(me.markLine.text.format)) {
                             var o = {
                                 iGroup: index,
@@ -578,6 +577,21 @@ define(
                             content = me.markLine.text.format(o)
                         }
                     };
+
+                    var _y = center;
+                    
+                    //如果markline有自己预设的y值
+                    if( me.markLine.y != undefined ){
+                        var _y = me.markLine.y;
+                        if(_.isFunction(_y)){
+                            _y = _y( g.field );
+                        };
+
+                        if( _y != undefined ){
+                            _y = g._yAxis.tansValToPos(_y);
+                        }
+                    };
+
                     var o = {
                         w: me._xAxis.xGraphsWidth,
                         h: me._yAxis.yGraphsHeight,
@@ -586,7 +600,7 @@ define(
                             y: me._back.pos.y
                         },
                         line: {
-                            y: center,
+                            y: _y,
                             list: [
                                 [0, 0],
                                 [me._xAxis.xGraphsWidth, 0]

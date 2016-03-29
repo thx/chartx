@@ -1292,7 +1292,7 @@ define(
             _widget:function(){
                 var me = this;
  
-                var width = 0,height = me.tag.height;
+                var width = 0,height = 0;
                 _.each( this.data , function( obj , i ){
 
                     //如果外面没有设置过，就默认为激活状态
@@ -1351,11 +1351,13 @@ define(
                     var spItemC = {
                         height : me.tag.height
                     };
+
                     if( me.layoutType == "v" ){
+                        height += me.tag.height;
                         spItemC.y = height;
                         width = Math.max( width , itemW );
-                        height = me.tag.height*i;
                     } else {
+                        height = me.tag.height
                         spItemC.x = width ;
                         width += itemW;
                     };
@@ -2562,15 +2564,20 @@ define(
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
             },
+            tansValToPos : function( val ){
+                var max = this.dataSection[this.dataSection.length - 1];
+                var y = -(val - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
+                y = isNaN(y) ? 0 : parseInt(y);
+                return y;
+            },
             _trimYAxis: function() {
                 var max = this.dataSection[this.dataSection.length - 1];
                 var tmpData = [];
                 for (var a = 0, al = this.dataSection.length; a < al; a++) {
-                    var y = -(this.dataSection[a] - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
-                    y = isNaN(y) ? 0 : parseInt(y);
+                    
                     tmpData[a] = {
                         content: this.dataSection[a],
-                        y: y
+                        y: this.tansValToPos( this.dataSection[a] )
                     };
                 }
 
