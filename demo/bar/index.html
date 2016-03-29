@@ -42,11 +42,19 @@ var data= [
 ];
 var options = {
     yAxis : {
-        field : ["uv","pv"],
+        field : [ ["uv","pv"] , "click"],
         //enabled : false
     },
     xAxis : {
         field : ["xfield"]
+    },
+    legend : {
+        tips : {
+            enabled:true,
+            content : function(e){
+
+            }
+        }
     }
 };   
 Chartx.bar("canvasTest" , data , options).then(function(bar){

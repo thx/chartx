@@ -158,6 +158,7 @@ define(
                 var me = this
                 var index = $o.iNode
                 var group = me.barsSp.getChildById('barGroup_' + index)
+                
                 var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
                 for (var a = 0, al = group.getNumChildren(); a < al; a++) {
                     var rectEl = group.getChildAt(a)
@@ -222,15 +223,18 @@ define(
                 if (this.bar.width) {
                     if (_.isFunction(this.bar.width)) {
                         this.bar._width = this.bar.width(xDis1);
+                    } else {
+                        this.bar._width = this.bar.width;
                     }
-                };
-                if (!this.bar.width) {
+                } else {
                     this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
+
+                    //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
+                    if (this.bar._width == 1 && xDis1 > 3) {
+                        this.bar._width = parseInt(xDis1) - 2;
+                    };
                 };
                 this.bar._width < 1 && (this.bar._width = 1);
-                if (this.bar._width == 1 && xDis1 > 3) {
-                    this.bar._width = parseInt(xDis1) - 2;
-                };
             },
             resetData: function(data, opt) {
                 this.draw(data.data, opt);
@@ -585,7 +589,7 @@ define(
                 };
 
                 //先把已经不在当前range范围内的元素destroy掉
-                if (self.barsSp.children.length > self.data[0][0].length) {
+                if ( self.data[0] && self.barsSp.children.length > self.data[0][0].length) {
                     for (var i = self.data[0][0].length, l = self.barsSp.children.length; i < l; i++) {
                         self.barsSp.getChildAt(i).destroy();
                         self.text.enabled && self.txtsSp.getChildAt(i).destroy();
@@ -832,9 +836,10 @@ define(
         'chartx/chart/bar/graphs',
         'chartx/components/tips/tip',
         'chartx/utils/dataformat',
-        'chartx/components/datazoom/index'
+        'chartx/components/datazoom/index',
+        'chartx/components/legend/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat, DataZoom) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat, DataZoom, Legend) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -874,6 +879,12 @@ define(
                 };
 
                 this.dataFrame = this._initData(data);
+
+                this._setLengend();
+                
+                //吧原始的field转换为对应结构的显示树
+                //["uv"] --> [{field:'uv',enabled:true , fillStyle: }]
+                this._fieldsDisplayMap = this.__setFieldsDisplay( this._opts.yAxis.field );
 
                 //一些继承自该类的constructor 会拥有_init来做一些覆盖，比如横向柱状图
                 this._init && this._init(node, data, opts);
@@ -920,6 +931,143 @@ define(
                 return _.filter(me._checkedList, function(o) {
                     return o
                 })
+            },
+            //和原始field结构保持一致，但是对应的field换成 {field: , enabled:}结构
+            __setFieldsDisplay : function( fields ){
+                var clone_fields = _.clone( fields );
+                for(var i = 0 , l=fields.length ; i<l ; i++) {
+                    if( _.isString( fields[i] ) ){
+                        clone_fields[i] = {
+                            field : fields[i],
+                            enabled : true
+                        }
+                    }
+                    if( _.isArray( fields[i] ) ){
+                        clone_fields[i] = this.__setFieldsDisplay( fields[i] );
+                    }
+                };
+                return clone_fields;
+            },
+            _getFieldsOfDisplay: function( maps ){
+                var fields = [];
+                !maps && ( maps = this._fieldsDisplayMap );
+                for( var i=0,l=maps.length ; i<l ; i++ ){
+                    if( _.isArray(maps[i]) ){
+                        var _fs = this._getFieldsOfDisplay( maps[i] );
+                        _fs.length>0 && (fields[i] = _fs);
+                    } else if( maps[i].field && maps[i].enabled ) {
+                        fields[i] = maps[i].field;
+                    };
+                };
+                return fields;
+            },
+            //设置_fieldsDisplayMap中对应field 的 enabled状态
+            _setFieldDisplay: function( field ){
+                var me = this;
+                function set( maps ){
+                    _.each( maps , function( map , i ){
+                        if( _.isArray( map ) ){
+                            set( map )
+                        } else if( map.field && map.field == field ) {
+                            map.enabled = !map.enabled;
+                        }
+                    } );
+                }
+                set( me._fieldsDisplayMap );
+            },
+            //TODO：bar中用来改变yAxis.field的临时 方案
+            _resetOfLengend : function( field ){
+                var me = this;
+                
+                me._setFieldDisplay( field );
+
+                _.deepExtend(this, {
+                    yAxis : {
+                        field : me._getFieldsOfDisplay()
+                    }
+                });
+
+                if( this.graphs && this.graphs.bar && _.isFunction( this.graphs.bar.fillStyle )){
+                    var _fillStyle = this.graphs.bar.fillStyle;
+                    this.graphs.bar.fillStyle = function( f ){
+                        var res = _fillStyle( f );
+                        if( !res ){
+                            if( me._legend ){
+                                res = me._legend.getStyle(f.field).fillStyle;
+                            }
+                        }
+                        return res;
+                    }
+                } else {
+                    _.deepExtend(this, {
+                        graphs : {
+                            bar : {
+                                fillStyle : function( f ){
+                
+                                    if( me._legend ){
+                                        return me._legend.getStyle(f.field).fillStyle;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+
+
+                for (var i=0,l=this.canvax.children.length;i<l;i++){
+                    var stage = this.canvax.getChildAt(i);
+                    for( var s = 0 , sl=stage.children.length ; s<sl ; s++){
+                        var sp = stage.getChildAt(s);
+                        if(sp.id == "LegendSprite" || sp.id == "legend_tip"){
+                            continue
+                        }
+                        stage.getChildAt(s).destroy();
+                        s--;
+                        sl--;
+                    }
+                };
+                
+                this.dataFrame = this._initData( this._data );
+                this.draw();
+            },
+            _setLengend: function(){
+                var me = this;
+                if( this.legend && "enabled" in this.legend && !this.legend.enabled ) return;
+                //设置legendOpt
+                var legendOpt = _.deepExtend({
+                    label  : function( info ){
+                       return info.field
+                    },
+                    onChecked : function( field ){
+                       me._resetOfLengend( field );
+                    },
+                    onUnChecked : function( field ){
+                       me._resetOfLengend( field );
+                    }
+                } , this._opts.legend);
+                
+                this._legend = new Legend( this._getLegendData() , legendOpt );
+                this.stage.addChild( this._legend.sprite );
+                this._legend.pos( {
+                    x : 0,
+                    y : this.padding.top
+                } );
+
+                this.padding.top += this._legend.height;
+            },
+            //只有field为多组数据的时候才需要legend
+            _getLegendData : function(){
+                var me   = this;
+                var data = [];
+                _.each( _.flatten(me.dataFrame.yAxis.field) , function( f , i ){
+                    data.push({
+                        field : f,
+                        value : null,
+                        fillStyle : null
+                    });
+                });
+                return data;
             },
             checkAt: function(index) {
                 var me = this
@@ -1181,7 +1329,18 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this._initDataZoom();
-                }
+                };
+
+                //如果有legend，调整下位置,和设置下颜色
+                if(this._legend && !this._legend.inited){
+                    this._legend.pos( { x : _yAxisW } );
+
+                    for( var f in this._graphs._yAxisFieldsMap ){
+                        var ffill = this._graphs._yAxisFieldsMap[f].fillStyle;
+                        this._legend.setStyle( f , {fillStyle : ffill} );
+                    };
+                    this._legend.inited = true;
+                };
             },
 
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面

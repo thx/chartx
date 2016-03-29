@@ -10,9 +10,10 @@ define(
         'chartx/chart/line/graphs',
         'chartx/chart/line/tips',
         'chartx/utils/dataformat',
-        'chartx/components/datazoom/index'
+        'chartx/components/datazoom/index',
+        'chartx/components/legend/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom , Legend) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -53,6 +54,8 @@ define(
 
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
+
+                this._setLengend();
             },
             draw: function() {
                 this.stageTip = new Canvax.Display.Sprite({
@@ -77,12 +80,22 @@ define(
                 this._endDraw();
                 this.inited = true;
             },
+            reset: function(obj) {
+                this._reset && this._reset( obj );
+                var d = ( this.dataFrame.org || [] );
+                if (obj && obj.options) {
+                    _.deepExtend(this, obj.options);
+                };
+                if (obj && obj.data) {
+                    d = obj.data;
+                };
+                d && this.resetData(d);
+            },
             /*
              * 如果只有数据改动的情况
              */
             resetData: function(data) {
                 this.dataFrame = this._initData(data, this);
-
                 this._xAxis.resetData(this.dataFrame.xAxis);
                 this._yAxis.resetData(this.dataFrame.yAxis);
                 this._graphs.resetData(this._trimGraphs(), {
@@ -284,21 +297,6 @@ define(
 
                 var me = this;
 
-
-                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
-                /*
-                if (this.biaxial) {
-                    _.each(this._graphs.groups, function(group, i) {
-                        var color = group._bline.context.strokeStyle;
-                        if (i == 0) {
-                            me._yAxis.setAllStyle(color);
-                        } else {
-                            me._yAxisR.setAllStyle(color);
-                        }
-                    });
-                }
-                */
-
                 //执行生长动画
                 if (!this.inited) {
                     this._graphs.grow(function(g) {
@@ -315,7 +313,6 @@ define(
                 if (this._anchor.enabled) {
                     //绘制点位线
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
-
                     this._anchor.draw({
                         w: this._xAxis.xGraphsWidth, //this.width - _yAxisW - _yAxisRW,
                         h: _graphsH,
@@ -334,6 +331,17 @@ define(
                 if (this.dataZoom.enabled) {
                     this._initDataZoom();
                 };
+
+                //如果有legend，调整下位置,和设置下颜色
+                if(this._legend && !this._legend.inited){
+                    this._legend.pos( { x : _yAxisW } );
+
+                    for( var f in this._graphs._yAxisFieldsMap ){
+                        var ffill = this._graphs._yAxisFieldsMap[f].line.strokeStyle;
+                        this._legend.setStyle( f , {fillStyle : ffill} );
+                    };
+                    this._legend.inited = true;
+                };
             },
             _endDraw: function() {
                 //this.stageBg.addChild(this._back.sprite);
@@ -346,6 +354,49 @@ define(
                 this.core.addChild(this._graphs.sprite);
                 this.stageTip.addChild(this._tip.sprite);
             },
+
+            //设置图例 begin
+            _setLengend: function(){
+                var me = this;
+                if( this.legend && "enabled" in this.legend && !this.legend.enabled ) return;
+                //设置legendOpt
+                var legendOpt = _.deepExtend({
+                    label  : function( info ){
+                       return info.field
+                    },
+                    onChecked : function( field ){
+                       //me._resetOfLengend( field );
+                       me.add( field );
+                    },
+                    onUnChecked : function( field ){
+                       //me._resetOfLengend( field );
+                       me.remove( field );
+                    }
+                } , this._opts.legend);
+                
+                this._legend = new Legend( this._getLegendData() , legendOpt );
+                this.stage.addChild( this._legend.sprite );
+                this._legend.pos( {
+                    x : 0,
+                    y : this.padding.top
+                } );
+
+                this.padding.top += this._legend.height;
+            },
+            //只有field为多组数据的时候才需要legend
+            _getLegendData : function(){
+                var me   = this;
+                var data = [];
+                _.each( _.flatten(me.dataFrame.yAxis.field) , function( f , i ){
+                    data.push({
+                        field : f,
+                        value : null,
+                        fillStyle : null
+                    });
+                });
+                return data;
+            },
+            ////设置图例end
             _initPlugs: function(opts, g) {
                 if (opts.markLine) {
                     this._initMarkLine(g);
@@ -513,12 +564,11 @@ define(
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
-                var center = parseInt(dataFrame.yAxis.center[index].agPosition)
+                var center = parseInt(dataFrame.yAxis.center[index].agPosition);
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var content = g.field + '均值',
                         strokeStyle = g.line.strokeStyle;
                     if (me.markLine.text && me.markLine.text.enabled) {
-
                         if (_.isFunction(me.markLine.text.format)) {
                             var o = {
                                 iGroup: index,
@@ -527,6 +577,21 @@ define(
                             content = me.markLine.text.format(o)
                         }
                     };
+
+                    var _y = center;
+                    
+                    //如果markline有自己预设的y值
+                    if( me.markLine.y != undefined ){
+                        var _y = me.markLine.y;
+                        if(_.isFunction(_y)){
+                            _y = _y( g.field );
+                        };
+
+                        if( _y != undefined ){
+                            _y = g._yAxis.tansValToPos(_y);
+                        }
+                    };
+
                     var o = {
                         w: me._xAxis.xGraphsWidth,
                         h: me._yAxis.yGraphsHeight,
@@ -535,7 +600,7 @@ define(
                             y: me._back.pos.y
                         },
                         line: {
-                            y: center,
+                            y: _y,
                             list: [
                                 [0, 0],
                                 [me._xAxis.xGraphsWidth, 0]

@@ -11,14 +11,14 @@ define(
             this.h = 0;
             this.y = 0;
 
-            //这里所有的opt都要透传给group
+            //这里所有的opt都要透传给 group
             this.opt = opt;
             this.root = root;
             this.ctx = root.stage.context2D;
             this.field = null;
 
             //一个记录了原始yAxis.field 一些基本信息的map
-            //{ "uv" : {ind : 0 , _yAxis : } ...}
+            //{ "uv" : {ind : 0 , _yAxis : , line} ...}
             this._yAxisFieldsMap = {};
             this._setyAxisFieldsMap();
 
@@ -57,6 +57,11 @@ define(
             draw: function(opt) {
                 _.deepExtend(this, opt);
                 this._widget(opt);
+                
+                var me = this;
+                _.each( this.groups , function( group ){
+                    me._yAxisFieldsMap[group.field].line = group.line;
+                } );
             },
             resetData: function(data, opt) {
                 var self = this;
@@ -100,6 +105,7 @@ define(
             add: function(opt, field) {
                 var self = this;
                 _.deepExtend(this, opt);
+
                 var group = new Group(
                     field,
                     self._yAxisFieldsMap[field]._groupInd, //_groupInd
@@ -121,7 +127,8 @@ define(
 
                 _.each(this.groups, function(g, i) {
                     //_groupInd要重新计算
-                    g._groupInd = i;
+                    //TODO：这个_groupInd的重新计算取消了可能会影像到其他场景
+                    //g._groupInd = i;
                     g.update({
                         data: self.data[i]
                     });

@@ -65,6 +65,15 @@ $("body").click(function(){
     $("#canvasTest").width(400)
     $("#canvasTest").height(300)
 
+    var options = {
+    yAxis : {
+        field : ["uv"],
+        //enabled : false
+    },
+    xAxis : {
+        field : ["xfield"]
+    }
+}
     bar.reset({
         data : data1,
         options:options

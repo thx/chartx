@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original'],
+    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original' , 'sankey'],
     canvax: null,
     create: {},
     _start: function() {
@@ -66,12 +66,24 @@ window.Chartx || (Chartx = {
                     promise.chart = new chartConstructor(el, data, options);
                     promise.chart.draw();
 
-                    _.each(promise._thenFn, function(fn) {
-                        _.isFunction(fn) && fn(promise.chart);
-                    });
-                    promise._thenFn = [];
+                    function _drawEnd(){
+                        _.each(promise._thenFn, function(fn) {
+                            _.isFunction(fn) && fn(promise.chart);
+                        });
+                        promise._thenFn = [];
+                        promise.path = path;
+                    };
 
-                    promise.path = path;
+                    if( promise.chart.drawEnd ){
+                        var __drawEnd = promise.chart.drawEnd;
+                        promise.chart.drawEnd = function(){
+                            __drawEnd.apply( promise.chart , arguments );
+                            _drawEnd();
+                        };
+                    } else {
+                        _drawEnd();
+                    };
+                    
                 } else {
                     //如果require回来的时候发现已经promise._destroy == true了
                     //说明已经其已经不需要创建了，可能宿主环境已经销毁
@@ -318,7 +330,7 @@ define(
             dataFrame: null, //每个图表的数据集合 都 存放在dataFrame中。
             draw: function() {},
             /*
-             * chart的销毁 
+             * chart的销毁
              */
             destroy: function() {
                 this.clean();
@@ -353,37 +365,26 @@ define(
             /**
              * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
              * @param obj {data , options}
+             * 这个是最简单粗暴的reset方式，全部叉掉重新画，但是如果有些需要比较细腻的reset，比如
+             * line，bar数据变化是在原有的原件上面做平滑的变动的话，需要在各自图表的构造函数中重置该函数
              */
             reset: function(obj) {
-                /*如果用户有调用reset就说明用户是有想要绘制的 
-                 *还是把这个权利交给使用者自己来控制吧
-                if( !obj || _.isEmpty(obj)){
-                    return;
-                }
-                */
-                //如果只有数据的变化
-                if (obj && obj.data && !obj.options && this.resetData) {
-                    this.resetData( obj.data );
-                    return;
-                };
+                this._reset && this._reset( obj );
+                var d = ( this.dataFrame.org || [] );
                 if (obj && obj.options) {
-                    //注意，options的覆盖用的是deepExtend
-                    //所以只需要传入要修改的 option部分
-
                     _.deepExtend(this, obj.options);
-
-                    //配置的变化有可能也会导致data的改变
-                    this.dataFrame && (this.dataFrame = this._initData(this.dataFrame.org));
-                }
+                };
                 if (obj && obj.data) {
-                    //数据集合，由_initData 初始化
-                    this.dataFrame = this._initData(obj.data);
-                }
+                    d = obj.data;
+                };
+                d && this.resetData(d);
                 this.clean();
                 this.canvax.getDomContainer().innerHTML = "";
                 this.draw();
             },
-
+            resetData: function( data ){
+                this.dataFrame = this._initData( data );
+            },
             _rotate: function(angle) {
                 var currW = this.width;
                 var currH = this.height;
@@ -853,7 +854,7 @@ define(
                 start: 0,
                 end: 1,
                 max : '',
-                min : 2
+                min : 1
             };
             this.count = 1;
             this.pos = {
@@ -951,9 +952,9 @@ define(
 
                 if(me.underline.enabled){
                     me._underline = me._addLine({
-                        xStart : me.range.start / (me.count - 1) * me.w + me.btnW / 2,
+                        xStart : me.range.start / me.count * me.w + me.btnW / 2,
                         yStart : me.barY + me.barH + 2,
-                        xEnd   : me.range.end / (me.count - 1) * me.w - me.btnW / 2,
+                        xEnd   : (me.range.end + 1) / me.count * me.w  - me.btnW / 2,
                         yEnd   : me.barY + me.barH + 2,
                         lineWidth : me.underline.lineWidth,
                         strokeStyle : me.underline.strokeStyle,
@@ -961,19 +962,19 @@ define(
                     me.dataZoomBg.addChild(me._underline); 
                 }
 
-                this._btnLeft = new Rect({
+                me._btnLeft = new Rect({
                     id          : 'btnLeft',
-                    dragEnabled : this.left.eventEnabled,
+                    dragEnabled : me.left.eventEnabled,
                     context: {
-                        x: this.range.start / (this.count - 1)* this.w,
-                        y: this.barY - this.barAddH / 2 + 1,
-                        width: this.btnW,
-                        height: this.barH + this.barAddH,
-                        fillStyle : this.btnFillStyle,
-                        cursor: this.left.eventEnabled && "move"
+                        x: me.range.start / me.count * me.w,
+                        y: me.barY - me.barAddH / 2 + 1,
+                        width: me.btnW,
+                        height: me.barH + me.barAddH,
+                        fillStyle : me.btnFillStyle,
+                        cursor: me.left.eventEnabled && "move"
                     }
                 });
-                this._btnLeft.on("draging" , function(){
+                me._btnLeft.on("draging" , function(){
                    this.context.y = me.barY - me.barAddH / 2 + 1
                    if(this.context.x < 0){
                        this.context.x = 0;
@@ -987,29 +988,28 @@ define(
                    if(me._btnRight.context.x + me.btnW - this.context.x < me.disPart.min){
                        this.context.x = me._btnRight.context.x + me.btnW - me.disPart.min
                    }
-
                    me.rangeRect.context.width = me._btnRight.context.x - this.context.x - me.btnW;
                    me.rangeRect.context.x = this.context.x + me.btnW;
                    me._setRange();
                 });
-                this._btnLeft.on("dragend" , function(){
+                me._btnLeft.on("dragend" , function(){
                    me.dragEnd( me.range );
                 });
 
 
-                this._btnRight = new Rect({
+                me._btnRight = new Rect({
                     id          : 'btnRight',
-                    dragEnabled : this.right.eventEnabled,
+                    dragEnabled : me.right.eventEnabled,
                     context: {
-                        x: this.range.end / (this.count - 1) * this.w - this.btnW,
-                        y: this.barY - this.barAddH / 2 + 1,
-                        width: this.btnW,
-                        height: this.barH + this.barAddH ,
-                        fillStyle : this.btnFillStyle,
-                        cursor : this.right.eventEnabled && "move"
+                        x: (me.range.end + 1) / me.count * me.w - me.btnW,
+                        y: me.barY - me.barAddH / 2 + 1,
+                        width: me.btnW,
+                        height: me.barH + me.barAddH ,
+                        fillStyle : me.btnFillStyle,
+                        cursor : me.right.eventEnabled && "move"
                     }
                 });
-                this._btnRight.on("draging" , function(){
+                me._btnRight.on("draging" , function(){
                     this.context.y = me.barY - me.barAddH / 2 + 1
                     if( this.context.x > me.w - me.btnW ){
                         this.context.x = me.w - me.btnW;
@@ -1020,11 +1020,10 @@ define(
                     if( this.context.x + me.btnW - me._btnLeft.context.x < me.disPart.min){
                         this.context.x = me.disPart.min - (me.btnW - me._btnLeft.context.x)
                     }
-
                     me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnW;
                     me._setRange();
                 });
-                this._btnRight.on("dragend" , function(){
+                me._btnRight.on("dragend" , function(){
                     me.dragEnd( me.range );
                 });
 
@@ -1126,8 +1125,8 @@ define(
                 linesCenter.context.y = btnCenter.context.y + (btnCenter.context.height - linesCenter.context.height ) / 2
 
                 if(me.underline.enabled){
-                    me._underline.context.xStart = me.range.start / (me.count - 1) * me.w + me.btnW / 2
-                    me._underline.context.xEnd   = me.range.end / (me.count - 1) * me.w - me.btnW / 2
+                    me._underline.context.xStart = linesLeft.context.x + me.btnW / 2
+                    me._underline.context.xEnd   = linesRight.context.x + me.btnW / 2
                 }
             },
 
@@ -1181,25 +1180,37 @@ define(
     "chartx/components/legend/index" , 
     [
         "canvax/index",
-        "canvax/shape/Rect"
+        "canvax/shape/Circle",
+        "chartx/components/tips/tip",
     ],
-    function(Canvax , Rect){
+    function(Canvax , Circle , Tips){
         var Legend = function(data , opt){
             this.data = data || [];
-            this.w = 0;
-            this.h = 0;
+            this.width = 0;
+            this.height = 0;
             this.tag = {
                 height : 20
-            }
-            this.enabled = 1 ; //1,0 true ,false 
+            };
+            this.enabled = true; //1,0 true ,false 
 
             this.icon = {
-                width : 6,
-                height: 6,
+                r : 5,
                 lineWidth : 1,
                 fillStyle : "#999"
-            }
-            this.layoutType = "vertical"
+            };
+
+            this.tips = {
+                enabled : false
+            };
+
+            this.onChecked=function(){};
+            this.onUnChecked=function(){};
+
+            this._labelColor = "#999";
+
+            //this.label = null; //label格式化函数配置
+
+            this.layoutType = "h"; //横向 horizontal--> h
 
             this.sprite  = null;
 
@@ -1218,67 +1229,183 @@ define(
                 this.draw();
             },
             pos : function( pos ){
-                this.sprite.context.x = pos.x;
-                this.sprite.context.y = pos.y;
+                pos.x && (this.sprite.context.x = pos.x);
+                pos.y && (this.sprite.context.y = pos.y);
             },
             draw:function(opt , _xAxis , _yAxis){
                 if( this.enabled ){ 
                     this._widget();
-                } 
+                }; 
             },
+            _showTips : function(e){
+                if( this._hideTimer ){
+                    clearTimeout( this._hideTimer );
+                };
+                this._hideTimer = null;
+
+                if( !this._legendTip ){
+                    this._legendTip = new Canvax.Display.Sprite({
+                        id: 'legend_tip'
+                    });
+                    var stage = this.sprite.getStage();
+                    stage.addChild( this._legendTip );
+                    this._tips = new Tips(this.tips, stage.parent.getDomContainer());
+                    this._tips._getDefaultContent = function(info) {
+                        return info.field;
+                    };
+                    this._legendTip.addChild( this._tips.sprite );
+                };
+                this._tips.show(e);
+            },
+            _hide: function(e){
+                var me = this;
+                this._hideTimer = setTimeout(function(){
+                    me._tips.hide();
+                } , 300);
+            },
+            //label格式化函数配置
             label : function( info ){
                 return info.field+"："+info.value;
             },
+            setStyle : function( field , style ){
+                var me = this;
+                _.each( this.data , function( obj , i ){
+                    if( obj.field == field ){
+                        if( style.fillStyle ){
+                            obj.fillStyle = style.fillStyle;
+                            var icon = me.sprite.getChildById("lenend_field_"+i).getChildById("lenend_field_icon_"+i);
+                            icon.context.fillStyle = style.fillStyle;
+                        };
+                    };
+                } );
+            },
+            getStyle : function( field ){
+                var me = this;
+                var data = null;
+                _.each( this.data , function( obj , i ){
+                    if( obj.field == field ){
+                        data = obj;
+                    };
+                } );
+                return data;
+            },
             _widget:function(){
                 var me = this;
-
-                var max = 0;
+ 
+                var width = 0,height = 0;
                 _.each( this.data , function( obj , i ){
-                    var sprite = new Canvax.Display.Sprite({
-                        context : {
-                            height : me.tag.height,
-                            y      : me.tag.height*i
-                        }
-                    });
-                    var icon   = new Rect({
-                        context : {
-                            width : me.icon.width,
-                            height: me.icon.height,
-                            x     : 0,
-                            y     : me.tag.height/2 - me.icon.height/2,
-                            fillStyle : obj.fillStyle
-                        }
-                    });
-                    sprite.addChild( icon );
 
+                    //如果外面没有设置过，就默认为激活状态
+                    if( obj.activate == undefined || obj.activate ){
+                        obj.activate = true;
+                    } else {
+                        obj.activate = false;
+                    };
+
+                    var icon   = new Circle({
+                        id : "lenend_field_icon_"+i,
+                        context : {
+                            x     : 0,
+                            y     : me.tag.height/2 ,
+                            fillStyle : obj.activate ? "#ccc" : (obj.fillStyle || me._labelColor),
+                            r : me.icon.r,
+                            cursor: "pointer"
+                        }
+                    });
+                    icon.hover(function( e ){
+                        me._showTips( me._getInfoHandler(e,obj) );
+                    } , function(e){
+                        me._hide(e);
+                    });
+                    icon.on("mousemove" , function( e ){
+                        me._showTips( me._getInfoHandler(e,obj) );
+                    });
+                    icon.on("click" , function(){});
+                    
                     var content= me.label(obj);
                     var txt    = new Canvax.Display.Text( content , {
+                        id: "lenend_field_txt_"+i,
                         context : {
-                            x : me.icon.width+6,
+                            x : me.icon.r + 3 ,
                             y : me.tag.height / 2,
                             textAlign : "left",
                             textBaseline : "middle",
-                            fillStyle : "#333" //obj.fillStyle
+                            fillStyle : "#333", //obj.fillStyle
+                            cursor: "pointer"
                         }
                     } );
-                    sprite.addChild(txt);
+                
+                    txt.hover(function( e ){
+                        me._showTips( me._getInfoHandler(e,obj) );
+                    } , function(e){
+                        me._hide(e);
+                    });
+                    txt.on("mousemove" , function( e ){
+                        me._showTips( me._getInfoHandler(e,obj) );
+                    });
+                    txt.on("click" , function(){});
 
-                    sprite.context.width = me.icon.width + 6 + txt.getTextWidth();
-                    max = Math.max( max , sprite.context.width );
+                    var txtW = txt.getTextWidth();
+                    var itemW = txtW + me.icon.r*2 + 20;
+
+                    var spItemC = {
+                        height : me.tag.height
+                    };
+
+                    if( me.layoutType == "v" ){
+                        height += me.tag.height;
+                        spItemC.y = height;
+                        width = Math.max( width , itemW );
+                    } else {
+                        height = me.tag.height
+                        spItemC.x = width ;
+                        width += itemW;
+                    };
+                    var sprite = new Canvax.Display.Sprite({
+                        id : "lenend_field_"+i,
+                        context : spItemC
+                    });
+                    sprite.addChild( icon );
+                    sprite.addChild( txt );
+
+                    sprite.context.width = itemW;
                     me.sprite.addChild(sprite);
+
+                    sprite.on("click" , function( e ){
+                        icon.context.fillStyle = obj.activate ? "#ccc" : (obj.fillStyle || me._labelColor)
+                        obj.activate = !obj.activate;
+                        if( obj.activate ){
+                            me.onChecked( obj.field );
+                        } else {
+                            me.onUnChecked( obj.field );
+                        }
+                    });
+
                 } );
 
-                me.sprite.context.width  = max;
-                me.sprite.context.height = me.sprite.children.length * me.tag.height;
-                
-                me.w = max+10;
-                me.h = me.sprite.children.length * me.tag.height;
+                //向后兼容有
+                me.width = me.sprite.context.width  = width;
+                me.height = me.sprite.context.height = height;
+            },
+            _getInfoHandler : function(e , data){
+                e.eventInfo = {
+                    field : data.field,
+                    fillStyle : data.fillStyle
+                };
+                if( data.value ) {
+                    e.eventInfo.value = data.value;
+                };
+                return e;
             }
         };
         return Legend;
     
     } 
 )
+
+
+
+
 
 
 define(
@@ -2437,15 +2564,20 @@ define(
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
             },
+            tansValToPos : function( val ){
+                var max = this.dataSection[this.dataSection.length - 1];
+                var y = -(val - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
+                y = isNaN(y) ? 0 : parseInt(y);
+                return y;
+            },
             _trimYAxis: function() {
                 var max = this.dataSection[this.dataSection.length - 1];
                 var tmpData = [];
                 for (var a = 0, al = this.dataSection.length; a < al; a++) {
-                    var y = -(this.dataSection[a] - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
-                    y = isNaN(y) ? 0 : parseInt(y);
+                    
                     tmpData[a] = {
                         content: this.dataSection[a],
-                        y: y
+                        y: this.tansValToPos( this.dataSection[a] )
                     };
                 }
 

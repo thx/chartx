@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original'],
+    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original' , 'sankey'],
     canvax: null,
     create: {},
     _start: function() {
@@ -66,12 +66,24 @@ window.Chartx || (Chartx = {
                     promise.chart = new chartConstructor(el, data, options);
                     promise.chart.draw();
 
-                    _.each(promise._thenFn, function(fn) {
-                        _.isFunction(fn) && fn(promise.chart);
-                    });
-                    promise._thenFn = [];
+                    function _drawEnd(){
+                        _.each(promise._thenFn, function(fn) {
+                            _.isFunction(fn) && fn(promise.chart);
+                        });
+                        promise._thenFn = [];
+                        promise.path = path;
+                    };
 
-                    promise.path = path;
+                    if( promise.chart.drawEnd ){
+                        var __drawEnd = promise.chart.drawEnd;
+                        promise.chart.drawEnd = function(){
+                            __drawEnd.apply( promise.chart , arguments );
+                            _drawEnd();
+                        };
+                    } else {
+                        _drawEnd();
+                    };
+                    
                 } else {
                     //如果require回来的时候发现已经promise._destroy == true了
                     //说明已经其已经不需要创建了，可能宿主环境已经销毁

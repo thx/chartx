@@ -94,7 +94,7 @@ define(
                 var color = this._getProp(s);
                 if (!color || color == "") {
                     color = this.colors[this._groupInd];
-                }
+                };
                 return color;
             },
             _getProp: function(s) {
