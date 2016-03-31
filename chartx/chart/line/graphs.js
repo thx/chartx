@@ -157,6 +157,7 @@ define(
             _setGroupsForYfield: function(fields, data, groupInd) {
                 var self = this;
                 for (var i = 0, l = fields.length; i < l; i++) {
+                    if(!data[i]) return;
                     var _sort = self.root._yAxis.sort;
                     var _biaxial = self.root.biaxial;
                     var _yAxis = self.root._yAxis;

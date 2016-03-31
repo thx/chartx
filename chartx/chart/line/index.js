@@ -696,11 +696,16 @@ define(
 
                 function _trimGraphs(_fields, _arr, _tmpData, _center, _firstLay) {
                     for (var i = 0, l = _fields.length; i < l; i++) {
-                        var __tmpData = [];
-                        _tmpData.push(__tmpData);
 
                         //单条line的全部data数据
                         var _lineData = _arr[i];
+
+                        if( !_lineData ) return;
+
+                        var __tmpData = [];
+                        _tmpData.push(__tmpData);
+
+                        
 
                         if (_firstLay && self.biaxial && i > 0) {
                             _yAxis = self._yAxisR;

@@ -378,6 +378,7 @@ define(
                 } else {
                     this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
                 }
+                this.line.strokeStyle = this.__lineStyleStyle;
                 return this.__lineStyleStyle;
             },
             _createNodes: function() {
