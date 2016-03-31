@@ -18,7 +18,6 @@
             this.sectorsSp = null;
             this.checkedSp = null;
             this.branchTxt = null;
-            //this.angleOffset = -90; //正常情况下，饼图的扇形0度是从3点钟开始，-90表示从12点开始；改值只能是90的倍数
 
             this.dataLabel = {
                 enabled: true,
@@ -359,8 +358,8 @@
                         r: self.r,
                         r0: self.r0
                     },
-                    duration: 800,
-                    easing: "Back.Out",
+                    duration: 500,
+                    //easing: "Back.In",
                     onUpdate: function () {
                         for (var i = 0; i < self.sectors.length; i++) {
                             var sec = self.sectors[i];
@@ -479,7 +478,7 @@
                 for (i = 0; i < indexs.length; i++) {
                     currentIndex = indexs[i];
                     //若Y值小于最小值，不画label    
-                    if (data[currentIndex].y != 0 && data[currentIndex].percentage <= minPercent) continue
+                    if ((data[currentIndex].y != 0 && data[currentIndex].percentage <= minPercent) || data[currentIndex].ignored) continue
                     currentY = data[currentIndex].edgey;
                     adjustX = Math.abs(data[currentIndex].edgex);
                     txtDis = currentY - baseY;
@@ -827,8 +826,9 @@
                                 }
                             };
                         });
-
-                        self.sectorsSp.addChildAt(sector, 0);
+                        if (!data[i].ignored) {
+                            self.sectorsSp.addChildAt(sector, 0);
+                        }
                         moreSecData = {
                             name: data[i].name,
                             value: data[i].y,
