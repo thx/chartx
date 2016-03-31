@@ -476,48 +476,49 @@ define(
                 };
                 return list;
             },
-            _widget: function() {
-                var self = this;
+            _widget: function(){
+                var me = this;
+                me._pointList = this._getPointList(me.data);
 
-                self._pointList = this._getPointList(self.data);
-
-                if (self._pointList.length == 0) {
+                if (me._pointList.length == 0) {
                     //filter后，data可能length==0
                     return;
                 };
                 var list = [];
-                if (self.animation) {
-                    for (var a = 0, al = self.data.length; a < al; a++) {
-                        var o = self.data[a];
+                if (me.animation) {
+                    for (var a = 0, al = me.data.length; a < al; a++) {
+                        var o = me.data[a];
                         var sourceInd = 0;
                         //如果是属于双轴中的右轴。
-                        if (self._yAxis.place == "right") {
+                        if (me._yAxis.place == "right") {
                             sourceInd = al - 1;
                         };
                         list.push([
                             o.x,
-                            self.data[sourceInd].y
+                            me.data[sourceInd].y
                         ]);
                     };
                 } else {
-                    list = self._pointList;
+                    list = me._pointList;
                 };
                 
-                self._currPointList = list;
+                me._currPointList = list;
 
                 var bline = new BrokenLine({ //线条
-                    id: "brokenline_" + self._groupInd,
+                    id: "brokenline_" + me._groupInd,
                     context: {
                         pointList: list,
-                        //strokeStyle: self._getLineStrokeStyle(),
-                        lineWidth: self.line.lineWidth,
-                        y: self.y,
-                        smooth: self.line.smooth,
-                        lineType: self._getProp(self.line.lineType),
+                        //strokeStyle: me._getLineStrokeStyle(),
+                        lineWidth: me.line.lineWidth,
+                        y: me.y,
+                        smooth: me.line.smooth,
+                        lineType: me._getProp(me.line.lineType),
                         //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
                         smoothFilter: function(rp) {
                             if (rp[1] > 0) {
                                 rp[1] = 0;
+                            } else if( Math.abs(rp[1]) > me.h ) {
+                                rp[1] = -me.h;
                             }
                         }
                     }
@@ -525,21 +526,21 @@ define(
                 if (!this.line.enabled) {
                     bline.context.visible = false
                 }
-                self.sprite.addChild(bline);
-                self._bline = bline;
+                me.sprite.addChild(bline);
+                me._bline = bline;
                 
-                bline.context.strokeStyle = self._getLineStrokeStyle();
+                bline.context.strokeStyle = me._getLineStrokeStyle();
 
                 var fill = new Path({ //填充
                     context: {
-                        path: self._fillLine(bline),
-                        fillStyle: self._getFillStyle(), //fill_gradient || self._getColor(self.fill.fillStyle),
-                        globalAlpha: _.isArray(self.fill.alpha) ? 1 : self.fill.alpha //self._getProp( self.fill.alpha )
+                        path: me._fillLine(bline),
+                        fillStyle: me._getFillStyle(), //fill_gradient || me._getColor(me.fill.fillStyle),
+                        globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha //me._getProp( me.fill.alpha )
                     }
                 });
-                self.sprite.addChild(fill);
-                self._fill = fill;
-                self._createNodes();
+                me.sprite.addChild(fill);
+                me._fill = fill;
+                me._createNodes();
             },
             _getFillStyle: function() {
                 var self = this;
