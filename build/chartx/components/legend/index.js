@@ -65,7 +65,7 @@ define(
             draw:function(opt , _xAxis , _yAxis){
                 if( this.enabled ){ 
                     this._widget();
-                }; 
+                };
             },
             _showTips : function(e){
                 if( this._hideTimer ){
@@ -202,6 +202,14 @@ define(
                     me.sprite.addChild(sprite);
 
                     sprite.on("click" , function( e ){
+
+                        //只有一个field的时候，不支持取消
+                        if( _.filter( me.data , function(obj){return obj.activate} ).length == 1 ){
+                            if( obj.activate ){
+                                return;
+                            }
+                        };
+                        
                         icon.context.fillStyle = obj.activate ? "#ccc" : (obj.fillStyle || me._labelColor)
                         obj.activate = !obj.activate;
                         if( obj.activate ){

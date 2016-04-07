@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
 <title>xChart demo -- line</title>
-<script type="text/javascript" src="../../lib/sea.js"></script>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -45,7 +45,7 @@ var data= [
     [ 8      , 66   , 83 , 51    ]
 ];
 
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+
 var options = {
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
@@ -63,9 +63,14 @@ var options = {
 
             }
         }
+    },
+    graphs : {
+       line : {
+           strokeStyle:["#4d7fff","#fa5519"]
+       }
     }
 };
-//Chartx.line开始初始化chart实例
+
 var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
 
 });
