@@ -1226,9 +1226,10 @@ define(
             //设置图例 begin
             _setLengend: function () {
                 var me = this;
-                if (this.legend && "enabled" in this.legend && !this.legend.enabled) return;
+                if ( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
                 //设置legendOpt
                 var legendOpt = _.deepExtend({
+                    legend:true,
                     label: function (info) {
                         return info.field
                     },

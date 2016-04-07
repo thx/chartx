@@ -880,7 +880,7 @@ define(
 
                 this.dataFrame = this._initData(data);
 
-                this._setLengend();
+                this._setLegend();
                 
                 //吧原始的field转换为对应结构的显示树
                 //["uv"] --> [{field:'uv',enabled:true , fillStyle: }]
@@ -1031,11 +1031,13 @@ define(
                 this.dataFrame = this._initData( this._data );
                 this.draw();
             },
-            _setLengend: function(){
+            _setLegend: function(){
+
                 var me = this;
-                if( this.legend && "enabled" in this.legend && !this.legend.enabled ) return;
+                if( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
                 //设置legendOpt
                 var legendOpt = _.deepExtend({
+                    enabled:true,
                     label  : function( info ){
                        return info.field
                     },

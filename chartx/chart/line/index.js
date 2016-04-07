@@ -55,7 +55,7 @@ define(
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
 
-                this._setLengend();
+                this._setLegend();
             },
             draw: function() {
                 this.stageTip = new Canvax.Display.Sprite({
@@ -332,7 +332,7 @@ define(
                     this._initDataZoom();
                 };
 
-                //如果有legend，调整下位置,和设置下颜色
+                //如果有 legend，调整下位置,和设置下颜色
                 if(this._legend && !this._legend.inited){
                     this._legend.pos( { x : _yAxisW } );
 
@@ -356,11 +356,12 @@ define(
             },
 
             //设置图例 begin
-            _setLengend: function(){
+            _setLegend: function(){
                 var me = this;
-                if( this.legend && "enabled" in this.legend && !this.legend.enabled ) return;
+                if( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
                 //设置legendOpt
                 var legendOpt = _.deepExtend({
+                    enabled:true,
                     label  : function( info ){
                        return info.field
                     },

@@ -79,13 +79,12 @@ define(
                                      break;
                                  }
                             }
-                        };
-
-                        //干掉无效的field配置
-                        if( !fieldInTotal ){
-                            $field.splice( i , 1 );
-                            i--;
-                            l--;
+                            //干掉无效的field配置
+                            if( !fieldInTotal ){
+                                $field.splice( i , 1 );
+                                i--;
+                                l--;
+                            };
                         };
                     }
                     return newData;
