@@ -979,7 +979,7 @@ define(
             this.tag = {
                 height : 20
             };
-            this.enabled = true; //1,0 true ,false 
+            this.enabled = false; //1,0 true ,false 
 
             this.icon = {
                 r : 5,
@@ -2204,6 +2204,7 @@ define(
 
     }
 )
+
 
 define(
     "chartx/components/yaxis/yAxis", [
