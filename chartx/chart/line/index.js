@@ -50,8 +50,6 @@ define(
 
                 this.biaxial = false;
 
-                this._lineField = null;
-
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
 
@@ -81,15 +79,24 @@ define(
                 this.inited = true;
             },
             reset: function(obj) {
+                var me = this;
                 this._reset && this._reset( obj );
                 var d = ( this.dataFrame.org || [] );
+                var yAxisChange;
+                
+
                 if (obj && obj.options) {
                     _.deepExtend(this, obj.options);
+                    yAxisChange = (obj.options.yAxis && obj.options.yAxis.field);
                 };
                 if (obj && obj.data) {
                     d = obj.data;
                 };
+                
                 d && this.resetData(d);
+                if( yAxisChange ){
+                    me.yAxisFieldChange( yAxisChange );
+                }
             },
             /*
              * 如果只有数据改动的情况
@@ -103,21 +110,57 @@ define(
                 });
             },
             /*
+            * 如果配置的yAxis有修改
+            */
+            yAxisFieldChange : function( yAxisChange ){
+                var me = this;
+                _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
+                //如果新的yAxis.field有需要del的
+                _.each( me._graphs.field , function( _f , i ){
+                    var dopy = _.find( yAxisChange , function( f ){
+                        return f == _f
+                    } );
+                    if( !dopy ){
+                        me._graphs.remove(i);
+                        delete me._graphs[ _f ];
+                        delete me._graphs._yAxisFieldsMap[ _f ];
+                        me._graphs.update({
+                            data: me._trimGraphs()
+                        });
+                    }
+                } );
+                //新的field配置有需要add的
+                _.each( yAxisChange , function( opy , i ){
+                    var fopy = _.find( me._graphs.groups ,function( f ){
+                        return f.field == opy;
+                    } );
+                    if( !fopy ){
+                        me._graphs.add({
+                            data: me._trimGraphs()
+                        }, opy);
+                    };
+
+                } );
+
+                _.each( me._graphs.groups , function( g , i ){
+                    g.update({
+                        _groupInd : i
+                    })
+                } );
+            },
+            /*
              *添加一个yAxis字段，也就是添加一条brokenline折线
              *@params field 添加的字段
              **/
-            add: function(field) {
-                var ind = 0;
+            add: function( field ) {
                 var self = this;
+                
+                if( !self._graphs._yAxisFieldsMap[field] ){
+                    this.yAxis.field.push( field );
+                } else {
+                    this.yAxis.field.splice( self._graphs._yAxisFieldsMap[ field ].ind , 0, field);
+                }
 
-                //这代码有必要注释下，从_graphs._yAxisFieldsMap去查询field对应的原始索引，查出所有索引比自己低的总和，然后把自己插入对应的位置
-                _.each(_.flatten(this.yAxis.field), function(f, i) {
-                    if (self._graphs._yAxisFieldsMap[f].ind < self._graphs._yAxisFieldsMap[field].ind) {
-                        ind++;
-                    }
-                });
-
-                this.yAxis.field.splice(ind, 0, field);
                 this.dataFrame = this._initData(this.dataFrame.org, this);
                 this._yAxis.update(this.yAxis, this.dataFrame.yAxis);
 
@@ -136,7 +179,7 @@ define(
              *删除一个yaxis字段，也就是删除一条brokenline线
              *@params target 也可以是字段名字，也可以是 index
              **/
-            remove: function(target) {
+            remove: function(target , _ind) {
                 var ind = null;
                 if (_.isNumber(target)) {
                     //说明是索引
@@ -743,15 +786,11 @@ define(
 
                 function _getYaxisField(i) {
                     //这里要兼容从折柱混合图过来的情况
-                    if (self._lineField) {
-                        return self._lineField;
-                    };
                     if (self.type && self.type.indexOf("line") >= 0) {
-                        self._lineField = self._lineChart.dataFrame.yAxis.field;
+                        return self._lineChart.dataFrame.yAxis.field;
                     } else {
-                        self._lineField = self.dataFrame.yAxis.field;
+                        return self.dataFrame.yAxis.field;
                     };
-                    return self._lineField;
                 };
 
                 _trimGraphs(_getYaxisField(), arr, tmpData, center, true);

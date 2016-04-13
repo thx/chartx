@@ -13,7 +13,7 @@ define(
     function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween, Theme, AnimationFrame) {
         window.Canvax = Canvax
         var Group = function(field, a, opt, ctx, sort, yAxis, h, w) {
-            this.field = field; //_groupInd在yAxis.field中对应的值
+            this.field = field; //_groupInd 在yAxis.field中对应的值
             this._groupInd = a;
             this._nodeInd = -1;
             this._yAxis = yAxis;
@@ -82,8 +82,17 @@ define(
             },
             update: function(opt) {
                 _.deepExtend(this, opt);
-                this._pointList = this._getPointList(this.data);
-                this._grow();
+                if( opt.data ){
+                    this._pointList = this._getPointList(this.data);
+                    this._grow();
+                }
+
+                if( opt._groupInd !== undefined ){
+                    var _strokeStyle = this._getLineStrokeStyle();
+                    this._bline.context.strokeStyle = _strokeStyle;
+                    this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
+                    this._setNodesStyle();
+                }
             },
             //自我销毁
             destroy: function() {
@@ -272,7 +281,6 @@ define(
                 me._currPointList = list;
 
                 var bline = new BrokenLine({ //线条
-                    id: "brokenline_" + me._groupInd,
                     context: {
                         pointList: list,
                         //strokeStyle: me._getLineStrokeStyle(),
@@ -297,7 +305,7 @@ define(
                 me._bline = bline;
                 
                 var _strokeStyle = me._getLineStrokeStyle();
-                bline.context.strokeStyle = _strokeStyle
+                bline.context.strokeStyle = _strokeStyle;
 
                 var fill = new Path({ //填充
                     context: {
@@ -387,30 +395,19 @@ define(
                 } else {
                     this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
                 }
-                this.line.strokeStyle = this.__lineStyleStyle;
+                //this.line.strokeStyle = this.__lineStyleStyle;
                 return this.__lineStyleStyle;
             },
-            _createNodes: function() {
+            _setNodesStyle: function(){
                 var self = this;
                 var list = self._currPointList;
-                // var node =  new Canvax.Display.Sprite();
-                // self.sprite.addChild(node)
                 if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
-                    this._circles = new Canvax.Display.Sprite({
-                        id: "circles"
-                    });
-                    this.sprite.addChild(this._circles);
                     for (var a = 0, al = list.length; a < al; a++) {
                         self._nodeInd = a;
-                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
-                        var context = {
-                            x: self._currPointList[a][0],
-                            y: self._currPointList[a][1],
-                            r: self._getProp(self.node.r),
-                            fillStyle: list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff",
-                            strokeStyle: strokeStyle,
-                            lineWidth: self._getProp(self.node.lineWidth) || 2
-                        };
+                        var nodeEl = self._circles.getChildAt( a );
+                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); 
+                        nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff";
+                        nodeEl.context.strokeStyle = strokeStyle;
 
                         var sourceInd = 0;
                         if (self._yAxis.place == "right") {
@@ -418,12 +415,31 @@ define(
                         };
 
                         if (a == sourceInd) {
-                            context.fillStyle = context.strokeStyle;
-                            context.r++;
-                        }
+                            nodeEl.context.fillStyle = nodeEl.context.strokeStyle;
+                            nodeEl.context.r++;
+                        };
+                        self._nodeInd = -1;
+                    }
+                }
+            },
+            _createNodes: function() {
+                var self = this;
+                var list = self._currPointList;
+                // var node =  new Canvax.Display.Sprite();
+                // self.sprite.addChild(node)
+                if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
+                    this._circles = new Canvax.Display.Sprite({});
+                    this.sprite.addChild(this._circles);
+                    for (var a = 0, al = list.length; a < al; a++) {
+                        var context = {
+                            x: self._currPointList[a][0],
+                            y: self._currPointList[a][1],
+                            r: self._getProp(self.node.r),
+                            lineWidth: self._getProp(self.node.lineWidth) || 2
+                        };
 
                         var circle = new Circle({
-                            id: "circle_" + a,
+                            id: "circle_"+a,
                             context: context
                         });
 
@@ -439,8 +455,8 @@ define(
                         };
                         self._circles.addChild(circle);
                     }
-                    self._nodeInd = -1
-                }
+                };
+                this._setNodesStyle();
             },
             _fillLine: function(bline) { //填充直线
                 var fillPath = _.clone(bline.context.pointList);

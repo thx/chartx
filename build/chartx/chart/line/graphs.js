@@ -53,7 +53,6 @@ define(
             getY: function() {
                 return this.sprite.context.y
             },
-
             draw: function(opt) {
                 _.deepExtend(this, opt);
                 this._widget(opt);
@@ -92,9 +91,9 @@ define(
             },
             _getYaxisField: function(i) {
                 //这里要兼容从折柱混合图过来的情况
-                if (this.field) {
-                    return this.field;
-                }
+                //if (this.field) {
+                //    return this.field;
+                //}
                 if (this.root.type && this.root.type.indexOf("line") >= 0) {
                     this.field = this.root._lineChart.dataFrame.yAxis.field;
                 } else {
@@ -102,37 +101,28 @@ define(
                 };
                 return this.field;
             },
+            creatFields: function( field , fields){
+                var me = this;
+                var fs = [];
+                _.each( fields , function( f , i ){
+                    if( _.isArray(f) ){
+                        fs.push( me.creatFields( field , f ) );
+                    } else {
+                        if( field == f ){
+                            fs.push( f );
+                        } else {
+                            fs.push( null );
+                        }
+                    }
+                } );
+                return fs;
+            },
             add: function(opt, field) {
-                var self = this;
                 _.deepExtend(this, opt);
-
-                var group = new Group(
-                    field,
-                    self._yAxisFieldsMap[field]._groupInd, //_groupInd
-                    self.opt,
-                    self.ctx,
-                    self._yAxisFieldsMap[field]._sort,
-                    self._yAxisFieldsMap[field]._yAxis,
-                    self.h,
-                    self.w
-                );
-
-                var ind = _.indexOf(self.field, field);
-                group.draw({
-                    data: self.data[ind]
-                });
-
-                self.sprite.addChildAt(group.sprite, ind);
-                self.groups.splice(ind, 0, group);
-
-                _.each(this.groups, function(g, i) {
-                    //_groupInd要重新计算
-                    //TODO：这个_groupInd的重新计算取消了可能会影像到其他场景
-                    //g._groupInd = i;
-                    g.update({
-                        data: self.data[i]
-                    });
-                });
+                this._setyAxisFieldsMap();
+                var creatFs = this.creatFields(field , this.field);
+                this._setGroupsForYfield( creatFs , this.data );
+                this.update();
             },
             /*
              *删除 ind
@@ -140,12 +130,13 @@ define(
             remove: function(i) {
                 var target = this.groups.splice(i, 1)[0];
                 target.destroy();
+                //this.update();
             },
             /*
              * 更新下最新的状态
              **/
             update: function(opt) {
-                _.deepExtend(this, opt);
+                opt && _.deepExtend(this, opt);
                 //剩下的要更新下位置
                 var self = this;
                 _.each(this.groups, function(g, i) {
@@ -154,10 +145,12 @@ define(
                     });
                 });
             },
+
             _setGroupsForYfield: function(fields, data, groupInd) {
+                var gs = [];
                 var self = this;
                 for (var i = 0, l = fields.length; i < l; i++) {
-                    if(!data[i]) return;
+                    if(!data[i] || !fields[i]) continue;
                     var _sort = self.root._yAxis.sort;
                     var _biaxial = self.root.biaxial;
                     var _yAxis = self.root._yAxis;
@@ -196,10 +189,23 @@ define(
                         group.draw({
                             data: data[i]
                         });
-                        self.sprite.addChild(group.sprite);
-                        self.groups.push(group);
+                        self.sprite.addChildAt(group.sprite , _groupInd);
+
+                        var insert = false;
+                        for( var gi=0,gl=self.groups.length ; gi<gl ; gi++ ){
+                            if( self.groups[gi]._groupInd > _groupInd ){
+                                self.groups.splice( gi , 0 , group );
+                                insert=true;
+                                break;
+                            }
+                        };
+                        if( !insert ){
+                            self.groups.push(group);
+                        };
+                        gs.push( group );
                     }
-                }
+                };
+                return gs;
             },
             _widget: function(opt) {
                 var self = this;
