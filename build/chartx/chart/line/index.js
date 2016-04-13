@@ -644,15 +644,17 @@ define(
                         nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff";
                         nodeEl.context.strokeStyle = strokeStyle;
 
+                        /*
                         var sourceInd = 0;
                         if (self._yAxis.place == "right") {
                             sourceInd = al - 1;
                         };
-
                         if (a == sourceInd) {
                             nodeEl.context.fillStyle = nodeEl.context.strokeStyle;
                             nodeEl.context.r++;
                         };
+                        */
+
                         self._nodeInd = -1;
                     }
                 }
