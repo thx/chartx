@@ -94,9 +94,10 @@ define(
                 };
                 
                 d && this.resetData(d);
+                
                 if( yAxisChange ){
-                    me.yAxisFieldChange( yAxisChange );
-                }
+                    me._graphs.yAxisFieldChange( yAxisChange );
+                };
             },
             /*
              * 如果只有数据改动的情况
@@ -108,45 +109,6 @@ define(
                 this._graphs.resetData(this._trimGraphs(), {
                     disX: this._getGraphsDisX()
                 });
-            },
-            /*
-            * 如果配置的yAxis有修改
-            */
-            yAxisFieldChange : function( yAxisChange ){
-                var me = this;
-                _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
-                //如果新的yAxis.field有需要del的
-                _.each( me._graphs.field , function( _f , i ){
-                    var dopy = _.find( yAxisChange , function( f ){
-                        return f == _f
-                    } );
-                    if( !dopy ){
-                        me._graphs.remove(i);
-                        delete me._graphs[ _f ];
-                        delete me._graphs._yAxisFieldsMap[ _f ];
-                        me._graphs.update({
-                            data: me._trimGraphs()
-                        });
-                    }
-                } );
-                //新的field配置有需要add的
-                _.each( yAxisChange , function( opy , i ){
-                    var fopy = _.find( me._graphs.groups ,function( f ){
-                        return f.field == opy;
-                    } );
-                    if( !fopy ){
-                        me._graphs.add({
-                            data: me._trimGraphs()
-                        }, opy);
-                    };
-
-                } );
-
-                _.each( me._graphs.groups , function( g , i ){
-                    g.update({
-                        _groupInd : i
-                    })
-                } );
             },
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线

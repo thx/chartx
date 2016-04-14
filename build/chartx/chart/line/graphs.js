@@ -63,13 +63,14 @@ define(
                 } );
             },
             resetData: function(data, opt) {
-                var self = this;
-                self.data = data;
-                opt && _.deepExtend(self, opt);
-                for (var a = 0, al = self.data.length; a < al; a++) {
-                    var group = self.groups[a];
+                var me = this;
+                me.data = data;
+                opt && _.deepExtend(me, opt);
+                
+                for (var a = 0, al = me.field.length; a < al; a++) {
+                    var group = me.groups[a];
                     group.resetData({
-                        data: self.data[a]
+                        data: me.data[ me._yAxisFieldsMap[group.field].ind ]
                     });
                 }
             },
@@ -84,10 +85,26 @@ define(
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this._getYaxisField()), function(field, i) {
-                    me._yAxisFieldsMap[field] = {
-                        ind: i
-                    };
+                    var _yAxisF = me._yAxisFieldsMap[field];
+                    if( _yAxisF ){
+                        me._yAxisFieldsMap[field].ind = i;
+                    } else {
+                        me._yAxisFieldsMap[field] = {
+                            ind: i
+                        };
+                    }
                 });
+            },
+            _addyAxisFieldsMap: function( field ){
+                if( !this._yAxisFieldsMap[field] ){
+                    var maxInd = 0;
+                    for( var f in this._yAxisFieldsMap ){
+                        maxInd = Math.max( this._yAxisFieldsMap[f].ind );
+                    };
+                    this._yAxisFieldsMap[field] = {
+                        ind : ++maxInd
+                    };
+                };
             },
             _getYaxisField: function(i) {
                 //这里要兼容从折柱混合图过来的情况
@@ -117,11 +134,54 @@ define(
                 } );
                 return fs;
             },
+            /*
+            * 如果配置的yAxis有修改
+            */
+            yAxisFieldChange : function( yAxisChange ){
+                var me = this;
+                _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
+                
+                //如果新的yAxis.field有需要del的
+                _.each( me.field , function( _f , i ){
+                    var dopy = _.find( yAxisChange , function( f ){
+                        return f == _f
+                    } );
+                    if( !dopy ){
+                        me.remove(i);
+                        //delete me[ _f ];
+                        delete me._yAxisFieldsMap[ _f ];
+                        me.update({
+                            data: me.data
+                        });
+                    }
+                } );
+                //新的field配置有需要add的
+                _.each( yAxisChange , function( opy , i ){
+                    var fopy = _.find( me.groups ,function( f ){
+                        return f.field == opy;
+                    } );
+                    if( !fopy ){
+                        me.add({
+                            data: me.data
+                        }, opy);
+                    };
+
+                } );
+
+                me._setyAxisFieldsMap();
+
+                _.each( me.groups , function( g , i ){
+                    g.update({
+                        _groupInd : i
+                    });
+                } );
+            },
             add: function(opt, field) {
                 _.deepExtend(this, opt);
-                this._setyAxisFieldsMap();
-                var creatFs = this.creatFields(field , this.field);
-                this._setGroupsForYfield( creatFs , this.data );
+                //this._setyAxisFieldsMap();
+                this._addyAxisFieldsMap( field );
+                var creatFs = this.creatFields(field , this._getYaxisField());
+                this._setGroupsForYfield( creatFs , this.data , this._yAxisFieldsMap[field].ind);
                 this.update();
             },
             /*
