@@ -73,12 +73,6 @@ var options = {
     xAxis : {
         field : "xfield",
         label : "xaxis"
-    },
-
-    graphs : {
-       line : {
-           strokeStyle:["#4d7fff","#fa5519","#999999"]
-       }
     }
 };
 
@@ -89,7 +83,7 @@ setTimeout(function(){
     //chart.add("click")
     //return
     chart.reset({
-        data : data,
+        data : data1,
         options : {
             yAxis:{
                field : ['uv','pv']
@@ -97,6 +91,21 @@ setTimeout(function(){
         }
     })
 } , 1000);
+
+//return
+
+setTimeout(function(){
+    //chart.add("click")
+    debugger
+    chart.reset({
+        data : data1,
+        options : {
+            yAxis:{
+               field : ['click']
+            }
+        }
+    })
+} , 2000);
 
 
 setTimeout(function(){
@@ -106,14 +115,42 @@ setTimeout(function(){
         data : data1,
         options : {
             yAxis:{
-               field : ['uv']
+               field : ['pv']
             }
         }
     })
-} , 2000);
+} , 3000);
 
 
+setTimeout(function(){
+    //chart.add("click")
+    debugger
+    chart.reset({
+        data : data1,
+        options : {
+            yAxis:{
+               field : ['uv' , 'click']
+            }
+        }
+    })
+} , 4000);
 
+
+setTimeout(function(){
+    //chart.add("click")
+    debugger
+    chart.reset({
+        data : data1,
+        options : {
+            yAxis:{
+               field : ['uv' , 'click','pv']
+            }
+        }
+    })
+} , 5000);
+
+
+return
 
 setTimeout(function(){
     chart.add("pv");
