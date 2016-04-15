@@ -850,7 +850,8 @@ define(
             /*
             * 如果配置的yAxis有修改
             */
-            yAxisFieldChange : function( yAxisChange ){
+            yAxisFieldChange : function( yAxisChange , trimData ){
+                !trimData && ( trimData = me.data );
                 var me = this;
                 _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
                 
@@ -864,7 +865,7 @@ define(
                         //delete me[ _f ];
                         delete me._yAxisFieldsMap[ _f ];
                         me.update({
-                            data: me.data
+                            data: trimData
                         });
                     }
                 } );
@@ -875,7 +876,7 @@ define(
                     } );
                     if( !fopy ){
                         me.add({
-                            data: me.data
+                            data: trimData
                         }, opy);
                     };
 
@@ -1131,7 +1132,6 @@ define(
                 var d = ( this.dataFrame.org || [] );
                 var yAxisChange;
                 
-
                 if (obj && obj.options) {
                     _.deepExtend(this, obj.options);
                     yAxisChange = (obj.options.yAxis && obj.options.yAxis.field);
@@ -1140,22 +1140,31 @@ define(
                     d = obj.data;
                 };
                 
-                d && this.resetData(d);
-                
+                var trimData = this._resetDataFrameAndGetTrimData( obj.data );
                 if( yAxisChange ){
-                    me._graphs.yAxisFieldChange( yAxisChange );
+                    me._graphs.yAxisFieldChange( yAxisChange , trimData);
                 };
+
+                d && this.resetData(d , trimData);
             },
             /*
              * 如果只有数据改动的情况
              */
-            resetData: function(data) {
+            resetData: function(data , trimData) {
+
+                if( !trimData ){
+                    trimData = _resetDataFrameAndGetTrimData( data );
+                };
+
+                this._graphs.resetData( trimData , {
+                    disX: this._getGraphsDisX()
+                });
+            },
+            _resetDataFrameAndGetTrimData: function( data ){
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis);
                 this._yAxis.resetData(this.dataFrame.yAxis);
-                this._graphs.resetData(this._trimGraphs(), {
-                    disX: this._getGraphsDisX()
-                });
+                return this._trimGraphs()
             },
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线

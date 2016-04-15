@@ -44,28 +44,6 @@ var data= [
     [ 7      , 55  , 68     ],
     [ 8      , 66   , 83     ]
 ];
-
-
-
-var options = {
-    yAxis : {
-        //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["uv" , "pv" ],
-        label : "yaxis"
-    },
-    xAxis : {
-        field : "xfield",
-        label : "xaxis"
-    },
-
-    graphs : {
-       line : {
-           strokeStyle:["#4d7fff","#fa5519","#999999"]
-       }
-    }
-};
-
-var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
 var data1= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , 3 , 120 , 33    ],
@@ -84,14 +62,37 @@ var data1= [
     [ 8      , 66   ,183 , 51    ]
 ];
 
+
+
+var options = {
+    yAxis : {
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : ["uv"  ],
+        label : "yaxis"
+    },
+    xAxis : {
+        field : "xfield",
+        label : "xaxis"
+    },
+
+    graphs : {
+       line : {
+           strokeStyle:["#4d7fff","#fa5519","#999999"]
+       }
+    }
+};
+
+var chartx = Chartx.line("canvasTest" , data1 , options).then(function( chart ){
+
+
 setTimeout(function(){
     //chart.add("click")
     //return
     chart.reset({
-        data : data1,
+        data : data,
         options : {
             yAxis:{
-               field : ['pv','click']
+               field : ['uv','pv']
             }
         }
     })
@@ -99,27 +100,49 @@ setTimeout(function(){
 
 
 setTimeout(function(){
-    chart.add("uv");
-} , 2000)
+    //chart.add("click")
+    debugger
+    chart.reset({
+        data : data1,
+        options : {
+            yAxis:{
+               field : ['uv']
+            }
+        }
+    })
+} , 2000);
 
 
-setTimeout(function(){
-    chart.remove("click");
-} , 3000)
-
-
-setTimeout(function(){
-    chart.add("click");
-} , 4000)
-
-setTimeout(function(){
-    chart.remove("pv");
-} , 5000)
 
 
 setTimeout(function(){
     chart.add("pv");
+} , 3000)
+
+
+setTimeout(function(){
+debugger
+    chart.add("click");
+} , 4000)
+
+
+setTimeout(function(){
+    chart.remove("click");
+} , 5000)
+
+
+setTimeout(function(){
+    chart.add("click");
 } , 6000)
+
+setTimeout(function(){
+    chart.remove("pv");
+} , 7000)
+
+
+setTimeout(function(){
+    chart.add("pv");
+} , 8000)
     
 });
 </textarea></form>

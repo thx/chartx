@@ -137,7 +137,8 @@ define(
             /*
             * 如果配置的yAxis有修改
             */
-            yAxisFieldChange : function( yAxisChange ){
+            yAxisFieldChange : function( yAxisChange , trimData ){
+                !trimData && ( trimData = me.data );
                 var me = this;
                 _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
                 
@@ -151,7 +152,7 @@ define(
                         //delete me[ _f ];
                         delete me._yAxisFieldsMap[ _f ];
                         me.update({
-                            data: me.data
+                            data: trimData
                         });
                     }
                 } );
@@ -162,7 +163,7 @@ define(
                     } );
                     if( !fopy ){
                         me.add({
-                            data: me.data
+                            data: trimData
                         }, opy);
                     };
 
