@@ -170,7 +170,6 @@ define(
                         return f.field == opy;
                     } );
                     if( !fopy ){
-                        debugger
                         me.add({
                             data: trimData
                         }, opy);
