@@ -265,9 +265,12 @@ define(
             function geo2pos(obj, p) {
                 convertor.offset = obj.offset;
                 convertor.scale = obj.scale;
-                return p instanceof Array
-                    ? convertor.makePoint([p[0] * 1, p[1] * 1])
-                    : convertor.makePoint([p.x * 1, p.y * 1]);
+                
+                if( p instanceof Array ){
+                    return convertor.makePoint([p[0] * 1, p[1] * 1]);
+                } else {
+                    return convertor.makePoint([p.x * 1, p.y * 1]);
+                }
             }
 
             return {

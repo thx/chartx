@@ -248,7 +248,7 @@ define(
     function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween, Theme, AnimationFrame) {
         window.Canvax = Canvax
         var Group = function(field, a, opt, ctx, sort, yAxis, h, w) {
-            this.field = field; //_groupInd在yAxis.field中对应的值
+            this.field = field; //_groupInd 在yAxis.field中对应的值
             this._groupInd = a;
             this._nodeInd = -1;
             this._yAxis = yAxis;
@@ -317,8 +317,17 @@ define(
             },
             update: function(opt) {
                 _.deepExtend(this, opt);
-                this._pointList = this._getPointList(this.data);
-                this._grow();
+                if( opt.data ){
+                    this._pointList = this._getPointList(this.data);
+                    this._grow();
+                }
+
+                if( opt._groupInd !== undefined ){
+                    var _strokeStyle = this._getLineStrokeStyle();
+                    this._bline.context.strokeStyle = _strokeStyle;
+                    this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
+                    this._setNodesStyle();
+                }
             },
             //自我销毁
             destroy: function() {
@@ -329,7 +338,7 @@ define(
                 var color = this._getProp(s);
                 if (!color || color == "") {
                     color = this.colors[this._groupInd];
-                }
+                };
                 return color;
             },
             _getProp: function(s) {
@@ -393,6 +402,7 @@ define(
                 self._grow();
             },
             _grow: function(callback) {
+            
                 var self = this;
                 if (!self.animation) {
                     callback && callback(self);
@@ -410,11 +420,12 @@ define(
                             var xory = parseInt(p.split("_")[1]);
                             self._currPointList[ind] && (self._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
                         };
+                        var _strokeStyle = self._getLineStrokeStyle();
                         self._bline.context.pointList = _.clone(self._currPointList);
-                        self._bline.context.strokeStyle = self._getLineStrokeStyle();
+                        self._bline.context.strokeStyle = _strokeStyle;
 
                         self._fill.context.path = self._fillLine(self._bline);
-                        self._fill.context.fillStyle = self._getFillStyle();
+                        self._fill.context.fillStyle = self._getFillStyle() || _strokeStyle;
                         self._circles && _.each(self._circles.children, function(circle, i) {
                             var ind = parseInt(circle.id.split("_")[1]);
                             circle.context.y = self._currPointList[ind][1];
@@ -436,7 +447,7 @@ define(
                 return obj;
             },
             _isNotNum: function(val) {
-                return isNaN(val) || val === null || val === ""
+                return val === undefined || isNaN(val) || val === null || val === ""
             },
             _filterEmptyValue: function(list) {
 
@@ -476,48 +487,48 @@ define(
                 };
                 return list;
             },
-            _widget: function() {
-                var self = this;
+            _widget: function(){
+                var me = this;
+                me._pointList = this._getPointList(me.data);
 
-                self._pointList = this._getPointList(self.data);
-
-                if (self._pointList.length == 0) {
+                if (me._pointList.length == 0) {
                     //filter后，data可能length==0
                     return;
                 };
                 var list = [];
-                if (self.animation) {
-                    for (var a = 0, al = self.data.length; a < al; a++) {
-                        var o = self.data[a];
+                if (me.animation) {
+                    for (var a = 0, al = me.data.length; a < al; a++) {
+                        var o = me.data[a];
                         var sourceInd = 0;
                         //如果是属于双轴中的右轴。
-                        if (self._yAxis.place == "right") {
+                        if (me._yAxis.place == "right") {
                             sourceInd = al - 1;
                         };
                         list.push([
                             o.x,
-                            self.data[sourceInd].y
+                            me.data[sourceInd].y
                         ]);
                     };
                 } else {
-                    list = self._pointList;
+                    list = me._pointList;
                 };
                 
-                self._currPointList = list;
+                me._currPointList = list;
 
                 var bline = new BrokenLine({ //线条
-                    id: "brokenline_" + self._groupInd,
                     context: {
                         pointList: list,
-                        //strokeStyle: self._getLineStrokeStyle(),
-                        lineWidth: self.line.lineWidth,
-                        y: self.y,
-                        smooth: self.line.smooth,
-                        lineType: self._getProp(self.line.lineType),
+                        //strokeStyle: me._getLineStrokeStyle(),
+                        lineWidth: me.line.lineWidth,
+                        y: me.y,
+                        smooth: me.line.smooth,
+                        lineType: me._getProp(me.line.lineType),
                         //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
                         smoothFilter: function(rp) {
                             if (rp[1] > 0) {
                                 rp[1] = 0;
+                            } else if( Math.abs(rp[1]) > me.h ) {
+                                rp[1] = -me.h;
                             }
                         }
                     }
@@ -525,52 +536,59 @@ define(
                 if (!this.line.enabled) {
                     bline.context.visible = false
                 }
-                self.sprite.addChild(bline);
-                self._bline = bline;
+                me.sprite.addChild(bline);
+                me._bline = bline;
                 
-                bline.context.strokeStyle = self._getLineStrokeStyle();
+                var _strokeStyle = me._getLineStrokeStyle();
+                bline.context.strokeStyle = _strokeStyle;
 
                 var fill = new Path({ //填充
                     context: {
-                        path: self._fillLine(bline),
-                        fillStyle: self._getFillStyle(), //fill_gradient || self._getColor(self.fill.fillStyle),
-                        globalAlpha: _.isArray(self.fill.alpha) ? 1 : self.fill.alpha //self._getProp( self.fill.alpha )
+                        path: me._fillLine(bline),
+                        fillStyle: me._getFillStyle() || _strokeStyle, //fill_gradient || me._getColor(me.fill.fillStyle),
+                        globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha //me._getProp( me.fill.alpha )
                     }
                 });
-                self.sprite.addChild(fill);
-                self._fill = fill;
-                self._createNodes();
+                me.sprite.addChild(fill);
+                me._fill = fill;
+                me._createNodes();
             },
-            _getFillStyle: function() {
+            _getFillStyle: function( ) {
                 var self = this;
+            
                 var fill_gradient = null;
-                if (_.isArray(self.fill.alpha)) {
+                
+                if( self.fill.fillStyle ){
+                    if (_.isArray(self.fill.alpha)) {
+                        //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
+                        self.fill.alpha.length = 2;
+                        if (self.fill.alpha[0] == undefined) {
+                            self.fill.alpha[0] = 0;
+                        };
+                        if (self.fill.alpha[1] == undefined) {
+                            self.fill.alpha[1] = 0;
+                        };
 
-                    //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
-                    self.fill.alpha.length = 2;
-                    if (self.fill.alpha[0] == undefined) {
-                        self.fill.alpha[0] = 0;
+                        //从bline中找到最高的点
+                        var topP = _.min(self._bline.context.pointList, function(p) {
+                            return p[1]
+                        });
+                        //创建一个线性渐变
+                        fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+
+                        var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
+                        var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                        fill_gradient.addColorStop(0, rgba0);
+
+                        var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                        fill_gradient.addColorStop(1, rgba1);
+
+                        return fill_gradient;
                     };
-                    if (self.fill.alpha[1] == undefined) {
-                        self.fill.alpha[1] = 0;
-                    };
-
-                    //从bline中找到最高的点
-                    var topP = _.min(self._bline.context.pointList, function(p) {
-                        return p[1]
-                    });
-                    //创建一个线性渐变
-                    fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
-
-                    var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
-                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
-                    fill_gradient.addColorStop(0, rgba0);
-
-                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
-                    fill_gradient.addColorStop(1, rgba1);
-                };
-
-                return fill_gradient || self._getColor(self.fill.fillStyle);
+                    return self._getColor(self.fill.fillStyle);
+                } else {
+                    return null;
+                }
             },
             _getLineStrokeStyle: function() {
                 var self = this;
@@ -612,7 +630,34 @@ define(
                 } else {
                     this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
                 }
+                //this.line.strokeStyle = this.__lineStyleStyle;
                 return this.__lineStyleStyle;
+            },
+            _setNodesStyle: function(){
+                var self = this;
+                var list = self._currPointList;
+                if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
+                    for (var a = 0, al = list.length; a < al; a++) {
+                        self._nodeInd = a;
+                        var nodeEl = self._circles.getChildAt( a );
+                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); 
+                        nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff";
+                        nodeEl.context.strokeStyle = strokeStyle;
+
+                        /*
+                        var sourceInd = 0;
+                        if (self._yAxis.place == "right") {
+                            sourceInd = al - 1;
+                        };
+                        if (a == sourceInd) {
+                            nodeEl.context.fillStyle = nodeEl.context.strokeStyle;
+                            nodeEl.context.r++;
+                        };
+                        */
+
+                        self._nodeInd = -1;
+                    }
+                }
             },
             _createNodes: function() {
                 var self = this;
@@ -620,34 +665,18 @@ define(
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)
                 if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
-                    this._circles = new Canvax.Display.Sprite({
-                        id: "circles"
-                    });
+                    this._circles = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._circles);
                     for (var a = 0, al = list.length; a < al; a++) {
-                        self._nodeInd = a;
-                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
                         var context = {
                             x: self._currPointList[a][0],
                             y: self._currPointList[a][1],
                             r: self._getProp(self.node.r),
-                            fillStyle: list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff",
-                            strokeStyle: strokeStyle,
                             lineWidth: self._getProp(self.node.lineWidth) || 2
                         };
 
-                        var sourceInd = 0;
-                        if (self._yAxis.place == "right") {
-                            sourceInd = al - 1;
-                        };
-
-                        if (a == sourceInd) {
-                            context.fillStyle = context.strokeStyle;
-                            context.r++;
-                        }
-
                         var circle = new Circle({
-                            id: "circle_" + a,
+                            id: "circle_"+a,
                             context: context
                         });
 
@@ -663,8 +692,8 @@ define(
                         };
                         self._circles.addChild(circle);
                     }
-                    self._nodeInd = -1
-                }
+                };
+                this._setNodesStyle();
             },
             _fillLine: function(bline) { //填充直线
                 var fillPath = _.clone(bline.context.pointList);
@@ -695,14 +724,14 @@ define(
             this.h = 0;
             this.y = 0;
 
-            //这里所有的opt都要透传给group
+            //这里所有的opt都要透传给 group
             this.opt = opt;
             this.root = root;
             this.ctx = root.stage.context2D;
             this.field = null;
 
             //一个记录了原始yAxis.field 一些基本信息的map
-            //{ "uv" : {ind : 0 , _yAxis : } ...}
+            //{ "uv" : {ind : 0 , _yAxis : , line} ...}
             this._yAxisFieldsMap = {};
             this._setyAxisFieldsMap();
 
@@ -737,19 +766,24 @@ define(
             getY: function() {
                 return this.sprite.context.y
             },
-
             draw: function(opt) {
                 _.deepExtend(this, opt);
                 this._widget(opt);
+                
+                var me = this;
+                _.each( this.groups , function( group ){
+                    me._yAxisFieldsMap[group.field].line = group.line;
+                } );
             },
             resetData: function(data, opt) {
-                var self = this;
-                self.data = data;
-                opt && _.deepExtend(self, opt);
-                for (var a = 0, al = self.data.length; a < al; a++) {
-                    var group = self.groups[a];
+                var me = this;
+                me.data = data;
+                opt && _.deepExtend(me, opt);
+                
+                for (var a = 0, al = me.field.length; a < al; a++) {
+                    var group = me.groups[a];
                     group.resetData({
-                        data: self.data[a]
+                        data: me.data[ me._yAxisFieldsMap[group.field].ind ]
                     });
                 }
             },
@@ -764,16 +798,32 @@ define(
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this._getYaxisField()), function(field, i) {
-                    me._yAxisFieldsMap[field] = {
-                        ind: i
-                    };
+                    var _yAxisF = me._yAxisFieldsMap[field];
+                    if( _yAxisF ){
+                        me._yAxisFieldsMap[field].ind = i;
+                    } else {
+                        me._yAxisFieldsMap[field] = {
+                            ind: i
+                        };
+                    }
                 });
+            },
+            _addyAxisFieldsMap: function( field ){
+                if( !this._yAxisFieldsMap[field] ){
+                    var maxInd = 0;
+                    for( var f in this._yAxisFieldsMap ){
+                        maxInd = Math.max( this._yAxisFieldsMap[f].ind );
+                    };
+                    this._yAxisFieldsMap[field] = {
+                        ind : ++maxInd
+                    };
+                };
             },
             _getYaxisField: function(i) {
                 //这里要兼容从折柱混合图过来的情况
-                if (this.field) {
-                    return this.field;
-                }
+                //if (this.field) {
+                //    return this.field;
+                //}
                 if (this.root.type && this.root.type.indexOf("line") >= 0) {
                     this.field = this.root._lineChart.dataFrame.yAxis.field;
                 } else {
@@ -781,35 +831,72 @@ define(
                 };
                 return this.field;
             },
-            add: function(opt, field) {
-                var self = this;
-                _.deepExtend(this, opt);
-                var group = new Group(
-                    field,
-                    self._yAxisFieldsMap[field]._groupInd, //_groupInd
-                    self.opt,
-                    self.ctx,
-                    self._yAxisFieldsMap[field]._sort,
-                    self._yAxisFieldsMap[field]._yAxis,
-                    self.h,
-                    self.w
-                );
+            creatFields: function( field , fields){
+                var me = this;
+                var fs = [];
+                _.each( fields , function( f , i ){
+                    if( _.isArray(f) ){
+                        fs.push( me.creatFields( field , f ) );
+                    } else {
+                        if( field == f ){
+                            fs.push( f );
+                        } else {
+                            fs.push( null );
+                        }
+                    }
+                } );
+                return fs;
+            },
+            /*
+            * 如果配置的yAxis有修改
+            */
+            yAxisFieldChange : function( yAxisChange , trimData ){
+                !trimData && ( trimData = me.data );
+                var me = this;
+                _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
+                
+                //如果新的yAxis.field有需要del的
+                _.each( me.field , function( _f , i ){
+                    var dopy = _.find( yAxisChange , function( f ){
+                        return f == _f
+                    } );
+                    if( !dopy ){
+                        me.remove(i);
+                        //delete me[ _f ];
+                        delete me._yAxisFieldsMap[ _f ];
+                        me.update({
+                            data: trimData
+                        });
+                    }
+                } );
+                //新的field配置有需要add的
+                _.each( yAxisChange , function( opy , i ){
+                    var fopy = _.find( me.groups ,function( f ){
+                        return f.field == opy;
+                    } );
+                    if( !fopy ){
+                        me.add({
+                            data: trimData
+                        }, opy);
+                    };
 
-                var ind = _.indexOf(self.field, field);
-                group.draw({
-                    data: self.data[ind]
-                });
+                } );
 
-                self.sprite.addChildAt(group.sprite, ind);
-                self.groups.splice(ind, 0, group);
+                me._setyAxisFieldsMap();
 
-                _.each(this.groups, function(g, i) {
-                    //_groupInd要重新计算
-                    g._groupInd = i;
+                _.each( me.groups , function( g , i ){
                     g.update({
-                        data: self.data[i]
+                        _groupInd : i
                     });
-                });
+                } );
+            },
+            add: function(opt, field) {
+                _.deepExtend(this, opt);
+                //this._setyAxisFieldsMap();
+                this._addyAxisFieldsMap( field );
+                var creatFs = this.creatFields(field , this._getYaxisField());
+                this._setGroupsForYfield( creatFs , this.data , this._yAxisFieldsMap[field].ind);
+                this.update();
             },
             /*
              *删除 ind
@@ -817,12 +904,13 @@ define(
             remove: function(i) {
                 var target = this.groups.splice(i, 1)[0];
                 target.destroy();
+                //this.update();
             },
             /*
              * 更新下最新的状态
              **/
             update: function(opt) {
-                _.deepExtend(this, opt);
+                opt && _.deepExtend(this, opt);
                 //剩下的要更新下位置
                 var self = this;
                 _.each(this.groups, function(g, i) {
@@ -831,9 +919,12 @@ define(
                     });
                 });
             },
+
             _setGroupsForYfield: function(fields, data, groupInd) {
+                var gs = [];
                 var self = this;
                 for (var i = 0, l = fields.length; i < l; i++) {
+                    if(!data[i] || !fields[i]) continue;
                     var _sort = self.root._yAxis.sort;
                     var _biaxial = self.root.biaxial;
                     var _yAxis = self.root._yAxis;
@@ -872,10 +963,23 @@ define(
                         group.draw({
                             data: data[i]
                         });
-                        self.sprite.addChild(group.sprite);
-                        self.groups.push(group);
+                        self.sprite.addChildAt(group.sprite , _groupInd);
+
+                        var insert = false;
+                        for( var gi=0,gl=self.groups.length ; gi<gl ; gi++ ){
+                            if( self.groups[gi]._groupInd > _groupInd ){
+                                self.groups.splice( gi , 0 , group );
+                                insert=true;
+                                break;
+                            }
+                        };
+                        if( !insert ){
+                            self.groups.push(group);
+                        };
+                        gs.push( group );
                     }
-                }
+                };
+                return gs;
             },
             _widget: function(opt) {
                 var self = this;
@@ -954,9 +1058,10 @@ define(
         'chartx/chart/line/graphs',
         'chartx/chart/line/tips',
         'chartx/utils/dataformat',
-        'chartx/components/datazoom/index'
+        'chartx/components/datazoom/index',
+        'chartx/components/legend/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom , Legend) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -993,10 +1098,10 @@ define(
 
                 this.biaxial = false;
 
-                this._lineField = null;
-
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
+
+                this._setLegend();
             },
             draw: function() {
                 this.stageTip = new Canvax.Display.Sprite({
@@ -1021,34 +1126,59 @@ define(
                 this._endDraw();
                 this.inited = true;
             },
+            reset: function(obj) {
+                var me = this;
+                this._reset && this._reset( obj );
+                var d = ( this.dataFrame.org || [] );
+                var yAxisChange;
+                
+                if (obj && obj.options) {
+                    _.deepExtend(this, obj.options);
+                    yAxisChange = (obj.options.yAxis && obj.options.yAxis.field);
+                };
+                if (obj && obj.data) {
+                    d = obj.data;
+                };
+                
+                var trimData = this._resetDataFrameAndGetTrimData( obj.data );
+                if( yAxisChange ){
+                    me._graphs.yAxisFieldChange( yAxisChange , trimData);
+                };
+
+                d && this.resetData(d , trimData);
+            },
             /*
              * 如果只有数据改动的情况
              */
-            resetData: function(data) {
-                this.dataFrame = this._initData(data, this);
+            resetData: function(data , trimData) {
 
-                this._xAxis.resetData(this.dataFrame.xAxis);
-                this._yAxis.resetData(this.dataFrame.yAxis);
-                this._graphs.resetData(this._trimGraphs(), {
+                if( !trimData ){
+                    trimData = _resetDataFrameAndGetTrimData( data );
+                };
+
+                this._graphs.resetData( trimData , {
                     disX: this._getGraphsDisX()
                 });
+            },
+            _resetDataFrameAndGetTrimData: function( data ){
+                this.dataFrame = this._initData(data, this);
+                this._xAxis.resetData(this.dataFrame.xAxis);
+                this._yAxis.resetData(this.dataFrame.yAxis);
+                return this._trimGraphs()
             },
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线
              *@params field 添加的字段
              **/
-            add: function(field) {
-                var ind = 0;
+            add: function( field ) {
                 var self = this;
+                
+                if( !self._graphs._yAxisFieldsMap[field] ){
+                    this.yAxis.field.push( field );
+                } else {
+                    this.yAxis.field.splice( self._graphs._yAxisFieldsMap[ field ].ind , 0, field);
+                }
 
-                //这代码有必要注释下，从_graphs._yAxisFieldsMap去查询field对应的原始索引，查出所有索引比自己低的总和，然后把自己插入对应的位置
-                _.each(_.flatten(this.yAxis.field), function(f, i) {
-                    if (self._graphs._yAxisFieldsMap[f].ind < self._graphs._yAxisFieldsMap[field].ind) {
-                        ind++;
-                    }
-                });
-
-                this.yAxis.field.splice(ind, 0, field);
                 this.dataFrame = this._initData(this.dataFrame.org, this);
                 this._yAxis.update(this.yAxis, this.dataFrame.yAxis);
 
@@ -1067,7 +1197,7 @@ define(
              *删除一个yaxis字段，也就是删除一条brokenline线
              *@params target 也可以是字段名字，也可以是 index
              **/
-            remove: function(target) {
+            remove: function(target , _ind) {
                 var ind = null;
                 if (_.isNumber(target)) {
                     //说明是索引
@@ -1107,7 +1237,7 @@ define(
                 var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
                 if (dataZoom && dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1));
+                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1 + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -1228,21 +1358,6 @@ define(
 
                 var me = this;
 
-
-                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
-                /*
-                if (this.biaxial) {
-                    _.each(this._graphs.groups, function(group, i) {
-                        var color = group._bline.context.strokeStyle;
-                        if (i == 0) {
-                            me._yAxis.setAllStyle(color);
-                        } else {
-                            me._yAxisR.setAllStyle(color);
-                        }
-                    });
-                }
-                */
-
                 //执行生长动画
                 if (!this.inited) {
                     this._graphs.grow(function(g) {
@@ -1259,7 +1374,6 @@ define(
                 if (this._anchor.enabled) {
                     //绘制点位线
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
-
                     this._anchor.draw({
                         w: this._xAxis.xGraphsWidth, //this.width - _yAxisW - _yAxisRW,
                         h: _graphsH,
@@ -1278,6 +1392,17 @@ define(
                 if (this.dataZoom.enabled) {
                     this._initDataZoom();
                 };
+
+                //如果有 legend，调整下位置,和设置下颜色
+                if(this._legend && !this._legend.inited){
+                    this._legend.pos( { x : _yAxisW } );
+
+                    for( var f in this._graphs._yAxisFieldsMap ){
+                        var ffill = this._graphs._yAxisFieldsMap[f].line.strokeStyle;
+                        this._legend.setStyle( f , {fillStyle : ffill} );
+                    };
+                    this._legend.inited = true;
+                };
             },
             _endDraw: function() {
                 //this.stageBg.addChild(this._back.sprite);
@@ -1290,6 +1415,50 @@ define(
                 this.core.addChild(this._graphs.sprite);
                 this.stageTip.addChild(this._tip.sprite);
             },
+
+            //设置图例 begin
+            _setLegend: function(){
+                var me = this;
+                if( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
+                //设置legendOpt
+                var legendOpt = _.deepExtend({
+                    enabled:true,
+                    label  : function( info ){
+                       return info.field
+                    },
+                    onChecked : function( field ){
+                       //me._resetOfLengend( field );
+                       me.add( field );
+                    },
+                    onUnChecked : function( field ){
+                       //me._resetOfLengend( field );
+                       me.remove( field );
+                    }
+                } , this._opts.legend);
+                
+                this._legend = new Legend( this._getLegendData() , legendOpt );
+                this.stage.addChild( this._legend.sprite );
+                this._legend.pos( {
+                    x : 0,
+                    y : this.padding.top
+                } );
+
+                this.padding.top += this._legend.height;
+            },
+            //只有field为多组数据的时候才需要legend
+            _getLegendData : function(){
+                var me   = this;
+                var data = [];
+                _.each( _.flatten(me.dataFrame.yAxis.field) , function( f , i ){
+                    data.push({
+                        field : f,
+                        value : null,
+                        fillStyle : null
+                    });
+                });
+                return data;
+            },
+            ////设置图例end
             _initPlugs: function(opts, g) {
                 if (opts.markLine) {
                     this._initMarkLine(g);
@@ -1400,7 +1569,7 @@ define(
                 var graphssp = this.__cloneChart.thumbBar._graphs.sprite;
                 graphssp.id = graphssp.id + "_datazoomthumbbarbg"
                 graphssp.context.x = 0;
-                graphssp.context.y = me._dataZoom.height - me._dataZoom.barY;
+                graphssp.context.y = me._dataZoom.h - me._dataZoom.barY;
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneChart.thumbBar._graphs.h;
 
                 me._dataZoom.dataZoomBg.addChild(graphssp);
@@ -1457,12 +1626,11 @@ define(
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
-                var center = parseInt(dataFrame.yAxis.center[index].agPosition)
+                var center = parseInt(dataFrame.yAxis.center[index].agPosition);
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var content = g.field + '均值',
                         strokeStyle = g.line.strokeStyle;
                     if (me.markLine.text && me.markLine.text.enabled) {
-
                         if (_.isFunction(me.markLine.text.format)) {
                             var o = {
                                 iGroup: index,
@@ -1471,6 +1639,21 @@ define(
                             content = me.markLine.text.format(o)
                         }
                     };
+
+                    var _y = center;
+                    
+                    //如果markline有自己预设的y值
+                    if( me.markLine.y != undefined ){
+                        var _y = me.markLine.y;
+                        if(_.isFunction(_y)){
+                            _y = _y( g.field );
+                        };
+
+                        if( _y != undefined ){
+                            _y = g._yAxis.tansValToPos(_y);
+                        }
+                    };
+
                     var o = {
                         w: me._xAxis.xGraphsWidth,
                         h: me._yAxis.yGraphsHeight,
@@ -1479,7 +1662,7 @@ define(
                             y: me._back.pos.y
                         },
                         line: {
-                            y: center,
+                            y: _y,
                             list: [
                                 [0, 0],
                                 [me._xAxis.xGraphsWidth, 0]
@@ -1547,10 +1730,20 @@ define(
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
             //方便外部自定义tip是的content
             _setXaxisYaxisToTipsInfo: function(e) {
+                if (!e.eventInfo) {
+                    return;
+                };
+                var me = this;
                 e.eventInfo.xAxis = {
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
                 };
+
+                e.eventInfo.dataZoom = me.dataZoom;
+
+                e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
+
+                e.eventInfo.iNode += this.dataZoom.range.start;
             },
             _trimGraphs: function(_yAxis, dataFrame) {
 
@@ -1565,11 +1758,16 @@ define(
 
                 function _trimGraphs(_fields, _arr, _tmpData, _center, _firstLay) {
                     for (var i = 0, l = _fields.length; i < l; i++) {
-                        var __tmpData = [];
-                        _tmpData.push(__tmpData);
 
                         //单条line的全部data数据
                         var _lineData = _arr[i];
+
+                        if( !_lineData ) return;
+
+                        var __tmpData = [];
+                        _tmpData.push(__tmpData);
+
+                        
 
                         if (_firstLay && self.biaxial && i > 0) {
                             _yAxis = self._yAxisR;
@@ -1606,15 +1804,11 @@ define(
 
                 function _getYaxisField(i) {
                     //这里要兼容从折柱混合图过来的情况
-                    if (self._lineField) {
-                        return self._lineField;
-                    };
                     if (self.type && self.type.indexOf("line") >= 0) {
-                        self._lineField = self._lineChart.dataFrame.yAxis.field;
+                        return self._lineChart.dataFrame.yAxis.field;
                     } else {
-                        self._lineField = self.dataFrame.yAxis.field;
+                        return self.dataFrame.yAxis.field;
                     };
-                    return self._lineField;
                 };
 
                 _trimGraphs(_getYaxisField(), arr, tmpData, center, true);

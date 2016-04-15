@@ -10,26 +10,32 @@ define(
         'chartx/utils/projection/normal',
         'chartx/components/tips/tip', //'./tips',
         'chartx/utils/dataformat',
-        "chartx/components/markpoint/index",
-        "chartx/chart/theme",
-        "chartx/utils/colorformat"
+        'chartx/components/markpoint/index',
+        'chartx/utils/colorformat'
     ],
-    function(Canvax, Chart, Path, Polygon, mapParams, GeoCoord, TextFixed, Projection, Tips, DataFormat, MarkPoint, Theme, ColorFormat) {
+    function(Canvax, Chart, Path, Polygon, mapParams, GeoCoord, TextFixed, Projection, Tips, DataFormat, MarkPoint, ColorFormat) {
 
         return Chart.extend({
             init: function(node, data, opts) {
                 this._opts = opts;
                 this.mapName = "china"; //map类型 默认为中国地图
+                this.administrativeCode = null; //如果是查询的行政编码地图，上面的mapName 犹这个查询出来
                 this._mapDataMap = {};
                 this._nameMap = {};
                 this.checkedList = {};
                 this.tips = {};
+                this.themeColor = "#6E7586"; //没人的主题色彩，所有的有数据的area都是在这个颜色的基础上做透明度变化，同时也是默认的hover色  
                 this.area = {
                     strokeStyle: null,
                     fillStyle: null,
-                    hoverStrokeStyle: null,
-                    normalFillStyle: "#fff",
-                    normalStrokeStyle: "#ccc",
+                    hoverStrokeStyle: this.themeColor,
+                    hoverFillStyle:null,
+
+                    checkedStrokeStyle: null,
+                    checkedFillStyle:null,
+
+                    _normalFillStyle: "#fff",
+                    _normalStrokeStyle: "#ccc",
                     lineWidth: 1,
                     linkage: false, //是否开启省市联动，目前只支持中国地图
                     text: {
@@ -51,7 +57,7 @@ define(
 
                 this.checked = {
                     enabled: false
-                }
+                };
 
                 _.deepExtend(this, opts);
 
@@ -89,7 +95,6 @@ define(
                 return this.dataFrame;
             },
             draw: function() {
-
                 //因为draw的时候可能是 reset触发的。这个时候要先清除了sprite的所有子节点
                 //然后把它重新add入stage
                 this.sprite.removeAllChildren();
@@ -104,14 +109,23 @@ define(
                     me._widget(md);
                     if ("markPoint" in me._opts) {
                         me._initMarkPoint();
-                    }
+                    };
                     //绘制完了后调整当前sprite的尺寸和位置
                     me._setSpPos();
-
+                    me.drawEnd();
                     this.inited = true;
                 });
             },
-            _setSpPos: function() {
+            drawEnd : function(){
+
+            },
+            _reset: function(obj){
+                if( obj.options ){
+                    _.deepExtend(this, obj.options);
+                    _.deepExtend(this._opts, obj.options);
+                }
+            },
+            _setSpPos: function(){
                 var tf = this._mapDataMap[this.mapName].transform;
                 var spc = this.sprite.context;
                 spc.width = tf.width;
@@ -128,13 +142,18 @@ define(
             _getMapData: function(mt, callback) {
                 var me = this;
                 this._mapDataMap[mt] = (this._mapDataMap[mt] || {});
-                //var mapObj = mapParams.params[mt.replace("省","").replace("市","")];
-                for( var name in mapParams.params ){
-                    if( name.indexOf( mt ) >= 0 || mt.indexOf( name ) >= 0 ){
-                        mapObj = mapParams.params[name];
-                    }
-                };
-                mapObj && mapObj.getGeoJson(this._mapDataCallback(mt, callback));
+                if( me.administrativeCode ){
+                    mapParams.params.administrative.getGeoJson( me.administrativeCode , me._mapDataCallback(mt, callback) );
+                } else {
+                    var mapObj;
+                    for( var name in mapParams.params ){
+                        if( name.indexOf( mt ) >= 0 || mt.indexOf( name ) >= 0 ){
+                            mapObj = mapParams.params[name];
+                            break;
+                        }
+                    };
+                    mapObj && mapObj.getGeoJson(me._mapDataCallback(mt, callback));
+                }
             },
             /**
              * @param {string} mt mapName
@@ -186,16 +205,6 @@ define(
 
                 var position = [transform.left, transform.top];
                 for (var i = 0, l = pathArray.length; i < l; i++) {
-                    /* for test
-                    console.log(
-                        mapData.features[i].properties.cp, // 经纬度度
-                        pathArray[i].cp                    // 平面坐标
-                    );
-                    console.log(
-                        this.pos2geo(mapName, pathArray[i].cp),  // 平面坐标转经纬度
-                        this.geo2pos(mapName, mapData.features[i].properties.cp)
-                    )
-                    */
                     province.push(this._getSingleProvince(
                         mapName, pathArray[i], position
                     ));
@@ -362,7 +371,7 @@ define(
                             if (!val) {
                                 color = null;
                             } else {
-                                color = ColorFormat.colorRgba(Theme.brandColor, parseFloat((val * 0.85 / this.maxValue).toFixed(2)));
+                                color = ColorFormat.colorRgba( this.themeColor , parseFloat((val * 0.85 / this.maxValue).toFixed(2)));
                             }
                         };
                     };
@@ -408,8 +417,9 @@ define(
                     md.ind = i;
                     var aread = me._getDataForArea(md);
 
-                    var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area.normalFillStyle);
-                    var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area.normalStrokeStyle);
+                    var fillStyle = (me._getColor(me.area.fillStyle, aread, "fillStyle") || me.area._normalFillStyle);
+                    var strokeStyle = (me._getColor(me.area.strokeStyle, aread, "strokeStyle") || me.area._normalStrokeStyle);
+
                     var shapeCtx = {
                         x: 0,
                         y: 0,
@@ -434,7 +444,8 @@ define(
                     area.mapData = md;
                     area._strokeStyle = strokeStyle;
                     area._fillStyle = fillStyle;
-                    area._hoverFillStyle = fillStyle;
+                    area._hoverFillStyle = me.area.hoverFillStyle || fillStyle;
+                    area._hoverStrokeStyle = me.area.hoverStrokeStyle
 
                     area.on("mouseover", function(e) {
                         if (e.fromTarget && e.fromTarget.type == "text" && e.fromTarget.text == this.mapData.name) {
@@ -443,8 +454,7 @@ define(
                         if (!this.mapData.checked) {
                             this.toFront();
                             //this.context.lineWidth ++;
-                            var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
-                            this.context.strokeStyle = hoverStrokeStyle;
+                            this.context.strokeStyle = this._hoverStrokeStyle;
                             this.context.fillStyle = this._hoverFillStyle;
                         };
 
@@ -500,24 +510,11 @@ define(
                         if (me.checked.enabled) {
                             if (me.checkedList[mapData.id]) {
                                 //已经存在了。取消选中态度
-                                mapData.checked = false;
-                                delete me.checkedList[mapData.id];
-                                if (areaEl._fillStyle == me.area.normalFillStyle) {
-                                    areaEl.context.fillStyle = me.area.normalFillStyle;
-                                }
+                                me._uncheckAt( this , e );
                             } else {
-                                me.checkedList[mapData.id] = mapData;
-                                mapData.checked = true;
-                                if (areaEl.context.fillStyle == me.area.normalFillStyle) {
-                                    areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
-                                };
+                                me._checkAt( this , e );
                             };
                         };
-                        /*
-                        e.eventInfo = {
-                            mapData: mapData
-                        };
-                        */
                         e.eventInfo = me._getDataForArea(mapData);
                         me.fire("click", e);
                     });
@@ -568,8 +565,8 @@ define(
                     if (md.checked) {
                         var area = area_sp.getChildById("area_" + md.id);
                         area.toFront();
-                        area.context.strokeStyle = me.area.hoverStrokeStyle || Theme.brandColor;
-                        if (area.context.fillStyle == me.area.normalFillStyle) {
+                        area.context.strokeStyle = me.area.hoverStrokeStyle;
+                        if (area.context.fillStyle == me.area._normalFillStyle) {
                             area.context.fillStyle = ColorFormat.colorRgba(area.context.strokeStyle, 0.05);
                         }
                     }
@@ -577,54 +574,137 @@ define(
                 me.sprite.addChild(area_sp);
                 area_txt_sp && me.sprite.addChild(area_txt_sp);
             },
+            _checkAt: function(target , e) {
+                var me = this,mapData,areaEl;
+                if(target === undefined) return;
+                if( _.isNumber( target ) ){
+                    mapData = _.find(this.mapDataList, function(d) {
+                        return d.ind == target;
+                    });
+                    areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                } else {
+                    areaEl = target;
+                    mapData = e.currentTarget.mapData;
+                };
 
-            checkAt: function(index) {
-                var me = this;
-
-                var mapData = _.find(this.mapDataList, function(d) {
-                    return d.ind == index;
-                });
-                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
-
+                
                 if (!me.checkedList[mapData.id]) {
                     me.checkedList[mapData.id] = mapData;
                     mapData.checked = true;
 
-                    var hoverStrokeStyle = me.area.hoverStrokeStyle || Theme.brandColor
-                    areaEl.context.strokeStyle = hoverStrokeStyle;
-                    if (areaEl.context.fillStyle == me.area.normalFillStyle) {
-                        areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                    //如果有设置checked的Style
+                    areaEl.context.strokeStyle = me.area.checkedStrokeStyle || me.area.hoverStrokeStyle;
+                    if( me.area.checkedFillStyle ){
+                        areaEl.context.fillStyle = me.area.checkedFillStyle;
+                    } else {
+                        if (areaEl._fillStyle == me.area._normalFillStyle) {
+                            areaEl.context.fillStyle = ColorFormat.colorRgba(areaEl.context.strokeStyle, 0.05);
+                        };
                     };
+
                     areaEl.toFront();
                 };
             },
-            uncheckAt: function(index) {
+            checkAt: function( indexs ){
+                if( !_.isArray(indexs) ){
+                    indexs = [ indexs ]
+                };
                 var me = this;
-                var mapData = _.find(this.mapDataList, function(d) {
-                    return d.ind == index;
-                });
-                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                _.each( indexs , function(index){
+                    me._checkAt(index);
+                } );
+            },
+            _uncheckAt: function( target , e ) {
+                var me = this;
+                var me = this,mapData,areaEl;
+
+                if( _.isNumber( target ) ){
+                    mapData = _.find(this.mapDataList, function(d) {
+                        return d.ind == target;
+                    });
+                    areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                } else {
+                    areaEl = target;
+                    mapData = e.currentTarget.mapData;
+                };
+
                 if (me.checkedList[mapData.id]) {
                     //已经存在了。取消选中态度
                     mapData.checked = false;
                     delete me.checkedList[mapData.id];
+
+                    areaEl.context.strokeStyle = e ? areaEl._hoverStrokeStyle : areaEl._strokeStyle;
+                    areaEl.context.fillStyle = e ? areaEl._hoverFillStyle : areaEl._fillStyle;
+                    
+                    /*
                     areaEl.context.strokeStyle = areaEl._strokeStyle;
                     areaEl.context.fillStyle = areaEl._fillStyle;
-                    areaEl.toBack();
+                    */
+
+                    !e && areaEl.toBack();
+                };
+            },
+            uncheckAt: function(indexs){
+                if( !_.isArray(indexs) ){
+                    indexs = [indexs]
+                }
+                var me = this;
+                _.each( indexs , function(index){
+                    me._uncheckAt(index);
+                } );
+            },
+            checkAll: function(){
+                var me =this;
+                for( var i in me.mapDataList ){
+                    this._checkAt( me.mapDataList[i].ind );
                 };
             },
             uncheckAll: function(){
                 var me =this;
                 for( var i in me.checkedList ){
-                    this.uncheckAt( me.checkedList[i].ind );
+                    this._uncheckAt( me.checkedList[i].ind );
                 };
                 me.checkedList = {};
             },
             checkOf: function( areaName ){
-                this.checkAt( this._getAreaIndexOfName(areaName) );
+                var me = this;
+                if( _.isString( areaName ) ){
+                    areaName = [ areaName ];
+                };
+                _.each( areaName , function( an ){
+                    me._checkAt( me._getAreaIndexOfName( an ) );
+                } );
             },
             uncheckOf: function( areaName ){
-                this.uncheckAt( this._getAreaIndexOfName(areaName) );
+                var me = this;
+                if( _.isString( areaName ) ){
+                    areaName = [ areaName ];
+                };
+                _.each( areaName , function( an ){
+                    me._uncheckAt( me._getAreaIndexOfName( an ) );
+                } );
+            },
+            setAreaStyle: function( areaName , style ){
+                var areaEl = this._getAreaOf( areaName );
+                for( var p in style ){
+                    areaEl.context[p] = style[p]
+                };
+                if( style.strokeStyle ) {
+                    areaEl._strokeStyle = style.strokeStyle;
+                };
+                if( style.fillStyle )  {
+                    areaEl._fillStyle = style.fillStyle;
+                    areaEl._hoverFillStyle = this.area.hoverFillStyle || style.fillStyle;
+                };
+            },
+            _getAreaOf: function( areaName ){
+                var me = this;
+                var index = me._getAreaIndexOfName( areaName );
+                var mapData = _.find(this.mapDataList, function(d) {
+                    return d.ind == index;
+                });
+                var areaEl = me.sprite.getChildById("areas").getChildById("area_" + mapData.id);
+                return areaEl;
             },
             _getAreaIndexOfName : function( areaName ){
                 var i;
@@ -640,6 +720,7 @@ define(
             _initMarkPoint: function() {
                 var me = this;
                 require(["chartx/chart/map/map-data/geo-json/china_city"], function(citys) {
+
                     _.each(me.dataFrame.xAxis.org[0], function(c, i) {
                         if (c in me.geoCoordSupply) {
                             me._setMarkToPoint(c, me.geo2pos(me.mapName, me.geoCoordSupply[c]));

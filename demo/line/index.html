@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
 <title>xChart demo -- line</title>
-<script type="text/javascript" src="../../lib/sea.js"></script>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -34,32 +34,116 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
+    ["xfield","uv" ,"pv"],
+    [ 1      , 3 , 20     ],
+    [ 2      , 0   , 51     ],
+    [ 3      , 32   , 45     ],
+    [ 4      , 58  , 35     ],
+    [ 5      , 79  , 73     ],
+    [ 6      , 88  , 54     ],
+    [ 7      , 55  , 68     ],
+    [ 8      , 66   , 83     ]
+];
+var data1= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 3 , 20 , 33    ],
-    [ 2      , 0   , 51 , 26    ],
-    [ 3      , 32   , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 39    ],
-    [ 7      , 55  , 68 , 65    ],
-    [ 8      , 66   , 83 , 51    ]
+    [ 1      , 3 , 120 , 33    ],
+    [ 2      , 0   , 151 , 26    ],
+    [ 3      , 32   , 145 , 243    ],
+    [ 4      , 58  , 135 , 231    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 188  , 154 , 39    ],
+    [ 7      , 55  , 168 , 65    ],
+    [ 8      , 66   ,183 , 51    ],
+    [ 3      , 32   , 145 , 243    ],
+    [ 4      , 58  , 135 , 231    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 188  , 154 , 39    ],
+    [ 7      , 55  , 168 , 65    ],
+    [ 8      , 66   ,183 , 51    ]
 ];
 
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+
+
 var options = {
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["uv" , "pv" ],
+        field : ["uv"  ],
         label : "yaxis"
     },
     xAxis : {
         field : "xfield",
         label : "xaxis"
+    },
+
+    graphs : {
+       line : {
+           strokeStyle:["#4d7fff","#fa5519","#999999"]
+       }
     }
 };
-//Chartx.line开始初始化chart实例
-var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
 
+var chartx = Chartx.line("canvasTest" , data1 , options).then(function( chart ){
+
+
+setTimeout(function(){
+    //chart.add("click")
+    //return
+    chart.reset({
+        data : data,
+        options : {
+            yAxis:{
+               field : ['uv','pv']
+            }
+        }
+    })
+} , 1000);
+
+
+setTimeout(function(){
+    //chart.add("click")
+    debugger
+    chart.reset({
+        data : data1,
+        options : {
+            yAxis:{
+               field : ['uv']
+            }
+        }
+    })
+} , 2000);
+
+
+
+
+setTimeout(function(){
+    chart.add("pv");
+} , 3000)
+
+
+setTimeout(function(){
+debugger
+    chart.add("click");
+} , 4000)
+
+
+setTimeout(function(){
+    chart.remove("click");
+} , 5000)
+
+
+setTimeout(function(){
+    chart.add("click");
+} , 6000)
+
+setTimeout(function(){
+    chart.remove("pv");
+} , 7000)
+
+
+setTimeout(function(){
+    chart.add("pv");
+} , 8000)
+    
 });
 </textarea></form>
 

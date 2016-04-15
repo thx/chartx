@@ -1,20 +1,23 @@
 ﻿define(
     'chartx/chart/pie/index', [
         'chartx/chart/index',
-        'chartx/chart/pie/pie'
+        'chartx/chart/pie/pie',
+        'chartx/components/legend/index'
     ],
-    function(Chart, Pie) {
+    function (Chart, Pie, Legend) {
         /*
-         *@node chart在dom里的目标容器节点。
-         */
+        *@node chart在dom里的目标容器节点。
+        */
         var Canvax = Chart.Canvax;
 
         return Chart.extend({
             // element : null,
             // opts    : null,
-            init: function(node, data, opts) {
+            init: function (node, data, opts) {
                 // this.element = node;
                 this.data = data;
+                this.ignoreFields = [];
+                this._opts = opts;
                 this.options = opts;
                 this.config = {
                     mode: 1,
@@ -30,8 +33,9 @@
                 };
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
+                this._setLengend();
             },
-            draw: function() {
+            draw: function () {
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
                 });
@@ -50,13 +54,13 @@
                 this._drawEnd(); //绘制结束，添加到舞台  
                 this.inited = true;
             },
-            getByIndex: function(index) {
+            getByIndex: function (index) {
                 return this._pie._getByIndex(index);
             },
-            getLabelList: function() {
+            getLabelList: function () {
                 return this._pie.getLabelList();
             },
-            getList: function() {
+            getList: function () {
                 var self = this;
                 var list = [];
                 var item;
@@ -81,51 +85,51 @@
                 };
                 return list;
             },
-            getCheckedList: function() {
+            getCheckedList: function () {
                 var cl = [];
-                _.each(this.getList(), function(item) {
+                _.each(this.getList(), function (item) {
                     if (item.checked) {
                         cl.push(item);
                     }
                 });
                 return cl;
             },
-            focusAt: function(index) {
+            focusAt: function (index) {
                 if (this._pie) {
                     this._pie.focus(index);
                 }
             },
-            unfocusAt: function(index) {
+            unfocusAt: function (index) {
                 if (this._pie) {
                     this._pie.unfocus(index);
                 }
             },
-            checkAt: function(index) {
+            checkAt: function (index) {
                 if (this._pie) {
                     this._pie.check(index);
                 }
             },
-            uncheckAt: function(index) {
+            uncheckAt: function (index) {
                 if (this._pie) {
                     this._pie.uncheck(index);
                 }
             },
-            uncheckAll: function(){
+            uncheckAll: function () {
                 if (this._pie) {
                     this._pie.uncheckAll();
                 }
             },
-            checkOf: function( xvalue ){
-                this.checkAt( this._getIndexOfxName(xvalue) );
+            checkOf: function (xvalue) {
+                this.checkAt(this._getIndexOfxName(xvalue));
             },
-            uncheckOf: function( xvalue ){
-                this.uncheckAt( this._getIndexOfxName(xvalue) );
+            uncheckOf: function (xvalue) {
+                this.uncheckAt(this._getIndexOfxName(xvalue));
             },
-            _getIndexOfxName: function( xvalue ){
+            _getIndexOfxName: function (xvalue) {
                 var i;
                 var list = this.getList();
-                for( var ii=0,il=list.length ; ii<il ; ii++ ){
-                    if( list[ii].name == xvalue ){
+                for (var ii = 0, il = list.length; ii < il; ii++) {
+                    if (list[ii].name == xvalue) {
                         i = ii;
                         break;
                     }
@@ -135,10 +139,10 @@
             _initData: function(arr, opt) {
                 var data = [];
                 var arr = _.clone(arr)
-                    /*
-                     * @释剑
-                     * 用校正处理， 把pie的data入参规范和chartx数据格式一致
-                     **/
+                /*
+                * @释剑
+                * 用校正处理， 把pie的data入参规范和chartx数据格式一致
+                **/
                 if (!this.xAxis.field) {
                     data = arr;
                 } else {
@@ -173,29 +177,33 @@
                     for (var i = 0; i < arr.length; i++) {
                         var obj = {};
                         if (_.isArray(arr[i])) {
+
                             obj.name = arr[i][0];
                             obj.y = parseFloat(arr[i][1]);
                             obj.sliced = false;
                             obj.selected = false;
+
                         } else if (typeof arr[i] == 'object') {
+
                             obj.name = arr[i].name;
                             obj.y = parseFloat(arr[i].y);
                             obj.sliced = arr[i].sliced || false;
                             obj.selected = arr[i].selected || false;
+
                         }
 
                         if (obj.name) dataFrame.data.push(obj);
                     }
                 }
                 if (data.length > 0 && opt.sort == 'asc' || opt.sort == 'desc') {
-                    dataFrame.org.sort(function(a, b) {
+                    dataFrame.org.sort(function (a, b) {
                         if (opt.sort == 'desc') {
                             return a[1] - b[1];
                         } else if (opt.sort == 'asc') {
                             return b[1] - a[1];
                         }
                     });
-                    dataFrame.data.sort(function(a, b) {
+                    dataFrame.data.sort(function (a, b) {
                         if (opt.sort == 'desc') {
                             return a.y - b.y;
                         } else if (opt.sort == 'asc') {
@@ -204,31 +212,35 @@
                     });
                 }
 
+                if (dataFrame.data.length > 0) {
+                    for (i = 0; i < dataFrame.data.length; i++) {
+                        if (_.contains(this.ignoreFields, dataFrame.data[i].name)) {
+                            dataFrame.data[i].ignored = true;
+                            dataFrame.data[i].y = 0;
+                        }
+                    }
+
+
+                }
+
                 return dataFrame;
 
             },
-            clear: function() {
+            clear: function () {
                 this.stageBg.removeAllChildren()
                 this.core.removeAllChildren()
                 this.stageTip.removeAllChildren();
             },
-            reset: function(obj) {
-                this.clear()
-                this._pie.clear()
-                    // var element = $('#' + this.element)
-                    // this.width = parseInt(element.width);
-                    // this.height = parseInt(element.height);
-                    // this.width = parseInt(this.el.offsetWidth);
-                    // this.height = parseInt(this.el.offsetHeight)
-
-                var data = obj.data || this.data
-                    // var opt = obj.options || this.opts
-                    // _.deepExtend(this, obj.data);
+            reset: function (obj) {
+                obj = obj || {};
+                this.clear();
+                this._pie.clear();
+                var data = obj.data || this.data;
                 _.deepExtend(this, obj.options);
                 this.dataFrame = this._initData(data, this.options);
-                this.draw()
+                this.draw();
             },
-            _initModule: function() {
+            _initModule: function () {
                 var self = this;
                 var w = self.width;
                 var h = self.height;
@@ -261,14 +273,14 @@
                     startAngle: parseInt(self.startAngle),
                     colors: self.colors,
                     focusCallback: {
-                        focus: function(e, index) {
+                        focus: function (e, index) {
                             self.fire('focus', e);
                         },
-                        unfocus: function(e, index) {
+                        unfocus: function (e, index) {
                             self.fire('unfocus', e);
                         }
                     },
-                    checked : (self.checked ? self.checked : { enabled : false })
+                    checked: (self.checked ? self.checked : { enabled: false })
                 };
 
                 if (self.dataLabel) {
@@ -277,19 +289,94 @@
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
-                self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function(e) {
+                self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
                     self.fire(e.type, e);
                 });
             },
-            _startDraw: function() {
+            _startDraw: function () {
                 this._pie.draw(this);
+                var me = this;                
+                //如果有legend，调整下位置,和设置下颜色
+                if (this._legend && !this._legend.inited) {
+                    _.each(this.getList(), function (item, i) {
+                        var ffill = item.color;
+                        me._legend.setStyle(item.name, { fillStyle: ffill });
+                    });
+                    this._legend.inited = true;
+                };
             },
-            _drawEnd: function() {
+            _drawEnd: function () {
                 this.core.addChild(this._pie.sprite);
                 if (this._tip) this.stageTip.addChild(this._tip.sprite);
                 this.fire('complete', {
                     data: this.getList()
                 });
+            },
+            remove: function (field) {
+                var me = this;
+                var data = me.data;
+                if (field && data.length > 1) {
+                    for (var i = 1; i < data.length; i++) {
+                        if (data[i][0] == field && !_.contains(me.ignoreFields, field)) {
+                            me.ignoreFields.push(field);
+                            console.log(me.ignoreFields.toString());
+                        }
+                    }
+                }
+                me.reset();
+            },
+            add: function (field) {
+                var me = this;
+                var data = me.data;
+                if (field && data.length > 1) {
+                    for (var i = 1; i < data.length; i++) {
+                        if (data[i][0] == field && _.contains(me.ignoreFields, field)) {
+                            me.ignoreFields.splice(_.indexOf(me.ignoreFields, field), 1);
+                        }
+                    }
+                }
+                me.reset();
+            },
+            //设置图例 begin
+            _setLengend: function () {
+                var me = this;
+                if ( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
+                //设置legendOpt
+                var legendOpt = _.deepExtend({
+                    legend:true,
+                    label: function (info) {
+                        return info.field
+                    },
+                    onChecked: function (field) {
+                        me.add(field);
+                    },
+                    onUnChecked: function (field) {
+                        me.remove(field);
+                    },
+                    layoutType: "v"
+                }, this._opts.legend);
+                this._legend = new Legend(this._getLegendData(), legendOpt);
+                this.stage.addChild(this._legend.sprite);
+                this._legend.pos({
+                    x: this.width - this._legend.width,
+                    y: this.height / 2 - this._legend.h / 2
+                });
+
+                this.padding.right += this._legend.width;
+            },
+            _getLegendData: function () {
+                var me = this;
+                var data = [];                
+                _.each(this.dataFrame.data, function (obj, i) {
+                    data.push({
+                        field: obj.name,
+                        value: obj.y,
+                        fillStyle: null
+                    });
+                });
+
+                return data;
             }
+            ////设置图例end
         });
     });

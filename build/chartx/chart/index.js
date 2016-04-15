@@ -58,7 +58,7 @@ define(
             dataFrame: null, //每个图表的数据集合 都 存放在dataFrame中。
             draw: function() {},
             /*
-             * chart的销毁 
+             * chart的销毁
              */
             destroy: function() {
                 this.clean();
@@ -93,37 +93,26 @@ define(
             /**
              * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
              * @param obj {data , options}
+             * 这个是最简单粗暴的reset方式，全部叉掉重新画，但是如果有些需要比较细腻的reset，比如
+             * line，bar数据变化是在原有的原件上面做平滑的变动的话，需要在各自图表的构造函数中重置该函数
              */
             reset: function(obj) {
-                /*如果用户有调用reset就说明用户是有想要绘制的 
-                 *还是把这个权利交给使用者自己来控制吧
-                if( !obj || _.isEmpty(obj)){
-                    return;
-                }
-                */
-                //如果只有数据的变化
-                if (obj && obj.data && !obj.options && this.resetData) {
-                    this.resetData( obj.data );
-                    return;
-                };
+                this._reset && this._reset( obj );
+                var d = ( this.dataFrame.org || [] );
                 if (obj && obj.options) {
-                    //注意，options的覆盖用的是deepExtend
-                    //所以只需要传入要修改的 option部分
-
                     _.deepExtend(this, obj.options);
-
-                    //配置的变化有可能也会导致data的改变
-                    this.dataFrame && (this.dataFrame = this._initData(this.dataFrame.org));
-                }
+                };
                 if (obj && obj.data) {
-                    //数据集合，由_initData 初始化
-                    this.dataFrame = this._initData(obj.data);
-                }
+                    d = obj.data;
+                };
+                d && this.resetData(d);
                 this.clean();
                 this.canvax.getDomContainer().innerHTML = "";
                 this.draw();
             },
-
+            resetData: function( data ){
+                this.dataFrame = this._initData( data );
+            },
             _rotate: function(angle) {
                 var currW = this.width;
                 var currH = this.height;

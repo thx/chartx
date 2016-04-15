@@ -12,7 +12,7 @@ define(
                 start: 0,
                 end: 1,
                 max : '',
-                min : 2,
+                min : 1
             };
             this.count = 1;
             this.pos = {
@@ -21,17 +21,17 @@ define(
             };
             this.left = {
                 eventEnabled : true
-            },
+            };
             this.right = {
                 eventEnabled : true
-            },
+            };
             this.center = {
                 fillStyle : '#ffffff',
                 globalAlpha : 0
-            }
+            };
 
             this.w = 0;
-            this.h = 46;
+            this.h = 40;
 
             this.color = "#008ae6";
 
@@ -55,8 +55,10 @@ define(
 
             if(!this.range.max)
                 this.range.max = this.count;
-            this.disPart = this._getDisPart()
-            this.barAddH = 8
+            if( this.range.end > this.count - 1)
+                this.range.end = this.count - 1;
+            this.disPart = this._getDisPart();
+            this.barAddH = 8;
             this.barH = this.h - this.barAddH;
             this.barY = 6 / 2;
             this.btnW = 8;
@@ -108,9 +110,9 @@ define(
 
                 if(me.underline.enabled){
                     me._underline = me._addLine({
-                        xStart : me.range.start/me.count * me.w + me.btnW / 2,
+                        xStart : me.range.start / me.count * me.w + me.btnW / 2,
                         yStart : me.barY + me.barH + 2,
-                        xEnd   : me.range.end/me.count * me.w - me.btnW / 2,
+                        xEnd   : (me.range.end + 1) / me.count * me.w  - me.btnW / 2,
                         yEnd   : me.barY + me.barH + 2,
                         lineWidth : me.underline.lineWidth,
                         strokeStyle : me.underline.strokeStyle,
@@ -118,19 +120,19 @@ define(
                     me.dataZoomBg.addChild(me._underline); 
                 }
 
-                this._btnLeft = new Rect({
+                me._btnLeft = new Rect({
                     id          : 'btnLeft',
-                    dragEnabled : this.left.eventEnabled,
+                    dragEnabled : me.left.eventEnabled,
                     context: {
-                        x: this.range.start/this.count * this.w,
-                        y: this.barY - this.barAddH / 2 + 1,
-                        width: this.btnW,
-                        height: this.barH + this.barAddH,
-                        fillStyle : this.btnFillStyle,
-                        cursor: this.left.eventEnabled && "move"
+                        x: me.range.start / me.count * me.w,
+                        y: me.barY - me.barAddH / 2 + 1,
+                        width: me.btnW,
+                        height: me.barH + me.barAddH,
+                        fillStyle : me.btnFillStyle,
+                        cursor: me.left.eventEnabled && "move"
                     }
                 });
-                this._btnLeft.on("draging" , function(){
+                me._btnLeft.on("draging" , function(){
                    this.context.y = me.barY - me.barAddH / 2 + 1
                    if(this.context.x < 0){
                        this.context.x = 0;
@@ -144,29 +146,28 @@ define(
                    if(me._btnRight.context.x + me.btnW - this.context.x < me.disPart.min){
                        this.context.x = me._btnRight.context.x + me.btnW - me.disPart.min
                    }
-
                    me.rangeRect.context.width = me._btnRight.context.x - this.context.x - me.btnW;
                    me.rangeRect.context.x = this.context.x + me.btnW;
                    me._setRange();
                 });
-                this._btnLeft.on("dragend" , function(){
+                me._btnLeft.on("dragend" , function(){
                    me.dragEnd( me.range );
                 });
 
 
-                this._btnRight = new Rect({
+                me._btnRight = new Rect({
                     id          : 'btnRight',
-                    dragEnabled : this.right.eventEnabled,
+                    dragEnabled : me.right.eventEnabled,
                     context: {
-                        x: this.range.end / this.count * this.w - this.btnW,
-                        y: this.barY - this.barAddH / 2 + 1,
-                        width: this.btnW,
-                        height: this.barH + this.barAddH ,
-                        fillStyle : this.btnFillStyle,
-                        cursor : this.right.eventEnabled && "move"
+                        x: (me.range.end + 1) / me.count * me.w - me.btnW,
+                        y: me.barY - me.barAddH / 2 + 1,
+                        width: me.btnW,
+                        height: me.barH + me.barAddH ,
+                        fillStyle : me.btnFillStyle,
+                        cursor : me.right.eventEnabled && "move"
                     }
                 });
-                this._btnRight.on("draging" , function(){
+                me._btnRight.on("draging" , function(){
                     this.context.y = me.barY - me.barAddH / 2 + 1
                     if( this.context.x > me.w - me.btnW ){
                         this.context.x = me.w - me.btnW;
@@ -177,11 +178,10 @@ define(
                     if( this.context.x + me.btnW - me._btnLeft.context.x < me.disPart.min){
                         this.context.x = me.disPart.min - (me.btnW - me._btnLeft.context.x)
                     }
-
                     me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnW;
                     me._setRange();
                 });
-                this._btnRight.on("dragend" , function(){
+                me._btnRight.on("dragend" , function(){
                     me.dragEnd( me.range );
                 });
 
@@ -255,12 +255,11 @@ define(
             },
             _setRange : function(){
                 var me = this
-                var start = (me._btnLeft.context.x / me.w) * me.count ;
-                var end = ( (me._btnRight.context.x + me.btnW) / me.w) * me.count;
+                var start = (me._btnLeft.context.x / me.w) * (me.count - 1) ;
+                var end = ( (me._btnRight.context.x + me.btnW) / me.w) * (me.count - 1);
                 me.range.start = start;
                 me.range.end = end;
                 me.dragIng( me.range );
-
                 me._setLines()
             },
 
@@ -284,8 +283,8 @@ define(
                 linesCenter.context.y = btnCenter.context.y + (btnCenter.context.height - linesCenter.context.height ) / 2
 
                 if(me.underline.enabled){
-                    me._underline.context.xStart = me.range.start/me.count * me.w + me.btnW / 2
-                    me._underline.context.xEnd   = me.range.end/me.count * me.w - me.btnW / 2
+                    me._underline.context.xStart = linesLeft.context.x + me.btnW / 2
+                    me._underline.context.xEnd   = linesRight.context.x + me.btnW / 2
                 }
             },
 

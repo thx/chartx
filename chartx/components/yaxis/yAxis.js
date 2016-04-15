@@ -153,15 +153,20 @@ define(
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
             },
+            tansValToPos : function( val ){
+                var max = this.dataSection[this.dataSection.length - 1];
+                var y = -(val - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
+                y = isNaN(y) ? 0 : parseInt(y);
+                return y;
+            },
             _trimYAxis: function() {
                 var max = this.dataSection[this.dataSection.length - 1];
                 var tmpData = [];
                 for (var a = 0, al = this.dataSection.length; a < al; a++) {
-                    var y = -(this.dataSection[a] - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
-                    y = isNaN(y) ? 0 : parseInt(y);
+                    
                     tmpData[a] = {
                         content: this.dataSection[a],
-                        y: y
+                        y: this.tansValToPos( this.dataSection[a] )
                     };
                 }
 
