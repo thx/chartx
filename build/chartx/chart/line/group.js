@@ -81,6 +81,9 @@ define(
                 this._widget();
             },
             update: function(opt) {
+                if(!this._bline){
+                    return;
+                }
                 _.deepExtend(this, opt);
                 if( opt.data ){
                     this._pointList = this._getPointList(this.data);
@@ -462,6 +465,9 @@ define(
             },
             _fillLine: function(bline) { //填充直线
                 var fillPath = _.clone(bline.context.pointList);
+                if( fillPath.length == 0 ){
+                    return "";
+                }
                 var baseY = 0;
                 if (this.sort == "desc") {
                     baseY = -this.h;

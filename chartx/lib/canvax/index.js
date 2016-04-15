@@ -1030,7 +1030,9 @@ define(
 
 	return TWEEN;
 
-});;/* 
+});
+
+;/* 
 window.FlashCanvasOptions = {
     swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
@@ -3945,7 +3947,7 @@ define(
                     this._notWatch = true; //本次转换不出发心跳
                     var currL = SmoothSpline(obj);
 
-                    if (value) {
+                    if (value && value.length>0) {
                         currL[currL.length - 1][0] = value[value.length - 1][0];
                     };
                     myC.pointList = currL;

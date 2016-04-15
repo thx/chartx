@@ -103,11 +103,9 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data , trimData) {
-
                 if( !trimData ){
                     trimData = _resetDataFrameAndGetTrimData( data );
                 };
-
                 this._graphs.resetData( trimData , {
                     disX: this._getGraphsDisX()
                 });
@@ -116,7 +114,7 @@ define(
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis);
                 this._yAxis.resetData(this.dataFrame.yAxis);
-                return this._trimGraphs()
+                return this._trimGraphs();
             },
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线
@@ -124,12 +122,15 @@ define(
              **/
             add: function( field ) {
                 var self = this;
-                
+                if( _.indexOf( this.yAxis.field , field ) > 0 ){
+                    //说明已经在field列表里了，该add操作无效
+                    return
+                };
                 if( !self._graphs._yAxisFieldsMap[field] ){
                     this.yAxis.field.push( field );
                 } else {
                     this.yAxis.field.splice( self._graphs._yAxisFieldsMap[ field ].ind , 0, field);
-                }
+                };
 
                 this.dataFrame = this._initData(this.dataFrame.org, this);
                 this._yAxis.update(this.yAxis, this.dataFrame.yAxis);

@@ -1905,7 +1905,9 @@ define(
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
+                if( this.data.length == 0 ){
 
+                };
                 this._getLabel();
                 this._initConfig(opt);
                 this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
@@ -2124,7 +2126,7 @@ define(
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {
 
-                if (this.sprite.getNumChildren() == 0)
+                if (this.data.length == 0)
                     return;
 
                 var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
