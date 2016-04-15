@@ -115,7 +115,7 @@ define(
                         xEnd   : (me.range.end + 1) / me.count * me.w  - me.btnW / 2,
                         yEnd   : me.barY + me.barH + 2,
                         lineWidth : me.underline.lineWidth,
-                        strokeStyle : me.underline.strokeStyle,
+                        strokeStyle : me.underline.strokeStyle
                     })
                     me.dataZoomBg.addChild(me._underline); 
                 }
@@ -219,13 +219,13 @@ define(
                 this.linesLeft = new Canvax.Display.Sprite({ id : "linesLeft" });
                 if(this.left.eventEnabled){
                     this._addLines({
-                        sprite : this.linesLeft,
+                        sprite : this.linesLeft
                     })
                 }
                 this.linesRight = new Canvax.Display.Sprite({ id : "linesRight" });
                 if(this.right.eventEnabled){
                     this._addLines({
-                        sprite : this.linesRight,
+                        sprite : this.linesRight
                     })
                 }
                 this.linesCenter = new Canvax.Display.Sprite({ id : "linesCenter" });

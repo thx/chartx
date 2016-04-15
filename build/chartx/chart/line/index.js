@@ -9,7 +9,7 @@ define(
     function( Canvax , Line , Circle , Tip ){
         var Tips = function(opt , data , tipDomContainer){
             this.line      = {
-                enabled      : 1,
+                enabled      : 1
                  //strokeStyle : null
             };
             this.node      = {
@@ -810,12 +810,15 @@ define(
             },
             _addyAxisFieldsMap: function( field ){
                 if( !this._yAxisFieldsMap[field] ){
-                    var maxInd = 0;
+                    var maxInd;
                     for( var f in this._yAxisFieldsMap ){
-                        maxInd = Math.max( this._yAxisFieldsMap[f].ind );
+                        if( isNaN( maxInd ) ){
+                            maxInd = 0;
+                        };
+                        maxInd = Math.max( this._yAxisFieldsMap[f].ind , maxInd );
                     };
                     this._yAxisFieldsMap[field] = {
-                        ind : ++maxInd
+                        ind : isNaN( maxInd )? 0 : ++maxInd
                     };
                 };
             },
@@ -856,25 +859,31 @@ define(
                 _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
                 
                 //如果新的yAxis.field有需要del的
-                _.each( me.field , function( _f , i ){
+                for( var i=0,l=me.field.length ; i<l ; i++ ){
+                    var _f = me.field[i];
                     var dopy = _.find( yAxisChange , function( f ){
                         return f == _f
                     } );
                     if( !dopy ){
                         me.remove(i);
                         //delete me[ _f ];
+                        me.field.splice( i , 1 );
                         delete me._yAxisFieldsMap[ _f ];
                         me.update({
                             data: trimData
                         });
-                    }
-                } );
+                        i--;
+                        l--;
+                    };
+                };
+
                 //新的field配置有需要add的
                 _.each( yAxisChange , function( opy , i ){
                     var fopy = _.find( me.groups ,function( f ){
                         return f.field == opy;
                     } );
                     if( !fopy ){
+                        debugger
                         me.add({
                             data: trimData
                         }, opy);
