@@ -9,7 +9,7 @@ define(
     function( Canvax , Line , Circle , Tip ){
         var Tips = function(opt , data , tipDomContainer){
             this.line      = {
-                enabled      : 1,
+                enabled      : 1
                  //strokeStyle : null
             };
             this.node      = {
