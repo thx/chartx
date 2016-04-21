@@ -203,7 +203,7 @@ define(
                     }
                 };
                 for( var i = 0, il=arr.length; i<il ; i++ ){
-                    arr[i] = Number( arr[i] );
+                    arr[i] =  arr[i] || 0;
                 };
                 return arr;
             },
@@ -275,9 +275,11 @@ define(
                     var content = o.content
                     if (_.isFunction(self.text.format)) {
                         content = self.text.format(content, self);
-                    } else {
-                        content = Tools.numAddSymbol(content);
-                    }
+                    };
+                    if( content === undefined || content === null ){
+                        content = Tools.numAddSymbol( o.content );
+                    };  
+                    
                     var yNode = new Canvax.Display.Sprite({
                         id: "yNode" + a
                     });

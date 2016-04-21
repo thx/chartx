@@ -3648,7 +3648,7 @@ define(
                 if(arguments.length >= 4) {
                     this.context2D.clearRect(x, y, width, height);
                 } else {
-                    this.context2D.clearRect( 0, 0, this.context2D.canvas.offsetWidth, this.context2D.canvas.offsetHeight );
+                    this.context2D.clearRect( 0, 0, this.parent.width , this.parent.height );
                 }
             }
         });
@@ -5125,10 +5125,10 @@ define(
             
             this._isReady = true;
         },
-        resize : function(){
+        resize : function( opt ){
             //重新设置坐标系统 高宽 等。
-            this.width    = parseInt( this._rootDom.offsetWidth  );
-            this.height   = parseInt( this._rootDom.offsetHeight );
+            this.width      = parseInt("width"  in opt || this._rootDom.offsetWidth  , 10); 
+            this.height     = parseInt("height" in opt || this._rootDom.offsetHeight , 10); 
  
             this.el.style.width  = this.width +"px";
             this.el.style.height = this.height+"px";
