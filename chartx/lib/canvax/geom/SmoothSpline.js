@@ -15,8 +15,8 @@ define(
          * @inner
          */
         function interpolate(p0, p1, p2, p3, t, t2, t3) {
-            var v0 = (p2 - p0) * 0.5;
-            var v1 = (p3 - p1) * 0.5;
+            var v0 = (p2 - p0) * 0.25;
+            var v1 = (p3 - p1) * 0.25;
             return (2 * (p1 - p2) + v0 + v1) * t3 
                    + (- 3 * (p1 - p2) - 2 * v0 - v1) * t2
                    + v0 * t + p1;

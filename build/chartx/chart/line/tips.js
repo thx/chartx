@@ -41,6 +41,9 @@ define(
                 this._tip = new Tip( opt , tipDomContainer );
     
             },
+            reset: function( opt ){
+                _.deepExtend(this._tip , opt);
+            },
             show : function(e , tipsPoint){
 
                 if( !this.enabled ) return;
@@ -55,6 +58,7 @@ define(
 
                 this._isShow = true;
             },
+
             move : function(e){
                 if( !this.enabled ) return;
                 this._resetStatus(e);

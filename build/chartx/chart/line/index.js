@@ -41,6 +41,9 @@ define(
                 this._tip = new Tip( opt , tipDomContainer );
     
             },
+            reset: function( opt ){
+                _.deepExtend(this._tip , opt);
+            },
             show : function(e , tipsPoint){
 
                 if( !this.enabled ) return;
@@ -55,6 +58,7 @@ define(
 
                 this._isShow = true;
             },
+
             move : function(e){
                 if( !this.enabled ) return;
                 this._resetStatus(e);
@@ -1104,7 +1108,7 @@ define(
                 this._anchor = null;
                 this._back = null;
                 this._graphs = null;
-                this._tip = null;
+                this._tips = null;
 
                 this.xAxis = {};
                 this.yAxis = {};
@@ -1148,6 +1152,16 @@ define(
                 
                 if (obj && obj.options) {
                     _.deepExtend(this, obj.options);
+                    for( var oo in obj.options ){
+                        if( this["_"+oo] ){
+                            if( this["_"+oo].reset ){
+                                this["_"+oo].reset( obj.options[oo] );
+                            } else {
+                                _.deepExtend( this["_"+oo] , obj.options[oo]);
+                            }
+                        }
+                    }
+
                     yAxisChange = (obj.options.yAxis && obj.options.yAxis.field);
                 };
                 if (obj && obj.data) {
@@ -1280,7 +1294,7 @@ define(
                 this.stageBg.addChild(this._anchor.sprite);
 
                 this._graphs = new Graphs(this.graphs, this);
-                this._tip = new Tips(this.tips, this.dataFrame, this.canvax.getDomContainer());
+                this._tips = new Tips(this.tips, this.dataFrame, this.canvax.getDomContainer());
             },
             _startDraw: function(opt) {
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
@@ -1381,7 +1395,7 @@ define(
                 };
 
                 this.bindEvent(this._graphs.sprite);
-                this._tip.sprite.on('nodeclick', function(e) {
+                this._tips.sprite.on('nodeclick', function(e) {
                     self._setXaxisYaxisToTipsInfo(e);
                     self.fire("nodeclick", e.eventInfo);
                 })
@@ -1428,7 +1442,7 @@ define(
                     this.core.addChild(this._yAxisR.sprite);
                 };
                 this.core.addChild(this._graphs.sprite);
-                this.stageTip.addChild(this._tip.sprite);
+                this.stageTip.addChild(this._tips.sprite);
             },
 
             //设置图例 begin
@@ -1700,24 +1714,24 @@ define(
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on("panstart mouseover", function(e) {
-                    if (self._tip.enabled && e.eventInfo.nodesInfoList.length > 0) {
-                        self._tip.hide(e);
+                    if (self._tips.enabled && e.eventInfo.nodesInfoList.length > 0) {
+                        self._tips.hide(e);
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
-                        self._tip.show(e);
+                        self._tips.show(e);
                     }
                 });
                 spt.on("panmove mousemove", function(e) {
-                    if (self._tip.enabled) {
+                    if (self._tips.enabled) {
                         if (e.eventInfo.nodesInfoList.length > 0) {
                             _setXaxisYaxisToTipsInfo.apply(self, [e]);
-                            if (self._tip._isShow) {
-                                self._tip.move(e);
+                            if (self._tips._isShow) {
+                                self._tips.move(e);
                             } else {
-                                self._tip.show(e);
+                                self._tips.show(e);
                             }
                         } else {
-                            if (self._tip._isShow) {
-                                self._tip.hide(e);
+                            if (self._tips._isShow) {
+                                self._tips.hide(e);
                             }
                         }
                     }
@@ -1726,15 +1740,15 @@ define(
                     if (e.toTarget && e.toTarget.name == 'node') {
                         return
                     }
-                    if (self._tip.enabled) {
-                        self._tip.hide(e);
+                    if (self._tips.enabled) {
+                        self._tips.hide(e);
                     }
                 });
                 spt.on("tap", function(e) {
-                    if (self._tip.enabled && e.eventInfo.nodesInfoList.length > 0) {
-                        self._tip.hide(e);
+                    if (self._tips.enabled && e.eventInfo.nodesInfoList.length > 0) {
+                        self._tips.hide(e);
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
-                        self._tip.show(e);
+                        self._tips.show(e);
                     }
                 });
                 spt.on("click", function(e) {

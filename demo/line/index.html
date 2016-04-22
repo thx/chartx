@@ -34,15 +34,19 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv"]
+    ["xfield","uv" ,"pv"],
+    [ 6      , 188  , 154    ],
+    [ 7      , 55  , 168    ],
+    [ 8      , 66   ,183     ],
+    [ 3      , 32   , 145     ]
 ];
 var data1= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , undefined , 120 , 33    ],
     [ 2      , 0   , 151 , 26    ],
-    [ 3      , 32   , 145 , 243    ],
-    [ 4      , 58  , 135 , 231    ],
-    [ 5      , 79  , 173 , 71    ],
+    [ 3      , 232   , 145 , 243    ],
+    [ 4      , 258  , 135 , 231    ],
+    [ 5      , 279  , 173 , 71    ],
     [ 6      , 188  , 154 , 39    ],
     [ 7      , 55  , 168 , 65    ],
     [ 8      , 66   ,183 , 51    ],
@@ -68,8 +72,11 @@ var options = {
     }
 };
 
-var chartx = Chartx.line("canvasTest" , data1 , options).then(function( chart ){
+//var chartx = Chartx.line("canvasTest" , data1 , options);
 
+
+var chartx = Chartx.line("canvasTest" , data1 , options).then(function( chart ){
+return
 var i=1
 setTimeout(function(){
 
@@ -78,12 +85,17 @@ setTimeout(function(){
         options : {
             yAxis:{
                field : ['uv','pv']
+            },
+            tips : {
+                content : function(){
+                     return "xxoo"
+                }
             }
         }
     })
 } , i++*1000);
 
-
+return
 
 setTimeout(function(){
     chart.reset({
