@@ -123,16 +123,15 @@ define(
                 var self = this;
 
                 _.each( e.eventInfo.nodesInfoList , function( node ){
-                    
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y)
                         }
                     });
-
+                    
                     var bigCircle = new Circle({
                         context : {
-                            r : node.r + 2 + 1 ,
+                            r : node.r + 2,
                             fillStyle   : self.node.backFillStyle || "white",//node.fillStyle,
                             strokeStyle : self.node.strokeStyle || node.strokeStyle,
                             lineWidth   : node.lineWidth,
@@ -149,12 +148,14 @@ define(
 
                     csp.addChild(bigCircle);
 
+                    /*
                     csp.addChild( new Circle({
                         context : {
                             r : node.r + 1,
                             fillStyle   : self.node.fillStyle || node.strokeStyle
                         }
                     }) );
+                    */
 
                     self._nodes.addChild( csp );
                     bigCircle.on("mousemove", function(e) {

@@ -41,7 +41,7 @@ define(
                 r: 2, //半径 node 圆点的半径
                 fillStyle: '#ffffff',
                 strokeStyle: null,
-                lineWidth: 3
+                lineWidth: 4
             };
 
             this.fill = { //填充
