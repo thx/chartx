@@ -64,7 +64,7 @@ define(
             init: function(opt) {
                 _.deepExtend(this, opt);
 
-                //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
+                //如果opt中没有 node fill的设置，那么要把fill node 的style和line做同步
                 //!this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
                 //!this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
 
@@ -432,6 +432,7 @@ define(
                 var list = self._currPointList;
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)
+                debugger
                 if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._circles);

@@ -35,10 +35,7 @@
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv"],
-    [ 6      , 188  , 154    ],
-    [ 7      , 55  , 168    ],
-    [ 8      , 66   ,183     ],
-    [ 3      , 32   , 145     ]
+    [ 6      , 188  , 154    ]
 ];
 var data1= [
     ["xfield","uv" ,"pv","click"],
@@ -69,13 +66,30 @@ var options = {
     xAxis : {
         field : "xfield",
         label : "xaxis"
+    },
+    graphs:{
+        node : {
+            enabled:false
+        },
+        line : {
+            strokeStyle : {
+                lineargradient : [
+                    {position : 0    , color:"#ff7033"},
+                    {position : 0.05 , color:"#ff9933"},
+                    {position : 0.15 , color:"#2dafe3"},
+                    {position : 0.85 , color:"#449be3"},
+                    {position : 0.95 , color:"#7177e3"},
+                    {position : 1.0  , color:"#5744e3"}
+                ]
+            }
+        }
     }
 };
 
 //var chartx = Chartx.line("canvasTest" , data1 , options);
 
 
-var chartx = Chartx.line("canvasTest" , data1 , options).then(function( chart ){
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
 return
 var i=1
 setTimeout(function(){
