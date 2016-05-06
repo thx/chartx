@@ -40,7 +40,7 @@
             this.sectors = [];
             this.sectorMap = [];
             this.isMoving = false;
-
+            this.labelMaxCount = 15;
             this.labelList = [];
 
         };
@@ -85,7 +85,7 @@
                 var limitAngle = 360 + self.angleOffset;
                 var adjustFontSize = 12 * self.boundWidth / 1000;
                 self.labelFontSize = adjustFontSize < 12 ? 12 : adjustFontSize;
-                var percentFixedNum = 2;
+                var percentFixedNum = 2;                
                 var data = self.data.data;
                 self.clickMoveDis = self.r / 11;
                 if (data.length && data.length > 0) {
@@ -454,6 +454,7 @@
             },
             _widgetLabel: function (quadrant, indexs, lmin, rmin, isEnd, ySpaceInfo) {
                 var self = this;
+                var count = 0;
                 var data = self.data.data;
                 var sectorMap = self.sectorMap;
                 var minTxtDis = 15;
@@ -462,11 +463,11 @@
                 var currentIndex, baseY, clockwise, isleft, minPercent;
                 var currentY, adjustX, txtDis, bkLineStartPoint, bklineMidPoint, bklineEndPoint, branchLine, brokenline, branchTxt, bwidth, bheight, bx, by;
                 var isMixed, yBound, remainingNum, remainingY, adjustY;
-
+                
                 clockwise = quadrant == 2 || quadrant == 4;
                 isleft = quadrant == 2 || quadrant == 3;
                 isup = quadrant == 3 || quadrant == 4;
-                minPercent = isleft ? lmin : rmin;
+                minY = isleft ? lmin : rmin;
 
                 //label的绘制顺序做修正，label的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
                 if (indexs.length > 0) {
@@ -474,11 +475,12 @@
                         return isup ? data[a].edgey - data[b].edgey : data[b].edgey - data[a].edgey;
                     })
                 }
-
+                
                 for (i = 0; i < indexs.length; i++) {
                     currentIndex = indexs[i];
                     //若Y值小于最小值，不画label    
-                    if ((data[currentIndex].y != 0 && data[currentIndex].percentage <= minPercent) || data[currentIndex].ignored) continue
+                    if (data[currentIndex].ignored || data[currentIndex].y < minY || count >= self.labelMaxCount) continue
+                    count++;
                     currentY = data[currentIndex].edgey;
                     adjustX = Math.abs(data[currentIndex].edgex);
                     txtDis = currentY - baseY;
@@ -637,7 +639,9 @@
                 var self = this;
                 var data = self.data.data;
                 var rMinPercentage = 0,
-                    lMinPercentage = 0;
+                    lMinPercentage = 0,
+                    rMinY = 0,
+                    lMinY = 0;
                 var quadrantsOrder = [];
                 var quadrantInfo = [{
                     indexs: [],
@@ -693,21 +697,24 @@
                 widgetInfo.left.indexs = quadrantInfo[widgetInfo.left.startQuadrant - 1].indexs.concat(quadrantInfo[widgetInfo.left.endQuadrant - 1].indexs);
 
                 var overflowIndexs, sortedIndexs;
-                if (widgetInfo.right.indexs.length > 15) {
+                
+                if (widgetInfo.right.indexs.length > self.labelMaxCount) {
                     sortedIndexs = widgetInfo.right.indexs.slice(0);
                     sortedIndexs.sort(function (a, b) {
-                        return data[b].percentage - data[a].percentage;
+                        return data[b].y - data[a].y;
                     });
-                    overflowIndexs = sortedIndexs.slice(15);
+                    overflowIndexs = sortedIndexs.slice(self.labelMaxCount);
                     rMinPercentage = data[overflowIndexs[0]].percentage;
+                    rMinY = data[overflowIndexs[0]].y;
                 }
-                if (widgetInfo.left.indexs.length > 15) {
+                if (widgetInfo.left.indexs.length > self.labelMaxCount) {
                     sortedIndexs = widgetInfo.left.indexs.slice(0);
                     sortedIndexs.sort(function (a, b) {
-                        return data[b].percentage - data[a].percentage;
+                        return data[b].y - data[a].y;
                     });
-                    overflowIndexs = sortedIndexs.slice(15);
+                    overflowIndexs = sortedIndexs.slice(self.labelMaxCount);
                     lMinPercentage = data[overflowIndexs[0]].percentage;
+                    lMinY = data[overflowIndexs[0]].y;
                 }
 
                 quadrantsOrder.push(widgetInfo.right.startQuadrant);
@@ -719,7 +726,7 @@
 
                 for (i = 0; i < quadrantsOrder.length; i++) {
                     var isEnd = i == 1 || i == 3;
-                    self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinPercentage, rMinPercentage, isEnd, ySpaceInfo)
+                    self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo)
                 }
             },
             _getAngleTime: function (secc) {
