@@ -52,10 +52,9 @@ define(
 
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
-
-                this._setLegend();
             },
-            draw: function() {
+            draw: function( e ) {
+                this._setLegend(e);
                 this.stageTip = new Canvax.Display.Sprite({
                     id: 'tip'
                 });
@@ -74,7 +73,7 @@ define(
                     this._rotate(this.rotate);
                 };
                 this._initModule(); //初始化模块  
-                this._startDraw(); //开始绘图
+                this._startDraw( e ); //开始绘图
                 this._endDraw();
                 this.inited = true;
             },
@@ -233,9 +232,10 @@ define(
             _startDraw: function(opt) {
                 // this.dataFrame.yAxis.org = [[201,245,288,546,123,1000,445],[500,200,700,200,100,300,400]]
                 // this.dataFrame.xAxis.org = ['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
-                var self = this
-                var w = (opt && opt.w) || this.width;
-                var h = (opt && opt.h) || this.height;
+                var self = this;
+                !opt && (opt ={});
+                var w = opt.w || this.width;
+                var h = opt.h || this.height;
 
                 var y = this.height - this._xAxis.h;
                 var graphsH = y - this.padding.top - this.padding.bottom;
@@ -246,7 +246,8 @@ define(
                         x: this.padding.left,
                         y: y - this.padding.bottom
                     },
-                    yMaxHeight: graphsH
+                    yMaxHeight: graphsH,
+                    resize : opt.resize
                 });
 
                 if (this.dataZoom.enabled) {
@@ -268,7 +269,8 @@ define(
                             x: 0, //this.padding.right,
                             y: y - this.padding.bottom
                         },
-                        yMaxHeight: graphsH
+                        yMaxHeight: graphsH,
+                        resize : opt.resize
                     });
                     _yAxisRW = this._yAxisR.w;
                     this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
@@ -278,7 +280,8 @@ define(
                 this._xAxis.draw({
                     graphh: h - this.padding.bottom,
                     graphw: this.width - _yAxisRW - this.padding.right,
-                    yAxisW: _yAxisW
+                    yAxisW: _yAxisW,
+                    resize: opt.resize
                 });
                 if (this._xAxis.yAxisW != _yAxisW) {
                     //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
@@ -305,7 +308,8 @@ define(
                     pos: {
                         x: _yAxisW,
                         y: y - this.padding.bottom
-                    }
+                    },
+                    resize: opt.resize
                 });
 
                 this._graphs.draw({
@@ -314,7 +318,8 @@ define(
                     data: this._trimGraphs(),
                     disX: this._getGraphsDisX(),
                     smooth: this.smooth,
-                    inited: this.inited
+                    inited: this.inited,
+                    resize: opt.resize
                 });
 
                 this._graphs.setX(_yAxisW), this._graphs.setY(y - this.padding.bottom);
@@ -357,7 +362,8 @@ define(
                 };
 
                 //如果有 legend，调整下位置,和设置下颜色
-                if(this._legend && !this._legend.inited){
+                if( this._legend && (!this._legend.inited || opt.resize) ){
+                    console.log("legend")
                     this._legend.pos( { x : _yAxisW } );
 
                     for( var f in this._graphs._yAxisFieldsMap ){
@@ -380,7 +386,8 @@ define(
             },
 
             //设置图例 begin
-            _setLegend: function(){
+            _setLegend: function( e ){
+                !e && (e={});
                 var me = this;
                 if( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
                 //设置legendOpt
@@ -403,10 +410,10 @@ define(
                 this.stage.addChild( this._legend.sprite );
                 this._legend.pos( {
                     x : 0,
-                    y : this.padding.top
+                    y : this.padding.top + ( e.resize ? -this._legend.height : 0 )
                 } );
 
-                this.padding.top += this._legend.height;
+                !e.resize && (this.padding.top += this._legend.height);
             },
             //只有field为多组数据的时候才需要legend
             _getLegendData : function(){

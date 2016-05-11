@@ -1,5 +1,6 @@
 window.Chartx || (Chartx = {
     _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original' , 'sankey'],
+    instances: {}, //存储所有的图表组件实例
     canvax: null,
     create: {},
     _start: function() {
@@ -39,7 +40,7 @@ window.Chartx || (Chartx = {
                 if (this.chart) {
                     _.isFunction(fn) && fn(this.chart);
                     return this;
-                }
+                };
                 this._thenFn.push(fn);
                 return this;
             },
@@ -48,11 +49,12 @@ window.Chartx || (Chartx = {
             destroy: function() {
                 //console.log("chart destroy!");
                 this._destroy = true;
-                if (this.chart) {
+                if ( this.chart ) {
                     //this.chart.destroy();
                     delete this.chart;
                     promise = null;
-                }
+                };
+                delete Chartx.instances["_instance_"+name+"_"+el];
             },
             path: null
         };
@@ -65,6 +67,8 @@ window.Chartx || (Chartx = {
 
                     promise.chart = new chartConstructor(el, data, options);
                     promise.chart.draw();
+
+                    Chartx.instances["_instance_"+name+"_"+el] = promise.chart;
 
                     function _drawEnd(){
                         _.each(promise._thenFn, function(fn) {

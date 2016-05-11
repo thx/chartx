@@ -64,6 +64,7 @@ define(
             this.isH = false; //是否为横向转向的x轴
 
             this.animation = true;
+            this.resize = false;
 
             this.init(opt, data);
         };
@@ -172,6 +173,8 @@ define(
                         this._layout();
                     }
                 }
+
+                this.resize = false;
                 // this.data = this.layoutData
             },
             _getLabel: function() {
@@ -351,7 +354,7 @@ define(
 
                     this.sprite.addChild(xNode);
 
-                    if (this.animation) {
+                    if (this.animation && !this.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20

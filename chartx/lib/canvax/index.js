@@ -2612,8 +2612,8 @@ define(
          * @inner
          */
         function interpolate(p0, p1, p2, p3, t, t2, t3) {
-            var v0 = (p2 - p0) * 0.225;
-            var v1 = (p3 - p1) * 0.225;
+            var v0 = (p2 - p0) * 0.25;
+            var v1 = (p3 - p1) * 0.25;
             return (2 * (p1 - p2) + v0 + v1) * t3 
                    + (- 3 * (p1 - p2) - 2 * v0 - v1) * t2
                    + v0 * t + p1;
@@ -2685,6 +2685,8 @@ define(
         };
     } 
 );
+
+
 ;define(
     "canvax/display/DisplayObject",
     [
@@ -5127,8 +5129,8 @@ define(
         },
         resize : function( opt ){
             //重新设置坐标系统 高宽 等。
-            this.width      = parseInt("width"  in opt || this._rootDom.offsetWidth  , 10); 
-            this.height     = parseInt("height" in opt || this._rootDom.offsetHeight , 10); 
+            this.width      = parseInt((opt && "width" in opt) || this._rootDom.offsetWidth  , 10); 
+            this.height     = parseInt((opt && "height" in opt) || this._rootDom.offsetHeight , 10); 
  
             this.el.style.width  = this.width +"px";
             this.el.style.height = this.height+"px";

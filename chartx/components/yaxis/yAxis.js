@@ -58,6 +58,7 @@ define(
             this.isH = false; //是否横向
 
             this.animation = true;
+            this.resize = false;
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
@@ -152,6 +153,8 @@ define(
 
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
+
+                this.resize = false;
             },
             tansValToPos : function( val ){
                 var max = this.dataSection[this.dataSection.length - 1];
@@ -349,7 +352,8 @@ define(
 
                     self.sprite.addChild(yNode);
 
-                    if (self.animation) {
+                    //如果是resize的话也不要处理动画
+                    if (self.animation && !self.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20

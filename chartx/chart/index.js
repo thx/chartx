@@ -87,7 +87,9 @@ define(
                 this.height = parseInt(this.el.offsetHeight);
                 this.canvax.resize();
                 this.inited = false;
-                this.draw();
+                this.draw({
+                    resize : true
+                });
                 this.inited = true;
             },
             /**

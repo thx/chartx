@@ -24,6 +24,7 @@ define(
             this.y = 0;
 
             this.animation = true;
+            this.resize = false;
 
             this.colors = Theme.colors;
 
@@ -172,7 +173,7 @@ define(
             _grow: function(callback) {
             
                 var self = this;
-                if (!self.animation) {
+                if (!self.animation || self.resize) {
                     callback && callback(self);
                 }
                 if (self._currPointList.length == 0) {
@@ -264,7 +265,7 @@ define(
                     return;
                 };
                 var list = [];
-                if (me.animation) {
+                if (me.animation && !me.resize) {
                     for (var a = 0, al = me.data.length; a < al; a++) {
                         var o = me.data[a];
                         var sourceInd = 0;
@@ -432,7 +433,7 @@ define(
                 var list = self._currPointList;
                 // var node =  new Canvax.Display.Sprite();
                 // self.sprite.addChild(node)
-                debugger
+                
                 if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._circles);
