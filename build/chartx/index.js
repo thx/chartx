@@ -64,7 +64,7 @@ window.Chartx || (Chartx = {
         var getChart = function() {
             require([path], function(chartConstructor) {
                 if (!promise._destroy) {
-
+debugger
                     promise.chart = new chartConstructor(el, data, options);
                     promise.chart.draw();
 
