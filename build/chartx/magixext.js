@@ -45,8 +45,14 @@ define(
                 el = "#"+el;
             };
             query = query("#"+this.id+" " + el);
-            debugger
-            me.manage( el , Chartx.create[ type ]( query , data , opts ).then(function( chart ){
+
+            if( query.length == 0 ) return;
+            if( query[0].getAttribute("id") ){
+                query[0].setAttribute("id" , "chart_"+(new Date().getTime() + "_" + Math.floor(Math.random()*100) + "_" + Math.floor(Math.random()*100)));
+            }
+            var id = query[0].getAttribute("id");
+
+            me.manage( "chart_" + id , Chartx.create[ type ]( id , data , opts ).then(function( chart ){
                 obj.chart = chart;
                 _.each( obj._promiseHand , function( fn ){
                     _.isFunction( fn ) && fn( chart );
