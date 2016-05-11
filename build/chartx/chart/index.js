@@ -62,7 +62,10 @@ define(
              */
             destroy: function() {
                 this.clean();
-                this.el && this.el.innerHTML = "";
+                if(this.el){
+                    this.el.innerHTML = "";
+                    this.el = null;
+                };
                 this._destroy && this._destroy();
                 this.fire("destroy");
             },
@@ -83,9 +86,12 @@ define(
              * 容器的尺寸改变重新绘制
              */
             resize: function() {
+                var _w = parseInt(this.el.offsetWidth);
+                var _h = parseInt(this.el.offsetHeight);
+                if( _w == this.width && _h == this.height ) return;
                 this.clean();
-                this.width = parseInt(this.el.offsetWidth);
-                this.height = parseInt(this.el.offsetHeight);
+                this.width = _w;
+                this.height = _h;
                 this.canvax.resize();
                 this.inited = false;
                 this.draw({
