@@ -35,7 +35,7 @@ window.Chartx || (Chartx = {
     },
     _queryChart: function(name, el, data, options) {
 
-        var id = "_instance_"+name+"_"+ (typeof el == "string" ? el : (new Date().getTime() + "_" + Math.floor(Math.random()*100)) );
+        var id = "_instance_"+name+"_"+ (typeof el == "string" ? el : (new Date().getTime() + "_" + Math.floor(Math.random()*100) + "_" + Math.floor(Math.random()*100)) );
  
         var promise = {
             _thenFn: [],
