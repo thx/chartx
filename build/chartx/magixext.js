@@ -45,7 +45,7 @@ define(
                 el = "#"+el;
             };
             query = query("#"+this.id+" " + el);
-            me.manage( Chartx.create[ type ]( query , data , opts ).then(function( chart ){
+            me.manage( el , Chartx.create[ type ]( query , data , opts ).then(function( chart ){
                 obj.chart = chart;
                 _.each( obj._promiseHand , function( fn ){
                     _.isFunction( fn ) && fn( chart );

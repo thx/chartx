@@ -431,9 +431,7 @@ define(
             _createNodes: function() {
                 var self = this;
                 var list = self._currPointList;
-                // var node =  new Canvax.Display.Sprite();
-                // self.sprite.addChild(node)
-                
+
                 if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._circles);

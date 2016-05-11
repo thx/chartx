@@ -122,8 +122,9 @@ define(
              */
             destroy: function() {
                 this.clean();
-                this.el.innerHTML = "";
+                this.el && this.el.innerHTML = "";
                 this._destroy && this._destroy();
+                this.fire("destroy");
             },
             /*
              * 清除整个图表
@@ -147,7 +148,9 @@ define(
                 this.height = parseInt(this.el.offsetHeight);
                 this.canvax.resize();
                 this.inited = false;
-                this.draw();
+                this.draw({
+                    resize : true
+                });
                 this.inited = true;
             },
             /**
@@ -469,6 +472,9 @@ define(
             this.sprite       = null;                       //总的sprite
             this.xAxisSp      = null;                       //x轴上的线集合
             this.yAxisSp      = null;                       //y轴上的线集合
+
+            this.animation = true;
+            this.resize = false;
     
             this.init(opt);
         };
@@ -530,15 +536,21 @@ define(
                         });
                         self.xAxisSp.addChild(line);
                         
-                        line.animate({
-                            xStart : 0,
-                            xEnd : self.w
-                        } , {
-                            duration : 500,
-                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                            delay : (al-a) * 80,
-                            id : line.id
-                        });
+                        if( this.animation && !this.resize ){
+                            line.animate({
+                                xStart : 0,
+                                xEnd : self.w
+                            } , {
+                                duration : 500,
+                                //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                                delay : (al-a) * 80,
+                                id : line.id
+                            });
+                        } else {
+                            line.context.xStart = 0;
+                            line.context.xEnd = self.w;
+                        }
+
 
                     };
                 };
@@ -1820,6 +1832,7 @@ define(
             this.isH = false; //是否为横向转向的x轴
 
             this.animation = true;
+            this.resize = false;
 
             this.init(opt, data);
         };
@@ -1928,6 +1941,8 @@ define(
                         this._layout();
                     }
                 }
+
+                this.resize = false;
                 // this.data = this.layoutData
             },
             _getLabel: function() {
@@ -2107,7 +2122,7 @@ define(
 
                     this.sprite.addChild(xNode);
 
-                    if (this.animation) {
+                    if (this.animation && !this.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20
@@ -2268,6 +2283,7 @@ define(
             this.isH = false; //是否横向
 
             this.animation = true;
+            this.resize = false;
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
@@ -2362,6 +2378,8 @@ define(
 
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
+
+                this.resize = false;
             },
             tansValToPos : function( val ){
                 var max = this.dataSection[this.dataSection.length - 1];
@@ -2559,7 +2577,8 @@ define(
 
                     self.sprite.addChild(yNode);
 
-                    if (self.animation) {
+                    //如果是resize的话也不要处理动画
+                    if (self.animation && !self.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20

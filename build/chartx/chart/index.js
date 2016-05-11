@@ -62,8 +62,9 @@ define(
              */
             destroy: function() {
                 this.clean();
-                this.el.innerHTML = "";
+                this.el && this.el.innerHTML = "";
                 this._destroy && this._destroy();
+                this.fire("destroy");
             },
             /*
              * 清除整个图表
@@ -87,7 +88,9 @@ define(
                 this.height = parseInt(this.el.offsetHeight);
                 this.canvax.resize();
                 this.inited = false;
-                this.draw();
+                this.draw({
+                    resize : true
+                });
                 this.inited = true;
             },
             /**

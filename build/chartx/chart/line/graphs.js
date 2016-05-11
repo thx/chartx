@@ -256,7 +256,8 @@ define(
                             self.w
                         );
                         group.draw({
-                            data: data[i]
+                            data: data[i],
+                            resize : self.resize
                         });
                         self.sprite.addChildAt(group.sprite , _groupInd);
 
@@ -308,6 +309,7 @@ define(
                         e.eventInfo = self._getInfoHandler(e);
                     })
                 }
+                self.resize = false;
             },
             _getInfoHandler: function(e) {
                 // console.log(e)

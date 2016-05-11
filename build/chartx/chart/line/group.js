@@ -24,6 +24,7 @@ define(
             this.y = 0;
 
             this.animation = true;
+            this.resize = false;
 
             this.colors = Theme.colors;
 
@@ -64,7 +65,7 @@ define(
             init: function(opt) {
                 _.deepExtend(this, opt);
 
-                //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
+                //如果opt中没有 node fill的设置，那么要把fill node 的style和line做同步
                 //!this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
                 //!this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
 
@@ -172,7 +173,7 @@ define(
             _grow: function(callback) {
             
                 var self = this;
-                if (!self.animation) {
+                if (!self.animation || self.resize) {
                     callback && callback(self);
                 }
                 if (self._currPointList.length == 0) {
@@ -264,7 +265,7 @@ define(
                     return;
                 };
                 var list = [];
-                if (me.animation) {
+                if (me.animation && !me.resize) {
                     for (var a = 0, al = me.data.length; a < al; a++) {
                         var o = me.data[a];
                         var sourceInd = 0;
@@ -430,8 +431,7 @@ define(
             _createNodes: function() {
                 var self = this;
                 var list = self._currPointList;
-                // var node =  new Canvax.Display.Sprite();
-                // self.sprite.addChild(node)
+
                 if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._circles);

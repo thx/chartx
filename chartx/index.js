@@ -50,7 +50,7 @@ window.Chartx || (Chartx = {
                 //console.log("chart destroy!");
                 this._destroy = true;
                 if ( this.chart ) {
-                    //this.chart.destroy();
+                    this.chart.destroy();
                     delete this.chart;
                     promise = null;
                 };
@@ -69,6 +69,9 @@ window.Chartx || (Chartx = {
                     promise.chart.draw();
 
                     Chartx.instances["_instance_"+name+"_"+el] = promise.chart;
+                    promise.chart.on("destroy" , function(){
+                        delete Chartx.instances["_instance_"+name+"_"+el];
+                    });
 
                     function _drawEnd(){
                         _.each(promise._thenFn, function(fn) {
