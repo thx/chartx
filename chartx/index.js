@@ -35,7 +35,7 @@ window.Chartx || (Chartx = {
     },
     _queryChart: function(name, el, data, options) {
 
-        var id = "_instance_"+name+"_"+ typeof el == "string" ? el : new Date().getTime();
+        var id = "_instance_"+name+"_"+ (typeof el == "string" ? el : new Date().getTime());
  
         var promise = {
             _thenFn: [],
@@ -57,7 +57,7 @@ window.Chartx || (Chartx = {
                     delete this.chart;
                     promise = null;
                 };
-                delete Chartx.instances["_instance_"+name+"_"+id];
+                delete Chartx.instances[id];
             },
             path: null
         };
@@ -71,9 +71,9 @@ window.Chartx || (Chartx = {
                     promise.chart = new chartConstructor(el, data, options);
                     promise.chart.draw();
 
-                    Chartx.instances["_instance_"+name+"_"+id] = promise.chart;
+                    Chartx.instances[id] = promise.chart;
                     promise.chart.on("destroy" , function(){
-                        delete Chartx.instances["_instance_"+name+"_"+id];
+                        delete Chartx.instances[id];
                     });
 
                     function _drawEnd(){
