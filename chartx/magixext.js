@@ -47,7 +47,7 @@ define(
             query = query("#"+this.id+" " + el);
 
             if( query.length == 0 ) return;
-            if( query[0].getAttribute("id") ){
+            if( !query[0].getAttribute("id") ){
                 query[0].setAttribute("id" , "chart_"+(new Date().getTime() + "_" + Math.floor(Math.random()*100) + "_" + Math.floor(Math.random()*100)));
             }
             var id = query[0].getAttribute("id");
