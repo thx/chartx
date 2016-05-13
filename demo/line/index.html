@@ -51,26 +51,6 @@ var data= [
     [ 7      , 55  , 168 , 65    ],
     [ 8      , undefined   ,183 , 51    ]
 ];
-var data = {"data":{"cpc":1.35,"cpm":111.09,"ctr":0.0823,"hourList":[{"adPv":8845,"advertiserId":12932661,"advertiserName":null,"charge":1033.26,"click":986,"ctr":0.1115,"ctrStr":"11.15","ecpc":1.05,"ecpm":116.82,"hourId":0,"hourStr":"0:00 ~ 1:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":1,"advertiserId":12932661,"advertiserName":null,"charge":0,"click":0,"ctr":0,"ctrStr":"0.00","ecpc":null,"ecpm":0,"hourId":1,"hourStr":"1:00 ~ 2:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":16717,"advertiserId":12932661,"advertiserName":null,"charge":1868.03,"click":1496,"ctr":0.0895,"ctrStr":"8.95","ecpc":1.25,"ecpm":111.74,"hourId":8,"hourStr":"8:00 ~ 9:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":18224,"advertiserId":12932661,"advertiserName":null,"charge":1993.05,"click":1272,"ctr":0.0698,"ctrStr":"6.98","ecpc":1.57,"ecpm":109.36,"hourId":9,"hourStr":"9:00 ~ 10:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":19306,"advertiserId":12932661,"advertiserName":null,"charge":2176.07,"click":1430,"ctr":0.0741,"ctrStr":"7.41","ecpc":1.52,"ecpm":112.71,"hourId":10,"hourStr":"10:00 ~ 11:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":18410,"advertiserId":12932661,"advertiserName":null,"charge":2116.73,"click":1364,"ctr":0.0741,"ctrStr":"7.41","ecpc":1.55,"ecpm":114.98,"hourId":11,"hourStr":"11:00 ~ 12:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":9034,"advertiserId":12932661,"advertiserName":null,"charge":1028.82,"click":720,"ctr":0.0797,"ctrStr":"7.97","ecpc":1.43,"ecpm":113.88,"hourId":12,"hourStr":"12:00 ~ 13:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":220,"advertiserId":12932661,"advertiserName":null,"charge":25.76,"click":23,"ctr":0.1045,"ctrStr":"10.45","ecpc":1.12,"ecpm":117.09,"hourId":13,"hourStr":"13:00 ~ 14:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":1508,"advertiserId":12932661,"advertiserName":null,"charge":145.87,"click":108,"ctr":0.0716,"ctrStr":"7.16","ecpc":1.35,"ecpm":96.73,"hourId":14,"hourStr":"14:00 ~ 15:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":19100,"advertiserId":12932661,"advertiserName":null,"charge":2037.66,"click":1672,"ctr":0.0875,"ctrStr":"8.75","ecpc":1.22,"ecpm":106.68,"hourId":15,"hourStr":"15:00 ~ 16:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":18812,"advertiserId":12932661,"advertiserName":null,"charge":2020.26,"click":1522,"ctr":0.0809,"ctrStr":"8.09","ecpc":1.33,"ecpm":107.39,"hourId":16,"hourStr":"16:00 ~ 17:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":19048,"advertiserId":12932661,"advertiserName":null,"charge":2166.36,"click":1710,"ctr":0.0898,"ctrStr":"8.98","ecpc":1.27,"ecpm":113.73,"hourId":17,"hourStr":"17:00 ~ 18:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":6190,"advertiserId":12932661,"advertiserName":null,"charge":682.02,"click":515,"ctr":0.0832,"ctrStr":"8.32","ecpc":1.32,"ecpm":110.18,"hourId":18,"hourStr":"18:00 ~ 19:00","logDate":"2016-05-09","logDateStr":"2016-05-09"},{"adPv":704,"advertiserId":12932661,"advertiserName":null,"charge":48.71,"click":35,"ctr":0.0497,"ctrStr":"4.97","ecpc":1.39,"ecpm":69.19,"hourId":19,"hourStr":"19:00 ~ 20:00","logDate":"2016-05-09","logDateStr":"2016-05-09"}],"totalAdPv":156119,"totalCharge":17342.60,"totalClick":12853},"info":{"disableTime":false,"errorCode":null,"lockSla":false,"message":null,"ok":true,"unlockUrl":null}};
-
-var _initChartData = function( dataorg  ){
-                var me   = this;
-                var titles = [];
-                var data = [];
-                for( var t in dataorg[0] ){
-                    titles.push( t );
-                };
-                data.push(titles);
-                for( var i= 0,len=dataorg.length ; i<len ; i++ ){
-                    var obj = [];
-                    for( var ii = 0,ll=titles.length ; ii<ll ; ii++ ){
-                        obj[ ii ] = dataorg[i][ titles[ii] ]
-                    }
-                    data.push(obj)
-                }
-                return data;
-            }
-data = _initChartData( data.data.hourList )
 
 
 var data1= [
@@ -99,12 +79,11 @@ var options = {
     },
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        //{"adPv":,"advertiserId":,"advertiserName":,"charge":,"click":,"ctr":,"ctrStr":,"ecpc":,"ecpm":,}
-        field : ["adPv"  ],
+        field : ["pv"  ],
         label : "yaxis"
     },
     xAxis : {
-        field : "hourId",
+        field : "xfield",
         dataSection : data.totalType == "hour" ? [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23] : [],
                         filter : function(e){
                             if(!(e.index % 2)){

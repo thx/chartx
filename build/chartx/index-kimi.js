@@ -2073,6 +2073,8 @@ define(
                     this.sprite.addChild(this._label);
                 };
 
+                var delay = Math.min(1000 / arr.length, 25);
+
                 for (var a = 0, al = arr.length; a < al; a++) {
                     var xNode = new Canvax.Display.Sprite({
                         id: "xNode" + a
@@ -2135,7 +2137,7 @@ define(
                         }, {
                             duration: 500,
                             easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * 80,
+                            delay: a * delay,
                             id: txt.id
                         });
                     } else {
