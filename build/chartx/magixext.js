@@ -54,6 +54,7 @@ define(
 
             me.manage( "chart_" + id , Chartx.create[ type ]( id , data , opts ).then(function( chart ){
                 obj.chart = chart;
+                chart._viewId = me.id;
                 _.each( obj._promiseHand , function( fn ){
                     _.isFunction( fn ) && fn( chart );
                 } );
