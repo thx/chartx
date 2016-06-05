@@ -2424,9 +2424,12 @@ define(
                 dis = dis > disMax ? disMax : dis
                 return dis
             },
-            _setDataSection: function(data) {
+            _setDataSection: function(data , data1) {
                 var arr = [];
-                var d = (data.org || data.data);
+                var d = (data.org || data.data || data);
+                if( data1 && _.isArray(data1) ){
+                    d = d.concat(data1);
+                }
                 if (!this.biaxial) {
                     arr = _.flatten( d ); //_.flatten( data.org );
                 } else {

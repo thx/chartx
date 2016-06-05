@@ -373,9 +373,10 @@ define(
                     var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
-                    var bottomP = _.max(self._bline.context.pointList, function(p) {
-                        return p[1]
-                    });
+                    //var bottomP = _.max(self._bline.context.pointList, function(p) {
+                    //    return p[1]
+                    //});
+                    var bottomP = [ 0 , 0 ];
                     //创建一个线性渐变
                     this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 

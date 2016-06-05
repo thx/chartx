@@ -613,9 +613,10 @@ define(
                     var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
-                    var bottomP = _.max(self._bline.context.pointList, function(p) {
-                        return p[1]
-                    });
+                    //var bottomP = _.max(self._bline.context.pointList, function(p) {
+                    //    return p[1]
+                    //});
+                    var bottomP = [ 0 , 0 ];
                     //创建一个线性渐变
                     this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
@@ -1281,7 +1282,13 @@ define(
                     this.yAxis.biaxial = true;
                 };
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
+                var _y = [];
+                if( this.markLine && this.markLine.y ){
+                    _y.push( this.markLine.y );
+                }
+
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis , _y);
+
                 //再折线图中会有双轴图表
                 if (this.biaxial) {
                     this._yAxisR = new yAxis(_.extend(_.clone(this.yAxis), {
@@ -1687,10 +1694,14 @@ define(
                         if(_.isFunction(_y)){
                             _y = _y( g.field );
                         };
+                        if(_.isArray( _y )){
+                            _y = _y[ index ];
+                        };
 
                         if( _y != undefined ){
                             _y = g._yAxis.tansValToPos(_y);
                         }
+
                     };
 
                     var o = {
