@@ -138,7 +138,8 @@
             },
             _initData: function(arr, opt) {
                 var data = [];
-                var arr = _.clone(arr)
+                var arr = _.clone(arr);
+            
                 /*
                 * @释剑
                 * 用校正处理， 把pie的data入参规范和chartx数据格式一致
@@ -173,22 +174,22 @@
                 var dataFrame = {};
                 dataFrame.org = data;
                 dataFrame.data = [];
-                if (_.isArray(arr)) {
-                    for (var i = 0; i < arr.length; i++) {
+                if (_.isArray(data)) {
+                    for (var i = 0; i < data.length; i++) {
                         var obj = {};
-                        if (_.isArray(arr[i])) {
+                        if (_.isArray(data[i])) {
 
-                            obj.name = arr[i][0];
-                            obj.y = parseFloat(arr[i][1]);
+                            obj.name = data[i][0];
+                            obj.y = parseFloat(data[i][1]);
                             obj.sliced = false;
                             obj.selected = false;
 
-                        } else if (typeof arr[i] == 'object') {
+                        } else if (typeof data[i] == 'object') {
 
-                            obj.name = arr[i].name;
-                            obj.y = parseFloat(arr[i].y);
-                            obj.sliced = arr[i].sliced || false;
-                            obj.selected = arr[i].selected || false;
+                            obj.name = data[i].name;
+                            obj.y = parseFloat(data[i].y);
+                            obj.sliced = data[i].sliced || false;
+                            obj.selected = data[i].selected || false;
 
                         }
 

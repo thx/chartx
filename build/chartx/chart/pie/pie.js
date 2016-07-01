@@ -424,6 +424,7 @@
                 return "<div style='color:" + info.fillStyle + "'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div>" + parseInt(info.percentage) + "%</div>";
             },
             _geteventInfo: function (e, ind) {
+                
                 var data = this.data.data[ind];
                 var fillColor = this.getColorByIndex(this.colors, ind);
                 e.eventInfo = {
