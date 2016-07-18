@@ -57,7 +57,7 @@ define(
                 
                 //吧原始的field转换为对应结构的显示树
                 //["uv"] --> [{field:'uv',enabled:true , fillStyle: }]
-                this._fieldsDisplayMap = this.__setFieldsDisplay( this._opts.yAxis.field );
+                this._fieldsDisplayMap = this.__setFieldsDisplay( this._opts.yAxis.field || this._opts.yAxis.bar.field );
 
                 //一些继承自该类的constructor 会拥有_init来做一些覆盖，比如横向柱状图
                 this._init && this._init(node, data, opts);

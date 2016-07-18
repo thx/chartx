@@ -188,14 +188,14 @@ define(
             //获取折线部分的tip info信息
             _getLineTipInfo: function(e) {
                 //横向分组索引
-                var igroup = e.target.iGroup;
+                var iNode = e.target.iNode;
                 var _nodesInfoList = []; //节点信息集合
                 var groups = this._lineChart._graphs.groups;
                 if (!e.eventInfo) {
                     return;
                 }
                 for (var a = 0, al = groups.length; a < al; a++) {
-                    var o = groups[a].getNodeInfoAt(igroup);
+                    var o = groups[a].getNodeInfoAt(iNode);
                     if (o) {
                         o.field = this._lineChart.dataFrame.yAxis.field[o._groupInd];
                         _nodesInfoList.push(o);
@@ -205,7 +205,7 @@ define(
 
                 return {
                     x: this._xAxis.sprite.localToGlobal({
-                        x: this._xAxis.data[igroup].x,
+                        x: this._xAxis.data[iNode].x,
                         y: 0
                     }).x,
                     lineH: this._graphs.h,
