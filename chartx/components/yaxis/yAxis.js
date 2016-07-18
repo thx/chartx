@@ -58,6 +58,7 @@ define(
             this.isH = false; //是否横向
 
             this.animation = true;
+            this.resize = false;
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
@@ -152,6 +153,8 @@ define(
 
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
+
+                this.resize = false;
             },
             tansValToPos : function( val ){
                 var max = this.dataSection[this.dataSection.length - 1];
@@ -188,9 +191,12 @@ define(
                 dis = dis > disMax ? disMax : dis
                 return dis
             },
-            _setDataSection: function(data) {
+            _setDataSection: function(data , data1) {
                 var arr = [];
-                var d = (data.org || data.data);
+                var d = (data.org || data.data || data);
+                if( data1 && _.isArray(data1) ){
+                    d = d.concat(data1);
+                }
                 if (!this.biaxial) {
                     arr = _.flatten( d ); //_.flatten( data.org );
                 } else {
@@ -203,7 +209,7 @@ define(
                     }
                 };
                 for( var i = 0, il=arr.length; i<il ; i++ ){
-                    arr[i] = Number( arr[i] );
+                    arr[i] =  arr[i] || 0;
                 };
                 return arr;
             },
@@ -275,9 +281,11 @@ define(
                     var content = o.content
                     if (_.isFunction(self.text.format)) {
                         content = self.text.format(content, self);
-                    } else {
-                        content = Tools.numAddSymbol(content);
-                    }
+                    };
+                    if( content === undefined || content === null ){
+                        content = Tools.numAddSymbol( o.content );
+                    };  
+                    
                     var yNode = new Canvax.Display.Sprite({
                         id: "yNode" + a
                     });
@@ -347,7 +355,8 @@ define(
 
                     self.sprite.addChild(yNode);
 
-                    if (self.animation) {
+                    //如果是resize的话也不要处理动画
+                    if (self.animation && !self.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20
@@ -377,3 +386,4 @@ define(
 
         return yAxis;
     })
+

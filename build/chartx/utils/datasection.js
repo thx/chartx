@@ -124,7 +124,7 @@ define(
     	var DataSection  = {
     		
     		section:function($arr,$maxPart,$cfg){
-                return getLinearTickPositions($arr,$maxPart,$cfg)
+                return _.uniq( getLinearTickPositions($arr,$maxPart,$cfg));
     		}
     	};
     

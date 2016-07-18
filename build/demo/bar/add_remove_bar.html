@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
-<script type="text/javascript" src="../../lib/sea.js"></script>
+<title>xChart demo -- bar add_remove_bar</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -35,41 +35,24 @@
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 113 , 20 , 33    ],
-    [ 2      , 0   , 51 , 26    ],
-    [ 3      , 132   , 45 , 43    ],
-    [ 4      , 258  , 35 , 31    ],
-    [ 5      , 379  , 73 , 71    ],
-    [ 6      , 488  , 54 , 39    ],
-    [ 7      , 155  , 68 , 65    ],
-    [ 8      , 266   , 83 , 51    ]
+    [ 1      , 101 , 20 , 33    ],
+    [ 2      , 67  , 51 , 26    ],
+    [ 3      , 100 , 50 , 150    ]
 ];
-
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
     yAxis : {
-        //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["click",'uv']
+        field : ["uv","pv"],
+        //enabled : false
     },
     xAxis : {
-        field : "xfield"
-    },
-    markLine : {
-        enabled : true ,
-        text : {
-            enabled : true,
-            format : function(info){
-                //info.iGroup    第几条线    从0开始
-                //info.value     平均值 
-                return options.yAxis.field[info.iGroup] + '平均值 ：' + parseInt(info.value)
-            },
-            fontSize : 14
-        },
-        y : [100 ,800]
+        field : ["xfield"]
     }
-};
-//Chartx.line开始初始化chart实例
-var chartx = Chartx.line("canvasTest" , data , options);
+};   
+Chartx.bar("canvasTest" , data , options).then(function(bar){
+
+});
+
+
 </textarea></form>
 
         </td>
@@ -78,13 +61,29 @@ var chartx = Chartx.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>柱状图 - 添加,删除柱状</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>
             </div>
-            <div  class="test-c">
+            <div  class="test-c" style="position:relative;padding-bottom:50px;">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
+
+                <div style="position:absolute;left:40px;top:0;">
+                <div class="checkbox" style="float:left;margin:0;line-height:20px;margin-right:20px;">
+                    <label>
+                        <input id="uv" checked type="checkbox"> UV
+                    </label>
+                </div>
+
+                <div class="checkbox" style="float:left;margin:0;line-height:20px;">
+                    <label>
+                        <input id="pv" checked type="checkbox"> PV
+                    </label>
+                </div>
+
+                </div>
+
             </div>
 
             </div>
@@ -92,6 +91,5 @@ var chartx = Chartx.line("canvasTest" , data , options);
     </tr>
 </table>
 
-    
 </body> 
 </html>

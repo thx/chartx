@@ -64,6 +64,7 @@ define(
             this.isH = false; //是否为横向转向的x轴
 
             this.animation = true;
+            this.resize = false;
 
             this.init(opt, data);
         };
@@ -149,7 +150,9 @@ define(
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
+                if( this.data.length == 0 ){
 
+                };
                 this._getLabel();
                 this._initConfig(opt);
                 this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
@@ -170,6 +173,8 @@ define(
                         this._layout();
                     }
                 }
+
+                this.resize = false;
                 // this.data = this.layoutData
             },
             _getLabel: function() {
@@ -296,6 +301,8 @@ define(
                     this.sprite.addChild(this._label);
                 };
 
+                var delay = Math.min(1000 / arr.length, 25);
+
                 for (var a = 0, al = arr.length; a < al; a++) {
                     var xNode = new Canvax.Display.Sprite({
                         id: "xNode" + a
@@ -351,14 +358,14 @@ define(
 
                     this.sprite.addChild(xNode);
 
-                    if (this.animation) {
+                    if (this.animation && !this.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20
                         }, {
                             duration: 500,
                             easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * 80,
+                            delay: a * delay,
                             id: txt.id
                         });
                     } else {
@@ -370,7 +377,7 @@ define(
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {
 
-                if (this.sprite.getNumChildren() == 0)
+                if (this.data.length == 0)
                     return;
 
                 var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);

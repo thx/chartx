@@ -383,6 +383,7 @@ define(
                                 fillStyle: finalPos.fillStyle,
                                 scaleY: 0
                             };
+                            
                             if (!!me.bar.radius && v == vLen - 1) {
                                 var radiusR = Math.min(me.bar._width / 2, rectH);
                                 radiusR = Math.min(radiusR, me.bar.radius);

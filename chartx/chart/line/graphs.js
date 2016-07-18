@@ -53,7 +53,6 @@ define(
             getY: function() {
                 return this.sprite.context.y
             },
-
             draw: function(opt) {
                 _.deepExtend(this, opt);
                 this._widget(opt);
@@ -64,13 +63,14 @@ define(
                 } );
             },
             resetData: function(data, opt) {
-                var self = this;
-                self.data = data;
-                opt && _.deepExtend(self, opt);
-                for (var a = 0, al = self.data.length; a < al; a++) {
-                    var group = self.groups[a];
+                var me = this;
+                me.data = data;
+                opt && _.deepExtend(me, opt);
+                
+                for (var a = 0, al = me.field.length; a < al; a++) {
+                    var group = me.groups[a];
                     group.resetData({
-                        data: self.data[a]
+                        data: me.data[ me._yAxisFieldsMap[group.field].ind ]
                     });
                 }
             },
@@ -85,16 +85,35 @@ define(
             _setyAxisFieldsMap: function() {
                 var me = this;
                 _.each(_.flatten(this._getYaxisField()), function(field, i) {
-                    me._yAxisFieldsMap[field] = {
-                        ind: i
-                    };
+                    var _yAxisF = me._yAxisFieldsMap[field];
+                    if( _yAxisF ){
+                        me._yAxisFieldsMap[field].ind = i;
+                    } else {
+                        me._yAxisFieldsMap[field] = {
+                            ind: i
+                        };
+                    }
                 });
+            },
+            _addyAxisFieldsMap: function( field ){
+                if( !this._yAxisFieldsMap[field] ){
+                    var maxInd;
+                    for( var f in this._yAxisFieldsMap ){
+                        if( isNaN( maxInd ) ){
+                            maxInd = 0;
+                        };
+                        maxInd = Math.max( this._yAxisFieldsMap[f].ind , maxInd );
+                    };
+                    this._yAxisFieldsMap[field] = {
+                        ind : isNaN( maxInd )? 0 : ++maxInd
+                    };
+                };
             },
             _getYaxisField: function(i) {
                 //这里要兼容从折柱混合图过来的情况
-                if (this.field) {
-                    return this.field;
-                }
+                //if (this.field) {
+                //    return this.field;
+                //}
                 if (this.root.type && this.root.type.indexOf("line") >= 0) {
                     this.field = this.root._lineChart.dataFrame.yAxis.field;
                 } else {
@@ -102,37 +121,77 @@ define(
                 };
                 return this.field;
             },
-            add: function(opt, field) {
-                var self = this;
-                _.deepExtend(this, opt);
+            creatFields: function( field , fields){
+                var me = this;
+                var fs = [];
+                _.each( fields , function( f , i ){
+                    if( _.isArray(f) ){
+                        fs.push( me.creatFields( field , f ) );
+                    } else {
+                        if( field == f ){
+                            fs.push( f );
+                        } else {
+                            fs.push( null );
+                        }
+                    }
+                } );
+                return fs;
+            },
+            /*
+            * 如果配置的yAxis有修改
+            */
+            yAxisFieldChange : function( yAxisChange , trimData ){
+                !trimData && ( trimData = me.data );
+                var me = this;
+                _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
+                
+                //如果新的yAxis.field有需要del的
+                for( var i=0,l=me.field.length ; i<l ; i++ ){
+                    var _f = me.field[i];
+                    var dopy = _.find( yAxisChange , function( f ){
+                        return f == _f
+                    } );
+                    if( !dopy ){
+                        me.remove(i);
+                        //delete me[ _f ];
+                        me.field.splice( i , 1 );
+                        delete me._yAxisFieldsMap[ _f ];
+                        me.update({
+                            data: trimData
+                        });
+                        i--;
+                        l--;
+                    };
+                };
 
-                var group = new Group(
-                    field,
-                    self._yAxisFieldsMap[field]._groupInd, //_groupInd
-                    self.opt,
-                    self.ctx,
-                    self._yAxisFieldsMap[field]._sort,
-                    self._yAxisFieldsMap[field]._yAxis,
-                    self.h,
-                    self.w
-                );
+                //新的field配置有需要add的
+                _.each( yAxisChange , function( opy , i ){
+                    var fopy = _.find( me.groups ,function( f ){
+                        return f.field == opy;
+                    } );
+                    if( !fopy ){
+                        me.add({
+                            data: trimData
+                        }, opy);
+                    };
 
-                var ind = _.indexOf(self.field, field);
-                group.draw({
-                    data: self.data[ind]
-                });
+                } );
 
-                self.sprite.addChildAt(group.sprite, ind);
-                self.groups.splice(ind, 0, group);
+                me._setyAxisFieldsMap();
 
-                _.each(this.groups, function(g, i) {
-                    //_groupInd要重新计算
-                    //TODO：这个_groupInd的重新计算取消了可能会影像到其他场景
-                    //g._groupInd = i;
+                _.each( me.groups , function( g , i ){
                     g.update({
-                        data: self.data[i]
+                        _groupInd : i
                     });
-                });
+                } );
+            },
+            add: function(opt, field) {
+                _.deepExtend(this, opt);
+                //this._setyAxisFieldsMap();
+                this._addyAxisFieldsMap( field );
+                var creatFs = this.creatFields(field , this._getYaxisField());
+                this._setGroupsForYfield( creatFs , this.data , this._yAxisFieldsMap[field].ind);
+                this.update();
             },
             /*
              *删除 ind
@@ -140,12 +199,13 @@ define(
             remove: function(i) {
                 var target = this.groups.splice(i, 1)[0];
                 target.destroy();
+                //this.update();
             },
             /*
              * 更新下最新的状态
              **/
             update: function(opt) {
-                _.deepExtend(this, opt);
+                opt && _.deepExtend(this, opt);
                 //剩下的要更新下位置
                 var self = this;
                 _.each(this.groups, function(g, i) {
@@ -154,9 +214,12 @@ define(
                     });
                 });
             },
+
             _setGroupsForYfield: function(fields, data, groupInd) {
+                var gs = [];
                 var self = this;
                 for (var i = 0, l = fields.length; i < l; i++) {
+                    if(!data[i] || !fields[i]) continue;
                     var _sort = self.root._yAxis.sort;
                     var _biaxial = self.root.biaxial;
                     var _yAxis = self.root._yAxis;
@@ -193,12 +256,26 @@ define(
                             self.w
                         );
                         group.draw({
-                            data: data[i]
+                            data: data[i],
+                            resize : self.resize
                         });
-                        self.sprite.addChild(group.sprite);
-                        self.groups.push(group);
+                        self.sprite.addChildAt(group.sprite , _groupInd);
+
+                        var insert = false;
+                        for( var gi=0,gl=self.groups.length ; gi<gl ; gi++ ){
+                            if( self.groups[gi]._groupInd > _groupInd ){
+                                self.groups.splice( gi , 0 , group );
+                                insert=true;
+                                break;
+                            }
+                        };
+                        if( !insert ){
+                            self.groups.push(group);
+                        };
+                        gs.push( group );
                     }
-                }
+                };
+                return gs;
             },
             _widget: function(opt) {
                 var self = this;
@@ -232,6 +309,7 @@ define(
                         e.eventInfo = self._getInfoHandler(e);
                     })
                 }
+                self.resize = false;
             },
             _getInfoHandler: function(e) {
                 // console.log(e)

@@ -9,7 +9,7 @@ define(
     function( Canvax , Line , Circle , Tip ){
         var Tips = function(opt , data , tipDomContainer){
             this.line      = {
-                enabled      : 1,
+                enabled      : 1
                  //strokeStyle : null
             };
             this.node      = {
@@ -41,6 +41,9 @@ define(
                 this._tip = new Tip( opt , tipDomContainer );
     
             },
+            reset: function( opt ){
+                _.deepExtend(this._tip , opt);
+            },
             show : function(e , tipsPoint){
 
                 if( !this.enabled ) return;
@@ -55,6 +58,7 @@ define(
 
                 this._isShow = true;
             },
+
             move : function(e){
                 if( !this.enabled ) return;
                 this._resetStatus(e);
@@ -119,16 +123,15 @@ define(
                 var self = this;
 
                 _.each( e.eventInfo.nodesInfoList , function( node ){
-                    
                     var csp = new Canvax.Display.Sprite({
                         context : {
                             y : e.target.context.height - Math.abs(node.y)
                         }
                     });
-
+                    
                     var bigCircle = new Circle({
                         context : {
-                            r : node.r + 2 + 1 ,
+                            r : node.r + 2,
                             fillStyle   : self.node.backFillStyle || "white",//node.fillStyle,
                             strokeStyle : self.node.strokeStyle || node.strokeStyle,
                             lineWidth   : node.lineWidth,
@@ -145,12 +148,14 @@ define(
 
                     csp.addChild(bigCircle);
 
+                    /*
                     csp.addChild( new Circle({
                         context : {
                             r : node.r + 1,
                             fillStyle   : self.node.fillStyle || node.strokeStyle
                         }
                     }) );
+                    */
 
                     self._nodes.addChild( csp );
                     bigCircle.on("mousemove", function(e) {

@@ -52,6 +52,9 @@ define(
             this.sprite       = null;                       //总的sprite
             this.xAxisSp      = null;                       //x轴上的线集合
             this.yAxisSp      = null;                       //y轴上的线集合
+
+            this.animation = true;
+            this.resize = false;
     
             this.init(opt);
         };
@@ -113,15 +116,21 @@ define(
                         });
                         self.xAxisSp.addChild(line);
                         
-                        line.animate({
-                            xStart : 0,
-                            xEnd : self.w
-                        } , {
-                            duration : 500,
-                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                            delay : (al-a) * 80,
-                            id : line.id
-                        });
+                        if( this.animation && !this.resize ){
+                            line.animate({
+                                xStart : 0,
+                                xEnd : self.w
+                            } , {
+                                duration : 500,
+                                //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                                delay : (al-a) * 80,
+                                id : line.id
+                            });
+                        } else {
+                            line.context.xStart = 0;
+                            line.context.xEnd = self.w;
+                        }
+
 
                     };
                 };

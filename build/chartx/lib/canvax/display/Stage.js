@@ -62,7 +62,7 @@ define(
                 if(arguments.length >= 4) {
                     this.context2D.clearRect(x, y, width, height);
                 } else {
-                    this.context2D.clearRect( 0, 0, this.context2D.canvas.offsetWidth, this.context2D.canvas.offsetHeight );
+                    this.context2D.clearRect( 0, 0, this.parent.width , this.parent.height );
                 }
             }
         });

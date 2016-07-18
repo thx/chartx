@@ -122,8 +122,12 @@ define(
              */
             destroy: function() {
                 this.clean();
-                this.el.innerHTML = "";
+                if(this.el){
+                    this.el.innerHTML = "";
+                    this.el = null;
+                };
                 this._destroy && this._destroy();
+                this.fire("destroy");
             },
             /*
              * 清除整个图表
@@ -142,12 +146,17 @@ define(
              * 容器的尺寸改变重新绘制
              */
             resize: function() {
+                var _w = parseInt(this.el.offsetWidth);
+                var _h = parseInt(this.el.offsetHeight);
+                if( _w == this.width && _h == this.height ) return;
                 this.clean();
-                this.width = parseInt(this.el.offsetWidth);
-                this.height = parseInt(this.el.offsetHeight);
+                this.width = _w;
+                this.height = _h;
                 this.canvax.resize();
                 this.inited = false;
-                this.draw();
+                this.draw({
+                    resize : true
+                });
                 this.inited = true;
             },
             /**
@@ -469,6 +478,9 @@ define(
             this.sprite       = null;                       //总的sprite
             this.xAxisSp      = null;                       //x轴上的线集合
             this.yAxisSp      = null;                       //y轴上的线集合
+
+            this.animation = true;
+            this.resize = false;
     
             this.init(opt);
         };
@@ -530,15 +542,21 @@ define(
                         });
                         self.xAxisSp.addChild(line);
                         
-                        line.animate({
-                            xStart : 0,
-                            xEnd : self.w
-                        } , {
-                            duration : 500,
-                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                            delay : (al-a) * 80,
-                            id : line.id
-                        });
+                        if( this.animation && !this.resize ){
+                            line.animate({
+                                xStart : 0,
+                                xEnd : self.w
+                            } , {
+                                duration : 500,
+                                //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                                delay : (al-a) * 80,
+                                id : line.id
+                            });
+                        } else {
+                            line.context.xStart = 0;
+                            line.context.xEnd = self.w;
+                        }
+
 
                     };
                 };
@@ -745,7 +763,7 @@ define(
                         xEnd   : (me.range.end + 1) / me.count * me.w  - me.btnW / 2,
                         yEnd   : me.barY + me.barH + 2,
                         lineWidth : me.underline.lineWidth,
-                        strokeStyle : me.underline.strokeStyle,
+                        strokeStyle : me.underline.strokeStyle
                     })
                     me.dataZoomBg.addChild(me._underline); 
                 }
@@ -849,13 +867,13 @@ define(
                 this.linesLeft = new Canvax.Display.Sprite({ id : "linesLeft" });
                 if(this.left.eventEnabled){
                     this._addLines({
-                        sprite : this.linesLeft,
+                        sprite : this.linesLeft
                     })
                 }
                 this.linesRight = new Canvax.Display.Sprite({ id : "linesRight" });
                 if(this.right.eventEnabled){
                     this._addLines({
-                        sprite : this.linesRight,
+                        sprite : this.linesRight
                     })
                 }
                 this.linesCenter = new Canvax.Display.Sprite({ id : "linesCenter" });
@@ -979,7 +997,7 @@ define(
             this.tag = {
                 height : 20
             };
-            this.enabled = true; //1,0 true ,false 
+            this.enabled = false; //1,0 true ,false 
 
             this.icon = {
                 r : 5,
@@ -1023,7 +1041,7 @@ define(
             draw:function(opt , _xAxis , _yAxis){
                 if( this.enabled ){ 
                     this._widget();
-                }; 
+                };
             },
             _showTips : function(e){
                 if( this._hideTimer ){
@@ -1160,6 +1178,14 @@ define(
                     me.sprite.addChild(sprite);
 
                     sprite.on("click" , function( e ){
+
+                        //只有一个field的时候，不支持取消
+                        if( _.filter( me.data , function(obj){return obj.activate} ).length == 1 ){
+                            if( obj.activate ){
+                                return;
+                            }
+                        };
+                        
                         icon.context.fillStyle = obj.activate ? "#ccc" : (obj.fillStyle || me._labelColor)
                         obj.activate = !obj.activate;
                         if( obj.activate ){
@@ -1812,6 +1838,7 @@ define(
             this.isH = false; //是否为横向转向的x轴
 
             this.animation = true;
+            this.resize = false;
 
             this.init(opt, data);
         };
@@ -1897,7 +1924,9 @@ define(
             },
             draw: function(opt) {
                 // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
+                if( this.data.length == 0 ){
 
+                };
                 this._getLabel();
                 this._initConfig(opt);
                 this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
@@ -1918,6 +1947,8 @@ define(
                         this._layout();
                     }
                 }
+
+                this.resize = false;
                 // this.data = this.layoutData
             },
             _getLabel: function() {
@@ -2042,6 +2073,8 @@ define(
                     this.sprite.addChild(this._label);
                 };
 
+                var delay = Math.min(1000 / arr.length, 25);
+
                 for (var a = 0, al = arr.length; a < al; a++) {
                     var xNode = new Canvax.Display.Sprite({
                         id: "xNode" + a
@@ -2097,14 +2130,14 @@ define(
 
                     this.sprite.addChild(xNode);
 
-                    if (this.animation) {
+                    if (this.animation && !this.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20
                         }, {
                             duration: 500,
                             easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * 80,
+                            delay: a * delay,
                             id: txt.id
                         });
                     } else {
@@ -2116,7 +2149,7 @@ define(
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {
 
-                if (this.sprite.getNumChildren() == 0)
+                if (this.data.length == 0)
                     return;
 
                 var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
@@ -2197,6 +2230,7 @@ define(
     }
 )
 
+
 define(
     "chartx/components/yaxis/yAxis", [
         "canvax/index",
@@ -2257,6 +2291,7 @@ define(
             this.isH = false; //是否横向
 
             this.animation = true;
+            this.resize = false;
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
@@ -2351,6 +2386,8 @@ define(
 
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
+
+                this.resize = false;
             },
             tansValToPos : function( val ){
                 var max = this.dataSection[this.dataSection.length - 1];
@@ -2387,9 +2424,12 @@ define(
                 dis = dis > disMax ? disMax : dis
                 return dis
             },
-            _setDataSection: function(data) {
+            _setDataSection: function(data , data1) {
                 var arr = [];
-                var d = (data.org || data.data);
+                var d = (data.org || data.data || data);
+                if( data1 && _.isArray(data1) ){
+                    d = d.concat(data1);
+                }
                 if (!this.biaxial) {
                     arr = _.flatten( d ); //_.flatten( data.org );
                 } else {
@@ -2402,7 +2442,7 @@ define(
                     }
                 };
                 for( var i = 0, il=arr.length; i<il ; i++ ){
-                    arr[i] = Number( arr[i] );
+                    arr[i] =  arr[i] || 0;
                 };
                 return arr;
             },
@@ -2474,9 +2514,11 @@ define(
                     var content = o.content
                     if (_.isFunction(self.text.format)) {
                         content = self.text.format(content, self);
-                    } else {
-                        content = Tools.numAddSymbol(content);
-                    }
+                    };
+                    if( content === undefined || content === null ){
+                        content = Tools.numAddSymbol( o.content );
+                    };  
+                    
                     var yNode = new Canvax.Display.Sprite({
                         id: "yNode" + a
                     });
@@ -2546,7 +2588,8 @@ define(
 
                     self.sprite.addChild(yNode);
 
-                    if (self.animation) {
+                    //如果是resize的话也不要处理动画
+                    if (self.animation && !self.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20
@@ -2576,3 +2619,4 @@ define(
 
         return yAxis;
     })
+

@@ -57,7 +57,8 @@ define("canvax/animation/Tween", [], function() {
 
 			remove: function(tween) {
 
-				var i = _tweens.indexOf(tween);
+				//var i = _tweens.indexOf(tween);
+				var i = _.indexOf( _tweens , tween );
 
 				if (i !== -1) {
 					_tweens.splice(i, 1);
@@ -853,3 +854,4 @@ define("canvax/animation/Tween", [], function() {
 	return TWEEN;
 
 });
+

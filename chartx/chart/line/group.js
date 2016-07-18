@@ -13,7 +13,7 @@ define(
     function(Canvax, BrokenLine, Circle, Path, Tools, ColorFormat, Tween, Theme, AnimationFrame) {
         window.Canvax = Canvax
         var Group = function(field, a, opt, ctx, sort, yAxis, h, w) {
-            this.field = field; //_groupInd在yAxis.field中对应的值
+            this.field = field; //_groupInd 在yAxis.field中对应的值
             this._groupInd = a;
             this._nodeInd = -1;
             this._yAxis = yAxis;
@@ -24,6 +24,7 @@ define(
             this.y = 0;
 
             this.animation = true;
+            this.resize = false;
 
             this.colors = Theme.colors;
 
@@ -41,7 +42,7 @@ define(
                 r: 2, //半径 node 圆点的半径
                 fillStyle: '#ffffff',
                 strokeStyle: null,
-                lineWidth: 3
+                lineWidth: 4
             };
 
             this.fill = { //填充
@@ -64,7 +65,7 @@ define(
             init: function(opt) {
                 _.deepExtend(this, opt);
 
-                //如果opt中没有node fill的设置，那么要把fill node 的style和line做同步
+                //如果opt中没有 node fill的设置，那么要把fill node 的style和line做同步
                 //!this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
                 //!this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
 
@@ -81,9 +82,21 @@ define(
                 this._widget();
             },
             update: function(opt) {
+                if(!this._bline){
+                    return;
+                }
                 _.deepExtend(this, opt);
-                this._pointList = this._getPointList(this.data);
-                this._grow();
+                if( opt.data ){
+                    this._pointList = this._getPointList(this.data);
+                    this._grow();
+                }
+
+                if( opt._groupInd !== undefined ){
+                    var _strokeStyle = this._getLineStrokeStyle();
+                    this._bline.context.strokeStyle = _strokeStyle;
+                    this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
+                    this._setNodesStyle();
+                }
             },
             //自我销毁
             destroy: function() {
@@ -158,8 +171,9 @@ define(
                 self._grow();
             },
             _grow: function(callback) {
+            
                 var self = this;
-                if (!self.animation) {
+                if (!self.animation || self.resize) {
                     callback && callback(self);
                 }
                 if (self._currPointList.length == 0) {
@@ -175,11 +189,12 @@ define(
                             var xory = parseInt(p.split("_")[1]);
                             self._currPointList[ind] && (self._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
                         };
+                        var _strokeStyle = self._getLineStrokeStyle();
                         self._bline.context.pointList = _.clone(self._currPointList);
-                        self._bline.context.strokeStyle = self._getLineStrokeStyle();
+                        self._bline.context.strokeStyle = _strokeStyle;
 
                         self._fill.context.path = self._fillLine(self._bline);
-                        self._fill.context.fillStyle = self._getFillStyle();
+                        self._fill.context.fillStyle = self._getFillStyle() || _strokeStyle;
                         self._circles && _.each(self._circles.children, function(circle, i) {
                             var ind = parseInt(circle.id.split("_")[1]);
                             circle.context.y = self._currPointList[ind][1];
@@ -201,7 +216,7 @@ define(
                 return obj;
             },
             _isNotNum: function(val) {
-                return isNaN(val) || val === null || val === ""
+                return val === undefined || isNaN(val) || val === null || val === ""
             },
             _filterEmptyValue: function(list) {
 
@@ -250,7 +265,8 @@ define(
                     return;
                 };
                 var list = [];
-                if (me.animation) {
+
+                if (me.animation && !me.resize) {
                     for (var a = 0, al = me.data.length; a < al; a++) {
                         var o = me.data[a];
                         var sourceInd = 0;
@@ -270,7 +286,6 @@ define(
                 me._currPointList = list;
 
                 var bline = new BrokenLine({ //线条
-                    id: "brokenline_" + me._groupInd,
                     context: {
                         pointList: list,
                         //strokeStyle: me._getLineStrokeStyle(),
@@ -294,12 +309,14 @@ define(
                 me.sprite.addChild(bline);
                 me._bline = bline;
                 
-                bline.context.strokeStyle = me._getLineStrokeStyle();
+                var _strokeStyle = me._getLineStrokeStyle();
+                bline.context.strokeStyle = _strokeStyle;
 
                 var fill = new Path({ //填充
                     context: {
                         path: me._fillLine(bline),
-                        fillStyle: me._getFillStyle(), //fill_gradient || me._getColor(me.fill.fillStyle),
+
+                        fillStyle: me._getFillStyle() || _strokeStyle, //fill_gradient || me._getColor(me.fill.fillStyle),
                         globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha //me._getProp( me.fill.alpha )
                     }
                 });
@@ -307,36 +324,42 @@ define(
                 me._fill = fill;
                 me._createNodes();
             },
-            _getFillStyle: function() {
+            _getFillStyle: function( ) {
                 var self = this;
+            
                 var fill_gradient = null;
-                if (_.isArray(self.fill.alpha)) {
+                
+                if( self.fill.fillStyle ){
+                    if (_.isArray(self.fill.alpha)) {
+                        //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
+                        self.fill.alpha.length = 2;
+                        if (self.fill.alpha[0] == undefined) {
+                            self.fill.alpha[0] = 0;
+                        };
+                        if (self.fill.alpha[1] == undefined) {
+                            self.fill.alpha[1] = 0;
+                        };
 
-                    //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
-                    self.fill.alpha.length = 2;
-                    if (self.fill.alpha[0] == undefined) {
-                        self.fill.alpha[0] = 0;
+                        //从bline中找到最高的点
+                        var topP = _.min(self._bline.context.pointList, function(p) {
+                            return p[1]
+                        });
+                        //创建一个线性渐变
+                        fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+
+                        var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
+                        var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                        fill_gradient.addColorStop(0, rgba0);
+
+                        var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                        fill_gradient.addColorStop(1, rgba1);
+
+                        return fill_gradient;
                     };
-                    if (self.fill.alpha[1] == undefined) {
-                        self.fill.alpha[1] = 0;
-                    };
-
-                    //从bline中找到最高的点
-                    var topP = _.min(self._bline.context.pointList, function(p) {
-                        return p[1]
-                    });
-                    //创建一个线性渐变
-                    fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
-
-                    var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
-                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
-                    fill_gradient.addColorStop(0, rgba0);
-
-                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
-                    fill_gradient.addColorStop(1, rgba1);
-                };
-
-                return fill_gradient || self._getColor(self.fill.fillStyle);
+                    return self._getColor(self.fill.fillStyle);
+                } else {
+                    return null;
+                }
             },
             _getLineStrokeStyle: function() {
                 var self = this;
@@ -352,9 +375,10 @@ define(
                     var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
-                    var bottomP = _.max(self._bline.context.pointList, function(p) {
-                        return p[1]
-                    });
+                    //var bottomP = _.max(self._bline.context.pointList, function(p) {
+                    //    return p[1]
+                    //});
+                    var bottomP = [ 0 , 0 ];
                     //创建一个线性渐变
                     this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
@@ -378,42 +402,52 @@ define(
                 } else {
                     this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
                 }
+                //this.line.strokeStyle = this.__lineStyleStyle;
                 return this.__lineStyleStyle;
             },
-            _createNodes: function() {
+            _setNodesStyle: function(){
                 var self = this;
                 var list = self._currPointList;
-                // var node =  new Canvax.Display.Sprite();
-                // self.sprite.addChild(node)
                 if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
-                    this._circles = new Canvax.Display.Sprite({
-                        id: "circles"
-                    });
-                    this.sprite.addChild(this._circles);
                     for (var a = 0, al = list.length; a < al; a++) {
                         self._nodeInd = a;
-                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
-                        var context = {
-                            x: self._currPointList[a][0],
-                            y: self._currPointList[a][1],
-                            r: self._getProp(self.node.r),
-                            fillStyle: list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff",
-                            strokeStyle: strokeStyle,
-                            lineWidth: self._getProp(self.node.lineWidth) || 2
-                        };
+                        var nodeEl = self._circles.getChildAt( a );
+                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); 
+                        nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff";
+                        nodeEl.context.strokeStyle = strokeStyle;
 
+                        /*
                         var sourceInd = 0;
                         if (self._yAxis.place == "right") {
                             sourceInd = al - 1;
                         };
-
                         if (a == sourceInd) {
-                            context.fillStyle = context.strokeStyle;
-                            context.r++;
-                        }
+                            nodeEl.context.fillStyle = nodeEl.context.strokeStyle;
+                            nodeEl.context.r++;
+                        };
+                        */
+
+                        self._nodeInd = -1;
+                    }
+                }
+            },
+            _createNodes: function() {
+                var self = this;
+                var list = self._currPointList;
+
+                if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
+                    this._circles = new Canvax.Display.Sprite({});
+                    this.sprite.addChild(this._circles);
+                    for (var a = 0, al = list.length; a < al; a++) {
+                        var context = {
+                            x: self._currPointList[a][0],
+                            y: self._currPointList[a][1],
+                            r: self._getProp(self.node.r),
+                            lineWidth: self._getProp(self.node.lineWidth) || 2
+                        };
 
                         var circle = new Circle({
-                            id: "circle_" + a,
+                            id: "circle_"+a,
                             context: context
                         });
 
@@ -429,11 +463,14 @@ define(
                         };
                         self._circles.addChild(circle);
                     }
-                    self._nodeInd = -1
-                }
+                };
+                this._setNodesStyle();
             },
             _fillLine: function(bline) { //填充直线
                 var fillPath = _.clone(bline.context.pointList);
+                if( fillPath.length == 0 ){
+                    return "";
+                }
                 var baseY = 0;
                 if (this.sort == "desc") {
                     baseY = -this.h;

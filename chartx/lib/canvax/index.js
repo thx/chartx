@@ -148,7 +148,6 @@ define(
             };
             return tween;
         };
-
         /*
          * @param tween
          * @result void(0)
@@ -235,7 +234,8 @@ define(
 
 			remove: function(tween) {
 
-				var i = _tweens.indexOf(tween);
+				//var i = _tweens.indexOf(tween);
+				var i = _.indexOf( _tweens , tween );
 
 				if (i !== -1) {
 					_tweens.splice(i, 1);
@@ -1030,7 +1030,9 @@ define(
 
 	return TWEEN;
 
-});;/* 
+});
+
+;/* 
 window.FlashCanvasOptions = {
     swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
@@ -2610,8 +2612,8 @@ define(
          * @inner
          */
         function interpolate(p0, p1, p2, p3, t, t2, t3) {
-            var v0 = (p2 - p0) * 0.5;
-            var v1 = (p3 - p1) * 0.5;
+            var v0 = (p2 - p0) * 0.25;
+            var v1 = (p3 - p1) * 0.25;
             return (2 * (p1 - p2) + v0 + v1) * t3 
                    + (- 3 * (p1 - p2) - 2 * v0 - v1) * t2
                    + v0 * t + p1;
@@ -2683,6 +2685,8 @@ define(
         };
     } 
 );
+
+
 ;define(
     "canvax/display/DisplayObject",
     [
@@ -3646,7 +3650,7 @@ define(
                 if(arguments.length >= 4) {
                     this.context2D.clearRect(x, y, width, height);
                 } else {
-                    this.context2D.clearRect( 0, 0, this.context2D.canvas.offsetWidth, this.context2D.canvas.offsetHeight );
+                    this.context2D.clearRect( 0, 0, this.parent.width , this.parent.height );
                 }
             }
         });
@@ -3945,7 +3949,7 @@ define(
                     this._notWatch = true; //本次转换不出发心跳
                     var currL = SmoothSpline(obj);
 
-                    if (value) {
+                    if (value && value.length>0) {
                         currL[currL.length - 1][0] = value[value.length - 1][0];
                     };
                     myC.pointList = currL;
@@ -5123,10 +5127,10 @@ define(
             
             this._isReady = true;
         },
-        resize : function(){
+        resize : function( opt ){
             //重新设置坐标系统 高宽 等。
-            this.width    = parseInt( this._rootDom.offsetWidth  );
-            this.height   = parseInt( this._rootDom.offsetHeight );
+            this.width      = parseInt((opt && "width" in opt) || this._rootDom.offsetWidth  , 10); 
+            this.height     = parseInt((opt && "height" in opt) || this._rootDom.offsetHeight , 10); 
  
             this.el.style.width  = this.width +"px";
             this.el.style.height = this.height+"px";
@@ -5312,7 +5316,7 @@ define(
                     var shape   = opt.shape;
                     var name    = opt.name;
                     var value   = opt.value;
-                    var preValue=opt.preValue;
+                    var preValue= opt.preValue;
  
                     if (!self._isReady) {
                         //在还没初始化完毕的情况下，无需做任何处理
@@ -5351,7 +5355,7 @@ define(
                         stage = stage || target;
                         if(!self.convertStages[stage.id]) {
                             self.convertStages[stage.id]={
-                                stage : stage ,
+                                stage : stage,
                                 convertShapes : {}
                             }
                         }

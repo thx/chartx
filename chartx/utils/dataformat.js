@@ -64,19 +64,28 @@ define(
     
                 var getDataOrg = function( $field , totalList, type ){
                     var arr = totalList;
+
                     //这个时候的arr只是totalList的过滤，还没有完全的按照$field 中的排序
                     var newData = [];
                     for( var i=0,l=$field.length; i<l ; i++ ){
+                        var fieldInTotal = false; //如果该field在数据里面根本没有，那么就说明是无效的field配置
                         if( _.isArray($field[i]) ){
                             newData.push( getDataOrg( $field[i] , totalList , type ) );
                         } else {
                             for( var ii=0,iil=arr.length ; ii<iil ; ii++ ){
                                  if( $field[i] == arr[ii].field ){
+                                     fieldInTotal = true;
                                      newData.push( arr[ii].data );
                                      break;
                                  }
                             }
-                        }
+                            //干掉无效的field配置
+                            if( !fieldInTotal ){
+                                $field.splice( i , 1 );
+                                i--;
+                                l--;
+                            };
+                        };
                     }
                     return newData;
                 }
