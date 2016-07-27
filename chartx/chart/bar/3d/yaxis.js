@@ -2,15 +2,35 @@ define('chartx/chart/bar/3d/yaxis',
     [
         "canvax/index",
         "canvax/core/Base",
-        "canvax/shape/Rect",
+        "canvax/shape/Line",
         "chartx/utils/tools",
         "chartx/utils/datasection"
     ],
-    function (Canvax, CanvaxBase, Rect, Tools, DataSection) {
-        var Yaxis = function (opt, data , data1) {
+    function (Canvax, CanvaxBase, Line, Tools, DataSection) {
+        var yAxis = function (root) {
+
+            var opt = root.yAxis,
+                data = root.dataFrame.yAxis,
+                data1 = root._getaverageData();
+
+            this.root = root;
 
             this.w = 0;
             this.enabled = 1; //true false 1,0都可以
+            this.dis = 6; //线到文本的距离
+            this.maxW = 0; //最大文本的width
+            this.field = null; //这个 轴 上面的 field
+
+            this.label = "";
+            this._label = null; //label的text对象
+
+            this.line = {
+                enabled: 1, //是否有line
+                width: 4,
+                lineWidth: 1,
+                strokeStyle: '#cccccc'
+            };
+
             this.text = {
                 fillStyle: '#999',
                 fontSize: 12,
@@ -21,31 +41,44 @@ define('chartx/chart/bar/3d/yaxis',
                 x: 0,
                 y: 0
             };
-
+            this.place = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
+            this.biaxial = false; //是否是双轴中的一份
             this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
             this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
             this.dataOrg = []; //源数据
 
             this.sprite = null;
-
+            //this.x           = 0;
+            //this.y           = 0;
             this.disYAxisTopLine = 6; //y轴顶端预留的最小值
             this.yMaxHeight = 0; //y轴最大高
             this.yGraphsHeight = 0; //y轴第一条线到原点的高
 
-            this.label = "";
-            this._label = null; //label的text对象
+            this.baseNumber = null;
+            this.basePoint = null; //value为baseNumber的point {x,y}
+
+            //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
+            //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
+            this.filter = null; //function(params){};
 
             this.isH = false; //是否横向
-            this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
+            this.animation = true;
+            this.resize = false;
+
+            this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
             this.init(opt, data , data1);
         };
 
-        Yaxis.prototype = {
-            init: function (opt, data , data1) {
+        yAxis.prototype = {
+            init: function (opt, data, data1) {
                 _.deepExtend(this, opt);
 
+                if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
+                    this.isH = true;
+                }
+                ;
 
                 this._initData(data , data1);
                 this.sprite = new Canvax.Display.Sprite();
@@ -58,8 +91,57 @@ define('chartx/chart/bar/3d/yaxis',
                 this.sprite.context.y = $n;
                 this.pos.y = $n;
             },
+            setAllStyle: function (sty) {
+                _.each(this.sprite.children, function (s) {
+                    _.each(s.children, function (cel) {
+                        if (cel.type == "text") {
+                            cel.context.fillStyle = sty;
+                        } else if (cel.type == "line") {
+                            cel.context.strokeStyle = sty;
+                        }
+                    });
+                });
+            },
+            //数据变化，配置没变的情况
+            resetData: function (data, opt) {
+                //先在field里面删除一个字段，然后重新计算
+                if (opt) {
+                    _.deepExtend(this, opt);
+                }
+                ;
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+                //_.deepExtend( this , opt );
+                this._initData(data);
+                this._trimYAxis();
+                this._widget();
+                //this.draw();
+            },
+            //配置和数据变化
+            update: function (opt, data) {
+                //先在field里面删除一个字段，然后重新计算
+                this.sprite.removeAllChildren();
+                this.dataSection = [];
+                _.deepExtend(this, opt);
+                this._initData(data);
+                this._trimYAxis();
+                this._widget();
+                //this.draw();
+            },
+            _getLabel: function () {
+                if (this.label && this.label != "") {
+                    this._label = new Canvax.Display.Text(this.label, {
+                        context: {
+                            fontSize: this.text.fontSize,
+                            textAlign: "left",
+                            textBaseline: this.isH ? "top" : "bottom",
+                            fillStyle: this.text.fillStyle,
+                            rotation: this.isH ? -90 : 0
+                        }
+                    });
+                }
+            },
             draw: function (opt) {
-
                 this.sprite.removeAllChildren();
                 opt && _.deepExtend(this, opt);
                 this._getLabel();
@@ -79,6 +161,17 @@ define('chartx/chart/bar/3d/yaxis',
 
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
+
+                //基本变换过程为:local ===> screen ===> world ===> projection
+                //             ===> screen ===> local
+
+                this.root._localToScreen(this.sprite);
+
+                this.root._screenToWorld(this.sprite);
+
+                this.root._projectionToScreen(this.sprite);
+
+                this.root._screenToLocal(this.sprite);
 
                 this.resize = false;
             },
@@ -109,19 +202,6 @@ define('chartx/chart/bar/3d/yaxis',
                     y: basePy
                 }
             },
-            _getLabel: function() {
-                if (this.label && this.label != "") {
-                    this._label = new Canvax.Display.Text(this.label, {
-                        context: {
-                            fontSize: this.text.fontSize,
-                            textAlign: "left",
-                            textBaseline: this.isH ? "top" : "bottom",
-                            fillStyle: this.text.fillStyle,
-                            rotation: this.isH ? -90 : 0
-                        }
-                    });
-                }
-            },
             _getYAxisDisLine: function() { //获取y轴顶高到第一条线之间的距离
                 var disMin = this.disYAxisTopLine
                 var disMax = 2 * disMin
@@ -130,21 +210,31 @@ define('chartx/chart/bar/3d/yaxis',
                 dis = dis > disMax ? disMax : dis
                 return dis
             },
-            _setDataSection: function(data , data1) {
+            _setDataSection: function (data, data1) {
                 var arr = [];
-                var d = (data.org || data.data || data);
-                if( data1 && _.isArray(data1) ){
-                    d = d.concat(data1);
+                _.each(data.org, function (d, i) {
+                    var varr = [];
+                    var len = d[0].length;
+                    var vLen = d.length;
+                    var min = 0;
+                    for (var i = 0; i < len; i++) {
+                        var count = 0;
+                        for (var ii = 0; ii < vLen; ii++) {
+                            count += d[ii][i];
+                            min = Math.min(d[ii][i], min);
+                        }
+                        varr.push(count);
+                    }
+                    ;
+                    varr.push(min);
+                    arr.push(varr);
+                });
+                if (!data1) {
+                    data1 = [];
                 }
-
-                arr = _.flatten( d ); //_.flatten( data.org );
-
-                for( var i = 0, il=arr.length; i<il ; i++ ){
-                    arr[i] =  arr[i] || 0;
-                };
-                return arr;
+                return _.flatten(arr).concat(data1);
             },
-
+            //data1 == [1,2,3,4]
             _initData: function(data , data1) {
                 var arr = this._setDataSection(data , data1);
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
@@ -185,6 +275,15 @@ define('chartx/chart/bar/3d/yaxis',
                  */
                 if (this.baseNumber == null) {
                     this.baseNumber = this._bottomNumber > 0 ? this._bottomNumber : 0;
+                }
+            },
+            resetWidth: function (w) {
+                var self = this;
+                self.w = w;
+                if (self.line.enabled) {
+                    self.sprite.context.x = w - self.dis - self.line.width;
+                } else {
+                    self.sprite.context.x = w - self.dis;
                 }
             },
             _widget: function() {
@@ -253,18 +352,33 @@ define('chartx/chart/bar/3d/yaxis',
                         self.maxW = Math.max(self.maxW, txt.getTextHeight());
                     }
 
-
+                    if (self.line.enabled) {
+                        //线条
+                        var line = new Line({
+                            context: {
+                                x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
+                                y: y,
+                                xEnd: self.line.width,
+                                yEnd: 0,
+                                lineWidth: self.line.lineWidth,
+                                strokeStyle: self.line.strokeStyle
+                            }
+                        });
+                        yNode.addChild(line);
+                    }
+                    ;
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
                     _.isFunction(self.filter) && self.filter({
                         layoutData: self.layoutData,
                         index: a,
-                        txt: txt
+                        txt: txt,
+                        line: line
                     });
 
                     self.sprite.addChild(yNode);
 
                     //如果是resize的话也不要处理动画
-                    if (self.animation && !self.resize) {
+                    if (false && self.animation && !self.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - 20
@@ -282,10 +396,16 @@ define('chartx/chart/bar/3d/yaxis',
 
                 self.maxW += self.dis;
 
-                self.w = self.maxW + self.dis + self.pos.x;
-
+                //self.sprite.context.x = self.maxW + self.pos.x;
+                //self.pos.x = self.maxW + self.pos.x;
+                if (self.line.enabled) {
+                    self.w = self.maxW + self.dis + self.line.width + self.pos.x;
+                } else {
+                    self.w = self.maxW + self.dis + self.pos.x;
+                }
             }
         };
 
-        return Yaxis;
+        return yAxis;
+
     });

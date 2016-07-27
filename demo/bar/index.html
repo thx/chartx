@@ -43,7 +43,7 @@ var data= [
 var options = {
     type:"3d",
     yAxis : {
-        field : [ ["uv","pv"] , "click"],
+        field : [ "click"],
         //enabled : false
     },
     xAxis : {
@@ -51,7 +51,7 @@ var options = {
     }
 };   
 Chartx.bar("canvasTest" , data , options).then(function(bar){
-
+window.bar = bar;
 });
 
 
@@ -69,7 +69,7 @@ Chartx.bar("canvasTest" , data , options).then(function(bar){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
+                <div id="canvasTest" style='width:700px;height:300px;'></div>
             </div>
 
             </div>
