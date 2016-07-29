@@ -130,8 +130,11 @@ define('chartx/chart/bar/3d/yaxis',
             },
             _getLabel: function () {
                 if (this.label && this.label != "") {
-                    this._label = new Canvax.Display.Text(this.label, {
+                    this._label =this.sprite.getChildById('yAxis_label_'+this.label)||
+                    new Canvax.Display.Text(this.label, {
+                        id:'yAxis_label_'+this.label,
                         context: {
+
                             fontSize: this.text.fontSize,
                             textAlign: "left",
                             textBaseline: this.isH ? "top" : "bottom",
@@ -307,7 +310,8 @@ define('chartx/chart/bar/3d/yaxis',
                         content = Tools.numAddSymbol( o.content );
                     };
 
-                    var yNode = new Canvax.Display.Sprite({
+                    var yNode = self.sprite.getChildById("yNode" + a) ||
+                        new Canvax.Display.Sprite({
                         id: "yNode" + a
                     });
 
@@ -332,8 +336,9 @@ define('chartx/chart/bar/3d/yaxis',
                     };
 
                     //文字
-                    var txt = new Canvax.Display.Text(content, {
-                        id: "yAxis_txt_" + CanvaxBase.getUID(),
+                    var txt = yNode.getChildById("yAxis_txt_" + a) ||
+                        new Canvax.Display.Text(content, {
+                            id: "yAxis_txt_" + a,
                         context: {
                             x: x + (self.place == "left" ? -5 : 5),
                             y: posy + 20,
@@ -354,7 +359,9 @@ define('chartx/chart/bar/3d/yaxis',
 
                     if (self.line.enabled) {
                         //线条
-                        var line = new Line({
+                        var line = yNode.getChildById("yAxis_line_" + a) ||
+                            new Line({
+                                id: "yAxis_line_" + a,
                             context: {
                                 x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
                                 y: y,

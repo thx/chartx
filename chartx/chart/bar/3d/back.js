@@ -101,26 +101,39 @@ define('chartx/chart/bar/3d/back',
                 if (!this.enabled) {
                     return
                 }
-
-                self.xAxisSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.xAxisSp)
-                self.yAxisSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.yAxisSp)
+                self.xAxisSp = self.sprite.getChildById('Back_xAsix') ||
+                    new Canvax.Display.Sprite({
+                        id: 'Back_xAsix'
+                    }),
+                    self.sprite.addChild(self.xAxisSp);
+                self.yAxisSp = self.sprite.getChildById('Back_yAsix') ||
+                    new Canvax.Display.Sprite({
+                        id: 'Back_yAsix'
+                    }),
+                    self.sprite.addChild(self.yAxisSp)
 
                 //x轴方向的线集合
                 var arr = self.xAxis.data;
                 for (var a = 0, al = arr.length; a < al; a++) {
                     var o = arr[a];
-                    var line = new Line({
-                        id: "back_line_" + a,
+                    var line = self.xAxisSp.getChildById("back_line_xAxis" + a)||
+                        new Line({
+                        id: "back_line_xAxis" + a,
                         context: {
                             xStart: 0,
                             yStart: o.y,
-                            xEnd: 0,//self.w,
+                            xEnd: self.w,
                             yEnd: o.y,
                             lineType: self.xAxis.lineType,
                             lineWidth: self.xAxis.lineWidth,
                             strokeStyle: self.xAxis.strokeStyle
                         }
                     });
+
+                    line.context.xStart=0;
+                    line.context.yStart=o.y;
+                    line.context.xEnd=self.w;
+                    line.context.yEnd= o.y;
 
                     //todo:line的context不能保留额外的值
                     line.zStart=_depth;
@@ -134,24 +147,25 @@ define('chartx/chart/bar/3d/back',
                         });
                         self.xAxisSp.addChild(line);
 
-                        if (false && this.animation && !this.resize) {
-                            line.animate({
-                                xStart: 0,
-                                xEnd: self.w
-                            }, {
-                                duration: 500,
-                                //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                                delay: (al - a) * 80,
-                                id: line.id
-                            });
-                        } else {
-                            line.context.xStart = 0;
-                            line.context.xEnd = self.w;
-                        }
+                        //if (false && this.animation && !this.resize) {
+                        //    line.animate({
+                        //        xStart: 0,
+                        //        xEnd: self.w
+                        //    }, {
+                        //        duration: 500,
+                        //        //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                        //        delay: (al - a) * 80,
+                        //        id: line.id
+                        //    });
+                        //} else {
+                        //    line.context.xStart = 0;
+                        //    line.context.xEnd = self.w;
+                        //}
 
                         //绘制Z轴的线条
-                        var line = new Line({
-                            id: "back_line_" + a,
+                        var line =self.xAxisSp.getChildById("back_line_xAxis_z" + a)||
+                            new Line({
+                            id: "back_line_xAxis_z" + a,
                             context: {
                                 xStart: 0,
                                 yStart: o.y,
@@ -162,6 +176,12 @@ define('chartx/chart/bar/3d/back',
                                 strokeStyle: self.xAxis.strokeStyle
                             }
                         });
+
+                        line.context.xStart=0;
+                        line.context.yStart=o.y;
+                        line.context.xEnd=0;
+                        line.context.yEnd=o.y;
+
                         line.zStart=0;
                         line.zEnd=_depth;
                         self.xAxisSp.addChild(line);
@@ -175,7 +195,9 @@ define('chartx/chart/bar/3d/back',
                 var arr = self.yAxis.data
                 for (var a = 0, al = arr.length; a < al; a++) {
                     var o = arr[a]
-                    var line = new Line({
+                    var line = self.yAxisSp.getChildById('back_line_yAxis'+a)||
+                        new Line({
+                            id:'back_line_yAxis'+a,
                         context: {
                             xStart: o.x,
                             yStart: 0,
@@ -187,7 +209,10 @@ define('chartx/chart/bar/3d/back',
                             visible: o.x ? true : false
                         }
                     })
-
+                    line.context.xStart= o.x;
+                    line.context.yStart=0;
+                    line.context.xEnd= o.x;
+                    line.context.yEnd=-self.h;
                     line.zStart=_depth;
                     line.zEnd=_depth;
 
@@ -200,7 +225,9 @@ define('chartx/chart/bar/3d/back',
                         self.yAxisSp.addChild(line);
 
                         //绘制Z轴的线条
-                        var line = new Line({
+                        var line =self.yAxisSp.getChildById('back_line_yAxis_z'+a)||
+                            new Line({
+                                id:'back_line_yAxis_z'+a,
                             context: {
                                 xStart: o.x,
                                 yStart: 0,
@@ -212,13 +239,37 @@ define('chartx/chart/bar/3d/back',
                                 visible: o.x ? true : false
                             }
                         })
-
+                        line.context.xStart= o.x;
+                        line.context.yStart=0;
+                        line.context.xEnd= o.x;
+                        line.context.yEnd=0;
                         line.zStart=0;
                         line.zEnd=_depth;
 
                         self.yAxisSp.addChild(line);
                     }
                 }
+                var line = self.yAxisSp.getChildById('back_line_yAxis_00')||
+                    new Line({
+                        id:'back_line_yAxis_00',
+                        context: {
+                            xStart: 0,
+                            yStart: 0,
+                            xEnd: 0,
+                            yEnd: -self.h,
+                            lineType: self.yAxis.lineType,
+                            lineWidth: self.yAxis.lineWidth,
+                            strokeStyle: self.yAxis.strokeStyle,
+                            visible: o.x ? true : false
+                        }
+                    })
+                line.context.xStart= 0;
+                line.context.yStart=0;
+                line.context.xEnd= 0;
+                line.context.yEnd=-self.h;
+                line.zStart=_depth;
+                line.zEnd=_depth;
+                self.yAxisSp.addChild(line);
                 ;
 
                 //原点开始的y轴线
@@ -227,7 +278,9 @@ define('chartx/chart/bar/3d/back',
                 }).x );
 
                 //self.yAxis.org = xAxisOrg;
-                var line = new Line({
+                var line = self.sprite.getChildById('Back_xAxisOrg')||
+                    new Line({
+                        id:'Back_xAxisOrg',
                     context: {
                         xStart: xAxisOrg,
                         yStart: 0,
@@ -237,6 +290,10 @@ define('chartx/chart/bar/3d/back',
                         strokeStyle: self.yOrigin.strokeStyle
                     }
                 });
+                line.context.xStart= xAxisOrg;
+                line.context.yStart=0;
+                line.context.xEnd= xAxisOrg;
+                line.context.yEnd=-self.h;
                 line.zStart=0;
                 line.zEnd=0;
 
@@ -244,7 +301,9 @@ define('chartx/chart/bar/3d/back',
                     self.sprite.addChild(line)
 
                 if (self.yOrigin.biaxial) {
-                    var lineR = new Line({
+                    var lineR = self.sprite.getChildById('Back_biaxial')||
+                        new Line({
+                        id:'Back_biaxial',
                         context: {
                             xStart: self.w,
                             yStart: 0,
@@ -254,6 +313,11 @@ define('chartx/chart/bar/3d/back',
                             strokeStyle: self.yOrigin.strokeStyle
                         }
                     })
+
+                    line.context.xStart= self.w;
+                    line.context.yStart=0;
+                    line.context.xEnd= self.w;
+                    line.context.yEnd=-self.h;
                     lineR.zStart=0;
                     lineR.zEnd=0;
                     if (self.yOrigin.enabled)
@@ -267,7 +331,9 @@ define('chartx/chart/bar/3d/back',
                 }).y );
 
                 //self.xAxis.org = yAxisOrg;
-                var line = new Line({
+                var line = self.sprite.getChildById("Back_yAxisOrg")||
+                    new Line({
+                    id:"Back_yAxisOrg",
                     context: {
                         yStart: yAxisOrg,
                         xEnd: self.w,
@@ -276,6 +342,10 @@ define('chartx/chart/bar/3d/back',
                         strokeStyle: self.xOrigin.strokeStyle
                     }
                 })
+                line.context.xStart= yAxisOrg;
+                line.context.yStart=0;
+                line.context.xEnd= self.w;
+                line.context.yEnd=yAxisOrg;
                 line.zStart=0;
                 line.zEnd=0;
                 if (self.xOrigin.enabled)

@@ -7,9 +7,10 @@ define('chartx/chart/bar/3d/graphs',
         "canvax/animation/AnimationFrame",
         "canvax/shape/BrokenLine",
         "canvax/shape/Shapes",
-        'chartx/utils/math3d/gl-matrix'
+        "chartx/utils/math3d/gl-matrix",
+        "chartx/utils/colorformat"
     ],
-    function (Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine, Shapes, glMatrix) {
+    function (Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine, Shapes, glMatrix, ColorFormat) {
 
         var Vector3 = glMatrix.vec3;
         var Vector4 = glMatrix.vec4;
@@ -22,6 +23,7 @@ define('chartx/chart/bar/3d/graphs',
             this.data = [];
             this.w = 0;
             this.h = 0;
+            this.depth = 50;
 
             this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
             this._setyAxisFieldsMap();
@@ -84,19 +86,7 @@ define('chartx/chart/bar/3d/graphs',
 
             this.init();
 
-            //构建立方体
 
-            var baseCube = [
-                -0.5, 1, 0,
-                0.5, 1, 0,
-                0.5, 0, 0,
-                -0.5, 0, 0,
-
-                -0.5, 1, -1,
-                0.5, 1, -1,
-                0.5, 0, -1,
-                -0.5, 0, -1
-            ];
         };
 
         Graphs.prototype = {
@@ -312,7 +302,8 @@ define('chartx/chart/bar/3d/graphs',
                             if (h <= preLen - 1) {
                                 groupH = me.barsSp.getChildById("barGroup_" + h);
                             } else {
-                                groupH = new Canvax.Display.Sprite({
+                                groupH = me.barsSp.getChildById("barGroup_" + h) ||
+                                    new Canvax.Display.Sprite({
                                     id: "barGroup_" + h
                                 });
                                 me.barsSp.addChild(groupH);
@@ -333,7 +324,7 @@ define('chartx/chart/bar/3d/graphs',
                                 var _right = _left + itemW;
                                 var _top = (me.sort && me.sort == "desc") ? 0 : -me.h;
                                 var _bottom = _top + me.h;
-                                var _rectH = [[_left, _top, -100], [_right, _top, -100], [_right, _bottom, -100], [_left, _bottom, -100]];
+                                var _rectH = [[_left, _top, -100], [_right, _top, -100], [_right, _bottom, -100], [_right, _bottom, 0], [_left, _bottom, 0], [_left, _bottom, -100]];
 
                                 if (h <= preLen - 1) {
                                     //hoverRect = groupH.getChildById("bhr_" + h);
@@ -356,7 +347,8 @@ define('chartx/chart/bar/3d/graphs',
                                     //});
 
 
-                                    hoverRect = new Shapes.Polygon({
+                                    hoverRect = groupH.getChildById("bhr_polygon_" + h) ||
+                                        new Shapes.Polygon({
                                         id: "bhr_polygon_" + h,
                                         pointChkPriority: false,
                                         context: {
@@ -367,14 +359,14 @@ define('chartx/chart/bar/3d/graphs',
                                             globalAlpha: 0
                                         }
                                     });
-
+                                    hoverRect.context.pointList = _rectH;
 
                                     //toto:与back的深度一致
                                     //hoverRect.z = -100;
 
                                     groupH.addChild(hoverRect);
                                     hoverRect.hover(function (e) {
-                                        this.context.globalAlpha = 0.5;
+                                        this.context.globalAlpha = 0.2;
                                     }, function (e) {
                                         this.context.globalAlpha = 0;
                                     });
@@ -396,7 +388,8 @@ define('chartx/chart/bar/3d/graphs',
                             if (h <= preLen - 1) {
                                 txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
                             } else {
-                                txtGroupH = new Canvax.Display.Sprite({
+                                txtGroupH = me.txtsSp.getChildById("txtGroup_" + h) ||
+                                    new Canvax.Display.Sprite({
                                     id: "txtGroup_" + h
                                 });
                                 me.txtsSp.addChild(txtGroupH);
@@ -463,75 +456,29 @@ define('chartx/chart/bar/3d/graphs',
                             ;
 
                             var rectEl;
-                            if (h <= preLen - 1) {
-                                rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
-                                rectEl.context.fillStyle = fillStyle;
-                            } else {
+                            //if (h <= preLen - 1) {
+                            //    rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                            //    rectEl.context.fillStyle = fillStyle;
+                            //} else {
                                 //rectEl = new Rect({
                                 //    id: "bar_" + i + "_" + h + "_" + v,
                                 //    context: rectCxt
                                 //});
 
 
-                                //四边形 转换为 立方体
-
-                                var _left = rectCxt.x;
-                                var _right = _left + rectCxt.width;
-                                var _top = rectCxt.y;
-                                var _bottom = _top + rectCxt.height;
-                                var _depth = -50;
+                                //me._rectToCube(rectCxt,groupH);
 
 
-                                rectEl = new Canvax.Display.Sprite({
+                                rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v) ||
+                                    new Canvax.Display.Sprite({
                                     id: "bar_" + i + "_" + h + "_" + v
                                 });
 
-                                //前面
-                                var _rectH = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
-                                var frontFace = new Shapes.Polygon({
-                                    id: "bar_polygon_" + i + "_" + h + "_" + v,
-                                    pointChkPriority: false,
-                                    context: {
-                                        x: 0,
-                                        y: 0,
-                                        pointList: _rectH,
-                                        fillStyle: finalPos.fillStyle
-                                    }
-                                });
-
-                                //右侧
-                                var _rectH = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
-                                var rightFace = new Shapes.Polygon({
-                                    id: "bar_polygon_" + i + "_" + h + "_" + v,
-                                    pointChkPriority: false,
-                                    context: {
-                                        x: 0,
-                                        y: 0,
-                                        pointList: _rectH,
-                                        fillStyle: '#ff00cc'
-                                    }
-                                });
-
-                                //顶部
-                                var _rectH = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
-                                var topFace = new Shapes.Polygon({
-                                    id: "bar_polygon_" + i + "_" + h + "_" + v,
-                                    pointChkPriority: false,
-                                    context: {
-                                        x: 0,
-                                        y: 0,
-                                        pointList: _rectH,
-                                        fillStyle: "#00ffcc"
-                                    }
-                                });
-
-                                rectEl.addChild(frontFace);
-                                rectEl.addChild(rightFace);
-                                rectEl.addChild(topFace);
-
+                                //四边形 转换为 立方体
+                                me.drawCube(rectEl, rectCxt);
 
                                 groupH.addChild(rectEl);
-                            }
+                            //}
                             ;
 
                             rectEl.finalPos = finalPos;
@@ -703,6 +650,8 @@ define('chartx/chart/bar/3d/graphs',
                 this._projectionToScreen(this.sprite);
 
                 this._screenToLocal(this.sprite);
+
+                this._depthTest(this.sprite);
 
             },
             _updateInfoTextPos: function (el) {
@@ -1013,7 +962,17 @@ define('chartx/chart/bar/3d/graphs',
             },
             _localToScreen: function (sprite) {
 
-                sprite.__sprite = sprite.clone();
+                if (!sprite.__sprite) {
+                    sprite.__sprite = sprite.clone();
+                    sprite.__sprite.id = sprite.id;
+                } else {
+                    var id = sprite.__sprite.id;
+                    sprite = sprite.__sprite.clone();
+                    sprite.id = id;
+                    sprite.__sprite = sprite.clone();
+                    sprite.__sprite.id = id;
+                }
+
 
                 (function (_sprite, _rootSprite) {
                     var getLeaf = arguments.callee;
@@ -1168,7 +1127,252 @@ define('chartx/chart/bar/3d/graphs',
 
                     }
                 })(sprite, sprite);
+            },
+
+
+            drawCube: function (sprite, rectCxt) {
+
+                var me = this;
+
+                //四边形 转换为 立方体
+                var _left = rectCxt.x;
+                var _right = _left + rectCxt.width;
+                var _top = rectCxt.y;
+                var _bottom = _top + rectCxt.height;
+                var _depth = -1 * me.depth;
+
+
+                //绘制样式
+                var _strokeStyle = rectCxt.fillStyle;
+                var _frontFillStyle = rectCxt.fillStyle;
+                var _topFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, 0.1);
+                var _sideFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, -0.1);
+
+                //左面
+                var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
+                var leftFace = sprite.getChildById("polygon_left") ||
+                    me.drawFace("polygon_left", _pointList, _sideFillStyle, _strokeStyle);
+                leftFace.context.pointList = _pointList;
+
+                //前面
+                var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
+                var frontFace = sprite.getChildById("polygon_front") ||
+                    me.drawFace("polygon_front", _pointList, _frontFillStyle, _strokeStyle)
+                frontFace.context.pointList = _pointList;
+
+                //右侧
+                var _pointList = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
+                var rightFace = sprite.getChildById("polygon_right") ||
+                    me.drawFace("polygon_right", _pointList, _sideFillStyle, _strokeStyle)
+                rightFace.context.pointList = _pointList;
+
+                //顶部
+                var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
+                var topFace = sprite.getChildById("polygon_top") ||
+                    me.drawFace("polygon_top", _pointList, _topFillStyle, _strokeStyle)
+                topFace.context.pointList = _pointList;
+
+                sprite.addChild(leftFace);
+                sprite.addChild(frontFace);
+                sprite.addChild(rightFace);
+                sprite.addChild(topFace);
+
+
+            },
+            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle) {
+                var _polygon = new Shapes.Polygon({
+                    id: _id,
+                    pointChkPriority: false,
+                    context: {
+                        x: 0,
+                        y: 0,
+                        pointList: _pointList,
+                        strokeStyle: _strokeStyle,
+                        fillStyle: _fillStyle
+                    }
+                });
+                return _polygon;
+            },
+            _depthTest: function (sprite) {
+
+                (function (_sprite, _rootSprite) {
+                    var getLeaf = arguments.callee;
+                    if (_sprite.children && _sprite.children.length > 0) {
+                        _.each(_sprite.children, function (a, i) {
+                            getLeaf(a, _rootSprite);
+                        })
+                    } else {
+                        var _parentSprite = _sprite.parent;
+
+                        if (_sprite instanceof Shapes.Polygon && ~_parentSprite.id.indexOf('bar_')) {
+
+                            var _frontFace = null;
+                            var currFace = _sprite.context.pointList;
+                            _.each(_parentSprite.children, function (o, i) {
+                                if (~o.id.indexOf('front')) {
+                                    _frontFace = o.context.pointList;
+                                }
+                            });
+
+                            //判断该面的Z值为负数的点是否在前面的范围内
+                            if (~_sprite.id.indexOf('left') || ~_sprite.id.indexOf('right')) {
+                                var isCover = false;
+
+
+                                var p1 = Vector3.fromValues(currFace[1][0], currFace[1][1], 0);
+                                if (~_sprite.id.indexOf('left')) {
+                                    var p2 = Vector3.fromValues(_frontFace[0][0], _frontFace[0][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[3][0], _frontFace[3][1], 0);
+                                }
+                                if (~_sprite.id.indexOf('right')) {
+                                    var p2 = Vector3.fromValues(_frontFace[1][0], _frontFace[1][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[2][0], _frontFace[2][1], 0);
+                                }
+
+
+                                var _v1 = Vector3.create();
+                                var _v2 = Vector3.create();
+                                var _vc = Vector3.create();
+                                //顶面指向Z轴负半轴的向量
+                                Vector3.sub(_v1, p1, p2);
+                                Vector3.normalize(_v1, _v1);
+                                //前面指向Y轴正半轴的向量
+                                Vector3.sub(_v2, p2, p3);
+                                Vector3.normalize(_v2, _v2);
+
+                                //二维空间中,XY的叉积指向Z轴的结果
+                                Vector3.cross(_vc, _v1, _v2);
+
+                                //根据不同的侧面判断Z的大小,取得是否在Y轴的左侧或右侧
+                                if (~_sprite.id.indexOf('left') && _vc[2] < 0) {
+                                    isCover = true;
+                                } else if (~_sprite.id.indexOf('right') && _vc[2] > 0) {
+                                    isCover = true;
+                                }
+
+                                if (isCover) {
+                                    _sprite.context.visible = false;
+                                }else{
+                                    _sprite.context.visible = true;
+                                }
+                            }
+
+                        }
+
+                    }
+                })(sprite, sprite);
+
+
             }
+
+//_rectToCube: function (rect, _rootSprite) {
+//    var me = this;
+//    var calculatePoints = function (baseCube, transMatrix) {
+//        var point_count = baseCube.length / 3;
+//
+//        var point = [];
+//        var one = [];
+//        var out = [];
+//        for (var i = 0; i < point_count; i++) {
+//            one = [0, 0, 0, 1];
+//            out = [0, 0, 0, 1];
+//            one[0] = baseCube[i * 3];
+//            one[1] = baseCube[i * 3 + 1];
+//            one[2] = baseCube[i * 3 + 2];
+//            Vector3.transformMat4(out, one, transMatrix);
+//            point[i * 3] = out[0];
+//            point[i * 3 + 1] = out[1];
+//            point[i * 3 + 2] = out[2];
+//
+//        }
+//        return point;
+//    };
+//
+//    var projectionToPoints = function (baseCube) {
+//        var point_count = baseCube.length / 3;
+//
+//        var point = [];
+//        var one = [];
+//        var out = [];
+//        for (var i = 0; i < point_count; i++) {
+//            one = [0, 0, 0, 1];
+//            out = [0, 0, 0, 1];
+//            one[0] = baseCube[i * 3];
+//            one[1] = baseCube[i * 3 + 1];
+//            one[2] = baseCube[i * 3 + 2];
+//            Vector3.transformMat4(out, one, me.root._viewProjectMatrix);
+//            point[i * 3] = (( out[0] + 1 ) * me.root.width ) / 2.0;
+//            point[i * 3 + 1] = ( ( out[1] - 1 ) * me.root.height ) / (-2.0);
+//            point[i * 3 + 2] = out[2];
+//
+//        }
+//        return point;
+//    };
+//
+//
+//    var modelMatrix = Matrix.create();
+//
+//    //单位柱子
+//    var baseCube = [
+//        -0.5, 1, 0,
+//        0.5, 1, 0,
+//        0.5, 0, 0,
+//        -0.5, 0, 0,
+//
+//        -0.5, 1, -1,
+//        0.5, 1, -1,
+//        0.5, 0, -1,
+//        -0.5, 0, -1
+//    ];
+//
+//    var _width = rect.width;
+//    var _height = rect.height;
+//    var _depth = -1 * 50;
+//
+//    Matrix.scale(modelMatrix, modelMatrix, Vector3.fromValues(_width, _height, _depth));
+//
+//    var pointList = calculatePoints(baseCube, modelMatrix);
+//
+//    //to local to screen
+//    var _pos = _rootSprite.localToGlobal({
+//        x: rect.x,
+//        y: rect.y
+//    });
+//
+//    //screen to world
+//
+//    _pos = {
+//        x: _pos.x - this.root.width * 0.5,
+//        y: this.root.height * 0.5 - _pos.y
+//    };
+//
+//    //调整柱子的每个点到世界坐标系下
+//
+//    modelMatrix = Matrix.create();
+//
+//    Matrix.translate(modelMatrix, modelMatrix, Vector3.fromValues(_pos.x, _pos.y, 0));
+//
+//    pointList = calculatePoints(baseCube, modelMatrix);
+//
+//
+//    //world project to screen
+//    pointList = projectionToPoints(pointList);
+//
+//    //screen to local
+//    var arr = [];
+//    for (var i = 0; i < pointList.length; i = i + 3) {
+//        _pos = _rootSprite.globalToLocal({
+//            x: pointList[i],
+//            y: pointList[i + 1]
+//        });
+//        arr.push([_pos.x, _pos.y]);
+//    }
+//    console.log(arr);
+//    return arr;
+//
+//}
+
+
         };
         return Graphs;
     });

@@ -17,6 +17,8 @@ define("chartx/chart/bar/3d",
         var Vector3 = glMatrix.vec3;
         var Vector4 = glMatrix.vec4;
         var Matrix = glMatrix.mat4;
+        var Quaternion=glMatrix.quat;
+
 
         var Canvax = Chart.Canvax;
         var Bar3d = Chart.extend({
@@ -71,20 +73,63 @@ define("chartx/chart/bar/3d",
                 this._projectMatrix = Matrix.create();
                 this._viewMatrix = Matrix.create();
                 this._viewProjectMatrix = Matrix.create();
+                //初始化投影矩阵
+                this._initProjection();
+                //初始化相机
+                this._initCamera();
 
+                //var me = this;
+                //var testRotate=function(){
+                //    eye[0] = eye[0] - 1;
+                //    eye[1] = eye[1] - 0.5;
+                //    this._viewMatrix = Matrix.create();
+                //    this._viewProjectMatrix = Matrix.create();
+                //    Matrix.lookAt(me._viewMatrix, eye, center, up);
+                //    Matrix.multiply(me._viewProjectMatrix, me._projectMatrix, me._viewMatrix);
+                //    // me.stage.removeAllChildren();
+                //    me._startDraw();
+                //    if (eye[0] < 0) {
+                //        window.clearInterval(_timer);
+                //       return;
+                //    }
+                //    window.setTimeout(testRotate);
+                //}
+                //
+                //var _timer = window.setTimeout(function () {
+                //    testRotate();
+                //}, 1000);
+
+
+            },
+            _initProjection:function(){
                 //透视矩阵
-
                 var fovy = 45 * Math.PI / 180;
                 var aspect = this.width / this.height;
                 var near = 0.1;
                 var far = 1000;
                 Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
 
-
-                //相机初始化
+            },
+            _initCamera: function (eye) {
                 var center = [0, 0, 0];
                 var up = [0, 1, 0];
-                var eye = [350, 350, 350];
+                eye = eye || [0, 0, 600];
+
+                if(arguments.length===0){
+                    var rotation = Quaternion.create();
+                    var m=Matrix.create();
+                    var out=Vector3.create();
+
+                    //Quaternion.setAxisAngle(rotation, [0,1,0], this.value*Math.PI/180);
+                    Quaternion.rotateY(rotation,rotation,25*Math.PI/180);
+                    Quaternion.rotateX(rotation,rotation,-25*Math.PI/180);
+
+                    Matrix.fromQuat(m,rotation);
+                    Vector3.transformMat4(eye, eye, m);
+
+                }
+
+
                 Matrix.lookAt(this._viewMatrix, eye, center, up);
                 Matrix.multiply(this._viewProjectMatrix, this._projectMatrix, this._viewMatrix);
             },
@@ -505,7 +550,6 @@ define("chartx/chart/bar/3d",
                     this._yAxis.resetWidth(this._xAxis.yAxisW);
                     _yAxisW = this._xAxis.yAxisW;
                 }
-                ;
 
                 var _graphsH = this._yAxis.yGraphsHeight;
                 //绘制背景网格
@@ -1060,6 +1104,55 @@ define("chartx/chart/bar/3d",
                     me._setXaxisYaxisToTipsInfo(e);
                     me.fire(e.type, e);
                 });
+
+
+                //测试旋转
+                var domY=document.getElementById('yAxis');
+                var domX=document.getElementById('xAxis');
+
+                var eye=[0,0,600];
+
+                domY.onchange=function(){
+                    document.getElementById('yAxis_value').innerHTML=this.value;
+
+                    var rotation = Quaternion.create();
+                    var m=Matrix.create();
+                    var out=Vector3.create();
+
+                    //Quaternion.setAxisAngle(rotation, [0,1,0], this.value*Math.PI/180);
+
+                    Quaternion.rotateY(rotation,rotation,this.value*Math.PI/180);
+
+                    Quaternion.rotateX(rotation,rotation,-domX.value*Math.PI/180);
+
+                    Matrix.fromQuat(m,rotation);
+                    Vector3.transformMat4(out, eye, m);
+
+                    me._initCamera(out);
+                    me._startDraw();
+
+                };
+
+                domX.onchange=function() {
+                    document.getElementById('xAxis_value').innerHTML = this.value;
+
+                    var rotation = Quaternion.create();
+                    var m=Matrix.create();
+                    var out=Vector3.create();
+
+                    Quaternion.rotateY(rotation,rotation,domY.value*Math.PI/180);
+                    Quaternion.rotateX(rotation,rotation,-this.value*Math.PI/180);
+
+                    Matrix.fromQuat(m,rotation);
+                    Vector3.transformMat4(out, eye, m);
+
+                    me._initCamera(out);
+                    me._startDraw();
+                }
+
+
+
+
             },
             //projection to screen
             //todo:四次迭代后面优化合并
@@ -1139,7 +1232,16 @@ define("chartx/chart/bar/3d",
             },
             _localToScreen: function (sprite) {
 
-                sprite.__sprite = sprite.clone();
+                if (!sprite.__sprite) {
+                    sprite.__sprite = sprite.clone();
+                    sprite.__sprite.id = sprite.id;
+                } else {
+                    var id = sprite.__sprite.id;
+                    sprite = sprite.__sprite.clone();
+                    sprite.id = id;
+                    sprite.__sprite = sprite.clone();
+                    sprite.__sprite.id = id;
+                }
 
                 (function (_sprite, _rootSprite) {
                     var getLeaf = arguments.callee;

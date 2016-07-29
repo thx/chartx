@@ -43,7 +43,7 @@ var data= [
 var options = {
     type:"3d",
     yAxis : {
-        field : [ "click"],
+        field : ["uv","pv","click"],
         //enabled : false
     },
     xAxis : {
@@ -71,7 +71,12 @@ window.bar = bar;
             <div  class="test-c">
                 <div id="canvasTest" style='width:700px;height:300px;'></div>
             </div>
-
+                <div style="margin:30px">
+                    <div><label>Y轴旋转: <span id="yAxis_value">15</span></label><input id="yAxis" type="range"  min="15" max="45" value="15"  style="line-height:1;width:300px "></div>
+                </div>
+                <div style="margin:30px">
+                    <div><label>X轴旋转: <span id="xAxis_value">15</span></label><input id="xAxis" type="range" min="15" max="45" value="15" style="line-height:1;width:300px "></div>
+                </div>
             </div>
         </td>
     </tr>

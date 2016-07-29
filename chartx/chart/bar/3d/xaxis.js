@@ -67,7 +67,7 @@ define('chartx/chart/bar/3d/xaxis',
 
             this.isH = false; //是否为横向转向的x轴
 
-            this.animation = true;
+            this.animation = false;
             this.resize = false;
 
             this.init(opt, data);
@@ -180,7 +180,6 @@ define('chartx/chart/bar/3d/xaxis',
                         this._layout();
                     }
                 }
-
                 this.root._localToScreen(this.sprite);
 
                 this.root._screenToWorld(this.sprite);
@@ -196,7 +195,10 @@ define('chartx/chart/bar/3d/xaxis',
             _getLabel: function () {
                 if (this.label && this.label != "") {
 
-                    this._label = new Canvax.Display.Text(this.label, {
+                    this._label = this.sprite.getChildById("xAxis_label_" + this.label) ||
+
+                        new Canvax.Display.Text(this.label, {
+                            id: "xAxis_label_" + this.label,
                         context: {
                             fontSize: this.text.fontSize,
                             textAlign: this.isH ? "center" : "left",
@@ -327,7 +329,9 @@ define('chartx/chart/bar/3d/xaxis',
                 var delay = Math.min(1000 / arr.length, 25);
 
                 for (var a = 0, al = arr.length; a < al; a++) {
-                    var xNode = new Canvax.Display.Sprite({
+
+                    var xNode = this.sprite.getChildById("xNode" + a) ||
+                        new Canvax.Display.Sprite({
                         id: "xNode" + a
                     });
 
@@ -336,30 +340,35 @@ define('chartx/chart/bar/3d/xaxis',
                         y = this.disY + this.line.height + this.dis
 
                     //文字
-                    var txt = new Canvax.Display.Text((o.layoutText || o.content), {
-                        id: "xAxis_txt_" + CanvaxBase.getUID(),
+                    var txt = xNode.getChildById("xAxis_txt_" + a) ||
+                        new Canvax.Display.Text((o.layoutText || o.content), {
+                            id: "xAxis_txt_" + a,
                         context: {
                             x: x,
-                            y: y + 20,
+                            y: y,
                             fillStyle: this.text.fillStyle,
                             fontSize: this.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
                             textAlign: this.text.textAlign || (!!this.text.rotation ? "right" : "center"),
                             textBaseline: !!this.text.rotation ? "middle" : "top",
-                            globalAlpha: 0
+                            globalAlpha: 1
                         }
                     });
+
+                    txt.context.x = x;
+                    txt.context.y = y;
                     xNode.addChild(txt);
 
                     if (!!this.text.rotation && this.text.rotation != 90) {
                         txt.context.x += 5;
                         txt.context.y += 3;
                     }
-                    ;
 
                     if (this.line.enabled) {
                         //线条
-                        var line = new Line({
+                        var line = xNode.getChildById("xAxis_line_" + a) ||
+                            new Line({
+                                id: "xAxis_line_" + a,
                             context: {
                                 x: x,
                                 y: this.disY,
@@ -369,6 +378,12 @@ define('chartx/chart/bar/3d/xaxis',
                                 strokeStyle: this.line.strokeStyle
                             }
                         });
+
+                        line.context.x = x;
+                        line.context.y = this.disY;
+                        line.xEnd = 0;
+                        line.End = this.line.height + this.disY;
+
                         xNode.addChild(line);
                     }
                     ;
@@ -383,20 +398,20 @@ define('chartx/chart/bar/3d/xaxis',
 
                     this.sprite.addChild(xNode);
 
-                    if (false && this.animation && !this.resize) {
-                        txt.animate({
-                            globalAlpha: 1,
-                            y: txt.context.y - 20
-                        }, {
-                            duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * delay,
-                            id: txt.id
-                        });
-                    } else {
-                        txt.context.y = txt.context.y - 20;
-                        txt.context.globalAlpha = 1;
-                    }
+                    //if (false && this.animation && !this.resize) {
+                    //    txt.animate({
+                    //        globalAlpha: 1,
+                    //        y: txt.context.y - 20
+                    //    }, {
+                    //        duration: 500,
+                    //        easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                    //        delay: a * delay,
+                    //        id: txt.id
+                    //    });
+                    //} else {
+                    //        txt.context.y = txt.context.y - 20;
+                    //        txt.context.globalAlpha = 1;
+                    //}
                     ;
                 }
                 ;
