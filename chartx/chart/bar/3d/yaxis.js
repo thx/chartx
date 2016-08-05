@@ -165,16 +165,6 @@ define('chartx/chart/bar/3d/yaxis',
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
 
-                //基本变换过程为:local ===> screen ===> world ===> projection
-                //             ===> screen ===> local
-
-                this.root._localToScreen(this.sprite);
-
-                this.root._screenToWorld(this.sprite);
-
-                this.root._projectionToScreen(this.sprite);
-
-                this.root._screenToLocal(this.sprite);
 
                 this.resize = false;
             },
@@ -340,8 +330,6 @@ define('chartx/chart/bar/3d/yaxis',
                         new Canvax.Display.Text(content, {
                             id: "yAxis_txt_" + a,
                         context: {
-                            x: x + (self.place == "left" ? -5 : 5),
-                            y: posy + 20,
                             fillStyle: self.text.fillStyle,
                             fontSize: self.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
@@ -350,6 +338,8 @@ define('chartx/chart/bar/3d/yaxis',
                             globalAlpha: 0
                         }
                     });
+                    txt.context.x = x + (self.place == "left" ? -5 : 5);
+                    txt.context.y = posy + 20;
                     yNode.addChild(txt);
 
                     self.maxW = Math.max(self.maxW, txt.getTextWidth());
@@ -363,14 +353,14 @@ define('chartx/chart/bar/3d/yaxis',
                             new Line({
                                 id: "yAxis_line_" + a,
                             context: {
-                                x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
-                                y: y,
-                                xEnd: self.line.width,
-                                yEnd: 0,
                                 lineWidth: self.line.lineWidth,
                                 strokeStyle: self.line.strokeStyle
                             }
                         });
+                        line.context.x = 0 + (self.place == "left" ? +1 : -1) * self.dis - 2;
+                        line.context.y = y;
+                        line.context.xEnd = self.line.width;
+                        line.context.yEnd = 0;
                         yNode.addChild(line);
                     }
                     ;

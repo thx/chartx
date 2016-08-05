@@ -8,9 +8,10 @@ define('chartx/chart/bar/3d/graphs',
         "canvax/shape/BrokenLine",
         "canvax/shape/Shapes",
         "chartx/utils/math3d/gl-matrix",
-        "chartx/utils/colorformat"
+        "chartx/utils/colorformat",
+        "canvax/animation/AnimationFrame"
     ],
-    function (Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine, Shapes, glMatrix, ColorFormat) {
+    function (Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine, Shapes, glMatrix, ColorFormat, AnimationFrame) {
 
         var Vector3 = glMatrix.vec3;
         var Vector4 = glMatrix.vec4;
@@ -18,7 +19,8 @@ define('chartx/chart/bar/3d/graphs',
 
         var Graphs = function (root) {
 
-            var opt = this.graphs;
+
+            var opt = root.graphs;
             this.root = root;
             this.data = [];
             this.w = 0;
@@ -28,7 +30,7 @@ define('chartx/chart/bar/3d/graphs',
             this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
             this._setyAxisFieldsMap();
 
-            this.animation = false;
+            this.animation = true;
 
             this.pos = {
                 x: 0,
@@ -324,27 +326,13 @@ define('chartx/chart/bar/3d/graphs',
                                 var _right = _left + itemW;
                                 var _top = (me.sort && me.sort == "desc") ? 0 : -me.h;
                                 var _bottom = _top + me.h;
-                                var _rectH = [[_left, _top, -100], [_right, _top, -100], [_right, _bottom, -100], [_right, _bottom, 0], [_left, _bottom, 0], [_left, _bottom, -100]];
+                                var _depth = me.root._back._depth;
+                                var _rectH = [[_left, _top, _depth], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0], [_left, _bottom, 0], [_left, _bottom, _depth]];
 
                                 if (h <= preLen - 1) {
-                                    //hoverRect = groupH.getChildById("bhr_" + h);
-                                    //hoverRect.context.width = itemW;
-                                    //hoverRect.context.x = itemW * h;
                                     hoverRect = groupH.getChildById("bhr_polygon_" + h);
                                     hoverRect.context.pointList = _rectH
                                 } else {
-                                    //hoverRect = new Rect({
-                                    //    id: "bhr_" + h,
-                                    //    pointChkPriority: false,
-                                    //    context: {
-                                    //        x: itemW * h,
-                                    //        y: (me.sort && me.sort == "desc") ? 0 : -me.h,
-                                    //        width: itemW,
-                                    //        height: me.h,
-                                    //        fillStyle: "#ccc",
-                                    //        globalAlpha: 0
-                                    //    }
-                                    //});
 
 
                                     hoverRect = groupH.getChildById("bhr_polygon_" + h) ||
@@ -354,7 +342,7 @@ define('chartx/chart/bar/3d/graphs',
                                         context: {
                                             x: 0,
                                             y: 0,
-                                            pointList: _rectH,
+                                            pointList:_rectH,
                                             fillStyle: "#ccc",
                                             globalAlpha: 0
                                         }
@@ -366,7 +354,7 @@ define('chartx/chart/bar/3d/graphs',
 
                                     groupH.addChild(hoverRect);
                                     hoverRect.hover(function (e) {
-                                        this.context.globalAlpha = 0.2;
+                                        this.context.globalAlpha = 0.5;
                                     }, function (e) {
                                         this.context.globalAlpha = 0;
                                     });
@@ -437,7 +425,7 @@ define('chartx/chart/bar/3d/graphs',
                                 x: finalPos.x,
                                 y: 0,
                                 width: finalPos.width,
-                                height: finalPos.height,
+                                height: 0,
                                 fillStyle: finalPos.fillStyle,
                                 scaleY: 0
                             };
@@ -452,24 +440,11 @@ define('chartx/chart/bar/3d/graphs',
                             if (!me.animation) {
                                 delete rectCxt.scaleY;
                                 rectCxt.y = finalPos.y;
+                                rectCxt.height = finalPos.height;
                             }
                             ;
 
-                            var rectEl;
-                            //if (h <= preLen - 1) {
-                            //    rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
-                            //    rectEl.context.fillStyle = fillStyle;
-                            //} else {
-                                //rectEl = new Rect({
-                                //    id: "bar_" + i + "_" + h + "_" + v,
-                                //    context: rectCxt
-                                //});
-
-
-                                //me._rectToCube(rectCxt,groupH);
-
-
-                                rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v) ||
+                            var rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v) ||
                                     new Canvax.Display.Sprite({
                                     id: "bar_" + i + "_" + h + "_" + v
                                 });
@@ -478,7 +453,7 @@ define('chartx/chart/bar/3d/graphs',
                                 me.drawCube(rectEl, rectCxt);
 
                                 groupH.addChild(rectEl);
-                            //}
+
                             ;
 
                             rectEl.finalPos = finalPos;
@@ -643,15 +618,6 @@ define('chartx/chart/bar/3d/graphs',
                     this.sprite.context.y -= this.h;
                 }
 
-                this._localToScreen(this.sprite);
-
-                this._screenToWorld(this.sprite);
-
-                this._projectionToScreen(this.sprite);
-
-                this._screenToLocal(this.sprite);
-
-                this._depthTest(this.sprite);
 
             },
             _updateInfoTextPos: function (el) {
@@ -704,7 +670,7 @@ define('chartx/chart/bar/3d/graphs',
                 ;
 
                 var options = _.extend({
-                    delay: Math.min(1000 / this._barsLen, 80),
+                    delay: Math.min(1000 / this._barsLen, 200),
                     easing: "Back.Out",
                     duration: 500
                 }, opt);
@@ -721,7 +687,7 @@ define('chartx/chart/bar/3d/graphs',
                             var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
                             //console.log("finalPos"+bar.finalPos.y)
 
-                            if (true || options.duration == 0) {
+                            if (options.duration == 0) {
                                 bar.context.scaleY = sy;
                                 bar.context.y = sy * sy * bar.finalPos.y;
                                 bar.context.x = bar.finalPos.x;
@@ -732,31 +698,45 @@ define('chartx/chart/bar/3d/graphs',
                                     AnimationFrame.destroyTween(bar._tweenObj);
                                 }
 
-                                bar._tweenObj = bar.animate({
-                                    scaleY: sy,
-                                    y: sy * bar.finalPos.y,
-                                    x: bar.finalPos.x,
-                                    width: bar.finalPos.width,
-                                    height: bar.finalPos.height
-                                }, {
-                                    duration: options.duration,
-                                    easing: options.easing,
-                                    delay: h * options.delay,
-                                    onUpdate: function (arg) {
+                                var options_Animation = {
+                                    from: {
+                                        y: 0,
+                                        height: 0
+                                    },
+                                    to: {
+                                        y: bar.finalPos.y,
+                                        height: bar.finalPos.height
+                                    },
+                                    onUpdate: (function (bar, me) {
+                                        var _sprite = bar;
+                                        return function (arg) {
+                                            me.drawCube(_sprite, {
+                                                x: _sprite.finalPos.x,
+                                                y: this.y,
+                                                width: _sprite.finalPos.width,
+                                                height: this.height
+                                            });
+
+                                            me.root._to3d(_sprite);
+
+                                        };
+                                    }(bar, self)),
+
+                                    onComplete: function () {
 
                                     },
-                                    onComplete: function (arg) {
-                                        if (arg.width < 3) {
-                                            this.context.radius = 0;
-                                        }
-                                    },
-                                    id: bar.id
-                                });
+                                    id: bar.id,
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    delay: h * options.delay
+                                }
+
+                                bar._tweenObj = AnimationFrame.registTween(options_Animation);
+
                             }
                             ;
 
                         }
-                        ;
 
                         //txt grow
                         if (self.text.enabled) {
@@ -864,271 +844,6 @@ define('chartx/chart/bar/3d/graphs',
                 });
                 return arr;
             },
-            //projection to screen
-            //todo:四次迭代后面优化合并
-            _projectionToScreen: function (sprite) {
-
-                var me = this;
-
-                var calculatePoints = function (baseCube) {
-                    var point_count = baseCube.length / 3;
-
-                    var point = [];
-                    var one = [];
-                    var out = [];
-                    for (var i = 0; i < point_count; i++) {
-                        one = [0, 0, 0, 1];
-                        out = [0, 0, 0, 1];
-                        one[0] = baseCube[i * 3];
-                        one[1] = baseCube[i * 3 + 1];
-                        one[2] = baseCube[i * 3 + 2];
-                        Vector3.transformMat4(out, one, me.root._viewProjectMatrix);
-                        point[i * 3] = (( out[0] + 1 ) * me.root.width ) / 2.0;
-                        point[i * 3 + 1] = ( ( out[1] - 1 ) * me.root.height ) / (-2.0);
-                        point[i * 3 + 2] = out[2];
-
-                    }
-                    return point;
-                };
-
-
-                (function (_sprite, _width, _height) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a);
-                        })
-                    } else {
-
-                        if (_sprite instanceof Shapes.Polygon) {
-
-                            _sprite.projectionPosition = [];
-
-                            _.each(_sprite.worldPosition, function (o, i) {
-                                var _arr = calculatePoints([
-                                    o.x,
-                                    o.y,
-                                    (_sprite.context.pointList[i][2] || 0)]);
-
-                                _sprite.projectionPosition.push(
-                                    {
-                                        x: _arr[0],
-                                        y: _arr[1]
-                                    }
-                                )
-                            })
-
-
-                        } else if (_sprite instanceof Shapes.Line) {
-
-
-                            var _z = [
-                                _sprite.zStart,
-                                _sprite.zEnd
-                            ];
-
-
-                            _sprite.projectionPosition = [];
-                            for (var i = 0; i < _sprite.worldPosition.length; i++) {
-                                var arr = calculatePoints([
-                                    _sprite.worldPosition[i].x,
-                                    _sprite.worldPosition[i].y,
-                                    (_z[i] || 0)]);
-
-                                _sprite.projectionPosition.push(
-                                    {
-                                        x: arr[0],
-                                        y: arr[1]
-                                    }
-                                )
-                            }
-
-
-                        } else {
-
-
-                            var arr = calculatePoints([
-                                _sprite.worldPosition.x,
-                                _sprite.worldPosition.y,
-                                0]);
-                            _sprite.projectionPosition = {
-                                x: arr[0],
-                                y: arr[1]
-                            }
-                        }
-                    }
-                })(sprite);
-
-            },
-            _localToScreen: function (sprite) {
-
-                if (!sprite.__sprite) {
-                    sprite.__sprite = sprite.clone();
-                    sprite.__sprite.id = sprite.id;
-                } else {
-                    var id = sprite.__sprite.id;
-                    sprite = sprite.__sprite.clone();
-                    sprite.id = id;
-                    sprite.__sprite = sprite.clone();
-                    sprite.__sprite.id = id;
-                }
-
-
-                (function (_sprite, _rootSprite) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a, _rootSprite);
-                        })
-                    } else {
-
-                        if (_sprite instanceof Shapes.Polygon) {
-                            _sprite.globalPosition = [];
-
-                            _.each(_sprite.context.pointList, function (o, i) {
-                                var _pos = _rootSprite.localToGlobal({
-                                    x: o[0],
-                                    y: o[1]
-                                });
-                                _sprite.globalPosition.push(_pos);
-                            });
-                        } else if (_sprite instanceof Shapes.Line) {
-
-                            var _start = _rootSprite.localToGlobal({
-                                x: _sprite.context.xStart + _sprite.context.x,
-                                y: _sprite.context.yStart + _sprite.context.y
-                            });
-
-                            var _end = _rootSprite.localToGlobal({
-                                x: _sprite.context.xEnd + _sprite.context.x,
-                                y: _sprite.context.yEnd + _sprite.context.y
-                            });
-
-
-                            _sprite.globalPosition = [_start, _end];
-
-                        } else {
-                            _sprite.globalPosition = _rootSprite.localToGlobal({
-                                x: _sprite.context.x,
-                                y: _sprite.context.y
-                            });
-                        }
-
-                    }
-                })(sprite, sprite);
-
-            },
-            _screenToWorld: function (sprite) {
-
-                (function (_sprite, _width, _height) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a, _width, _height);
-                        })
-                    } else {
-                        if (_sprite instanceof Shapes.Polygon) {
-
-                            _sprite.worldPosition = [];
-
-
-                            _.each(_sprite.globalPosition, function (o, i) {
-                                var _pos = {
-                                    x: o.x - _width * 0.5,
-                                    y: _height * 0.5 - o.y
-                                };
-                                _sprite.worldPosition.push(_pos);
-                            })
-
-
-                        } else if (_sprite instanceof Shapes.Line) {
-
-
-                            var _start = {
-                                x: _sprite.globalPosition[0].x - _width * 0.5,
-                                y: _height * 0.5 - _sprite.globalPosition[0].y
-                            };
-
-                            var _end = {
-                                x: _sprite.globalPosition[1].x - _width * 0.5,
-                                y: _height * 0.5 - _sprite.globalPosition[1].y
-                            };
-
-                            _sprite.worldPosition = [_start, _end];
-
-                        } else {
-
-                            _sprite.worldPosition = {
-                                x: _sprite.globalPosition.x - _width * 0.5,
-                                y: _height * 0.5 - _sprite.globalPosition.y
-                            };
-                        }
-                    }
-                })(sprite, this.root.width, this.root.height);
-
-
-            },
-            _screenToLocal: function (sprite) {
-
-                (function (_sprite, _rootSprite) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a, _rootSprite);
-                        })
-                    } else {
-
-                        if (_sprite instanceof Shapes.Polygon) {
-
-                            var _pointList = [];
-
-                            _.each(_sprite.projectionPosition, function (o, i) {
-                                var _pos = _rootSprite.globalToLocal({
-                                    x: o.x,
-                                    y: o.y
-                                });
-                                _pointList.push([
-                                    _pos.x,
-                                    _pos.y
-                                ]);
-                            });
-                            _sprite.context.pointList = _pointList;
-
-                        } else if (_sprite instanceof Shapes.Line) {
-
-                            var _start = _rootSprite.globalToLocal({
-                                x: _sprite.projectionPosition[0].x,
-                                y: _sprite.projectionPosition[0].y
-                            });
-
-                            var _end = _rootSprite.globalToLocal({
-                                x: _sprite.projectionPosition[1].x,
-                                y: _sprite.projectionPosition[1].y
-                            });
-
-                            _sprite.context.xStart = _start.x;
-                            _sprite.context.yStart = _start.y;
-
-                            _sprite.context.xEnd = _end.x;
-                            _sprite.context.yEnd = _end.y;
-
-                            _sprite.context.x = 0;
-                            _sprite.context.y = 0;
-
-
-                        } else {
-                            var pos = _rootSprite.globalToLocal({
-                                x: _sprite.projectionPosition.x,
-                                y: _sprite.projectionPosition.y
-                            })
-                            _sprite.context.x = pos.x;
-                            _sprite.context.y = pos.y;
-                        }
-
-                    }
-                })(sprite, sprite);
-            },
-
 
             drawCube: function (sprite, rectCxt) {
 
@@ -1150,27 +865,21 @@ define('chartx/chart/bar/3d/graphs',
 
                 //左面
                 var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
-                var leftFace = sprite.getChildById("polygon_left") ||
-                    me.drawFace("polygon_left", _pointList, _sideFillStyle, _strokeStyle);
-                leftFace.context.pointList = _pointList;
+                var leftFace = me.drawFace("polygon_left", _pointList, _sideFillStyle, _strokeStyle, sprite);
 
                 //前面
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
-                var frontFace = sprite.getChildById("polygon_front") ||
-                    me.drawFace("polygon_front", _pointList, _frontFillStyle, _strokeStyle)
-                frontFace.context.pointList = _pointList;
+                var frontFace = me.drawFace("polygon_front", _pointList, _frontFillStyle, _strokeStyle, sprite);
 
                 //右侧
                 var _pointList = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
-                var rightFace = sprite.getChildById("polygon_right") ||
-                    me.drawFace("polygon_right", _pointList, _sideFillStyle, _strokeStyle)
-                rightFace.context.pointList = _pointList;
+                var rightFace = me.drawFace("polygon_right", _pointList, _sideFillStyle, _strokeStyle, sprite);
+
 
                 //顶部
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
-                var topFace = sprite.getChildById("polygon_top") ||
-                    me.drawFace("polygon_top", _pointList, _topFillStyle, _strokeStyle)
-                topFace.context.pointList = _pointList;
+                var topFace = me.drawFace("polygon_top", _pointList, _topFillStyle, _strokeStyle, sprite);
+
 
                 sprite.addChild(leftFace);
                 sprite.addChild(frontFace);
@@ -1179,27 +888,31 @@ define('chartx/chart/bar/3d/graphs',
 
 
             },
-            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle) {
-                var _polygon = new Shapes.Polygon({
+            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle, sprite) {
+                var _polygon = sprite.getChildById(_id) ||
+                    new Shapes.Polygon({
                     id: _id,
                     pointChkPriority: false,
                     context: {
-                        x: 0,
-                        y: 0,
                         pointList: _pointList,
                         strokeStyle: _strokeStyle,
                         fillStyle: _fillStyle
                     }
                 });
+
+                _polygon.context.pointList = _pointList;
+                _polygon.context.x = 0;
+                _polygon.context.y = 0;
+
                 return _polygon;
             },
             _depthTest: function (sprite) {
 
-                (function (_sprite, _rootSprite) {
+                (function (_sprite) {
                     var getLeaf = arguments.callee;
                     if (_sprite.children && _sprite.children.length > 0) {
                         _.each(_sprite.children, function (a, i) {
-                            getLeaf(a, _rootSprite);
+                            getLeaf(a);
                         })
                     } else {
                         var _parentSprite = _sprite.parent;
@@ -1260,119 +973,9 @@ define('chartx/chart/bar/3d/graphs',
                         }
 
                     }
-                })(sprite, sprite);
-
+                })(sprite);
 
             }
-
-//_rectToCube: function (rect, _rootSprite) {
-//    var me = this;
-//    var calculatePoints = function (baseCube, transMatrix) {
-//        var point_count = baseCube.length / 3;
-//
-//        var point = [];
-//        var one = [];
-//        var out = [];
-//        for (var i = 0; i < point_count; i++) {
-//            one = [0, 0, 0, 1];
-//            out = [0, 0, 0, 1];
-//            one[0] = baseCube[i * 3];
-//            one[1] = baseCube[i * 3 + 1];
-//            one[2] = baseCube[i * 3 + 2];
-//            Vector3.transformMat4(out, one, transMatrix);
-//            point[i * 3] = out[0];
-//            point[i * 3 + 1] = out[1];
-//            point[i * 3 + 2] = out[2];
-//
-//        }
-//        return point;
-//    };
-//
-//    var projectionToPoints = function (baseCube) {
-//        var point_count = baseCube.length / 3;
-//
-//        var point = [];
-//        var one = [];
-//        var out = [];
-//        for (var i = 0; i < point_count; i++) {
-//            one = [0, 0, 0, 1];
-//            out = [0, 0, 0, 1];
-//            one[0] = baseCube[i * 3];
-//            one[1] = baseCube[i * 3 + 1];
-//            one[2] = baseCube[i * 3 + 2];
-//            Vector3.transformMat4(out, one, me.root._viewProjectMatrix);
-//            point[i * 3] = (( out[0] + 1 ) * me.root.width ) / 2.0;
-//            point[i * 3 + 1] = ( ( out[1] - 1 ) * me.root.height ) / (-2.0);
-//            point[i * 3 + 2] = out[2];
-//
-//        }
-//        return point;
-//    };
-//
-//
-//    var modelMatrix = Matrix.create();
-//
-//    //单位柱子
-//    var baseCube = [
-//        -0.5, 1, 0,
-//        0.5, 1, 0,
-//        0.5, 0, 0,
-//        -0.5, 0, 0,
-//
-//        -0.5, 1, -1,
-//        0.5, 1, -1,
-//        0.5, 0, -1,
-//        -0.5, 0, -1
-//    ];
-//
-//    var _width = rect.width;
-//    var _height = rect.height;
-//    var _depth = -1 * 50;
-//
-//    Matrix.scale(modelMatrix, modelMatrix, Vector3.fromValues(_width, _height, _depth));
-//
-//    var pointList = calculatePoints(baseCube, modelMatrix);
-//
-//    //to local to screen
-//    var _pos = _rootSprite.localToGlobal({
-//        x: rect.x,
-//        y: rect.y
-//    });
-//
-//    //screen to world
-//
-//    _pos = {
-//        x: _pos.x - this.root.width * 0.5,
-//        y: this.root.height * 0.5 - _pos.y
-//    };
-//
-//    //调整柱子的每个点到世界坐标系下
-//
-//    modelMatrix = Matrix.create();
-//
-//    Matrix.translate(modelMatrix, modelMatrix, Vector3.fromValues(_pos.x, _pos.y, 0));
-//
-//    pointList = calculatePoints(baseCube, modelMatrix);
-//
-//
-//    //world project to screen
-//    pointList = projectionToPoints(pointList);
-//
-//    //screen to local
-//    var arr = [];
-//    for (var i = 0; i < pointList.length; i = i + 3) {
-//        _pos = _rootSprite.globalToLocal({
-//            x: pointList[i],
-//            y: pointList[i + 1]
-//        });
-//        arr.push([_pos.x, _pos.y]);
-//    }
-//    console.log(arr);
-//    return arr;
-//
-//}
-
-
         };
         return Graphs;
     });

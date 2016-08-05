@@ -11,6 +11,7 @@ define('chartx/chart/bar/3d/back',
             this.root = root;
             this.w = 0;
             this.h = 0;
+            this._depth = -100;
 
             this.pos = {
                 x: 0,
@@ -65,6 +66,9 @@ define('chartx/chart/bar/3d/back',
 
             init: function (opt) {
                 _.deepExtend(this, opt);
+                if (opt.depth ) {
+                    this._depth = -opt.depth;
+                }
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function ($n) {
@@ -80,15 +84,6 @@ define('chartx/chart/bar/3d/back',
                 this._widget();
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
-
-                this.root._localToScreen(this.sprite);
-
-                this.root._screenToWorld(this.sprite);
-
-                this.root._projectionToScreen(this.sprite);
-
-                this.root._screenToLocal(this.sprite);
-
             },
             update: function (opt) {
                 this.sprite.removeAllChildren();
@@ -97,7 +92,7 @@ define('chartx/chart/bar/3d/back',
             _widget: function () {
                 var self = this;
 
-                var _depth = -100;
+                var _depth = this._depth;
                 if (!this.enabled) {
                     return
                 }
@@ -120,10 +115,6 @@ define('chartx/chart/bar/3d/back',
                         new Line({
                         id: "back_line_xAxis" + a,
                         context: {
-                            xStart: 0,
-                            yStart: o.y,
-                            xEnd: self.w,
-                            yEnd: o.y,
                             lineType: self.xAxis.lineType,
                             lineWidth: self.xAxis.lineWidth,
                             strokeStyle: self.xAxis.strokeStyle
@@ -167,10 +158,6 @@ define('chartx/chart/bar/3d/back',
                             new Line({
                             id: "back_line_xAxis_z" + a,
                             context: {
-                                xStart: 0,
-                                yStart: o.y,
-                                xEnd: 0,//self.w,
-                                yEnd: o.y,
                                 lineType: self.xAxis.lineType,
                                 lineWidth: self.xAxis.lineWidth,
                                 strokeStyle: self.xAxis.strokeStyle
@@ -199,10 +186,6 @@ define('chartx/chart/bar/3d/back',
                         new Line({
                             id:'back_line_yAxis'+a,
                         context: {
-                            xStart: o.x,
-                            yStart: 0,
-                            xEnd: o.x,
-                            yEnd: -self.h,
                             lineType: self.yAxis.lineType,
                             lineWidth: self.yAxis.lineWidth,
                             strokeStyle: self.yAxis.strokeStyle,
@@ -229,10 +212,6 @@ define('chartx/chart/bar/3d/back',
                             new Line({
                                 id:'back_line_yAxis_z'+a,
                             context: {
-                                xStart: o.x,
-                                yStart: 0,
-                                xEnd: o.x,
-                                yEnd: 0,
                                 lineType: self.yAxis.lineType,
                                 lineWidth: self.yAxis.lineWidth,
                                 strokeStyle: self.yAxis.strokeStyle,
@@ -253,10 +232,6 @@ define('chartx/chart/bar/3d/back',
                     new Line({
                         id:'back_line_yAxis_00',
                         context: {
-                            xStart: 0,
-                            yStart: 0,
-                            xEnd: 0,
-                            yEnd: -self.h,
                             lineType: self.yAxis.lineType,
                             lineWidth: self.yAxis.lineWidth,
                             strokeStyle: self.yAxis.strokeStyle,
@@ -282,10 +257,6 @@ define('chartx/chart/bar/3d/back',
                     new Line({
                         id:'Back_xAxisOrg',
                     context: {
-                        xStart: xAxisOrg,
-                        yStart: 0,
-                        xEnd: xAxisOrg,
-                        yEnd: -self.h,
                         lineWidth: self.yOrigin.lineWidth,
                         strokeStyle: self.yOrigin.strokeStyle
                     }
@@ -305,10 +276,6 @@ define('chartx/chart/bar/3d/back',
                         new Line({
                         id:'Back_biaxial',
                         context: {
-                            xStart: self.w,
-                            yStart: 0,
-                            xEnd: self.w,
-                            yEnd: -self.h,
                             lineWidth: self.yOrigin.lineWidth,
                             strokeStyle: self.yOrigin.strokeStyle
                         }
@@ -335,9 +302,6 @@ define('chartx/chart/bar/3d/back',
                     new Line({
                     id:"Back_yAxisOrg",
                     context: {
-                        yStart: yAxisOrg,
-                        xEnd: self.w,
-                        yEnd: yAxisOrg,
                         lineWidth: self.xOrigin.lineWidth,
                         strokeStyle: self.xOrigin.strokeStyle
                     }

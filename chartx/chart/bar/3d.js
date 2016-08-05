@@ -69,35 +69,26 @@ define("chartx/chart/bar/3d",
                 this._init && this._init(node, data, opts);
 
 
-                //3d
+                //3d场景初始化
                 this._projectMatrix = Matrix.create();
                 this._viewMatrix = Matrix.create();
                 this._viewProjectMatrix = Matrix.create();
+
+
                 //初始化投影矩阵
                 this._initProjection();
-                //初始化相机
-                this._initCamera();
 
-                //var me = this;
-                //var testRotate=function(){
-                //    eye[0] = eye[0] - 1;
-                //    eye[1] = eye[1] - 0.5;
-                //    this._viewMatrix = Matrix.create();
-                //    this._viewProjectMatrix = Matrix.create();
-                //    Matrix.lookAt(me._viewMatrix, eye, center, up);
-                //    Matrix.multiply(me._viewProjectMatrix, me._projectMatrix, me._viewMatrix);
-                //    // me.stage.removeAllChildren();
-                //    me._startDraw();
-                //    if (eye[0] < 0) {
-                //        window.clearInterval(_timer);
-                //       return;
-                //    }
-                //    window.setTimeout(testRotate);
-                //}
-                //
-                //var _timer = window.setTimeout(function () {
-                //    testRotate();
-                //}, 1000);
+                //初始化相机
+                this._eye = Vector3.fromValues(0, 0, this.height * 2);
+                this._rotation = {
+                    x: 25,
+                    y: 25
+                };
+                _.extend(this._rotation, this._opts.rotation);
+                this._rotationCamera();
+                //调整相机位置
+                this._adjustmentFitPosition();
+
 
 
             },
@@ -110,29 +101,92 @@ define("chartx/chart/bar/3d",
                 Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
 
             },
-            _initCamera: function (eye) {
+
+            _initCamera: function () {
+                var me = this;
                 var center = [0, 0, 0];
                 var up = [0, 1, 0];
-                eye = eye || [0, 0, 600];
+                var eye = this._eye;
+                Matrix.lookAt(this._viewMatrix, eye, center, up);
+                Matrix.multiply(this._viewProjectMatrix, this._projectMatrix, this._viewMatrix);
 
-                if(arguments.length===0){
-                    var rotation = Quaternion.create();
-                    var m=Matrix.create();
-                    var out=Vector3.create();
+            },
+            _rotationCamera: function () {
+                var me = this;
+                var rotateX = me._rotation.x;
+                var rotateY = me._rotation.y;
+                var rotation = Quaternion.create();
+                var m = Matrix.create();
+                var length=Vector3.length(this._eye);
+                var origin = Vector3.fromValues(0, 0, length);
 
-                    //Quaternion.setAxisAngle(rotation, [0,1,0], this.value*Math.PI/180);
-                    Quaternion.rotateY(rotation,rotation,25*Math.PI/180);
-                    Quaternion.rotateX(rotation,rotation,-25*Math.PI/180);
+                rotateX = rotateX !== undefined ? Math.max(15, Math.min(rotateX, 45)) : 25;
+                rotateY = rotateY !== undefined ? Math.max(15, Math.min(rotateY, 45)) : 25;
 
-                    Matrix.fromQuat(m,rotation);
-                    Vector3.transformMat4(eye, eye, m);
+
+                Quaternion.rotateY(rotation, rotation, rotateY * Math.PI / 180);
+                Quaternion.rotateX(rotation, rotation, -1 * rotateX * Math.PI / 180);
+
+                Matrix.fromQuat(m, rotation);
+                Vector3.transformMat4(me._eye, origin, m);
+                me._initCamera();
+
+            },
+            _adjustmentFitPosition: function () { //调整相机到最合适的位置
+                var me = this;
+
+                //构建世界空间特殊点
+                var _widht = me.width * 0.5;
+                var _heght = me.height * 0.5;
+                var _depth = me.back && me.back.depth || 100;
+                var _point = [];
+                var _screenPoints = [];
+                var isFineTuning = false;   //是否微调
+                var _scale = Vector3.create();
+                var padding = 0;
+
+
+                for (i = 0, t = 0; i < 24; i = i + 3) {
+                    _point[i] = i % 2 === 0 ? -1 * _widht : _widht;
+                    _point[i + 1] = _.indexOf([2, 3, 6, 7], t) === -1 ? _heght : -1 * _heght;
+                    _point[i + 2] = t < 4 ? 0 : -1 * _depth
+                    t++;
+                }
+
+                while (true) {
+                    me._initCamera();
+                    _screenPoints = me._worldToScreen(_point);
+
+                    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                    for (i = 0; i < _screenPoints.length; i = i + 3) {
+                        minX = Math.min(minX, _screenPoints[i]);
+                        maxX = Math.max(maxX, _screenPoints[i]);
+
+                        minY = Math.min(minY, _screenPoints[i + 1]);
+                        maxY = Math.max(maxY, _screenPoints[i + 1]);
+                    }
+
+
+                    if (minX < padding || minY < padding || maxX > me.width - padding || maxY > me.height - padding) {
+                        if (isFineTuning) {
+                            isFineTuning = false;
+                            break;
+                        }
+                        Vector3.scale(_scale, me._eye, 0.5);
+                        Vector3.add(me._eye, me._eye, _scale);
+
+                    } else {
+
+                        isFineTuning = true;
+                        Vector3.scale(_scale, me._eye, 0.1);
+                        Vector3.sub(me._eye, me._eye, _scale);
+
+                    }
 
                 }
 
-
-                Matrix.lookAt(this._viewMatrix, eye, center, up);
-                Matrix.multiply(this._viewProjectMatrix, this._projectMatrix, this._viewMatrix);
             },
+
             /*
              * 如果只有数据改动的情况
              */
@@ -446,6 +500,8 @@ define("chartx/chart/bar/3d",
 
                 this.inited = true;
 
+                this._to3d(this.stage);
+
             },
             _initData: function (data, opt) {
 
@@ -600,7 +656,9 @@ define("chartx/chart/bar/3d",
                     ;
                     this._legend.inited = true;
                 }
-                ;
+
+                this.fire('_to3d');
+
             },
 
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
@@ -1105,258 +1163,224 @@ define("chartx/chart/bar/3d",
                     me.fire(e.type, e);
                 });
 
-
-                //测试旋转
-                var domY=document.getElementById('yAxis');
-                var domX=document.getElementById('xAxis');
-
-                var eye=[0,0,600];
-
-                domY.onchange=function(){
-                    document.getElementById('yAxis_value').innerHTML=this.value;
-
-                    var rotation = Quaternion.create();
-                    var m=Matrix.create();
-                    var out=Vector3.create();
-
-                    //Quaternion.setAxisAngle(rotation, [0,1,0], this.value*Math.PI/180);
-
-                    Quaternion.rotateY(rotation,rotation,this.value*Math.PI/180);
-
-                    Quaternion.rotateX(rotation,rotation,-domX.value*Math.PI/180);
-
-                    Matrix.fromQuat(m,rotation);
-                    Vector3.transformMat4(out, eye, m);
-
-                    me._initCamera(out);
-                    me._startDraw();
-
-                };
-
-                domX.onchange=function() {
-                    document.getElementById('xAxis_value').innerHTML = this.value;
-
-                    var rotation = Quaternion.create();
-                    var m=Matrix.create();
-                    var out=Vector3.create();
-
-                    Quaternion.rotateY(rotation,rotation,domY.value*Math.PI/180);
-                    Quaternion.rotateX(rotation,rotation,-this.value*Math.PI/180);
-
-                    Matrix.fromQuat(m,rotation);
-                    Vector3.transformMat4(out, eye, m);
-
-                    me._initCamera(out);
-                    me._startDraw();
-                }
+                this.on('_to3d', function () {
+                    me._to3d(me.stage);
+                });
 
 
 
 
             },
-            //projection to screen
-            //todo:四次迭代后面优化合并
-            _projectionToScreen: function (sprite) {
 
+            //projection to screen
+            //基本变换过程为:local ===> screen ===> world ===> projection
+            //             ===> screen ===> local
+            _worldToScreen: function (ps) {
                 var me = this;
 
-                var calculatePoints = function (baseCube) {
-                    var point_count = baseCube.length / 3;
+                var p = new Array(ps.length);
+                var one = Vector4.create();
+                var out = Vector4.create();
+                for (var x = 0, y = 0, z = 0; x < ps.length; x = x + 3) {
+                    y = x + 1;
+                    z = x + 2;
+                    Vector4.set(one, ps[x], ps[y], ps[z], 1);
 
-                    var point = [];
-                    var one = [];
-                    var out = [];
-                    for (var i = 0; i < point_count; i++) {
-                        one = [0, 0, 0, 1];
-                        out = [0, 0, 0, 1];
-                        one[0] = baseCube[i * 3];
-                        one[1] = baseCube[i * 3 + 1];
-                        one[2] = baseCube[i * 3 + 2];
-                        Vector3.transformMat4(out, one, me._viewProjectMatrix);
-                        point[i * 3] = (( out[0] + 1 ) * me.width ) / 2.0;
-                        point[i * 3 + 1] = ( ( out[1] - 1 ) * me.height ) / (-2.0);
-                        point[i * 3 + 2] = out[2];
+                    Vector3.transformMat4(out, one, me._viewProjectMatrix);
+                    p[x] = (( out[0] + 1 ) * me.width ) / 2.0;
+                    p[y] = ( ( out[1] - 1 ) * me.height ) / (-2.0);
+                    p[z] = out[2];
 
+                }
+                return p;
+
+            },
+            _projectionToScreen: function (_shapes, _worldPosition) {
+                var me = this;
+                var _projectionPosition = null, _z, _points, _arr;
+                if (_shapes instanceof Shapes.Line) {
+                    _points = [];
+                    _projectionPosition = [];
+                    _z = [
+                        _shapes.zStart,
+                        _shapes.zEnd
+                    ];
+                    _.each(_worldPosition, function (o, i) {
+
+                        _arr = me._worldToScreen([
+                            _worldPosition[i].x,
+                            _worldPosition[i].y,
+                            (_z[i] || 0)]);
+                        _projectionPosition.push(
+                            {
+                                x: _arr[0],
+                                y: _arr[1]
+                            }
+                        )
+                    });
+
+                } else if (_shapes instanceof Shapes.Polygon) {
+                    _projectionPosition = [];
+                    _.each(_worldPosition, function (o, i) {
+                        _arr = me._worldToScreen([
+                            o.x,
+                            o.y,
+                            (_shapes.context.pointList[i][2] || 0)]);
+
+                        _projectionPosition.push(
+                            {
+                                x: _arr[0],
+                                y: _arr[1]
+                            }
+                        )
+                    });
+                } else {
+                    _arr = me._worldToScreen([
+                        _worldPosition.x,
+                        _worldPosition.y,
+                        0]);
+                    _projectionPosition = {
+                        x: _arr[0],
+                        y: _arr[1]
                     }
-                    return point;
-                };
+                }
+                return _projectionPosition;
+            },
+            _localToScreen: function (_shapes) {
+                var _globalPosition = null;
+                var _rootSprite = _shapes.parent;
+                if (_shapes instanceof Shapes.Line) {
+
+                    var _start = _rootSprite.localToGlobal({
+                        x: _shapes.context.xStart + _shapes.context.x,
+                        y: _shapes.context.yStart + _shapes.context.y
+                    });
+
+                    var _end = _rootSprite.localToGlobal({
+                        x: _shapes.context.xEnd + _shapes.context.x,
+                        y: _shapes.context.yEnd + _shapes.context.y
+                    });
 
 
-                (function (_sprite, _width, _height) {
+                    _globalPosition = [_start, _end];
+
+                } else if (_shapes instanceof Shapes.Polygon) {
+                    _globalPosition = [];
+                    _.each(_shapes.context.pointList, function (o, i) {
+                        var _pos = _rootSprite.localToGlobal({
+                            x: o[0],
+                            y: o[1]
+                        });
+                        _globalPosition.push(_pos);
+                    });
+                } else {
+                    _globalPosition = _rootSprite.localToGlobal({
+                        x: _shapes.context.x,
+                        y: _shapes.context.y
+                    });
+                }
+                return _globalPosition;
+            },
+            _screenToWorld: function (_shapes, _width, _height, _globalPosition) {
+                var _worldPosition = null;
+                if (_shapes instanceof Shapes.Line) {
+                    var _start = {
+                        x: _globalPosition[0].x - _width * 0.5,
+                        y: _height * 0.5 - _globalPosition[0].y
+                    };
+
+                    var _end = {
+                        x: _globalPosition[1].x - _width * 0.5,
+                        y: _height * 0.5 - _globalPosition[1].y
+                    };
+                    _worldPosition = [_start, _end];
+
+                } else if (_shapes instanceof Shapes.Polygon) {
+                    _worldPosition = [];
+                    _.each(_globalPosition, function (o, i) {
+                        var _pos = {
+                            x: o.x - _width * 0.5,
+                            y: _height * 0.5 - o.y
+                        };
+                        _worldPosition.push(_pos);
+                    })
+
+                } else {
+
+                    _worldPosition = {
+                        x: _globalPosition.x - _width * 0.5,
+                        y: _height * 0.5 - _globalPosition.y
+                    };
+                }
+                return _worldPosition;
+
+            },
+            _screenToLocal: function (_shapes, _projectionPosition) {
+                var _rootSprite = _shapes.parent;
+                var _pointList = [];
+                if (_shapes instanceof Shapes.Line) {
+
+                    var _start = _rootSprite.globalToLocal({
+                        x: _projectionPosition[0].x,
+                        y: _projectionPosition[0].y
+                    });
+
+                    var _end = _rootSprite.globalToLocal({
+                        x: _projectionPosition[1].x,
+                        y: _projectionPosition[1].y
+                    });
+
+                    _shapes.context.xStart = _start.x;
+                    _shapes.context.yStart = _start.y;
+
+                    _shapes.context.xEnd = _end.x;
+                    _shapes.context.yEnd = _end.y;
+
+                    _shapes.context.x = 0;
+                    _shapes.context.y = 0;
+
+
+                } else if (_shapes instanceof Shapes.Polygon) {
+                    _.each(_projectionPosition, function (o, i) {
+                        var _pos = _rootSprite.globalToLocal({
+                            x: o.x,
+                            y: o.y
+                        });
+                        _pointList.push([
+                            _pos.x,
+                            _pos.y
+                        ]);
+                    });
+                    _shapes.context.pointList = _pointList;
+                } else {
+                    var pos = _rootSprite.globalToLocal({
+                        x: _projectionPosition.x,
+                        y: _projectionPosition.y
+                    })
+                    _shapes.context.x = pos.x;
+                    _shapes.context.y = pos.y;
+                }
+            },
+            _to3d: function (sprite) {
+                var me = this;
+                var _globalPosition, _worldPosition, _projectionPosition;
+                (function (node) {
                     var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
+                    if (node.children && node.children.length > 0) {
+                        _.each(node.children, function (a, i) {
                             getLeaf(a);
                         })
                     } else {
-                        if (_sprite instanceof Shapes.Line) {
-
-
-                            var _z = [
-                                _sprite.zStart,
-                                _sprite.zEnd
-                            ];
-
-
-                            _sprite.projectionPosition = [];
-                            for (var i = 0; i < _sprite.worldPosition.length; i++) {
-                                var arr = calculatePoints([
-                                    _sprite.worldPosition[i].x,
-                                    _sprite.worldPosition[i].y,
-                                    (_z[i] || 0)]);
-
-                                _sprite.projectionPosition.push(
-                                    {
-                                        x: arr[0],
-                                        y: arr[1]
-                                    }
-                                )
-                            }
-
-
-                        } else {
-
-
-                            var arr = calculatePoints([
-                                _sprite.worldPosition.x,
-                                _sprite.worldPosition.y,
-                                0]);
-                            _sprite.projectionPosition = {
-                                x: arr[0],
-                                y: arr[1]
-                            }
-                        }
-                    }
-                })(sprite);
-
-            },
-            _localToScreen: function (sprite) {
-
-                if (!sprite.__sprite) {
-                    sprite.__sprite = sprite.clone();
-                    sprite.__sprite.id = sprite.id;
-                } else {
-                    var id = sprite.__sprite.id;
-                    sprite = sprite.__sprite.clone();
-                    sprite.id = id;
-                    sprite.__sprite = sprite.clone();
-                    sprite.__sprite.id = id;
-                }
-
-                (function (_sprite, _rootSprite) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a, _rootSprite);
-                        })
-                    } else {
-
-                        if (_sprite instanceof Shapes.Line) {
-
-
-                            var _start = _rootSprite.localToGlobal({
-                                x: _sprite.context.xStart + _sprite.context.x,
-                                y: _sprite.context.yStart + _sprite.context.y
-                            });
-
-                            var _end = _rootSprite.localToGlobal({
-                                x: _sprite.context.xEnd + _sprite.context.x,
-                                y: _sprite.context.yEnd + _sprite.context.y
-                            });
-
-
-                            _sprite.globalPosition = [_start, _end];
-
-                        } else {
-                            _sprite.globalPosition = _rootSprite.localToGlobal({
-                                x: _sprite.context.x,
-                                y: _sprite.context.y
-                            });
-                        }
+                        _globalPosition = me._localToScreen(node);
+                        _worldPosition = me._screenToWorld(node, me.width, me.height, _globalPosition);
+                        _projectionPosition = me._projectionToScreen(node, _worldPosition);
+                        me._screenToLocal(node, _projectionPosition);
 
                     }
-                })(sprite, sprite);
-
-            },
-            _screenToWorld: function (sprite) {
-
-                (function (_sprite, _width, _height) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a, _width, _height);
-                        })
-                    } else {
-                        if (_sprite instanceof Shapes.Line) {
-
-
-                            var _start = {
-                                x: _sprite.globalPosition[0].x - _width * 0.5,
-                                y: _height * 0.5 - _sprite.globalPosition[0].y
-                            };
-
-                            var _end = {
-                                x: _sprite.globalPosition[1].x - _width * 0.5,
-                                y: _height * 0.5 - _sprite.globalPosition[1].y
-                            };
-
-                            _sprite.worldPosition = [_start, _end];
-
-                        } else {
-
-                            _sprite.worldPosition = {
-                                x: _sprite.globalPosition.x - _width * 0.5,
-                                y: _height * 0.5 - _sprite.globalPosition.y
-                            };
-                        }
-                    }
-                })(sprite, this.width, this.height);
-
-
-            },
-            _screenToLocal: function (sprite) {
-
-                (function (_sprite, _rootSprite) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a, _rootSprite);
-                        })
-                    } else {
-                        if (_sprite instanceof Shapes.Line) {
-
-                            var _start = _rootSprite.globalToLocal({
-                                x: _sprite.projectionPosition[0].x,
-                                y: _sprite.projectionPosition[0].y
-                            });
-
-                            var _end = _rootSprite.globalToLocal({
-                                x: _sprite.projectionPosition[1].x,
-                                y: _sprite.projectionPosition[1].y
-                            });
-
-                            _sprite.context.xStart = _start.x;
-                            _sprite.context.yStart = _start.y;
-
-                            _sprite.context.xEnd = _end.x;
-                            _sprite.context.yEnd = _end.y;
-
-                            _sprite.context.x = 0;
-                            _sprite.context.y = 0;
-
-
-                        } else {
-                            var pos = _rootSprite.globalToLocal({
-                                x: _sprite.projectionPosition.x,
-                                y: _sprite.projectionPosition.y
-                            })
-                            _sprite.context.x = pos.x;
-                            _sprite.context.y = pos.y;
-                        }
-
-                    }
-                })(sprite, sprite);
+                })(sprite)
+                me._graphs._depthTest(sprite);
             }
+
 
         });
 

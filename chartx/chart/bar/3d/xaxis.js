@@ -180,14 +180,6 @@ define('chartx/chart/bar/3d/xaxis',
                         this._layout();
                     }
                 }
-                this.root._localToScreen(this.sprite);
-
-                this.root._screenToWorld(this.sprite);
-
-                this.root._projectionToScreen(this.sprite);
-
-                this.root._screenToLocal(this.sprite);
-
 
                 this.resize = false;
                 // this.data = this.layoutData
@@ -344,8 +336,6 @@ define('chartx/chart/bar/3d/xaxis',
                         new Canvax.Display.Text((o.layoutText || o.content), {
                             id: "xAxis_txt_" + a,
                         context: {
-                            x: x,
-                            y: y,
                             fillStyle: this.text.fillStyle,
                             fontSize: this.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
@@ -370,10 +360,6 @@ define('chartx/chart/bar/3d/xaxis',
                             new Line({
                                 id: "xAxis_line_" + a,
                             context: {
-                                x: x,
-                                y: this.disY,
-                                xEnd: 0,
-                                yEnd: this.line.height + this.disY,
                                 lineWidth: this.line.width,
                                 strokeStyle: this.line.strokeStyle
                             }
