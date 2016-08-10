@@ -298,6 +298,10 @@ define(
             this._currPointList = []; //brokenline 动画中的当前状态
             this._bline = null;
 
+
+            //从配置里面转换后的一些私有属性
+            this.__lineStrokeStyle = null;
+
             this.init(opt)
         };
 
@@ -607,11 +611,6 @@ define(
             },
             _getLineStrokeStyle: function( from ) {
                 var self = this;
-                /*
-                if (this.__lineStyleStyle) {
-                    return this.__lineStyleStyle;
-                };
-                */
                 
                 if( this.line.strokeStyle.lineargradient ){
                     //如果填充是一个线性渐变
@@ -627,30 +626,20 @@ define(
                     };
                     //var bottomP = [ 0 , 0 ];
                     //创建一个线性渐变
-                    this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+                    this.__lineStrokeStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
                     if( !_.isArray( this.line.strokeStyle.lineargradient ) ){
                         this.line.strokeStyle.lineargradient = [this.line.strokeStyle.lineargradient];
                     };
 
                     _.each(this.line.strokeStyle.lineargradient , function( item , i ){
-                        self.__lineStyleStyle.addColorStop( item.position , item.color);
+                        self.__lineStrokeStyle.addColorStop( item.position , item.color);
                     });
-                
-                    /*
-                    var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
-                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
-                    this.__lineStyleStyle.addColorStop(0, rgba0);
-
-                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
-                    this.__lineStyleStyle.addColorStop(1, rgba1);
-                    */
 
                 } else {
-                    this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
+                    this.__lineStrokeStyle = this._getColor(this.line.strokeStyle);
                 }
-                //this.line.strokeStyle = this.__lineStyleStyle;
-                return this.__lineStyleStyle;
+                return this.__lineStrokeStyle;
             },
             _setNodesStyle: function(){
                 var self = this;
@@ -662,17 +651,6 @@ define(
                         var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); 
                         nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff";
                         nodeEl.context.strokeStyle = strokeStyle;
-
-                        /*
-                        var sourceInd = 0;
-                        if (self._yAxis.place == "right") {
-                            sourceInd = al - 1;
-                        };
-                        if (a == sourceInd) {
-                            nodeEl.context.fillStyle = nodeEl.context.strokeStyle;
-                            nodeEl.context.r++;
-                        };
-                        */
 
                         self._nodeInd = -1;
                     }
@@ -1446,15 +1424,17 @@ define(
                     this._initDataZoom();
                 };
 
-                //如果有 legend，调整下位置,和设置下颜色
+                //如果有 legend ，调整下位置,和设置下颜色
                 if( this._legend && (!this._legend.inited || opt.resize) ){
             
                     this._legend.pos( { x : _yAxisW } );
 
-                    for( var f in this._graphs._yAxisFieldsMap ){
-                        var ffill = this._graphs._yAxisFieldsMap[f].line.strokeStyle;
-                        this._legend.setStyle( f , {fillStyle : ffill} );
-                    };
+                    _.each( this._graphs.groups , function( g ){
+                        me._legend.setStyle( g.field , {
+                            fillStyle : g.__lineStrokeStyle
+                        } );
+                    } );
+
                     this._legend.inited = true;
                 };
             },
