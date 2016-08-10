@@ -52,13 +52,11 @@ var data= [
     [ 8      , undefined   ,183 , 51    ]
 ];
 
+var yAxisFields = [ "uv" , "pv" , "click" ];
+
 var options = {
-    legend:{
-        enabled:true
-    },
     yAxis : {
-        //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["pv"  ]
+        field : yAxisFields
     },
     xAxis : {
         field : "xfield"
@@ -66,11 +64,32 @@ var options = {
 };
 
 
-
-
 var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
-    window.chart = chart;    
+    window.chart = chart;
+
+    var legendStr = "";
+    _.each( yAxisFields , function( field ){
+        legendStr += "<div class='legend'>";
+        legendStr += "    <label>";
+        legendStr += "       <input id='"+ field +"' checked type='checkbox'>" + field;
+        legendStr += "    </label>"; 
+        legendStr += "</div>";
+    } );    
+    document.getElementById("legends").innerHTML = legendStr;
+
+    _.each( yAxisFields , function( field , i){
+        document.getElementById( field ).onclick = function(e){
+            if( !this.checked ){
+                chart.remove( this.id );
+            } else {
+                chart.add(this.id );
+            };
+        }
+    });
+
 });
+
+
 </textarea></form>
 
         </td>
@@ -79,12 +98,26 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>折线图（line chart）- 自定义图例</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
+                <style>
+                #legends {
+                    padding:10px;overflow:hidden;zoom:1;
+                }
+                .legend {
+                    float:left;margin-right:20px;line-height:20px;cursor:pointer;
+                }
+                .legend input {
+                    margin-right:6px;
+                }
+                </style>
+                <div id="legends">
+                    
+                </div>
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
 

@@ -52,72 +52,16 @@ var data= [
     [ 8      , undefined   ,183 , 51    ]
 ];
 
-
-var data1= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , undefined , 120 , 33    ],
-    [ 2      , 0   , 151 , 26    ],
-    [ 3      , 232   , 145 , 243    ],
-    [ 4      , 232  , 135 , 231    ],
-    [ 5      , 279  , 173 , 71    ],
-    [ 6      , 188  , 154 , 39    ],
-    [ 7      , 55  , 168 , 65    ],
-    [ 8      , 66   ,183 , 51    ],
-    [ 3      , 32   , 145 , 243    ],
-    [ 4      , 58  , 135 , 231    ],
-    [ 5      , 79  , 173 , 71    ],
-    [ 6      , 188  , 154 , 39    ],
-    [ 7      , 55  , 168 , 65    ],
-    [ 8      , undefined   ,183 , 51    ]
-];
-
-
-
 var options = {
     legend:{
         enabled:true
     },
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["pv"  ],
-        label : "yaxis"
+        field : ["pv"  ]
     },
     xAxis : {
-        field : "xfield",
-        dataSection : data.totalType == "hour" ? [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23] : [],
-                        filter : function(e){
-                            if(!(e.index % 2)){
-                                e.txt.context.fillStyle = '#333333'
-                            } else {
-                                e.txt.context.visible = false;
-                            }
-                        },
-                        text : {
-                            //rotation : (data.totalType == "day" && data.total.list.length > 8 ) ? 30 : 0
-                        }
-    }, 
-    graphs:{
-        node : {
-            enabled:false
-        },
-        line : {
-            strokeStyle : {
-                lineargradient : [
-                    {position : 0    , color:"#ff7033"},
-                    {position : 0.05 , color:"#ff9933"},
-                    {position : 0.15 , color:"#2dafe3"},
-                    {position : 0.85 , color:"#449be3"},
-                    {position : 0.95 , color:"#7177e3"},
-                    {position : 1.0  , color:"#5744e3"}
-                ]
-            }
-        }
-    },
-    tips : {
-        content : function(e){
-            console.log( e.xAxis.value )
-            return "今天"+ e.xAxis.value +"点";
-        }
+        field : "xfield"
     }
 };
 
@@ -125,108 +69,7 @@ var options = {
 
 
 var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
-window.chart = chart;
-return
-var i=1
-setTimeout(function(){
-
-    chart.reset({
-        data : data,
-        options : {
-            yAxis:{
-               field : ['uv','pv']
-            },
-            tips : {
-                content : function(){
-                     return "xxoo"
-                }
-            }
-        }
-    })
-} , i++*1000);
-
-return
-
-setTimeout(function(){
-    chart.reset({
-        data : data1,
-        options : {
-            yAxis:{
-               field : ['click']
-            }
-        }
-    })
-} , i++*1000);
-
-
-setTimeout(function(){
-    chart.reset({
-        data : data1,
-        options : {
-            yAxis:{
-               field : ['pv']
-            }
-        }
-    })
-} , i++*1000);
-
-
-setTimeout(function(){
-    chart.reset({
-        data : data1,
-        options : {
-            yAxis:{
-               field : ['uv' , 'click']
-            }
-        }
-    })
-} , i++*1000);
-
-
-setTimeout(function(){
-    chart.reset({
-        data : data1,
-        options : {
-            yAxis:{
-               field : ['uv' , 'click','pv']
-            }
-        }
-    })
-} , i++*1000);
-
-
-
-
-setTimeout(function(){
-    chart.remove("pv");
-} , i++*1000)
-
-
-setTimeout(function(){
-
-    chart.remove("click");
-} , i++*1000)
-
-
-setTimeout(function(){
-    chart.remove("uv");
-} , i++*1000)
-
-
-
-setTimeout(function(){
-    chart.add("click");
-} , i++*1000)
-
-setTimeout(function(){
-    chart.add("pv");
-} , i++*1000)
-
-
-setTimeout(function(){
-    chart.add("uv");
-} , i++*1000)
-    
+    window.chart = chart;    
 });
 </textarea></form>
 
