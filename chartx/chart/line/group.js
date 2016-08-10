@@ -328,40 +328,46 @@ define(
                 var self = this;
             
                 var fill_gradient = null;
-                
-                if( self.fill.fillStyle ){
-                    if (_.isArray(self.fill.alpha)) {
-                        //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
-                        self.fill.alpha.length = 2;
-                        if (self.fill.alpha[0] == undefined) {
-                            self.fill.alpha[0] = 0;
-                        };
-                        if (self.fill.alpha[1] == undefined) {
-                            self.fill.alpha[1] = 0;
-                        };
+                var _fillStyle = self.fill.fillStyle;
 
-                        //从bline中找到最高的点
-                        var topP = _.min(self._bline.context.pointList, function(p) {
-                            return p[1]
-                        });
-                        //创建一个线性渐变
-                        fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
-
-                        var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
-                        var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
-                        fill_gradient.addColorStop(0, rgba0);
-
-                        var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
-                        fill_gradient.addColorStop(1, rgba1);
-
-                        return fill_gradient;
-                    };
-                    return self._getColor(self.fill.fillStyle);
-                } else {
-                    return null;
+                if( !_fillStyle ){
+                    //如果没有配置的fillStyle，那么就取对应的line.strokeStyle
+                    _fillStyle = self._getLineStrokeStyle("fillStyle")
                 }
+
+                _fillStyle || (_fillStyle = self._getColor(self.fill.fillStyle));
+
+                if (_.isArray(self.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+                    //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
+                    //如果拿回来的style已经是个gradient了，那么就不管了
+                    self.fill.alpha.length = 2;
+                    if (self.fill.alpha[0] == undefined) {
+                        self.fill.alpha[0] = 0;
+                    };
+                    if (self.fill.alpha[1] == undefined) {
+                        self.fill.alpha[1] = 0;
+                    };
+
+                    //从bline中找到最高的点
+                    var topP = _.min(self._bline.context.pointList, function(p) {
+                        return p[1]
+                    });
+                    //创建一个线性渐变
+                    fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+
+                    var rgb = ColorFormat.colorRgb( _fillStyle );
+                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                    fill_gradient.addColorStop(0, rgba0);
+
+                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                    fill_gradient.addColorStop(1, rgba1);
+
+                    _fillStyle = fill_gradient;
+                };
+            
+                return _fillStyle;
             },
-            _getLineStrokeStyle: function() {
+            _getLineStrokeStyle: function( from ) {
                 var self = this;
                 /*
                 if (this.__lineStyleStyle) {
@@ -375,10 +381,13 @@ define(
                     var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
-                    //var bottomP = _.max(self._bline.context.pointList, function(p) {
-                    //    return p[1]
-                    //});
-                    var bottomP = [ 0 , 0 ];
+                    var bottomP = _.max(self._bline.context.pointList, function(p) {
+                        return p[1]
+                    });
+                    if( from == "fillStyle" ){
+                        bottomP = [ 0 , 0 ];
+                    };
+                    //var bottomP = [ 0 , 0 ];
                     //创建一个线性渐变
                     this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 

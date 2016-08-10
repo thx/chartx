@@ -369,7 +369,7 @@ define(
 
                 //如果有 legend，调整下位置,和设置下颜色
                 if( this._legend && (!this._legend.inited || opt.resize) ){
-                    console.log("legend")
+            
                     this._legend.pos( { x : _yAxisW } );
 
                     for( var f in this._graphs._yAxisFieldsMap ){
