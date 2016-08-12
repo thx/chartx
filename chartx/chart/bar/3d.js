@@ -5,14 +5,17 @@ define("chartx/chart/bar/3d",
         'chartx/utils/datasection',
         'chartx/components/tips/tip',
         'chartx/utils/dataformat',
+        'chartx/components/datazoom/index',
+        'chartx/components/legend/index',
         'chartx/chart/bar/3d/xaxis',
         'chartx/chart/bar/3d/yaxis',
         'chartx/chart/bar/3d/back',
         'chartx/chart/bar/3d/graphs',
         "canvax/shape/Shapes",
         'chartx/utils/math3d/gl-matrix'
+
     ],
-    function (Chart, Tools, DataSection, Tip, dataFormat, xAxis, yAxis, Back, Graphs, Shapes, glMatrix) {
+    function (Chart, Tools, DataSection, Tip, dataFormat, DataZoom, Legend, xAxis, yAxis, Back, Graphs, Shapes, glMatrix) {
 
         var Vector3 = glMatrix.vec3;
         var Vector4 = glMatrix.vec4;
@@ -92,6 +95,20 @@ define("chartx/chart/bar/3d",
 
 
             },
+            _reset: function (obj) {
+                //初始化投影矩阵
+                this._initProjection();
+                //初始化相机
+                this._eye = Vector3.fromValues(0, 0, this.height);
+                this._rotation = {
+                    x: 25,
+                    y: 25
+                };
+                _.extend(this._rotation, obj.options.rotation);
+                this._rotationCamera();
+                //调整相机位置
+                this._adjustmentFitPosition();
+            },
             _initProjection:function(){
                 //透视矩阵
                 var fovy = 45 * Math.PI / 180;
@@ -120,8 +137,8 @@ define("chartx/chart/bar/3d",
                 var length=Vector3.length(this._eye);
                 var origin = Vector3.fromValues(0, 0, length);
 
-                rotateX = rotateX !== undefined ? Math.max(15, Math.min(rotateX, 45)) : 25;
-                rotateY = rotateY !== undefined ? Math.max(15, Math.min(rotateY, 45)) : 25;
+                rotateX = rotateX !== undefined ? Math.max(10, Math.min(rotateX, 45)) : 25;
+                rotateY = rotateY !== undefined ? Math.max(10, Math.min(rotateY, 45)) : 25;
 
 
                 Quaternion.rotateY(rotation, rotation, rotateY * Math.PI / 180);
@@ -143,7 +160,7 @@ define("chartx/chart/bar/3d",
                 var _screenPoints = [];
                 var isFineTuning = false;   //是否微调
                 var _scale = Vector3.create();
-                var padding = 0;
+                var padding = 5;
 
 
                 for (i = 0, t = 0; i < 24; i = i + 3) {
@@ -165,11 +182,14 @@ define("chartx/chart/bar/3d",
                         minY = Math.min(minY, _screenPoints[i + 1]);
                         maxY = Math.max(maxY, _screenPoints[i + 1]);
                     }
-
-
                     if (minX < padding || minY < padding || maxX > me.width - padding || maxY > me.height - padding) {
                         if (isFineTuning) {
                             isFineTuning = false;
+
+                            Vector3.scale(me._eye, me._eye, 9 / 10);
+                            //Vector3.normalize(_scale,me._eye);
+                            //Vector3.add(me._eye, me._eye, _scale);
+                            me._initCamera();
                             break;
                         }
                         Vector3.scale(_scale, me._eye, 0.5);
@@ -178,6 +198,7 @@ define("chartx/chart/bar/3d",
                     } else {
 
                         isFineTuning = true;
+                        //Vector3.normalize(_scale,me._eye);
                         Vector3.scale(_scale, me._eye, 0.1);
                         Vector3.sub(me._eye, me._eye, _scale);
 
@@ -354,12 +375,12 @@ define("chartx/chart/bar/3d",
                 }, this._opts.legend);
 
                 this._legend = new Legend(this._getLegendData(), legendOpt);
+                this._legend.sprite.noTransform = true;
                 this.stage.addChild(this._legend.sprite);
                 this._legend.pos({
                     x: 0,
                     y: this.padding.top
                 });
-
                 this.padding.top += this._legend.height;
             },
             //只有field为多组数据的时候才需要legend
@@ -499,8 +520,8 @@ define("chartx/chart/bar/3d",
                 this._drawEnd(); //绘制结束，添加到舞台
 
                 this.inited = true;
-
                 this._to3d(this.stage);
+
 
             },
             _initData: function (data, opt) {
@@ -657,7 +678,7 @@ define("chartx/chart/bar/3d",
                     this._legend.inited = true;
                 }
 
-                this.fire('_to3d');
+
 
             },
 
@@ -905,6 +926,7 @@ define("chartx/chart/bar/3d",
                 graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
 
                 me._dataZoom.dataZoomBg.addChild(graphssp);
+                //me._dataZoom.sprite.noSkip=true;
                 me.core.addChild(me._dataZoom.sprite);
 
                 this.__cloneBar.thumbBar.destroy();
@@ -1007,7 +1029,25 @@ define("chartx/chart/bar/3d",
                         }
 
                         new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function () {
-                            me.core.addChild(this.sprite)
+                            me.core.addChild(this.sprite);
+                            me._to3d(this.sprite);
+                            var points = null;
+                            _.each(this.sprite.children, function (_shape) {
+                                if (_shape instanceof Shapes.BrokenLine) {
+                                    points = _shape.context.pointList;
+                                }
+                            });
+
+                            var p1 = Vector3.fromValues(points[0][0], points[0][1], 0);
+                            var p2 = Vector3.fromValues(points[1][0], points[1][1], 0);
+
+                            var v1 = Vector3.create();
+                            Vector3.sub(v1, p2, p1);
+                            var v2 = Vector3.fromValues(1, 0, 0);
+
+                            var angle = Vector3.angle(v1, v2);
+                            this.txt.context.rotation = angle * 180 / Math.PI;
+
                         })
                     }
                 })
@@ -1038,11 +1078,15 @@ define("chartx/chart/bar/3d",
                                     iLay: barObj.iLay,
                                     point: {
                                         x: barObj.x,
-                                        y: barObj.y
+                                        y: barObj.y,
                                     }
                                 };
                                 new MarkPoint(me._opts, mpCtx).done(function () {
                                     me.core.addChild(this.sprite);
+                                    if (this.shape)this.shape.z = -25;
+                                    if (this.shapeBg)this.shapeBg.z = -25;
+                                    if (this.shapeCircle) this.shapeCircle.z = -25;
+                                    me._to3d(this.sprite);
                                     var mp = this;
                                     this.shape.hover(function (e) {
                                         this.context.hr++;
@@ -1219,14 +1263,13 @@ define("chartx/chart/bar/3d",
                         )
                     });
 
-                } else if (_shapes instanceof Shapes.Polygon) {
+                } else if (_shapes instanceof Shapes.Polygon || _shapes instanceof Shapes.BrokenLine) {
                     _projectionPosition = [];
                     _.each(_worldPosition, function (o, i) {
                         _arr = me._worldToScreen([
                             o.x,
                             o.y,
                             (_shapes.context.pointList[i][2] || 0)]);
-
                         _projectionPosition.push(
                             {
                                 x: _arr[0],
@@ -1238,7 +1281,7 @@ define("chartx/chart/bar/3d",
                     _arr = me._worldToScreen([
                         _worldPosition.x,
                         _worldPosition.y,
-                        0]);
+                        _shapes.z || 0]);
                     _projectionPosition = {
                         x: _arr[0],
                         y: _arr[1]
@@ -1264,14 +1307,15 @@ define("chartx/chart/bar/3d",
 
                     _globalPosition = [_start, _end];
 
-                } else if (_shapes instanceof Shapes.Polygon) {
+                } else if (_shapes instanceof Shapes.Polygon || _shapes instanceof Shapes.BrokenLine) {
                     _globalPosition = [];
                     _.each(_shapes.context.pointList, function (o, i) {
                         var _pos = _rootSprite.localToGlobal({
-                            x: o[0],
-                            y: o[1]
+                            x: o[0] + _shapes.context.x,
+                            y: o[1] + _shapes.context.y
                         });
                         _globalPosition.push(_pos);
+                        console.log(_shapes.id,_shapes.context.pointList[i][2]);
                     });
                 } else {
                     _globalPosition = _rootSprite.localToGlobal({
@@ -1295,7 +1339,7 @@ define("chartx/chart/bar/3d",
                     };
                     _worldPosition = [_start, _end];
 
-                } else if (_shapes instanceof Shapes.Polygon) {
+                } else if (_shapes instanceof Shapes.Polygon || _shapes instanceof Shapes.BrokenLine) {
                     _worldPosition = [];
                     _.each(_globalPosition, function (o, i) {
                         var _pos = {
@@ -1340,7 +1384,7 @@ define("chartx/chart/bar/3d",
                     _shapes.context.y = 0;
 
 
-                } else if (_shapes instanceof Shapes.Polygon) {
+                } else if (_shapes instanceof Shapes.Polygon || _shapes instanceof Shapes.BrokenLine) {
                     _.each(_projectionPosition, function (o, i) {
                         var _pos = _rootSprite.globalToLocal({
                             x: o.x,
@@ -1352,6 +1396,10 @@ define("chartx/chart/bar/3d",
                         ]);
                     });
                     _shapes.context.pointList = _pointList;
+
+                    _shapes.context.x = 0;
+                    _shapes.context.y = 0;
+
                 } else {
                     var pos = _rootSprite.globalToLocal({
                         x: _projectionPosition.x,
@@ -1362,11 +1410,14 @@ define("chartx/chart/bar/3d",
                 }
             },
             _to3d: function (sprite) {
+                //noTransform  不做转换
+                //noSkip  只变换本身,不变换子元素
                 var me = this;
                 var _globalPosition, _worldPosition, _projectionPosition;
                 (function (node) {
                     var getLeaf = arguments.callee;
-                    if (node.children && node.children.length > 0) {
+                    if(node.noTransform) return;
+                    if (node.children && node.children.length > 0 && !node.noSkip) {
                         _.each(node.children, function (a, i) {
                             getLeaf(a);
                         })

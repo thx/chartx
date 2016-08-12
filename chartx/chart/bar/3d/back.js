@@ -66,7 +66,7 @@ define('chartx/chart/bar/3d/back',
 
             init: function (opt) {
                 _.deepExtend(this, opt);
-                if (opt.depth ) {
+                if (opt && opt.depth) {
                     this._depth = -opt.depth;
                 }
                 this.sprite = new Canvax.Display.Sprite();

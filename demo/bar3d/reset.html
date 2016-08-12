@@ -49,6 +49,7 @@ var data1= [
 
 ];
 var options = {
+    type:"3d",
     yAxis : {
         field : ["uv","pv"],
         //enabled : false
@@ -65,7 +66,14 @@ $("body").click(function(){
     $("#canvasTest").width(400)
     $("#canvasTest").height(300)
 
+    bar.width=400;
+    bar.height=300;
+
     var options = {
+     rotation:{
+       x : 15,
+       y : 15
+    },
     yAxis : {
         field : ["uv"],
         //enabled : false
@@ -73,12 +81,12 @@ $("body").click(function(){
     xAxis : {
         field : ["xfield"]
     }
+
 }
     bar.reset({
         data : data1,
         options:options
     })
-
     bar.resize()
 })
 
@@ -96,7 +104,7 @@ $("body").click(function(){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
+                <div id="canvasTest" style='width:600px;height:300px;border:1px solid red'></div>
             </div>
 
             </div>

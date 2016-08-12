@@ -329,10 +329,10 @@ define('chartx/chart/bar/3d/graphs',
                                 var _depth = me.root._back._depth;
                                 var _rectH = [[_left, _top, _depth], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0], [_left, _bottom, 0], [_left, _bottom, _depth]];
 
-                                if (h <= preLen - 1) {
-                                    hoverRect = groupH.getChildById("bhr_polygon_" + h);
-                                    hoverRect.context.pointList = _rectH
-                                } else {
+                                //if (h <= preLen - 1) {
+                                //    hoverRect = groupH.getChildById("bhr_polygon_" + h);
+                                //    hoverRect.context.pointList = _rectH
+                                //} else {
 
 
                                     hoverRect = groupH.getChildById("bhr_polygon_" + h) ||
@@ -348,7 +348,6 @@ define('chartx/chart/bar/3d/graphs',
                                         }
                                     });
                                     hoverRect.context.pointList = _rectH;
-
                                     //toto:与back的深度一致
                                     //hoverRect.z = -100;
 
@@ -362,7 +361,7 @@ define('chartx/chart/bar/3d/graphs',
                                     hoverRect.on("panstart mouseover mousemove mouseout click", function (e) {
                                         e.eventInfo = me._getInfoHandler(this, e);
                                     });
-                                }
+                               // }
                             }
                             ;
                         } else {
@@ -481,7 +480,8 @@ define('chartx/chart/bar/3d/graphs',
                                 if (h <= preLen - 1) {
                                     infosp = txtGroupH.getChildById("infosp_" + i + "_" + h);
                                 } else {
-                                    infosp = new Canvax.Display.Sprite({
+                                    infosp = txtGroupH.getChildById("infosp_" + i + "_" + h) ||
+                                        new Canvax.Display.Sprite({
                                         id: "infosp_" + i + "_" + h,
                                         context: {
                                             visible: false
@@ -490,6 +490,7 @@ define('chartx/chart/bar/3d/graphs',
                                     infosp._hGroup = h;
                                     txtGroupH.addChild(infosp);
                                 }
+                                infosp.noSkip = true;
                                 ;
 
                                 if (vLen > 1) {
@@ -527,6 +528,7 @@ define('chartx/chart/bar/3d/graphs',
                                                 strokeStyle: me.text.strokeStyle
                                             }
                                         });
+                                        txt.z = -me.depth * 0.5;
                                         infosp.addChild(txt);
                                     }
                                     ;
@@ -545,6 +547,7 @@ define('chartx/chart/bar/3d/graphs',
                                                 fillStyle: "#999"
                                             }
                                         });
+                                        txt.z = -me.depth * 0.5;
                                         infoWidth += txt.getTextWidth() + 2;
                                         infosp.addChild(txt);
                                     }
@@ -556,10 +559,11 @@ define('chartx/chart/bar/3d/graphs',
                                 infosp._centerX = rectData.x;
                                 infosp.context.width = infoWidth;
                                 infosp.context.height = infoHeight;
+                                infosp.context.x = rectData.x - infoWidth / 2;
 
                                 if (!me.animation) {
-                                    infosp.context.y = finalPos.y - infoHeight;
-                                    infosp.context.x = rectData.x - infoWidth / 2;
+                                    infosp.context.y = finalPos.y - infoHeight - 15;
+                                    //infosp.context.x = rectData.x - infoWidth / 2;
                                     infosp.context.visible = true;
                                 }
 
@@ -620,7 +624,7 @@ define('chartx/chart/bar/3d/graphs',
 
 
             },
-            _updateInfoTextPos: function (el) {
+            _updateInfoTextPos: function (el, index) {
                 if (this.root.type == "horizontal") {
                     return;
                 }
@@ -636,9 +640,15 @@ define('chartx/chart/bar/3d/graphs',
                     }
                     ;
                 });
-                el.context.x = el._centerX - infoWidth / 2 + 1;
+                //el.context.x = el._centerX - infoWidth / 2 + 1;
+
                 el.context.width = infoWidth;
                 el.context.height = infoHeight;
+                if (index === 0) {
+                    this.root._to3d(el);
+                }
+
+
             },
             /**
              * 生长动画
@@ -747,10 +757,10 @@ define('chartx/chart/bar/3d/graphs',
                             if (self.root.type == "horizontal") {
                                 infosp.context.x = infosp._finalX;
                             }
-                            ;
+
 
                             infosp.animate({
-                                y: infosp._finalY,
+                                y: infosp._finalY-15,
                                 x: infosp._finalX
                             }, {
                                 duration: options.duration,
@@ -762,8 +772,7 @@ define('chartx/chart/bar/3d/graphs',
                                 onComplete: function () {
                                 }
                             });
-
-                            _.each(infosp.children, function (txt) {
+                            _.each(infosp.children, function (txt, index) {
                                 if (txt._text) {
                                     if (txt._tweenObj) {
                                         AnimationFrame.destroyTween(txt._tweenObj);
@@ -776,23 +785,28 @@ define('chartx/chart/bar/3d/graphs',
                                         to: {
                                             v: txt._text
                                         },
-                                        duration: options.duration + 300,
+                                        duration: options.duration,
                                         delay: h * options.delay,
-                                        onUpdate: function () {
-                                            var content = this.v;
-                                            if (_.isFunction(self.text.format)) {
-                                                content = self.text.format(content);
-                                            } else if (_.isNumber(content)) {
-                                                content = Tools.numAddSymbol(parseInt(content));
+                                        onUpdate: (function (txt, index) {
+
+                                            return function () {
+                                                var content = this.v;
+                                                if (_.isFunction(self.text.format)) {
+                                                    content = self.text.format(content);
+                                                } else if (_.isNumber(content)) {
+                                                    content = Tools.numAddSymbol(parseInt(content));
+                                                }
+                                                ;
+                                                txt.resetText(content);
+                                                if (txt.parent) {
+                                                    self._updateInfoTextPos(txt.parent, index);
+                                                } else {
+                                                    txt.destroy();
+                                                }
                                             }
-                                            ;
-                                            txt.resetText(content);
-                                            if (txt.parent) {
-                                                self._updateInfoTextPos(txt.parent);
-                                            } else {
-                                                txt.destroy();
-                                            }
-                                        }
+                                        })(txt, index),
+
+
                                     })
                                 }
                                 ;
