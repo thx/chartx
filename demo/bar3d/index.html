@@ -41,6 +41,11 @@ var data= [
 
 ];
 var options = {
+    type : "3d",
+    rotation:{
+       x : 27,
+       y : 28
+    },
     yAxis : {
         field : [ ["uv","pv"] , "click"],
         //enabled : false
@@ -48,17 +53,37 @@ var options = {
     xAxis : {
         field : ["xfield"]
     },
-    legend : {
-        tips : {
-            enabled:true,
-            content : function(e){
-
-            }
-        }
+    graphs : {
+       depth : 50
+    },
+    back : {
+        depth : 100
     }
 };
 Chartx.bar("canvasTest" , data , options).then(function(bar){
+ //测试旋转
+                var domY=document.getElementById('yAxis');
+                var domX=document.getElementById('xAxis');
 
+                domY.onchange=function(){
+                    document.getElementById('yAxis_value').innerHTML=this.value;
+                    bar._graphs.animation=false;
+                    bar._rotation.x = domX.value;
+                    bar._rotation.y = domY.value;
+                    bar._rotationCamera();
+                    bar._startDraw();
+                    bar.fire('_to3d');
+
+                };
+                domX.onchange = function () {
+                    document.getElementById('xAxis_value').innerHTML = this.value;
+                    bar._graphs.animation=false;
+                    bar._rotation.x = domX.value;
+                    bar._rotation.y = domY.value;
+                    bar._rotationCamera();
+                    bar._startDraw();
+                    bar.fire('_to3d');
+                };
 });
 
 
@@ -77,6 +102,12 @@ Chartx.bar("canvasTest" , data , options).then(function(bar){
                 </div>
                 <div  class="test-c">
                     <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+                <div style="margin:10px">
+                    <label>沿X轴旋转: <b id="xAxis_value">27</b></label>
+                    <input type="range" min="15" max="45" value="27" id="xAxis">
+                    <label>沿Y轴旋转: <b id="yAxis_value">28</b></label>
+                    <input type="range" min="15" max="45" value="28" id="yAxis">
                 </div>
 
             </div>

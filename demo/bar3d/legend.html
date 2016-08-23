@@ -41,6 +41,16 @@ var data= [
 
 ];
 var options = {
+    type : "3d",
+    legend : {
+        tips : {
+            enabled:true
+        }
+    },
+    rotation:{
+       x : 27,
+       y : 28
+    },
     yAxis : {
         field : [ ["uv","pv"] , "click"],
         //enabled : false
@@ -48,18 +58,14 @@ var options = {
     xAxis : {
         field : ["xfield"]
     },
-    legend : {
-        tips : {
-            enabled:true,
-            content : function(e){
-
-            }
-        }
+    graphs : {
+       depth : 50
+    },
+    back : {
+        depth : 100
     }
 };
-Chartx.bar("canvasTest" , data , options).then(function(bar){
-
-});
+Chartx.bar("canvasTest" , data , options);
 
 
 </textarea></form>
