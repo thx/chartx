@@ -76,6 +76,7 @@ module.exports = function(grunt) {
              ],
              dest : bc+"chart/bar/index.js"
          },
+
          bar_3d:{
              src : [
                  bc+"chart/bar/3d/graphs.js",
