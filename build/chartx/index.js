@@ -949,7 +949,8 @@ define(
                         x: me.pos.x,
                         y: me.pos.y
                     }
-                }); 
+                });
+                me.sprite.noSkip=true;
                 me.dataZoomBg = new Canvax.Display.Sprite({
                     id : "dataZoomBg"
                 });
