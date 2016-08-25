@@ -54,6 +54,12 @@ module.exports = function(grunt) {
              ],
              dest: bc+'index.js'
          },
+         utils:{
+             src: [
+                 bc+"utils/math3d/gl-matrix.js",
+             ],
+             dest: bc+"utils/math3d/gl-matrix.js"
+         } ,
          kimi : {
              src: [
                 //'chartx/index.js',
