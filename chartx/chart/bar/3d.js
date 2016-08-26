@@ -12,15 +12,12 @@ define("chartx/chart/bar/3d",
         'chartx/chart/bar/3d/back',
         'chartx/chart/bar/3d/graphs',
         "canvax/shape/Shapes",
-        'chartx/utils/math3d/gl-matrix'
-
+        'chartx/utils/math3d/vec3',
+        'chartx/utils/math3d/vec4',
+        'chartx/utils/math3d/mat4',
+        'chartx/utils/math3d/quat',
     ],
-    function (Chart, Tools, DataSection, Tip, dataFormat, DataZoom, Legend, xAxis, yAxis, Back, Graphs, Shapes, glMatrix) {
-
-        var Vector3 = glMatrix.vec3;
-        var Vector4 = glMatrix.vec4;
-        var Matrix = glMatrix.mat4;
-        var Quaternion=glMatrix.quat;
+    function (Chart, Tools, DataSection, Tip, dataFormat, DataZoom, Legend, xAxis, yAxis, Back, Graphs, Shapes, Vector3, Vector4,Matrix,Quaternion) {
 
 
         var Canvax = Chart.Canvax;
