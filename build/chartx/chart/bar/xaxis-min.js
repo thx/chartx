@@ -1,0 +1,1 @@
+define("chartx/chart/bar/xaxis",["chartx/components/xaxis/xAxis"],function(a){var b=function(a,c){this.xDis1=0,b.superclass.constructor.apply(this,arguments)};return Chartx.extend(b,a,{_trimXAxis:function(a,b){var c=[];this.xDis1=b/a.length;for(var d=0,e=a.length;d<e;d++){var f={content:a[d],x:this.xDis1*(d+1)-this.xDis1/2};c.push(f)}return c}}),b});
