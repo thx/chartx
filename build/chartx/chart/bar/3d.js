@@ -7,15 +7,12 @@ define('chartx/chart/bar/3d/graphs',
         "canvax/animation/AnimationFrame",
         "canvax/shape/BrokenLine",
         "canvax/shape/Shapes",
-        "chartx/utils/math3d/gl-matrix",
+        "chartx/utils/math3d/vec3",
         "chartx/utils/colorformat",
         "canvax/animation/AnimationFrame"
     ],
-    function (Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine, Shapes, glMatrix, ColorFormat, AnimationFrame) {
-
-        var Vector3 = glMatrix.vec3;
-        var Vector4 = glMatrix.vec4;
-        var Matrix = glMatrix.mat4;
+    function (Canvax, Rect, Tools, Theme, AnimationFrame, BrokenLine, Shapes, Vector3, ColorFormat, AnimationFrame) {
+        
 
         var Graphs = function (root) {
 
