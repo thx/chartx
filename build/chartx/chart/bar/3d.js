@@ -3529,7 +3529,6 @@ define("chartx/chart/bar/3d",
                             y: o[1] + _shapes.context.y
                         });
                         _globalPosition.push(_pos);
-                        console.log(_shapes.id,_shapes.context.pointList[i][2]);
                     });
                 } else {
                     _globalPosition = _rootSprite.localToGlobal({
