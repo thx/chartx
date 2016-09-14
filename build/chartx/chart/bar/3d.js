@@ -324,37 +324,21 @@ define('chartx/chart/bar/3d/graphs',
                                 var _top = (me.sort && me.sort == "desc") ? 0 : -me.h;
                                 var _bottom = _top + me.h;
                                 var _depth = me.root._back._depth;
-                                var _rectH = [[_left, _top, _depth], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0], [_left, _bottom, 0], [_left, _bottom, _depth]];
-
-                                //if (h <= preLen - 1) {
-                                //    hoverRect = groupH.getChildById("bhr_polygon_" + h);
-                                //    hoverRect.context.pointList = _rectH
-                                //} else {
 
 
-                                    hoverRect = groupH.getChildById("bhr_polygon_" + h) ||
-                                        new Shapes.Polygon({
-                                        id: "bhr_polygon_" + h,
-                                        pointChkPriority: false,
-                                        context: {
-                                            x: 0,
-                                            y: 0,
-                                            pointList:_rectH,
-                                            fillStyle: "#ccc",
-                                            globalAlpha: 0
-                                        }
+                                hoverRect = groupH.getChildById("bhr_polygon_" + h) ||
+                                    new Canvax.Display.Sprite({
+                                        id: "bhr_polygon_" + h
                                     });
-                                    hoverRect.context.pointList = _rectH;
+
+                                me.drawHoverCube(hoverRect, _left, _right, _top, _bottom, _depth);
+
                                     //toto:与back的深度一致
                                     //hoverRect.z = -100;
 
                                     groupH.addChild(hoverRect);
-                                    hoverRect.hover(function (e) {
-                                        this.context.globalAlpha = 0.5;
-                                    }, function (e) {
-                                        this.context.globalAlpha = 0;
-                                    });
-                                    hoverRect.iGroup = -1, hoverRect.iNode = h, hoverRect.iLay = -1;
+                               
+                                hoverRect.iGroup = -1, hoverRect.iNode = h, hoverRect.iLay = -1;
                                     hoverRect.on("panstart mouseover mousemove mouseout click", function (e) {
                                         e.eventInfo = me._getInfoHandler(this, e);
                                     });
@@ -855,7 +839,57 @@ define('chartx/chart/bar/3d/graphs',
                 });
                 return arr;
             },
+            drawHoverCube: function (sprite, _left, _right, _top, _bottom, _depth) {
+                var me = this;
+                var _strokeStyle = null;
+                var _frontFillStyle = "#ccc";
+                var _topFillStyle = "#ccc";
+                var _sideFillStyle = "#ccc";
+                var _globalAlpha = 0.3
 
+                //左面
+                var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
+                var leftFace = me.drawFace("bhr_polygon_left", _pointList, _sideFillStyle, _strokeStyle, sprite);
+
+                //前面
+                var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
+                var frontFace = me.drawFace("bhr_polygon_front", _pointList, _frontFillStyle, _strokeStyle, sprite);
+
+                //右侧
+                var _pointList = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
+                var rightFace = me.drawFace("bhr_polygon_right", _pointList, _sideFillStyle, _strokeStyle, sprite);
+
+
+                //顶部
+                var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
+                var topFace = me.drawFace("bhr_polygon_top", _pointList, _topFillStyle, _strokeStyle, sprite);
+
+                var _hoverEnter = function (e) {
+                    leftFace.context.globalAlpha = _globalAlpha;
+                    frontFace.context.globalAlpha = _globalAlpha;
+                    rightFace.context.globalAlpha = _globalAlpha;
+                    topFace.context.globalAlpha = _globalAlpha;
+
+                };
+                var _hoverLeave = function (e) {
+                    leftFace.context.globalAlpha = 0;
+                    frontFace.context.globalAlpha = 0;
+                    rightFace.context.globalAlpha = 0;
+                    topFace.context.globalAlpha = 0;
+                };
+                _hoverLeave();
+
+
+                leftFace.hover(_hoverEnter, _hoverLeave);
+                frontFace.hover(_hoverEnter, _hoverLeave);
+                frontFace.hover(_hoverEnter, _hoverLeave);
+                frontFace.hover(_hoverEnter, _hoverLeave);
+
+                sprite.addChild(leftFace);
+                sprite.addChild(frontFace);
+                sprite.addChild(rightFace);
+                sprite.addChild(topFace);
+            },
             drawCube: function (sprite, rectCxt) {
 
                 var me = this;
