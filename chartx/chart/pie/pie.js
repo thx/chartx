@@ -64,6 +64,8 @@
                 };
                 this._configData();
                 this._configColors();
+
+                this.clear();
             },
             clear: function () {
                 // this.domContainer.removeChildren()

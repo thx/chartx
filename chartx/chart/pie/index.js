@@ -34,8 +34,7 @@
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
                 this._setLengend();
-            },
-            draw: function () {
+
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
                 });
@@ -47,8 +46,10 @@
                 });
                 this.canvax.addChild(this.stageTip);
                 this.stageTip.toFront();
-                this.stage.addChild(this.core);
-
+                
+            },
+            draw: function () {
+                debugger
                 this._initModule(); //初始化模块
                 this._startDraw(); //开始绘图
                 this._drawEnd(); //绘制结束，添加到舞台  
@@ -312,6 +313,7 @@
                 this.fire('complete', {
                     data: this.getList()
                 });
+                this.stage.addChild(this.core);
             },
             remove: function (field) {
                 var me = this;
