@@ -215,6 +215,7 @@ define(
             },
             //data1 == [1,2,3,4]
             _initData: function(data , data1) {
+                debugger
                 var arr = this._setDataSection(data , data1);
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {

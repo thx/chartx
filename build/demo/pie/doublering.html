@@ -47,76 +47,45 @@ var options = {
     yAxis : {
         field : "value"
     },
-    tips : {
-        //enabled  : false,
-        content : function(info){
-            return info.name+"："+info.percentage+"%"
-        }
-    },
     //周边tip
     dataLabel: {
-        //enabled: false,
-        //是否绘制连接线(注意：此配置仅限于扇形块比较分散，若扇形比较紧密时，无连线会导致识别混淆)
-        //allowLine:false,
-        //format: '{point.name} : {point.y}' //和下面等价
-        format : function( data ){
-            return "<div><span>"+data.name+"</span>：<span>"+data.y+"（"+ data.percentage +"%）</span></div>"
-        }
-
+        enabled: false
     },
-    //饼图的起始角度[有效值范围0-360度，默认值0度
-    //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
-    startAngle:-90,
-    //数据排序，默认按用户给定顺序[desc/asc]
+    event : {
+        enabled: false
+    },
     sort: 'desc',
-    //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
-    allowPointSelect: true,
-    //是否允许动画
-    animation: true,
     //内圆半径
-    innerRadius: 50,
-    //颜色序列,若不设置，会有默认的颜色序列
-    //colors:['red', 'yellow', 'blue']
+    innerRadius: 280,
 
-    checked : {
-        enabled : true
-    }
 };
-Chartx.pie("canvasTest" , data , options).then(function( pie ){
-    window.pie = pie;
-    //pie.slice(3);
-    pie.on('focus' , function (e) {
-        console.log(e.type);
-    });
-    pie.on('unfocus' , function (e) {
-        console.log(e.type);
-    });
-    pie.on('click',function(e){
-        console.log(e.type);
-    });
-    pie.on('mousedown',function(e){
-        console.log(e.type);
-    });
-    pie.on('mouseup',function(e){
-        console.log(e.type);
-    });
-    pie.on('mousemove',function(e){
-        console.log(e.type);
-    });
-    pie.on('dblclick',function(e){
-        console.log(e.type);
-    });
+Chartx.pie("out-ring" , data , options).then(function( pieOut ){
 
-    window.onresize=function(){
-        debugger
-        pie.resize();
-    }
+    options.innerRadius = 0;
+    options.event.enabled = true;
+    options.tips = {
+        enabled  : true,
+        content : function( info ){
+            var node = {
+                out : pieOut.getByIndex( info.iNode ),
+                in : info
+            };
+            
+            var str = node.in.name+"："+node.in.percentage+"%" + "<br />";
+            str += node.out.name+"："+node.out.percentage+"%" + "<br />";
+            return str;
+        }
+    };
 
-    /*
-    _.each( pie.getLabelList() , function( pos ){
-    $("#canvasTest").append("<div style='position:absolute;width:"+pos.width+"px;height:"+pos.height+"px;left:"+pos.x+"px;top:"+pos.y+"px;border:1px solid red;'></div>");
-    } );
-    */
+    Chartx.pie("in-ring" , data , options).then(function( pieIn ){
+        pieIn.on("focus" , function(e){
+            pieOut.focusAt( e.eventInfo.iNode );
+        });
+        pieIn.on("unfocus" , function(e){
+            pieOut.unfocusAt( e.eventInfo.iNode );
+        });
+    });
+    
 });
 </textarea></form>
 
@@ -128,11 +97,34 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
 
                 <h4>饼图（pie chart）- 基础饼图</h4>
                 <p>
-                    联系人：@自勉
+                    联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+                <style>
+                    .doublering {
+                        position: relative;
+                    }
+                    #out-ring {
+                        position: absolute;
+                        top:0;left:0;
+                        width:400px;height:400px;
+                        opacity:.5;
+                    }
+                    #in-ring {
+                        position: absolute;
+                        top:100px;left:100px;
+                        width:200px;height:200px;
+                    }
+                </style>
+                <div class="doublering">
+                    <div id='out-ring'>
+                        
+                    </div>
+                    <div id='in-ring'>
+                        
+                    </div>
+                </div>
             </div>
 
             </div>

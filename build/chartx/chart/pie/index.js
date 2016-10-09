@@ -64,6 +64,8 @@ define(
                 };
                 this._configData();
                 this._configColors();
+
+                this.clear();
             },
             clear: function () {
                 // this.domContainer.removeChildren()
@@ -79,7 +81,7 @@ define(
             _configData: function () {
                 var self = this;
                 self.total = 0;
-                self.angleOffset = _.isNaN(self.startAngle) ? 0 : self.startAngle;
+                self.angleOffset = _.isNaN(self.startAngle) ? -90 : self.startAngle;
                 self.angleOffset = self.angleOffset % 360;
                 self.currentAngle = 0 + self.angleOffset;
                 var limitAngle = 360 + self.angleOffset;
@@ -802,7 +804,8 @@ define(
                         sector.__dataIndex = i;
                         sector.__isSliced = data[i].sliced;
                         //扇形事件
-                        sector.hover(function (e) {
+                        self.event.enabled && sector.hover(function (e) {
+
                             var me = this;
                             if (self.tips.enabled) {
                                 self._showTip(e, this.__dataIndex);
@@ -813,9 +816,13 @@ define(
                                 self.focus(this.__dataIndex);
                             }
                         }, function (e) {
+                        
                             if (self.tips.enabled) {
                                 self._hideTip(e);
                             };
+
+                            //上面的_showTip会设置一下eventInfo，所以这里必须显式的调用下_geteventInfo来设置一下eventInfo
+                            self._geteventInfo(e, this.__dataIndex);
                             var secData = self.data.data[this.__dataIndex];
                             if (!secData.checked) {
                                 self._sectorUnfocus(e, this.__dataIndex);
@@ -823,7 +830,7 @@ define(
                             }
                         });
 
-                        sector.on('mousedown mouseup click mousemove dblclick', function (e) {
+                        self.event.enabled && sector.on('mousedown mouseup click mousemove dblclick', function (e) {
                             self._geteventInfo(e, this.__dataIndex);
                             if (e.type == "click") {
                                 self.secClick(this, e);
@@ -834,9 +841,11 @@ define(
                                 }
                             };
                         });
+
                         if (!data[i].ignored) {
                             self.sectorsSp.addChildAt(sector, 0);
-                        }
+                        };
+
                         moreSecData = {
                             name: data[i].name,
                             value: data[i].y,
@@ -913,12 +922,9 @@ define(
                 this.ignoreFields = [];
                 this._opts = opts;
                 this.options = opts;
-                this.config = {
-                    mode: 1,
-                    event: {
-                        enabled: 1
-                    }
-                };
+                this.event = {
+                    enabled : true
+                }
                 this.xAxis = {
                     field: null
                 };
@@ -926,10 +932,10 @@ define(
                     field: null
                 };
                 _.deepExtend(this, opts);
+
                 this.dataFrame = this._initData(data, this);
                 this._setLengend();
-            },
-            draw: function () {
+
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
                 });
@@ -941,8 +947,9 @@ define(
                 });
                 this.canvax.addChild(this.stageTip);
                 this.stageTip.toFront();
-                this.stage.addChild(this.core);
-
+                
+            },
+            draw: function () {
                 this._initModule(); //初始化模块
                 this._startDraw(); //开始绘图
                 this._drawEnd(); //绘制结束，添加到舞台  
@@ -1148,9 +1155,10 @@ define(
                     //要预留clickMoveDis位置来hover sector 的时候外扩
                     r -= r / 11;
                 };
+                r = parseInt( r );
 
                 var r0 = parseInt(self.innerRadius || 0);
-                var maxInnerRadius = r * 2 / 3;
+                var maxInnerRadius = r - 20;
                 r0 = r0 >= 0 ? r0 : 0;
                 r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
                 var pieX = w / 2 + this.padding.left;
@@ -1165,6 +1173,7 @@ define(
                     data: self.dataFrame,
                     //dataLabel: self.dataLabel, 
                     animation: self.animation,
+                    event: self.event,
                     startAngle: parseInt(self.startAngle),
                     colors: self.colors,
                     focusCallback: {
@@ -1184,7 +1193,7 @@ define(
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
-                self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
+                self.event.enabled && self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
                     self.fire(e.type, e);
                 });
             },
@@ -1206,6 +1215,7 @@ define(
                 this.fire('complete', {
                     data: this.getList()
                 });
+                this.stage.addChild(this.core);
             },
             remove: function (field) {
                 var me = this;
