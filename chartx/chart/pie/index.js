@@ -254,10 +254,19 @@
                 };
                 r = parseInt( r );
 
+                //某些情况下容器没有高宽等，导致r计算为负数，会报错
+                if( r < 0 ){
+                    r = 1;
+                };
+
                 var r0 = parseInt(self.innerRadius || 0);
                 var maxInnerRadius = r - 20;
                 r0 = r0 >= 0 ? r0 : 0;
                 r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
+                if( r0 < 0 ){
+                    r0 = 0;
+                };
+
                 var pieX = w / 2 + this.padding.left;
                 var pieY = h / 2 + this.padding.top;
                 self.pie = {
