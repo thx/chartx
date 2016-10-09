@@ -81,7 +81,7 @@
             _configData: function () {
                 var self = this;
                 self.total = 0;
-                self.angleOffset = _.isNaN(self.startAngle) ? 0 : self.startAngle;
+                self.angleOffset = _.isNaN(self.startAngle) ? -90 : self.startAngle;
                 self.angleOffset = self.angleOffset % 360;
                 self.currentAngle = 0 + self.angleOffset;
                 var limitAngle = 360 + self.angleOffset;
@@ -804,7 +804,8 @@
                         sector.__dataIndex = i;
                         sector.__isSliced = data[i].sliced;
                         //扇形事件
-                        sector.hover(function (e) {
+                        self.event.enabled && sector.hover(function (e) {
+
                             var me = this;
                             if (self.tips.enabled) {
                                 self._showTip(e, this.__dataIndex);
@@ -815,9 +816,13 @@
                                 self.focus(this.__dataIndex);
                             }
                         }, function (e) {
+                        
                             if (self.tips.enabled) {
                                 self._hideTip(e);
                             };
+
+                            //上面的_showTip会设置一下eventInfo，所以这里必须显式的调用下_geteventInfo来设置一下eventInfo
+                            self._geteventInfo(e, this.__dataIndex);
                             var secData = self.data.data[this.__dataIndex];
                             if (!secData.checked) {
                                 self._sectorUnfocus(e, this.__dataIndex);
@@ -825,7 +830,7 @@
                             }
                         });
 
-                        sector.on('mousedown mouseup click mousemove dblclick', function (e) {
+                        self.event.enabled && sector.on('mousedown mouseup click mousemove dblclick', function (e) {
                             self._geteventInfo(e, this.__dataIndex);
                             if (e.type == "click") {
                                 self.secClick(this, e);
@@ -836,9 +841,11 @@
                                 }
                             };
                         });
+
                         if (!data[i].ignored) {
                             self.sectorsSp.addChildAt(sector, 0);
-                        }
+                        };
+
                         moreSecData = {
                             name: data[i].name,
                             value: data[i].y,

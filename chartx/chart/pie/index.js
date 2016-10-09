@@ -19,12 +19,9 @@
                 this.ignoreFields = [];
                 this._opts = opts;
                 this.options = opts;
-                this.config = {
-                    mode: 1,
-                    event: {
-                        enabled: 1
-                    }
-                };
+                this.event = {
+                    enabled : true
+                }
                 this.xAxis = {
                     field: null
                 };
@@ -32,6 +29,7 @@
                     field: null
                 };
                 _.deepExtend(this, opts);
+
                 this.dataFrame = this._initData(data, this);
                 this._setLengend();
 
@@ -49,7 +47,6 @@
                 
             },
             draw: function () {
-                debugger
                 this._initModule(); //初始化模块
                 this._startDraw(); //开始绘图
                 this._drawEnd(); //绘制结束，添加到舞台  
@@ -255,9 +252,10 @@
                     //要预留clickMoveDis位置来hover sector 的时候外扩
                     r -= r / 11;
                 };
+                r = parseInt( r );
 
                 var r0 = parseInt(self.innerRadius || 0);
-                var maxInnerRadius = r * 2 / 3;
+                var maxInnerRadius = r - 20;
                 r0 = r0 >= 0 ? r0 : 0;
                 r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
                 var pieX = w / 2 + this.padding.left;
@@ -272,6 +270,7 @@
                     data: self.dataFrame,
                     //dataLabel: self.dataLabel, 
                     animation: self.animation,
+                    event: self.event,
                     startAngle: parseInt(self.startAngle),
                     colors: self.colors,
                     focusCallback: {
@@ -291,7 +290,7 @@
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
-                self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
+                self.event.enabled && self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
                     self.fire(e.type, e);
                 });
             },
