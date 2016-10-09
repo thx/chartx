@@ -54,6 +54,12 @@ module.exports = function(grunt) {
              ],
              dest: bc+'index.js'
          },
+         utils:{
+             src: [
+                 bc+"utils/math3d/gl-matrix.js",
+             ],
+             dest: bc+"utils/math3d/gl-matrix.js"
+         } ,
          kimi : {
              src: [
                 //'chartx/index.js',
@@ -75,6 +81,19 @@ module.exports = function(grunt) {
                  
              ],
              dest : bc+"chart/bar/index.js"
+         },
+
+         bar_3d:{
+             src : [
+                 bc+"chart/bar/3d/graphs.js",
+                 bc+"chart/bar/3d/xaxis.js",
+                 bc+"chart/bar/3d/yaxis.js",
+                 bc+"chart/bar/3d/back.js",
+
+                 bc+"chart/bar/3d.js"
+
+             ],
+             dest : bc+"chart/bar/3d.js"
          },
          /*
          bar_h : {

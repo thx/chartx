@@ -5058,6 +5058,10 @@ define(
         this._cid = new Date().getTime() + "_" + Math.floor(Math.random()*100); 
         
         this._rootDom   = Base.getEl(opt.el);
+        if( !this._rootDom ){
+            //如果宿主对象不存在,那么，我也懒的画了
+            return;
+        }
         this.width      = parseInt("width"  in opt || this._rootDom.offsetWidth  , 10); 
         this.height     = parseInt("height" in opt || this._rootDom.offsetHeight , 10); 
 

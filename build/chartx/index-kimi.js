@@ -727,7 +727,8 @@ define(
                         x: me.pos.x,
                         y: me.pos.y
                     }
-                }); 
+                });
+                me.sprite.noSkip=true;
                 me.dataZoomBg = new Canvax.Display.Sprite({
                     id : "dataZoomBg"
                 });
@@ -1485,7 +1486,7 @@ define(
                            me.shapeBg.context.globalAlpha = this.alpha;
                        } ).repeat(Infinity).delay(800)
                        .onComplete(function(){
-                           //debugger;
+                           
                        })
                        .easing( me.easing )
                        .start();
@@ -1590,6 +1591,7 @@ define(
                 //iNode         : 0  //数据点的索引对应二维数据map的y
             };
             this.prefix  = [];
+            this.positionInRange = false; //tip的浮层是否限定在画布区域
             this.init(opt);
         }
         Tip.prototype = {
@@ -1742,12 +1744,14 @@ define(
              *并且校验是否超出了界限
              */
             _checkX : function( x ){
-                var w = this.dW + 2; //后面的2 是 两边的linewidth
-                if( x < 0 ){
-                    x = 0;
-                }
-                if( x + w > this.cW ){
-                    x = this.cW - w;
+                if( this.positionInRange ){
+                    var w = this.dW + 2; //后面的2 是 两边的linewidth
+                    if( x < 0 ){
+                        x = 0;
+                    }
+                    if( x + w > this.cW ){
+                        x = this.cW - w;
+                    }
                 }
                 return x
             },
@@ -1757,12 +1761,14 @@ define(
              *并且校验是否超出了界限
              */
             _checkY : function( y ){
-                var h = this.dH + 2; //后面的2 是 两边的linewidth
-                if( y < 0 ){
-                    y = 0;
-                }
-                if( y + h > this.cH ){
-                    y = this.cH - h;
+                if(this.positionInRange){
+                    var h = this.dH + 2; //后面的2 是 两边的linewidth
+                    if( y < 0 ){
+                        y = 0;
+                    }
+                    if( y + h > this.cH ){
+                        y = this.cH - h;
+                    }
                 }
                 return y
             }
@@ -2448,6 +2454,7 @@ define(
             },
             //data1 == [1,2,3,4]
             _initData: function(data , data1) {
+                
                 var arr = this._setDataSection(data , data1);
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {

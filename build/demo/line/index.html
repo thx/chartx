@@ -58,15 +58,10 @@ var options = {
     },
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["pv"  ]
+        field : "pv"
     },
     xAxis : {
         field : "xfield"
-    },
-    graphs : {
-        line : {
-            strokeStyle : ["red","blue"]
-        }
     }
 };
 
@@ -90,7 +85,7 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
+                <div id="canvasTest" style='width:100%;height:300px;'></div>
             </div>
 
             </div>

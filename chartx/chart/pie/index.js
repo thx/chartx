@@ -19,12 +19,9 @@
                 this.ignoreFields = [];
                 this._opts = opts;
                 this.options = opts;
-                this.config = {
-                    mode: 1,
-                    event: {
-                        enabled: 1
-                    }
-                };
+                this.event = {
+                    enabled : true
+                }
                 this.xAxis = {
                     field: null
                 };
@@ -32,10 +29,10 @@
                     field: null
                 };
                 _.deepExtend(this, opts);
+
                 this.dataFrame = this._initData(data, this);
                 this._setLengend();
-            },
-            draw: function () {
+
                 this.stageBg = new Canvax.Display.Sprite({
                     id: 'bg'
                 });
@@ -47,8 +44,9 @@
                 });
                 this.canvax.addChild(this.stageTip);
                 this.stageTip.toFront();
-                this.stage.addChild(this.core);
-
+                
+            },
+            draw: function () {
                 this._initModule(); //初始化模块
                 this._startDraw(); //开始绘图
                 this._drawEnd(); //绘制结束，添加到舞台  
@@ -254,11 +252,21 @@
                     //要预留clickMoveDis位置来hover sector 的时候外扩
                     r -= r / 11;
                 };
+                r = parseInt( r );
+
+                //某些情况下容器没有高宽等，导致r计算为负数，会报错
+                if( r < 0 ){
+                    r = 1;
+                };
 
                 var r0 = parseInt(self.innerRadius || 0);
-                var maxInnerRadius = r * 2 / 3;
+                var maxInnerRadius = r - 20;
                 r0 = r0 >= 0 ? r0 : 0;
                 r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
+                if( r0 < 0 ){
+                    r0 = 0;
+                };
+
                 var pieX = w / 2 + this.padding.left;
                 var pieY = h / 2 + this.padding.top;
                 self.pie = {
@@ -271,6 +279,7 @@
                     data: self.dataFrame,
                     //dataLabel: self.dataLabel, 
                     animation: self.animation,
+                    event: self.event,
                     startAngle: parseInt(self.startAngle),
                     colors: self.colors,
                     focusCallback: {
@@ -290,7 +299,7 @@
 
                 self._pie = new Pie(self.pie, self.tips, self.canvax.getDomContainer());
 
-                self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
+                self.event.enabled && self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
                     self.fire(e.type, e);
                 });
             },
@@ -312,6 +321,7 @@
                 this.fire('complete', {
                     data: this.getList()
                 });
+                this.stage.addChild(this.core);
             },
             remove: function (field) {
                 var me = this;
