@@ -1,9 +1,10 @@
 define(
     "chartx/chart/bar/yaxis",
     [
+        "canvax/index",
         "chartx/components/yaxis/yAxis"
     ],
-    function( yAxisBase ){
+    function( Canvax , yAxisBase ){
         var yAxis = function( opt , data , data1){
             yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
         };

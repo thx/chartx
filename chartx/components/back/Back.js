@@ -3,12 +3,14 @@ define(
     [
          "canvax/index",
          "canvax/shape/Line",
+         "canvax/shape/Rect",
          "chartx/utils/tools"
     ],
-    function( Canvax, Line, Tools){
+    function( Canvax, Line, Rect , Tools){
         var Back = function(opt){
             this.w       = 0;   
             this.h       = 0;
+            this.root    = null; //该组件被添加到的目标图表项目，
     
             this.pos     = {
                 x : 0,
@@ -71,8 +73,8 @@ define(
             setY:function($n){
                 this.sprite.context.y = $n
             },
-    
-            draw : function(opt){
+            draw : function(opt , root){
+                this.root = root;
                 _.deepExtend( this , opt );
                 //this._configData(opt);
                 this._widget();
@@ -87,10 +89,28 @@ define(
                 var self  = this;
                 if(!this.enabled){
                     return
-                }
+                };
+                if( self.root && self.root._yAxis && self.root._yAxis.dataSectionGroup ){
+                    self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
+                    for( var g = 0 , gl=self.root._yAxis.dataSectionGroup.length ; g < gl ; g++ ){
+                        var yGroupHeight = self.root._yAxis.yGraphsHeight / gl ;
+                        var groupRect = new Rect({
+                            context : {
+                                x : 0,
+                                y : -yGroupHeight * g,
+                                width : self.w,
+                                height : -yGroupHeight,
+                                fillStyle : "#000",
+                                globalAlpha : 0.025 * (g%2)
+                            }
+                        });
+                        self.yGroupSp.addChild( groupRect );
+                    };
+                };
 
-                self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp)
-                self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp)
+                self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp);
+                self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
+                
    
                 //x轴方向的线集合
                 var arr = self.xAxis.data;
