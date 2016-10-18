@@ -2397,8 +2397,10 @@ define(
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {
 
-                if (this.data.length == 0)
+                if (this.data.length == 0 || this.sprite.getNumChildren() <=2 ){
+                    //压根没数据 或者 如果都只有两个节点，当然也不需要矫正了
                     return;
+                };
 
                 var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
                 if (popText) {
