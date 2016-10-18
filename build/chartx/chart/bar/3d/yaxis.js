@@ -168,7 +168,7 @@ define('chartx/chart/bar/3d/yaxis',
 
                 this.resize = false;
             },
-            tansValToPos : function( val ){
+            getYposFromVal : function( val ){
                 var max = this.dataSection[this.dataSection.length - 1];
                 var y = -(val - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
                 y = isNaN(y) ? 0 : parseInt(y);
@@ -181,7 +181,7 @@ define('chartx/chart/bar/3d/yaxis',
 
                     tmpData[a] = {
                         content: this.dataSection[a],
-                        y: this.tansValToPos( this.dataSection[a] )
+                        y: this.getYposFromVal( this.dataSection[a] )
                     };
                 }
 

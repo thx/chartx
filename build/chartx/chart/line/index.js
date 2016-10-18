@@ -1688,7 +1688,7 @@ define(
                         };
 
                         if( _y != undefined ){
-                            _y = g._yAxis.tansValToPos(_y);
+                            _y = g._yAxis.getYposFromVal(_y);
                         }
 
                     };
