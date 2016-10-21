@@ -826,7 +826,25 @@ define(
                                 }
                                 content = me.markLine.text.format(o)
                             }
-                        }
+                        };
+
+                        var _y = center;
+                    
+                        //如果markline有自己预设的y值
+                        if( me.markLine.y != undefined ){
+                            var _y = me.markLine.y;
+                            if(_.isFunction(_y)){
+                                _y = _y( yfieldFlat[a] );
+                            };
+                            if(_.isArray( _y )){
+                                _y = _y[ a ];
+                            };
+
+                            if( _y != undefined ){
+                                _y = me._yAxis.getYposFromVal(_y);
+                            }
+                        };
+
                         var o = {
                             w: me._xAxis.xGraphsWidth,
                             h: me._yAxis.yGraphsHeight,
@@ -836,7 +854,7 @@ define(
                             },
                             field: _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
                             line: {
-                                y: center,
+                                y: _y,
                                 list: [
                                     [0, 0],
                                     [me._xAxis.xGraphsWidth, 0]
