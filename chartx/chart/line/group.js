@@ -58,6 +58,10 @@ define(
             this._currPointList = []; //brokenline 动画中的当前状态
             this._bline = null;
 
+
+            //从配置里面转换后的一些私有属性
+            this.__lineStrokeStyle = null;
+
             this.init(opt)
         };
 
@@ -326,46 +330,47 @@ define(
                 var self = this;
             
                 var fill_gradient = null;
-                
-                if( self.fill.fillStyle ){
-                    if (_.isArray(self.fill.alpha)) {
-                        //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
-                        self.fill.alpha.length = 2;
-                        if (self.fill.alpha[0] == undefined) {
-                            self.fill.alpha[0] = 0;
-                        };
-                        if (self.fill.alpha[1] == undefined) {
-                            self.fill.alpha[1] = 0;
-                        };
+                var _fillStyle = self.fill.fillStyle;
 
-                        //从bline中找到最高的点
-                        var topP = _.min(self._bline.context.pointList, function(p) {
-                            return p[1]
-                        });
-                        //创建一个线性渐变
-                        fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
-
-                        var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
-                        var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
-                        fill_gradient.addColorStop(0, rgba0);
-
-                        var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
-                        fill_gradient.addColorStop(1, rgba1);
-
-                        return fill_gradient;
-                    };
-                    return self._getColor(self.fill.fillStyle);
-                } else {
-                    return null;
+                if( !_fillStyle ){
+                    //如果没有配置的fillStyle，那么就取对应的line.strokeStyle
+                    _fillStyle = self._getLineStrokeStyle("fillStyle")
                 }
-            },
-            _getLineStrokeStyle: function() {
-                var self = this;
-                /*
-                if (this.__lineStyleStyle) {
-                    return this.__lineStyleStyle;
+
+                _fillStyle || (_fillStyle = self._getColor(self.fill.fillStyle));
+
+                if (_.isArray(self.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+                    //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
+                    //如果拿回来的style已经是个gradient了，那么就不管了
+                    self.fill.alpha.length = 2;
+                    if (self.fill.alpha[0] == undefined) {
+                        self.fill.alpha[0] = 0;
+                    };
+                    if (self.fill.alpha[1] == undefined) {
+                        self.fill.alpha[1] = 0;
+                    };
+
+                    //从bline中找到最高的点
+                    var topP = _.min(self._bline.context.pointList, function(p) {
+                        return p[1]
+                    });
+                    //创建一个线性渐变
+                    fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+
+                    var rgb = ColorFormat.colorRgb( _fillStyle );
+                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                    fill_gradient.addColorStop(0, rgba0);
+
+                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                    fill_gradient.addColorStop(1, rgba1);
+
+                    _fillStyle = fill_gradient;
                 };
-                */
+            
+                return _fillStyle;
+            },
+            _getLineStrokeStyle: function( from ) {
+                var self = this;
                 
                 if( this.line.strokeStyle.lineargradient ){
                     //如果填充是一个线性渐变
@@ -373,35 +378,28 @@ define(
                     var topP = _.min(self._bline.context.pointList, function(p) {
                         return p[1]
                     });
-                    //var bottomP = _.max(self._bline.context.pointList, function(p) {
-                    //    return p[1]
-                    //});
-                    var bottomP = [ 0 , 0 ];
+                    var bottomP = _.max(self._bline.context.pointList, function(p) {
+                        return p[1]
+                    });
+                    if( from == "fillStyle" ){
+                        bottomP = [ 0 , 0 ];
+                    };
+                    //var bottomP = [ 0 , 0 ];
                     //创建一个线性渐变
-                    this.__lineStyleStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+                    this.__lineStrokeStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
                     if( !_.isArray( this.line.strokeStyle.lineargradient ) ){
                         this.line.strokeStyle.lineargradient = [this.line.strokeStyle.lineargradient];
                     };
 
                     _.each(this.line.strokeStyle.lineargradient , function( item , i ){
-                        self.__lineStyleStyle.addColorStop( item.position , item.color);
+                        self.__lineStrokeStyle.addColorStop( item.position , item.color);
                     });
-                
-                    /*
-                    var rgb = ColorFormat.colorRgb(self._getColor(self.fill.fillStyle));
-                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
-                    this.__lineStyleStyle.addColorStop(0, rgba0);
-
-                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
-                    this.__lineStyleStyle.addColorStop(1, rgba1);
-                    */
 
                 } else {
-                    this.__lineStyleStyle = this._getColor(this.line.strokeStyle);
+                    this.__lineStrokeStyle = this._getColor(this.line.strokeStyle);
                 }
-                //this.line.strokeStyle = this.__lineStyleStyle;
-                return this.__lineStyleStyle;
+                return this.__lineStrokeStyle;
             },
             _setNodesStyle: function(){
                 var self = this;
@@ -413,17 +411,6 @@ define(
                         var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); 
                         nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff";
                         nodeEl.context.strokeStyle = strokeStyle;
-
-                        /*
-                        var sourceInd = 0;
-                        if (self._yAxis.place == "right") {
-                            sourceInd = al - 1;
-                        };
-                        if (a == sourceInd) {
-                            nodeEl.context.fillStyle = nodeEl.context.strokeStyle;
-                            nodeEl.context.r++;
-                        };
-                        */
 
                         self._nodeInd = -1;
                     }

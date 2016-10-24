@@ -367,15 +367,17 @@ define(
                     this._initDataZoom();
                 };
 
-                //如果有 legend，调整下位置,和设置下颜色
+                //如果有 legend ，调整下位置,和设置下颜色
                 if( this._legend && (!this._legend.inited || opt.resize) ){
-                    console.log("legend")
+            
                     this._legend.pos( { x : _yAxisW } );
 
-                    for( var f in this._graphs._yAxisFieldsMap ){
-                        var ffill = this._graphs._yAxisFieldsMap[f].line.strokeStyle;
-                        this._legend.setStyle( f , {fillStyle : ffill} );
-                    };
+                    _.each( this._graphs.groups , function( g ){
+                        me._legend.setStyle( g.field , {
+                            fillStyle : g.__lineStrokeStyle
+                        } );
+                    } );
+
                     this._legend.inited = true;
                 };
             },
@@ -629,7 +631,7 @@ define(
                         };
 
                         if( _y != undefined ){
-                            _y = g._yAxis.tansValToPos(_y);
+                            _y = g._yAxis.getYposFromVal(_y);
                         }
 
                     };

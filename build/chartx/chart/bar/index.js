@@ -789,9 +789,10 @@ define(
 define(
     "chartx/chart/bar/yaxis",
     [
+        "canvax/index",
         "chartx/components/yaxis/yAxis"
     ],
-    function( yAxisBase ){
+    function( Canvax , yAxisBase ){
         var yAxis = function( opt , data , data1){
             yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
         };
@@ -1312,7 +1313,7 @@ define(
                         x: _yAxisW,
                         y: y - this.padding.bottom
                     }
-                });
+                } , this);
 
                 this._setaverageLayoutData();
 
@@ -1429,7 +1430,8 @@ define(
                             if (me.proportion) {
                                 y = -val / vCount * _yAxis.yGraphsHeight;
                             } else {
-                                y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                                y = _yAxis.getYposFromVal( val );
+                                //y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
                             };
                             if (v > 0) {
                                 y += tmpData[b][v - 1][i].y;
@@ -1510,6 +1512,7 @@ define(
             },
             _initDataZoom: function() {
                 var me = this;
+
                 //require(["chartx/components/datazoom/index"], function(DataZoom) {
                 //初始化 datazoom 模块
 
@@ -1531,7 +1534,8 @@ define(
                         ) {
                             return;
                         };
-//console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
+                        
+                        //console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
