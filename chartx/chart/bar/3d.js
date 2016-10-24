@@ -767,7 +767,9 @@ define("chartx/chart/bar/3d",
                             if (me.proportion) {
                                 y = -val / vCount * _yAxis.yGraphsHeight;
                             } else {
-                                y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                                y = _yAxis.getYposFromVal( val );
+
+                               // y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
                             }
                             ;
                             if (v > 0) {
