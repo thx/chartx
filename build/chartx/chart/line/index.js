@@ -719,7 +719,7 @@ define(
                 var self = this;
                 var list = self._currPointList;
 
-                if ( self.text.enabled || true ) { //节点上面的文本info
+                if ( self.text.enabled ) { //节点上面的文本info
                     this._texts = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._texts);
                     
