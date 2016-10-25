@@ -290,7 +290,8 @@ define(
                 fillStyle: null,
                 strokeStyle: null,
                 fontSize: 13,
-                format: null
+                format: null,
+
             };
 
             this.fill = { //填充
@@ -740,7 +741,7 @@ define(
 
                         var content = self.data[ a ].value;
                         if (_.isFunction(self.text.format)) {
-                            content = self.text.format(content , a);
+                            content = (self.text.format.apply( self , [content , a]) || content );
                         };
 
                         var text =  new Canvax.Display.Text( content , {

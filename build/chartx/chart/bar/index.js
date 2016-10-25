@@ -453,7 +453,7 @@ define(
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
                                     if (!me.animation && _.isFunction(me.text.format)) {
-                                        content = me.text.format(cdata.value);
+                                        content = (me.text.format.apply(me , [cdata.value]) || content );
                                     };
                                     if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
@@ -692,7 +692,7 @@ define(
                                         onUpdate: function() {
                                             var content = this.v;
                                             if (_.isFunction(self.text.format)) {
-                                                content = self.text.format(content);
+                                                content = (self.text.format.apply( self , [content]) || content);
                                             } else if (_.isNumber(content)) {
                                                 content = Tools.numAddSymbol(parseInt(content));
                                             };
