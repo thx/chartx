@@ -127,12 +127,16 @@ define(
                     return s[this._groupInd]
                 }
                 if (_.isFunction(s)) {
-
-                    return s({
+                    var obj = {
                         iGroup: this._groupInd,
                         iNode: this._nodeInd,
                         field: this.field
-                    });
+                    };
+                    if( this._nodeInd >= 0 ){
+                        obj.value = this.data[ this._nodeInd ].value;
+                    };
+
+                    return s.apply( this , [obj] );
                 }
                 return s
             },
@@ -478,8 +482,11 @@ define(
                 if ( self.text.enabled || true ) { //节点上面的文本info
                     this._texts = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._texts);
-                    var fontFillStyle = self._getProp(self.text.fillStyle) || self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
+                    
                     for (var a = 0, al = list.length; a < al; a++) {
+                        self._nodeInd = a;
+                        var fontFillStyle = self._getProp(self.text.fillStyle) || self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
+                        self._nodeInd = -1;
                         var context = {
                             x: self._currPointList[a][0],
                             y: self._currPointList[a][1] - 3,
