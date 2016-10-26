@@ -2665,7 +2665,7 @@ define(
                     var top = ds.slice(-1)[0];
                     if( 
                         (val > min && val <= max) || 
-                        ( this.sort == "desc" && val >= min && val < max )
+                        ( this._getSortType() == "desc" && val >= min && val < max )
                     ){
                         var y = -((val - bottom) / (top - bottom) * yGroupHeight + i*yGroupHeight) ;
                         break;
@@ -2752,20 +2752,7 @@ define(
             },
             _sort: function(){
                 if (this.sort) {
-                    var sort = "asc";
-                    if (_.isString(this.sort)) {
-                        sort = this.sort;
-                    }
-                    if (_.isArray(this.sort)) {
-                        var i = 0;
-                        if (this.place == "right") {
-                            i = 1;
-                        };
-                        if (this.sort[i]) {
-                            sort = this.sort[i];
-                        };
-                    };
-
+                    var sort = this._getSortType();
                     if (sort == "desc") {
                         this.dataSection.reverse();
 
@@ -2777,6 +2764,19 @@ define(
                         //dataSectionGroup reverse end
                     };
                 };
+            },
+            _getSortType: function(){
+                var _sort;
+                if( _.isString(this.sort) ){
+                    _sort = this.sort;
+                }
+                if( _.isArray(this.sort) ){
+                    _sort = this.sort[ this.place == "left" ? 0 : 1 ];
+                }
+                if( !_sort ){
+                    _sort = "asc";
+                }
+                return _sort;
             },
             _setBottomAndBaseNumber : function(){
                 this._bottomNumber = this.dataSection[0];
@@ -2894,7 +2894,7 @@ define(
                         context: {
                             x: x + (self.place == "left" ? -5 : 5),
                             y: posy + 20,
-                            fillStyle: self.text.fillStyle,
+                            fillStyle: self._getProp(self.text.fillStyle),
                             fontSize: self.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
                             textAlign: textAlign,
@@ -2918,7 +2918,7 @@ define(
                                 xEnd: self.line.width,
                                 yEnd: 0,
                                 lineWidth: self.line.lineWidth,
-                                strokeStyle: self.line.strokeStyle
+                                strokeStyle: self._getProp(self.line.strokeStyle)
                             }
                         });
                         yNode.addChild(line);
@@ -2959,7 +2959,17 @@ define(
                 } else {
                     self.w = self.maxW + self.dis + self.pos.x;
                 }
-            }
+            },
+            _getProp: function(s) {
+                var res;
+                if (_.isFunction(s)) {
+                    res = s.call( this , this );
+                }
+                if( !res ){
+                    res = "#999";
+                }
+                return res
+            },
         };
 
         return yAxis;
