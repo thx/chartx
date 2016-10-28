@@ -66,6 +66,8 @@ define(
             this.animation = true;
             this.resize = false;
 
+            this.trim = true;
+
             this.init(opt, data);
         };
 
@@ -161,7 +163,7 @@ define(
                     obj.layoutText = me._layoutDataSection[i];
                 });
 
-                this._trimLayoutData();
+                this.trim && this._trimLayoutData();
 
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);

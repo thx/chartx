@@ -26,7 +26,7 @@ define(
             };
             this.strokeStyle = "#ccc";
             this.lineWidth   = 1;
-            this.alpha       = 0.5;
+            
             
             this._tipDom = null;
             //this._back   = null;
@@ -63,7 +63,6 @@ define(
                 this.cH   = stage.context.height;
     
                 this._initContent(e);
-                this._initBack(e);
                 
                 this.setPosition(e);
 
@@ -152,35 +151,6 @@ define(
                 });
                 str+="</table>";
                 return str;
-            },
-            /**
-             *Back相关-------------------------
-             */
-            _initBack : function(e){
-                return
-                var opt = {
-                    x : 0,
-                    y : 0,
-                    width  : this.dW,
-                    height : this.dH,
-                    lineWidth : this.lineWidth,
-                    //strokeStyle : "#333333",
-                    fillStyle : this.fillStyle,
-                    radius : [ this.backR ],
-                    globalAlpha  : this.alpha
-                };
-
-                if( this.strokeStyle ){
-                    opt.strokeStyle = this.strokeStyle;
-                }
-               
-                /*
-                this._back = new Rect({
-                    id : "tipsBack",
-                    context : opt
-                });
-                this.sprite.addChild( this._back );
-                */
             },
             _resetBackSize:function(e){
                 /*
