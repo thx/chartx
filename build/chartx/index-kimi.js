@@ -1933,7 +1933,7 @@ define(
                     obj.layoutText = me._layoutDataSection[i];
                 });
 
-                this.trim && this._trimLayoutData();
+                this._trimLayoutData();
 
                 this.setX(this.pos.x);
                 this.setY(this.pos.y);
@@ -2206,6 +2206,11 @@ define(
                 if (!!this.text.rotation) {
                     mw = this._textMaxHeight * 1.5;
                 };
+
+                if( !this.trim ){
+                    this.layoutData = arr
+                    return;
+                }
 
                 //总共能多少像素展现
                 var n = Math.min(Math.floor(this.w / mw), arr.length - 1); //能展现几个
