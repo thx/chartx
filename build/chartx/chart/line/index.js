@@ -410,7 +410,7 @@ define(
                 if (plen < cplen) {
                     for (var i = plen, l = cplen; i < l; i++) {
                         self._circles && self._circles.removeChildAt(i);
-                        self._texts.removeChildAt(i);
+                        self._texts && self._texts.removeChildAt(i);
                         l--;
                         i--;
                     };
