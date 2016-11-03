@@ -48,6 +48,8 @@ define(
                 this.yAxis = {};
                 this.graphs = {};
 
+                this._markLines = [];
+
                 this.biaxial = false;
 
                 _.deepExtend(this, opts);
@@ -112,11 +114,15 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data , trimData) {
+                var me = this;
                 if( !trimData ){
                     trimData = _resetDataFrameAndGetTrimData( data );
                 };
                 this._graphs.resetData( trimData , {
                     disX: this._getGraphsDisX()
+                });
+                _.each(this._markLines , function( ml , i ){
+                    ml.reset(i);
                 });
             },
             _resetDataFrameAndGetTrimData: function( data ){
@@ -617,6 +623,8 @@ define(
                     });
                 });
             },
+
+            //markline begin
             _initMarkLine: function(g, dataFrame) {
                 var me = this;
                 var index = g._groupInd;
@@ -639,7 +647,7 @@ define(
                     var _y = center;
                     
                     //如果markline有自己预设的y值
-                    if( me.markLine.y != undefined ){
+                    function getYForVal(){
                         var _y = me.markLine.y;
                         if(_.isFunction(_y)){
                             _y = _y( g.field );
@@ -647,12 +655,15 @@ define(
                         if(_.isArray( _y )){
                             _y = _y[ index ];
                         };
-
                         if( _y != undefined ){
                             _y = g._yAxis.getYposFromVal(_y);
                         }
-
+                        return _y;
                     };
+                    if( me.markLine.y != undefined ){
+                        _y = getYForVal();
+                    };
+                    
 
                     var o = {
                         w: me._xAxis.xGraphsWidth,
@@ -673,14 +684,29 @@ define(
                             content: content,
                             fillStyle: strokeStyle
                         },
-                        field: g.field
+                        field: g.field,
+                        reset: function( i ){
+                            if(me.markLine.y != undefined){ 
+                                var _y = getYForVal();
+                                this._line.animate({
+                                    y: _y
+                                }, {
+                                    duration: 500,
+                                    easing: 'Back.Out' //Tween.Easing.Elastic.InOut
+                                });
+                            }
+                        }
                     };
 
                     new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
-                        me.core.addChild(this.sprite)
+                        me.core.addChild(this.sprite);
+                        me._markLines.push( this ); 
                     });
+                    
                 })
             },
+            //markline end
+
             bindEvent: function(spt, _setXaxisYaxisToTipsInfo) {
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);

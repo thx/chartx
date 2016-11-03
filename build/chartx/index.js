@@ -1510,7 +1510,9 @@ define(
             this.done   = function( fn ){
                 this._doneHandle = fn;
             };
-            this.txt = null
+            this.txt = null;
+
+            this._line = null;
            
             opt && _.deepExtend(this, opt);
             this.init();
@@ -1543,6 +1545,7 @@ define(
                     }
                 });
                 me.sprite.addChild(line)
+                me._line = line;
 
 
                 if(me.text.enabled){
@@ -1566,6 +1569,9 @@ define(
             _done : function(){
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
             },
+            reset : function(){
+                
+            }
         }
         return markLine
     } 
