@@ -128,7 +128,13 @@ define(
             _resetDataFrameAndGetTrimData: function( data ){
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis);
-                this._yAxis.resetData(this.dataFrame.yAxis);
+
+                
+                if( this.markLine && this.markLine.y ){
+                    this.dataFrame.yAxis.org.push( this.markLine.y );
+                };
+                
+                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
                 return this._trimGraphs();
             },
             /*
@@ -218,12 +224,11 @@ define(
                     this.yAxis.biaxial = true;
                 };
 
-                var _y = [];
                 if( this.markLine && this.markLine.y ){
-                    _y.push( this.markLine.y );
+                    this.dataFrame.yAxis.org.push( this.markLine.y );
                 }
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis , _y);
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis );
 
                 //再折线图中会有双轴图表
                 if (this.biaxial) {
@@ -264,9 +269,9 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneChart = this._getCloneLine();
-                    this._yAxis.resetData(this.__cloneChart.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.__cloneChart.thumbBar.dataFrame.yAxis);
                 };
 
                 var _yAxisW = this._yAxis.w;

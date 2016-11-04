@@ -5,13 +5,23 @@ define(
         "chartx/components/yaxis/yAxis"
     ],
     function( Canvax , yAxisBase ){
-        var yAxis = function( opt , data , data1){
-            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
+        var yAxis = function( opt , data ){
+            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data ] );
         };
         Chartx.extend( yAxis , yAxisBase , {
-            _setDataSection : function( data , data1 ){
+            _setDataSection : function( data ){
                 var arr = [];
                 _.each( data.org , function( d , i ){
+                    if( !d.length ){
+                        return
+                    };
+
+                    //有数据的情况下 
+                    if( !_.isArray(d[0]) ){
+                        arr.push( d );
+                        return;
+                    };
+                    
                     var varr = [];
                     var len  = d[0].length;
                     var vLen = d.length;
@@ -27,10 +37,7 @@ define(
                     varr.push(min);
                     arr.push( varr );
                 } );
-                if( !data1 ){
-                    data1 = [];
-                }
-                return _.flatten(arr).concat( data1 );
+                return _.flatten(arr);
             }
         } );
     
