@@ -2595,21 +2595,21 @@ define("chartx/chart/bar/3d",
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.resetData(this.dataFrame.xAxis, {
+                this._xAxis.update({
                     animation: false
-                });
+                } , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update({
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.resetData(this.dataFrame.yAxis, {
+                    this._yAxis.update({
                         animation: false
-                    });
+                    } , this.dataFrame.yAxis);
                 }
                 ;
                 this._graphs.resetData(this._trimGraphs());
@@ -2987,9 +2987,9 @@ define("chartx/chart/bar/3d",
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update({
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._yAxis.setX(this._yAxis.pos.x);
                 }
                 ;
@@ -3269,9 +3269,9 @@ define("chartx/chart/bar/3d",
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
-                        me._xAxis.resetData(me.dataFrame.xAxis, {
+                        me._xAxis.update({
                             animation: false
-                        });
+                        } , me.dataFrame.xAxis );
 
                         me._graphs.average.data = null;
                         me._graphs.w = me._xAxis.xGraphsWidth;

@@ -1896,7 +1896,6 @@ define(
             },
             //数据变化，配置没变的情况
             resetData: function(data , opt) {
-                //先在field里面删除一个字段，然后重新计算
                 if (opt) {
                     _.deepExtend(this, opt);
                 };
@@ -2251,7 +2250,7 @@ define(
         "chartx/utils/datasection"
     ],
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
-        var yAxis = function(opt, data , data1) {
+        var yAxis = function(opt, data ) {
 
             this.w = 0;
             this.enabled = 1; //true false 1,0都可以
@@ -2313,20 +2312,18 @@ define(
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
-            
-
-            this.init(opt, data , data1);
+            this.init(opt, data );
         };
 
         yAxis.prototype = {
-            init: function(opt, data , data1) {
+            init: function(opt, data ) {
                 _.deepExtend(this, opt);
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
                 };
 
-                this._initData(data , data1);
+                this._initData(data);
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
@@ -2348,33 +2345,20 @@ define(
                     });
                 });
             },
-            //数据变化，配置没变的情况
-            resetData: function(data,opt) {
-                //先在field里面删除一个字段，然后重新计算
-                if (opt) {
-                    _.deepExtend(this, opt);
-                };
-                this.sprite.removeAllChildren();
-                this.dataSection = [];
-                this.dataSectionGroup = [];
-                //_.deepExtend( this , opt );
-                this._initData(data);
-                this._trimYAxis();
-                this._widget();
-
-                //this.draw();
-            },
             //配置和数据变化
             update: function(opt, data) {
                 //先在field里面删除一个字段，然后重新计算
                 this.sprite.removeAllChildren();
                 this.dataSection = [];
                 this.dataSectionGroup = [];
-                _.deepExtend(this, opt);
+
+                if (opt) {
+                    _.deepExtend(this, opt);
+                };
+
                 this._initData(data);
                 this._trimYAxis();
                 this._widget();
-                //this.draw();
             },
             _getLabel: function() {
                 if (this.label && this.label != "") {
@@ -2469,12 +2453,9 @@ define(
                 dis = dis > disMax ? disMax : dis
                 return dis
             }, 
-            _setDataSection: function(data , data1) {
+            _setDataSection: function(data) {
                 var arr = [];
                 var d = (data.org || data.data || data);
-                if( data1 && _.isArray(data1) ){
-                    d = d.concat(data1);
-                }
                 if (!this.biaxial) {
                     arr = _.flatten( d ); //_.flatten( data.org );
                 } else {
@@ -2491,10 +2472,8 @@ define(
                 };
                 return arr;
             },
-            //data1 == [1,2,3,4]
-            _initData: function(data , data1) {
-                
-                var arr = this._setDataSection(data , data1);
+            _initData: function(data) {
+                var arr = this._setDataSection(data);
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);

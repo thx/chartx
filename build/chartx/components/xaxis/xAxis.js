@@ -120,7 +120,6 @@ define(
             },
             //数据变化，配置没变的情况
             resetData: function(data , opt) {
-                //先在field里面删除一个字段，然后重新计算
                 if (opt) {
                     _.deepExtend(this, opt);
                 };
