@@ -36,12 +36,10 @@ KISSY.use('node,event', function(S, Node) {
         }
     })
 
-    /*
     S.one('#J_settingsToggler').on('click', function(e) {
         S.one('.settings').toggleClass('settings-visible')
         e.stopPropagation()
     })
-    */
 
     S.one('body').on('click', function() {
         S.one('#page').removeClass('page-dodged')
@@ -70,24 +68,25 @@ KISSY.use('node,event', function(S, Node) {
     })
 
     S.one(window).on('scroll', function(e) {
-        if (S.one('body').scrollTop() > 10) {
+        var ceilingHeight = S.one('#ceiling').outerHeight()
+        if (S.one('body').scrollTop() > ceilingHeight) {
             S.one('#nav').addClass('fixed')
             S.one('#stoc').addClass('fixed')
         }
         else {
-            S.one('#nav').removeClass('fixed');
-            S.one('#stoc').removeClass('fixed');
+            S.one('#nav').removeClass('fixed')
+            S.one('#stoc').removeClass('fixed')
         }
     })
 
     S.ready(function() {
-        S.getScript('http://static.duoshuo.com/embed.js')
+        S.getScript('https://static.duoshuo.com/embed.js')
     })
 })
 
 KISSY.config('packages', {
     mosaics: {
-        base: 'http://g.tbcdn.cn/a',
+        base: 'https://g.alicdn.com/a',
         combine: true,
         debug: false,
         ignorePackageNameInUri: true,
