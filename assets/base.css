@@ -216,6 +216,7 @@ a {
     color: #fff;
     /*width: 130px;*/
     font-size: 56px;
+    margin-top: -0.15em;    /* to cope with the new baseline of iconfont.cn */
 }
 
 #nav .logo-text {
