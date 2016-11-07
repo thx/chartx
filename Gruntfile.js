@@ -4,7 +4,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
      clean : {
          build : {
-             src : "./build" 
+             src : "./build"
          }
      },
      uglify: {
@@ -72,7 +72,7 @@ module.exports = function(grunt) {
                  bc+"chart/bar/yaxis.js",
 
                  bc+"chart/bar/index.js"
-                 
+
              ],
              dest : bc+"chart/bar/index.js"
          },
@@ -104,7 +104,7 @@ module.exports = function(grunt) {
              src : [
                  bc+"chart/pie/pie.js",
                  bc+"chart/pie/index.js"
-                 
+
              ],
              dest : bc+"chart/pie/index.js"
          },
@@ -114,7 +114,7 @@ module.exports = function(grunt) {
                  bc+"chart/radar/graphs.js",
                  bc+"chart/radar/xaxis.js",
                  bc+"chart/radar/index.js"
-                 
+
              ],
              dest : bc+"chart/radar/index.js"
          },
@@ -123,19 +123,19 @@ module.exports = function(grunt) {
                  bc+"chart/scat/xaxis.js",
                  bc+"chart/scat/graphs.js",
                  bc+"chart/scat/index.js"
-                 
+
              ],
              dest : bc+"chart/scat/index.js"
          }
       }
   });
- 
+
   //载入concat和uglify插件，分别对于合并和压缩
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
- 
+
   //注册任务
   grunt.registerTask('default', [ 'clean' , 'copy' ,  'concat' ,  'uglify:min'  ]);
 }
@@ -144,5 +144,4 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json')
   })
 
-  grunt.loadTasks('_tasks')
 }
