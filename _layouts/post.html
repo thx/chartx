@@ -1,12 +1,12 @@
 ---
 layout: page
-script: assets/post.js
 ---
 
 <div id="page">
   {% include settings.html %}
   <div id="content">
     <div id="content-wrap">
+      {% include ceiling.html %}
       {% include toc.html %}
       <article class="type">
         <h1>{{ page.title }}</h1>
@@ -25,48 +25,23 @@ script: assets/post.js
   </div>
   <div id="nav">
     <a href="javascript:void(0)" class="toggler" id="J_toggler">
-      <i class="iconfont">&#271;</i>
+      <i class="iconfont">&#xe60b;</i>
       <span class="label">导航</span>
     </a>
-    <h1 class="logo"><a href="http://thx.github.io/chartx">
-       <i class="iconlogo dib">&#x3437;</i>
-       <span class="logo-text dib">Chartx</span>
-    </h1>
-    <ul class="menu">
+    <a href="{{ site.baseurl }}/" class="logo dib-box">
+      <i class="iconlogo dib mi-{{ site.title | downcase }}"></i>
+      <span class="logo-text dib">{{ site.title }}</span>
+    </a>
+    <ul class="categories menu">
     {% for category in site.categories %}
       <li>
-        <a href="http://nickli.github.io/{{ category[0] }}" class="entry">
+        <a href="{{ site.baseurl }}/{{ category[0] }}" class="entry">
           <i class="iconfont mi-{{ category[0] }}"></i>
           {{ category[0] | capitalize }}
         </a>
       </li>
     {% endfor %}
-
-    <li>
-        <a href="http://thx.alibaba-inc.com" target="_blank" class="entry">
-          更多THX前端工具
-        </a>
-    </li>
-    <li>
-        <a href="https://github.com/thx/chartx" target="_blank" class="entry">
-          <i class="iconfont">&#61464;</i> Github
-        </a>
-    </li>
-    <li>
-        <a href="./doc.html" target="_blank" class="entry">
-          文档
-        </a>
-    </li>
-    <li>
-        <a href="./example.html" target="_blank" class="entry">
-          实例中心
-        </a>
-    </li>
-    <li>
-        <a href="./started.html" target="_blank" class="entry">
-          5分钟入门
-        </a>
-    </li>
+      {% include extra-nav.html %}
     </ul>
   </div>
 </div>

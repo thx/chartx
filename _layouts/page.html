@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8">
 {% include meta.html %}
-  <title>{% if page.title %}{{ page.title }} - {% endif %} THX</title>
+  <title>{% if page.title %}{{ page.title }} - {% endif %}THX</title>
 {% include styles.html %}
+{% include extra-styles.html %}
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ site.url }}{{ site.baseurl }}/feed.xml">
 </head>
 <body bx-app class="{% if site.baseurl %}skin-{{ site.baseurl | remove_first: '/' }} {% else %}skin-home {% endif %}">
   {{ content }}

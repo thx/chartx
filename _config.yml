@@ -1,8 +1,4 @@
 baseurl: /chartx
-markdown: redcarpet
-pygments: true
-safe: true
-lsi: false
 permalink: /:categories/:title
 excerpt_separator: "\n\n"
 exclude:
@@ -11,3 +7,10 @@ exclude:
   - package.json
   - readme.md
   - node_modules
+
+title: Chartx
+url: http://thx.github.io/chatx
+
+gems:
+  - jekyll-feed
+  - jekyll-sitemap
