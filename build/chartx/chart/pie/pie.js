@@ -42,6 +42,7 @@
             this.isMoving = false;
             this.labelMaxCount = 15;
             this.labelList = [];
+            this.completed = false;//首次加载动画是否完成
 
         };
 
@@ -389,11 +390,31 @@
                                     secc.startAngle = lastEndAngle;
                                     secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * this.process;
                                 }
+
+                                //如果已经被选中，有一个选中态
+                                if(sec.sector._checkedSec){
+
+                                    /*
+                                    x: secc.x,
+                                    y: secc.y,
+                                    r0: secc.r,
+                                    r: secc.r + 8,
+                                    startAngle: secc.startAngle,
+                                    endAngle: secc.startAngle + 0.5, //secc.endAngle,
+                                    fillStyle: secc.fillStyle,
+                                    globalAlpha: 0.3
+                                    */
+                                    sec.sector._checkedSec.context.r0 = secc.r;
+                                    sec.sector._checkedSec.context.r  = secc.r + 8;
+                                    sec.sector._checkedSec.context.startAngle = secc.startAngle;
+                                    sec.sector._checkedSec.context.endAngle = secc.endAngle;
+                                }
                             }
                         }
                     },
                     onComplete: function () {
                         self._showDataLabel();
+                        self.completed = true;
                     }
                 });
             },
@@ -736,7 +757,6 @@
                 return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
             },
             addCheckedSec: function (sec, callback) {
-
                 var secc = sec.context;
                 var sector = new Sector({
                     context: {
@@ -747,27 +767,37 @@
                         startAngle: secc.startAngle,
                         endAngle: secc.startAngle + 0.5, //secc.endAngle,
                         fillStyle: secc.fillStyle,
-                        globalAlpha: 0.5
+                        globalAlpha: 0.3
                     },
                     id: 'checked_' + sec.id
                 });
+                sec._checkedSec = sector
+
                 this.checkedSp.addChild(sector);
-                sector.animate({
-                    endAngle: secc.endAngle
-                }, {
-                    duration: this._getAngleTime(secc),
-                    onComplete: function () {
-                        callback && callback();
-                    }
-                });
+
+                if( this.completed ){
+                    sector.animate({
+                        endAngle: secc.endAngle
+                    }, {
+                        duration: this._getAngleTime(secc),
+                        onComplete: function () {
+                            callback && callback();
+                        }
+                    });
+                } else {
+                    sector.context.endAngle = secc.endAngle;
+                }
             },
             cancelCheckedSec: function (sec, callback) {
-                var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
+                //var checkedSec = this.checkedSp.getChildById('checked_' + sec.id);
+                var checkedSec = sec._checkedSec;
+                
                 checkedSec.animate({
                     //endAngle : checkedSec.context.startAngle+0.5
                     startAngle: checkedSec.context.endAngle - 0.3
                 }, {
                     onComplete: function () {
+                        delete sec._checkedSec;
                         checkedSec.destroy();
                         callback && callback();
                     },

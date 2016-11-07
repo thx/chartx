@@ -198,12 +198,10 @@ define('chartx/chart/bar/3d/graphs',
                 var style = null;
                 if (_.isString(c)) {
                     style = c
-                }
-                ;
+                };
                 if (_.isArray(c)) {
                     style = _.flatten(c)[this._yAxisFieldsMap[field].index];
-                }
-                ;
+                };
                 if (_.isFunction(c)) {
                     style = c.apply(this, [{
                         iGroup: i,
@@ -216,12 +214,10 @@ define('chartx/chart/bar/3d/graphs',
                             value: this.root._xAxis.data[h].content
                         }
                     }]);
-                }
-                ;
+                };
                 if (!style || style == "") {
                     style = this._colors[this._yAxisFieldsMap[field].index];
-                }
-                ;
+                };
                 return style;
             },
             //只用到了i v。 i＝＝ 一级分组， v 二级分组
@@ -248,10 +244,8 @@ define('chartx/chart/bar/3d/graphs',
                     //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
                     if (this.bar._width == 1 && xDis1 > 3) {
                         this.bar._width = parseInt(xDis1) - 2;
-                    }
-                    ;
-                }
-                ;
+                    };
+                };
                 this.bar._width < 1 && (this.bar._width = 1);
             },
             resetData: function (data, opt) {
@@ -261,8 +255,7 @@ define('chartx/chart/bar/3d/graphs',
                 _.deepExtend(this, opt);
                 if (data.length == 0) {
                     return;
-                }
-                ;
+                };
 
                 var preLen = 0;
                 this.data[0] && (preLen = this.data[0][0].length);
@@ -310,11 +303,9 @@ define('chartx/chart/bar/3d/graphs',
                                 groupH.on("click dblclick mousedown mousemove mouseup", function (e) {
                                     if (!e.eventInfo) {
                                         e.eventInfo = me._getInfoHandler(this);
-                                    }
-                                    ;
+                                    };
                                 });
-                            }
-                            ;
+                            };
 
                             if (me.eventEnabled) {
                                 var hoverRect;

@@ -7,7 +7,7 @@ define(
         "chartx/utils/datasection"
     ],
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
-        var yAxis = function(opt, data , data1) {
+        var yAxis = function(opt, data ) {
 
             this.w = 0;
             this.enabled = 1; //true false 1,0都可以
@@ -39,6 +39,13 @@ define(
             this.biaxial = false; //是否是双轴中的一份
             this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
             this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
+
+            //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
+            this.dataSectionGroup = []; 
+
+            //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
+            this.middleweight = null; 
+
             this.dataOrg = []; //源数据
 
             this.sprite = null;
@@ -62,18 +69,18 @@ define(
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
-            this.init(opt, data , data1);
+            this.init(opt, data );
         };
 
         yAxis.prototype = {
-            init: function(opt, data , data1) {
+            init: function(opt, data ) {
                 _.deepExtend(this, opt);
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
                 };
 
-                this._initData(data , data1);
+                this._initData(data);
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
@@ -95,30 +102,20 @@ define(
                     });
                 });
             },
-            //数据变化，配置没变的情况
-            resetData: function(data,opt) {
-                //先在field里面删除一个字段，然后重新计算
-                if (opt) {
-                    _.deepExtend(this, opt);
-                };
-                this.sprite.removeAllChildren();
-                this.dataSection = [];
-                //_.deepExtend( this , opt );
-                this._initData(data);
-                this._trimYAxis();
-                this._widget();
-                //this.draw();
-            },
             //配置和数据变化
             update: function(opt, data) {
                 //先在field里面删除一个字段，然后重新计算
                 this.sprite.removeAllChildren();
                 this.dataSection = [];
-                _.deepExtend(this, opt);
+                this.dataSectionGroup = [];
+
+                if (opt) {
+                    _.deepExtend(this, opt);
+                };
+
                 this._initData(data);
                 this._trimYAxis();
                 this._widget();
-                //this.draw();
             },
             _getLabel: function() {
                 if (this.label && this.label != "") {
@@ -156,25 +153,47 @@ define(
 
                 this.resize = false;
             },
-            tansValToPos : function( val ){
+            //更具y轴的值来输出对应的在y轴上面的位置
+            getYposFromVal : function( val ){
+                var y = 0;
+                var dsgLen = this.dataSectionGroup.length;
+                var yGroupHeight = this.yGraphsHeight / dsgLen ;
+
+                for( var i=0,l=dsgLen ; i<l ; i++ ){
+                    var ds = this.dataSectionGroup[i];
+                    var min = _.min(ds);
+                    var max = _.max(ds);
+                    var bottom = ds[0];
+                    var top = ds.slice(-1)[0];
+                    if( 
+                        (val > min && val <= max) || 
+                        ( this._getSortType() == "desc" && val >= min && val < max )
+                    ){
+                        var y = -((val - bottom) / (top - bottom) * yGroupHeight + i*yGroupHeight) ;
+                        break;
+                    }
+                };
+                y = isNaN(y) ? 0 : parseInt(y);
+                return y;
+                
+                /*
                 var max = this.dataSection[this.dataSection.length - 1];
                 var y = -(val - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
                 y = isNaN(y) ? 0 : parseInt(y);
                 return y;
+                */
             },
             _trimYAxis: function() {
+
                 var max = this.dataSection[this.dataSection.length - 1];
                 var tmpData = [];
                 for (var a = 0, al = this.dataSection.length; a < al; a++) {
-                    
                     tmpData[a] = {
                         content: this.dataSection[a],
-                        y: this.tansValToPos( this.dataSection[a] )
+                        y: this.getYposFromVal( this.dataSection[a] )
                     };
-                }
-
+                };
                 this.layoutData = tmpData;
-
                 //设置basePoint
                 var basePy = -(this.baseNumber - this._bottomNumber) / (max - this._bottomNumber) * this.yGraphsHeight;
                 basePy = isNaN(basePy) ? 0 : parseInt(basePy);
@@ -190,13 +209,10 @@ define(
                 dis = disMin + this.yMaxHeight % this.dataSection.length;
                 dis = dis > disMax ? disMax : dis
                 return dis
-            },
-            _setDataSection: function(data , data1) {
+            }, 
+            _setDataSection: function(data) {
                 var arr = [];
                 var d = (data.org || data.data || data);
-                if( data1 && _.isArray(data1) ){
-                    d = d.concat(data1);
-                }
                 if (!this.biaxial) {
                     arr = _.flatten( d ); //_.flatten( data.org );
                 } else {
@@ -213,10 +229,8 @@ define(
                 };
                 return arr;
             },
-            //data1 == [1,2,3,4]
-            _initData: function(data , data1) {
-                
-                var arr = this._setDataSection(data , data1);
+            _initData: function(data) {
+                var arr = this._setDataSection(data);
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);
@@ -225,37 +239,97 @@ define(
                 //如果还是0
                 if (this.dataSection.length == 0) {
                     this.dataSection = [0]
-                };
+                };   
+                this.dataSectionGroup = [ _.clone(this.dataSection) ];
 
+                this._sort();
+                this._setBottomAndBaseNumber();
+
+                this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
+            },
+            _sort: function(){
                 if (this.sort) {
-                    var sort = "asc";
-                    if (_.isString(this.sort)) {
-                        sort = this.sort;
-                    }
-                    if (_.isArray(this.sort)) {
-                        var i = 0;
-                        if (this.place == "right") {
-                            i = 1;
-                        };
-                        if (this.sort[i]) {
-                            sort = this.sort[i];
-                        };
-                    };
+                    var sort = this._getSortType();
                     if (sort == "desc") {
                         this.dataSection.reverse();
+
+                        //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
+                        _.each( this.dataSectionGroup , function( dsg , i ){
+                            dsg.reverse();
+                        } );
+                        this.dataSectionGroup.reverse();
+                        //dataSectionGroup reverse end
                     };
                 };
-
+            },
+            _getSortType: function(){
+                var _sort;
+                if( _.isString(this.sort) ){
+                    _sort = this.sort;
+                }
+                if( _.isArray(this.sort) ){
+                    _sort = this.sort[ this.place == "left" ? 0 : 1 ];
+                }
+                if( !_sort ){
+                    _sort = "asc";
+                }
+                return _sort;
+            },
+            _setBottomAndBaseNumber : function(){
                 this._bottomNumber = this.dataSection[0];
-                /*
-                if(arr.length == 1){
-                    this.dataSection[0] = arr[0] * 2;
-                    this._bottomNumber  = 0;
-                }
-                */
                 if (this.baseNumber == null) {
-                    this.baseNumber = this._bottomNumber > 0 ? this._bottomNumber : 0;
+                    var min = _.min( this.dataSection );
+                    this.baseNumber = min > 0 ? min : 0;
                 }
+            },
+            _middleweight : function(){
+                if( this.middleweight ){
+                    //支持多个量级的设置
+                    //量级的设置只支持非sort的柱状图场景，否则这里修改过的datasection会和 _initData 中sort过的逻辑有冲突
+                    if( !_.isArray( this.middleweight ) ){
+                        this.middleweight = [ this.middleweight ];
+                    };
+
+                    //拿到dataSection中的min和max后，用middleweight数据重新设置一遍dataSection
+                    var dMin = _.min( this.dataSection );
+                    var dMax = _.max( this.dataSection );
+                    var newDS = [ dMin ];
+                    var newDSG = [];
+
+                    for( var i=0,l=this.middleweight.length ; i<l ; i++ ){
+                        var preMiddleweight = dMin;
+                        if( i > 0 ){
+                            preMiddleweight = this.middleweight[ i-1 ];
+                        };
+                        var middleVal = preMiddleweight + parseInt( (this.middleweight[i] - preMiddleweight) / 2 );
+
+                        newDS.push( middleVal );
+                        newDS.push( this.middleweight[i] );
+
+                        newDSG.push([
+                            preMiddleweight,
+                            middleVal,
+                            this.middleweight[i]
+                        ]);
+                    };
+                    var lastMW = parseInt( this.middleweight.slice(-1)[0] );
+                    newDS.push( lastMW + parseInt( (dMax - lastMW) / 2 ) );
+                    newDS.push( dMax );
+
+                    newDSG.push([
+                        lastMW,
+                        lastMW + parseInt( (dMax - lastMW) / 2 ),
+                        dMax
+                    ]);
+
+                    //好了。 到这里用简单的规则重新拼接好了新的 dataSection
+                    this.dataSection = newDS;
+                    this.dataSectionGroup = newDSG;
+
+                    //因为重新设置过了 dataSection 所以要重新排序和设置bottom and base 值
+                    this._sort();
+                    this._setBottomAndBaseNumber();
+                };                
             },
             resetWidth: function(w) {
                 var self = this;
@@ -317,7 +391,7 @@ define(
                         context: {
                             x: x + (self.place == "left" ? -5 : 5),
                             y: posy + 20,
-                            fillStyle: self.text.fillStyle,
+                            fillStyle: self._getProp(self.text.fillStyle),
                             fontSize: self.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
                             textAlign: textAlign,
@@ -341,7 +415,7 @@ define(
                                 xEnd: self.line.width,
                                 yEnd: 0,
                                 lineWidth: self.line.lineWidth,
-                                strokeStyle: self.line.strokeStyle
+                                strokeStyle: self._getProp(self.line.strokeStyle)
                             }
                         });
                         yNode.addChild(line);
@@ -382,7 +456,17 @@ define(
                 } else {
                     self.w = self.maxW + self.dis + self.pos.x;
                 }
-            }
+            },
+            _getProp: function(s) {
+                var res;
+                if (_.isFunction(s)) {
+                    res = s.call( this , this );
+                }
+                if( !res ){
+                    res = "#999";
+                }
+                return res
+            },
         };
 
         return yAxis;

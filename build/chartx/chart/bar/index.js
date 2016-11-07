@@ -453,7 +453,7 @@ define(
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
                                     if (!me.animation && _.isFunction(me.text.format)) {
-                                        content = me.text.format(cdata.value);
+                                        content = (me.text.format.apply(me , [cdata.value]) || content );
                                     };
                                     if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
@@ -692,7 +692,7 @@ define(
                                         onUpdate: function() {
                                             var content = this.v;
                                             if (_.isFunction(self.text.format)) {
-                                                content = self.text.format(content);
+                                                content = (self.text.format.apply( self , [content]) || content);
                                             } else if (_.isNumber(content)) {
                                                 content = Tools.numAddSymbol(parseInt(content));
                                             };
@@ -789,16 +789,27 @@ define(
 define(
     "chartx/chart/bar/yaxis",
     [
+        "canvax/index",
         "chartx/components/yaxis/yAxis"
     ],
-    function( yAxisBase ){
-        var yAxis = function( opt , data , data1){
-            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
+    function( Canvax , yAxisBase ){
+        var yAxis = function( opt , data ){
+            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data ] );
         };
         Chartx.extend( yAxis , yAxisBase , {
-            _setDataSection : function( data , data1 ){
+            _setDataSection : function( data ){
                 var arr = [];
                 _.each( data.org , function( d , i ){
+                    if( !d.length ){
+                        return
+                    };
+
+                    //有数据的情况下 
+                    if( !_.isArray(d[0]) ){
+                        arr.push( d );
+                        return;
+                    };
+                    
                     var varr = [];
                     var len  = d[0].length;
                     var vLen = d.length;
@@ -814,10 +825,7 @@ define(
                     varr.push(min);
                     arr.push( varr );
                 } );
-                if( !data1 ){
-                    data1 = [];
-                }
-                return _.flatten(arr).concat( data1 );
+                return _.flatten(arr);
             }
         } );
     
@@ -897,21 +905,21 @@ define(
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.resetData(this.dataFrame.xAxis, {
+                this._xAxis.update({
                     animation: false
-                });
+                } , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update({
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.resetData(this.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.dataFrame.yAxis);
                 };
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function() {
@@ -1255,7 +1263,12 @@ define(
 
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getaverageData());
+                if( this._graphs.average.enabled ){
+                    //this._getaverageData();
+                    this.dataFrame.yAxis.org.push( this._getaverageData() );
+                };
+
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
 
                 this._back = new Back(this.back);
                 this._tip = new Tip(this.tips, this.canvax.getDomContainer());
@@ -1277,9 +1290,9 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._yAxis.setX(this._yAxis.pos.x);
                 };
 
@@ -1312,7 +1325,7 @@ define(
                         x: _yAxisW,
                         y: y - this.padding.bottom
                     }
-                });
+                } , this);
 
                 this._setaverageLayoutData();
 
@@ -1380,7 +1393,7 @@ define(
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
-                var hLen = yArr.length; //bar的横向分组length
+                var hLen = _yAxis.field.length; //bar的横向分组length
 
                 var xDis1 = _xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
@@ -1429,7 +1442,8 @@ define(
                             if (me.proportion) {
                                 y = -val / vCount * _yAxis.yGraphsHeight;
                             } else {
-                                y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
+                                y = _yAxis.getYposFromVal( val );
+                                //y = -(val - _yAxis._bottomNumber) / Math.abs(maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
                             };
                             if (v > 0) {
                                 y += tmpData[b][v - 1][i].y;
@@ -1510,6 +1524,7 @@ define(
             },
             _initDataZoom: function() {
                 var me = this;
+
                 //require(["chartx/components/datazoom/index"], function(DataZoom) {
                 //初始化 datazoom 模块
 
@@ -1531,13 +1546,14 @@ define(
                         ) {
                             return;
                         };
-//console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
+                        
+                        //console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
-                        me._xAxis.resetData(me.dataFrame.xAxis, {
+                        me._xAxis.update({
                             animation: false
-                        });
+                        } , me.dataFrame.xAxis );
 
                         me._graphs.average.data = null;
                         me._graphs.w = me._xAxis.xGraphsWidth;
@@ -1651,7 +1667,25 @@ define(
                                 }
                                 content = me.markLine.text.format(o)
                             }
-                        }
+                        };
+
+                        var _y = center;
+                    
+                        //如果markline有自己预设的y值
+                        if( me.markLine.y != undefined ){
+                            var _y = me.markLine.y;
+                            if(_.isFunction(_y)){
+                                _y = _y( yfieldFlat[a] );
+                            };
+                            if(_.isArray( _y )){
+                                _y = _y[ a ];
+                            };
+
+                            if( _y != undefined ){
+                                _y = me._yAxis.getYposFromVal(_y);
+                            }
+                        };
+
                         var o = {
                             w: me._xAxis.xGraphsWidth,
                             h: me._yAxis.yGraphsHeight,
@@ -1661,7 +1695,7 @@ define(
                             },
                             field: _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
                             line: {
-                                y: center,
+                                y: _y,
                                 list: [
                                     [0, 0],
                                     [me._xAxis.xGraphsWidth, 0]

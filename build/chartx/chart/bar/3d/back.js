@@ -2,9 +2,10 @@ define('chartx/chart/bar/3d/back',
     [
         "canvax/index",
         "canvax/shape/Line",
-        "chartx/utils/tools"
+        "chartx/utils/tools",
+        "canvax/shape/Shapes"
     ],
-    function (Canvax, Line, Tools) {
+    function (Canvax, Line, Tools,Shapes) {
         var Back = function (root) {
 
             var opt = root.back;
@@ -96,6 +97,56 @@ define('chartx/chart/bar/3d/back',
                 if (!this.enabled) {
                     return
                 }
+
+
+
+                if( self.root && self.root._yAxis && self.root._yAxis.dataSectionGroup ){
+                    self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
+                    for( var g = 0 , gl=self.root._yAxis.dataSectionGroup.length ; g < gl ; g++ ){
+                        var yGroupHeight = self.root._yAxis.yGraphsHeight / gl ;
+                        //var groupRect = new Shapes.Rect({
+                        //    context : {
+                        //        x : 0,
+                        //        y : -yGroupHeight * g,
+                        //        width : self.w,
+                        //        height : -yGroupHeight,
+                        //        fillStyle : "#000",
+                        //        globalAlpha : 0.025 * (g%2)
+                        //    }
+                        //});
+
+                        var _id="Back_section_"+g;
+                        var _pointList=[];
+                        var _left = 0;
+                        var _right = _left + self.w;
+                        var _top = -yGroupHeight * g;
+                        var _bottom = _top  -yGroupHeight;
+
+                        var _pointList=[[_left,_top,0],[_left,_top,_depth],[_right,_top,_depth],[_right,_bottom,_depth],[_left,_bottom,_depth],[_left,_bottom,0]];
+
+                        var _polygon = self.yGroupSp.getChildById(_id) ||
+                            new Shapes.Polygon({
+                                id: _id,
+                                pointChkPriority: false,
+                                context: {
+                                    pointList: _pointList,
+                                    fillStyle: "#000",
+                                    globalAlpha :  0.04 * (g%2)
+                                }
+                            });
+
+                        _polygon.context.pointList = _pointList;
+                        _polygon.context.x = 0;
+                        _polygon.context.y = 0;
+
+
+                        self.yGroupSp.addChild( _polygon );
+                    };
+                };
+
+
+
+
                 self.xAxisSp = self.sprite.getChildById('Back_xAsix') ||
                     new Canvax.Display.Sprite({
                         id: 'Back_xAsix'

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar</title>
+<title>xChart demo -- line</title>
 <script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
@@ -33,40 +33,41 @@
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
+
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 31  , 30 , 53    ],
-    [ 3      , 52  , 25 , 13    ],
-    [ 4      , 234 , 100, 133   ],
-    [ 5      , 11  , 89 , 55    ],
-    [ 6      , 89  , 52 , 88    ],
-    [ 7      , 19  , 29 , 36    ],
-    [ 8      , 101 , 20 , 77    ],
-    [ 9      , 67  , 51 , 26    ]
-
+    [ 1      , undefined , 120 , 33    ],
+    [ 2      , 0   , 151 , 26    ],
+    [ 3      , 23   , 145 , 243    ],
+    [ 4      , 232  , 135 , 231    ],
+    [ 5      , 0  , 173 , 71    ],
+    [ 6      , 0  , 154 , 39    ],
+    [ 7      , 0  , 168 , 65    ],
+    [ 8      , 66   ,183 , 51    ],
+    [ 3      , 32   , 145 , 243    ],
+    [ 4      , 58  , 135 , 231    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 188  , 154 , 39    ],
+    [ 7      , 55  , 168 , 65    ],
+    [ 8      , undefined   ,183 , 51    ]
 ];
+
 var options = {
-    type : "bar_line",
+    legend:{
+        enabled:true
+    },
     yAxis : {
-        bar  : {
-            field : ["uv","pv"]
-        },
-        line : {
-            field : ["click"]
-        }
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : "pv"
     },
     xAxis : {
-        field : ["xfield"]
+        field : "xfield"
     },
-    graphs : {
-        line : {
-            strokeStyle : "#D28D54"
-        },
+    graphs:{
         text: {
             enabled : 1,
             fillStyle:function( arg ){
-        
+            debugger
                 //field : "pv"
                 //iGroup : 0
                 //iNode : 0
@@ -75,14 +76,16 @@ var options = {
                     return "blue"
                 }
             }
-            //format: function(e){
-            //    debugger
-            //    return e
-            //}
         }
     }
-}   
-Chartx.hybrid("canvasTest" , data , options);
+};
+
+
+
+
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
+    window.chart = chart;    
+});
 </textarea></form>
 
         </td>
@@ -91,13 +94,13 @@ Chartx.hybrid("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>混合图 - 柱折混合图 </h4>
+                <h4>折线图（line chart）- 基础折线图</h4>
                 <p>
-                    联系人：@释剑
+                    联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
+                <div id="canvasTest" style='width:100%;height:300px;'></div>
             </div>
 
             </div>

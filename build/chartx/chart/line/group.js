@@ -46,6 +46,15 @@ define(
                 lineWidth: 4
             };
 
+            this.text = {
+                enabled : 0,
+                fillStyle: null,
+                strokeStyle: null,
+                fontSize: 13,
+                format: null,
+
+            };
+
             this.fill = { //填充
                 fillStyle: null,
                 alpha: 0.05
@@ -120,12 +129,16 @@ define(
                     return s[this._groupInd]
                 }
                 if (_.isFunction(s)) {
-
-                    return s({
+                    var obj = {
                         iGroup: this._groupInd,
                         iNode: this._nodeInd,
                         field: this.field
-                    });
+                    };
+                    if( this._nodeInd >= 0 ){
+                        obj.value = this.data[ this._nodeInd ].value;
+                    };
+
+                    return s.apply( this , [obj] );
                 }
                 return s
             },
@@ -157,7 +170,8 @@ define(
                 var cplen = self._currPointList.length;
                 if (plen < cplen) {
                     for (var i = plen, l = cplen; i < l; i++) {
-                        self._circles.removeChildAt(i);
+                        self._circles && self._circles.removeChildAt(i);
+                        self._texts && self._texts.removeChildAt(i);
                         l--;
                         i--;
                     };
@@ -172,7 +186,9 @@ define(
                 };
 
                 self._circles && self._circles.removeAllChildren();
+                self._texts && self._texts.removeAllChildren();
                 self._createNodes();
+                self._createTexts();
                 self._grow();
             },
             _grow: function(callback) {
@@ -204,6 +220,13 @@ define(
                             var ind = parseInt(circle.id.split("_")[1]);
                             circle.context.y = self._currPointList[ind][1];
                             circle.context.x = self._currPointList[ind][0];
+                        });
+
+                        self._texts && _.each(self._texts.children, function(text, i) {
+                            var ind = parseInt(text.id.split("_")[1]);
+                            text.context.y = self._currPointList[ind][1] - 3;
+                            text.context.x = self._currPointList[ind][0];
+                            self._checkTextPos( text , i );
                         });
                     },
                     onComplete: function() {
@@ -309,7 +332,7 @@ define(
                 });
                 if (!this.line.enabled) {
                     bline.context.visible = false
-                }
+                };
                 me.sprite.addChild(bline);
                 me._bline = bline;
                 
@@ -326,6 +349,7 @@ define(
                 me.sprite.addChild(fill);
                 me._fill = fill;
                 me._createNodes();
+                me._createTexts();
             },
             _getFillStyle: function( ) {
                 var self = this;
@@ -451,6 +475,68 @@ define(
                     }
                 };
                 this._setNodesStyle();
+            },
+            _createTexts: function() {
+                
+                var self = this;
+                var list = self._currPointList;
+
+                if ( self.text.enabled ) { //节点上面的文本info
+                    this._texts = new Canvax.Display.Sprite({});
+                    this.sprite.addChild(this._texts);
+                    
+                    for (var a = 0, al = list.length; a < al; a++) {
+                        self._nodeInd = a;
+                        var fontFillStyle = self._getProp(self.text.fillStyle) || self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
+                        self._nodeInd = -1;
+                        var context = {
+                            x: self._currPointList[a][0],
+                            y: self._currPointList[a][1] - 3,
+                            fontSize: this.text.fontSize,
+                            textAlign: "center",
+                            textBaseline: "bottom",
+                            fillStyle: fontFillStyle,
+                            lineWidth:1,
+                            strokeStyle:"#ffffff"
+                        };
+
+                        var content = self.data[ a ].value;
+                        if (_.isFunction(self.text.format)) {
+                            content = (self.text.format.apply( self , [content , a]) || content );
+                        };
+
+                        var text =  new Canvax.Display.Text( content , {
+                            id: "text_"+a,
+                            context: context
+                        });
+
+                        self._texts.addChild(text);
+                        self._checkTextPos( text , a );
+
+                    }
+                };
+                this._setNodesStyle();
+            },
+            _checkTextPos : function( text , ind ){
+                var self = this;
+                var list = self._currPointList;
+                var pre = list[ ind - 1 ];
+                var next = list[ ind + 1 ];
+                if( ind == 0 ){
+                    text.context.textAlign = "left"
+                }; 
+                if( ind == list.length-1 ){
+                    text.context.textAlign = "right"
+                };
+
+                if( 
+                    pre && next &&
+                    ( pre[1] < text.context.y && next[1] < text.context.y )
+                 ){
+                    text.context.y += 7;
+                    text.context.textBaseline = "top"
+                }
+              
             },
             _fillLine: function(bline) { //填充直线
                 var fillPath = _.clone(bline.context.pointList);

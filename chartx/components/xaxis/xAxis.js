@@ -66,6 +66,8 @@ define(
             this.animation = true;
             this.resize = false;
 
+            this.trim = true;
+
             this.init(opt, data);
         };
 
@@ -118,7 +120,6 @@ define(
             },
             //数据变化，配置没变的情况
             resetData: function(data , opt) {
-                //先在field里面删除一个字段，然后重新计算
                 if (opt) {
                     _.deepExtend(this, opt);
                 };
@@ -377,8 +378,10 @@ define(
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {
 
-                if (this.data.length == 0)
+                if (this.data.length == 0 || this.sprite.getNumChildren() <=2 ){
+                    //压根没数据 或者 如果都只有两个节点，当然也不需要矫正了
                     return;
+                };
 
                 var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
                 if (popText) {
@@ -436,6 +439,11 @@ define(
                 if (!!this.text.rotation) {
                     mw = this._textMaxHeight * 1.5;
                 };
+
+                if( !this.trim ){
+                    this.layoutData = arr
+                    return;
+                }
 
                 //总共能多少像素展现
                 var n = Math.min(Math.floor(this.w / mw), arr.length - 1); //能展现几个

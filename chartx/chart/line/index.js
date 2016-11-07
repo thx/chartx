@@ -48,6 +48,8 @@ define(
                 this.yAxis = {};
                 this.graphs = {};
 
+                this._markLines = [];
+
                 this.biaxial = false;
 
                 _.deepExtend(this, opts);
@@ -112,17 +114,27 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data , trimData) {
+                var me = this;
                 if( !trimData ){
                     trimData = _resetDataFrameAndGetTrimData( data );
                 };
                 this._graphs.resetData( trimData , {
                     disX: this._getGraphsDisX()
                 });
+                _.each(this._markLines , function( ml , i ){
+                    ml.reset(i);
+                });
             },
             _resetDataFrameAndGetTrimData: function( data ){
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis);
-                this._yAxis.resetData(this.dataFrame.yAxis);
+
+                
+                if( this.markLine && this.markLine.y ){
+                    this.dataFrame.yAxis.org.push( this.markLine.y );
+                };
+                
+                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
                 return this._trimGraphs();
             },
             /*
@@ -212,12 +224,11 @@ define(
                     this.yAxis.biaxial = true;
                 };
 
-                var _y = [];
                 if( this.markLine && this.markLine.y ){
-                    _y.push( this.markLine.y );
+                    this.dataFrame.yAxis.org.push( this.markLine.y );
                 }
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis , _y);
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis );
 
                 //再折线图中会有双轴图表
                 if (this.biaxial) {
@@ -258,9 +269,9 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneChart = this._getCloneLine();
-                    this._yAxis.resetData(this.__cloneChart.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.__cloneChart.thumbBar.dataFrame.yAxis);
                 };
 
                 var _yAxisW = this._yAxis.w;
@@ -331,6 +342,24 @@ define(
                 this._graphs.setX(_yAxisW), this._graphs.setY(y - this.padding.bottom);
 
                 var me = this;
+
+
+                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
+                if (this.biaxial && 
+                    (
+                        (this.yAxis.text && !this.yAxis.text.fillStyle) || 
+                        (this.yAxis.line && !this.yAxis.line.strokeStyle)
+                    )
+                    ) {
+                    _.each(this._graphs.groups, function(group, i) {
+                        var color = group._bline.context.strokeStyle;
+                        if (i == 0) {
+                            me._yAxis.setAllStyle(color);
+                        } else {
+                            me._yAxisR.setAllStyle(color);
+                        }
+                    });
+                };
 
                 //执行生长动画
                 if (!this.inited) {
@@ -599,6 +628,8 @@ define(
                     });
                 });
             },
+
+            //markline begin
             _initMarkLine: function(g, dataFrame) {
                 var me = this;
                 var index = g._groupInd;
@@ -621,7 +652,7 @@ define(
                     var _y = center;
                     
                     //如果markline有自己预设的y值
-                    if( me.markLine.y != undefined ){
+                    function getYForVal(){
                         var _y = me.markLine.y;
                         if(_.isFunction(_y)){
                             _y = _y( g.field );
@@ -629,12 +660,15 @@ define(
                         if(_.isArray( _y )){
                             _y = _y[ index ];
                         };
-
                         if( _y != undefined ){
-                            _y = g._yAxis.tansValToPos(_y);
+                            _y = g._yAxis.getYposFromVal(_y);
                         }
-
+                        return _y;
                     };
+                    if( me.markLine.y != undefined ){
+                        _y = getYForVal();
+                    };
+                    
 
                     var o = {
                         w: me._xAxis.xGraphsWidth,
@@ -655,14 +689,29 @@ define(
                             content: content,
                             fillStyle: strokeStyle
                         },
-                        field: g.field
+                        field: g.field,
+                        reset: function( i ){
+                            if(me.markLine.y != undefined){ 
+                                var _y = getYForVal();
+                                this._line.animate({
+                                    y: _y
+                                }, {
+                                    duration: 500,
+                                    easing: 'Back.Out' //Tween.Easing.Elastic.InOut
+                                });
+                            }
+                        }
                     };
 
                     new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
-                        me.core.addChild(this.sprite)
+                        me.core.addChild(this.sprite);
+                        me._markLines.push( this ); 
                     });
+                    
                 })
             },
+            //markline end
+
             bindEvent: function(spt, _setXaxisYaxisToTipsInfo) {
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
