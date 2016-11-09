@@ -317,7 +317,7 @@ define(
                     y = e.point.y - this.h;
                 //todo:底层加判断
                 x = x > this.w ? this.w : x;
-debugger
+
                 var tmpINode = this.disX == 0 ? 0 : parseInt((x + (this.disX / 2)) / this.disX);
 
                 var _nodesInfoList = []; //节点信息集合

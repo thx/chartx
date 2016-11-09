@@ -2437,7 +2437,7 @@ define(
                 if( !this.trim ){
                     this.layoutData = arr
                     return;
-                }
+                };
 
                 //总共能多少像素展现
                 var n = Math.min(Math.floor(this.w / mw), arr.length - 1); //能展现几个

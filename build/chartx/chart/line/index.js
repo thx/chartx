@@ -1115,7 +1115,7 @@ define(
                     y = e.point.y - this.h;
                 //todo:底层加判断
                 x = x > this.w ? this.w : x;
-
+debugger
                 var tmpINode = this.disX == 0 ? 0 : parseInt((x + (this.disX / 2)) / this.disX);
 
                 var _nodesInfoList = []; //节点信息集合
@@ -1856,6 +1856,7 @@ define(
             //markline end
 
             bindEvent: function(spt, _setXaxisYaxisToTipsInfo) {
+            
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on("panstart mouseover", function(e) {
@@ -1942,7 +1943,6 @@ define(
                         _tmpData.push(__tmpData);
 
                         
-
                         if (_firstLay && self.biaxial && i > 0) {
                             _yAxis = self._yAxisR;
                             maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
@@ -1956,11 +1956,13 @@ define(
                             var maxValue = 0;
                             _center[i] = {};
                             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                                if (b >= self._xAxis.data.length) {
+                                //if (b >= self._xAxis.data.length) {
                                     //如果发现数据节点已经超过了x轴的节点，就扔掉
-                                    break;
-                                }
-                                var x = self._xAxis.data[b].x;
+                                //    break;
+                                //}
+                                //var x = self._xAxis.data[b].x;
+
+                                var x = b * self._xAxis.xGraphsWidth / (bl-1);
                                 var y = -(_lineData[b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
                                 y = isNaN(y) ? 0 : y
                                 __tmpData[b] = {
@@ -2002,7 +2004,7 @@ define(
             },
             //每两个点之间的距离
             _getGraphsDisX: function() {
-                var dsl = this._xAxis.dataSection.length;
+                var dsl = this.dataFrame.org.length - 1;
                 var n = this._xAxis.xGraphsWidth / (dsl - 1);
                 if (dsl == 1) {
                     n = 0
