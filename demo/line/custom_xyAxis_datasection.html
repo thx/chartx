@@ -44,12 +44,12 @@ var data= [
     [ 6      , 0  , 154 , 39    ],
     [ 7      , 0  , 168 , 65    ],
     [ 8      , 66   ,183 , 51    ],
-    [ 3      , 32   , 145 , 243    ],
-    [ 4      , 58  , 135 , 231    ],
-    [ 5      , 79  , 173 , 71    ],
-    [ 6      , 188  , 154 , 39    ],
-    [ 7      , 55  , 168 , 65    ],
-    [ 8      , undefined   ,183 , 51    ]
+    [ 10      , 32   , 145 , 243    ],
+    [ 16      , 58  , 135 , 231    ],
+    [ 20      , 79  , 173 , 71    ],
+    [ 26      , 188  , 154 , 39    ],
+    [ 37      , 55  , 168 , 65    ],
+    [ 38      , undefined   ,183 , 51    ]
 ];
 //chart的配置信息
 var options = {
@@ -58,12 +58,14 @@ var options = {
         //一般 yAxis.dataSection 一般都是根据传入的field然后
         //通过一个section的算法来计算。但是也可以用户自主来设置一组dataSection
         //用来显示在y轴上面的文本
-        dataSection : [0,50,100,150,250]
+        dataSection : [-30, 0 ,50,100,150,250]
     },
     xAxis : {
         field : "xfield",
+        maxVal: 50,
+        animation:false,
         //和yAxis轴的dataSection配置同理
-        dataSection : [ "星期一" , "星期二" , "星期三" , "星期四" ]
+        //dataSection : [ "星期一" , "星期二" , "星期三" , "星期四" ]
     }
 };
 //Chartx.line开始初始化chart实例

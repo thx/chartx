@@ -222,9 +222,17 @@ define(
                     });
                 } else {
                     for (var a = 0, al  = data.length; a < al; a++ ) {
+                        //默认string类型的情况下是均分
+                        var x = parseInt(a / (max - 1) * xGraphsWidth);
+
+                        if( this.valType == "number" ){
+                            //nam 刻度的x要根据 maxVal - minVal 来计算
+                            x = xGraphsWidth * ( (data[a] - this.minVal) / (this.maxVal - this.minVal) );
+                        };
+
                         var o = {
                             'content':data[a], 
-                            'x':parseInt(a / (max - 1) * xGraphsWidth)
+                            'x': x
                         }
                         tmpData.push( o )
                     }
@@ -1115,7 +1123,7 @@ define(
                     y = e.point.y - this.h;
                 //todo:底层加判断
                 x = x > this.w ? this.w : x;
-debugger
+
                 var tmpINode = this.disX == 0 ? 0 : parseInt((x + (this.disX / 2)) / this.disX);
 
                 var _nodesInfoList = []; //节点信息集合

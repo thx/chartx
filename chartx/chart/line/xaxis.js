@@ -20,9 +20,17 @@ define(
                     });
                 } else {
                     for (var a = 0, al  = data.length; a < al; a++ ) {
+                        //默认string类型的情况下是均分
+                        var x = parseInt(a / (max - 1) * xGraphsWidth);
+
+                        if( this.valType == "number" ){
+                            //nam 刻度的x要根据 maxVal - minVal 来计算
+                            x = xGraphsWidth * ( (data[a] - this.minVal) / (this.maxVal - this.minVal) );
+                        };
+
                         var o = {
                             'content':data[a], 
-                            'x':parseInt(a / (max - 1) * xGraphsWidth)
+                            'x': x
                         }
                         tmpData.push( o )
                     }

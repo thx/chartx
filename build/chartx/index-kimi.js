@@ -1841,8 +1841,10 @@ define(
 
             this.animation = true;
             this.resize = false;
-
-            this.trim = true;
+    
+            this.valType= "string";
+            this.maxVal = null; //如果xaxis的刻度为number类型那么这里会有一个number的maxVal
+            this.minVal = null; //同maxVal
 
             this.init(opt, data);
         };
@@ -1853,8 +1855,10 @@ define(
                     id: "xAxisSprite"
                 });
                 this._initHandle(opt, data);
+                window.xaxis = this;
             },
             _initHandle: function(opt, data) {
+
                 data && data.org && (this.dataOrg = data.org);
 
                 if (opt) {
@@ -1879,6 +1883,13 @@ define(
                 //然后计算好最大的width 和 最大的height，外部组件需要用
                 this._setTextMaxWidth();
                 this._setXAxisHeight();
+
+                //取第一个数据来判断xaxis的刻度值类型是否为number
+                if( this.dataSection.length>0 && _.isNumber(this.dataSection[0]) ){
+                    this.valType= "number";
+                    this.minVal == null && (this.minVal = _.min( this.dataSection ));
+                    this.maxVal == null && (this.maxVal = _.max( this.dataSection ));
+                }
 
             },
             /**
@@ -1994,8 +2005,10 @@ define(
                 this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
             },
             _trimXAxis: function(data, xGraphsWidth) {
+
                 var tmpData = [];
                 var dis = xGraphsWidth / (data.length + 1);
+
                 for (var a = 0, al = data.length; a < al; a++) {
                     var o = {
                         'content': data[a],
@@ -2085,7 +2098,7 @@ define(
 
                     var o = arr[a]
                     var x = o.x,
-                        y = this.disY + this.line.height + this.dis
+                        y = this.disY + this.line.height + this.dis;
 
                     //文字
                     var txt = new Canvax.Display.Text((o.layoutText || o.content), {
@@ -2210,11 +2223,6 @@ define(
 
                 if (!!this.text.rotation) {
                     mw = this._textMaxHeight * 1.5;
-                };
-
-                if( !this.trim ){
-                    this.layoutData = arr
-                    return;
                 };
 
                 //总共能多少像素展现
