@@ -109,7 +109,10 @@ define(
                 this._setXAxisHeight();
 
                 //取第一个数据来判断xaxis的刻度值类型是否为number
-                if( this.dataSection.length>0 && _.isNumber(this.dataSection[0]) ){
+                if(
+                    (this.dataSection.length>0 && _.isNumber(this.dataSection[0])) ||
+                    (opt && opt.valType == 'number')                   
+                 ){
                     this.valType= "number";
                     this.minVal == null && (this.minVal = _.min( this.dataSection ));
                     this.maxVal == null && (this.maxVal = _.max( this.dataSection ));
