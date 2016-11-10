@@ -210,7 +210,7 @@ define(
             },
             //只用到了i v。 i＝＝ 一级分组， v 二级分组
             _getFieldFromIHV : function( i , h , v ){
-                var yField = this.root._yAxis.field;
+                var yField = this.root.dataFrame.yAxis.field;
                 var field = null;
                 if( _.isString(yField[i]) ){
                     field = yField[i];
@@ -1409,6 +1409,7 @@ define(
                     yLen = [];
 
                 var me = this;
+                
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0;

@@ -1267,7 +1267,7 @@ define(
             resetData: function(data , trimData) {
                 var me = this;
                 if( !trimData ){
-                    trimData = _resetDataFrameAndGetTrimData( data );
+                    trimData = this._resetDataFrameAndGetTrimData( data );
                 };
                 this._graphs.resetData( trimData , {
                     disX: this._getGraphsDisX()

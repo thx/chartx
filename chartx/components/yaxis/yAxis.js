@@ -13,7 +13,7 @@ define(
             this.enabled = 1; //true false 1,0都可以
             this.dis = 6; //线到文本的距离
             this.maxW = 0; //最大文本的width
-            this.field = null; //这个 轴 上面的 field
+            this.field = []; //这个 轴 上面的 field
 
             this.label = "";
             this._label = null; //label的text对象
@@ -211,6 +211,7 @@ define(
                 return dis
             }, 
             _setDataSection: function(data) {
+
                 var arr = [];
                 var d = (data.org || data.data || data);
                 if (!this.biaxial) {
@@ -230,6 +231,12 @@ define(
                 return arr;
             },
             _initData: function(data) {
+
+                //先要矫正子啊field确保一定是个array
+                if( !_.isArray(this.field) ){
+                    this.field = [this.field];
+                };
+
                 var arr = this._setDataSection(data);
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {

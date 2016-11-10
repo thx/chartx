@@ -573,6 +573,7 @@ define(
                     yLen = [];
 
                 var me = this;
+                
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0;
