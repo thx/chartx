@@ -146,7 +146,10 @@ define(
                 this.stage.addChild( sprite );
                 var r   = this.r - (Math.max( this.barWidth , this.axisWidth )+this.barDis)*i;
                 var br  = r - ( this.barWidth - this.axisWidth )/2;
-                var br0 = r - this.axisWidth - ( this.barWidth - this.axisWidth )/2
+                var br0 = r - this.axisWidth - ( this.barWidth - this.axisWidth )/2;
+                if( br0 < 0 ){
+                    br0 = 0;
+                }
                 sprite.addChild( this._getCircle( this.startAngle , r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
                 sprite.addChild( this._getCircle( this.startAngle + this.angleCount , r - this.barWidth/2 , this.axisWidth/2 , this.normalColor ) );
                 
@@ -171,13 +174,19 @@ define(
                 this._circle.id = "circle_"+i;
                 sprite.addChild( this._circle );
                 sprite.addChild( this._circle.clone() );
+
+                var _r0 = r - this.barWidth;
+                if( _r0 < 0 ){
+                    _r0 = 0;
+                }
+
                 var speedSec = new Sector({
                    id : "speed_"+i,
                    context : {
                         x  : this.width  / 2,
                         y  : this.height / 2,
                         r  : r,
-                        r0 : r - this.barWidth,
+                        r0 : _r0,
                         startAngle : this.startAngle ,
                         endAngle   : this.startAngle ,
                         fillStyle  : progColor,
