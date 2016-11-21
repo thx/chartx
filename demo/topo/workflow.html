@@ -118,8 +118,12 @@ Chartx.topo("canvasTest" , data , options).then(function( tree ){
             tree.addTo( node , e.target.node.id );
         }
     });
-    tree.on("nodeClick" , function(e){
-        console.log( "nodeClick" );
+
+    
+    //双击删除节点
+    tree.on("nodeDblClick" , function(e){
+        tree.remove( e.target.node.id )
+        console.log( "nodedblClick" );
     });
 
 })

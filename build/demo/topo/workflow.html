@@ -118,8 +118,9 @@ Chartx.topo("canvasTest" , data , options).then(function( tree ){
             tree.addTo( node , e.target.node.id );
         }
     });
-    tree.on("nodeClick" , function(e){
-        console.log( "nodeClick" );
+    tree.on("nodeDblClick" , function(e){
+        tree.remove( e.target.node.id )
+        console.log( "nodedblClick" );
     });
 
 })

@@ -281,6 +281,9 @@ define(
                     me.g.removeEdge(parent, id);
                     //然后删除代表关系的链接线
                     me.linksSp.getChildById("link_" + parent + "_" + id).remove();
+                    if(me.arrow.enabled){
+                        me.arrowsSp.getChildById("arrow_" + parent + "_" + id).remove();
+                    };
 
                     //然后在parent的link中把自己给删除了
                     _.each(me.data[parent].link, function(target, i) {
@@ -466,6 +469,9 @@ define(
                     });
                     rect.on("click", function(e) {
                         me.fire("nodeClick", e);
+                    });
+                    rect.on("dblclick", function(e) {
+                        me.fire("nodeDblClick", e);
                     });
                     rect.on("mousedown", function(e) {
                         me.fire("nodeMousedown", e);
@@ -740,9 +746,6 @@ define(
 
                                 if (p == "x" || p == "y") {
                                     if(id.indexOf('arrow')>=0){
-                                        if(id.indexOf('shitouren')>=0){
-                                            debugger
-                                        }
                                         me.arrowsSp.getChildById(id).context[p] = val;
                                     } else {
                                         me.nodesSp.getChildById(id).context[p] = val;
