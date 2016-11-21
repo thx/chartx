@@ -66,7 +66,8 @@ define(
                     right: 0,
                     bottom: 0
                 }
-                window._nodesRect = this._nodesRect;
+                //window._nodesRect = this._nodesRect;
+                window.__me = this;
             },
             draw: function() {
                 //用来触发scale 和 drag 的rect原件
@@ -236,8 +237,7 @@ define(
                         //那么就要手动建立一个
                         this.nodesSp.getChildById("node_" + targetId).addChild(this._getTail(targetId));
 
-
-                        addShapes.push(this._creatLinkLine(targetId, i));
+                        addShapes.push( this._creatLinkLine(targetId, i).line );
                         this.g.setEdge(targetId, i);
 
                         this._updateLayout(function() {
@@ -467,6 +467,14 @@ define(
                     rect.on("click", function(e) {
                         me.fire("nodeClick", e);
                     });
+                    rect.on("mousedown", function(e) {
+                        me.fire("nodeMousedown", e);
+                        e.type = "mousedown";
+                    });
+                    rect.on("mouseup", function(e) {
+                        me.fire("nodeMouseup", e);
+                        e.type = "mouseop";
+                    });
                     //时间侦听over
 
                     if (_.isArray(addShapes)) {
@@ -477,7 +485,7 @@ define(
             },
             //只创建一个link对应的Path，不设置具体的位置。
             _creatLinkLine: function(pId, cId) {
-                var link = new Path({
+                var line = new Path({
                     id: "link_" + pId + "_" + cId,
                     context: {
                         path: "M0,0",
@@ -485,8 +493,40 @@ define(
                         lineWidth: 1
                     }
                 });
-                this.linksSp.addChild(link);
-                return link;
+                this.linksSp.addChild(line);
+
+                var arrow;
+                if(this.arrow.enabled){
+                    var arrowC = {};
+                    if (this.graph.rankdir == "TB") {
+                        arrowC = {
+                            scaleY: -1,
+                            fillStyle: this.link.strokeStyle,
+                            r: 6,
+                            n: 3
+                        }
+                    };
+                    if (this.graph.rankdir == "LR") {
+                        arrowC = {
+                            rotation : 90,
+                            fillStyle: this.link.strokeStyle,
+                            r: 6,
+                            n: 3
+                        }
+                    };
+
+                    arrow = new Isogon({
+                        id : "arrow_" + pId + "_" + cId,
+                        context: arrowC
+                    });
+
+                    this.arrowsSp.addChild(arrow);
+                };
+                
+                return {
+                    line : line,
+                    arrow : arrow
+                };
             },
             _getLinkPath: function(wbegin, wvControl, vTailPoint) {
                 var me = this;
@@ -577,28 +617,22 @@ define(
                         if (me.graph.rankdir == "TB") {
                             arrowC = {
                                 x: wbegin.x,
-                                y: wbegin.y - 3 - 2,
-                                r: 6,
-                                n: 3,
-                                scaleY: -1,
-                                fillStyle: lc.strokeStyle
+                                y: wbegin.y - 3 - 2
+                                //scaleY: -1,
+                                //fillStyle: lc.strokeStyle
                             }
                         };
                         if (me.graph.rankdir == "LR") {
                             arrowC = {
                                 x: wbegin.x - 3 - 2,
                                 y: wbegin.y,
-                                r: 6,
-                                n: 3,
                                 //scaleY: -1,
-                                rotation : 90,
-                                fillStyle: lc.strokeStyle
+                                //rotation : 90,
+                                //fillStyle: lc.strokeStyle
                             }
                         };
-                        var arrow = new Isogon({
-                            context: arrowC
-                        });
-                        me.arrowsSp.addChild(arrow);
+                        var ac = me.arrowsSp.getChildById("arrow_" + e.v + "_" + e.w);
+                        _.extend( ac.context , arrowC );    
                     }
                 });
             },
@@ -626,7 +660,7 @@ define(
                             x: wbegin.x,
                             y: vTailPoint.y
                         }; //从wbegin 发射到vTailPoint 的控制折点
-                    } else {
+                  } else {
                         vTailPoint = wbegin = wvControl = {
                             x: 0,
                             y: 0
@@ -642,6 +676,23 @@ define(
                     //控制点
                     pos["link_" + e.v + "_" + e.w + "_wvControl-x"] = wvControl.x;
                     pos["link_" + e.v + "_" + e.w + "_wvControl-y"] = wvControl.y;
+
+                    //如果有箭头
+                    if (me.arrow.enabled) {
+                        //父节点尾巴
+                        var __pos = {
+                            x : wbegin.x,
+                            y : wbegin.y
+                        }
+                        if (me.graph.rankdir == "TB") {
+                            __pos.y = __pos.y-3-2;
+                        }
+                        if (me.graph.rankdir == "LR") {
+                            __pos.x = __pos.x-3-2;
+                        }
+                        pos["arrow_" + e.v + "_" + e.w + "_x"] = __pos.x;
+                        pos["arrow_" + e.v + "_" + e.w + "_y"] = __pos.y;
+                    };
 
                 });
                 return pos;
@@ -676,6 +727,7 @@ define(
                 var me = this;
                 var timer = null;
                 var growAnima = function() {
+                    
                     var bezierT = new Tween.Tween(obj.pos)
                         .to(obj.posTo, 300)
                         .onUpdate(function() {
@@ -687,7 +739,14 @@ define(
                                 id = id.substr(0, id.lastIndexOf("_"));
 
                                 if (p == "x" || p == "y") {
-                                    me.nodesSp.getChildById(id).context[p] = val;
+                                    if(id.indexOf('arrow')>=0){
+                                        if(id.indexOf('shitouren')>=0){
+                                            debugger
+                                        }
+                                        me.arrowsSp.getChildById(id).context[p] = val;
+                                    } else {
+                                        me.nodesSp.getChildById(id).context[p] = val;
+                                    };
                                 } else {
                                     if (!linkPaths[id]) {
                                         linkPaths[id] = {};
@@ -704,8 +763,7 @@ define(
                                 var l = linkPaths[link];
                                 var path = me._getLinkPath(l.wbegin, l.wvControl, l.vTailPoint);
                                 me.linksSp.getChildById(link).context.path = path;
-                            }
-
+                            };
                         }).onComplete(function() {
                             cancelAnimationFrame(timer);
                             callback && callback();
@@ -724,7 +782,6 @@ define(
             _initNodesSpritePos: function() {
                 this.sprite.context.x = (this.width - (this._nodesRect.right - this._nodesRect.left)) / 2;
                 this.sprite.context.y = 10;
-
             }
         });
     }
