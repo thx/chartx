@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- 标签行星图</title>
+<script type="text/javascript" src="../../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+    var data = [
+        ["group" , "name" , "pv" , "tgi"],
+        [  0     , "iphone" , 2312,  23  ],
+        [  0     , "360" , 23461,  231  ],
+        [  0     , "小米" , 23423,  423  ],
+        [  0     , "华为" , 645435,  223  ],
+        [  0     , "一加" , 45345,  233  ],
+        [  0     , "诺基亚" , 2334,  243  ],
+        [  0     , "云手机" , 1144,  223  ],
+        [  0     , "手机壳" , 8679,  213  ],
+        [  0     , "透明手机" , 899,  253  ],
+        [  0     , "圆弧边" , 860,  2113  ],
+        [  0     , "助手" , 567,  2233  ],
+        [  0     , "皇子" , 644,  2563  ],
+        [  0     , "1024" , 36345,  2123  ],
+        [  0     , "香格里拉" , 845,  253  ],
+        [  0     , "电风扇" , 2234,  263  ],
+        [  0     , "规定范围" , 2243,  2233  ],
+        [  0     , "水电费" , 87689,  1123  ],
+        [  0     , "哥惹我" , 55,  867  ],
+        [  0     , "oppo" , 345,  823  ],
+        [  0     , "观看" , 4543,  239  ],
+        [  0     , "好莱坞" , 3444,  2433  ],
+        [  0     , "大片" , 32232,  21343  ],
+        [  0     , "基地" , 765,  2563  ],
+        [  0     , "娃儿" , 4537,  923  ],
+        [  0     , "斯蒂芬森" , 887,  666  ],
+        [  0     , "认识" , 4345,  786  ],
+        [  0     , "水电费" , 45676,  567  ],
+        [  0     , "王二文" , 456,  345  ],
+        [  0     , "是否" , 11,  8567  ],
+        [  0     , "收拾收拾" , 123,  221  ],
+
+        [  1     , "皇子1" , 644,  2563  ],
+        [  1     , "10241" , 36345,  2123  ],
+        [  1     , "香格里拉1" , 845,  253  ],
+        [  1     , "电风扇1" , 2234,  263  ],
+        [  1     , "规定范围1" , 2243,  2233  ],
+        [  1     , "水电费1" , 87689,  1123  ],
+        [  1     , "哥惹我1" , 55,  867  ],
+        [  1     , "oppo1" , 345,  823  ],
+        [  1     , "观看1" , 4543,  239  ],
+        [  1     , "好莱坞1" , 3444,  2433  ],
+        [  1     , "大片1" , 32232,  21343  ]
+    ];
+    var options = {
+        type  : "demand",
+        coordinate: {
+            center : {
+                //x : 0,
+                //y : 140
+            }
+        },
+        graphs: {
+
+        }
+    };
+
+    Chartx.original("canvasTest" , data, options);
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>灵活极坐标星系图（planet chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:380px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
+
