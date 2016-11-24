@@ -5,7 +5,7 @@
  */
 /* 
 window.FlashCanvasOptions = {
-    swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
+    swfPath: "http://g.alicdn.com//thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
 */
 define(

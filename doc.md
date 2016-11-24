@@ -14,7 +14,7 @@ Chartx线上文件地址：
 
 daily环境为：http:// <code>g-assets.daily.taobao.net/thx/charts/1.9.73/chartx/index[-min].js</code>
 
-cdn环境为 ： http://  <code>g.tbcdn.cn/thx/charts/1.9.72/chartx/index[-min].js</code>
+cdn环境为 ： http://  <code>g.alicdn.com//thx/charts/1.9.72/chartx/index[-min].js</code>
 
 
 交流群：

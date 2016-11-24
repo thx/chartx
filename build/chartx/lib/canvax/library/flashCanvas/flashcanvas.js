@@ -7,7 +7,7 @@
 
 define("canvax/library/flashCanvas/flashcanvas" , [] , function(){
 window.FlashCanvasOptions = {
-    swfPath: "http://g.tbcdn.cn/thx/canvax/1.0.0/canvax/library/flashCanvas/"
+    swfPath: "http://g.alicdn.com//thx/canvax/1.0.0/canvax/library/flashCanvas/"
 };
 window.ActiveXObject&&!document.createElement('canvas').getContext&&function(l,k,q){function O(a){this.code=a;this.message=ga[a]}function w(a,b,c){if(!c)for(var c=[],d=0,e=a*b*4;d<e;++d)c[d]=0;this.width=a;this.height=b;this.data=c}function ha(a){this.width=a}function x(a){this.id=a.F++}function o(a){this.J=a;this.id=a.F++}function A(a,b){this.canvas=a;this.z=b;this.e=b.id.slice(8);this.G();this.F=0;this.j=this.D="";this.d=0}function B(){if(k.readyState==="complete"){k.detachEvent(P,B);for(var a=k.getElementsByTagName(r),
 b=0,c=a.length;b<c;++b)C.initElement(a[b])}}function Q(){var a=event.srcElement,b=a.parentNode;a.blur();b.focus()}function D(){event.button&2&&event.srcElement.parentNode.setCapture()}function E(){event.button&2&&event.srcElement.parentNode.releaseCapture()}function R(){var a=event.propertyName;if(a==="width"||a==="height"){var b=event.srcElement,c=b[a],d=parseInt(c,10);if(isNaN(d)||d<0)d=a==="width"?300:150;c===d?(b.style[a]=d+"px",b.getContext("2d").K(b.width,b.height)):b[a]=d}}function S(){l.detachEvent(T,
