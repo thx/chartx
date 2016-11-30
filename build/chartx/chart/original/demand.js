@@ -25,7 +25,6 @@ define(
                 this.dataFrame = this.initData( data );
 
                 _.deepExtend( this, this._opts );
-                debugger
 
                 this.padding.top = 30;
                 this.padding.bottom = 30;
@@ -80,25 +79,28 @@ define(
             },
             initData: dataFormat,
             _bindEvent  : function(){
-                var self = this;
+                var me = this;
                 this._graphs.sprite.on("panstart mouseover", function(e){
                     if( e.eventInfo ){
-                        self._tip.show( e );
+                        me._tip.show( e );
                     }
                 });
                 this._graphs.sprite.on("panmove mousemove", function(e){
                     if( e.eventInfo ){
-                        self._tip.move( e );
+                        me._tip.move( e );
                     }
 
                 });
                 this._graphs.sprite.on("panend mouseout", function(e){
                     if( e.eventInfo ){
-                        self._tip.hide( e );
+                        me._tip.hide( e );
                     }
                 });
                 this._graphs.sprite.on("tap click", function(e){
-
+                    me.fire("tap click" , e);
+                });
+                this._graphs.sprite.on("doubletap dblclick", function(e){
+                    me.fire("doubletap dblclick" , e);
                 });
             }
            

@@ -147,6 +147,9 @@ define(
                         circle.on("tap click", function(e){
                             e.eventInfo = me._getInfoHandler(e);
                         });
+                        circle.on("doubletap dblclick", function(e){
+                            e.eventInfo = me._getInfoHandler(e);
+                        });
 
 
                         //然后添加label

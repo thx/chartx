@@ -130,7 +130,14 @@
         }
     };
 
-    Chartx.original("canvasTest" , data, options);
+    Chartx.original("canvasTest" , data, options).then(function( chart ){
+        chart.on("click" , function( e ){
+            console.log("click")
+        });
+        chart.on("dblclick" , function( e ){
+            console.log("dblclick")
+        });
+    });
 </textarea></form>
 
         </td>
