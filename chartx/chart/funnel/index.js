@@ -59,7 +59,7 @@ define(
             _initData  : function(data, opt){
                 var me = this
                 var d = dataFormat.apply(this, arguments)
-
+                d.graphs
                 var arr = []
 
                 var xData = d.data[opt.xAxis.field], yData = d.data[opt.yAxis.field]
@@ -69,7 +69,7 @@ define(
                         value : yData[i]
                     })
                 })
-                d.graphs.org = _.sortBy(arr, 'value')
+                d.org = _.sortBy(arr, 'value')
                 return d
             },
             _initModule:function(){
@@ -84,8 +84,8 @@ define(
                 me.graphsw = w
                 me.graphsH = h
 
-                me.dataFrame.graphs.data = me._trimGraphs().data
-                me._graphs.draw(me.dataFrame.graphs.data, {
+                me.dataFrame.data = me._trimGraphs().data
+                me._graphs.draw(me.dataFrame.data, {
                     pos  : {
                          x : 0 ,
                          y : 0
@@ -97,7 +97,7 @@ define(
             _trimGraphs:function(){
                 var me = this
                 var tmpData = []
-                var data = _.clone(me.dataFrame.graphs.org)
+                var data = _.clone(me.dataFrame.org)
                 var count = data.length                              //总共几个梯形
                 var maxW = me.graphsw, maxH = me.graphsH
                 var centerY = maxW / 2                               //y方向中线
@@ -173,10 +173,9 @@ define(
             _setXaxisYaxisToeventInfo : function( e ){
                 var me = this;
                 var iNode = e.eventInfo.iNode
-                var data = me.dataFrame.graphs.data[iNode]
+                var data = me.dataFrame.data[iNode]
                 e.eventInfo.nodesInfoList = [{field:data.name, value:data.value}]
-               
-            },
+            }
         });
     }
 );
