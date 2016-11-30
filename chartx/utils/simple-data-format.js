@@ -20,9 +20,7 @@ define(
             var dataFrame  = {    //数据框架集合
                 org        : [],   //最原始的数据 
                 data       : {},
-                graphs     : {
-                    field  : []
-                }
+                fields     : []
             };
 
             dataFrame.org  = _.clone(data);
@@ -44,7 +42,7 @@ define(
                 arr = titles
             }
             
-            dataFrame.graphs.field = arr
+            dataFrame.fields = arr
             return dataFrame;
         }
     }
