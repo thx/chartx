@@ -128,9 +128,9 @@ define(
                     //如果只有一个，那么就强制添加到3个
                     var _diffR = (me.back.scale[0].r - me.center.r) / me.back.scaleNum;
                     me.back.scale = [];
-                    for( var i=0;i<me.back.scaleNum ; i++ ){
+                    for( var i=0;i<=me.back.scaleNum ; i++ ){
                         me.back.scale.push({
-                            r           : me.center.r + _diffR*i,
+                            r           : me.center.r + _diffR*(i+1),
                             lineWidth   : me._getBackProp( me.back.lineWidth , i),
                             strokeStyle : me._getBackProp( me.back.strokeStyle , i),
                             fillStyle   : me._getBackProp( me.back.fillStyle , i)
