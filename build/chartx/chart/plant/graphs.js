@@ -1,9 +1,9 @@
 define(
-    "chartx/chart/original/demand/graphs", [
+    "chartx/chart/plant/graphs", [
         "canvax/index",
         'chartx/utils/simple-data-format',
         "canvax/shape/Circle",
-        "chartx/chart/original/demand/group",
+        "chartx/chart/plant/group",
         "canvax/shape/Sector"
     ],
     function(Canvax , dataFormat , Circle , Group , Sector) {
@@ -25,7 +25,9 @@ define(
             this.back = {
                 fillStyle : null,
                 strokeStyle: null,
-                lineWidth : 1
+                lineWidth : 1,
+                scale: [],
+                scaleNum: 3 //在scale.length>1的时候会被修改为scale.length
             }
 
             this.groups = {
@@ -58,8 +60,6 @@ define(
                 var cx = this.coordinate.center.x;
                 var cy = this.coordinate.center.y;
 
-                
-
                 var nextGroupRStart = this.center.r + this.center.margin;
                 
                 _.each( this.groups.data , function( d , i ){
@@ -79,24 +79,17 @@ define(
 
                     nextGroupRStart = _g.rRange.to;
                     me._groups.push( _g );
+
+                    me.back.scale.push({
+                        r           : _g.rRange.to,
+                        lineWidth   : me._getBackProp( me.back.lineWidth , i),
+                        strokeStyle : me._getBackProp( me.back.strokeStyle , i),
+                        fillStyle   : me._getBackProp( me.back.fillStyle , i)
+                    });
                     //me.sprite.addChild( _g.sprite );
                 } );
 
-                for( var i=me._groups.length-1 ; i>=0 ; i-- ){
-                    me.sprite.addChild( new Circle({
-                        context : {
-                            x : me.coordinate.center.x,
-                            y : me.coordinate.center.y,
-                            r : me._groups[i].rRange.to,
-                            lineWidth : me._getBackProp( me.back.lineWidth , i),
-                            strokeStyle : me._getBackProp( me.back.strokeStyle , i),
-                            fillStyle: me._getBackProp( me.back.fillStyle , i),
-                            globalAlpha:1
-                        }
-                    }) );
-                    
-                    
-                };
+                me._drawBack();
 
                 _.each( me._groups , function(g){
                     me.sprite.addChild( g.sprite );
@@ -128,6 +121,39 @@ define(
                 this.sprite.addChild( this._label );
 
 
+            },
+            _drawBack: function(){
+                var me = this;
+                if( me.back.scale.length == 1 ){
+                    //如果只有一个，那么就强制添加到3个
+                    var _diffR = (me.back.scale[0].r - me.center.r) / me.back.scaleNum;
+                    me.back.scale = [];
+                    for( var i=0;i<me.back.scaleNum ; i++ ){
+                        me.back.scale.push({
+                            r           : me.center.r + _diffR*i,
+                            lineWidth   : me._getBackProp( me.back.lineWidth , i),
+                            strokeStyle : me._getBackProp( me.back.strokeStyle , i),
+                            fillStyle   : me._getBackProp( me.back.fillStyle , i)
+                        });
+                    }
+                } else {
+                    me.back.scaleNum = me.back.scale.length;
+                };
+
+                //如果有多个group，那么就直接按照group来划分
+                for( var i=me.back.scale.length-1 ; i>=0 ; i-- ){
+                    var _scale = me.back.scale[i];
+                    me.sprite.addChild( new Circle({
+                        context : {
+                            x : me.coordinate.center.x,
+                            y : me.coordinate.center.y,
+                            r : _scale.r,
+                            lineWidth : _scale.lineWidth,
+                            strokeStyle : _scale.strokeStyle,
+                            fillStyle: _scale.fillStyle
+                        }
+                    }) );
+                };
             },
             dataHandle: function(){
                 var groupFieldInd = _.indexOf(this.dataFrame.fields , this.groups.field);

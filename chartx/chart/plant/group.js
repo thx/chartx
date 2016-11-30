@@ -1,5 +1,5 @@
 define(
-    "chartx/chart/original/demand/group", [
+    "chartx/chart/plant/group", [
         "canvax/index",
         "canvax/shape/Circle",
         "canvax/shape/Sector"

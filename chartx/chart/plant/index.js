@@ -1,9 +1,9 @@
 define(
-    "chartx/chart/original/demand",
+    "chartx/chart/plant/index",
     [
         'chartx/chart/index',
         'chartx/utils/simple-data-format',
-        'chartx/chart/original/demand/graphs',
+        'chartx/chart/plant/graphs',
         'chartx/components/polar/polar',
         'chartx/components/tips/tip'
     ],
