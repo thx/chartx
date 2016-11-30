@@ -12,7 +12,7 @@ define(
     [],
     function(){
         return function( data , opt ){
-    
+            
               var dataFrame  = {    //数据框架集合
                     org        : [],   //最原始的数据  
                     data       : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
@@ -60,6 +60,7 @@ define(
  
     
                 dataFrame.data = total;
+
                 //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
     
                 var getDataOrg = function( $field , totalList, type ){
