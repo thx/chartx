@@ -87,7 +87,6 @@ define(
                 var pos = e.pos || e.target.localToGlobal( e.point );
                 var x   = this._checkX( pos.x + this.offset );
                 var y   = this._checkY( pos.y + this.offset );
-                var _backPos = this.sprite.parent.globalToLocal( { x : x , y : y} );
                 this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
             },
             /**

@@ -72,7 +72,7 @@ define(
                 this._graphs.draw({
                     w    : this.graphsW,
                     h    : this.graphsH,
-                    data : this.dataFrame.data[this.dataFrame.graphs.field[0]],
+                    data : this.dataFrame.data[this.dataFrame.fields[0]],
                     // turn : [],
                     pos  : {
                          x : this.dis.left,

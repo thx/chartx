@@ -158,7 +158,7 @@ define(
                 var graphs = [],
                     yAxis = [],
                     xAxis = []
-                var data = this.dataFrame.graphs.org
+                var data = this.dataFrame.org
                 var max = data[data.length - 1].xAxis
                 var maxR = this.graphsw
 
