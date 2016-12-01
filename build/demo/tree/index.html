@@ -37,7 +37,7 @@ var data = [
     [ "id"   , "label"   , "link"                      ],
     [ "lol"  , "英雄联盟" , [ "dmhz" , "jfjh" , "hbss" ]],
     [ 'dmhz' , "德玛皇子" , [ "ms" , "gl"  ]            ],
-    [ 'jfjh' , "亚索"    , [ "wqds" , "js" , "zzzw" , "mgn" , "hbss" ]  ],
+    [ 'jfjh' , "亚索"    , [ "wqds" , "js" , "zzzw" ]  ],
     [ 'hbss' , "艾希"    , [ "mgn" , "jj" ]            ],
     [ 'ms'   , "盲僧"    , [  ]                        ],
     [ 'wqds' , "武器大师" , [  ]                        ],
@@ -49,7 +49,6 @@ var data = [
 ];
 
 var options = {
-    type : "tree",
     tips : {
         content : function(e){
     
@@ -58,7 +57,7 @@ var options = {
 }
 
 
-Chartx.topo("canvasTest" , data , options).then(function( tree ){
+Chartx.tree("canvasTest" , data , options).then(function( tree ){
     tree.on("nodeMouseover" , function(){
         console.log( "nodeMouseover" );
     });

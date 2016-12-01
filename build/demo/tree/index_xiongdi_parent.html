@@ -35,28 +35,29 @@
 //topology图 的 key 一定 至少要包含有id ，label ， link 
 var data = [
     [ "id"   , "label"   , "link"                      ],
-    [ "lol"  , "英雄联盟", [ "dmhz" , "jfjh"  ]        ],
-    [ 'dmhz' , "德玛皇子", [ "ms" , "gl"  ]            ],
-    [ 'jfjh' , "亚索"    , [ "wqds" ]                  ],
+    [ "lol"  , "英雄联盟" , [ "dmhz" , "jfjh" , "hbss" ]],
+    [ 'dmhz' , "德玛皇子" , [ "ms" , "gl"  ]            ],
+    [ 'jfjh' , "亚索"    , [ "wqds" , "js" , "zzzw" , "mgn" , "hbss" ]  ],
     [ 'hbss' , "艾希"    , [ "mgn" , "jj" ]            ],
-    [ 'ms'   , "盲僧"    , [ "hbss" ]                  ],
-    [ 'wqds' , "武器大师", [ "zzzw" ]                  ],
+    [ 'ms'   , "盲僧"    , [  ]                        ],
+    [ 'wqds' , "武器大师" , [  ]                        ],
     [ 'zzzw' , "潘神"    , [  ]                        ],
     [ 'js'   , "剑圣"    , [  ]                        ],
     [ 'jj'   , "剑姬"    , [  ]                        ],
-    [ 'mgn'  , "莫甘娜"  , [  ]                        ],
-    [ 'gl'   , "盖伦"    , [  "js" ]                   ]
+    [ 'mgn'  , "莫甘娜"   , [  ]                        ],
+    [ 'gl'   , "盖伦"    , [  ]                        ]
 ];
 
 var options = {
-    type : "tree",
-    graph : {
-        rankdir : "LR"
+    tips : {
+        content : function(e){
+    
+        }
     }
 }
 
 
-Chartx.topo("canvasTest" , data , options).then(function( tree ){
+Chartx.tree("canvasTest" , data , options).then(function( tree ){
     tree.on("nodeMouseover" , function(){
         console.log( "nodeMouseover" );
     });

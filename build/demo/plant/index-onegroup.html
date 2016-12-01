@@ -121,7 +121,9 @@
             back : {
                 fillStyle:["#e3f9f3" , "#ecfbf7" , "#f5fdfb"],
                 strokeStyle: function(e){
-                
+                    if(e.groupInd < e.groups.length-1){
+                        return "#c1f3e5"
+                    }
                 }
             }
         }

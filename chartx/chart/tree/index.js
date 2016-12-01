@@ -14,7 +14,7 @@
  */
 
 define(
-    "chartx/chart/topo/tree", [
+    "chartx/chart/tree/index", [
         "chartx/chart/index",
         "canvax/shape/Rect",
         "canvax/shape/Line",
@@ -65,9 +65,10 @@ define(
                     top: 0,
                     right: 0,
                     bottom: 0
-                }
+                };
+
                 //window._nodesRect = this._nodesRect;
-                window.__me = this;
+                //window.__me = this;
             },
             draw: function() {
                 //用来触发scale 和 drag 的rect原件
@@ -205,13 +206,13 @@ define(
             /**
              *添加节点
              *@data param 要添加的 子节点。一次添加一个 {id : { label : "text" }}
-             *targetId 要添加到的目标node的Id
+             *targetId 要添加到的目标 node 的 Id
              */
             addTo: function(data, targetId) {
                 if (!this.data[targetId]) {
                     //要添加的目标节点不存在
                     return;
-                }
+                };
                 for (i in data) {
                     if (this.data[i]) {
                         //说明已经有一个这样的id了
@@ -260,7 +261,7 @@ define(
                 //如果是==0，就要把parent的tail尾巴给干掉
                 if (me.data[parent].link.length == 0) {
                     me.nodesSp.getChildById("node_" + parent).getChildById("tail_" + parent).remove();
-                }
+                };
 
                 this._updateLayout();
             },

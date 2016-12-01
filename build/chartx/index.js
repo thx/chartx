@@ -1,5 +1,5 @@
 window.Chartx || (Chartx = {
-    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'topo', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original' , 'sankey', 'plant'],
+    _charts: ['bar', 'force', 'line', 'map', 'pie', 'planet', 'progress', 'radar', 'scat', 'tree', 'chord', 'venn', 'hybrid', 'funnel', 'cloud' , 'original' , 'sankey', 'plant'],
     instances: {}, //存储所有的图表组件实例
     canvax: null,
     create: {},
