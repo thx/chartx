@@ -1138,19 +1138,20 @@ define(
                 !opts.tips && (opts.tips = {});
                 opts.tips = _.deepExtend(opts.tips, {
                     content: function(info) {
-                        var str = "<table>";
+                        var str = "<table style='border:none'>";
                         var self = this;
                         _.each(info.nodesInfoList, function(node, i) {
                             str += "<tr style='color:" + (node.color || node.fillStyle) + "'>";
                             var prefixName = self.prefix[i];
+                            var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
                             if (prefixName) {
-                                str += "<td>" + prefixName + "：</td>";
+                                str += "<td "+tsStyle+">" + prefixName + "：</td>";
                             } else {
                                 if (node.field) {
-                                    str += "<td>" + node.field + "：</td>";
+                                    str += "<td "+tsStyle+">" + node.field + "：</td>";
                                 }
                             };
-                            str += "<td>" + Tools.numAddSymbol(node.value);
+                            str += "<td "+tsStyle+">" + Tools.numAddSymbol(node.value);
                             if( node.vCount ){
                                 str += "（" + Math.round(node.value / node.vCount * 100) + "%）";
                             };

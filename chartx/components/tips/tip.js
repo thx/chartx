@@ -74,7 +74,6 @@ define(
                 this.setPosition(e);
             },
             hide : function(){
-                return
                 if( !this.enabled ) return;
                 this.sprite.removeAllChildren();
                 this._removeContent();
@@ -134,16 +133,17 @@ define(
                 _.each( info.nodesInfoList , function( node , i ){
 
                     str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
+                    var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
-                        str+="<td style='border:none;white-space:nowrap;word-wrap:normal;'>"+ prefixName +"：</td>";
+                        str+="<td "+tsStyle+">"+ prefixName +"：</td>";
                     } else {
                         if( node.field ){
-                            str+="<td style='border:none;white-space:nowrap;word-wrap:normal;'>"+ node.field +"：</td>";
+                            str+="<td "+tsStyle+">"+ node.field +"：</td>";
                         }
                     };
 
-                    str += "<td style='border:none;white-space:nowrap;word-wrap:normal;'>"+ Tools.numAddSymbol(node.value) +"</td></tr>";
+                    str += "<td "+tsStyle+">"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
                 return str;
