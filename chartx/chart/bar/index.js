@@ -302,7 +302,7 @@ define(
                         var str = "<table>";
                         var self = this;
                         _.each(info.nodesInfoList, function(node, i) {
-                            str += "<tr style='color:" + node.fillStyle + "'>";
+                            str += "<tr style='color:" + (node.color || node.fillStyle) + "'>";
                             var prefixName = self.prefix[i];
                             if (prefixName) {
                                 str += "<td>" + prefixName + "：</td>";
@@ -311,7 +311,11 @@ define(
                                     str += "<td>" + node.field + "：</td>";
                                 }
                             };
-                            str += "<td>" + Tools.numAddSymbol(node.value) + "（" + Math.round(node.value / node.vCount * 100) + "%）</td></tr>";
+                            str += "<td>" + Tools.numAddSymbol(node.value);
+                            if( node.vCount ){
+                                str += "（" + Math.round(node.value / node.vCount * 100) + "%）";
+                            };
+                            str +="</td></tr>";
                         });
                         str += "</table>";
                         return str;

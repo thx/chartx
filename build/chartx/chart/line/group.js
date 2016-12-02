@@ -151,7 +151,7 @@ define(
                     o.r = self._getProp(self.node.r);
                     o.fillStyle = self._getProp(self.node.fillStyle) || "#ffffff";
                     o.strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
-                    o.color = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); //这个给tips里面的文本用
+                    o.color = o.strokeStyle;
                     o.lineWidth = self._getProp(self.node.lineWidth) || 2;
                     o.alpha = self._getProp(self.fill.alpha);
                     o.field = self.field;

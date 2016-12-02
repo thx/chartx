@@ -53,8 +53,8 @@ define(
                 this.sprite = new Canvax.Display.Sprite({
                     id : "group_"+this.ind,
                     context : {
-                        x : this.coordinate.center.x,
-                        y : this.coordinate.center.y
+                        x : this.coordinate.origin.x,
+                        y : this.coordinate.origin.y
                     }
                 });
 
@@ -87,6 +87,11 @@ define(
 
                         plant.fillStyle = me._getProp( me.circle.fillStyle , i , plants.data);
                     }
+                } );
+
+                var cxf = me.coordinate.rAxis.field;
+                plants = plants.sort( function(a , b){
+                    return b.data[ cxf ] - a.data[ cxf ];
                 } );
                 
                 this._rings = this["_setRings_"+ this.layout.type +"Range"]( plants );
@@ -211,8 +216,8 @@ define(
                     _.each( arcs, function( arc ){
                         var sector = new Sector({
                             context: {
-                                //x: me.coordinate.center.x,
-                                //y: me.coordinate.center.y,
+                                //x: me.coordinate.origin.x,
+                                //y: me.coordinate.origin.y,
                                 r: _r,
                                 startAngle: arc[0].radian*180/Math.PI,
                                 endAngle: arc[1].radian*180/Math.PI, //secc.endAngle,
@@ -322,39 +327,14 @@ define(
 
                 return _rings;
             },
-            //索引区间分段法
+            //索引区间分段法 待实现
             _setRings_indexRange: function( plants ){
-                var me = this;
-                //每一ring上面有多少个星球
-                var ringPlantsNum = Math.ceil( plants.length / this.ringNum );
+
             },
             //值区间分段法
-            //todo:这样确实就很可能数据集中在两段中间没有
+            //todo:这样确实就很可能数据集中在两段中间没有 待实现
             _setRings_valRange: function( plants ){
-                var me = this;
-                //先对数据更具坐标系统的xAxis做一次排序，越大的越靠近太阳
-                var cxf = me.coordinate.xAxis.field;
-                plants.sort( function(a , b){
-                    return b.data[ cxf ] - b.data[ cxf ];
-                } );
 
-                var xAxisMax = _.max( this.data.data[ cxf ] );
-                var xAxisMin = _.min( this.data.data[ cxf ] );
-
-                //所在同一ring上的对应val区间
-                var ringVal = ( xAxisMax - xAxisMin ) / this.ringNum; 
-
-                var _rings = [];
-                _.each( plants , function( plant , i ){
-                    var ind = parseInt((plant.data[cxf] - xAxisMin) / ringVal , 10);
-                    if( !_rings[ind] ){
-                        _rings[ind] = {
-                            plants : []
-                        };
-                    };
-                    _rings[ind].plants.push( plant );
-                } );
-                return _rings
             },
             _getProp: function( p , i , nodeData ){
                 var groupInd = this.ind;

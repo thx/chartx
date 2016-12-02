@@ -184,7 +184,7 @@ define(
                 xAxis.unshift({
                     x: 0
                 })
-                debugger
+                
                 return {
                     data: graphs,
                     yAxisData: yAxis,

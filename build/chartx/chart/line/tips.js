@@ -13,6 +13,7 @@ define(
                  //strokeStyle : null
             };
             this.node      = {
+                enabled : 1
                 //strokeStyle : null
                 //backFillStyle : null
             }
@@ -112,7 +113,10 @@ define(
              *nodes相关-------------------------
              */
             _initNodes : function(e , tipsPoint){
-                var self = this
+                var self = this;
+                if( !this.node.enabled ){
+                    return;
+                }
                 this._nodes = new Canvax.Display.Sprite({
                     id : "line-tipsNodes",
                     context : {

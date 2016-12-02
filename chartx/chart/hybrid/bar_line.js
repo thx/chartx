@@ -39,7 +39,9 @@ define(
                         xAxis: this.xAxis
                     }),
                     _graphs: null
-                }
+                };
+
+                this._markLines = [];
             },
             draw: function() {
                 this._setStages();
@@ -62,7 +64,12 @@ define(
                 );
 
                 //覆盖掉bar中的tip组件
-                this._tip = new Tips(this.tips, this._lineChart.dataFrame, this.canvax.getDomContainer());
+                this._tip = new Tips( _.deepExtend( {
+                    node : {
+                        enabled : false
+                    },
+                    content: null
+                } , this.tips ) , this._lineChart.dataFrame, this.canvax.getDomContainer());
 
                 //附加的折线图的y轴放在右侧
                 this._yAxisR = new yAxis(

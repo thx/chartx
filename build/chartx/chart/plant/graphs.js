@@ -57,8 +57,8 @@ define(
             },
             draw: function(){
                 var me = this;
-                var cx = this.coordinate.center.x;
-                var cy = this.coordinate.center.y;
+                var cx = this.coordinate.origin.x;
+                var cy = this.coordinate.origin.y;
 
                 var nextGroupRStart = this.center.r + this.center.margin;
                 
@@ -145,8 +145,8 @@ define(
                     var _scale = me.back.scale[i];
                     me.sprite.addChild( new Circle({
                         context : {
-                            x : me.coordinate.center.x,
-                            y : me.coordinate.center.y,
+                            x : me.coordinate.origin.x,
+                            y : me.coordinate.origin.y,
                             r : _scale.r,
                             lineWidth : _scale.lineWidth,
                             strokeStyle : _scale.strokeStyle,
@@ -208,8 +208,8 @@ define(
                 _.each( arcs, function( arc ){
                     var sector = new Sector({
                         context: {
-                            x: me.coordinate.center.x,
-                            y: me.coordinate.center.y,
+                            x: me.coordinate.origin.x,
+                            y: me.coordinate.origin.y,
                             r: r,
                             startAngle: arc[0].radian*180/Math.PI,
                             endAngle: arc[1].radian*180/Math.PI, //secc.endAngle,

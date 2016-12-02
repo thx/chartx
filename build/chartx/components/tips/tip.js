@@ -71,7 +71,6 @@ define(
             move : function(e){
                 if( !this.enabled ) return;
                 this._setContent(e);
-                this._resetBackSize(e);
                 this.setPosition(e);
             },
             hide : function(){
@@ -129,7 +128,7 @@ define(
                 return tipsContent;
             },
             _getDefaultContent : function( info ){
-                var str  = "<table>";
+                var str  = "<table border='0' cellpadding='0' cellspacing='0'>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
 
@@ -147,14 +146,7 @@ define(
                 });
                 str+="</table>";
                 return str;
-            },
-            _resetBackSize:function(e){
-                /*
-                this._back.context.width  = this.dW;
-                this._back.context.height = this.dH;
-                */
-            },
-    
+            },    
             /**
              *获取back要显示的x
              *并且校验是否超出了界限

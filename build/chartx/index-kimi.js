@@ -1585,14 +1585,19 @@ define(
         var Polar = function( opt , data ){
             this.w = opt.w || 0;
             this.h = opt.h || 0;
-            this.center = {
+            this.origin = {
                 x: this.w/2,
                 y: this.h/2
             };
             this.maxR = null;
 
-            //极坐标的x轴
-            this.xAxis = {
+            //极坐标的r轴 半径
+            this.rAxis = {
+                field : null
+            };
+
+            //极坐标的t轴，角度
+            this.tAxis = {
                 field : null
             };
 
@@ -1606,10 +1611,10 @@ define(
             //重新计算maxR
             _computeMaxR : function(){
                 //如果外面要求过maxR，
-                var center = this.center;
+                var origin = this.origin;
                 var _maxR;
-                if( center.x != this.w/2 || center.y != this.h/2 ){
-                    var _distances = [ center.x , this.w-center.x , center.y , this.h - center.y ];
+                if( origin.x != this.w/2 || origin.y != this.h/2 ){
+                    var _distances = [ origin.x , this.w-origin.x , origin.y , this.h - origin.y ];
                     _maxR = _.max( _distances );
                 } else {
                     _maxR = Math.max( this.w / 2 , this.h / 2 );
@@ -1629,16 +1634,16 @@ define(
                 if( r > this.maxR ){
                     return [];
                 } else {
-                    //下面的坐标点都是已经center为原点的坐标系统里
+                    //下面的坐标点都是已经origin为原点的坐标系统里
 
                     //矩形的4边框线段
-                    var center = this.center;
+                    var origin = this.origin;
 
                     var x,y;
 
                     //于上边界的相交点
                     //最多有两个交点
-                    var distanceT = center.y;
+                    var distanceT = origin.y;
                     if( distanceT < r ){
                         x = Math.sqrt( Math.pow(r,2)-Math.pow(distanceT , 2) );
                         _rs = _rs.concat( this._filterPointsInRect([
@@ -1649,7 +1654,7 @@ define(
 
                     //于右边界的相交点
                     //最多有两个交点
-                    var distanceR = this.w - center.x;
+                    var distanceR = this.w - origin.x;
                     if( distanceR < r ){
                         y = Math.sqrt( Math.pow(r,2)-Math.pow(distanceR , 2) );
                         _rs = _rs.concat( this._filterPointsInRect([
@@ -1659,7 +1664,7 @@ define(
                     };
                     //于下边界的相交点
                     //最多有两个交点
-                    var distanceB = this.h - center.y;
+                    var distanceB = this.h - origin.y;
                     if( distanceB < r ){
                         x = Math.sqrt( Math.pow(r,2)-Math.pow(distanceB , 2) );
                         _rs = _rs.concat( this._filterPointsInRect([
@@ -1669,7 +1674,7 @@ define(
                     };
                     //于左边界的相交点
                     //最多有两个交点
-                    var distanceL = center.x;
+                    var distanceL = origin.x;
                     if( distanceL < r ){
                         y = Math.sqrt( Math.pow(r,2)-Math.pow(distanceL , 2) );
                         _rs = _rs.concat( this._filterPointsInRect([
@@ -1721,8 +1726,8 @@ define(
                 return points;
             },
             _checkPointInRect: function(p){
-                var center = this.center;
-                var _tansRoot = { x : p.x + center.x , y: p.y + center.y };
+                var origin = this.origin;
+                var _tansRoot = { x : p.x + origin.x , y: p.y + origin.y };
                 return !( _tansRoot.x < 0 || _tansRoot.x > this.w || _tansRoot.y < 0 || _tansRoot.y > this.h );
             },
             //检查由n个相交点分割出来的圆弧是否在rect内
@@ -1835,7 +1840,6 @@ define(
             move : function(e){
                 if( !this.enabled ) return;
                 this._setContent(e);
-                this._resetBackSize(e);
                 this.setPosition(e);
             },
             hide : function(){
@@ -1893,7 +1897,7 @@ define(
                 return tipsContent;
             },
             _getDefaultContent : function( info ){
-                var str  = "<table>";
+                var str  = "<table border='0' cellpadding='0' cellspacing='0'>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
 
@@ -1911,14 +1915,7 @@ define(
                 });
                 str+="</table>";
                 return str;
-            },
-            _resetBackSize:function(e){
-                /*
-                this._back.context.width  = this.dW;
-                this._back.context.height = this.dH;
-                */
-            },
-    
+            },    
             /**
              *获取back要显示的x
              *并且校验是否超出了界限

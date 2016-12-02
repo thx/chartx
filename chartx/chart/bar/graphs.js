@@ -709,9 +709,12 @@ define(
                         }
                     };
                 });
+                callback && callback(self);
+                /*
                 window.setTimeout(function() {
                     callback && callback(self);
                 }, 300 * (this.barsSp.children.length - 1));
+                */
             },
             _getInfoHandler: function(target) {
                 var node = {
