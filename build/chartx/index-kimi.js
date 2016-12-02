@@ -1843,6 +1843,7 @@ define(
                 this.setPosition(e);
             },
             hide : function(){
+                return
                 if( !this.enabled ) return;
                 this.sprite.removeAllChildren();
                 this._removeContent();
