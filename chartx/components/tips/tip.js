@@ -74,7 +74,6 @@ define(
                 this.setPosition(e);
             },
             hide : function(){
-                return
                 if( !this.enabled ) return;
                 this.sprite.removeAllChildren();
                 this._removeContent();
@@ -129,21 +128,21 @@ define(
                 return tipsContent;
             },
             _getDefaultContent : function( info ){
-                var str  = "<table border='0' cellpadding='0' cellspacing='0'>";
+                var str  = "<table style='border:none'>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
 
                     str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
-                        str+="<td>"+ prefixName +"：</td>";
+                        str+="<td style='border:none;white-space:nowrap;word-wrap:normal;'>"+ prefixName +"：</td>";
                     } else {
                         if( node.field ){
-                            str+="<td>"+ node.field +"：</td>";
+                            str+="<td style='border:none;white-space:nowrap;word-wrap:normal;'>"+ node.field +"：</td>";
                         }
                     };
 
-                    str += "<td>"+ Tools.numAddSymbol(node.value) +"</td></tr>";
+                    str += "<td style='border:none;white-space:nowrap;word-wrap:normal;'>"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
                 return str;
