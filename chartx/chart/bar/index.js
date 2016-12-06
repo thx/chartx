@@ -3,7 +3,7 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        'chartx/chart/bar/xaxis',
+        'chartx/components/xaxis/xAxis',
         'chartx/chart/bar/yaxis',
         'chartx/components/back/Back',
         'chartx/chart/bar/graphs',
@@ -21,6 +21,10 @@ define(
             init: function(node, data, opts) {
 
                 this._xAxis = null;
+                this.xAxis = {
+                    layoutType: "peak" //波峰波谷布局模型
+                };
+
                 this._yAxis = null;
                 this._back = null;
                 this._graphs = null;
@@ -297,7 +301,8 @@ define(
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
                 !opts.tips && (opts.tips = {});
-                opts.tips = _.deepExtend(opts.tips, {
+
+                opts.tips = _.deepExtend({
                     content: function(info) {
                         var str = "<table style='border:none'>";
                         var self = this;
@@ -321,7 +326,7 @@ define(
                         str += "</table>";
                         return str;
                     }
-                });
+                } , opts.tips );
 
                 _.deepExtend(this, opts);
                 _.deepExtend(this.yAxis, {
@@ -606,6 +611,7 @@ define(
                                 });
                             };
 
+                            //TODO：这里也是bar有自己计算x的公式， 要和line一样改造成调用xAxis的接口来计算
                             var x = xArr[i].x - xDis1 / 2 + xDis2 * (b + 1);
 
                             var y = 0;

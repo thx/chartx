@@ -205,52 +205,6 @@ define(
 
 
 define(
-    "chartx/chart/line/xaxis",
-    [
-        "chartx/components/xaxis/xAxis"
-    ],
-    function( xAxisBase ){
-        var xAxis = function( opt , data ){
-            xAxis.superclass.constructor.apply( this , arguments );
-        };
-        Chartx.extend( xAxis , xAxisBase , {
-            //覆盖xAxisBase 中的 _trimXAxis
-            _trimXAxis : function( data , xGraphsWidth ){
-                var max  = data.length
-                var tmpData = [];
-    
-                if( max == 1 ){
-                    tmpData.push({
-                        content : data[0],
-                        x       : parseInt( xGraphsWidth / 2 )
-                    });
-                } else {
-                    for (var a = 0, al  = data.length; a < al; a++ ) {
-                        //默认string类型的情况下是均分
-                        var x = parseInt(a / (max - 1) * xGraphsWidth);
-
-                        if( this.valType == "number" ){
-                            //nam 刻度的x要根据 maxVal - minVal 来计算
-                            x = xGraphsWidth * ( (data[a] - this.minVal) / (this.maxVal - this.minVal) );
-                        };
-
-                        var o = {
-                            'content':data[a], 
-                            'x': x
-                        }
-                        tmpData.push( o )
-                    }
-                }
-                return tmpData;
-            }
-        } );
-    
-        return xAxis;
-    }
-);
-
-
-define(
     "chartx/chart/line/group", [
         "canvax/index",
         "canvax/shape/BrokenLine",
@@ -1158,7 +1112,7 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        'chartx/chart/line/xaxis',
+        'chartx/components/xaxis/xAxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         'chartx/components/anchor/Anchor',
@@ -1199,7 +1153,9 @@ define(
                 this._graphs = null;
                 this._tips = null;
 
-                this.xAxis = {};
+                this.xAxis = {
+                    layoutType : "rule"
+                };
                 this.yAxis = {};
                 this.graphs = {};
 
@@ -1208,6 +1164,7 @@ define(
                 this.biaxial = false;
 
                 _.deepExtend(this, opts);
+
                 this.dataFrame = this._initData(data, this);
             },
             draw: function( e ) {
@@ -1968,13 +1925,19 @@ define(
                             var maxValue = 0;
                             _center[i] = {};
                             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                                //if (b >= self._xAxis.data.length) {
-                                    //如果发现数据节点已经超过了x轴的节点，就扔掉
-                                //    break;
-                                //}
+
+                                //不能用x轴组件的x值， 要脱离关系， 各自有自己的一套计算方法，以为x轴的数据是可能完全自定义的
                                 //var x = self._xAxis.data[b].x;
 
-                                var x = b * self._xAxis.xGraphsWidth / (bl-1);
+                                //下面这个就是 完全自己的一套计算x position的方法
+                                //var x = b * self._xAxis.xGraphsWidth / (bl-1);
+                                
+                                var x = self._xAxis.getPosX( {
+                                    ind : b,
+                                    dataLen : bl,
+                                    layoutType : self.xAxis.layoutType
+                                } );
+                                console.log(x);
                                 var y = -(_lineData[b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
                                 y = isNaN(y) ? 0 : y
                                 __tmpData[b] = {

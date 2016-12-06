@@ -2024,9 +2024,12 @@ define(
             this.animation = true;
             this.resize = false;
     
-            this.valType= "string";
-            this.maxVal = null; //如果xaxis的刻度为number类型那么这里会有一个number的maxVal
-            this.minVal = null; //同maxVal
+            this.maxVal = null; 
+            this.minVal = null; 
+
+            this.xDis1 = 0; //x方向一维均分长度,layoutType==peak的时候要用到
+
+            this.layoutType = "step"; //step , rule , peak
 
             this.init(opt, data);
         };
@@ -2045,15 +2048,15 @@ define(
 
                 if (opt) {
                     _.deepExtend(this, opt);
-                }
+                };
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
-                }
+                };
 
                 if (!this.line.enabled) {
                     this.line.height = 1
-                }
+                };
 
                 if (this.dataSection.length == 0) {
                     this.dataSection = this._initDataSection(this.dataOrg);
@@ -2066,15 +2069,9 @@ define(
                 this._setTextMaxWidth();
                 this._setXAxisHeight();
 
-                //取第一个数据来判断xaxis的刻度值类型是否为number
-                if(
-                    (this.dataSection.length>0 && _.isNumber(this.dataSection[0])) ||
-                    (opt && opt.valType == 'number')                   
-                 ){
-                    this.valType= "number";
-                    this.minVal == null && (this.minVal = _.min( this.dataSection ));
-                    this.maxVal == null && (this.maxVal = _.max( this.dataSection ));
-                }
+                //取第一个数据来判断xaxis的刻度值类型是否为 number
+                this.minVal == null && (this.minVal = _.min( this.dataSection ));
+                this.maxVal == null && (this.maxVal = _.max( this.dataSection ));
 
             },
             /**
@@ -2189,19 +2186,110 @@ define(
                 };
                 this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
             },
-            _trimXAxis: function(data, xGraphsWidth) {
+            //获取x对应的位置
+            //val ind 至少要有一个
+            getPosX: function( opt ){
+                var x = 0;
+                var val = opt.val; 
+                var ind = "ind" in opt ? opt.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
+                var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
+                var xGraphsWidth = "xGraphsWidth" in opt ? opt.xGraphsWidth : this.xGraphsWidth;
+                var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
 
+                if( dataLen == 1 ){
+                    x =  xGraphsWidth / 2;
+                };
+                if( layoutType == "rule" ){
+                    x = ind / (dataLen - 1) * xGraphsWidth;
+                };
+                if( layoutType == "proportion" ){
+                    //按照数据真实的值在minVal - maxVal区间中的比例值
+                    if( val == undefined ){
+                        val = (ind * (this.maxVal - this.minVal)/(dataLen-1)) + this.minVal;
+                    };
+                    x = xGraphsWidth * ( (val - this.minVal) / (this.maxVal - this.minVal) );
+                };
+                if( layoutType == "peak" ){
+                    x = this.xDis1 * (ind+1) - this.xDis1/2;
+                };
+                if( layoutType == "step" ){
+                    x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
+                };
+                return parseInt( x , 10 );
+            },
+            _trimXAxis: function($data, $xGraphsWidth) {
                 var tmpData = [];
-                var dis = xGraphsWidth / (data.length + 1);
+                var data = $data || this.dataSection;
+                var xGraphsWidth = xGraphsWidth || this.xGraphsWidth;
 
-                for (var a = 0, al = data.length; a < al; a++) {
+                this.xDis1 = xGraphsWidth / data.length;//这个属性目前主要是柱状图有分组柱状图的场景在用
+
+                for (var a = 0, al  = data.length; a < al; a++ ) {
                     var o = {
-                        'content': data[a],
-                        'x': parseInt(dis * (a + 1))
-                    }
-                    tmpData.push(o);
+                        'content':data[a], 
+                        'x': this.getPosX({
+                            val : data[a],
+                            ind : a,
+                            dataLen: al,
+                            xGraphsWidth : xGraphsWidth
+                        })
+                    };
+                    tmpData.push( o );
                 };
                 return tmpData;
+
+                /*
+                if( data.length == 1 ){
+                    //当只有一个数据的时候
+                    tmpData.push({
+                        content : data[0],
+                        x       : parseInt( xGraphsWidth / 2 )
+                    });
+
+                    //目前只有柱状图用到的peak布局模型里才会用的到
+                    this.xDis1  = xGraphsWidth;
+                    return tmpData;
+                }; 
+
+                if ( this.layoutType == "rule" ){
+                    //标尺布局法，从0开始，到最后都有布局点,主要是折线图用的多
+                    for (var a = 0, al  = data.length; a < al; a++ ) {
+                        //默认string类型的情况下是均分
+                        var x = parseInt(a / (data.length - 1) * xGraphsWidth);
+                        if( this.layoutType == "number" ){
+                            //nam 刻度的x要根据 maxVal - minVal 来计算
+                            x = xGraphsWidth * ( (data[a] - this.minVal) / (this.maxVal - this.minVal) );
+                        };
+                        var o = {
+                            'content':data[a], 
+                            'x': x
+                        };
+                        tmpData.push( o );
+                    };
+                } else if( this.layoutType == "peak" ){
+                    //主要是柱状图在使用波峰布局
+                    this.xDis1  = xGraphsWidth / data.length;
+                    for (var a = 0, al = data.length; a < al; a++ ) {
+                        var o = {
+                            'content' : data[a],
+                            'x'       : this.xDis1 * (a+1) - this.xDis1/2
+                        };
+                        tmpData.push( o );
+                    };
+                } else if( this.layoutType == "step" ) {
+                    //梯子布局
+                    var dis = xGraphsWidth / (data.length + 1);
+
+                    for (var a = 0, al = data.length; a < al; a++) {
+                        var o = {
+                            'content': data[a],
+                            'x': parseInt(dis * (a + 1))
+                        }
+                        tmpData.push(o);
+                    };
+                };
+                return tmpData;
+                */
             },
             _formatDataSectionText: function(arr) {
                 if (!arr) {

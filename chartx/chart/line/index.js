@@ -3,7 +3,7 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        'chartx/chart/line/xaxis',
+        'chartx/components/xaxis/xAxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         'chartx/components/anchor/Anchor',
@@ -44,7 +44,9 @@ define(
                 this._graphs = null;
                 this._tips = null;
 
-                this.xAxis = {};
+                this.xAxis = {
+                    layoutType : "rule"
+                };
                 this.yAxis = {};
                 this.graphs = {};
 
@@ -53,6 +55,7 @@ define(
                 this.biaxial = false;
 
                 _.deepExtend(this, opts);
+
                 this.dataFrame = this._initData(data, this);
             },
             draw: function( e ) {
@@ -813,13 +816,19 @@ define(
                             var maxValue = 0;
                             _center[i] = {};
                             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                                //if (b >= self._xAxis.data.length) {
-                                    //如果发现数据节点已经超过了x轴的节点，就扔掉
-                                //    break;
-                                //}
+
+                                //不能用x轴组件的x值， 要脱离关系， 各自有自己的一套计算方法，以为x轴的数据是可能完全自定义的
                                 //var x = self._xAxis.data[b].x;
 
-                                var x = b * self._xAxis.xGraphsWidth / (bl-1);
+                                //下面这个就是 完全自己的一套计算x position的方法
+                                //var x = b * self._xAxis.xGraphsWidth / (bl-1);
+                                
+                                var x = self._xAxis.getPosX( {
+                                    ind : b,
+                                    dataLen : bl,
+                                    layoutType : self.xAxis.layoutType
+                                } );
+                                console.log(x);
                                 var y = -(_lineData[b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
                                 y = isNaN(y) ? 0 : y
                                 __tmpData[b] = {
