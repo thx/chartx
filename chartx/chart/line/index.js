@@ -229,7 +229,7 @@ define(
 
                 if( this.markLine && this.markLine.y ){
                     this.dataFrame.yAxis.org.push( this.markLine.y );
-                }
+                };
 
                 this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis );
 
@@ -635,6 +635,13 @@ define(
             //markline begin
             _initMarkLine: function(g, dataFrame) {
                 var me = this;
+
+                //如果markline有target配置，那么只现在target配置里的字段的markline
+                var _t = me.markLine.target;
+                if( _t && !( ( _.isArray(_t) && _.indexOf( _t , g.field )>=0 ) || (_t === g.field) ) ){
+                    return;
+                };
+
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);

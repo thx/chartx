@@ -2804,6 +2804,9 @@ define(
             this.baseNumber = null;
             this.basePoint = null; //value为baseNumber的point {x,y}
 
+            this.maxNumber = null;
+            this.minNumber = null;
+
             //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter = null; //function(params){}; 
@@ -2974,6 +2977,7 @@ define(
                 for( var i = 0, il=arr.length; i<il ; i++ ){
                     arr[i] =  arr[i] || 0;
                 };
+
                 return arr;
             },
             _initData: function(data) {

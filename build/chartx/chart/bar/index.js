@@ -1246,8 +1246,10 @@ define(
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
 
                 if( this._graphs.average.enabled ){
-                    //this._getaverageData();
-                    this.dataFrame.yAxis.org.push( this._getaverageData() );
+                    this.dataFrame.yAxis.org.push( [ this._getaverageData() ] );
+                };
+                if( this.markLine && this.markLine.y ){
+                    this.dataFrame.yAxis.org.push( [ this.markLine.y ] );
                 };
 
                 this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
@@ -1626,13 +1628,21 @@ define(
                 }
             },
             _initMarkLine: function(g) {
-                var me = this
+                var me = this;
+                
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var yfieldFlat = _.flatten(me._yAxis.field);
                     for (var a = 0, al = yfieldFlat.length; a < al; a++) {
                         var index = a;
                         var center = null;
-                        
+
+                        //如果markline有target配置，那么只现在target配置里的字段的markline
+                        var _yField = yfieldFlat[a];
+                        var _t = me.markLine.target;
+                        if( _t && !( ( _.isArray(_t) && _.indexOf( _t , _yField )>=0 ) || (_t === _yField) ) ){
+                            continue;
+                        };
+
                         if(!me.dataFrame.yAxis.center[a]){
                             continue
                         } else {
