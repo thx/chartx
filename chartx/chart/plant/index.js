@@ -92,6 +92,7 @@ define(
 
                 });
                 this._graphs.sprite.on("panend mouseout", function(e){
+                    debugger
                     //if( e.eventInfo ){
                         me._tip.hide( e );
                     //}

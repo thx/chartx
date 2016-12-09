@@ -139,7 +139,7 @@
             console.log("click")
         });
         chart.on("dblclick" , function( e ){
-            console.log("dblclick")
+            e.target.fire("mouseout")
         });
     });
 

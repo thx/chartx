@@ -146,6 +146,7 @@ define(
                             e.eventInfo = me._getInfoHandler(e);
                         });
                         circle.on("panend mouseout", function(e){
+                            debugger
                             e.eventInfo = {};
                             this.context.r --;
                         });
