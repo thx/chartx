@@ -348,7 +348,6 @@ define(
     
                 var rotation = ctx.rotation;
                 if( rotation ){
-                    debugger
                     //如果有旋转
                     //旋转的原点坐标
                     var origin = new Point(ctx.rotateOrigin);
