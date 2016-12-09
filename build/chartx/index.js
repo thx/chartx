@@ -2037,7 +2037,7 @@ define(
             this.positionInRange = false; //tip的浮层是否限定在画布区域
             this.init(opt);
         }
-        Tip.prototype = {
+        Tip.prototype = { 
             init : function(opt){
                 _.deepExtend( this , opt );
                 this.sprite = new Canvax.Display.Sprite({
