@@ -175,6 +175,8 @@ define(
                             }
                         });
 
+                        circle.label = _label;
+
                         _ringSp.addChild( _label );
                     } );
 
