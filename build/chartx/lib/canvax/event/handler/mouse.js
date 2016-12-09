@@ -162,6 +162,11 @@ define(
                 var me     = this;
                 var root   = me.canvax;
                 var oldObj = me.curPointsTarget[0];
+
+                if( oldObj && !oldObj.context ){
+                    //如果有oldObj 但是已经被销毁了
+                    oldObj = null;
+                };
  
                 var e = new CanvaxEvent( e );
  
