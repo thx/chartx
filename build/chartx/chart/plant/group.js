@@ -123,7 +123,7 @@ define(
                             x : point.x,
                             y : point.y,
                             r : r,
-                            fillStyle: me._getProp( me.circle.fillStyle ),
+                            fillStyle: me._getProp( p.fillStyle ),
                             lineWidth : 2,
                             strokeStyle : "#fff"
                         };

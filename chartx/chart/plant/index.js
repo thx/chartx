@@ -63,7 +63,7 @@ define(
                 this._tip._getDefaultContent = this._getTipDefaultContent;
             },
             _getTipDefaultContent: function( e ){
-                return e.node.data.name;
+                return "<span style='color:"+e.node.fillStyle+"'>"+e.node.data.name+"</span>";
             },
             _startDraw: function(){
                 this._graphs.draw();
@@ -92,9 +92,9 @@ define(
 
                 });
                 this._graphs.sprite.on("panend mouseout", function(e){
-                    if( e.eventInfo ){
+                    //if( e.eventInfo ){
                         me._tip.hide( e );
-                    }
+                    //}
                 });
                 this._graphs.sprite.on("tap click", function(e){
                     me.fire("tap click" , e);
