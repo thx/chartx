@@ -85,7 +85,7 @@ define(
                         } );
                         plants.push( plant );
 
-                        plant.fillStyle = me._getProp( me.circle.fillStyle , i , plants.data);
+                        plant.fillStyle = me._getProp( me.circle.fillStyle , i , plant.data);
                     }
                 } );
 
@@ -118,12 +118,13 @@ define(
                             return;
                         };
                         var point = me.coordinate.getPointInRadian( p.pit.middle , ring.r );
-                        var r = me._getProp( me.circle.r );
+
+                        var r = me._getProp( me.circle.r , ii , p.data);
                         var circleCtx = {
                             x : point.x,
                             y : point.y,
                             r : r,
-                            fillStyle: me._getProp( p.fillStyle ),
+                            fillStyle: me._getProp( p.fillStyle , ii , p.data ),
                             lineWidth : 2,
                             strokeStyle : "#fff"
                         };
@@ -146,7 +147,6 @@ define(
                             e.eventInfo = me._getInfoHandler(e);
                         });
                         circle.on("panend mouseout", function(e){
-                            debugger
                             e.eventInfo = {};
                             this.context.r --;
                         });
