@@ -92,9 +92,7 @@ define(
 
                 });
                 this._graphs.sprite.on("panend mouseout", function(e){
-                    //if( e.eventInfo ){
-                        me._tip.hide( e );
-                    //}
+                    me._tip.hide( e );
                 });
                 this._graphs.sprite.on("tap click", function(e){
                     me.fire("tap click" , e);
