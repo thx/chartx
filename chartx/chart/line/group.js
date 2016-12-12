@@ -200,6 +200,27 @@ define(
                     return;
                 };
 
+                function _update( list ){
+                    var _strokeStyle = self._getLineStrokeStyle();
+                    self._bline.context.pointList = _.clone( list );
+                    self._bline.context.strokeStyle = _strokeStyle;
+
+                    self._fill.context.path = self._fillLine(self._bline);
+                    self._fill.context.fillStyle = self._getFillStyle() || _strokeStyle;
+                    self._circles && _.each(self._circles.children, function(circle, i) {
+                        var ind = parseInt(circle.id.split("_")[1]);
+                        circle.context.y = list[ind][1];
+                        circle.context.x = list[ind][0];
+                    });
+
+                    self._texts && _.each(self._texts.children, function(text, i) {
+                        var ind = parseInt(text.id.split("_")[1]);
+                        text.context.y = list[ind][1] - 3;
+                        text.context.x = list[ind][0];
+                        self._checkTextPos( text , i );
+                    });
+                };
+
                 this._growTween = AnimationFrame.registTween({
                     from: self._getPointPosStr(self._currPointList),
                     to: self._getPointPosStr(self._pointList),
@@ -209,27 +230,11 @@ define(
                             var xory = parseInt(p.split("_")[1]);
                             self._currPointList[ind] && (self._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
                         };
-                        var _strokeStyle = self._getLineStrokeStyle();
-                        self._bline.context.pointList = _.clone(self._currPointList);
-                        self._bline.context.strokeStyle = _strokeStyle;
-
-                        self._fill.context.path = self._fillLine(self._bline);
-                        self._fill.context.fillStyle = self._getFillStyle() || _strokeStyle;
-                        self._circles && _.each(self._circles.children, function(circle, i) {
-                            var ind = parseInt(circle.id.split("_")[1]);
-                            circle.context.y = self._currPointList[ind][1];
-                            circle.context.x = self._currPointList[ind][0];
-                        });
-
-                        self._texts && _.each(self._texts.children, function(text, i) {
-                            var ind = parseInt(text.id.split("_")[1]);
-                            text.context.y = self._currPointList[ind][1] - 3;
-                            text.context.x = self._currPointList[ind][0];
-                            self._checkTextPos( text , i );
-                        });
+                        _update( self._currPointList );
                     },
                     onComplete: function() {
                         self._growTween = null;
+                        _update( self._pointList );
                         callback && callback(self);
                     }
                 });
@@ -285,6 +290,7 @@ define(
             },
             _widget: function(){
                 var me = this;
+                debugger
                 me._pointList = this._getPointList(me.data);
 
                 if (me._pointList.length == 0) {
