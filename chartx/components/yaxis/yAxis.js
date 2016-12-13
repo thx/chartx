@@ -9,7 +9,7 @@ define(
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
         var yAxis = function(opt, data ) {
 
-            this.w = 0;
+            this.width = null;
             this.enabled = 1; //true false 1,0都可以
             this.dis = 6; //线到文本的距离
             this.maxW = 0; //最大文本的width
@@ -344,7 +344,7 @@ define(
             },
             resetWidth: function(w) {
                 var self = this;
-                self.w = w;
+                self.width = w;
                 if (self.line.enabled) {
                     self.sprite.context.x = w - self.dis - self.line.width;
                 } else {
@@ -354,7 +354,7 @@ define(
             _widget: function() {
                 var self = this;
                 if (!self.enabled) {
-                    self.w = 0;
+                    self.width = 0;
                     return;
                 }
                 var arr = this.layoutData;
@@ -462,10 +462,12 @@ define(
 
                 //self.sprite.context.x = self.maxW + self.pos.x;
                 //self.pos.x = self.maxW + self.pos.x;
-                if (self.line.enabled) {
-                    self.w = self.maxW + self.dis + self.line.width + self.pos.x;
-                } else {
-                    self.w = self.maxW + self.dis + self.pos.x;
+                if( self.width == null ){
+                    if (self.line.enabled) {
+                        self.width = self.maxW + self.dis + self.line.width + self.pos.x;
+                    } else {
+                        self.width = self.maxW + self.dis + self.pos.x;
+                    }
                 }
             },
             _getProp: function(s) {
