@@ -87,7 +87,7 @@ define(
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
-                this.sprite.context.x = $n + (this.place == "left" ? this.maxW : 0);
+                this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
                 this.pos.x = $n;
             },
             setY: function($n) {
@@ -203,7 +203,7 @@ define(
                 this.basePoint = {
                     content: this.baseNumber,
                     y: basePy
-                }
+                };
             },
             _getYAxisDisLine: function() { //获取y轴顶高到第一条线之间的距离         
                 var disMin = this.disYAxisTopLine
@@ -342,13 +342,13 @@ define(
                     this._setBottomAndBaseNumber();
                 };                
             },
-            resetWidth: function(w) {
+            resetWidth: function(width) {
                 var self = this;
-                self.width = w;
+                self.width = width;
                 if (self.line.enabled) {
-                    self.sprite.context.x = w - self.dis - self.line.width;
+                    self.sprite.context.x = width - self.dis - self.line.width;
                 } else {
-                    self.sprite.context.x = w - self.dis;
+                    self.sprite.context.x = width - self.dis;
                 }
             },
             _widget: function() {
@@ -415,7 +415,8 @@ define(
                     self.maxW = Math.max(self.maxW, txt.getTextWidth());
                     if (self.text.rotation == 90 || self.text.rotation == -90) {
                         self.maxW = Math.max(self.maxW, txt.getTextHeight());
-                    }
+                    };
+
 
                     if (self.line.enabled) {
                         //线条
@@ -468,7 +469,7 @@ define(
                     } else {
                         self.width = self.maxW + self.dis + self.pos.x;
                     }
-                }
+                };
             },
             _getProp: function(s) {
                 var res;

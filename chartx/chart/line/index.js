@@ -277,7 +277,7 @@ define(
                     } , this.__cloneChart.thumbBar.dataFrame.yAxis);
                 };
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
 
 
@@ -835,7 +835,7 @@ define(
                                     dataLen : bl,
                                     layoutType : self.xAxis.layoutType
                                 } );
-                                console.log(x);
+                                //console.log(x);
                                 var y = -(_lineData[b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
                                 y = isNaN(y) ? 0 : y
                                 __tmpData[b] = {

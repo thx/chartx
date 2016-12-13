@@ -118,7 +118,7 @@ define(
                     yMaxHeight: y
                 });
 
-                var _yAxisW = Math.ceil(this._yAxis.w);
+                var _yAxisW = Math.ceil(this._yAxis.width);
 
                 //绘制x轴
                 this._xAxis.draw({

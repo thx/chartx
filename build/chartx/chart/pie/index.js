@@ -1263,7 +1263,7 @@ define(
                     for (var i = 1; i < data.length; i++) {
                         if (data[i][0] == field && !_.contains(me.ignoreFields, field)) {
                             me.ignoreFields.push(field);
-                            console.log(me.ignoreFields.toString());
+                            //console.log(me.ignoreFields.toString());
                         }
                     }
                 }

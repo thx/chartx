@@ -447,7 +447,7 @@ define(
                     yMaxHeight : graphsH 
                 });
                 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
     
     
                 //绘制x轴

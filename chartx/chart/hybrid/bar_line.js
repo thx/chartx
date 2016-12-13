@@ -103,7 +103,7 @@ define(
                     },
                     yMaxHeight: graphsH
                 });
-                var _yAxisW = me._yAxis.w;
+                var _yAxisW = me._yAxis.width;
 
                 //绘制右侧的y轴给line用
                 var _yAxisRW = 0;

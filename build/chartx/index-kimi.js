@@ -2535,7 +2535,7 @@ define(
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
         var yAxis = function(opt, data ) {
 
-            this.w = 0;
+            this.width = null;
             this.enabled = 1; //true false 1,0都可以
             this.dis = 6; //线到文本的距离
             this.maxW = 0; //最大文本的width
@@ -2613,7 +2613,7 @@ define(
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
-                this.sprite.context.x = $n + (this.place == "left" ? this.maxW : 0);
+                this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
                 this.pos.x = $n;
             },
             setY: function($n) {
@@ -2729,7 +2729,7 @@ define(
                 this.basePoint = {
                     content: this.baseNumber,
                     y: basePy
-                }
+                };
             },
             _getYAxisDisLine: function() { //获取y轴顶高到第一条线之间的距离         
                 var disMin = this.disYAxisTopLine
@@ -2868,19 +2868,19 @@ define(
                     this._setBottomAndBaseNumber();
                 };                
             },
-            resetWidth: function(w) {
+            resetWidth: function(width) {
                 var self = this;
-                self.w = w;
+                self.width = width;
                 if (self.line.enabled) {
-                    self.sprite.context.x = w - self.dis - self.line.width;
+                    self.sprite.context.x = width - self.dis - self.line.width;
                 } else {
-                    self.sprite.context.x = w - self.dis;
+                    self.sprite.context.x = width - self.dis;
                 }
             },
             _widget: function() {
                 var self = this;
                 if (!self.enabled) {
-                    self.w = 0;
+                    self.width = 0;
                     return;
                 }
                 var arr = this.layoutData;
@@ -2941,7 +2941,8 @@ define(
                     self.maxW = Math.max(self.maxW, txt.getTextWidth());
                     if (self.text.rotation == 90 || self.text.rotation == -90) {
                         self.maxW = Math.max(self.maxW, txt.getTextHeight());
-                    }
+                    };
+
 
                     if (self.line.enabled) {
                         //线条
@@ -2988,11 +2989,13 @@ define(
 
                 //self.sprite.context.x = self.maxW + self.pos.x;
                 //self.pos.x = self.maxW + self.pos.x;
-                if (self.line.enabled) {
-                    self.w = self.maxW + self.dis + self.line.width + self.pos.x;
-                } else {
-                    self.w = self.maxW + self.dis + self.pos.x;
-                }
+                if( self.width == null ){
+                    if (self.line.enabled) {
+                        self.width = self.maxW + self.dis + self.line.width + self.pos.x;
+                    } else {
+                        self.width = self.maxW + self.dis + self.pos.x;
+                    }
+                };
             },
             _getProp: function(s) {
                 var res;

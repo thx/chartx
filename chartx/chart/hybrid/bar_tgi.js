@@ -172,7 +172,7 @@ define(
                     yMaxHeight: graphsH
                 });
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
                 //有双轴
                 var _yAxisRW = 0;

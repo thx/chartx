@@ -2994,7 +2994,7 @@ define("chartx/chart/bar/3d",
                 }
                 ;
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
                 //绘制x轴
                 this._xAxis.draw({

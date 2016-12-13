@@ -1280,7 +1280,7 @@ define(
                     this._yAxis.setX(this._yAxis.pos.x);
                 };
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
                 //绘制x轴
                 this._xAxis.draw({

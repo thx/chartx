@@ -236,7 +236,7 @@ define(
                         self._growTween = null;
                         //在动画结束后强制把目标状态绘制一次。
                         //解决在onUpdate中可能出现的异常会导致绘制有问题。
-                        //这样的话，至少最后的结果会是对的
+                        //这样的话，至少最后的结果会是对的。
                         _update( self._pointList );
                         callback && callback(self);
                     }
@@ -293,7 +293,7 @@ define(
             },
             _widget: function(){
                 var me = this;
-                debugger
+                
                 me._pointList = this._getPointList(me.data);
 
                 if (me._pointList.length == 0) {
