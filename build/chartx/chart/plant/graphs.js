@@ -35,6 +35,7 @@ define(
                 data : []
             };
             this._groups = [];
+            this.groupLen = 0;
             this.group = {}; //透传给 group 的参数
 
 
@@ -79,15 +80,17 @@ define(
 
                     nextGroupRStart = _g.rRange.to;
                     me._groups.push( _g );
+                    me.groupLen++;
 
                     me.back.scale.push({
-                        r           : _g.rRange.to,
-                        lineWidth   : me._getBackProp( me.back.lineWidth , i),
-                        strokeStyle : me._getBackProp( me.back.strokeStyle , i),
-                        fillStyle   : me._getBackProp( me.back.fillStyle , i)
+                        r           : _g.rRange.to
+                        //lineWidth   : me._getBackProp( me.back.lineWidth , i),
+                        //strokeStyle : me._getBackProp( me.back.strokeStyle , i),
+                        //fillStyle   : me._getBackProp( me.back.fillStyle , i)
                     });
                     //me.sprite.addChild( _g.sprite );
                 } );
+
 
                 me._drawBack();
 
@@ -131,9 +134,9 @@ define(
                     for( var i=0;i<=me.back.scaleNum ; i++ ){
                         me.back.scale.push({
                             r           : me.center.r + _diffR*(i+1),
-                            lineWidth   : me._getBackProp( me.back.lineWidth , i),
-                            strokeStyle : me._getBackProp( me.back.strokeStyle , i),
-                            fillStyle   : me._getBackProp( me.back.fillStyle , i)
+                            //lineWidth   : me._getBackProp( me.back.lineWidth , i),
+                            //strokeStyle : me._getBackProp( me.back.strokeStyle , i),
+                            //fillStyle   : me._getBackProp( me.back.fillStyle , i)
                         });
                     }
                 } else {
@@ -148,9 +151,9 @@ define(
                             x : me.coordinate.origin.x,
                             y : me.coordinate.origin.y,
                             r : _scale.r,
-                            lineWidth : _scale.lineWidth,
-                            strokeStyle : _scale.strokeStyle,
-                            fillStyle: _scale.fillStyle
+                            lineWidth : me._getBackProp( me.back.lineWidth , i),
+                            strokeStyle : me._getBackProp( me.back.strokeStyle , i),
+                            fillStyle: me._getBackProp( me.back.fillStyle , i)
                         }
                     }) );
                 };

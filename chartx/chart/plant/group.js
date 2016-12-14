@@ -25,6 +25,11 @@ define(
                 r : 15
             };
 
+            this.label = {
+                fillStyle : "#666",
+                fontSize  : 13
+            };
+
             this.layout = {
                 type : "radian"
             };
@@ -164,10 +169,10 @@ define(
                             context: {
                                 x: point.x,
                                 y: point.y + r +3,
-                                fontSize: 15,
+                                fontSize: me.label.fontSize,
                                 textAlign: "center",
                                 textBaseline: "top",
-                                fillStyle: "#666",
+                                fillStyle: me.label.fillStyle,
                                 rotation : -_ringCtx.rotation,
                                 rotateOrigin : {
                                     x : 0,
