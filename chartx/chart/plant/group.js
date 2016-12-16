@@ -255,7 +255,7 @@ define(
                 var allPlantsMax = 0; //所有ring里面
 
                 //计算每个环的最大可以创建星球数量,然后把所有的数量相加做分母。
-                //然后计算自己的比例去plants里面拿对应比例的数据
+                //然后计算自己的比例去 plants 里面拿对应比例的数据
                 _.each( _rings , function( ring , i ){
                     //先计算上这个轨道上排排站一共可以放的下多少个星球
                     //一个星球需要多少弧度
@@ -312,9 +312,18 @@ define(
                 //allPlantsMax有了后作为分明， 可以给每个ring去分摊plant了
                 var preAllCount = 0;
                 _.each( _rings , function( ring , i ){
-                    var num = parseInt( ring.max/allPlantsMax * plants.length );
-                    var endNum = preAllCount+num;
-                    ring.plants = plants.slice( preAllCount , (i==_rings.length-1 ? plants.length-1 : endNum) ) ;
+debugger
+                    if( preAllCount >= plants.length ){
+                        return false;
+                    };
+                    
+                    var num = Math.ceil( ring.max/allPlantsMax * plants.length );
+                    num = Math.min( ring.max , num );
+
+                    ring.plants = plants.slice( preAllCount , preAllCount + num );
+                    if( i == _rings.length - 1 ){
+                        ring.plants = plants.slice( preAllCount );
+                    };
                     preAllCount += num;
 
                     //给每个萝卜分配一个坑位
