@@ -2192,8 +2192,8 @@ define(
             this.graphw = 0;
             this.graphh = 0;
             this.yAxisW = 0;
-            this.w = 0;
-            this.h = 0;
+            this.width = 0;
+            this.height = 0;
 
             this.disY = 1;
             this.dis = 6; //线到文本的距离
@@ -2392,14 +2392,14 @@ define(
                 };
 
                 this.yAxisW = Math.max(this.yAxisW, this.leftDisX);
-                this.w = this.graphw - this.yAxisW;
+                this.width = this.graphw - this.yAxisW;
                 if (this.pos.x == null) {
                     this.pos.x = this.yAxisW + this.disOriginX;
                 };
                 if (this.pos.y == null) {
-                    this.pos.y = this.graphh - this.h;
+                    this.pos.y = this.graphh - this.height;
                 };
-                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine());
+                this.xGraphsWidth = parseInt(this.width - this._getXAxisDisLine());
 
                 if (this._label) {
                     if (this.isH) {
@@ -2408,7 +2408,7 @@ define(
                         this.xGraphsWidth -= this._label.getTextWidth() + 5
                     }
                 };
-                this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
+                this.disOriginX = parseInt((this.width - this.xGraphsWidth) / 2);
             },
             //获取x对应的位置
             //val ind 至少要有一个
@@ -2530,7 +2530,7 @@ define(
                 var disMin = this.disXAxisLine
                 var disMax = 2 * disMin
                 var dis = disMin
-                dis = disMin + this.w % _.flatten(this.dataOrg).length
+                dis = disMin + this.width % _.flatten(this.dataOrg).length
                 dis = dis > disMax ? disMax : dis
                 dis = isNaN(dis) ? 0 : dis
                 return dis
@@ -2538,7 +2538,7 @@ define(
             _setXAxisHeight: function() { //检测下文字的高等
                 if (!this.enabled) { //this.display == "none"
                     this.dis = 0;
-                    this.h = 3; //this.dis;//this.max.txtH;
+                    this.height = 3; //this.dis;//this.max.txtH;
                 } else {
                     var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
                         context: {
@@ -2550,15 +2550,15 @@ define(
 
                     if (!!this.text.rotation) {
                         if (this.text.rotation % 90 == 0) {
-                            this.h = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
+                            this.height = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
                         } else {
                             var sinR = Math.sin(Math.abs(this.text.rotation) * Math.PI / 180);
                             var cosR = Math.cos(Math.abs(this.text.rotation) * Math.PI / 180);
-                            this.h = sinR * this._textMaxWidth + txt.getTextHeight() + 5;
+                            this.height = sinR * this._textMaxWidth + txt.getTextHeight() + 5;
                             this.leftDisX = cosR * txt.getTextWidth() + 8;
                         }
                     } else {
-                        this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
+                        this.height = this.disY + this.line.height + this.dis + this.maxTxtH;
                         this.leftDisX = txt.getTextWidth() / 2;
                     }
                 }
@@ -2671,12 +2671,12 @@ define(
                 if (popText) {
                     var pc = popText.context;
                     if (pc.textAlign == "center" &&
-                        pc.x + popText.context.width / 2 > this.w) {
-                        pc.x = this.w - popText.context.width / 2
+                        pc.x + popText.context.width / 2 > this.width) {
+                        pc.x = this.width - popText.context.width / 2
                     };
                     if (pc.textAlign == "left" &&
-                        pc.x + popText.context.width > this.w) {
-                        pc.x = this.w - popText.context.width
+                        pc.x + popText.context.width > this.width) {
+                        pc.x = this.width - popText.context.width
                     };
                     if (this.sprite.getNumChildren() > 2) {
                         //倒数第二个text
@@ -2723,7 +2723,7 @@ define(
                 };
 
                 //总共能多少像素展现
-                var n = Math.min(Math.floor(this.w / mw), arr.length - 1); //能展现几个
+                var n = Math.min(Math.floor(this.width / mw), arr.length - 1); //能展现几个
 
                 if (n >= arr.length - 1) {
                     this.layoutData = arr;

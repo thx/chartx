@@ -276,6 +276,7 @@ define(
                 };
             },
             _getPointList: function(data) {
+            
                 var self = this;
 
                 self.dataOrg = _.clone(data);

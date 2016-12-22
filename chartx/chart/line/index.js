@@ -257,7 +257,7 @@ define(
                 var w = opt.w || this.width;
                 var h = opt.h || this.height;
 
-                var y = this.height - this._xAxis.h;
+                var y = this.height - this._xAxis.height;
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -292,7 +292,7 @@ define(
                         yMaxHeight: graphsH,
                         resize : opt.resize
                     });
-                    _yAxisRW = this._yAxisR.w;
+                    _yAxisRW = this._yAxisR.width;
                     this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
 
@@ -533,10 +533,10 @@ define(
                 //初始化datazoom模块
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
-                    //h : me._xAxis.h,
+                    //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
-                        y: me._xAxis.pos.y + me._xAxis.h
+                        y: me._xAxis.pos.y + me._xAxis.height
                     },
                     count : me._data.length-1,
                     dragIng : function( range ){

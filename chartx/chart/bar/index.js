@@ -452,7 +452,7 @@ define(
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
-                var y = parseInt(h - this._xAxis.h);
+                var y = parseInt(h - this._xAxis.height);
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -709,10 +709,10 @@ define(
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
                     count: me._data.length - 1,
-                    //h : me._xAxis.h,
+                    //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
-                        y: me._xAxis.pos.y + me._xAxis.h
+                        y: me._xAxis.pos.y + me._xAxis.height
                     },
                     dragIng: function(range) {
                         //if (me.dataZoom.range.end <= me.dataZoom.range.start) {

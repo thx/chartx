@@ -92,7 +92,7 @@ define(
             },
             _startDraw: function(opt) {
                 var me = this;
-                var y = parseInt(me.height - me._xAxis.h);
+                var y = parseInt(me.height - me._xAxis.height);
                 var graphsH = y - this.padding.top;
 
                 //绘制yAxis
@@ -115,7 +115,7 @@ define(
                         },
                         yMaxHeight: me._yAxis.yGraphsHeight
                     });
-                    _yAxisRW = me._yAxisR.w;
+                    _yAxisRW = me._yAxisR.width;
                     //me._yAxisR.setX(me.width - _yAxisRW);
                     me._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };

@@ -108,7 +108,7 @@ define(
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width - this.dis.left - this.dis.right
                 var h = (opt && opt.h) || this.height - this.dis.top - this.dis.bottom
-                var y = parseInt(h - this._xAxis.h)
+                var y = parseInt(h - this._xAxis.height)
                     //绘制yAxis
                 this._yAxis.draw({
                     pos: {

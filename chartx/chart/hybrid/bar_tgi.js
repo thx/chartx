@@ -160,7 +160,7 @@ define(
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
-                var y = parseInt(h - this._xAxis.h);
+                var y = parseInt(h - this._xAxis.height);
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -184,7 +184,7 @@ define(
                         },
                         yMaxHeight: graphsH
                     });
-                    _yAxisRW = this._yAxisR.w;
+                    _yAxisRW = this._yAxisR.width;
                     this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
 
