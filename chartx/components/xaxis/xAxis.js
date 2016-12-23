@@ -143,7 +143,6 @@ define(
             },
             getIndexOfVal : function(xvalue){
                 var i;
-
                 for( var ii=0,il=this.data.length ; ii<il ; ii++ ){
                     var obj = this.data[ii];
                     if(obj.content == xvalue){
@@ -240,23 +239,24 @@ define(
 
                 if( dataLen == 1 ){
                     x =  xGraphsWidth / 2;
-                };
-                if( layoutType == "rule" ){
-                    x = ind / (dataLen - 1) * xGraphsWidth;
-                };
-                if( layoutType == "proportion" ){
-                    //按照数据真实的值在minVal - maxVal区间中的比例值
-                    if( val == undefined ){
-                        val = (ind * (this.maxVal - this.minVal)/(dataLen-1)) + this.minVal;
+                } else {
+                    if( layoutType == "rule" ){
+                        x = ind / (dataLen - 1) * xGraphsWidth;
                     };
-                    x = xGraphsWidth * ( (val - this.minVal) / (this.maxVal - this.minVal) );
-                };
-                if( layoutType == "peak" ){
-                    x = this.xDis1 * (ind+1) - this.xDis1/2;
-                };
-                if( layoutType == "step" ){
-                    x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
-                };
+                    if( layoutType == "proportion" ){
+                        //按照数据真实的值在minVal - maxVal区间中的比例值
+                        if( val == undefined ){
+                            val = (ind * (this.maxVal - this.minVal)/(dataLen-1)) + this.minVal;
+                        };
+                        x = xGraphsWidth * ( (val - this.minVal) / (this.maxVal - this.minVal) );
+                    };
+                    if( layoutType == "peak" ){
+                        x = this.xDis1 * (ind+1) - this.xDis1/2;
+                    };
+                    if( layoutType == "step" ){
+                        x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
+                    };
+                }
                 return parseInt( x , 10 );
             },
             _trimXAxis: function($data, $xGraphsWidth) {
