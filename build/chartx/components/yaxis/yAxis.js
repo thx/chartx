@@ -242,6 +242,9 @@ define(
                 };
 
                 var arr = this._setDataSection(data);
+                if( arr.length == 1 ){
+                    arr.push( arr[0]*2 );
+                }
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);
