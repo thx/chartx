@@ -42,9 +42,10 @@ var data= [
 ];
 var options = {
     type : "3d",
+    mode : 0,   //0:正交投影   1:透视投影  默认正交投影
     rotation:{
-       x : 27,
-       y : 28
+       x : 10,
+       y : 10
     },
     yAxis : {
         field : [ ["uv","pv"] , "click"],
@@ -97,17 +98,17 @@ Chartx.bar("canvasTest" , data , options).then(function(bar){
 
                     <h4>柱状图 - 基础柱状图</h4>
                     <p>
-                        联系人：@逢春 @释剑
+                        联系人：@不决 @释剑
                     </p>
                 </div>
                 <div  class="test-c">
                     <div id="canvasTest" style='width:600px;height:300px;'></div>
                 </div>
                 <div style="margin:10px">
-                    <label>沿X轴旋转: <b id="xAxis_value">27</b></label>
-                    <input type="range" min="15" max="45" value="27" id="xAxis">
-                    <label>沿Y轴旋转: <b id="yAxis_value">28</b></label>
-                    <input type="range" min="15" max="45" value="28" id="yAxis">
+                    <label>沿X轴旋转: <b id="xAxis_value">10</b></label>
+                    <input type="range" min="10" max="45" value="10" id="xAxis">
+                    <label>沿Y轴旋转: <b id="yAxis_value">10</b></label>
+                    <input type="range" min="10" max="45" value="10" id="yAxis">
                 </div>
 
             </div>

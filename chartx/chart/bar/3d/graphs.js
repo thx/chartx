@@ -249,6 +249,7 @@ define('chartx/chart/bar/3d/graphs',
                 this.bar._width < 1 && (this.bar._width = 1);
             },
             resetData: function (data, opt) {
+                this._setyAxisFieldsMap();
                 this.draw(data.data, opt);
             },
             draw: function (data, opt) {

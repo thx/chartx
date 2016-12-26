@@ -35,6 +35,7 @@ define("chartx/chart/bar/3d",
                 this._node = node;
                 this._data = data;
                 this._opts = opts;
+                this.padding.top = 20;
 
                 this.dataZoom = {
                     enabled: false,
@@ -47,6 +48,8 @@ define("chartx/chart/bar/3d",
                     this.dataZoom.enabled = true;
                     this.padding.bottom += (opts.dataZoom.height || 46);
                 }
+
+                this.mode = 0;     //0:正交投影   1:透视投影  默认正交投影
 
 
                 if (opts.proportion) {
@@ -81,13 +84,15 @@ define("chartx/chart/bar/3d",
                 //初始化相机
                 this._eye = Vector3.fromValues(0, 0, this.height * 2);
                 this._rotation = {
-                    x: 25,
-                    y: 25
+                    x: 15,
+                    y: 15
                 };
                 _.extend(this._rotation, this._opts.rotation);
                 this._rotationCamera();
                 //调整相机位置
-                this._adjustmentFitPosition();
+                if (this.mode == 1) {
+                    this._adjustmentFitPosition();
+                }
 
 
 
@@ -98,22 +103,39 @@ define("chartx/chart/bar/3d",
                 //初始化相机
                 this._eye = Vector3.fromValues(0, 0, this.height);
                 this._rotation = {
-                    x: 25,
-                    y: 25
+                    x: 15,
+                    y: 15
                 };
-                _.extend(this._rotation, obj.options.rotation);
+                //if(obj.options.rotation){
+                _.extend(this, obj.options);
+                //}
                 this._rotationCamera();
                 //调整相机位置
-                this._adjustmentFitPosition();
+                if (this.mode == 1) {
+                    this._adjustmentFitPosition();
+                }
             },
             _initProjection:function(){
-                //透视矩阵
-                var fovy = 45 * Math.PI / 180;
-                var aspect = this.width / this.height;
-                var near = 0.1;
-                var far = 1000;
-                Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
+                if (this.mode == 1) {
+                    //透视矩阵
+                    var fovy = 45 * Math.PI / 180;
+                    var aspect = this.width / this.height;
+                    var near = 0.1;
+                    var far = 1000;
+                    Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
+                } else {
 
+                    var left = -1 * (this.width * 0.5 + this.padding.left);
+                    var right = this.width * 0.5 + this.padding.right;
+
+                    var top = this.height * 0.5 + this.padding.top;
+                    var bottom = -1 * (this.height * 0.5 + this.padding.bottom);
+
+                    var near = 1000;
+                    var far = -1000;
+
+                    Matrix.ortho(this._projectMatrix, left, right, bottom, top, near, far);
+                }
             },
 
             _initCamera: function () {
@@ -134,8 +156,11 @@ define("chartx/chart/bar/3d",
                 var length=Vector3.length(this._eye);
                 var origin = Vector3.fromValues(0, 0, length);
 
-                rotateX = rotateX !== undefined ? Math.max(10, Math.min(rotateX, 45)) : 25;
-                rotateY = rotateY !== undefined ? Math.max(10, Math.min(rotateY, 45)) : 25;
+                if (me.mode == 1) {
+                    rotateX = rotateX !== undefined ? Math.max(10, Math.min(rotateX, 45)) : 25;
+                    rotateY = rotateY !== undefined ? Math.max(10, Math.min(rotateY, 45)) : 25;
+
+                }
 
 
                 Quaternion.rotateY(rotation, rotation, rotateY * Math.PI / 180);
@@ -212,7 +237,7 @@ define("chartx/chart/bar/3d",
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.resetData(this.dataFrame.xAxis, { });
+                this._xAxis.resetData(this.dataFrame.xAxis, this.xAxis);
                 //this._xAxis.update({
                 //    animation: false
                 //} , this.dataFrame.xAxis);
@@ -226,12 +251,12 @@ define("chartx/chart/bar/3d",
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.resetData(this.dataFrame.yAxis, {});
+                    this._yAxis.resetData(this.dataFrame.yAxis, this.yAxis);
                     //this._yAxis.update({
                     //    animation: false
                     //} , this.dataFrame.yAxis);
                 }
-                ;
+
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function () {
                     //callback
@@ -816,7 +841,6 @@ define("chartx/chart/bar/3d",
                 ;
                 //均值
                 this.dataFrame.yAxis.center = center;
-
                 return {
                     data: tmpData
                 };
