@@ -212,21 +212,24 @@ define("chartx/chart/bar/3d",
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.update({
-                    animation: false
-                } , this.dataFrame.xAxis);
+                this._xAxis.resetData(this.dataFrame.xAxis, { });
+                //this._xAxis.update({
+                //    animation: false
+                //} , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
-                        animation: false
-                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {});
+                    //this._yAxis.update({
+                    //    animation: false
+                    //} , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.update({
-                        animation: false
-                    } , this.dataFrame.yAxis);
+                    this._yAxis.resetData(this.dataFrame.yAxis, {});
+                    //this._yAxis.update({
+                    //    animation: false
+                    //} , this.dataFrame.yAxis);
                 }
                 ;
                 this._graphs.resetData(this._trimGraphs());
@@ -590,7 +593,7 @@ define("chartx/chart/bar/3d",
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
-                var y = parseInt(h - this._xAxis.height);
+                var y = parseInt(h - this._xAxis.h);
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -604,14 +607,15 @@ define("chartx/chart/bar/3d",
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
-                        animation: false
-                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {});
+                    //this._yAxis.update({
+                    //    animation: false
+                    //} , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._yAxis.setX(this._yAxis.pos.x);
                 }
                 ;
 
-                var _yAxisW = this._yAxis.width;
+                var _yAxisW = this._yAxis.w;
 
                 //绘制x轴
                 this._xAxis.draw({
@@ -869,7 +873,7 @@ define("chartx/chart/bar/3d",
                     //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
-                        y: me._xAxis.pos.y + me._xAxis.height
+                        y: me._xAxis.pos.y + me._xAxis.h
                     },
                     dragIng: function (range) {
                         //if (me.dataZoom.range.end <= me.dataZoom.range.start) {
