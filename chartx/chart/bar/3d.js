@@ -1263,6 +1263,7 @@ define("chartx/chart/bar/3d",
                     p[z] = out[2];
 
                 }
+
                 return p;
 
             },
@@ -1425,7 +1426,7 @@ define("chartx/chart/bar/3d",
 
                     _shapes.context.x = 0;
                     _shapes.context.y = 0;
-
+                    
                 } else {
                     var pos = _rootSprite.globalToLocal({
                         x: _projectionPosition.x,
@@ -1434,6 +1435,8 @@ define("chartx/chart/bar/3d",
                     _shapes.context.x = pos.x;
                     _shapes.context.y = pos.y;
                 }
+                _shapes.xyToInt=false;
+                _shapes.context.xyToInt=false;
             },
             _to3d: function (sprite) {
                 //noTransform  不做转换

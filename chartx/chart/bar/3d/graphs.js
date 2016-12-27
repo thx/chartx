@@ -897,8 +897,8 @@ define('chartx/chart/bar/3d/graphs',
                 //绘制样式
                 var _strokeStyle = rectCxt.fillStyle;
                 var _frontFillStyle = rectCxt.fillStyle;
-                var _topFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, 0.1);
-                var _sideFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, -0.1);
+                var _topFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, 0.2);
+                var _sideFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, -0.2);
 
                 //左面
                 var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
