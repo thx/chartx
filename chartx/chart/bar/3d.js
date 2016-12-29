@@ -1242,6 +1242,25 @@ define("chartx/chart/bar/3d",
 
 
             },
+            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle, _globalAlpha, sprite) {
+                var _polygon = sprite.getChildById(_id) ||
+                    new Shapes.Polygon({
+                        id: _id,
+                        pointChkPriority: false,
+                        context: {
+                            pointList: _pointList,
+                            strokeStyle: _strokeStyle,
+                            fillStyle: _fillStyle,
+                            globalAlpha: _globalAlpha
+                        }
+                    });
+
+                _polygon.context.pointList = _pointList;
+                _polygon.context.x = 0;
+                _polygon.context.y = 0;
+
+                return _polygon;
+            },
 
             //projection to screen
             //基本变换过程为:local ===> screen ===> world ===> projection
@@ -1426,7 +1445,7 @@ define("chartx/chart/bar/3d",
 
                     _shapes.context.x = 0;
                     _shapes.context.y = 0;
-                    
+
                 } else {
                     var pos = _rootSprite.globalToLocal({
                         x: _projectionPosition.x,
@@ -1437,6 +1456,76 @@ define("chartx/chart/bar/3d",
                 }
                 _shapes.xyToInt=false;
                 _shapes.context.xyToInt=false;
+            },
+            _depthTest: function (sprite) {
+
+                (function (_sprite) {
+                    var getLeaf = arguments.callee;
+                    if (_sprite.children && _sprite.children.length > 0) {
+                        _.each(_sprite.children, function (a, i) {
+                            getLeaf(a);
+                        })
+                    } else {
+                        var _parentSprite = _sprite.parent;
+
+                        if (_sprite instanceof Shapes.Polygon && ~_parentSprite.id.indexOf('bar_')) {
+
+                            var _frontFace = null;
+                            var currFace = _sprite.context.pointList;
+                            _.each(_parentSprite.children, function (o, i) {
+                                if (~o.id.indexOf('front')) {
+                                    _frontFace = o.context.pointList;
+                                }
+                            });
+
+                            //判断该面的Z值为负数的点是否在前面的范围内
+                            if (~_sprite.id.indexOf('left') || ~_sprite.id.indexOf('right')) {
+                                var isCover = false;
+
+
+                                var p1 = Vector3.fromValues(currFace[1][0], currFace[1][1], 0);
+                                if (~_sprite.id.indexOf('left')) {
+                                    var p2 = Vector3.fromValues(_frontFace[0][0], _frontFace[0][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[3][0], _frontFace[3][1], 0);
+                                }
+                                if (~_sprite.id.indexOf('right')) {
+                                    var p2 = Vector3.fromValues(_frontFace[1][0], _frontFace[1][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[2][0], _frontFace[2][1], 0);
+                                }
+
+
+                                var _v1 = Vector3.create();
+                                var _v2 = Vector3.create();
+                                var _vc = Vector3.create();
+                                //顶面指向Z轴负半轴的向量
+                                Vector3.sub(_v1, p1, p2);
+                                Vector3.normalize(_v1, _v1);
+                                //前面指向Y轴正半轴的向量
+                                Vector3.sub(_v2, p2, p3);
+                                Vector3.normalize(_v2, _v2);
+
+                                //二维空间中,XY的叉积指向Z轴的结果
+                                Vector3.cross(_vc, _v1, _v2);
+
+                                //根据不同的侧面判断Z的大小,取得是否在Y轴的左侧或右侧
+                                if (~_sprite.id.indexOf('left') && _vc[2] < 0) {
+                                    isCover = true;
+                                } else if (~_sprite.id.indexOf('right') && _vc[2] > 0) {
+                                    isCover = true;
+                                }
+
+                                if (isCover) {
+                                    _sprite.context.visible = false;
+                                }else{
+                                    _sprite.context.visible = true;
+                                }
+                            }
+
+                        }
+
+                    }
+                })(sprite);
+
             },
             _to3d: function (sprite) {
                 //noTransform  不做转换
@@ -1458,7 +1547,7 @@ define("chartx/chart/bar/3d",
 
                     }
                 })(sprite)
-                me._graphs._depthTest(sprite);
+                me._depthTest(sprite);
             }
 
 
