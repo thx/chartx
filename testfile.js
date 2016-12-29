@@ -1,5 +1,6 @@
 /*
-* 使用方法: node testfile.js
+* 使用方法: node testfile.js 默认demo目录下的所有html文件,或者只测试bar目录下的demo: node testfile.js path=/demo/bar
+* 传参:path=/demo/相对目录名称,如:path=/demo/bar path=/demo/hybrid
 * 功能:执行node testfile.js 程序会自动访问制定目录下的每一个HTML文件,并将页面返回的日志输出到node控制台,方便版本更新后对其他模块产生影响的排查
 * Author:不决
 * Date:2016-12-23
@@ -55,8 +56,20 @@ function promiseCall(filename) {
         resolve(filename)
     })
 }
+
+
+
+var args = process.argv.slice(2);
+var path = __dirname + '/demo';
+args.forEach(function (val) {
+    if (val.indexOf('path') != -1) {
+        path = __dirname + val.split('=')[1];
+    }
+});
+
+
 //获取html列表
-walk(__dirname + '/demo');
+walk(path);
 //访问读取日志
 
 console.log('\n\n测试开始:\n\n');

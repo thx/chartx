@@ -3,9 +3,10 @@ define('chartx/chart/bar/3d/back',
         "canvax/index",
         "canvax/shape/Line",
         "chartx/utils/tools",
-        "canvax/shape/Shapes"
+        "canvax/shape/Shapes",
+        "chartx/utils/colorformat"
     ],
-    function (Canvax, Line, Tools,Shapes) {
+    function (Canvax, Line, Tools, Shapes, ColorFormat) {
         var Back = function (root) {
 
             var opt = root.back;
@@ -24,14 +25,11 @@ define('chartx/chart/bar/3d/back',
             this.xOrigin = {                                //原点开始的x轴线
                 enabled: 1,
                 lineWidth: 1,
-                strokeStyle: '#e6e6e6'
+                strokeStyle: '#eee'
             }
-            this.yOrigin = {                                //原点开始的y轴线
-                enabled: 1,
-                lineWidth: 1,
-                strokeStyle: '#e6e6e6',
+            _.extend(this.yOrigin = {}, this.xOrigin, { //原点开始的y轴线
                 biaxial: false
-            }
+            });
             this.xAxis = {                                //x轴上的线
                 enabled: 1,
                 data: [],                      //[{y:100},{}]
@@ -39,26 +37,20 @@ define('chartx/chart/bar/3d/back',
                 // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                 lineType: 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                 lineWidth: 1,
-                strokeStyle: '#f0f0f0', //'#e5e5e5',
+                strokeStyle: '#f5f5f5', //'#e5e5e5',
                 filter: null
-            }
-            this.yAxis = {                                //y轴上的线
-                enabled: 1,
-                data: [],                      //[{x:100},{}]
-                org: null,                    //y轴坐标原点，默认为上面的data[0]
-                // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
-                lineType: 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
-                lineWidth: 1,
-                strokeStyle: '#f0f0f0',//'#e5e5e5',
-                filter: null
-            }
+            };
+
+            _.extend(this.yAxis = {}, this.xAxis);   //y轴上的线
+
+
 
             this.sprite = null;                       //总的sprite
             this.xAxisSp = null;                       //x轴上的线集合
             this.yAxisSp = null;                       //y轴上的线集合
 
-            this.animation = true;
             this.resize = false;
+            this.isFillBackColor = 1;
 
             this.init(opt);
         };
@@ -90,61 +82,59 @@ define('chartx/chart/bar/3d/back',
                 this.sprite.removeAllChildren();
                 this.draw(opt);
             },
+            _drawLine: function (_id, _sprite, _context, _style) {
+                var _line = _sprite.getChildById(_id) ||
+                    new Line({
+                        id: _id,
+                        context: {
+                            lineType: _style.lineType,
+                            lineWidth: _style.lineWidth,
+                            strokeStyle: _style.strokeStyle
+                        }
+                    });
+
+                _.extend(_line.context, _context);
+
+                //todo:line的context不能保留额外的值
+                _line.zStart = _context.zStart;
+                _line.zEnd = _context.zEnd;
+                return _line;
+            },
+            drawBackground: function (_id, line1, line2, _globalAlpha, _sprite) {
+                var me = this;
+                var _fillStyle = '#000';
+
+                var lc = line1.context;
+                var lc2 = line2.context;
+                var _pointList = [[lc.xStart, lc.yStart, line1.zStart], [lc.xEnd, lc.yEnd, line1.zEnd], [lc2.xEnd, lc2.yEnd, line2.zEnd], [lc2.xStart, lc2.yStart, line2.zStart]];
+
+                var BackgroundRect = me.root.drawFace(_id, _pointList, _fillStyle, _fillStyle, _globalAlpha, _sprite);
+
+                me.sprite.addChild(BackgroundRect);
+            },
             _widget: function () {
                 var self = this;
-
                 var _depth = this._depth;
                 if (!this.enabled) {
                     return
                 }
-
-
-
+                //Y轴显示不等比例数据时,通过添加背景色划分区域
                 if( self.root && self.root._yAxis && self.root._yAxis.dataSectionGroup ){
                     self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
                     for( var g = 0 , gl=self.root._yAxis.dataSectionGroup.length ; g < gl ; g++ ){
                         var yGroupHeight = self.root._yAxis.yGraphsHeight / gl ;
-                        //var groupRect = new Shapes.Rect({
-                        //    context : {
-                        //        x : 0,
-                        //        y : -yGroupHeight * g,
-                        //        width : self.w,
-                        //        height : -yGroupHeight,
-                        //        fillStyle : "#000",
-                        //        globalAlpha : 0.025 * (g%2)
-                        //    }
-                        //});
 
                         var _id="Back_section_"+g;
-                        var _pointList=[];
                         var _left = 0;
                         var _right = _left + self.w;
                         var _top = -yGroupHeight * g;
                         var _bottom = _top  -yGroupHeight;
-
                         var _pointList=[[_left,_top,0],[_left,_top,_depth],[_right,_top,_depth],[_right,_bottom,_depth],[_left,_bottom,_depth],[_left,_bottom,0]];
+                        var groupRect = self.root.drawFace(_id, _pointList, "#000", "#000", 0.04 * (g % 2), self.yGroupSp);
 
-                        var _polygon = self.yGroupSp.getChildById(_id) ||
-                            new Shapes.Polygon({
-                                id: _id,
-                                pointChkPriority: false,
-                                context: {
-                                    pointList: _pointList,
-                                    fillStyle: "#000",
-                                    globalAlpha :  0.04 * (g%2)
-                                }
-                            });
-
-                        _polygon.context.pointList = _pointList;
-                        _polygon.context.x = 0;
-                        _polygon.context.y = 0;
-
-
-                        self.yGroupSp.addChild( _polygon );
-                    };
-                };
-
-
+                        self.yGroupSp.addChild(groupRect);
+                    }
+                }
 
 
                 self.xAxisSp = self.sprite.getChildById('Back_xAsix') ||
@@ -156,32 +146,27 @@ define('chartx/chart/bar/3d/back',
                     new Canvax.Display.Sprite({
                         id: 'Back_yAsix'
                     }),
-                    self.sprite.addChild(self.yAxisSp)
+                    self.sprite.addChild(self.yAxisSp);
 
                 //x轴方向的线集合
                 var arr = self.xAxis.data;
-                for (var a = 0, al = arr.length; a < al; a++) {
-                    var o = arr[a];
-                    var line = self.xAxisSp.getChildById("back_line_xAxis" + a)||
-                        new Line({
-                        id: "back_line_xAxis" + a,
-                        context: {
-                            lineType: self.xAxis.lineType,
-                            lineWidth: self.xAxis.lineWidth,
-                            strokeStyle: self.xAxis.strokeStyle
-                        }
-                    });
+                if (self.xAxis.enabled) {
+                    for (var a = 0, al = arr.length; a < al; a++) {
+                        var o = arr[a];
 
-                    line.context.xStart=0;
-                    line.context.yStart=o.y;
-                    line.context.xEnd=self.w;
-                    line.context.yEnd= o.y;
+                        var _id = "back_line_xAxis_" + a;
+                        var _context = {
+                            xStart: 0,
+                            yStart: o.y,
+                            xEnd: self.w,
+                            yEnd: o.y,
+                            zStart: _depth,
+                            zEnd: _depth
+                        };
 
-                    //todo:line的context不能保留额外的值
-                    line.zStart=_depth;
-                    line.zEnd=_depth;
+                        var line = self._drawLine(_id, self.xAxisSp, _context, self.xAxis);
 
-                    if (self.xAxis.enabled) {
+
                         _.isFunction(self.xAxis.filter) && self.xAxis.filter({
                             layoutData: self.yAxis.data,
                             index: a,
@@ -189,68 +174,78 @@ define('chartx/chart/bar/3d/back',
                         });
                         self.xAxisSp.addChild(line);
 
-                        //if (false && this.animation && !this.resize) {
-                        //    line.animate({
-                        //        xStart: 0,
-                        //        xEnd: self.w
-                        //    }, {
-                        //        duration: 500,
-                        //        //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                        //        delay: (al - a) * 80,
-                        //        id: line.id
-                        //    });
-                        //} else {
-                        //    line.context.xStart = 0;
-                        //    line.context.xEnd = self.w;
-                        //}
 
                         //绘制Z轴的线条
-                        var line =self.xAxisSp.getChildById("back_line_xAxis_z" + a)||
-                            new Line({
-                            id: "back_line_xAxis_z" + a,
-                            context: {
-                                lineType: self.xAxis.lineType,
-                                lineWidth: self.xAxis.lineWidth,
-                                strokeStyle: self.xAxis.strokeStyle
-                            }
-                        });
 
-                        line.context.xStart=0;
-                        line.context.yStart=o.y;
-                        line.context.xEnd=0;
-                        line.context.yEnd=o.y;
+                        var _id = "back_line_xAxis_z_" + a;
+                        var _context = {
+                            xStart: 0,
+                            yStart: o.y,
+                            xEnd: 0,
+                            yEnd: o.y,
+                            zStart: 0,
+                            zEnd: _depth
+                        };
 
-                        line.zStart=0;
-                        line.zEnd=_depth;
+                        var line = self._drawLine(_id, self.xAxisSp, _context, self.xAxis);
                         self.xAxisSp.addChild(line);
 
                     }
 
+                    //原点开始的x轴线
+                    if (self.xOrigin.enabled) {
+
+                        var yAxisOrg = (self.xAxis.org == null ? 0 : _.find(self.xAxis.data, function (obj) {
+                            return obj.content == self.xAxis.org
+                        }).y );
+
+
+                        var _id = "Back_xAxisOrg";
+                        var _context = {
+                            xStart: yAxisOrg,
+                            yStart: 0,
+                            xEnd: self.w,
+                            yEnd: yAxisOrg,
+                            zStart: 0,
+                            zEnd: 0
+                        };
+
+                        var line = self._drawLine(_id, self.xAxisSp, _context, self.xOrigin);
+                        self.xAxisSp.addChild(line);
+                    }
+
+                    //X轴背景
+                    if (self.isFillBackColor) {
+                        var _id = 'Back_xBackground';
+                        var line1 = self.xAxisSp.getChildById('Back_xAxisOrg');
+                        var line2 = self.xAxisSp.getChildById('back_line_xAxis_0');
+                        var _globalAlpha = 0.04;
+                        self.drawBackground(_id, line1, line2, _globalAlpha, self.sprite);
+
+                    }
                 }
-                ;
 
                 //y轴方向的线集合
-                var arr = self.yAxis.data
-                for (var a = 0, al = arr.length; a < al; a++) {
-                    var o = arr[a]
-                    var line = self.yAxisSp.getChildById('back_line_yAxis'+a)||
-                        new Line({
-                            id:'back_line_yAxis'+a,
-                        context: {
-                            lineType: self.yAxis.lineType,
-                            lineWidth: self.yAxis.lineWidth,
-                            strokeStyle: self.yAxis.strokeStyle,
-                            visible: o.x ? true : false
-                        }
-                    })
-                    line.context.xStart= o.x;
-                    line.context.yStart=0;
-                    line.context.xEnd= o.x;
-                    line.context.yEnd=-self.h;
-                    line.zStart=_depth;
-                    line.zEnd=_depth;
+                var arr = self.yAxis.data;
+                if (self.yAxis.enabled) {
+                    arr.unshift({x: 0.5}); //增加最左侧线条
+                    arr.push({x: self.w}); //增加最右侧线条
+                    for (var a = 0, al = arr.length; a < al; a++) {
+                        var o = arr[a];
 
-                    if (self.yAxis.enabled) {
+                        var _id = "back_line_yAxis_" + a;
+                        var _context = {
+                            xStart: o.x,
+                            yStart: 0,
+                            xEnd: o.x,
+                            yEnd: -self.h,
+                            zStart: _depth,
+                            zEnd: _depth
+                        };
+
+                        var line = self._drawLine(_id, self.yAxisSp, _context, self.yAxis);
+                        line.context.visible = o.x ? true : false;
+
                         _.isFunction(self.yAxis.filter) && self.yAxis.filter({
                             layoutData: self.xAxis.data,
                             index: a,
@@ -258,116 +253,71 @@ define('chartx/chart/bar/3d/back',
                         });
                         self.yAxisSp.addChild(line);
 
-                        //绘制Z轴的线条
-                        var line =self.yAxisSp.getChildById('back_line_yAxis_z'+a)||
-                            new Line({
-                                id:'back_line_yAxis_z'+a,
-                            context: {
-                                lineType: self.yAxis.lineType,
-                                lineWidth: self.yAxis.lineWidth,
-                                strokeStyle: self.yAxis.strokeStyle,
-                                visible: o.x ? true : false
-                            }
-                        })
-                        line.context.xStart= o.x;
-                        line.context.yStart=0;
-                        line.context.xEnd= o.x;
-                        line.context.yEnd=0;
-                        line.zStart=0;
-                        line.zEnd=_depth;
+
+                        var _id = "back_line_yAxis_z_" + a;
+                        var _context = {
+                            xStart: o.x,
+                            yStart: 0,
+                            xEnd: o.x,
+                            yEnd: 0,
+                            zStart: 0,
+                            zEnd: _depth
+                        };
+
+                        var line = self._drawLine(_id, self.yAxisSp, _context, self.yAxis);
+                        line.context.visible = o.x ? true : false;
+
 
                         self.yAxisSp.addChild(line);
                     }
-                }
-                var line = self.yAxisSp.getChildById('back_line_yAxis_00')||
-                    new Line({
-                        id:'back_line_yAxis_00',
-                        context: {
-                            lineType: self.yAxis.lineType,
-                            lineWidth: self.yAxis.lineWidth,
-                            strokeStyle: self.yAxis.strokeStyle,
-                            visible: o.x ? true : false
-                        }
-                    })
-                line.context.xStart= 0;
-                line.context.yStart=0;
-                line.context.xEnd= 0;
-                line.context.yEnd=-self.h;
-                line.zStart=_depth;
-                line.zEnd=_depth;
-                self.yAxisSp.addChild(line);
-                ;
 
-                //原点开始的y轴线
-                var xAxisOrg = (self.yAxis.org == null ? 0 : _.find(self.yAxis.data, function (obj) {
-                    return obj.content == self.yAxis.org
-                }).x );
+                    //原点开始的y轴线
+                    if (self.yOrigin.enabled) {
+                        var yAxisOrg = (self.yAxis.org == null ? 0 : _.find(self.yAxis.data, function (obj) {
+                            return obj.content == self.yAxis.org
+                        }).x );
+                        var _id = "Back_yAxisOrg";
+                        var _context = {
+                            xStart: yAxisOrg,
+                            yStart: 0,
+                            xEnd: yAxisOrg,
+                            yEnd: -self.h,
+                            zStart: 0,
+                            zEnd: 0
+                        };
 
-                //self.yAxis.org = xAxisOrg;
-                var line = self.sprite.getChildById('Back_xAxisOrg')||
-                    new Line({
-                        id:'Back_xAxisOrg',
-                    context: {
-                        lineWidth: self.yOrigin.lineWidth,
-                        strokeStyle: self.yOrigin.strokeStyle
+                        var line = self._drawLine(_id, self.yAxisSp, _context, self.yOrigin);
+                        self.yAxisSp.addChild(line);
                     }
-                });
-                line.context.xStart= xAxisOrg;
-                line.context.yStart=0;
-                line.context.xEnd= xAxisOrg;
-                line.context.yEnd=-self.h;
-                line.zStart=0;
-                line.zEnd=0;
+                    //Y轴背景
+                    if (self.isFillBackColor) {
+                        var _id = 'Back_yBackground';
+                        var line1 = self.yAxisSp.getChildById('Back_yAxisOrg');
+                        var line2 = self.yAxisSp.getChildById('back_line_yAxis_0');
+                        var _globalAlpha = 0.1;
+                        self.drawBackground(_id, line1, line2, _globalAlpha, self.sprite);
+                    }
 
-                if (self.yOrigin.enabled)
-                    self.sprite.addChild(line)
+                }
 
                 if (self.yOrigin.biaxial) {
-                    var lineR = self.sprite.getChildById('Back_biaxial')||
-                        new Line({
-                        id:'Back_biaxial',
-                        context: {
-                            lineWidth: self.yOrigin.lineWidth,
-                            strokeStyle: self.yOrigin.strokeStyle
-                        }
-                    })
+                    //todo 暂不支持Y轴第二坐标
+                }
 
-                    line.context.xStart= self.w;
-                    line.context.yStart=0;
-                    line.context.xEnd= self.w;
-                    line.context.yEnd=-self.h;
-                    lineR.zStart=0;
-                    lineR.zEnd=0;
-                    if (self.yOrigin.enabled)
-                        self.sprite.addChild(lineR)
+                //back背景
+                if (self.isFillBackColor) {
+                    var _id = 'Back_Background';
+                    var _num = self.xAxis.data.length - 1;
+                    var line1 = self.xAxisSp.getChildById('back_line_xAxis_' + _num);
+                    var line2 = self.xAxisSp.getChildById('back_line_xAxis_0');
+                    var _globalAlpha = 0.02;
+                    self.drawBackground(_id, line1, line2, _globalAlpha, self.sprite);
 
                 }
 
-                //原点开始的x轴线
-                var yAxisOrg = (self.xAxis.org == null ? 0 : _.find(self.xAxis.data, function (obj) {
-                    return obj.content == self.xAxis.org
-                }).y );
-
-                //self.xAxis.org = yAxisOrg;
-                var line = self.sprite.getChildById("Back_yAxisOrg")||
-                    new Line({
-                    id:"Back_yAxisOrg",
-                    context: {
-                        lineWidth: self.xOrigin.lineWidth,
-                        strokeStyle: self.xOrigin.strokeStyle
-                    }
-                })
-                line.context.xStart= yAxisOrg;
-                line.context.yStart=0;
-                line.context.xEnd= self.w;
-                line.context.yEnd=yAxisOrg;
-                line.zStart=0;
-                line.zEnd=0;
-                if (self.xOrigin.enabled)
-                    self.sprite.addChild(line)
             }
 
-        };
+        }
 
         return Back;
     });
