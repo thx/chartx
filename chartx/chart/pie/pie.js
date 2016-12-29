@@ -332,8 +332,9 @@
                     var sec = sm.sector;
                     var secData = me.data.data[i];
                     if (secData.checked) {
-                        me.cancelCheckedSec(sec);
-                        secData.checked = false;
+                        me.uncheck( i );
+                        //me.cancelCheckedSec(sec);
+                        //secData.checked = false;
                     }
                 });
             },
