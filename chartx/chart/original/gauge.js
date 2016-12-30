@@ -85,7 +85,7 @@ define(
                     var dataZoomOpt = _.deepExtend({
                         w: w,
                         // count: 1,
-                        // h : me._xAxis.h,
+                        // h : me._xAxis.height,
                         h : 30,
                         color : '#00a8e6',
                         pos: {

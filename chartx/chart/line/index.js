@@ -3,7 +3,7 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        'chartx/chart/line/xaxis',
+        'chartx/components/xaxis/xAxis',
         'chartx/components/yaxis/yAxis',
         'chartx/components/back/Back',
         'chartx/components/anchor/Anchor',
@@ -44,13 +44,18 @@ define(
                 this._graphs = null;
                 this._tips = null;
 
-                this.xAxis = {};
+                this.xAxis = {
+                    layoutType : "rule"
+                };
                 this.yAxis = {};
                 this.graphs = {};
+
+                this._markLines = [];
 
                 this.biaxial = false;
 
                 _.deepExtend(this, opts);
+
                 this.dataFrame = this._initData(data, this);
             },
             draw: function( e ) {
@@ -112,17 +117,27 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data , trimData) {
+                var me = this;
                 if( !trimData ){
-                    trimData = _resetDataFrameAndGetTrimData( data );
+                    trimData = this._resetDataFrameAndGetTrimData( data );
                 };
                 this._graphs.resetData( trimData , {
                     disX: this._getGraphsDisX()
+                });
+                _.each(this._markLines , function( ml , i ){
+                    ml.reset(i);
                 });
             },
             _resetDataFrameAndGetTrimData: function( data ){
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.resetData(this.dataFrame.xAxis);
-                this._yAxis.resetData(this.dataFrame.yAxis);
+
+                
+                if( this.markLine && this.markLine.y ){
+                    this.dataFrame.yAxis.org.push( this.markLine.y );
+                };
+                
+                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
                 return this._trimGraphs();
             },
             /*
@@ -212,12 +227,11 @@ define(
                     this.yAxis.biaxial = true;
                 };
 
-                var _y = [];
                 if( this.markLine && this.markLine.y ){
-                    _y.push( this.markLine.y );
-                }
+                    this.dataFrame.yAxis.org.push( this.markLine.y );
+                };
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis , _y);
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis );
 
                 //再折线图中会有双轴图表
                 if (this.biaxial) {
@@ -243,7 +257,7 @@ define(
                 var w = opt.w || this.width;
                 var h = opt.h || this.height;
 
-                var y = this.height - this._xAxis.h;
+                var y = this.height - this._xAxis.height;
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -258,12 +272,12 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneChart = this._getCloneLine();
-                    this._yAxis.resetData(this.__cloneChart.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.__cloneChart.thumbBar.dataFrame.yAxis);
                 };
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
 
 
@@ -278,7 +292,7 @@ define(
                         yMaxHeight: graphsH,
                         resize : opt.resize
                     });
-                    _yAxisRW = this._yAxisR.w;
+                    _yAxisRW = this._yAxisR.width;
                     this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
 
@@ -331,6 +345,24 @@ define(
                 this._graphs.setX(_yAxisW), this._graphs.setY(y - this.padding.bottom);
 
                 var me = this;
+
+
+                //如果是双轴折线，那么graphs之后，还要根据graphs中的两条折线的颜色，来设置左右轴的颜色
+                if (this.biaxial && 
+                    (
+                        (this.yAxis.text && !this.yAxis.text.fillStyle) || 
+                        (this.yAxis.line && !this.yAxis.line.strokeStyle)
+                    )
+                    ) {
+                    _.each(this._graphs.groups, function(group, i) {
+                        var color = group._bline.context.strokeStyle;
+                        if (i == 0) {
+                            me._yAxis.setAllStyle(color);
+                        } else {
+                            me._yAxisR.setAllStyle(color);
+                        }
+                    });
+                };
 
                 //执行生长动画
                 if (!this.inited) {
@@ -501,10 +533,10 @@ define(
                 //初始化datazoom模块
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
-                    //h : me._xAxis.h,
+                    //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
-                        y: me._xAxis.pos.y + me._xAxis.h
+                        y: me._xAxis.pos.y + me._xAxis.height
                     },
                     count : me._data.length-1,
                     dragIng : function( range ){
@@ -599,8 +631,17 @@ define(
                     });
                 });
             },
+
+            //markline begin
             _initMarkLine: function(g, dataFrame) {
                 var me = this;
+
+                //如果markline有target配置，那么只现在target配置里的字段的markline
+                var _t = me.markLine.target;
+                if( _t && !( ( _.isArray(_t) && _.indexOf( _t , g.field )>=0 ) || (_t === g.field) ) ){
+                    return;
+                };
+
                 var index = g._groupInd;
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
@@ -621,7 +662,7 @@ define(
                     var _y = center;
                     
                     //如果markline有自己预设的y值
-                    if( me.markLine.y != undefined ){
+                    function getYForVal(){
                         var _y = me.markLine.y;
                         if(_.isFunction(_y)){
                             _y = _y( g.field );
@@ -629,12 +670,15 @@ define(
                         if(_.isArray( _y )){
                             _y = _y[ index ];
                         };
-
                         if( _y != undefined ){
                             _y = g._yAxis.getYposFromVal(_y);
                         }
-
+                        return _y;
                     };
+                    if( me.markLine.y != undefined ){
+                        _y = getYForVal();
+                    };
+                    
 
                     var o = {
                         w: me._xAxis.xGraphsWidth,
@@ -655,15 +699,31 @@ define(
                             content: content,
                             fillStyle: strokeStyle
                         },
-                        field: g.field
+                        field: g.field,
+                        reset: function( i ){
+                            if(me.markLine.y != undefined){ 
+                                var _y = getYForVal();
+                                this._line.animate({
+                                    y: _y
+                                }, {
+                                    duration: 500,
+                                    easing: 'Back.Out' //Tween.Easing.Elastic.InOut
+                                });
+                            }
+                        }
                     };
 
                     new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
-                        me.core.addChild(this.sprite)
+                        me.core.addChild(this.sprite);
+                        me._markLines.push( this ); 
                     });
+                    
                 })
             },
+            //markline end
+
             bindEvent: function(spt, _setXaxisYaxisToTipsInfo) {
+            
                 var self = this;
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on("panstart mouseover", function(e) {
@@ -750,7 +810,6 @@ define(
                         _tmpData.push(__tmpData);
 
                         
-
                         if (_firstLay && self.biaxial && i > 0) {
                             _yAxis = self._yAxisR;
                             maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
@@ -764,11 +823,19 @@ define(
                             var maxValue = 0;
                             _center[i] = {};
                             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                                if (b >= self._xAxis.data.length) {
-                                    //如果发现数据节点已经超过了x轴的节点，就扔掉
-                                    break;
-                                }
-                                var x = self._xAxis.data[b].x;
+
+                                //不能用x轴组件的x值， 要脱离关系， 各自有自己的一套计算方法，以为x轴的数据是可能完全自定义的
+                                //var x = self._xAxis.data[b].x;
+
+                                //下面这个就是 完全自己的一套计算x position的方法
+                                //var x = b * self._xAxis.xGraphsWidth / (bl-1);
+                                
+                                var x = self._xAxis.getPosX( {
+                                    ind : b,
+                                    dataLen : bl,
+                                    layoutType : self.xAxis.layoutType
+                                } );
+                                //console.log(x);
                                 var y = -(_lineData[b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
                                 y = isNaN(y) ? 0 : y
                                 __tmpData[b] = {
@@ -810,7 +877,7 @@ define(
             },
             //每两个点之间的距离
             _getGraphsDisX: function() {
-                var dsl = this._xAxis.dataSection.length;
+                var dsl = this.dataFrame.org.length - 1;
                 var n = this._xAxis.xGraphsWidth / (dsl - 1);
                 if (dsl == 1) {
                     n = 0

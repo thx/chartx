@@ -62,6 +62,23 @@ var options = {
     graphs : {
         line : {
             strokeStyle : "#D28D54"
+        },
+        text: {
+            enabled : 1,
+            fillStyle:function( arg ){
+        
+                //field : "pv"
+                //iGroup : 0
+                //iNode : 0
+                //value : 120
+                if(arg.value == 120){
+                    return "blue"
+                }
+            }
+            //format: function(e){
+            //    debugger
+            //    return e
+            //}
         }
     }
 }   

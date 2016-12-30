@@ -32,7 +32,13 @@ define(
             this.type = "isogon";
         };
         Base.creatClass(Isogon, Polygon, {
+            $watch: function(name, value, preValue) {
+                if (name == "r" || name == "n") { //如果path有变动，需要自动计算新的pointList
+                    this.setPointList( this.context );
+                }
+            },
             setPointList: function(style) {
+                style.pointList.length = 0;
                 var n = style.n, r = style.r;
                 var dStep = 2 * Math.PI / n;
                 var beginDeg = -Math.PI / 2;

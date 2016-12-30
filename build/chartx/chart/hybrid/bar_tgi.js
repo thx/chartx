@@ -160,7 +160,7 @@ define(
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
-                var y = parseInt(h - this._xAxis.h);
+                var y = parseInt(h - this._xAxis.height);
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -172,7 +172,7 @@ define(
                     yMaxHeight: graphsH
                 });
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
                 //有双轴
                 var _yAxisRW = 0;
@@ -184,15 +184,15 @@ define(
                         },
                         yMaxHeight: graphsH
                     });
-                    _yAxisRW = this._yAxisR.w;
+                    _yAxisRW = this._yAxisR.width;
                     this._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update({
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                 };
 
                 //绘制x轴

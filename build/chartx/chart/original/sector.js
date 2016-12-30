@@ -108,7 +108,7 @@ define(
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width - this.dis.left - this.dis.right
                 var h = (opt && opt.h) || this.height - this.dis.top - this.dis.bottom
-                var y = parseInt(h - this._xAxis.h)
+                var y = parseInt(h - this._xAxis.height)
                     //绘制yAxis
                 this._yAxis.draw({
                     pos: {
@@ -118,7 +118,7 @@ define(
                     yMaxHeight: y
                 });
 
-                var _yAxisW = Math.ceil(this._yAxis.w);
+                var _yAxisW = Math.ceil(this._yAxis.width);
 
                 //绘制x轴
                 this._xAxis.draw({
@@ -158,7 +158,7 @@ define(
                 var graphs = [],
                     yAxis = [],
                     xAxis = []
-                var data = this.dataFrame.graphs.org
+                var data = this.dataFrame.org
                 var max = data[data.length - 1].xAxis
                 var maxR = this.graphsw
 
@@ -184,7 +184,7 @@ define(
                 xAxis.unshift({
                     x: 0
                 })
-
+                
                 return {
                     data: graphs,
                     yAxisData: yAxis,

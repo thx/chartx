@@ -2906,7 +2906,7 @@ function time(name, fn) {
   try {
     return fn();
   } finally {
-    console.log(name + " time: " + (_.now() - start) + "ms");
+    //console.log(name + " time: " + (_.now() - start) + "ms");
   }
 }
 

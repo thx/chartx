@@ -3,7 +3,7 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        'chartx/chart/bar/xaxis',
+        'chartx/components/xaxis/xAxis',
         'chartx/chart/bar/yaxis',
         'chartx/components/back/Back',
         'chartx/chart/bar/graphs',
@@ -21,6 +21,10 @@ define(
             init: function(node, data, opts) {
 
                 this._xAxis = null;
+                this.xAxis = {
+                    layoutType: "peak" //波峰波谷布局模型
+                };
+
                 this._yAxis = null;
                 this._back = null;
                 this._graphs = null;
@@ -69,21 +73,21 @@ define(
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.resetData(this.dataFrame.xAxis, {
+                this._xAxis.update({
                     animation: false
-                });
+                } , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update({
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.resetData(this.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.dataFrame.yAxis);
                 };
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function() {
@@ -297,26 +301,32 @@ define(
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
                 !opts.tips && (opts.tips = {});
-                opts.tips = _.deepExtend(opts.tips, {
+
+                opts.tips = _.deepExtend({
                     content: function(info) {
-                        var str = "<table>";
+                        var str = "<table style='border:none'>";
                         var self = this;
                         _.each(info.nodesInfoList, function(node, i) {
-                            str += "<tr style='color:" + node.fillStyle + "'>";
+                            str += "<tr style='color:" + (node.color || node.fillStyle) + "'>";
                             var prefixName = self.prefix[i];
+                            var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
                             if (prefixName) {
-                                str += "<td>" + prefixName + "：</td>";
+                                str += "<td "+tsStyle+">" + prefixName + "：</td>";
                             } else {
                                 if (node.field) {
-                                    str += "<td>" + node.field + "：</td>";
+                                    str += "<td "+tsStyle+">" + node.field + "：</td>";
                                 }
                             };
-                            str += "<td>" + Tools.numAddSymbol(node.value) + "（" + Math.round(node.value / node.vCount * 100) + "%）</td></tr>";
+                            str += "<td "+tsStyle+">" + Tools.numAddSymbol(node.value);
+                            if( node.vCount ){
+                                str += "（" + Math.round(node.value / node.vCount * 100) + "%）";
+                            };
+                            str +="</td></tr>";
                         });
                         str += "</table>";
                         return str;
                     }
-                });
+                } , opts.tips );
 
                 _.deepExtend(this, opts);
                 _.deepExtend(this.yAxis, {
@@ -427,7 +437,14 @@ define(
 
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getaverageData());
+                if( this._graphs.average.enabled ){
+                    this.dataFrame.yAxis.org.push( [ this._getaverageData() ] );
+                };
+                if( this.markLine && this.markLine.y ){
+                    this.dataFrame.yAxis.org.push( [ this.markLine.y ] );
+                };
+
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
 
                 this._back = new Back(this.back);
                 this._tip = new Tip(this.tips, this.canvax.getDomContainer());
@@ -435,7 +452,7 @@ define(
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
-                var y = parseInt(h - this._xAxis.h);
+                var y = parseInt(h - this._xAxis.height);
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -449,13 +466,13 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._yAxis.setX(this._yAxis.pos.x);
                 };
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
                 //绘制x轴
                 this._xAxis.draw({
@@ -552,7 +569,7 @@ define(
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
-                var hLen = yArr.length; //bar的横向分组length
+                var hLen = _yAxis.field.length; //bar的横向分组length
 
                 var xDis1 = _xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
@@ -568,6 +585,7 @@ define(
                     yLen = [];
 
                 var me = this;
+                
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0;
@@ -595,6 +613,7 @@ define(
                                 });
                             };
 
+                            //TODO：这里也是bar有自己计算x的公式， 要和line一样改造成调用xAxis的接口来计算
                             var x = xArr[i].x - xDis1 / 2 + xDis2 * (b + 1);
 
                             var y = 0;
@@ -690,10 +709,10 @@ define(
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
                     count: me._data.length - 1,
-                    //h : me._xAxis.h,
+                    //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
-                        y: me._xAxis.pos.y + me._xAxis.h
+                        y: me._xAxis.pos.y + me._xAxis.height
                     },
                     dragIng: function(range) {
                         //if (me.dataZoom.range.end <= me.dataZoom.range.start) {
@@ -710,9 +729,9 @@ define(
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
-                        me._xAxis.resetData(me.dataFrame.xAxis, {
+                        me._xAxis.update({
                             animation: false
-                        });
+                        } , me.dataFrame.xAxis );
 
                         me._graphs.average.data = null;
                         me._graphs.w = me._xAxis.xGraphsWidth;
@@ -801,13 +820,21 @@ define(
                 }
             },
             _initMarkLine: function(g) {
-                var me = this
+                var me = this;
+                
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var yfieldFlat = _.flatten(me._yAxis.field);
                     for (var a = 0, al = yfieldFlat.length; a < al; a++) {
                         var index = a;
                         var center = null;
-                        
+
+                        //如果markline有target配置，那么只现在target配置里的字段的markline
+                        var _yField = yfieldFlat[a];
+                        var _t = me.markLine.target;
+                        if( _t && !( ( _.isArray(_t) && _.indexOf( _t , _yField )>=0 ) || (_t === _yField) ) ){
+                            continue;
+                        };
+
                         if(!me.dataFrame.yAxis.center[a]){
                             continue
                         } else {

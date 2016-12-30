@@ -10,8 +10,8 @@ define(
             this.graphw = 0;
             this.graphh = 0;
             this.yAxisW = 0;
-            this.w = 0;
-            this.h = 0;
+            this.width = 0;
+            this.height = 0;
 
             this.disY = 1;
             this.dis = 6; //线到文本的距离
@@ -65,6 +65,13 @@ define(
 
             this.animation = true;
             this.resize = false;
+    
+            this.maxVal = null; 
+            this.minVal = null; 
+
+            this.xDis1 = 0; //x方向一维均分长度,layoutType==peak的时候要用到
+
+            this.layoutType = "step"; //step , rule , peak
 
             this.init(opt, data);
         };
@@ -75,21 +82,23 @@ define(
                     id: "xAxisSprite"
                 });
                 this._initHandle(opt, data);
+                window.xaxis = this;
             },
             _initHandle: function(opt, data) {
+
                 data && data.org && (this.dataOrg = data.org);
 
                 if (opt) {
                     _.deepExtend(this, opt);
-                }
+                };
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
-                }
+                };
 
                 if (!this.line.enabled) {
                     this.line.height = 1
-                }
+                };
 
                 if (this.dataSection.length == 0) {
                     this.dataSection = this._initDataSection(this.dataOrg);
@@ -101,6 +110,10 @@ define(
                 //然后计算好最大的width 和 最大的height，外部组件需要用
                 this._setTextMaxWidth();
                 this._setXAxisHeight();
+
+                //取第一个数据来判断xaxis的刻度值类型是否为 number
+                this.minVal == null && (this.minVal = _.min( this.dataSection ));
+                this.maxVal == null && (this.maxVal = _.max( this.dataSection ));
 
             },
             /**
@@ -118,7 +131,6 @@ define(
             },
             //数据变化，配置没变的情况
             resetData: function(data , opt) {
-                //先在field里面删除一个字段，然后重新计算
                 if (opt) {
                     _.deepExtend(this, opt);
                 };
@@ -131,7 +143,6 @@ define(
             },
             getIndexOfVal : function(xvalue){
                 var i;
-
                 for( var ii=0,il=this.data.length ; ii<il ; ii++ ){
                     var obj = this.data[ii];
                     if(obj.content == xvalue){
@@ -198,14 +209,14 @@ define(
                 };
 
                 this.yAxisW = Math.max(this.yAxisW, this.leftDisX);
-                this.w = this.graphw - this.yAxisW;
+                this.width = this.graphw - this.yAxisW;
                 if (this.pos.x == null) {
                     this.pos.x = this.yAxisW + this.disOriginX;
                 };
                 if (this.pos.y == null) {
-                    this.pos.y = this.graphh - this.h;
+                    this.pos.y = this.graphh - this.height;
                 };
-                this.xGraphsWidth = parseInt(this.w - this._getXAxisDisLine());
+                this.xGraphsWidth = parseInt(this.width - this._getXAxisDisLine());
 
                 if (this._label) {
                     if (this.isH) {
@@ -214,19 +225,113 @@ define(
                         this.xGraphsWidth -= this._label.getTextWidth() + 5
                     }
                 };
-                this.disOriginX = parseInt((this.w - this.xGraphsWidth) / 2);
+                this.disOriginX = parseInt((this.width - this.xGraphsWidth) / 2);
             },
-            _trimXAxis: function(data, xGraphsWidth) {
+            //获取x对应的位置
+            //val ind 至少要有一个
+            getPosX: function( opt ){
+                var x = 0;
+                var val = opt.val; 
+                var ind = "ind" in opt ? opt.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
+                var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
+                var xGraphsWidth = "xGraphsWidth" in opt ? opt.xGraphsWidth : this.xGraphsWidth;
+                var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
+
+                if( dataLen == 1 ){
+                    x =  xGraphsWidth / 2;
+                } else {
+                    if( layoutType == "rule" ){
+                        x = ind / (dataLen - 1) * xGraphsWidth;
+                    };
+                    if( layoutType == "proportion" ){
+                        //按照数据真实的值在minVal - maxVal区间中的比例值
+                        if( val == undefined ){
+                            val = (ind * (this.maxVal - this.minVal)/(dataLen-1)) + this.minVal;
+                        };
+                        x = xGraphsWidth * ( (val - this.minVal) / (this.maxVal - this.minVal) );
+                    };
+                    if( layoutType == "peak" ){
+                        x = this.xDis1 * (ind+1) - this.xDis1/2;
+                    };
+                    if( layoutType == "step" ){
+                        x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
+                    };
+                }
+                return parseInt( x , 10 );
+            },
+            _trimXAxis: function($data, $xGraphsWidth) {
                 var tmpData = [];
-                var dis = xGraphsWidth / (data.length + 1);
-                for (var a = 0, al = data.length; a < al; a++) {
+                var data = $data || this.dataSection;
+                var xGraphsWidth = xGraphsWidth || this.xGraphsWidth;
+
+                this.xDis1 = xGraphsWidth / data.length;//这个属性目前主要是柱状图有分组柱状图的场景在用
+
+                for (var a = 0, al  = data.length; a < al; a++ ) {
                     var o = {
-                        'content': data[a],
-                        'x': parseInt(dis * (a + 1))
-                    }
-                    tmpData.push(o);
+                        'content':data[a], 
+                        'x': this.getPosX({
+                            val : data[a],
+                            ind : a,
+                            dataLen: al,
+                            xGraphsWidth : xGraphsWidth
+                        })
+                    };
+                    tmpData.push( o );
                 };
                 return tmpData;
+
+                /*
+                if( data.length == 1 ){
+                    //当只有一个数据的时候
+                    tmpData.push({
+                        content : data[0],
+                        x       : parseInt( xGraphsWidth / 2 )
+                    });
+
+                    //目前只有柱状图用到的peak布局模型里才会用的到
+                    this.xDis1  = xGraphsWidth;
+                    return tmpData;
+                }; 
+
+                if ( this.layoutType == "rule" ){
+                    //标尺布局法，从0开始，到最后都有布局点,主要是折线图用的多
+                    for (var a = 0, al  = data.length; a < al; a++ ) {
+                        //默认string类型的情况下是均分
+                        var x = parseInt(a / (data.length - 1) * xGraphsWidth);
+                        if( this.layoutType == "number" ){
+                            //nam 刻度的x要根据 maxVal - minVal 来计算
+                            x = xGraphsWidth * ( (data[a] - this.minVal) / (this.maxVal - this.minVal) );
+                        };
+                        var o = {
+                            'content':data[a], 
+                            'x': x
+                        };
+                        tmpData.push( o );
+                    };
+                } else if( this.layoutType == "peak" ){
+                    //主要是柱状图在使用波峰布局
+                    this.xDis1  = xGraphsWidth / data.length;
+                    for (var a = 0, al = data.length; a < al; a++ ) {
+                        var o = {
+                            'content' : data[a],
+                            'x'       : this.xDis1 * (a+1) - this.xDis1/2
+                        };
+                        tmpData.push( o );
+                    };
+                } else if( this.layoutType == "step" ) {
+                    //梯子布局
+                    var dis = xGraphsWidth / (data.length + 1);
+
+                    for (var a = 0, al = data.length; a < al; a++) {
+                        var o = {
+                            'content': data[a],
+                            'x': parseInt(dis * (a + 1))
+                        }
+                        tmpData.push(o);
+                    };
+                };
+                return tmpData;
+                */
             },
             _formatDataSectionText: function(arr) {
                 if (!arr) {
@@ -243,7 +348,7 @@ define(
                 var disMin = this.disXAxisLine
                 var disMax = 2 * disMin
                 var dis = disMin
-                dis = disMin + this.w % _.flatten(this.dataOrg).length
+                dis = disMin + this.width % _.flatten(this.dataOrg).length
                 dis = dis > disMax ? disMax : dis
                 dis = isNaN(dis) ? 0 : dis
                 return dis
@@ -251,7 +356,7 @@ define(
             _setXAxisHeight: function() { //检测下文字的高等
                 if (!this.enabled) { //this.display == "none"
                     this.dis = 0;
-                    this.h = 3; //this.dis;//this.max.txtH;
+                    this.height = 3; //this.dis;//this.max.txtH;
                 } else {
                     var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
                         context: {
@@ -263,15 +368,15 @@ define(
 
                     if (!!this.text.rotation) {
                         if (this.text.rotation % 90 == 0) {
-                            this.h = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
+                            this.height = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
                         } else {
                             var sinR = Math.sin(Math.abs(this.text.rotation) * Math.PI / 180);
                             var cosR = Math.cos(Math.abs(this.text.rotation) * Math.PI / 180);
-                            this.h = sinR * this._textMaxWidth + txt.getTextHeight() + 5;
+                            this.height = sinR * this._textMaxWidth + txt.getTextHeight() + 5;
                             this.leftDisX = cosR * txt.getTextWidth() + 8;
                         }
                     } else {
-                        this.h = this.disY + this.line.height + this.dis + this.maxTxtH;
+                        this.height = this.disY + this.line.height + this.dis + this.maxTxtH;
                         this.leftDisX = txt.getTextWidth() / 2;
                     }
                 }
@@ -308,7 +413,7 @@ define(
 
                     var o = arr[a]
                     var x = o.x,
-                        y = this.disY + this.line.height + this.dis
+                        y = this.disY + this.line.height + this.dis;
 
                     //文字
                     var txt = new Canvax.Display.Text((o.layoutText || o.content), {
@@ -384,12 +489,12 @@ define(
                 if (popText) {
                     var pc = popText.context;
                     if (pc.textAlign == "center" &&
-                        pc.x + popText.context.width / 2 > this.w) {
-                        pc.x = this.w - popText.context.width / 2
+                        pc.x + popText.context.width / 2 > this.width) {
+                        pc.x = this.width - popText.context.width / 2
                     };
                     if (pc.textAlign == "left" &&
-                        pc.x + popText.context.width > this.w) {
-                        pc.x = this.w - popText.context.width
+                        pc.x + popText.context.width > this.width) {
+                        pc.x = this.width - popText.context.width
                     };
                     if (this.sprite.getNumChildren() > 2) {
                         //倒数第二个text
@@ -436,7 +541,7 @@ define(
                 };
 
                 //总共能多少像素展现
-                var n = Math.min(Math.floor(this.w / mw), arr.length - 1); //能展现几个
+                var n = Math.min(Math.floor(this.width / mw), arr.length - 1); //能展现几个
 
                 if (n >= arr.length - 1) {
                     this.layoutData = arr;

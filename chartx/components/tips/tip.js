@@ -26,7 +26,7 @@ define(
             };
             this.strokeStyle = "#ccc";
             this.lineWidth   = 1;
-            this.alpha       = 0.5;
+            
             
             this._tipDom = null;
             //this._back   = null;
@@ -44,7 +44,7 @@ define(
             this.positionInRange = false; //tip的浮层是否限定在画布区域
             this.init(opt);
         }
-        Tip.prototype = {
+        Tip.prototype = { 
             init : function(opt){
                 _.deepExtend( this , opt );
                 this.sprite = new Canvax.Display.Sprite({
@@ -63,7 +63,6 @@ define(
                 this.cH   = stage.context.height;
     
                 this._initContent(e);
-                this._initBack(e);
                 
                 this.setPosition(e);
 
@@ -72,7 +71,6 @@ define(
             move : function(e){
                 if( !this.enabled ) return;
                 this._setContent(e);
-                this._resetBackSize(e);
                 this.setPosition(e);
             },
             hide : function(){
@@ -88,11 +86,7 @@ define(
                 var pos = e.pos || e.target.localToGlobal( e.point );
                 var x   = this._checkX( pos.x + this.offset );
                 var y   = this._checkY( pos.y + this.offset );
-
-                var _backPos = this.sprite.parent.globalToLocal( { x : x , y : y} );
-                //this.sprite.context.x = _backPos.x;
-                //this.sprite.context.y = _backPos.y;
-                this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;";
+                this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
             },
             /**
              *content相关-------------------------
@@ -134,61 +128,26 @@ define(
                 return tipsContent;
             },
             _getDefaultContent : function( info ){
-                var str  = "<table>";
+                var str  = "<table style='border:none'>";
                 var self = this;
                 _.each( info.nodesInfoList , function( node , i ){
 
                     str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
+                    var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
                     var prefixName = self.prefix[i];
                     if( prefixName ) {
-                        str+="<td>"+ prefixName +"：</td>";
+                        str+="<td "+tsStyle+">"+ prefixName +"：</td>";
                     } else {
                         if( node.field ){
-                            str+="<td>"+ node.field +"：</td>";
+                            str+="<td "+tsStyle+">"+ node.field +"：</td>";
                         }
                     };
 
-                    str += "<td>"+ Tools.numAddSymbol(node.value) +"</td></tr>";
+                    str += "<td "+tsStyle+">"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
                 return str;
-            },
-            /**
-             *Back相关-------------------------
-             */
-            _initBack : function(e){
-                return
-                var opt = {
-                    x : 0,
-                    y : 0,
-                    width  : this.dW,
-                    height : this.dH,
-                    lineWidth : this.lineWidth,
-                    //strokeStyle : "#333333",
-                    fillStyle : this.fillStyle,
-                    radius : [ this.backR ],
-                    globalAlpha  : this.alpha
-                };
-
-                if( this.strokeStyle ){
-                    opt.strokeStyle = this.strokeStyle;
-                }
-               
-                /*
-                this._back = new Rect({
-                    id : "tipsBack",
-                    context : opt
-                });
-                this.sprite.addChild( this._back );
-                */
-            },
-            _resetBackSize:function(e){
-                /*
-                this._back.context.width  = this.dW;
-                this._back.context.height = this.dH;
-                */
-            },
-    
+            },    
             /**
              *获取back要显示的x
              *并且校验是否超出了界限

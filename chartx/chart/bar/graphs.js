@@ -210,7 +210,7 @@ define(
             },
             //只用到了i v。 i＝＝ 一级分组， v 二级分组
             _getFieldFromIHV : function( i , h , v ){
-                var yField = this.root._yAxis.field;
+                var yField = this.root.dataFrame.yAxis.field;
                 var field = null;
                 if( _.isString(yField[i]) ){
                     field = yField[i];
@@ -453,7 +453,7 @@ define(
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
                                     if (!me.animation && _.isFunction(me.text.format)) {
-                                        content = me.text.format(cdata.value);
+                                        content = (me.text.format.apply(me , [cdata.value]) || content );
                                     };
                                     if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
@@ -692,7 +692,7 @@ define(
                                         onUpdate: function() {
                                             var content = this.v;
                                             if (_.isFunction(self.text.format)) {
-                                                content = self.text.format(content);
+                                                content = (self.text.format.apply( self , [content]) || content);
                                             } else if (_.isNumber(content)) {
                                                 content = Tools.numAddSymbol(parseInt(content));
                                             };
@@ -709,9 +709,12 @@ define(
                         }
                     };
                 });
+                callback && callback(self);
+                /*
                 window.setTimeout(function() {
                     callback && callback(self);
                 }, 300 * (this.barsSp.children.length - 1));
+                */
             },
             _getInfoHandler: function(target) {
                 var node = {

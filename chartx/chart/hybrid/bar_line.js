@@ -39,7 +39,9 @@ define(
                         xAxis: this.xAxis
                     }),
                     _graphs: null
-                }
+                };
+
+                this._markLines = [];
             },
             draw: function() {
                 this._setStages();
@@ -60,9 +62,14 @@ define(
                     , 
                     this
                 );
-
                 //覆盖掉bar中的tip组件
-                this._tip = new Tips(this.tips, this._lineChart.dataFrame, this.canvax.getDomContainer());
+                this.tips = _.deepExtend( {
+                    node : {
+                        enabled : false
+                    },
+                    content: null
+                } , this.tips);
+                this._tip = new Tips( this.tips , this._lineChart.dataFrame, this.canvax.getDomContainer());
 
                 //附加的折线图的y轴放在右侧
                 this._yAxisR = new yAxis(
@@ -85,7 +92,7 @@ define(
             },
             _startDraw: function(opt) {
                 var me = this;
-                var y = parseInt(me.height - me._xAxis.h);
+                var y = parseInt(me.height - me._xAxis.height);
                 var graphsH = y - this.padding.top;
 
                 //绘制yAxis
@@ -96,7 +103,7 @@ define(
                     },
                     yMaxHeight: graphsH
                 });
-                var _yAxisW = me._yAxis.w;
+                var _yAxisW = me._yAxis.width;
 
                 //绘制右侧的y轴给line用
                 var _yAxisRW = 0;
@@ -108,7 +115,7 @@ define(
                         },
                         yMaxHeight: me._yAxis.yGraphsHeight
                     });
-                    _yAxisRW = me._yAxisR.w;
+                    _yAxisRW = me._yAxisR.width;
                     //me._yAxisR.setX(me.width - _yAxisRW);
                     me._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
@@ -120,7 +127,7 @@ define(
                     yAxisW: _yAxisW
                 });
                 if (me._xAxis.yAxisW != _yAxisW) {
-                    //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
+                    //说明在 xaxis 里面的时候被修改过了。那么要同步到yaxis
                     me._yAxis.resetWidth(me._xAxis.yAxisW);
                     _yAxisW = me._xAxis.yAxisW;
                 };

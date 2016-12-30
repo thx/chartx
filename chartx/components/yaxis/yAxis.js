@@ -7,13 +7,13 @@ define(
         "chartx/utils/datasection"
     ],
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
-        var yAxis = function(opt, data , data1) {
+        var yAxis = function(opt, data ) {
 
-            this.w = 0;
+            this.width = null;
             this.enabled = 1; //true false 1,0都可以
             this.dis = 6; //线到文本的距离
             this.maxW = 0; //最大文本的width
-            this.field = null; //这个 轴 上面的 field
+            this.field = []; //这个 轴 上面的 field
 
             this.label = "";
             this._label = null; //label的text对象
@@ -58,6 +58,9 @@ define(
             this.baseNumber = null;
             this.basePoint = null; //value为baseNumber的point {x,y}
 
+            this.maxNumber = null;
+            this.minNumber = null;
+
             //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter = null; //function(params){}; 
@@ -69,24 +72,22 @@ define(
 
             this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
-            
-
-            this.init(opt, data , data1);
+            this.init(opt, data );
         };
 
         yAxis.prototype = {
-            init: function(opt, data , data1) {
+            init: function(opt, data ) {
                 _.deepExtend(this, opt);
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
                 };
 
-                this._initData(data , data1);
+                this._initData(data);
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
-                this.sprite.context.x = $n + (this.place == "left" ? this.maxW : 0);
+                this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
                 this.pos.x = $n;
             },
             setY: function($n) {
@@ -104,33 +105,20 @@ define(
                     });
                 });
             },
-            //数据变化，配置没变的情况
-            resetData: function(data,opt) {
-                //先在field里面删除一个字段，然后重新计算
-                if (opt) {
-                    _.deepExtend(this, opt);
-                };
-                this.sprite.removeAllChildren();
-                this.dataSection = [];
-                this.dataSectionGroup = [];
-                //_.deepExtend( this , opt );
-                this._initData(data);
-                this._trimYAxis();
-                this._widget();
-
-                //this.draw();
-            },
             //配置和数据变化
             update: function(opt, data) {
                 //先在field里面删除一个字段，然后重新计算
                 this.sprite.removeAllChildren();
                 this.dataSection = [];
                 this.dataSectionGroup = [];
-                _.deepExtend(this, opt);
+
+                if (opt) {
+                    _.deepExtend(this, opt);
+                };
+
                 this._initData(data);
                 this._trimYAxis();
                 this._widget();
-                //this.draw();
             },
             _getLabel: function() {
                 if (this.label && this.label != "") {
@@ -182,7 +170,7 @@ define(
                     var top = ds.slice(-1)[0];
                     if( 
                         (val > min && val <= max) || 
-                        ( this.sort == "desc" && val >= min && val < max )
+                        ( this._getSortType() == "desc" && val >= min && val < max )
                     ){
                         var y = -((val - bottom) / (top - bottom) * yGroupHeight + i*yGroupHeight) ;
                         break;
@@ -215,7 +203,7 @@ define(
                 this.basePoint = {
                     content: this.baseNumber,
                     y: basePy
-                }
+                };
             },
             _getYAxisDisLine: function() { //获取y轴顶高到第一条线之间的距离         
                 var disMin = this.disYAxisTopLine
@@ -225,12 +213,10 @@ define(
                 dis = dis > disMax ? disMax : dis
                 return dis
             }, 
-            _setDataSection: function(data , data1) {
+            _setDataSection: function(data) {
+
                 var arr = [];
                 var d = (data.org || data.data || data);
-                if( data1 && _.isArray(data1) ){
-                    d = d.concat(data1);
-                }
                 if (!this.biaxial) {
                     arr = _.flatten( d ); //_.flatten( data.org );
                 } else {
@@ -245,12 +231,20 @@ define(
                 for( var i = 0, il=arr.length; i<il ; i++ ){
                     arr[i] =  arr[i] || 0;
                 };
+
                 return arr;
             },
-            //data1 == [1,2,3,4]
-            _initData: function(data , data1) {
-                
-                var arr = this._setDataSection(data , data1);
+            _initData: function(data) {
+
+                //先要矫正子啊field确保一定是个array
+                if( !_.isArray(this.field) ){
+                    this.field = [this.field];
+                };
+
+                var arr = this._setDataSection(data);
+                if( arr.length == 1 ){
+                    arr.push( arr[0]*2 );
+                }
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);
@@ -269,20 +263,7 @@ define(
             },
             _sort: function(){
                 if (this.sort) {
-                    var sort = "asc";
-                    if (_.isString(this.sort)) {
-                        sort = this.sort;
-                    }
-                    if (_.isArray(this.sort)) {
-                        var i = 0;
-                        if (this.place == "right") {
-                            i = 1;
-                        };
-                        if (this.sort[i]) {
-                            sort = this.sort[i];
-                        };
-                    };
-
+                    var sort = this._getSortType();
                     if (sort == "desc") {
                         this.dataSection.reverse();
 
@@ -294,6 +275,19 @@ define(
                         //dataSectionGroup reverse end
                     };
                 };
+            },
+            _getSortType: function(){
+                var _sort;
+                if( _.isString(this.sort) ){
+                    _sort = this.sort;
+                }
+                if( _.isArray(this.sort) ){
+                    _sort = this.sort[ this.place == "left" ? 0 : 1 ];
+                }
+                if( !_sort ){
+                    _sort = "asc";
+                }
+                return _sort;
             },
             _setBottomAndBaseNumber : function(){
                 this._bottomNumber = this.dataSection[0];
@@ -351,19 +345,19 @@ define(
                     this._setBottomAndBaseNumber();
                 };                
             },
-            resetWidth: function(w) {
+            resetWidth: function(width) {
                 var self = this;
-                self.w = w;
+                self.width = width;
                 if (self.line.enabled) {
-                    self.sprite.context.x = w - self.dis - self.line.width;
+                    self.sprite.context.x = width - self.dis - self.line.width;
                 } else {
-                    self.sprite.context.x = w - self.dis;
+                    self.sprite.context.x = width - self.dis;
                 }
             },
             _widget: function() {
                 var self = this;
                 if (!self.enabled) {
-                    self.w = 0;
+                    self.width = 0;
                     return;
                 }
                 var arr = this.layoutData;
@@ -411,7 +405,7 @@ define(
                         context: {
                             x: x + (self.place == "left" ? -5 : 5),
                             y: posy + 20,
-                            fillStyle: self.text.fillStyle,
+                            fillStyle: self._getProp(self.text.fillStyle),
                             fontSize: self.text.fontSize,
                             rotation: -Math.abs(this.text.rotation),
                             textAlign: textAlign,
@@ -424,7 +418,8 @@ define(
                     self.maxW = Math.max(self.maxW, txt.getTextWidth());
                     if (self.text.rotation == 90 || self.text.rotation == -90) {
                         self.maxW = Math.max(self.maxW, txt.getTextHeight());
-                    }
+                    };
+
 
                     if (self.line.enabled) {
                         //线条
@@ -435,7 +430,7 @@ define(
                                 xEnd: self.line.width,
                                 yEnd: 0,
                                 lineWidth: self.line.lineWidth,
-                                strokeStyle: self.line.strokeStyle
+                                strokeStyle: self._getProp(self.line.strokeStyle)
                             }
                         });
                         yNode.addChild(line);
@@ -471,12 +466,24 @@ define(
 
                 //self.sprite.context.x = self.maxW + self.pos.x;
                 //self.pos.x = self.maxW + self.pos.x;
-                if (self.line.enabled) {
-                    self.w = self.maxW + self.dis + self.line.width + self.pos.x;
-                } else {
-                    self.w = self.maxW + self.dis + self.pos.x;
+                if( self.width == null ){
+                    if (self.line.enabled) {
+                        self.width = self.maxW + self.dis + self.line.width + self.pos.x;
+                    } else {
+                        self.width = self.maxW + self.dis + self.pos.x;
+                    }
+                };
+            },
+            _getProp: function(s) {
+                var res;
+                if (_.isFunction(s)) {
+                    res = s.call( this , this );
                 }
-            }
+                if( !res ){
+                    res = "#999";
+                }
+                return res
+            },
         };
 
         return yAxis;

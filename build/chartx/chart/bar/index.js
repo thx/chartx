@@ -210,7 +210,7 @@ define(
             },
             //只用到了i v。 i＝＝ 一级分组， v 二级分组
             _getFieldFromIHV : function( i , h , v ){
-                var yField = this.root._yAxis.field;
+                var yField = this.root.dataFrame.yAxis.field;
                 var field = null;
                 if( _.isString(yField[i]) ){
                     field = yField[i];
@@ -453,7 +453,7 @@ define(
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
                                     if (!me.animation && _.isFunction(me.text.format)) {
-                                        content = me.text.format(cdata.value);
+                                        content = (me.text.format.apply(me , [cdata.value]) || content );
                                     };
                                     if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
@@ -692,7 +692,7 @@ define(
                                         onUpdate: function() {
                                             var content = this.v;
                                             if (_.isFunction(self.text.format)) {
-                                                content = self.text.format(content);
+                                                content = (self.text.format.apply( self , [content]) || content);
                                             } else if (_.isNumber(content)) {
                                                 content = Tools.numAddSymbol(parseInt(content));
                                             };
@@ -709,9 +709,12 @@ define(
                         }
                     };
                 });
+                callback && callback(self);
+                /*
                 window.setTimeout(function() {
                     callback && callback(self);
                 }, 300 * (this.barsSp.children.length - 1));
+                */
             },
             _getInfoHandler: function(target) {
                 var node = {
@@ -756,50 +759,29 @@ define(
 );
 
 define(
-    "chartx/chart/bar/xaxis",
-    [
-        "chartx/components/xaxis/xAxis"
-    ],
-    function( xAxisBase ){
-        var xAxis = function( opt , data ){
-            this.xDis1 = 0; //x方向一维均分长度
-            xAxis.superclass.constructor.apply( this , arguments );
-        };
-        Chartx.extend( xAxis , xAxisBase , {
-            _trimXAxis:function( data , xGraphsWidth ){
-                
-                var tmpData = [];
-                this.xDis1  = xGraphsWidth / data.length;
-                for (var a = 0, al  = data.length; a < al; a++ ) {
-                    var o = {
-                        'content' : data[a], 
-                        'x'       : this.xDis1 * (a+1) - this.xDis1/2
-                    }
-                    tmpData.push( o );
-                };
-                return tmpData;
-            } 
-        } );
-    
-        return xAxis;
-    } 
-);
-
-
-define(
     "chartx/chart/bar/yaxis",
     [
         "canvax/index",
         "chartx/components/yaxis/yAxis"
     ],
     function( Canvax , yAxisBase ){
-        var yAxis = function( opt , data , data1){
-            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data , data1 ] );
+        var yAxis = function( opt , data ){
+            yAxis.superclass.constructor.apply( this , [ ( opt.bar ? opt.bar : opt ) , data ] );
         };
         Chartx.extend( yAxis , yAxisBase , {
-            _setDataSection : function( data , data1 ){
+            _setDataSection : function( data ){
                 var arr = [];
                 _.each( data.org , function( d , i ){
+                    if( !d.length ){
+                        return
+                    };
+
+                    //有数据的情况下 
+                    if( !_.isArray(d[0]) ){
+                        arr.push( d );
+                        return;
+                    };
+                    
                     var varr = [];
                     var len  = d[0].length;
                     var vLen = d.length;
@@ -815,10 +797,7 @@ define(
                     varr.push(min);
                     arr.push( varr );
                 } );
-                if( !data1 ){
-                    data1 = [];
-                }
-                return _.flatten(arr).concat( data1 );
+                return _.flatten(arr);
             }
         } );
     
@@ -832,7 +811,7 @@ define(
         'chartx/chart/index',
         'chartx/utils/tools',
         'chartx/utils/datasection',
-        'chartx/chart/bar/xaxis',
+        'chartx/components/xaxis/xAxis',
         'chartx/chart/bar/yaxis',
         'chartx/components/back/Back',
         'chartx/chart/bar/graphs',
@@ -850,6 +829,10 @@ define(
             init: function(node, data, opts) {
 
                 this._xAxis = null;
+                this.xAxis = {
+                    layoutType: "peak" //波峰波谷布局模型
+                };
+
                 this._yAxis = null;
                 this._back = null;
                 this._graphs = null;
@@ -898,21 +881,21 @@ define(
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.resetData(this.dataFrame.xAxis, {
+                this._xAxis.update({
                     animation: false
-                });
+                } , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update({
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.resetData(this.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.dataFrame.yAxis);
                 };
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function() {
@@ -1126,26 +1109,32 @@ define(
             //如果为比例柱状图的话
             _initProportion: function(node, data, opts) {
                 !opts.tips && (opts.tips = {});
-                opts.tips = _.deepExtend(opts.tips, {
+
+                opts.tips = _.deepExtend({
                     content: function(info) {
-                        var str = "<table>";
+                        var str = "<table style='border:none'>";
                         var self = this;
                         _.each(info.nodesInfoList, function(node, i) {
-                            str += "<tr style='color:" + node.fillStyle + "'>";
+                            str += "<tr style='color:" + (node.color || node.fillStyle) + "'>";
                             var prefixName = self.prefix[i];
+                            var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
                             if (prefixName) {
-                                str += "<td>" + prefixName + "：</td>";
+                                str += "<td "+tsStyle+">" + prefixName + "：</td>";
                             } else {
                                 if (node.field) {
-                                    str += "<td>" + node.field + "：</td>";
+                                    str += "<td "+tsStyle+">" + node.field + "：</td>";
                                 }
                             };
-                            str += "<td>" + Tools.numAddSymbol(node.value) + "（" + Math.round(node.value / node.vCount * 100) + "%）</td></tr>";
+                            str += "<td "+tsStyle+">" + Tools.numAddSymbol(node.value);
+                            if( node.vCount ){
+                                str += "（" + Math.round(node.value / node.vCount * 100) + "%）";
+                            };
+                            str +="</td></tr>";
                         });
                         str += "</table>";
                         return str;
                     }
-                });
+                } , opts.tips );
 
                 _.deepExtend(this, opts);
                 _.deepExtend(this.yAxis, {
@@ -1256,7 +1245,14 @@ define(
 
                 this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
 
-                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis, this._getaverageData());
+                if( this._graphs.average.enabled ){
+                    this.dataFrame.yAxis.org.push( [ this._getaverageData() ] );
+                };
+                if( this.markLine && this.markLine.y ){
+                    this.dataFrame.yAxis.org.push( [ this.markLine.y ] );
+                };
+
+                this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
 
                 this._back = new Back(this.back);
                 this._tip = new Tip(this.tips, this.canvax.getDomContainer());
@@ -1264,7 +1260,7 @@ define(
             _startDraw: function(opt) {
                 var w = (opt && opt.w) || this.width;
                 var h = (opt && opt.h) || this.height;
-                var y = parseInt(h - this._xAxis.h);
+                var y = parseInt(h - this._xAxis.height);
                 var graphsH = y - this.padding.top - this.padding.bottom;
 
                 //绘制yAxis
@@ -1278,13 +1274,13 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {
+                    this._yAxis.update( {
                         animation: false
-                    });
+                    } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._yAxis.setX(this._yAxis.pos.x);
                 };
 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
 
                 //绘制x轴
                 this._xAxis.draw({
@@ -1381,7 +1377,7 @@ define(
                 _yAxis || (_yAxis = this._yAxis);
                 var xArr = _xAxis.data;
                 var yArr = _yAxis.dataOrg;
-                var hLen = yArr.length; //bar的横向分组length
+                var hLen = _yAxis.field.length; //bar的横向分组length
 
                 var xDis1 = _xAxis.xDis1;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
@@ -1397,6 +1393,7 @@ define(
                     yLen = [];
 
                 var me = this;
+                
                 for (var b = 0; b < hLen; b++) {
                     !tmpData[b] && (tmpData[b] = []);
                     yValueMaxs[b] = 0;
@@ -1424,6 +1421,7 @@ define(
                                 });
                             };
 
+                            //TODO：这里也是bar有自己计算x的公式， 要和line一样改造成调用xAxis的接口来计算
                             var x = xArr[i].x - xDis1 / 2 + xDis2 * (b + 1);
 
                             var y = 0;
@@ -1519,10 +1517,10 @@ define(
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
                     count: me._data.length - 1,
-                    //h : me._xAxis.h,
+                    //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
-                        y: me._xAxis.pos.y + me._xAxis.h
+                        y: me._xAxis.pos.y + me._xAxis.height
                     },
                     dragIng: function(range) {
                         //if (me.dataZoom.range.end <= me.dataZoom.range.start) {
@@ -1539,9 +1537,9 @@ define(
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
-                        me._xAxis.resetData(me.dataFrame.xAxis, {
+                        me._xAxis.update({
                             animation: false
-                        });
+                        } , me.dataFrame.xAxis );
 
                         me._graphs.average.data = null;
                         me._graphs.w = me._xAxis.xGraphsWidth;
@@ -1630,13 +1628,21 @@ define(
                 }
             },
             _initMarkLine: function(g) {
-                var me = this
+                var me = this;
+                
                 require(['chartx/components/markline/index'], function(MarkLine) {
                     var yfieldFlat = _.flatten(me._yAxis.field);
                     for (var a = 0, al = yfieldFlat.length; a < al; a++) {
                         var index = a;
                         var center = null;
-                        
+
+                        //如果markline有target配置，那么只现在target配置里的字段的markline
+                        var _yField = yfieldFlat[a];
+                        var _t = me.markLine.target;
+                        if( _t && !( ( _.isArray(_t) && _.indexOf( _t , _yField )>=0 ) || (_t === _yField) ) ){
+                            continue;
+                        };
+
                         if(!me.dataFrame.yAxis.center[a]){
                             continue
                         } else {
@@ -1655,7 +1661,25 @@ define(
                                 }
                                 content = me.markLine.text.format(o)
                             }
-                        }
+                        };
+
+                        var _y = center;
+                    
+                        //如果markline有自己预设的y值
+                        if( me.markLine.y != undefined ){
+                            var _y = me.markLine.y;
+                            if(_.isFunction(_y)){
+                                _y = _y( yfieldFlat[a] );
+                            };
+                            if(_.isArray( _y )){
+                                _y = _y[ a ];
+                            };
+
+                            if( _y != undefined ){
+                                _y = me._yAxis.getYposFromVal(_y);
+                            }
+                        };
+
                         var o = {
                             w: me._xAxis.xGraphsWidth,
                             h: me._yAxis.yGraphsHeight,
@@ -1665,7 +1689,7 @@ define(
                             },
                             field: _.isArray(me._yAxis.field[a]) ? me._yAxis.field[a][0] : me._yAxis.field[a],
                             line: {
-                                y: center,
+                                y: _y,
                                 list: [
                                     [0, 0],
                                     [me._xAxis.xGraphsWidth, 0]
