@@ -37,27 +37,12 @@ var data= [
     ["ie"     , 500   ],
     ["firefox", 100   ],
     ["safari" , 400   ],
-    ["其他"   , 200   ],
-    ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
-    ["其他"   , 200   ],
-    ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
-    ["其他"   , 200   ],
-    ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
-    ["其他"   , 200   ],
-    ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
-    ["其他"   , 200   ],
+    ["其他"   , 200   ]
 ];
 
 var options = {
     type : '3d',
+    ignoreFields:['firefox'],
     xAxis : {
         field : "node"
     },
@@ -81,54 +66,11 @@ var options = {
         }
 
     },
-    //饼图的起始角度[有效值范围0-360度，默认值0度
-    //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
-    startAngle:-90,
-    //数据排序，默认按用户给定顺序[desc/asc]
-    sort: 'desc',
-    //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
-    allowPointSelect: true,
-    //是否允许动画
-    animation: true,
     //内圆半径
-    innerRadius: 50,
-    //颜色序列,若不设置，会有默认的颜色序列
-    //colors:['red', 'yellow', 'blue']
-
-    checked : {
-        enabled : true
-    }
+    innerRadius: 50
 };
 Chartx.pie("canvasTest" , data , options).then(function( pie ){
-    window.pie = pie;
-    //pie.slice(3);
-    pie.on('focus' , function (e) {
-        console.log(e.type);
-    });
-    pie.on('unfocus' , function (e) {
-        console.log(e.type);
-    });
-    pie.on('click',function(e){
-        console.log(e.type);
-    });
-    pie.on('mousedown',function(e){
-        console.log(e.type);
-    });
-    pie.on('mouseup',function(e){
-        console.log(e.type);
-    });
-    pie.on('mousemove',function(e){
-        console.log(e.type);
-    });
-    pie.on('dblclick',function(e){
-        console.log(e.type);
-    });
 
-    /*
-    _.each( pie.getLabelList() , function( pos ){
-    $("#canvasTest").append("<div style='position:absolute;width:"+pos.width+"px;height:"+pos.height+"px;left:"+pos.x+"px;top:"+pos.y+"px;border:1px solid red;'></div>");
-    } );
-    */
 });
 </textarea></form>
 

@@ -58,6 +58,8 @@
             return result;
         }
 
+        var _attrs = ['side1', 'side2', 'inn', 'out', 'top'];
+
 
         var Pie = function (opt, tipsOpt, domContainer) {
             this.data = null;
@@ -150,7 +152,7 @@
                 self.labelFontSize = adjustFontSize < 12 ? 12 : adjustFontSize;
                 var percentFixedNum = 2;
                 var data = self.data.data;
-                self.clickMoveDis = self.r /11;
+                self.clickMoveDis = self.r / 6;  //11
                 if (data.length && data.length > 0) {
                     for (var i = 0; i < data.length; i++) {
                         self.total += data[i].y;
@@ -335,6 +337,8 @@
                 var topSp = self.sprite.getChildById('sector_sp_top').getChildById('sp_top_clone_' + index);
                 var outSp = self.sprite.getChildById('sector_sp_out').getChildById('sp_out_clone_' + index);
                 var innSp = self.sprite.getChildById('sector_sp_inn').getChildById('sp_inn_clone_' + index);
+                var side1Sp = self.sprite.getChildById('sector_sp_side1').getChildById('sp_side1_clone_' + index);
+                var side2Sp = self.sprite.getChildById('sector_sp_side2').getChildById('sp_side2_clone_' + index);
 
                 var secData = self.data.data[index];
                 secData._selected = true;
@@ -350,6 +354,11 @@
                         outSp.context.y = a.y;
                         innSp.context.x = a.x;
                         innSp.context.y = a.y;
+
+                        side1Sp.context.x = a.x;
+                        side1Sp.context.y = a.y;
+                        side2Sp.context.x = a.x;
+                        side2Sp.context.y = a.y;
                     },
                     onComplete: function () {
                         //secData.checked = true;
@@ -360,9 +369,12 @@
             unfocus: function (index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
+
                 var topSp = self.sprite.getChildById('sector_sp_top').getChildById('sp_top_clone_' + index);
                 var outSp = self.sprite.getChildById('sector_sp_out').getChildById('sp_out_clone_' + index);
                 var innSp = self.sprite.getChildById('sector_sp_inn').getChildById('sp_inn_clone_' + index);
+                var side1Sp = self.sprite.getChildById('sector_sp_side1').getChildById('sp_side1_clone_' + index);
+                var side2Sp = self.sprite.getChildById('sector_sp_side2').getChildById('sp_side2_clone_' + index);
 
                 var secData = self.data.data[index];
                 secData._selected = false;
@@ -378,6 +390,11 @@
                         outSp.context.y = a.y;
                         innSp.context.x = a.x;
                         innSp.context.y = a.y;
+
+                        side1Sp.context.x = a.x;
+                        side1Sp.context.y = a.y;
+                        side2Sp.context.x = a.x;
+                        side2Sp.context.y = a.y;
                     },
                     onComplete: function () {
                         callback && callback();
@@ -389,9 +406,9 @@
                 var sec = this.sectorMap[index].sector;
                 var secData = this.data.data[index];
                 if (secData.checked) {
-                    return
+                    return;
                 }
-                ;
+
                 var me = this;
                 if (!secData._selected) {
                     this.focus(index, function () {
@@ -400,7 +417,7 @@
                 } else {
                     this.addCheckedSec(sec);
                 }
-                ;
+
                 secData.checked = true;
             },
             uncheck: function (index) {
@@ -506,9 +523,13 @@
                         }
                     },
                     onComplete: function () {
-                        self.sectorsSp3d_inn.context.globalAlpha=1;
-                        self.sectorsSp3d_out.context.globalAlpha=1;
-                        self.sectorsSp3d_top.context.globalAlpha=1;
+                        _.each(_attrs, function (item) {
+                            self['sectorsSp3d_' + item].context.globalAlpha = 1;
+                        });
+                         //动画完成后清除部分sprite
+                        self.sprite.removeChildById(self.sectorsSp.id);
+                        delete self.spriteSp;
+
                         self._showDataLabel();
                     }
                 });
@@ -868,7 +889,6 @@
                         startAngle: secc.startAngle,
                         endAngle: secc.startAngle + 0.5, //secc.endAngle,
                         fillStyle: secc.fillStyle,
-                        globalAlpha: 0.5
                     },
                     id: 'checked_' + sec.id
                 });
@@ -898,25 +918,22 @@
             _widget: function () {
                 var self = this;
                 var data = self.data.data;
-                var _attrs = ['inn', 'side1', 'side2', 'out', 'top'];
                 var moreSecData;
 
-                self.sectorsSp3d_top = self.sectorsSp.getChildById('sector_sp_top') || new Canvax.Display.Sprite({
-                        id: 'sector_sp_top'
-                    });
-                self.sectorsSp3d_inn = self.sectorsSp.getChildById('sector_sp_inn') || new Canvax.Display.Sprite({
-                        id: 'sector_sp_inn'
-                    });
-                self.sectorsSp3d_out = self.sectorsSp.getChildById('sector_sp_out') || new Canvax.Display.Sprite({
-                        id: 'sector_sp_out'
-                    });
+                _.each(_attrs, function (item) {
+                    self['sectorsSp3d_' + item] = self.sectorsSp.getChildById('sector_sp_' + item) || new Canvax.Display.Sprite({
+                            id: 'sector_sp_' + item
+                        });
+
+                });
+
 
                 if (data.length > 0 && self.total > 0) {
                     self.branchSp && self.sprite.addChild(self.branchSp);
                     for (var i = 0; i < data.length; i++) {
                         if (self.colorIndex >= self.colors.length) self.colorIndex = 0;
                         var fillColor = self.getColorByIndex(self.colors, i);
-                        var _sideFillStyle = ColorFormat.colorBrightness(fillColor, -0.1);
+                        var _sideFillStyle = ColorFormat.colorBrightness(fillColor, -0.2);
 
                         //扇形主体
 
@@ -942,6 +959,7 @@
                         });
 
                         _.each(_attrs, function (item) {
+
                             var _pathObj = new Path({
                                 id: "path_" + item + '_' + data[i].index,
                                 context: {
@@ -955,20 +973,22 @@
                             });
                             sectorsSp3d.addChild(_pathObj);
 
-                            _pathObj.__data = data[i];
-                            _pathObj.__colorIndex = i;
-                            _pathObj.__dataIndex = i;
-                            _pathObj.__isSliced = data[i].sliced;
+                            var _cloneTopPath = _pathObj.clone();
+                            _cloneTopPath.id = 'sp_' + item + '_clone_' + data[i].index;
+                            self['sectorsSp3d_' + item].addChild(_cloneTopPath);
 
                             if (item === 'top') {
+                                _cloneTopPath.__data = data[i];
+                                _cloneTopPath.__colorIndex = i;
+                                _cloneTopPath.__dataIndex = i;
+                                _cloneTopPath.__isSliced = data[i].sliced;
 
                                 //扇形事件
-                                _pathObj.hover(function (e) {
+                                _cloneTopPath.hover(function (e) {
                                     var me = this;
                                     if (self.tips.enabled) {
                                         self._showTip(e, this.__dataIndex);
                                     }
-                                    ;
                                     var secData = self.data.data[this.__dataIndex];
                                     if (!secData.checked) {
                                         self._sectorFocus(e, this.__dataIndex);
@@ -978,7 +998,6 @@
                                     if (self.tips.enabled) {
                                         self._hideTip(e);
                                     }
-                                    ;
                                     var secData = self.data.data[this.__dataIndex];
                                     if (!secData.checked) {
                                         self._sectorUnfocus(e, this.__dataIndex);
@@ -986,7 +1005,7 @@
                                     }
                                 });
 
-                                _pathObj.on('mousedown mouseup click mousemove dblclick', function (e) {
+                                _cloneTopPath.on('mousedown mouseup click mousemove dblclick', function (e) {
                                     self._geteventInfo(e, this.__dataIndex);
                                     if (e.type == "click") {
                                         self.secClick(this, e);
@@ -1001,24 +1020,16 @@
                                 });
 
 
-                                var _cloneTopPath = _pathObj.clone();
-                                _cloneTopPath.id = 'sp_top_clone_' + data[i].index;
-                                self.sectorsSp3d_top.addChild(_cloneTopPath);
-                            }else if (item === 'out') {
-                                var _cloneOutPath = _pathObj.clone();
-                                _cloneOutPath.id = 'sp_out_clone_' + data[i].index;
-                                self.sectorsSp3d_out.addChild(_cloneOutPath);
-                            }else if(item==='inn'){
-                                var _cloneInnPath =  _pathObj.clone();
-                                _cloneInnPath.id = 'sp_inn_clone_' + data[i].index;
-                                self.sectorsSp3d_inn.addChild(_cloneInnPath);
                             }
-
-
 
                         });
                         if (!data[i].ignored) {
                             self.sectorsSp.addChild(sectorsSp3d);
+                        }else{
+                            //移除忽略的区域
+                            _.each(_attrs, function (item) {
+                                self['sectorsSp3d_' + item].removeChildById('sp_' + item + '_clone_' + data[i].index);
+                            });
                         }
 
 
@@ -1048,13 +1059,18 @@
                     if (self.dataLabel.enabled) {
                         self._startWidgetLabel();
                     }
-                    self.sprite.addChild(self.sectorsSp3d_inn);
-                    self.sprite.addChild(self.sectorsSp3d_out);
-                    self.sprite.addChild(self.sectorsSp3d_top);
+
+                    //渲染顺序调整
+                    _attrs = ['side1', 'side2', 'inn', 'out', 'top'];
+                    _.each(_attrs, function (item) {
+                        self.sprite.addChild(self['sectorsSp3d_' + item]);
+                    })
+
+
                     if(self.animation){
-                        self.sectorsSp3d_inn.context.globalAlpha=0;
-                        self.sectorsSp3d_out.context.globalAlpha=0;
-                        self.sectorsSp3d_top.context.globalAlpha=0;
+                        _.each(_attrs, function (item) {
+                            self['sectorsSp3d_' + item].context.globalAlpha = 0;
+                        });
                     }
 
                 }
@@ -1062,11 +1078,11 @@
             secClick: function (sectorEl, e) {
                 if (!this.checked.enabled) return;
                 var secData = this.data.data[sectorEl.__dataIndex];
-                if (sectorEl.clickIng) {
-                    return;
-                }
-                ;
-                sectorEl.clickIng = true;
+                //if (sectorEl.clickIng) {
+                //    return;
+                //}
+                //;
+                //sectorEl.clickIng = true;
                 if (!secData.checked) {
                     this.addCheckedSec(sectorEl, function () {
                         sectorEl.clickIng = false;
@@ -1263,10 +1279,11 @@
             },
             setPaths: function (attribs) {
                 var me = this;
-                var _attrs = ['top', 'inn', 'out', 'side1', 'side2'];
+
                 //console.log(JSON.stringify(attribs));
                 var _paths = me.arc3dPath(attribs);
                 var _SVGPaths = {};
+                _.extend(_SVGPaths, _paths);
                 _.each(_attrs, function (item) {
                     _SVGPaths[item] = me.arrayToPath(_paths[item]);
                 });

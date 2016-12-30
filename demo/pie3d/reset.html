@@ -54,6 +54,7 @@ var data1= [
 ];
 
 var options = {
+    type : '3d',
     xAxis : {
         field : "node"
     },
@@ -120,15 +121,15 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
     */
 });
 $("body").click(function(){
-    <!-- $("#canvasTest").width(400) -->
-    <!-- $("#canvasTest").width(300) -->
+     <!--$("#canvasTest").width(400)-->
+     <!--$("#canvasTest").width(300)-->
 
     pie.reset({
-        <!-- data : data1//, -->
+        data : data1,
         options:options
     })
 
-    <!-- pie.resize() -->
+     <!--pie.resize() -->
 })
 </textarea></form>
 
@@ -140,7 +141,7 @@ $("body").click(function(){
 
                 <h4>饼图（pie chart）- 基础饼图</h4>
                 <p>
-                    联系人：@自勉
+                    联系人：@不决 @自勉 @释剑
                 </p>
             </div>
             <div  class="test-c">
