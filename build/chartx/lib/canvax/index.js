@@ -4693,10 +4693,11 @@ define(
                 }
 
                 var minX = Number.MAX_VALUE;
-                var maxX = Number.MIN_VALUE;
+
+                var maxX = -Number.MAX_VALUE;
 
                 var minY = Number.MAX_VALUE;
-                var maxY = Number.MIN_VALUE;
+                var maxY = -Number.MAX_VALUE;
 
                 // 平移坐标
                 var x = 0;
