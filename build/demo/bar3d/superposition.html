@@ -46,6 +46,7 @@ var data= [
 
 ];
 var options = {
+   // type : '3d',
     yAxis : {
         field : [
              [ "uv" , "pv" ],
@@ -67,16 +68,16 @@ var options = {
 }   
 var chartx = Chartx.bar("canvasTest" , data , options);
 chartx.then(function( line ){
-    line.on( "mouseover" , function( e ){
+    line.on( "tap" , function( e ){
         eventHandler(e);
     } );
     //mobile 触屏事件对应的为
     //tap(点击)， panstart(手势准备开始移动) ，panmove(手势移动中)， panend(手势移动结束)
 });
 var eventHandler = function( e ){
-    <!-- console.log(e.params.iGroup, e.params.iNode, e.params.iLay) -->
-    <!-- var log = "<div>type："+ e.type + " iGroup：" + e.params.iGroup + " iNode：" + e.params.iNode + " iLay: " + e.params.iLay + "</div>"; -->
-    <!-- $("#chart-event-log").prepend( $(log) ); -->
+     console.log(e.params.iGroup, e.params.iNode, e.params.iLay)
+     var log = "<div>type："+ e.type + " iGroup：" + e.params.iGroup + " iNode：" + e.params.iNode + " iLay: " + e.params.iLay + "</div>";
+     $("#chart-event-log").prepend( $(log) );
 }
 </textarea></form>
 
@@ -88,7 +89,7 @@ var eventHandler = function( e ){
 
                 <h4>柱状图 - 基础柱状图</h4>
                 <p>
-                    联系人：@逢春 @释剑
+                    联系人：@不决 @释剑
                 </p>
             </div>
             <div  class="test-c">

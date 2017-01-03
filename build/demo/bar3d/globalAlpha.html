@@ -42,10 +42,10 @@ var data= [
 ];
 var options = {
     type : "3d",
-    legend : {
-        tips : {
-            enabled:true
-        }
+    mode : 0,   //0:正交投影   1:透视投影  默认正交投影
+    rotation:{
+       x : 10,
+       y : 10
     },
     yAxis : {
         field : [ ["uv","pv"] , "click"],
@@ -55,13 +55,16 @@ var options = {
         field : ["xfield"]
     },
     graphs : {
+       globalAlpha:0.75,
        depth : 50
     },
     back : {
         depth : 100
     }
 };
-Chartx.bar("canvasTest" , data , options);
+Chartx.bar("canvasTest" , data , options).then(function(bar){
+
+});
 
 
 </textarea></form>
@@ -80,7 +83,6 @@ Chartx.bar("canvasTest" , data , options);
                 <div  class="test-c">
                     <div id="canvasTest" style='width:600px;height:300px;'></div>
                 </div>
-
             </div>
         </td>
     </tr>

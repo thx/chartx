@@ -79,6 +79,8 @@ define('chartx/chart/bar/3d/graphs',
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
 
+            this.globalAlpha = 1;
+
             _.deepExtend(this, opt);
 
             this._initaverage();
@@ -249,6 +251,7 @@ define('chartx/chart/bar/3d/graphs',
                 this.bar._width < 1 && (this.bar._width = 1);
             },
             resetData: function (data, opt) {
+                this._setyAxisFieldsMap();
                 this.draw(data.data, opt);
             },
             draw: function (data, opt) {
@@ -836,24 +839,26 @@ define('chartx/chart/bar/3d/graphs',
                 var _frontFillStyle = "#ccc";
                 var _topFillStyle = "#ccc";
                 var _sideFillStyle = "#ccc";
-                var _globalAlpha = 0.3
+                var _globalAlpha = 0.3;
+
+                var drawFace = me.root.drawFace;
 
                 //左面
                 var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
-                var leftFace = me.drawFace("bhr_polygon_left", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var leftFace = drawFace("bhr_polygon_left", _pointList, _sideFillStyle, _strokeStyle, 0, sprite);
 
                 //前面
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
-                var frontFace = me.drawFace("bhr_polygon_front", _pointList, _frontFillStyle, _strokeStyle, sprite);
+                var frontFace = drawFace("bhr_polygon_front", _pointList, _frontFillStyle, _strokeStyle, 0, sprite);
 
                 //右侧
                 var _pointList = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
-                var rightFace = me.drawFace("bhr_polygon_right", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var rightFace = drawFace("bhr_polygon_right", _pointList, _sideFillStyle, _strokeStyle, 0, sprite);
 
 
                 //顶部
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
-                var topFace = me.drawFace("bhr_polygon_top", _pointList, _topFillStyle, _strokeStyle, sprite);
+                var topFace = drawFace("bhr_polygon_top", _pointList, _topFillStyle, _strokeStyle, 0, sprite);
 
                 var _hoverEnter = function (e) {
                     leftFace.context.globalAlpha = _globalAlpha;
@@ -868,13 +873,10 @@ define('chartx/chart/bar/3d/graphs',
                     rightFace.context.globalAlpha = 0;
                     topFace.context.globalAlpha = 0;
                 };
-                _hoverLeave();
 
 
-                leftFace.hover(_hoverEnter, _hoverLeave);
                 frontFace.hover(_hoverEnter, _hoverLeave);
-                frontFace.hover(_hoverEnter, _hoverLeave);
-                frontFace.hover(_hoverEnter, _hoverLeave);
+
 
                 sprite.addChild(leftFace);
                 sprite.addChild(frontFace);
@@ -896,25 +898,28 @@ define('chartx/chart/bar/3d/graphs',
                 //绘制样式
                 var _strokeStyle = rectCxt.fillStyle;
                 var _frontFillStyle = rectCxt.fillStyle;
-                var _topFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, 0.1);
-                var _sideFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, -0.1);
+                var _topFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, 0.2);
+                var _sideFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, -0.2);
+
+                var drawFace = me.root.drawFace;
+                var _globalAlpha = me.globalAlpha;
 
                 //左面
                 var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
-                var leftFace = me.drawFace("polygon_left", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var leftFace = drawFace("polygon_left", _pointList, _sideFillStyle, _strokeStyle, _globalAlpha, sprite);
 
                 //前面
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
-                var frontFace = me.drawFace("polygon_front", _pointList, _frontFillStyle, _strokeStyle, sprite);
+                var frontFace = drawFace("polygon_front", _pointList, _frontFillStyle, _strokeStyle, _globalAlpha, sprite);
 
                 //右侧
                 var _pointList = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
-                var rightFace = me.drawFace("polygon_right", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var rightFace = drawFace("polygon_right", _pointList, _sideFillStyle, _strokeStyle, _globalAlpha, sprite);
 
 
                 //顶部
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
-                var topFace = me.drawFace("polygon_top", _pointList, _topFillStyle, _strokeStyle, sprite);
+                var topFace = drawFace("polygon_top", _pointList, _topFillStyle, _strokeStyle, _globalAlpha, sprite);
 
 
                 sprite.addChild(leftFace);
@@ -922,94 +927,6 @@ define('chartx/chart/bar/3d/graphs',
                 sprite.addChild(rightFace);
                 sprite.addChild(topFace);
 
-
-            },
-            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle, sprite) {
-                var _polygon = sprite.getChildById(_id) ||
-                    new Shapes.Polygon({
-                    id: _id,
-                    pointChkPriority: false,
-                    context: {
-                        pointList: _pointList,
-                        strokeStyle: _strokeStyle,
-                        fillStyle: _fillStyle
-                    }
-                });
-
-                _polygon.context.pointList = _pointList;
-                _polygon.context.x = 0;
-                _polygon.context.y = 0;
-
-                return _polygon;
-            },
-            _depthTest: function (sprite) {
-
-                (function (_sprite) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a);
-                        })
-                    } else {
-                        var _parentSprite = _sprite.parent;
-
-                        if (_sprite instanceof Shapes.Polygon && ~_parentSprite.id.indexOf('bar_')) {
-
-                            var _frontFace = null;
-                            var currFace = _sprite.context.pointList;
-                            _.each(_parentSprite.children, function (o, i) {
-                                if (~o.id.indexOf('front')) {
-                                    _frontFace = o.context.pointList;
-                                }
-                            });
-
-                            //判断该面的Z值为负数的点是否在前面的范围内
-                            if (~_sprite.id.indexOf('left') || ~_sprite.id.indexOf('right')) {
-                                var isCover = false;
-
-
-                                var p1 = Vector3.fromValues(currFace[1][0], currFace[1][1], 0);
-                                if (~_sprite.id.indexOf('left')) {
-                                    var p2 = Vector3.fromValues(_frontFace[0][0], _frontFace[0][1], 0);
-                                    var p3 = Vector3.fromValues(_frontFace[3][0], _frontFace[3][1], 0);
-                                }
-                                if (~_sprite.id.indexOf('right')) {
-                                    var p2 = Vector3.fromValues(_frontFace[1][0], _frontFace[1][1], 0);
-                                    var p3 = Vector3.fromValues(_frontFace[2][0], _frontFace[2][1], 0);
-                                }
-
-
-                                var _v1 = Vector3.create();
-                                var _v2 = Vector3.create();
-                                var _vc = Vector3.create();
-                                //顶面指向Z轴负半轴的向量
-                                Vector3.sub(_v1, p1, p2);
-                                Vector3.normalize(_v1, _v1);
-                                //前面指向Y轴正半轴的向量
-                                Vector3.sub(_v2, p2, p3);
-                                Vector3.normalize(_v2, _v2);
-
-                                //二维空间中,XY的叉积指向Z轴的结果
-                                Vector3.cross(_vc, _v1, _v2);
-
-                                //根据不同的侧面判断Z的大小,取得是否在Y轴的左侧或右侧
-                                if (~_sprite.id.indexOf('left') && _vc[2] < 0) {
-                                    isCover = true;
-                                } else if (~_sprite.id.indexOf('right') && _vc[2] > 0) {
-                                    isCover = true;
-                                }
-
-                                if (isCover) {
-                                    _sprite.context.visible = false;
-                                }else{
-                                    _sprite.context.visible = true;
-                                }
-                            }
-
-                        }
-
-                    }
-                })(sprite);
 
             }
         };

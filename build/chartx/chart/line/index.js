@@ -430,6 +430,7 @@ define(
                 this._growTween = AnimationFrame.registTween({
                     from: self._getPointPosStr(self._currPointList),
                     to: self._getPointPosStr(self._pointList),
+                    desc: self.field + ' animation',
                     onUpdate: function() {
                         for (var p in this) {
                             var ind = parseInt(p.split("_")[2]);

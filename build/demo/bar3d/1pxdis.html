@@ -53,6 +53,10 @@ var data= [
 ];
 var options = {
     type:"3d",
+    rotation:{
+       x : 10,
+       y : 10
+    },
     yAxis : {
         field : ["uv"]
     },
@@ -62,7 +66,7 @@ var options = {
     graphs : {
         bar : {
             width : function( dis1 , dis2 ){
-                return dis1 - 1;
+                return dis1 - 3;
             }
         }
     }
@@ -80,7 +84,7 @@ Chartx.bar("canvasTest" , data , options);
 
                 <h4>柱状图 - 基础柱状图</h4>
                 <p>
-                    联系人：@逢春 @释剑
+                    联系人：@不决 @释剑
                 </p>
             </div>
             <div  class="test-c">

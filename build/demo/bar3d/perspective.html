@@ -42,10 +42,10 @@ var data= [
 ];
 var options = {
     type : "3d",
-    legend : {
-        tips : {
-            enabled:true
-        }
+    mode : 1,   //0:正交投影   1:透视投影  默认正交投影
+    rotation:{
+       x : 20,
+       y : 20
     },
     yAxis : {
         field : [ ["uv","pv"] , "click"],
@@ -61,7 +61,31 @@ var options = {
         depth : 100
     }
 };
-Chartx.bar("canvasTest" , data , options);
+Chartx.bar("canvasTest" , data , options).then(function(bar){
+ //测试旋转
+                var domY=document.getElementById('yAxis');
+                var domX=document.getElementById('xAxis');
+
+                domY.onchange=function(){
+                    document.getElementById('yAxis_value').innerHTML=this.value;
+                    bar._graphs.animation=false;
+                    bar._rotation.x = domX.value;
+                    bar._rotation.y = domY.value;
+                    bar._rotationCamera();
+                    bar._startDraw();
+                    bar.fire('_to3d');
+
+                };
+                domX.onchange = function () {
+                    document.getElementById('xAxis_value').innerHTML = this.value;
+                    bar._graphs.animation=false;
+                    bar._rotation.x = domX.value;
+                    bar._rotation.y = domY.value;
+                    bar._rotationCamera();
+                    bar._startDraw();
+                    bar.fire('_to3d');
+                };
+});
 
 
 </textarea></form>
@@ -79,6 +103,12 @@ Chartx.bar("canvasTest" , data , options);
                 </div>
                 <div  class="test-c">
                     <div id="canvasTest" style='width:600px;height:300px;'></div>
+                </div>
+                <div style="margin:10px">
+                    <label>沿X轴旋转: <b id="xAxis_value">10</b></label>
+                    <input type="range" min="10" max="45" value="10" id="xAxis">
+                    <label>沿Y轴旋转: <b id="yAxis_value">10</b></label>
+                    <input type="range" min="10" max="45" value="10" id="yAxis">
                 </div>
 
             </div>

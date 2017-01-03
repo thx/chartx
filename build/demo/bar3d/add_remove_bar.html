@@ -40,6 +40,7 @@ var data= [
     [ 3      , 100 , 50 , 150    ]
 ];
 var options = {
+    type  : '3d',
     yAxis : {
         field : ["uv","pv"],
         //enabled : false
@@ -49,6 +50,17 @@ var options = {
     }
 };   
 Chartx.bar("canvasTest" , data , options).then(function(bar){
+    $(':checked').on('change',function(e){
+            options.yAxis.field=[];
+            $(':checked').each(function(index,item){
+                if(item.checked){
+                 options.yAxis.field.push(item.id);
+                }
+            });
+               console.log(JSON.stringify(options));
+            bar.reset({options:options,data:null});
+    })
+
 
 });
 
@@ -63,7 +75,7 @@ Chartx.bar("canvasTest" , data , options).then(function(bar){
 
                 <h4>柱状图 - 添加,删除柱状</h4>
                 <p>
-                    联系人：@逢春 @释剑
+                    联系人：@不决 @释剑
                 </p>
             </div>
             <div  class="test-c" style="position:relative;padding-bottom:50px;">

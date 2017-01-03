@@ -26,7 +26,9 @@ define(
             };
 
             this.checked = {
-                enabled: false
+                enabled: false,
+                r: 8,
+                globalAlpha : 0.3
             }
 
             this.tips = _.deepExtend({
@@ -332,8 +334,9 @@ define(
                     var sec = sm.sector;
                     var secData = me.data.data[i];
                     if (secData.checked) {
-                        me.cancelCheckedSec(sec);
-                        secData.checked = false;
+                        me.uncheck( i );
+                        //me.cancelCheckedSec(sec);
+                        //secData.checked = false;
                     }
                 });
             },
@@ -405,7 +408,7 @@ define(
                                     globalAlpha: 0.3
                                     */
                                     sec.sector._checkedSec.context.r0 = secc.r;
-                                    sec.sector._checkedSec.context.r  = secc.r + 8;
+                                    sec.sector._checkedSec.context.r  = secc.r + self.checked.r;
                                     sec.sector._checkedSec.context.startAngle = secc.startAngle;
                                     sec.sector._checkedSec.context.endAngle = secc.endAngle;
                                 }
@@ -763,11 +766,11 @@ define(
                         x: secc.x,
                         y: secc.y,
                         r0: secc.r,
-                        r: secc.r + 8,
+                        r: secc.r + this.checked.r,
                         startAngle: secc.startAngle,
                         endAngle: secc.startAngle + 0.5, //secc.endAngle,
                         fillStyle: secc.fillStyle,
-                        globalAlpha: 0.3
+                        globalAlpha: this.checked.globalAlpha
                     },
                     id: 'checked_' + sec.id
                 });
