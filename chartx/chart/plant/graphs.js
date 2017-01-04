@@ -62,6 +62,8 @@ define(
                 var cy = this.coordinate.origin.y;
 
                 var nextGroupRStart = this.center.r + this.center.margin;
+
+                me.groupLen = this.groups.data.length;
                 
                 _.each( this.groups.data , function( d , i ){
                     var maxR = me.coordinate.maxR - me.center.margin;
@@ -69,6 +71,7 @@ define(
                     var _g = new Group({
                         data : d,
                         ind : i,
+                        groupLen : me.groupLen,
                         coordinate: me.coordinate,
                         options: _.extend({
                             rRange : {
@@ -80,7 +83,6 @@ define(
 
                     nextGroupRStart = _g.rRange.to;
                     me._groups.push( _g );
-                    me.groupLen++;
 
                     me.back.scale.push({
                         r           : _g.rRange.to

@@ -10,6 +10,7 @@ define(
 
             this.data = opt.data;
             this.ind = opt.ind;
+            this.groupLen = opt.groupLen;
             this.coordinate = opt.coordinate;
 
             this.rRange = {
@@ -90,7 +91,7 @@ define(
                         } );
                         plants.push( plant );
 
-                        plant.fillStyle = me._getProp( me.circle.fillStyle , i , plant.data);
+                        //plant.fillStyle = me._getProp( me.circle.fillStyle , i , plant.data);
                     }
                 } );
 
@@ -124,12 +125,12 @@ define(
                         };
                         var point = me.coordinate.getPointInRadian( p.pit.middle , ring.r );
 
-                        var r = me._getProp( me.circle.r , ii , p.data);
+                        var r = me._getProp( me.circle.r , i, ii , p.data);
                         var circleCtx = {
                             x : point.x,
                             y : point.y,
                             r : r,
-                            fillStyle: me._getProp( p.fillStyle , ii , p.data ),
+                            fillStyle: me._getProp( me.circle.fillStyle , i , ii , p.data ),
                             lineWidth : 2,
                             strokeStyle : "#fff"
                         };
@@ -312,7 +313,7 @@ define(
                 //allPlantsMax有了后作为分明， 可以给每个ring去分摊plant了
                 var preAllCount = 0;
                 _.each( _rings , function( ring , i ){
-debugger
+
                     if( preAllCount >= plants.length ){
                         return false;
                     };
@@ -353,13 +354,15 @@ debugger
             _setRings_valRange: function( plants ){
 
             },
-            _getProp: function( p , i , nodeData ){
+            _getProp: function( p , ringInd , nodeInd , nodeData ){
                 var groupInd = this.ind;
-                var nodeInd = i;
                 if( _.isFunction( p ) ){
                     return p.apply( this , [ {
                         groupInd : groupInd,
+                        groupLen : this.groupLen,
                         nodeInd: nodeInd,
+                        ringInd: ringInd,
+                        ringLen: this._rings.length,
                         nodeData: nodeData
                     } ] );
                 };

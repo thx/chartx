@@ -10,6 +10,7 @@ define(
 
             this.data = opt.data;
             this.ind = opt.ind;
+            this.groupLen = opt.groupLen;
             this.coordinate = opt.coordinate;
 
             this.rRange = {
@@ -312,7 +313,7 @@ define(
                 //allPlantsMax有了后作为分明， 可以给每个ring去分摊plant了
                 var preAllCount = 0;
                 _.each( _rings , function( ring , i ){
-debugger
+
                     if( preAllCount >= plants.length ){
                         return false;
                     };
@@ -358,8 +359,10 @@ debugger
                 if( _.isFunction( p ) ){
                     return p.apply( this , [ {
                         groupInd : groupInd,
+                        groupLen : this.groupLen,
                         nodeInd: nodeInd,
                         ringInd: ringInd,
+                        ringLen: this._rings.length,
                         nodeData: nodeData
                     } ] );
                 };
