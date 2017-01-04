@@ -227,6 +227,6 @@ define(
                 } );
             }
         };
-        return Graphs;
+        return Graphs; 
     }
 );
