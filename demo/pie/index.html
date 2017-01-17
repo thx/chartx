@@ -83,6 +83,7 @@ var options = {
     }
 };
 Chartx.pie("canvasTest" , data , options).then(function( pie ){
+pie.hideLabelAll();
 pie.checkAt(0)
     window.pie = pie;
     //pie.slice(3);

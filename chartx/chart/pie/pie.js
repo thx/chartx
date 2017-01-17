@@ -351,7 +351,8 @@
                         sec.context.endAngle = self.angleOffset;
                     }
                 });
-                self._hideDataLabel();
+
+                self._hideGrowLabel();
 
                 AnimationFrame.registTween({
                     from: {
@@ -407,7 +408,7 @@
                                     fillStyle: secc.fillStyle,
                                     globalAlpha: 0.3
                                     */
-                                    sec.sector._checkedSec.context.r0 = secc.r;
+                                    sec.sector._checkedSec.context.r0 = secc.r - 1;
                                     sec.sector._checkedSec.context.r  = secc.r + self.checked.r;
                                     sec.sector._checkedSec.context.startAngle = secc.startAngle;
                                     sec.sector._checkedSec.context.endAngle = secc.endAngle;
@@ -416,27 +417,19 @@
                         }
                     },
                     onComplete: function () {
-                        self._showDataLabel();
+                        self._showGorwLabel();
                         self.completed = true;
                     }
                 });
             },
-            _showDataLabel: function () {
-                if (this.branchSp) {
-                    this.branchSp.context.globalAlpha = 1;
-                    _.each(this.labelList, function (lab) {
-                        lab.labelEle.style.display = "block"
-                    });
-                }
+            _hideGrowLabel: function(){
+
             },
-            _hideDataLabel: function () {
-                if (this.branchSp) {
-                    this.branchSp.context.globalAlpha = 0;
-                    _.each(this.labelList, function (lab) {
-                        lab.labelEle.style.display = "none"
-                    });
-                }
+            _showGorwLabel: function(){
+
             },
+
+
             _showTip: function (e, ind) {
                 this._tip.show(this._geteventInfo(e, ind));
             },
@@ -488,7 +481,7 @@
                 var labelOffsetX = 5;
                 var outCircleRadius = self.r + 2 * self.clickMoveDis;
                 var currentIndex, baseY, clockwise, isleft, minPercent;
-                var currentY, adjustX, txtDis, bkLineStartPoint, bklineMidPoint, bklineEndPoint, branchLine, brokenline, branchTxt, bwidth, bheight, bx, by;
+                var currentY, adjustX, txtDis, bkLineStartPoint, bklineMidPoint, bklineEndPoint, brokenline, branchTxt, bwidth, bheight, bx, by;
                 var isMixed, yBound, remainingNum, remainingY, adjustY;
                 
                 clockwise = quadrant == 2 || quadrant == 4;
@@ -544,22 +537,17 @@
                         }
                     }
                     //指示线
-                    branchLine = new Line({
-                        context: {
-                            xStart: data[currentIndex].centerx,
-                            yStart: data[currentIndex].centery,
-                            xEnd: data[currentIndex].outx,
-                            yEnd: data[currentIndex].outy,
-                            lineWidth: 1,
-                            strokeStyle: sectorMap[currentIndex].color,
-                            lineType: 'solid'
-                        }
-                    });
                     brokenline = new BrokenLine({
                         context: {
                             lineType: 'solid',
                             smooth: false,
-                            pointList: [bkLineStartPoint, bklineMidPoint, bklineEndPoint],
+                            pointList: [
+                                [data[currentIndex].centerx , data[currentIndex].centery],
+                                [data[currentIndex].outx , data[currentIndex].outy],
+                                bkLineStartPoint, 
+                                bklineMidPoint, 
+                                bklineEndPoint
+                            ],
                             lineWidth: 1,
                             strokeStyle: sectorMap[currentIndex].color
                         }
@@ -618,21 +606,17 @@
                             break;
                     };
 
-                    //branchTxt.context.x = bx;
-                    //branchTxt.context.y = by;
-
                     branchTxt.style.left = bx + self.x + "px";
                     branchTxt.style.top = by + self.y + "px";
 
                     if (self.dataLabel.allowLine) {
-                        self.branchSp.addChild(branchLine);
                         self.branchSp.addChild(brokenline);
                     };
 
                     self.sectorMap[currentIndex].label = {
-                        line1: branchLine,
-                        line2: brokenline,
-                        label: branchTxt
+                        line: brokenline,
+                        label: branchTxt,
+                        visible: true
                     };
 
                     self.labelList.push({
@@ -646,20 +630,32 @@
                     });
                 }
             },
+            _showLabelAll: function ( ind ) {
+                var me = this;
+                _.each(this.sectorMap , function( sec , i ){
+                    me._showLabel(i);
+                });
+            },
+            _hideLabelAll: function ( ind ) {
+                var me = this;
+                _.each(this.sectorMap , function( sec , i ){
+                    me._hideLabel(i);
+                });
+            },
             _hideLabel: function (index) {
                 if (this.sectorMap[index]) {
                     var label = this.sectorMap[index].label;
-                    label.line1.context.visible = false;
-                    label.line2.context.visible = false;
+                    label.line.context.visible = false;
                     label.label.style.display = "none";
-                }
+                    label.visible = false;
+                };
             },
             _showLabel: function (index) {
                 if (this.sectorMap[index]) {
                     var label = this.sectorMap[index].label;
-                    label.line1.context.visible = true;
-                    label.line2.context.visible = true;
+                    label.line.context.visible = true;
                     label.label.style.display = "block";
+                    label.visible = true;
                 }
             },
             _startWidgetLabel: function () {
@@ -765,10 +761,10 @@
                     context: {
                         x: secc.x,
                         y: secc.y,
-                        r0: secc.r,
+                        r0: secc.r - 1,
                         r: secc.r + this.checked.r,
                         startAngle: secc.startAngle,
-                        endAngle: secc.startAngle + 0.5, //secc.endAngle,
+                        endAngle: secc.startAngle, //secc.endAngle,
                         fillStyle: secc.fillStyle,
                         globalAlpha: this.checked.globalAlpha
                     },

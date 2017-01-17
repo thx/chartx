@@ -55,9 +55,6 @@
             getByIndex: function (index) {
                 return this._pie._getByIndex(index);
             },
-            getLabelList: function () {
-                return this._pie.getLabelList();
-            },
             getList: function () {
                 var self = this;
                 var list = [];
@@ -118,12 +115,40 @@
                 }
             },
             checkOf: function (xvalue) {
-                this.checkAt(this._getIndexOfxName(xvalue));
+                this.checkAt(this.getIndexOf(xvalue));
             },
             uncheckOf: function (xvalue) {
-                this.uncheckAt(this._getIndexOfxName(xvalue));
+                this.uncheckAt(this.getIndexOf(xvalue));
             },
-            _getIndexOfxName: function (xvalue) {
+
+            getLabelList: function () {
+                return this._pie.getLabelList();
+            },
+            showLabelAt: function( index ){
+                this._pie && this._pie._showLabel( index );
+            },
+            hideLabelAt: function( index ){
+                this._pie && this._pie._hideLabel( index );
+            },
+            showLabelOf: function( xvalue ){
+                this.showLabelAt( this.getIndexOf(xvalue) );
+            },
+            hideLabelOf: function( xvalue ){
+                this.hideLabelAt( this.getIndexOf(xvalue) );
+            },
+            showLabelAll: function(){
+                var me = this;
+                _.each( this.getLabelList() , function( label , i ){
+                    me.showLabelAt(i);
+                } );
+            },
+            hideLabelAll: function(){
+                var me = this;
+                _.each( this.getLabelList() , function( label , i ){
+                    me.hideLabelAt(i);
+                } );
+            },
+            getIndexOf: function (xvalue) {
                 var i;
                 var list = this.getList();
                 for (var ii = 0, il = list.length; ii < il; ii++) {
@@ -134,6 +159,7 @@
                 }
                 return i;
             },
+
             _initData: function(arr, opt) {
                 var data = [];
                 var arr = _.clone(arr);
