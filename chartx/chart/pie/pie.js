@@ -417,16 +417,26 @@
                         }
                     },
                     onComplete: function () {
-                        self._showGorwLabel();
+                        self._showGrowLabel();
                         self.completed = true;
                     }
                 });
             },
-            _hideGrowLabel: function(){
-
+            _showGrowLabel: function(){
+                if (this.branchSp) {
+                    this.branchSp.context.globalAlpha = 1;
+                    _.each(this.labelList, function (lab) {
+                        lab.labelEle.style.visibility = "visible"
+                    });
+                }
             },
-            _showGorwLabel: function(){
-
+            _hideGrowLabel: function(){
+                if (this.branchSp) {
+                    this.branchSp.context.globalAlpha = 0;
+                    _.each(this.labelList, function (lab) {
+                        lab.labelEle.style.visibility = "hidden"
+                    });
+                }
             },
 
 
