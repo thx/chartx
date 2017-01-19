@@ -84,6 +84,7 @@ define(
             },
             _setyAxisFieldsMap: function() {
                 var me = this;
+                me._yAxisFieldsMap = [];
                 _.each(_.flatten(this._getYaxisField()), function(field, i) {
                     var _yAxisF = me._yAxisFieldsMap[field];
                     if( _yAxisF ){
@@ -144,6 +145,8 @@ define(
                 !trimData && ( trimData = me.data );
                 var me = this;
                 _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
+
+
                 
                 //如果新的yAxis.field有需要del的
                 for( var i=0,l=me.field.length ; i<l ; i++ ){
@@ -164,6 +167,9 @@ define(
                     };
                 };
 
+                //remove掉被去掉的field后，重新整理下 _yAxisFieldsMap
+                me._setyAxisFieldsMap();
+
                 //新的field配置有需要add的
                 _.each( yAxisChange , function( opy , i ){
                     var fopy = _.find( me.groups ,function( f ){
@@ -177,8 +183,7 @@ define(
 
                 } );
 
-                me._setyAxisFieldsMap();
-
+                
                 _.each( me.groups , function( g , i ){
                     g.update({
                         _groupInd : i
