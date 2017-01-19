@@ -106,9 +106,9 @@ define(
                     d = obj.data;
                 };
                 
-                var trimData = this._resetDataFrameAndGetTrimData( obj.data );
+                var trimData = this._resetDataFrameAndGetTrimData( d );
                 if( yAxisChange ){
-                    me._graphs.yAxisFieldChange( yAxisChange , trimData);
+                    me._graphs.yAxisFieldChange( obj.options.yAxis.field , trimData);
                 };
 
                 d && this.resetData(d , trimData);
