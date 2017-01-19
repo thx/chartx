@@ -198,7 +198,14 @@ define(
              **/
             remove: function(i) {
                 var target = this.groups.splice(i, 1)[0];
-                target.destroy();
+                target.sprite.animate({
+                    globalAlpha : 0
+                } , {
+                    complate: function(){
+                        target.destroy();
+                    }
+                });
+                
                 //this.update();
             },
             /*

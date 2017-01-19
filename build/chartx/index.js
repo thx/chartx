@@ -401,6 +401,8 @@ define(
                 this.canvax.getDomContainer().innerHTML = "";
                 this.draw();
             },
+
+            //这个resetData一般会被具体的chart实例给覆盖实现
             resetData: function( data ){
                 this.dataFrame = this._initData( data );
             },

@@ -973,7 +973,14 @@ define(
              **/
             remove: function(i) {
                 var target = this.groups.splice(i, 1)[0];
-                target.destroy();
+                target.sprite.animate({
+                    globalAlpha : 0
+                } , {
+                    complate: function(){
+                        target.destroy();
+                    }
+                });
+                
                 //this.update();
             },
             /*
@@ -1226,9 +1233,9 @@ define(
                     d = obj.data;
                 };
                 
-                var trimData = this._resetDataFrameAndGetTrimData( obj.data );
+                var trimData = this._resetDataFrameAndGetTrimData( d );
                 if( yAxisChange ){
-                    me._graphs.yAxisFieldChange( yAxisChange , trimData);
+                    me._graphs.yAxisFieldChange( obj.options.yAxis.field , trimData);
                 };
 
                 d && this.resetData(d , trimData);
