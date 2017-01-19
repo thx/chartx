@@ -47,7 +47,7 @@ var data= [
 var options = {
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["pv"],
+        field : ["pv" , 'uv'],
         label : "yaxis"
     },
     xAxis : {
@@ -76,6 +76,7 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function(chart){
                             }
                         }  
                     }
+
                 }
             }
         });
