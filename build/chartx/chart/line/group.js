@@ -97,19 +97,18 @@ define(
             update: function(opt) {
                 if(!this._bline){
                     return;
-                }
+                };
                 _.deepExtend(this, opt);
                 if( opt.data ){
                     this._pointList = this._getPointList(this.data);
                     this._grow();
-                }
-
+                };
                 if( opt._groupInd !== undefined ){
                     var _strokeStyle = this._getLineStrokeStyle();
                     this._bline.context.strokeStyle = _strokeStyle;
                     this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
                     this._setNodesStyle();
-                }
+                };
             },
             //自我销毁
             destroy: function() {
