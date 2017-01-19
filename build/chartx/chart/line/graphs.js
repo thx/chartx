@@ -146,8 +146,6 @@ define(
                 var me = this;
                 _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
 
-
-                
                 //如果新的yAxis.field有需要del的
                 for( var i=0,l=me.field.length ; i<l ; i++ ){
                     var _f = me.field[i];
@@ -183,11 +181,10 @@ define(
 
                 } );
 
-                
                 _.each( me.groups , function( g , i ){
-                    g.update({
+                    g.update( _.extend({
                         _groupInd : i
-                    });
+                    } , me.opt ));
                 } );
             },
             add: function(opt, field) {

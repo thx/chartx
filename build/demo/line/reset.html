@@ -54,6 +54,11 @@ var options = {
         field : "xfield",
         label : "xaxis"
     },
+    graphs: {
+        line : {
+            strokeStyle: ['#F24455' , '#9F60FF' , '#8FCC00']
+        }
+    },
     markLine : {
         enabled : true,
         y : 180 
@@ -70,11 +75,7 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function(chart){
                 },
                 graphs : {
                     line : {
-                        strokeStyle : function( e ){
-                            if( e.field == "click" ){
-                                return "#82d982"
-                            }
-                        }  
+                        strokeStyle : ['black' , '#333' ]
                     }
 
                 }
