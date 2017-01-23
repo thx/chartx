@@ -577,10 +577,10 @@ define(
                     _fillStyle = self._getLineStrokeStyle("fillStyle")
                 }
 
-                _fillStyle || (_fillStyle = self._getColor(self.fill.fillStyle));
+                _fillStyle && (_fillStyle = self._getColor(self.fill.fillStyle));
 
                 if (_.isArray(self.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
-                    //alpha如果是数据，那么就是渐变背景，那么就至少要有两个值
+                    //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
                     //如果拿回来的style已经是个gradient了，那么就不管了
                     self.fill.alpha.length = 2;
                     if (self.fill.alpha[0] == undefined) {

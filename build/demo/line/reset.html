@@ -55,8 +55,8 @@ var options = {
         label : "xaxis"
     },
     graphs: {
-        line : {
-            strokeStyle: ['#F24455' , '#9F60FF' , '#8FCC00']
+        fill : {
+            fillStyle: ['#F24455' , '#9F60FF' , '#8FCC00']
         }
     },
     markLine : {
@@ -72,6 +72,11 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function(chart){
             options: {
                 yAxis : {
                     field: ["click" , "uv"]
+                },
+                graphs: {
+                    fill : {
+                        fillStyle: ['yellow' , 'red' , 'blue']
+                    }
                 }
             }
         });
