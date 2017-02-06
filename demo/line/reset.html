@@ -56,7 +56,8 @@ var options = {
     },
     graphs: {
         fill : {
-            fillStyle: ['#F24455' , '#9F60FF' , '#8FCC00']
+            fillStyle: ['#F24455' , '#9F60FF'],
+            alpha:0.2
         }
     },
     markLine : {
@@ -74,8 +75,8 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function(chart){
                     field: ["click" , "uv"]
                 },
                 graphs: {
-                    fill : {
-                        fillStyle: ['yellow' , 'red' , 'blue']
+                    line : {
+                        strokeStyle: ['#8FCC00' , '#F24455' ]
                     }
                 }
             }

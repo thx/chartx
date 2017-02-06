@@ -71,7 +71,7 @@ define(
 
             this.xDis1 = 0; //x方向一维均分长度,layoutType==peak的时候要用到
 
-            this.layoutType = "step"; //step , rule , peak
+            this.layoutType = "step"; //step , rule , peak, proportion
 
             this.init(opt, data);
         };

@@ -112,7 +112,15 @@ define(
             },
             //自我销毁
             destroy: function() {
-                this.sprite.remove();
+                var me = this;
+                me.sprite.animate({
+                    globalAlpha : 0
+                } , {
+                    duration: 300,
+                    complate: function(){
+                        me.sprite.remove();
+                    }
+                });
             },
             //styleType , normals , groupInd
             _getColor: function(s) {
@@ -361,6 +369,7 @@ define(
                 me._createTexts();
             },
             _getFillStyle: function( ) {
+
                 var self = this;
             
                 var fill_gradient = null;

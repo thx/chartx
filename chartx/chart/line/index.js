@@ -106,40 +106,39 @@ define(
                     d = obj.data;
                 };
                 
-                var trimData = this._resetDataFrameAndGetTrimData( d );
+                this.dataFrame = this._initData(data, this);
+
                 if( yAxisChange ){
-                    me._graphs.yAxisFieldChange( obj.options.yAxis.field , trimData);
+                    me._graphs.yAxisFieldChange( obj.options.yAxis.field , this.dataFrame);
                 };
 
-                d && this.resetData(d , trimData);
+                d && this.resetData( d , this.dataFrame );
             },
             /*
              * 如果只有数据改动的情况
              */
-            resetData: function(data , trimData) {
+            resetData: function(data , dataFrame) {
                 var me = this;
-                if( !trimData ){
-                    trimData = this._resetDataFrameAndGetTrimData( data );
+                if( !dataFrame ){ //从reset中调用的resetData已经计算过了dataFrame
+                    this.dataFrame = dataFrame = this._initData(data, this);
                 };
-                this._graphs.resetData( trimData , {
+                this._graphs.resetData( this.dataFrame , {
                     disX: this._getGraphsDisX()
                 });
+
+                this._xAxis.resetData(this.dataFrame.xAxis);
+
+                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
+                
                 _.each(this._markLines , function( ml , i ){
                     ml.reset(i);
                 });
-            },
-            _resetDataFrameAndGetTrimData: function( data ){
-                this.dataFrame = this._initData(data, this);
-                this._xAxis.resetData(this.dataFrame.xAxis);
-
-                
                 if( this.markLine && this.markLine.y ){
                     this.dataFrame.yAxis.org.push( this.markLine.y );
                 };
-                
-                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
-                return this._trimGraphs();
+                 
             },
+
             /*
              *添加一个yAxis字段，也就是添加一条brokenline折线
              *@params field 添加的字段
@@ -166,9 +165,7 @@ define(
                     }
                 });
 
-                this._graphs.add({
-                    data: this._trimGraphs()
-                }, field);
+                this._graphs.add(field);
             },
             /*
              *删除一个yaxis字段，也就是删除一条brokenline线
@@ -205,9 +202,6 @@ define(
                 });
                 //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
                 this._graphs.remove(ind);
-                this._graphs.update({
-                    data: this._trimGraphs()
-                });
             },
             _initData: function(data, opt) {
                 var d;
@@ -335,7 +329,6 @@ define(
                 this._graphs.draw({
                     w: this._xAxis.xGraphsWidth,
                     h: this._yAxis.yGraphsHeight,
-                    data: this._trimGraphs(),
                     disX: this._getGraphsDisX(),
                     smooth: this.smooth,
                     inited: this.inited,
@@ -787,89 +780,10 @@ define(
 
                 e.eventInfo.iNode += this.dataZoom.range.start;
             },
-            _trimGraphs: function(_yAxis, dataFrame) {
-
-                _yAxis || (_yAxis = this._yAxis);
-                dataFrame || (dataFrame = this.dataFrame);
-                var self = this;
-
-                var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
-                var arr = dataFrame.yAxis.org;
-                var tmpData = [];
-                var center = [];
-
-                function _trimGraphs(_fields, _arr, _tmpData, _center, _firstLay) {
-                    for (var i = 0, l = _fields.length; i < l; i++) {
-
-                        //单条line的全部data数据
-                        var _lineData = _arr[i];
-
-                        if( !_lineData ) return;
-
-                        var __tmpData = [];
-                        _tmpData.push(__tmpData);
-
-                        
-                        if (_firstLay && self.biaxial && i > 0) {
-                            _yAxis = self._yAxisR;
-                            maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
-                        };
-
-                        if (_.isArray(_fields[i])) {
-                            var __center = [];
-                            _center.push(__center);
-                            _trimGraphs(_fields[i], _lineData, __tmpData, __center);
-                        } else {
-                            var maxValue = 0;
-                            _center[i] = {};
-                            for (var b = 0, bl = _lineData.length; b < bl; b++) {
-
-                                //不能用x轴组件的x值， 要脱离关系， 各自有自己的一套计算方法，以为x轴的数据是可能完全自定义的
-                                //var x = self._xAxis.data[b].x;
-
-                                //下面这个就是 完全自己的一套计算x position的方法
-                                //var x = b * self._xAxis.xGraphsWidth / (bl-1);
-                                
-                                var x = self._xAxis.getPosX( {
-                                    ind : b,
-                                    dataLen : bl,
-                                    layoutType : self.xAxis.layoutType
-                                } );
-                                //console.log(x);
-                                var y = -(_lineData[b] - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight
-                                y = isNaN(y) ? 0 : y
-                                __tmpData[b] = {
-                                    value: _lineData[b],
-                                    x: x,
-                                    y: y
-                                };
-                                maxValue += _lineData[b]
-                            };
-                            _center[i].agValue = maxValue / bl;
-                            _center[i].agPosition = -(_center[i].agValue - _yAxis._bottomNumber) / (maxYAxis - _yAxis._bottomNumber) * _yAxis.yGraphsHeight;
-                        }
-                    }
-                };
-
-                function _getYaxisField(i) {
-                    //这里要兼容从折柱混合图过来的情况
-                    if (self.type && self.type.indexOf("line") >= 0) {
-                        return self._lineChart.dataFrame.yAxis.field;
-                    } else {
-                        return self.dataFrame.yAxis.field;
-                    };
-                };
-
-                _trimGraphs(_getYaxisField(), arr, tmpData, center, true);
-
-                //均值
-                dataFrame.yAxis.center = center;
-                return tmpData;
-            },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs: function(index, num) {
                 var x = this._xAxis.data[index].x;
-                var y = this._graphs.data[0][index].y
+                var y = this._graphs.data[ this._yAxis.field[0] ][index].y
                 return {
                     x: x,
                     y: y
