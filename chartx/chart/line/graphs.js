@@ -15,10 +15,12 @@ define(
             this.opt = opt;
             this.root = root;
             this.ctx = root.stage.context2D;
-            this.dataFrame = root.dataFrame; //root.dataFrame的引用
+            this.dataFrame = opt.dataFrame || root.dataFrame; //root.dataFrame的引用
             this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
 
+            //field默认从this.dataFrame.yAxis.field获取
             this.field = this.dataFrame.yAxis.field;
+
             //一个记录了原始yAxis.field 一些基本信息的map
             //{ "uv" : {ind : 0 , _yAxis : , line} ...}
             this._yAxisFieldsMap = {};
@@ -82,13 +84,11 @@ define(
                 };
             },
             //_yAxis, dataFrame
-            _trimGraphs: function( opt ) {
+            _trimGraphs: function( ) {
                 var self = this;
-
-                opt = opt || {};
-
-                var _yAxis = opt._yAxis || self.root._yAxis;
-                var _dataFrame = opt.dataFrame || self.root.dataFrame;
+                //柱折混合图里面会把_yAxis设置为_yAxisR
+                var _yAxis = self._yAxis || self.root._yAxis;
+                var _dataFrame = self.dataFrame || self.root.dataFrame;
 
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = {}; //{"uv":[{}.. ,"click"]}

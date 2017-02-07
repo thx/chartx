@@ -53,11 +53,13 @@ define(
                 var barFL = _.flatten( this.yAxis.bar.field ).length;
                 var themeColor = _.clone(Theme.colors);
                 themeColor.splice(0,barFL);
+                
                 this._lineChart._graphs = new lineGraphs(
                     _.deepExtend( {
                         line : {
                             strokeStyle : themeColor
-                        }
+                        },
+                        dataFrame : this._lineChart.dataFrame 
                     } , this.graphs ) 
                     , 
                     this
@@ -79,6 +81,7 @@ define(
                     this._lineChart.dataFrame.yAxis
                 );
                 this.core.addChild(this._yAxisR.sprite);
+                this._lineChart._graphs._yAxis = this._yAxisR;
 
                 this._startDraw(); //开始绘图
 
@@ -175,9 +178,7 @@ define(
                 me._lineChart._graphs.draw({
                     w: _graphsW,
                     h: _graphsH,
-                    data: Line.prototype._trimGraphs.apply(me, [me._yAxisR, me._lineChart.dataFrame]),
-                    disX: Line.prototype._getGraphsDisX.apply(me, []),
-                    smooth: me.smooth
+                    disX: Line.prototype._getGraphsDisX.apply(me, [])
                 });
                 me._lineChart._graphs.setX(_yAxisW), me._lineChart._graphs.setY(y);
                 me._lineChart._graphs.grow(function(g) {

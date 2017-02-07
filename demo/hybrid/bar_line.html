@@ -82,7 +82,9 @@ var options = {
         }
     }
 }   
-Chartx.hybrid("canvasTest" , data , options);
+Chartx.hybrid("canvasTest" , data , options).then(function(chart){
+    window.chart = chart;
+});
 </textarea></form>
 
         </td>
