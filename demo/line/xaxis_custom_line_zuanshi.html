@@ -55,7 +55,7 @@ var options = {
     xAxis : {
         field : "xfield",
         layoutType: "proportion",
-        dataSection: [ 1 , 6 , 15 , 23 , 28 ]
+        dataSection: [ 1 , 6 , 10 , 23 , 28 ]
     },
     graphs: {
         node : {
@@ -88,7 +88,7 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
             }
         }); 
         
-        var markLineMid = chart.createMarkColumn( 15 , {
+        var markLineMid = chart.createMarkColumn( 10 , {
             line: {
                 lineWidth : 2,
                 strokeStyle : "#d1927f"

@@ -11,7 +11,8 @@ define(
     function( Canvax , Line , CanvaxBase , CanvaxEventDispatcher, Circle , Tip ){
         var markColumn = function(opt , data){
             this.line      = {
-                enabled      : 1
+                enabled      : 1,
+                eventEnabled : true
                  //strokeStyle : null
             };
             this.node      = {
@@ -89,25 +90,26 @@ define(
                         this._line.name = "_markcolumn_line";
                         this.sprite.addChild( this._line );
 
-                        
-                        this._line.on("mouseover", function(evt) {
-                            if( evt.fromTarget && evt.fromTarget.name == "_markcolumn_node" ){
-                                return;
-                            }
-                            evt.eventInfo = e.eventInfo;
-                            me.fire("mouseover" , evt);
-                        });
-                        this._line.on("mousemove", function(evt) {
-                            evt.eventInfo = e.eventInfo;
-                            me.fire("mousemove" , evt);
-                        });
-                        this._line.on("mouseout", function(evt) {
-                            if( evt.toTarget && evt.toTarget.name == "_markcolumn_node" ){
-                                return;
-                            }
-                            evt.eventInfo = e.eventInfo;
-                            me.fire("mouseout" , evt);
-                        });
+                        if( this.line.eventEnabled ){
+                            this._line.on("mouseover", function(evt) {
+                                if( evt.fromTarget && evt.fromTarget.name == "_markcolumn_node" ){
+                                    return;
+                                }
+                                evt.eventInfo = e.eventInfo;
+                                me.fire("mouseover" , evt);
+                            });
+                            this._line.on("mousemove", function(evt) {
+                                evt.eventInfo = e.eventInfo;
+                                me.fire("mousemove" , evt);
+                            });
+                            this._line.on("mouseout", function(evt) {
+                                if( evt.toTarget && evt.toTarget.name == "_markcolumn_node" ){
+                                    return;
+                                }
+                                evt.eventInfo = e.eventInfo;
+                                me.fire("mouseout" , evt);
+                            });
+                        }
                         
                     }
                 }

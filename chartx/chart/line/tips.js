@@ -33,7 +33,11 @@ define(
                 this._tip = new Tip( opt , tipDomContainer );
                 this.sprite.addChild(this._tip.sprite);
 
-                this._markColumn = new markColumn( opt );
+                this._markColumn = new markColumn( _.extend({
+                    line : {
+                        eventEnabled: false
+                    }
+                }, opt) );
                 this.sprite.addChild( this._markColumn.sprite );
 
                 this._markColumn.on("mouseover" , function(e){
