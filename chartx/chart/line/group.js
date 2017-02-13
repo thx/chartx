@@ -148,104 +148,171 @@ define(
                 }
                 return s
             },
+            _createNodeInfo: function(){
+                var me = this;
+                var obj = {};
+                obj.r = me._getProp(me.node.r);
+                obj.fillStyle = me._getProp(me.node.fillStyle) || "#ffffff";
+                obj.strokeStyle = me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle();
+                obj.color = obj.strokeStyle;
+                obj.lineWidth = me._getProp(me.node.lineWidth) || 2;
+                obj.alpha = me._getProp(me.fill.alpha);
+                obj.field = me.field;
+                obj._groupInd = me._groupInd;
+                return obj
+            },
 
             //这个是tips需要用到的 
             getNodeInfoAt: function($index) {
-                var self = this;
-                self._nodeInd = $index;
-                var o = _.clone(self.dataOrg[$index]);
+                var me = this;
+                me._nodeInd = $index;
+                var o = _.clone(me.dataOrg[$index]);
                 if (o && o.value != null && o.value != undefined && o.value !== "") {
-                    o.r = self._getProp(self.node.r);
-                    o.fillStyle = self._getProp(self.node.fillStyle) || "#ffffff";
-                    o.strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
-                    o.color = o.strokeStyle;
-                    o.lineWidth = self._getProp(self.node.lineWidth) || 2;
-                    o.alpha = self._getProp(self.fill.alpha);
-                    o.field = self.field;
-                    o._groupInd = self._groupInd;
-                    // o.fillStyle = '#cc3300'
-                    return o
+                    return _.extend(o , me._createNodeInfo());
                 } else {
-                    return null
+                    return null;
                 }
             },
-            resetData: function(opt) {
-                var self = this;
-                self._pointList = this._getPointList(opt.data);
-                var plen = self._pointList.length;
-                var cplen = self._currPointList.length;
+            //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
+            getNodeInfoOfX: function( x ){
+                var me = this;
+                var nodeInfo;
+                for( var i = 0,l = this.dataOrg.length; i<l; i++ ){
+                    if( Math.abs( this.dataOrg[i].x - x) <= 1 ){
+                        //左右相差不到1px的，都算
+                        nodeInfo = this.getNodeInfoAt(i);
+                        return nodeInfo;
+                    }
+                };
+
+                var getPointFromXInLine = function( x , line ){
+                    var p = {x : x, y: 0};
+                    p.y = line[0][1] + ((line[1][1]-line[0][1])/(line[1][0]-line[0][0])) * (x - line[0][0]);
+                    return p;
+                };
+
+                var point;
+                var search = function( points ){
+
+                    if( x<points[0][0] || x>points.slice(-1)[0][0] ){
+                        return;
+                    };
+
+                    var midInd = parseInt(points.length / 2);
+                    if( Math.abs(points[midInd][0] - x ) <= 1 ){
+                        point = {
+                            x: points[midInd][0],
+                            y: points[midInd][1]
+                        };
+                        return;
+                    };
+                    var _pl = [];
+                    if( x > points[midInd][0] ){
+                        if( x < points[midInd+1][0]){
+                            point = getPointFromXInLine( x , [ points[midInd] , points[midInd+1] ] );
+                            return;
+                        } else {
+                            _pl = points.slice( midInd+1 );
+                        }
+                    } else {
+                        if( x > points[midInd-1][0] ){
+                            point = getPointFromXInLine( x , [ points[midInd-1] , points[midInd] ] );
+                            return;
+                        } else {
+                            _pl = points.slice( 0 , midInd );
+                        }
+                    };
+                    search(_pl);
+
+                };
+                
+                search( this._bline.context.pointList );
+                
+                if(!point){
+                    return null;
+                }
+
+                point.value = null;
+                me._nodeInd = -1;
+                return _.extend( point, me._createNodeInfo());
+            },
+            reset: function(opt) {
+                var me = this;
+                me._pointList = this._getPointList(opt.data);
+                var plen = me._pointList.length;
+                var cplen = me._currPointList.length;
                 if (plen < cplen) {
                     for (var i = plen, l = cplen; i < l; i++) {
-                        self._circles && self._circles.removeChildAt(i);
-                        self._texts && self._texts.removeChildAt(i);
+                        me._circles && me._circles.removeChildAt(i);
+                        me._texts && me._texts.removeChildAt(i);
                         l--;
                         i--;
                     };
-                    self._currPointList.length = plen;
+                    me._currPointList.length = plen;
                 };
 
                 if (plen > cplen) {
                     diffLen = plen - cplen;
                     for (var i = 0; i < diffLen; i++) {
-                        self._currPointList.push(_.clone(self._currPointList[cplen - 1]));
+                        me._currPointList.push(_.clone(me._currPointList[cplen - 1]));
                     }
                 };
 
-                self._circles && self._circles.removeAllChildren();
-                self._texts && self._texts.removeAllChildren();
-                self._createNodes();
-                self._createTexts();
-                self._grow();
+                me._circles && me._circles.removeAllChildren();
+                me._texts && me._texts.removeAllChildren();
+                me._createNodes();
+                me._createTexts();
+                me._grow();
             },
             _grow: function(callback) {
             
-                var self = this;
-                if (!self.animation || self.resize) {
+                var me = this;
+                if (!me.animation || me.resize) {
                     callback && callback(self);
                 }
-                if (self._currPointList.length == 0) {
+                if (me._currPointList.length == 0) {
                     return;
                 };
 
                 function _update( list ){
-                    var _strokeStyle = self._getLineStrokeStyle();
-                    self._bline.context.pointList = _.clone( list );
-                    self._bline.context.strokeStyle = _strokeStyle;
+                    var _strokeStyle = me._getLineStrokeStyle();
+                    me._bline.context.pointList = _.clone( list );
+                    me._bline.context.strokeStyle = _strokeStyle;
 
-                    self._fill.context.path = self._fillLine(self._bline);
-                    self._fill.context.fillStyle = self._getFillStyle() || _strokeStyle;
-                    self._circles && _.each(self._circles.children, function(circle, i) {
+                    me._fill.context.path = me._fillLine(me._bline);
+                    me._fill.context.fillStyle = me._getFillStyle() || _strokeStyle;
+                    me._circles && _.each(me._circles.children, function(circle, i) {
                         var ind = parseInt(circle.id.split("_")[1]);
                         circle.context.y = list[ind][1];
                         circle.context.x = list[ind][0];
                     });
 
-                    self._texts && _.each(self._texts.children, function(text, i) {
+                    me._texts && _.each(me._texts.children, function(text, i) {
                         var ind = parseInt(text.id.split("_")[1]);
                         text.context.y = list[ind][1] - 3;
                         text.context.x = list[ind][0];
-                        self._checkTextPos( text , i );
+                        me._checkTextPos( text , i );
                     });
                 };
 
                 this._growTween = AnimationFrame.registTween({
-                    from: self._getPointPosStr(self._currPointList),
-                    to: self._getPointPosStr(self._pointList),
-                    desc: self.field + ' animation',
+                    from: me._getPointPosStr(me._currPointList),
+                    to: me._getPointPosStr(me._pointList),
+                    desc: me.field + ' animation',
                     onUpdate: function() {
                         for (var p in this) {
                             var ind = parseInt(p.split("_")[2]);
                             var xory = parseInt(p.split("_")[1]);
-                            self._currPointList[ind] && (self._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
+                            me._currPointList[ind] && (me._currPointList[ind][xory] = this[p]); //p_1_n中间的1代表x or y
                         };
-                        _update( self._currPointList );
+                        _update( me._currPointList );
                     },
                     onComplete: function() {
-                        self._growTween = null;
+                        me._growTween = null;
                         //在动画结束后强制把目标状态绘制一次。
                         //解决在onUpdate中可能出现的异常会导致绘制有问题。
                         //这样的话，至少最后的结果会是对的。
-                        _update( self._pointList );
+                        _update( me._pointList );
                         callback && callback(self);
                     }
                 });
@@ -285,10 +352,10 @@ define(
             },
             _getPointList: function(data) {
             
-                var self = this;
+                var me = this;
 
-                self.dataOrg = _.clone(data);
-                self._filterEmptyValue(data);
+                me.dataOrg = _.clone(data);
+                me._filterEmptyValue(data);
 
                 var list = [];
                 for (var a = 0, al = data.length; a < al; a++) {
@@ -370,41 +437,41 @@ define(
             },
             _getFillStyle: function( ) {
 
-                var self = this;
+                var me = this;
             
                 var fill_gradient = null;
-                var _fillStyle = self.fill.fillStyle;
+                var _fillStyle = me.fill.fillStyle;
 
                 if( !_fillStyle ){
                     //如果没有配置的fillStyle，那么就取对应的line.strokeStyle
-                    _fillStyle = self._getLineStrokeStyle("fillStyle")
+                    _fillStyle = me._getLineStrokeStyle("fillStyle")
                 }
 
-                _fillStyle && (_fillStyle = self._getColor(self.fill.fillStyle));
+                _fillStyle && (_fillStyle = me._getColor(me.fill.fillStyle));
 
-                if (_.isArray(self.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+                if (_.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
                     //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
                     //如果拿回来的style已经是个gradient了，那么就不管了
-                    self.fill.alpha.length = 2;
-                    if (self.fill.alpha[0] == undefined) {
-                        self.fill.alpha[0] = 0;
+                    me.fill.alpha.length = 2;
+                    if (me.fill.alpha[0] == undefined) {
+                        me.fill.alpha[0] = 0;
                     };
-                    if (self.fill.alpha[1] == undefined) {
-                        self.fill.alpha[1] = 0;
+                    if (me.fill.alpha[1] == undefined) {
+                        me.fill.alpha[1] = 0;
                     };
 
                     //从bline中找到最高的点
-                    var topP = _.min(self._bline.context.pointList, function(p) {
+                    var topP = _.min(me._bline.context.pointList, function(p) {
                         return p[1]
                     });
                     //创建一个线性渐变
-                    fill_gradient = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+                    fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
                     var rgb = ColorFormat.colorRgb( _fillStyle );
-                    var rgba0 = rgb.replace(')', ', ' + self._getProp(self.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                    var rgba0 = rgb.replace(')', ', ' + me._getProp(me.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
                     fill_gradient.addColorStop(0, rgba0);
 
-                    var rgba1 = rgb.replace(')', ', ' + self.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                    var rgba1 = rgb.replace(')', ', ' + me.fill.alpha[1] + ')').replace('RGB', 'RGBA');
                     fill_gradient.addColorStop(1, rgba1);
 
                     _fillStyle = fill_gradient;
@@ -413,15 +480,15 @@ define(
                 return _fillStyle;
             },
             _getLineStrokeStyle: function( from ) {
-                var self = this;
+                var me = this;
                 
                 if( this.line.strokeStyle.lineargradient ){
                     //如果填充是一个线性渐变
                     //从bline中找到最高的点
-                    var topP = _.min(self._bline.context.pointList, function(p) {
+                    var topP = _.min(me._bline.context.pointList, function(p) {
                         return p[1]
                     });
-                    var bottomP = _.max(self._bline.context.pointList, function(p) {
+                    var bottomP = _.max(me._bline.context.pointList, function(p) {
                         return p[1]
                     });
                     if( from == "fillStyle" ){
@@ -429,14 +496,14 @@ define(
                     };
                     //var bottomP = [ 0 , 0 ];
                     //创建一个线性渐变
-                    this.__lineStrokeStyle = self.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+                    this.__lineStrokeStyle = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
                     if( !_.isArray( this.line.strokeStyle.lineargradient ) ){
                         this.line.strokeStyle.lineargradient = [this.line.strokeStyle.lineargradient];
                     };
 
                     _.each(this.line.strokeStyle.lineargradient , function( item , i ){
-                        self.__lineStrokeStyle.addColorStop( item.position , item.color);
+                        me.__lineStrokeStyle.addColorStop( item.position , item.color);
                     });
 
                 } else {
@@ -445,33 +512,33 @@ define(
                 return this.__lineStrokeStyle;
             },
             _setNodesStyle: function(){
-                var self = this;
-                var list = self._currPointList;
-                if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
+                var me = this;
+                var list = me._currPointList;
+                if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
                     for (var a = 0, al = list.length; a < al; a++) {
-                        self._nodeInd = a;
-                        var nodeEl = self._circles.getChildAt( a );
-                        var strokeStyle = self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle(); 
-                        nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : self._getProp(self.node.fillStyle) || "#ffffff";
+                        me._nodeInd = a;
+                        var nodeEl = me._circles.getChildAt( a );
+                        var strokeStyle = me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle(); 
+                        nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : me._getProp(me.node.fillStyle) || "#ffffff";
                         nodeEl.context.strokeStyle = strokeStyle;
 
-                        self._nodeInd = -1;
+                        me._nodeInd = -1;
                     }
                 }
             },
             _createNodes: function() {
-                var self = this;
-                var list = self._currPointList;
+                var me = this;
+                var list = me._currPointList;
 
-                if ((self.node.enabled || list.length == 1) && !!self.line.lineWidth) { //拐角的圆点
+                if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
                     this._circles = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._circles);
                     for (var a = 0, al = list.length; a < al; a++) {
                         var context = {
-                            x: self._currPointList[a][0],
-                            y: self._currPointList[a][1],
-                            r: self._getProp(self.node.r),
-                            lineWidth: self._getProp(self.node.lineWidth) || 2
+                            x: me._currPointList[a][0],
+                            y: me._currPointList[a][1],
+                            r: me._getProp(me.node.r),
+                            lineWidth: me._getProp(me.node.lineWidth) || 2
                         };
 
                         var circle = new Circle({
@@ -479,37 +546,37 @@ define(
                             context: context
                         });
 
-                        if (self.node.corner) { //拐角才有节点
-                            var y = self._pointList[a][1];
-                            var pre = self._pointList[a - 1];
-                            var next = self._pointList[a + 1];
+                        if (me.node.corner) { //拐角才有节点
+                            var y = me._pointList[a][1];
+                            var pre = me._pointList[a - 1];
+                            var next = me._pointList[a + 1];
                             if (pre && next) {
                                 if (y == pre[1] && y == next[1]) {
                                     circle.context.visible = false;
                                 }
                             }
                         };
-                        self._circles.addChild(circle);
+                        me._circles.addChild(circle);
                     }
                 };
                 this._setNodesStyle();
             },
             _createTexts: function() {
                 
-                var self = this;
-                var list = self._currPointList;
+                var me = this;
+                var list = me._currPointList;
 
-                if ( self.text.enabled ) { //节点上面的文本info
+                if ( me.text.enabled ) { //节点上面的文本info
                     this._texts = new Canvax.Display.Sprite({});
                     this.sprite.addChild(this._texts);
                     
                     for (var a = 0, al = list.length; a < al; a++) {
-                        self._nodeInd = a;
-                        var fontFillStyle = self._getProp(self.text.fillStyle) || self._getProp(self.node.strokeStyle) || self._getLineStrokeStyle();
-                        self._nodeInd = -1;
+                        me._nodeInd = a;
+                        var fontFillStyle = me._getProp(me.text.fillStyle) || me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle();
+                        me._nodeInd = -1;
                         var context = {
-                            x: self._currPointList[a][0],
-                            y: self._currPointList[a][1] - 3,
+                            x: me._currPointList[a][0],
+                            y: me._currPointList[a][1] - 3,
                             fontSize: this.text.fontSize,
                             textAlign: "center",
                             textBaseline: "bottom",
@@ -518,9 +585,9 @@ define(
                             strokeStyle:"#ffffff"
                         };
 
-                        var content = self.data[ a ].value;
-                        if (_.isFunction(self.text.format)) {
-                            content = (self.text.format.apply( self , [content , a]) || content );
+                        var content = me.data[ a ].value;
+                        if (_.isFunction(me.text.format)) {
+                            content = (me.text.format.apply( self , [content , a]) || content );
                         };
 
                         var text =  new Canvax.Display.Text( content , {
@@ -528,16 +595,16 @@ define(
                             context: context
                         });
 
-                        self._texts.addChild(text);
-                        self._checkTextPos( text , a );
+                        me._texts.addChild(text);
+                        me._checkTextPos( text , a );
 
                     }
                 };
                 this._setNodesStyle();
             },
             _checkTextPos : function( text , ind ){
-                var self = this;
-                var list = self._currPointList;
+                var me = this;
+                var list = me._currPointList;
                 var pre = list[ ind - 1 ];
                 var next = list[ ind + 1 ];
                 if( ind == 0 ){

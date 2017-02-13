@@ -28,7 +28,8 @@ define(
                         field  : [],   //字段 对应this.data
                         org    : []    //原始数据['星期一','星期二']
                     },
-                    getRowData : _getRowData
+                    getRowData : _getRowData,
+                    getFieldData: _getFieldData
                 }
 
                 if( !data || data.length == 0 ){
@@ -164,6 +165,16 @@ define(
                         }
                     }
                     return o
+                }
+
+                function _getFieldData( field ){
+                    var data;
+                    _.each( dataFrame.data , function( d ){
+                        if( d.field == field ){
+                            data = d;
+                        }
+                    } ); 
+                    return data.data;
                 }
 
                 return dataFrame;

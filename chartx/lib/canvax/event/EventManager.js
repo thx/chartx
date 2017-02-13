@@ -33,6 +33,9 @@ define(
                 }
                 var addResult = true;
                 var self      = this;
+                if( !self._eventMap ){
+                    self._eventMap = [];
+                }
                 _.each( type.split(" ") , function(type){
                     var map = self._eventMap[type];
                     if(!map){

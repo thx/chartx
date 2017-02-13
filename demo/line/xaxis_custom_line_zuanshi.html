@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
 <title>xChart demo -- line</title>
-<script type="text/javascript" src="../../lib/sea.js"></script>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -33,59 +33,87 @@
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
+
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , 3   , 20 , 33    ],
-    [ 2      , 0   , 51 , 26    ],
-    [ 3      , 32  , 45 , 43    ],
-    [ 4      , 58  , 35 , 31    ],
-    [ 5      , 79  , 73 , 71    ],
-    [ 6      , 88  , 54 , 300    ]
+    [ 1      , undefined , 120 , 33    ],
+    [ 2      , 0   , 151 , 26    ],
+    [ 6      , 23   , 145 , 243    ],
+    [ 16      , 288  , 254 , 39    ],
+    [ 27      , 55  , 168 , 65    ],
+    [ 28      , undefined   ,183 , 51    ]
 ];
 
-//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
 var options = {
+    legend:{
+        enabled:true
+    },
     yAxis : {
         //这里说明会显示 uv 和pv 两个维度的 折线
-        field : ["pv" , 'uv'],
-        label : "yaxis"
+        field : ["uv" , "pv"]
     },
     xAxis : {
         field : "xfield",
-        label : "xaxis"
+        layoutType: "proportion",
+        dataSection: [ 1 , 6 , 15 , 23 , 28 ]
     },
     graphs: {
-        fill : {
-            fillStyle: ['#F24455' , '#9F60FF'],
-            alpha:0.2
-        }
+        node : {
+            enabled : false
+        },
+        eventEnabled: false
     },
-    markLine : {
-        enabled : true,
-        y : 180 
+    tips: {
+        node : {
+            enabled: false
+        },
+        line : {
+            enabled: false
+        }
     }
 };
-//Chartx.line开始初始化chart实例
-var chartx = Chartx.line("canvasTest" , data , options).then(function(chart){
-    setTimeout(function(){
-        debugger
-        chart.reset({
-            options: {
-                yAxis : {
-                    field: ["click" , "uv"]
-                },
-                graphs: {
-                    line : {
-                        strokeStyle: ['#8FCC00' , '#F24455' ]
-                    }
-                }
+
+
+
+
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
+    window.chart = chart; 
+    var g = chart._graphs;
+
+    chart.on("complete" , function(){
+        chart.createMarkColumn( 6 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#829ae0"
+            }
+        }); 
+        
+        var markLineMid = chart.createMarkColumn( 15 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#d1927f"
+            }
+        });  
+        
+        chart.createMarkColumn( 23 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#d5d5d5"
             }
         });
 
-    } , 1500);
-    
-});
+        setTimeout(function(){
+            chart.reset({options : {
+                xAxis : {
+                    dataSection : [ 1 , 6 , 20 , 23 , 28 ]
+                }
+            }});
 
+            chart.moveMarkColumnTo( markLineMid , 20 );
+
+        } , 1000);
+    });
+});
 </textarea></form>
 
         </td>
@@ -94,13 +122,13 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function(chart){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 平滑的数据切换效果</h4>
+                <h4>折线图（line chart）- 基础折线图</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:300px;'></div>
+                <div id="canvasTest" style='width:100%;height:300px;'></div>
             </div>
 
             </div>

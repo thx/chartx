@@ -110,7 +110,11 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function(chart){
                     [ 7      , 10  , 251 , 26    ],
                     [ 8      , 13  , 285 , 43    ],
                     [ 9      , 28  , 235 , 31    ]
-                   ]});
+                   ],options:{
+                       markLine : {
+                           y: 200
+                       }
+                   }});
         } , 3000);
 
     } , 1500);

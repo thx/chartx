@@ -84,7 +84,13 @@ define(
                 };
 
                 this._initData(data);
-                this.sprite = new Canvax.Display.Sprite();
+                this.sprite = new Canvax.Display.Sprite({
+                    id: "yAxisSprite"
+                });
+                this.rulesSprite = new Canvax.Display.Sprite({
+                    id: "yRulesSprite"
+                });
+                this.sprite.addChild( this.rulesSprite );
             },
             setX: function($n) {
                 this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
@@ -95,7 +101,7 @@ define(
                 this.pos.y = $n;
             },
             setAllStyle: function(sty) {
-                _.each(this.sprite.children, function(s) {
+                _.each(this.rulesSprite.children, function(s) {
                     _.each(s.children, function(cel) {
                         if (cel.type == "text") {
                             cel.context.fillStyle = sty;
@@ -106,7 +112,7 @@ define(
                 });
             },
             //配置和数据变化
-            update: function(opt, data) {
+            reset: function(opt, data) {
                 //先在field里面删除一个字段，然后重新计算
                 this.dataSection = [];
                 this.dataSectionGroup = [];
@@ -393,7 +399,7 @@ define(
                         }
                     };
 
-                    var yNode = this.sprite.getChildAt(a);
+                    var yNode = this.rulesSprite.getChildAt(a);
 
                     if( yNode ){
                         if(yNode.__txt){
@@ -406,7 +412,6 @@ define(
                                     id: yNode.__txt.id
                                 });
                             };
-                            console.log(content)
                             yNode.__txt.resetText( content );
                         };
 
@@ -468,7 +473,7 @@ define(
                             line: line
                         });
 
-                        self.sprite.addChild(yNode);
+                        self.rulesSprite.addChild(yNode);
 
                         //如果是resize的话也不要处理动画
                         if (self.animation && !self.resize) {
@@ -488,17 +493,17 @@ define(
                     }
                 };
 
-                //把sprite.children中多余的给remove掉
-                if( self.sprite.children.length > arr.length ){
-                    for( var al = arr.length,pl = self.sprite.children.length;al<pl;al++  ){
-                        self.sprite.getChildAt( al ).remove();
+                //把 rulesSprite.children中多余的给remove掉
+                if( self.rulesSprite.children.length > arr.length ){
+                    for( var al = arr.length,pl = self.rulesSprite.children.length;al<pl;al++  ){
+                        self.rulesSprite.getChildAt( al ).remove();
                         al--,pl--;
                     };
                 };
 
                 self.maxW += self.dis;
 
-                //self.sprite.context.x = self.maxW + self.pos.x;
+                //self.rulesSprite.context.x = self.maxW + self.pos.x;
                 //self.pos.x = self.maxW + self.pos.x;
                 if( self.width == null ){
                     if (self.line.enabled) {

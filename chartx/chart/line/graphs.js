@@ -3,9 +3,12 @@ define(
         "canvax/index",
         "canvax/shape/Rect",
         "chartx/utils/tools",
-        "chartx/chart/line/group"
+        "chartx/chart/line/group",
+        "chartx/chart/line/markcolumn",
+        "canvax/core/Base",
+        "canvax/event/EventDispatcher"
     ],
-    function(Canvax, Rect, Tools, Group) {
+    function(Canvax, Rect, Tools, Group, markColumn, CanvaxBase , CanvaxEventDispatcher) {
         var Graphs = function(opt, root) {
             this.w = 0;
             this.h = 0;
@@ -36,13 +39,19 @@ define(
             this.sprite = null;
             this.induce = null;
 
-            this.eventEnabled = (opt.eventEnabled || true);
+            this.eventEnabled = true;
+
+            //TODO:
+            //暂时继承CanvaxEventDispatcher 只有 DisplayObject才行， 以为其他对象没有_eventMap
+            //临时加上
+            this._eventMap = {};
 
             this.init(opt);
         };
-        Graphs.prototype = {
+        CanvaxBase.creatClass( Graphs , CanvaxEventDispatcher , {
             init: function(opt) {
                 this.opt = opt;
+                _.deepExtend(this, opt);
                 this.sprite = new Canvax.Display.Sprite();
             },
             setX: function($n) {
@@ -60,6 +69,8 @@ define(
             draw: function(opt) {
                 _.deepExtend(this, opt);
 
+                this.disX = this._getGraphsDisX();
+
                 this.data = this._trimGraphs();
                 
                 this._widget(opt);
@@ -69,16 +80,26 @@ define(
                     me._yAxisFieldsMap[group.field].line = group.line;
                 } );
             },
-            resetData: function(dataFrame, opt) {
+            reset: function(opt , dataFrame) {
                 var me = this;
-                me.dataFrame = dataFrame;
-                me.data = me._trimGraphs();
 
-                opt && _.deepExtend(me, opt);
-                
+                if(dataFrame){
+                    me.dataFrame = dataFrame;
+                    me.data = me._trimGraphs();
+                };
+
+                if( opt ){
+                    _.deepExtend(me, opt);
+                    if( opt.yAxisChange ){
+                        me.yAxisFieldChange( opt.yAxisChange , this.dataFrame);
+                    };
+                };
+
+                this.disX = this._getGraphsDisX();
+
                 for (var a = 0, al = me.field.length; a < al; a++) {
                     var group = me.groups[a];
-                    group.resetData({
+                    group.reset({
                         data: me.data[ group.field ]
                     });
                 };
@@ -93,14 +114,11 @@ define(
                 var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
                 var tmpData = {}; //{"uv":[{}.. ,"click"]}
                 var center = [];
-                function __trimGraphs(_fields, _arr, _center, _firstLay) {
+                function __trimGraphs(_fields, _center, _firstLay) {
                     for (var i = 0, l = _fields.length; i < l; i++) {
 
                         var field = _fields[i];
-
-                        //单条line的全部data数据
-                        var _lineData = _arr[i];
-                        if( !_lineData ) return;
+                        
                         if (_firstLay && self.root.biaxial && i > 0) {
                             self._yAxisFieldsMap[ field ].yAxisInd = 1; //1代表右边的y轴
                             _yAxis = self.root._yAxisR;
@@ -110,10 +128,14 @@ define(
                         if (_.isArray( field )) {
                             var __center = [];
                             _center.push(__center);
-                            __trimGraphs( field, _lineData, __center );
+                            __trimGraphs( field, __center );
                         } else {
                             var maxValue = 0;
                             _center[i] = {};
+
+                            //单条line的全部data数据
+                            var _lineData = _dataFrame.getFieldData(field);
+                            if( !_lineData ) return;
 
                             var _groupData = [];
                             for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -148,7 +170,7 @@ define(
                     }
                 };
 
-                __trimGraphs( self._getYaxisField(), _dataFrame.yAxis.org , center, true);
+                __trimGraphs( self._getYaxisField(), center, true);
 
                 //均值
                 _dataFrame.yAxis.center = center;
@@ -158,9 +180,19 @@ define(
              * 生长动画
              */
             grow: function(callback) {
+                var gi = 0;
+                var gl = this.groups.length;
+                var me = this;
                 _.each(this.groups, function(g, i) {
-                    g._grow(callback);
+                    g._grow(function(){
+                        gi++;
+                        callback( g );
+                        if( gi == gl ){
+                            me.fire("growComplete");
+                        }
+                    });
                 });
+                return this;
             },
             _setyAxisFieldsMap: function( fields ) {
                 var me = this;
@@ -264,6 +296,7 @@ define(
             },
             //add 和 remove 都不涉及到 _yAxisFieldsMap 的操作,只有reset才会重新构建 _yAxisFieldsMap
             add: function(field , opt) {
+
                 _.deepExtend(this, opt);
 
                 this._addNewField( field );
@@ -362,21 +395,23 @@ define(
             },
             _widget: function(opt) {
                 var self = this;
-                if (self.eventEnabled) {
-                    self._setGroupsForYfield( self.field );
-                    self.induce = new Rect({
-                        id: "induce",
-                        context: {
-                            y: -self.h,
-                            width: self.w,
-                            height: self.h,
-                            fillStyle: '#000000',
-                            globalAlpha: 0,
-                            cursor: 'pointer'
-                        }
-                    });
 
-                    self.sprite.addChild(self.induce);
+                self._setGroupsForYfield( self.field );
+                self.induce = new Rect({
+                    id: "induce",
+                    context: {
+                        y: -self.h,
+                        width: self.w,
+                        height: self.h,
+                        fillStyle: '#000000',
+                        globalAlpha: 0,
+                        cursor: 'pointer'
+                    }
+                });
+
+                self.sprite.addChild(self.induce);
+
+                if (self.eventEnabled) {
 
                     self.induce.on("panstart mouseover", function(e) {
                         e.eventInfo = self._getInfoHandler(e);
@@ -395,7 +430,7 @@ define(
                 self.resize = false;
             },
             _getInfoHandler: function(e) {
-                
+                debugger
                 var x = e.point.x,
                     y = e.point.y - this.h;
                 //todo:底层加判断
@@ -420,8 +455,43 @@ define(
                     nodesInfoList: _.clone(_nodesInfoList)
                 };
                 return node;
-            }
-        };
+            },
+            getNodesInfoOfx: function( x ){
+                var _nodesInfoList = []; //节点信息集合
+                for (var a = 0, al = this.groups.length; a < al; a++) {
+                    var o = this.groups[a].getNodeInfoOfX(x);
+                    o && _nodesInfoList.push(o);
+                };
+                var node = {
+                    iGroup: -1,
+                    iNode: -1,
+                    nodesInfoList: _.clone(_nodesInfoList)
+                };
+                return node;
+            },
+            createMarkColumn: function( x , opt ){
+                var ml = new markColumn( opt );
+                this.sprite.addChild( ml.sprite );
+                ml.h = this.induce.context.height;
+                ml.y = -ml.h;
+                var e = {
+                    eventInfo :  this.getNodesInfoOfx(x)
+                }
+                ml.show( e , {x : x} );
+
+                return ml;
+            },
+            //每两个点之间的距离
+            _getGraphsDisX: function() {
+                var dsl = this.dataFrame.org.length - 1;
+                var n = this.w / (dsl - 1);
+                if (dsl == 1) {
+                    n = 0
+                }
+                return n
+            },
+        });
+        
         return Graphs;
     }
 );

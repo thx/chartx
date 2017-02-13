@@ -177,8 +177,7 @@ define(
                 //绘制折线图主图形区域
                 me._lineChart._graphs.draw({
                     w: _graphsW,
-                    h: _graphsH,
-                    disX: Line.prototype._getGraphsDisX.apply(me, [])
+                    h: _graphsH
                 });
                 me._lineChart._graphs.setX(_yAxisW), me._lineChart._graphs.setY(y);
                 me._lineChart._graphs.grow(function(g) {

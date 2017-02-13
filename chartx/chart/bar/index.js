@@ -62,7 +62,7 @@ define(
                 //吧原始的field转换为对应结构的显示树
                 //["uv"] --> [{field:'uv',enabled:true , fillStyle: }]
                 this._fieldsDisplayMap = this.__setFieldsDisplay( this._opts.yAxis.field || this._opts.yAxis.bar.field );
-
+                
                 //一些继承自该类的constructor 会拥有_init来做一些覆盖，比如横向柱状图
                 this._init && this._init(node, data, opts);
             },
@@ -73,19 +73,19 @@ define(
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.update({
+                this._xAxis.reset({
                     animation: false
                 } , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
+                    this._yAxis.reset({
                         animation: false
                     } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.update( {
+                    this._yAxis.reset( {
                         animation: false
                     } , this.dataFrame.yAxis);
                 };
@@ -111,6 +111,9 @@ define(
             },
             //和原始field结构保持一致，但是对应的field换成 {field: , enabled:}结构
             __setFieldsDisplay : function( fields ){
+                if( _.isString(fields) ){
+                    fields = [fields];
+                };
                 var clone_fields = _.clone( fields );
                 for(var i = 0 , l=fields.length ; i<l ; i++) {
                     if( _.isString( fields[i] ) ){
@@ -466,7 +469,7 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update( {
+                    this._yAxis.reset( {
                         animation: false
                     } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                     this._yAxis.setX(this._yAxis.pos.x);
@@ -536,7 +539,7 @@ define(
             },
 
             //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
-            //方便外部自定义tip是的content
+            //方便外部自定义 tip 是的content
             _setXaxisYaxisToTipsInfo: function(e) {
                 if (!e.eventInfo) {
                     return;
@@ -729,7 +732,7 @@ define(
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
-                        me._xAxis.update({
+                        me._xAxis.reset({
                             animation: false
                         } , me.dataFrame.xAxis );
 

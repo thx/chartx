@@ -82,61 +82,52 @@ define(
                 this._endDraw();
                 this.inited = true;
             },
-            reset: function(obj) {
+            reset: function(opt) {
                 var me = this;
-                this._reset && this._reset( obj );
+                this._reset && this._reset( opt );
+                
+                if (opt && opt.options) {
+                    _.deepExtend(this, opt.options);
+
+                    //如果有配置yAxis.field，说明要覆盖之前的yAxis.field配置
+                    if( opt.options.yAxis && opt.options.yAxis.field ){
+                        if( !opt.options.graphs ){
+                            opt.options.graphs = {};
+                        };
+                        opt.options.graphs.yAxisChange = opt.options.yAxis.field
+                    };
+                };
+
                 var d = ( this.dataFrame.org || [] );
-                var yAxisChange;
-                
-                if (obj && obj.options) {
-                    _.deepExtend(this, obj.options);
-                    for( var oo in obj.options ){
-                        if( this["_"+oo] ){
-                            if( this["_"+oo].reset ){
-                                this["_"+oo].reset( obj.options[oo] );
-                            } else {
-                                _.deepExtend( this["_"+oo] , obj.options[oo]);
-                            }
-                        }
-                    }
-
-                    yAxisChange = (obj.options.yAxis && obj.options.yAxis.field);
-                };
-                if (obj && obj.data) {
-                    d = obj.data;
+                if (opt && opt.data) {
+                    d = opt.data;
                 };
                 
-                this.dataFrame = this._initData(data, this);
+                //不管opt里面有没有传入数据，option的改变也会影响到dataFrame。
+                this.dataFrame = this._initData( d , this);
 
-                if( yAxisChange ){
-                    me._graphs.yAxisFieldChange( obj.options.yAxis.field , this.dataFrame);
+                //如果markLine.y有配置，需要加入到yAxis.org中去,以为yAixs的dataSection区间可能就不一样了
+                if( this.markLine && this.markLine.y ){
+                    this.dataFrame.yAxis.org.push( this.markLine.y );
                 };
 
-                d && this.resetData( d , this.dataFrame );
+                this.__reset( opt.options );
             },
             /*
              * 如果只有数据改动的情况
              */
-            resetData: function(data , dataFrame) {
-                var me = this;
-                if( !dataFrame ){ //从reset中调用的resetData已经计算过了dataFrame
-                    this.dataFrame = dataFrame = this._initData(data, this);
-                };
-                this._graphs.resetData( this.dataFrame , {
-                    disX: this._getGraphsDisX()
-                });
-
-                this._xAxis.resetData(this.dataFrame.xAxis);
-
-                this._yAxis.update( this.yAxis , this.dataFrame.yAxis );
-                
+            resetData: function(data) {
+                this.dataFrame = this._initData(data, this);
+                this.__reset();
+            },
+            __reset: function( opt ){
+                opt = !opt ? this : opt;
+                this._graphs.reset( opt.graphs , this.dataFrame);
+                this._xAxis.reset( opt.xAxis , this.dataFrame.xAxis );
+                this._yAxis.reset( opt.yAxis , this.dataFrame.yAxis );
                 _.each(this._markLines , function( ml , i ){
                     ml.reset(i);
-                });
-                if( this.markLine && this.markLine.y ){
-                    this.dataFrame.yAxis.org.push( this.markLine.y );
-                };
-                 
+                }); 
             },
 
             /*
@@ -156,7 +147,7 @@ define(
                 };
 
                 this.dataFrame = this._initData(this.dataFrame.org, this);
-                this._yAxis.update(this.yAxis, this.dataFrame.yAxis);
+                this._yAxis.reset(this.yAxis, this.dataFrame.yAxis);
 
                 //然后yAxis更新后，对应的背景也要更新
                 this._back.update({
@@ -192,7 +183,7 @@ define(
                 this.dataFrame.yAxis.org.splice(ind, 1);
                 //this.yAxis.field.splice(ind , 1);
 
-                this._yAxis.update(this.yAxis, this.dataFrame.yAxis);
+                this._yAxis.reset(this.yAxis, this.dataFrame.yAxis);
 
                 //然后yAxis更新后，对应的背景也要更新
                 this._back.update({
@@ -241,6 +232,7 @@ define(
                 this.stageBg.addChild(this._anchor.sprite);
 
                 this._graphs = new Graphs(this.graphs, this);
+
                 this._tips = new Tips(this.tips, this.dataFrame, this.canvax.getDomContainer());
             },
             _startDraw: function(opt) {
@@ -266,7 +258,7 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneChart = this._getCloneLine();
-                    this._yAxis.update( {
+                    this._yAxis.reset( {
                         animation: false
                     } , this.__cloneChart.thumbBar.dataFrame.yAxis);
                 };
@@ -329,13 +321,15 @@ define(
                 this._graphs.draw({
                     w: this._xAxis.xGraphsWidth,
                     h: this._yAxis.yGraphsHeight,
-                    disX: this._getGraphsDisX(),
                     smooth: this.smooth,
                     inited: this.inited,
                     resize: opt.resize
                 });
 
                 this._graphs.setX(_yAxisW), this._graphs.setY(y - this.padding.bottom);
+
+                //绘制完grapsh后，要把induce 给到 _tips.induce
+                this._tips.setInduce( this._graphs.induce );
 
                 var me = this;
 
@@ -361,6 +355,8 @@ define(
                 if (!this.inited) {
                     this._graphs.grow(function(g) {
                         me._initPlugs(me._opts, g);
+                    }).on("growComplete" , function(){
+                        me.fire("complete");
                     });
                 };
 
@@ -721,7 +717,7 @@ define(
                 _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = self._setXaxisYaxisToTipsInfo);
                 spt.on("panstart mouseover", function(e) {
                     if (self._tips.enabled && e.eventInfo.nodesInfoList.length > 0) {
-                        self._tips.hide(e);
+                        //self._tips.hide(e);
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
                         self._tips.show(e);
                     }
@@ -743,7 +739,7 @@ define(
                     }
                 });
                 spt.on("panend mouseout", function(e) {
-                    if (e.toTarget && e.toTarget.name == 'node') {
+                    if (e.toTarget && ( e.toTarget.name == '_markcolumn_node' || e.toTarget.name == '_markcolumn_line')) {
                         return
                     }
                     if (self._tips.enabled) {
@@ -789,14 +785,17 @@ define(
                     y: y
                 }
             },
-            //每两个点之间的距离
-            _getGraphsDisX: function() {
-                var dsl = this.dataFrame.org.length - 1;
-                var n = this._xAxis.xGraphsWidth / (dsl - 1);
-                if (dsl == 1) {
-                    n = 0
-                }
-                return n
+            
+            createMarkColumn: function( xVal , opt){
+                return this._graphs.createMarkColumn( this._xAxis.getPosX( {val : xVal} ) , opt);
+            },
+            moveMarkColumnTo: function( mcl , xval , opt ){
+                var x = this._xAxis.getPosX( {val : xval} );
+                return mcl.move( {
+                    eventInfo : this._graphs.getNodesInfoOfx( x )
+                } , {
+                    x : x
+                })
             }
         });
         return Line;
