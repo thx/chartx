@@ -368,6 +368,7 @@ define(
 
                 if (this._anchor.enabled) {
                     //绘制点位线
+                    //debugger
                     var pos = this._getPosAtGraphs(this._anchor.xIndex, this._anchor.num);
                     this._anchor.draw({
                         w: this._xAxis.xGraphsWidth, //this.width - _yAxisW - _yAxisRW,
@@ -378,10 +379,10 @@ define(
                         },
                         pos: {
                             x: _yAxisW,
-                            y: y - _graphsH
+                            y: y - _graphsH - this.padding.top
                         }
                     });
-                    //, this._anchor.setY(y)
+                    //this._anchor.setY(y)
                 };
 
                 if (this.dataZoom.enabled) {

@@ -430,7 +430,7 @@ define(
                 self.resize = false;
             },
             _getInfoHandler: function(e) {
-                debugger
+                
                 var x = e.point.x,
                     y = e.point.y - this.h;
                 //todo:底层加判断
