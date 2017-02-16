@@ -450,7 +450,7 @@ define(
                 this._tip.move(this._geteventInfo(e, ind))
             },
             _getTipDefaultContent: function (info) {
-                return "<div style='color:" + info.fillStyle + "'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div>" + parseInt(info.percentage) + "%</div>";
+                return "<div style='color:" + info.fillStyle + ";border:none;white-space:nowrap;word-wrap:normal;'><div style='padding-bottom:3px;'>" + info.name + "：" + info.value + "</div>" + parseInt(info.percentage) + "%</div>";
             },
             _geteventInfo: function (e, ind) {
                 
