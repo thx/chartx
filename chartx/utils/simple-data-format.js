@@ -13,14 +13,25 @@
 */
 define(
     "chartx/utils/simple-data-format",
-    [],
-    function(){
+    [
+        "chartx/utils/tools"
+    ],
+    function( Tools ){
         return function( data, opt ){
 
             var dataFrame  = {    //数据框架集合
                 org        : [],   //最原始的数据 
                 data       : {},
                 fields     : []
+            };
+
+            if( !data || data.length == 0 ){
+                return dataFrame
+            };
+
+            //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
+            if( data.length > 0 && !_.isArray( data[0] ) ){
+                data = Tools.json2MatrixData(data);
             };
 
             dataFrame.org  = _.clone(data);

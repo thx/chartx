@@ -944,9 +944,10 @@ define(
     'chartx/chart/pie/index', [
         'chartx/chart/index',
         'chartx/chart/pie/pie',
-        'chartx/components/legend/index'
+        'chartx/components/legend/index',
+        'chartx/utils/tools'
     ],
-    function (Chart, Pie, Legend) {
+    function (Chart, Pie, Legend, Tools) {
         /*
         *@node chart在dom里的目标容器节点。
         */
@@ -1103,6 +1104,17 @@ define(
             },
 
             _initData: function(arr, opt) {
+                
+
+                if( !arr || arr.length == 0 ){
+                    return dataFrame
+                };
+
+                //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
+                if( arr.length > 0 && !_.isArray( arr[0] ) ){
+                    arr = Tools.json2MatrixData(arr);
+                };
+
                 var data = [];
                 var arr = _.clone(arr);
             

@@ -9,8 +9,10 @@
 */
 define(
     "chartx/utils/dataformat",
-    [],
-    function(){
+    [
+        "chartx/utils/tools"
+    ],
+    function( Tools ){
         return function( data , opt ){
             
             var dataFrame  = {    //数据框架集合
@@ -32,36 +34,13 @@ define(
                 getFieldData: _getFieldData
             }
 
-            //如果应用传入的数据是[{name:name, sex:sex ...} , ...] 这样的数据，就自动转换为chartx需要的矩阵格式数据
-            var json2MatrixData = function( list ){
-                var newArr = [];
-                var fields = [];
-                var fieldNum = 0;
-                for( var i=0,l=list.length ; i<l ; i++ ){
-                    var row = list[i];
-                    if( i == 0 ){
-                        for( var f in row ){
-                            fields.push( f ); 
-                        };
-                        newArr.push( fields );
-                        fieldNum = fields.length;
-                    };
-                    var _rowData = [];
-                    for( var ii=0 ; ii<fieldNum ; ii++ ){
-                        _rowData.push( row[ fields[ii] ] );
-                    };
-                    newArr.push( _rowData );
-                };
-                return newArr;
-            };
-
             if( !data || data.length == 0 ){
                 return dataFrame
             };
 
             //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
             if( data.length > 0 && !_.isArray( data[0] ) ){
-                data = json2MatrixData(data);
+                data = Tools.json2MatrixData(data);
             };
 
             var arr = data;
