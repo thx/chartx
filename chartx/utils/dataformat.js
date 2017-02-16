@@ -55,14 +55,15 @@ define(
                 return newArr;
             };
 
+            if( !data || data.length == 0 ){
+                return dataFrame
+            };
+
             //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
             if( data.length > 0 && !_.isArray( data[0] ) ){
                 data = json2MatrixData(data);
             };
 
-            if( !data || data.length == 0 ){
-                return dataFrame
-            }
             var arr = data;
             dataFrame.org = arr;
             var fileds = arr[0] ? arr[0] : []; //所有的字段集合
