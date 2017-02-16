@@ -190,7 +190,7 @@ define(
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
+                    this._yAxis.reset({
                         animation: false
                     } , this.__cloneBar.thumbBar.dataFrame.yAxis );
                 };

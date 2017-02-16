@@ -1761,6 +1761,9 @@ define(
                 }
                 var addResult = true;
                 var self      = this;
+                if( !self._eventMap ){
+                	self._eventMap = [];
+                }
                 _.each( type.split(" ") , function(type){
                     var map = self._eventMap[type];
                     if(!map){
@@ -2343,6 +2346,7 @@ define(
         function _isInsideCircle(shape, x, y, r) {
             var context = shape.context;
             !r && (r = context.r);
+            r+= context.lineWidth;
             return (x * x + y * y) < r * r;
         };
 

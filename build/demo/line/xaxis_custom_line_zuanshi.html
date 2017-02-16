@@ -34,15 +34,85 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 
-var data= [["hourId","adPv","click","ctr","ecpm","ecpc","charge"],[0,0,0,0,0,0,0],[1,0,0,0,0,0,0],[2,0,0,0,0,0,0],[3,0,0,0,0,0,0],[4,0,0,0,0,0,0],[5,0,0,0,0,0,0],[6,0,0,0,0,0,0],[7,0,0,0,0,0,0],[8,0,0,0,0,0,0],[9,0,0,0,0,0,0],[10,595,15,0.0252,34.05,1.35,20.26],[11,29,2,0.069,115.17,1.67,3.34],[12,null,null,null,null,null,null],[13,null,null,null,null,null,null],[14,null,null,null,null,null,null],[15,null,null,null,null,null,null],[16,null,null,null,null,null,null],[17,null,null,null,null,null,null],[18,null,null,null,null,null,null],[19,null,null,null,null,null,null],[20,null,null,null,null,null,null],[21,null,null,null,null,null,null],[22,null,null,null,null,null,null],[23,null,null,null,null,null,null]];
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , undefined , 120 , 33    ],
+    [ 2      , 0   , 151 , 26    ],
+    [ 6      , 23   , 145 , 243    ],
+    [ 16      , 288  , 254 , 39    ],
+    [ 27      , 55  , 168 , 65    ],
+    [ 28      , undefined   ,183 , 51    ]
+];
 
-var options = {"yAxis":{"enabled":false,"field":["adPv"],"text":{}},"xAxis":{"enabled":false,"field":"hourId","dataSection":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},"back":{"yOrigin":{"enabled":false},"xAxis":{"enabled":false},"yAxis":{"enabled":false}},"graphs":{"line":{"lineWidth":1,"strokeStyle":{"lineargradient":[{"position":0,"color":"#b6eb17"},{"position":0.06,"color":"#2bcca0"},{"position":0.13,"color":"#4c7fff"},{"position":0.85,"color":"#4c7fff"},{"position":0.95,"color":"#0e34ef"},{"position":1,"color":"#170089"}]}},"fill":{"alpha":0.1,"fillStyle":"#4c7fff"},"node":{"enabled":false}},"tips":{"enabled":false}}
+var options = {
+    legend:{
+        enabled:true
+    },
+    yAxis : {
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "xfield",
+        layoutType: "proportion",
+        dataSection: [ 1 , 6 , 10 , 23 , 28 ]
+    },
+    graphs: {
+        node : {
+            enabled : false
+        },
+        eventEnabled: false
+    },
+    tips: {
+        node : {
+            enabled: false
+        },
+        line : {
+            enabled: false
+        }
+    }
+};
 
 
 
 
 var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
-    window.chart = chart;    
+    window.chart = chart; 
+    var g = chart._graphs;
+
+    chart.on("complete" , function(){
+        chart.createMarkColumn( 6 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#829ae0"
+            }
+        }); 
+        
+        var markLineMid = chart.createMarkColumn( 10 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#d1927f"
+            }
+        });  
+        
+        chart.createMarkColumn( 23 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#d5d5d5"
+            }
+        });
+
+        setTimeout(function(){
+            chart.reset({options : {
+                xAxis : {
+                    dataSection : [ 1 , 6 , 20 , 23 , 28 ]
+                }
+            }});
+
+            chart.moveMarkColumnTo( markLineMid , 20 );
+
+        } , 1000);
+    });
 });
 </textarea></form>
 
@@ -58,7 +128,7 @@ var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:100px;height:80px;'></div>
+                <div id="canvasTest" style='width:100%;height:300px;'></div>
             </div>
 
             </div>
