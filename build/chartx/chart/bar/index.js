@@ -828,6 +828,8 @@ define(
         var Bar = Chart.extend({
             init: function(node, data, opts) {
 
+                data = Tools.parse2MatrixData(data);
+
                 this._xAxis = null;
                 this.xAxis = {
                     layoutType: "peak" //波峰波谷布局模型
@@ -841,7 +843,7 @@ define(
                 this._currCheckedList = []; //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
                 this._node = node;
-                this._data = Tools.parse2MatrixData(data);
+                this._data = data;
                 this._opts = opts;
 
                 this.dataZoom = {
