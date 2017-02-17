@@ -2442,12 +2442,13 @@ define(
                         x = xGraphsWidth * ( (val - this.minVal) / (this.maxVal - this.minVal) );
                     };
                     if( layoutType == "peak" ){
-                        x = this.xDis1 * (ind+1) - this.xDis1/2;
+                        var _xdis = parseInt( this.xDis1 )
+                        x = _xdis * (ind+1) - _xdis/2;
                     };
                     if( layoutType == "step" ){
                         x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
                     };
-                }
+                };
                 return parseInt( x , 10 );
             },
             _trimXAxis: function($data, $xGraphsWidth) {

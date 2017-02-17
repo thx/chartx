@@ -648,7 +648,6 @@ define(
 
                             tmpData[b][v].push(node);
 
-
                             yValueMaxs[b] += Number(val)
                             yLen = subv.length
                         });
