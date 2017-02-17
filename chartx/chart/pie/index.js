@@ -170,7 +170,7 @@
 
                 //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
                 if( arr.length > 0 && !_.isArray( arr[0] ) ){
-                    arr = Tools.json2MatrixData(arr);
+                    arr = Tools.parse2MatrixData(arr);
                 };
 
                 var data = [];

@@ -33,7 +33,7 @@ define(
                 this._currCheckedList = []; //当前的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
                 this._node = node;
-                this._data = data;
+                this._data = Tools.parse2MatrixData(data);
                 this._opts = opts;
 
                 this.dataZoom = {
@@ -70,7 +70,7 @@ define(
              * 如果只有数据改动的情况
              */
             resetData: function(data) {
-                this._data = data;
+                this._data = Tools.parse2MatrixData( data );
 
                 this.dataFrame = this._initData(data, this);
                 this._xAxis.reset({
@@ -731,7 +731,6 @@ define(
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, me._opts);
-                        
                         me._xAxis.reset({
                             animation: false
                         } , me.dataFrame.xAxis );

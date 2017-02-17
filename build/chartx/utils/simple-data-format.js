@@ -31,7 +31,7 @@ define(
 
             //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
             if( data.length > 0 && !_.isArray( data[0] ) ){
-                data = Tools.json2MatrixData(data);
+                data = Tools.parse2MatrixData(data);
             };
 
             dataFrame.org  = _.clone(data);

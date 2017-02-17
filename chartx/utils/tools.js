@@ -196,7 +196,7 @@ define(
      	    	return s
      		},
             //如果应用传入的数据是[{name:name, sex:sex ...} , ...] 这样的数据，就自动转换为chartx需要的矩阵格式数据
-            json2MatrixData : function( list ){
+            parse2MatrixData : function( list ){
                 //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
                 if( list.length > 0 && !_.isArray( list[0] ) ){
                     var newArr = [];
