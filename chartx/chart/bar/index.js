@@ -730,7 +730,8 @@ define(
                         //console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
-                        me.dataFrame = me._initData(me._data, this);
+                        me.dataFrame = me._initData(me._data, me._opts);
+                        
                         me._xAxis.reset({
                             animation: false
                         } , me.dataFrame.xAxis );
