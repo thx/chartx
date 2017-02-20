@@ -1169,11 +1169,11 @@ define('chartx/chart/bar/3d/xaxis',
             _trimXAxis: function (data, xGraphsWidth) {
 
                 var tmpData = [];
-                this.xDis1 = xGraphsWidth / data.length;
+                this.xDis = xGraphsWidth / data.length;
                 for (var a = 0, al = data.length; a < al; a++) {
                     var o = {
                         'content': data[a],
-                        'x': this.xDis1 * (a + 1) - this.xDis1 / 2
+                        'x': this.xDis * (a + 1) - this.xDis / 2
                     }
                     tmpData.push(o);
                 }
@@ -3025,7 +3025,7 @@ define("chartx/chart/bar/3d",
                 var yArr = _yAxis.dataOrg;
                 var hLen = yArr.length; //bar的横向分组length
 
-                var xDis1 = _xAxis.xDis1;
+                var xDis1 = _xAxis.xDis;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2 = xDis1 / (hLen + 1);
 

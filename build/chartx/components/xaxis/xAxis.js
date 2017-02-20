@@ -69,7 +69,7 @@ define(
             this.maxVal = null; 
             this.minVal = null; 
 
-            this.xDis1 = 0; //x方向一维均分长度,layoutType==peak的时候要用到
+            this.xDis = 0; //x方向一维均分长度,layoutType==peak的时候要用到
 
             this.layoutType = "step"; //step , rule , peak, proportion
 
@@ -258,8 +258,7 @@ define(
                         x = xGraphsWidth * ( (val - this.minVal) / (this.maxVal - this.minVal) );
                     };
                     if( layoutType == "peak" ){
-                        var _xdis = parseInt( this.xDis1 )
-                        x = _xdis * (ind+1) - _xdis/2;
+                        x = this.xDis * (ind+1) - this.xDis/2;
                     };
                     if( layoutType == "step" ){
                         x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
@@ -272,7 +271,7 @@ define(
                 var data = $data || this.dataSection;
                 var xGraphsWidth = xGraphsWidth || this.xGraphsWidth;
 
-                this.xDis1 = xGraphsWidth / data.length;//这个属性目前主要是柱状图有分组柱状图的场景在用
+                this.xDis = parseInt(xGraphsWidth / data.length);//这个属性目前主要是柱状图有分组柱状图的场景在用
 
                 for (var a = 0, al  = data.length; a < al; a++ ) {
                     var o = {

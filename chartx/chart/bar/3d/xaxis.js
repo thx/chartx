@@ -233,11 +233,11 @@ define('chartx/chart/bar/3d/xaxis',
             _trimXAxis: function (data, xGraphsWidth) {
 
                 var tmpData = [];
-                this.xDis1 = xGraphsWidth / data.length;
+                this.xDis = xGraphsWidth / data.length;
                 for (var a = 0, al = data.length; a < al; a++) {
                     var o = {
                         'content': data[a],
-                        'x': this.xDis1 * (a + 1) - this.xDis1 / 2
+                        'x': this.xDis * (a + 1) - this.xDis / 2
                     }
                     tmpData.push(o);
                 }

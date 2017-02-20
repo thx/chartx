@@ -746,7 +746,7 @@ define("chartx/chart/bar/3d",
                 var yArr = _yAxis.dataOrg;
                 var hLen = yArr.length; //bar的横向分组length
 
-                var xDis1 = _xAxis.xDis1;
+                var xDis1 = _xAxis.xDis;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2 = xDis1 / (hLen + 1);
 

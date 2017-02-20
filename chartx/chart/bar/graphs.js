@@ -29,7 +29,9 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4
+                radius: 4,
+                fillStyle : null,
+                filter : function(){} //用来定制bar的样式
             };
 
             this.text = {
@@ -271,7 +273,9 @@ define(
                     var vLen = h_group.length;
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
-                    itemW = me.w / hLen;
+
+                    //itemW 还是要跟着xAxis的xDis保持一致
+                    itemW = parseInt(me.w / hLen);
 
                     me._barsLen = hLen * groups;
 
@@ -410,6 +414,8 @@ define(
                             rectEl.finalPos = finalPos;
 
                             rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                            me.bar.filter.apply( rectEl, [ rectData , me] );
 
                             if (me.eventEnabled) {
                                 rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {

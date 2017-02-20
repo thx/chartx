@@ -29,7 +29,9 @@ define(
             this.bar = {
                 width: 0,
                 _width: 0,
-                radius: 4
+                radius: 4,
+                fillStyle : null,
+                filter : function(){} //用来定制bar的样式
             };
 
             this.text = {
@@ -271,7 +273,9 @@ define(
                     var vLen = h_group.length;
                     if (vLen == 0) return;
                     var hLen = h_group[0].length;
-                    itemW = me.w / hLen;
+
+                    //itemW 还是要跟着xAxis的xDis保持一致
+                    itemW = parseInt(me.w / hLen);
 
                     me._barsLen = hLen * groups;
 
@@ -410,6 +414,8 @@ define(
                             rectEl.finalPos = finalPos;
 
                             rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                            me.bar.filter.apply( rectEl, [ rectData , me] );
 
                             if (me.eventEnabled) {
                                 rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {
@@ -1308,7 +1314,8 @@ define(
                         data: this._yAxis.layoutData
                     },
                     yAxis: {
-                        data: this._xAxis.layoutData
+                        data: this._xAxis.layoutData,
+                        xDis: this._xAxis.xDis
                     },
                     pos: {
                         x: _yAxisW,
@@ -1384,7 +1391,7 @@ define(
                 var yArr = _yAxis.dataOrg;
                 var hLen = _yAxis.field.length; //bar的横向分组length
 
-                var xDis1 = _xAxis.xDis1;
+                var xDis1 = _xAxis.xDis;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2 = xDis1 / (hLen + 1);
 
@@ -1449,7 +1456,12 @@ define(
                                 value: val,
                                 field: me._getTargetField(b, v, i, _yAxis.field),
                                 x: x,
-                                y: y
+                                y: y,
+                                xAxis: {
+                                    field: me._xAxis.field,
+                                    value: xArr[i].content,
+                                    layoutText: xArr[i].layoutText
+                                }
                             };
 
                             if (me.proportion) {
