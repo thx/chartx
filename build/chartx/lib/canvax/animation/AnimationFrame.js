@@ -36,21 +36,13 @@ define(
         var _taskList = []; //[{ id : task: }...]
         var _requestAid = null;
 
-        /*
-         * @param task 要加入到渲染帧队列中的任务
-         * @result frameid
-         */
-        function registFrame(task) {
-            if (!task) {
-                return;
-            };
-            _taskList.push(task);
+        function enabledAnimationFrame(){
             if (!_requestAid) {
                 _requestAid = requestAnimationFrame(function() {
-                    //console.log("frame__" + _taskList.length);
-                    if (_tweenLen) {
-                        Tween.update();
-                    };
+                    console.log("frame__" + _taskList.length);
+                    //if ( Tween.getAll().length ) {
+                    Tween.update(); //tween自己会做length判断
+                    //};
                     var currTaskList = _taskList;
                     _taskList = [];
                     _requestAid = null;
@@ -60,17 +52,27 @@ define(
                 });
             };
             return _requestAid;
+        }; 
+
+        /*
+         * @param task 要加入到渲染帧队列中的任务
+         * @result frameid
+         */
+        function registFrame( $frame ) {
+            if (!$frame) {
+                return;
+            };
+            _taskList.push($frame);
+            return enabledAnimationFrame();
         };
-
-
 
         /*
          *  @param task 要从渲染帧队列中删除的任务
          */
-        function destroyFrame(task) {
+        function destroyFrame( $frame ) {
             var d_result = false;
             for (var i = 0, l = _taskList.length; i < l; i++) {
-                if (_taskList[i].id === task.id) {
+                if (_taskList[i].id === $frame.id) {
                     d_result = true;
                     _taskList.splice(i, 1);
                     i--;
@@ -84,7 +86,6 @@ define(
             return d_result;
         };
 
-        var _tweenLen = 0;
 
         /* 
          * @param opt {from , to , onUpdate , onComplete , ......}
@@ -95,56 +96,66 @@ define(
                 from: null,
                 to: null,
                 duration: 500,
+                onStart: function(){},
                 onUpdate: function() {},
                 onComplete: function() {},
+                onStop: function(){},
                 repeat: 0,
                 delay: 0,
-                easing: null
+                easing: 'Linear.None',
+                desc: '' //动画描述，方便查找bug
             }, options);
+
             var tween = {};
+            var tid = "tween_" + Base.getUID();
+            opt.id && ( tid = tid+"_"+opt.id );
+
             if (opt.from && opt.to) {
-                tween = new Tween.Tween(opt.from).to(opt.to, opt.duration).onUpdate(opt.onUpdate);
+                tween = new Tween.Tween( opt.from )
+                .to( opt.to, opt.duration )
+                .onStart(function(){
+                    opt.onStart.apply( this )
+                })
+                .onUpdate( function(){
+                    opt.onUpdate.apply( this );
+                } )
+                .onComplete( function() {
+                    destroyFrame({
+                        id: tid
+                    });
+                    tween._isCompleteed = true;
+                    opt.onComplete.apply( this , [this] ); //执行用户的conComplete
+                } )
+                .onStop( function(){
+                    destroyFrame({
+                        id: tid
+                    });
+                    tween._isStoped = true;
+                    opt.onStop.apply( this , [this] );
+                } )
+                .repeat( opt.repeat )
+                .delay( opt.delay )
+                .easing( Tween.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]] )
+                
+                tween.id = tid;
+                tween.start();
 
-                opt.repeat && tween.repeat(opt.repeat);
-                opt.delay && tween.delay(opt.delay);
-                opt.easing && tween.easing(Tween.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
-
-                var tid = "tween_" + Base.getUID();
 
                 function animate() {
-                    if (!tween || !tween.animate) {
+
+                    if ( tween._isCompleteed || tween._isStoped ) {
+                        tween = null;
                         return;
                     };
                     registFrame({
                         id: tid,
-                        task: animate
+                        task: animate,
+                        desc: opt.desc,
+                        tween: tween
                     });
                 };
-
-                tween.onComplete(function() {
-
-                    _tweenLen--;
-
-                    destroyFrame({
-                        task: animate,
-                        id: tid
-                    });
-                    tween.animate = null;
-                    tween = null;
-
-                    var t = this;
-                    setTimeout(function() {
-                        opt.onComplete(t); //执行用户的conComplete
-                    }, 10);
-                });
-
-                tween.start();
-
-                _tweenLen++;
-
-                tween.animate = animate;
-                tween.id = tid;
                 animate();
+
             };
             return tween;
         };
@@ -152,19 +163,8 @@ define(
          * @param tween
          * @result void(0)
          */
-        function destroyTween(tween) {
-
+        function destroyTween(tween , msg) {
             tween.stop();
-
-            if (destroyFrame({
-                    task: tween.animate,
-                    id: tween.id
-                })) {
-                _tweenLen--;
-            };
-            tween.animate = null;
-            tween = null;
-
         };
 
         return {

@@ -2,9 +2,10 @@
     'chartx/chart/pie/index', [
         'chartx/chart/index',
         'chartx/chart/pie/pie',
-        'chartx/components/legend/index'
+        'chartx/components/legend/index',
+        'chartx/utils/tools'
     ],
-    function (Chart, Pie, Legend) {
+    function (Chart, Pie, Legend, Tools) {
         /*
         *@node chart在dom里的目标容器节点。
         */
@@ -54,9 +55,6 @@
             },
             getByIndex: function (index) {
                 return this._pie._getByIndex(index);
-            },
-            getLabelList: function () {
-                return this._pie.getLabelList();
             },
             getList: function () {
                 var self = this;
@@ -118,12 +116,40 @@
                 }
             },
             checkOf: function (xvalue) {
-                this.checkAt(this._getIndexOfxName(xvalue));
+                this.checkAt(this.getIndexOf(xvalue));
             },
             uncheckOf: function (xvalue) {
-                this.uncheckAt(this._getIndexOfxName(xvalue));
+                this.uncheckAt(this.getIndexOf(xvalue));
             },
-            _getIndexOfxName: function (xvalue) {
+
+            getLabelList: function () {
+                return this._pie.getLabelList();
+            },
+            showLabelAt: function( index ){
+                this._pie && this._pie._showLabel( index );
+            },
+            hideLabelAt: function( index ){
+                this._pie && this._pie._hideLabel( index );
+            },
+            showLabelOf: function( xvalue ){
+                this.showLabelAt( this.getIndexOf(xvalue) );
+            },
+            hideLabelOf: function( xvalue ){
+                this.hideLabelAt( this.getIndexOf(xvalue) );
+            },
+            showLabelAll: function(){
+                var me = this;
+                _.each( this.getLabelList() , function( label , i ){
+                    me.showLabelAt(i);
+                } );
+            },
+            hideLabelAll: function(){
+                var me = this;
+                _.each( this.getLabelList() , function( label , i ){
+                    me.hideLabelAt(i);
+                } );
+            },
+            getIndexOf: function (xvalue) {
                 var i;
                 var list = this.getList();
                 for (var ii = 0, il = list.length; ii < il; ii++) {
@@ -134,7 +160,19 @@
                 }
                 return i;
             },
+
             _initData: function(arr, opt) {
+                
+
+                if( !arr || arr.length == 0 ){
+                    return dataFrame
+                };
+
+                //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
+                if( arr.length > 0 && !_.isArray( arr[0] ) ){
+                    arr = Tools.parse2MatrixData(arr);
+                };
+
                 var data = [];
                 var arr = _.clone(arr);
             
@@ -330,7 +368,7 @@
                     for (var i = 1; i < data.length; i++) {
                         if (data[i][0] == field && !_.contains(me.ignoreFields, field)) {
                             me.ignoreFields.push(field);
-                            console.log(me.ignoreFields.toString());
+                            //console.log(me.ignoreFields.toString());
                         }
                     }
                 }

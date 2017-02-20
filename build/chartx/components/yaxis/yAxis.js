@@ -9,11 +9,11 @@ define(
     function(Canvax, CanvaxBase, Line, Tools, DataSection) {
         var yAxis = function(opt, data ) {
 
-            this.w = 0;
+            this.width = null;
             this.enabled = 1; //true false 1,0都可以
             this.dis = 6; //线到文本的距离
             this.maxW = 0; //最大文本的width
-            this.field = null; //这个 轴 上面的 field
+            this.field = []; //这个 轴 上面的 field
 
             this.label = "";
             this._label = null; //label的text对象
@@ -58,6 +58,9 @@ define(
             this.baseNumber = null;
             this.basePoint = null; //value为baseNumber的point {x,y}
 
+            this.maxNumber = null;
+            this.minNumber = null;
+
             //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
             //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
             this.filter = null; //function(params){}; 
@@ -81,10 +84,16 @@ define(
                 };
 
                 this._initData(data);
-                this.sprite = new Canvax.Display.Sprite();
+                this.sprite = new Canvax.Display.Sprite({
+                    id: "yAxisSprite"
+                });
+                this.rulesSprite = new Canvax.Display.Sprite({
+                    id: "yRulesSprite"
+                });
+                this.sprite.addChild( this.rulesSprite );
             },
             setX: function($n) {
-                this.sprite.context.x = $n + (this.place == "left" ? this.maxW : 0);
+                this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
                 this.pos.x = $n;
             },
             setY: function($n) {
@@ -92,7 +101,7 @@ define(
                 this.pos.y = $n;
             },
             setAllStyle: function(sty) {
-                _.each(this.sprite.children, function(s) {
+                _.each(this.rulesSprite.children, function(s) {
                     _.each(s.children, function(cel) {
                         if (cel.type == "text") {
                             cel.context.fillStyle = sty;
@@ -103,9 +112,8 @@ define(
                 });
             },
             //配置和数据变化
-            update: function(opt, data) {
+            reset: function(opt, data) {
                 //先在field里面删除一个字段，然后重新计算
-                this.sprite.removeAllChildren();
                 this.dataSection = [];
                 this.dataSectionGroup = [];
 
@@ -131,7 +139,6 @@ define(
                 }
             },
             draw: function(opt) {
-                this.sprite.removeAllChildren();
                 opt && _.deepExtend(this, opt);
                 this._getLabel();
                 this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine();
@@ -200,7 +207,7 @@ define(
                 this.basePoint = {
                     content: this.baseNumber,
                     y: basePy
-                }
+                };
             },
             _getYAxisDisLine: function() { //获取y轴顶高到第一条线之间的距离         
                 var disMin = this.disYAxisTopLine
@@ -211,6 +218,7 @@ define(
                 return dis
             }, 
             _setDataSection: function(data) {
+
                 var arr = [];
                 var d = (data.org || data.data || data);
                 if (!this.biaxial) {
@@ -227,10 +235,20 @@ define(
                 for( var i = 0, il=arr.length; i<il ; i++ ){
                     arr[i] =  arr[i] || 0;
                 };
+
                 return arr;
             },
             _initData: function(data) {
+
+                //先要矫正子啊field确保一定是个array
+                if( !_.isArray(this.field) ){
+                    this.field = [this.field];
+                };
+
                 var arr = this._setDataSection(data);
+                if( arr.length == 1 ){
+                    arr.push( arr[0]*2 );
+                }
                 this.dataOrg = (data.org || data.data); //这里必须是data.org
                 if (this.dataSection.length == 0) {
                     this.dataSection = DataSection.section(arr, 3);
@@ -331,19 +349,19 @@ define(
                     this._setBottomAndBaseNumber();
                 };                
             },
-            resetWidth: function(w) {
+            resetWidth: function(width) {
                 var self = this;
-                self.w = w;
+                self.width = width;
                 if (self.line.enabled) {
-                    self.sprite.context.x = w - self.dis - self.line.width;
+                    self.sprite.context.x = width - self.dis - self.line.width;
                 } else {
-                    self.sprite.context.x = w - self.dis;
+                    self.sprite.context.x = width - self.dis;
                 }
             },
             _widget: function() {
                 var self = this;
                 if (!self.enabled) {
-                    self.w = 0;
+                    self.width = 0;
                     return;
                 }
                 var arr = this.layoutData;
@@ -360,12 +378,8 @@ define(
                     if( content === undefined || content === null ){
                         content = Tools.numAddSymbol( o.content );
                     };  
-                    
-                    var yNode = new Canvax.Display.Sprite({
-                        id: "yNode" + a
-                    });
 
-                    　
+                
                     var textAlign = (self.place == "left" ? "right" : "left");
                     //为横向图表把y轴反转后的 逻辑
                     if (self.text.rotation == 90 || self.text.rotation == -90) {
@@ -385,77 +399,119 @@ define(
                         }
                     };
 
-                    //文字
-                    var txt = new Canvax.Display.Text(content, {
-                        id: "yAxis_txt_" + CanvaxBase.getUID(),
-                        context: {
-                            x: x + (self.place == "left" ? -5 : 5),
-                            y: posy + 20,
-                            fillStyle: self._getProp(self.text.fillStyle),
-                            fontSize: self.text.fontSize,
-                            rotation: -Math.abs(this.text.rotation),
-                            textAlign: textAlign,
-                            textBaseline: "middle",
-                            globalAlpha: 0
-                        }
-                    });
-                    yNode.addChild(txt);
+                    var yNode = this.rulesSprite.getChildAt(a);
 
-                    self.maxW = Math.max(self.maxW, txt.getTextWidth());
-                    if (self.text.rotation == 90 || self.text.rotation == -90) {
-                        self.maxW = Math.max(self.maxW, txt.getTextHeight());
-                    }
+                    if( yNode ){
+                        if(yNode.__txt){
+                            if( yNode.__txt.context.y != posy ){
+                                yNode.__txt.animate({
+                                    y: posy
+                                }, {
+                                    duration: 500,
+                                    delay: a*80,
+                                    id: yNode.__txt.id
+                                });
+                            };
+                            yNode.__txt.resetText( content );
+                        };
 
-                    if (self.line.enabled) {
-                        //线条
-                        var line = new Line({
-                            context: {
-                                x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
-                                y: y,
-                                xEnd: self.line.width,
-                                yEnd: 0,
-                                lineWidth: self.line.lineWidth,
-                                strokeStyle: self._getProp(self.line.strokeStyle)
-                            }
-                        });
-                        yNode.addChild(line);
-                    };
-                    //这里可以由用户来自定义过滤 来 决定 该node的样式
-                    _.isFunction(self.filter) && self.filter({
-                        layoutData: self.layoutData,
-                        index: a,
-                        txt: txt,
-                        line: line
-                    });
-
-                    self.sprite.addChild(yNode);
-
-                    //如果是resize的话也不要处理动画
-                    if (self.animation && !self.resize) {
-                        txt.animate({
-                            globalAlpha: 1,
-                            y: txt.context.y - 20
+                        yNode.__line && yNode.__line.animate({
+                            y: y
                         }, {
                             duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * 80,
-                            id: txt.id
+                            delay: a*80,
+                            id: yNode.__line.id
                         });
                     } else {
-                        txt.context.y = txt.context.y - 20;
-                        txt.context.globalAlpha = 1;
+                        yNode = new Canvax.Display.Sprite({
+                            id: "yNode" + a
+                        });
+
+                        //文字
+                        var txt = new Canvax.Display.Text(content, {
+                            id: "yAxis_txt_" + CanvaxBase.getUID(),
+                            context: {
+                                x: x + (self.place == "left" ? -5 : 5),
+                                y: posy + 20,
+                                fillStyle: self._getProp(self.text.fillStyle),
+                                fontSize: self.text.fontSize,
+                                rotation: -Math.abs(this.text.rotation),
+                                textAlign: textAlign,
+                                textBaseline: "middle",
+                                globalAlpha: 0
+                            }
+                        });
+                        yNode.addChild(txt);
+                        yNode.__txt = txt;
+
+                        self.maxW = Math.max(self.maxW, txt.getTextWidth());
+                        if (self.text.rotation == 90 || self.text.rotation == -90) {
+                            self.maxW = Math.max(self.maxW, txt.getTextHeight());
+                        };
+
+
+                        if (self.line.enabled) {
+                            //线条
+                            var line = new Line({
+                                context: {
+                                    x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
+                                    y: y,
+                                    xEnd: self.line.width,
+                                    yEnd: 0,
+                                    lineWidth: self.line.lineWidth,
+                                    strokeStyle: self._getProp(self.line.strokeStyle)
+                                }
+                            });
+                            yNode.addChild(line);
+                            yNode.__line = line;
+                        };
+                        //这里可以由用户来自定义过滤 来 决定 该node的样式
+                        _.isFunction(self.filter) && self.filter({
+                            layoutData: self.layoutData,
+                            index: a,
+                            txt: txt,
+                            line: line
+                        });
+
+                        self.rulesSprite.addChild(yNode);
+
+                        //如果是resize的话也不要处理动画
+                        if (self.animation && !self.resize) {
+                            txt.animate({
+                                globalAlpha: 1,
+                                y: txt.context.y - 20
+                            }, {
+                                duration: 500,
+                                easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                                delay: (a+1) * 80,
+                                id: txt.id
+                            });
+                        } else {
+                            txt.context.y = txt.context.y - 20;
+                            txt.context.globalAlpha = 1;
+                        }
                     }
+                };
+
+                //把 rulesSprite.children中多余的给remove掉
+                if( self.rulesSprite.children.length > arr.length ){
+                    for( var al = arr.length,pl = self.rulesSprite.children.length;al<pl;al++  ){
+                        self.rulesSprite.getChildAt( al ).remove();
+                        al--,pl--;
+                    };
                 };
 
                 self.maxW += self.dis;
 
-                //self.sprite.context.x = self.maxW + self.pos.x;
+                //self.rulesSprite.context.x = self.maxW + self.pos.x;
                 //self.pos.x = self.maxW + self.pos.x;
-                if (self.line.enabled) {
-                    self.w = self.maxW + self.dis + self.line.width + self.pos.x;
-                } else {
-                    self.w = self.maxW + self.dis + self.pos.x;
-                }
+                if( self.width == null ){
+                    if (self.line.enabled) {
+                        self.width = self.maxW + self.dis + self.line.width + self.pos.x;
+                    } else {
+                        self.width = self.maxW + self.dis + self.pos.x;
+                    }
+                };
             },
             _getProp: function(s) {
                 var res;

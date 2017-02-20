@@ -237,26 +237,55 @@ define('chartx/chart/bar/3d/yaxis',
                 return dis
             },
             _setDataSection: function (data, data1) {
+                //var arr = [];
+                //var d = (data.org || data.data || data);
+                //if( data1 && _.isArray(data1) ){
+                //    d = d.concat(data1);
+                //}
+                //if (!this.biaxial) {
+                //    arr = _.flatten( d ); //_.flatten( data.org );
+                //} else {
+                //    if (this.place == "left") {
+                //        arr = _.flatten(d[0]);
+                //        this.field = _.flatten([this.field[0]]);
+                //    } else {
+                //        arr = _.flatten(d[1]);
+                //        this.field = _.flatten([this.field[1]]);
+                //    }
+                //};
+                //for( var i = 0, il=arr.length; i<il ; i++ ){
+                //    arr[i] =  arr[i] || 0;
+                //};
+                //return arr;
+
                 var arr = [];
-                var d = (data.org || data.data || data);
-                if( data1 && _.isArray(data1) ){
-                    d = d.concat(data1);
-                }
-                if (!this.biaxial) {
-                    arr = _.flatten( d ); //_.flatten( data.org );
-                } else {
-                    if (this.place == "left") {
-                        arr = _.flatten(d[0]);
-                        this.field = _.flatten([this.field[0]]);
-                    } else {
-                        arr = _.flatten(d[1]);
-                        this.field = _.flatten([this.field[1]]);
-                    }
-                };
-                for( var i = 0, il=arr.length; i<il ; i++ ){
-                    arr[i] =  arr[i] || 0;
-                };
-                return arr;
+                _.each( data.org , function( d , i ){
+                    if( !d.length ){
+                        return
+                    };
+
+                    //有数据的情况下
+                    if( !_.isArray(d[0]) ){
+                        arr.push( d );
+                        return;
+                    };
+
+                    var varr = [];
+                    var len  = d[0].length;
+                    var vLen = d.length;
+                    var min = 0;
+                    for( var i = 0 ; i<len ; i++ ){
+                        var count = 0;
+                        for( var ii = 0 ; ii < vLen ; ii++ ){
+                            count += d[ii][i];
+                            min = Math.min( d[ii][i], min );
+                        }
+                        varr.push( count );
+                    };
+                    varr.push(min);
+                    arr.push( varr );
+                } );
+                return _.flatten(arr);
             },
             //data1 == [1,2,3,4]
             _initData: function(data , data1) {

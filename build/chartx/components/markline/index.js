@@ -15,6 +15,8 @@ define(
                 x : 0 , y : 0
             };
 
+            this.target = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个field显示markline
+
             this.line       = {
                 y           : 0,
                 list        : [],
@@ -33,11 +35,11 @@ define(
                 lineType : 'dashed',
                 lineWidth: 1,
                 strokeStyle : "white"
-            }
+            };
 
             this.filter = function( ){
                 
-            }
+            };
 
             this._doneHandle = null;
             this.done   = function( fn ){

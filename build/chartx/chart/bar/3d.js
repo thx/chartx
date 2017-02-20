@@ -79,6 +79,8 @@ define('chartx/chart/bar/3d/graphs',
 
             this.yDataSectionLen = 0; //y轴方向有多少个section
 
+            this.globalAlpha = 1;
+
             _.deepExtend(this, opt);
 
             this._initaverage();
@@ -249,6 +251,7 @@ define('chartx/chart/bar/3d/graphs',
                 this.bar._width < 1 && (this.bar._width = 1);
             },
             resetData: function (data, opt) {
+                this._setyAxisFieldsMap();
                 this.draw(data.data, opt);
             },
             draw: function (data, opt) {
@@ -836,24 +839,26 @@ define('chartx/chart/bar/3d/graphs',
                 var _frontFillStyle = "#ccc";
                 var _topFillStyle = "#ccc";
                 var _sideFillStyle = "#ccc";
-                var _globalAlpha = 0.3
+                var _globalAlpha = 0.3;
+
+                var drawFace = me.root.drawFace;
 
                 //左面
                 var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
-                var leftFace = me.drawFace("bhr_polygon_left", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var leftFace = drawFace("bhr_polygon_left", _pointList, _sideFillStyle, _strokeStyle, 0, sprite);
 
                 //前面
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
-                var frontFace = me.drawFace("bhr_polygon_front", _pointList, _frontFillStyle, _strokeStyle, sprite);
+                var frontFace = drawFace("bhr_polygon_front", _pointList, _frontFillStyle, _strokeStyle, 0, sprite);
 
                 //右侧
                 var _pointList = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
-                var rightFace = me.drawFace("bhr_polygon_right", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var rightFace = drawFace("bhr_polygon_right", _pointList, _sideFillStyle, _strokeStyle, 0, sprite);
 
 
                 //顶部
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
-                var topFace = me.drawFace("bhr_polygon_top", _pointList, _topFillStyle, _strokeStyle, sprite);
+                var topFace = drawFace("bhr_polygon_top", _pointList, _topFillStyle, _strokeStyle, 0, sprite);
 
                 var _hoverEnter = function (e) {
                     leftFace.context.globalAlpha = _globalAlpha;
@@ -868,13 +873,10 @@ define('chartx/chart/bar/3d/graphs',
                     rightFace.context.globalAlpha = 0;
                     topFace.context.globalAlpha = 0;
                 };
-                _hoverLeave();
 
 
-                leftFace.hover(_hoverEnter, _hoverLeave);
                 frontFace.hover(_hoverEnter, _hoverLeave);
-                frontFace.hover(_hoverEnter, _hoverLeave);
-                frontFace.hover(_hoverEnter, _hoverLeave);
+
 
                 sprite.addChild(leftFace);
                 sprite.addChild(frontFace);
@@ -896,25 +898,28 @@ define('chartx/chart/bar/3d/graphs',
                 //绘制样式
                 var _strokeStyle = rectCxt.fillStyle;
                 var _frontFillStyle = rectCxt.fillStyle;
-                var _topFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, 0.1);
-                var _sideFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, -0.1);
+                var _topFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, 0.2);
+                var _sideFillStyle = ColorFormat.colorBrightness(rectCxt.fillStyle, -0.2);
+
+                var drawFace = me.root.drawFace;
+                var _globalAlpha = me.globalAlpha;
 
                 //左面
                 var _pointList = [[_left, _top, 0], [_left, _top, _depth], [_left, _bottom, _depth], [_left, _bottom, 0]];
-                var leftFace = me.drawFace("polygon_left", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var leftFace = drawFace("polygon_left", _pointList, _sideFillStyle, _strokeStyle, _globalAlpha, sprite);
 
                 //前面
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _bottom, 0], [_left, _bottom, 0]];
-                var frontFace = me.drawFace("polygon_front", _pointList, _frontFillStyle, _strokeStyle, sprite);
+                var frontFace = drawFace("polygon_front", _pointList, _frontFillStyle, _strokeStyle, _globalAlpha, sprite);
 
                 //右侧
                 var _pointList = [[_right, _top, 0], [_right, _top, _depth], [_right, _bottom, _depth], [_right, _bottom, 0]];
-                var rightFace = me.drawFace("polygon_right", _pointList, _sideFillStyle, _strokeStyle, sprite);
+                var rightFace = drawFace("polygon_right", _pointList, _sideFillStyle, _strokeStyle, _globalAlpha, sprite);
 
 
                 //顶部
                 var _pointList = [[_left, _top, 0], [_right, _top, 0], [_right, _top, _depth], [_left, _top, _depth]];
-                var topFace = me.drawFace("polygon_top", _pointList, _topFillStyle, _strokeStyle, sprite);
+                var topFace = drawFace("polygon_top", _pointList, _topFillStyle, _strokeStyle, _globalAlpha, sprite);
 
 
                 sprite.addChild(leftFace);
@@ -922,94 +927,6 @@ define('chartx/chart/bar/3d/graphs',
                 sprite.addChild(rightFace);
                 sprite.addChild(topFace);
 
-
-            },
-            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle, sprite) {
-                var _polygon = sprite.getChildById(_id) ||
-                    new Shapes.Polygon({
-                    id: _id,
-                    pointChkPriority: false,
-                    context: {
-                        pointList: _pointList,
-                        strokeStyle: _strokeStyle,
-                        fillStyle: _fillStyle
-                    }
-                });
-
-                _polygon.context.pointList = _pointList;
-                _polygon.context.x = 0;
-                _polygon.context.y = 0;
-
-                return _polygon;
-            },
-            _depthTest: function (sprite) {
-
-                (function (_sprite) {
-                    var getLeaf = arguments.callee;
-                    if (_sprite.children && _sprite.children.length > 0) {
-                        _.each(_sprite.children, function (a, i) {
-                            getLeaf(a);
-                        })
-                    } else {
-                        var _parentSprite = _sprite.parent;
-
-                        if (_sprite instanceof Shapes.Polygon && ~_parentSprite.id.indexOf('bar_')) {
-
-                            var _frontFace = null;
-                            var currFace = _sprite.context.pointList;
-                            _.each(_parentSprite.children, function (o, i) {
-                                if (~o.id.indexOf('front')) {
-                                    _frontFace = o.context.pointList;
-                                }
-                            });
-
-                            //判断该面的Z值为负数的点是否在前面的范围内
-                            if (~_sprite.id.indexOf('left') || ~_sprite.id.indexOf('right')) {
-                                var isCover = false;
-
-
-                                var p1 = Vector3.fromValues(currFace[1][0], currFace[1][1], 0);
-                                if (~_sprite.id.indexOf('left')) {
-                                    var p2 = Vector3.fromValues(_frontFace[0][0], _frontFace[0][1], 0);
-                                    var p3 = Vector3.fromValues(_frontFace[3][0], _frontFace[3][1], 0);
-                                }
-                                if (~_sprite.id.indexOf('right')) {
-                                    var p2 = Vector3.fromValues(_frontFace[1][0], _frontFace[1][1], 0);
-                                    var p3 = Vector3.fromValues(_frontFace[2][0], _frontFace[2][1], 0);
-                                }
-
-
-                                var _v1 = Vector3.create();
-                                var _v2 = Vector3.create();
-                                var _vc = Vector3.create();
-                                //顶面指向Z轴负半轴的向量
-                                Vector3.sub(_v1, p1, p2);
-                                Vector3.normalize(_v1, _v1);
-                                //前面指向Y轴正半轴的向量
-                                Vector3.sub(_v2, p2, p3);
-                                Vector3.normalize(_v2, _v2);
-
-                                //二维空间中,XY的叉积指向Z轴的结果
-                                Vector3.cross(_vc, _v1, _v2);
-
-                                //根据不同的侧面判断Z的大小,取得是否在Y轴的左侧或右侧
-                                if (~_sprite.id.indexOf('left') && _vc[2] < 0) {
-                                    isCover = true;
-                                } else if (~_sprite.id.indexOf('right') && _vc[2] > 0) {
-                                    isCover = true;
-                                }
-
-                                if (isCover) {
-                                    _sprite.context.visible = false;
-                                }else{
-                                    _sprite.context.visible = true;
-                                }
-                            }
-
-                        }
-
-                    }
-                })(sprite);
 
             }
         };
@@ -1252,11 +1169,11 @@ define('chartx/chart/bar/3d/xaxis',
             _trimXAxis: function (data, xGraphsWidth) {
 
                 var tmpData = [];
-                this.xDis1 = xGraphsWidth / data.length;
+                this.xDis = xGraphsWidth / data.length;
                 for (var a = 0, al = data.length; a < al; a++) {
                     var o = {
                         'content': data[a],
-                        'x': this.xDis1 * (a + 1) - this.xDis1 / 2
+                        'x': this.xDis * (a + 1) - this.xDis / 2
                     }
                     tmpData.push(o);
                 }
@@ -1747,26 +1664,55 @@ define('chartx/chart/bar/3d/yaxis',
                 return dis
             },
             _setDataSection: function (data, data1) {
+                //var arr = [];
+                //var d = (data.org || data.data || data);
+                //if( data1 && _.isArray(data1) ){
+                //    d = d.concat(data1);
+                //}
+                //if (!this.biaxial) {
+                //    arr = _.flatten( d ); //_.flatten( data.org );
+                //} else {
+                //    if (this.place == "left") {
+                //        arr = _.flatten(d[0]);
+                //        this.field = _.flatten([this.field[0]]);
+                //    } else {
+                //        arr = _.flatten(d[1]);
+                //        this.field = _.flatten([this.field[1]]);
+                //    }
+                //};
+                //for( var i = 0, il=arr.length; i<il ; i++ ){
+                //    arr[i] =  arr[i] || 0;
+                //};
+                //return arr;
+
                 var arr = [];
-                var d = (data.org || data.data || data);
-                if( data1 && _.isArray(data1) ){
-                    d = d.concat(data1);
-                }
-                if (!this.biaxial) {
-                    arr = _.flatten( d ); //_.flatten( data.org );
-                } else {
-                    if (this.place == "left") {
-                        arr = _.flatten(d[0]);
-                        this.field = _.flatten([this.field[0]]);
-                    } else {
-                        arr = _.flatten(d[1]);
-                        this.field = _.flatten([this.field[1]]);
-                    }
-                };
-                for( var i = 0, il=arr.length; i<il ; i++ ){
-                    arr[i] =  arr[i] || 0;
-                };
-                return arr;
+                _.each( data.org , function( d , i ){
+                    if( !d.length ){
+                        return
+                    };
+
+                    //有数据的情况下
+                    if( !_.isArray(d[0]) ){
+                        arr.push( d );
+                        return;
+                    };
+
+                    var varr = [];
+                    var len  = d[0].length;
+                    var vLen = d.length;
+                    var min = 0;
+                    for( var i = 0 ; i<len ; i++ ){
+                        var count = 0;
+                        for( var ii = 0 ; ii < vLen ; ii++ ){
+                            count += d[ii][i];
+                            min = Math.min( d[ii][i], min );
+                        }
+                        varr.push( count );
+                    };
+                    varr.push(min);
+                    arr.push( varr );
+                } );
+                return _.flatten(arr);
             },
             //data1 == [1,2,3,4]
             _initData: function(data , data1) {
@@ -2012,9 +1958,10 @@ define('chartx/chart/bar/3d/back',
         "canvax/index",
         "canvax/shape/Line",
         "chartx/utils/tools",
-        "canvax/shape/Shapes"
+        "canvax/shape/Shapes",
+        "chartx/utils/colorformat"
     ],
-    function (Canvax, Line, Tools,Shapes) {
+    function (Canvax, Line, Tools, Shapes, ColorFormat) {
         var Back = function (root) {
 
             var opt = root.back;
@@ -2033,14 +1980,11 @@ define('chartx/chart/bar/3d/back',
             this.xOrigin = {                                //原点开始的x轴线
                 enabled: 1,
                 lineWidth: 1,
-                strokeStyle: '#e6e6e6'
+                strokeStyle: '#eee'
             }
-            this.yOrigin = {                                //原点开始的y轴线
-                enabled: 1,
-                lineWidth: 1,
-                strokeStyle: '#e6e6e6',
+            _.extend(this.yOrigin = {}, this.xOrigin, { //原点开始的y轴线
                 biaxial: false
-            }
+            });
             this.xAxis = {                                //x轴上的线
                 enabled: 1,
                 data: [],                      //[{y:100},{}]
@@ -2048,26 +1992,20 @@ define('chartx/chart/bar/3d/back',
                 // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                 lineType: 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
                 lineWidth: 1,
-                strokeStyle: '#f0f0f0', //'#e5e5e5',
+                strokeStyle: '#f5f5f5', //'#e5e5e5',
                 filter: null
-            }
-            this.yAxis = {                                //y轴上的线
-                enabled: 1,
-                data: [],                      //[{x:100},{}]
-                org: null,                    //y轴坐标原点，默认为上面的data[0]
-                // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
-                lineType: 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
-                lineWidth: 1,
-                strokeStyle: '#f0f0f0',//'#e5e5e5',
-                filter: null
-            }
+            };
+
+            _.extend(this.yAxis = {}, this.xAxis);   //y轴上的线
+
+
 
             this.sprite = null;                       //总的sprite
             this.xAxisSp = null;                       //x轴上的线集合
             this.yAxisSp = null;                       //y轴上的线集合
 
-            this.animation = true;
             this.resize = false;
+            this.isFillBackColor = 1;
 
             this.init(opt);
         };
@@ -2099,61 +2037,59 @@ define('chartx/chart/bar/3d/back',
                 this.sprite.removeAllChildren();
                 this.draw(opt);
             },
+            _drawLine: function (_id, _sprite, _context, _style) {
+                var _line = _sprite.getChildById(_id) ||
+                    new Line({
+                        id: _id,
+                        context: {
+                            lineType: _style.lineType,
+                            lineWidth: _style.lineWidth,
+                            strokeStyle: _style.strokeStyle
+                        }
+                    });
+
+                _.extend(_line.context, _context);
+
+                //todo:line的context不能保留额外的值
+                _line.zStart = _context.zStart;
+                _line.zEnd = _context.zEnd;
+                return _line;
+            },
+            drawBackground: function (_id, line1, line2, _globalAlpha, _sprite) {
+                var me = this;
+                var _fillStyle = '#000';
+
+                var lc = line1.context;
+                var lc2 = line2.context;
+                var _pointList = [[lc.xStart, lc.yStart, line1.zStart], [lc.xEnd, lc.yEnd, line1.zEnd], [lc2.xEnd, lc2.yEnd, line2.zEnd], [lc2.xStart, lc2.yStart, line2.zStart]];
+
+                var BackgroundRect = me.root.drawFace(_id, _pointList, _fillStyle, _fillStyle, _globalAlpha, _sprite);
+
+                me.sprite.addChild(BackgroundRect);
+            },
             _widget: function () {
                 var self = this;
-
                 var _depth = this._depth;
                 if (!this.enabled) {
                     return
                 }
-
-
-
+                //Y轴显示不等比例数据时,通过添加背景色划分区域
                 if( self.root && self.root._yAxis && self.root._yAxis.dataSectionGroup ){
                     self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
                     for( var g = 0 , gl=self.root._yAxis.dataSectionGroup.length ; g < gl ; g++ ){
                         var yGroupHeight = self.root._yAxis.yGraphsHeight / gl ;
-                        //var groupRect = new Shapes.Rect({
-                        //    context : {
-                        //        x : 0,
-                        //        y : -yGroupHeight * g,
-                        //        width : self.w,
-                        //        height : -yGroupHeight,
-                        //        fillStyle : "#000",
-                        //        globalAlpha : 0.025 * (g%2)
-                        //    }
-                        //});
 
                         var _id="Back_section_"+g;
-                        var _pointList=[];
                         var _left = 0;
                         var _right = _left + self.w;
                         var _top = -yGroupHeight * g;
                         var _bottom = _top  -yGroupHeight;
-
                         var _pointList=[[_left,_top,0],[_left,_top,_depth],[_right,_top,_depth],[_right,_bottom,_depth],[_left,_bottom,_depth],[_left,_bottom,0]];
+                        var groupRect = self.root.drawFace(_id, _pointList, "#000", "#000", 0.04 * (g % 2), self.yGroupSp);
 
-                        var _polygon = self.yGroupSp.getChildById(_id) ||
-                            new Shapes.Polygon({
-                                id: _id,
-                                pointChkPriority: false,
-                                context: {
-                                    pointList: _pointList,
-                                    fillStyle: "#000",
-                                    globalAlpha :  0.04 * (g%2)
-                                }
-                            });
-
-                        _polygon.context.pointList = _pointList;
-                        _polygon.context.x = 0;
-                        _polygon.context.y = 0;
-
-
-                        self.yGroupSp.addChild( _polygon );
-                    };
-                };
-
-
+                        self.yGroupSp.addChild(groupRect);
+                    }
+                }
 
 
                 self.xAxisSp = self.sprite.getChildById('Back_xAsix') ||
@@ -2165,32 +2101,27 @@ define('chartx/chart/bar/3d/back',
                     new Canvax.Display.Sprite({
                         id: 'Back_yAsix'
                     }),
-                    self.sprite.addChild(self.yAxisSp)
+                    self.sprite.addChild(self.yAxisSp);
 
                 //x轴方向的线集合
                 var arr = self.xAxis.data;
-                for (var a = 0, al = arr.length; a < al; a++) {
-                    var o = arr[a];
-                    var line = self.xAxisSp.getChildById("back_line_xAxis" + a)||
-                        new Line({
-                        id: "back_line_xAxis" + a,
-                        context: {
-                            lineType: self.xAxis.lineType,
-                            lineWidth: self.xAxis.lineWidth,
-                            strokeStyle: self.xAxis.strokeStyle
-                        }
-                    });
+                if (self.xAxis.enabled) {
+                    for (var a = 0, al = arr.length; a < al; a++) {
+                        var o = arr[a];
 
-                    line.context.xStart=0;
-                    line.context.yStart=o.y;
-                    line.context.xEnd=self.w;
-                    line.context.yEnd= o.y;
+                        var _id = "back_line_xAxis_" + a;
+                        var _context = {
+                            xStart: 0,
+                            yStart: o.y,
+                            xEnd: self.w,
+                            yEnd: o.y,
+                            zStart: _depth,
+                            zEnd: _depth
+                        };
 
-                    //todo:line的context不能保留额外的值
-                    line.zStart=_depth;
-                    line.zEnd=_depth;
+                        var line = self._drawLine(_id, self.xAxisSp, _context, self.xAxis);
 
-                    if (self.xAxis.enabled) {
+
                         _.isFunction(self.xAxis.filter) && self.xAxis.filter({
                             layoutData: self.yAxis.data,
                             index: a,
@@ -2198,68 +2129,78 @@ define('chartx/chart/bar/3d/back',
                         });
                         self.xAxisSp.addChild(line);
 
-                        //if (false && this.animation && !this.resize) {
-                        //    line.animate({
-                        //        xStart: 0,
-                        //        xEnd: self.w
-                        //    }, {
-                        //        duration: 500,
-                        //        //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                        //        delay: (al - a) * 80,
-                        //        id: line.id
-                        //    });
-                        //} else {
-                        //    line.context.xStart = 0;
-                        //    line.context.xEnd = self.w;
-                        //}
 
                         //绘制Z轴的线条
-                        var line =self.xAxisSp.getChildById("back_line_xAxis_z" + a)||
-                            new Line({
-                            id: "back_line_xAxis_z" + a,
-                            context: {
-                                lineType: self.xAxis.lineType,
-                                lineWidth: self.xAxis.lineWidth,
-                                strokeStyle: self.xAxis.strokeStyle
-                            }
-                        });
 
-                        line.context.xStart=0;
-                        line.context.yStart=o.y;
-                        line.context.xEnd=0;
-                        line.context.yEnd=o.y;
+                        var _id = "back_line_xAxis_z_" + a;
+                        var _context = {
+                            xStart: 0,
+                            yStart: o.y,
+                            xEnd: 0,
+                            yEnd: o.y,
+                            zStart: 0,
+                            zEnd: _depth
+                        };
 
-                        line.zStart=0;
-                        line.zEnd=_depth;
+                        var line = self._drawLine(_id, self.xAxisSp, _context, self.xAxis);
                         self.xAxisSp.addChild(line);
 
                     }
 
+                    //原点开始的x轴线
+                    if (self.xOrigin.enabled) {
+
+                        var yAxisOrg = (self.xAxis.org == null ? 0 : _.find(self.xAxis.data, function (obj) {
+                            return obj.content == self.xAxis.org
+                        }).y );
+
+
+                        var _id = "Back_xAxisOrg";
+                        var _context = {
+                            xStart: yAxisOrg,
+                            yStart: 0,
+                            xEnd: self.w,
+                            yEnd: yAxisOrg,
+                            zStart: 0,
+                            zEnd: 0
+                        };
+
+                        var line = self._drawLine(_id, self.xAxisSp, _context, self.xOrigin);
+                        self.xAxisSp.addChild(line);
+                    }
+
+                    //X轴背景
+                    if (self.isFillBackColor) {
+                        var _id = 'Back_xBackground';
+                        var line1 = self.xAxisSp.getChildById('Back_xAxisOrg');
+                        var line2 = self.xAxisSp.getChildById('back_line_xAxis_0');
+                        var _globalAlpha = 0.04;
+                        self.drawBackground(_id, line1, line2, _globalAlpha, self.sprite);
+
+                    }
                 }
-                ;
 
                 //y轴方向的线集合
-                var arr = self.yAxis.data
-                for (var a = 0, al = arr.length; a < al; a++) {
-                    var o = arr[a]
-                    var line = self.yAxisSp.getChildById('back_line_yAxis'+a)||
-                        new Line({
-                            id:'back_line_yAxis'+a,
-                        context: {
-                            lineType: self.yAxis.lineType,
-                            lineWidth: self.yAxis.lineWidth,
-                            strokeStyle: self.yAxis.strokeStyle,
-                            visible: o.x ? true : false
-                        }
-                    })
-                    line.context.xStart= o.x;
-                    line.context.yStart=0;
-                    line.context.xEnd= o.x;
-                    line.context.yEnd=-self.h;
-                    line.zStart=_depth;
-                    line.zEnd=_depth;
+                var arr = self.yAxis.data;
+                if (self.yAxis.enabled) {
+                    arr.unshift({x: 0.5}); //增加最左侧线条
+                    arr.push({x: self.w}); //增加最右侧线条
+                    for (var a = 0, al = arr.length; a < al; a++) {
+                        var o = arr[a];
 
-                    if (self.yAxis.enabled) {
+                        var _id = "back_line_yAxis_" + a;
+                        var _context = {
+                            xStart: o.x,
+                            yStart: 0,
+                            xEnd: o.x,
+                            yEnd: -self.h,
+                            zStart: _depth,
+                            zEnd: _depth
+                        };
+
+                        var line = self._drawLine(_id, self.yAxisSp, _context, self.yAxis);
+                        line.context.visible = o.x ? true : false;
+
                         _.isFunction(self.yAxis.filter) && self.yAxis.filter({
                             layoutData: self.xAxis.data,
                             index: a,
@@ -2267,116 +2208,71 @@ define('chartx/chart/bar/3d/back',
                         });
                         self.yAxisSp.addChild(line);
 
-                        //绘制Z轴的线条
-                        var line =self.yAxisSp.getChildById('back_line_yAxis_z'+a)||
-                            new Line({
-                                id:'back_line_yAxis_z'+a,
-                            context: {
-                                lineType: self.yAxis.lineType,
-                                lineWidth: self.yAxis.lineWidth,
-                                strokeStyle: self.yAxis.strokeStyle,
-                                visible: o.x ? true : false
-                            }
-                        })
-                        line.context.xStart= o.x;
-                        line.context.yStart=0;
-                        line.context.xEnd= o.x;
-                        line.context.yEnd=0;
-                        line.zStart=0;
-                        line.zEnd=_depth;
+
+                        var _id = "back_line_yAxis_z_" + a;
+                        var _context = {
+                            xStart: o.x,
+                            yStart: 0,
+                            xEnd: o.x,
+                            yEnd: 0,
+                            zStart: 0,
+                            zEnd: _depth
+                        };
+
+                        var line = self._drawLine(_id, self.yAxisSp, _context, self.yAxis);
+                        line.context.visible = o.x ? true : false;
+
 
                         self.yAxisSp.addChild(line);
                     }
-                }
-                var line = self.yAxisSp.getChildById('back_line_yAxis_00')||
-                    new Line({
-                        id:'back_line_yAxis_00',
-                        context: {
-                            lineType: self.yAxis.lineType,
-                            lineWidth: self.yAxis.lineWidth,
-                            strokeStyle: self.yAxis.strokeStyle,
-                            visible: o.x ? true : false
-                        }
-                    })
-                line.context.xStart= 0;
-                line.context.yStart=0;
-                line.context.xEnd= 0;
-                line.context.yEnd=-self.h;
-                line.zStart=_depth;
-                line.zEnd=_depth;
-                self.yAxisSp.addChild(line);
-                ;
 
-                //原点开始的y轴线
-                var xAxisOrg = (self.yAxis.org == null ? 0 : _.find(self.yAxis.data, function (obj) {
-                    return obj.content == self.yAxis.org
-                }).x );
+                    //原点开始的y轴线
+                    if (self.yOrigin.enabled) {
+                        var yAxisOrg = (self.yAxis.org == null ? 0 : _.find(self.yAxis.data, function (obj) {
+                            return obj.content == self.yAxis.org
+                        }).x );
+                        var _id = "Back_yAxisOrg";
+                        var _context = {
+                            xStart: yAxisOrg,
+                            yStart: 0,
+                            xEnd: yAxisOrg,
+                            yEnd: -self.h,
+                            zStart: 0,
+                            zEnd: 0
+                        };
 
-                //self.yAxis.org = xAxisOrg;
-                var line = self.sprite.getChildById('Back_xAxisOrg')||
-                    new Line({
-                        id:'Back_xAxisOrg',
-                    context: {
-                        lineWidth: self.yOrigin.lineWidth,
-                        strokeStyle: self.yOrigin.strokeStyle
+                        var line = self._drawLine(_id, self.yAxisSp, _context, self.yOrigin);
+                        self.yAxisSp.addChild(line);
                     }
-                });
-                line.context.xStart= xAxisOrg;
-                line.context.yStart=0;
-                line.context.xEnd= xAxisOrg;
-                line.context.yEnd=-self.h;
-                line.zStart=0;
-                line.zEnd=0;
+                    //Y轴背景
+                    if (self.isFillBackColor) {
+                        var _id = 'Back_yBackground';
+                        var line1 = self.yAxisSp.getChildById('Back_yAxisOrg');
+                        var line2 = self.yAxisSp.getChildById('back_line_yAxis_0');
+                        var _globalAlpha = 0.1;
+                        self.drawBackground(_id, line1, line2, _globalAlpha, self.sprite);
+                    }
 
-                if (self.yOrigin.enabled)
-                    self.sprite.addChild(line)
+                }
 
                 if (self.yOrigin.biaxial) {
-                    var lineR = self.sprite.getChildById('Back_biaxial')||
-                        new Line({
-                        id:'Back_biaxial',
-                        context: {
-                            lineWidth: self.yOrigin.lineWidth,
-                            strokeStyle: self.yOrigin.strokeStyle
-                        }
-                    })
+                    //todo 暂不支持Y轴第二坐标
+                }
 
-                    line.context.xStart= self.w;
-                    line.context.yStart=0;
-                    line.context.xEnd= self.w;
-                    line.context.yEnd=-self.h;
-                    lineR.zStart=0;
-                    lineR.zEnd=0;
-                    if (self.yOrigin.enabled)
-                        self.sprite.addChild(lineR)
+                //back背景
+                if (self.isFillBackColor) {
+                    var _id = 'Back_Background';
+                    var _num = self.xAxis.data.length - 1;
+                    var line1 = self.xAxisSp.getChildById('back_line_xAxis_' + _num);
+                    var line2 = self.xAxisSp.getChildById('back_line_xAxis_0');
+                    var _globalAlpha = 0.02;
+                    self.drawBackground(_id, line1, line2, _globalAlpha, self.sprite);
 
                 }
 
-                //原点开始的x轴线
-                var yAxisOrg = (self.xAxis.org == null ? 0 : _.find(self.xAxis.data, function (obj) {
-                    return obj.content == self.xAxis.org
-                }).y );
-
-                //self.xAxis.org = yAxisOrg;
-                var line = self.sprite.getChildById("Back_yAxisOrg")||
-                    new Line({
-                    id:"Back_yAxisOrg",
-                    context: {
-                        lineWidth: self.xOrigin.lineWidth,
-                        strokeStyle: self.xOrigin.strokeStyle
-                    }
-                })
-                line.context.xStart= yAxisOrg;
-                line.context.yStart=0;
-                line.context.xEnd= self.w;
-                line.context.yEnd=yAxisOrg;
-                line.zStart=0;
-                line.zEnd=0;
-                if (self.xOrigin.enabled)
-                    self.sprite.addChild(line)
             }
 
-        };
+        }
 
         return Back;
     });
@@ -2418,6 +2314,7 @@ define("chartx/chart/bar/3d",
                 this._node = node;
                 this._data = data;
                 this._opts = opts;
+                this.padding.top = 20;
 
                 this.dataZoom = {
                     enabled: false,
@@ -2430,6 +2327,8 @@ define("chartx/chart/bar/3d",
                     this.dataZoom.enabled = true;
                     this.padding.bottom += (opts.dataZoom.height || 46);
                 }
+
+                this.mode = 0;     //0:正交投影   1:透视投影  默认正交投影
 
 
                 if (opts.proportion) {
@@ -2464,13 +2363,15 @@ define("chartx/chart/bar/3d",
                 //初始化相机
                 this._eye = Vector3.fromValues(0, 0, this.height * 2);
                 this._rotation = {
-                    x: 25,
-                    y: 25
+                    x: 15,
+                    y: 15
                 };
                 _.extend(this._rotation, this._opts.rotation);
                 this._rotationCamera();
                 //调整相机位置
-                this._adjustmentFitPosition();
+                if (this.mode == 1) {
+                    this._adjustmentFitPosition();
+                }
 
 
 
@@ -2481,22 +2382,39 @@ define("chartx/chart/bar/3d",
                 //初始化相机
                 this._eye = Vector3.fromValues(0, 0, this.height);
                 this._rotation = {
-                    x: 25,
-                    y: 25
+                    x: 15,
+                    y: 15
                 };
-                _.extend(this._rotation, obj.options.rotation);
+                //if(obj.options.rotation){
+                _.extend(this, obj.options);
+                //}
                 this._rotationCamera();
                 //调整相机位置
-                this._adjustmentFitPosition();
+                if (this.mode == 1) {
+                    this._adjustmentFitPosition();
+                }
             },
             _initProjection:function(){
-                //透视矩阵
-                var fovy = 45 * Math.PI / 180;
-                var aspect = this.width / this.height;
-                var near = 0.1;
-                var far = 1000;
-                Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
+                if (this.mode == 1) {
+                    //透视矩阵
+                    var fovy = 45 * Math.PI / 180;
+                    var aspect = this.width / this.height;
+                    var near = 0.1;
+                    var far = 1000;
+                    Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
+                } else {
 
+                    var left = -1 * (this.width * 0.5 + this.padding.left);
+                    var right = this.width * 0.5 + this.padding.right;
+
+                    var top = this.height * 0.5 + this.padding.top;
+                    var bottom = -1 * (this.height * 0.5 + this.padding.bottom);
+
+                    var near = 1000;
+                    var far = -1000;
+
+                    Matrix.ortho(this._projectMatrix, left, right, bottom, top, near, far);
+                }
             },
 
             _initCamera: function () {
@@ -2517,8 +2435,11 @@ define("chartx/chart/bar/3d",
                 var length=Vector3.length(this._eye);
                 var origin = Vector3.fromValues(0, 0, length);
 
-                rotateX = rotateX !== undefined ? Math.max(10, Math.min(rotateX, 45)) : 25;
-                rotateY = rotateY !== undefined ? Math.max(10, Math.min(rotateY, 45)) : 25;
+                if (me.mode == 1) {
+                    rotateX = rotateX !== undefined ? Math.max(10, Math.min(rotateX, 45)) : 25;
+                    rotateY = rotateY !== undefined ? Math.max(10, Math.min(rotateY, 45)) : 25;
+
+                }
 
 
                 Quaternion.rotateY(rotation, rotation, rotateY * Math.PI / 180);
@@ -2595,23 +2516,26 @@ define("chartx/chart/bar/3d",
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.update({
-                    animation: false
-                } , this.dataFrame.xAxis);
+                this._xAxis.resetData(this.dataFrame.xAxis, this.xAxis);
+                //this._xAxis.reset({
+                //    animation: false
+                //} , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
-                        animation: false
-                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {});
+                    //this._yAxis.reset({
+                    //    animation: false
+                    //} , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.update({
-                        animation: false
-                    } , this.dataFrame.yAxis);
+                    this._yAxis.resetData(this.dataFrame.yAxis, this.yAxis);
+                    //this._yAxis.reset({
+                    //    animation: false
+                    //} , this.dataFrame.yAxis);
                 }
-                ;
+
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function () {
                     //callback
@@ -2987,9 +2911,10 @@ define("chartx/chart/bar/3d",
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
-                        animation: false
-                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {});
+                    //this._yAxis.reset({
+                    //    animation: false
+                    //} , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._yAxis.setX(this._yAxis.pos.x);
                 }
                 ;
@@ -3100,7 +3025,7 @@ define("chartx/chart/bar/3d",
                 var yArr = _yAxis.dataOrg;
                 var hLen = yArr.length; //bar的横向分组length
 
-                var xDis1 = _xAxis.xDis1;
+                var xDis1 = _xAxis.xDis;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2 = xDis1 / (hLen + 1);
 
@@ -3195,7 +3120,6 @@ define("chartx/chart/bar/3d",
                 ;
                 //均值
                 this.dataFrame.yAxis.center = center;
-
                 return {
                     data: tmpData
                 };
@@ -3249,7 +3173,7 @@ define("chartx/chart/bar/3d",
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
                     count: me._data.length - 1,
-                    //h : me._xAxis.h,
+                    //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
                         y: me._xAxis.pos.y + me._xAxis.h
@@ -3269,7 +3193,7 @@ define("chartx/chart/bar/3d",
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
-                        me._xAxis.update({
+                        me._xAxis.reset({
                             animation: false
                         } , me.dataFrame.xAxis );
 
@@ -3597,6 +3521,25 @@ define("chartx/chart/bar/3d",
 
 
             },
+            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle, _globalAlpha, sprite) {
+                var _polygon = sprite.getChildById(_id) ||
+                    new Shapes.Polygon({
+                        id: _id,
+                        pointChkPriority: false,
+                        context: {
+                            pointList: _pointList,
+                            strokeStyle: _strokeStyle,
+                            fillStyle: _fillStyle,
+                            globalAlpha: _globalAlpha
+                        }
+                    });
+
+                _polygon.context.pointList = _pointList;
+                _polygon.context.x = 0;
+                _polygon.context.y = 0;
+
+                return _polygon;
+            },
 
             //projection to screen
             //基本变换过程为:local ===> screen ===> world ===> projection
@@ -3618,6 +3561,7 @@ define("chartx/chart/bar/3d",
                     p[z] = out[2];
 
                 }
+
                 return p;
 
             },
@@ -3789,6 +3733,78 @@ define("chartx/chart/bar/3d",
                     _shapes.context.x = pos.x;
                     _shapes.context.y = pos.y;
                 }
+                _shapes.xyToInt=false;
+                _shapes.context.xyToInt=false;
+            },
+            _depthTest: function (sprite) {
+
+                (function (_sprite) {
+                    var getLeaf = arguments.callee;
+                    if (_sprite.children && _sprite.children.length > 0) {
+                        _.each(_sprite.children, function (a, i) {
+                            getLeaf(a);
+                        })
+                    } else {
+                        var _parentSprite = _sprite.parent;
+
+                        if (_sprite instanceof Shapes.Polygon && ~_parentSprite.id.indexOf('bar_')) {
+
+                            var _frontFace = null;
+                            var currFace = _sprite.context.pointList;
+                            _.each(_parentSprite.children, function (o, i) {
+                                if (~o.id.indexOf('front')) {
+                                    _frontFace = o.context.pointList;
+                                }
+                            });
+
+                            //判断该面的Z值为负数的点是否在前面的范围内
+                            if (~_sprite.id.indexOf('left') || ~_sprite.id.indexOf('right')) {
+                                var isCover = false;
+
+
+                                var p1 = Vector3.fromValues(currFace[1][0], currFace[1][1], 0);
+                                if (~_sprite.id.indexOf('left')) {
+                                    var p2 = Vector3.fromValues(_frontFace[0][0], _frontFace[0][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[3][0], _frontFace[3][1], 0);
+                                }
+                                if (~_sprite.id.indexOf('right')) {
+                                    var p2 = Vector3.fromValues(_frontFace[1][0], _frontFace[1][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[2][0], _frontFace[2][1], 0);
+                                }
+
+
+                                var _v1 = Vector3.create();
+                                var _v2 = Vector3.create();
+                                var _vc = Vector3.create();
+                                //顶面指向Z轴负半轴的向量
+                                Vector3.sub(_v1, p1, p2);
+                                Vector3.normalize(_v1, _v1);
+                                //前面指向Y轴正半轴的向量
+                                Vector3.sub(_v2, p2, p3);
+                                Vector3.normalize(_v2, _v2);
+
+                                //二维空间中,XY的叉积指向Z轴的结果
+                                Vector3.cross(_vc, _v1, _v2);
+
+                                //根据不同的侧面判断Z的大小,取得是否在Y轴的左侧或右侧
+                                if (~_sprite.id.indexOf('left') && _vc[2] < 0) {
+                                    isCover = true;
+                                } else if (~_sprite.id.indexOf('right') && _vc[2] > 0) {
+                                    isCover = true;
+                                }
+
+                                if (isCover) {
+                                    _sprite.context.visible = false;
+                                }else{
+                                    _sprite.context.visible = true;
+                                }
+                            }
+
+                        }
+
+                    }
+                })(sprite);
+
             },
             _to3d: function (sprite) {
                 //noTransform  不做转换
@@ -3810,7 +3826,7 @@ define("chartx/chart/bar/3d",
 
                     }
                 })(sprite)
-                me._graphs._depthTest(sprite);
+                me._depthTest(sprite);
             }
 
 

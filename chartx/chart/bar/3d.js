@@ -35,6 +35,7 @@ define("chartx/chart/bar/3d",
                 this._node = node;
                 this._data = data;
                 this._opts = opts;
+                this.padding.top = 20;
 
                 this.dataZoom = {
                     enabled: false,
@@ -47,6 +48,8 @@ define("chartx/chart/bar/3d",
                     this.dataZoom.enabled = true;
                     this.padding.bottom += (opts.dataZoom.height || 46);
                 }
+
+                this.mode = 0;     //0:正交投影   1:透视投影  默认正交投影
 
 
                 if (opts.proportion) {
@@ -81,13 +84,15 @@ define("chartx/chart/bar/3d",
                 //初始化相机
                 this._eye = Vector3.fromValues(0, 0, this.height * 2);
                 this._rotation = {
-                    x: 25,
-                    y: 25
+                    x: 15,
+                    y: 15
                 };
                 _.extend(this._rotation, this._opts.rotation);
                 this._rotationCamera();
                 //调整相机位置
-                this._adjustmentFitPosition();
+                if (this.mode == 1) {
+                    this._adjustmentFitPosition();
+                }
 
 
 
@@ -98,22 +103,39 @@ define("chartx/chart/bar/3d",
                 //初始化相机
                 this._eye = Vector3.fromValues(0, 0, this.height);
                 this._rotation = {
-                    x: 25,
-                    y: 25
+                    x: 15,
+                    y: 15
                 };
-                _.extend(this._rotation, obj.options.rotation);
+                //if(obj.options.rotation){
+                _.extend(this, obj.options);
+                //}
                 this._rotationCamera();
                 //调整相机位置
-                this._adjustmentFitPosition();
+                if (this.mode == 1) {
+                    this._adjustmentFitPosition();
+                }
             },
             _initProjection:function(){
-                //透视矩阵
-                var fovy = 45 * Math.PI / 180;
-                var aspect = this.width / this.height;
-                var near = 0.1;
-                var far = 1000;
-                Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
+                if (this.mode == 1) {
+                    //透视矩阵
+                    var fovy = 45 * Math.PI / 180;
+                    var aspect = this.width / this.height;
+                    var near = 0.1;
+                    var far = 1000;
+                    Matrix.perspective(this._projectMatrix, fovy, aspect, near, far);
+                } else {
 
+                    var left = -1 * (this.width * 0.5 + this.padding.left);
+                    var right = this.width * 0.5 + this.padding.right;
+
+                    var top = this.height * 0.5 + this.padding.top;
+                    var bottom = -1 * (this.height * 0.5 + this.padding.bottom);
+
+                    var near = 1000;
+                    var far = -1000;
+
+                    Matrix.ortho(this._projectMatrix, left, right, bottom, top, near, far);
+                }
             },
 
             _initCamera: function () {
@@ -134,8 +156,11 @@ define("chartx/chart/bar/3d",
                 var length=Vector3.length(this._eye);
                 var origin = Vector3.fromValues(0, 0, length);
 
-                rotateX = rotateX !== undefined ? Math.max(10, Math.min(rotateX, 45)) : 25;
-                rotateY = rotateY !== undefined ? Math.max(10, Math.min(rotateY, 45)) : 25;
+                if (me.mode == 1) {
+                    rotateX = rotateX !== undefined ? Math.max(10, Math.min(rotateX, 45)) : 25;
+                    rotateY = rotateY !== undefined ? Math.max(10, Math.min(rotateY, 45)) : 25;
+
+                }
 
 
                 Quaternion.rotateY(rotation, rotation, rotateY * Math.PI / 180);
@@ -212,23 +237,26 @@ define("chartx/chart/bar/3d",
                 this._data = data;
 
                 this.dataFrame = this._initData(data, this);
-                this._xAxis.update({
-                    animation: false
-                } , this.dataFrame.xAxis);
+                this._xAxis.resetData(this.dataFrame.xAxis, this.xAxis);
+                //this._xAxis.reset({
+                //    animation: false
+                //} , this.dataFrame.xAxis);
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
-                        animation: false
-                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {});
+                    //this._yAxis.reset({
+                    //    animation: false
+                    //} , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._dataZoom.sprite.destroy();
                     this._initDataZoom();
                 } else {
-                    this._yAxis.update({
-                        animation: false
-                    } , this.dataFrame.yAxis);
+                    this._yAxis.resetData(this.dataFrame.yAxis, this.yAxis);
+                    //this._yAxis.reset({
+                    //    animation: false
+                    //} , this.dataFrame.yAxis);
                 }
-                ;
+
                 this._graphs.resetData(this._trimGraphs());
                 this._graphs.grow(function () {
                     //callback
@@ -604,9 +632,10 @@ define("chartx/chart/bar/3d",
 
                 if (this.dataZoom.enabled) {
                     this.__cloneBar = this._getCloneBar();
-                    this._yAxis.update({
-                        animation: false
-                    } , this.__cloneBar.thumbBar.dataFrame.yAxis);
+                    this._yAxis.resetData(this.__cloneBar.thumbBar.dataFrame.yAxis, {});
+                    //this._yAxis.reset({
+                    //    animation: false
+                    //} , this.__cloneBar.thumbBar.dataFrame.yAxis);
                     this._yAxis.setX(this._yAxis.pos.x);
                 }
                 ;
@@ -717,7 +746,7 @@ define("chartx/chart/bar/3d",
                 var yArr = _yAxis.dataOrg;
                 var hLen = yArr.length; //bar的横向分组length
 
-                var xDis1 = _xAxis.xDis1;
+                var xDis1 = _xAxis.xDis;
                 //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
                 var xDis2 = xDis1 / (hLen + 1);
 
@@ -812,7 +841,6 @@ define("chartx/chart/bar/3d",
                 ;
                 //均值
                 this.dataFrame.yAxis.center = center;
-
                 return {
                     data: tmpData
                 };
@@ -866,7 +894,7 @@ define("chartx/chart/bar/3d",
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
                     count: me._data.length - 1,
-                    //h : me._xAxis.h,
+                    //h : me._xAxis.height,
                     pos: {
                         x: me._xAxis.pos.x,
                         y: me._xAxis.pos.y + me._xAxis.h
@@ -886,7 +914,7 @@ define("chartx/chart/bar/3d",
                         me.dataZoom.range.start = parseInt(range.start);
                         me.dataZoom.range.end = parseInt(range.end);
                         me.dataFrame = me._initData(me._data, this);
-                        me._xAxis.update({
+                        me._xAxis.reset({
                             animation: false
                         } , me.dataFrame.xAxis );
 
@@ -1214,6 +1242,25 @@ define("chartx/chart/bar/3d",
 
 
             },
+            drawFace: function (_id, _pointList, _fillStyle, _strokeStyle, _globalAlpha, sprite) {
+                var _polygon = sprite.getChildById(_id) ||
+                    new Shapes.Polygon({
+                        id: _id,
+                        pointChkPriority: false,
+                        context: {
+                            pointList: _pointList,
+                            strokeStyle: _strokeStyle,
+                            fillStyle: _fillStyle,
+                            globalAlpha: _globalAlpha
+                        }
+                    });
+
+                _polygon.context.pointList = _pointList;
+                _polygon.context.x = 0;
+                _polygon.context.y = 0;
+
+                return _polygon;
+            },
 
             //projection to screen
             //基本变换过程为:local ===> screen ===> world ===> projection
@@ -1235,6 +1282,7 @@ define("chartx/chart/bar/3d",
                     p[z] = out[2];
 
                 }
+
                 return p;
 
             },
@@ -1406,6 +1454,78 @@ define("chartx/chart/bar/3d",
                     _shapes.context.x = pos.x;
                     _shapes.context.y = pos.y;
                 }
+                _shapes.xyToInt=false;
+                _shapes.context.xyToInt=false;
+            },
+            _depthTest: function (sprite) {
+
+                (function (_sprite) {
+                    var getLeaf = arguments.callee;
+                    if (_sprite.children && _sprite.children.length > 0) {
+                        _.each(_sprite.children, function (a, i) {
+                            getLeaf(a);
+                        })
+                    } else {
+                        var _parentSprite = _sprite.parent;
+
+                        if (_sprite instanceof Shapes.Polygon && ~_parentSprite.id.indexOf('bar_')) {
+
+                            var _frontFace = null;
+                            var currFace = _sprite.context.pointList;
+                            _.each(_parentSprite.children, function (o, i) {
+                                if (~o.id.indexOf('front')) {
+                                    _frontFace = o.context.pointList;
+                                }
+                            });
+
+                            //判断该面的Z值为负数的点是否在前面的范围内
+                            if (~_sprite.id.indexOf('left') || ~_sprite.id.indexOf('right')) {
+                                var isCover = false;
+
+
+                                var p1 = Vector3.fromValues(currFace[1][0], currFace[1][1], 0);
+                                if (~_sprite.id.indexOf('left')) {
+                                    var p2 = Vector3.fromValues(_frontFace[0][0], _frontFace[0][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[3][0], _frontFace[3][1], 0);
+                                }
+                                if (~_sprite.id.indexOf('right')) {
+                                    var p2 = Vector3.fromValues(_frontFace[1][0], _frontFace[1][1], 0);
+                                    var p3 = Vector3.fromValues(_frontFace[2][0], _frontFace[2][1], 0);
+                                }
+
+
+                                var _v1 = Vector3.create();
+                                var _v2 = Vector3.create();
+                                var _vc = Vector3.create();
+                                //顶面指向Z轴负半轴的向量
+                                Vector3.sub(_v1, p1, p2);
+                                Vector3.normalize(_v1, _v1);
+                                //前面指向Y轴正半轴的向量
+                                Vector3.sub(_v2, p2, p3);
+                                Vector3.normalize(_v2, _v2);
+
+                                //二维空间中,XY的叉积指向Z轴的结果
+                                Vector3.cross(_vc, _v1, _v2);
+
+                                //根据不同的侧面判断Z的大小,取得是否在Y轴的左侧或右侧
+                                if (~_sprite.id.indexOf('left') && _vc[2] < 0) {
+                                    isCover = true;
+                                } else if (~_sprite.id.indexOf('right') && _vc[2] > 0) {
+                                    isCover = true;
+                                }
+
+                                if (isCover) {
+                                    _sprite.context.visible = false;
+                                }else{
+                                    _sprite.context.visible = true;
+                                }
+                            }
+
+                        }
+
+                    }
+                })(sprite);
+
             },
             _to3d: function (sprite) {
                 //noTransform  不做转换
@@ -1427,7 +1547,7 @@ define("chartx/chart/bar/3d",
 
                     }
                 })(sprite)
-                me._graphs._depthTest(sprite);
+                me._depthTest(sprite);
             }
 
 

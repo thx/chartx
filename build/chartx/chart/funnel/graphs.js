@@ -4,39 +4,21 @@ define(
         "canvax/index",
         "canvax/shape/Polygon",
         "canvax/animation/Tween",
-        "chartx/utils/tools"
+        "chartx/utils/tools",
+        "chartx/chart/theme",
+        'chartx/utils/gradient-color',
     ],
-    function(Canvax , Polygon , Tween , Tools ){
+    function(Canvax , Polygon , Tween , Tools, Theme, GradientColor){
  
         var Graphs = function(opt){
 
-            this.w = 0;
-            this.h = 0;
+            this.colors = Theme.colors
 
-            this.data = [
-                {
-                   pointList   : [[24,5], [550,5], [487,49], [87,49]],
-                   fillStyle   : '#B6A2DF',
-                   strokeStyle : '#B6A2DF',
-                   lineWidth   : 1
-                },
+            this.text = {
+                fontSize : 12,
+                fillStyle:'#ffffff'
+            }   
 
-                {
-                    pointList  : [[90,61],[480,61],[420,101],[153,101]],
-                    fillStyle  : '#59bef0',
-                    strokeStyle: '#59bef0',
-                    lineWidth  : 1 
-                }
-            ]
-
-            this.back = {
-                pointList    : [[0,0],[500,0],[250,280]],
-                strokeStyle  : '#cccccc',
-                lineWidth    : 1
-            };
-
-            this.eventEnabled = true;
-    
             this.sprite = null ;
     
             _.deepExtend(this , opt);
@@ -55,24 +37,56 @@ define(
                 this.sprite.context.y = $n
             },
             draw : function(data , opt){
-                var me    = this;
-                _.deepExtend(this , opt);
-    
-                var back = new Polygon({         //背景
-                    id : "back",
-                    context : this.back
-                })
+                var me  = this;
+                me.data = data
 
+                _.deepExtend(this , opt);
+                
+                var colors = me.colors
+                if(!_.isArray(colors)){
+                    var colors = new GradientColor(colors.first, colors.last, me.data.length)
+                    colors.push(colors.end)
+                }
 
                 _.each(me.data, function(data, i){
+                    var sprite = new Canvax.Display.Sprite({ id : i });
+                    me.sprite.addChild(sprite)
+
+                    //画多边形
+                    data.polygon.fillStyle = colors[i]
+
                     var polygon = new Polygon({
-                        id : 'polygon_' + i,
-                        context : data
+                        id : i,
+                        context : data.polygon
                     })
-                    me.sprite.addChild(polygon)
+                    polygon.iNode = i
+                    polygon.hoverClone = false
+                    sprite.addChild(polygon)
+
+                    polygon.on("panstart mouseover", function(e){
+                        e.eventInfo = me._getInfoHandler(e);
+                        this.context.globalAlpha = 0.7;
+                        // this.parent.getChildAt(1).context.fontSize = 20
+                    });
+                    polygon.on("panmove mousemove", function(e){
+                        e.eventInfo = me._getInfoHandler(e);
+                    });
+                    polygon.on("panend mouseout", function(e){
+                        e.eventInfo = {};
+                        this.context.globalAlpha = 1
+                    });
+
+                    //写文字
+                    data.text.y -= me.text.fontSize / 2 + 2
+                    data.text.textAlign = 'center'
+                    data.text.fontSize = me.text.fontSize
+                    data.text.fillStyle = me.text.fillStyle
+                    var text = new Canvax.Display.Text(data.text.label, {
+                        context: data.text
+                    });
+                    sprite.addChild(text)
                 });
 
-                me.sprite.addChild(back)
 
                 me.sprite.context.x = me.pos.x;
                 me.sprite.context.y = me.pos.y;
@@ -86,19 +100,17 @@ define(
             _growEnd : function(){
 
             },
-            _getInfoHandler:function( target ){
-
+            _getInfoHandler:function( e ){
+                var target = e.target;
+                return {
+                    iNode         : target.iNode,
+                    nodesInfoList : []
+                };
             },
             _getNodeInfo : function(){
                
             },
             _fireHandler:function(e){
-                // e.params  = {
-                //     iGroup : e.tipsInfo.iGroup,
-                //     iNode  : e.tipsInfo.iNode,
-                //     iLay   : e.tipsInfo.iLay
-                // }
-                // this.root.fire( e.type , e );
             }
         }; 
     

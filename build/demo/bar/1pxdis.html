@@ -34,7 +34,7 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
+    ["xfield","bottom" ,"top","click"],
     [ 1      , 101 , 20 , 33    ],
     [ 2      , 67  , 51 , 26    ],
     [ 3      , 100 , 50 , 150    ],
@@ -51,18 +51,98 @@ var data= [
     [ 3      , 100 , 50 , 150    ]
 
 ];
+var data = [
+  {xfield : 111, bottom: 32,  top:56, click:333},
+  {xfield : 112, bottom: 11,  top:22, click:333},
+  {xfield : 113, bottom: 21,  top:122,click:333},
+  {xfield : 114, bottom: 232, top:262,click:333},
+  {xfield : 115, bottom: 43,  top:233,click:333},
+  {xfield : 116, bottom: 23,  top:343,click:333},
+  {xfield : 117, bottom: 33,  top:226,click:333},
+  {xfield : 118, bottom: 222, top:175,click:333},
+  {xfield : 119, bottom: 263, top:177,click:333},
+  {xfield : 120, bottom: 46,  top:88, click:333},
+  {xfield : 121, bottom: 54,  top:97, click:333},
+  {xfield : 122, bottom: 34,  top:58, click:333},
+  {xfield : 123, bottom: 111, top:84, click:333},
+  {xfield : 124, bottom: 151, top:274,click:333},
+  {xfield : 125, bottom: 161, top:137,click:333},
+  {xfield : 126, bottom: 121, top:222,click:333},
+  {xfield : 127, bottom: 211, top:345,click:333},
+  {xfield : 128, bottom: 100, top:274,click:333},
+  {xfield : 129, bottom: 232, top:89, click:333},
+  {xfield : 130, bottom: 64,  top:211,click:333},
+  {xfield : 131, bottom: 292, top:234,click:333},
+  {xfield : 132, bottom: 199, top:76, click:333},
+  {xfield : 133, bottom: 342, top:99, click:333},
+  {xfield : 134, bottom: 123, top:83, click:333},
+  {xfield : 135, bottom: 55,  top:221,click:333}
+];
+
 var options = {
     yAxis : {
-        field : ["uv"]
+        field : [["bottom","top"]]
     },
     xAxis : {
-        field : ["xfield"]
+        field : ["xfield"],
+        text : {
+            rotation : 45
+        },
+        filter : function( e ){
+            if(e.index %2){
+                e.txt.context.fillStyle = "#cdcdcd"
+            } else {
+                e.txt.context.fillStyle = "#999999"
+            }
+        }
     },
     graphs : {
         bar : {
+            fillStyle : ["" , "#90b601"],
             width : function( dis1 , dis2 ){
                 return dis1 - 1;
+            },
+            radius : 0,
+            filter : function( obj , graphs ){
+                
+                if( obj.field == "bottom" ){
+                    this.context.visible = false
+                } else {
+                    if(obj.xAxis.value == "111" || obj.xAxis.value == "112" || obj.xAxis.value == "113"){
+                        this.context.fillStyle = "#999"
+                    }
+                    if( obj.xAxis.value == "114" ){
+                        this.context.fillStyle = "#f98301"
+                    }
+                }
             }
+        }
+    },
+    back : {
+        xAxis : {
+            enabled : false
+        },
+        yAxis : {
+            enabled : true,
+            filter : function( obj , back ){
+                this.context.x += back.yAxis.xDis/2
+            }
+        },
+        fill : {
+            fillStyle: "#f6f6f6",
+            globalAlpha : 1
+        }
+    },
+    tips : {
+        content : function(e){
+            var str = "";
+            for( var i = 0 , l=e.nodesInfoList.length; i < l; i++ ){
+                var node = e.nodesInfoList[i];
+                if( node.field != "bottom" ){
+                    str += node.field+":"+node.value;
+                }
+            }
+            return str;
         }
     }
 }   

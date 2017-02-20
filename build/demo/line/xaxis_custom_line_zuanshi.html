@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- line</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , undefined , 120 , 33    ],
+    [ 2      , 0   , 151 , 26    ],
+    [ 6      , 23   , 145 , 243    ],
+    [ 16      , 288  , 254 , 39    ],
+    [ 27      , 55  , 168 , 65    ],
+    [ 28      , undefined   ,183 , 51    ]
+];
+
+var options = {
+    legend:{
+        enabled:true
+    },
+    yAxis : {
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : ["uv" , "pv"]
+    },
+    xAxis : {
+        field : "xfield",
+        layoutType: "proportion",
+        dataSection: [ 1 , 6 , 10 , 23 , 28 ]
+    },
+    graphs: {
+        node : {
+            enabled : false
+        },
+        eventEnabled: false
+    },
+    tips: {
+        node : {
+            enabled: false
+        },
+        line : {
+            enabled: false
+        }
+    }
+};
+
+
+
+
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
+    window.chart = chart; 
+    var g = chart._graphs;
+
+    chart.on("complete" , function(){
+        chart.createMarkColumn( 6 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#829ae0"
+            }
+        }); 
+        
+        var markLineMid = chart.createMarkColumn( 10 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#d1927f"
+            }
+        });  
+        
+        chart.createMarkColumn( 23 , {
+            line: {
+                lineWidth : 2,
+                strokeStyle : "#d5d5d5"
+            }
+        });
+
+        setTimeout(function(){
+            chart.reset({options : {
+                xAxis : {
+                    dataSection : [ 1 , 6 , 20 , 23 , 28 ]
+                }
+            }});
+
+            chart.moveMarkColumnTo( markLineMid , 20 );
+
+        } , 1000);
+    });
+});
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（line chart）- 基础折线图</h4>
+                <p>
+                    联系人：@逢春 @释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>

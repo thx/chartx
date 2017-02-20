@@ -91,7 +91,7 @@ define(
                 var w = (opt && opt.w) || this.width;
                 //w     -= (this.padding.right + this.padding.left); 
                 var h = (opt && opt.h) || this.height;
-                var y = parseInt( h - this._xAxis.h );
+                var y = parseInt( h - this._xAxis.height );
                 var graphsH = y - this.padding.top;
                 
                 //绘制yAxis
@@ -103,7 +103,7 @@ define(
                     yMaxHeight : graphsH 
                 });
                 
-                var _yAxisW = this._yAxis.w;
+                var _yAxisW = this._yAxis.width;
     
     
                 //绘制x轴

@@ -83,14 +83,27 @@ var options = {
     }
 };
 Chartx.pie("canvasTest" , data , options).then(function( pie ){
+
+//先把所有的label给隐藏了
+pie.hideLabelAll();
+
 pie.checkAt(0)
+
+//把对应的第一个label显示
+pie.showLabelAt(0);
+
     window.pie = pie;
+
+
+
     //pie.slice(3);
     pie.on('focus' , function (e) {
         console.log(e.type);
+        pie.showLabelAt( e.eventInfo.iNode );
     });
     pie.on('unfocus' , function (e) {
         console.log(e.type);
+        pie.hideLabelAt( e.eventInfo.iNode );
     });
     pie.on('click',function(e){
         console.log(e.type);

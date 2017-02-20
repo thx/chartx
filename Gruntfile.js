@@ -74,7 +74,6 @@ module.exports = function(grunt) {
          bar : {
              src : [
                  bc+"chart/bar/graphs.js",
-                 bc+"chart/bar/xaxis.js",
                  bc+"chart/bar/yaxis.js",
 
                  bc+"chart/bar/index.js"
@@ -106,7 +105,6 @@ module.exports = function(grunt) {
          line : {
              src : [
                  bc+"chart/line/tips.js",
-                 bc+"chart/line/xaxis.js",
                  bc+"chart/line/group.js",
                  bc+"chart/line/graphs.js",
                  bc+"chart/line/index.js"

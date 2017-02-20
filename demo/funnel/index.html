@@ -34,19 +34,24 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["vv"    ,"uv" ,"pv"],
-    [ 1      , 100 , 80 ],
-    [ 2      , 80  , 60 ],
-    [ 3      , 60  , 40 ],
-    [ 4      , 40  , 20 ],
-    [ 5      , 20  , 10 ]
+    ["node"   , "value"],
+    ["展现"     , 100   ],
+    ["点击", 80   ],
+    ["成交" , 20   ],
+    ["咨询"   , 60   ],     
+    ["订单"   , 40   ]      
 ];
 
 //chart的配置信息
 var options = {
-    field : ["pv","uv"],
-    graphs: {
-    }
+    xAxis : {
+        field : "node"
+    },
+    yAxis : {
+        field : "value"
+    },
+    min:0,
+    max:100
 };
 //Chartx.funnel开始初始化chart实例
 var chartx = Chartx.funnel("canvasTest" , data , options);

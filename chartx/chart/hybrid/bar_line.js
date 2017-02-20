@@ -39,7 +39,9 @@ define(
                         xAxis: this.xAxis
                     }),
                     _graphs: null
-                }
+                };
+
+                this._markLines = [];
             },
             draw: function() {
                 this._setStages();
@@ -51,18 +53,25 @@ define(
                 var barFL = _.flatten( this.yAxis.bar.field ).length;
                 var themeColor = _.clone(Theme.colors);
                 themeColor.splice(0,barFL);
+                
                 this._lineChart._graphs = new lineGraphs(
                     _.deepExtend( {
                         line : {
                             strokeStyle : themeColor
-                        }
+                        },
+                        dataFrame : this._lineChart.dataFrame 
                     } , this.graphs ) 
                     , 
                     this
                 );
-
                 //覆盖掉bar中的tip组件
-                this._tip = new Tips(this.tips, this._lineChart.dataFrame, this.canvax.getDomContainer());
+                this.tips = _.deepExtend( {
+                    node : {
+                        enabled : false
+                    },
+                    content: null
+                } , this.tips);
+                this._tip = new Tips( this.tips , this._lineChart.dataFrame, this.canvax.getDomContainer());
 
                 //附加的折线图的y轴放在右侧
                 this._yAxisR = new yAxis(
@@ -72,6 +81,7 @@ define(
                     this._lineChart.dataFrame.yAxis
                 );
                 this.core.addChild(this._yAxisR.sprite);
+                this._lineChart._graphs._yAxis = this._yAxisR;
 
                 this._startDraw(); //开始绘图
 
@@ -85,7 +95,7 @@ define(
             },
             _startDraw: function(opt) {
                 var me = this;
-                var y = parseInt(me.height - me._xAxis.h);
+                var y = parseInt(me.height - me._xAxis.height);
                 var graphsH = y - this.padding.top;
 
                 //绘制yAxis
@@ -96,7 +106,7 @@ define(
                     },
                     yMaxHeight: graphsH
                 });
-                var _yAxisW = me._yAxis.w;
+                var _yAxisW = me._yAxis.width;
 
                 //绘制右侧的y轴给line用
                 var _yAxisRW = 0;
@@ -108,7 +118,7 @@ define(
                         },
                         yMaxHeight: me._yAxis.yGraphsHeight
                     });
-                    _yAxisRW = me._yAxisR.w;
+                    _yAxisRW = me._yAxisR.width;
                     //me._yAxisR.setX(me.width - _yAxisRW);
                     me._yAxisR.setX(this.width - _yAxisRW - this.padding.right + 1);
                 };
@@ -120,7 +130,7 @@ define(
                     yAxisW: _yAxisW
                 });
                 if (me._xAxis.yAxisW != _yAxisW) {
-                    //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
+                    //说明在 xaxis 里面的时候被修改过了。那么要同步到yaxis
                     me._yAxis.resetWidth(me._xAxis.yAxisW);
                     _yAxisW = me._xAxis.yAxisW;
                 };
@@ -167,10 +177,7 @@ define(
                 //绘制折线图主图形区域
                 me._lineChart._graphs.draw({
                     w: _graphsW,
-                    h: _graphsH,
-                    data: Line.prototype._trimGraphs.apply(me, [me._yAxisR, me._lineChart.dataFrame]),
-                    disX: Line.prototype._getGraphsDisX.apply(me, []),
-                    smooth: me.smooth
+                    h: _graphsH
                 });
                 me._lineChart._graphs.setX(_yAxisW), me._lineChart._graphs.setY(y);
                 me._lineChart._graphs.grow(function(g) {

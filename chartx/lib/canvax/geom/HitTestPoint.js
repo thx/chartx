@@ -143,6 +143,7 @@ define(
         function _isInsideCircle(shape, x, y, r) {
             var context = shape.context;
             !r && (r = context.r);
+            r += context.lineWidth;
             return (x * x + y * y) < r * r;
         };
 
