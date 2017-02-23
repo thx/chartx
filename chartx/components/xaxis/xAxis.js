@@ -479,12 +479,11 @@ define(
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {
 
-                if (this.data.length == 0 || this.sprite.getNumChildren() <=2 ){
-                    //压根没数据 或者 如果都只有两个节点，当然也不需要矫正了
+                if (this.data.length == 0 || this.rulesSprite.getNumChildren() <=1 ){
                     return;
                 };
 
-                var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
+                var popText = this.rulesSprite.getChildAt(this.rulesSprite.getNumChildren() - 1).getChildAt(0);
                 if (popText) {
                     var pc = popText.context;
                     if (pc.textAlign == "center" &&
@@ -495,9 +494,9 @@ define(
                         pc.x + popText.context.width > this.width) {
                         pc.x = this.width - popText.context.width
                     };
-                    if (this.sprite.getNumChildren() > 2) {
+                    if (this.rulesSprite.getNumChildren() > 2) {
                         //倒数第二个text
-                        var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
+                        var popPreText = this.rulesSprite.getChildAt(this.rulesSprite.getNumChildren() - 2).getChildAt(0);
                         var ppc = popPreText.context;
                         //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
                         if (ppc.visible && pc.x < ppc.x + ppc.width) {
