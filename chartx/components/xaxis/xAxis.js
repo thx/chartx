@@ -73,6 +73,8 @@ define(
 
             this.layoutType = "step"; //step , rule , peak, proportion
 
+            this.autoTrimLayout = true;
+
             this.init(opt, data);
         };
 
@@ -390,7 +392,7 @@ define(
                     if( xNode._txt ){
                         //_.extend( xNode._txt.context , textContext );
                         //debugger
-                        xNode._txt.resetText( (o.layoutText || o.content)+"" );
+                        xNode._txt.resetText( o.layoutText+"" );
                         if( this.animation ){
                             xNode._txt.animate( {
                                 x : textContext.x
@@ -402,7 +404,8 @@ define(
                         }
 
                     } else {
-                        xNode._txt = new Canvax.Display.Text((o.layoutText || o.content), {
+
+                        xNode._txt = new Canvax.Display.Text(o.layoutText, {
                             id: "xAxis_txt_" + CanvaxBase.getUID(),
                             context: textContext
                         });
@@ -529,7 +532,6 @@ define(
             },
             _trimLayoutData: function() {
 
-                var tmp = []
                 var arr = this.data
 
                 var mw = this._textMaxWidth + 10;
@@ -540,18 +542,21 @@ define(
 
                 //总共能多少像素展现
                 var n = Math.min(Math.floor(this.width / mw), arr.length - 1); //能展现几个
+             
+                this.layoutData = arr;
 
-                if (n >= arr.length - 1) {
-                    this.layoutData = arr;
-                } else {
+                if (n < arr.length - 1 && this.autoTrimLayout ) {
                     //需要做间隔
                     var dis = Math.max(Math.ceil(arr.length / n - 1), 0); //array中展现间隔
                     //存放展现的数据
-                    for (var a = 0; a < n; a++) {
-                        var obj = arr[a + dis * a];
-                        obj && tmp.push(obj);
+                    for (var a = 0; a < arr.length; a++) {
+                        if( a % (1+dis) ){
+                            arr[a].layoutText = "";
+                        }
+                        //var obj = arr[a + dis * a];
+                        //obj && tmp.push(obj);
                     };
-                    this.layoutData = tmp;
+                    //this.layoutData = tmp;
                 };
             }
         };

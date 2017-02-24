@@ -402,25 +402,25 @@ define(
                     var yNode = this.rulesSprite.getChildAt(a);
 
                     if( yNode ){
-                        if(yNode.__txt){
-                            if( yNode.__txt.context.y != posy ){
-                                yNode.__txt.animate({
+                        if(yNode._txt){
+                            if( yNode._txt.context.y != posy ){
+                                yNode._txt.animate({
                                     y: posy
                                 }, {
                                     duration: 500,
                                     delay: a*80,
-                                    id: yNode.__txt.id
+                                    id: yNode._txt.id
                                 });
                             };
-                            yNode.__txt.resetText( content );
+                            yNode._txt.resetText( content );
                         };
 
-                        yNode.__line && yNode.__line.animate({
+                        yNode._line && yNode._line.animate({
                             y: y
                         }, {
                             duration: 500,
                             delay: a*80,
-                            id: yNode.__line.id
+                            id: yNode._line.id
                         });
                     } else {
                         yNode = new Canvax.Display.Sprite({
@@ -442,7 +442,7 @@ define(
                             }
                         });
                         yNode.addChild(txt);
-                        yNode.__txt = txt;
+                        yNode._txt = txt;
 
                         self.maxW = Math.max(self.maxW, txt.getTextWidth());
                         if (self.text.rotation == 90 || self.text.rotation == -90) {
@@ -463,7 +463,7 @@ define(
                                 }
                             });
                             yNode.addChild(line);
-                            yNode.__line = line;
+                            yNode._line = line;
                         };
                         //这里可以由用户来自定义过滤 来 决定 该node的样式
                         _.isFunction(self.filter) && self.filter({

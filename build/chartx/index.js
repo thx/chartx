@@ -2267,6 +2267,8 @@ define(
 
             this.layoutType = "step"; //step , rule , peak, proportion
 
+            this.autoTrimLayout = true;
+
             this.init(opt, data);
         };
 
@@ -2584,7 +2586,7 @@ define(
                     if( xNode._txt ){
                         //_.extend( xNode._txt.context , textContext );
                         //debugger
-                        xNode._txt.resetText( (o.layoutText || o.content)+"" );
+                        xNode._txt.resetText( o.layoutText+"" );
                         if( this.animation ){
                             xNode._txt.animate( {
                                 x : textContext.x
@@ -2596,7 +2598,8 @@ define(
                         }
 
                     } else {
-                        xNode._txt = new Canvax.Display.Text((o.layoutText || o.content), {
+
+                        xNode._txt = new Canvax.Display.Text(o.layoutText, {
                             id: "xAxis_txt_" + CanvaxBase.getUID(),
                             context: textContext
                         });
@@ -2673,12 +2676,11 @@ define(
             /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
             _layout: function() {
 
-                if (this.data.length == 0 || this.sprite.getNumChildren() <=2 ){
-                    //压根没数据 或者 如果都只有两个节点，当然也不需要矫正了
+                if (this.data.length == 0 || this.rulesSprite.getNumChildren() <=1 ){
                     return;
                 };
 
-                var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
+                var popText = this.rulesSprite.getChildAt(this.rulesSprite.getNumChildren() - 1).getChildAt(0);
                 if (popText) {
                     var pc = popText.context;
                     if (pc.textAlign == "center" &&
@@ -2689,9 +2691,9 @@ define(
                         pc.x + popText.context.width > this.width) {
                         pc.x = this.width - popText.context.width
                     };
-                    if (this.sprite.getNumChildren() > 2) {
+                    if (this.rulesSprite.getNumChildren() > 2) {
                         //倒数第二个text
-                        var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
+                        var popPreText = this.rulesSprite.getChildAt(this.rulesSprite.getNumChildren() - 2).getChildAt(0);
                         var ppc = popPreText.context;
                         //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
                         if (ppc.visible && pc.x < ppc.x + ppc.width) {
@@ -2724,7 +2726,6 @@ define(
             },
             _trimLayoutData: function() {
 
-                var tmp = []
                 var arr = this.data
 
                 var mw = this._textMaxWidth + 10;
@@ -2735,18 +2736,21 @@ define(
 
                 //总共能多少像素展现
                 var n = Math.min(Math.floor(this.width / mw), arr.length - 1); //能展现几个
+             
+                this.layoutData = arr;
 
-                if (n >= arr.length - 1) {
-                    this.layoutData = arr;
-                } else {
+                if (n < arr.length - 1 && this.autoTrimLayout ) {
                     //需要做间隔
                     var dis = Math.max(Math.ceil(arr.length / n - 1), 0); //array中展现间隔
                     //存放展现的数据
-                    for (var a = 0; a < n; a++) {
-                        var obj = arr[a + dis * a];
-                        obj && tmp.push(obj);
+                    for (var a = 0; a < arr.length; a++) {
+                        if( a % (1+dis) ){
+                            arr[a].layoutText = "";
+                        }
+                        //var obj = arr[a + dis * a];
+                        //obj && tmp.push(obj);
                     };
-                    this.layoutData = tmp;
+                    //this.layoutData = tmp;
                 };
             }
         };
@@ -3161,25 +3165,25 @@ define(
                     var yNode = this.rulesSprite.getChildAt(a);
 
                     if( yNode ){
-                        if(yNode.__txt){
-                            if( yNode.__txt.context.y != posy ){
-                                yNode.__txt.animate({
+                        if(yNode._txt){
+                            if( yNode._txt.context.y != posy ){
+                                yNode._txt.animate({
                                     y: posy
                                 }, {
                                     duration: 500,
                                     delay: a*80,
-                                    id: yNode.__txt.id
+                                    id: yNode._txt.id
                                 });
                             };
-                            yNode.__txt.resetText( content );
+                            yNode._txt.resetText( content );
                         };
 
-                        yNode.__line && yNode.__line.animate({
+                        yNode._line && yNode._line.animate({
                             y: y
                         }, {
                             duration: 500,
                             delay: a*80,
-                            id: yNode.__line.id
+                            id: yNode._line.id
                         });
                     } else {
                         yNode = new Canvax.Display.Sprite({
@@ -3201,7 +3205,7 @@ define(
                             }
                         });
                         yNode.addChild(txt);
-                        yNode.__txt = txt;
+                        yNode._txt = txt;
 
                         self.maxW = Math.max(self.maxW, txt.getTextWidth());
                         if (self.text.rotation == 90 || self.text.rotation == -90) {
@@ -3222,7 +3226,7 @@ define(
                                 }
                             });
                             yNode.addChild(line);
-                            yNode.__line = line;
+                            yNode._line = line;
                         };
                         //这里可以由用户来自定义过滤 来 决定 该node的样式
                         _.isFunction(self.filter) && self.filter({
