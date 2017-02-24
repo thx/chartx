@@ -2747,16 +2747,11 @@ define(
                         if( a % (1+dis) ){
                             arr[a].layoutText = "";
                         }
-                        //var obj = arr[a + dis * a];
-                        //obj && tmp.push(obj);
                     };
-                    //this.layoutData = tmp;
                 };
             }
         };
-
         return xAxis;
-
     }
 )
 
