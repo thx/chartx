@@ -499,7 +499,7 @@ define(
                                         });
                                         infosp.addChild(txt);
                                     };
-                                    txt._text = content;
+                                    txt._text = cdata.value;
                                     txt._data = cdata;
                                     infoWidth += txt.getTextWidth() + 2;
                                     infoHeight = Math.max(infoHeight, txt.getTextHeight());
