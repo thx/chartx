@@ -458,11 +458,29 @@ define(
                                 
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
-                                    if (!me.animation && _.isFunction(me.text.format)) {
-                                        content = (me.text.format.apply(me , [cdata.value]) || content );
+                                    if (_.isFunction(me.text.format)) {
+                                        var _formatc = me.text.format.apply( self , [content , cdata]);
+                                        if(!!_formatc || _formatc==""){
+                                            content = _formatc
+                                        }
                                     };
                                     if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
+                                    };
+
+                                    if( !content ){
+                                        return;
+                                    };
+
+                                    if (ci > 0) {
+                                        txt = new Canvax.Display.Text("/", {
+                                            context: {
+                                                x: infoWidth + 2,
+                                                fillStyle: "#999"
+                                            }
+                                        });
+                                        infoWidth += txt.getTextWidth() + 2;
+                                        infosp.addChild(txt);
                                     };
 
                                     var txt;
@@ -482,22 +500,12 @@ define(
                                         infosp.addChild(txt);
                                     };
                                     txt._text = content;
+                                    txt._data = cdata;
                                     infoWidth += txt.getTextWidth() + 2;
                                     infoHeight = Math.max(infoHeight, txt.getTextHeight());
 
                                     if( me.animation ){
                                         txt.resetText(0);
-                                    }
-
-                                    if (ci <= vLen - 2) {
-                                        txt = new Canvax.Display.Text("/", {
-                                            context: {
-                                                x: infoWidth + 2,
-                                                fillStyle: "#999"
-                                            }
-                                        });
-                                        infoWidth += txt.getTextWidth() + 2;
-                                        infosp.addChild(txt);
                                     };
                                 });
 
@@ -698,7 +706,10 @@ define(
                                         onUpdate: function() {
                                             var content = this.v;
                                             if (_.isFunction(self.text.format)) {
-                                                content = (self.text.format.apply( self , [content]) || content);
+                                                var _formatc = self.text.format.apply( self , [content , txt._data]);
+                                                if(!!_formatc || _formatc==""){
+                                                    content = _formatc
+                                                }
                                             } else if (_.isNumber(content)) {
                                                 content = Tools.numAddSymbol(parseInt(content));
                                             };

@@ -53,7 +53,12 @@ var options = {
     },
     graphs : {
         text : {
-            enabled : true
+            enabled : true,
+            format: function(e , _d){
+                if(_d.field == "pv"){
+                    return ""
+                }
+            }
         }
     }
 }   
