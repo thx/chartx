@@ -472,7 +472,7 @@ define(
                                         return;
                                     };
 
-                                    if (ci > 0) {
+                                    if (ci > 0 && infosp.children.length>0) {
                                         txt = new Canvax.Display.Text("/", {
                                             context: {
                                                 x: infoWidth + 2,

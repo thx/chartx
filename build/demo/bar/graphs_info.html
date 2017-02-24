@@ -54,10 +54,13 @@ var options = {
     graphs : {
         text : {
             enabled : true,
-            format: function(e , _d){
-                if(_d.field == "pv"){
+            format: function(n , _d){
+                if(_d.field == "uv"){
                     return ""
                 }
+                debugger
+                       var str = ((n - 1) * 100).toFixed(0) + "%";
+                        return /-/.test(str) ? str : '+' + str;
             }
         }
     }
