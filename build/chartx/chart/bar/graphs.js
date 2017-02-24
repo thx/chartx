@@ -460,7 +460,7 @@ define(
                                     var content = cdata.value;
                                     if (_.isFunction(me.text.format)) {
                                         var _formatc = me.text.format.apply( self , [content , cdata]);
-                                        if(!!_formatc || _formatc==""){
+                                        if(!!_formatc || _formatc==="" || _formatc===0){
                                             content = _formatc
                                         }
                                     };
@@ -468,7 +468,7 @@ define(
                                         content = Tools.numAddSymbol(content);
                                     };
 
-                                    if( !content ){
+                                    if( content === "" ){
                                         return;
                                     };
 
@@ -707,7 +707,7 @@ define(
                                             var content = this.v;
                                             if (_.isFunction(self.text.format)) {
                                                 var _formatc = self.text.format.apply( self , [content , txt._data]);
-                                                if(!!_formatc || _formatc==""){
+                                                if(!!_formatc || _formatc==="" || _formatc===0){
                                                     content = _formatc
                                                 }
                                             } else if (_.isNumber(content)) {
