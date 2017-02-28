@@ -1599,6 +1599,7 @@ define(
                         me._initPlugs(me._opts, g);
                     }).on("growComplete" , function(){
                         me.fire("complete");
+                        me._opts.markLine && me._initMarkLine();
                     });
                 };
 
@@ -1669,11 +1670,9 @@ define(
                        return info.field
                     },
                     onChecked : function( field ){
-                       //me._resetOfLengend( field );
                        me.add( field );
                     },
                     onUnChecked : function( field ){
-                       //me._resetOfLengend( field );
                        me.remove( field );
                     }
                 } , this._opts.legend);
@@ -1702,7 +1701,8 @@ define(
             },
             ////设置图例end
             _initPlugs: function(opts, g) {
-                if (opts.markLine) {
+                //如果有配置opts.markLine.y， 就说明这个markline是用户自己要定义的
+                if (opts.markLine && opts.markLine.y === undefined) {
                     this._initAverageLine(g);
                 };
                 if (opts.markPoint) {
@@ -1870,8 +1870,10 @@ define(
                     if( !_.isArray(_y) ){
                         _y = [_y]
                     };
-                    _.each( function( _y , i ){
-                    
+                    _.each( _y , function( y , i ){
+                        var posY = me._yAxis.getYposFromVal(y);
+                        var strokeStyle = "#333"
+                        me._createMarkLine("", posY, "markline："+y, strokeStyle);
                     } );
                 }
             },

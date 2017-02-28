@@ -2551,7 +2551,7 @@ define(
             this.field = []; //这个 轴 上面的 field
 
             this.label = "";
-            this._label = null; //label的text对象
+            this._label = null; // label 的text对象
 
             this.line = {
                 enabled: 1, //是否有line
@@ -2661,11 +2661,19 @@ define(
                 this._widget();
             },
             _getLabel: function() {
-                if (this.label && this.label != "") {
-                    this._label = new Canvax.Display.Text(this.label, {
+
+                var _label = "";
+                if(_.isArray(this.label)){
+                    _label = this.label[ this.place == "left" ? 0 : 1 ];
+                } else {
+                    _label = this.label;
+                };
+                
+                if (_label && _label != "") {
+                    this._label = new Canvax.Display.Text(_label, {
                         context: {
                             fontSize: this.text.fontSize,
-                            textAlign: "left",
+                            textAlign: this.place,//"left",
                             textBaseline: this.isH ? "top" : "bottom",
                             fillStyle: this.text.fillStyle,
                             rotation: this.isH ? -90 : 0
