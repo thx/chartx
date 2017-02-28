@@ -15,12 +15,12 @@ define(
                 x : 0 , y : 0
             };
 
-            this.target = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个field显示markline
+            this.target = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
 
             this.line       = {
                 y           : 0,
                 list        : [],
-                strokeStyle : '#000000',
+                strokeStyle : '#999',
                 lineWidth   : 1,
                 smooth      : false,
                 lineType    : 'dashed'

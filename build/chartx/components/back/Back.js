@@ -33,7 +33,6 @@ define(
             this.xAxis   = {                                //x轴上的线
                     enabled     : 1,
                     data        : [],                      //[{y:100},{}]
-
                     org         : null,                    //x轴坐标原点，默认为上面的data[0]
                     // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
@@ -41,7 +40,7 @@ define(
                     strokeStyle : '#f0f0f0', //'#e5e5e5',
                     filter      : null 
             }
-            this.yAxis   = {                                //y轴上的线
+            this.yAxis = {                                //y轴上的线
                     enabled     : 0,
                     data        : [],                      //[{x:100},{}]
                     xDis        : 0,
@@ -54,7 +53,7 @@ define(
             } 
             this.fill = {
                 fillStyle : null,
-                globalAlpha : null
+                alpha : null
             }
     
             this.sprite       = null;                       //总的sprite
@@ -108,7 +107,7 @@ define(
                                 width : self.w,
                                 height : -yGroupHeight,
                                 fillStyle : self.fill.fillStyle || "#000",
-                                globalAlpha : self.fill.globalAlpha || 0.025 * (g%2)
+                                globalAlpha : self.fill.alpha || 0.025 * (g%2)
                             }
                         });
                         

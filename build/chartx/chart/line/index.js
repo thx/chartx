@@ -1761,7 +1761,7 @@ define(
             _initDataZoom: function(g) {
                 var me = this;
                 //require(["chartx/components/datazoom/index"], function(DataZoom) {
-                //初始化datazoom模块
+                //初始化 datazoom 模块
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
                     //h : me._xAxis.height,
