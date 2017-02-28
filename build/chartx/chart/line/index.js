@@ -1702,7 +1702,7 @@ define(
             ////设置图例end
             _initPlugs: function(opts, g) {
                 if (opts.markLine) {
-                    this._initMarkLine(g);
+                    this._initAverageLine(g);
                 };
                 if (opts.markPoint) {
                     this._initMarkPoint(g);
@@ -1862,13 +1862,24 @@ define(
                     });
                 });
             },
-
+            _initMarkLine: function(){
+                var me = this;
+                if( !me.markLine.target && !me.markLine.field && me.markLine.y !== undefined ){
+                    var _y = me.markLine.y;
+                    if( !_.isArray(_y) ){
+                        _y = [_y]
+                    };
+                    _.each( function( _y , i ){
+                    
+                    } );
+                }
+            },
             //markline begin
-            _initMarkLine: function(g, dataFrame) {
+            _initAverageLine: function(g, dataFrame) {
                 var me = this;
 
                 //如果markline有target配置，那么只现在target配置里的字段的markline
-                var _t = me.markLine.target;
+                var _t = me.markLine.field || me.markLine.target;
                 if( _t && !( ( _.isArray(_t) && _.indexOf( _t , g.field )>=0 ) || (_t === g.field) ) ){
                     return;
                 };
@@ -1906,7 +1917,7 @@ define(
                         }
                         return _y;
                     };
-                    if( me.markLine.y != undefined ){
+                    if( me.markLine.y !== undefined ){
                         _y = getYForVal();
                     };
                     
@@ -1932,6 +1943,7 @@ define(
                         },
                         field: g.field,
                         reset: function( i ){
+                            /*
                             if(me.markLine.y != undefined){ 
                                 var _y = getYForVal();
                                 this._line.animate({
@@ -1941,6 +1953,7 @@ define(
                                     easing: 'Back.Out' //Tween.Easing.Elastic.InOut
                                 });
                             }
+                            */
                         }
                     };
 
@@ -1950,6 +1963,36 @@ define(
                     });
                     
                 })
+            },
+            _createMarkLine: function( field, y, resetHandle ){
+                var me = this;
+                var o = {
+                    w: me._xAxis.xGraphsWidth,
+                    h: me._yAxis.yGraphsHeight,
+                    origin: {
+                        x: me._back.pos.x,
+                        y: me._back.pos.y
+                    },
+                    line: {
+                        y: _y,
+                        list: [
+                            [0, 0],
+                            [me._xAxis.xGraphsWidth, 0]
+                        ],
+                        strokeStyle: strokeStyle
+                    },
+                    text: {
+                        content: content,
+                        fillStyle: strokeStyle
+                    },
+                    field: field,
+                    reset: resetHandle
+                };
+
+                new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
+                    me.core.addChild(this.sprite);
+                    me._markLines.push( this ); 
+                });
             },
             //markline end
 
