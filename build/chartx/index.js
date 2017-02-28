@@ -1485,7 +1485,8 @@ define(
          "canvax/display/Text"
     ],
     function(Canvax, BrokenLine, Sprite, Text){
-        var markLine = function(opt){
+        var markLine = function(opt , _yAxis){
+            this._yAxis = _yAxis;
             this.w      = 0;
             this.h      = 0
             this.field  = null;
@@ -1494,7 +1495,7 @@ define(
             };
 
             this.target = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
-
+            this.value = 0;
             this.line       = {
                 y           : 0,
                 list        : [],
@@ -1557,7 +1558,7 @@ define(
                         lineType    : me.line.lineType
                     }
                 });
-                me.sprite.addChild(line)
+                me.sprite.addChild(line);
                 me._line = line;
 
 
@@ -1582,8 +1583,16 @@ define(
             _done : function(){
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
             },
-            reset : function(){
-                
+            reset : function(opt , i){
+                opt && _.deepExtend(this, opt);
+                if( this.line.y != this._line.context.y ){
+                    this._line.animate({
+                        y: this.line.y
+                    }, {
+                        duration: 500,
+                        easing: 'Back.Out' //Tween.Easing.Elastic.InOut
+                    });
+                }
             }
         }
         return markLine
@@ -2029,7 +2038,6 @@ define(
                 fillStyle    : "#999"
             };
             this.strokeStyle = "#ccc";
-            this.lineWidth   = 1;
             
             
             this._tipDom = null;
@@ -2158,7 +2166,7 @@ define(
              */
             _checkX : function( x ){
                 if( this.positionInRange ){
-                    var w = this.dW + 2; //后面的2 是 两边的linewidth
+                    var w = this.dW + 2; //后面的2 是 两边的 linewidth
                     if( x < 0 ){
                         x = 0;
                     }
@@ -2175,7 +2183,7 @@ define(
              */
             _checkY : function( y ){
                 if(this.positionInRange){
-                    var h = this.dH + 2; //后面的2 是 两边的linewidth
+                    var h = this.dH + 2; //后面的2 是 两边的 linewidth
                     if( y < 0 ){
                         y = 0;
                     }

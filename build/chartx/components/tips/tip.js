@@ -25,7 +25,6 @@ define(
                 fillStyle    : "#999"
             };
             this.strokeStyle = "#ccc";
-            this.lineWidth   = 1;
             
             
             this._tipDom = null;
@@ -154,7 +153,7 @@ define(
              */
             _checkX : function( x ){
                 if( this.positionInRange ){
-                    var w = this.dW + 2; //后面的2 是 两边的linewidth
+                    var w = this.dW + 2; //后面的2 是 两边的 linewidth
                     if( x < 0 ){
                         x = 0;
                     }
@@ -171,7 +170,7 @@ define(
              */
             _checkY : function( y ){
                 if(this.positionInRange){
-                    var h = this.dH + 2; //后面的2 是 两边的linewidth
+                    var h = this.dH + 2; //后面的2 是 两边的 linewidth
                     if( y < 0 ){
                         y = 0;
                     }

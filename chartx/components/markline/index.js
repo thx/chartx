@@ -7,7 +7,8 @@ define(
          "canvax/display/Text"
     ],
     function(Canvax, BrokenLine, Sprite, Text){
-        var markLine = function(opt){
+        var markLine = function(opt , _yAxis){
+            this._yAxis = _yAxis;
             this.w      = 0;
             this.h      = 0
             this.field  = null;
@@ -16,7 +17,7 @@ define(
             };
 
             this.target = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
-
+            this.value = 0;
             this.line       = {
                 y           : 0,
                 list        : [],
@@ -79,7 +80,7 @@ define(
                         lineType    : me.line.lineType
                     }
                 });
-                me.sprite.addChild(line)
+                me.sprite.addChild(line);
                 me._line = line;
 
 
@@ -104,8 +105,16 @@ define(
             _done : function(){
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
             },
-            reset : function(){
-                
+            reset : function(opt , i){
+                opt && _.deepExtend(this, opt);
+                if( this.line.y != this._line.context.y ){
+                    this._line.animate({
+                        y: this.line.y
+                    }, {
+                        duration: 500,
+                        easing: 'Back.Out' //Tween.Easing.Elastic.InOut
+                    });
+                }
             }
         }
         return markLine

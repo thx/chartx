@@ -1221,6 +1221,7 @@ define(
                     eventInfo :  this.getNodesInfoOfx(x)
                 }
                 ml.show( e , {x : x} );
+                ml.data = e.eventInfo;
 
                 return ml;
             },
@@ -1364,11 +1365,19 @@ define(
             },
             __reset: function( opt ){
                 opt = !opt ? this : opt;
-                this._graphs.reset( opt.graphs , this.dataFrame);
+                
                 this._xAxis.reset( opt.xAxis , this.dataFrame.xAxis );
                 this._yAxis.reset( opt.yAxis , this.dataFrame.yAxis );
+
+                //_graphs比如最后reset
+                this._graphs.reset( opt.graphs , this.dataFrame);
+
                 _.each(this._markLines , function( ml , i ){
-                    ml.reset(i);
+                    ml.reset({
+                        line: {
+                            y : ml._yAxis.getYposFromVal( ml.value )
+                        }
+                    } ,i);
                 }); 
             },
 
@@ -1870,10 +1879,18 @@ define(
                     if( !_.isArray(_y) ){
                         _y = [_y]
                     };
+                    function getProp( obj , p , i , def){
+                        if( obj == undefined ) return def;
+                        if( obj[p] == undefined ) return def;
+                        if( !_.isArray(obj[p]) ) return obj[p];
+                        return obj[p][i] == undefined ? def : obj[p][i] 
+                    };
                     _.each( _y , function( y , i ){
                         var posY = me._yAxis.getYposFromVal(y);
-                        var strokeStyle = "#333"
-                        me._createMarkLine("", posY, "markline："+y, strokeStyle);
+                        var strokeStyle = getProp(me.markLine , "strokeStyle" , i , "#999");
+                        var yAxis = me._yAxis;
+                        //TODO: 如果这样有双轴，还需要一个配置告诉我你这个markLine需要附属到哪个yAxis上面去
+                        me._createMarkLine("",y, posY, "markline："+y, strokeStyle , yAxis);
                     } );
                 }
             },
@@ -1881,7 +1898,7 @@ define(
             _initAverageLine: function(g, dataFrame) {
                 var me = this;
 
-                //如果markline有target配置，那么只现在target配置里的字段的markline
+                //如果markline有target配置，那么只现在target配置里的字段的 markline
                 var _t = me.markLine.field || me.markLine.target;
                 if( _t && !( ( _.isArray(_t) && _.indexOf( _t , g.field )>=0 ) || (_t === g.field) ) ){
                     return;
@@ -1891,6 +1908,7 @@ define(
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
                 var center = parseInt(dataFrame.yAxis.center[index].agPosition);
+                var center_v = dataFrame.yAxis.center[index].agValue
                 var content = g.field + '均值', strokeStyle = g.line.strokeStyle;
                 if (me.markLine.text && me.markLine.text.enabled) {
                     if (_.isFunction(me.markLine.text.format)) {
@@ -1902,41 +1920,20 @@ define(
                     }
                 };
 
-                /*
-                var _y = center;
-                
-                //如果markline有自己预设的y值
-                function getYForVal(){
-                    var _y = me.markLine.y;
-                    if(_.isFunction(_y)){
-                        _y = _y( g.field );
-                    };
-                    if(_.isArray( _y )){
-                        _y = _y[ index ];
-                    };
-                    if( _y != undefined ){
-                        _y = g._yAxis.getYposFromVal(_y);
-                    }
-                    return _y;
-                };
-                if( me.markLine.y !== undefined ){
-                    _y = getYForVal();
-                };
-                */
-                
-                me._createMarkLine(g.field, center, content, strokeStyle);
+                me._createMarkLine(g.field,center_v, center, content, strokeStyle , g._yAxis);
             },
-            _createMarkLine: function( field, y, content, strokeStyle, resetHandle ){
+            _createMarkLine: function( field, yVal, yPos, content, strokeStyle , yAxis){
                 var me = this;
                 var o = {
                     w: me._xAxis.xGraphsWidth,
                     h: me._yAxis.yGraphsHeight,
+                    value: yVal,
                     origin: {
                         x: me._back.pos.x,
                         y: me._back.pos.y
                     },
                     line: {
-                        y: y,
+                        y: yPos,
                         list: [
                             [0, 0],
                             [me._xAxis.xGraphsWidth, 0]
@@ -1947,11 +1944,10 @@ define(
                         content: content,
                         fillStyle: strokeStyle
                     },
-                    field: field,
-                    reset: resetHandle || function(){}
+                    field: field
                 };
 
-                new MarkLine(_.deepExtend( me._opts.markLine, o)).done(function() {
+                new MarkLine(_.deepExtend( me._opts.markLine, o) , yAxis).done(function() {
                     me.core.addChild(this.sprite);
                     me._markLines.push( this ); 
                 });

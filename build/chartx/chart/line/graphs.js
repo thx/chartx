@@ -478,6 +478,7 @@ define(
                     eventInfo :  this.getNodesInfoOfx(x)
                 }
                 ml.show( e , {x : x} );
+                ml.data = e.eventInfo;
 
                 return ml;
             },
