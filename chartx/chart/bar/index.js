@@ -701,7 +701,6 @@ define(
 
                 //执行生长动画
                 this._graphs.grow(function(g) {
-                    console.log(g)
                     if (me._opts.markLine) {
                         me._initMarkLine(g);
                     };
@@ -919,6 +918,7 @@ define(
                     function getProp( obj , p , i , def){
                         if( obj == undefined ) return def;
                         if( obj[p] == undefined ) return def;
+                        if( !_.isArray(obj[p]) ) return obj[p];
                         return obj[p][i] == undefined ? def : obj[p][i] 
                     };
                     _.each( _mly , function( y , i ){

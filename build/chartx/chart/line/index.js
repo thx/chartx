@@ -1252,9 +1252,10 @@ define(
         'chartx/chart/line/tips',
         'chartx/utils/dataformat',
         'chartx/components/datazoom/index',
-        'chartx/components/legend/index'
+        'chartx/components/legend/index',
+        'chartx/components/markline/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom , Legend) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom , Legend, MarkLine) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -1888,83 +1889,42 @@ define(
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
                 var center = parseInt(dataFrame.yAxis.center[index].agPosition);
-                require(['chartx/components/markline/index'], function(MarkLine) {
-                    var content = g.field + '均值',
-                        strokeStyle = g.line.strokeStyle;
-                    if (me.markLine.text && me.markLine.text.enabled) {
-                        if (_.isFunction(me.markLine.text.format)) {
-                            var o = {
-                                iGroup: index,
-                                value: dataFrame.yAxis.center[index].agValue
-                            }
-                            content = me.markLine.text.format(o)
+                var content = g.field + '均值', strokeStyle = g.line.strokeStyle;
+                if (me.markLine.text && me.markLine.text.enabled) {
+                    if (_.isFunction(me.markLine.text.format)) {
+                        var o = {
+                            iGroup: index,
+                            value: dataFrame.yAxis.center[index].agValue
                         }
-                    };
+                        content = me.markLine.text.format(o)
+                    }
+                };
 
-                    var _y = center;
-                    
-                    //如果markline有自己预设的y值
-                    function getYForVal(){
-                        var _y = me.markLine.y;
-                        if(_.isFunction(_y)){
-                            _y = _y( g.field );
-                        };
-                        if(_.isArray( _y )){
-                            _y = _y[ index ];
-                        };
-                        if( _y != undefined ){
-                            _y = g._yAxis.getYposFromVal(_y);
-                        }
-                        return _y;
+                /*
+                var _y = center;
+                
+                //如果markline有自己预设的y值
+                function getYForVal(){
+                    var _y = me.markLine.y;
+                    if(_.isFunction(_y)){
+                        _y = _y( g.field );
                     };
-                    if( me.markLine.y !== undefined ){
-                        _y = getYForVal();
+                    if(_.isArray( _y )){
+                        _y = _y[ index ];
                     };
-                    
-
-                    var o = {
-                        w: me._xAxis.xGraphsWidth,
-                        h: me._yAxis.yGraphsHeight,
-                        origin: {
-                            x: me._back.pos.x,
-                            y: me._back.pos.y
-                        },
-                        line: {
-                            y: _y,
-                            list: [
-                                [0, 0],
-                                [me._xAxis.xGraphsWidth, 0]
-                            ],
-                            strokeStyle: strokeStyle
-                        },
-                        text: {
-                            content: content,
-                            fillStyle: strokeStyle
-                        },
-                        field: g.field,
-                        reset: function( i ){
-                            /*
-                            if(me.markLine.y != undefined){ 
-                                var _y = getYForVal();
-                                this._line.animate({
-                                    y: _y
-                                }, {
-                                    duration: 500,
-                                    easing: 'Back.Out' //Tween.Easing.Elastic.InOut
-                                });
-                            }
-                            */
-                        }
-                    };
-
-                    new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
-                        me.core.addChild(this.sprite);
-                        me._markLines.push( this ); 
-                    });
-                    
-                })
+                    if( _y != undefined ){
+                        _y = g._yAxis.getYposFromVal(_y);
+                    }
+                    return _y;
+                };
+                if( me.markLine.y !== undefined ){
+                    _y = getYForVal();
+                };
+                */
+                
+                me._createMarkLine(g.field, center, content, strokeStyle);
             },
-            _createMarkLine: function( field, y, resetHandle ){
+            _createMarkLine: function( field, y, content, strokeStyle, resetHandle ){
                 var me = this;
                 var o = {
                     w: me._xAxis.xGraphsWidth,
@@ -1974,7 +1934,7 @@ define(
                         y: me._back.pos.y
                     },
                     line: {
-                        y: _y,
+                        y: y,
                         list: [
                             [0, 0],
                             [me._xAxis.xGraphsWidth, 0]
@@ -1986,10 +1946,10 @@ define(
                         fillStyle: strokeStyle
                     },
                     field: field,
-                    reset: resetHandle
+                    reset: resetHandle || function(){}
                 };
 
-                new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
+                new MarkLine(_.deepExtend( me._opts.markLine, o)).done(function() {
                     me.core.addChild(this.sprite);
                     me._markLines.push( this ); 
                 });
