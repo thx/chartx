@@ -198,6 +198,12 @@ define(
                 return y;
                 */
             },
+            getValFromYpos: function( y ){
+                var start = this.layoutData[0];
+                var end   = this.layoutData.slice(-1)[0];
+                var val = (end.content-start.content) * ((y-start.y)/(end.y-start.y)) + start.content;
+                return val;
+            },
             _trimYAxis: function() {
 
                 var max = this.dataSection[this.dataSection.length - 1];

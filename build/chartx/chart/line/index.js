@@ -331,7 +331,7 @@ define(
                     return null;
                 }
 
-                point.value = null;
+                point.value = me._yAxis.getValFromYpos( point.y ); //null;
                 me._nodeInd = -1;
                 return _.extend( point, me._createNodeInfo());
             },
