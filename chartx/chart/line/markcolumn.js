@@ -5,11 +5,11 @@ define(
         "canvax/shape/Line",
         "canvax/core/Base",
         "canvax/event/EventDispatcher",
-        "canvax/shape/Circle",
-        "chartx/components/tips/tip"
+        "canvax/shape/Circle"
     ],
-    function( Canvax , Line , CanvaxBase , CanvaxEventDispatcher, Circle , Tip ){
+    function( Canvax , Line , CanvaxBase , CanvaxEventDispatcher, Circle  ){
         var markColumn = function(opt , data){
+            this.xVal      = null;
             this.line      = {
                 enabled      : 1,
                 eventEnabled : true
@@ -58,6 +58,9 @@ define(
                 if(this._line){
                     this._line.context.x  = parseInt(pointInfo.x);
                 };
+                if( pointInfo.xVal !== undefined ){
+                    this.xVal = pointInfo.xVal;
+                };
                 this._resetNodesStatus(e , pointInfo);
             }, 
             destroy: function(){
@@ -94,12 +97,18 @@ define(
                             this._line.on("mouseover", function(evt) {
                                 if( evt.fromTarget && evt.fromTarget.name == "_markcolumn_node" ){
                                     return;
-                                }
+                                };
                                 evt.eventInfo = e.eventInfo;
+                                if( me.xVal !== null ){
+                                    evt.eventInfo.xAxis = {value : me.xVal};
+                                };
                                 me.fire("mouseover" , evt);
                             });
                             this._line.on("mousemove", function(evt) {
                                 evt.eventInfo = e.eventInfo;
+                                if( me.xVal !== null ){
+                                    evt.eventInfo.xAxis = {value : me.xVal};
+                                };
                                 me.fire("mousemove" , evt);
                             });
                             this._line.on("mouseout", function(evt) {
@@ -107,6 +116,9 @@ define(
                                     return;
                                 }
                                 evt.eventInfo = e.eventInfo;
+                                if( me.xVal !== null ){
+                                    evt.eventInfo.xAxis = {value : me.xVal};
+                                };
                                 me.fire("mouseout" , evt);
                             });
                         }
@@ -165,7 +177,6 @@ define(
 
                         me._nodes.addChild( csp );
 
-                        
                         bigCircle.on("mouseover", function(evt) {
                             if( evt.fromTarge && (evt.fromTarget.name == "_markcolumn_line" || evt.fromTarget.name == "_markcolumn_node" )){
                                 return;

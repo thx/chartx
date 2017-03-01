@@ -2008,10 +2008,10 @@ define(
                     return;
                 };
                 var me = this;
-                e.eventInfo.xAxis = {
+                e.eventInfo.xAxis = _.extend({
                     field: this.dataFrame.xAxis.field,
                     value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
-                };
+                } , e.eventInfo.xAxis);
 
                 e.eventInfo.dataZoom = me.dataZoom;
 
@@ -2030,15 +2030,16 @@ define(
             },
             
             createMarkColumn: function( xVal , opt){
-                return this._graphs.createMarkColumn( this._xAxis.getPosX( {val : xVal} ) , opt);
+                return this._graphs.createMarkColumn( this._xAxis.getPosX( {val : xVal} ) , _.extend(opt,{xVal: xVal}));
             },
             moveMarkColumnTo: function( mcl , xval , opt ){
                 var x = this._xAxis.getPosX( {val : xval} );
                 return mcl.move( {
-                    eventInfo : this._graphs.getNodesInfoOfx( x )
+                    eventInfo: this._graphs.getNodesInfoOfx( x )
                 } , {
-                    x : x
-                })
+                    x: x,
+                    xVal: xval
+                });
             }
         });
         return Line;

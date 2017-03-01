@@ -2155,7 +2155,6 @@ define(
                             str+="<td "+tsStyle+">"+ node.field +"：</td>";
                         }
                     };
-
                     str += "<td "+tsStyle+">"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
