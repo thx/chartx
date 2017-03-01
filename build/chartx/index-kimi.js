@@ -1901,10 +1901,10 @@ define(
                     return;
                 };
                 var tipxContent = this._getContent(e);
-                if( tipxContent === "_hide_" ){
+                if( tipxContent === "_hide_" || tipxContent === "" ){
                     this.hide();
                     return;
-                }
+                };
                 this._tipDom.innerHTML = tipxContent;
                 this.dW = this._tipDom.offsetWidth;
                 this.dH = this._tipDom.offsetHeight;
@@ -1912,6 +1912,7 @@ define(
             _getContent : function(e){
                 _.extend( this.tipsInfo , (e.tipsInfo || e.eventInfo || {}) );
                 var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
+                //只有undefined false null才会继续走默认配置， "" 0 都会认为是用户的意思
                 if( !tipsContent && tipsContent != 0 ){
                     tipsContent = this._getDefaultContent( this.tipsInfo );
                 }
