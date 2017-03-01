@@ -111,6 +111,7 @@ define(
                 x: 0,
                 y: 0
             };
+            
             this.r = 0; //蜘蛛网的最大半径
             this.data = [];
             this.yDataSection = [];
