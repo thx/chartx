@@ -22,7 +22,11 @@ define(
             this._colors = Theme.colors;
             this.fillStyle = null;
             this.alpha = 0.5;
-            this.lineWidth = 1;
+            this.lineWidth = 2;
+            this.node = {
+                r : 5
+            };
+            this.hoverAlpha = 0.3;
             this.smooth = false;
             this.sprite = null;
             this.currentAngInd = null;
@@ -83,7 +87,6 @@ define(
                     }
                     this.currentAngInd = ind;
                     this._setCircleStyleForInd(ind);
-
                 }
             },
             _getTipsInfo: function(e, ind) {
@@ -125,6 +128,7 @@ define(
                 spc.y = y;
             },
             _widget: function() {
+                var me = this;
 
                 if (this.data.length == 0) {
                     return;
@@ -170,10 +174,10 @@ define(
                             context: {
                                 x: px,
                                 y: py,
-                                r: 5,
+                                r: this.node.r,
                                 fillStyle: this.getFillStyle(i, ii, val), //this._colors[i],
                                 strokeStyle: "#ffffff",
-                                lineWidth: 2,
+                                lineWidth: this.lineWidth,
                                 globalAlpha: 1
                             }
                         }));
@@ -199,7 +203,7 @@ define(
                         id: "radar_Border_" + i,
                         context: {
                             pointList: _.clone(pointList),
-                            lineWidth: 2,
+                            lineWidth: this.lineWidth,
                             cursor: "pointer",
                             fillStyle: "RGBA(0,0,0,0)",
                             smooth: this.smooth,
@@ -213,12 +217,11 @@ define(
                     polygonBorder.hover(function(e) {
                         e.groupInd = this.groupInd;
                         this.parent.toFront();
-                        this.bg.context.globalAlpha += 0.3
+                        this.bg.context.globalAlpha += me.hoverAlpha;
                     }, function() {
                         var backCount = this.parent.parent.getNumChildren();
                         this.parent.toBack(backCount - this.groupInd - 1);
-                        this.bg.context.globalAlpha -= 0.3
-
+                        this.bg.context.globalAlpha -= me.hoverAlpha;
                     });
 
                     polygonBorder.on("click tap", function(e) {
