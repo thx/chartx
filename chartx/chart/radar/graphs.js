@@ -64,9 +64,19 @@ define(
                 this._widget();
             },
             angOver: function(e, ind) {
+                this._setCurStyle(ind);
                 this._tip.show(this._getTipsInfo(e, ind));
             },
             angMove: function(e, ind) {
+                this._setCurStyle(ind);
+                this._tip.move(this._getTipsInfo(e, ind));
+            },
+            angOut: function(e) {
+                this._setCircleStyleForInd(this.currentAngInd);
+                this.currentAngInd = null;
+                this._tip.hide(e)
+            },
+            _setCurStyle: function(ind){
                 if (ind != this.currentAngInd) {
                     if (this.currentAngInd != null) {
                         this._setCircleStyleForInd(this.currentAngInd);
@@ -75,12 +85,6 @@ define(
                     this._setCircleStyleForInd(ind);
 
                 }
-                this._tip.move(this._getTipsInfo(e, ind));
-            },
-            angOut: function(e) {
-                this._setCircleStyleForInd(this.currentAngInd);
-                this.currentAngInd = null;
-                this._tip.hide(e)
             },
             _getTipsInfo: function(e, ind) {
                 e.tipsInfo = {
@@ -217,7 +221,7 @@ define(
 
                     });
 
-                    polygonBorder.on("click", function(e) {
+                    polygonBorder.on("click tap", function(e) {
                         e.groupInd = this.groupInd
                     });
 
