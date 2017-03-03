@@ -222,7 +222,6 @@ define(
                         var backCount = this.parent.parent.getNumChildren();
                         this.parent.toBack(backCount - this.groupInd - 1);
                         this.bg.context.globalAlpha -= me.hoverAlpha;
-
                     });
 
                     polygonBorder.on("click tap", function(e) {
