@@ -182,6 +182,7 @@ define(
                                 return;
                             }
                             evt.eventInfo = evt.target.eventInfo;
+                            
                             if( me.xVal !== null ){
                                 evt.eventInfo.xAxis = {value : me.xVal};
                             };

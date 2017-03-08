@@ -1961,7 +1961,9 @@ define(
                 spt.on("panstart mouseover", function(e) {
                     if (self._tips.enabled && e.eventInfo.nodesInfoList.length > 0) {
                         //self._tips.hide(e);
+
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
+                        
                         self._tips.show(e);
                     }
                 });
@@ -2007,10 +2009,19 @@ define(
                 if (!e.eventInfo) {
                     return;
                 };
+
+                var value;
+
+                if( e.eventInfo.xAxis && e.eventInfo.xAxis.value ){
+                    value = e.eventInfo.xAxis.value;
+                } else {
+                    value = this.dataFrame.xAxis.org[0][e.eventInfo.iNode];
+                }
+
                 var me = this;
                 e.eventInfo.xAxis = _.extend({
                     field: this.dataFrame.xAxis.field,
-                    value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
+                    value: value
                 } , e.eventInfo.xAxis);
 
                 e.eventInfo.dataZoom = me.dataZoom;

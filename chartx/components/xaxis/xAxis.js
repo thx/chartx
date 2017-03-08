@@ -192,7 +192,7 @@ define(
                     if (!this.text.rotation) {
                         this._layout();
                     }
-                }
+                };
 
                 this.resize = false;
                 // this.data = this.layoutData
@@ -276,6 +276,11 @@ define(
                 this.xDis = parseInt(xGraphsWidth / data.length);//这个属性目前主要是柱状图有分组柱状图的场景在用
 
                 for (var a = 0, al  = data.length; a < al; a++ ) {
+                    var txt = new Canvax.Display.Text( data[a] , {
+                        context: {
+                            fontSize: this.text.fontSize
+                        }
+                    });
                     var o = {
                         'content':data[a], 
                         'x': this.getPosX({
@@ -283,7 +288,8 @@ define(
                             ind : a,
                             dataLen: al,
                             xGraphsWidth : xGraphsWidth
-                        })
+                        }),
+                        'textWidth': txt.getTextWidth()
                     };
                     tmpData.push( o );
                 };
@@ -372,6 +378,8 @@ define(
                         });
                         this.rulesSprite.addChild(xNode);
                     }
+
+                    xNode.context.visible = arr[a].visible;
 
                     var o = arr[a]
                     var x = o.x,
@@ -517,7 +525,7 @@ define(
                         maxLenText = arr[a];
                     }
                 };
-debugger
+
                 var txt = new Canvax.Display.Text(maxLenText || "test", {
                     context: {
                         fillStyle: this.text.fillStyle,
@@ -532,29 +540,31 @@ debugger
             },
             _trimLayoutData: function() {
 
-                var arr = this.data
+                var arr = this.data;
 
-                var mw = this._textMaxWidth + 10;
+                var ind = 0;
+                var l = arr.length;
 
-                if (!!this.text.rotation) {
-                    mw = this._textMaxHeight * 1.5;
-                };
-
-                //总共能多少像素展现
-                var n = Math.min(Math.floor(this.width / mw), arr.length - 1); //能展现几个
-             
-                this.layoutData = arr;
-
-                if (n < arr.length - 1 && this.autoTrimLayout ) {
-                    //需要做间隔
-                    var dis = Math.max(Math.ceil(arr.length / n - 1), 0); //array中展现间隔
-                    //存放展现的数据
-                    for (var a = 0; a < arr.length; a++) {
-                        if( a % (1+dis) ){
-                            arr[a].layoutText = "";
+                while( ind < l ){
+                    var curr = arr[ind];
+                    curr.visible = true;
+                    if( arr[ind+1] ){
+                        for( var ii=ind ; ii<l; ii++ ){
+                            var next = arr[ii+1];
+                            if( next.x >= curr.x+curr.textWidth ){
+                                ind = ii+1;
+                                break;
+                            } else {
+                                next.visible = false;
+                            }
                         }
-                    };
-                };
+                    } else {
+                        break;
+                    }
+                }
+
+                this.layoutData = this.data;
+
             }
         };
         return xAxis;
