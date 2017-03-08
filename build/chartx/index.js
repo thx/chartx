@@ -2718,7 +2718,7 @@ define(
                         maxLenText = arr[a];
                     }
                 };
-
+debugger
                 var txt = new Canvax.Display.Text(maxLenText || "test", {
                     context: {
                         fillStyle: this.text.fillStyle,

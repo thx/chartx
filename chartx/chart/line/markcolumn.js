@@ -182,10 +182,16 @@ define(
                                 return;
                             }
                             evt.eventInfo = evt.target.eventInfo;
+                            if( me.xVal !== null ){
+                                evt.eventInfo.xAxis = {value : me.xVal};
+                            };
                             me.fire("mouseover" , evt);
                         });
                         bigCircle.on("mousemove", function(evt) {
                             evt.eventInfo = evt.target.eventInfo;
+                            if( me.xVal !== null ){
+                                evt.eventInfo.xAxis = {value : me.xVal};
+                            };
                             me.fire("mousemove" , evt);
                         });
                         bigCircle.on("mouseout", function(evt) {
@@ -193,6 +199,9 @@ define(
                                 return;
                             }
                             evt.eventInfo = evt.target.eventInfo;
+                            if( me.xVal !== null ){
+                                evt.eventInfo.xAxis = {value : me.xVal};
+                            };
                             me.fire("mouseout" , evt);
                         });
                         bigCircle.on("click", function(evt) {
@@ -201,6 +210,9 @@ define(
                             // delete eventInfo.nodesInfoList
                             var o = {
                                 eventInfo : _.clone(evt.target.eventInfo)
+                            };
+                            if( me.xVal !== null ){
+                                o.eventInfo.xAxis = {value : me.xVal};
                             };
                             me.sprite.fire("nodeclick", o);
                         });
