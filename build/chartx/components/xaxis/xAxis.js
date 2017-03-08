@@ -188,10 +188,6 @@ define(
 
                 if (this.enabled) { //this.display != "none"
                     this._widget();
-
-                    if (!this.text.rotation) {
-                        this._layout();
-                    }
                 };
 
                 this.resize = false;
@@ -387,7 +383,7 @@ define(
 
                     //文字
                     var textContext = {
-                        x: x,
+                        x: o.text_x || o.x,
                         y: y + 20,
                         fillStyle: this.text.fillStyle,
                         fontSize: this.text.fontSize,
@@ -487,26 +483,6 @@ define(
                 };
 
             },
-            /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
-            _layout: function() {
-
-                if (this.data.length == 0 || this.rulesSprite.getNumChildren() <=1 ){
-                    return;
-                };
-
-                var popText = this.rulesSprite.getChildAt(this.rulesSprite.getNumChildren() - 1).getChildAt(0);
-                if (popText) {
-                    var pc = popText.context;
-                    if (pc.textAlign == "center" &&
-                        pc.x + popText.context.width / 2 > this.width) {
-                        pc.x = this.width - popText.context.width / 2
-                    };
-                    if (pc.textAlign == "left" &&
-                        pc.x + popText.context.width > this.width) {
-                        pc.x = this.width - popText.context.width
-                    };
-                }
-            },
             _setTextMaxWidth: function() {
                 var arr = this._layoutDataSection;
                 var maxLenText = arr[0];
@@ -545,10 +521,12 @@ define(
                         if( ii == l-2 ){
                             //next是最后一个
                             if( me.text.textAlign == "center" && (next.x+next.textWidth/2) > me.width ){
-                                next_x = me.width - next.textWidth
+                                next_x = me.width - next.textWidth;
+                                next.text_x = me.width - next.textWidth/2;
                             }
                             if( me.text.textAlign == "left" && (next.x+next.textWidth) > me.width ){
-                                next_x = me.width - next.textWidth
+                                next_x = me.width - next.textWidth;
+                                next.text_x = me.width - next.textWidth;
                             }
                         }
 
@@ -567,8 +545,11 @@ define(
                         }
                     };
                 };
-                
-                checkOver(0);
+
+                //非rotation下才做显示隐藏
+                if (!this.text.rotation) {
+                    checkOver(0);
+                };
 
                 this.layoutData = this.data;
 
