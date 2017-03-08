@@ -31,7 +31,7 @@ define(
                 fontSize: 12,
                 rotation: 0,
                 format: null,
-                textAlign: null
+                textAlign: "center"
             };
             this.maxTxtH = 0;
 
@@ -505,15 +505,6 @@ define(
                         pc.x + popText.context.width > this.width) {
                         pc.x = this.width - popText.context.width
                     };
-                    if (this.rulesSprite.getNumChildren() > 2) {
-                        //倒数第二个text
-                        var popPreText = this.rulesSprite.getChildAt(this.rulesSprite.getNumChildren() - 2).getChildAt(0);
-                        var ppc = popPreText.context;
-                        //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
-                        if (ppc.visible && pc.x < ppc.x + ppc.width) {
-                            pc.visible = false;
-                        }
-                    }
                 }
             },
             _setTextMaxWidth: function() {
@@ -539,29 +530,45 @@ define(
                 return this._textMaxWidth;
             },
             _trimLayoutData: function() {
-
+                var me = this;
                 var arr = this.data;
 
-                var ind = 0;
                 var l = arr.length;
 
-                while( ind < l ){
-                    var curr = arr[ind];
+                function checkOver(i){
+                    var curr = arr[i];
                     curr.visible = true;
-                    if( arr[ind+1] ){
-                        for( var ii=ind ; ii<l; ii++ ){
-                            var next = arr[ii+1];
-                            if( !next || next.x >= curr.x+curr.textWidth ){
-                                ind = ii+1;
-                                break;
+                    for( var ii=i; ii<l-1; ii++ ){
+                        var next = arr[ii+1];
+                        var next_x = next.x - next.textWidth/2;
+
+                        if( ii == l-2 ){
+                            //next是最后一个
+                            if( me.text.textAlign == "center" && (next.x+next.textWidth/2) > me.width ){
+                                next_x = me.width - next.textWidth
+                            }
+                            if( me.text.textAlign == "left" && (next.x+next.textWidth) > me.width ){
+                                next_x = me.width - next.textWidth
+                            }
+                        }
+
+                        if( next_x < curr.x+curr.textWidth/2 ){
+                            if( ii == l-2 ){
+                                //最后一个的话，反把前面的给hide
+                                next.visible = true;
+                                curr.visible = false;
+                                return;
                             } else {
                                 next.visible = false;
                             }
+                        } else {
+                            checkOver( ii+1 );
+                            break;
                         }
-                    } else {
-                        break;
-                    }
-                }
+                    };
+                };
+                
+                checkOver(0);
 
                 this.layoutData = this.data;
 
