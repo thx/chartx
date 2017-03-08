@@ -46,8 +46,9 @@ define(
                 });
             },
             show: function(e , pointInfo){
+                this.eventInfo = e.eventInfo;
                 this.sprite.context.visible = true;
-                this._showLine(e , pointInfo);
+                this._showLine(pointInfo);
                 this._showNodes(e , pointInfo);
                 return this;
             },
@@ -55,6 +56,8 @@ define(
                 this.sprite.context.visible = false;
             },
             move: function( e , pointInfo ){
+                this.eventInfo = e.eventInfo;
+
                 if(this._line){
                     this._line.context.x  = parseInt(pointInfo.x);
                 };
@@ -70,7 +73,7 @@ define(
             },            /**
              * line相关------------------------
              */
-            _showLine : function(e , pointInfo){
+            _showLine : function(pointInfo){
                 var me = this;
                 var lineOpt = _.deepExtend({
                     x       : parseInt(pointInfo.x),
@@ -98,14 +101,14 @@ define(
                                 if( evt.fromTarget && evt.fromTarget.name == "_markcolumn_node" ){
                                     return;
                                 };
-                                evt.eventInfo = e.eventInfo;
+                                evt.eventInfo = me.eventInfo;
                                 if( me.xVal !== null ){
                                     evt.eventInfo.xAxis = {value : me.xVal};
                                 };
                                 me.fire("mouseover" , evt);
                             });
                             this._line.on("mousemove", function(evt) {
-                                evt.eventInfo = e.eventInfo;
+                                evt.eventInfo = me.eventInfo;
                                 if( me.xVal !== null ){
                                     evt.eventInfo.xAxis = {value : me.xVal};
                                 };
@@ -115,7 +118,7 @@ define(
                                 if( evt.toTarget && evt.toTarget.name == "_markcolumn_node" ){
                                     return;
                                 }
-                                evt.eventInfo = e.eventInfo;
+                                evt.eventInfo = me.eventInfo;
                                 if( me.xVal !== null ){
                                     evt.eventInfo.xAxis = {value : me.xVal};
                                 };
