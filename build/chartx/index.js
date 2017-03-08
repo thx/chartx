@@ -2752,10 +2752,7 @@ define(
                     if( arr[ind+1] ){
                         for( var ii=ind ; ii<l; ii++ ){
                             var next = arr[ii+1];
-                            if(!next){
-                                break;
-                            };
-                            if( next.x >= curr.x+curr.textWidth ){
+                            if( !next || next.x >= curr.x+curr.textWidth ){
                                 ind = ii+1;
                                 break;
                             } else {
