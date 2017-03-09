@@ -141,7 +141,7 @@ define(
                         field: this.field
                     };
                     if( this._nodeInd >= 0 ){
-                        obj.value = this.data[ this._nodeInd ].value;
+                        obj.value = this.dataOrg[ this._nodeInd ].value;
                     };
 
                     return s.apply( this , [obj] );
