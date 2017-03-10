@@ -150,12 +150,22 @@ define(
             this.xDataSection = [];
             this._colors = Theme.colors;
             this.fillStyle = null;
-            this.alpha = 0.5;
+
+
+            this.fill = {
+                fillStyle: null,
+                alpha: 0.2,
+                hoverAlpha: 0.1
+            }
+
+            this.line = {
+                strokeStyle: null
+            }
+
             this.lineWidth = 2;
             this.node = {
                 r : 5
             };
-            this.hoverAlpha = 0.3;
             this.smooth = false;
             this.sprite = null;
             this.currentAngInd = null;
@@ -190,6 +200,19 @@ define(
                     fillStyle = this._colors[i];
                 }
                 return fillStyle;
+            },
+            getStyle: function( p , i , ii, value ){
+                var res = null;
+                if (_.isArray(p)) {
+                    res = p[i]
+                }
+                if (_.isFunction(p)) {
+                    res = p(i, ii, value);
+                }
+                if (!res) {
+                    res = this._colors[i];
+                }
+                return res;
             },
             draw: function(data, opt) {
                 this.data = data;
@@ -304,7 +327,7 @@ define(
                                 x: px,
                                 y: py,
                                 r: this.node.r,
-                                fillStyle: this.getFillStyle(i, ii, val), //this._colors[i],
+                                fillStyle: this.getStyle(this.line.strokeStyle , i, ii, val), //this._colors[i],
                                 strokeStyle: "#ffffff",
                                 lineWidth: this.lineWidth,
                                 globalAlpha: 1
@@ -322,9 +345,9 @@ define(
                         id: "radar_bg_" + i,
                         context: {
                             pointList: _.clone(pointList),
-                            globalAlpha: this.alpha, //0.5,
+                            globalAlpha: this.fill.alpha, //0.5,
                             smooth: this.smooth,
-                            fillStyle: this.getFillStyle(i) //this._colors[i]
+                            fillStyle: this.getStyle( this.line.strokeStyle || this.fill.fillStyle , i) //this._colors[i]
                         }
                     });
 
@@ -336,7 +359,7 @@ define(
                             cursor: "pointer",
                             fillStyle: "RGBA(0,0,0,0)",
                             smooth: this.smooth,
-                            strokeStyle: this.getFillStyle(i) //this._colors[i]
+                            strokeStyle: this.getStyle(this.line.strokeStyle, i) //this._colors[i]
                         }
                     });
 
@@ -346,11 +369,11 @@ define(
                     polygonBorder.hover(function(e) {
                         e.groupInd = this.groupInd;
                         this.parent.toFront();
-                        this.bg.context.globalAlpha += me.hoverAlpha;
+                        this.bg.context.globalAlpha += me.fill.hoverAlpha;
                     }, function() {
                         var backCount = this.parent.parent.getNumChildren();
                         this.parent.toBack(backCount - this.groupInd - 1);
-                        this.bg.context.globalAlpha -= me.hoverAlpha;
+                        this.bg.context.globalAlpha -= me.fill.hoverAlpha;
                     });
 
                     polygonBorder.on("click tap", function(e) {

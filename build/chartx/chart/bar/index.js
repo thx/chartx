@@ -690,7 +690,7 @@ define(
                             });
 
                             _.each(infosp.children, function(txt) {
-                                if (txt._text) {
+                                if (txt._text || txt._text===0) {
                                     if (txt._tweenObj) {
                                         AnimationFrame.destroyTween(txt._tweenObj);
                                     };
@@ -705,6 +705,7 @@ define(
                                         delay: h * options.delay,
                                         onUpdate: function() {
                                             var content = this.v;
+
                                             if (_.isFunction(self.text.format)) {
                                                 var _formatc = self.text.format.apply( self , [content , txt._data]);
                                                 if(!!_formatc || _formatc==="" || _formatc===0){
