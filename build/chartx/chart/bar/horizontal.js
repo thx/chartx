@@ -79,6 +79,7 @@ define(
                     ctx.scaleOrigin.y = rect.y + rect.height / 2;
                     ctx.scaleY = -1
                 });
+
                 //把y轴文案做一次镜像反转
                 _.each(this._yAxis.rulesSprite.children, function(ynode) {
                     var ctx = ynode._txt.context;

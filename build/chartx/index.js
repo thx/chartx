@@ -2306,6 +2306,7 @@ define(
 
                 if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
                     this.isH = true;
+                    this.text.textAlign = "right";
                 };
 
                 if (!this.line.enabled) {
@@ -2576,7 +2577,12 @@ define(
                         this.rulesSprite.addChild(xNode);
                     }
 
-                    xNode.context.visible = arr[a].visible;
+                    var _visible = true;
+                    if( arr[a].visible!==undefined ){
+                        _visible = arr[a].visible;
+                    }
+
+                    xNode.context.visible = _visible;
 
                     var o = arr[a]
                     var x = o.x,
@@ -2589,7 +2595,7 @@ define(
                         fillStyle: this.text.fillStyle,
                         fontSize: this.text.fontSize,
                         rotation: -Math.abs(this.text.rotation),
-                        textAlign: this.text.textAlign || (!!this.text.rotation ? "right" : "center"),
+                        textAlign: this.text.textAlign,
                         textBaseline: !!this.text.rotation ? "middle" : "top",
                         globalAlpha: 0
                     };
