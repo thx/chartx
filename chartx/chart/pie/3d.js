@@ -31,9 +31,17 @@ define(
                 this.yAxis = {
                     field: null
                 };
+                this.rotation = {
+                    x: 45,
+                    y: 0
+                };
+
+                this.thickness = 26.25;
+
+
                 _.deepExtend(this, opts);
                 this.dataFrame = this._initData(data, this);
-                this._setLengend();
+
             },
             draw: function () {
                 this.stageBg = new Canvax.Display.Sprite({
@@ -54,88 +62,6 @@ define(
                 this._drawEnd(); //绘制结束，添加到舞台  
                 this.inited = true;
             },
-            getByIndex: function (index) {
-                return this._pie._getByIndex(index);
-            },
-            getLabelList: function () {
-                return this._pie.getLabelList();
-            },
-            getList: function () {
-                var self = this;
-                var list = [];
-                var item;
-                if (self._pie) {
-                    var sectorList = self._pie.getList();
-                    if (sectorList.length > 0) {
-                        for (var i = 0; i < sectorList.length; i++) {
-                            item = sectorList[i];
-                            var idata = self._pie.data.data[i];
-
-                            list.push({
-                                name: item.name,
-                                index: item.index,
-                                color: item.color,
-                                r: item.r,
-                                value: item.value,
-                                percentage: item.percentage,
-                                checked: idata.checked
-                            });
-                        }
-                    }
-                };
-                return list;
-            },
-            getCheckedList: function () {
-                var cl = [];
-                _.each(this.getList(), function (item) {
-                    if (item.checked) {
-                        cl.push(item);
-                    }
-                });
-                return cl;
-            },
-            focusAt: function (index) {
-                if (this._pie) {
-                    this._pie.focus(index);
-                }
-            },
-            unfocusAt: function (index) {
-                if (this._pie) {
-                    this._pie.unfocus(index);
-                }
-            },
-            checkAt: function (index) {
-                if (this._pie) {
-                    this._pie.check(index);
-                }
-            },
-            uncheckAt: function (index) {
-                if (this._pie) {
-                    this._pie.uncheck(index);
-                }
-            },
-            uncheckAll: function () {
-                if (this._pie) {
-                    this._pie.uncheckAll();
-                }
-            },
-            checkOf: function (xvalue) {
-                this.checkAt(this._getIndexOfxName(xvalue));
-            },
-            uncheckOf: function (xvalue) {
-                this.uncheckAt(this._getIndexOfxName(xvalue));
-            },
-            _getIndexOfxName: function (xvalue) {
-                var i;
-                var list = this.getList();
-                for (var ii = 0, il = list.length; ii < il; ii++) {
-                    if (list[ii].name == xvalue) {
-                        i = ii;
-                        break;
-                    }
-                }
-                return i;
-            },
             _initData: function(arr, opt) {
                 var data = [];
                 var arr = _.clone(arr);
@@ -153,10 +79,10 @@ define(
                     var yFieldInd = xFieldInd + 1;
                     if (yFieldInd >= titles.length) {
                         yFieldInd = 0;
-                    };
+                    }
                     if (this.yAxis.field) {
                         yFieldInd = _.indexOf(titles, this.yAxis.field);
-                    };
+                    }
                     _.each(arr, function(row) {
                         var rowData = [];
                         if (_.isArray(row)) {
@@ -227,20 +153,6 @@ define(
                 return dataFrame;
 
             },
-            clear: function () {
-                this.stageBg.removeAllChildren()
-                this.core.removeAllChildren()
-                this.stageTip.removeAllChildren();
-            },
-            reset: function (obj) {
-                obj = obj || {};
-                this.clear();
-                this._pie.clear();
-                var data = obj.data || this.data;
-                _.deepExtend(this, obj.options);
-                this.dataFrame = this._initData(data, this.options);
-                this.draw();
-            },
             _initModule: function () {
                 var self = this;
                 var w = self.width;
@@ -266,6 +178,8 @@ define(
                     y: pieY,
                     r0: r0,
                     r: r,
+                    rotation: self.rotation,
+                    thickness: self.thickness,
                     boundWidth: w,
                     boundHeight: h,
                     data: self.dataFrame,
@@ -296,88 +210,11 @@ define(
             },
             _startDraw: function () {
                 this._pie.draw(this);
-                var me = this;
-                //如果有legend，调整下位置,和设置下颜色
-                if (this._legend && !this._legend.inited) {
-                    _.each(this.getList(), function (item, i) {
-                        var ffill = item.color;
-                        me._legend.setStyle(item.name, { fillStyle: ffill });
-                    });
-                    this._legend.inited = true;
-                };
             },
             _drawEnd: function () {
                 this.core.addChild(this._pie.sprite);
-                if (this._tip) this.stageTip.addChild(this._tip.sprite);
-                this.fire('complete', {
-                    data: this.getList()
-                });
-            },
-            remove: function (field) {
-                var me = this;
-                var data = me.data;
-                if (field && data.length > 1) {
-                    for (var i = 1; i < data.length; i++) {
-                        if (data[i][0] == field && !_.contains(me.ignoreFields, field)) {
-                            me.ignoreFields.push(field);
-                            console.log(me.ignoreFields.toString());
-                        }
-                    }
-                }
-                me.reset();
-            },
-            add: function (field) {
-                var me = this;
-                var data = me.data;
-                if (field && data.length > 1) {
-                    for (var i = 1; i < data.length; i++) {
-                        if (data[i][0] == field && _.contains(me.ignoreFields, field)) {
-                            me.ignoreFields.splice(_.indexOf(me.ignoreFields, field), 1);
-                        }
-                    }
-                }
-                me.reset();
-            },
-            //设置图例 begin
-            _setLengend: function () {
-                var me = this;
-                if ( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
-                //设置legendOpt
-                var legendOpt = _.deepExtend({
-                    legend:true,
-                    label: function (info) {
-                        return info.field
-                    },
-                    onChecked: function (field) {
-                        me.add(field);
-                    },
-                    onUnChecked: function (field) {
-                        me.remove(field);
-                    },
-                    layoutType: "v"
-                }, this._opts.legend);
-                this._legend = new Legend(this._getLegendData(), legendOpt);
-                this.stage.addChild(this._legend.sprite);
-                this._legend.pos({
-                    x: this.width - this._legend.width,
-                    y: this.height / 2 - this._legend.h / 2
-                });
-
-                this.padding.right += this._legend.width;
-            },
-            _getLegendData: function () {
-                var me = this;
-                var data = [];
-                _.each(this.dataFrame.data, function (obj, i) {
-                    data.push({
-                        field: obj.name,
-                        value: obj.y,
-                        fillStyle: null
-                    });
-                });
-
-                return data;
             }
-            ////设置图例end
+
+
         });
     });

@@ -14,6 +14,7 @@
     ],
     function (Canvax, Sector, Line, BrokenLine, Rect, Path, Tools, AnimationFrame, Tip, Theme, ColorFormat) {
 
+
         var PI = Math.PI,
             deg2rad = (PI / 180), // degrees to radians
             sin = Math.sin,
@@ -93,19 +94,6 @@
             this.labelMaxCount = 15;
             this.labelList = [];
 
-            var attribs = {
-                alpha: 0.7853981633974483,
-                beta: 0,
-                //center: [318, 170, 320, 0],
-                depth: 26.25,
-                end: 1.257,
-                innerR: 50,
-                r: 160,
-                start: -1.571,
-                x: 318,
-                y: 170,
-                // z: 0
-            };
 
         };
 
@@ -126,7 +114,6 @@
                 if (this.dataLabel.enabled) {
                     this.branchSp = new Canvax.Display.Sprite();
                 }
-                ;
                 this._configData();
                 this._configColors();
             },
@@ -152,7 +139,7 @@
                 self.labelFontSize = adjustFontSize < 12 ? 12 : adjustFontSize;
                 var percentFixedNum = 2;
                 var data = self.data.data;
-                self.clickMoveDis = self.r / 6;  //11
+                self.clickMoveDis = self.r / 11;
                 if (data.length && data.length > 0) {
                     for (var i = 0; i < data.length; i++) {
                         self.total += data[i].y;
@@ -228,8 +215,8 @@
                                 midAngle: midAngle,
                                 outOffsetx: self.clickMoveDis * cosV,
                                 outOffsety: self.clickMoveDis * sinV,
-                                centerx: (self.r - self.clickMoveDis) * cosV * Math.sin(Math.PI/4),
-                                centery: (self.r - self.clickMoveDis) * sinV * Math.cos(Math.PI/4),
+                                centerx: (self.r - self.clickMoveDis ) * cosV - self.r * cosV * sin(deg2rad * self.rotation.y),
+                                centery: (self.r - self.clickMoveDis ) * sinV - self.r * sinV * sin(deg2rad * self.rotation.x),
                                 outx: (self.r + self.clickMoveDis) * cosV,
                                 outy: (self.r + self.clickMoveDis) * sinV,
                                 edgex: (self.r + 2 * self.clickMoveDis) * cosV,
@@ -247,7 +234,7 @@
                             self.currentAngle += angle;
                             if (self.currentAngle > limitAngle) self.currentAngle = limitAngle;
                         }
-                        ;
+
                         data[maxIndex].isMax = true;
                         //处理保留小数后百分比总和不等于100的情况
                         //总会有除不尽的情况（如1，1，1，每份都是33.33333...，没必要做修正）
@@ -323,23 +310,47 @@
                 self.setX(self.x);
                 self.setY(self.y);
                 self._widget();
+
+                self.data.data[0].y = 0;
+                var clearTime = null;
+
+                var testFun = function () {
+                    self.data.data[0].y += 1;
+                    //console.time('_configData')
+                    self._configData();
+                    //console.timeEnd('_configData')
+                    // console.time('_widget')
+                    self._widget();
+                    // console.timeEnd('_widget')
+                    window.requestAnimationFrame(testFun)
+                    console.log(self.data.data[0].y)
+                };
+
+                //testFun();
+
+
+
                 //this.sprite.context.globalAlpha = 0;      
-                if (opt.animation) {
-                    self.grow();
-                }
-                if (opt.complete) {
-                    opt.complete.call(self);
-                }
+                //if (opt.animation) {
+                //    self.grow();
+                //}
+                //if (opt.complete) {
+                //    opt.complete.call(self);
+                //}
+            },
+            getOneSector: function (index) {
+                var self = this;
+                var allFace = self.sprite.getChildById("allFace");
+                var everyFace = {};
+                _.each(_attrs, function (name) {
+                    everyFace[name] = allFace.getChildById('path_' + name + '_' + index);
+                });
+                return everyFace;
             },
             focus: function (index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
-                var topSp = self.sprite.getChildById('sector_sp_top').getChildById('sp_top_clone_' + index);
-                var outSp = self.sprite.getChildById('sector_sp_out').getChildById('sp_out_clone_' + index);
-                var innSp = self.sprite.getChildById('sector_sp_inn').getChildById('sp_inn_clone_' + index);
-                var side1Sp = self.sprite.getChildById('sector_sp_side1').getChildById('sp_side1_clone_' + index);
-                var side2Sp = self.sprite.getChildById('sector_sp_side2').getChildById('sp_side2_clone_' + index);
-
+                var _everyFace = self.getOneSector(index);
                 var secData = self.data.data[index];
                 secData._selected = true;
                 sec.animate({
@@ -348,17 +359,12 @@
                 }, {
                     duration: 100,
                     onUpdate: function (a) {
-                        topSp.context.x = a.x;
-                        topSp.context.y = a.y;
-                        outSp.context.x = a.x;
-                        outSp.context.y = a.y;
-                        innSp.context.x = a.x;
-                        innSp.context.y = a.y;
+                        _.each(_attrs, function (name) {
+                            _everyFace[name].context.x = a.x;
+                            _everyFace[name].context.y = a.y;
 
-                        side1Sp.context.x = a.x;
-                        side1Sp.context.y = a.y;
-                        side2Sp.context.x = a.x;
-                        side2Sp.context.y = a.y;
+                        });
+
                     },
                     onComplete: function () {
                         //secData.checked = true;
@@ -369,12 +375,7 @@
             unfocus: function (index, callback) {
                 var self = this;
                 var sec = self.sectorMap[index].sector;
-
-                var topSp = self.sprite.getChildById('sector_sp_top').getChildById('sp_top_clone_' + index);
-                var outSp = self.sprite.getChildById('sector_sp_out').getChildById('sp_out_clone_' + index);
-                var innSp = self.sprite.getChildById('sector_sp_inn').getChildById('sp_inn_clone_' + index);
-                var side1Sp = self.sprite.getChildById('sector_sp_side1').getChildById('sp_side1_clone_' + index);
-                var side2Sp = self.sprite.getChildById('sector_sp_side2').getChildById('sp_side2_clone_' + index);
+                var _everyFace = self.getOneSector(index);
 
                 var secData = self.data.data[index];
                 secData._selected = false;
@@ -384,17 +385,11 @@
                 }, {
                     duration: 100,
                     onUpdate: function (a) {
-                        topSp.context.x = a.x;
-                        topSp.context.y = a.y;
-                        outSp.context.x = a.x;
-                        outSp.context.y = a.y;
-                        innSp.context.x = a.x;
-                        innSp.context.y = a.y;
+                        _.each(_attrs, function (name) {
+                            _everyFace[name].context.x = a.x;
+                            _everyFace[name].context.y = a.y;
 
-                        side1Sp.context.x = a.x;
-                        side1Sp.context.y = a.y;
-                        side2Sp.context.x = a.x;
-                        side2Sp.context.y = a.y;
+                        });
                     },
                     onComplete: function () {
                         callback && callback();
@@ -919,37 +914,31 @@
                 var self = this;
                 var data = self.data.data;
                 var moreSecData;
+                var sectorsSp3d = [];
 
-                _.each(_attrs, function (item) {
-                    self['sectorsSp3d_' + item] = self.sectorsSp.getChildById('sector_sp_' + item) || new Canvax.Display.Sprite({
-                            id: 'sector_sp_' + item
-                        });
-
-                });
-
+                self.sprite.removeAllChildren();
 
                 if (data.length > 0 && self.total > 0) {
                     self.branchSp && self.sprite.addChild(self.branchSp);
                     for (var i = 0; i < data.length; i++) {
+
+                        if (data[i].ignored) continue;
+
                         if (self.colorIndex >= self.colors.length) self.colorIndex = 0;
                         var fillColor = self.getColorByIndex(self.colors, i);
                         var _sideFillStyle = ColorFormat.colorBrightness(fillColor, -0.2);
 
-                        //扇形主体
+                        var oneSector = new Canvax.Display.Sprite({
+                            id: "sp_sector" + i
+                        })
 
-                        var sectorsSp3d = self.sectorsSp.getChildById('sector_sp_' + i) || new Canvax.Display.Sprite({
-                                id: 'sector_sp_' + i,
-                                context: {
-                                    x: data[i].sliced ? data[i].outOffsetx : 0,
-                                    y: data[i].sliced ? data[i].outOffsety : 0
-                                }
-                            });
+                        //扇形主体
 
 
                         var _SVGPaths = self.setPaths({
-                            alpha: deg2rad * 45,  //0.7853981633974483,
-                            beta: 0,
-                            depth: 26.25,
+                            alpha: deg2rad * self.rotation.x,  //0.7853981633974483,
+                            beta: deg2rad * self.rotation.y,
+                            depth: self.thickness,  // 26.25,
                             end: deg2rad * (data[i].end + 360) - 0.0001,
                             innerR: self.r0,
                             r: self.r,
@@ -958,34 +947,41 @@
                             y: 0
                         });
 
+
                         _.each(_attrs, function (item) {
 
                             var _pathObj = new Path({
                                 id: "path_" + item + '_' + data[i].index,
+                                zIndex: _SVGPaths['z' + item],
                                 context: {
                                     x: data[i].sliced ? data[i].outOffsetx : 0,
                                     y: data[i].sliced ? data[i].outOffsety : 0,
                                     path: _SVGPaths[item],
                                     fillStyle: item === 'top' ? fillColor : _sideFillStyle,
                                     index: data[i].index,
-                                    cursor: "pointer"
+                                    cursor: "pointer",
+                                    globalAlpha: 1
+
                                 }
                             });
-                            sectorsSp3d.addChild(_pathObj);
 
-                            var _cloneTopPath = _pathObj.clone();
-                            _cloneTopPath.id = 'sp_' + item + '_clone_' + data[i].index;
-                            self['sectorsSp3d_' + item].addChild(_cloneTopPath);
+                            oneSector.addChild(_pathObj);
 
+                            sectorsSp3d.push(_pathObj);
+
+
+                            //var _cloneTopPath = _pathObj.clone();
+                            //_cloneTopPath.id = 'sp_' + item + '_clone_' + data[i].index;
+                            //self['sectorsSp3d_' + item].addChild(_cloneTopPath);
+                            //
                             if (item === 'top') {
-                                _cloneTopPath.__data = data[i];
-                                _cloneTopPath.__colorIndex = i;
-                                _cloneTopPath.__dataIndex = i;
-                                _cloneTopPath.__isSliced = data[i].sliced;
+                                _pathObj.__data = data[i];
+                                _pathObj.__colorIndex = i;
+                                _pathObj.__dataIndex = i;
+                                _pathObj.__isSliced = data[i].sliced;
 
                                 //扇形事件
-                                _cloneTopPath.hover(function (e) {
-                                    var me = this;
+                                _pathObj.hover(function (e) {
                                     if (self.tips.enabled) {
                                         self._showTip(e, this.__dataIndex);
                                     }
@@ -1005,7 +1001,7 @@
                                     }
                                 });
 
-                                _cloneTopPath.on('mousedown mouseup click mousemove dblclick', function (e) {
+                                _pathObj.on('mousedown mouseup click mousemove dblclick', function (e) {
                                     self._geteventInfo(e, this.__dataIndex);
                                     if (e.type == "click") {
                                         self.secClick(this, e);
@@ -1016,27 +1012,26 @@
                                             self._moveTip(e, this.__dataIndex);
                                         }
                                     }
-                                    ;
                                 });
 
 
                             }
 
                         });
-                        if (!data[i].ignored) {
-                            self.sectorsSp.addChild(sectorsSp3d);
-                        }else{
-                            //移除忽略的区域
-                            _.each(_attrs, function (item) {
-                                self['sectorsSp3d_' + item].removeChildById('sp_' + item + '_clone_' + data[i].index);
-                            });
-                        }
+                        //if (!data[i].ignored) {
+                        //    self.sectorsSp.addChild(sectorsSp3d);
+                        //}else{
+                        //    //移除忽略的区域
+                        //    _.each(_attrs, function (item) {
+                        //        self['sectorsSp3d_' + item].removeChildById('sp_' + item + '_' + data[i].index);
+                        //    });
+                        //}
 
 
                         moreSecData = {
                             name: data[i].name,
                             value: data[i].y,
-                            sector: sectorsSp3d,
+                            sector: oneSector,
                             r: self.r,
                             startAngle: data[i].start,
                             endAngle: data[i].end,
@@ -1047,31 +1042,43 @@
                         };
 
                         self.sectors.push(moreSecData);
+
                     }
+
+                    sectorsSp3d.sort(function (a, b) {
+                        return a.zIndex < b.zIndex ? -1 : 1;
+                    });
+
+                    var allFaceSprite = new Canvax.Display.Sprite({
+                        id: 'allFace'
+                    });
+
+                    for (var t = 0, len = sectorsSp3d.length; t < len; t++) {
+                        allFaceSprite.addChild(sectorsSp3d[t]);
+                    }
+
+
+                    self.sprite.addChild(allFaceSprite);
 
                     if (self.sectors.length > 0) {
                         self.sectorMap = {};
                         for (var i = 0; i < self.sectors.length; i++) {
                             self.sectorMap[self.sectors[i].index] = self.sectors[i];
                         }
+
+                        //self.sprite.addChild(self.sectorsSp);
                     }
 
                     if (self.dataLabel.enabled) {
                         self._startWidgetLabel();
                     }
 
-                    //渲染顺序调整
-                    _attrs = ['side1', 'side2', 'inn', 'out', 'top'];
-                    _.each(_attrs, function (item) {
-                        self.sprite.addChild(self['sectorsSp3d_' + item]);
-                    })
 
-
-                    if(self.animation){
-                        _.each(_attrs, function (item) {
-                            self['sectorsSp3d_' + item].context.globalAlpha = 0;
-                        });
-                    }
+                    //if(self.animation){
+                    //    _.each(_attrs, function (item) {
+                    //        self['sectorsSp3d_' + item].context.globalAlpha = 0;
+                    //    });
+                    //}
 
                 }
             },
@@ -1159,44 +1166,44 @@
                 var out = ['M', cx + (rx * cos(start2)), cy + (ry * sin(start2))];
                 out = out.concat(curveTo(cx, cy, rx, ry, start2, end2, 0, 0));
 
-                if (end > midEnd && start < midEnd) { // When shape is wide, it can cross both, (c) and (d) edges, when using startAngle
-                    // Go to outer side
-                    out = out.concat([
-                        'L', cx + (rx * cos(end2)) + dx, cy + (ry * sin(end2)) + dy
-                    ]);
-                    // Curve to the right edge of the slice (d)
-                    out = out.concat(curveTo(cx, cy, rx, ry, end2, midEnd, dx, dy));
-                    // Go to the inner side
-                    out = out.concat([
-                        'L', cx + (rx * cos(midEnd)), cy + (ry * sin(midEnd))
-                    ]);
-                    // Curve to the true end of the slice
-                    out = out.concat(curveTo(cx, cy, rx, ry, midEnd, end, 0, 0));
-                    // Go to the outer side
-                    out = out.concat([
-                        'L', cx + (rx * cos(end)) + dx, cy + (ry * sin(end)) + dy
-                    ]);
-                    // Go back to middle (d)
-                    out = out.concat(curveTo(cx, cy, rx, ry, end, midEnd, dx, dy));
-                    out = out.concat([
-                        'L', cx + (rx * cos(midEnd)), cy + (ry * sin(midEnd))
-                    ]);
-                    // Go back to the left edge
-                    out = out.concat(curveTo(cx, cy, rx, ry, midEnd, end2, 0, 0));
-                } else if (end > PI - a && start < PI - a) { // But shape can cross also only (c) edge:
-                    // Go to outer side
-                    out = out.concat([
-                        'L', cx + (rx * cos(end2)) + dx, cy + (ry * sin(end2)) + dy
-                    ]);
-                    // Curve to the true end of the slice
-                    out = out.concat(curveTo(cx, cy, rx, ry, end2, end, dx, dy));
-                    // Go to the inner side
-                    out = out.concat([
-                        'L', cx + (rx * cos(end)), cy + (ry * sin(end))
-                    ]);
-                    // Go back to the artifical end2
-                    out = out.concat(curveTo(cx, cy, rx, ry, end, end2, 0, 0));
-                }
+                //if (end > midEnd && start < midEnd) { // When shape is wide, it can cross both, (c) and (d) edges, when using startAngle
+                //    // Go to outer side
+                //    out = out.concat([
+                //        'L', cx + (rx * cos(end2)) + dx, cy + (ry * sin(end2)) + dy
+                //    ]);
+                //    // Curve to the right edge of the slice (d)
+                //    out = out.concat(curveTo(cx, cy, rx, ry, end2, midEnd, dx, dy));
+                //    // Go to the inner side
+                //    out = out.concat([
+                //        'L', cx + (rx * cos(midEnd)), cy + (ry * sin(midEnd))
+                //    ]);
+                //    // Curve to the true end of the slice
+                //    out = out.concat(curveTo(cx, cy, rx, ry, midEnd, end, 0, 0));
+                //    // Go to the outer side
+                //    out = out.concat([
+                //        'L', cx + (rx * cos(end)) + dx, cy + (ry * sin(end)) + dy
+                //    ]);
+                //    // Go back to middle (d)
+                //    out = out.concat(curveTo(cx, cy, rx, ry, end, midEnd, dx, dy));
+                //    out = out.concat([
+                //        'L', cx + (rx * cos(midEnd)), cy + (ry * sin(midEnd))
+                //    ]);
+                //    // Go back to the left edge
+                //    out = out.concat(curveTo(cx, cy, rx, ry, midEnd, end2, 0, 0));
+                //} else if (end > PI - a && start < PI - a) { // But shape can cross also only (c) edge:
+                //    // Go to outer side
+                //    out = out.concat([
+                //        'L', cx + (rx * cos(end2)) + dx, cy + (ry * sin(end2)) + dy
+                //    ]);
+                //    // Curve to the true end of the slice
+                //    out = out.concat(curveTo(cx, cy, rx, ry, end2, end, dx, dy));
+                //    // Go to the inner side
+                //    out = out.concat([
+                //        'L', cx + (rx * cos(end)), cy + (ry * sin(end))
+                //    ]);
+                //    // Go back to the artifical end2
+                //    out = out.concat(curveTo(cx, cy, rx, ry, end, end2, 0, 0));
+                //}
 
                 out = out.concat([
                     'L', cx + (rx * cos(end2)) + dx, cy + (ry * sin(end2)) + dy
@@ -1235,6 +1242,7 @@
                     angleStart = Math.abs(start + angleCorr),
                     angleMid = Math.abs((start + end) / 2 + angleCorr);
 
+
                 // set to 0-PI range
                 function toZeroPIRange(angle) {
                     angle = angle % (2 * PI);
@@ -1244,9 +1252,11 @@
                     return angle;
                 }
 
+
                 angleEnd = toZeroPIRange(angleEnd);
                 angleStart = toZeroPIRange(angleStart);
                 angleMid = toZeroPIRange(angleMid);
+
 
                 // *1e5 is to compensate pInt in zIndexSetter
                 var incPrecision = 1e5,
@@ -1254,18 +1264,23 @@
                     a2 = angleStart * incPrecision,
                     a3 = angleEnd * incPrecision;
 
-                return {
+
+                var value = {
                     top: top,
-                    zTop: PI * incPrecision + 1, // max angle is PI, so this is allways higher
+                    ztop: PI * incPrecision + 1, // max angle is PI, so this is allways higher
                     out: out,
-                    zOut: Math.max(a1, a2, a3),
+                    zout: Math.max(a1, a2, a3),
                     inn: inn,
-                    zInn: Math.max(a1, a2, a3),
+                    zinn: Math.max(a1, a2, a3),
                     side1: side1,
-                    zSide1: a3 * 0.99, // to keep below zOut and zInn in case of same values
+                    zside1: a2 * 0.99, // to keep below zOut and zInn in case of same values
                     side2: side2,
-                    zSide2: a2 * 0.99
+                    zside2: a3 * 0.99
                 };
+
+                // console.log(value)
+
+                return value;
             },
             arrayToPath: function (arrPath) {
                 var _path = arrPath.join(',').replace(/([0-9a-zA-Z.]+)(\,)([0-9a-zA-Z.]+)/ig, function ($1, $2, $3, $4) {
