@@ -1593,11 +1593,13 @@ define(
                     )
                     ) {
                     _.each(this._graphs.groups, function(group, i) {
-                        var color = group._bline.context.strokeStyle;
-                        if (i == 0) {
-                            me._yAxis.setAllStyle(color);
-                        } else {
-                            me._yAxisR.setAllStyle(color);
+                        if( group._bline ){
+                            var color = group._bline.context.strokeStyle;
+                            if (i == 0) {
+                                me._yAxis.setAllStyle(color);
+                            } else {
+                                me._yAxisR.setAllStyle(color);
+                            }
                         }
                     });
                 };
