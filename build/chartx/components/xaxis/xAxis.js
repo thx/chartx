@@ -103,8 +103,10 @@ define(
                     }
                 };
 
-                if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
-                    this.isH = true;
+                if (this.text.rotation != 0 ) {
+                    if(this.text.rotation % 90 == 0){
+                        this.isH = true;
+                    };
                     this.text.textAlign = "right";
                 };
 
@@ -398,7 +400,7 @@ define(
                         textBaseline: !!this.text.rotation ? "middle" : "top",
                         globalAlpha: 0
                     };
-
+debugger
                     if( xNode._txt ){
                         //_.extend( xNode._txt.context , textContext );
                         //debugger

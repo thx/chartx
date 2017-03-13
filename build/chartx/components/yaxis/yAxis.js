@@ -254,6 +254,15 @@ define(
             },
             _initData: function(data) {
 
+                //TODO:begin 临时解决多y轴的情况下，有两个自定义datasection的情况
+                if( _.isArray(this.dataSection) && this.dataSection.length && _.isArray(this.dataSection[0]) )
+                {
+                    this.dataSection = this.dataSection[ this.place=="left"?0:1 ] || [];
+                }
+                //end
+
+
+
                 //先要矫正子啊field确保一定是个array
                 if( !_.isArray(this.field) ){
                     this.field = [this.field];
