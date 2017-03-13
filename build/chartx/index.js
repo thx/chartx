@@ -2601,7 +2601,7 @@ define(
                         textBaseline: !!this.text.rotation ? "middle" : "top",
                         globalAlpha: 0
                     };
-debugger
+
                     if( xNode._txt ){
                         //_.extend( xNode._txt.context , textContext );
                         //debugger
