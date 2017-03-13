@@ -2722,6 +2722,10 @@ define(
 
                 function checkOver(i){
                     var curr = arr[i];
+                    
+                    if( curr === undefined ){
+                        return;
+                    };
                     curr.visible = true;
                     for( var ii=i; ii<l-1; ii++ ){
                         var next = arr[ii+1];
