@@ -91,3 +91,8 @@ var options = {
 
 特别的鸣谢：感谢@李牧，@左莫在chartx的成长中的各种支持
 
+
+自动测试
+
+https://aone.alibaba-inc.com/project/473479/task/9785062?akProjectId=473479&
+
