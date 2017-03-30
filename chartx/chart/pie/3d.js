@@ -173,6 +173,10 @@ define(
                 r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
                 var pieX = w / 2 + this.padding.left;
                 var pieY = h / 2 + this.padding.top;
+
+                self.rotation.x = Math.max(0, Math.min(75, self.rotation.x));
+                self.rotation.y = Math.max(0, Math.min(75, self.rotation.y));
+
                 self.pie = {
                     x: pieX,
                     y: pieY,
@@ -185,6 +189,7 @@ define(
                     data: self.dataFrame,
                     //dataLabel: self.dataLabel, 
                     animation: self.animation,
+                    globalAlpha: self.globalAlpha,
                     startAngle: parseInt(self.startAngle),
                     colors: self.colors,
                     focusCallback: {
@@ -213,8 +218,175 @@ define(
             },
             _drawEnd: function () {
                 this.core.addChild(this._pie.sprite);
-            }
+            },
+            clear: function () {
+                this.stageBg.removeAllChildren()
+                this.core.removeAllChildren()
+                this.stageTip.removeAllChildren();
+            },
+            reset: function (obj) {
+                obj = obj || {};
+                this.clear();
+                this._pie.clear();
+                var data = obj.data || this.data;
+                _.deepExtend(this, obj.options);
+                this.dataFrame = this._initData(data, this.options);
+                this.draw();
+            },
+            checkAt: function (index) {
+                if (this._pie) {
+                    this._pie.check(index);
+                }
+            },
+            uncheckAt: function (index) {
+                if (this._pie) {
+                    this._pie.uncheck(index);
+                }
+            },
+            focusAt: function (index) {
+                if (this._pie) {
+                    this._pie.focus(index);
+                }
+            },
+            unfocusAt: function (index) {
+                if (this._pie) {
+                    this._pie.unfocus(index);
+                }
+            },
 
+            uncheckAll: function () {
+                if (this._pie) {
+                    this._pie.uncheckAll();
+                }
+            },
+            checkOf: function (xvalue) {
+                this.checkAt(this._getIndexOfxName(xvalue));
+            },
+            uncheckOf: function (xvalue) {
+                this.uncheckAt(this._getIndexOfxName(xvalue));
+            },
+            _getIndexOfxName: function (xvalue) {
+                var i;
+                var list = this.getList();
+                for (var ii = 0, il = list.length; ii < il; ii++) {
+                    if (list[ii].name == xvalue) {
+                        i = ii;
+                        break;
+                    }
+                }
+                return i;
+            },
+
+//设置图例 begin
+            _setLengend: function () {
+                var me = this;
+                if (!this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled)) return;
+                //设置legendOpt
+                var legendOpt = _.deepExtend({
+                    legend: true,
+                    label: function (info) {
+                        return info.field
+                    },
+                    onChecked: function (field) {
+                        me.add(field);
+                    },
+                    onUnChecked: function (field) {
+                        me.remove(field);
+                    },
+                    layoutType: "v"
+                }, this._opts.legend);
+                this._legend = new Legend(this._getLegendData(), legendOpt);
+                this.stage.addChild(this._legend.sprite);
+                this._legend.pos({
+                    x: this.width - this._legend.width,
+                    y: this.height / 2 - this._legend.h / 2
+                });
+
+                this.padding.right += this._legend.width;
+            },
+            _getLegendData: function () {
+                var me = this;
+                var data = [];
+                _.each(this.dataFrame.data, function (obj, i) {
+                    data.push({
+                        field: obj.name,
+                        value: obj.y,
+                        fillStyle: null
+                    });
+                });
+
+                return data;
+            },
+////设置图例end
+
+
+            getByIndex: function (index) {
+                return this._pie._getByIndex(index);
+            },
+            getLabelList: function () {
+                return this._pie.getLabelList();
+            },
+            getList: function () {
+                var self = this;
+                var list = [];
+                var item;
+                if (self._pie) {
+                    var sectorList = self._pie.getList();
+                    if (sectorList.length > 0) {
+                        for (var i = 0; i < sectorList.length; i++) {
+                            item = sectorList[i];
+                            var idata = self._pie.data.data[i];
+
+                            list.push({
+                                name: item.name,
+                                index: item.index,
+                                color: item.color,
+                                r: item.r,
+                                value: item.value,
+                                percentage: item.percentage,
+                                checked: idata.checked
+                            });
+                        }
+                    }
+                }
+                ;
+                return list;
+            },
+            getCheckedList: function () {
+                var cl = [];
+                _.each(this.getList(), function (item) {
+                    if (item.checked) {
+                        cl.push(item);
+                    }
+                });
+                return cl;
+            },
+
+            remove: function (field) {
+                var me = this;
+                var data = me.data;
+                if (field && data.length > 1) {
+                    for (var i = 1; i < data.length; i++) {
+                        if (data[i][0] == field && !_.contains(me.ignoreFields, field)) {
+                            me.ignoreFields.push(field);
+                            console.log(me.ignoreFields.toString());
+                        }
+                    }
+                }
+                me.reset();
+            },
+            add: function (field) {
+                var me = this;
+                var data = me.data;
+                if (field && data.length > 1) {
+                    for (var i = 1; i < data.length; i++) {
+                        if (data[i][0] == field && _.contains(me.ignoreFields, field)) {
+                            me.ignoreFields.splice(_.indexOf(me.ignoreFields, field), 1);
+                        }
+                    }
+                }
+                me.reset();
+            }
 
         });
     });

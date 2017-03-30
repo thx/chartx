@@ -215,11 +215,11 @@
                                 midAngle: midAngle,
                                 outOffsetx: self.clickMoveDis * cosV,
                                 outOffsety: self.clickMoveDis * sinV,
-                                centerx: (self.r - self.clickMoveDis ) * cosV - self.r * cosV * sin(deg2rad * self.rotation.y),
-                                centery: (self.r - self.clickMoveDis ) * sinV - self.r * sinV * sin(deg2rad * self.rotation.x),
+                                centerx: (self.r - self.clickMoveDis ) * cosV - (self.r - self.clickMoveDis ) * cosV * sin(deg2rad * self.rotation.y),
+                                centery: (self.r + self.clickMoveDis ) * sinV - (self.r - self.clickMoveDis ) * sinV * sin(deg2rad * self.rotation.x),
                                 outx: (self.r + self.clickMoveDis) * cosV,
                                 outy: (self.r + self.clickMoveDis) * sinV,
-                                edgex: (self.r + 2 * self.clickMoveDis) * cosV,
+                                edgex: (self.r + 2 * self.clickMoveDis ) * cosV,
                                 edgey: (self.r + 2 * self.clickMoveDis) * sinV,
                                 orginPercentage: percentage,
                                 percentage: fixedPercentage,
@@ -311,32 +311,14 @@
                 self.setY(self.y);
                 self._widget();
 
-                self.data.data[0].y = 0;
-                var clearTime = null;
 
-                var testFun = function () {
-                    self.data.data[0].y += 1;
-                    //console.time('_configData')
-                    self._configData();
-                    //console.timeEnd('_configData')
-                    // console.time('_widget')
-                    self._widget();
-                    // console.timeEnd('_widget')
-                    window.requestAnimationFrame(testFun)
-                    console.log(self.data.data[0].y)
-                };
-
-                //testFun();
-
-
-
-                //this.sprite.context.globalAlpha = 0;      
-                //if (opt.animation) {
-                //    self.grow();
-                //}
-                //if (opt.complete) {
-                //    opt.complete.call(self);
-                //}
+                //this.sprite.context.globalAlpha = 0;
+                if (opt.animation) {
+                    self.grow();
+                }
+                if (opt.complete) {
+                    opt.complete.call(self);
+                }
             },
             getOneSector: function (index) {
                 var self = this;
@@ -443,10 +425,13 @@
                 var self = this;
                 var timer = null;
                 var _context = null;
+
                 _.each(self.sectors, function (sec, index) {
+
                     sec.startAngleForAnimation= self.angleOffset;
                     sec.endAngleForAnimation= self.angleOffset;
-                    _.each(sec.sector && sec.sector.children, function (face) {
+
+                    _.each(self.getOneSector(index), function (face) {
                         if (_context = face.context) {
                             _context.path = 'M 0,0';
                         }
@@ -496,20 +481,22 @@
 
 
                             var _SVGPaths = self.setPaths({
-                                alpha: deg2rad * 45,  //0.7853981633974483,
-                                beta: 0,
-                                depth: 26.25,
-                                end: deg2rad * ( sec.startAngleForAnimation + 360) - 0.00001,
+                                alpha: deg2rad * self.rotation.x,  //0.7853981633974483,
+                                beta: deg2rad * self.rotation.y,
+                                depth: self.thickness,  // 26.25,
+                                end: deg2rad * (sec.startAngleForAnimation + 360) - 0.0001,
                                 innerR: this.r0,
                                 r: this.r,
-                                start: deg2rad * (sec.endAngleForAnimation + 360) + 0.00001,
+                                start: deg2rad * (sec.endAngleForAnimation + 360) + 0.0001,
                                 x: 0,
                                 y: 0
                             });
 
-                            _.each(sec.sector && sec.sector.children, function (face) {
+
+                            var _process = this.process;
+                            _.each(self.getOneSector(i), function (face) {
                                 if (_context = face.context) {
-                                    _context.globalAlpha = this.process;
+                                    _context.globalAlpha = self.globalAlpha || _process;
                                     var _key = face.id.split('_')[1];
                                     _context.path = _SVGPaths[_key];
                                 }
@@ -518,13 +505,6 @@
                         }
                     },
                     onComplete: function () {
-                        _.each(_attrs, function (item) {
-                            self['sectorsSp3d_' + item].context.globalAlpha = 1;
-                        });
-                         //动画完成后清除部分sprite
-                        self.sprite.removeChildById(self.sectorsSp.id);
-                        delete self.spriteSp;
-
                         self._showDataLabel();
                     }
                 });
@@ -960,12 +940,12 @@
                                     fillStyle: item === 'top' ? fillColor : _sideFillStyle,
                                     index: data[i].index,
                                     cursor: "pointer",
-                                    globalAlpha: 1
+                                    globalAlpha: self.globalAlpha || 1
 
                                 }
                             });
 
-                            oneSector.addChild(_pathObj);
+                            oneSector.addChild(_pathObj.clone());
 
                             sectorsSp3d.push(_pathObj);
 
@@ -1018,14 +998,6 @@
                             }
 
                         });
-                        //if (!data[i].ignored) {
-                        //    self.sectorsSp.addChild(sectorsSp3d);
-                        //}else{
-                        //    //移除忽略的区域
-                        //    _.each(_attrs, function (item) {
-                        //        self['sectorsSp3d_' + item].removeChildById('sp_' + item + '_' + data[i].index);
-                        //    });
-                        //}
 
 
                         moreSecData = {
@@ -1044,7 +1016,6 @@
                         self.sectors.push(moreSecData);
 
                     }
-
                     sectorsSp3d.sort(function (a, b) {
                         return a.zIndex < b.zIndex ? -1 : 1;
                     });
@@ -1074,11 +1045,11 @@
                     }
 
 
-                    //if(self.animation){
-                    //    _.each(_attrs, function (item) {
-                    //        self['sectorsSp3d_' + item].context.globalAlpha = 0;
-                    //    });
-                    //}
+                    if (self.animation) {
+                        _.each(allFaceSprite.children, function (face) {
+                            face.context.globalAlpha = 0;
+                        });
+                    }
 
                 }
             },

@@ -42,15 +42,15 @@ var data= [
     ["firefox", 300   ],
     ["safari" , 100   ],
     ["其他"   , 200   ],
-                 ["ie"     , 500   ],
+    ["ie"     , 500   ],
     ["firefox", 300   ],
     ["safari" , 100   ],
     ["其他"   , 200   ],
-                 ["ie"     , 500   ],
+    ["ie"     , 500   ],
     ["firefox", 300   ],
     ["safari" , 100   ],
     ["其他"   , 200   ],
-                 ["ie"     , 500   ],
+    ["ie"     , 500   ],
     ["firefox", 300   ],
     ["safari" , 100   ],
     ["其他"   , 200   ]
@@ -58,11 +58,13 @@ var data= [
 
 var options = {
     type : '3d',
+    //旋转范围为0-75度
     rotation:{
        x : 45,
        y : 0
     },
-    thickness:26.25,
+    //饼图的厚度
+    thickness: 50,
     xAxis : {
         field : "node"
     },
@@ -90,11 +92,13 @@ var options = {
     //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
     startAngle:-90,
     //数据排序，默认按用户给定顺序[desc/asc]
-    //sort: 'desc',
+    sort: 'desc',
     //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
     allowPointSelect: true,
     //是否允许动画
     animation: true,
+    //饼图的透明度
+    globalAlpha: 0.8,
     //内圆半径
     innerRadius: 50,
     //颜色序列,若不设置，会有默认的颜色序列
