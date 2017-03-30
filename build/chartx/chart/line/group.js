@@ -268,7 +268,7 @@ define(
             
                 var me = this;
                 if (!me.animation || me.resize) {
-                    callback && callback(self);
+                    callback && callback(me);
                 }
                 if (me._currPointList.length == 0) {
                     return;
@@ -313,7 +313,7 @@ define(
                         //解决在onUpdate中可能出现的异常会导致绘制有问题。
                         //这样的话，至少最后的结果会是对的。
                         _update( me._pointList );
-                        callback && callback(self);
+                        callback && callback( me );
                     }
                 });
             },
@@ -587,7 +587,7 @@ define(
 
                         var content = me.data[ a ].value;
                         if (_.isFunction(me.text.format)) {
-                            content = (me.text.format.apply( self , [content , a]) || content );
+                            content = (me.text.format.apply( me , [content , a]) || content );
                         };
 
                         var text =  new Canvax.Display.Text( content , {
