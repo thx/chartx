@@ -1292,7 +1292,7 @@ define(
                 this._markLines = [];
 
                 this.biaxial = false;
-debugger
+
                 _.deepExtend(this, opts);
 
                 if ( opts.dataZoom ) {
@@ -1763,7 +1763,7 @@ debugger
                 });
                 delete opts.dataZoom;
 
-                debugger
+                
                 var thumbBar = new lineConstructor(cloneEl, me._data, opts);
                 thumbBar.draw();
                 return {
