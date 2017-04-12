@@ -600,7 +600,7 @@ define(
                             xbaseNum = this._xAxis._baseNumber = this._xAxis.dataSection[0];
                         };
                         //var x = (xArr[i][ii] - xbaseNum) / (maxXAxis - xbaseNum) * this._xAxis.w;
-                        debugger
+                        
                         var x = this._xAxis.getPosX( {val : xArr[i][ii]} );
                         tmpData[i][ii] = {
                             //value : {

@@ -26,7 +26,7 @@ define(
                     field  : [],   //字段 对应this.data
                     org    : []    //原始数据['星期一','星期二']
                 },
-                zAxis      : {     //z轴
+                rAxis      : {     //z轴
                     field  : [],   //字段 对应this.data
                     org    : []    //原始数据['星期一','星期二']
                 },
@@ -50,11 +50,11 @@ define(
             if( opt ){
                 opt.yAxis  && ( dataFrame.yAxis.field = opt.yAxis.field );
                 opt.xAxis  && ( dataFrame.xAxis.field = opt.xAxis.field );
-                opt.zAxis  && ( dataFrame.zAxis.field = opt.zAxis.field );
+                opt.rAxis  && ( dataFrame.rAxis.field = opt.rAxis.field );
             } else {
                 this.yAxis && ( dataFrame.yAxis.field = this.yAxis.field );
                 this.xAxis && ( dataFrame.xAxis.field = this.xAxis.field );
-                this.zAxis && ( dataFrame.zAxis.field = this.zAxis.field );
+                this.rAxis && ( dataFrame.rAxis.field = this.rAxis.field );
             }
 
             var total = [];
@@ -149,16 +149,16 @@ define(
             dataFrame.yAxis.org = getDataOrg( yField , total , "yAxis");
 
             /*
-             * 然后设置对应的zAxis数据
+             * 然后设置对应的rAxis数据
              */
-            var zField = dataFrame.zAxis.field;
+            var zField = dataFrame.rAxis.field;
             if( _.isString( zField ) ){
                 zField = [ zField ];
             }             
-            dataFrame.zAxis.field = zField;
-            var allZFields = _.flatten(dataFrame.zAxis.field);
+            dataFrame.rAxis.field = zField;
+            var allZFields = _.flatten(dataFrame.rAxis.field);
             if( allZFields.length > 0 ){
-                dataFrame.zAxis.org = getDataOrg( zField , total );
+                dataFrame.rAxis.org = getDataOrg( zField , total );
             };
 
             /*
