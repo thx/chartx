@@ -175,8 +175,8 @@ define(
                     value : self.dataFrame.xAxis.org[ e.eventInfo.iGroup ][ e.eventInfo.iNode ]
                 };
                 
-                if( e.target.zAxis ){
-                    e.eventInfo.zAxis = e.target.zAxis;
+                if( e.target.rAxis ){
+                    e.eventInfo.rAxis = e.target.rAxis;
                 };
                 _.each( e.eventInfo.nodesInfoList , function( node , i ){
                     node.field = self.dataFrame.yAxis.field[ e.eventInfo.iGroup ]

@@ -10,7 +10,7 @@ define(
     function( Canvax , Circle , Rect , Tween , Theme ){
 
         var Graphs = function( opt , dataFrame ){
-            this.zAxis = dataFrame.zAxis;
+            this.rAxis = dataFrame.rAxis;
             this.xAxis = dataFrame.xAxis;
             this.yAxis = dataFrame.yAxis;
             this.dataFrame = dataFrame;
@@ -80,12 +80,12 @@ define(
                         value : value
                     },
                     label  : this._getLabel( iGroup , iNode ),
-                    zAxis  : null
+                    rAxis  : null
                 }
-                if( this.zAxis.field[iGroup] ){
-                    node.zAxis = {
-                        field : this.zAxis.field[iGroup],
-                        value : this.zAxis.org[iGroup][iNode]
+                if( this.rAxis.field[iGroup] ){
+                    node.rAxis = {
+                        field : this.rAxis.field[iGroup],
+                        value : this.rAxis.org[iGroup][iNode]
                     }
                 }
                 return node;
@@ -156,8 +156,8 @@ define(
 
                 var zMax = 1;
 
-                if( this.zAxis.field && this.zAxis.field.length > 0 ){
-                    zMax = _.max( _.flatten(this.zAxis.org) );
+                if( this.rAxis.field && this.rAxis.field.length > 0 ){
+                    zMax = _.max( _.flatten(this.rAxis.org) );
                 }
 
                 for( var i = 0 ; i < barGroupLen ; i++ ){
@@ -165,13 +165,13 @@ define(
                     for( var ii = 0 , iil = data.length ; ii < iil ; ii++ ){
                         var d = data[ii][i];
 
-                        var zAxisV  = this.zAxis.org[ii] && this.zAxis.org[ii][i];
+                        var rAxisV  = this.rAxis.org[ii] && this.rAxis.org[ii][i];
 
-                        if (zAxisV == 0 ) {
+                        if (rAxisV == 0 ) {
                             continue
                         };
 
-                        var r = this.getR(d) || (zAxisV ? Math.max(this.circle.maxR*(zAxisV/zMax) , this.circle.minR) : this.circle.normalR );
+                        var r = this.getR(d) || (rAxisV ? Math.max(this.circle.maxR*(rAxisV/zMax) , this.circle.minR) : this.circle.normalR );
                         var circleNode = this._getCircleNode(ii , i , d.value);
 
                         var fillStyle  = this.getCircleFillStyle( i , ii , d.value , circleNode );
@@ -196,11 +196,11 @@ define(
                         circle.iNode  = i;
                         circle.r      = r;
                         circle.label  = circleNode.label;
-                        if( zAxisV != undefined || zAxisV != null ){
-                            circle.zAxis  = {
-                                field : this.zAxis.field,
-                                value : zAxisV,
-                                org   : this.zAxis.org
+                        if( rAxisV != undefined || rAxisV != null ){
+                            circle.rAxis  = {
+                                field : this.rAxis.field,
+                                value : rAxisV,
+                                org   : this.rAxis.org
                             }
                         }
 
