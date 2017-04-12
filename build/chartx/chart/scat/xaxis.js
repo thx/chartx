@@ -7,6 +7,7 @@ define(
     function(xAxisBase , DataSection ){
         var xAxis = function( opt , data ){
             this.xDis = 0; //x方向一维均分长度
+            opt.layoutType = "proportion";
             xAxis.superclass.constructor.apply( this , arguments );
         };
         Chartx.extend( xAxis , xAxisBase , {
@@ -26,6 +27,7 @@ define(
             _trimXAxis : function( data , xGraphsWidth ){
                 var tmpData = [];
                 this.xDis  = xGraphsWidth / (data.length-1);
+
                 for (var a = 0, al  = data.length; a < al; a++ ) {
                     var o = {
                         'content' : data[a], 

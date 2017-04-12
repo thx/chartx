@@ -33,10 +33,6 @@ define(
                         end: data.length - 1 //因为第一行是title
                     }
                 };
-                if (opts.dataZoom) {
-                    this.dataZoom.enabled = true;
-                    this.padding.bottom += (opts.dataZoom.height || 46);
-                };
 
                 this._xAxis = null;
                 this._yAxis = null;
@@ -54,8 +50,13 @@ define(
                 this._markLines = [];
 
                 this.biaxial = false;
-
+debugger
                 _.deepExtend(this, opts);
+
+                if ( opts.dataZoom ) {
+                    this.dataZoom.enabled = true;
+                    this.padding.bottom += (opts.dataZoom.height || 46);
+                };
 
                 this.dataFrame = this._initData(data, this);
             },
@@ -108,7 +109,7 @@ define(
                 this.dataFrame = this._initData( d , this);
 
                 //如果markLine.y有配置，需要加入到yAxis.org中去,以为yAixs的dataSection区间可能就不一样了
-                if( this.markLine && this.markLine.y ){
+                if( this.markLine && this.markLine.enabled && this.markLine.y ){
                     this.dataFrame.yAxis.org.push( this.markLine.y );
                 };
 
@@ -208,7 +209,7 @@ define(
                 var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
                 if (dataZoom && dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1 + 1));
+                    datas = datas.concat(data.slice( parseInt(dataZoom.range.start) + 1, parseInt(dataZoom.range.end) + 1 + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -221,7 +222,7 @@ define(
                     this.yAxis.biaxial = true;
                 };
 
-                if( this.markLine && this.markLine.y ){
+                if( this.markLine && this.markLine.enabled && this.markLine.y ){
                     this.dataFrame.yAxis.org.push( this.markLine.y );
                 };
 
@@ -469,9 +470,10 @@ define(
                 return data;
             },
             ////设置图例end
+
             _initPlugs: function(opts, g) {
                 //如果有配置opts.markLine.y， 就说明这个markline是用户自己要定义的
-                if (opts.markLine && opts.markLine.y === undefined) {
+                if (opts.markLine && this.markLine.enabled && opts.markLine.y === undefined) {
                     this._initAverageLine(g);
                 };
                 if (opts.markPoint) {
@@ -510,9 +512,6 @@ define(
                             enabled: false
                         }
                     },
-                    dataZoom: {
-                        enabled: false
-                    },
                     xAxis: {
                         //enabled: false
                     },
@@ -520,7 +519,9 @@ define(
                         //enabled: false
                     }
                 });
+                delete opts.dataZoom;
 
+                debugger
                 var thumbBar = new lineConstructor(cloneEl, me._data, opts);
                 thumbBar.draw();
                 return {
@@ -788,7 +789,7 @@ define(
 
                 e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
 
-                e.eventInfo.iNode += this.dataZoom.range.start;
+                e.eventInfo.iNode += parseInt(this.dataZoom.range.start);
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs: function(index, num) {

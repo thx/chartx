@@ -120,6 +120,7 @@ define(
                 };
             },
             draw : function(data , opt){
+                
                 var self = this;
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
@@ -177,6 +178,7 @@ define(
                         if( d.value == null || d.value == undefined || d.value === "" ){
                             continue;
                         }
+
                         var circle = new Circle({
                             hoverClone : false,
                             context : {
