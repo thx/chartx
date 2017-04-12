@@ -48,7 +48,9 @@ var options = {
     }
 }  
 
-Chartx.bar("canvasTest" , data , options);  
+Chartx.bar("canvasTest" , data , options).then(function(chart){
+    window.line = chart
+});  
     
             </textarea></form>
 

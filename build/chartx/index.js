@@ -683,7 +683,6 @@ define(
             this.xAxis   = {                                //x轴上的线
                     enabled     : 1,
                     data        : [],                      //[{y:100},{}]
-
                     org         : null,                    //x轴坐标原点，默认为上面的data[0]
                     // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
                     lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
@@ -691,7 +690,7 @@ define(
                     strokeStyle : '#f0f0f0', //'#e5e5e5',
                     filter      : null 
             }
-            this.yAxis   = {                                //y轴上的线
+            this.yAxis = {                                //y轴上的线
                     enabled     : 0,
                     data        : [],                      //[{x:100},{}]
                     xDis        : 0,
@@ -704,7 +703,7 @@ define(
             } 
             this.fill = {
                 fillStyle : null,
-                globalAlpha : null
+                alpha : null
             }
     
             this.sprite       = null;                       //总的sprite
@@ -758,7 +757,7 @@ define(
                                 width : self.w,
                                 height : -yGroupHeight,
                                 fillStyle : self.fill.fillStyle || "#000",
-                                globalAlpha : self.fill.globalAlpha || 0.025 * (g%2)
+                                globalAlpha : self.fill.alpha || 0.025 * (g%2)
                             }
                         });
                         
@@ -1486,7 +1485,8 @@ define(
          "canvax/display/Text"
     ],
     function(Canvax, BrokenLine, Sprite, Text){
-        var markLine = function(opt){
+        var markLine = function(opt , _yAxis){
+            this._yAxis = _yAxis;
             this.w      = 0;
             this.h      = 0
             this.field  = null;
@@ -1494,12 +1494,12 @@ define(
                 x : 0 , y : 0
             };
 
-            this.target = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个field显示markline
-
+            this.target = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
+            this.value = 0;
             this.line       = {
                 y           : 0,
                 list        : [],
-                strokeStyle : '#000000',
+                strokeStyle : '#999',
                 lineWidth   : 1,
                 smooth      : false,
                 lineType    : 'dashed'
@@ -1558,7 +1558,7 @@ define(
                         lineType    : me.line.lineType
                     }
                 });
-                me.sprite.addChild(line)
+                me.sprite.addChild(line);
                 me._line = line;
 
 
@@ -1583,8 +1583,16 @@ define(
             _done : function(){
                 _.isFunction( this._doneHandle ) && this._doneHandle.apply( this , [] );
             },
-            reset : function(){
-                
+            reset : function(opt , i){
+                opt && _.deepExtend(this, opt);
+                if( this.line.y != this._line.context.y ){
+                    this._line.animate({
+                        y: this.line.y
+                    }, {
+                        duration: 500,
+                        easing: 'Back.Out' //Tween.Easing.Elastic.InOut
+                    });
+                }
             }
         }
         return markLine
@@ -2030,7 +2038,6 @@ define(
                 fillStyle    : "#999"
             };
             this.strokeStyle = "#ccc";
-            this.lineWidth   = 1;
             
             
             this._tipDom = null;
@@ -2116,10 +2123,10 @@ define(
                     return;
                 };
                 var tipxContent = this._getContent(e);
-                if( tipxContent === "_hide_" ){
+                if( tipxContent === "_hide_" || tipxContent === "" ){
                     this.hide();
                     return;
-                }
+                };
                 this._tipDom.innerHTML = tipxContent;
                 this.dW = this._tipDom.offsetWidth;
                 this.dH = this._tipDom.offsetHeight;
@@ -2127,6 +2134,7 @@ define(
             _getContent : function(e){
                 _.extend( this.tipsInfo , (e.tipsInfo || e.eventInfo || {}) );
                 var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
+                //只有undefined false null才会继续走默认配置， "" 0 都会认为是用户的意思
                 if( !tipsContent && tipsContent != 0 ){
                     tipsContent = this._getDefaultContent( this.tipsInfo );
                 }
@@ -2147,7 +2155,6 @@ define(
                             str+="<td "+tsStyle+">"+ node.field +"：</td>";
                         }
                     };
-
                     str += "<td "+tsStyle+">"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
@@ -2159,7 +2166,7 @@ define(
              */
             _checkX : function( x ){
                 if( this.positionInRange ){
-                    var w = this.dW + 2; //后面的2 是 两边的linewidth
+                    var w = this.dW + 2; //后面的2 是 两边的 linewidth
                     if( x < 0 ){
                         x = 0;
                     }
@@ -2176,7 +2183,7 @@ define(
              */
             _checkY : function( y ){
                 if(this.positionInRange){
-                    var h = this.dH + 2; //后面的2 是 两边的linewidth
+                    var h = this.dH + 2; //后面的2 是 两边的 linewidth
                     if( y < 0 ){
                         y = 0;
                     }
@@ -2225,7 +2232,7 @@ define(
                 fontSize: 12,
                 rotation: 0,
                 format: null,
-                textAlign: null
+                textAlign: "center"
             };
             this.maxTxtH = 0;
 
@@ -2267,6 +2274,8 @@ define(
 
             this.layoutType = "step"; //step , rule , peak, proportion
 
+            this.autoTrimLayout = true;
+
             this.init(opt, data);
         };
 
@@ -2295,8 +2304,11 @@ define(
                     }
                 };
 
-                if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
-                    this.isH = true;
+                if (this.text.rotation != 0 ) {
+                    if(this.text.rotation % 90 == 0){
+                        this.isH = true;
+                    };
+                    this.text.textAlign = "right";
                 };
 
                 if (!this.line.enabled) {
@@ -2380,11 +2392,7 @@ define(
 
                 if (this.enabled) { //this.display != "none"
                     this._widget();
-
-                    if (!this.text.rotation) {
-                        this._layout();
-                    }
-                }
+                };
 
                 this.resize = false;
                 // this.data = this.layoutData
@@ -2468,6 +2476,11 @@ define(
                 this.xDis = parseInt(xGraphsWidth / data.length);//这个属性目前主要是柱状图有分组柱状图的场景在用
 
                 for (var a = 0, al  = data.length; a < al; a++ ) {
+                    var txt = new Canvax.Display.Text( data[a] , {
+                        context: {
+                            fontSize: this.text.fontSize
+                        }
+                    });
                     var o = {
                         'content':data[a], 
                         'x': this.getPosX({
@@ -2475,7 +2488,8 @@ define(
                             ind : a,
                             dataLen: al,
                             xGraphsWidth : xGraphsWidth
-                        })
+                        }),
+                        'textWidth': txt.getTextWidth()
                     };
                     tmpData.push( o );
                 };
@@ -2565,18 +2579,25 @@ define(
                         this.rulesSprite.addChild(xNode);
                     }
 
+                    var _visible = true;
+                    if( arr[a].visible!==undefined ){
+                        _visible = arr[a].visible;
+                    }
+
+                    xNode.context.visible = _visible;
+
                     var o = arr[a]
                     var x = o.x,
                         y = this.disY + this.line.height + this.dis;
 
                     //文字
                     var textContext = {
-                        x: x,
+                        x: o.text_x || o.x,
                         y: y + 20,
                         fillStyle: this.text.fillStyle,
                         fontSize: this.text.fontSize,
                         rotation: -Math.abs(this.text.rotation),
-                        textAlign: this.text.textAlign || (!!this.text.rotation ? "right" : "center"),
+                        textAlign: this.text.textAlign,
                         textBaseline: !!this.text.rotation ? "middle" : "top",
                         globalAlpha: 0
                     };
@@ -2584,7 +2605,7 @@ define(
                     if( xNode._txt ){
                         //_.extend( xNode._txt.context , textContext );
                         //debugger
-                        xNode._txt.resetText( (o.layoutText || o.content)+"" );
+                        xNode._txt.resetText( o.layoutText+"" );
                         if( this.animation ){
                             xNode._txt.animate( {
                                 x : textContext.x
@@ -2596,7 +2617,8 @@ define(
                         }
 
                     } else {
-                        xNode._txt = new Canvax.Display.Text((o.layoutText || o.content), {
+
+                        xNode._txt = new Canvax.Display.Text(o.layoutText, {
                             id: "xAxis_txt_" + CanvaxBase.getUID(),
                             context: textContext
                         });
@@ -2670,36 +2692,6 @@ define(
                 };
 
             },
-            /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
-            _layout: function() {
-
-                if (this.data.length == 0 || this.sprite.getNumChildren() <=2 ){
-                    //压根没数据 或者 如果都只有两个节点，当然也不需要矫正了
-                    return;
-                };
-
-                var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
-                if (popText) {
-                    var pc = popText.context;
-                    if (pc.textAlign == "center" &&
-                        pc.x + popText.context.width / 2 > this.width) {
-                        pc.x = this.width - popText.context.width / 2
-                    };
-                    if (pc.textAlign == "left" &&
-                        pc.x + popText.context.width > this.width) {
-                        pc.x = this.width - popText.context.width
-                    };
-                    if (this.sprite.getNumChildren() > 2) {
-                        //倒数第二个text
-                        var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
-                        var ppc = popPreText.context;
-                        //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
-                        if (ppc.visible && pc.x < ppc.x + ppc.width) {
-                            pc.visible = false;
-                        }
-                    }
-                }
-            },
             _setTextMaxWidth: function() {
                 var arr = this._layoutDataSection;
                 var maxLenText = arr[0];
@@ -2723,36 +2715,60 @@ define(
                 return this._textMaxWidth;
             },
             _trimLayoutData: function() {
+                var me = this;
+                var arr = this.data;
 
-                var tmp = []
-                var arr = this.data
+                var l = arr.length;
 
-                var mw = this._textMaxWidth + 10;
-
-                if (!!this.text.rotation) {
-                    mw = this._textMaxHeight * 1.5;
-                };
-
-                //总共能多少像素展现
-                var n = Math.min(Math.floor(this.width / mw), arr.length - 1); //能展现几个
-
-                if (n >= arr.length - 1) {
-                    this.layoutData = arr;
-                } else {
-                    //需要做间隔
-                    var dis = Math.max(Math.ceil(arr.length / n - 1), 0); //array中展现间隔
-                    //存放展现的数据
-                    for (var a = 0; a < n; a++) {
-                        var obj = arr[a + dis * a];
-                        obj && tmp.push(obj);
+                function checkOver(i){
+                    var curr = arr[i];
+                    
+                    if( curr === undefined ){
+                        return;
                     };
-                    this.layoutData = tmp;
+                    curr.visible = true;
+                    for( var ii=i; ii<l-1; ii++ ){
+                        var next = arr[ii+1];
+                        var next_x = next.x - next.textWidth/2;
+
+                        if( ii == l-2 ){
+                            //next是最后一个
+                            if( me.text.textAlign == "center" && (next.x+next.textWidth/2) > me.width ){
+                                next_x = me.width - next.textWidth;
+                                next.text_x = me.width - next.textWidth/2;
+                            }
+                            if( me.text.textAlign == "left" && (next.x+next.textWidth) > me.width ){
+                                next_x = me.width - next.textWidth;
+                                next.text_x = me.width - next.textWidth;
+                            }
+                        }
+
+                        if( next_x < curr.x+curr.textWidth/2 ){
+                            if( ii == l-2 ){
+                                //最后一个的话，反把前面的给hide
+                                next.visible = true;
+                                curr.visible = false;
+                                return;
+                            } else {
+                                next.visible = false;
+                            }
+                        } else {
+                            checkOver( ii+1 );
+                            break;
+                        }
+                    };
                 };
+
+                //非rotation下才做显示隐藏
+                if (!this.text.rotation) {
+                    checkOver(0);
+                };
+
+                this.layoutData = this.data;
+
             }
         };
-
         return xAxis;
-
     }
 )
 
@@ -2775,7 +2791,7 @@ define(
             this.field = []; //这个 轴 上面的 field
 
             this.label = "";
-            this._label = null; //label的text对象
+            this._label = null; // label 的text对象
 
             this.line = {
                 enabled: 1, //是否有line
@@ -2885,11 +2901,19 @@ define(
                 this._widget();
             },
             _getLabel: function() {
-                if (this.label && this.label != "") {
-                    this._label = new Canvax.Display.Text(this.label, {
+
+                var _label = "";
+                if(_.isArray(this.label)){
+                    _label = this.label[ this.place == "left" ? 0 : 1 ];
+                } else {
+                    _label = this.label;
+                };
+                
+                if (_label && _label != "") {
+                    this._label = new Canvax.Display.Text(_label, {
                         context: {
                             fontSize: this.text.fontSize,
-                            textAlign: "left",
+                            textAlign: this.place,//"left",
                             textBaseline: this.isH ? "top" : "bottom",
                             fillStyle: this.text.fillStyle,
                             rotation: this.isH ? -90 : 0
@@ -2949,6 +2973,12 @@ define(
                 return y;
                 */
             },
+            getValFromYpos: function( y ){
+                var start = this.layoutData[0];
+                var end   = this.layoutData.slice(-1)[0];
+                var val = (end.content-start.content) * ((y-start.y)/(end.y-start.y)) + start.content;
+                return val;
+            },
             _trimYAxis: function() {
 
                 var max = this.dataSection[this.dataSection.length - 1];
@@ -2998,6 +3028,15 @@ define(
                 return arr;
             },
             _initData: function(data) {
+
+                //TODO:begin 临时解决多y轴的情况下，有两个自定义datasection的情况
+                if( _.isArray(this.dataSection) && this.dataSection.length && _.isArray(this.dataSection[0]) )
+                {
+                    this.dataSection = this.dataSection[ this.place=="left"?0:1 ] || [];
+                }
+                //end
+
+
 
                 //先要矫正子啊field确保一定是个array
                 if( !_.isArray(this.field) ){
@@ -3161,25 +3200,25 @@ define(
                     var yNode = this.rulesSprite.getChildAt(a);
 
                     if( yNode ){
-                        if(yNode.__txt){
-                            if( yNode.__txt.context.y != posy ){
-                                yNode.__txt.animate({
+                        if(yNode._txt){
+                            if( yNode._txt.context.y != posy ){
+                                yNode._txt.animate({
                                     y: posy
                                 }, {
                                     duration: 500,
                                     delay: a*80,
-                                    id: yNode.__txt.id
+                                    id: yNode._txt.id
                                 });
                             };
-                            yNode.__txt.resetText( content );
+                            yNode._txt.resetText( content );
                         };
 
-                        yNode.__line && yNode.__line.animate({
+                        yNode._line && yNode._line.animate({
                             y: y
                         }, {
                             duration: 500,
                             delay: a*80,
-                            id: yNode.__line.id
+                            id: yNode._line.id
                         });
                     } else {
                         yNode = new Canvax.Display.Sprite({
@@ -3201,7 +3240,7 @@ define(
                             }
                         });
                         yNode.addChild(txt);
-                        yNode.__txt = txt;
+                        yNode._txt = txt;
 
                         self.maxW = Math.max(self.maxW, txt.getTextWidth());
                         if (self.text.rotation == 90 || self.text.rotation == -90) {
@@ -3222,7 +3261,7 @@ define(
                                 }
                             });
                             yNode.addChild(line);
-                            yNode.__line = line;
+                            yNode._line = line;
                         };
                         //这里可以由用户来自定义过滤 来 决定 该node的样式
                         _.isFunction(self.filter) && self.filter({
@@ -3273,11 +3312,11 @@ define(
                 };
             },
             _getProp: function(s) {
-                var res;
+                var res = s;
                 if (_.isFunction(s)) {
                     res = s.call( this , this );
                 }
-                if( !res ){
+                if( !s ){
                     res = "#999";
                 }
                 return res

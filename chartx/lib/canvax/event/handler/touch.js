@@ -8,9 +8,10 @@ define(
     "canvax/event/handler/touch",
     [
         "canvax/core/Base",
-        "canvax/library/hammer"
+        "canvax/library/hammer",
+        "canvax/event/CanvaxEvent"
     ],
-    function( Base , Hammer ){
+    function( Base , Hammer , CanvaxEvent ){
         var EventsTypes = [ 
             "pan","panstart","panmove","panend","pancancel","panleft","panright","panup","pandown",
             "press" , "pressup",
@@ -51,9 +52,17 @@ define(
                     this._hammer.options.prevent_default = false
                 }
  
-                //touch下的curPointsTarget 从touches中来
+                //touch下的curPointsTarget 从 touches 中来
                 //获取canvax坐标系统里面的坐标
                 me.curPoints = me.__getCanvaxPointInTouchs( e );
+
+                var childs = me.__getChildInTouchs( me.curPoints );
+                if( me.__dispatchEventInChilds( e , childs ) ){
+                    me.curPointsTarget = childs;
+                } else {
+                    //如果当前没有一个target，就把事件派发到canvax上面
+                    me.__dispatchEventInChilds( e , [ root ] );
+                };
 
                 //drag开始
                 if( e.type == "panstart"){
@@ -95,14 +104,7 @@ define(
                         me._draging = false;
                     }
                 }
- 
-                var childs = me.__getChildInTouchs( me.curPoints );
-                if( me.__dispatchEventInChilds( e , childs ) ){
-                    me.curPointsTarget = childs;
-                } else {
-                    //如果当前没有一个target，就把事件派发到canvax上面
-                    me.__dispatchEventInChilds( e , [ root ] );
-                };
+
             },
             
             //从touchs中获取到对应touch , 在上面添加上canvax坐标系统的x，y
@@ -111,9 +113,12 @@ define(
                 var root      = me.canvax;
                 var curTouchs = [];
                 _.each( e.pointers , function( touch ){
-                   touch.x = touch.pageX - root.rootOffset.left , 
-                   touch.y = touch.pageY - root.rootOffset.top
-                   curTouchs.push( touch );
+                   //touch.x = touch.pageX - root.rootOffset.left , 
+                   //touch.y = touch.pageY - root.rootOffset.top
+                   curTouchs.push( {
+                       x : CanvaxEvent.pageX( touch ) - root.rootOffset.left,
+                       y : CanvaxEvent.pageY( touch ) - root.rootOffset.top
+                   } );
                 });
                 return curTouchs;
             },

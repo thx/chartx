@@ -41,7 +41,7 @@ define(
                 me.curPoints = [ new Point( 
                     CanvaxEvent.pageX( e ) - root.rootOffset.left , 
                     CanvaxEvent.pageY( e ) - root.rootOffset.top
-                    )];
+                )];
  
                 var curMousePoint  = me.curPoints[0]; 
                 var curMouseTarget = me.curPointsTarget[0];

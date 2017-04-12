@@ -70,10 +70,10 @@ define(
     
                 var me = this;
 
-                this.stage.on("mouseover" , function(e){
+                this.stage.on("mouseover panstart" , function(e){
                     me._graphs.angOver( e , me._getCurrAng(e) );
                 });
-                this.stage.on("mousemove" , function(e){
+                this.stage.on("mousemove panmove" , function(e){
                     me._graphs.angMove( e , me._getCurrAng(e) );
                 });
                 this.stage.on("mouseout",function(e){
@@ -85,7 +85,8 @@ define(
                         me._graphs.angOut( );
                     }
                 });
-                this.stage.on("click" , function(e){
+                this.stage.on("click tap" , function(e){
+                    
                     e.eventInfo = {
                         field : _.isArray(me.yAxis.field) ? me.yAxis.field[e.groupInd] : me.yAxis.field
                     };
@@ -99,7 +100,8 @@ define(
                     } else {
                         e.eventInfo.role = null
                     }
-                    me.fire("click" , e);
+                    me._graphs.angOver(e , me._getCurrAng(e));
+                    me.fire("click tap" , e);
                 });
 
                 this.inited = true;

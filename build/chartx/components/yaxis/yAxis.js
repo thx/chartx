@@ -16,7 +16,7 @@ define(
             this.field = []; //这个 轴 上面的 field
 
             this.label = "";
-            this._label = null; //label的text对象
+            this._label = null; // label 的text对象
 
             this.line = {
                 enabled: 1, //是否有line
@@ -126,11 +126,19 @@ define(
                 this._widget();
             },
             _getLabel: function() {
-                if (this.label && this.label != "") {
-                    this._label = new Canvax.Display.Text(this.label, {
+
+                var _label = "";
+                if(_.isArray(this.label)){
+                    _label = this.label[ this.place == "left" ? 0 : 1 ];
+                } else {
+                    _label = this.label;
+                };
+                
+                if (_label && _label != "") {
+                    this._label = new Canvax.Display.Text(_label, {
                         context: {
                             fontSize: this.text.fontSize,
-                            textAlign: "left",
+                            textAlign: this.place,//"left",
                             textBaseline: this.isH ? "top" : "bottom",
                             fillStyle: this.text.fillStyle,
                             rotation: this.isH ? -90 : 0
@@ -190,6 +198,12 @@ define(
                 return y;
                 */
             },
+            getValFromYpos: function( y ){
+                var start = this.layoutData[0];
+                var end   = this.layoutData.slice(-1)[0];
+                var val = (end.content-start.content) * ((y-start.y)/(end.y-start.y)) + start.content;
+                return val;
+            },
             _trimYAxis: function() {
 
                 var max = this.dataSection[this.dataSection.length - 1];
@@ -239,6 +253,15 @@ define(
                 return arr;
             },
             _initData: function(data) {
+
+                //TODO:begin 临时解决多y轴的情况下，有两个自定义datasection的情况
+                if( _.isArray(this.dataSection) && this.dataSection.length && _.isArray(this.dataSection[0]) )
+                {
+                    this.dataSection = this.dataSection[ this.place=="left"?0:1 ] || [];
+                }
+                //end
+
+
 
                 //先要矫正子啊field确保一定是个array
                 if( !_.isArray(this.field) ){
@@ -402,25 +425,25 @@ define(
                     var yNode = this.rulesSprite.getChildAt(a);
 
                     if( yNode ){
-                        if(yNode.__txt){
-                            if( yNode.__txt.context.y != posy ){
-                                yNode.__txt.animate({
+                        if(yNode._txt){
+                            if( yNode._txt.context.y != posy ){
+                                yNode._txt.animate({
                                     y: posy
                                 }, {
                                     duration: 500,
                                     delay: a*80,
-                                    id: yNode.__txt.id
+                                    id: yNode._txt.id
                                 });
                             };
-                            yNode.__txt.resetText( content );
+                            yNode._txt.resetText( content );
                         };
 
-                        yNode.__line && yNode.__line.animate({
+                        yNode._line && yNode._line.animate({
                             y: y
                         }, {
                             duration: 500,
                             delay: a*80,
-                            id: yNode.__line.id
+                            id: yNode._line.id
                         });
                     } else {
                         yNode = new Canvax.Display.Sprite({
@@ -442,7 +465,7 @@ define(
                             }
                         });
                         yNode.addChild(txt);
-                        yNode.__txt = txt;
+                        yNode._txt = txt;
 
                         self.maxW = Math.max(self.maxW, txt.getTextWidth());
                         if (self.text.rotation == 90 || self.text.rotation == -90) {
@@ -463,7 +486,7 @@ define(
                                 }
                             });
                             yNode.addChild(line);
-                            yNode.__line = line;
+                            yNode._line = line;
                         };
                         //这里可以由用户来自定义过滤 来 决定 该node的样式
                         _.isFunction(self.filter) && self.filter({
@@ -514,11 +537,11 @@ define(
                 };
             },
             _getProp: function(s) {
-                var res;
+                var res = s;
                 if (_.isFunction(s)) {
                     res = s.call( this , this );
                 }
-                if( !res ){
+                if( !s ){
                     res = "#999";
                 }
                 return res

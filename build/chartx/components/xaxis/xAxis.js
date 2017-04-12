@@ -31,7 +31,7 @@ define(
                 fontSize: 12,
                 rotation: 0,
                 format: null,
-                textAlign: null
+                textAlign: "center"
             };
             this.maxTxtH = 0;
 
@@ -73,6 +73,8 @@ define(
 
             this.layoutType = "step"; //step , rule , peak, proportion
 
+            this.autoTrimLayout = true;
+
             this.init(opt, data);
         };
 
@@ -101,8 +103,11 @@ define(
                     }
                 };
 
-                if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
-                    this.isH = true;
+                if (this.text.rotation != 0 ) {
+                    if(this.text.rotation % 90 == 0){
+                        this.isH = true;
+                    };
+                    this.text.textAlign = "right";
                 };
 
                 if (!this.line.enabled) {
@@ -186,11 +191,7 @@ define(
 
                 if (this.enabled) { //this.display != "none"
                     this._widget();
-
-                    if (!this.text.rotation) {
-                        this._layout();
-                    }
-                }
+                };
 
                 this.resize = false;
                 // this.data = this.layoutData
@@ -274,6 +275,11 @@ define(
                 this.xDis = parseInt(xGraphsWidth / data.length);//这个属性目前主要是柱状图有分组柱状图的场景在用
 
                 for (var a = 0, al  = data.length; a < al; a++ ) {
+                    var txt = new Canvax.Display.Text( data[a] , {
+                        context: {
+                            fontSize: this.text.fontSize
+                        }
+                    });
                     var o = {
                         'content':data[a], 
                         'x': this.getPosX({
@@ -281,7 +287,8 @@ define(
                             ind : a,
                             dataLen: al,
                             xGraphsWidth : xGraphsWidth
-                        })
+                        }),
+                        'textWidth': txt.getTextWidth()
                     };
                     tmpData.push( o );
                 };
@@ -371,18 +378,25 @@ define(
                         this.rulesSprite.addChild(xNode);
                     }
 
+                    var _visible = true;
+                    if( arr[a].visible!==undefined ){
+                        _visible = arr[a].visible;
+                    }
+
+                    xNode.context.visible = _visible;
+
                     var o = arr[a]
                     var x = o.x,
                         y = this.disY + this.line.height + this.dis;
 
                     //文字
                     var textContext = {
-                        x: x,
+                        x: o.text_x || o.x,
                         y: y + 20,
                         fillStyle: this.text.fillStyle,
                         fontSize: this.text.fontSize,
                         rotation: -Math.abs(this.text.rotation),
-                        textAlign: this.text.textAlign || (!!this.text.rotation ? "right" : "center"),
+                        textAlign: this.text.textAlign,
                         textBaseline: !!this.text.rotation ? "middle" : "top",
                         globalAlpha: 0
                     };
@@ -390,7 +404,7 @@ define(
                     if( xNode._txt ){
                         //_.extend( xNode._txt.context , textContext );
                         //debugger
-                        xNode._txt.resetText( (o.layoutText || o.content)+"" );
+                        xNode._txt.resetText( o.layoutText+"" );
                         if( this.animation ){
                             xNode._txt.animate( {
                                 x : textContext.x
@@ -402,7 +416,8 @@ define(
                         }
 
                     } else {
-                        xNode._txt = new Canvax.Display.Text((o.layoutText || o.content), {
+
+                        xNode._txt = new Canvax.Display.Text(o.layoutText, {
                             id: "xAxis_txt_" + CanvaxBase.getUID(),
                             context: textContext
                         });
@@ -476,36 +491,6 @@ define(
                 };
 
             },
-            /*校验最后一个文本是否超出了界限。然后决定是否矫正*/
-            _layout: function() {
-
-                if (this.data.length == 0 || this.sprite.getNumChildren() <=2 ){
-                    //压根没数据 或者 如果都只有两个节点，当然也不需要矫正了
-                    return;
-                };
-
-                var popText = this.sprite.getChildAt(this.sprite.getNumChildren() - 1).getChildAt(0);
-                if (popText) {
-                    var pc = popText.context;
-                    if (pc.textAlign == "center" &&
-                        pc.x + popText.context.width / 2 > this.width) {
-                        pc.x = this.width - popText.context.width / 2
-                    };
-                    if (pc.textAlign == "left" &&
-                        pc.x + popText.context.width > this.width) {
-                        pc.x = this.width - popText.context.width
-                    };
-                    if (this.sprite.getNumChildren() > 2) {
-                        //倒数第二个text
-                        var popPreText = this.sprite.getChildAt(this.sprite.getNumChildren() - 2).getChildAt(0);
-                        var ppc = popPreText.context;
-                        //如果最后一个文本 和 倒数第二个 重叠了，就 隐藏掉
-                        if (ppc.visible && pc.x < ppc.x + ppc.width) {
-                            pc.visible = false;
-                        }
-                    }
-                }
-            },
             _setTextMaxWidth: function() {
                 var arr = this._layoutDataSection;
                 var maxLenText = arr[0];
@@ -529,35 +514,59 @@ define(
                 return this._textMaxWidth;
             },
             _trimLayoutData: function() {
+                var me = this;
+                var arr = this.data;
 
-                var tmp = []
-                var arr = this.data
+                var l = arr.length;
 
-                var mw = this._textMaxWidth + 10;
-
-                if (!!this.text.rotation) {
-                    mw = this._textMaxHeight * 1.5;
-                };
-
-                //总共能多少像素展现
-                var n = Math.min(Math.floor(this.width / mw), arr.length - 1); //能展现几个
-
-                if (n >= arr.length - 1) {
-                    this.layoutData = arr;
-                } else {
-                    //需要做间隔
-                    var dis = Math.max(Math.ceil(arr.length / n - 1), 0); //array中展现间隔
-                    //存放展现的数据
-                    for (var a = 0; a < n; a++) {
-                        var obj = arr[a + dis * a];
-                        obj && tmp.push(obj);
+                function checkOver(i){
+                    var curr = arr[i];
+                    
+                    if( curr === undefined ){
+                        return;
                     };
-                    this.layoutData = tmp;
+                    curr.visible = true;
+                    for( var ii=i; ii<l-1; ii++ ){
+                        var next = arr[ii+1];
+                        var next_x = next.x - next.textWidth/2;
+
+                        if( ii == l-2 ){
+                            //next是最后一个
+                            if( me.text.textAlign == "center" && (next.x+next.textWidth/2) > me.width ){
+                                next_x = me.width - next.textWidth;
+                                next.text_x = me.width - next.textWidth/2;
+                            }
+                            if( me.text.textAlign == "left" && (next.x+next.textWidth) > me.width ){
+                                next_x = me.width - next.textWidth;
+                                next.text_x = me.width - next.textWidth;
+                            }
+                        }
+
+                        if( next_x < curr.x+curr.textWidth/2 ){
+                            if( ii == l-2 ){
+                                //最后一个的话，反把前面的给hide
+                                next.visible = true;
+                                curr.visible = false;
+                                return;
+                            } else {
+                                next.visible = false;
+                            }
+                        } else {
+                            checkOver( ii+1 );
+                            break;
+                        }
+                    };
                 };
+
+                //非rotation下才做显示隐藏
+                if (!this.text.rotation) {
+                    checkOver(0);
+                };
+
+                this.layoutData = this.data;
+
             }
         };
-
         return xAxis;
-
     }
 )

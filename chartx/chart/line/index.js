@@ -11,9 +11,10 @@ define(
         'chartx/chart/line/tips',
         'chartx/utils/dataformat',
         'chartx/components/datazoom/index',
-        'chartx/components/legend/index'
+        'chartx/components/legend/index',
+        'chartx/components/markline/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom , Legend) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Anchor, Graphs, Tips, dataFormat, DataZoom , Legend, MarkLine) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -32,10 +33,6 @@ define(
                         end: data.length - 1 //因为第一行是title
                     }
                 };
-                if (opts.dataZoom) {
-                    this.dataZoom.enabled = true;
-                    this.padding.bottom += (opts.dataZoom.height || 46);
-                };
 
                 this._xAxis = null;
                 this._yAxis = null;
@@ -53,8 +50,13 @@ define(
                 this._markLines = [];
 
                 this.biaxial = false;
-
+debugger
                 _.deepExtend(this, opts);
+
+                if ( opts.dataZoom ) {
+                    this.dataZoom.enabled = true;
+                    this.padding.bottom += (opts.dataZoom.height || 46);
+                };
 
                 this.dataFrame = this._initData(data, this);
             },
@@ -107,7 +109,7 @@ define(
                 this.dataFrame = this._initData( d , this);
 
                 //如果markLine.y有配置，需要加入到yAxis.org中去,以为yAixs的dataSection区间可能就不一样了
-                if( this.markLine && this.markLine.y ){
+                if( this.markLine && this.markLine.enabled && this.markLine.y ){
                     this.dataFrame.yAxis.org.push( this.markLine.y );
                 };
 
@@ -122,11 +124,19 @@ define(
             },
             __reset: function( opt ){
                 opt = !opt ? this : opt;
-                this._graphs.reset( opt.graphs , this.dataFrame);
+                
                 this._xAxis.reset( opt.xAxis , this.dataFrame.xAxis );
                 this._yAxis.reset( opt.yAxis , this.dataFrame.yAxis );
+
+                //_graphs比如最后reset
+                this._graphs.reset( opt.graphs , this.dataFrame);
+
                 _.each(this._markLines , function( ml , i ){
-                    ml.reset(i);
+                    ml.reset({
+                        line: {
+                            y : ml._yAxis.getYposFromVal( ml.value )
+                        }
+                    } ,i);
                 }); 
             },
 
@@ -199,7 +209,7 @@ define(
                 var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
                 if (dataZoom && dataZoom.enabled) {
                     var datas = [data[0]];
-                    datas = datas.concat(data.slice(dataZoom.range.start + 1, dataZoom.range.end + 1 + 1));
+                    datas = datas.concat(data.slice( parseInt(dataZoom.range.start) + 1, parseInt(dataZoom.range.end) + 1 + 1));
                     d = dataFormat.apply(this, [datas, opt]);
                 } else {
                     d = dataFormat.apply(this, arguments);
@@ -212,7 +222,7 @@ define(
                     this.yAxis.biaxial = true;
                 };
 
-                if( this.markLine && this.markLine.y ){
+                if( this.markLine && this.markLine.enabled && this.markLine.y ){
                     this.dataFrame.yAxis.org.push( this.markLine.y );
                 };
 
@@ -342,11 +352,13 @@ define(
                     )
                     ) {
                     _.each(this._graphs.groups, function(group, i) {
-                        var color = group._bline.context.strokeStyle;
-                        if (i == 0) {
-                            me._yAxis.setAllStyle(color);
-                        } else {
-                            me._yAxisR.setAllStyle(color);
+                        if( group._bline ){
+                            var color = group._bline.context.strokeStyle;
+                            if (i == 0) {
+                                me._yAxis.setAllStyle(color);
+                            } else {
+                                me._yAxisR.setAllStyle(color);
+                            }
                         }
                     });
                 };
@@ -357,6 +369,7 @@ define(
                         me._initPlugs(me._opts, g);
                     }).on("growComplete" , function(){
                         me.fire("complete");
+                        me._opts.markLine && me._initMarkLine();
                     });
                 };
 
@@ -427,11 +440,9 @@ define(
                        return info.field
                     },
                     onChecked : function( field ){
-                       //me._resetOfLengend( field );
                        me.add( field );
                     },
                     onUnChecked : function( field ){
-                       //me._resetOfLengend( field );
                        me.remove( field );
                     }
                 } , this._opts.legend);
@@ -459,9 +470,11 @@ define(
                 return data;
             },
             ////设置图例end
+
             _initPlugs: function(opts, g) {
-                if (opts.markLine) {
-                    this._initMarkLine(g);
+                //如果有配置opts.markLine.y， 就说明这个markline是用户自己要定义的
+                if (opts.markLine && this.markLine.enabled && opts.markLine.y === undefined) {
+                    this._initAverageLine(g);
                 };
                 if (opts.markPoint) {
                     this._initMarkPoint(g);
@@ -499,9 +512,6 @@ define(
                             enabled: false
                         }
                     },
-                    dataZoom: {
-                        enabled: false
-                    },
                     xAxis: {
                         //enabled: false
                     },
@@ -509,7 +519,9 @@ define(
                         //enabled: false
                     }
                 });
+                delete opts.dataZoom;
 
+                debugger
                 var thumbBar = new lineConstructor(cloneEl, me._data, opts);
                 thumbBar.draw();
                 return {
@@ -520,7 +532,7 @@ define(
             _initDataZoom: function(g) {
                 var me = this;
                 //require(["chartx/components/datazoom/index"], function(DataZoom) {
-                //初始化datazoom模块
+                //初始化 datazoom 模块
                 var dataZoomOpt = _.deepExtend({
                     w: me._xAxis.xGraphsWidth,
                     //h : me._xAxis.height,
@@ -621,13 +633,34 @@ define(
                     });
                 });
             },
-
+            _initMarkLine: function(){
+                var me = this;
+                if( !me.markLine.target && !me.markLine.field && me.markLine.y !== undefined ){
+                    var _y = me.markLine.y;
+                    if( !_.isArray(_y) ){
+                        _y = [_y]
+                    };
+                    function getProp( obj , p , i , def){
+                        if( obj == undefined ) return def;
+                        if( obj[p] == undefined ) return def;
+                        if( !_.isArray(obj[p]) ) return obj[p];
+                        return obj[p][i] == undefined ? def : obj[p][i] 
+                    };
+                    _.each( _y , function( y , i ){
+                        var posY = me._yAxis.getYposFromVal(y);
+                        var strokeStyle = getProp(me.markLine , "strokeStyle" , i , "#999");
+                        var yAxis = me._yAxis;
+                        //TODO: 如果这样有双轴，还需要一个配置告诉我你这个markLine需要附属到哪个yAxis上面去
+                        me._createMarkLine("",y, posY, "markline："+y, strokeStyle , yAxis);
+                    } );
+                }
+            },
             //markline begin
-            _initMarkLine: function(g, dataFrame) {
+            _initAverageLine: function(g, dataFrame) {
                 var me = this;
 
-                //如果markline有target配置，那么只现在target配置里的字段的markline
-                var _t = me.markLine.target;
+                //如果markline有target配置，那么只现在target配置里的字段的 markline
+                var _t = me.markLine.field || me.markLine.target;
                 if( _t && !( ( _.isArray(_t) && _.indexOf( _t , g.field )>=0 ) || (_t === g.field) ) ){
                     return;
                 };
@@ -636,79 +669,49 @@ define(
                 var pointList = _.clone(g._pointList);
                 dataFrame || (dataFrame = me.dataFrame);
                 var center = parseInt(dataFrame.yAxis.center[index].agPosition);
-                require(['chartx/components/markline/index'], function(MarkLine) {
-                    var content = g.field + '均值',
-                        strokeStyle = g.line.strokeStyle;
-                    if (me.markLine.text && me.markLine.text.enabled) {
-                        if (_.isFunction(me.markLine.text.format)) {
-                            var o = {
-                                iGroup: index,
-                                value: dataFrame.yAxis.center[index].agValue
-                            }
-                            content = me.markLine.text.format(o)
+                var center_v = dataFrame.yAxis.center[index].agValue
+                var content = g.field + '均值', strokeStyle = g.line.strokeStyle;
+                if (me.markLine.text && me.markLine.text.enabled) {
+                    if (_.isFunction(me.markLine.text.format)) {
+                        var o = {
+                            iGroup: index,
+                            value: dataFrame.yAxis.center[index].agValue
                         }
-                    };
+                        content = me.markLine.text.format(o)
+                    }
+                };
 
-                    var _y = center;
-                    
-                    //如果markline有自己预设的y值
-                    function getYForVal(){
-                        var _y = me.markLine.y;
-                        if(_.isFunction(_y)){
-                            _y = _y( g.field );
-                        };
-                        if(_.isArray( _y )){
-                            _y = _y[ index ];
-                        };
-                        if( _y != undefined ){
-                            _y = g._yAxis.getYposFromVal(_y);
-                        }
-                        return _y;
-                    };
-                    if( me.markLine.y != undefined ){
-                        _y = getYForVal();
-                    };
-                    
+                me._createMarkLine(g.field,center_v, center, content, strokeStyle , g._yAxis);
+            },
+            _createMarkLine: function( field, yVal, yPos, content, strokeStyle , yAxis){
+                var me = this;
+                var o = {
+                    w: me._xAxis.xGraphsWidth,
+                    h: me._yAxis.yGraphsHeight,
+                    value: yVal,
+                    origin: {
+                        x: me._back.pos.x,
+                        y: me._back.pos.y
+                    },
+                    line: {
+                        y: yPos,
+                        list: [
+                            [0, 0],
+                            [me._xAxis.xGraphsWidth, 0]
+                        ],
+                        strokeStyle: strokeStyle
+                    },
+                    text: {
+                        content: content,
+                        fillStyle: strokeStyle
+                    },
+                    field: field
+                };
 
-                    var o = {
-                        w: me._xAxis.xGraphsWidth,
-                        h: me._yAxis.yGraphsHeight,
-                        origin: {
-                            x: me._back.pos.x,
-                            y: me._back.pos.y
-                        },
-                        line: {
-                            y: _y,
-                            list: [
-                                [0, 0],
-                                [me._xAxis.xGraphsWidth, 0]
-                            ],
-                            strokeStyle: strokeStyle
-                        },
-                        text: {
-                            content: content,
-                            fillStyle: strokeStyle
-                        },
-                        field: g.field,
-                        reset: function( i ){
-                            if(me.markLine.y != undefined){ 
-                                var _y = getYForVal();
-                                this._line.animate({
-                                    y: _y
-                                }, {
-                                    duration: 500,
-                                    easing: 'Back.Out' //Tween.Easing.Elastic.InOut
-                                });
-                            }
-                        }
-                    };
-
-                    new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
-                        me.core.addChild(this.sprite);
-                        me._markLines.push( this ); 
-                    });
-                    
-                })
+                new MarkLine(_.deepExtend( me._opts.markLine, o) , yAxis).done(function() {
+                    me.core.addChild(this.sprite);
+                    me._markLines.push( this ); 
+                });
             },
             //markline end
 
@@ -719,7 +722,9 @@ define(
                 spt.on("panstart mouseover", function(e) {
                     if (self._tips.enabled && e.eventInfo.nodesInfoList.length > 0) {
                         //self._tips.hide(e);
+
                         _setXaxisYaxisToTipsInfo.apply(self, [e]);
+                        
                         self._tips.show(e);
                     }
                 });
@@ -765,17 +770,26 @@ define(
                 if (!e.eventInfo) {
                     return;
                 };
+
+                var value;
+
+                if( e.eventInfo.xAxis && e.eventInfo.xAxis.value ){
+                    value = e.eventInfo.xAxis.value;
+                } else {
+                    value = this.dataFrame.xAxis.org[0][e.eventInfo.iNode];
+                }
+
                 var me = this;
-                e.eventInfo.xAxis = {
+                e.eventInfo.xAxis = _.extend({
                     field: this.dataFrame.xAxis.field,
-                    value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
-                };
+                    value: value
+                } , e.eventInfo.xAxis);
 
                 e.eventInfo.dataZoom = me.dataZoom;
 
                 e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
 
-                e.eventInfo.iNode += this.dataZoom.range.start;
+                e.eventInfo.iNode += parseInt(this.dataZoom.range.start);
             },
             //根据x轴分段索引和具体值,计算出处于Graphs中的坐标
             _getPosAtGraphs: function(index, num) {
@@ -788,15 +802,16 @@ define(
             },
             
             createMarkColumn: function( xVal , opt){
-                return this._graphs.createMarkColumn( this._xAxis.getPosX( {val : xVal} ) , opt);
+                return this._graphs.createMarkColumn( this._xAxis.getPosX( {val : xVal} ) , _.extend(opt,{xVal: xVal}));
             },
             moveMarkColumnTo: function( mcl , xval , opt ){
                 var x = this._xAxis.getPosX( {val : xval} );
                 return mcl.move( {
-                    eventInfo : this._graphs.getNodesInfoOfx( x )
+                    eventInfo: this._graphs.getNodesInfoOfx( x )
                 } , {
-                    x : x
-                })
+                    x: x,
+                    xVal: xval
+                });
             }
         });
         return Line;

@@ -25,7 +25,6 @@ define(
                 fillStyle    : "#999"
             };
             this.strokeStyle = "#ccc";
-            this.lineWidth   = 1;
             
             
             this._tipDom = null;
@@ -111,10 +110,10 @@ define(
                     return;
                 };
                 var tipxContent = this._getContent(e);
-                if( tipxContent === "_hide_" ){
+                if( tipxContent === "_hide_" || tipxContent === "" ){
                     this.hide();
                     return;
-                }
+                };
                 this._tipDom.innerHTML = tipxContent;
                 this.dW = this._tipDom.offsetWidth;
                 this.dH = this._tipDom.offsetHeight;
@@ -122,6 +121,7 @@ define(
             _getContent : function(e){
                 _.extend( this.tipsInfo , (e.tipsInfo || e.eventInfo || {}) );
                 var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
+                //只有undefined false null才会继续走默认配置， "" 0 都会认为是用户的意思
                 if( !tipsContent && tipsContent != 0 ){
                     tipsContent = this._getDefaultContent( this.tipsInfo );
                 }
@@ -142,7 +142,6 @@ define(
                             str+="<td "+tsStyle+">"+ node.field +"：</td>";
                         }
                     };
-
                     str += "<td "+tsStyle+">"+ Tools.numAddSymbol(node.value) +"</td></tr>";
                 });
                 str+="</table>";
@@ -154,7 +153,7 @@ define(
              */
             _checkX : function( x ){
                 if( this.positionInRange ){
-                    var w = this.dW + 2; //后面的2 是 两边的linewidth
+                    var w = this.dW + 2; //后面的2 是 两边的 linewidth
                     if( x < 0 ){
                         x = 0;
                     }
@@ -171,7 +170,7 @@ define(
              */
             _checkY : function( y ){
                 if(this.positionInRange){
-                    var h = this.dH + 2; //后面的2 是 两边的linewidth
+                    var h = this.dH + 2; //后面的2 是 两边的 linewidth
                     if( y < 0 ){
                         y = 0;
                     }

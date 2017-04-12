@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- line</title>
-<script type="text/javascript" src="../../lib/sea.js"></script>
+<title>xChart demo -- horizontal_graphs_info</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../chartx/index.js"></script>
 <!-- codemirror -->
@@ -24,55 +24,41 @@
 <!--bootstrap end-->
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
+<!--<script type="text/javascript" src="../bar_h/index.js"></script>-->
 </head>
 <body >
 
 <table>
     <tr>
         <td id="td-vl">
-            <form><textarea id="code" name="code">
-
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
-var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 637  , 51 , 26    ],
-    [ 3      , 500 , 50 , 150   ],
-    [ 4      , 101 , 20 , 33    ],
-    [ 5      , 267  , 51 , 26    ],
-    [ 6      , 160 , 50 , 150   ],
-    [ 7      , 101 , 20 , 33    ],
-    [ 8      , 267  , 51 , 26    ],
-    [ 9      , 170 , 50 , 150   ],
-    [ 10     , 181 , 20 , 33    ],
-    [ 11     , 672  , 51 , 26    ],
-    [ 12     , 100 , 50 , 150   ],
-    [ 13     , 267  , 51 , 26    ],
-    [ 14     , 140 , 50 , 150   ],
-    [ 15     , 191 , 20 , 33    ],
-    [ 16     , 367  , 51 , 26    ],
-    [ 17     , 800 , 50 , 150   ],
-    [ 18     , 121 , 20 , 33    ],
-    [ 19     , 367  , 51 , 26    ],
-    [ 20     , 100 , 50 , 150   ]
+<form><textarea id="code" name="code">
+var data = [
+    ["xfield","line1","line2","line3"],
+    [ '1-2K' , 101   , 201   , 310 ] ,
+    [ '2-3K' , 88    , 145   , 220 ] ,
+    [ '3-4k' , 488   , 88    , 122 ] ,
+    [ '4-5k' , 390   , 546   , 110 ] ,
+    [ '5-6k' , 1300  , 88    , 151 ] 
 ];
 var options = {
+    type  : 'horizontal',
     yAxis : {
-        field : ["uv"]
+        field : [ "line3" ]
     },
     xAxis : {
         field : ["xfield"]
     },
-    dataZoom : {
-        enabled: true,
-        range : {
-            start : 0,
-            end   : 2
+
+    graphs:{
+        text: {
+            enabled : 1
         }
     }
-}   
-Chartx.line("canvasTest" , data , options);
+}       
+
+Chartx.bar("canvasTest" , data , options).then(function( bar ){
+    debugger
+});  
 </textarea></form>
 
         </td>
@@ -81,7 +67,7 @@ Chartx.line("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（line chart）- 基础折线图</h4>
+                <h4>柱状图- 横向柱状图，有柱形条上有信息</h4>
                 <p>
                     联系人：@逢春 @释剑
                 </p>
@@ -89,6 +75,7 @@ Chartx.line("canvasTest" , data , options);
             <div  class="test-c">
                 <div id="canvasTest" style='width:600px;height:300px;'></div>
             </div>
+
 
             </div>
         </td>
@@ -98,3 +85,4 @@ Chartx.line("canvasTest" , data , options);
     
 </body> 
 </html>
+

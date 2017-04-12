@@ -5,11 +5,11 @@ define(
         "canvax/shape/Line",
         "canvax/core/Base",
         "canvax/event/EventDispatcher",
-        "canvax/shape/Circle",
-        "chartx/components/tips/tip"
+        "canvax/shape/Circle"
     ],
-    function( Canvax , Line , CanvaxBase , CanvaxEventDispatcher, Circle , Tip ){
+    function( Canvax , Line , CanvaxBase , CanvaxEventDispatcher, Circle  ){
         var markColumn = function(opt , data){
+            this.xVal      = null;
             this.line      = {
                 enabled      : 1,
                 eventEnabled : true
@@ -46,8 +46,9 @@ define(
                 });
             },
             show: function(e , pointInfo){
+                this.eventInfo = e.eventInfo;
                 this.sprite.context.visible = true;
-                this._showLine(e , pointInfo);
+                this._showLine(pointInfo);
                 this._showNodes(e , pointInfo);
                 return this;
             },
@@ -55,8 +56,13 @@ define(
                 this.sprite.context.visible = false;
             },
             move: function( e , pointInfo ){
+                this.eventInfo = e.eventInfo;
+
                 if(this._line){
                     this._line.context.x  = parseInt(pointInfo.x);
+                };
+                if( pointInfo.xVal !== undefined ){
+                    this.xVal = pointInfo.xVal;
                 };
                 this._resetNodesStatus(e , pointInfo);
             }, 
@@ -67,7 +73,7 @@ define(
             },            /**
              * line相关------------------------
              */
-            _showLine : function(e , pointInfo){
+            _showLine : function(pointInfo){
                 var me = this;
                 var lineOpt = _.deepExtend({
                     x       : parseInt(pointInfo.x),
@@ -94,19 +100,28 @@ define(
                             this._line.on("mouseover", function(evt) {
                                 if( evt.fromTarget && evt.fromTarget.name == "_markcolumn_node" ){
                                     return;
-                                }
-                                evt.eventInfo = e.eventInfo;
+                                };
+                                evt.eventInfo = me.eventInfo;
+                                if( me.xVal !== null ){
+                                    evt.eventInfo.xAxis = {value : me.xVal};
+                                };
                                 me.fire("mouseover" , evt);
                             });
                             this._line.on("mousemove", function(evt) {
-                                evt.eventInfo = e.eventInfo;
+                                evt.eventInfo = me.eventInfo;
+                                if( me.xVal !== null ){
+                                    evt.eventInfo.xAxis = {value : me.xVal};
+                                };
                                 me.fire("mousemove" , evt);
                             });
                             this._line.on("mouseout", function(evt) {
                                 if( evt.toTarget && evt.toTarget.name == "_markcolumn_node" ){
                                     return;
                                 }
-                                evt.eventInfo = e.eventInfo;
+                                evt.eventInfo = me.eventInfo;
+                                if( me.xVal !== null ){
+                                    evt.eventInfo.xAxis = {value : me.xVal};
+                                };
                                 me.fire("mouseout" , evt);
                             });
                         }
@@ -165,16 +180,22 @@ define(
 
                         me._nodes.addChild( csp );
 
-                        
                         bigCircle.on("mouseover", function(evt) {
                             if( evt.fromTarge && (evt.fromTarget.name == "_markcolumn_line" || evt.fromTarget.name == "_markcolumn_node" )){
                                 return;
                             }
                             evt.eventInfo = evt.target.eventInfo;
+                            
+                            if( me.xVal !== null ){
+                                evt.eventInfo.xAxis = {value : me.xVal};
+                            };
                             me.fire("mouseover" , evt);
                         });
                         bigCircle.on("mousemove", function(evt) {
                             evt.eventInfo = evt.target.eventInfo;
+                            if( me.xVal !== null ){
+                                evt.eventInfo.xAxis = {value : me.xVal};
+                            };
                             me.fire("mousemove" , evt);
                         });
                         bigCircle.on("mouseout", function(evt) {
@@ -182,6 +203,9 @@ define(
                                 return;
                             }
                             evt.eventInfo = evt.target.eventInfo;
+                            if( me.xVal !== null ){
+                                evt.eventInfo.xAxis = {value : me.xVal};
+                            };
                             me.fire("mouseout" , evt);
                         });
                         bigCircle.on("click", function(evt) {
@@ -190,6 +214,9 @@ define(
                             // delete eventInfo.nodesInfoList
                             var o = {
                                 eventInfo : _.clone(evt.target.eventInfo)
+                            };
+                            if( me.xVal !== null ){
+                                o.eventInfo.xAxis = {value : me.xVal};
                             };
                             me.sprite.fire("nodeclick", o);
                         });

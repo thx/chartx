@@ -35,29 +35,36 @@
 var data= [
     ["node"   , "value"],
     ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
+    ["firefox", 300   ],
+    ["safari" , 100   ],
     ["其他"   , 200   ],
     ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
+    ["firefox", 300   ],
+    ["safari" , 100   ],
     ["其他"   , 200   ],
     ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
+    ["firefox", 300   ],
+    ["safari" , 100   ],
     ["其他"   , 200   ],
     ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
+    ["firefox", 300   ],
+    ["safari" , 100   ],
     ["其他"   , 200   ],
     ["ie"     , 500   ],
-    ["firefox", 100   ],
-    ["safari" , 400   ],
-    ["其他"   , 200   ],
+    ["firefox", 300   ],
+    ["safari" , 100   ],
+    ["其他"   , 200   ]
 ];
 
 var options = {
     type : '3d',
+    //旋转范围为0-75度
+    rotation:{
+       x : 45,
+       y : 0
+    },
+    //饼图的厚度
+    thickness: 50,
     xAxis : {
         field : "node"
     },
@@ -90,6 +97,8 @@ var options = {
     allowPointSelect: true,
     //是否允许动画
     animation: true,
+    //饼图的透明度
+    globalAlpha: 0.8,
     //内圆半径
     innerRadius: 50,
     //颜色序列,若不设置，会有默认的颜色序列
@@ -144,7 +153,7 @@ Chartx.pie("canvasTest" , data , options).then(function( pie ){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:400px;'></div>
+                <div id="canvasTest" style='width:1000px;height:600px;'></div>
             </div>
 
             </div>

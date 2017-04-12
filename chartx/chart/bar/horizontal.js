@@ -72,19 +72,18 @@ define(
 
 
                 //把x轴文案做一次镜像反转
-                _.each(this._xAxis.sprite.children, function(xnode) {
-                    var text = xnode.children ? xnode.children[0] : xnode;
-                    var ctx = text.context;
-                    var rect = text.getRect();
+                _.each(this._xAxis.rulesSprite.children, function(xnode) {
+                    var ctx = xnode._txt.context;
+                    var rect = xnode._txt.getRect();
                     ctx.scaleOrigin.x = rect.x + rect.width / 2;
                     ctx.scaleOrigin.y = rect.y + rect.height / 2;
                     ctx.scaleY = -1
                 });
+
                 //把y轴文案做一次镜像反转
-                _.each(this._yAxis.sprite.children, function(ynode) {
-                    var text = ynode.children ? ynode.children[0] : ynode;
-                    var ctx = text.context;
-                    var rect = text.getRect();
+                _.each(this._yAxis.rulesSprite.children, function(ynode) {
+                    var ctx = ynode._txt.context;
+                    var rect = ynode._txt.getRect();
                     ctx.scaleOrigin.x = rect.x + rect.width / 2;
                     ctx.scaleOrigin.y = rect.y + rect.height / 2;
                     ctx.scaleY = -1

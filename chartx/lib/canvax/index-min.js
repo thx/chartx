@@ -2346,7 +2346,7 @@ define(
         function _isInsideCircle(shape, x, y, r) {
             var context = shape.context;
             !r && (r = context.r);
-            r+=context.lineWidth;
+            r+= context.lineWidth;
             return (x * x + y * y) < r * r;
         };
 
@@ -3710,7 +3710,7 @@ define(
             self._context = _.deepExtend({
                 fontSize: 13, //字体大小默认13
                 fontWeight: "normal",
-                fontFamily: "微软雅黑",
+                fontFamily: "微软雅黑,sans-serif",
                 textDecoration: null,
                 fillStyle: 'blank',
                 strokeStyle: null,
@@ -4697,10 +4697,11 @@ define(
                 }
 
                 var minX = Number.MAX_VALUE;
-                var maxX = Number.MIN_VALUE;
+
+                var maxX = -Number.MAX_VALUE;
 
                 var minY = Number.MAX_VALUE;
-                var maxY = Number.MIN_VALUE;
+                var maxY = -Number.MAX_VALUE;
 
                 // 平移坐标
                 var x = 0;
@@ -5429,6 +5430,16 @@ define(
                //否则智慧继续确认心跳
                self._heartBeat = true;
             }
+        },
+        toDataURL: function(){
+        	var canvas = Base._createCanvas( "curr_base64_canvas" , this.context.width , this.context.height );
+            var ctx = canvas.getContext("2d");
+
+        	_.each( this.children , function( stage ){
+                ctx.drawImage( stage.context2D.canvas , 0 , 0 );
+        	} );
+        	
+        	return canvas.toDataURL();
         }
     } );
  

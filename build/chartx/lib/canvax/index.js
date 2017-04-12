@@ -3710,7 +3710,7 @@ define(
             self._context = _.deepExtend({
                 fontSize: 13, //字体大小默认13
                 fontWeight: "normal",
-                fontFamily: "微软雅黑",
+                fontFamily: "微软雅黑,sans-serif",
                 textDecoration: null,
                 fillStyle: 'blank',
                 strokeStyle: null,
@@ -5429,6 +5429,16 @@ define(
                //否则智慧继续确认心跳
                self._heartBeat = true;
             }
+        },
+        toDataURL: function(){
+        	var canvas = Base._createCanvas( "curr_base64_canvas" , this.context.width , this.context.height );
+            var ctx = canvas.getContext("2d");
+
+        	_.each( this.children , function( stage ){
+                ctx.drawImage( stage.context2D.canvas , 0 , 0 );
+        	} );
+        	
+        	return canvas.toDataURL();
         }
     } );
  

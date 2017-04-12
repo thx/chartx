@@ -458,11 +458,29 @@ define(
                                 
                                 _.each(contents, function(cdata, ci) {
                                     var content = cdata.value;
-                                    if (!me.animation && _.isFunction(me.text.format)) {
-                                        content = (me.text.format.apply(me , [cdata.value]) || content );
+                                    if (_.isFunction(me.text.format)) {
+                                        var _formatc = me.text.format.apply( self , [content , cdata]);
+                                        if(!!_formatc || _formatc==="" || _formatc===0){
+                                            content = _formatc
+                                        }
                                     };
                                     if (!me.animation && _.isNumber(content)) {
                                         content = Tools.numAddSymbol(content);
+                                    };
+
+                                    if( content === "" ){
+                                        return;
+                                    };
+
+                                    if (ci > 0 && infosp.children.length>0) {
+                                        txt = new Canvax.Display.Text("/", {
+                                            context: {
+                                                x: infoWidth + 2,
+                                                fillStyle: "#999"
+                                            }
+                                        });
+                                        infoWidth += txt.getTextWidth() + 2;
+                                        infosp.addChild(txt);
                                     };
 
                                     var txt;
@@ -481,23 +499,13 @@ define(
                                         });
                                         infosp.addChild(txt);
                                     };
-                                    txt._text = content;
+                                    txt._text = cdata.value;
+                                    txt._data = cdata;
                                     infoWidth += txt.getTextWidth() + 2;
                                     infoHeight = Math.max(infoHeight, txt.getTextHeight());
 
                                     if( me.animation ){
                                         txt.resetText(0);
-                                    }
-
-                                    if (ci <= vLen - 2) {
-                                        txt = new Canvax.Display.Text("/", {
-                                            context: {
-                                                x: infoWidth + 2,
-                                                fillStyle: "#999"
-                                            }
-                                        });
-                                        infoWidth += txt.getTextWidth() + 2;
-                                        infosp.addChild(txt);
                                     };
                                 });
 
@@ -682,7 +690,7 @@ define(
                             });
 
                             _.each(infosp.children, function(txt) {
-                                if (txt._text) {
+                                if (txt._text || txt._text===0) {
                                     if (txt._tweenObj) {
                                         AnimationFrame.destroyTween(txt._tweenObj);
                                     };
@@ -697,8 +705,12 @@ define(
                                         delay: h * options.delay,
                                         onUpdate: function() {
                                             var content = this.v;
+
                                             if (_.isFunction(self.text.format)) {
-                                                content = (self.text.format.apply( self , [content]) || content);
+                                                var _formatc = self.text.format.apply( self , [content , txt._data]);
+                                                if(!!_formatc || _formatc==="" || _formatc===0){
+                                                    content = _formatc
+                                                }
                                             } else if (_.isNumber(content)) {
                                                 content = Tools.numAddSymbol(parseInt(content));
                                             };
@@ -824,9 +836,10 @@ define(
         'chartx/components/tips/tip',
         'chartx/utils/dataformat',
         'chartx/components/datazoom/index',
-        'chartx/components/legend/index'
+        'chartx/components/legend/index',
+        'chartx/components/markline/index'
     ],
-    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat, DataZoom, Legend) {
+    function(Chart, Tools, DataSection, xAxis, yAxis, Back, Graphs, Tip, dataFormat, DataZoom, Legend, MarkLine) {
         /*
          *@node chart在dom里的目标容器节点。
          */
@@ -1645,17 +1658,17 @@ define(
             },
             _initMarkLine: function(g) {
                 var me = this;
-                
-                require(['chartx/components/markline/index'], function(MarkLine) {
-                    var yfieldFlat = _.flatten(me._yAxis.field);
-                    for (var a = 0, al = yfieldFlat.length; a < al; a++) {
-                        var index = a;
-                        var center = null;
 
-                        //如果markline有target配置，那么只现在target配置里的字段的markline
+                var _field = me.markLine.field || me.markLine.target;
+            
+                var yfieldFlat = _.flatten(me._yAxis.field);
+                if( me.markLine.y === undefined ){
+                    for (var a = 0, al = yfieldFlat.length; a < al; a++) {
+                        var center = null;
+                        //如果markline有 target 配置，那么只现在 target 配置里的字段的markline
                         var _yField = yfieldFlat[a];
-                        var _t = me.markLine.target;
-                        if( _t && !( ( _.isArray(_t) && _.indexOf( _t , _yField )>=0 ) || (_t === _yField) ) ){
+                        
+                        if( _field && !( ( _.isArray(_field) && _.indexOf( _field , _yField )>=0 ) || (_field === _yField) ) ){
                             continue;
                         };
 
@@ -1667,13 +1680,12 @@ define(
 
                         var strokeStyle = g._yAxisFieldsMap[ yfieldFlat[a] ].fillStyle; //g.sprite.children[0] ? g.sprite.children[0].children[a + 1].context.fillStyle : '#000000'
 
-                        var content = me.dataFrame.yAxis.field[a] + '均值'
+                        var content = me.dataFrame.yAxis.field[a] + '均值：'+me.dataFrame.yAxis.center[a].agValue
                         if (me.markLine.text && me.markLine.text.enabled) {
-
                             if (_.isFunction(me.markLine.text.format)) {
                                 var o = {
-                                    iGroup: index,
-                                    value : me.dataFrame.yAxis.center[index].agValue
+                                    iGroup: a,
+                                    value : me.dataFrame.yAxis.center[a].agValue
                                 }
                                 content = me.markLine.text.format(o)
                             }
@@ -1681,19 +1693,20 @@ define(
 
                         var _y = center;
                     
-                        //如果markline有自己预设的y值
+                        //如果 markline 有自己预设的y值
                         if( me.markLine.y != undefined ){
                             var _y = me.markLine.y;
                             if(_.isFunction(_y)){
                                 _y = _y( yfieldFlat[a] );
                             };
+
                             if(_.isArray( _y )){
                                 _y = _y[ a ];
                             };
 
                             if( _y != undefined ){
                                 _y = me._yAxis.getYposFromVal(_y);
-                            }
+                            };
                         };
 
                         var o = {
@@ -1715,14 +1728,51 @@ define(
                             text: {
                                 content: content,
                                 fillStyle: strokeStyle
-                            },
-                        }
+                            }
+                        };
 
                         new MarkLine(_.deepExtend(o, me._opts.markLine)).done(function() {
                             me.core.addChild(this.sprite)
-                        })
+                        });
                     }
-                })
+                } else {
+                    //如果没有配置field的话，就根据me.markLine.y来生成对应的markline实例
+                    var _mly = me.markLine.y;
+                    if( !_.isArray(_mly) ){
+                        _mly = [ _mly ];
+                    };
+                    function getProp( obj , p , i , def){
+                        if( obj == undefined ) return def;
+                        if( obj[p] == undefined ) return def;
+                        if( !_.isArray(obj[p]) ) return obj[p];
+                        return obj[p][i] == undefined ? def : obj[p][i] 
+                    };
+                    _.each( _mly , function( y , i ){
+                        var o = {
+                            w: me._xAxis.xGraphsWidth,
+                            h: me._yAxis.yGraphsHeight,
+                            origin: {
+                                x: me._back.pos.x,
+                                y: me._back.pos.y
+                            },
+                            line: {
+                                y: me._yAxis.getYposFromVal(y),
+                                list: [
+                                    [0, 0],
+                                    [me._xAxis.xGraphsWidth, 0]
+                                ],
+                                strokeStyle: getProp( me.markLine.line, "strokeStyle" , i , "#999" )
+                            },
+                            text: {
+                                content: "markLine：" + y,
+                                fillStyle: getProp( me.markLine.text, "fillStyle" , i , "#999" )
+                            }
+                        };
+                        new MarkLine(_.deepExtend( me._opts.markLine , o )).done(function() {
+                            me.core.addChild(this.sprite)
+                        });
+                    } );
+                }
             },
             _initMarkPoint: function(g) {
                 var me = this;

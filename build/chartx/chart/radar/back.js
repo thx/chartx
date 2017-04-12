@@ -15,6 +15,8 @@ define(
             this.strokeStyle  = "#e5e5e5";
             this.lineWidth    = 1;
             this.sprite       = null;
+            this.guidType     = "spider"; //蜘蛛网，也可以是 圆环（ ripple ）
+            this.outerPointList    = []; //外围的
             this.init(opt);
         };
         Back.prototype = {
@@ -47,47 +49,77 @@ define(
                     if( rScale == 0 ){
                         continue;
                     };
-                    var isogon = new Isogon({
-                        id : "isogon_" + i,
-                        context : {
-                            x : r,
-                            y : r,
-                            r : this.r * rScale,
-                            n : this.xDataSection.length,
-                            strokeStyle : this.strokeStyle,
-                            lineWidth   : this.lineWidth,
-                            fillStyle   : "RGBA(0,0,0,0)"
-                        }
-                    });
+                    var ringEl;
+                    if(this.guidType == "spider"){
+                        ringEl = new Isogon({
+                            id : "ring_isogon_" + i,
+                            context : {
+                                x : r,
+                                y : r,
+                                r : this.r * rScale,
+                                n : this.xDataSection.length,
+                                strokeStyle : this.strokeStyle,
+                                lineWidth   : this.lineWidth,
+                                fillStyle   : "RGBA(0,0,0,0)"
+                            }
+                        });
+                    } else {
+                        ringEl = new Circle({
+                            id : "ring_circle_" + i,
+                            context : {
+                                x : r,
+                                y : r,
+                                r : this.r * rScale,
+                                strokeStyle : this.strokeStyle,
+                                lineWidth   : this.lineWidth,
+                                fillStyle   : "RGBA(0,0,0,0)"
+                            }
+                        });
+                    };
                     //给最外面的蜘蛛网添加事件，让它冒泡到外面去
                     if( i == l - 1 ) {
-                        isogon.hover(function(){},function(){});
-                        isogon.on("mousemove",function(){});
+                        ringEl.hover(function(){},function(){});
+                        ringEl.on("mousemove",function(){});
+                        ringEl.on("click tap",function(){});
                         //然后要把最外面的isogon的rect范围作为sprite 的 width and height
-                        var rectRange = isogon.getRect();
+                        var rectRange = ringEl.getRect();
                         var spc       = spt.context;
                         spc.width     = rectRange.width;
                         spc.height    = rectRange.height;
-                    }
-                    spt.addChild( isogon );
-                }
+
+                        //并且计算最外网丝上面的对应顶点
+                        if(this.guidType == "spider"){
+                            this.outerPointList = ringEl.context.pointList;
+                        } else {
+                            //圆环的话，就需要自己计算了
+                            var n = ys.length;
+                            var dStep = 2 * Math.PI / n;
+                            var beginDeg = -Math.PI / 2;
+                            var deg = beginDeg;
+                            for (var i = 0, end = n; i < end; i++) {
+                                this.outerPointList.push([r * Math.cos(deg), r * Math.sin(deg)]);
+                                deg += dStep;
+                            };
+                        };
+                    };
+                    spt.addChild( ringEl );
+                };
     
-                var pointList = spt.children[ spt.children.length-1 ].context.pointList;
-    
-                for( var ii=0 , ll = pointList.length ; ii < ll ; ii++ ){
+                //从中心圆绘制朝外的射线
+                for( var ii=0 , ll = this.outerPointList.length ; ii < ll ; ii++ ){
                     var line = new Line({
                         id : "line_"+ii,
                         context : {
                             xStart : r,
                             yStart : r,
-                            xEnd   : pointList[ii][0] + r,
-                            yEnd   : pointList[ii][1] + r,
+                            xEnd   : this.outerPointList[ii][0] + r,
+                            yEnd   : this.outerPointList[ii][1] + r,
                             lineWidth   : this.lineWidth,
                             strokeStyle : this.strokeStyle
                         }
                     });
                     spt.addChild( line );
-                }
+                };
             }
         }
         return Back;
