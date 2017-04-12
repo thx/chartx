@@ -537,11 +537,11 @@ define(
                 };
             },
             _getProp: function(s) {
-                var res;
+                var res = s;
                 if (_.isFunction(s)) {
                     res = s.call( this , this );
                 }
-                if( !res ){
+                if( !s ){
                     res = "#999";
                 }
                 return res

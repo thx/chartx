@@ -7,6 +7,7 @@ define(
     function(xAxisBase , DataSection ){
         var xAxis = function( opt , data ){
             this.xDis = 0; //x方向一维均分长度
+            opt.layoutType = "proportion";
             xAxis.superclass.constructor.apply( this , arguments );
         };
         Chartx.extend( xAxis , xAxisBase , {
@@ -26,6 +27,7 @@ define(
             _trimXAxis : function( data , xGraphsWidth ){
                 var tmpData = [];
                 this.xDis  = xGraphsWidth / (data.length-1);
+
                 for (var a = 0, al  = data.length; a < al; a++ ) {
                     var o = {
                         'content' : data[a], 
@@ -164,6 +166,7 @@ define(
                 };
             },
             draw : function(data , opt){
+                
                 var self = this;
                 _.deepExtend(this , opt);
                 if( data.length == 0 ){
@@ -221,6 +224,7 @@ define(
                         if( d.value == null || d.value == undefined || d.value === "" ){
                             continue;
                         }
+
                         var circle = new Circle({
                             hoverClone : false,
                             context : {
@@ -595,8 +599,9 @@ define(
                         if( xbaseNum == undefined || xbaseNum == null ){
                             xbaseNum = this._xAxis._baseNumber = this._xAxis.dataSection[0];
                         };
-                        var x = (xArr[i][ii] - xbaseNum) / (maxXAxis - xbaseNum) * this._xAxis.w;
-    
+                        //var x = (xArr[i][ii] - xbaseNum) / (maxXAxis - xbaseNum) * this._xAxis.w;
+                        debugger
+                        var x = this._xAxis.getPosX( {val : xArr[i][ii]} );
                         tmpData[i][ii] = {
                             //value : {
                             //    x : xArr[i][ii],
