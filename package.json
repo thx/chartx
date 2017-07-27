@@ -1,0 +1,19 @@
+{
+  "name": "chartx",
+  "version": "1.0.0",
+  "description": "Data Visualization Chart Library",
+  "main": "index.js",
+  "scripts": {
+  
+  },
+  "keywords": [
+    "chart",
+    "canvas",
+    "webgl",
+    "2d",
+    "Data",
+    "Visualization"
+  ],
+  "author": "litao",
+  "license": "MIT"
+}
