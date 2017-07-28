@@ -686,7 +686,7 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
     }
 };
 
-var $$1 = {
+var $ = {
     // dom操作相关代码
     query: function query(el) {
         if (_$1.isString(el)) {
@@ -850,7 +850,7 @@ EventHandler.prototype = {
             //不再关心浏览器环境是否 'ontouchstart' in window 
             //而是直接只管传给事件模块的是一个原生dom还是 jq对象 or hammer对象等
             if (me.target.nodeType == 1) {
-                $$1.addEvent(me.target, type, function (e) {
+                $.addEvent(me.target, type, function (e) {
                     me.__mouseHandler(e);
                 });
             } else {
@@ -870,7 +870,7 @@ EventHandler.prototype = {
 
         root.updateViewOffset();
 
-        me.curPoints = [new Point($$1.pageX(e) - root.viewOffset.left, $$1.pageY(e) - root.viewOffset.top)];
+        me.curPoints = [new Point($.pageX(e) - root.viewOffset.left, $.pageY(e) - root.viewOffset.top)];
 
         //理论上来说，这里拿到point了后，就要计算这个point对应的target来push到curPointsTarget里，
         //但是因为在drag的时候其实是可以不用计算对应target的。
@@ -3878,11 +3878,10 @@ var SystemRenderer = function () {
             Utils.now = new Date().getTime();
             if (self._heartBeat) {
 
-                var _begin = new Date().getTime();
+                //var _begin = new Date().getTime();
                 self.render(this.app);
-                var _end = new Date().getTime();
-
-                $(document.body).append("<br />render：" + (_end - _begin));
+                //var _end = new Date().getTime();
+                //$(document.body).append( "<br />render："+ (_end - _begin) );
 
                 self._heartBeat = false;
                 //渲染完了，打上最新时间挫
@@ -8183,12 +8182,12 @@ var Application = function (_DisplayObjectContain) {
 
         _this._cid = new Date().getTime() + "_" + Math.floor(Math.random() * 100);
 
-        _this.el = $$1.query(opt.el);
+        _this.el = $.query(opt.el);
 
         _this.width = parseInt("width" in opt || _this.el.offsetWidth, 10);
         _this.height = parseInt("height" in opt || _this.el.offsetHeight, 10);
 
-        var viewObj = $$1.createView(_this.width, _this.height, _this._cid);
+        var viewObj = $.createView(_this.width, _this.height, _this._cid);
         _this.view = viewObj.view;
         _this.stageView = viewObj.stageView;
         _this.domView = viewObj.domView;
@@ -8196,7 +8195,7 @@ var Application = function (_DisplayObjectContain) {
         _this.el.innerHTML = "";
         _this.el.appendChild(_this.view);
 
-        _this.viewOffset = $$1.offset(_this.view);
+        _this.viewOffset = $.offset(_this.view);
         _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
         _this.webGL = opt.webGL;
@@ -8246,7 +8245,7 @@ var Application = function (_DisplayObjectContain) {
             this.view.style.width = this.width + "px";
             this.view.style.height = this.height + "px";
 
-            this.viewOffset = $$1.offset(this.view);
+            this.viewOffset = $.offset(this.view);
             this.context.$model.width = this.width;
             this.context.$model.height = this.height;
 
@@ -8303,9 +8302,9 @@ var Application = function (_DisplayObjectContain) {
     }, {
         key: "_createPixelContext",
         value: function _createPixelContext() {
-            var _pixelCanvas = $$1.query("_pixelCanvas");
+            var _pixelCanvas = $.query("_pixelCanvas");
             if (!_pixelCanvas) {
-                _pixelCanvas = $$1.createCanvas(0, 0, "_pixelCanvas");
+                _pixelCanvas = $.createCanvas(0, 0, "_pixelCanvas");
             } else {
                 //如果又的话 就不需要在创建了
                 return;
@@ -8330,7 +8329,7 @@ var Application = function (_DisplayObjectContain) {
         value: function updateViewOffset() {
             var now = new Date().getTime();
             if (now - this.lastGetRO > 1000) {
-                this.viewOffset = $$1.offset(this.view);
+                this.viewOffset = $.offset(this.view);
                 this.lastGetRO = now;
             }
         }
@@ -8340,7 +8339,7 @@ var Application = function (_DisplayObjectContain) {
             var canvas;
 
             if (!stage.canvas) {
-                canvas = $$1.createCanvas(this.context.$model.width, this.context.$model.height, stage.id);
+                canvas = $.createCanvas(this.context.$model.width, this.context.$model.height, stage.id);
             } else {
                 canvas = stage.canvas;
             }
@@ -13416,6 +13415,7 @@ var Pie$1 = function () {
         value: function _hideGrowLabel() {
             if (this.branchSp) {
                 //this.branchSp.context.globalAlpha = 0;
+                //TODO: 这里canvax有个bug，不能用上面的方法
                 underscore.each(this.branchSp.children, function (bl) {
                     bl.context.globalAlpha = 0;
                 });

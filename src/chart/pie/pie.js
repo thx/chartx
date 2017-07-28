@@ -462,6 +462,7 @@ export default class Pie
     {
         if (this.branchSp) {
             //this.branchSp.context.globalAlpha = 0;
+            //TODO: 这里canvax有个bug，不能用上面的方法
             _.each( this.branchSp.children, function(bl){
                 bl.context.globalAlpha = 0;
             } );
