@@ -60,7 +60,7 @@ export function mixinUnderscore()
         recurse = function(key) {
             return source[key] = deepExtendCouple(destination[key], source[key], maxDepth - 1);
         };
-        for (_i = 0, _len = sharedObjectKeys.length; _i < _len; _i++) {
+        for (var _i = 0, _len = sharedObjectKeys.length; _i < _len; _i++) {
             sharedObjectKey = sharedObjectKeys[_i];
             recurse(sharedObjectKey);
         }
@@ -72,7 +72,7 @@ export function mixinUnderscore()
 
             //return source[key] = _.union(destination[key], source[key]);
         };
-        for (_j = 0, _len1 = sharedArrayKeys.length; _j < _len1; _j++) {
+        for (var _j = 0, _len1 = sharedArrayKeys.length; _j < _len1; _j++) {
             sharedArrayKey = sharedArrayKeys[_j];
             combine(sharedArrayKey);
         }

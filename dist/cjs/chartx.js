@@ -1,5 +1,15 @@
 'use strict';
 
+var commonjsGlobal$1 = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+
+
+
+
+function createCommonjsModule$1(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -46,30 +56,7 @@ var createClass = function () {
 
 
 
-var get = function get(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
 
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
 
 var inherits = function (subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
@@ -1187,8 +1174,10 @@ EventHandler.prototype = {
         //这里只能直接修改_transform 。 不能用下面的修改x，y的方式。
         var _dragDuplicate = root._bufferStage.getChildById(target.id);
         _dragDuplicate._transform = target.getConcatenatedMatrix();
-        _dragDuplicate.worldTransform = null;
-        _dragDuplicate.getWorldTransform();
+
+        //worldTransform在renderer的时候计算
+        //_dragDuplicate.worldTransform = null;
+        //_dragDuplicate.setWorldTransform();
 
         //直接修改的_transform不会出发心跳上报， 渲染引擎不制动这个stage需要绘制。
         //所以要手动出发心跳包
@@ -1685,6 +1674,17 @@ Matrix.prototype = {
     }
 };
 
+var commonjsGlobal$$1 = typeof window !== 'undefined' ? window : typeof commonjsGlobal$1 !== 'undefined' ? commonjsGlobal$1 : typeof self !== 'undefined' ? self : {};
+
+
+
+
+
+function createCommonjsModule$$1(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var Tween = createCommonjsModule$$1(function (module, exports) {
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/tweenjs/tween.js
@@ -1694,83 +1694,89 @@ Matrix.prototype = {
  * Thank you all, you're awesome!
  */
 
-var TWEEN = TWEEN || function () {
 
-	var _tweens = [];
+var _Group = function () {
+	this._tweens = {};
+	this._tweensAddedDuringUpdate = {};
+};
 
-	return {
+_Group.prototype = {
+	getAll: function () {
 
-		getAll: function getAll() {
+		return Object.keys(this._tweens).map(function (tweenId) {
+			return this._tweens[tweenId];
+		}.bind(this));
 
-			return _tweens;
-		},
+	},
 
-		removeAll: function removeAll() {
+	removeAll: function () {
 
-			_tweens = [];
-		},
+		this._tweens = {};
 
-		add: function add(tween) {
+	},
 
-			_tweens.push(tween);
-		},
+	add: function (tween) {
 
-		remove: function remove(tween) {
+		this._tweens[tween.getId()] = tween;
+		this._tweensAddedDuringUpdate[tween.getId()] = tween;
 
-			var i = _$1.indexOf(_tweens, tween); //_tweens.indexOf(tween);
+	},
 
-			if (i !== -1) {
-				_tweens.splice(i, 1);
-			}
-		},
+	remove: function (tween) {
 
-		update: function update(time, preserve) {
+		delete this._tweens[tween.getId()];
+		delete this._tweensAddedDuringUpdate[tween.getId()];
 
-			if (_tweens.length === 0) {
-				return false;
-			}
+	},
 
-			var i = 0;
+	update: function (time, preserve) {
 
-			time = time !== undefined ? time : TWEEN.now();
+		var tweenIds = Object.keys(this._tweens);
 
-			while (i < _tweens.length) {
+		if (tweenIds.length === 0) {
+			return false;
+		}
 
-				/* old 
-    if (_tweens[i].update(time) || preserve) {
-    i++;
-    } else {
-    _tweens.splice(i, 1);
-    }
-    */
+		time = time !== undefined ? time : TWEEN.now();
 
-				//new code
-				//in real world, tween.update has chance to remove itself, so we have to handle this situation.
-				//in certain cases, onUpdateCallback will remove instances in _tweens, which make _tweens.splice(i, 1) fail
-				//@litao.lt@alibaba-inc.com
-				var _t = _tweens[i];
-				var _updateRes = _t.update(time);
+		// Tweens are updated in "batches". If you add a new tween during an update, then the
+		// new tween will be updated in the next batch.
+		// If you remove a tween during an update, it will normally still be updated. However,
+		// if the removed tween was added during the current batch, then it will not be updated.
+		while (tweenIds.length > 0) {
+			this._tweensAddedDuringUpdate = {};
 
-				if (!_tweens[i]) {
-					break;
-				}
-				if (_t === _tweens[i]) {
-					if (_updateRes || preserve) {
-						i++;
-					} else {
-						_tweens.splice(i, 1);
+			for (var i = 0; i < tweenIds.length; i++) {
+
+				if (this._tweens[tweenIds[i]].update(time) === false) {
+					this._tweens[tweenIds[i]]._isPlaying = false;
+
+					if (!preserve) {
+						delete this._tweens[tweenIds[i]];
 					}
 				}
 			}
 
-			return true;
+			tweenIds = Object.keys(this._tweensAddedDuringUpdate);
 		}
-	};
-}();
+
+		return true;
+
+	}
+};
+
+var TWEEN = new _Group();
+
+TWEEN.Group = _Group;
+TWEEN._nextId = 0;
+TWEEN.nextId = function () {
+	return TWEEN._nextId++;
+};
+
 
 // Include a performance.now polyfill.
 // In node.js, use process.hrtime.
-if (typeof window === 'undefined' && typeof process !== 'undefined') {
+if (typeof (window) === 'undefined' && typeof (process) !== 'undefined') {
 	TWEEN.now = function () {
 		var time = process.hrtime();
 
@@ -1779,236 +1785,270 @@ if (typeof window === 'undefined' && typeof process !== 'undefined') {
 	};
 }
 // In a browser, use window.performance.now if it is available.
-else if (typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined) {
-		// This must be bound, because directly assigning this function
-		// leads to an invocation exception in Chrome.
-		TWEEN.now = window.performance.now.bind(window.performance);
-	}
-	// Use Date.now if it is available.
-	else if (Date.now !== undefined) {
-			TWEEN.now = Date.now;
-		}
-		// Otherwise, use 'new Date().getTime()'.
-		else {
-				TWEEN.now = function () {
-					return new Date().getTime();
-				};
-			}
+else if (typeof (window) !== 'undefined' &&
+         window.performance !== undefined &&
+		 window.performance.now !== undefined) {
+	// This must be bound, because directly assigning this function
+	// leads to an invocation exception in Chrome.
+	TWEEN.now = window.performance.now.bind(window.performance);
+}
+// Use Date.now if it is available.
+else if (Date.now !== undefined) {
+	TWEEN.now = Date.now;
+}
+// Otherwise, use 'new Date().getTime()'.
+else {
+	TWEEN.now = function () {
+		return new Date().getTime();
+	};
+}
 
-TWEEN.Tween = function (object) {
 
-	var _object = object;
-	var _valuesStart = {};
-	var _valuesEnd = {};
-	var _valuesStartRepeat = {};
-	var _duration = 1000;
-	var _repeat = 0;
-	var _repeatDelayTime;
-	var _yoyo = false;
-	var _isPlaying = false;
-	var _reversed = false;
-	var _delayTime = 0;
-	var _startTime = null;
-	var _easingFunction = TWEEN.Easing.Linear.None;
-	var _interpolationFunction = TWEEN.Interpolation.Linear;
-	var _chainedTweens = [];
-	var _onStartCallback = null;
-	var _onStartCallbackFired = false;
-	var _onUpdateCallback = null;
-	var _onCompleteCallback = null;
-	var _onStopCallback = null;
+TWEEN.Tween = function (object, group) {
+	this._object = object;
+	this._valuesStart = {};
+	this._valuesEnd = {};
+	this._valuesStartRepeat = {};
+	this._duration = 1000;
+	this._repeat = 0;
+	this._repeatDelayTime = undefined;
+	this._yoyo = false;
+	this._isPlaying = false;
+	this._reversed = false;
+	this._delayTime = 0;
+	this._startTime = null;
+	this._easingFunction = TWEEN.Easing.Linear.None;
+	this._interpolationFunction = TWEEN.Interpolation.Linear;
+	this._chainedTweens = [];
+	this._onStartCallback = null;
+	this._onStartCallbackFired = false;
+	this._onUpdateCallback = null;
+	this._onCompleteCallback = null;
+	this._onStopCallback = null;
+	this._group = group || TWEEN;
+	this._id = TWEEN.nextId();
 
-	this.to = function (properties, duration) {
+};
 
-		_valuesEnd = properties;
+TWEEN.Tween.prototype = {
+	getId: function getId() {
+		return this._id;
+	},
+
+	isPlaying: function isPlaying() {
+		return this._isPlaying;
+	},
+
+	to: function to(properties, duration) {
+
+		this._valuesEnd = properties;
 
 		if (duration !== undefined) {
-			_duration = duration;
+			this._duration = duration;
 		}
 
 		return this;
-	};
 
-	this.start = function (time) {
+	},
 
-		TWEEN.add(this);
+	start: function start(time) {
 
-		_isPlaying = true;
+		this._group.add(this);
 
-		_onStartCallbackFired = false;
+		this._isPlaying = true;
 
-		_startTime = time !== undefined ? time : TWEEN.now();
-		_startTime += _delayTime;
+		this._onStartCallbackFired = false;
 
-		for (var property in _valuesEnd) {
+		this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
+		this._startTime += this._delayTime;
+
+		for (var property in this._valuesEnd) {
 
 			// Check if an Array was provided as property value
-			if (_valuesEnd[property] instanceof Array) {
+			if (this._valuesEnd[property] instanceof Array) {
 
-				if (_valuesEnd[property].length === 0) {
+				if (this._valuesEnd[property].length === 0) {
 					continue;
 				}
 
 				// Create a local copy of the Array with the start value at the front
-				_valuesEnd[property] = [_object[property]].concat(_valuesEnd[property]);
+				this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+
 			}
 
 			// If `to()` specifies a property that doesn't exist in the source object,
 			// we should not set that property in the object
-			if (_object[property] === undefined) {
+			if (this._object[property] === undefined) {
 				continue;
 			}
 
 			// Save the starting value.
-			_valuesStart[property] = _object[property];
+			this._valuesStart[property] = this._object[property];
 
-			if (_valuesStart[property] instanceof Array === false) {
-				_valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+			if ((this._valuesStart[property] instanceof Array) === false) {
+				this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
 			}
 
-			_valuesStartRepeat[property] = _valuesStart[property] || 0;
+			this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+
 		}
 
 		return this;
-	};
 
-	this.stop = function () {
+	},
 
-		if (!_isPlaying) {
+	stop: function stop() {
+
+		if (!this._isPlaying) {
 			return this;
 		}
 
-		TWEEN.remove(this);
-		_isPlaying = false;
+		this._group.remove(this);
+		this._isPlaying = false;
 
-		if (_onStopCallback !== null) {
-			_onStopCallback.call(_object, _object);
+		if (this._onStopCallback !== null) {
+			this._onStopCallback(this._object);
 		}
 
 		this.stopChainedTweens();
 		return this;
-	};
 
-	this.end = function () {
+	},
 
-		this.update(_startTime + _duration);
+	end: function end() {
+
+		this.update(this._startTime + this._duration);
 		return this;
-	};
 
-	this.stopChainedTweens = function () {
+	},
 
-		for (var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++) {
-			_chainedTweens[i].stop();
+	stopChainedTweens: function stopChainedTweens() {
+
+		for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+			this._chainedTweens[i].stop();
 		}
-	};
 
-	this.delay = function (amount) {
+	},
 
-		_delayTime = amount;
+	delay: function delay(amount) {
+
+		this._delayTime = amount;
 		return this;
-	};
 
-	this.repeat = function (times) {
+	},
 
-		_repeat = times;
+	repeat: function repeat(times) {
+
+		this._repeat = times;
 		return this;
-	};
 
-	this.repeatDelay = function (amount) {
+	},
 
-		_repeatDelayTime = amount;
+	repeatDelay: function repeatDelay(amount) {
+
+		this._repeatDelayTime = amount;
 		return this;
-	};
 
-	this.yoyo = function (yoyo) {
+	},
 
-		_yoyo = yoyo;
+	yoyo: function yoyo(yoyo) {
+
+		this._yoyo = yoyo;
 		return this;
-	};
 
-	this.easing = function (easing) {
+	},
 
-		_easingFunction = easing;
+	easing: function easing(easing) {
+
+		this._easingFunction = easing;
 		return this;
-	};
 
-	this.interpolation = function (interpolation) {
+	},
 
-		_interpolationFunction = interpolation;
+	interpolation: function interpolation(interpolation) {
+
+		this._interpolationFunction = interpolation;
 		return this;
-	};
 
-	this.chain = function () {
+	},
 
-		_chainedTweens = arguments;
+	chain: function chain() {
+
+		this._chainedTweens = arguments;
 		return this;
-	};
 
-	this.onStart = function (callback) {
+	},
 
-		_onStartCallback = callback;
+	onStart: function onStart(callback) {
+
+		this._onStartCallback = callback;
 		return this;
-	};
 
-	this.onUpdate = function (callback) {
+	},
 
-		_onUpdateCallback = callback;
+	onUpdate: function onUpdate(callback) {
+
+		this._onUpdateCallback = callback;
 		return this;
-	};
 
-	this.onComplete = function (callback) {
+	},
 
-		_onCompleteCallback = callback;
+	onComplete: function onComplete(callback) {
+
+		this._onCompleteCallback = callback;
 		return this;
-	};
 
-	this.onStop = function (callback) {
+	},
 
-		_onStopCallback = callback;
+	onStop: function onStop(callback) {
+
+		this._onStopCallback = callback;
 		return this;
-	};
 
-	this.update = function (time) {
+	},
+
+	update: function update(time) {
 
 		var property;
 		var elapsed;
 		var value;
 
-		if (time < _startTime) {
+		if (time < this._startTime) {
 			return true;
 		}
 
-		if (_onStartCallbackFired === false) {
+		if (this._onStartCallbackFired === false) {
 
-			if (_onStartCallback !== null) {
-				_onStartCallback.call(_object, _object);
+			if (this._onStartCallback !== null) {
+				this._onStartCallback(this._object);
 			}
 
-			_onStartCallbackFired = true;
+			this._onStartCallbackFired = true;
 		}
 
-		elapsed = (time - _startTime) / _duration;
+		elapsed = (time - this._startTime) / this._duration;
 		elapsed = elapsed > 1 ? 1 : elapsed;
 
-		value = _easingFunction(elapsed);
+		value = this._easingFunction(elapsed);
 
-		for (property in _valuesEnd) {
+		for (property in this._valuesEnd) {
 
 			// Don't update properties that do not exist in the source object
-			if (_valuesStart[property] === undefined) {
+			if (this._valuesStart[property] === undefined) {
 				continue;
 			}
 
-			var start = _valuesStart[property] || 0;
-			var end = _valuesEnd[property];
+			var start = this._valuesStart[property] || 0;
+			var end = this._valuesEnd[property];
 
 			if (end instanceof Array) {
 
-				_object[property] = _interpolationFunction(end, value);
+				this._object[property] = this._interpolationFunction(end, value);
+
 			} else {
 
 				// Parses relative end values with start as base (e.g.: +10, -3)
-				if (typeof end === 'string') {
+				if (typeof (end) === 'string') {
 
 					if (end.charAt(0) === '+' || end.charAt(0) === '-') {
 						end = start + parseFloat(end);
@@ -2018,208 +2058,234 @@ TWEEN.Tween = function (object) {
 				}
 
 				// Protect against non numeric properties.
-				if (typeof end === 'number') {
-					_object[property] = start + (end - start) * value;
+				if (typeof (end) === 'number') {
+					this._object[property] = start + (end - start) * value;
 				}
+
 			}
+
 		}
 
-		if (_onUpdateCallback !== null) {
-			_onUpdateCallback.call(_object, value);
+		if (this._onUpdateCallback !== null) {
+			this._onUpdateCallback(this._object);
 		}
 
 		if (elapsed === 1) {
 
-			if (_repeat > 0) {
+			if (this._repeat > 0) {
 
-				if (isFinite(_repeat)) {
-					_repeat--;
+				if (isFinite(this._repeat)) {
+					this._repeat--;
 				}
 
 				// Reassign starting values, restart by making startTime = now
-				for (property in _valuesStartRepeat) {
+				for (property in this._valuesStartRepeat) {
 
-					if (typeof _valuesEnd[property] === 'string') {
-						_valuesStartRepeat[property] = _valuesStartRepeat[property] + parseFloat(_valuesEnd[property]);
+					if (typeof (this._valuesEnd[property]) === 'string') {
+						this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
 					}
 
-					if (_yoyo) {
-						var tmp = _valuesStartRepeat[property];
+					if (this._yoyo) {
+						var tmp = this._valuesStartRepeat[property];
 
-						_valuesStartRepeat[property] = _valuesEnd[property];
-						_valuesEnd[property] = tmp;
+						this._valuesStartRepeat[property] = this._valuesEnd[property];
+						this._valuesEnd[property] = tmp;
 					}
 
-					_valuesStart[property] = _valuesStartRepeat[property];
+					this._valuesStart[property] = this._valuesStartRepeat[property];
+
 				}
 
-				if (_yoyo) {
-					_reversed = !_reversed;
+				if (this._yoyo) {
+					this._reversed = !this._reversed;
 				}
 
-				if (_repeatDelayTime !== undefined) {
-					_startTime = time + _repeatDelayTime;
+				if (this._repeatDelayTime !== undefined) {
+					this._startTime = time + this._repeatDelayTime;
 				} else {
-					_startTime = time + _delayTime;
+					this._startTime = time + this._delayTime;
 				}
 
 				return true;
+
 			} else {
 
-				if (_onCompleteCallback !== null) {
+				if (this._onCompleteCallback !== null) {
 
-					_onCompleteCallback.call(_object, _object);
+					this._onCompleteCallback(this._object);
 				}
 
-				for (var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++) {
+				for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
 					// Make the chained tweens start exactly at the time they should,
 					// even if the `update()` method was called way past the duration of the tween
-					_chainedTweens[i].start(_startTime + _duration);
+					this._chainedTweens[i].start(this._startTime + this._duration);
 				}
 
 				return false;
+
 			}
+
 		}
 
 		return true;
-	};
+
+	}
 };
+
 
 TWEEN.Easing = {
 
 	Linear: {
 
-		None: function None(k) {
+		None: function (k) {
 
 			return k;
+
 		}
 
 	},
 
 	Quadratic: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return k * k;
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
 			return k * (2 - k);
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if ((k *= 2) < 1) {
 				return 0.5 * k * k;
 			}
 
-			return -0.5 * (--k * (k - 2) - 1);
+			return - 0.5 * (--k * (k - 2) - 1);
+
 		}
 
 	},
 
 	Cubic: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return k * k * k;
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
 			return --k * k * k + 1;
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if ((k *= 2) < 1) {
 				return 0.5 * k * k * k;
 			}
 
 			return 0.5 * ((k -= 2) * k * k + 2);
+
 		}
 
 	},
 
 	Quartic: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return k * k * k * k;
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
-			return 1 - --k * k * k * k;
+			return 1 - (--k * k * k * k);
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if ((k *= 2) < 1) {
 				return 0.5 * k * k * k * k;
 			}
 
-			return -0.5 * ((k -= 2) * k * k * k - 2);
+			return - 0.5 * ((k -= 2) * k * k * k - 2);
+
 		}
 
 	},
 
 	Quintic: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return k * k * k * k * k;
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
 			return --k * k * k * k * k + 1;
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if ((k *= 2) < 1) {
 				return 0.5 * k * k * k * k * k;
 			}
 
 			return 0.5 * ((k -= 2) * k * k * k * k + 2);
+
 		}
 
 	},
 
 	Sinusoidal: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return 1 - Math.cos(k * Math.PI / 2);
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
 			return Math.sin(k * Math.PI / 2);
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			return 0.5 * (1 - Math.cos(Math.PI * k));
+
 		}
 
 	},
 
 	Exponential: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return k === 0 ? 0 : Math.pow(1024, k - 1);
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
-			return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+			return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if (k === 0) {
 				return 0;
@@ -2233,37 +2299,41 @@ TWEEN.Easing = {
 				return 0.5 * Math.pow(1024, k - 1);
 			}
 
-			return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+			return 0.5 * (- Math.pow(2, - 10 * (k - 1)) + 2);
+
 		}
 
 	},
 
 	Circular: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return 1 - Math.sqrt(1 - k * k);
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
-			return Math.sqrt(1 - --k * k);
+			return Math.sqrt(1 - (--k * k));
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if ((k *= 2) < 1) {
-				return -0.5 * (Math.sqrt(1 - k * k) - 1);
+				return - 0.5 * (Math.sqrt(1 - k * k) - 1);
 			}
 
 			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+
 		}
 
 	},
 
 	Elastic: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			if (k === 0) {
 				return 0;
@@ -2274,9 +2344,10 @@ TWEEN.Easing = {
 			}
 
 			return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
 			if (k === 0) {
 				return 0;
@@ -2287,9 +2358,10 @@ TWEEN.Easing = {
 			}
 
 			return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if (k === 0) {
 				return 0;
@@ -2306,27 +2378,30 @@ TWEEN.Easing = {
 			}
 
 			return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+
 		}
 
 	},
 
 	Back: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			var s = 1.70158;
 
 			return k * k * ((s + 1) * k - s);
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
 			var s = 1.70158;
 
 			return --k * k * ((s + 1) * k + s) + 1;
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			var s = 1.70158 * 1.525;
 
@@ -2335,37 +2410,41 @@ TWEEN.Easing = {
 			}
 
 			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+
 		}
 
 	},
 
 	Bounce: {
 
-		In: function In(k) {
+		In: function (k) {
 
 			return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+
 		},
 
-		Out: function Out(k) {
+		Out: function (k) {
 
-			if (k < 1 / 2.75) {
+			if (k < (1 / 2.75)) {
 				return 7.5625 * k * k;
-			} else if (k < 2 / 2.75) {
-				return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
-			} else if (k < 2.5 / 2.75) {
-				return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+			} else if (k < (2 / 2.75)) {
+				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+			} else if (k < (2.5 / 2.75)) {
+				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
 			} else {
-				return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
 			}
+
 		},
 
-		InOut: function InOut(k) {
+		InOut: function (k) {
 
 			if (k < 0.5) {
 				return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
 			}
 
 			return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+
 		}
 
 	}
@@ -2374,7 +2453,7 @@ TWEEN.Easing = {
 
 TWEEN.Interpolation = {
 
-	Linear: function Linear(v, k) {
+	Linear: function (v, k) {
 
 		var m = v.length - 1;
 		var f = m * k;
@@ -2390,9 +2469,10 @@ TWEEN.Interpolation = {
 		}
 
 		return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+
 	},
 
-	Bezier: function Bezier(v, k) {
+	Bezier: function (v, k) {
 
 		var b = 0;
 		var n = v.length - 1;
@@ -2404,9 +2484,10 @@ TWEEN.Interpolation = {
 		}
 
 		return b;
+
 	},
 
-	CatmullRom: function CatmullRom(v, k) {
+	CatmullRom: function (v, k) {
 
 		var m = v.length - 1;
 		var f = m * k;
@@ -2420,6 +2501,7 @@ TWEEN.Interpolation = {
 			}
 
 			return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+
 		} else {
 
 			if (k < 0) {
@@ -2431,24 +2513,28 @@ TWEEN.Interpolation = {
 			}
 
 			return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+
 		}
+
 	},
 
 	Utils: {
 
-		Linear: function Linear(p0, p1, t) {
+		Linear: function (p0, p1, t) {
 
 			return (p1 - p0) * t + p0;
+
 		},
 
-		Bernstein: function Bernstein(n, i) {
+		Bernstein: function (n, i) {
 
 			var fc = TWEEN.Interpolation.Utils.Factorial;
 
 			return fc(n) / fc(i) / fc(n - i);
+
 		},
 
-		Factorial: function () {
+		Factorial: (function () {
 
 			var a = [1];
 
@@ -2466,22 +2552,45 @@ TWEEN.Interpolation = {
 
 				a[n] = s;
 				return s;
-			};
-		}(),
 
-		CatmullRom: function CatmullRom(p0, p1, p2, p3, t) {
+			};
+
+		})(),
+
+		CatmullRom: function (p0, p1, p2, p3, t) {
 
 			var v0 = (p2 - p0) * 0.5;
 			var v1 = (p3 - p1) * 0.5;
 			var t2 = t * t;
 			var t3 = t * t2;
 
-			return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+			return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (- 3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+
 		}
 
 	}
 
 };
+
+// UMD (Universal Module Definition)
+(function (root) {
+
+	if (typeof undefined === 'function' && undefined.amd) {
+
+		// AMD
+		undefined([], function () {
+			return TWEEN;
+		});
+
+	} else {
+
+		// Node.js
+		module.exports = TWEEN;
+
+	}
+
+})(commonjsGlobal$$1);
+});
 
 /**
  * 设置 AnimationFrame begin
@@ -2518,7 +2627,7 @@ function enabledAnimationFrame() {
         _requestAid = requestAnimationFrame(function () {
             //console.log("frame__" + _taskList.length);
             //if ( Tween.getAll().length ) {
-            TWEEN.update(); //tween自己会做length判断
+            Tween.update(); //tween自己会做length判断
             //};
             var currTaskList = _taskList;
             _taskList = [];
@@ -2602,7 +2711,7 @@ function registTween(options) {
                 });
             };
 
-            tween = new TWEEN.Tween(opt.from).to(opt.to, opt.duration).onStart(function () {
+            tween = new Tween.Tween(opt.from).to(opt.to, opt.duration).onStart(function () {
                 opt.onStart.apply(this);
             }).onUpdate(function () {
                 opt.onUpdate.apply(this);
@@ -2618,7 +2727,7 @@ function registTween(options) {
                 });
                 tween._isStoped = true;
                 opt.onStop.apply(this, [this]);
-            }).repeat(opt.repeat).delay(opt.delay).easing(TWEEN.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
+            }).repeat(opt.repeat).delay(opt.delay).easing(Tween.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
 
             tween.id = tid;
             tween.start();
@@ -2649,14 +2758,11 @@ var AnimationFrame = {
  *
  * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
  *
- * 属性工厂，ie下面用VBS提供支持
+ * 把canvax元素的context实现监听属性改动
  * 来给整个引擎提供心跳包的触发机制
  */
 
 function Observe(scope) {
-
-    //scope.$model = scope;
-    //return scope;
 
     var stopRepeatAssign = true;
 
@@ -2664,26 +2770,26 @@ function Observe(scope) {
         //要返回的对象
     accessores = {},
         //内部用于转换的对象
-    _VBPublics = ["$skipArray", "$watch", "$model"],
+    _Publics = ["$watch", "$model"],
         //公共属性，不需要get set 化的
     model = {}; //这是pmodel上的$model属性
 
-    var VBPublics = _VBPublics.concat(scope.$skipArray || []);
+    var Publics = _Publics;
 
     function loop(name, val) {
-        if (_$1.indexOf(_VBPublics, name) === -1) {
-            //非_VBPublics中的值，都要先设置好对应的val到model上
+        if (_$1.indexOf(_Publics, name) === -1) {
+            //非 _Publics 中的值，都要先设置好对应的val到model上
             model[name] = val;
         }
 
         var valueType = typeof val === "undefined" ? "undefined" : _typeof(val);
 
-        if (_$1.indexOf(VBPublics, name) > -1) {
+        if (_$1.indexOf(Publics, name) > -1) {
             return;
         }
 
         if (valueType === "function") {
-            VBPublics.push(name); //函数无需要转换，也可以做为公共属性存在
+            Publics.push(name); //函数无需要转换，也可以做为公共属性存在
         } else {
             var accessor = function accessor(neo) {
                 //创建监控属性或数组，自变量，由用户触发其改变
@@ -2731,6 +2837,7 @@ function Observe(scope) {
                     if (value && valueType === "object" && !(value instanceof Array) && !value.$model && !value.addColorStop) {
 
                         value = Observe(value, value);
+                        value.$watch = pmodel.$watch;
                         //accessor.value = value;
                         model[name] = value;
                     }
@@ -2751,9 +2858,9 @@ function Observe(scope) {
         loop(i, scope[i]);
     }
 
-    pmodel = defineProperties(pmodel, accessores, VBPublics); //生成一个空的ViewModel
+    pmodel = defineProperties(pmodel, accessores, Publics); //生成一个空的ViewModel
 
-    _$1.forEach(VBPublics, function (name) {
+    _$1.forEach(Publics, function (name) {
         if (scope[name]) {
             //然后为函数等不被监控的属性赋值
             if (typeof scope[name] == "function") {
@@ -2776,6 +2883,7 @@ function Observe(scope) {
 
     return pmodel;
 }
+
 var defineProperty$1 = Object.defineProperty;
 //如果浏览器不支持ecma262v5的Object.defineProperties或者存在BUG，比如IE8
 //标准浏览器使用__defineGetter__, __defineSetter__实现
@@ -2808,54 +2916,6 @@ try {
         };
     }
 }
-//IE6-8使用VBScript类的set get语句实现
-if (!defineProperties && window.VBArray) {
-    (function () {
-        var VBMediator = function VBMediator(description, name, value) {
-            var fn = description[name] && description[name].set;
-            if (arguments.length === 3) {
-                fn(value);
-            } else {
-                return fn();
-            }
-        };
-
-        window.execScript(["Function parseVB(code)", "\tExecuteGlobal(code)", "End Function"].join("\n"), "VBScript");
-
-        
-        defineProperties = function defineProperties(publics, description, array) {
-            publics = array.slice(0);
-            publics.push("hasOwnProperty");
-            var className = "VBClass" + setTimeout("1"),
-                owner = {},
-                buffer = [];
-            buffer.push("Class " + className, "\tPrivate [__data__], [__proxy__]", "\tPublic Default Function [__const__](d, p)", "\t\tSet [__data__] = d: set [__proxy__] = p", "\t\tSet [__const__] = Me", //链式调用
-            "\tEnd Function");
-            _$1.forEach(publics, function (name) {
-                //添加公共属性,如果此时不加以后就没机会了
-                if (owner[name] !== true) {
-                    owner[name] = true; //因为VBScript对象不能像JS那样随意增删属性
-                    buffer.push("\tPublic [" + name + "]"); //你可以预先放到  skipArray 中
-                }
-            });
-            for (var name in description) {
-                owner[name] = true;
-                buffer.push(
-                //由于不知对方会传入什么,因此set, let都用上
-                "\tPublic Property Let [" + name + "](val)", //setter
-                "\t\tCall [__proxy__]([__data__], \"" + name + "\", val)", "\tEnd Property", "\tPublic Property Set [" + name + "](val)", //setter
-                "\t\tCall [__proxy__]([__data__], \"" + name + "\", val)", "\tEnd Property", "\tPublic Property Get [" + name + "]", //getter
-                "\tOn Error Resume Next", //必须优先使用set语句,否则它会误将数组当字符串返回
-                "\t\tSet[" + name + "] = [__proxy__]([__data__],\"" + name + "\")", "\tIf Err.Number <> 0 Then", "\t\t[" + name + "] = [__proxy__]([__data__],\"" + name + "\")", "\tEnd If", "\tOn Error Goto 0", "\tEnd Property");
-            }
-            buffer.push("End Class"); //类定义完毕
-            buffer.push("Function " + className + "Factory(a, b)", //创建实例并传入两个关键的参数
-            "\tDim o", "\tSet o = (New " + className + ")(a, b)", "\tSet " + className + "Factory = o", "End Function");
-            window.parseVB(buffer.join("\r\n")); //先创建一个VB类工厂
-            return window[className + "Factory"](description, VBMediator); //得到其产品
-        };
-    })();
-}
 
 var RENDERER_TYPE = {
     UNKNOWN: 0,
@@ -2863,15 +2923,7 @@ var RENDERER_TYPE = {
     CANVAS: 2
 };
 
-var DRAW_MODES = {
-    POINTS: 0,
-    LINES: 1,
-    LINE_LOOP: 2,
-    LINE_STRIP: 3,
-    TRIANGLES: 4,
-    TRIANGLE_STRIP: 5,
-    TRIANGLE_FAN: 6
-};
+
 
 var SHAPES = {
     POLY: 0,
@@ -2889,6 +2941,7 @@ var SHAPES = {
 var TRANSFORM_PROPS = ["x", "y", "scaleX", "scaleY", "rotation", "scaleOrigin", "rotateOrigin"];
 
 //所有和样式相关的属性
+//appha 有 自己的 处理方式
 var STYLE_PROPS = ["lineWidth", "lineAlpha", "strokeStyle", "fillStyle", "fillAlpha", "globalAlpha"];
 
 /**
@@ -2950,7 +3003,9 @@ var DisplayObject = function (_EventDispatcher) {
         var _this = possibleConstructorReturn(this, (DisplayObject.__proto__ || Object.getPrototypeOf(DisplayObject)).call(this, opt));
 
         _this._transform = null;
-        _this.worldTransform = null; //webgl 渲染器中专用
+        _this.worldTransform = null;
+        //_transform如果有修改，则_transformChange为true，renderer的时候worldTransform
+        _this._transformChange = false;
 
         //心跳次数
         _this._heartBeatNum = 0;
@@ -3041,17 +3096,7 @@ var DisplayObject = function (_EventDispatcher) {
 
                 if (_$1.indexOf(TRANSFORM_PROPS, name) > -1) {
                     obj._updateTransform();
-
-                    //stage本身就是世界坐标，所以其worldTransform不需要动态修改
-                    if (obj.parent && obj.type != "stage" && obj.parent.worldTransform) {
-                        obj.worldTransform = null;
-                        //只有parent有worldTransform，就可以算出自己对应的世界坐标
-                        obj.getWorldTransform();
-                        if (obj.children) {
-                            //如果自己还有子元素，那么子元素的世界坐标也都要对应的调整
-                            obj.updateChildWorldTransform();
-                        }
-                    }
+                    obj._transformChange = true;
                 }
 
                 if (obj._notWatch) {
@@ -3355,15 +3400,14 @@ var DisplayObject = function (_EventDispatcher) {
         //世界坐标是从上而下的，所以只要和parent的直接坐标相乘就好了
 
     }, {
-        key: "getWorldTransform",
-        value: function getWorldTransform() {
-            var cm;
-            if (!this.worldTransform) {
-                cm = new Matrix();
-                cm.concat(this._transform);
-                cm.concat(this.parent.worldTransform);
-                this.worldTransform = cm;
-            }
+        key: "setWorldTransform",
+        value: function setWorldTransform() {
+            //if( !this.worldTransform ){
+            var cm = new Matrix();
+            cm.concat(this._transform);
+            cm.concat(this.parent.worldTransform);
+            this.worldTransform = cm;
+            //};
             return this.worldTransform;
         }
 
@@ -3440,15 +3484,41 @@ var DisplayObject = function (_EventDispatcher) {
 
     }, {
         key: "animate",
-        value: function animate(toContent, options) {
+        value: function animate(toContent, options, context) {
+
+            if (!context) {
+                context = this.context;
+            }
+
             var to = toContent;
-            var from = {};
+            var from = null;
             for (var p in to) {
-                if (isNaN(to[p]) && to[p] !== '' && to[p] !== null && to[p] !== undefined) {
+                if (_$1.isObject(to[p])) {
+
+                    //options必须传递一份copy出去，比如到下一个animate
+                    this.animate(to[p], _$1.extend({}, options), context[p]);
+                    //如果是个object
                     continue;
                 }
-                from[p] = this.context[p];
+                if (isNaN(to[p]) && to[p] !== '' && to[p] !== null && to[p] !== undefined) {
+                    delete to[p];
+                    continue;
+                }
+                if (!from) {
+                    from = {};
+                }
+                from[p] = context[p];
             }
+
+            if (!from) {
+                //这里很重要，不能删除。 
+                //比如line.animate({start:{x:0,y:0}} , {duration:500});
+                //那么递归到start的时候  from 的值依然为null
+                //如果这个时候继续执行的话，会有很严重的bug
+                //line.context.start 会 被赋值了 line对象上的所有属性，严重的bug
+                return;
+            }
+
             !options && (options = {});
             options.from = from;
             options.to = to;
@@ -3461,13 +3531,13 @@ var DisplayObject = function (_EventDispatcher) {
             var tween;
             options.onUpdate = function () {
                 //如果context不存在说明该obj已经被destroy了，那么要把他的tween给destroy
-                if (!self.context && tween) {
+                if (!context && tween) {
                     AnimationFrame.destroyTween(tween);
                     tween = null;
                     return;
                 }
                 for (var p in this) {
-                    self.context[p] = this[p];
+                    context[p] = this[p];
                 }
                 upFun.apply(self, [this]);
             };
@@ -3570,11 +3640,6 @@ var DisplayObjectContainer = function (_DisplayObject) {
 
             if (this._afterAddChild) {
                 this._afterAddChild(child);
-            }
-
-            if (this.worldTransform) {
-                //如果过自己已经有了世界坐标了，那么要把新添加进来的所有节点包括其子节点都设置好世界坐标
-                this.updateChildWorldTransform();
             }
 
             return child;
@@ -3735,19 +3800,6 @@ var DisplayObjectContainer = function (_DisplayObject) {
                 }
             }
             return result;
-        }
-
-        //更新所有子节点的世界坐标
-
-    }, {
-        key: "updateChildWorldTransform",
-        value: function updateChildWorldTransform() {
-            _$1.each(this.children, function (obj) {
-                obj.getWorldTransform();
-                if (obj.children) {
-                    obj.updateChildWorldTransform();
-                }
-            });
         }
     }]);
     return DisplayObjectContainer;
@@ -3993,16 +4045,10 @@ var CanvasGraphicsRenderer = function () {
 
     createClass(CanvasGraphicsRenderer, [{
         key: 'render',
-        value: function render(displayObject, stage) {
+        value: function render(displayObject, stage, globalAlpha) {
             var renderer = this.renderer;
             var graphicsData = displayObject.graphics.graphicsData;
             var ctx = stage.ctx;
-            var $MC = displayObject.context.$model;
-            var $PMC = displayObject.parent.context.$model;
-
-            if (displayObject.parent) {
-                $MC.globalAlpha *= $PMC.globalAlpha;
-            }
 
             for (var i = 0; i < graphicsData.length; i++) {
                 var data = graphicsData[i];
@@ -4022,23 +4068,23 @@ var CanvasGraphicsRenderer = function () {
                     this.renderPolygon(shape.points, shape.closed, ctx);
 
                     if (fill) {
-                        ctx.globalAlpha = data.fillAlpha;
+                        ctx.globalAlpha = data.fillAlpha * globalAlpha;
                         ctx.fillStyle = fillStyle;
                         ctx.fill();
                     }
                     if (line) {
-                        ctx.globalAlpha = data.lineAlpha;
+                        ctx.globalAlpha = data.lineAlpha * globalAlpha;
                         ctx.strokeStyle = strokeStyle;
                         ctx.stroke();
                     }
                 } else if (data.type === SHAPES.RECT) {
                     if (fill) {
-                        ctx.globalAlpha = data.fillAlpha;
+                        ctx.globalAlpha = data.fillAlpha * globalAlpha;
                         ctx.fillStyle = fillStyle;
                         ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
                     }
                     if (line) {
-                        ctx.globalAlpha = data.lineAlpha;
+                        ctx.globalAlpha = data.lineAlpha * globalAlpha;
                         ctx.strokeStyle = strokeStyle;
                         ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
                     }
@@ -4050,12 +4096,12 @@ var CanvasGraphicsRenderer = function () {
                     ctx.closePath();
 
                     if (fill) {
-                        ctx.globalAlpha = data.fillAlpha;
+                        ctx.globalAlpha = data.fillAlpha * globalAlpha;
                         ctx.fillStyle = fillStyle;
                         ctx.fill();
                     }
                     if (line) {
-                        ctx.globalAlpha = data.lineAlpha;
+                        ctx.globalAlpha = data.lineAlpha * globalAlpha;
                         ctx.strokeStyle = strokeStyle;
                         ctx.stroke();
                     }
@@ -4085,12 +4131,12 @@ var CanvasGraphicsRenderer = function () {
                     ctx.closePath();
 
                     if (fill) {
-                        ctx.globalAlpha = data.fillAlpha;
+                        ctx.globalAlpha = data.fillAlpha * globalAlpha;
                         ctx.fillStyle = fillStyle;
                         ctx.fill();
                     }
                     if (line) {
-                        ctx.globalAlpha = data.lineAlpha;
+                        ctx.globalAlpha = data.lineAlpha * globalAlpha;
                         ctx.strokeStyle = strokeStyle;
                         ctx.stroke();
                     }
@@ -4144,22 +4190,36 @@ var CanvasRenderer = function (_SystemRenderer) {
                 stage.ctx = stage.canvas.getContext("2d");
             }
             stage.stageRending = true;
+            stage.setWorldTransform();
             this._clear(stage);
             this._render(stage);
             stage.stageRending = false;
         }
     }, {
         key: '_render',
-        value: function _render(stage, displayObject) {
+        value: function _render(stage, displayObject, globalAlpha) {
             if (!displayObject) {
                 displayObject = stage;
+            }
+            if (!globalAlpha) {
+                globalAlpha = 1;
+            }
+
+            var $MC = displayObject.context.$model;
+
+            if (!displayObject.worldTransform || displayObject._transformChange || displayObject.parent._transformChange) {
+                displayObject.setWorldTransform();
+                displayObject._transformChange = true;
+            }
+
+            globalAlpha *= $MC.globalAlpha;
+
+            if (!$MC.visible || globalAlpha <= 0) {
+                return;
             }
 
             //因为已经采用了setTransform了， 非shape元素已经不需要执行transform 和 render
             if (displayObject.graphics) {
-                if (!displayObject.context.$model.visible || displayObject.context.$model.globalAlpha <= 0) {
-                    return;
-                }
 
                 var ctx = stage.ctx;
 
@@ -4171,7 +4231,7 @@ var CanvasRenderer = function (_SystemRenderer) {
                     displayObject._draw(displayObject.graphics); //_draw会完成绘制准备好 graphicsData
                 }
 
-                this.CGR.render(displayObject, stage, this);
+                this.CGR.render(displayObject, stage, globalAlpha);
             }
 
             if (displayObject.type == "text") {
@@ -4183,9 +4243,11 @@ var CanvasRenderer = function (_SystemRenderer) {
 
             if (displayObject.children) {
                 for (var i = 0, len = displayObject.children.length; i < len; i++) {
-                    this._render(stage, displayObject.children[i]);
+                    this._render(stage, displayObject.children[i], globalAlpha);
                 }
             }
+
+            displayObject._transformChange = false;
         }
     }, {
         key: '_clear',
@@ -4198,3957 +4260,17 @@ var CanvasRenderer = function (_SystemRenderer) {
     return CanvasRenderer;
 }(SystemRenderer);
 
-var arcToSegmentsCache = {};
-var segmentToBezierCache = {};
-var boundsOfCurveCache = {};
-var _join = Array.prototype.join;
-
-/* Adapted from http://dxr.mozilla.org/mozilla-central/source/content/svg/content/src/nsSVGPathDataParser.cpp
- * by Andrea Bogazzi code is under MPL. if you don't have a copy of the license you can take it here
- * http://mozilla.org/MPL/2.0/
- */
-function arcToSegments(toX, toY, rx, ry, large, sweep, rotateX) {
-  var argsString = _join.call(arguments);
-  if (arcToSegmentsCache[argsString]) {
-    return arcToSegmentsCache[argsString];
-  }
-
-  var PI = Math.PI,
-      th = rotateX * PI / 180,
-      sinTh = Math.sin(th),
-      cosTh = Math.cos(th),
-      fromX = 0,
-      fromY = 0;
-
-  rx = Math.abs(rx);
-  ry = Math.abs(ry);
-
-  var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
-      py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
-      rx2 = rx * rx,
-      ry2 = ry * ry,
-      py2 = py * py,
-      px2 = px * px,
-      pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
-      root = 0;
-
-  if (pl < 0) {
-    var s = Math.sqrt(1 - pl / (rx2 * ry2));
-    rx *= s;
-    ry *= s;
-  } else {
-    root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
-  }
-
-  var cx = root * rx * py / ry,
-      cy = -root * ry * px / rx,
-      cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
-      cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
-      mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
-      dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
-
-  if (sweep === 0 && dtheta > 0) {
-    dtheta -= 2 * PI;
-  } else if (sweep === 1 && dtheta < 0) {
-    dtheta += 2 * PI;
-  }
-
-  // Convert into cubic bezier segments <= 90deg
-  var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
-      result = [],
-      mDelta = dtheta / segments,
-      mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
-      th3 = mTheta + mDelta;
-
-  for (var i = 0; i < segments; i++) {
-    result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
-    fromX = result[i][4];
-    fromY = result[i][5];
-    mTheta = th3;
-    th3 += mDelta;
-  }
-  arcToSegmentsCache[argsString] = result;
-  return result;
-}
-
-function segmentToBezier(th2, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY) {
-  var argsString2 = _join.call(arguments);
-  if (segmentToBezierCache[argsString2]) {
-    return segmentToBezierCache[argsString2];
-  }
-
-  var costh2 = Math.cos(th2),
-      sinth2 = Math.sin(th2),
-      costh3 = Math.cos(th3),
-      sinth3 = Math.sin(th3),
-      toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
-      toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
-      cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
-      cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
-      cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
-      cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
-
-  segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
-  return segmentToBezierCache[argsString2];
-}
-
-/*
- * Private
- */
-function calcVectorAngle(ux, uy, vx, vy) {
-  var ta = Math.atan2(uy, ux),
-      tb = Math.atan2(vy, vx);
-  if (tb >= ta) {
-    return tb - ta;
-  } else {
-    return 2 * Math.PI - (ta - tb);
-  }
-}
-
-/**
- * Draws arc
- * @param {graphics} graphics
- * @param {Number} fx
- * @param {Number} fy
- * @param {Array} coords
- */
-var drawArc = function drawArc(graphics, fx, fy, coords) {
-  var rx = coords[0],
-      ry = coords[1],
-      rot = coords[2],
-      large = coords[3],
-      sweep = coords[4],
-      tx = coords[5],
-      ty = coords[6],
-      segs = [[], [], [], []],
-      segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
-
-  for (var i = 0, len = segsNorm.length; i < len; i++) {
-    segs[i][0] = segsNorm[i][0] + fx;
-    segs[i][1] = segsNorm[i][1] + fy;
-    segs[i][2] = segsNorm[i][2] + fx;
-    segs[i][3] = segsNorm[i][3] + fy;
-    segs[i][4] = segsNorm[i][4] + fx;
-    segs[i][5] = segsNorm[i][5] + fy;
-    graphics.bezierCurveTo.apply(graphics, segs[i]);
-  }
-};
-
-/**
- * Calculate bounding box of a elliptic-arc
- * @param {Number} fx start point of arc
- * @param {Number} fy
- * @param {Number} rx horizontal radius
- * @param {Number} ry vertical radius
- * @param {Number} rot angle of horizontal axe
- * @param {Number} large 1 or 0, whatever the arc is the big or the small on the 2 points
- * @param {Number} sweep 1 or 0, 1 clockwise or counterclockwise direction
- * @param {Number} tx end point of arc
- * @param {Number} ty
- */
-var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, tx, ty) {
-
-  var fromX = 0,
-      fromY = 0,
-      bound,
-      bounds = [],
-      segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
-
-  for (var i = 0, len = segs.length; i < len; i++) {
-    bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
-    bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
-    bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
-    fromX = segs[i][4];
-    fromY = segs[i][5];
-  }
-  return bounds;
-};
-
-/**
- * Calculate bounding box of a beziercurve
- * @param {Number} x0 starting point
- * @param {Number} y0
- * @param {Number} x1 first control point
- * @param {Number} y1
- * @param {Number} x2 secondo control point
- * @param {Number} y2
- * @param {Number} x3 end of beizer
- * @param {Number} y3
- */
-// taken from http://jsbin.com/ivomiq/56/edit  no credits available for that.
-function getBoundsOfCurve(x0, y0, x1, y1, x2, y2, x3, y3) {
-  var argsString = _join.call(arguments);
-  if (boundsOfCurveCache[argsString]) {
-    return boundsOfCurveCache[argsString];
-  }
-
-  var sqrt = Math.sqrt,
-      min = Math.min,
-      max = Math.max,
-      abs = Math.abs,
-      tvalues = [],
-      bounds = [[], []],
-      a,
-      b,
-      c,
-      t,
-      t1,
-      t2,
-      b2ac,
-      sqrtb2ac;
-
-  b = 6 * x0 - 12 * x1 + 6 * x2;
-  a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
-  c = 3 * x1 - 3 * x0;
-
-  for (var i = 0; i < 2; ++i) {
-    if (i > 0) {
-      b = 6 * y0 - 12 * y1 + 6 * y2;
-      a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
-      c = 3 * y1 - 3 * y0;
-    }
-
-    if (abs(a) < 1e-12) {
-      if (abs(b) < 1e-12) {
-        continue;
-      }
-      t = -c / b;
-      if (0 < t && t < 1) {
-        tvalues.push(t);
-      }
-      continue;
-    }
-    b2ac = b * b - 4 * c * a;
-    if (b2ac < 0) {
-      continue;
-    }
-    sqrtb2ac = sqrt(b2ac);
-    t1 = (-b + sqrtb2ac) / (2 * a);
-    if (0 < t1 && t1 < 1) {
-      tvalues.push(t1);
-    }
-    t2 = (-b - sqrtb2ac) / (2 * a);
-    if (0 < t2 && t2 < 1) {
-      tvalues.push(t2);
-    }
-  }
-
-  var x,
-      y,
-      j = tvalues.length,
-      jlen = j,
-      mt;
-  while (j--) {
-    t = tvalues[j];
-    mt = 1 - t;
-    x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
-    bounds[0][j] = x;
-
-    y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
-    bounds[1][j] = y;
-  }
-
-  bounds[0][jlen] = x0;
-  bounds[1][jlen] = y0;
-  bounds[0][jlen + 1] = x3;
-  bounds[1][jlen + 1] = y3;
-  var result = [{
-    x: min.apply(null, bounds[0]),
-    y: min.apply(null, bounds[1])
-  }, {
-    x: max.apply(null, bounds[0]),
-    y: max.apply(null, bounds[1])
-  }];
-  boundsOfCurveCache[argsString] = result;
-  return result;
-}
-
-var Arc = {
-  drawArc: drawArc,
-  getBoundsOfCurve: getBoundsOfCurve,
-  getBoundsOfArc: getBoundsOfArc
-};
-
-var Rectangle = function () {
-    function Rectangle() {
-        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-        classCallCheck(this, Rectangle);
-
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.type = SHAPES.RECT;
-    }
-
-    createClass(Rectangle, [{
-        key: 'clone',
-        value: function clone() {
-            return new Rectangle(this.x, this.y, this.width, this.height);
-        }
-    }, {
-        key: 'copy',
-        value: function copy(rectangle) {
-            this.x = rectangle.x;
-            this.y = rectangle.y;
-            this.width = rectangle.width;
-            this.height = rectangle.height;
-
-            return this;
-        }
-    }, {
-        key: 'contains',
-        value: function contains(x, y) {
-            if (this.width <= 0 || this.height <= 0) {
-                return false;
-            }
-
-            if (x >= this.x && x < this.x + this.width) {
-                if (y >= this.y && y < this.y + this.height) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }]);
-    return Rectangle;
-}();
-
-var Circle = function () {
-    function Circle() {
-        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        var radius = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        classCallCheck(this, Circle);
-
-        this.x = x;
-
-        this.y = y;
-
-        this.radius = radius;
-
-        this.type = SHAPES.CIRC;
-
-        this.closed = true;
-    }
-
-    createClass(Circle, [{
-        key: 'clone',
-        value: function clone() {
-            return new Circle(this.x, this.y, this.radius);
-        }
-    }, {
-        key: 'contains',
-        value: function contains(x, y) {
-            if (this.radius <= 0) {
-                return false;
-            }
-
-            var r2 = this.radius * this.radius;
-            var dx = this.x - x;
-            var dy = this.y - y;
-
-            dx *= dx;
-            dy *= dy;
-
-            return dx + dy <= r2;
-        }
-    }, {
-        key: 'getBounds',
-        value: function getBounds() {
-            return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-        }
-    }]);
-    return Circle;
-}();
-
-var Ellipse = function () {
-    function Ellipse() {
-        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-        var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-        classCallCheck(this, Ellipse);
-
-        this.x = x;
-
-        this.y = y;
-
-        this.width = width;
-
-        this.height = height;
-
-        this.type = SHAPES.ELIP;
-
-        this.closed = true;
-    }
-
-    createClass(Ellipse, [{
-        key: 'clone',
-        value: function clone() {
-            return new Ellipse(this.x, this.y, this.width, this.height);
-        }
-    }, {
-        key: 'contains',
-        value: function contains(x, y) {
-            if (this.width <= 0 || this.height <= 0) {
-                return false;
-            }
-
-            var normx = (x - this.x) / this.width;
-            var normy = (y - this.y) / this.height;
-
-            normx *= normx;
-            normy *= normy;
-
-            return normx + normy <= 1;
-        }
-    }, {
-        key: 'getBounds',
-        value: function getBounds() {
-            return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
-        }
-    }]);
-    return Ellipse;
-}();
-
-var Polygon = function () {
-    function Polygon() {
-        for (var _len = arguments.length, points = Array(_len), _key = 0; _key < _len; _key++) {
-            points[_key] = arguments[_key];
-        }
-
-        classCallCheck(this, Polygon);
-
-        var point_0 = points[0];
-        if (Array.isArray(point_0)) {
-            points = point_0;
-        }
-
-        if (point_0 && "x" in point_0 && "y" in point_0) {
-            var p = [];
-
-            for (var i = 0, il = points.length; i < il; i++) {
-                p.push(points[i].x, points[i].y);
-            }
-
-            points = p;
-        }
-
-        this.closed = true;
-
-        this.points = points;
-
-        this.type = SHAPES.POLY;
-    }
-
-    createClass(Polygon, [{
-        key: "clone",
-        value: function clone() {
-            return new Polygon(this.points.slice());
-        }
-    }, {
-        key: "close",
-        value: function close() {
-            var points = this.points;
-            if (points[0] !== points[points.length - 2] || points[1] !== points[points.length - 1]) {
-                points.push(points[0], points[1]);
-            }
-            this.closed = true;
-        }
-    }, {
-        key: "contains",
-        value: function contains(x, y) {
-            return this._isInsidePolygon_WindingNumber(x, y);
-        }
-
-        /**
-         * 多边形包含判断 Nonzero Winding Number Rule
-         */
-
-    }, {
-        key: "_isInsidePolygon_WindingNumber",
-        value: function _isInsidePolygon_WindingNumber(x, y) {
-            var points = this.points;
-            var wn = 0;
-            for (var shiftP, shift = points[1] > y, i = 3; i < points.length; i += 2) {
-                shiftP = shift;
-                shift = points[i] > y;
-                if (shiftP != shift) {
-                    var n = (shiftP ? 1 : 0) - (shift ? 1 : 0);
-                    if (n * ((points[i - 3] - x) * (points[i - 0] - y) - (points[i - 2] - y) * (points[i - 1] - x)) > 0) {
-                        wn += n;
-                    }
-                }
-            }
-            return wn;
-        }
-    }]);
-    return Polygon;
-}();
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-/**
- * Helper class to create a webGL Context
- *
- * @class
- * @memberof PIXI.glCore
- * @param canvas {HTMLCanvasElement} the canvas element that we will get the context from
- * @param options {Object} An options object that gets passed in to the canvas element containing the context attributes,
- *                         see https://developer.mozilla.org/en/docs/Web/API/HTMLCanvasElement/getContext for the options available
- * @return {WebGLRenderingContext} the WebGL context
- */
-var createContext = function(canvas, options)
-{
-    var gl = canvas.getContext('webgl', options) || 
-         canvas.getContext('experimental-webgl', options);
-
-    if (!gl)
-    {
-        // fail, not able to get a context
-        throw new Error('This browser does not support webGL. Try using the canvas renderer');
-    }
-
-    return gl;
-};
-
-var createContext_1 = createContext;
-
-// var GL_MAP = {};
-
-/**
- * @param gl {WebGLRenderingContext} The current WebGL context
- * @param attribs {*}
- * @param state {*}
- */
-var setVertexAttribArrays = function (gl, attribs, state)
-{
-    var i;
-    if(state)
-    {
-        var tempAttribState = state.tempAttribState,
-            attribState = state.attribState;
-
-        for (i = 0; i < tempAttribState.length; i++)
-        {
-            tempAttribState[i] = false;
-        }
-
-        // set the new attribs
-        for (i = 0; i < attribs.length; i++)
-        {
-            tempAttribState[attribs[i].attribute.location] = true;
-        }
-
-        for (i = 0; i < attribState.length; i++)
-        {
-            if (attribState[i] !== tempAttribState[i])
-            {
-                attribState[i] = tempAttribState[i];
-
-                if (state.attribState[i])
-                {
-                    gl.enableVertexAttribArray(i);
-                }
-                else
-                {
-                    gl.disableVertexAttribArray(i);
-                }
-            }
-        }
-
-    }
-    else
-    {
-        for (i = 0; i < attribs.length; i++)
-        {
-            var attrib = attribs[i];
-            gl.enableVertexAttribArray(attrib.attribute.location);
-        }
-    }
-};
-
-var setVertexAttribArrays_1 = setVertexAttribArrays;
-
-var EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
-
-/**
- * Helper class to create a webGL buffer
- *
- * @class
- * @memberof PIXI.glCore
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param type {gl.ARRAY_BUFFER | gl.ELEMENT_ARRAY_BUFFER} @mat
- * @param data {ArrayBuffer| SharedArrayBuffer|ArrayBufferView} an array of data
- * @param drawType {gl.STATIC_DRAW|gl.DYNAMIC_DRAW|gl.STREAM_DRAW}
- */
-var Buffer = function(gl, type, data, drawType)
-{
-
-	/**
-     * The current WebGL rendering context
-     *
-     * @member {WebGLRenderingContext}
-     */
-	this.gl = gl;
-
-	/**
-     * The WebGL buffer, created upon instantiation
-     *
-     * @member {WebGLBuffer}
-     */
-	this.buffer = gl.createBuffer();
-
-	/**
-     * The type of the buffer
-     *
-     * @member {gl.ARRAY_BUFFER|gl.ELEMENT_ARRAY_BUFFER}
-     */
-	this.type = type || gl.ARRAY_BUFFER;
-
-	/**
-     * The draw type of the buffer
-     *
-     * @member {gl.STATIC_DRAW|gl.DYNAMIC_DRAW|gl.STREAM_DRAW}
-     */
-	this.drawType = drawType || gl.STATIC_DRAW;
-
-	/**
-     * The data in the buffer, as a typed array
-     *
-     * @member {ArrayBuffer| SharedArrayBuffer|ArrayBufferView}
-     */
-	this.data = EMPTY_ARRAY_BUFFER;
-
-	if(data)
-	{
-		this.upload(data);
-	}
-
-	this._updateID = 0;
-};
-
-/**
- * Uploads the buffer to the GPU
- * @param data {ArrayBuffer| SharedArrayBuffer|ArrayBufferView} an array of data to upload
- * @param offset {Number} if only a subset of the data should be uploaded, this is the amount of data to subtract
- * @param dontBind {Boolean} whether to bind the buffer before uploading it
- */
-Buffer.prototype.upload = function(data, offset, dontBind)
-{
-	// todo - needed?
-	if(!dontBind) this.bind();
-
-	var gl = this.gl;
-
-	data = data || this.data;
-	offset = offset || 0;
-
-	if(this.data.byteLength >= data.byteLength)
-	{
-		gl.bufferSubData(this.type, offset, data);
-	}
-	else
-	{
-		gl.bufferData(this.type, data, this.drawType);
-	}
-
-	this.data = data;
-};
-/**
- * Binds the buffer
- *
- */
-Buffer.prototype.bind = function()
-{
-	var gl = this.gl;
-	gl.bindBuffer(this.type, this.buffer);
-};
-
-Buffer.createVertexBuffer = function(gl, data, drawType)
-{
-	return new Buffer(gl, gl.ARRAY_BUFFER, data, drawType);
-};
-
-Buffer.createIndexBuffer = function(gl, data, drawType)
-{
-	return new Buffer(gl, gl.ELEMENT_ARRAY_BUFFER, data, drawType);
-};
-
-Buffer.create = function(gl, type, data, drawType)
-{
-	return new Buffer(gl, type, data, drawType);
-};
-
-/**
- * Destroys the buffer
- *
- */
-Buffer.prototype.destroy = function(){
-	this.gl.deleteBuffer(this.buffer);
-};
-
-var GLBuffer = Buffer;
-
-/**
- * Helper class to create a WebGL Texture
- *
- * @class
- * @memberof PIXI.glCore
- * @param gl {WebGLRenderingContext} The current WebGL context
- * @param width {number} the width of the texture
- * @param height {number} the height of the texture
- * @param format {number} the pixel format of the texture. defaults to gl.RGBA
- * @param type {number} the gl type of the texture. defaults to gl.UNSIGNED_BYTE
- */
-var Texture = function(gl, width, height, format, type)
-{
-	/**
-	 * The current WebGL rendering context
-	 *
-	 * @member {WebGLRenderingContext}
-	 */
-	this.gl = gl;
-
-
-	/**
-	 * The WebGL texture
-	 *
-	 * @member {WebGLTexture}
-	 */
-	this.texture = gl.createTexture();
-
-	/**
-	 * If mipmapping was used for this texture, enable and disable with enableMipmap()
-	 *
-	 * @member {Boolean}
-	 */
-	// some settings..
-	this.mipmap = false;
-
-
-	/**
-	 * Set to true to enable pre-multiplied alpha
-	 *
-	 * @member {Boolean}
-	 */
-	this.premultiplyAlpha = false;
-
-	/**
-	 * The width of texture
-	 *
-	 * @member {Number}
-	 */
-	this.width = width || -1;
-	/**
-	 * The height of texture
-	 *
-	 * @member {Number}
-	 */
-	this.height = height || -1;
-
-	/**
-	 * The pixel format of the texture. defaults to gl.RGBA
-	 *
-	 * @member {Number}
-	 */
-	this.format = format || gl.RGBA;
-
-	/**
-	 * The gl type of the texture. defaults to gl.UNSIGNED_BYTE
-	 *
-	 * @member {Number}
-	 */
-	this.type = type || gl.UNSIGNED_BYTE;
-
-
-};
-
-/**
- * Uploads this texture to the GPU
- * @param source {HTMLImageElement|ImageData|HTMLVideoElement} the source image of the texture
- */
-Texture.prototype.upload = function(source)
-{
-	this.bind();
-
-	var gl = this.gl;
-
-
-	gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
-
-	var newWidth = source.videoWidth || source.width;
-	var newHeight = source.videoHeight || source.height;
-
-	if(newHeight !== this.height || newWidth !== this.width)
-	{
-		gl.texImage2D(gl.TEXTURE_2D, 0, this.format, this.format, this.type, source);
-	}
-	else
-	{
-    	gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this.format, this.type, source);
-	}
-
-	// if the source is a video, we need to use the videoWidth / videoHeight properties as width / height will be incorrect.
-	this.width = newWidth;
-	this.height = newHeight;
-
-};
-
-var FLOATING_POINT_AVAILABLE = false;
-
-/**
- * Use a data source and uploads this texture to the GPU
- * @param data {TypedArray} the data to upload to the texture
- * @param width {number} the new width of the texture
- * @param height {number} the new height of the texture
- */
-Texture.prototype.uploadData = function(data, width, height)
-{
-	this.bind();
-
-	var gl = this.gl;
-
-
-	if(data instanceof Float32Array)
-	{
-		if(!FLOATING_POINT_AVAILABLE)
-		{
-			var ext = gl.getExtension("OES_texture_float");
-
-			if(ext)
-			{
-				FLOATING_POINT_AVAILABLE = true;
-			}
-			else
-			{
-				throw new Error('floating point textures not available');
-			}
-		}
-
-		this.type = gl.FLOAT;
-	}
-	else
-	{
-		// TODO support for other types
-		this.type = this.type || gl.UNSIGNED_BYTE;
-	}
-
-	// what type of data?
-	gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
-
-
-	if(width !== this.width || height !== this.height)
-	{
-		gl.texImage2D(gl.TEXTURE_2D, 0, this.format,  width, height, 0, this.format, this.type, data || null);
-	}
-	else
-	{
-		gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, width, height, this.format, this.type, data || null);
-	}
-
-	this.width = width;
-	this.height = height;
-
-
-//	texSubImage2D
-};
-
-/**
- * Binds the texture
- * @param  location
- */
-Texture.prototype.bind = function(location)
-{
-	var gl = this.gl;
-
-	if(location !== undefined)
-	{
-		gl.activeTexture(gl.TEXTURE0 + location);
-	}
-
-	gl.bindTexture(gl.TEXTURE_2D, this.texture);
-};
-
-/**
- * Unbinds the texture
- */
-Texture.prototype.unbind = function()
-{
-	var gl = this.gl;
-	gl.bindTexture(gl.TEXTURE_2D, null);
-};
-
-/**
- * @param linear {Boolean} if we want to use linear filtering or nearest neighbour interpolation
- */
-Texture.prototype.minFilter = function( linear )
-{
-	var gl = this.gl;
-
-	this.bind();
-
-	if(this.mipmap)
-	{
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, linear ? gl.LINEAR_MIPMAP_LINEAR : gl.NEAREST_MIPMAP_NEAREST);
-	}
-	else
-	{
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, linear ? gl.LINEAR : gl.NEAREST);
-	}
-};
-
-/**
- * @param linear {Boolean} if we want to use linear filtering or nearest neighbour interpolation
- */
-Texture.prototype.magFilter = function( linear )
-{
-	var gl = this.gl;
-
-	this.bind();
-
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, linear ? gl.LINEAR : gl.NEAREST);
-};
-
-/**
- * Enables mipmapping
- */
-Texture.prototype.enableMipmap = function()
-{
-	var gl = this.gl;
-
-	this.bind();
-
-	this.mipmap = true;
-
-	gl.generateMipmap(gl.TEXTURE_2D);
-};
-
-/**
- * Enables linear filtering
- */
-Texture.prototype.enableLinearScaling = function()
-{
-	this.minFilter(true);
-	this.magFilter(true);
-};
-
-/**
- * Enables nearest neighbour interpolation
- */
-Texture.prototype.enableNearestScaling = function()
-{
-	this.minFilter(false);
-	this.magFilter(false);
-};
-
-/**
- * Enables clamping on the texture so WebGL will not repeat it
- */
-Texture.prototype.enableWrapClamp = function()
-{
-	var gl = this.gl;
-
-	this.bind();
-
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-};
-
-/**
- * Enable tiling on the texture
- */
-Texture.prototype.enableWrapRepeat = function()
-{
-	var gl = this.gl;
-
-	this.bind();
-
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-};
-
-Texture.prototype.enableWrapMirrorRepeat = function()
-{
-	var gl = this.gl;
-
-	this.bind();
-
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-};
-
-
-/**
- * Destroys this texture
- */
-Texture.prototype.destroy = function()
-{
-	var gl = this.gl;
-	//TODO
-	gl.deleteTexture(this.texture);
-};
-
-/**
- * @static
- * @param gl {WebGLRenderingContext} The current WebGL context
- * @param source {HTMLImageElement|ImageData} the source image of the texture
- * @param premultiplyAlpha {Boolean} If we want to use pre-multiplied alpha
- */
-Texture.fromSource = function(gl, source, premultiplyAlpha)
-{
-	var texture = new Texture(gl);
-	texture.premultiplyAlpha = premultiplyAlpha || false;
-	texture.upload(source);
-
-	return texture;
-};
-
-/**
- * @static
- * @param gl {WebGLRenderingContext} The current WebGL context
- * @param data {TypedArray} the data to upload to the texture
- * @param width {number} the new width of the texture
- * @param height {number} the new height of the texture
- */
-Texture.fromData = function(gl, data, width, height)
-{
-	//console.log(data, width, height);
-	var texture = new Texture(gl);
-	texture.uploadData(data, width, height);
-
-	return texture;
-};
-
-
-var GLTexture = Texture;
-
-/**
- * Helper class to create a webGL Framebuffer
- *
- * @class
- * @memberof PIXI.glCore
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param width {Number} the width of the drawing area of the frame buffer
- * @param height {Number} the height of the drawing area of the frame buffer
- */
-var Framebuffer = function(gl, width, height)
-{
-    /**
-     * The current WebGL rendering context
-     *
-     * @member {WebGLRenderingContext}
-     */
-    this.gl = gl;
-
-    /**
-     * The frame buffer
-     *
-     * @member {WebGLFramebuffer}
-     */
-    this.framebuffer = gl.createFramebuffer();
-
-    /**
-     * The stencil buffer
-     *
-     * @member {WebGLRenderbuffer}
-     */
-    this.stencil = null;
-
-    /**
-     * The stencil buffer
-     *
-     * @member {PIXI.glCore.GLTexture}
-     */
-    this.texture = null;
-
-    /**
-     * The width of the drawing area of the buffer
-     *
-     * @member {Number}
-     */
-    this.width = width || 100;
-    /**
-     * The height of the drawing area of the buffer
-     *
-     * @member {Number}
-     */
-    this.height = height || 100;
-};
-
-/**
- * Adds a texture to the frame buffer
- * @param texture {PIXI.glCore.GLTexture}
- */
-Framebuffer.prototype.enableTexture = function(texture)
-{
-    var gl = this.gl;
-
-    this.texture = texture || new GLTexture(gl);
-
-    this.texture.bind();
-
-    //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,  this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
-    this.bind();
-
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.texture, 0);
-};
-
-/**
- * Initialises the stencil buffer
- */
-Framebuffer.prototype.enableStencil = function()
-{
-    if(this.stencil)return;
-
-    var gl = this.gl;
-
-    this.stencil = gl.createRenderbuffer();
-
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.stencil);
-
-    // TODO.. this is depth AND stencil?
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, this.stencil);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL,  this.width  , this.height );
-
-
-};
-
-/**
- * Erases the drawing area and fills it with a colour
- * @param  r {Number} the red value of the clearing colour
- * @param  g {Number} the green value of the clearing colour
- * @param  b {Number} the blue value of the clearing colour
- * @param  a {Number} the alpha value of the clearing colour
- */
-Framebuffer.prototype.clear = function( r, g, b, a )
-{
-    this.bind();
-
-    var gl = this.gl;
-
-    gl.clearColor(r, g, b, a);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-};
-
-/**
- * Binds the frame buffer to the WebGL context
- */
-Framebuffer.prototype.bind = function()
-{
-    var gl = this.gl;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer );
-};
-
-/**
- * Unbinds the frame buffer to the WebGL context
- */
-Framebuffer.prototype.unbind = function()
-{
-    var gl = this.gl;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null );
-};
-/**
- * Resizes the drawing area of the buffer to the given width and height
- * @param  width  {Number} the new width
- * @param  height {Number} the new height
- */
-Framebuffer.prototype.resize = function(width, height)
-{
-    var gl = this.gl;
-
-    this.width = width;
-    this.height = height;
-
-    if ( this.texture )
-    {
-        this.texture.uploadData(null, width, height);
-    }
-
-    if ( this.stencil )
-    {
-        // update the stencil buffer width and height
-        gl.bindRenderbuffer(gl.RENDERBUFFER, this.stencil);
-        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, width, height);
-    }
-};
-
-/**
- * Destroys this buffer
- */
-Framebuffer.prototype.destroy = function()
-{
-    var gl = this.gl;
-
-    //TODO
-    if(this.texture)
-    {
-        this.texture.destroy();
-    }
-
-    gl.deleteFramebuffer(this.framebuffer);
-
-    this.gl = null;
-
-    this.stencil = null;
-    this.texture = null;
-};
-
-/**
- * Creates a frame buffer with a texture containing the given data
- * @static
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param width {Number} the width of the drawing area of the frame buffer
- * @param height {Number} the height of the drawing area of the frame buffer
- * @param data {ArrayBuffer| SharedArrayBuffer|ArrayBufferView} an array of data
- */
-Framebuffer.createRGBA = function(gl, width, height, data)
-{
-    var texture = GLTexture.fromData(gl, null, width, height);
-    texture.enableNearestScaling();
-    texture.enableWrapClamp();
-
-    //now create the framebuffer object and attach the texture to it.
-    var fbo = new Framebuffer(gl, width, height);
-    fbo.enableTexture(texture);
-
-    //fbo.enableStencil(); // get this back on soon!
-
-    fbo.unbind();
-
-    return fbo;
-};
-
-/**
- * Creates a frame buffer with a texture containing the given data
- * @static
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param width {Number} the width of the drawing area of the frame buffer
- * @param height {Number} the height of the drawing area of the frame buffer
- * @param data {ArrayBuffer| SharedArrayBuffer|ArrayBufferView} an array of data
- */
-Framebuffer.createFloat32 = function(gl, width, height, data)
-{
-    // create a new texture..
-    var texture = new GLTexture.fromData(gl, data, width, height);
-    texture.enableNearestScaling();
-    texture.enableWrapClamp();
-
-    //now create the framebuffer object and attach the texture to it.
-    var fbo = new Framebuffer(gl, width, height);
-    fbo.enableTexture(texture);
-
-    fbo.unbind();
-
-    return fbo;
-};
-
-var GLFramebuffer$1 = Framebuffer;
-
-/**
- * @class
- * @memberof PIXI.glCore.shader
- * @param gl {WebGLRenderingContext} The current WebGL context {WebGLProgram}
- * @param vertexSrc {string|string[]} The vertex shader source as an array of strings.
- * @param fragmentSrc {string|string[]} The fragment shader source as an array of strings.
- * @param attributeLocations {Object} An attribute location map that lets you manually set the attribute locations
- * @return {WebGLProgram} the shader program
- */
-var compileProgram = function(gl, vertexSrc, fragmentSrc, attributeLocations)
-{
-    var glVertShader = compileShader(gl, gl.VERTEX_SHADER, vertexSrc);
-    var glFragShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
-
-    var program = gl.createProgram();
-
-    gl.attachShader(program, glVertShader);
-    gl.attachShader(program, glFragShader);
-
-    // optionally, set the attributes manually for the program rather than letting WebGL decide..
-    if(attributeLocations)
-    {
-        for(var i in attributeLocations)
-        {
-            gl.bindAttribLocation(program, attributeLocations[i], i);
-        }
-    }
-
-
-    gl.linkProgram(program);
-
-    // if linking fails, then log and cleanup
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-    {
-        console.error('Pixi.js Error: Could not initialize shader.');
-        console.error('gl.VALIDATE_STATUS', gl.getProgramParameter(program, gl.VALIDATE_STATUS));
-        console.error('gl.getError()', gl.getError());
-
-        // if there is a program info log, log it
-        if (gl.getProgramInfoLog(program) !== '')
-        {
-            console.warn('Pixi.js Warning: gl.getProgramInfoLog()', gl.getProgramInfoLog(program));
-        }
-
-        gl.deleteProgram(program);
-        program = null;
-    }
-
-    // clean up some shaders
-    gl.deleteShader(glVertShader);
-    gl.deleteShader(glFragShader);
-
-    return program;
-};
-
-/**
- * @private
- * @param gl {WebGLRenderingContext} The current WebGL context {WebGLProgram}
- * @param type {Number} the type, can be either VERTEX_SHADER or FRAGMENT_SHADER
- * @param vertexSrc {string|string[]} The vertex shader source as an array of strings.
- * @return {WebGLShader} the shader
- */
-var compileShader = function (gl, type, src)
-{
-    var shader = gl.createShader(type);
-
-    gl.shaderSource(shader, src);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-    {
-        console.log(gl.getShaderInfoLog(shader));
-        return null;
-    }
-
-    return shader;
-};
-
-var compileProgram_1 = compileProgram;
-
-var mapSize = function(gl, type) 
-{
-    if(!GL_TABLE) 
-    {
-        var typeNames = Object.keys(GL_TO_GLSL_TYPES);
-
-        GL_TABLE = {};
-
-        for(var i = 0; i < typeNames.length; ++i) 
-        {
-            var tn = typeNames[i];
-            GL_TABLE[ gl[tn] ] = GL_TO_GLSL_TYPES[tn];
-        }
-    }
-
-  return GL_TABLE[type];
-};
-
-var GL_TABLE = null;
-
-var GL_TO_GLSL_TYPES = {
-  'FLOAT':       'float',
-  'FLOAT_VEC2':  'vec2',
-  'FLOAT_VEC3':  'vec3',
-  'FLOAT_VEC4':  'vec4',
-
-  'INT':         'int',
-  'INT_VEC2':    'ivec2',
-  'INT_VEC3':    'ivec3',
-  'INT_VEC4':    'ivec4',
-  
-  'BOOL':        'bool',
-  'BOOL_VEC2':   'bvec2',
-  'BOOL_VEC3':   'bvec3',
-  'BOOL_VEC4':   'bvec4',
-  
-  'FLOAT_MAT2':  'mat2',
-  'FLOAT_MAT3':  'mat3',
-  'FLOAT_MAT4':  'mat4',
-  
-  'SAMPLER_2D':  'sampler2D'  
-};
-
-var mapType = mapSize;
-
-/**
- * @class
- * @memberof PIXI.glCore.shader
- * @param type {String}
- * @return {Number}
- */
-var mapSize$1 = function(type) 
-{ 
-    return GLSL_TO_SIZE[type];
-};
-
-
-var GLSL_TO_SIZE = {
-    'float':    1,
-    'vec2':     2,
-    'vec3':     3,
-    'vec4':     4,
-
-    'int':      1,
-    'ivec2':    2,
-    'ivec3':    3,
-    'ivec4':    4,
-
-    'bool':     1,
-    'bvec2':    2,
-    'bvec3':    3,
-    'bvec4':    4,
-
-    'mat2':     4,
-    'mat3':     9,
-    'mat4':     16,
-
-    'sampler2D':  1
-};
-
-var mapSize_1 = mapSize$1;
-
-/**
- * Extracts the attributes
- * @class
- * @memberof PIXI.glCore.shader
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param program {WebGLProgram} The shader program to get the attributes from
- * @return attributes {Object}
- */
-var extractAttributes = function(gl, program)
-{
-    var attributes = {};
-
-    var totalAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-
-    for (var i = 0; i < totalAttributes; i++)
-    {
-        var attribData = gl.getActiveAttrib(program, i);
-        var type = mapType(gl, attribData.type);
-
-        attributes[attribData.name] = {
-            type:type,
-            size:mapSize_1(type),
-            location:gl.getAttribLocation(program, attribData.name),
-            //TODO - make an attribute object
-            pointer: pointer
-        };
-    }
-
-    return attributes;
-};
-
-var pointer = function(type, normalized, stride, start){
-    // console.log(this.location)
-    gl.vertexAttribPointer(this.location,this.size, type || gl.FLOAT, normalized || false, stride || 0, start || 0);
-};
-
-var extractAttributes_1 = extractAttributes;
-
-/**
- * @class
- * @memberof PIXI.glCore.shader
- * @param type {String} Type of value
- * @param size {Number}
- */
-var defaultValue = function(type, size) 
-{
-    switch (type)
-    {
-        case 'float':
-            return 0;
-
-        case 'vec2': 
-            return new Float32Array(2 * size);
-
-        case 'vec3':
-            return new Float32Array(3 * size);
-
-        case 'vec4':     
-            return new Float32Array(4 * size);
-            
-        case 'int':
-        case 'sampler2D':
-            return 0;
-
-        case 'ivec2':   
-            return new Int32Array(2 * size);
-
-        case 'ivec3':
-            return new Int32Array(3 * size);
-
-        case 'ivec4': 
-            return new Int32Array(4 * size);
-
-        case 'bool':     
-            return false;
-
-        case 'bvec2':
-
-            return booleanArray( 2 * size);
-
-        case 'bvec3':
-            return booleanArray(3 * size);
-
-        case 'bvec4':
-            return booleanArray(4 * size);
-
-        case 'mat2':
-            return new Float32Array([1, 0,
-                                     0, 1]);
-
-        case 'mat3': 
-            return new Float32Array([1, 0, 0,
-                                     0, 1, 0,
-                                     0, 0, 1]);
-
-        case 'mat4':
-            return new Float32Array([1, 0, 0, 0,
-                                     0, 1, 0, 0,
-                                     0, 0, 1, 0,
-                                     0, 0, 0, 1]);
-    }
-};
-
-var booleanArray = function(size)
-{
-    var array = new Array(size);
-
-    for (var i = 0; i < array.length; i++) 
-    {
-        array[i] = false;
-    }
-
-    return array;
-};
-
-var defaultValue_1 = defaultValue;
-
-/**
- * Extracts the uniforms
- * @class
- * @memberof PIXI.glCore.shader
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param program {WebGLProgram} The shader program to get the uniforms from
- * @return uniforms {Object}
- */
-var extractUniforms = function(gl, program)
-{
-	var uniforms = {};
-
-    var totalUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-
-    for (var i = 0; i < totalUniforms; i++)
-    {
-    	var uniformData = gl.getActiveUniform(program, i);
-    	var name = uniformData.name.replace(/\[.*?\]/, "");
-        var type = mapType(gl, uniformData.type );
-
-    	uniforms[name] = {
-    		type:type,
-    		size:uniformData.size,
-    		location:gl.getUniformLocation(program, name),
-    		value:defaultValue_1(type, uniformData.size)
-    	};
-    }
-
-	return uniforms;
-};
-
-var extractUniforms_1 = extractUniforms;
-
-/**
- * Sets the float precision on the shader. If the precision is already present this function will do nothing
- * @param {string} src       the shader source
- * @param {string} precision The float precision of the shader. Options are 'lowp', 'mediump' or 'highp'.
- *
- * @return {string} modified shader source
- */
-var setPrecision = function(src, precision)
-{
-    if(src.substring(0, 9) !== 'precision')
-    {
-        return 'precision ' + precision + ' float;\n' + src;
-    }
-
-    return src;
-};
-
-var setPrecision_1 = setPrecision;
-
-/**
- * Extracts the attributes
- * @class
- * @memberof PIXI.glCore.shader
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- * @param uniforms {Array} @mat ?
- * @return attributes {Object}
- */
-var generateUniformAccessObject = function(gl, uniformData)
-{
-    // this is the object we will be sending back.
-    // an object hierachy will be created for structs
-    var uniforms = {data:{}};
-
-    uniforms.gl = gl;
-
-    var uniformKeys= Object.keys(uniformData);
-
-    for (var i = 0; i < uniformKeys.length; i++)
-    {
-        var fullName = uniformKeys[i];
-
-        var nameTokens = fullName.split('.');
-        var name = nameTokens[nameTokens.length - 1];
-
-
-        var uniformGroup = getUniformGroup(nameTokens, uniforms);
-
-        var uniform =  uniformData[fullName];
-        uniformGroup.data[name] = uniform;
-
-        uniformGroup.gl = gl;
-
-        Object.defineProperty(uniformGroup, name, {
-            get: generateGetter(name),
-            set: generateSetter(name, uniform)
-        });
-    }
-
-    return uniforms;
-};
-
-var generateGetter = function(name)
-{
-	var template = getterTemplate.replace('%%', name);
-	return new Function(template); // jshint ignore:line
-};
-
-var generateSetter = function(name, uniform)
-{
-    var template = setterTemplate.replace(/%%/g, name);
-    var setTemplate;
-
-    if(uniform.size === 1)
-    {
-        setTemplate = GLSL_TO_SINGLE_SETTERS[uniform.type];
-    }
-    else
-    {
-        setTemplate = GLSL_TO_ARRAY_SETTERS[uniform.type];
-    }
-
-    if(setTemplate)
-    {
-        template += "\nthis.gl." + setTemplate + ";";
-    }
-
-  	return new Function('value', template); // jshint ignore:line
-};
-
-var getUniformGroup = function(nameTokens, uniform)
-{
-    var cur = uniform;
-
-    for (var i = 0; i < nameTokens.length - 1; i++)
-    {
-        var o = cur[nameTokens[i]] || {data:{}};
-        cur[nameTokens[i]] = o;
-        cur = o;
-    }
-
-    return cur;
-};
-
-var getterTemplate = [
-    'return this.data.%%.value;',
-].join('\n');
-
-var setterTemplate = [
-    'this.data.%%.value = value;',
-    'var location = this.data.%%.location;'
-].join('\n');
-
-
-var GLSL_TO_SINGLE_SETTERS = {
-
-    'float':    'uniform1f(location, value)',
-
-    'vec2':     'uniform2f(location, value[0], value[1])',
-    'vec3':     'uniform3f(location, value[0], value[1], value[2])',
-    'vec4':     'uniform4f(location, value[0], value[1], value[2], value[3])',
-
-    'int':      'uniform1i(location, value)',
-    'ivec2':    'uniform2i(location, value[0], value[1])',
-    'ivec3':    'uniform3i(location, value[0], value[1], value[2])',
-    'ivec4':    'uniform4i(location, value[0], value[1], value[2], value[3])',
-
-    'bool':     'uniform1i(location, value)',
-    'bvec2':    'uniform2i(location, value[0], value[1])',
-    'bvec3':    'uniform3i(location, value[0], value[1], value[2])',
-    'bvec4':    'uniform4i(location, value[0], value[1], value[2], value[3])',
-
-    'mat2':     'uniformMatrix2fv(location, false, value)',
-    'mat3':     'uniformMatrix3fv(location, false, value)',
-    'mat4':     'uniformMatrix4fv(location, false, value)',
-
-    'sampler2D':'uniform1i(location, value)'
-};
-
-var GLSL_TO_ARRAY_SETTERS = {
-
-    'float':    'uniform1fv(location, value)',
-
-    'vec2':     'uniform2fv(location, value)',
-    'vec3':     'uniform3fv(location, value)',
-    'vec4':     'uniform4fv(location, value)',
-
-    'int':      'uniform1iv(location, value)',
-    'ivec2':    'uniform2iv(location, value)',
-    'ivec3':    'uniform3iv(location, value)',
-    'ivec4':    'uniform4iv(location, value)',
-
-    'bool':     'uniform1iv(location, value)',
-    'bvec2':    'uniform2iv(location, value)',
-    'bvec3':    'uniform3iv(location, value)',
-    'bvec4':    'uniform4iv(location, value)',
-
-    'sampler2D':'uniform1iv(location, value)'
-};
-
-var generateUniformAccessObject_1 = generateUniformAccessObject;
-
-/**
- * Helper class to create a webGL Shader
- *
- * @class
- * @memberof PIXI.glCore
- * @param gl {WebGLRenderingContext}
- * @param vertexSrc {string|string[]} The vertex shader source as an array of strings.
- * @param fragmentSrc {string|string[]} The fragment shader source as an array of strings.
- * @param precision {precision]} The float precision of the shader. Options are 'lowp', 'mediump' or 'highp'.
- * @param attributeLocations {object} A key value pair showing which location eact attribute should sit eg {position:0, uvs:1}
- */
-var Shader = function(gl, vertexSrc, fragmentSrc, precision, attributeLocations)
-{
-	/**
-	 * The current WebGL rendering context
-	 *
-	 * @member {WebGLRenderingContext}
-	 */
-	this.gl = gl;
-
-	if(precision)
-	{
-		vertexSrc = setPrecision_1(vertexSrc, precision);
-		fragmentSrc = setPrecision_1(fragmentSrc, precision);
-	}
-
-	/**
-	 * The shader program
-	 *
-	 * @member {WebGLProgram}
-	 */
-	// First compile the program..
-	this.program = compileProgram_1(gl, vertexSrc, fragmentSrc, attributeLocations);
-
-	/**
-	 * The attributes of the shader as an object containing the following properties
-	 * {
-	 * 	type,
-	 * 	size,
-	 * 	location,
-	 * 	pointer
-	 * }
-	 * @member {Object}
-	 */
-	// next extract the attributes
-	this.attributes = extractAttributes_1(gl, this.program);
-
-    this.uniformData = extractUniforms_1(gl, this.program);
-
-	/**
-	 * The uniforms of the shader as an object containing the following properties
-	 * {
-	 * 	gl,
-	 * 	data
-	 * }
-	 * @member {Object}
-	 */
-	this.uniforms = generateUniformAccessObject_1( gl, this.uniformData );
-
-};
-/**
- * Uses this shader
- */
-Shader.prototype.bind = function()
-{
-	this.gl.useProgram(this.program);
-};
-
-/**
- * Destroys this shader
- * TODO
- */
-Shader.prototype.destroy = function()
-{
-	this.attributes = null;
-	this.uniformData = null;
-	this.uniforms = null;
-
-	var gl = this.gl;
-	gl.deleteProgram(this.program);
-};
-
-
-var GLShader = Shader;
-
-// state object//
-
-
-/**
- * Helper class to work with WebGL VertexArrayObjects (vaos)
- * Only works if WebGL extensions are enabled (they usually are)
- *
- * @class
- * @memberof PIXI.glCore
- * @param gl {WebGLRenderingContext} The current WebGL rendering context
- */
-function VertexArrayObject(gl, state)
-{
-    this.nativeVaoExtension = null;
-
-    if(!VertexArrayObject.FORCE_NATIVE)
-    {
-        this.nativeVaoExtension = gl.getExtension('OES_vertex_array_object') ||
-                                  gl.getExtension('MOZ_OES_vertex_array_object') ||
-                                  gl.getExtension('WEBKIT_OES_vertex_array_object');
-    }
-
-    this.nativeState = state;
-
-    if(this.nativeVaoExtension)
-    {
-        this.nativeVao = this.nativeVaoExtension.createVertexArrayOES();
-
-        var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-
-        // VAO - overwrite the state..
-        this.nativeState = {
-            tempAttribState: new Array(maxAttribs),
-            attribState: new Array(maxAttribs)
-        };
-    }
-
-    /**
-     * The current WebGL rendering context
-     *
-     * @member {WebGLRenderingContext}
-     */
-    this.gl = gl;
-
-    /**
-     * An array of attributes
-     *
-     * @member {Array}
-     */
-    this.attributes = [];
-
-    /**
-     * @member {PIXI.glCore.GLBuffer}
-     */
-    this.indexBuffer = null;
-
-    /**
-     * A boolean flag
-     *
-     * @member {Boolean}
-     */
-    this.dirty = false;
-}
-
-VertexArrayObject.prototype.constructor = VertexArrayObject;
-var VertexArrayObject_1 = VertexArrayObject;
-
-/**
-* Some devices behave a bit funny when using the newer extensions (im looking at you ipad 2!)
-* If you find on older devices that things have gone a bit weird then set this to true.
-*/
-/**
- * Lets the VAO know if you should use the WebGL extension or the native methods.
- * Some devices behave a bit funny when using the newer extensions (im looking at you ipad 2!)
- * If you find on older devices that things have gone a bit weird then set this to true.
- * @static
- * @property {Boolean} FORCE_NATIVE
- */
-VertexArrayObject.FORCE_NATIVE = false;
-
-/**
- * Binds the buffer
- */
-VertexArrayObject.prototype.bind = function()
-{
-    if(this.nativeVao)
-    {
-        this.nativeVaoExtension.bindVertexArrayOES(this.nativeVao);
-
-        if(this.dirty)
-        {
-            this.dirty = false;
-            this.activate();
-        }
-    }
-    else
-    {
-
-        this.activate();
-    }
-
-    return this;
-};
-
-/**
- * Unbinds the buffer
- */
-VertexArrayObject.prototype.unbind = function()
-{
-    if(this.nativeVao)
-    {
-        this.nativeVaoExtension.bindVertexArrayOES(null);
-    }
-
-    return this;
-};
-
-/**
- * Uses this vao
- */
-VertexArrayObject.prototype.activate = function()
-{
-
-    var gl = this.gl;
-    var lastBuffer = null;
-
-    for (var i = 0; i < this.attributes.length; i++)
-    {
-        var attrib = this.attributes[i];
-
-        if(lastBuffer !== attrib.buffer)
-        {
-            attrib.buffer.bind();
-            lastBuffer = attrib.buffer;
-        }
-
-        gl.vertexAttribPointer(attrib.attribute.location,
-                               attrib.attribute.size,
-                               attrib.type || gl.FLOAT,
-                               attrib.normalized || false,
-                               attrib.stride || 0,
-                               attrib.start || 0);
-    }
-
-    setVertexAttribArrays_1(gl, this.attributes, this.nativeState);
-
-    if(this.indexBuffer)
-    {
-        this.indexBuffer.bind();
-    }
-
-    return this;
-};
-
-/**
- *
- * @param buffer     {PIXI.gl.GLBuffer}
- * @param attribute  {*}
- * @param type       {String}
- * @param normalized {Boolean}
- * @param stride     {Number}
- * @param start      {Number}
- */
-VertexArrayObject.prototype.addAttribute = function(buffer, attribute, type, normalized, stride, start)
-{
-    this.attributes.push({
-        buffer:     buffer,
-        attribute:  attribute,
-
-        location:   attribute.location,
-        type:       type || this.gl.FLOAT,
-        normalized: normalized || false,
-        stride:     stride || 0,
-        start:      start || 0
-    });
-
-    this.dirty = true;
-
-    return this;
-};
-
-/**
- *
- * @param buffer   {PIXI.gl.GLBuffer}
- */
-VertexArrayObject.prototype.addIndex = function(buffer/*, options*/)
-{
-    this.indexBuffer = buffer;
-
-    this.dirty = true;
-
-    return this;
-};
-
-/**
- * Unbinds this vao and disables it
- */
-VertexArrayObject.prototype.clear = function()
-{
-    // var gl = this.gl;
-
-    // TODO - should this function unbind after clear?
-    // for now, no but lets see what happens in the real world!
-    if(this.nativeVao)
-    {
-        this.nativeVaoExtension.bindVertexArrayOES(this.nativeVao);
-    }
-
-    this.attributes.length = 0;
-    this.indexBuffer = null;
-
-    return this;
-};
-
-/**
- * @param type  {Number}
- * @param size  {Number}
- * @param start {Number}
- */
-VertexArrayObject.prototype.draw = function(type, size, start)
-{
-    var gl = this.gl;
-
-    if(this.indexBuffer)
-    {
-        gl.drawElements(type, size || this.indexBuffer.data.length, gl.UNSIGNED_SHORT, (start || 0) * 2 );
-    }
-    else
-    {
-        // TODO need a better way to calculate size..
-        gl.drawArrays(type, start, size || this.getSize());
-    }
-
-    return this;
-};
-
-/**
- * Destroy this vao
- */
-VertexArrayObject.prototype.destroy = function()
-{
-    // lose references
-    this.gl = null;
-    this.indexBuffer = null;
-    this.attributes = null;
-    this.nativeState = null;
-
-    if(this.nativeVao)
-    {
-        this.nativeVaoExtension.deleteVertexArrayOES(this.nativeVao);
-    }
-
-    this.nativeVaoExtension = null;
-    this.nativeVao = null;
-};
-
-VertexArrayObject.prototype.getSize = function()
-{
-    var attrib = this.attributes[0];
-    return attrib.buffer.data.length / (( attrib.stride/4 ) || attrib.attribute.size);
-};
-
-var index$1 = {
-    compileProgram: compileProgram_1,
-    defaultValue: defaultValue_1,
-    extractAttributes: extractAttributes_1,
-    extractUniforms: extractUniforms_1,
-    generateUniformAccessObject: generateUniformAccessObject_1,
-    setPrecision: setPrecision_1,
-    mapSize: mapSize_1,
-    mapType: mapType
-};
-
-var index$1$1 = createCommonjsModule(function (module) {
-var gl = {
-    createContext:          createContext_1,
-    setVertexAttribArrays:  setVertexAttribArrays_1,
-    GLBuffer:               GLBuffer,
-    GLFramebuffer:          GLFramebuffer$1,
-    GLShader:               GLShader,
-    GLTexture:              GLTexture,
-    VertexArrayObject:      VertexArrayObject_1,
-    shader:                 index$1
-};
-
-// Export for Node-compatible environments
-if ('object' !== 'undefined' && module.exports)
-{
-    // Export the module
-    module.exports = gl;
-}
-
-// Add to the browser window pixi.gl
-if (typeof window !== 'undefined')
-{
-    // add the window object
-    window.PIXI = window.PIXI || {};
-    window.PIXI.glCore = gl;
-}
-});
-
-var GLFramebuffer = index$1$1.GLFramebuffer;
-
-var RenderTarget = function () {
-    function RenderTarget(gl, width, height, resolution, root) {
-        classCallCheck(this, RenderTarget);
-
-        this.gl = gl;
-
-        // framebuffer 是WebGL渲染的终点。当你看屏幕时，其他就是在看 framebuffer 中的内容。
-        this.frameBuffer = null;
-
-        this.clearColor = [0, 0, 0, 0];
-
-        this.size = new Rectangle(0, 0, 1, 1);
-
-        /**
-         * 设备分辨率
-         */
-        this.resolution = resolution || settings.RESOLUTION;
-
-        //投影矩阵，把所有的顶点投射到webgl的[-1,1]的坐标系内
-        this.projectionMatrix = new Matrix();
-
-        this.frame = null;
-
-        this.defaultFrame = new Rectangle();
-        this.destinationFrame = null;
-        this.sourceFrame = null;
-
-        this.root = root;
-
-        this.frameBuffer = new GLFramebuffer(gl, 100, 100);
-        this.frameBuffer.framebuffer = null;
-
-        this.setFrame();
-
-        this.resize(width, height);
-    }
-
-    createClass(RenderTarget, [{
-        key: 'clear',
-        value: function clear(clearColor) {
-            var cc = clearColor || this.clearColor;
-
-            this.frameBuffer.clear(cc[0], cc[1], cc[2], cc[3]); // r,g,b,a);
-        }
-    }, {
-        key: 'setFrame',
-        value: function setFrame(destinationFrame, sourceFrame) {
-            this.destinationFrame = destinationFrame || this.destinationFrame || this.defaultFrame;
-            this.sourceFrame = sourceFrame || this.sourceFrame || destinationFrame;
-        }
-
-        //在WebGLRenderer中被调用
-
-    }, {
-        key: 'activate',
-        value: function activate() {
-            var gl = this.gl;
-
-            this.frameBuffer.bind();
-
-            this.calculateProjection(this.destinationFrame, this.sourceFrame);
-
-            if (this.destinationFrame !== this.sourceFrame) {
-                gl.enable(gl.SCISSOR_TEST);
-                gl.scissor(this.destinationFrame.x | 0, this.destinationFrame.y | 0, this.destinationFrame.width * this.resolution | 0, this.destinationFrame.height * this.resolution | 0);
-            } else {
-                gl.disable(gl.SCISSOR_TEST);
-            }
-
-            gl.viewport(this.destinationFrame.x | 0, this.destinationFrame.y | 0, this.destinationFrame.width * this.resolution | 0, this.destinationFrame.height * this.resolution | 0);
-        }
-
-        //计算投影矩阵，把所有的顶点数据投射到 webgl 的 [-1,1] 坐标系内来
-
-    }, {
-        key: 'calculateProjection',
-        value: function calculateProjection(destinationFrame, sourceFrame) {
-            var pm = this.projectionMatrix;
-
-            sourceFrame = sourceFrame || destinationFrame;
-
-            pm.identity();
-
-            pm.a = 1 / destinationFrame.width;
-            pm.d = -1 / destinationFrame.height;
-
-            pm.tx = -1 - sourceFrame.x * pm.a;
-            pm.ty = 1 - sourceFrame.y * pm.d;
-        }
-
-        //stage 的 size发生变化，需要重新初始化这些对象的size，尤其是 projectionMatrix 投影举证
-
-    }, {
-        key: 'resize',
-        value: function resize(width, height) {
-            width = width | 0;
-            height = height | 0;
-
-            if (this.size.width === width && this.size.height === height) {
-                return;
-            }
-
-            this.size.width = width;
-            this.size.height = height;
-
-            this.defaultFrame.width = width;
-            this.defaultFrame.height = height;
-
-            this.frameBuffer.resize(width * this.resolution, height * this.resolution);
-
-            var projectionFrame = this.frame || this.size;
-
-            this.calculateProjection(projectionFrame);
-        }
-    }, {
-        key: 'destroy',
-        value: function destroy() {
-            this.frameBuffer.destroy();
-            this.frameBuffer = null;
-        }
-    }]);
-    return RenderTarget;
-}();
-
-var DEPTH_TEST = 1;
-var FRONT_FACE = 2;
-var CULL_FACE = 3;
-
-var WebGLState = function () {
-    function WebGLState(gl) {
-        classCallCheck(this, WebGLState);
-
-
-        this.activeState = new Uint8Array(16);
-
-        this.defaultState = new Uint8Array(16);
-
-        this.defaultState[0] = 1;
-
-        this.stackIndex = 0;
-
-        this.stack = [];
-
-        this.gl = gl;
-
-        this.maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-
-        this.attribState = {
-            tempAttribState: new Array(this.maxAttribs),
-            attribState: new Array(this.maxAttribs)
-        };
-
-        // check we have vao..
-        this.nativeVaoExtension = gl.getExtension('OES_vertex_array_object') || gl.getExtension('MOZ_OES_vertex_array_object') || gl.getExtension('WEBKIT_OES_vertex_array_object');
-    }
-
-    createClass(WebGLState, [{
-        key: 'push',
-        value: function push() {
-            var state = this.stack[++this.stackIndex];
-
-            if (!state) {
-                state = this.stack[this.stackIndex] = new Uint8Array(16);
-            }
-
-            for (var i = 0; i < this.activeState.length; i++) {
-                this.activeState[i] = state[i];
-            }
-        }
-    }, {
-        key: 'pop',
-        value: function pop() {
-            var state = this.stack[--this.stackIndex];
-
-            this.setState(state);
-        }
-    }, {
-        key: 'setState',
-        value: function setState(state) {
-            this.setDepthTest(state[DEPTH_TEST]);
-            this.setFrontFace(state[FRONT_FACE]);
-            this.setCullFace(state[CULL_FACE]);
-        }
-    }, {
-        key: 'setDepthTest',
-        value: function setDepthTest(value) {
-            value = value ? 1 : 0;
-
-            if (this.activeState[DEPTH_TEST] === value) {
-                return;
-            }
-
-            this.activeState[DEPTH_TEST] = value;
-            this.gl[value ? 'enable' : 'disable'](this.gl.DEPTH_TEST);
-        }
-    }, {
-        key: 'setCullFace',
-        value: function setCullFace(value) {
-            value = value ? 1 : 0;
-
-            if (this.activeState[CULL_FACE] === value) {
-                return;
-            }
-
-            this.activeState[CULL_FACE] = value;
-            this.gl[value ? 'enable' : 'disable'](this.gl.CULL_FACE);
-        }
-    }, {
-        key: 'setFrontFace',
-        value: function setFrontFace(value) {
-            value = value ? 1 : 0;
-
-            if (this.activeState[FRONT_FACE] === value) {
-                return;
-            }
-
-            this.activeState[FRONT_FACE] = value;
-            this.gl.frontFace(this.gl[value ? 'CW' : 'CCW']);
-        }
-    }, {
-        key: 'resetAttributes',
-        value: function resetAttributes() {
-            for (var i = 0; i < this.attribState.tempAttribState.length; i++) {
-                this.attribState.tempAttribState[i] = 0;
-            }
-
-            for (var _i = 0; _i < this.attribState.attribState.length; _i++) {
-                this.attribState.attribState[_i] = 0;
-            }
-
-            for (var _i2 = 1; _i2 < this.maxAttribs; _i2++) {
-                this.gl.disableVertexAttribArray(_i2);
-            }
-        }
-    }, {
-        key: 'resetToDefault',
-        value: function resetToDefault() {
-            if (this.nativeVaoExtension) {
-                this.nativeVaoExtension.bindVertexArrayOES(null);
-            }
-
-            this.resetAttributes();
-
-            for (var i = 0; i < this.activeState.length; ++i) {
-                this.activeState[i] = 32;
-            }
-
-            this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, false);
-
-            this.setState(this.defaultState);
-        }
-    }]);
-    return WebGLState;
-}();
-
-function hex2rgb(hex, out) {
-  //hex可能是“#ff0000” 也可能是 0xff0000
-  if (hex.replace) {
-    hex = parseInt(hex.replace("#", "0X"), 16);
-  }
-
-  out = out || [];
-
-  out[0] = (hex >> 16 & 0xFF) / 255;
-  out[1] = (hex >> 8 & 0xFF) / 255;
-  out[2] = (hex & 0xFF) / 255;
-
-  return out;
-}
-
-var WebGLGraphicsData = function () {
-  function WebGLGraphicsData(gl, shader, attribsState) {
-    classCallCheck(this, WebGLGraphicsData);
-
-    this.gl = gl;
-
-    this.color = [0, 0, 0]; // color split!
-
-
-    this.points = [];
-
-    /**
-     * The indices of the vertices
-     * @member {number[]}
-     */
-    this.indices = [];
-    /**
-     * The main buffer
-     * @member {WebGLBuffer}
-     */
-    this.buffer = index$1$1.GLBuffer.createVertexBuffer(gl);
-
-    /**
-     * The index buffer
-     * @member {WebGLBuffer}
-     */
-    this.indexBuffer = index$1$1.GLBuffer.createIndexBuffer(gl);
-
-    /**
-     * Whether this graphics is dirty or not
-     * @member {boolean}
-     */
-    this.dirty = true;
-
-    this.glPoints = null;
-    this.glIndices = null;
-
-    /**
-     *
-     * @member {PIXI.Shader}
-     */
-    this.shader = shader;
-
-    this.vao = new index$1$1.VertexArrayObject(gl, attribsState).addIndex(this.indexBuffer).addAttribute(this.buffer, shader.attributes.aVertexPosition, gl.FLOAT, false, 4 * 6, 0).addAttribute(this.buffer, shader.attributes.aColor, gl.FLOAT, false, 4 * 6, 2 * 4);
-  }
-
-  /**
-   * Resets the vertices and the indices
-   */
-
-
-  createClass(WebGLGraphicsData, [{
-    key: 'reset',
-    value: function reset() {
-      this.points.length = 0;
-      this.indices.length = 0;
-    }
-
-    /**
-     * Binds the buffers and uploads the data
-     */
-
-  }, {
-    key: 'upload',
-    value: function upload() {
-      this.glPoints = new Float32Array(this.points);
-      this.buffer.upload(this.glPoints);
-
-      this.glIndices = new Uint16Array(this.indices);
-      this.indexBuffer.upload(this.glIndices);
-
-      this.dirty = false;
-    }
-
-    /**
-     * Empties all the data
-     */
-
-  }, {
-    key: 'destroy',
-    value: function destroy() {
-      this.color = null;
-      this.points = null;
-      this.indices = null;
-
-      this.vao.destroy();
-      this.buffer.destroy();
-      this.indexBuffer.destroy();
-
-      this.gl = null;
-
-      this.buffer = null;
-      this.indexBuffer = null;
-
-      this.glPoints = null;
-      this.glIndices = null;
-    }
-  }]);
-  return WebGLGraphicsData;
-}();
-
-var PRECISION = settings.PRECISION;
-
-var GLShader$2 = index$1$1.GLShader;
-
-function checkPrecision(src) {
-    if (src instanceof Array) {
-        if (src[0].substring(0, 9) !== 'precision') {
-            var copy = src.slice(0);
-
-            copy.unshift('precision ' + PRECISION + ' float;');
-
-            return copy;
-        }
-    } else if (src.substring(0, 9) !== 'precision') {
-        return 'precision ' + PRECISION + ' float;\n' + src;
-    }
-
-    return src;
-}
-
-/**
- * Wrapper class, webGL Shader for Pixi.
- * Adds precision string if vertexSrc or fragmentSrc have no mention of it.
- *
- * @class
- * @extends GLShader
- * @memberof PIXI
- */
-
-var Shader$1 = function (_GLShader) {
-    inherits(Shader, _GLShader);
-
-    /**
-     *
-     * @param {WebGLRenderingContext} gl - The current WebGL rendering context
-     * @param {string|string[]} vertexSrc - The vertex shader source as an array of strings.
-     * @param {string|string[]} fragmentSrc - The fragment shader source as an array of strings.
-     */
-    function Shader(gl, vertexSrc, fragmentSrc) {
-        classCallCheck(this, Shader);
-        return possibleConstructorReturn(this, (Shader.__proto__ || Object.getPrototypeOf(Shader)).call(this, gl, checkPrecision(vertexSrc), checkPrecision(fragmentSrc)));
-    }
-
-    return Shader;
-}(GLShader$2);
-
-var PrimitiveShader = function (_Shader) {
-    inherits(PrimitiveShader, _Shader);
-
-    function PrimitiveShader(gl) {
-        classCallCheck(this, PrimitiveShader);
-        return possibleConstructorReturn(this, (PrimitiveShader.__proto__ || Object.getPrototypeOf(PrimitiveShader)).call(this, gl,
-        //vertex shader
-        ['attribute vec2 aVertexPosition;', 'attribute vec4 aColor;', 'uniform mat3 translationMatrix;', 'uniform mat3 projectionMatrix;', 'uniform float alpha;', 'uniform vec3 tint;', 'varying vec4 vColor;', 'void main(void){', '   gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);', '   vColor = aColor * vec4(tint * alpha, alpha);', '}'].join('\n'),
-        // fragment shader
-        ['varying vec4 vColor;', 'void main(void){', '   gl_FragColor = vColor;', '}'].join('\n')));
-    }
-
-    return PrimitiveShader;
-}(Shader$1);
-
-function buildLine(graphicsData, webGLData) {
-    var points = graphicsData.points;
-
-    if (points.length === 0) {
-        return;
-    }
-
-    var firstPoint = { x: points[0], y: points[1] };
-    var lastPoint = { x: points[points.length - 2], y: points[points.length - 1] };
-
-    if (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y) {
-        points = points.slice();
-
-        points.pop();
-        points.pop();
-
-        lastPoint = { x: points[points.length - 2], y: points[points.length - 1] };
-
-        var midPointX = lastPoint.x + (firstPoint.x - lastPoint.x) * 0.5;
-        var midPointY = lastPoint.y + (firstPoint.y - lastPoint.y) * 0.5;
-
-        points.unshift(midPointX, midPointY);
-        points.push(midPointX, midPointY);
-    }
-
-    var verts = webGLData.points;
-    var indices = webGLData.indices;
-    var length = points.length / 2;
-    var indexCount = points.length;
-    var indexStart = verts.length / 6;
-
-    var width = graphicsData.lineWidth / 2;
-
-    var color = hex2rgb(graphicsData.strokeStyle);
-    var alpha = graphicsData.lineAlpha;
-    var r = color[0] * alpha;
-    var g = color[1] * alpha;
-    var b = color[2] * alpha;
-
-    var p1x = points[0];
-    var p1y = points[1];
-    var p2x = points[2];
-    var p2y = points[3];
-    var p3x = 0;
-    var p3y = 0;
-
-    var perpx = -(p1y - p2y);
-    var perpy = p1x - p2x;
-    var perp2x = 0;
-    var perp2y = 0;
-    var perp3x = 0;
-    var perp3y = 0;
-
-    var dist = Math.sqrt(perpx * perpx + perpy * perpy);
-
-    perpx /= dist;
-    perpy /= dist;
-    perpx *= width;
-    perpy *= width;
-
-    // start
-    verts.push(p1x - perpx, p1y - perpy, r, g, b, alpha);
-
-    verts.push(p1x + perpx, p1y + perpy, r, g, b, alpha);
-
-    for (var i = 1; i < length - 1; ++i) {
-        p1x = points[(i - 1) * 2];
-        p1y = points[(i - 1) * 2 + 1];
-
-        p2x = points[i * 2];
-        p2y = points[i * 2 + 1];
-
-        p3x = points[(i + 1) * 2];
-        p3y = points[(i + 1) * 2 + 1];
-
-        perpx = -(p1y - p2y);
-        perpy = p1x - p2x;
-
-        dist = Math.sqrt(perpx * perpx + perpy * perpy);
-        perpx /= dist;
-        perpy /= dist;
-        perpx *= width;
-        perpy *= width;
-
-        perp2x = -(p2y - p3y);
-        perp2y = p2x - p3x;
-
-        dist = Math.sqrt(perp2x * perp2x + perp2y * perp2y);
-        perp2x /= dist;
-        perp2y /= dist;
-        perp2x *= width;
-        perp2y *= width;
-
-        var a1 = -perpy + p1y - (-perpy + p2y);
-        var b1 = -perpx + p2x - (-perpx + p1x);
-        var c1 = (-perpx + p1x) * (-perpy + p2y) - (-perpx + p2x) * (-perpy + p1y);
-        var a2 = -perp2y + p3y - (-perp2y + p2y);
-        var b2 = -perp2x + p2x - (-perp2x + p3x);
-        var c2 = (-perp2x + p3x) * (-perp2y + p2y) - (-perp2x + p2x) * (-perp2y + p3y);
-
-        var denom = a1 * b2 - a2 * b1;
-
-        if (Math.abs(denom) < 0.1) {
-            denom += 10.1;
-            verts.push(p2x - perpx, p2y - perpy, r, g, b, alpha);
-
-            verts.push(p2x + perpx, p2y + perpy, r, g, b, alpha);
-
-            continue;
-        }
-
-        var px = (b1 * c2 - b2 * c1) / denom;
-        var py = (a2 * c1 - a1 * c2) / denom;
-        var pdist = (px - p2x) * (px - p2x) + (py - p2y) * (py - p2y);
-
-        if (pdist > 196 * width * width) {
-            perp3x = perpx - perp2x;
-            perp3y = perpy - perp2y;
-
-            dist = Math.sqrt(perp3x * perp3x + perp3y * perp3y);
-            perp3x /= dist;
-            perp3y /= dist;
-            perp3x *= width;
-            perp3y *= width;
-
-            verts.push(p2x - perp3x, p2y - perp3y);
-            verts.push(r, g, b, alpha);
-
-            verts.push(p2x + perp3x, p2y + perp3y);
-            verts.push(r, g, b, alpha);
-
-            verts.push(p2x - perp3x, p2y - perp3y);
-            verts.push(r, g, b, alpha);
-
-            indexCount++;
-        } else {
-            verts.push(px, py);
-            verts.push(r, g, b, alpha);
-
-            verts.push(p2x - (px - p2x), p2y - (py - p2y));
-            verts.push(r, g, b, alpha);
-        }
-    }
-
-    p1x = points[(length - 2) * 2];
-    p1y = points[(length - 2) * 2 + 1];
-
-    p2x = points[(length - 1) * 2];
-    p2y = points[(length - 1) * 2 + 1];
-
-    perpx = -(p1y - p2y);
-    perpy = p1x - p2x;
-
-    dist = Math.sqrt(perpx * perpx + perpy * perpy);
-    perpx /= dist;
-    perpy /= dist;
-    perpx *= width;
-    perpy *= width;
-
-    verts.push(p2x - perpx, p2y - perpy);
-    verts.push(r, g, b, alpha);
-
-    verts.push(p2x + perpx, p2y + perpy);
-    verts.push(r, g, b, alpha);
-
-    indices.push(indexStart);
-
-    for (var _i = 0; _i < indexCount; ++_i) {
-        indices.push(indexStart++);
-    }
-
-    indices.push(indexStart - 1);
-}
-
-var earcut_1 = earcut;
-
-function earcut(data, holeIndices, dim) {
-
-    dim = dim || 2;
-
-    var hasHoles = holeIndices && holeIndices.length,
-        outerLen = hasHoles ? holeIndices[0] * dim : data.length,
-        outerNode = linkedList(data, 0, outerLen, dim, true),
-        triangles = [];
-
-    if (!outerNode) return triangles;
-
-    var minX, minY, maxX, maxY, x, y, size;
-
-    if (hasHoles) outerNode = eliminateHoles(data, holeIndices, outerNode, dim);
-
-    // if the shape is not too simple, we'll use z-order curve hash later; calculate polygon bbox
-    if (data.length > 80 * dim) {
-        minX = maxX = data[0];
-        minY = maxY = data[1];
-
-        for (var i = dim; i < outerLen; i += dim) {
-            x = data[i];
-            y = data[i + 1];
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-            if (x > maxX) maxX = x;
-            if (y > maxY) maxY = y;
-        }
-
-        // minX, minY and size are later used to transform coords into integers for z-order calculation
-        size = Math.max(maxX - minX, maxY - minY);
-    }
-
-    earcutLinked(outerNode, triangles, dim, minX, minY, size);
-
-    return triangles;
-}
-
-// create a circular doubly linked list from polygon points in the specified winding order
-function linkedList(data, start, end, dim, clockwise) {
-    var i, last;
-
-    if (clockwise === (signedArea(data, start, end, dim) > 0)) {
-        for (i = start; i < end; i += dim) last = insertNode(i, data[i], data[i + 1], last);
-    } else {
-        for (i = end - dim; i >= start; i -= dim) last = insertNode(i, data[i], data[i + 1], last);
-    }
-
-    if (last && equals(last, last.next)) {
-        removeNode(last);
-        last = last.next;
-    }
-
-    return last;
-}
-
-// eliminate colinear or duplicate points
-function filterPoints(start, end) {
-    if (!start) return start;
-    if (!end) end = start;
-
-    var p = start,
-        again;
-    do {
-        again = false;
-
-        if (!p.steiner && (equals(p, p.next) || area(p.prev, p, p.next) === 0)) {
-            removeNode(p);
-            p = end = p.prev;
-            if (p === p.next) return null;
-            again = true;
-
-        } else {
-            p = p.next;
-        }
-    } while (again || p !== end);
-
-    return end;
-}
-
-// main ear slicing loop which triangulates a polygon (given as a linked list)
-function earcutLinked(ear, triangles, dim, minX, minY, size, pass) {
-    if (!ear) return;
-
-    // interlink polygon nodes in z-order
-    if (!pass && size) indexCurve(ear, minX, minY, size);
-
-    var stop = ear,
-        prev, next;
-
-    // iterate through ears, slicing them one by one
-    while (ear.prev !== ear.next) {
-        prev = ear.prev;
-        next = ear.next;
-
-        if (size ? isEarHashed(ear, minX, minY, size) : isEar(ear)) {
-            // cut off the triangle
-            triangles.push(prev.i / dim);
-            triangles.push(ear.i / dim);
-            triangles.push(next.i / dim);
-
-            removeNode(ear);
-
-            // skipping the next vertice leads to less sliver triangles
-            ear = next.next;
-            stop = next.next;
-
-            continue;
-        }
-
-        ear = next;
-
-        // if we looped through the whole remaining polygon and can't find any more ears
-        if (ear === stop) {
-            // try filtering points and slicing again
-            if (!pass) {
-                earcutLinked(filterPoints(ear), triangles, dim, minX, minY, size, 1);
-
-            // if this didn't work, try curing all small self-intersections locally
-            } else if (pass === 1) {
-                ear = cureLocalIntersections(ear, triangles, dim);
-                earcutLinked(ear, triangles, dim, minX, minY, size, 2);
-
-            // as a last resort, try splitting the remaining polygon into two
-            } else if (pass === 2) {
-                splitEarcut(ear, triangles, dim, minX, minY, size);
-            }
-
-            break;
-        }
-    }
-}
-
-// check whether a polygon node forms a valid ear with adjacent nodes
-function isEar(ear) {
-    var a = ear.prev,
-        b = ear,
-        c = ear.next;
-
-    if (area(a, b, c) >= 0) return false; // reflex, can't be an ear
-
-    // now make sure we don't have other points inside the potential ear
-    var p = ear.next.next;
-
-    while (p !== ear.prev) {
-        if (pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
-            area(p.prev, p, p.next) >= 0) return false;
-        p = p.next;
-    }
-
-    return true;
-}
-
-function isEarHashed(ear, minX, minY, size) {
-    var a = ear.prev,
-        b = ear,
-        c = ear.next;
-
-    if (area(a, b, c) >= 0) return false; // reflex, can't be an ear
-
-    // triangle bbox; min & max are calculated like this for speed
-    var minTX = a.x < b.x ? (a.x < c.x ? a.x : c.x) : (b.x < c.x ? b.x : c.x),
-        minTY = a.y < b.y ? (a.y < c.y ? a.y : c.y) : (b.y < c.y ? b.y : c.y),
-        maxTX = a.x > b.x ? (a.x > c.x ? a.x : c.x) : (b.x > c.x ? b.x : c.x),
-        maxTY = a.y > b.y ? (a.y > c.y ? a.y : c.y) : (b.y > c.y ? b.y : c.y);
-
-    // z-order range for the current triangle bbox;
-    var minZ = zOrder(minTX, minTY, minX, minY, size),
-        maxZ = zOrder(maxTX, maxTY, minX, minY, size);
-
-    // first look for points inside the triangle in increasing z-order
-    var p = ear.nextZ;
-
-    while (p && p.z <= maxZ) {
-        if (p !== ear.prev && p !== ear.next &&
-            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
-            area(p.prev, p, p.next) >= 0) return false;
-        p = p.nextZ;
-    }
-
-    // then look for points in decreasing z-order
-    p = ear.prevZ;
-
-    while (p && p.z >= minZ) {
-        if (p !== ear.prev && p !== ear.next &&
-            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
-            area(p.prev, p, p.next) >= 0) return false;
-        p = p.prevZ;
-    }
-
-    return true;
-}
-
-// go through all polygon nodes and cure small local self-intersections
-function cureLocalIntersections(start, triangles, dim) {
-    var p = start;
-    do {
-        var a = p.prev,
-            b = p.next.next;
-
-        if (!equals(a, b) && intersects(a, p, p.next, b) && locallyInside(a, b) && locallyInside(b, a)) {
-
-            triangles.push(a.i / dim);
-            triangles.push(p.i / dim);
-            triangles.push(b.i / dim);
-
-            // remove two nodes involved
-            removeNode(p);
-            removeNode(p.next);
-
-            p = start = b;
-        }
-        p = p.next;
-    } while (p !== start);
-
-    return p;
-}
-
-// try splitting polygon into two and triangulate them independently
-function splitEarcut(start, triangles, dim, minX, minY, size) {
-    // look for a valid diagonal that divides the polygon into two
-    var a = start;
-    do {
-        var b = a.next.next;
-        while (b !== a.prev) {
-            if (a.i !== b.i && isValidDiagonal(a, b)) {
-                // split the polygon in two by the diagonal
-                var c = splitPolygon(a, b);
-
-                // filter colinear points around the cuts
-                a = filterPoints(a, a.next);
-                c = filterPoints(c, c.next);
-
-                // run earcut on each half
-                earcutLinked(a, triangles, dim, minX, minY, size);
-                earcutLinked(c, triangles, dim, minX, minY, size);
-                return;
-            }
-            b = b.next;
-        }
-        a = a.next;
-    } while (a !== start);
-}
-
-// link every hole into the outer loop, producing a single-ring polygon without holes
-function eliminateHoles(data, holeIndices, outerNode, dim) {
-    var queue = [],
-        i, len, start, end, list;
-
-    for (i = 0, len = holeIndices.length; i < len; i++) {
-        start = holeIndices[i] * dim;
-        end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
-        list = linkedList(data, start, end, dim, false);
-        if (list === list.next) list.steiner = true;
-        queue.push(getLeftmost(list));
-    }
-
-    queue.sort(compareX);
-
-    // process holes from left to right
-    for (i = 0; i < queue.length; i++) {
-        eliminateHole(queue[i], outerNode);
-        outerNode = filterPoints(outerNode, outerNode.next);
-    }
-
-    return outerNode;
-}
-
-function compareX(a, b) {
-    return a.x - b.x;
-}
-
-// find a bridge between vertices that connects hole with an outer ring and and link it
-function eliminateHole(hole, outerNode) {
-    outerNode = findHoleBridge(hole, outerNode);
-    if (outerNode) {
-        var b = splitPolygon(outerNode, hole);
-        filterPoints(b, b.next);
-    }
-}
-
-// David Eberly's algorithm for finding a bridge between hole and outer polygon
-function findHoleBridge(hole, outerNode) {
-    var p = outerNode,
-        hx = hole.x,
-        hy = hole.y,
-        qx = -Infinity,
-        m;
-
-    // find a segment intersected by a ray from the hole's leftmost point to the left;
-    // segment's endpoint with lesser x will be potential connection point
-    do {
-        if (hy <= p.y && hy >= p.next.y) {
-            var x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
-            if (x <= hx && x > qx) {
-                qx = x;
-                if (x === hx) {
-                    if (hy === p.y) return p;
-                    if (hy === p.next.y) return p.next;
-                }
-                m = p.x < p.next.x ? p : p.next;
-            }
-        }
-        p = p.next;
-    } while (p !== outerNode);
-
-    if (!m) return null;
-
-    if (hx === qx) return m.prev; // hole touches outer segment; pick lower endpoint
-
-    // look for points inside the triangle of hole point, segment intersection and endpoint;
-    // if there are no points found, we have a valid connection;
-    // otherwise choose the point of the minimum angle with the ray as connection point
-
-    var stop = m,
-        mx = m.x,
-        my = m.y,
-        tanMin = Infinity,
-        tan;
-
-    p = m.next;
-
-    while (p !== stop) {
-        if (hx >= p.x && p.x >= mx &&
-                pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
-
-            tan = Math.abs(hy - p.y) / (hx - p.x); // tangential
-
-            if ((tan < tanMin || (tan === tanMin && p.x > m.x)) && locallyInside(p, hole)) {
-                m = p;
-                tanMin = tan;
-            }
-        }
-
-        p = p.next;
-    }
-
-    return m;
-}
-
-// interlink polygon nodes in z-order
-function indexCurve(start, minX, minY, size) {
-    var p = start;
-    do {
-        if (p.z === null) p.z = zOrder(p.x, p.y, minX, minY, size);
-        p.prevZ = p.prev;
-        p.nextZ = p.next;
-        p = p.next;
-    } while (p !== start);
-
-    p.prevZ.nextZ = null;
-    p.prevZ = null;
-
-    sortLinked(p);
-}
-
-// Simon Tatham's linked list merge sort algorithm
-// http://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html
-function sortLinked(list) {
-    var i, p, q, e, tail, numMerges, pSize, qSize,
-        inSize = 1;
-
-    do {
-        p = list;
-        list = null;
-        tail = null;
-        numMerges = 0;
-
-        while (p) {
-            numMerges++;
-            q = p;
-            pSize = 0;
-            for (i = 0; i < inSize; i++) {
-                pSize++;
-                q = q.nextZ;
-                if (!q) break;
-            }
-
-            qSize = inSize;
-
-            while (pSize > 0 || (qSize > 0 && q)) {
-
-                if (pSize === 0) {
-                    e = q;
-                    q = q.nextZ;
-                    qSize--;
-                } else if (qSize === 0 || !q) {
-                    e = p;
-                    p = p.nextZ;
-                    pSize--;
-                } else if (p.z <= q.z) {
-                    e = p;
-                    p = p.nextZ;
-                    pSize--;
-                } else {
-                    e = q;
-                    q = q.nextZ;
-                    qSize--;
-                }
-
-                if (tail) tail.nextZ = e;
-                else list = e;
-
-                e.prevZ = tail;
-                tail = e;
-            }
-
-            p = q;
-        }
-
-        tail.nextZ = null;
-        inSize *= 2;
-
-    } while (numMerges > 1);
-
-    return list;
-}
-
-// z-order of a point given coords and size of the data bounding box
-function zOrder(x, y, minX, minY, size) {
-    // coords are transformed into non-negative 15-bit integer range
-    x = 32767 * (x - minX) / size;
-    y = 32767 * (y - minY) / size;
-
-    x = (x | (x << 8)) & 0x00FF00FF;
-    x = (x | (x << 4)) & 0x0F0F0F0F;
-    x = (x | (x << 2)) & 0x33333333;
-    x = (x | (x << 1)) & 0x55555555;
-
-    y = (y | (y << 8)) & 0x00FF00FF;
-    y = (y | (y << 4)) & 0x0F0F0F0F;
-    y = (y | (y << 2)) & 0x33333333;
-    y = (y | (y << 1)) & 0x55555555;
-
-    return x | (y << 1);
-}
-
-// find the leftmost node of a polygon ring
-function getLeftmost(start) {
-    var p = start,
-        leftmost = start;
-    do {
-        if (p.x < leftmost.x) leftmost = p;
-        p = p.next;
-    } while (p !== start);
-
-    return leftmost;
-}
-
-// check if a point lies within a convex triangle
-function pointInTriangle(ax, ay, bx, by, cx, cy, px, py) {
-    return (cx - px) * (ay - py) - (ax - px) * (cy - py) >= 0 &&
-           (ax - px) * (by - py) - (bx - px) * (ay - py) >= 0 &&
-           (bx - px) * (cy - py) - (cx - px) * (by - py) >= 0;
-}
-
-// check if a diagonal between two polygon nodes is valid (lies in polygon interior)
-function isValidDiagonal(a, b) {
-    return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) &&
-           locallyInside(a, b) && locallyInside(b, a) && middleInside(a, b);
-}
-
-// signed area of a triangle
-function area(p, q, r) {
-    return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-}
-
-// check if two points are equal
-function equals(p1, p2) {
-    return p1.x === p2.x && p1.y === p2.y;
-}
-
-// check if two segments intersect
-function intersects(p1, q1, p2, q2) {
-    if ((equals(p1, q1) && equals(p2, q2)) ||
-        (equals(p1, q2) && equals(p2, q1))) return true;
-    return area(p1, q1, p2) > 0 !== area(p1, q1, q2) > 0 &&
-           area(p2, q2, p1) > 0 !== area(p2, q2, q1) > 0;
-}
-
-// check if a polygon diagonal intersects any polygon segments
-function intersectsPolygon(a, b) {
-    var p = a;
-    do {
-        if (p.i !== a.i && p.next.i !== a.i && p.i !== b.i && p.next.i !== b.i &&
-                intersects(p, p.next, a, b)) return true;
-        p = p.next;
-    } while (p !== a);
-
-    return false;
-}
-
-// check if a polygon diagonal is locally inside the polygon
-function locallyInside(a, b) {
-    return area(a.prev, a, a.next) < 0 ?
-        area(a, b, a.next) >= 0 && area(a, a.prev, b) >= 0 :
-        area(a, b, a.prev) < 0 || area(a, a.next, b) < 0;
-}
-
-// check if the middle point of a polygon diagonal is inside the polygon
-function middleInside(a, b) {
-    var p = a,
-        inside = false,
-        px = (a.x + b.x) / 2,
-        py = (a.y + b.y) / 2;
-    do {
-        if (((p.y > py) !== (p.next.y > py)) && (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
-            inside = !inside;
-        p = p.next;
-    } while (p !== a);
-
-    return inside;
-}
-
-// link two polygon vertices with a bridge; if the vertices belong to the same ring, it splits polygon into two;
-// if one belongs to the outer ring and another to a hole, it merges it into a single ring
-function splitPolygon(a, b) {
-    var a2 = new Node(a.i, a.x, a.y),
-        b2 = new Node(b.i, b.x, b.y),
-        an = a.next,
-        bp = b.prev;
-
-    a.next = b;
-    b.prev = a;
-
-    a2.next = an;
-    an.prev = a2;
-
-    b2.next = a2;
-    a2.prev = b2;
-
-    bp.next = b2;
-    b2.prev = bp;
-
-    return b2;
-}
-
-// create a node and optionally link it with previous one (in a circular doubly linked list)
-function insertNode(i, x, y, last) {
-    var p = new Node(i, x, y);
-
-    if (!last) {
-        p.prev = p;
-        p.next = p;
-
-    } else {
-        p.next = last.next;
-        p.prev = last;
-        last.next.prev = p;
-        last.next = p;
-    }
-    return p;
-}
-
-function removeNode(p) {
-    p.next.prev = p.prev;
-    p.prev.next = p.next;
-
-    if (p.prevZ) p.prevZ.nextZ = p.nextZ;
-    if (p.nextZ) p.nextZ.prevZ = p.prevZ;
-}
-
-function Node(i, x, y) {
-    // vertice index in coordinates array
-    this.i = i;
-
-    // vertex coordinates
-    this.x = x;
-    this.y = y;
-
-    // previous and next vertice nodes in a polygon ring
-    this.prev = null;
-    this.next = null;
-
-    // z-order curve value
-    this.z = null;
-
-    // previous and next nodes in z-order
-    this.prevZ = null;
-    this.nextZ = null;
-
-    // indicates whether this is a steiner point
-    this.steiner = false;
-}
-
-// return a percentage difference between the polygon area and its triangulation area;
-// used to verify correctness of triangulation
-earcut.deviation = function (data, holeIndices, dim, triangles) {
-    var hasHoles = holeIndices && holeIndices.length;
-    var outerLen = hasHoles ? holeIndices[0] * dim : data.length;
-
-    var polygonArea = Math.abs(signedArea(data, 0, outerLen, dim));
-    if (hasHoles) {
-        for (var i = 0, len = holeIndices.length; i < len; i++) {
-            var start = holeIndices[i] * dim;
-            var end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
-            polygonArea -= Math.abs(signedArea(data, start, end, dim));
-        }
-    }
-
-    var trianglesArea = 0;
-    for (i = 0; i < triangles.length; i += 3) {
-        var a = triangles[i] * dim;
-        var b = triangles[i + 1] * dim;
-        var c = triangles[i + 2] * dim;
-        trianglesArea += Math.abs(
-            (data[a] - data[c]) * (data[b + 1] - data[a + 1]) -
-            (data[a] - data[b]) * (data[c + 1] - data[a + 1]));
-    }
-
-    return polygonArea === 0 && trianglesArea === 0 ? 0 :
-        Math.abs((trianglesArea - polygonArea) / polygonArea);
-};
-
-function signedArea(data, start, end, dim) {
-    var sum = 0;
-    for (var i = start, j = end - dim; i < end; i += dim) {
-        sum += (data[j] - data[i]) * (data[i + 1] + data[j + 1]);
-        j = i;
-    }
-    return sum;
-}
-
-// turn a polygon in a multi-dimensional array form (e.g. as in GeoJSON) into a form Earcut accepts
-earcut.flatten = function (data) {
-    var dim = data[0][0].length,
-        result = {vertices: [], holes: [], dimensions: dim},
-        holeIndex = 0;
-
-    for (var i = 0; i < data.length; i++) {
-        for (var j = 0; j < data[i].length; j++) {
-            for (var d = 0; d < dim; d++) result.vertices.push(data[i][j][d]);
-        }
-        if (i > 0) {
-            holeIndex += data[i - 1].length;
-            result.holes.push(holeIndex);
-        }
-    }
-    return result;
-};
-
-function buildPoly(graphicsData, webGLData) {
-    graphicsData.points = graphicsData.shape.points.slice();
-
-    var points = graphicsData.points;
-
-    if (graphicsData.hasFill() && graphicsData.fillAlpha && points.length >= 6) {
-        var holeArray = [];
-        var holes = graphicsData.holes;
-
-        for (var i = 0; i < holes.length; i++) {
-            var hole = holes[i];
-
-            holeArray.push(points.length / 2);
-
-            points = points.concat(hole.points);
-        }
-
-        var verts = webGLData.points;
-        var indices = webGLData.indices;
-
-        var length = points.length / 2;
-
-        var color = hex2rgb(graphicsData.fillStyle);
-        var alpha = graphicsData.fillAlpha;
-        var r = color[0] * alpha;
-        var g = color[1] * alpha;
-        var b = color[2] * alpha;
-
-        var triangles = earcut_1(points, holeArray, 2);
-
-        if (!triangles) {
-            return;
-        }
-
-        var vertPos = verts.length / 6;
-
-        for (var _i = 0; _i < triangles.length; _i += 3) {
-            indices.push(triangles[_i] + vertPos);
-            indices.push(triangles[_i] + vertPos);
-            indices.push(triangles[_i + 1] + vertPos);
-            indices.push(triangles[_i + 2] + vertPos);
-            indices.push(triangles[_i + 2] + vertPos);
-        }
-
-        for (var _i2 = 0; _i2 < length; _i2++) {
-            verts.push(points[_i2 * 2], points[_i2 * 2 + 1], r, g, b, alpha);
-        }
-    }
-
-    if (graphicsData.hasLine() && graphicsData.lineAlpha) {
-        buildLine(graphicsData, webGLData);
-    }
-}
-
-function buildRectangle(graphicsData, webGLData) {
-
-    var rectData = graphicsData.shape;
-    var x = rectData.x;
-    var y = rectData.y;
-    var width = rectData.width;
-    var height = rectData.height;
-
-    if (graphicsData.hasFill() && graphicsData.fillAlpha) {
-        var color = hex2rgb(graphicsData.fillStyle);
-        var alpha = graphicsData.fillAlpha;
-
-        var r = color[0] * alpha;
-        var g = color[1] * alpha;
-        var b = color[2] * alpha;
-
-        var verts = webGLData.points;
-        var indices = webGLData.indices;
-
-        var vertPos = verts.length / 6;
-
-        // start
-        verts.push(x, y);
-        verts.push(r, g, b, alpha);
-
-        verts.push(x + width, y);
-        verts.push(r, g, b, alpha);
-
-        verts.push(x, y + height);
-        verts.push(r, g, b, alpha);
-
-        verts.push(x + width, y + height);
-        verts.push(r, g, b, alpha);
-
-        // insert 2 dead triangles..
-        indices.push(vertPos, vertPos, vertPos + 1, vertPos + 2, vertPos + 3, vertPos + 3);
-    }
-
-    if (graphicsData.hasLine() && graphicsData.lineAlpha) {
-        var tempPoints = graphicsData.points;
-
-        graphicsData.points = [x, y, x + width, y, x + width, y + height, x, y + height, x, y];
-
-        buildLine(graphicsData, webGLData);
-
-        graphicsData.points = tempPoints;
-    }
-}
-
-function buildCircle(graphicsData, webGLData) {
-
-    var circleData = graphicsData.shape;
-    var x = circleData.x;
-    var y = circleData.y;
-    var width = void 0;
-    var height = void 0;
-
-    if (graphicsData.type === SHAPES.CIRC) {
-        width = circleData.radius;
-        height = circleData.radius;
-    } else {
-        width = circleData.width;
-        height = circleData.height;
-    }
-
-    var totalSegs = Math.floor(30 * Math.sqrt(circleData.radius)) || Math.floor(15 * Math.sqrt(circleData.width + circleData.height));
-
-    var seg = Math.PI * 2 / totalSegs;
-
-    if (graphicsData.hasFill() && graphicsData.fillAlpha) {
-        var color = hex2rgb(graphicsData.fillStyle);
-        var alpha = graphicsData.fillAlpha;
-
-        var r = color[0] * alpha;
-        var g = color[1] * alpha;
-        var b = color[2] * alpha;
-
-        var verts = webGLData.points;
-        var indices = webGLData.indices;
-
-        var vecPos = verts.length / 6;
-
-        indices.push(vecPos);
-
-        for (var i = 0; i < totalSegs + 1; i++) {
-            verts.push(x, y, r, g, b, alpha);
-
-            verts.push(x + Math.sin(seg * i) * width, y + Math.cos(seg * i) * height, r, g, b, alpha);
-
-            indices.push(vecPos++, vecPos++);
-        }
-
-        indices.push(vecPos - 1);
-    }
-
-    if (graphicsData.hasLine() && graphicsData.lineAlpha) {
-        var tempPoints = graphicsData.points;
-
-        graphicsData.points = [];
-
-        for (var _i = 0; _i < totalSegs + 1; _i++) {
-            graphicsData.points.push(x + Math.sin(seg * _i) * width, y + Math.cos(seg * _i) * height);
-        }
-
-        buildLine(graphicsData, webGLData);
-
-        graphicsData.points = tempPoints;
-    }
-}
-
-var GraphicsRenderer = function () {
-    function GraphicsRenderer(renderer) {
-        classCallCheck(this, GraphicsRenderer);
-
-        this.renderer = renderer;
-        this.graphicsDataPool = [];
-        this.primitiveShader = null;
-        this.gl = renderer.gl;
-        this.CONTEXT_UID = 0;
-    }
-
-    createClass(GraphicsRenderer, [{
-        key: 'onContextChange',
-        value: function onContextChange() {
-            this.gl = this.renderer.gl;
-            this.CONTEXT_UID = this.renderer.CONTEXT_UID;
-            this.primitiveShader = new PrimitiveShader(this.gl);
-        }
-    }, {
-        key: 'destroy',
-        value: function destroy() {
-            this.renderer = null;
-
-            for (var i = 0; i < this.graphicsDataPool.length; ++i) {
-                this.graphicsDataPool[i].destroy();
-            }
-
-            this.graphicsDataPool = null;
-        }
-    }, {
-        key: 'render',
-        value: function render(displayObject, stage) {
-            var renderer = this.renderer;
-            var gl = renderer.gl;
-            var graphics = displayObject.graphics;
-
-            var webGLData = void 0;
-            var webGL = graphics._webGL[this.CONTEXT_UID];
-
-            if (!webGL || graphics.dirty !== webGL.dirty) {
-                this.updateGraphics(graphics);
-
-                webGL = graphics._webGL[this.CONTEXT_UID];
-            }
-
-            var shader = this.primitiveShader;
-
-            renderer.bindShader(shader);
-
-            for (var i = 0, n = webGL.data.length; i < n; i++) {
-                webGLData = webGL.data[i];
-                var shaderTemp = webGLData.shader;
-
-                renderer.bindShader(shaderTemp);
-
-                shaderTemp.uniforms.translationMatrix = displayObject.worldTransform.toArray(true);
-                shaderTemp.uniforms.tint = hex2rgb(graphics.tint);
-                shaderTemp.uniforms.alpha = graphics.worldAlpha;
-
-                renderer.bindVao(webGLData.vao);
-                webGLData.vao.draw(gl.TRIANGLE_STRIP, webGLData.indices.length);
-            }
-        }
-    }, {
-        key: 'updateGraphics',
-        value: function updateGraphics(graphics) {
-            var gl = this.renderer.gl;
-
-            var webGL = graphics._webGL[this.CONTEXT_UID];
-
-            if (!webGL) {
-                webGL = graphics._webGL[this.CONTEXT_UID] = { lastIndex: 0, data: [], gl: gl, clearDirty: -1, dirty: -1 };
-            }
-
-            webGL.dirty = graphics.dirty;
-
-            if (graphics.clearDirty !== webGL.clearDirty) {
-                webGL.clearDirty = graphics.clearDirty;
-
-                for (var i = 0; i < webGL.data.length; i++) {
-                    this.graphicsDataPool.push(webGL.data[i]);
-                }
-
-                webGL.data.length = 0;
-                webGL.lastIndex = 0;
-            }
-
-            var webGLData = void 0;
-
-            for (var _i = webGL.lastIndex; _i < graphics.graphicsData.length; _i++) {
-                var data = graphics.graphicsData[_i];
-
-                webGLData = this.getWebGLData(webGL, 0);
-
-                if (data.type === SHAPES.POLY) {
-                    buildPoly(data, webGLData);
-                }
-                if (data.type === SHAPES.RECT) {
-                    buildRectangle(data, webGLData);
-                } else if (data.type === SHAPES.CIRC || data.type === SHAPES.ELIP) {
-                    buildCircle(data, webGLData);
-                }
-
-                webGL.lastIndex++;
-            }
-
-            this.renderer.bindVao(null);
-
-            for (var _i2 = 0; _i2 < webGL.data.length; _i2++) {
-                webGLData = webGL.data[_i2];
-
-                if (webGLData.dirty) {
-                    webGLData.upload();
-                }
-            }
-        }
-    }, {
-        key: 'getWebGLData',
-        value: function getWebGLData(gl, type) {
-            var webGLData = gl.data[gl.data.length - 1];
-
-            if (!webGLData || webGLData.points.length > 320000) {
-                webGLData = this.graphicsDataPool.pop() || new WebGLGraphicsData(this.renderer.gl, this.primitiveShader, this.renderer.state.attribsState);
-
-                webGLData.reset(type);
-                gl.data.push(webGLData);
-            }
-
-            webGLData.dirty = true;
-
-            return webGLData;
-        }
-    }]);
-    return GraphicsRenderer;
-}();
-
-var CONTEXT_UID = 0;
-
-var WebGLStageRenderer = function () {
-    function WebGLStageRenderer(stage, app) {
-        var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-        classCallCheck(this, WebGLStageRenderer);
-
-        this.type = RENDERER_TYPE.WEBGL;
-        this.width = app.width;
-        this.height = app.height;
-        this.canvas = stage.canvas;
-
-        /*
-        * WebGL程序必须有一个用于处理上下文丢失（Lost Context）的机制
-        * 导致上下文丢失的原因：
-        * 移动设备电力不足
-        * 其他外因导致GPU重置
-        * 当浏览器标签页处于后台时，浏览器抛弃了上下文
-        * 耗费资源过多，浏览器抛弃了上下文
-        */
-        this.handleContextLost = this.handleContextLost.bind(this);
-        this.handleContextRestored = this.handleContextRestored.bind(this);
-        this.canvas.addEventListener('webglcontextlost', this.handleContextLost, false);
-        this.canvas.addEventListener('webglcontextrestored', this.handleContextRestored, false);
-
-        this._backgroundColorRgba = [0, 0, 0, 0];
-
-        this._contextOptions = {
-            alpha: options.transparent,
-            antialias: options.antialias,
-            premultipliedAlpha: options.transparent && options.transparent !== 'notMultiplied',
-            stencil: true,
-            preserveDrawingBuffer: options.preserveDrawingBuffer
-        };
-
-        this.gl = options.context || index$1$1.createContext(this.canvas, this._contextOptions);
-
-        this.CONTEXT_UID = CONTEXT_UID++;
-
-        this.state = new WebGLState(this.gl);
-
-        this._activeShader = null;
-
-        this._activeVao = null;
-
-        this._activeRenderTarget = null;
-
-        this.drawModes = this.mapWebGLDrawModes();
-
-        this.webglGR = new GraphicsRenderer(this);
-
-        this._initContext();
-    }
-
-    createClass(WebGLStageRenderer, [{
-        key: '_initContext',
-        value: function _initContext() {
-            var gl = this.gl;
-
-            // restore a context if it was previously lost
-            if (gl.isContextLost() && gl.getExtension('WEBGL_lose_context')) {
-                gl.getExtension('WEBGL_lose_context').restoreContext();
-            }
-
-            this.state.resetToDefault();
-
-            this.rootRenderTarget = new RenderTarget(gl, this.width, this.height, settings.RESOLUTION, true);
-            this.rootRenderTarget.clearColor = this._backgroundColorRgba;
-
-            this.bindRenderTarget(this.rootRenderTarget);
-
-            this.webglGR.onContextChange();
-        }
-    }, {
-        key: 'render',
-        value: function render(displayObject, stage) {
-            if (!this.gl || this.gl.isContextLost()) {
-                return;
-            }
-
-            this.webglGR.render(displayObject, stage);
-        }
-    }, {
-        key: 'resize',
-        value: function resize(width, height) {
-            this.rootRenderTarget.resize(width, height);
-            if (this._activeRenderTarget === this.rootRenderTarget) {
-                this.rootRenderTarget.activate();
-
-                if (this._activeShader) {
-                    this._activeShader.uniforms.projectionMatrix = this.rootRenderTarget.projectionMatrix.toArray(true);
-                }
-            }
-        }
-    }, {
-        key: 'clear',
-        value: function clear(clearColor) {
-            this._activeRenderTarget.clear(clearColor);
-        }
-    }, {
-        key: 'bindRenderTarget',
-        value: function bindRenderTarget(renderTarget) {
-            if (renderTarget !== this._activeRenderTarget) {
-                this._activeRenderTarget = renderTarget;
-                renderTarget.activate();
-
-                if (this._activeShader) {
-                    this._activeShader.uniforms.projectionMatrix = renderTarget.projectionMatrix.toArray(true);
-                }
-            }
-            return this;
-        }
-    }, {
-        key: 'bindShader',
-        value: function bindShader(shader) {
-            if (this._activeShader !== shader) {
-                this._activeShader = shader;
-                shader.bind();
-                shader.uniforms.projectionMatrix = this._activeRenderTarget.projectionMatrix.toArray(true);
-            }
-
-            return this;
-        }
-    }, {
-        key: 'createVao',
-        value: function createVao() {
-            return new index$1$1.VertexArrayObject(this.gl, this.state.attribState);
-        }
-    }, {
-        key: 'bindVao',
-        value: function bindVao(vao) {
-            if (this._activeVao === vao) {
-                return this;
-            }
-
-            if (vao) {
-                vao.bind();
-            } else if (this._activeVao) {
-                this._activeVao.unbind();
-            }
-
-            this._activeVao = vao;
-
-            return this;
-        }
-    }, {
-        key: 'reset',
-        value: function reset() {
-            this._activeShader = null;
-            this._activeRenderTarget = this.rootRenderTarget;
-
-            this.rootRenderTarget.activate();
-
-            this.state.resetToDefault();
-
-            return this;
-        }
-    }, {
-        key: 'handleContextLost',
-        value: function handleContextLost(event) {
-            event.preventDefault();
-        }
-    }, {
-        key: 'handleContextRestored',
-        value: function handleContextRestored() {
-            this._initContext();
-            this.textureManager.removeAll();
-        }
-    }, {
-        key: 'mapWebGLDrawModes',
-        value: function mapWebGLDrawModes() {
-            var object = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            object[DRAW_MODES.POINTS] = this.gl.POINTS;
-            object[DRAW_MODES.LINES] = this.gl.LINES;
-            object[DRAW_MODES.LINE_LOOP] = this.gl.LINE_LOOP;
-            object[DRAW_MODES.LINE_STRIP] = this.gl.LINE_STRIP;
-            object[DRAW_MODES.TRIANGLES] = this.gl.TRIANGLES;
-            object[DRAW_MODES.TRIANGLE_STRIP] = this.gl.TRIANGLE_STRIP;
-            object[DRAW_MODES.TRIANGLE_FAN] = this.gl.TRIANGLE_FAN;
-
-            return object;
-        }
-    }, {
-        key: 'destroy',
-        value: function destroy(removeView) {
-            this.destroyPlugins();
-
-            this.canvas.removeEventListener('webglcontextlost', this.handleContextLost);
-            this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestored);
-
-            get(WebGLStageRenderer.prototype.__proto__ || Object.getPrototypeOf(WebGLStageRenderer.prototype), 'destroy', this).call(this, removeView);
-
-            this.uid = 0;
-
-            this.handleContextLost = null;
-            this.handleContextRestored = null;
-
-            this._contextOptions = null;
-            this.gl.useProgram(null);
-
-            if (this.gl.getExtension('WEBGL_lose_context')) {
-                this.gl.getExtension('WEBGL_lose_context').loseContext();
-            }
-
-            this.gl = null;
-        }
-    }]);
-    return WebGLStageRenderer;
-}();
-
-var WebGLRenderer = function (_SystemRenderer) {
-    inherits(WebGLRenderer, _SystemRenderer);
-
-    function WebGLRenderer(app) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        classCallCheck(this, WebGLRenderer);
-        return possibleConstructorReturn(this, (WebGLRenderer.__proto__ || Object.getPrototypeOf(WebGLRenderer)).call(this, RENDERER_TYPE.CANVAS, app, options));
-    }
-
-    createClass(WebGLRenderer, [{
-        key: 'render',
-        value: function render(app) {
-            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var me = this;
-
-            me.app = app;
-            _$1.extend(this.options, options);
-
-            _$1.each(_$1.values(app.convertStages), function (convertStage) {
-                me.renderStage(convertStage.stage);
-            });
-
-            app.convertStages = {};
-        }
-    }, {
-        key: 'renderStage',
-        value: function renderStage(stage) {
-            if (!stage.webGLStageRenderer) {
-                stage.webGLStageRenderer = new WebGLStageRenderer(stage, app, this.options);
-            }
-            stage.stageRending = true;
-            this._clear(stage);
-            this._render(stage);
-            stage.stageRending = false;
-        }
-    }, {
-        key: '_render',
-        value: function _render(stage, displayObject) {
-            if (!displayObject) {
-                displayObject = stage;
-            }
-
-            if (displayObject.graphics) {
-                if (!displayObject.context.$model.visible || displayObject.context.$model.globalAlpha <= 0) {
-                    return;
-                }
-
-                if (!displayObject.graphics.graphicsData.length) {
-                    displayObject._draw(displayObject.graphics);
-                }
-
-                stage.webGLStageRenderer.render(displayObject, stage);
-            }
-
-            if (displayObject.children) {
-                for (var i = 0, len = displayObject.children.length; i < len; i++) {
-                    this._render(stage, displayObject.children[i]);
-                }
-            }
-        }
-    }, {
-        key: '_clear',
-        value: function _clear(stage) {
-            stage.webGLStageRenderer.clear();
-        }
-    }]);
-    return WebGLRenderer;
-}(SystemRenderer);
+//import WebGLRenderer from './webgl/WebGLRenderer';
 
 function autoRenderer(app, options) {
-    if (app.webGL && Utils.isWebGLSupported()) {
-        return new WebGLRenderer(app, options);
-    }
     return new CanvasRenderer(app, options);
+    /*
+       if (app.webGL && utils.isWebGLSupported())
+       {
+           return new WebGLRenderer( app , options);
+       };
+       return new CanvasRenderer( app , options);
+       */
 }
 
 /**
@@ -8480,6 +4602,500 @@ var GraphicsData = function () {
         }
     }]);
     return GraphicsData;
+}();
+
+var arcToSegmentsCache = {};
+var segmentToBezierCache = {};
+var boundsOfCurveCache = {};
+var _join = Array.prototype.join;
+
+/* Adapted from http://dxr.mozilla.org/mozilla-central/source/content/svg/content/src/nsSVGPathDataParser.cpp
+ * by Andrea Bogazzi code is under MPL. if you don't have a copy of the license you can take it here
+ * http://mozilla.org/MPL/2.0/
+ */
+function arcToSegments(toX, toY, rx, ry, large, sweep, rotateX) {
+  var argsString = _join.call(arguments);
+  if (arcToSegmentsCache[argsString]) {
+    return arcToSegmentsCache[argsString];
+  }
+
+  var PI = Math.PI,
+      th = rotateX * PI / 180,
+      sinTh = Math.sin(th),
+      cosTh = Math.cos(th),
+      fromX = 0,
+      fromY = 0;
+
+  rx = Math.abs(rx);
+  ry = Math.abs(ry);
+
+  var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
+      py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
+      rx2 = rx * rx,
+      ry2 = ry * ry,
+      py2 = py * py,
+      px2 = px * px,
+      pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
+      root = 0;
+
+  if (pl < 0) {
+    var s = Math.sqrt(1 - pl / (rx2 * ry2));
+    rx *= s;
+    ry *= s;
+  } else {
+    root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
+  }
+
+  var cx = root * rx * py / ry,
+      cy = -root * ry * px / rx,
+      cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
+      cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
+      mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
+      dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
+
+  if (sweep === 0 && dtheta > 0) {
+    dtheta -= 2 * PI;
+  } else if (sweep === 1 && dtheta < 0) {
+    dtheta += 2 * PI;
+  }
+
+  // Convert into cubic bezier segments <= 90deg
+  var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
+      result = [],
+      mDelta = dtheta / segments,
+      mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
+      th3 = mTheta + mDelta;
+
+  for (var i = 0; i < segments; i++) {
+    result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
+    fromX = result[i][4];
+    fromY = result[i][5];
+    mTheta = th3;
+    th3 += mDelta;
+  }
+  arcToSegmentsCache[argsString] = result;
+  return result;
+}
+
+function segmentToBezier(th2, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY) {
+  var argsString2 = _join.call(arguments);
+  if (segmentToBezierCache[argsString2]) {
+    return segmentToBezierCache[argsString2];
+  }
+
+  var costh2 = Math.cos(th2),
+      sinth2 = Math.sin(th2),
+      costh3 = Math.cos(th3),
+      sinth3 = Math.sin(th3),
+      toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
+      toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
+      cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
+      cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
+      cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
+      cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
+
+  segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
+  return segmentToBezierCache[argsString2];
+}
+
+/*
+ * Private
+ */
+function calcVectorAngle(ux, uy, vx, vy) {
+  var ta = Math.atan2(uy, ux),
+      tb = Math.atan2(vy, vx);
+  if (tb >= ta) {
+    return tb - ta;
+  } else {
+    return 2 * Math.PI - (ta - tb);
+  }
+}
+
+/**
+ * Draws arc
+ * @param {graphics} graphics
+ * @param {Number} fx
+ * @param {Number} fy
+ * @param {Array} coords
+ */
+var drawArc = function drawArc(graphics, fx, fy, coords) {
+  var rx = coords[0],
+      ry = coords[1],
+      rot = coords[2],
+      large = coords[3],
+      sweep = coords[4],
+      tx = coords[5],
+      ty = coords[6],
+      segs = [[], [], [], []],
+      segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+
+  for (var i = 0, len = segsNorm.length; i < len; i++) {
+    segs[i][0] = segsNorm[i][0] + fx;
+    segs[i][1] = segsNorm[i][1] + fy;
+    segs[i][2] = segsNorm[i][2] + fx;
+    segs[i][3] = segsNorm[i][3] + fy;
+    segs[i][4] = segsNorm[i][4] + fx;
+    segs[i][5] = segsNorm[i][5] + fy;
+    graphics.bezierCurveTo.apply(graphics, segs[i]);
+  }
+};
+
+/**
+ * Calculate bounding box of a elliptic-arc
+ * @param {Number} fx start point of arc
+ * @param {Number} fy
+ * @param {Number} rx horizontal radius
+ * @param {Number} ry vertical radius
+ * @param {Number} rot angle of horizontal axe
+ * @param {Number} large 1 or 0, whatever the arc is the big or the small on the 2 points
+ * @param {Number} sweep 1 or 0, 1 clockwise or counterclockwise direction
+ * @param {Number} tx end point of arc
+ * @param {Number} ty
+ */
+var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, tx, ty) {
+
+  var fromX = 0,
+      fromY = 0,
+      bound,
+      bounds = [],
+      segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+
+  for (var i = 0, len = segs.length; i < len; i++) {
+    bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
+    bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
+    bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
+    fromX = segs[i][4];
+    fromY = segs[i][5];
+  }
+  return bounds;
+};
+
+/**
+ * Calculate bounding box of a beziercurve
+ * @param {Number} x0 starting point
+ * @param {Number} y0
+ * @param {Number} x1 first control point
+ * @param {Number} y1
+ * @param {Number} x2 secondo control point
+ * @param {Number} y2
+ * @param {Number} x3 end of beizer
+ * @param {Number} y3
+ */
+// taken from http://jsbin.com/ivomiq/56/edit  no credits available for that.
+function getBoundsOfCurve(x0, y0, x1, y1, x2, y2, x3, y3) {
+  var argsString = _join.call(arguments);
+  if (boundsOfCurveCache[argsString]) {
+    return boundsOfCurveCache[argsString];
+  }
+
+  var sqrt = Math.sqrt,
+      min = Math.min,
+      max = Math.max,
+      abs = Math.abs,
+      tvalues = [],
+      bounds = [[], []],
+      a,
+      b,
+      c,
+      t,
+      t1,
+      t2,
+      b2ac,
+      sqrtb2ac;
+
+  b = 6 * x0 - 12 * x1 + 6 * x2;
+  a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
+  c = 3 * x1 - 3 * x0;
+
+  for (var i = 0; i < 2; ++i) {
+    if (i > 0) {
+      b = 6 * y0 - 12 * y1 + 6 * y2;
+      a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
+      c = 3 * y1 - 3 * y0;
+    }
+
+    if (abs(a) < 1e-12) {
+      if (abs(b) < 1e-12) {
+        continue;
+      }
+      t = -c / b;
+      if (0 < t && t < 1) {
+        tvalues.push(t);
+      }
+      continue;
+    }
+    b2ac = b * b - 4 * c * a;
+    if (b2ac < 0) {
+      continue;
+    }
+    sqrtb2ac = sqrt(b2ac);
+    t1 = (-b + sqrtb2ac) / (2 * a);
+    if (0 < t1 && t1 < 1) {
+      tvalues.push(t1);
+    }
+    t2 = (-b - sqrtb2ac) / (2 * a);
+    if (0 < t2 && t2 < 1) {
+      tvalues.push(t2);
+    }
+  }
+
+  var x,
+      y,
+      j = tvalues.length,
+      jlen = j,
+      mt;
+  while (j--) {
+    t = tvalues[j];
+    mt = 1 - t;
+    x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
+    bounds[0][j] = x;
+
+    y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+    bounds[1][j] = y;
+  }
+
+  bounds[0][jlen] = x0;
+  bounds[1][jlen] = y0;
+  bounds[0][jlen + 1] = x3;
+  bounds[1][jlen + 1] = y3;
+  var result = [{
+    x: min.apply(null, bounds[0]),
+    y: min.apply(null, bounds[1])
+  }, {
+    x: max.apply(null, bounds[0]),
+    y: max.apply(null, bounds[1])
+  }];
+  boundsOfCurveCache[argsString] = result;
+  return result;
+}
+
+var Arc = {
+  drawArc: drawArc,
+  getBoundsOfCurve: getBoundsOfCurve,
+  getBoundsOfArc: getBoundsOfArc
+};
+
+var Rectangle = function () {
+    function Rectangle() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+        var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+        classCallCheck(this, Rectangle);
+
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.type = SHAPES.RECT;
+        this.closed = true;
+    }
+
+    createClass(Rectangle, [{
+        key: 'clone',
+        value: function clone() {
+            return new Rectangle(this.x, this.y, this.width, this.height);
+        }
+    }, {
+        key: 'copy',
+        value: function copy(rectangle) {
+            this.x = rectangle.x;
+            this.y = rectangle.y;
+            this.width = rectangle.width;
+            this.height = rectangle.height;
+
+            return this;
+        }
+    }, {
+        key: 'contains',
+        value: function contains(x, y) {
+            if (this.width <= 0 || this.height <= 0) {
+                return false;
+            }
+
+            if (x >= this.x && x < this.x + this.width) {
+                if (y >= this.y && y < this.y + this.height) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }]);
+    return Rectangle;
+}();
+
+var Circle = function () {
+    function Circle() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var radius = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+        classCallCheck(this, Circle);
+
+        this.x = x;
+
+        this.y = y;
+
+        this.radius = radius;
+
+        this.type = SHAPES.CIRC;
+
+        this.closed = true;
+    }
+
+    createClass(Circle, [{
+        key: 'clone',
+        value: function clone() {
+            return new Circle(this.x, this.y, this.radius);
+        }
+    }, {
+        key: 'contains',
+        value: function contains(x, y) {
+            if (this.radius <= 0) {
+                return false;
+            }
+
+            var r2 = this.radius * this.radius;
+            var dx = this.x - x;
+            var dy = this.y - y;
+
+            dx *= dx;
+            dy *= dy;
+
+            return dx + dy <= r2;
+        }
+    }, {
+        key: 'getBounds',
+        value: function getBounds() {
+            return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        }
+    }]);
+    return Circle;
+}();
+
+var Ellipse = function () {
+    function Ellipse() {
+        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+        var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+        classCallCheck(this, Ellipse);
+
+        this.x = x;
+
+        this.y = y;
+
+        this.width = width;
+
+        this.height = height;
+
+        this.type = SHAPES.ELIP;
+
+        this.closed = true;
+    }
+
+    createClass(Ellipse, [{
+        key: 'clone',
+        value: function clone() {
+            return new Ellipse(this.x, this.y, this.width, this.height);
+        }
+    }, {
+        key: 'contains',
+        value: function contains(x, y) {
+            if (this.width <= 0 || this.height <= 0) {
+                return false;
+            }
+
+            var normx = (x - this.x) / this.width;
+            var normy = (y - this.y) / this.height;
+
+            normx *= normx;
+            normy *= normy;
+
+            return normx + normy <= 1;
+        }
+    }, {
+        key: 'getBounds',
+        value: function getBounds() {
+            return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
+        }
+    }]);
+    return Ellipse;
+}();
+
+var Polygon = function () {
+    function Polygon() {
+        for (var _len = arguments.length, points = Array(_len), _key = 0; _key < _len; _key++) {
+            points[_key] = arguments[_key];
+        }
+
+        classCallCheck(this, Polygon);
+
+        var point_0 = points[0];
+        if (Array.isArray(point_0)) {
+            points = point_0;
+        }
+
+        if (point_0 && "x" in point_0 && "y" in point_0) {
+            var p = [];
+
+            for (var i = 0, il = points.length; i < il; i++) {
+                p.push(points[i].x, points[i].y);
+            }
+
+            points = p;
+        }
+
+        this.closed = true;
+
+        this.points = points;
+
+        this.type = SHAPES.POLY;
+    }
+
+    createClass(Polygon, [{
+        key: "clone",
+        value: function clone() {
+            return new Polygon(this.points.slice());
+        }
+    }, {
+        key: "close",
+        value: function close() {
+            var points = this.points;
+            if (points[0] !== points[points.length - 2] || points[1] !== points[points.length - 1]) {
+                points.push(points[0], points[1]);
+            }
+            this.closed = true;
+        }
+    }, {
+        key: "contains",
+        value: function contains(x, y) {
+            return this._isInsidePolygon_WindingNumber(x, y);
+        }
+
+        /**
+         * 多边形包含判断 Nonzero Winding Number Rule
+         */
+
+    }, {
+        key: "_isInsidePolygon_WindingNumber",
+        value: function _isInsidePolygon_WindingNumber(x, y) {
+            var points = this.points;
+            var wn = 0;
+            for (var shiftP, shift = points[1] > y, i = 3; i < points.length; i += 2) {
+                shiftP = shift;
+                shift = points[i] > y;
+                if (shiftP != shift) {
+                    var n = (shiftP ? 1 : 0) - (shift ? 1 : 0);
+                    if (n * ((points[i - 3] - x) * (points[i - 0] - y) - (points[i - 2] - y) * (points[i - 1] - x)) > 0) {
+                        wn += n;
+                    }
+                }
+            }
+            return wn;
+        }
+    }]);
+    return Polygon;
 }();
 
 function bezierCurveTo(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY) {
@@ -10584,7 +7200,7 @@ var Sector = function (_Shape) {
             var startAngle = myMath.degreeTo360(model.startAngle); // 起始角度[0,360)
             var endAngle = myMath.degreeTo360(model.endAngle); // 结束角度(0,360]
 
-            if (startAngle != endAngle && Math.abs(startAngle - endAngle) % 360 == 0) {
+            if (model.startAngle != model.endAngle && Math.abs(model.startAngle - model.endAngle) % 360 == 0) {
                 //if( startAngle == endAngle && model.startAngle != model.endAngle ) {
                 //如果两个角度相等，那么就认为是个圆环了
                 this.isRing = true;
@@ -10596,9 +7212,9 @@ var Sector = function (_Shape) {
             endAngle = myMath.degreeToRadian(endAngle);
 
             //处理下极小夹角的情况
-            if (endAngle - startAngle < 0.025) {
-                startAngle -= 0.003;
-            }
+            //if( endAngle - startAngle < 0.025 ){
+            //    startAngle -= 0.003
+            //}
 
             var G = graphics;
             //G.beginPath();
@@ -10689,16 +7305,6 @@ Canvax.Event = {
 Canvax.AnimationFrame = AnimationFrame;
 
 var canvax = Canvax;
-
-var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-
-
-
-
-function createCommonjsModule$1(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
 
 var underscore = createCommonjsModule$1(function (module, exports) {
 //     Underscore.js 1.8.3
@@ -12246,7 +8852,7 @@ var underscore = createCommonjsModule$1(function (module, exports) {
       return _;
     });
   }
-}.call(commonjsGlobal));
+}.call(commonjsGlobal$1));
 });
 
 //扩展underscore，主要是deepExtend
@@ -12314,7 +8920,7 @@ function mixinUnderscore() {
         recurse = function recurse(key) {
             return source[key] = _deepExtendCouple(destination[key], source[key], maxDepth - 1);
         };
-        for (_i = 0, _len = sharedObjectKeys.length; _i < _len; _i++) {
+        for (var _i = 0, _len = sharedObjectKeys.length; _i < _len; _i++) {
             sharedObjectKey = sharedObjectKeys[_i];
             recurse(sharedObjectKey);
         }
@@ -12326,7 +8932,7 @@ function mixinUnderscore() {
 
             //return source[key] = _.union(destination[key], source[key]);
         };
-        for (_j = 0, _len1 = sharedArrayKeys.length; _j < _len1; _j++) {
+        for (var _j = 0, _len1 = sharedArrayKeys.length; _j < _len1; _j++) {
             sharedArrayKey = sharedArrayKeys[_j];
             combine(sharedArrayKey);
         }
@@ -12397,7 +9003,19 @@ function parse2MatrixData(list) {
  * @param  {[type]} $s [千分位上的符号]
  * @return {[String]}    [根据$s提供的值 对千分位进行分隔 并且小数点上自动加上'.'号  组合成字符串]
  */
-
+function numAddSymbol($n, $s) {
+    var s = Number($n);
+    var symbol = $s ? $s : ',';
+    if (!s) {
+        return String($n);
+    }
+    if (s >= 1000) {
+        var num = parseInt(s / 1000);
+        return String($n.toString().replace(num, num + symbol));
+    } else {
+        return String($n);
+    }
+}
 
 function getEl(el) {
     if (underscore.isString(el)) {
@@ -12640,7 +9258,7 @@ var Chart = function (_Canvax$Event$EventDi) {
             d && this.resetData(d);
             this.plugs = [];
             this.clean();
-            this.canvax.getDomContainer().innerHTML = "";
+            this.canvax.domView.innerHTML = "";
             this.draw();
         }
 
@@ -12704,13 +9322,13 @@ var component = function () {
     return component;
 }();
 
-var tips = function (_Component) {
-    inherits$1(tips, _Component);
+var Tips = function (_Component) {
+    inherits$1(Tips, _Component);
 
-    function tips(opt, tipDomContainer) {
-        classCallCheck$1(this, tips);
+    function Tips(opt, tipDomContainer) {
+        classCallCheck$1(this, Tips);
 
-        var _this = possibleConstructorReturn$1(this, (tips.__proto__ || Object.getPrototypeOf(tips)).call(this));
+        var _this = possibleConstructorReturn$1(this, (Tips.__proto__ || Object.getPrototypeOf(Tips)).call(this));
 
         _this.tipDomContainer = tipDomContainer;
         _this.cW = 0; //容器的width
@@ -12751,7 +9369,7 @@ var tips = function (_Component) {
         return _this;
     }
 
-    createClass$1(tips, [{
+    createClass$1(Tips, [{
         key: "init",
         value: function init(opt) {
             underscore.deepExtend(this, opt);
@@ -12900,7 +9518,7 @@ var tips = function (_Component) {
                         str += "<td " + tsStyle + ">" + node.field + "：</td>";
                     }
                 }
-                str += "<td " + tsStyle + ">" + Tools.numAddSymbol(node.value) + "</td></tr>";
+                str += "<td " + tsStyle + ">" + numAddSymbol(node.value) + "</td></tr>";
             });
             str += "</table>";
             return str;
@@ -12946,7 +9564,7 @@ var tips = function (_Component) {
             return y;
         }
     }]);
-    return tips;
+    return Tips;
 }(component);
 
 var colors = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
@@ -13009,7 +9627,7 @@ var Pie$1 = function () {
             this.checkedSp = new canvax.Display.Sprite();
             this.sprite.addChild(this.checkedSp);
 
-            this._tip = new tips(this.tips, this.domContainer);
+            this._tip = new Tips(this.tips, this.domContainer);
             this._tip._getDefaultContent = this._getTipDefaultContent;
             this.sprite.addChild(this._tip.sprite);
             if (this.dataLabel.enabled) {
@@ -13762,7 +10380,7 @@ var Pie$1 = function () {
 
             var ySpaceInfo = {};
 
-            for (i = 0; i < quadrantsOrder.length; i++) {
+            for (var i = 0; i < quadrantsOrder.length; i++) {
                 var isEnd = i == 1 || i == 3;
                 self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo);
             }
@@ -13965,13 +10583,13 @@ var Pie$1 = function () {
 
 var Circle$1 = canvax.Shapes.Circle;
 
-var _class$1 = function (_Component) {
-    inherits$1(_class, _Component);
+var Legend = function (_Component) {
+    inherits$1(Legend, _Component);
 
-    function _class(data, opt) {
-        classCallCheck$1(this, _class);
+    function Legend(data, opt) {
+        classCallCheck$1(this, Legend);
 
-        var _this = possibleConstructorReturn$1(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this));
+        var _this = possibleConstructorReturn$1(this, (Legend.__proto__ || Object.getPrototypeOf(Legend)).call(this));
 
         _this.data = data || [];
         _this.width = 0;
@@ -14005,11 +10623,11 @@ var _class$1 = function (_Component) {
         return _this;
     }
 
-    createClass$1(_class, [{
+    createClass$1(Legend, [{
         key: "init",
         value: function init(opt) {
             if (opt) {
-                _.deepExtend(this, opt);
+                underscore.deepExtend(this, opt);
             }
             this.sprite = new canvax.Display.Sprite({
                 id: "LegendSprite"
@@ -14042,7 +10660,7 @@ var _class$1 = function (_Component) {
                 });
                 var stage = this.sprite.getStage();
                 stage.addChild(this._legendTip);
-                this._tips = new tips(this.tips, stage.parent.getDomContainer());
+                this._tips = new Tips(this.tips, stage.parent.domView);
                 this._tips._getDefaultContent = function (info) {
                     return info.field;
                 };
@@ -14070,7 +10688,7 @@ var _class$1 = function (_Component) {
         key: "setStyle",
         value: function setStyle(field, style) {
             var me = this;
-            _.each(this.data, function (obj, i) {
+            underscore.each(this.data, function (obj, i) {
                 if (obj.field == field) {
                     if (style.fillStyle) {
                         obj.fillStyle = style.fillStyle;
@@ -14085,7 +10703,7 @@ var _class$1 = function (_Component) {
         value: function getStyle(field) {
             var me = this;
             var data = null;
-            _.each(this.data, function (obj, i) {
+            underscore.each(this.data, function (obj, i) {
                 if (obj.field == field) {
                     data = obj;
                 }
@@ -14099,7 +10717,7 @@ var _class$1 = function (_Component) {
 
             var width = 0,
                 height = 0;
-            _.each(this.data, function (obj, i) {
+            underscore.each(this.data, function (obj, i) {
 
                 //如果外面没有设置过，就默认为激活状态
                 if (obj.activate == undefined || obj.activate) {
@@ -14180,7 +10798,7 @@ var _class$1 = function (_Component) {
                 sprite.on("click", function (e) {
 
                     //只有一个field的时候，不支持取消
-                    if (_.filter(me.data, function (obj) {
+                    if (underscore.filter(me.data, function (obj) {
                         return obj.activate;
                     }).length == 1) {
                         if (obj.activate) {
@@ -14215,7 +10833,7 @@ var _class$1 = function (_Component) {
             return e;
         }
     }]);
-    return _class;
+    return Legend;
 }(component);
 
 var _class = function (_Chart) {
@@ -14502,7 +11120,7 @@ var _class = function (_Chart) {
             }
 
             if (dataFrame.data.length > 0) {
-                for (i = 0; i < dataFrame.data.length; i++) {
+                for (var i = 0; i < dataFrame.data.length; i++) {
                     if (underscore.contains(this.ignoreFields, dataFrame.data[i].name)) {
                         dataFrame.data[i].ignored = true;
                         dataFrame.data[i].y = 0;
@@ -14683,7 +11301,7 @@ var _class = function (_Chart) {
                 },
                 layoutType: "v"
             }, this._opts.legend);
-            this._legend = new _class$1(this._getLegendData(), legendOpt);
+            this._legend = new Legend(this._getLegendData(), legendOpt);
             this.stage.addChild(this._legend.sprite);
             this._legend.pos({
                 x: this.width - this._legend.width,
@@ -14711,8 +11329,5056 @@ var _class = function (_Chart) {
     return _class;
 }(Chart);
 
+var Line$1 = canvax.Shapes.Line;
+
+var xAxis = function (_Component) {
+    inherits$1(xAxis, _Component);
+
+    function xAxis(opt, data, coordinate) {
+        classCallCheck$1(this, xAxis);
+
+        var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this));
+
+        _this._coordinate = coordinate || {};
+
+        //TODO:这个 graphw 目前是有问题的， 它实际是包括了yAxisW
+        _this.graphw = 0;
+        _this.graphh = 0;
+        _this.yAxisW = 0;
+        _this.width = 0;
+        _this.height = 0;
+
+        _this.disY = 1;
+        _this.dis = 6; //线到文本的距离
+
+        _this.label = "";
+        _this._label = null; //this.label对应的文本对象
+
+        _this.line = {
+            enabled: 1, //是否有line
+            width: 1,
+            height: 4,
+            strokeStyle: '#cccccc'
+        };
+
+        _this.text = {
+            fillStyle: '#999',
+            fontSize: 12,
+            rotation: 0,
+            format: null,
+            textAlign: "center"
+        };
+        _this.maxTxtH = 0;
+
+        _this.pos = {
+            x: null,
+            y: null
+        };
+
+        //this.display = "block";
+        _this.enabled = 1; //1,0 true ,false 
+
+        _this.disXAxisLine = 6; //x轴两端预留的最小值
+        _this.disOriginX = 0; //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
+        _this.xGraphsWidth = 0; //x轴宽(去掉两端)
+
+        _this.dataOrg = []; //源数据
+        _this.dataSection = []; //默认就等于源数据
+        _this._layoutDataSection = []; //dataSection的 format 后的数据
+        _this.data = []; //{x:100, content:'1000'}
+        _this.layoutData = []; //this.data(可能数据过多),重新编排过滤后的数据集合, 并根据此数组展现文字和线条
+        _this.sprite = null;
+
+        _this._textMaxWidth = 0;
+        _this.leftDisX = 0; //x轴最左边需要的间距。默认等于第一个x value字符串长度的一半
+
+        //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
+        //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
+        _this.filter = null; //function(params){}; 
+
+        _this.isH = false; //是否为横向转向的x轴
+
+        _this.animation = true;
+        _this.resize = false;
+
+        _this.maxVal = null;
+        _this.minVal = null;
+
+        _this.xDis = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
+
+        _this.layoutType = "rule"; // rule , peak, proportion
+
+        _this.autoTrimLayout = true;
+
+        _this.posParseToInt = false; //主要是柱状图里面有需要 要均匀间隔1px的时候需要
+
+        _this.init(opt, data);
+        return _this;
+    }
+
+    createClass$1(xAxis, [{
+        key: "init",
+        value: function init(opt, data) {
+            this.sprite = new canvax.Display.Sprite({
+                id: "xAxisSprite"
+            });
+            this.rulesSprite = new canvax.Display.Sprite({
+                id: "rulesSprite"
+            });
+            this.sprite.addChild(this.rulesSprite);
+            this._initHandle(opt, data);
+        }
+    }, {
+        key: "_initHandle",
+        value: function _initHandle(opt, data) {
+
+            if (data && data.org) {
+                this.dataOrg = data.org;
+            }
+
+            if (opt) {
+                underscore.deepExtend(this, opt);
+                if (!opt.dataSection && this.dataOrg) {
+                    //如果没有传入指定的dataSection，才需要计算dataSection
+                    this.dataSection = this._initDataSection(this.dataOrg);
+                }
+            }
+
+            if (this.text.rotation != 0) {
+                if (this.text.rotation % 90 == 0) {
+                    this.isH = true;
+                }
+                this.text.textAlign = "right";
+            }
+
+            if (!this.line.enabled) {
+                this.line.height = 1;
+            }
+
+            //先计算出来显示文本
+            this._layoutDataSection = this._formatDataSectionText(this.dataSection);
+
+            //然后计算好最大的 width 和 最大的height，外部组件需要用
+            this._setTextMaxWidth();
+            this._setXAxisHeight();
+
+            //取第一个数据来判断xaxis的刻度值类型是否为 number
+            this.minVal == null && (this.minVal = underscore.min(this.dataSection));
+            this.maxVal == null && (this.maxVal = underscore.max(this.dataSection));
+        }
+
+        /**
+         *return dataSection 默认为xAxis.dataOrg的的faltten
+         *即 [ [1,2,3,4] ] -- > [1,2,3,4]
+         */
+
+    }, {
+        key: "_initDataSection",
+        value: function _initDataSection(data) {
+            return underscore.flatten(data);
+        }
+    }, {
+        key: "setX",
+        value: function setX($n) {
+            this.sprite.context.x = $n;
+        }
+    }, {
+        key: "setY",
+        value: function setY($n) {
+            this.sprite.context.y = $n;
+        }
+
+        //配置和数据变化
+
+    }, {
+        key: "reset",
+        value: function reset(opt, data) {
+            //先在field里面删除一个字段，然后重新计算
+            opt && underscore.deepExtend(this, opt);
+
+            this._initHandle(opt, data);
+
+            this.draw();
+        }
+
+        //数据变化，配置没变的情况
+
+    }, {
+        key: "resetData",
+        value: function resetData(data) {
+            this.sprite.removeAllChildren();
+            this.dataSection = [];
+
+            this._initHandle(null, data);
+
+            this.draw();
+        }
+    }, {
+        key: "getIndexOfVal",
+        value: function getIndexOfVal(xvalue) {
+            var i;
+            for (var ii = 0, il = this.data.length; ii < il; ii++) {
+                var obj = this.data[ii];
+                if (obj.content == xvalue) {
+                    i = ii;
+                    break;
+                }
+            }
+
+            return i;
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+
+            // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
+            if (this.data.length == 0) {}
+            this._getLabel();
+            this._initConfig(opt);
+            this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
+            var me = this;
+            underscore.each(this.data, function (obj, i) {
+                obj.layoutText = me._layoutDataSection[i];
+            });
+
+            this._trimLayoutData();
+
+            this.setX(this.pos.x);
+            this.setY(this.pos.y);
+
+            //if (this.enabled) { //this.display != "none"
+            this._widget();
+            //};
+
+            this.resize = false;
+            // this.data = this.layoutData
+        }
+    }, {
+        key: "_getLabel",
+        value: function _getLabel() {
+            if (this.label && this.label != "") {
+                if (!this._label) {
+                    this._label = new canvax.Display.Text(this.label, {
+                        context: {
+                            fontSize: this.text.fontSize,
+                            textAlign: this.isH ? "center" : "left",
+                            textBaseline: this.isH ? "top" : "middle",
+                            fillStyle: this.text.fillStyle,
+                            rotation: this.isH ? -90 : 0
+                        }
+                    });
+                } else {
+                    this._label.resetText(this.label);
+                }
+            }
+        }
+
+        //初始化配置
+
+    }, {
+        key: "_initConfig",
+        value: function _initConfig(opt) {
+            if (opt) {
+                underscore.deepExtend(this, opt);
+            }
+
+            this.yAxisW = Math.max(this.yAxisW, this.leftDisX);
+            this.width = this.graphw - this.yAxisW;
+            if (this.pos.x == null) {
+                this.pos.x = this.yAxisW + this.disOriginX;
+            }
+            if (this.pos.y == null) {
+                this.pos.y = this.graphh - this.height;
+            }
+            this.xGraphsWidth = parseInt(this.width - this._getXAxisDisLine());
+
+            if (this._label) {
+                if (this.isH) {
+                    this.xGraphsWidth -= this._label.getTextHeight() + 5;
+                } else {
+                    this.xGraphsWidth -= this._label.getTextWidth() + 5;
+                }
+            }
+            this.disOriginX = parseInt((this.width - this.xGraphsWidth) / 2);
+        }
+
+        //获取x对应的位置
+        //val ind 至少要有一个
+
+    }, {
+        key: "getPosX",
+        value: function getPosX(opt) {
+            var x = 0;
+            var val = opt.val;
+            var ind = "ind" in opt ? opt.ind : underscore.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
+            var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
+            var xGraphsWidth = "xGraphsWidth" in opt ? opt.xGraphsWidth : this.xGraphsWidth;
+            var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
+
+            if (dataLen == 1) {
+                x = xGraphsWidth / 2;
+            } else {
+                if (layoutType == "rule") {
+                    //折线图的xyaxis就是 rule
+                    x = ind / (dataLen - 1) * xGraphsWidth;
+                }
+                if (layoutType == "proportion") {
+                    //按照数据真实的值在minVal - maxVal 区间中的比例值
+                    if (val == undefined) {
+                        val = ind * (this.maxVal - this.minVal) / (dataLen - 1) + this.minVal;
+                    }
+                    x = xGraphsWidth * ((val - this.minVal) / (this.maxVal - this.minVal));
+                }
+                if (layoutType == "peak") {
+                    //柱状图的就是peak 
+                    x = this.xDis * (ind + 1) - this.xDis / 2;
+                }
+                //if( layoutType == "step" ){
+                //    x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
+                //};
+            }
+
+            if (this.posParseToInt) {
+                return parseInt(x, 10);
+            } else {
+                return x;
+            }
+        }
+    }, {
+        key: "_trimXAxis",
+        value: function _trimXAxis($data, $xGraphsWidth) {
+            var tmpData = [];
+            var data = $data || this.dataSection;
+            var xGraphsWidth = xGraphsWidth || this.xGraphsWidth;
+
+            this.xDis = xGraphsWidth / data.length; //这个属性目前主要是柱状图有分组柱状图的场景在用
+
+            for (var a = 0, al = data.length; a < al; a++) {
+                var layoutText = this._getFormatText(data[a]);
+                var txt = new canvax.Display.Text(layoutText, {
+                    context: {
+                        fontSize: this.text.fontSize
+                    }
+                });
+
+                var o = {
+                    'content': data[a],
+                    'x': this.getPosX({
+                        val: data[a],
+                        ind: a,
+                        dataLen: al,
+                        xGraphsWidth: xGraphsWidth
+                    }),
+                    'textWidth': txt.getTextWidth()
+                };
+
+                tmpData.push(o);
+            }
+            return tmpData;
+        }
+    }, {
+        key: "_formatDataSectionText",
+        value: function _formatDataSectionText(arr) {
+            if (!arr) {
+                arr = this.dataSection;
+            }
+            var me = this;
+            var currArr = [];
+            underscore.each(arr, function (val) {
+                currArr.push(me._getFormatText(val));
+            });
+            return currArr;
+        }
+    }, {
+        key: "_getXAxisDisLine",
+        value: function _getXAxisDisLine() {
+            //获取x轴两端预留的距离
+            var disMin = this.disXAxisLine;
+            var disMax = 2 * disMin;
+            var dis = disMin;
+            dis = disMin + this.width % underscore.flatten(this.dataOrg).length;
+            dis = dis > disMax ? disMax : dis;
+            dis = isNaN(dis) ? 0 : dis;
+            return dis;
+        }
+    }, {
+        key: "_setXAxisHeight",
+        value: function _setXAxisHeight() {
+            //检测下文字的高等
+            if (!this.enabled) {
+                //this.display == "none"
+                this.dis = 0;
+                this.height = 3; //this.dis;//this.max.txtH;
+            } else {
+                var txt = new canvax.Display.Text(this._layoutDataSection[0] || "test", {
+                    context: {
+                        fontSize: this.text.fontSize
+                    }
+                });
+
+                this.maxTxtH = txt.getTextHeight();
+
+                if (!!this.text.rotation) {
+                    if (this.text.rotation % 90 == 0) {
+                        this.height = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
+                    } else {
+                        var sinR = Math.sin(Math.abs(this.text.rotation) * Math.PI / 180);
+                        var cosR = Math.cos(Math.abs(this.text.rotation) * Math.PI / 180);
+                        this.height = sinR * this._textMaxWidth + txt.getTextHeight() + 5;
+                        this.leftDisX = cosR * txt.getTextWidth() + 8;
+                    }
+                } else {
+                    this.height = this.disY + this.line.height + this.dis + this.maxTxtH;
+                    this.leftDisX = txt.getTextWidth() / 2;
+                }
+            }
+        }
+    }, {
+        key: "_getFormatText",
+        value: function _getFormatText(text) {
+            var res;
+            if (underscore.isFunction(this.text.format)) {
+                res = this.text.format(text);
+            } else {
+                res = text;
+            }
+            if (underscore.isArray(res)) {
+                res = numAddSymbol(res);
+            }
+            if (!res) {
+                res = text;
+            }
+            return res;
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            if (!this.enabled) return;
+
+            var arr = this.layoutData;
+
+            if (this._label) {
+                this._label.context.x = this.xGraphsWidth + 5;
+                this.sprite.addChild(this._label);
+            }
+
+            var delay = Math.min(1000 / arr.length, 25);
+
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var xNodeId = "xNode" + a;
+
+                var xNode = this.rulesSprite.getChildById(xNodeId);
+                if (!xNode) {
+                    xNode = new canvax.Display.Sprite({
+                        id: xNodeId
+                    });
+                    this.rulesSprite.addChild(xNode);
+                }
+
+                xNode.context.visible = !!arr[a].visible;
+
+                var o = arr[a];
+                var x = o.x,
+                    y = this.disY + this.line.height + this.dis;
+
+                //文字
+                var textContext = {
+                    x: o.text_x || o.x,
+                    y: y + 20,
+                    fillStyle: this.text.fillStyle,
+                    fontSize: this.text.fontSize,
+                    rotation: -Math.abs(this.text.rotation),
+                    textAlign: this.text.textAlign,
+                    textBaseline: !!this.text.rotation ? "middle" : "top",
+                    globalAlpha: 0
+                };
+
+                if (!!this.text.rotation && this.text.rotation != 90) {
+                    textContext.x += 5;
+                    textContext.y += 3;
+                }
+
+                if (xNode._txt) {
+                    //_.extend( xNode._txt.context , textContext );
+                    //debugger
+                    xNode._txt.resetText(o.layoutText + "");
+                    if (this.animation) {
+                        xNode._txt.animate({
+                            x: textContext.x
+                        }, {
+                            duration: 300
+                        });
+                    } else {
+                        xNode._txt.context.x = textContext.x;
+                    }
+                } else {
+
+                    xNode._txt = new canvax.Display.Text(o.layoutText, {
+                        id: "xAxis_txt_" + a,
+                        context: textContext
+                    });
+                    xNode.addChild(xNode._txt);
+
+                    //新建的 txt的 动画方式
+                    if (this.animation && !this.resize) {
+                        xNode._txt.animate({
+                            globalAlpha: 1,
+                            y: xNode._txt.context.y - 20
+                        }, {
+                            duration: 500,
+                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                            delay: a * delay,
+                            id: xNode._txt.id
+                        });
+                    } else {
+                        xNode._txt.context.y = xNode._txt.context.y - 20;
+                        xNode._txt.context.globalAlpha = 1;
+                    }
+                }
+
+                if (this.line.enabled) {
+                    var lineContext = {
+                        x: x,
+                        y: this.disY,
+                        end: {
+                            x: 0,
+                            y: this.line.height + this.disY
+                        },
+                        lineWidth: this.line.width,
+                        strokeStyle: this.line.strokeStyle
+                    };
+                    if (xNode._line) {
+                        //_.extend( xNode._txt.context , textContext );
+                        if (this.animation) {
+                            xNode._line.animate({
+                                x: lineContext.x
+                            }, {
+                                duration: 300
+                            });
+                        } else {
+                            xNode._line.context.x = lineContext.x;
+                        }
+                    } else {
+                        xNode._line = new Line$1({
+                            context: lineContext
+                        });
+                        xNode.addChild(xNode._line);
+                    }
+                }
+
+                //这里可以由用户来自定义过滤 来 决定 该node的样式
+                underscore.isFunction(this.filter) && this.filter({
+                    layoutData: arr,
+                    index: a,
+                    txt: xNode._txt,
+                    line: xNode._line || null
+                });
+            }
+
+            //把sprite.children中多余的给remove掉
+            if (this.rulesSprite.children.length > arr.length) {
+                for (var al = arr.length, pl = this.rulesSprite.children.length; al < pl; al++) {
+                    this.rulesSprite.getChildAt(al).remove();
+                    al--, pl--;
+                }
+            }
+        }
+    }, {
+        key: "_setTextMaxWidth",
+        value: function _setTextMaxWidth() {
+            var arr = this._layoutDataSection;
+            var maxLenText = arr[0];
+
+            for (var a = 0, l = arr.length; a < l; a++) {
+                if ((arr[a] + '').length > maxLenText.length) {
+                    maxLenText = arr[a];
+                }
+            }
+
+            var txt = new canvax.Display.Text(maxLenText || "test", {
+                context: {
+                    fillStyle: this.text.fillStyle,
+                    fontSize: this.text.fontSize
+                }
+            });
+
+            this._textMaxWidth = txt.getTextWidth();
+            this._textMaxHeight = txt.getTextHeight();
+
+            return this._textMaxWidth;
+        }
+    }, {
+        key: "_trimLayoutData",
+        value: function _trimLayoutData() {
+            var me = this;
+            var arr = this.data;
+            var l = arr.length;
+
+            if (!this.enabled || !l) return;
+
+            // rule , peak, proportion
+            if (me.layoutType == "proportion") {
+                this._checkOver();
+            }
+            if (me.layoutType == "peak") {
+                //TODO: peak暂时沿用_checkOver，这是保险的万无一失的。
+                this._checkOver();
+            }
+
+            if (me.layoutType == "rule") {
+                //最佳显示效果的width
+                var layoutItemW = me._textMaxWidth * 1.5;
+                if (!!me.text.rotation) {
+                    layoutItemW = 35;
+                }
+
+                var layoutCount = Math.min(parseInt(me.xGraphsWidth / layoutItemW), l); //可以显示的下多少个
+                for (var i = 0; i <= layoutCount; i++) {
+                    var textOpt = arr[parseInt((l - 1) / layoutCount * i)];
+                    textOpt.visible = true;
+                    //if( i == layoutCount && textOpt.textWidth > me._getRootPR()*2 ){
+                    if (i == layoutCount && textOpt.x + textOpt.textWidth / 2 > me.width) {
+                        //最后一个的话 , 如果右边会超出了右边界，矫正下位置
+                        textOpt.text_x = me.width - textOpt.textWidth / 2 - 2;
+                    }
+                }
+                this.layoutData = arr;
+            }
+        }
+    }, {
+        key: "_getRootPR",
+        value: function _getRootPR() {
+            //找到paddingRight,在最后一个文本右移的时候需要用到
+            var rootPaddingRight = 0;
+            if (this._coordinate._root) {
+                rootPaddingRight = this._coordinate._root.padding.right;
+            }
+            return rootPaddingRight;
+        }
+    }, {
+        key: "_checkOver",
+        value: function _checkOver() {
+            var me = this;
+            var arr = this.data;
+
+            var l = arr.length;
+
+            function checkOver(i) {
+                var curr = arr[i];
+
+                if (curr === undefined) {
+                    return;
+                }
+                curr.visible = true;
+                for (var ii = i; ii < l - 1; ii++) {
+                    var next = arr[ii + 1];
+
+                    var nextWidth = next.textWidth;
+                    var currWidth = curr.textWidth;
+                    if (!!me.text.rotation) {
+                        nextWidth = 35;
+                        currWidth = 35;
+                    }
+
+                    var next_x = next.x;
+                    if (me.text.textAlign == "center") {
+                        next_x = next.x - nextWidth / 2;
+                    }
+
+                    if (ii == l - 2) {
+                        //next是最后一个
+                        if (me.text.textAlign == "center" && next.x + nextWidth / 2 > me.width) {
+                            next_x = me.width - nextWidth;
+                            next.text_x = me.width - nextWidth / 2 + me._getRootPR();
+                        }
+                        if (me.text.textAlign == "left" && next.x + nextWidth > me.width) {
+                            next_x = me.width - nextWidth;
+                            next.text_x = me.width - nextWidth;
+                        }
+                    }
+
+                    if (next_x < curr.x + currWidth / 2) {
+                        if (ii == l - 2) {
+                            //最后一个的话，反把前面的给hide
+                            next.visible = true;
+                            curr.visible = false;
+                            return;
+                        } else {
+                            next.visible = false;
+                        }
+                    } else {
+                        checkOver(ii + 1);
+                        break;
+                    }
+                }
+            }
+
+            //非rotation下才做显示隐藏
+            //if (!this.text.rotation) {
+            checkOver(0);
+            //} else {
+            //    _.each( this.data , function( d ){
+            //        d.visible = true;
+            //    } );
+            //};
+            this.layoutData = this.data;
+        }
+    }]);
+    return xAxis;
+}(component);
+
+function normalizeTickInterval(interval, magnitude) {
+    var normalized, i;
+    // var multiples = [1, 2, 2.5, 5, 10];
+    var multiples = [1, 2, 5, 10];
+    // round to a tenfold of 1, 2, 2.5 or 5
+    normalized = interval / magnitude;
+
+    // normalize the interval to the nearest multiple
+    for (var i = 0; i < multiples.length; i++) {
+        interval = multiples[i];
+        if (normalized <= (multiples[i] + (multiples[i + 1] || multiples[i])) / 2) {
+            break;
+        }
+    }
+
+    // multiply back to the correct magnitude
+    interval *= magnitude;
+
+    return interval;
+}
+
+function correctFloat(num) {
+    return parseFloat(num.toPrecision(14));
+}
+
+function getLinearTickPositions(arr, $maxPart, $cfg) {
+
+    arr = underscore.without(arr, undefined, null, "");
+
+    var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) : 1;
+    //返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
+    var isInt = $cfg && $cfg.isInt ? 1 : 0;
+
+    if (isNaN(scale)) {
+        scale = 1;
+    }
+
+    var max = underscore.max(arr);
+    var initMax = max;
+    max *= scale;
+    var min = underscore.min(arr);
+
+    if (min == max) {
+        if (max > 0) {
+            min = 0;
+            return [min, max];
+            // min= Math.round(max/2);
+        } else if (max < 0) {
+            return [max, 0];
+            //min = max*2;
+        } else {
+            max = 1;
+            return [0, max];
+        }
+    }
+
+    var length = max - min;
+    if (length) {
+        var tempmin = min; //保证min>0的时候不会出现负数
+        min -= length * 0.05;
+        // S.log(min +":"+ tempmin)
+        if (min < 0 && tempmin >= 0) {
+            min = 0;
+        }
+        max += length * 0.05;
+    }
+
+    var tickInterval = (max - min) * 0.3; //72 / 365;
+    var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
+
+    tickInterval = normalizeTickInterval(tickInterval, magnitude);
+    if (isInt) {
+        tickInterval = Math.ceil(tickInterval);
+    }
+
+    var pos,
+        lastPos,
+        roundedMin = correctFloat(Math.floor(min / tickInterval) * tickInterval),
+        roundedMax = correctFloat(Math.ceil(max / tickInterval) * tickInterval),
+        tickPositions = [];
+
+    // Populate the intermediate values
+    pos = roundedMin;
+    while (pos <= roundedMax) {
+
+        // Place the tick on the rounded value
+        tickPositions.push(pos);
+
+        // Always add the raw tickInterval, not the corrected one.
+        pos = correctFloat(pos + tickInterval);
+
+        // If the interval is not big enough in the current min - max range to actually increase
+        // the loop variable, we need to break out to prevent endless loop. Issue #619
+        if (pos === lastPos) {
+            break;
+        }
+
+        // Record the last value
+        lastPos = pos;
+    }
+    if (tickPositions.length >= 3) {
+        if (tickPositions[tickPositions.length - 2] >= initMax) {
+            tickPositions.pop();
+        }
+    }
+    return tickPositions;
+}
+
+var DataSection = {
+    section: function section($arr, $maxPart, $cfg) {
+        return underscore.uniq(getLinearTickPositions($arr, $maxPart, $cfg));
+    }
+};
+
+var Line$2 = canvax.Shapes.Line;
+
+var yAxis$2 = function (_Component) {
+    inherits$1(yAxis, _Component);
+
+    function yAxis(opt, data) {
+        classCallCheck$1(this, yAxis);
+
+        var _this = possibleConstructorReturn$1(this, (yAxis.__proto__ || Object.getPrototypeOf(yAxis)).call(this));
+
+        _this._opt = opt;
+
+        _this.width = null;
+        _this.enabled = 1; //true false 1,0都可以
+        _this.dis = 6; //线到文本的距离
+        _this.maxW = 0; //最大文本的 width
+        _this.field = []; //这个 轴 上面的 field
+
+        _this.label = "";
+        _this._label = null; //label 的text对象
+
+        _this.line = {
+            enabled: 1, //是否有line
+            width: 4,
+            lineWidth: 1,
+            strokeStyle: '#cccccc'
+        };
+
+        _this.text = {
+            fillStyle: '#999',
+            fontSize: 12,
+            format: null,
+            rotation: 0
+        };
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+        _this.place = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
+        _this.biaxial = false; //是否是双轴中的一份
+        _this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
+        _this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
+
+        //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
+        _this.dataSectionGroup = [];
+
+        //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
+        _this.middleweight = null;
+
+        _this.dataOrg = []; //源数据
+
+        _this.sprite = null;
+        //this.x           = 0;
+        //this.y           = 0;
+        _this.disYAxisTopLine = 6; //y轴顶端预留的最小值
+        _this.yMaxHeight = 0; //y轴最大高
+        _this.yGraphsHeight = 0; //y轴第一条线到原点的高
+
+        _this.baseNumber = null; //为非负number
+        _this.basePoint = null; //value为 baseNumber 的point {x,y}
+
+        _this.bottomNumber = null;
+
+        _this._yOriginTrans = 0; //当设置的 baseNumber 和datasection的min不同的时候，
+
+
+        //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
+        //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
+        _this.filter = null; //function(params){}; 
+
+        _this.isH = false; //是否横向
+
+        _this.animation = true;
+        _this.resize = false;
+
+        _this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
+
+        _this.layoutType = "proportion"; // rule , peak, proportion
+
+        _this.init(opt, data);
+        return _this;
+    }
+
+    createClass$1(yAxis, [{
+        key: "init",
+        value: function init(opt, data) {
+            underscore.deepExtend(this, opt);
+
+            if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
+                this.isH = true;
+            }
+
+            this._initData(data);
+            this.sprite = new canvax.Display.Sprite({
+                id: "yAxisSprite_" + new Date().getTime()
+            });
+            this.rulesSprite = new canvax.Display.Sprite({
+                id: "yRulesSprite_" + new Date().getTime()
+            });
+            this.sprite.addChild(this.rulesSprite);
+        }
+
+        //配置和数据变化
+
+    }, {
+        key: "reset",
+        value: function reset(opt, data) {
+            this.dataSection = [];
+            this.dataSectionGroup = [];
+
+            opt && underscore.deepExtend(this, opt);
+
+            this._initData(data);
+            this._trimYAxis();
+            this._widget();
+        }
+    }, {
+        key: "setX",
+        value: function setX($n) {
+            this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW, this.width - this.pos.x - this.dis - this.line.width) : 0);
+            this.pos.x = $n;
+        }
+    }, {
+        key: "setY",
+        value: function setY($n) {
+            this.sprite.context.y = $n;
+            this.pos.y = $n;
+        }
+    }, {
+        key: "setAllStyle",
+        value: function setAllStyle(sty) {
+            underscore.each(this.rulesSprite.children, function (s) {
+                underscore.each(s.children, function (cel) {
+                    if (cel.type == "text") {
+                        cel.context.fillStyle = sty;
+                    } else if (cel.type == "line") {
+                        cel.context.strokeStyle = sty;
+                    }
+                });
+            });
+        }
+    }, {
+        key: "_getLabel",
+        value: function _getLabel() {
+
+            var _label = "";
+            if (underscore.isArray(this.label)) {
+                _label = this.label[this.place == "left" ? 0 : 1];
+            } else {
+                _label = this.label;
+            }
+
+            if (_label && _label != "") {
+                this._label = new canvax.Display.Text(_label, {
+                    context: {
+                        fontSize: this.text.fontSize,
+                        textAlign: this.place, //"left",
+                        textBaseline: this.isH ? "top" : "bottom",
+                        fillStyle: this.text.fillStyle,
+                        rotation: this.isH ? -90 : 0
+                    }
+                });
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            opt && underscore.deepExtend(this, opt);
+            this._getLabel();
+            this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine();
+
+            if (this._label) {
+                if (this.isH) {
+                    this.yGraphsHeight -= this._label.getTextWidth();
+                } else {
+                    this.yGraphsHeight -= this._label.getTextHeight();
+                }
+                this._label.context.y = -this.yGraphsHeight - 5;
+            }
+
+            this._trimYAxis();
+            this._widget();
+
+            this.setX(this.pos.x);
+            this.setY(this.pos.y);
+
+            this.resize = false;
+        }
+
+        //更具y轴的值来输出对应的在y轴上面的位置
+
+    }, {
+        key: "getYposFromVal",
+        value: function getYposFromVal(val) {
+
+            var y = 0;
+            var dsgLen = this.dataSectionGroup.length;
+            var yGroupHeight = this.yGraphsHeight / dsgLen;
+
+            for (var i = 0, l = dsgLen; i < l; i++) {
+                var ds = this.dataSectionGroup[i];
+                var min = underscore.min(ds);
+                var max = underscore.max(ds);
+                var valInd = underscore.indexOf(ds, val);
+
+                if (val >= min && val <= max || valInd >= 0) {
+                    if (this.layoutType == "proportion") {
+                        var _baseNumber = this.baseNumber;
+                        //如果 baseNumber 并不在这个区间
+                        if (_baseNumber < min || _baseNumber > max) {
+                            _baseNumber = min;
+                        } else {
+                            //如果刚好在这个区间Group
+
+                        }
+                        var maxGroupDisABS = Math.max(Math.abs(max - _baseNumber), Math.abs(_baseNumber - min));
+                        var amountABS = Math.abs(max - min);
+                        var h = maxGroupDisABS / amountABS * yGroupHeight;
+
+                        y = (val - _baseNumber) / maxGroupDisABS * h + i * yGroupHeight;
+                    }
+                    if (this.layoutType == "rule") {
+                        //line 的xaxis就是 rule
+                        y = valInd / (ds.length - 1) * yGroupHeight;
+                    }
+                    if (this.layoutType == "peak") {
+                        //bar的xaxis就是 peak
+                        y = yGroupHeight / ds.length * (valInd + 1) - yGroupHeight / ds.length / 2;
+                    }
+
+                    y += this._yOriginTrans;
+                    break;
+                }
+            }
+            //返回的y是以最底端为坐标原点的坐标值，所以就是负数
+            if (this.sort == "desc") {
+                y = this.yGraphsHeight - y;
+            }
+            return -y;
+        }
+    }, {
+        key: "getValFromYpos",
+        value: function getValFromYpos(y) {
+            var start = this.layoutData[0];
+            var end = this.layoutData.slice(-1)[0];
+            var val = (end.content - start.content) * ((y - start.y) / (end.y - start.y)) + start.content;
+            return val;
+        }
+    }, {
+        key: "_getYOriginTrans",
+        value: function _getYOriginTrans(baseNumber) {
+            var y = 0;
+            var dsgLen = this.dataSectionGroup.length;
+            var yGroupHeight = this.yGraphsHeight / dsgLen;
+
+            for (var i = 0, l = dsgLen; i < l; i++) {
+                var ds = this.dataSectionGroup[i];
+                var min = underscore.min(ds);
+                var max = underscore.max(ds);
+
+                var amountABS = Math.abs(max - min);
+
+                if (baseNumber >= min && baseNumber <= max) {
+                    y = (baseNumber - min) / amountABS * yGroupHeight + i * yGroupHeight;
+                    break;
+                }
+            }
+
+            y = isNaN(y) ? 0 : parseInt(y);
+            return y;
+        }
+    }, {
+        key: "_trimYAxis",
+        value: function _trimYAxis() {
+
+            var tmpData = [];
+            //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
+            //this._yOriginTrans = this._getYOriginTrans( 0 );
+
+
+            var originVal = underscore.min(this.dataSection);
+            if (originVal < 0) {
+                originVal = 0;
+            }
+
+            //originVal = this.baseNumber;
+
+            this._yOriginTrans = this._getYOriginTrans(originVal);
+
+            //设置 basePoint
+            this.basePoint = {
+                content: this.baseNumber,
+                y: this.getYposFromVal(this.baseNumber)
+            };
+
+            for (var a = 0, al = this.dataSection.length; a < al; a++) {
+                tmpData[a] = {
+                    content: this.dataSection[a],
+                    y: this.getYposFromVal(this.dataSection[a])
+                };
+            }
+            this.layoutData = tmpData;
+        }
+    }, {
+        key: "_getYAxisDisLine",
+        value: function _getYAxisDisLine() {
+            //获取y轴顶高到第一条线之间的距离         
+            var disMin = this.disYAxisTopLine;
+            var disMax = 2 * disMin;
+            var dis = disMin;
+            dis = disMin + this.yMaxHeight % this.dataSection.length;
+            dis = dis > disMax ? disMax : dis;
+            return dis;
+        }
+    }, {
+        key: "_setDataSection",
+        value: function _setDataSection(data) {
+
+            var arr = [];
+            var d = data.org || data.data || data;
+            if (!this.biaxial) {
+                arr = underscore.flatten(d); //_.flatten( data.org );
+            } else {
+                if (this.place == "left") {
+                    arr = underscore.flatten(d[0]);
+                    this.field = underscore.flatten([this.field[0]]);
+                } else {
+                    arr = underscore.flatten(d[1]);
+                    this.field = underscore.flatten([this.field[1]]);
+                }
+            }
+            for (var i = 0, il = arr.length; i < il; i++) {
+                arr[i] = arr[i] || 0;
+            }
+
+            return arr;
+        }
+    }, {
+        key: "_initData",
+        value: function _initData(data) {
+
+            //TODO:begin 临时解决多y轴的情况下，有两个自定义datasection的情况
+            if (underscore.isArray(this.dataSection) && this.dataSection.length && underscore.isArray(this.dataSection[0])) {
+                this.dataSection = this.dataSection[this.place == "left" ? 0 : 1] || [];
+            }
+            //end
+
+            //先要矫正子啊field确保一定是个array
+            if (!underscore.isArray(this.field)) {
+                this.field = [this.field];
+            }
+
+            var arr = this._setDataSection(data);
+            if (this.bottomNumber != null) {
+                arr.push(this.bottomNumber);
+            }
+            if (arr.length == 1) {
+                arr.push(arr[0] * 2);
+            }
+            this.dataOrg = data.org || data.data; //这里必须是data.org
+
+            //如果用户传入了自定义的dataSection， 那么优先级最高
+            if (!this._opt.dataSection) {
+
+                if (this._opt.baseNumber != undefined) {
+                    arr.push(this.baseNumber);
+                }
+                if (this._opt.minNumber != undefined) {
+                    arr.push(this.minNumber);
+                }
+                if (this._opt.maxNumber != undefined) {
+                    arr.push(this.maxNumber);
+                }
+
+                for (var ai = 0, al = arr.length; ai < al; ai++) {
+                    arr[ai] = Number(arr[ai]);
+                    if (isNaN(arr[ai])) {
+                        arr.splice(ai, 1);
+                        ai--;
+                        al--;
+                    }
+                }
+                this.dataSection = DataSection.section(arr, 3);
+            }
+
+            //如果还是0
+            if (this.dataSection.length == 0) {
+                this.dataSection = [0];
+            }
+            this.dataSectionGroup = [underscore.clone(this.dataSection)];
+
+            this._sort();
+            this._setBottomAndBaseNumber();
+
+            this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
+        }
+
+        //yVal 要被push到datasection 中去的 值
+
+    }, {
+        key: "resetDataSection",
+        value: function resetDataSection(yVal) {
+
+            if (yVal > underscore.min(this.dataSection) || yVal < underscore.max(this.dataSection)) {
+                this.dataSection.push(yVal);
+                this._initData({
+                    org: this.dataSection
+                });
+            }
+        }
+    }, {
+        key: "_sort",
+        value: function _sort() {
+
+            if (this.sort) {
+                var sort = this._getSortType();
+                if (sort == "desc") {
+                    this.dataSection.reverse();
+
+                    //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
+                    underscore.each(this.dataSectionGroup, function (dsg, i) {
+                        dsg.reverse();
+                    });
+                    this.dataSectionGroup.reverse();
+                    //dataSectionGroup reverse end
+                }
+            }
+        }
+    }, {
+        key: "_getSortType",
+        value: function _getSortType() {
+            var _sort;
+            if (underscore.isString(this.sort)) {
+                _sort = this.sort;
+            }
+            if (underscore.isArray(this.sort)) {
+                _sort = this.sort[this.place == "left" ? 0 : 1];
+            }
+            if (!_sort) {
+                _sort = "asc";
+            }
+            return _sort;
+        }
+    }, {
+        key: "_setBottomAndBaseNumber",
+        value: function _setBottomAndBaseNumber() {
+            if (this.bottomNumber == null) {
+                this.bottomNumber = this.dataSection[0];
+            }
+
+            //没人情况下 baseNumber 就是datasection的最小值
+            if (this._opt.baseNumber == undefined || this._opt.baseNumber == null) {
+                this.baseNumber = this.dataSection[0]; //_.min( this.dataSection );
+                if (this.baseNumber < 0) {
+                    this.baseNumber = 0;
+                }
+            }
+        }
+    }, {
+        key: "_middleweight",
+        value: function _middleweight() {
+            if (this.middleweight) {
+                //支持多个量级的设置
+                //量级的设置只支持非sort的柱状图场景，否则这里修改过的datasection会和 _initData 中sort过的逻辑有冲突
+                if (!underscore.isArray(this.middleweight)) {
+                    this.middleweight = [this.middleweight];
+                }
+
+                //拿到dataSection中的min和 max 后，用middleweight数据重新设置一遍dataSection
+                var dMin = underscore.min(this.dataSection);
+                var dMax = underscore.max(this.dataSection);
+                var newDS = [dMin];
+                var newDSG = [];
+
+                for (var i = 0, l = this.middleweight.length; i < l; i++) {
+                    var preMiddleweight = dMin;
+                    if (i > 0) {
+                        preMiddleweight = this.middleweight[i - 1];
+                    }
+                    var middleVal = preMiddleweight + parseInt((this.middleweight[i] - preMiddleweight) / 2);
+
+                    newDS.push(middleVal);
+                    newDS.push(this.middleweight[i]);
+
+                    newDSG.push([preMiddleweight, middleVal, this.middleweight[i]]);
+                }
+                var lastMW = this.middleweight.slice(-1)[0];
+                newDS.push(lastMW + (dMax - lastMW) / 2);
+                newDS.push(dMax);
+
+                newDSG.push([lastMW, lastMW + (dMax - lastMW) / 2, dMax]);
+
+                //好了。 到这里用简单的规则重新拼接好了新的 dataSection
+                this.dataSection = newDS;
+                this.dataSectionGroup = newDSG;
+
+                //因为重新设置过了 dataSection 所以要重新排序和设置bottom and base 值
+                this._sort();
+                this._setBottomAndBaseNumber();
+            }
+        }
+    }, {
+        key: "resetWidth",
+        value: function resetWidth(width) {
+            var self = this;
+            self.width = width;
+            if (self.line.enabled) {
+                self.sprite.context.x = width - self.dis - self.line.width;
+            } else {
+                self.sprite.context.x = width - self.dis;
+            }
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            var self = this;
+            if (!self.enabled) {
+                self.width = 0;
+                return;
+            }
+            var arr = this.layoutData;
+            self.maxW = 0;
+            self._label && self.sprite.addChild(self._label);
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var o = arr[a];
+                var x = 0,
+                    y = o.y;
+                var content = o.content;
+
+                if (underscore.isFunction(self.text.format)) {
+                    content = self.text.format(content, self);
+                }
+                if (content === undefined || content === null) {
+                    content = Tools.numAddSymbol(o.content);
+                }
+
+                var textAlign = self.place == "left" ? "right" : "left";
+                //为横向图表把y轴反转后的 逻辑
+                if (self.text.rotation == 90 || self.text.rotation == -90) {
+                    textAlign = "center";
+                    if (a == arr.length - 1) {
+                        textAlign = "right";
+                    }
+                }
+                var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
+                //为横向图表把y轴反转后的 逻辑
+                if (self.text.rotation == 90 || self.text.rotation == -90) {
+                    if (a == arr.length - 1) {
+                        posy = y - 2;
+                    }
+                    if (a == 0) {
+                        posy = y;
+                    }
+                }
+
+                var yNode = this.rulesSprite.getChildAt(a);
+
+                if (yNode) {
+                    if (yNode._txt) {
+                        if (yNode._txt.context.y != posy) {
+                            yNode._txt.animate({
+                                y: posy
+                            }, {
+                                duration: 500,
+                                delay: a * 80,
+                                id: yNode._txt.id
+                            });
+                        }
+                        yNode._txt.resetText(content);
+                    }
+
+                    yNode._line && yNode._line.animate({
+                        y: y
+                    }, {
+                        duration: 500,
+                        delay: a * 80,
+                        id: yNode._line.id
+                    });
+                } else {
+                    yNode = new canvax.Display.Sprite({
+                        id: "yNode" + a
+                    });
+
+                    var aniDis = 20;
+                    if (content == self.baseNumber) {
+                        aniDis = 0;
+                    }
+                    if (content < self.baseNumber) {
+                        aniDis = -20;
+                    }
+
+                    //文字
+                    var txt = new canvax.Display.Text(content, {
+                        id: "yAxis_txt_" + a,
+                        context: {
+                            x: x + (self.place == "left" ? -5 : 5),
+                            y: posy + aniDis,
+                            fillStyle: self._getProp(self.text.fillStyle),
+                            fontSize: self.text.fontSize,
+                            rotation: -Math.abs(this.text.rotation),
+                            textAlign: textAlign,
+                            textBaseline: "middle",
+                            globalAlpha: 0
+                        }
+                    });
+                    yNode.addChild(txt);
+                    yNode._txt = txt;
+
+                    self.maxW = Math.max(self.maxW, txt.getTextWidth());
+                    if (self.text.rotation == 90 || self.text.rotation == -90) {
+                        self.maxW = Math.max(self.maxW, txt.getTextHeight());
+                    }
+
+                    if (self.line.enabled) {
+                        //线条
+                        var line = new Line$2({
+                            context: {
+                                x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
+                                y: y,
+                                end: {
+                                    x: self.line.width,
+                                    y: 0
+                                },
+                                lineWidth: self.line.lineWidth,
+                                strokeStyle: self._getProp(self.line.strokeStyle)
+                            }
+                        });
+                        yNode.addChild(line);
+                        yNode._line = line;
+                    }
+                    //这里可以由用户来自定义过滤 来 决定 该node的样式
+                    underscore.isFunction(self.filter) && self.filter({
+                        layoutData: self.layoutData,
+                        index: a,
+                        txt: txt,
+                        line: line
+                    });
+
+                    self.rulesSprite.addChild(yNode);
+
+                    //如果是resize的话也不要处理动画
+                    if (self.animation && !self.resize) {
+                        txt.animate({
+                            globalAlpha: 1,
+                            y: txt.context.y - aniDis
+                        }, {
+                            duration: 500,
+                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                            delay: (a + 1) * 80,
+                            id: txt.id
+                        });
+                    } else {
+                        txt.context.y = txt.context.y - aniDis;
+                        txt.context.globalAlpha = 1;
+                    }
+                }
+            }
+
+            //把 rulesSprite.children中多余的给remove掉
+            if (self.rulesSprite.children.length > arr.length) {
+                for (var al = arr.length, pl = self.rulesSprite.children.length; al < pl; al++) {
+                    self.rulesSprite.getChildAt(al).remove();
+                    al--, pl--;
+                }
+            }
+
+            self.maxW += self.dis;
+
+            //self.rulesSprite.context.x = self.maxW + self.pos.x;
+            //self.pos.x = self.maxW + self.pos.x;
+            if (self.width == null) {
+                if (self.line.enabled) {
+                    self.width = self.maxW + self.dis + self.line.width + self.pos.x;
+                } else {
+                    self.width = self.maxW + self.dis + self.pos.x;
+                }
+            }
+        }
+    }, {
+        key: "_getProp",
+        value: function _getProp(s) {
+            var res = s;
+            if (underscore.isFunction(s)) {
+                res = s.call(this, this);
+            }
+            if (!s) {
+                res = "#999";
+            }
+            return res;
+        }
+    }]);
+    return yAxis;
+}(component);
+
+var yAxis = function (_yAxisBase) {
+    inherits$1(yAxis, _yAxisBase);
+
+    function yAxis(opt, data) {
+        classCallCheck$1(this, yAxis);
+        return possibleConstructorReturn$1(this, (yAxis.__proto__ || Object.getPrototypeOf(yAxis)).call(this, opt.bar ? opt.bar : opt, data));
+    }
+
+    createClass$1(yAxis, [{
+        key: "_setDataSection",
+        value: function _setDataSection(data) {
+            var arr = [];
+            var min;
+            underscore.each(data.org, function (d, i) {
+                if (!d.length) {
+                    return;
+                }
+
+                //有数据的情况下 
+                if (!underscore.isArray(d[0])) {
+                    arr.push(d);
+                    return;
+                }
+
+                var varr = [];
+                var len = d[0].length;
+                var vLen = d.length;
+
+                for (var i = 0; i < len; i++) {
+                    var up_count = 0;
+                    var up_i = 0;
+
+                    var down_count = 0;
+                    var down_i = 0;
+
+                    for (var ii = 0; ii < vLen; ii++) {
+                        !min && (min = d[ii][i]);
+                        min = Math.min(min, d[ii][i]);
+
+                        if (d[ii][i] >= 0) {
+                            up_count += d[ii][i];
+                            up_i++;
+                        } else {
+                            down_count += d[ii][i];
+                            down_i++;
+                        }
+                    }
+                    up_i && varr.push(up_count);
+                    down_i && varr.push(down_count);
+                }
+                arr.push(varr);
+            });
+            arr.push(min);
+            return underscore.flatten(arr);
+        }
+    }]);
+    return yAxis;
+}(yAxis$2);
+
+var Line$3 = canvax.Shapes.Line;
+var Rect$3 = canvax.Shapes.Rect;
+
+var Back = function (_Component) {
+    inherits$1(Back, _Component);
+
+    function Back(opt, root) {
+        classCallCheck$1(this, Back);
+
+        var _this = possibleConstructorReturn$1(this, (Back.__proto__ || Object.getPrototypeOf(Back)).call(this));
+
+        _this.w = 0;
+        _this.h = 0;
+        _this.root = root; //该组件被添加到的目标图表项目，
+
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+
+        _this.enabled = 1;
+
+        _this.xOrigin = { //原点开始的x轴线
+            enabled: 1,
+            lineWidth: 1,
+            strokeStyle: '#ccc'
+        };
+        _this.yOrigin = { //原点开始的y轴线               
+            enabled: 1,
+            lineWidth: 1,
+            strokeStyle: '#ccc'
+        };
+        _this.xAxis = { //x轴上的线
+            enabled: 1,
+            data: [], //[{y:100},{}]
+            org: null, //x轴坐标原点，默认为上面的data[0]
+            // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
+            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
+            lineWidth: 1,
+            strokeStyle: '#f0f0f0', //'#e5e5e5',
+            filter: null
+        };
+        _this.yAxis = { //y轴上的线
+            enabled: 0,
+            data: [], //[{x:100},{}]
+            xDis: 0,
+            org: null, //y轴坐标原点，默认为上面的data[0]
+            // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
+            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
+            lineWidth: 1,
+            strokeStyle: '#f0f0f0', //'#e5e5e5',
+            filter: null
+        };
+        _this.fill = {
+            fillStyle: null,
+            alpha: null
+        };
+
+        _this.sprite = null; //总的sprite
+        _this.xAxisSp = null; //x轴上的线集合
+        _this.yAxisSp = null; //y轴上的线集合
+
+        _this.animation = true;
+        _this.resize = false;
+
+        _this.init(opt);
+        return _this;
+    }
+
+    createClass$1(Back, [{
+        key: "init",
+        value: function init(opt) {
+            underscore.deepExtend(this, opt);
+            this.sprite = new canvax.Display.Sprite();
+        }
+    }, {
+        key: "setX",
+        value: function setX($n) {
+            this.sprite.context.x = $n;
+        }
+    }, {
+        key: "setY",
+        value: function setY($n) {
+            this.sprite.context.y = $n;
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            underscore.deepExtend(this, opt);
+            //this._configData(opt);
+            this._widget();
+            this.setX(this.pos.x);
+            this.setY(this.pos.y);
+        }
+    }, {
+        key: "update",
+        value: function update(opt) {
+            this.sprite.removeAllChildren();
+            this.draw(opt);
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            var self = this;
+            if (!this.enabled) {
+                return;
+            }
+
+            var _yAxis = self.root._yAxisLeft || self.root._yAxis || self.root;
+
+            if (self.root && _yAxis && _yAxis.dataSectionGroup) {
+                self.yGroupSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yGroupSp);
+                for (var g = 0, gl = _yAxis.dataSectionGroup.length; g < gl; g++) {
+                    var yGroupHeight = _yAxis.yGraphsHeight / gl;
+                    var groupRect = new Rect$3({
+                        context: {
+                            x: 0,
+                            y: -yGroupHeight * g,
+                            width: self.w,
+                            height: -yGroupHeight,
+                            fillStyle: self.fill.fillStyle || "#000",
+                            globalAlpha: self.fill.alpha || 0.025 * (g % 2)
+                        }
+                    });
+
+                    self.yGroupSp.addChild(groupRect);
+                }
+            }
+
+            self.xAxisSp = new canvax.Display.Sprite(), self.sprite.addChild(self.xAxisSp);
+            self.yAxisSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yAxisSp);
+
+            //x轴方向的线集合
+            var arr = self.xAxis.data;
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var o = arr[a];
+                var line = new Line$3({
+                    id: "back_line_" + a,
+                    context: {
+                        start: {
+                            x: 0,
+                            y: o.y
+                        },
+                        end: {
+                            x: 0,
+                            y: o.y
+                        },
+                        lineType: self.xAxis.lineType,
+                        lineWidth: self.xAxis.lineWidth,
+                        strokeStyle: self.xAxis.strokeStyle
+                    }
+                });
+                if (self.xAxis.enabled) {
+                    underscore.isFunction(self.xAxis.filter) && self.xAxis.filter.apply(line, [{
+                        layoutData: self.yAxis.data,
+                        index: a,
+                        line: line
+                    }, self]);
+                    self.xAxisSp.addChild(line);
+
+                    if (this.animation && !this.resize) {
+
+                        line.animate({
+                            start: {
+                                x: 0
+                            },
+                            end: {
+                                x: self.w
+                            }
+                        }, {
+                            duration: 500,
+                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                            delay: (al - a) * 80,
+                            id: line.id
+                        });
+                    } else {
+                        line.context.start.x = 0;
+                        line.context.end.x = self.w;
+                    }
+                }
+            }
+
+            //y轴方向的线集合
+            var arr = self.yAxis.data;
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var o = arr[a];
+                var line = new Line$3({
+                    context: {
+                        start: {
+                            x: o.x,
+                            y: 0
+                        },
+                        end: {
+                            x: o.x,
+                            y: -self.h
+                        },
+
+                        lineType: self.yAxis.lineType,
+                        lineWidth: self.yAxis.lineWidth,
+                        strokeStyle: self.yAxis.strokeStyle,
+                        visible: o.x ? true : false
+                    }
+                });
+                if (self.yAxis.enabled) {
+                    underscore.isFunction(self.yAxis.filter) && self.yAxis.filter.apply(line, [{
+                        layoutData: self.xAxis.data,
+                        index: a,
+                        line: line
+                    }, self]);
+                    self.yAxisSp.addChild(line);
+                }
+            }
+
+            //原点开始的y轴线
+            var xAxisOrg = self.yAxis.org == null ? 0 : underscore.find(self.yAxis.data, function (obj) {
+                return obj.content == self.yAxis.org;
+            }).x;
+
+            //self.yAxis.org = xAxisOrg;
+            var line = new Line$3({
+                context: {
+                    start: {
+                        x: xAxisOrg,
+                        y: 0
+                    },
+                    end: {
+                        x: xAxisOrg,
+                        y: -self.h
+                    },
+                    lineWidth: self.yOrigin.lineWidth,
+                    strokeStyle: self.yOrigin.strokeStyle
+                }
+            });
+            if (self.yOrigin.enabled) self.sprite.addChild(line);
+
+            if (this.root._yAxisRight) {
+                var lineR = new Line$3({
+                    context: {
+                        start: {
+                            x: self.w,
+                            y: self.w
+                        },
+                        end: {
+                            x: 0,
+                            y: -self.h
+                        },
+                        lineWidth: self.yOrigin.lineWidth,
+                        strokeStyle: self.yOrigin.strokeStyle
+                    }
+                });
+                if (self.yOrigin.enabled) self.sprite.addChild(lineR);
+            }
+
+            var line = new Line$3({
+                context: {
+                    start: {
+                        x: 0,
+                        y: _yAxis.basePoint.y
+                    },
+                    end: {
+                        x: self.w,
+                        y: _yAxis.basePoint.y
+                    },
+                    lineWidth: self.xOrigin.lineWidth,
+                    strokeStyle: self.xOrigin.strokeStyle
+                }
+            });
+
+            self.xOrigin.enabled && self.sprite.addChild(line);
+        }
+    }]);
+    return Back;
+}(component);
+
+var AnimationFrame$2 = canvax.AnimationFrame;
+var BrokenLine$2 = canvax.Shapes.BrokenLine;
+var Rect$4 = canvax.Shapes.Rect;
+
+var Graphs = function () {
+    function Graphs(opt, root) {
+        classCallCheck$1(this, Graphs);
+
+        this.data = [];
+        this.w = 0;
+        this.h = 0;
+        this.root = root;
+        this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
+        this._setyAxisFieldsMap();
+
+        this.animation = true;
+
+        this.pos = {
+            x: 0,
+            y: 0
+        };
+
+        this._colors = colors;
+
+        this.bar = {
+            width: 0,
+            _width: 0,
+            radius: 4,
+            fillStyle: null,
+            filter: function filter() {}, //用来定制bar的样式
+            count: 0 //总共有多少个bar
+        };
+
+        this.text = {
+            enabled: false,
+            fillStyle: '#999',
+            fontSize: 12,
+            format: null,
+            lineWidth: 1,
+            strokeStyle: 'white'
+        };
+
+        this.average = {
+            enabled: false,
+            field: "average",
+            fieldInd: -1,
+            fillStyle: "#c4c9d6",
+            data: null
+        };
+
+        this.checked = {
+            enabled: false,
+            fillStyle: '#00A8E6',
+            strokeStyle: '#00A8E6',
+            globalAlpha: 0.1,
+            lineWidth: 2
+        };
+
+        this.hoverRect = {
+            globalAlpha: 0.2,
+            fillStyle: "#333"
+        };
+
+        this.sort = null;
+
+        this._barsLen = 0;
+
+        this.eventEnabled = true;
+
+        this.sprite = null;
+        this.txtsSp = null;
+        this.checkedSp = null;
+
+        this.yDataSectionLen = 0; //y轴方向有多少个section
+
+        underscore.deepExtend(this, opt);
+
+        this._initaverage();
+
+        this.init();
+    }
+
+    createClass$1(Graphs, [{
+        key: "init",
+        value: function init() {
+            this.sprite = new canvax.Display.Sprite({
+                id: "graphsEl"
+            });
+            this.barsSp = new canvax.Display.Sprite({
+                id: "barsSp"
+            });
+            this.txtsSp = new canvax.Display.Sprite({
+                id: "txtsSp",
+                context: {
+                    //visible: false
+                }
+            });
+            this.checkedSp = new canvax.Display.Sprite({
+                id: "checkedSp"
+            });
+        }
+    }, {
+        key: "setX",
+        value: function setX($n) {
+            this.sprite.context.x = $n;
+        }
+    }, {
+        key: "setY",
+        value: function setY($n) {
+            this.sprite.context.y = $n;
+        }
+    }, {
+        key: "getInfo",
+        value: function getInfo(index) {
+            //该index指当前
+            return this._getInfoHandler({
+                iNode: index
+            });
+        }
+    }, {
+        key: "_checked",
+        value: function _checked($o) {
+            var me = this;
+            var index = $o.iNode;
+            var group = me.barsSp.getChildById('barGroup_' + index);
+            if (!group) {
+                return;
+            }
+
+            me.checkedSp.removeChildById('line_' + index);
+            me.checkedSp.removeChildById('rect_' + index);
+            var hoverRect = group.getChildAt(0);
+            var x0 = hoverRect.context.x;
+            var x1 = hoverRect.context.x + hoverRect.context.width,
+                y = -me.h;
+
+            if ($o.checked && !me.checkedSp.getChildById("rect_" + index)) {
+                var rect = new Rect$4({
+                    id: "rect_" + index,
+                    pointChkPriority: false,
+                    context: {
+                        x: x0,
+                        y: y,
+                        width: hoverRect.context.width,
+                        height: hoverRect.context.height,
+                        fillStyle: me.checked.fillStyle,
+                        globalAlpha: me.checked.globalAlpha
+                    }
+                });
+                me.checkedSp.addChild(rect);
+
+                var line = new BrokenLine$2({
+                    id: "line_" + index,
+                    context: {
+                        pointList: [[x0, y], [x1, y]],
+                        strokeStyle: me.checked.strokeStyle,
+                        lineWidth: me.checked.lineWidth
+                    }
+                });
+                me.checkedSp.addChild(line);
+            }
+        }
+    }, {
+        key: "removeAllChecked",
+        value: function removeAllChecked() {
+            var me = this;
+            me.checkedSp.removeAllChildren();
+        }
+    }, {
+        key: "setBarStyle",
+        value: function setBarStyle($o) {
+            var me = this;
+            var index = $o.iNode;
+            var group = me.barsSp.getChildById('barGroup_' + index);
+
+            var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle);
+            for (var a = 0, al = group.getNumChildren(); a < al; a++) {
+                var rectEl = group.getChildAt(a);
+                rectEl.context.fillStyle = fillStyle;
+            }
+        }
+    }, {
+        key: "_setyAxisFieldsMap",
+        value: function _setyAxisFieldsMap() {
+            var me = this;
+            underscore.each(underscore.flatten(this.root.dataFrame.yAxis.field), function (field, i) {
+                me._yAxisFieldsMap[field] = {
+                    index: i
+                };
+            });
+        }
+    }, {
+        key: "_initaverage",
+        value: function _initaverage() {
+            if (this.average.enabled) {
+                underscore.each(this.root.dataFraem, function (fd, i) {
+                    if (fd.field == this.average.field) {
+                        this.average.fieldInd = i;
+                    }
+                });
+            }
+        }
+    }, {
+        key: "_getColor",
+        value: function _getColor(c, groups, vLen, i, h, v, value, field) {
+            var style = null;
+            if (underscore.isString(c)) {
+                style = c;
+            }
+            if (underscore.isArray(c)) {
+                style = underscore.flatten(c)[this._yAxisFieldsMap[field].index];
+            }
+            if (underscore.isFunction(c)) {
+                style = c.apply(this, [{
+                    iGroup: i,
+                    iNode: h,
+                    iLay: v,
+                    field: field,
+                    value: value,
+                    xAxis: {
+                        field: this.root._xAxis.field,
+                        value: this.root._xAxis.data[h].content
+                    }
+                }]);
+            }
+            if (!style || style == "") {
+                style = this._colors[this._yAxisFieldsMap[field].index];
+            }
+            return style;
+        }
+
+        //只用到了i v。 i＝＝ 一级分组， v 二级分组
+
+    }, {
+        key: "_getFieldFromIHV",
+        value: function _getFieldFromIHV(i, h, v) {
+            var yField = this.root._yAxis.field;
+            var field = null;
+            if (underscore.isString(yField[i])) {
+                field = yField[i];
+            } else if (underscore.isArray(yField[i])) {
+                field = yField[i][v];
+            }
+            return field;
+        }
+    }, {
+        key: "getBarWidth",
+        value: function getBarWidth(xDis1, xDis2) {
+            if (this.bar.width) {
+                if (underscore.isFunction(this.bar.width)) {
+                    this.bar._width = this.bar.width(xDis1);
+                } else {
+                    this.bar._width = this.bar.width;
+                }
+            } else {
+                this.bar._width = parseInt(xDis2) - parseInt(Math.max(1, xDis2 * 0.3));
+
+                //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
+                if (this.bar._width == 1 && xDis1 > 3) {
+                    this.bar._width = parseInt(xDis1) - 2;
+                }
+            }
+            this.bar._width < 1 && (this.bar._width = 1);
+            return this.bar._width;
+        }
+    }, {
+        key: "resetData",
+        value: function resetData(data, opt) {
+            this.draw(data.data, opt);
+        }
+    }, {
+        key: "clean",
+        value: function clean() {
+            this.data = [];
+            this.barsSp.removeAllChildren();
+            this.checkedSp.removeAllChildren();
+            if (this.text.enabled) {
+                this.txtsSp.removeAllChildren();
+            }
+            this.averageSp && this.averageSp.removeAllChildren();
+        }
+    }, {
+        key: "draw",
+        value: function draw(data, opt) {
+            underscore.deepExtend(this, opt);
+            if (data.length == 0 || data[0].length == 0) {
+                this.clean();
+                return;
+            }
+
+            var preLen = 0; //纵向的分组，主要用于resetData的时候，对比前后data数量用
+            this.data[0] && (preLen = this.data[0][0].length);
+
+            this.data = data;
+            var me = this;
+            var groups = data.length;
+            var itemW = 0;
+
+            me.bar.count = 0;
+
+            underscore.each(data, function (h_group, i) {
+                /*
+                //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
+                //h_group就会为两组，一组代表uv 一组代表pv。
+                var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+                */
+
+                //vLen 为一单元bar上面纵向堆叠的length
+                //比如yAxis.field = [?
+                //    ["uv","pv"],  vLen == 2
+                //    "click"       vLen == 1
+                //]
+
+                //if (h <= preLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
+
+                var vLen = h_group.length;
+                if (vLen == 0) return;
+
+                //hlen为数据有多长
+                var hLen = h_group[0].length;
+
+                //itemW 还是要跟着xAxis的xDis保持一致
+                itemW = me.w / hLen;
+
+                me._barsLen = hLen * groups;
+
+                for (var h = 0; h < hLen; h++) {
+                    var groupH;
+                    if (i == 0) {
+                        //横向的分组
+                        if (h <= preLen - 1) {
+                            groupH = me.barsSp.getChildById("barGroup_" + h);
+                        } else {
+                            groupH = new canvax.Display.Sprite({
+                                id: "barGroup_" + h
+                            });
+                            me.barsSp.addChild(groupH);
+                            groupH.iNode = h;
+                            groupH.on("click dblclick mousedown mousemove mouseup", function (e) {
+                                if (!e.eventInfo) {
+                                    e.eventInfo = me._getInfoHandler(this);
+                                }
+                            });
+                        }
+
+                        if (me.eventEnabled) {
+                            var hoverRect;
+                            if (h <= preLen - 1) {
+                                hoverRect = groupH.getChildById("bhr_hoverRect_" + h);
+                                hoverRect.context.width = itemW;
+                                hoverRect.context.x = itemW * h;
+                            } else {
+                                hoverRect = new Rect$4({
+                                    id: "bhr_hoverRect_" + h,
+                                    pointChkPriority: false,
+                                    context: {
+                                        x: itemW * h,
+                                        y: me.sort && me.sort == "desc" ? 0 : -me.h,
+                                        width: itemW,
+                                        height: me.h,
+                                        fillStyle: me.hoverRect.fillStyle,
+                                        globalAlpha: 0
+                                    }
+                                });
+                                groupH.addChild(hoverRect);
+                                hoverRect.hover(function (e) {
+                                    this.context.globalAlpha = me.hoverRect.globalAlpha;
+                                }, function (e) {
+                                    this.context.globalAlpha = 0;
+                                });
+                                hoverRect.iGroup = -1, hoverRect.iNode = h, hoverRect.iLay = -1;
+                                hoverRect.on("panstart mouseover mousemove mouseout click", function (e) {
+                                    e.eventInfo = me._getInfoHandler(this, e);
+                                });
+                            }
+                        }
+                    } else {
+                        groupH = me.barsSp.getChildById("barGroup_" + h);
+                    }
+
+                    //同上面，给txt做好分组
+                    var txtGroupH;
+                    if (i == 0) {
+                        if (h <= preLen - 1) {
+                            txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+                        } else {
+                            txtGroupH = new canvax.Display.Sprite({
+                                id: "txtGroup_" + h
+                            });
+                            me.txtsSp.addChild(txtGroupH);
+                            txtGroupH.iGroup = i;
+                        }
+                    } else {
+                        txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+                    }
+
+                    for (var v = 0; v < vLen; v++) {
+
+                        me.bar.count++;
+
+                        //单个的bar，从纵向的底部开始堆叠矩形
+                        var rectData = h_group[v][h];
+                        rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
+
+                        var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
+
+                        //根据第一行数据来配置下_yAxisFieldsMap中对应field的fillStyle
+                        if (h == 0) {
+                            var _yMap = me._yAxisFieldsMap[me._getFieldFromIHV(i, h, v)];
+                            if (!_yMap.fillStyle) {
+                                _yMap.fillStyle = fillStyle;
+                            }
+                        }
+
+                        rectData.fillStyle = fillStyle;
+
+                        var rectH = rectData.y - rectData.fromY;
+
+                        if (isNaN(rectH) || Math.abs(rectH) < 1) {
+                            rectH = -1;
+                        }
+
+                        var finalPos = {
+                            x: Math.round(rectData.x),
+                            y: rectData.fromY,
+                            width: parseInt(me.bar._width),
+                            height: rectH,
+                            fillStyle: fillStyle,
+                            scaleY: -1
+                        };
+                        rectData.width = finalPos.width;
+
+                        var rectCxt = {
+                            x: finalPos.x,
+                            y: rectData.yBasePoint.y, //0,
+                            width: finalPos.width,
+                            height: finalPos.height,
+                            fillStyle: finalPos.fillStyle,
+                            scaleY: 0
+                        };
+
+                        if (!!me.bar.radius && rectData.isLeaf) {
+                            var radiusR = Math.min(me.bar._width / 2, Math.abs(rectH));
+                            radiusR = Math.min(radiusR, me.bar.radius);
+                            rectCxt.radius = [radiusR, radiusR, 0, 0];
+                        }
+
+                        if (!me.animation) {
+                            delete rectCxt.scaleY;
+                            rectCxt.y = finalPos.y;
+                        }
+
+                        var rectEl;
+                        if (h <= preLen - 1) {
+                            rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                            rectEl.context.fillStyle = fillStyle;
+                        } else {
+                            rectEl = new Rect$4({
+                                id: "bar_" + i + "_" + h + "_" + v,
+                                context: rectCxt
+                            });
+                            groupH.addChild(rectEl);
+                        }
+
+                        rectEl.finalPos = finalPos;
+
+                        rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                        me.bar.filter.apply(rectEl, [rectData, me]);
+
+                        if (me.eventEnabled) {
+                            rectEl.on("panstart mouseover mousemove mouseout click dblclick", function (e) {
+                                e.eventInfo = me._getInfoHandler(this, e);
+                                if (e.type == "mouseover") {
+                                    this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = 0.1;
+                                }
+                                if (e.type == "mouseout") {
+                                    this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = 0;
+                                }
+                            });
+                        }
+
+                        //叶子节点上面放置info
+                        if (rectData.isLeaf && me.text.enabled) {
+
+                            //文字
+                            var infosp;
+                            if (h <= preLen - 1) {
+                                infosp = txtGroupH.getChildById("infosp_" + i + "_" + h + "_" + v);
+                            } else {
+                                //console.log("infosp_" + i + "_" + h + "_" + v);
+                                infosp = new canvax.Display.Sprite({
+                                    id: "infosp_" + i + "_" + h + "_" + v,
+                                    context: {
+                                        y: rectData.yBasePoint.y,
+                                        visible: false
+                                    }
+                                });
+                                infosp._hGroup = h;
+                                txtGroupH.addChild(infosp);
+                            }
+
+                            var contents = [];
+                            for (var c = vLen - 1; c >= 0; c--) {
+                                //在baseNumber同一侧的数据放在一个叶子节点上面显示
+                                if (rectData.value > rectData.yBasePoint.content === h_group[c][h].value > h_group[c][h].yBasePoint.content) {
+                                    contents.push(h_group[c][h]);
+                                }
+                            }
+
+                            var infoWidth = 0;
+                            var infoHeight = 0;
+
+                            underscore.each(contents, function (cdata, ci) {
+                                var content = cdata.value;
+                                if (underscore.isFunction(me.text.format)) {
+                                    var _formatc = me.text.format.apply(me, [content, cdata]);
+                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
+                                        content = _formatc;
+                                    }
+                                }
+                                if (!me.animation && underscore.isNumber(content)) {
+                                    content = numAddSymbol(content);
+                                }
+
+                                if (content === "") {
+                                    return;
+                                }
+
+                                if (ci > 0 && infosp.children.length > 0) {
+                                    txt = new canvax.Display.Text("/", {
+                                        context: {
+                                            x: infoWidth + 2,
+                                            fillStyle: "#999"
+                                        }
+                                    });
+                                    infoWidth += txt.getTextWidth() + 2;
+                                    infosp.addChild(txt);
+                                }
+
+                                var txt;
+                                if (h <= preLen - 1) {
+                                    txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                } else {
+                                    txt = new canvax.Display.Text(content, {
+                                        id: "info_txt_" + i + "_" + h + "_" + ci,
+                                        context: {
+                                            x: infoWidth + 2,
+                                            fillStyle: cdata.fillStyle,
+                                            fontSize: me.text.fontSize,
+                                            lineWidth: me.text.lineWidth,
+                                            strokeStyle: me.text.strokeStyle
+                                        }
+                                    });
+                                    infosp.addChild(txt);
+                                }
+                                txt._text = cdata.value;
+                                txt._data = cdata;
+                                infoWidth += txt.getTextWidth() + 2;
+                                infoHeight = Math.max(infoHeight, txt.getTextHeight());
+
+                                if (me.animation) {
+                                    var beginNumber = 0;
+                                    if (content >= 100) {
+                                        beginNumber = 100;
+                                    }
+                                    if (content >= 1000) {
+                                        beginNumber = 1000;
+                                    }
+                                    if (content >= 10000) {
+                                        beginNumber = 10000;
+                                    }
+                                    if (content >= 100000) {
+                                        beginNumber = 100900;
+                                    }
+                                    //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
+                                    txt.resetText(beginNumber);
+                                }
+                            });
+
+                            infosp._finalX = rectData.x + me.bar._width / 2 - infoWidth / 2;
+
+                            //如果数据在basepoint下方
+                            if (rectData.value < rectData.yBasePoint.content) {
+                                infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
+                            } else {
+                                infosp._finalY = rectData.y - infoHeight;
+                                infosp.upOfYbaseNumber = true;
+                            }
+                            //if( rectData.value )
+
+                            infosp._centerX = rectData.x + me.bar._width / 2;
+                            infosp.context.width = infoWidth;
+                            infosp.context.height = infoHeight;
+
+                            if (!me.animation) {
+                                infosp.context.y = infosp._finalY;
+                                infosp.context.x = infosp._finalX;
+                                infosp.context.visible = true;
+                            }
+                        }
+                    }
+                }
+            });
+
+            this.sprite.addChild(this.barsSp);
+
+            this.sprite.addChild(this.checkedSp);
+
+            if (this.text.enabled) {
+                this.sprite.addChild(this.txtsSp);
+            }
+
+            //如果有average模块配置。
+            if (this.average.enabled && this.average.data) {
+                !this.averageSp && (this.averageSp = new canvax.Display.Sprite({
+                    id: "averageSp"
+                }));
+                underscore.each(this.average.layoutData, function (average, i) {
+                    var averageRectC = {
+                        x: itemW * i,
+                        y: average.y,
+                        fillStyle: me.average.fillStyle,
+                        width: itemW,
+                        height: 2
+                    };
+                    var averageLine;
+                    if (i <= preLen - 1) {
+                        averageLine = me.averageSp.getChildById("average_" + i);
+                        averageLine.context.x = averageRectC.x;
+                        averageLine.context.y = averageRectC.y;
+                        averageLine.context.width = averageRectC.width;
+                    } else {
+                        averageLine = new Rect$4({
+                            id: "average_" + i,
+                            context: averageRectC
+                        });
+                        me.averageSp.addChild(averageLine);
+                    }
+                });
+                this.sprite.addChild(me.averageSp);
+            }
+
+            this.sprite.context.x = this.pos.x;
+            this.sprite.context.y = this.pos.y;
+
+            if (this.sort && this.sort == "desc") {
+                this.sprite.context.y -= this.h;
+            }
+        }
+    }, {
+        key: "_updateInfoTextPos",
+        value: function _updateInfoTextPos(el) {
+
+            var infoWidth = 0;
+            var infoHeight = 0;
+            var cl = el.children.length;
+            underscore.each(el.children, function (c, i) {
+                if (c.getTextWidth) {
+                    c.context.x = infoWidth;
+                    infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
+                    infoHeight = Math.max(infoHeight, c.getTextHeight());
+                }
+            });
+            el.context.x = el._centerX - infoWidth / 2;
+            el.context.width = infoWidth;
+            el.context.height = infoHeight;
+        }
+
+        /**
+         * 生长动画
+         */
+
+    }, {
+        key: "grow",
+        value: function grow(callback, opt) {
+
+            var me = this;
+            if (!this.animation) {
+                callback && callback(me);
+                return;
+            }
+            var sy = 1;
+            if (this.sort && this.sort == "desc") {
+                sy = -1;
+            }
+
+            //先把已经不在当前range范围内的元素destroy掉
+            if (me.data[0] && me.data[0].length && me.barsSp.children.length > me.data[0][0].length) {
+                for (var i = me.data[0][0].length, l = me.barsSp.children.length; i < l; i++) {
+                    me.barsSp.getChildAt(i).destroy();
+                    me.text.enabled && me.txtsSp.getChildAt(i).destroy();
+                    me.averageSp && me.averageSp.getChildAt(i).destroy();
+                    i--;
+                    l--;
+                }
+            }
+
+            var options = underscore.extend({
+                delay: Math.min(1000 / this._barsLen, 80),
+                easing: "Back.Out",
+                duration: 500
+            }, opt);
+
+            var barCount = 0;
+            underscore.each(me.data, function (h_group, g) {
+                var vLen = h_group.length;
+                if (vLen == 0) return;
+                var hLen = h_group[0].length;
+                for (var h = 0; h < hLen; h++) {
+                    for (var v = 0; v < vLen; v++) {
+
+                        var group = me.barsSp.getChildById("barGroup_" + h);
+
+                        var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
+                        //console.log("finalPos"+bar.finalPos.y)
+
+                        if (options.duration == 0) {
+                            bar.context.scaleY = sy;
+                            bar.context.y = sy * sy * bar.finalPos.y;
+                            bar.context.x = bar.finalPos.x;
+                            bar.context.width = bar.finalPos.width;
+                            bar.context.height = bar.finalPos.height;
+                        } else {
+                            if (bar._tweenObj) {
+                                AnimationFrame$2.destroyTween(bar._tweenObj);
+                            }
+                            bar._tweenObj = bar.animate({
+                                scaleY: sy,
+                                y: sy * bar.finalPos.y,
+                                x: bar.finalPos.x,
+                                width: bar.finalPos.width,
+                                height: bar.finalPos.height
+                            }, {
+                                duration: options.duration,
+                                easing: options.easing,
+                                delay: h * options.delay,
+                                onUpdate: function onUpdate(arg) {},
+                                onComplete: function onComplete(arg) {
+                                    if (arg.width < 3) {
+                                        this.context.radius = 0;
+                                    }
+
+                                    barCount++;
+
+                                    if (barCount === me.bar.count) {
+                                        callback && callback(me);
+                                    }
+                                },
+                                id: bar.id
+                            });
+                        }
+
+                        //txt grow
+                        if (me.text.enabled) {
+                            var txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+
+                            var infosp = txtGroupH.getChildById("infosp_" + g + "_" + h + "_" + v);
+                            if (infosp) {
+
+                                infosp.animate({
+                                    y: infosp._finalY,
+                                    x: infosp._finalX
+                                }, {
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    delay: h * options.delay,
+                                    onUpdate: function onUpdate() {
+                                        this.context.visible = true;
+                                    },
+                                    onComplete: function onComplete() {}
+                                });
+
+                                underscore.each(infosp.children, function (txt) {
+                                    if (txt._text || txt._text === 0) {
+                                        if (txt._tweenObj) {
+                                            AnimationFrame$2.destroyTween(txt._tweenObj);
+                                        }
+                                        txt._tweenObj = AnimationFrame$2.registTween({
+                                            from: {
+                                                v: txt.text
+                                            },
+                                            to: {
+                                                v: txt._text
+                                            },
+                                            duration: options.duration + 300,
+                                            delay: h * options.delay,
+                                            onUpdate: function onUpdate() {
+                                                var content = this.v;
+
+                                                if (underscore.isFunction(me.text.format)) {
+                                                    var _formatc = me.text.format.apply(me, [content, txt._data]);
+                                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
+                                                        content = _formatc;
+                                                    }
+                                                } else if (underscore.isNumber(content)) {
+                                                    content = numAddSymbol(parseInt(content));
+                                                }
+                                                txt.resetText(content);
+                                                if (txt.parent) {
+                                                    me._updateInfoTextPos(txt.parent);
+                                                } else {
+                                                    txt.destroy();
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+            //callback && callback(me);
+            /*
+            window.setTimeout(function() {
+                callback && callback(me);
+            }, 300 * (this.barsSp.children.length - 1));
+            */
+        }
+    }, {
+        key: "_getInfoHandler",
+        value: function _getInfoHandler(target) {
+            var node = {
+                iGroup: target.iGroup,
+                iNode: target.iNode,
+                iLay: target.iLay,
+                nodesInfoList: this._getNodeInfo(target.iGroup, target.iNode, target.iLay)
+            };
+            return node;
+        }
+    }, {
+        key: "_getNodeInfo",
+        value: function _getNodeInfo(iGroup, iNode, iLay) {
+            var arr = [];
+            var me = this;
+            var groups = me.data.length;
+
+            iGroup == undefined && (iGroup = -1);
+            iNode == undefined && (iNode = 0);
+            iLay == undefined && (iLay = -1);
+
+            underscore.each(me.data, function (h_group, i) {
+                var node;
+                var vLen = h_group.length;
+                if (vLen == 0) return;
+                var hLen = h_group[0].length;
+                for (var h = 0; h < hLen; h++) {
+                    if (h == iNode) {
+                        for (var v = 0; v < vLen; v++) {
+                            if ((iGroup == i || iGroup == -1) && (iLay == v || iLay == -1)) {
+                                node = h_group[v][h];
+                                node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value, node.field);
+                                arr.push(node);
+                            }
+                        }
+                    }
+                }
+            });
+            return arr;
+        }
+    }]);
+    return Graphs;
+}();
+
+/**
+* 把原始的数据
+* field1 field2 field3
+*   1      2      3
+*   2      3      4
+* 这样的数据格式转换为内部的
+* [{field:'field1',index:0,data:[1,2]} ......]
+* 这样的结构化数据格式。
+*/
+
+var dataFormat = function (data, opt) {
+
+    var dataFrame = { //数据框架集合
+        org: [], //最原始的数据  
+        data: [], //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
+
+        //后续dataFrame不在默认设置yAxis,xAxis,rAxis 这几个对象
+
+        yAxis: { //y轴
+            field: null, //[],   //字段集合 对应this.data
+            org: [] //二维 原始数据[[100,200],[1000,2000]]
+        },
+        xAxis: { //x轴
+            field: [], //字段 对应this.data
+            org: [] //原始数据['星期一','星期二']
+        },
+        rAxis: { //z轴
+            field: [], //字段 对应this.data
+            org: [] //原始数据['星期一','星期二']
+        },
+
+        getRowData: _getRowData,
+        getFieldData: _getFieldData,
+        getDataOrg: getDataOrg
+    };
+
+    if (!data || data.length == 0) {
+        return dataFrame;
+    }
+
+    //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
+    if (data.length > 0 && !underscore.isArray(data[0])) {
+        data = Tools.parse2MatrixData(data);
+    }
+
+    var arr = data;
+    dataFrame.org = arr;
+    var fileds = arr[0] ? arr[0] : []; //所有的字段集合
+
+    var _coordinate;
+    if (opt) {
+        _coordinate = opt;
+        if (opt.coordinate) {
+            _coordinate = opt.coordinate;
+        }
+        _coordinate.yAxis && (dataFrame.yAxis.field = _coordinate.yAxis.field);
+        _coordinate.xAxis && (dataFrame.xAxis.field = _coordinate.xAxis.field);
+        _coordinate.rAxis && (dataFrame.rAxis.field = _coordinate.rAxis.field);
+    } else {
+        this.yAxis && (dataFrame.yAxis.field = this.yAxis.field);
+        this.xAxis && (dataFrame.xAxis.field = this.xAxis.field);
+        this.rAxis && (dataFrame.rAxis.field = this.rAxis.field);
+    }
+
+    var total = [];
+
+    for (var a = 0, al = fileds.length; a < al; a++) {
+        var o = {};
+        o.field = fileds[a];
+        o.index = a;
+        o.data = [];
+        total.push(o);
+    }
+
+    dataFrame.data = total;
+
+    //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
+
+    function getDataOrg($field, format, totalList) {
+
+        var arr = totalList || total;
+        if (!arr) {
+            return;
+        }
+        if (!format) {
+            format = function format(e) {
+                return e;
+            };
+        }
+
+        function _format(data) {
+            for (var i = 0, l = data.length; i < l; i++) {
+                data[i] = format(data[i]);
+            }
+            return data;
+        }
+
+        if (!underscore.isArray($field)) {
+            $field = [$field];
+        }
+
+        //这个时候的arr只是totalList的过滤，还没有完全的按照$field 中的排序
+        var newData = [];
+        for (var i = 0, l = $field.length; i < l; i++) {
+            var fieldInTotal = false; //如果该field在数据里面根本没有，那么就说明是无效的field配置
+            if (underscore.isArray($field[i])) {
+                newData.push(getDataOrg($field[i], format, totalList));
+            } else {
+                for (var ii = 0, iil = arr.length; ii < iil; ii++) {
+                    if ($field[i] == arr[ii].field) {
+                        fieldInTotal = true;
+                        newData.push(_format(arr[ii].data));
+                        break;
+                    }
+                }
+                //干掉无效的field配置
+                if (!fieldInTotal) {
+                    $field.splice(i, 1);
+                    i--;
+                    l--;
+                }
+            }
+        }
+        return newData;
+    }
+
+    /*
+     * 先设置xAxis的数据
+     */
+    var xField = dataFrame.xAxis.field;
+    if (!xField || xField == "" || underscore.isArray(xField) && (xField.length == 0 || !underscore.find(total, function (obj) {
+        if (underscore.indexOf(xField, obj.field) >= 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }))) {
+        xField = dataFrame.xAxis.field = [total[0].field];
+    } else {
+        //如果有配置好的xAxis字段
+        if (underscore.isString(xField)) {
+            xField = [xField];
+        }
+    }
+
+    /*
+     * 然后设置对应的yAxis数据
+     */
+    var yField = dataFrame.yAxis.field;
+    if (yField == "" || underscore.isArray(yField) && yField.length == 0) {
+        yField = [];
+    } else if (!yField) {
+        //如果yField没有，那么就自动获取除开xField 的所有字段    
+        yField = underscore.difference(fileds, xField);
+    } else if (underscore.isString(yField)) {
+        yField = [yField];
+    }
+    dataFrame.yAxis.field = yField;
+
+    //填充好total的data并且把属于yAxis的设置为number
+    for (var a = 1, al = arr.length; a < al; a++) {
+        for (var b = 0, bl = arr[a].length; b < bl; b++) {
+            total[b].data.push(arr[a][b]);
+        }
+    }
+
+    dataFrame.xAxis.org = getDataOrg(xField);
+    dataFrame.yAxis.org = getDataOrg(yField, function (val) {
+        if (val === undefined || val === null || val === "") {
+            return val;
+        }
+        return isNaN(Number(val)) ? val : Number(val);
+    });
+
+    /*
+     * 然后设置对应的rAxis数据
+     */
+    var zField = dataFrame.rAxis.field;
+    if (underscore.isString(zField)) {
+        zField = [zField];
+    }
+    dataFrame.rAxis.field = zField;
+    var allZFields = underscore.flatten(dataFrame.rAxis.field);
+    if (allZFields.length > 0) {
+        dataFrame.rAxis.org = getDataOrg(zField);
+    }
+
+    /*
+     * 获取一行数据
+    */
+    function _getRowData(index) {
+        var o = {};
+        var data = dataFrame.data;
+        for (var a = 0, al = data.length; a < al; a++) {
+            if (data[a]) {
+                o[data[a].field] = data[a].data[index];
+            }
+        }
+        return o;
+    }
+
+    function _getFieldData(field) {
+        var data;
+        underscore.each(dataFrame.data, function (d) {
+            if (d.field == field) {
+                data = d;
+            }
+        });
+        if (data) {
+            return data.data;
+        } else {
+            return [];
+        }
+    }
+
+    return dataFrame;
+};
+
+var Line$4 = canvax.Shapes.Line;
+var Rect$5 = canvax.Shapes.Rect;
+
+var dataZoom = function (_Component) {
+    inherits$1(dataZoom, _Component);
+
+    function dataZoom(opt) {
+        classCallCheck$1(this, dataZoom);
+
+        //0-1
+        var _this = possibleConstructorReturn$1(this, (dataZoom.__proto__ || Object.getPrototypeOf(dataZoom)).call(this));
+
+        _this.range = {
+            start: 0,
+            end: '',
+            max: 1,
+            min: 0
+        };
+        _this.count = 1;
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+        _this.left = {
+            eventEnabled: true
+        };
+        _this.right = {
+            eventEnabled: true
+        };
+        _this.center = {
+            fillStyle: '#ffffff',
+            globalAlpha: 0
+        };
+
+        _this.w = 0;
+        _this.h = 40;
+
+        _this.color = opt.color || "#008ae6";
+
+        _this.bg = {
+            enabled: true,
+            fillStyle: "",
+            strokeStyle: "#e6e6e6",
+            lineWidth: 1
+        };
+
+        _this.underline = {
+            enabled: true,
+            strokeStyle: _this.color,
+            lineWidth: 2
+        };
+
+        _this.dragIng = function () {};
+        _this.dragEnd = function () {};
+
+        _this.range.max = 0;
+        _this.range.end = 0;
+        _this.disPart = {};
+        _this.barAddH = 8;
+        _this.barH = _this.h - _this.barAddH;
+        _this.barY = 6 / 2;
+        _this.btnW = 8;
+        _this.btnFillStyle = _this.color;
+        _this._btnLeft = null;
+        _this._btnRight = null;
+        _this._underline = null;
+
+        _this.zoomBg = null;
+
+        opt && underscore.deepExtend(_this, opt);
+        _this._computeAttrs(opt);
+        _this.init(opt);
+        return _this;
+    }
+
+    createClass$1(dataZoom, [{
+        key: "init",
+        value: function init(opt) {
+            var me = this;
+            me.sprite = new canvax.Display.Sprite({
+                id: "dataZoom",
+                context: {
+                    x: me.pos.x,
+                    y: me.pos.y
+                }
+            });
+            me.sprite.noSkip = true;
+            me.dataZoomBg = new canvax.Display.Sprite({
+                id: "dataZoomBg"
+            });
+            me.dataZoomBtns = new canvax.Display.Sprite({
+                id: "dataZoomBtns"
+            });
+            me.sprite.addChild(me.dataZoomBg);
+            me.sprite.addChild(me.dataZoomBtns);
+
+            me.widget();
+            me._setLines();
+        }
+    }, {
+        key: "destroy",
+        value: function destroy() {
+            this.sprite.destroy();
+        }
+    }, {
+        key: "reset",
+        value: function reset(opt, zoomBgSp) {
+            opt && underscore.deepExtend(this, opt);
+            this._computeAttrs(opt);
+
+            this.widget();
+            //this._setLines();
+            this.setZoomBg(zoomBgSp);
+        }
+
+        //计算属性
+
+    }, {
+        key: "_computeAttrs",
+        value: function _computeAttrs(opt) {
+
+            if (!opt.range || !opt.range.max) {
+                this.range.max = this.count;
+            }
+
+            if (this.range.end == '' && (!opt.range || !opt.range.end) || parseInt(this.range.end) > this.count - 1) {
+                this.range.end = this.count - 1;
+            }
+
+            //这里为了避免外面没有传入number
+            this.range.start = parseInt(this.range.start);
+            this.range.end = parseInt(this.range.end);
+
+            this.disPart = this._getDisPart();
+            this.barH = this.h - this.barAddH;
+        }
+    }, {
+        key: "widget",
+        value: function widget() {
+            var me = this;
+            var setLines = function setLines() {
+                me._setLines.apply(me, arguments);
+            };
+            if (me.bg.enabled) {
+                var bgRectCtx = {
+                    x: 0,
+                    y: me.barY,
+                    width: me.w,
+                    height: me.barH,
+                    lineWidth: me.bg.lineWidth,
+                    strokeStyle: me.bg.strokeStyle,
+                    fillStyle: me.bg.fillStyle
+                };
+                if (me._bgRect) {
+                    me._bgRect.animate(bgRectCtx, {
+                        onUpdate: setLines
+                    });
+                } else {
+                    me._bgRect = new Rect$5({
+                        context: bgRectCtx
+                    });
+                    me.dataZoomBg.addChild(me._bgRect);
+                }
+            }
+
+            if (me.underline.enabled) {
+                var underlineCtx = {
+                    xStart: me.range.start / me.count * me.w + me.btnW / 2,
+                    yStart: me.barY + me.barH + 2,
+                    xEnd: (me.range.end + 1) / me.count * me.w - me.btnW / 2,
+                    yEnd: me.barY + me.barH + 2,
+                    lineWidth: me.underline.lineWidth,
+                    strokeStyle: me.underline.strokeStyle
+                };
+
+                if (me._underline) {
+                    me._underline.animate(underlineCtx, {
+                        onUpdate: setLines
+                    });
+                } else {
+                    me._underline = me._addLine(underlineCtx);
+                    me.dataZoomBg.addChild(me._underline);
+                }
+            }
+
+            var btnLeftCtx = {
+                x: me.range.start / me.count * me.w,
+                y: me.barY - me.barAddH / 2 + 1,
+                width: me.btnW,
+                height: me.barH + me.barAddH,
+                fillStyle: me.btnFillStyle,
+                cursor: me.left.eventEnabled && "move"
+            };
+            if (me._btnLeft) {
+                me._btnLeft.animate(btnLeftCtx, {
+                    onUpdate: setLines
+                });
+            } else {
+                me._btnLeft = new Rect$5({
+                    id: 'btnLeft',
+                    dragEnabled: me.left.eventEnabled,
+                    context: btnLeftCtx
+                });
+                me._btnLeft.on("draging", function () {
+                    this.context.y = me.barY - me.barAddH / 2 + 1;
+                    if (this.context.x < 0) {
+                        this.context.x = 0;
+                    }
+                    if (this.context.x > me._btnRight.context.x - me.btnW - 2) {
+                        this.context.x = me._btnRight.context.x - me.btnW - 2;
+                    }
+                    if (me._btnRight.context.x + me.btnW - this.context.x > me.disPart.max) {
+                        this.context.x = me._btnRight.context.x + me.btnW - me.disPart.max;
+                    }
+                    if (me._btnRight.context.x + me.btnW - this.context.x < me.disPart.min) {
+                        this.context.x = me._btnRight.context.x + me.btnW - me.disPart.min;
+                    }
+                    me.rangeRect.context.width = me._btnRight.context.x - this.context.x - me.btnW;
+                    me.rangeRect.context.x = this.context.x + me.btnW;
+                    me._setRange();
+                });
+                me._btnLeft.on("dragend", function () {
+                    me.dragEnd(me.range);
+                });
+                this.dataZoomBtns.addChild(this._btnLeft);
+            }
+
+            var btnRightCtx = {
+                x: (me.range.end + 1) / me.count * me.w - me.btnW,
+                y: me.barY - me.barAddH / 2 + 1,
+                width: me.btnW,
+                height: me.barH + me.barAddH,
+                fillStyle: me.btnFillStyle,
+                cursor: me.right.eventEnabled && "move"
+            };
+
+            if (me._btnRight) {
+                me._btnRight.animate(btnRightCtx, {
+                    onUpdate: setLines
+                });
+            } else {
+                me._btnRight = new Rect$5({
+                    id: 'btnRight',
+                    dragEnabled: me.right.eventEnabled,
+                    context: btnRightCtx
+                });
+                me._btnRight.on("draging", function () {
+                    this.context.y = me.barY - me.barAddH / 2 + 1;
+                    if (this.context.x > me.w - me.btnW) {
+                        this.context.x = me.w - me.btnW;
+                    }
+                    if (this.context.x + me.btnW - me._btnLeft.context.x > me.disPart.max) {
+                        this.context.x = me.disPart.max - (me.btnW - me._btnLeft.context.x);
+                    }
+                    if (this.context.x + me.btnW - me._btnLeft.context.x < me.disPart.min) {
+                        this.context.x = me.disPart.min - (me.btnW - me._btnLeft.context.x);
+                    }
+                    me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnW;
+                    me._setRange();
+                });
+                me._btnRight.on("dragend", function () {
+                    me.dragEnd(me.range);
+                });
+                this.dataZoomBtns.addChild(this._btnRight);
+            }
+
+            var rangeRectCtx = {
+                x: btnLeftCtx.x + me.btnW,
+                y: this.barY + 1,
+                width: btnRightCtx.x - btnLeftCtx.x - me.btnW,
+                height: this.barH - 1,
+                fillStyle: me.center.fillStyle,
+                globalAlpha: me.center.globalAlpha,
+                cursor: "move"
+            };
+            if (this.rangeRect) {
+                this.rangeRect.animate(rangeRectCtx, {
+                    onUpdate: setLines
+                });
+            } else {
+                //中间矩形拖拽区域
+                this.rangeRect = new Rect$5({
+                    id: 'btnCenter',
+                    dragEnabled: true,
+                    context: rangeRectCtx
+                });
+                this.rangeRect.on("draging", function (e) {
+                    this.context.y = me.barY + 1;
+                    if (this.context.x < me.btnW) {
+                        this.context.x = me.btnW;
+                    }
+                    if (this.context.x > me.w - this.context.width - me.btnW) {
+                        this.context.x = me.w - this.context.width - me.btnW;
+                    }
+                    me._btnLeft.context.x = this.context.x - me.btnW;
+                    me._btnRight.context.x = this.context.x + this.context.width;
+                    me._setRange();
+                });
+                this.rangeRect.on("dragend", function () {
+                    me.dragEnd(me.range);
+                });
+                this.dataZoomBtns.addChild(this.rangeRect);
+            }
+
+            if (!this.linesLeft) {
+                this.linesLeft = new canvax.Display.Sprite({ id: "linesLeft" });
+                if (this.left.eventEnabled) {
+                    this._addLines({
+                        sprite: this.linesLeft
+                    });
+                }
+                this.dataZoomBtns.addChild(this.linesLeft);
+            }
+            if (!this.linesRight) {
+                this.linesRight = new canvax.Display.Sprite({ id: "linesRight" });
+                if (this.right.eventEnabled) {
+                    this._addLines({
+                        sprite: this.linesRight
+                    });
+                }
+                this.dataZoomBtns.addChild(this.linesRight);
+            }
+
+            if (!this.linesCenter) {
+                this.linesCenter = new canvax.Display.Sprite({ id: "linesCenter" });
+                this._addLines({
+                    count: 6,
+                    // dis    : 1,
+                    sprite: this.linesCenter,
+                    strokeStyle: this.btnFillStyle
+                });
+                this.dataZoomBtns.addChild(this.linesCenter);
+            }
+        }
+    }, {
+        key: "_getDisPart",
+        value: function _getDisPart() {
+            var me = this;
+            return {
+                min: me.range.min / me.count * me.w,
+                max: me.range.max / me.count * me.w
+            };
+        }
+    }, {
+        key: "_setRange",
+        value: function _setRange() {
+            var me = this;
+
+            var start = me._btnLeft.context.x / me.w * (me.count - 1);
+            var end = (me._btnRight.context.x + me.btnW) / me.w * (me.count - 1);
+            me.range.start = start;
+            me.range.end = end;
+            //@比例range @像素range @单位总数 @width
+            me.dragIng(me.range, {
+                start: me._btnLeft.context.x,
+                end: me._btnRight.context.x + me.btnW
+            }, me.count, me.w);
+            me._setLines();
+        }
+    }, {
+        key: "_setLines",
+        value: function _setLines() {
+
+            var me = this;
+            var linesLeft = this.linesLeft;
+            var linesRight = this.linesRight;
+            var linesCenter = this.linesCenter;
+
+            var btnLeft = this._btnLeft;
+            var btnRight = this._btnRight;
+            var btnCenter = this.rangeRect;
+
+            linesLeft.context.x = btnLeft.context.x + (btnLeft.context.width - linesLeft.context.width) / 2;
+            linesLeft.context.y = btnLeft.context.y + (btnLeft.context.height - linesLeft.context.height) / 2;
+
+            linesRight.context.x = btnRight.context.x + (btnRight.context.width - linesRight.context.width) / 2;
+            linesRight.context.y = btnRight.context.y + (btnRight.context.height - linesRight.context.height) / 2;
+
+            linesCenter.context.x = btnCenter.context.x + (btnCenter.context.width - linesCenter.context.width) / 2;
+            linesCenter.context.y = btnCenter.context.y + (btnCenter.context.height - linesCenter.context.height) / 2;
+
+            if (me.underline.enabled) {
+                me._underline.context.xStart = linesLeft.context.x + me.btnW / 2;
+                me._underline.context.xEnd = linesRight.context.x + me.btnW / 2;
+            }
+        }
+    }, {
+        key: "_addLines",
+        value: function _addLines($o) {
+            var me = this;
+            var count = $o.count || 2;
+            var sprite = $o.sprite;
+            var dis = $o.dis || 2;
+            for (var a = 0, al = count; a < al; a++) {
+                sprite.addChild(me._addLine({
+                    x: a * dis,
+                    strokeStyle: $o.strokeStyle || ''
+                }));
+            }
+            sprite.context.width = a * dis - 1, sprite.context.height = 6;
+        }
+    }, {
+        key: "_addLine",
+        value: function _addLine($o) {
+            var o = $o || {};
+            var line = new Line$4({
+                id: o.id || '',
+                context: {
+                    x: o.x || 0,
+                    y: o.y || 0,
+                    xStart: o.xStart || 0,
+                    yStart: o.yStart || 0,
+                    xEnd: o.xEnd || 0,
+                    yEnd: o.yEnd || 6,
+                    lineWidth: o.lineWidth || 1,
+                    strokeStyle: o.strokeStyle || '#ffffff'
+                }
+            });
+            return line;
+        }
+    }, {
+        key: "setZoomBg",
+        value: function setZoomBg(zoomBgSp) {
+
+            if (this.zoomBg) {
+                zoomBgSp.context.x = this.zoomBg.context.x;
+                zoomBgSp.context.y = this.zoomBg.context.y;
+                zoomBgSp.context.scaleY = this.zoomBg.context.scaleY;
+                this.zoomBg.destroy();
+            }
+            this.zoomBg = zoomBgSp;
+            this.dataZoomBg.addChild(zoomBgSp);
+        }
+    }]);
+    return dataZoom;
+}(component);
+
+var BrokenLine$3 = canvax.Shapes.BrokenLine;
+var Sprite$1 = canvax.Display.Sprite;
+var Text$1 = canvax.Display.Text;
+
+var markLine = function (_Component) {
+    inherits$1(markLine, _Component);
+
+    function markLine() {
+        classCallCheck$1(this, markLine);
+
+        var _this = possibleConstructorReturn$1(this, (markLine.__proto__ || Object.getPrototypeOf(markLine)).call(this));
+
+        _this._yAxis = _yAxis;
+        _this.w = 0;
+        _this.h = 0;
+        _this.field = null;
+        _this.origin = {
+            x: 0, y: 0
+        };
+
+        _this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
+        _this.value = 0;
+        _this.line = {
+            y: 0,
+            list: [],
+            strokeStyle: '#999',
+            lineWidth: 1,
+            smooth: false,
+            lineType: 'dashed'
+        };
+
+        _this.text = {
+            enabled: false,
+            content: '',
+            fillStyle: '#999999',
+            fontSize: 12,
+            format: null,
+            lineType: 'dashed',
+            lineWidth: 1,
+            strokeStyle: "white"
+        };
+
+        _this.filter = function () {};
+
+        _this._txt = null;
+        _this._line = null;
+
+        opt && underscore.deepExtend(_this, opt);
+        _this.init();
+        return _this;
+    }
+
+    createClass$1(markLine, [{
+        key: "init",
+        value: function init() {
+            var me = this;
+
+            this.sprite = new Sprite$1({
+                context: {
+                    x: this.origin.x,
+                    y: this.origin.y
+                }
+            });
+            //setTimeout( function(){
+            me.widget();
+            //} , 10 );
+        }
+    }, {
+        key: "draw",
+        value: function draw() {}
+    }, {
+        key: "widget",
+        value: function widget() {
+            var me = this;
+
+            var line = new BrokenLine$3({ //线条
+                id: "line",
+                context: {
+                    y: me.line.y,
+                    pointList: me.line.list,
+                    strokeStyle: me.line.strokeStyle,
+                    lineWidth: me.line.lineWidth,
+                    lineType: me.line.lineType
+                }
+            });
+            me.sprite.addChild(line);
+            me._line = line;
+
+            if (me.text.enabled) {
+                var txt = new Text$1(me.text.content, { //文字
+                    context: me.text
+                });
+                this._txt = txt;
+                me.sprite.addChild(txt);
+
+                if (underscore.isNumber(me.text.x)) {
+                    txt.context.x = me.text.x, txt.context.y = me.text.y;
+                } else {
+                    txt.context.x = this.w - txt.getTextWidth();
+                    txt.context.y = me.line.y - txt.getTextHeight();
+                }
+            }
+
+            me.filter(me);
+        }
+    }, {
+        key: "reset",
+        value: function reset(opt) {
+            opt && underscore.deepExtend(this, opt);
+            if (this.line.y != this._line.context.y) {
+                this._line.animate({
+                    y: this.line.y
+                }, {
+                    duration: 500,
+                    easing: 'Back.Out' //Tween.Easing.Elastic.InOut
+                });
+            }
+            this._line.context.strokeStyle = this.line.strokeStyle;
+            this._txt && this._txt.resetText(this.text.context);
+        }
+    }]);
+    return markLine;
+}(component);
+
+var Circle$2$1 = canvax.Shapes.Circle;
+var Droplet$1 = canvax.Shapes.Droplet;
+
+var markPoint = function (_Component) {
+    inherits$1(markPoint, _Component);
+
+    function markPoint() {
+        classCallCheck$1(this, markPoint);
+
+        var _this = possibleConstructorReturn$1(this, (markPoint.__proto__ || Object.getPrototypeOf(markPoint)).call(this));
+
+        _this.markTo = null;
+        _this.data = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
+        _this.point = {
+            x: 0, y: 0
+        };
+        _this.normalColor = "#6B95CF";
+        _this.shapeType = "droplet"; //"circle";
+        _this.fillStyle = null;
+        _this.strokeStyle = null;
+        _this.lineWidth = 1;
+        _this.globalAlpha = 0.9;
+
+        _this.duration = 800; //如果有动画，则代表动画时长
+        _this.easing = null; //动画类型
+
+        //droplet opts
+        _this.hr = 8;
+        _this.vr = 12;
+
+        //circle opts
+        _this.r = 5;
+
+        _this.sprite = null;
+        _this.shape = null;
+
+        _this.iGroup = null;
+        _this.iNode = null;
+        _this.iLay = null;
+
+        _this.realTime = false; //是否是实时的一个点，如果是的话会有动画
+        _this.filter = function () {}; //过滤函数
+
+        if ("markPoint" in userOpts) {
+            underscore.deepExtend(_this, userOpts.markPoint);
+        }
+        chartOpts && underscore.deepExtend(_this, chartOpts);
+
+        _this.init();
+        return _this;
+    }
+
+    createClass$1(markPoint, [{
+        key: "init",
+        value: function init() {
+            var me = this;
+            this.sprite = new canvax.Display.Sprite({
+                context: {
+                    x: this.point.x,
+                    y: this.point.y,
+                    globalAlpha: this.globalAlpha
+                }
+            });
+            this.sprite.on("destroy", function (e) {});
+            me.widget();
+        }
+    }, {
+        key: "widget",
+        value: function widget() {
+            this._fillStyle = this._getColor(this.fillStyle, this.data);
+            this._strokeStyle = this._getColor(this.strokeStyle, this.data);
+            switch (this.shapeType.toLocaleLowerCase()) {
+                case "circle":
+                    this._initCircleMark();
+                    break;
+                case "droplet":
+                    this._initDropletMark();
+                    break;
+            }
+        }
+    }, {
+        key: "rePosition",
+        value: function rePosition(point) {
+            this.point = point;
+            this.sprite.context.x = this.point.x;
+            this.sprite.context.y = this.point.y;
+        }
+    }, {
+        key: "_getColor",
+        value: function _getColor(c, data, normalColor) {
+            var color = c;
+            if (underscore.isFunction(c)) {
+                color = c(data);
+            }
+            //缺省颜色
+            if (!color || color == "") {
+                //如果有传normal进来，就不管normalColor参数是什么，都直接用
+                if (arguments.length >= 3) {
+                    color = normalColor;
+                } else {
+                    color = this.normalColor;
+                }
+            }
+            return color;
+        }
+    }, {
+        key: "_done",
+        value: function _done() {
+            this.shape.context.visible = true;
+            this.shapeBg && (this.shapeBg.context.visible = true);
+            this.shapeCircle && (this.shapeCircle.context.visible = true);
+            underscore.isFunction(this.filter) && this.filter(this);
+        }
+    }, {
+        key: "_initCircleMark",
+        value: function _initCircleMark() {
+            var me = this;
+            var ctx = {
+                r: me.r,
+                fillStyle: me._fillStyle,
+                lineWidth: me.lineWidth,
+                strokeStyle: me._strokeStyle,
+                //globalAlpha : me.globalAlpha,
+                cursor: "point",
+                visible: false
+            };
+            me.shape = new Circle$2$1({
+                context: ctx
+            });
+            me.sprite.addChild(me.shape);
+            me._realTimeAnimate();
+            me._done();
+        }
+    }, {
+        key: "destroy",
+        value: function destroy() {
+            this.sprite.destroy();
+        }
+    }, {
+        key: "_realTimeAnimate",
+        value: function _realTimeAnimate() {
+            var me = this;
+            if (me.realTime) {
+                if (!me.shapeBg) {
+                    me.shapeBg = me.shape.clone();
+                    me.sprite.addChildAt(me.shapeBg, 0);
+                }
+            }
+        }
+    }, {
+        key: "_initDropletMark",
+        value: function _initDropletMark() {
+            var me = this;
+            var ctx = {
+                y: -me.vr,
+                scaleY: -1,
+                hr: me.hr,
+                vr: me.vr,
+                fillStyle: me._fillStyle,
+                lineWidth: me.lineWidth,
+                strokeStyle: me._strokeStyle,
+                //globalAlpha : me.globalAlpha,
+                cursor: "point",
+                visible: false
+            };
+            me.shape = new Droplet$1({
+                hoverClone: false,
+                context: ctx
+            });
+            me.sprite.addChild(me.shape);
+
+            var circleCtx = {
+                y: -me.vr,
+                x: 1,
+                r: Math.max(me.hr - 6, 2),
+                fillStyle: "#fff",
+                visible: false
+            };
+            me.shapeCircle = new Circle$2$1({
+                context: circleCtx
+            });
+            me.sprite.addChild(me.shapeCircle);
+
+            me._done();
+        }
+    }]);
+    return markPoint;
+}(component);
+
+var Bar = function (_Chart) {
+    inherits$1(Bar, _Chart);
+
+    function Bar(node, data, opts) {
+        classCallCheck$1(this, Bar);
+
+        var _this = possibleConstructorReturn$1(this, (Bar.__proto__ || Object.getPrototypeOf(Bar)).call(this, node, data, opts));
+
+        _this.type = "bar";
+
+        data = parse2MatrixData(data);
+
+        _this._node = node;
+        _this._data = data;
+        _this._opts = opts;
+
+        _this._xAxis = null;
+        _this.xAxis = {
+            layoutType: "peak", //波峰波谷布局模型
+            posParseToInt: false //true
+        };
+
+        _this._yAxis = null;
+        _this._back = null;
+        _this._graphs = null;
+        _this._tip = null;
+        _this._checkedList = []; //所有的选择对象
+        _this._currCheckedList = []; //当前可可视范围内的选择对象(根据dataZoom.start, dataZoom.end 过滤)
+
+        _this.dataZoom = {
+            h: 30,
+            range: {
+                start: 0,
+                end: data.length - 1 //因为第一行是title
+            }
+        };
+
+        if (opts.proportion) {
+            _this.proportion = opts.proportion;
+            _this._initProportion(node, data, opts);
+        } else {
+            underscore.deepExtend(_this, opts);
+        }
+
+        _this.dataFrame = _this._initData(data);
+
+        //吧原始的field转换为对应结构的显示树
+        //["uv"] --> [{field:'uv',enabled:true , fillStyle: }]
+        _this._fieldsDisplayMap = _this.__setFieldsDisplay(_this._opts.yAxis.field || _this._opts.yAxis.bar.field);
+
+        //一些继承自该类的constructor 会拥有_init来做一些覆盖，比如横向柱状图
+        _this._init && _this._init(node, data, opts);
+
+        _this.draw();
+        return _this;
+    }
+
+    createClass$1(Bar, [{
+        key: "init",
+        value: function init(node, data, opts) {}
+
+        /*
+         * 如果只有数据改动的情况
+         */
+
+    }, {
+        key: "resetData",
+        value: function resetData(data, e) {
+            this._data = parse2MatrixData(data);
+
+            this.dataFrame = this._initData(data, this);
+
+            this.__reset(this, e);
+
+            this.fire("_resetData");
+        }
+    }, {
+        key: "__reset",
+        value: function __reset(opt, e) {
+            var me = this;
+            opt = !opt ? this : opt;
+
+            me._removeChecked();
+
+            this._xAxis.reset({
+                animation: false
+            }, this.dataFrame.xAxis);
+
+            this.setYasixDataFrame();
+
+            this._yAxis.reset({
+                animation: false
+            }, this.dataFrame.yAxis);
+
+            if (this._data.length) {
+                this._graphs.resetData(this._trimGraphs());
+                this._graphs.grow(function () {
+                    //callback
+                }, {
+                    delay: 0
+                });
+            } else {
+                this._graphs.clean();
+                this._tip.hide();
+            }
+
+            this._plugsReset(opt, e);
+        }
+
+        //这里列举了所有可能影响到yAxis的 dataSection 的条件
+
+    }, {
+        key: "setYasixDataFrame",
+        value: function setYasixDataFrame() {
+            if (this._graphs.average.enabled) {
+                this.dataFrame.yAxis.org.push([this._getaverageData()]);
+            }
+            if (this.markLine && this.markLine.y) {
+                this.dataFrame.yAxis.org.push([this.markLine.y]);
+            }
+        }
+    }, {
+        key: "getCheckedCurrList",
+        value: function getCheckedCurrList() {
+            var me = this;
+            return underscore.filter(me._getCurrCheckedList(), function (o) {
+                return o;
+            });
+        }
+    }, {
+        key: "getCheckedList",
+        value: function getCheckedList() {
+            //获取选择之后的对象列表 列表中不含空对象 [eventInfo,evnetInfo,....]
+            var me = this;
+            return underscore.filter(me._checkedList, function (o) {
+                return o;
+            });
+        }
+
+        //和原始field结构保持一致，但是对应的field换成 {field: , enabled:}结构
+
+    }, {
+        key: "__setFieldsDisplay",
+        value: function __setFieldsDisplay(fields) {
+            if (underscore.isString(fields)) {
+                fields = [fields];
+            }
+            var clone_fields = underscore.clone(fields);
+            for (var i = 0, l = fields.length; i < l; i++) {
+                if (underscore.isString(fields[i])) {
+                    clone_fields[i] = {
+                        field: fields[i],
+                        enabled: true
+                    };
+                }
+                if (underscore.isArray(fields[i])) {
+                    clone_fields[i] = this.__setFieldsDisplay(fields[i]);
+                }
+            }
+            return clone_fields;
+        }
+    }, {
+        key: "_getFieldsOfDisplay",
+        value: function _getFieldsOfDisplay(maps) {
+            var fields = [];
+            !maps && (maps = this._fieldsDisplayMap);
+            for (var i = 0, l = maps.length; i < l; i++) {
+                if (underscore.isArray(maps[i])) {
+                    var _fs = this._getFieldsOfDisplay(maps[i]);
+                    _fs.length > 0 && (fields[i] = _fs);
+                } else if (maps[i].field && maps[i].enabled) {
+                    fields[i] = maps[i].field;
+                }
+            }
+            return fields;
+        }
+
+        //设置_fieldsDisplayMap中对应field 的 enabled状态
+
+    }, {
+        key: "_setFieldDisplay",
+        value: function _setFieldDisplay(field) {
+            var me = this;
+            function set$$1(maps) {
+                underscore.each(maps, function (map, i) {
+                    if (underscore.isArray(map)) {
+                        set$$1(map);
+                    } else if (map.field && map.field == field) {
+                        map.enabled = !map.enabled;
+                    }
+                });
+            }
+            set$$1(me._fieldsDisplayMap);
+        }
+    }, {
+        key: "checkAt",
+        value: function checkAt(index) {
+            var me = this;
+            var i = index - me.dataZoom.range.start;
+            var o = me._graphs.getInfo(i);
+
+            me._checkedList[index] = o;
+
+            me._checkedBar({
+                iNode: i,
+                checked: true
+            });
+            me._checkedMiniBar({
+                iNode: index,
+                checked: true
+            });
+
+            o.iNode = index;
+
+            me.fire('checked', {
+                eventInfo: o
+            });
+        }
+    }, {
+        key: "uncheckAt",
+        value: function uncheckAt(index) {
+            //取消选择某个对象 index是全局index
+            var me = this;
+            var i = index - me.dataZoom.range.start;
+            if (me._checkedList[index]) {
+                me._checked(me._graphs.getInfo(i));
+            }
+        }
+    }, {
+        key: "uncheckAll",
+        value: function uncheckAll() {
+            for (var i = 0, l = this._checkedList.length; i < l; i++) {
+                var obj = this._checkedList[i];
+                if (obj) {
+                    this.uncheckAt(i);
+                }
+            }
+            this._checkedList = [];
+            this._currCheckedList = [];
+        }
+    }, {
+        key: "checkOf",
+        value: function checkOf(xvalue) {
+            //TODO:这个有个bug就是，如果当前dataRange是0-5， xvalue如果是在第6个的话，这里是无效的，因为getIndexOfVal取不到值
+            //后续优化
+            this.checkAt(this._xAxis.getIndexOfVal(xvalue) + this.dataZoom.range.start);
+        }
+    }, {
+        key: "uncheckOf",
+        value: function uncheckOf(xvalue) {
+            this.uncheckAt(this._xAxis.getIndexOfVal(xvalue) + this.dataZoom.range.start);
+        }
+    }, {
+        key: "getGroupChecked",
+        value: function getGroupChecked(e) {
+            var checked = false;
+            underscore.each(this.getCheckedList(), function (obj) {
+                if (obj && obj.iNode == e.eventInfo.iNode) {
+                    checked = true;
+                }
+            });
+            return checked;
+        }
+    }, {
+        key: "_setStages",
+        value: function _setStages() {
+            this.core = new canvax.Display.Sprite({
+                id: 'core'
+            });
+            this.stageBg = new canvax.Display.Sprite({
+                id: 'bg'
+            });
+            this.stageTip = new canvax.Display.Sprite({
+                id: 'tip'
+            });
+
+            this.stage.addChild(this.stageBg);
+            this.stage.addChild(this.core);
+            this.stage.addChild(this.stageTip);
+
+            if (this.rotate) {
+                this._rotate(this.rotate);
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw(e) {
+
+            e = e || {};
+
+            this._setStages(e);
+
+            this._initModule(e); //初始化模块  
+
+            this._startDraw(e); //开始绘图
+
+            this._drawEnd(e); //绘制结束，添加到舞台
+
+            this.inited = true;
+        }
+    }, {
+        key: "_initData",
+        value: function _initData(data, opt) {
+
+            var d;
+            if (this._opts.dataZoom) {
+                var datas = [data[0]];
+                datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1 + 1));
+                d = dataFormat.apply(this, [datas, opt]);
+            } else {
+                d = dataFormat.apply(this, arguments);
+            }
+
+            //var d = dataFormat.apply(this, arguments);
+
+            underscore.each(d.yAxis.field, function (field, i) {
+                if (!underscore.isArray(field)) {
+                    field = [field];
+                    d.yAxis.org[i] = [d.yAxis.org[i]];
+                }
+            });
+            return d;
+        }
+    }, {
+        key: "_getaverageData",
+        value: function _getaverageData() {
+            var averageData = [];
+            var me = this;
+            if (this._graphs && this._graphs.average && this._graphs.average.data) {
+                return this._graphs.average.data;
+            }
+            if (this._graphs.average.enabled) {
+                underscore.each(this.dataFrame.data, function (fd, i) {
+                    if (fd.field == me._graphs.average.field) {
+                        averageData = fd.data;
+                    }
+                });
+            }
+            this._graphs.average.data = averageData;
+            return averageData;
+        }
+    }, {
+        key: "_setaverageLayoutData",
+        value: function _setaverageLayoutData() {
+            var layoutData = [];
+            var me = this;
+            if (this._graphs.average.enabled) {
+                var maxYAxis = this._yAxis.dataSection[this._yAxis.dataSection.length - 1];
+                underscore.each(this._graphs.average.data, function (fd, i) {
+                    layoutData.push({
+                        value: fd,
+                        y: -(fd - me._yAxis.bottomNumber) / Math.abs(maxYAxis - me._yAxis.bottomNumber) * me._yAxis.yGraphsHeight
+                    });
+                });
+                this._graphs.average.layoutData = layoutData;
+            }
+        }
+    }, {
+        key: "_initModule",
+        value: function _initModule() {
+            //因为tips放在graphs中，so 要吧tips的conf传到graphs中
+            this._graphs = new Graphs(this.graphs, this);
+            this.core.addChild(this._graphs.sprite);
+
+            this._xAxis = new xAxis(this.xAxis, this.dataFrame.xAxis);
+            this.core.addChild(this._xAxis.sprite);
+
+            this.setYasixDataFrame();
+
+            this._yAxis = new yAxis(this.yAxis, this.dataFrame.yAxis);
+            this.core.addChild(this._yAxis.sprite);
+
+            this._back = new Back(this.back, this._yAxis, this._xAxis);
+            this.stageBg.addChild(this._back.sprite);
+
+            this._tip = new Tips(this.tips, this.canvax.domView);
+            this.stageTip.addChild(this._tip.sprite);
+        }
+    }, {
+        key: "_startDraw",
+        value: function _startDraw(opt) {
+            var me = this;
+
+            var w = opt && opt.w || this.width;
+            var h = opt && opt.h || this.height;
+            var y = parseInt(h - this._xAxis.height);
+
+            //初始化一些在开始绘制的时候就要处理的plug，这些plug可能会影响到布局，比如legend，datazoom
+            me._initPlugs_computLayout(opt);
+
+            var graphsH = y - this.padding.top - this.padding.bottom;
+
+            //绘制yAxis
+            this._yAxis.draw({
+                pos: {
+                    x: this.padding.left,
+                    y: y - this.padding.bottom
+                },
+                yMaxHeight: graphsH
+            });
+
+            var _yAxisW = this._yAxis.width;
+
+            //绘制x轴
+            this._xAxis.draw({
+                graphh: h - this.padding.bottom,
+                graphw: w - this.padding.right,
+                yAxisW: _yAxisW
+            });
+            if (this._xAxis.yAxisW != _yAxisW) {
+                //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
+                this._yAxis.resetWidth(this._xAxis.yAxisW);
+                _yAxisW = this._xAxis.yAxisW;
+            }
+
+            var _graphsH = this._yAxis.yGraphsHeight;
+            //绘制背景网格
+            this._back.draw({
+                w: this._xAxis.xGraphsWidth,
+                h: _graphsH,
+                xAxis: {
+                    data: this._yAxis.layoutData
+                },
+                yAxis: {
+                    data: this._xAxis.layoutData,
+                    xDis: this._xAxis.xDis
+                },
+                pos: {
+                    x: _yAxisW,
+                    y: y - this.padding.bottom
+                }
+            }, this);
+
+            this._setaverageLayoutData();
+
+            //绘制主图形区域
+            var gd = this._trimGraphs().data;
+            this._graphs.draw(gd, {
+                w: this._xAxis.xGraphsWidth,
+                h: this._yAxis.yGraphsHeight,
+                pos: {
+                    x: _yAxisW,
+                    y: y - this.padding.bottom
+                },
+                yDataSectionLen: this._yAxis.dataSection.length,
+                sort: this._yAxis.sort
+            });
+
+            me._initPlugs(opt);
+        }
+
+        //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+        //方便外部自定义 tip 是的content
+
+    }, {
+        key: "_setXaxisYaxisToTipsInfo",
+        value: function _setXaxisYaxisToTipsInfo(e, isAddStart) {
+            if (!e.eventInfo) {
+                return;
+            }
+
+            e.eventInfo.xAxis = {
+                field: this.dataFrame.xAxis.field,
+                value: this.dataFrame.xAxis.org[0][e.eventInfo.iNode]
+            };
+            var me = this;
+
+            underscore.each(e.eventInfo.nodesInfoList, function (node, i) {
+                //把这个group当前是否选中状态记录
+                if (me._checkedList[node.iNode + me.dataZoom.range.start]) {
+                    node.checked = true;
+                } else {
+                    node.checked = false;
+                }
+            });
+
+            e.eventInfo.dataZoom = me.dataZoom;
+
+            e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
+
+            if (!isAddStart) {
+                e.eventInfo.iNode += this.dataZoom.range.start;
+            }
+        }
+    }, {
+        key: "_trimGraphs",
+        value: function _trimGraphs(_xAxis, _yAxis) {
+
+            _xAxis || (_xAxis = this._xAxis);
+            _yAxis || (_yAxis = this._yAxis);
+            var xArr = _xAxis.data;
+            var yArr = _yAxis.dataOrg;
+            var hLen = _yAxis.field.length; //bar的横向分组length
+
+            var xDis1 = _xAxis.xDis;
+
+            //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
+            var xDis2 = xDis1 / (hLen + 1);
+
+            //知道了xDis2 后 检测下 barW是否需要调整
+            var barW = this._graphs.getBarWidth(xDis1, xDis2);
+
+            var barDis = xDis2 - barW;
+            if (this.graphs && this.graphs.bar && this.graphs.bar.xDis != undefined) {
+                barDis = this.graphs.bar.xDis;
+            }
+
+            var maxYAxis = _yAxis.dataSection[_yAxis.dataSection.length - 1];
+            var tmpData = [];
+            var center = [],
+                yValueMaxs = [],
+                yLen = [];
+
+            var me = this;
+
+            var disLeft, disRight;
+            disLeft = disRight = (xDis1 - barW * hLen - barDis * (hLen - 1)) / 2;
+
+            for (var b = 0; b < hLen; b++) {
+                !tmpData[b] && (tmpData[b] = []);
+                yValueMaxs[b] = 0;
+                center[b] = {};
+                var yArrList = yArr[b];
+
+                underscore.each(yArrList, function (subv, v) {
+                    !tmpData[b][v] && (tmpData[b][v] = []);
+
+                    underscore.each(subv, function (val, i) {
+
+                        if (!xArr[i]) {
+                            return;
+                        }
+
+                        var vCount = 0;
+                        if (me.proportion) {
+                            //先计算总量
+                            underscore.each(yArrList, function (team, ti) {
+                                vCount += team[i];
+                            });
+                        }
+
+                        //TODO：这里也是bar有自己计算x的公式， 要和line一样改造成调用xAxis的接口来计算
+                        var x = xArr[i].x - xDis1 / 2 + xDis2 * (b + 1);
+
+                        var x = xArr[i].x - xDis1 / 2 + disLeft + barW * b + barDis * b;
+
+                        var y = 0;
+                        if (me.proportion) {
+                            y = -val / vCount * _yAxis.yGraphsHeight;
+                        } else {
+                            y = _yAxis.getYposFromVal(val);
+                        }
+
+                        function _getFromY(tmpData, b, v, i, val, y, yBasePoint) {
+                            var preData = tmpData[b][v - 1];
+                            if (!preData) {
+                                return yBasePoint.y;
+                            }
+
+                            var preY = preData[i].y;
+                            var preVal = preData[i].value;
+                            var yBaseNumber = yBasePoint.content;
+                            if (val >= yBaseNumber) {
+                                //如果大于基线的，那么就寻找之前所有大于基线的
+                                if (preVal >= yBaseNumber) {
+                                    //能找到，先把pre的isLeaf设置为false
+                                    preData[i].isLeaf = false;
+                                    return preY;
+                                } else {
+                                    return _getFromY(tmpData, b, v - 1, i, val, y, yBasePoint);
+                                }
+                            } else {
+                                if (preVal < yBaseNumber) {
+                                    //能找到，先把pre的isLeaf设置为false
+                                    preData[i].isLeaf = false;
+                                    return preY;
+                                } else {
+                                    return _getFromY(tmpData, b, v - 1, i, val, y, yBasePoint);
+                                }
+                            }
+                        }
+
+                        //找到其着脚点,一般就是 yAxis.basePoint
+                        var fromY = _getFromY(tmpData, b, v, i, val, y, _yAxis.basePoint);
+                        y += fromY - _yAxis.basePoint.y;
+
+                        //如果有排序的话
+                        //TODO:这个逻辑好像有问题
+                        if (me._yAxis.sort && me._yAxis.sort == "desc") {
+                            y = -(_yAxis.yGraphsHeight - Math.abs(y));
+                        }
+
+                        var node = {
+                            value: val,
+                            field: me._getTargetField(b, v, i, _yAxis.field),
+                            fromX: x,
+                            fromY: fromY,
+                            x: x,
+                            y: y,
+                            yBasePoint: _yAxis.basePoint,
+                            isLeaf: true,
+                            xAxis: {
+                                field: me._xAxis.field,
+                                value: xArr[i].content,
+                                layoutText: xArr[i].layoutText
+                            }
+                        };
+
+                        if (me.proportion) {
+                            node.vCount = vCount;
+                        }
+
+                        tmpData[b][v].push(node);
+
+                        yValueMaxs[b] += Number(val);
+                        yLen = subv.length;
+                    });
+                });
+            }
+
+            for (var a = 0, al = yValueMaxs.length; a < al; a++) {
+                center[a].agValue = yValueMaxs[a] / yLen;
+                center[a].agPosition = -(yValueMaxs[a] / yLen - _yAxis.bottomNumber) / (maxYAxis - _yAxis.bottomNumber) * _yAxis.yGraphsHeight;
+            }
+            //均值
+            this.dataFrame.yAxis.center = center;
+
+            return {
+                data: tmpData
+            };
+        }
+    }, {
+        key: "_getTargetField",
+        value: function _getTargetField(b, v, i, field) {
+            if (!field) {
+                field = this._yAxis.field;
+            }
+            if (underscore.isString(field)) {
+                return field;
+            } else if (underscore.isArray(field)) {
+                var res = field[b];
+                if (underscore.isString(res)) {
+                    return res;
+                } else if (underscore.isArray(res)) {
+                    return res[v];
+                }
+            }
+        }
+    }, {
+        key: "_drawEnd",
+        value: function _drawEnd() {
+            var me = this;
+
+            //执行生长动画
+            this._graphs.grow(function (g) {
+                me._initPlugs_drawComplete(g);
+            });
+
+            this.bindEvent();
+        }
+
+        //所有plug触发更新
+
+    }, {
+        key: "_plugsReset",
+        value: function _plugsReset(opt, e) {
+            var me = this;
+            underscore.each(this.plugs, function (p, i) {
+                if (p.type == "markLine") {
+                    p.plug.reset({
+                        line: {
+                            y: p.plug._yAxis.getYposFromVal(p.plug.value)
+                        }
+                    }, i);
+                    return;
+                }
+
+                if (p.type == "markLine") {
+                    p.plug.reset({
+                        line: {
+                            y: p.plug._yAxis.getYposFromVal(p.plug.value)
+                        }
+                    }, i);
+                    return;
+                }
+
+                if (p.type == "dataZoom") {
+                    if (!e || e && e.trigger != "dataZoom") {
+                        me.__cloneChart = me._getCloneBar();
+                        p.plug.reset({
+                            count: me._data.length - 1
+                        }, me.__cloneChart.thumbBar._graphs.sprite);
+                    }
+                    return;
+                }
+
+                p.plug.reset && p.plug.reset();
+            });
+        }
+
+        //这部分在startDraw开始的时候，因为要计算layout，但是不依赖其他绘图模块
+
+    }, {
+        key: "_initPlugs_computLayout",
+        value: function _initPlugs_computLayout(e) {
+
+            if (this._opts.legend && e.trigger != "legend") {
+                this._initLegend(e);
+            }
+            if (this._opts.dataZoom) {
+                //处理好因为dataZoom带来的layout的变动，和准备好initDataZoom需要的__cloneChart
+                !this.inited && (this.padding.bottom += this.dataZoom.h);
+                this.__cloneBar = this._getCloneBar();
+            }
+        }
+
+        //这个部分就是依赖其他的绘图布局组件， 在 end draw就 马上要绘制的plugs，不在graphs的animate后面排队
+
+    }, {
+        key: "_initPlugs",
+        value: function _initPlugs(e) {
+
+            if (this._opts.legend && e.trigger != "legend") {
+                this._setLegendPosAndStyle();
+            }
+            if (this._opts.dataZoom) {
+                this._initDataZoom(e);
+            }
+        }
+
+        //这部分依赖于graphs的animate排队。等graphs的入场动画结束后绘制
+
+    }, {
+        key: "_initPlugs_drawComplete",
+        value: function _initPlugs_drawComplete(e) {
+            if (this._opts.markLine) {
+                this._initMarkLine(e);
+            }
+            if (this._opts.markPoint) {
+                this._initMarkPoint(e);
+            }
+        }
+
+        //横向比例柱状图
+
+    }, {
+        key: "_initProportion",
+        value: function _initProportion(node, data, opts) {
+            !opts.tips && (opts.tips = {});
+
+            opts.tips = underscore.deepExtend({
+                content: function content(info) {
+                    var str = "<table style='border:none'>";
+                    var self = this;
+                    underscore.each(info.nodesInfoList, function (node, i) {
+                        str += "<tr style='color:" + (node.color || node.fillStyle) + "'>";
+                        var prefixName = self.prefix[i];
+                        var tsStyle = "style='border:none;white-space:nowrap;word-wrap:normal;'";
+                        if (prefixName) {
+                            str += "<td " + tsStyle + ">" + prefixName + "：</td>";
+                        } else {
+                            if (node.field) {
+                                str += "<td " + tsStyle + ">" + node.field + "：</td>";
+                            }
+                        }
+                        str += "<td " + tsStyle + ">" + numAddSymbol(node.value);
+                        if (node.vCount) {
+                            str += "（" + Math.round(node.value / node.vCount * 100) + "%）";
+                        }
+                        str += "</td></tr>";
+                    });
+                    str += "</table>";
+                    return str;
+                }
+            }, opts.tips);
+
+            underscore.deepExtend(this, opts);
+            underscore.deepExtend(this.yAxis, {
+                dataSection: [0, 20, 40, 60, 80, 100],
+                text: {
+                    format: function format(n) {
+                        return n + "%";
+                    }
+                }
+            });
+
+            !this.graphs && (this.graphs = {});
+            underscore.deepExtend(this.graphs, {
+                bar: {
+                    radius: 0
+                }
+            });
+        }
+
+        //legend组件 begin
+
+    }, {
+        key: "_initLegend",
+        value: function _initLegend(e) {
+
+            var me = this;
+            if (!this.legend || this.legend && "enabled" in this.legend && !this.legend.enabled) return;
+            //设置legendOpt
+            var legendOpt = underscore.deepExtend({
+                enabled: true,
+                label: function label(info) {
+                    return info.field;
+                },
+                onChecked: function onChecked(field) {
+                    me._resetOfLengend(field);
+                },
+                onUnChecked: function onUnChecked(field) {
+                    me._resetOfLengend(field);
+                }
+            }, this._opts.legend);
+
+            var _legend = new Legend(this._getLegendData(), legendOpt);
+            this.stage.addChild(_legend.sprite);
+            _legend.pos({
+                x: 0,
+                y: this.padding.top
+            });
+
+            this.padding.top += _legend.height;
+
+            this.plugs.push({
+                type: "legend",
+                plug: _legend
+            });
+        }
+
+        //TODO：bar中用来改变yAxis.field的临时 方案
+
+    }, {
+        key: "_resetOfLengend",
+        value: function _resetOfLengend(field) {
+            var me = this;
+
+            //先设置好yAxis.field
+            me._setFieldDisplay(field);
+            underscore.deepExtend(this, {
+                yAxis: {
+                    field: me._getFieldsOfDisplay()
+                }
+            });
+
+            var _legend = underscore.find(me.plugs, function (plug) {
+                return plug.type == "legend";
+            }).plug;
+
+            if (this.graphs && this.graphs.bar && underscore.isFunction(this.graphs.bar.fillStyle)) {
+                var _fillStyle = this.graphs.bar.fillStyle;
+                this.graphs.bar.fillStyle = function (f) {
+                    var res = _fillStyle(f);
+                    if (!res) {
+                        if (_legend) {
+                            res = _legend.getStyle(f.field).fillStyle;
+                        }
+                    }
+                    return res;
+                };
+            } else {
+                underscore.deepExtend(this, {
+                    graphs: {
+                        bar: {
+                            fillStyle: function fillStyle(f) {
+                                if (_legend) {
+                                    return _legend.getStyle(f.field).fillStyle;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            for (var i = 0, l = this.canvax.children.length; i < l; i++) {
+                var stage = this.canvax.getChildAt(i);
+                for (var s = 0, sl = stage.children.length; s < sl; s++) {
+                    var sp = stage.getChildAt(s);
+                    if (sp.id == "LegendSprite" || sp.id == "legend_tip") {
+                        continue;
+                    }
+                    stage.getChildAt(s).destroy();
+                    s--;
+                    sl--;
+                }
+            }
+
+            this.dataFrame = this._initData(this._data);
+            this.draw({
+                trigger: "legend"
+            });
+        }
+
+        //只有field为多组数据的时候才需要legend
+
+    }, {
+        key: "_getLegendData",
+        value: function _getLegendData() {
+            var me = this;
+            var data = [];
+            underscore.each(underscore.flatten(me.dataFrame.yAxis.field), function (f, i) {
+                data.push({
+                    field: f,
+                    value: null,
+                    fillStyle: null
+                });
+            });
+            return data;
+        }
+    }, {
+        key: "_setLegendPosAndStyle",
+        value: function _setLegendPosAndStyle() {
+
+            var legend = underscore.find(this.plugs, function (plug) {
+                return plug.type == "legend";
+            }).plug;
+            var _yAxisW = this._yAxis.width;
+            legend.pos({ x: _yAxisW });
+            for (var f in this._graphs._yAxisFieldsMap) {
+                var ffill = this._graphs._yAxisFieldsMap[f].fillStyle;
+                legend.setStyle(f, { fillStyle: ffill });
+            }
+        }
+        //legend end
+
+        //datazoom begin
+
+    }, {
+        key: "_initDataZoom",
+        value: function _initDataZoom() {
+            var me = this;
+
+            //初始化 datazoom 模块
+
+            var dataZoomOpt = underscore.deepExtend({
+                w: me._xAxis.xGraphsWidth,
+                count: me._data.length - 1, //_data第一行是title，所以正式的count应该是 length-1
+                //h : me._xAxis.height,
+                pos: {
+                    x: me._xAxis.pos.x,
+                    y: me._xAxis.pos.y + me._xAxis.height
+                },
+                dragIng: function dragIng(range, pixRange, count, width) {
+
+                    //完美解决dataZoom对柱状图的区间选择问题
+                    var itemW = width / count;
+                    var start = 0;
+                    for (var i = 0; i < count; i++) {
+                        if (itemW * i + itemW / 2 > pixRange.start) {
+                            start = i;
+                            break;
+                        }
+                    }
+                    var end = 0;
+                    for (var i = count - 1; i >= 0; i--) {
+                        if (itemW * i + itemW / 2 < pixRange.end) {
+                            end = i;
+                            break;
+                        }
+                    }
+                    //完美解决dataZoom对柱状图的区间选择问题
+
+
+                    if (me.dataZoom.range.start == start && me.dataZoom.range.end == end) {
+                        return;
+                    }
+                    me.dataZoom.range.start = start;
+                    me.dataZoom.range.end = end;
+
+                    me.resetData(me._data, {
+                        trigger: "dataZoom"
+                    });
+
+                    me._removeChecked();
+
+                    //console.log("start:"+me.dataZoom.range.start+"___end:"+me.dataZoom.range.end)
+                    /*
+                    me.dataFrame = me._initData(me._data, me._opts);
+                    me._xAxis.reset({
+                        animation: false
+                    } , me.dataFrame.xAxis );
+                     me._graphs.average.data = null;
+                    me._graphs.w = me._xAxis.xGraphsWidth;
+                    me._getaverageData();
+                    me._setaverageLayoutData();
+                     me._graphs.resetData(me._trimGraphs());
+                    me._graphs.grow(function() {
+                        //callback
+                    }, {
+                        delay: 0,
+                        easing: "Quadratic.Out",
+                        duration: 300
+                    });
+                     me._removeChecked();
+                    */
+
+                    me.fire("_dataZoomDragIng");
+                },
+                dragEnd: function dragEnd(range) {
+                    me._updateChecked();
+                }
+            }, me.dataZoom);
+
+            me._dataZoom = new dataZoom(dataZoomOpt);
+
+            var graphssp = this.__cloneBar.thumbBar._graphs.sprite;
+            graphssp.id = graphssp.id + "_datazoomthumbbarbg";
+            graphssp.context.x = 0;
+            graphssp.context.y = me._dataZoom.barH + me._dataZoom.barY;
+
+            graphssp.context.scaleY = me._dataZoom.barH / this.__cloneBar.thumbBar._graphs.h;
+
+            me._dataZoom.setZoomBg(graphssp);
+
+            this.__cloneBar.thumbBar.destroy();
+            this.__cloneBar.cloneEl.parentNode.removeChild(this.__cloneBar.cloneEl);
+
+            me.plugs.push({
+                type: "dataZoom",
+                plug: me._dataZoom
+            });
+            me.core.addChild(me._dataZoom.sprite);
+        }
+    }, {
+        key: "_getCloneBar",
+        value: function _getCloneBar() {
+            var me = this;
+            barConstructor = this.constructor; //(barConstructor || Bar);
+            var cloneEl = me.el.cloneNode();
+            cloneEl.innerHTML = "";
+            cloneEl.id = me.el.id + "_currclone";
+            cloneEl.style.position = "absolute";
+            cloneEl.style.width = me.el.offsetWidth + "px";
+            cloneEl.style.height = me.el.offsetHeight + "px";
+            cloneEl.style.top = "10000px";
+            document.body.appendChild(cloneEl);
+
+            var opts = underscore.deepExtend({}, me._opts);
+            underscore.deepExtend(opts, {
+                graphs: {
+                    bar: {
+                        fillStyle: me.dataZoom.normalColor || "#ececec"
+                    },
+                    animation: false,
+                    eventEnabled: false,
+                    text: {
+                        enabled: false
+                    },
+                    average: {
+                        enabled: false
+                    }
+                },
+                dataZoom: {
+                    enabled: false
+                },
+                xAxis: {
+                    //enabled: false
+                },
+                yAxis: {
+                    //enabled: false
+                }
+            });
+
+            delete opts.dataZoom;
+
+            var thumbBar = new barConstructor(cloneEl, me._data, opts);
+            thumbBar.draw();
+            return {
+                thumbBar: thumbBar,
+                cloneEl: cloneEl
+            };
+        }
+        //datazoom end
+
+
+    }, {
+        key: "_initMarkLine",
+        value: function _initMarkLine(g) {
+            var me = this;
+
+            var _t = me.markLine.markTo;
+            var yfieldFlat = underscore.flatten(me._yAxis.field);
+            for (var i = 0, l = yfieldFlat.length; i < l; i++) {
+                var getProp = function getProp(obj, p, i, def) {
+                    if (obj == undefined) return def;
+                    if (obj[p] == undefined) return def;
+                    if (!underscore.isArray(obj[p])) return obj[p];
+                    return obj[p][i] == undefined ? def : obj[p][i];
+                };
+
+                var _yField = yfieldFlat[i];
+                if (_t && !(underscore.isArray(_t) && underscore.indexOf(_t, _yField) >= 0 || _t === _yField)) {
+                    return;
+                }
+
+                var _y = me._opts.markLine.y;
+                var y = 0;
+                var yPos = 0;
+                var label = "";
+
+                
+                var lineStrokeStyle = getProp(me.markLine.line, "strokeStyle", i, g._yAxisFieldsMap[_yField].fillStyle);
+                var textFillStyle = getProp(me.markLine.text, "fillStyle", i, g._yAxisFieldsMap[_yField].fillStyle);
+
+                if (_y !== undefined) {
+                    if (underscore.isArray(_y)) {
+                        y = _y[i];
+                    } else {
+                        y = Number(_y);
+                    }
+
+                    if (y === undefined) return;
+
+                    yPos = me._yAxis.getYposFromVal(y);
+                    label = _yField.field + '：markLine';
+                } else {
+                    //没有配置y，则取均值
+                    //TODO: 后续需要center里面按照field存储
+                    if (!me.dataFrame.yAxis.center[i]) {
+                        return;
+                    }
+
+                    y = me.dataFrame.yAxis.center[i].agValue;
+
+                    if (y === undefined) return;
+
+                    yPos = parseInt(me.dataFrame.yAxis.center[i].agPosition);
+                    label = _yField.field + '均值';
+                }
+
+                if (me.markLine.text && me.markLine.text.enabled) {
+                    if (underscore.isFunction(me.markLine.text.format)) {
+                        var o = {
+                            iGroup: i,
+                            value: y
+                        };
+                        label = me.markLine.text.format(o);
+                    }
+                }
+
+                //bar 目前没有双y轴，所以最后一个参数传 me._yAxis
+                me._createOneMarkLine(_yField, y, yPos, label, lineStrokeStyle, textFillStyle, me._yAxis);
+            }
+        }
+    }, {
+        key: "_createOneMarkLine",
+        value: function _createOneMarkLine(field, yVal, yPos, content, lineStrokeStyle, textFillStyle, yAxis$$1) {
+            var me = this;
+            var o = {
+                w: me._xAxis.xGraphsWidth,
+                h: me._yAxis.yGraphsHeight,
+                value: yVal,
+                origin: {
+                    x: me._back.pos.x,
+                    y: me._back.pos.y
+                },
+                line: {
+                    y: yPos,
+                    list: [[0, 0], [me._xAxis.xGraphsWidth, 0]],
+                    strokeStyle: lineStrokeStyle
+                },
+                text: {
+                    content: content,
+                    fillStyle: textFillStyle
+                },
+                field: field
+            };
+
+            var _markLine = new markLine(underscore.deepExtend(me._opts.markLine, o), yAxis$$1);
+
+            me.plugs.push({
+                type: "markLine",
+                plug: _markLine
+            });
+
+            me.core.addChild(_markLine.sprite);
+        }
+    }, {
+        key: "_initMarkPoint",
+        value: function _initMarkPoint(g) {
+            var me = this;
+
+            var gOrigin = {
+                x: g.sprite.context.x + g.bar._width / 2,
+                y: g.sprite.context.y - 3
+            };
+            var _t = me.markPoint.markTo;
+
+            underscore.each(g.data, function (group, i) {
+                underscore.each(group, function (hgroup) {
+                    underscore.each(hgroup, function (bar) {
+                        if (_t && !(underscore.isArray(_t) && underscore.indexOf(_t, bar.field) >= 0 || _t === bar.field || underscore.isFunction(_t))) {
+                            return;
+                        }
+
+                        var barObj = underscore.clone(bar);
+                        barObj.x += gOrigin.x;
+                        barObj.y += gOrigin.y;
+                        var mpCtx = {
+                            value: barObj.value,
+                            shapeType: "droplet",
+                            markTo: barObj.field,
+                            //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 iNode 给出去的时候要反过来
+                            iGroup: barObj.iGroup,
+                            iNode: barObj.iNode,
+                            iLay: barObj.iLay,
+                            point: {
+                                x: barObj.x,
+                                y: barObj.y
+                            }
+                        };
+
+                        if (underscore.isFunction(_t) && !_t(mpCtx)) {
+                            //如果MarkTo是个表达式函数，返回为false的话
+                            return;
+                        }
+
+                        var _mp = new markPoint(me._opts, mpCtx);
+
+                        _mp.shape.hover(function (e) {
+                            _mp.sprite.context.globalAlpha += 0.1;
+                            this.context.cursor = "pointer";
+                            e.stopPropagation();
+                        }, function (e) {
+                            _mp.sprite.context.globalAlpha -= 0.1;
+                            e.stopPropagation();
+                        });
+                        _mp.shape.on("mousemove", function (e) {
+                            e.stopPropagation();
+                        });
+                        _mp.shape.on("tap click", function (e) {
+                            e.stopPropagation();
+                            e.eventInfo = _mp;
+                            me.fire("markpointclick", e);
+                        });
+
+                        me.plugs.push({
+                            type: "markPoint",
+                            plug: _mp
+                        });
+
+                        me.core.addChild(_mp.sprite);
+                    });
+                });
+            });
+        }
+    }, {
+        key: "_removeChecked",
+        value: function _removeChecked() {
+            this._graphs.removeAllChecked();
+        }
+    }, {
+        key: "_updateChecked",
+        value: function _updateChecked() {
+            var me = this;
+            me._currCheckedList = me._getCurrCheckedList();
+            for (var a = 0, al = me._currCheckedList.length; a < al; a++) {
+                var o = me._currCheckedList[a];
+                me._checkedBar({
+                    iNode: o.iNode - me.dataZoom.range.start,
+                    checked: true
+                });
+            }
+        }
+    }, {
+        key: "_getCurrCheckedList",
+        value: function _getCurrCheckedList() {
+            var me = this;
+            return underscore.filter(me._checkedList, function (o) {
+                if (o) {
+                    if (o.iNode >= me.dataZoom.range.start && o.iNode <= me.dataZoom.range.end) {
+                        return o;
+                    }
+                }
+            });
+        }
+    }, {
+        key: "_checked",
+        value: function _checked(eventInfo) {
+            //当点击graphs时 触发选中状态
+            var me = this;
+            if (!me._graphs.checked.enabled) {
+                return;
+            }
+            var i = eventInfo.iNode + me.dataZoom.range.start;
+
+            var checked = true;
+            if (me._checkedList[i]) {
+                //如果已经选中
+                me._checkedList[i] = null;
+                checked = false;
+            } else {
+                //如果没选中                           
+                me._checkedList[i] = eventInfo;
+            }
+            me._checkedBar({
+                iNode: eventInfo.iNode,
+                checked: checked
+            });
+            me._checkedMiniBar({
+                iNode: i,
+                checked: checked
+            });
+
+            eventInfo.iNode = i;
+
+            return checked;
+        }
+    }, {
+        key: "_checkedBar",
+        value: function _checkedBar($o) {
+            //选择bar
+            var me = this;
+            var graphs = me._graphs;
+            graphs._checked($o);
+        }
+    }, {
+        key: "_checkedMiniBar",
+        value: function _checkedMiniBar($o) {
+            //选择缩略的bar
+            if (this._opts.dataZoom) {
+                var me = this;
+                var graphs = me.__cloneBar.thumbBar._graphs;
+                var fillStyle = '';
+                if ($o.checked) {
+                    fillStyle = me._opts.dataZoom.checked && me._opts.dataZoom.checked.fillStyle || fillStyle;
+                }
+                graphs.setBarStyle({
+                    iNode: $o.iNode,
+                    fillStyle: fillStyle
+                });
+            }
+        }
+    }, {
+        key: "bindEvent",
+        value: function bindEvent() {
+            var me = this;
+            this._graphs.sprite.on("panstart mouseover", function (e) {
+                me._setXaxisYaxisToTipsInfo(e);
+                me._tip.show(e);
+                me.fire(e.type, e);
+            });
+            this._graphs.sprite.on("panmove mousemove", function (e) {
+                me._setXaxisYaxisToTipsInfo(e);
+                me._tip.move(e);
+                me.fire(e.type, e);
+            });
+            this._graphs.sprite.on("panend mouseout", function (e) {
+                me._tip.hide(e);
+                me.fire(e.type, e);
+            });
+            this._graphs.sprite.on("tap click dblclick mousedown mouseup", function (e) {
+                var isAddStart = false;
+                if (e.type == 'click') {
+                    //在click上面触发 checked
+                    me.fire('checkedBefor', e);
+
+                    if (e.eventInfo.iNode > -1) {
+                        if (me._checked(e.eventInfo)) {
+                            me.fire('checked', e);
+                        } else {
+                            me.fire('unchecked', e);
+                        }
+                        isAddStart = true;
+                    }
+                }
+                me._setXaxisYaxisToTipsInfo(e, isAddStart);
+                me.fire(e.type, e);
+            });
+        }
+    }]);
+    return Bar;
+}(Chart);
+
 var Chartx = {
-    Pie: _class
+    Pie: _class,
+    Bar: Bar
 };
 
 module.exports = Chartx;

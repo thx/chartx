@@ -142,7 +142,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         d && this.resetData(d);
         this.plugs = [];
         this.clean();
-        this.canvax.getDomContainer().innerHTML = "";
+        this.canvax.domView.innerHTML = "";
         this.draw();
     }
 

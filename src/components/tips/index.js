@@ -5,7 +5,7 @@ import _ from "underscore"
 
 var Rect = Canvax.Shapes.Rect;
 
-export default class tips extends Component
+export default class Tips extends Component
 {
 	constructor( opt , tipDomContainer )
 	{
@@ -196,7 +196,7 @@ export default class tips extends Component
                     str+="<td "+tsStyle+">"+ node.field +"：</td>";
                 }
             };
-            str += "<td "+tsStyle+">"+ Tools.numAddSymbol(node.value) +"</td></tr>";
+            str += "<td "+tsStyle+">"+ numAddSymbol(node.value) +"</td></tr>";
         });
         str+="</table>";
         return str;

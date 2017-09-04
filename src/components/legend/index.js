@@ -1,10 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import Tips from "../tips/tips"
+import Tips from "../tips/index"
+import _ from "underscore"
 
 var Circle = Canvax.Shapes.Circle
 
-export default class extends Component
+export default class Legend extends Component
 {
     constructor(data , opt)
     {
@@ -77,7 +78,7 @@ export default class extends Component
             });
             var stage = this.sprite.getStage();
             stage.addChild( this._legendTip );
-            this._tips = new Tips(this.tips, stage.parent.getDomContainer());
+            this._tips = new Tips(this.tips, stage.parent.domView);
             this._tips._getDefaultContent = function(info) {
                 return info.field;
             };

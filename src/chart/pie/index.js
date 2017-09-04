@@ -286,7 +286,7 @@ export default class extends Chart
         }
 
         if (dataFrame.data.length > 0) {
-            for (i = 0; i < dataFrame.data.length; i++) {
+            for (var i = 0; i < dataFrame.data.length; i++) {
                 if (_.contains(this.ignoreFields, dataFrame.data[i].name)) {
                     dataFrame.data[i].ignored = true;
                     dataFrame.data[i].y = 0;

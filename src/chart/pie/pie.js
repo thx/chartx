@@ -1,7 +1,7 @@
 //单环pie
 
 import Canvax from "canvax2d"
-import Tip from "../../components/tips/tips"
+import Tip from "../../components/tips/index"
 import {colors as themeColors} from "../theme"
 import _ from "underscore"
 
@@ -820,7 +820,7 @@ export default class Pie
 
         var ySpaceInfo = {}
 
-        for (i = 0; i < quadrantsOrder.length; i++) {
+        for (var i = 0; i < quadrantsOrder.length; i++) {
             var isEnd = i == 1 || i == 3;
             self._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo)
         }
