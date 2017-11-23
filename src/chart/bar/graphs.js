@@ -7,16 +7,22 @@ var AnimationFrame = Canvax.AnimationFrame;
 var BrokenLine = Canvax.Shapes.BrokenLine;
 var Rect = Canvax.Shapes.Rect;
 
-export default class Graphs 
+export default class Graphs extends Canvax.Event.EventDispatcher
 {
-	constructor(opt, root)
-	{
-		this.data = [];
+    constructor(opt, root)
+    {
+        super(opt, root);
+
+        this.data = [];
         this.w = 0;
         this.h = 0;
         this.root = root;
         this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
-        this._setyAxisFieldsMap();
+        this._setyAxisFieldsMap( opt );
+
+        //存储graphs对应的xAxis 和 yAxis实例，后续柱折混合图里对修改传入的yAxis实例
+        this._xAxis = this.root._coordinate._xAxis;
+        this._yAxis = this.root._coordinate._yAxis;
 
         this.animation = true;
 
@@ -25,7 +31,7 @@ export default class Graphs
             y: 0
         };
 
-        this._colors = themeColors;
+        this.colors = themeColors;
 
         this.bar = {
             width: 0,
@@ -33,7 +39,8 @@ export default class Graphs
             radius: 4,
             fillStyle : null,
             filter : function(){}, //用来定制bar的样式
-            count: 0 //总共有多少个bar
+            count: 0, //总共有多少个bar
+            xDis: null
         };
 
         this.text = {
@@ -45,25 +52,12 @@ export default class Graphs
             strokeStyle: 'white'
         };
 
-        this.average = {
-            enabled: false,
-            field: "average",
-            fieldInd: -1,
-            fillStyle: "#c4c9d6",
-            data: null
-        };
-
         this.checked = {
             enabled: false,
             fillStyle: '#00A8E6',
             strokeStyle: '#00A8E6',
-            globalAlpha: 0.1,
+            fillAlpha: 0.1,
             lineWidth: 2
-        };
-
-        this.hoverRect = {
-            globalAlpha: 0.15,
-            fillStyle: "#333"
         }
 
         this.sort = null;
@@ -76,17 +70,13 @@ export default class Graphs
         this.txtsSp = null;
         this.checkedSp = null;
 
-        this.yDataSectionLen = 0; //y轴方向有多少个section
-
         _.deepExtend(this, opt);
 
-        this._initaverage();
-
         this.init();
-	}
+    }
 
-	init() 
-	{
+    init()
+    {
         this.sprite = new Canvax.Display.Sprite({
             id: "graphsEl"
         });
@@ -122,7 +112,21 @@ export default class Graphs
         })
     }
 
-    _checked($o) 
+    _getTargetField(b, v, i, field) 
+    {
+        if (_.isString(field)) {
+            return field;
+        } else if (_.isArray(field)) {
+            var res = field[b];
+            if (_.isString(res)) {
+                return res;
+            } else if (_.isArray(res)) {
+                return res[v];
+            };
+        }
+    }
+
+    checkedAt($o)
     {
         var me = this
         var index = $o.iNode
@@ -148,7 +152,7 @@ export default class Graphs
                     width: hoverRect.context.width,
                     height: hoverRect.context.height,
                     fillStyle: me.checked.fillStyle,
-                    globalAlpha: me.checked.globalAlpha
+                    fillAlpha: me.checked.fillAlpha
                 }
             });
             me.checkedSp.addChild(rect)
@@ -168,13 +172,13 @@ export default class Graphs
         }
     }
 
-    removeAllChecked() 
+    removeAllChecked()
     {
         var me = this
         me.checkedSp.removeAllChildren()
     }
 
-    setBarStyle($o) 
+    setBarStyle($o)
     {
         var me = this
         var index = $o.iNode
@@ -187,28 +191,20 @@ export default class Graphs
         }
     }
 
-    _setyAxisFieldsMap() 
+    _setyAxisFieldsMap( opt )
     {
         var me = this;
-        _.each(_.flatten(this.root.dataFrame.yAxis.field), function(field, i) {
+        !opt && ( opt = {} );
+        //柱折混合图，会再opt里传入一份yAxisFields
+        var yAxisFields = opt.yAxisFields || this.root._coordinate.yAxisFields;
+        _.each( yAxisFields , function(field, i) {
             me._yAxisFieldsMap[field] = {
                 index: i
             };
         });
     }
 
-    _initaverage() 
-    {
-        if (this.average.enabled) {
-            _.each(this.root.dataFraem, function(fd, i) {
-                if (fd.field == this.average.field) {
-                    this.average.fieldInd = i;
-                }
-            });
-        }
-    }
-
-    _getColor(c, groups, vLen, i, h, v, value, field) 
+    _getColor(c, groups, vLen, i, h, v, value, field)
     {
         var style = null;
         if (_.isString(c)) {
@@ -225,31 +221,18 @@ export default class Graphs
                 field: field,
                 value: value,
                 xAxis: {
-                    field: this.root._xAxis.field,
-                    value: this.root._xAxis.data[h].content
+                    field: this._xAxis.field,
+                    value: this._xAxis.data[h].content
                 }
             }]);
         };
         if (!style || style == "") {
-            style = this._colors[this._yAxisFieldsMap[field].index];
+            style = this.colors[this._yAxisFieldsMap[field].index];
         };
         return style;
     }
 
-    //只用到了i v。 i＝＝ 一级分组， v 二级分组
-    _getFieldFromIHV( i , h , v )
-    {
-        var yField = this.root._yAxis.field;
-        var field = null;
-        if( _.isString(yField[i]) ){
-            field = yField[i];
-        } else if( _.isArray(yField[i]) ){
-            field = yField[i][v];
-        }
-        return field;
-    }
-
-    getBarWidth(xDis1, xDis2) 
+    _getBarWidth(xDis1, xDis2)
     {
         if (this.bar.width) {
             if (_.isFunction(this.bar.width)) {
@@ -269,12 +252,20 @@ export default class Graphs
         return this.bar._width;
     }
 
-    resetData(data, opt) 
+    add( field ){
+
+    }
+    remove( field )
     {
-        this.draw(data.data, opt);
+
     }
 
-    clean() 
+    reset(opt)
+    {
+        this.draw( opt );
+    }
+
+    clean()
     {
         this.data = [];
         this.barsSp.removeAllChildren();
@@ -282,12 +273,15 @@ export default class Graphs
         if (this.text.enabled) {
             this.txtsSp.removeAllChildren();
         };
-        this.averageSp && this.averageSp.removeAllChildren();
     }
 
-    draw(data, opt) 
-    {
+    draw(opt)
+    { //第二个data参数去掉，直接trimgraphs获取最新的data
+        
         _.deepExtend(this, opt);
+
+        var data = this._trimGraphs();
+
         if (data.length == 0 || data[0].length == 0) {
             this.clean();
             return;
@@ -351,33 +345,33 @@ export default class Graphs
                     if (me.eventEnabled) {
                         var hoverRect;
                         if (h <= preLen - 1) {
-                            hoverRect = groupH.getChildById("bhr_hoverRect_" + h);
+                            hoverRect = groupH.getChildById("bhr_" + h);
                             hoverRect.context.width = itemW;
                             hoverRect.context.x = itemW * h;
                         } else {
                             hoverRect = new Rect({
-                                id: "bhr_hoverRect_" + h,
+                                id: "bhr_" + h,
                                 pointChkPriority: false,
+                                hoverClone: false,
                                 context: {
                                     x: itemW * h,
                                     y: (me.sort && me.sort == "desc") ? 0 : -me.h,
                                     width: itemW,
                                     height: me.h,
-                                    fillStyle: me.hoverRect.fillStyle,
-                                    globalAlpha: 0
+                                    fillStyle: "#ccc",
+                                    fillAlpha: 0
                                 }
                             });
                             groupH.addChild(hoverRect);
                             hoverRect.hover(function(e) {
-                                this.context.globalAlpha = me.hoverRect.globalAlpha;
+                                this.context.fillAlpha = 0.1;
                             }, function(e) {
-                                this.context.globalAlpha = 0;
+                                this.context.fillAlpha = 0;
                             });
                             hoverRect.iGroup = -1, hoverRect.iNode = h, hoverRect.iLay = -1;
                             hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
                                 e.eventInfo = me._getInfoHandler(this, e);
                             });
-
                         }
                     };
                 } else {
@@ -411,8 +405,8 @@ export default class Graphs
                     var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
 
                     //根据第一行数据来配置下_yAxisFieldsMap中对应field的fillStyle
-                    if (h == 0) {
-                        var _yMap = me._yAxisFieldsMap[ me._getFieldFromIHV( i , h , v ) ];
+                    if ( h == 0 ) {
+                        var _yMap = me._yAxisFieldsMap[ rectData.field ];
                         if (!_yMap.fillStyle) {
                             _yMap.fillStyle = fillStyle;
                         };
@@ -423,7 +417,7 @@ export default class Graphs
                     var rectH = rectData.y - rectData.fromY;
 
                     if( isNaN(rectH) || Math.abs(rectH) < 1 ){
-                        rectH = -1;
+                        rectH = 0;
                     };
 
                     var finalPos = {
@@ -480,10 +474,10 @@ export default class Graphs
                         rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {
                             e.eventInfo = me._getInfoHandler(this, e);
                             if (e.type == "mouseover") {
-                                this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = me.hoverRect.globalAlpha;
+                                this.parent.getChildById("bhr_" + this.iNode).context.fillAlpha = 0.1;
                             }
                             if (e.type == "mouseout") {
-                                this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = 0;
+                                this.parent.getChildById("bhr_" + this.iNode).context.fillAlpha = 0;
                             }
                         });
                     };
@@ -624,43 +618,157 @@ export default class Graphs
             this.sprite.addChild(this.txtsSp);
         };
 
-        //如果有average模块配置。
-        if (this.average.enabled && this.average.data) {
-            !this.averageSp && (this.averageSp = new Canvax.Display.Sprite({
-                id: "averageSp"
-            }));
-            _.each(this.average.layoutData, function(average, i) {
-                var averageRectC = {
-                    x: itemW * i,
-                    y: average.y,
-                    fillStyle: me.average.fillStyle,
-                    width: itemW,
-                    height: 2
-                };
-                var averageLine;
-                if (i <= preLen - 1) {
-                    averageLine = me.averageSp.getChildById("average_" + i);
-                    averageLine.context.x = averageRectC.x;
-                    averageLine.context.y = averageRectC.y;
-                    averageLine.context.width = averageRectC.width;
-                } else {
-                    averageLine = new Rect({
-                        id: "average_" + i,
-                        context: averageRectC
-                    });
-                    me.averageSp.addChild(averageLine);
-                };
-
-            });
-            this.sprite.addChild(me.averageSp);
-        };
-
         this.sprite.context.x = this.pos.x;
         this.sprite.context.y = this.pos.y;
 
         if (this.sort && this.sort == "desc") {
             this.sprite.context.y -= this.h;
         };
+
+        this.grow(function() {
+            me.fire("complete");
+        }, {
+            delay: 0,
+            easing: me.proportion ? "Quadratic.Line" : "Quadratic.Out",
+            duration: 300
+        });
+
+    }
+
+    _trimGraphs()
+    {
+        
+        var _xAxis = this._xAxis;
+        var _yAxis = this._yAxis;
+
+        var xArr = _xAxis.data;
+        var hLen = 0;
+        _.each( _yAxis, function( _yaxis ){
+            hLen += _yaxis.field.length;
+        } );
+
+        var xDis1 = _xAxis.xDis;
+        //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
+        var xDis2 = xDis1 / (hLen + 1);
+        //知道了xDis2 后 检测下 barW是否需要调整
+        var barW = this._getBarWidth(xDis1, xDis2);
+        var barDis = xDis2 - barW;
+        if( this.bar.xDis != null ){
+            barDis = this.bar.xDis;
+        };
+        
+        var disLeft,disRight;
+        disLeft = disRight = (xDis1 - barW*hLen - barDis*(hLen-1) ) / 2;
+
+        var tmpData = [];
+        var me = this;
+
+        
+        _.each( _yAxis, function( _yaxis , yind ){
+            //dataOrg和field是一一对应的
+            _.each( _yaxis.dataOrg, function( hData, b ){
+                //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
+
+                //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
+                var tempBarData = [];
+                _.each( hData, function( vSectionData, v ){
+                    tempBarData[v] = [];
+                    //vSectionData 代表某个字段下面的一组数据比如 uv
+                    _.each(vSectionData, function(val, i) {
+                        if (!xArr[i]) {
+                            return;
+                        };
+
+                        var vCount = 0;
+                        if (me.proportion) {
+                            //先计算总量
+                            _.each( hData, function(team, ti) {
+                                vCount += team[i]
+                            });
+                        };
+                        
+                        var x = xArr[i].x - xDis1 / 2 + disLeft + (barW + barDis)*b;
+                        if( yind>0 ){
+                            x += (barW + barDis)*(_yAxis[yind-1].dataOrg.length);
+                        };
+
+                        var y = 0;
+                        if (me.proportion) {
+                            y = -val / vCount * _yaxis.yGraphsHeight;
+                        } else {
+                            y = _yaxis.getYposFromVal( val );
+                        };
+
+                        function _getFromY( tempBarData, v, i, val, y, yBasePoint ){
+                            var preData = tempBarData[v - 1];
+                            if( !preData ){
+                                return yBasePoint.y;
+                            };
+
+                            var preY = preData[i].y;
+                            var preVal = preData[i].value;
+                            var yBaseNumber = yBasePoint.content;
+                            if( val >= yBaseNumber ){
+                                //如果大于基线的，那么就寻找之前所有大于基线的
+                                if( preVal >= yBaseNumber ){
+                                    //能找到，先把pre的isLeaf设置为false
+                                    preData[i].isLeaf = false;
+                                    return preY;
+                                } else {
+                                    return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
+                                }
+                            } else {
+                                if( preVal < yBaseNumber ){
+                                    //能找到，先把pre的isLeaf设置为false
+                                    preData[i].isLeaf = false;
+                                    return preY;
+                                } else {
+                                    return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
+                                }
+                            }
+                        }
+
+                        //找到其着脚点,一般就是 yAxis.basePoint
+                        var fromY = _getFromY(tempBarData, v, i, val, y, _yaxis.basePoint);
+                        y += fromY - _yaxis.basePoint.y;
+
+
+                        //如果有排序的话
+                        //TODO:这个逻辑好像有问题
+                        if (_yaxis.sort && _yaxis.sort == "desc") {
+                            y = -(_yaxis.yGraphsHeight - Math.abs(y));
+                        };
+
+                        var node = {
+                            value: val,
+                            field: me._getTargetField(b, v, i, _yaxis.field),
+                            fromX: x,
+                            fromY: fromY,
+                            x: x,
+                            y: y,
+                            yBasePoint: _yaxis.basePoint,
+                            isLeaf: true,
+                            xAxis: {
+                                field: me._xAxis.field,
+                                value: xArr[i].content,
+                                layoutText: xArr[i].layoutText
+                            }
+                        };
+
+                        if (me.proportion) {
+                            node.vCount = vCount;
+                        };
+
+                        tempBarData[v].push(node);
+
+                    });
+                } );
+                
+                tempBarData.length && tmpData.push( tempBarData );
+            } );
+            
+        } );
+        return tmpData;
     }
 
     _updateInfoTextPos(el) 
@@ -702,7 +810,6 @@ export default class Graphs
             for (var i = me.data[0][0].length, l = me.barsSp.children.length; i < l; i++) {
                 me.barsSp.getChildAt(i).destroy();
                 me.text.enabled && me.txtsSp.getChildAt(i).destroy();
-                me.averageSp && me.averageSp.getChildAt(i).destroy();
                 i--;
                 l--;
             };
@@ -801,8 +908,8 @@ export default class Graphs
                                         },
                                         duration: options.duration + 300,
                                         delay: h * options.delay,
-                                        onUpdate: function( obj ) {
-                                            var content = obj.v;
+                                        onUpdate: function() {
+                                            var content = this.v;
 
                                             if (_.isFunction(me.text.format)) {
                                                 var _formatc = me.text.format.apply( me , [content , txt._data]);

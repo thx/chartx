@@ -2,16 +2,17 @@ import Component from "../component"
 import Canvax from "canvax2d"
 import _ from "underscore"
 import {numAddSymbol} from "../../utils/tools"
+import DataSection from "../../utils/datasection"
 
 var Line = Canvax.Shapes.Line;
 
 export default class xAxis extends Component
 {
-	constructor( opt, data, coordinate )
-	{
-		super();
+    constructor(opt, data, coordinate)
+    {
+        super();
 
-		this._coordinate = coordinate || {};
+        this._coordinate = coordinate || {};
 
         //TODO:这个 graphw 目前是有问题的， 它实际是包括了yAxisW
         this.graphw = 0; 
@@ -47,8 +48,7 @@ export default class xAxis extends Component
             y: null
         };
 
-        //this.display = "block";
-        this.enabled = 1; //1,0 true ,false 
+        this.display = true; //是否需要位置来绘制
 
         this.disXAxisLine = 6; //x轴两端预留的最小值
         this.disOriginX = 0; //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
@@ -73,22 +73,27 @@ export default class xAxis extends Component
         this.animation = true;
         this.resize = false;
 
+
+        //layoutType == "proportion"的时候才有效
         this.maxVal = null; 
         this.minVal = null; 
 
         this.xDis = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
 
-        this.layoutType = "rule"; // rule , peak, proportion
+        this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
 
-        this.autoTrimLayout = true;
+        //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
+        //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
+        //function
+        this.trimLayout = null; 
 
         this.posParseToInt = false; //主要是柱状图里面有需要 要均匀间隔1px的时候需要
 
         this.init(opt, data);
-	}
+    }
 
-	init(opt, data) 
-	{
+    init(opt, data) 
+    {
         this.sprite = new Canvax.Display.Sprite({
             id: "xAxisSprite"
         });
@@ -99,7 +104,7 @@ export default class xAxis extends Component
         this._initHandle(opt, data);
     }
 
-    _initHandle(opt, data) 
+    _initHandle(opt, data)
     {
 
         if(data && data.org){
@@ -134,7 +139,13 @@ export default class xAxis extends Component
 
         //取第一个数据来判断xaxis的刻度值类型是否为 number
         this.minVal == null && (this.minVal = _.min( this.dataSection ));
+        if( isNaN(this.minVal) || this.minVal==Infinity ){
+            this.minVal = 0;
+        };
         this.maxVal == null && (this.maxVal = _.max( this.dataSection ));
+        if( isNaN(this.maxVal) || this.maxVal==Infinity ){
+            this.maxVal = 1;
+        };
 
     }
 
@@ -142,22 +153,27 @@ export default class xAxis extends Component
      *return dataSection 默认为xAxis.dataOrg的的faltten
      *即 [ [1,2,3,4] ] -- > [1,2,3,4]
      */
-    _initDataSection(data) 
+    _initDataSection(data)
     {
-        return _.flatten(data);
+        var arr = _.flatten(data);
+        if( this.layoutType == "proportion" ){
+            arr = DataSection.section(arr)
+        };
+        return arr;
     }
 
-    setX($n){
+    setX($n) 
+    {
         this.sprite.context.x = $n
     }
 
-    setY($n) 
+    setY($n)
     {
         this.sprite.context.y = $n
     }
 
     //配置和数据变化
-    reset(opt, data) 
+    reset(opt, data)
     {
         //先在field里面删除一个字段，然后重新计算
         opt && _.deepExtend(this, opt);
@@ -169,7 +185,7 @@ export default class xAxis extends Component
     }
 
     //数据变化，配置没变的情况
-    resetData(data) 
+    resetData(data)
     {
         this.sprite.removeAllChildren();
         this.dataSection = [];
@@ -193,7 +209,7 @@ export default class xAxis extends Component
         return i;
     }
     
-    draw(opt) 
+    draw(opt)
     {
 
         // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
@@ -213,15 +229,13 @@ export default class xAxis extends Component
         this.setX(this.pos.x);
         this.setY(this.pos.y);
 
-        //if (this.enabled) { //this.display != "none"
-            this._widget();
-        //};
+        this._widget();
 
         this.resize = false;
         // this.data = this.layoutData
     }
 
-    _getLabel() 
+    _getLabel()
     {
         if (this.label && this.label != "") {
             if( !this._label ){
@@ -241,7 +255,7 @@ export default class xAxis extends Component
     }
 
     //初始化配置
-    _initConfig(opt) 
+    _initConfig(opt)
     {
         if (opt) {
             _.deepExtend(this, opt);
@@ -311,6 +325,7 @@ export default class xAxis extends Component
 
     _trimXAxis($data, $xGraphsWidth) 
     {
+        
         var tmpData = [];
         var data = $data || this.dataSection;
         var xGraphsWidth = xGraphsWidth || this.xGraphsWidth;
@@ -341,7 +356,7 @@ export default class xAxis extends Component
         return tmpData;
     }
 
-    _formatDataSectionText(arr) 
+    _formatDataSectionText(arr)
     {
         if (!arr) {
             arr = this.dataSection;
@@ -354,7 +369,7 @@ export default class xAxis extends Component
         return currArr;
     }
 
-    _getXAxisDisLine() 
+    _getXAxisDisLine()
     { //获取x轴两端预留的距离
         var disMin = this.disXAxisLine
         var disMax = 2 * disMin
@@ -365,9 +380,9 @@ export default class xAxis extends Component
         return dis
     }
 
-    _setXAxisHeight() 
+    _setXAxisHeight()
     { //检测下文字的高等
-        if (!this.enabled) { //this.display == "none"
+        if (!this.display) { //this.display == "none"
             this.dis = 0;
             this.height = 3; //this.dis;//this.max.txtH;
         } else {
@@ -395,7 +410,7 @@ export default class xAxis extends Component
         }
     }
 
-    _getFormatText(text) 
+    _getFormatText(text)
     {
         var res;
         if (_.isFunction(this.text.format)) {
@@ -404,7 +419,7 @@ export default class xAxis extends Component
             res = text
         }
         if (_.isArray(res)) {
-            res = numAddSymbol(res);
+            res = Tools.numAddSymbol(res);
         }
         if (!res) {
             res = text;
@@ -412,9 +427,9 @@ export default class xAxis extends Component
         return res;
     }
 
-    _widget() 
+    _widget()
     {
-        if( !this.enabled ) return;
+        if( !this.display ) return;
 
         var arr = this.layoutData
 
@@ -550,7 +565,7 @@ export default class xAxis extends Component
 
     }
 
-    _setTextMaxWidth() 
+    _setTextMaxWidth()
     {
         var arr = this._layoutDataSection;
         var maxLenText = arr[0];
@@ -580,35 +595,19 @@ export default class xAxis extends Component
         var arr = this.data;
         var l = arr.length;
 
-        if( !this.enabled || !l ) return;
+        if( !this.display || !l ) return;
 
         // rule , peak, proportion
         if( me.layoutType == "proportion" ){
             this._checkOver();
         }; 
         if( me.layoutType == "peak" ){
-            //TODO: peak暂时沿用_checkOver，这是保险的万无一失的。
+            //TODO: peak暂时沿用 _checkOver ，这是保险的万无一失的。
             this._checkOver();
         };
 
         if( me.layoutType == "rule" ){
-            //最佳显示效果的width
-            var layoutItemW = me._textMaxWidth * 1.5;
-            if(!!me.text.rotation){
-                layoutItemW = 35;
-            };
-
-            var layoutCount = Math.min( parseInt(me.xGraphsWidth / layoutItemW) , l ); //可以显示的下多少个
-            for( var i=0; i<=layoutCount; i++ ){
-                var textOpt = arr[ parseInt( ( (l-1) / layoutCount)*i ) ]
-                textOpt.visible = true;
-                //if( i == layoutCount && textOpt.textWidth > me._getRootPR()*2 ){
-                if( i == layoutCount && textOpt.x+textOpt.textWidth/2 > me.width ){
-                    //最后一个的话 , 如果右边会超出了右边界，矫正下位置
-                    textOpt.text_x = me.width - textOpt.textWidth/2 - 2;
-                }
-            };
-            this.layoutData = arr;
+            this._checkOver();
         };
 
     }
@@ -626,7 +625,16 @@ export default class xAxis extends Component
     _checkOver()
     {
         var me = this;
-        var arr = this.data;
+        var arr = me.data;
+
+        //现在的柱状图的自定义datasection有缺陷
+        if( me.trimLayout ){
+            //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
+            //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
+            me.trimLayout( arr );
+            me.layoutData = me.data;
+            return;
+        }
 
         var l = arr.length;                
 
@@ -642,6 +650,8 @@ export default class xAxis extends Component
 
                 var nextWidth = next.textWidth;
                 var currWidth = curr.textWidth;
+
+                //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
                 if(!!me.text.rotation){
                     nextWidth = 35
                     currWidth = 35
@@ -681,14 +691,8 @@ export default class xAxis extends Component
             };
         };
 
-        //非rotation下才做显示隐藏
-        //if (!this.text.rotation) {
         checkOver(0);
-        //} else {
-        //    _.each( this.data , function( d ){
-        //        d.visible = true;
-        //    } );
-        //};
+
         this.layoutData = this.data;
     }
-};
+}

@@ -7,9 +7,9 @@ var Circle = Canvax.Shapes.Circle;
 
 export default class Anchor extends Component
 {
-	constructor( opt )
-	{
-		super();
+    constructor()
+    {
+        super();
 
         this.w = 0;
         this.h = 0;
@@ -28,7 +28,7 @@ export default class Anchor extends Component
             r           : 2,                 //半径 node 圆点的半径
             fillStyle   : '#0088cf',
             strokeStyle : '#0088cf',
-            lineWidth   : 2
+            lineWidth   : 0
         }
         this.text    = {
             enabled   : 0,
@@ -52,10 +52,10 @@ export default class Anchor extends Component
         this._yAxis  = null;
 
         this.init( opt );
-	}
+    }
 
-	init( opt )
-	{
+    init( opt )
+    {
         if( opt ){
             _.deepExtend( this , opt );
         }
@@ -92,7 +92,7 @@ export default class Anchor extends Component
             this._txt.context.visible = false;
         }
     }
-
+    
     //初始化配置
     _initConfig( opt )
     {
@@ -101,7 +101,8 @@ export default class Anchor extends Component
         }
     }
 
-    resetCross( cross )
+    //瞄准
+    aim( cross )
     {
         this._xLine.context.yStart = cross.y;
         this._xLine.context.yEnd   = cross.y;
@@ -146,10 +147,14 @@ export default class Anchor extends Component
         self._xLine = new Line({
             id      : 'x',
             context : {
-                xStart      : 0,
-                yStart      : self.cross.y,
-                xEnd        : self.w,
-                yEnd        : self.cross.y,
+                start : {
+                    x : 0,
+                    y : self.cross.y
+                },
+                end : {
+                    x : self.w,
+                    y : self.cross.y
+                },
                 lineWidth   : self.xAxis.lineWidth,
                 strokeStyle : self.xAxis.fillStyle,
                 lineType    : self.xAxis.lineType
@@ -160,10 +165,14 @@ export default class Anchor extends Component
         self._yLine = new Line({
             id      : 'y',
             context : {
-                xStart      : self.cross.x,
-                yStart      : 0,
-                xEnd        : self.cross.x,
-                yEnd        : self.h,
+                start : {
+                    x : self.cross.x,
+                    y : 0,
+                },
+                end : {
+                    x : self.cross.x,
+                    y : self.h
+                },
                 lineWidth   : self.yAxis.lineWidth,
                 strokeStyle : self.yAxis.fillStyle,
                 lineType    : self.yAxis.lineType
@@ -179,7 +188,7 @@ export default class Anchor extends Component
                 r           : self._getProp( self.node.r ),
                 fillStyle   : self._getProp( self.node.fillStyle ) || "#ff0000",
                 strokeStyle : self._getProp( self.node.strokeStyle ) || '#cc3300',
-                lineWidth   : self._getProp( self.node.lineWidth ) || 4
+                lineWidth   : self._getProp( self.node.lineWidth )
             }
         });
         self.sprite.getStage().addChild(self._circle);
@@ -204,5 +213,5 @@ export default class Anchor extends Component
             return s();
         }
         return s
-    } 
-};
+    }         
+}

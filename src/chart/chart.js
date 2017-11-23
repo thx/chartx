@@ -9,7 +9,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //先处理好undersocre的插件,主要是deepExtend
         mixinUnderscore();
 
-        super();
+        super( node, data, opts );
 
         this.Canvax = Canvax;
 
@@ -22,8 +22,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             right: 10,
             bottom: 10,
             left: 10
-        }
-
+        };
 
         //Canvax实例
 		this.canvax = new Canvax.App({
@@ -44,25 +43,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
 
         this.init.apply(this, arguments);
-    }
-
-    getPlug( type , id )
-    {
-        var obj = _.find( this.plugs, function( plug ){ 
-            if( id != undefined ){
-                return plug.type == type && plug.id == id
-            } else {
-                return plug.type == type
-            }
-        } );
-        if( obj ){
-            return obj.plug
-        };
-    }
-
-    removePlug( plug )
-    {
-        this.plugs.splice( _.indexOf( this.plugs , plug ) , 1 );
+        
+        var me = this;
+        if( opts.waterMark ){
+            //添加水印的临时解决方案
+            setTimeout( function(){
+                me._initWaterMark( opts.waterMark );
+            } , 50);
+        }
     }
 
     init()
@@ -70,6 +58,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     }
 
+   
     draw()
     {
 
@@ -92,7 +81,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     /*
      * 清除整个图表
      **/
-    clean() 
+    clean()
     {
         for (var i=0,l=this.canvax.children.length;i<l;i++){
             var stage = this.canvax.getChildAt(i);
@@ -107,7 +96,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     /**
      * 容器的尺寸改变重新绘制
      */
-    resize() 
+    resize()
     {
         var _w = parseInt(this.el.offsetWidth);
         var _h = parseInt(this.el.offsetHeight);
@@ -124,12 +113,12 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
     /**
-     * reset有两种情况，一是 data 数据源改变， 一个options的参数配置改变。
+     * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
      * @param obj {data , options}
      * 这个是最简单粗暴的reset方式，全部叉掉重新画，但是如果有些需要比较细腻的reset，比如
      * line，bar数据变化是在原有的原件上面做平滑的变动的话，需要在各自图表的构造函数中重置该函数
      */
-    reset(obj) 
+    reset(obj)
     {
         this._reset && this._reset( obj );
         var d = ( this.dataFrame.org || [] );
@@ -142,7 +131,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         d && this.resetData(d);
         this.plugs = [];
         this.clean();
-        this.canvax.domView.innerHTML = "";
+        this.canvax.getDomContainer().innerHTML = "";
         this.draw();
     }
 
@@ -152,7 +141,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.dataFrame = this._initData( data );
     }
 
-    _rotate( angle ) 
+    _rotate(angle)
     {
         var currW = this.width;
         var currH = this.height;
@@ -170,9 +159,83 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
     //默认每个chart都要内部实现一个_initData
-    _initData(data) 
+    _initData(data)
     {
         return data;
+    }
+
+
+    //插件管理相关代码begin
+    initPlugsModules( opt )
+    {
+
+    }
+
+    //所有plug触发更新
+    plugsReset(opt , e)
+    {
+
+    }
+
+    drawPlugs()
+    {
+        do {
+            var p = this.plugs.shift();
+            p && p.plug && p.plug.draw && p.plug.draw();
+        } while ( this.plugs.length > 0 ); 
+    }
+
+    //插件相关代码end
+
+    //添加水印
+    _initWaterMark( waterMarkOpt )
+    {
+        var text = waterMarkOpt.content || "waterMark";
+        var sp = new Canvax.Display.Sprite({
+            id : "watermark",
+            context : {
+                //rotation : 45,
+                //rotateOrigin : {
+                //    x : this.width/2,
+                //    y : this.height/2
+                //}
+            }
+        });
+        var textEl = new Canvax.Display.Text( text , {
+            context: {
+                fontSize: waterMarkOpt.fontSize || 20,
+                strokeStyle : waterMarkOpt.strokeStyle || "#ccc",
+                lineWidth : waterMarkOpt.lineWidth || 2
+            }
+        });
+
+        var textW = textEl.getTextWidth();
+        var textH = textEl.getTextHeight();
+
+        var rowCount = parseInt(this.height / (textH*5)) +1;
+        var coluCount = parseInt(this.width / (textW*1.5)) +1;
+
+        for( var r=0; r< rowCount; r++){
+            for( var c=0; c< coluCount; c++){
+                //TODO:text 的 clone有问题
+                //var cloneText = textEl.clone();
+                var _textEl = new Canvax.Display.Text( text , {
+                    context: {
+                        rotation : 45,
+                        fontSize: waterMarkOpt.fontSize || 25,
+                        strokeStyle : waterMarkOpt.strokeStyle || "#ccc",
+                        lineWidth : waterMarkOpt.lineWidth || 0,
+                        fillStyle : waterMarkOpt.fillStyle || "#ccc",
+                        globalAlpha: waterMarkOpt.globalAlpha || 0.1
+                    }
+                });
+                _textEl.context.x = textW*1.5*c + textW*.25;
+                _textEl.context.y = textH*5*r ;
+                sp.addChild( _textEl );
+            }
+        }
+
+        this.stage.addChild( sp );
     }
 
 }

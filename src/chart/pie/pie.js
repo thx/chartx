@@ -1,7 +1,7 @@
 //单环pie
 
 import Canvax from "canvax2d"
-import Tip from "../../components/tips/index"
+import Tips from "../../components/tips/index"
 import {colors as themeColors} from "../theme"
 import _ from "underscore"
 
@@ -9,6 +9,7 @@ var Sector = Canvax.Shapes.Sector
 var BrokenLine = Canvax.Shapes.BrokenLine
 var Rect = Canvax.Shapes.Rect
 var AnimationFrame = Canvax.AnimationFrame
+
 
 export default class Pie
 {
@@ -37,7 +38,7 @@ export default class Pie
             enabled: true
         }, tipsOpt); //tip的confit
         this.domContainer = domContainer;
-        this._tip = null; //tip的对象 tip的config 放到graphs的config中传递过来
+        this._tips = null; //tip的对象 tip的config 放到graphs的config中传递过来
         this.moveDis = undefined;
 
         this.init(opt);
@@ -61,9 +62,9 @@ export default class Pie
         this.checkedSp = new Canvax.Display.Sprite();
         this.sprite.addChild(this.checkedSp);
 
-        this._tip = new Tip(this.tips, this.domContainer);
-        this._tip._getDefaultContent = this._getTipDefaultContent;
-        this.sprite.addChild(this._tip.sprite);
+        this._tips = new Tips(this.tips, this.domContainer);
+        this._tips._getDefaultContent = this._getTipDefaultContent;
+        this.sprite.addChild(this._tips.sprite);
         if (this.dataLabel.enabled) {
             this.branchSp = new Canvax.Display.Sprite();
         };
@@ -474,17 +475,17 @@ export default class Pie
 
     _showTip(e, ind) 
     {
-        this._tip.show(this._geteventInfo(e, ind));
+        this._tips.show(this._geteventInfo(e, ind));
     }
 
     _hideTip(e) 
     {
-        this._tip.hide(e);
+        this._tips.hide(e);
     }
 
     _moveTip(e, ind)
     {
-        this._tip.move(this._geteventInfo(e, ind))
+        this._tips.move(this._geteventInfo(e, ind))
     }
 
     _getTipDefaultContent(info) 

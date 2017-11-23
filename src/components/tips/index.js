@@ -3,14 +3,12 @@ import Canvax from "canvax2d"
 import {numAddSymbol} from "../../utils/tools"
 import _ from "underscore"
 
-var Rect = Canvax.Shapes.Rect;
-
 export default class Tips extends Component
 {
-	constructor( opt , tipDomContainer )
-	{
-		super();
-		
+    constructor( opt, tipDomContainer )
+    {
+        super();
+
         this.tipDomContainer = tipDomContainer;
         this.cW      = 0;  //容器的width
         this.cH      = 0;  //容器的height
@@ -18,7 +16,7 @@ export default class Tips extends Component
         this.dW      = 0;  //html的tips内容width
         this.dH      = 0;  //html的tips内容Height
 
-        this.backR   = "5px"; //背景框的 圆角 
+        this.backR   = "5px";  //背景框的 圆角 
 
         this.sprite  = null;
         this.content = null; //tips的详细内容
@@ -47,11 +45,10 @@ export default class Tips extends Component
         this.positionInRange = false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
         this.init(opt);
-	}
+    }
 
-
-	init(opt)
-	{
+    init(opt)
+    {
         _.deepExtend( this , opt );
         this.sprite = new Canvax.Display.Sprite({
             id : "TipSprite"
@@ -121,7 +118,7 @@ export default class Tips extends Component
         this._tipDom.className = "chart-tips";
         this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";border:1px solid "+this.strokeStyle+";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:"+this.text.fillStyle+";line-height:1.5"
         this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px "+this.strokeStyle+"; -webkit-box-shadow:1px 1px 3px "+this.strokeStyle+"; box-shadow:1px 1px 3px "+this.strokeStyle+";"
-
+        this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
         this.tipDomContainer.appendChild( this._tipDom );
         this._setContent(e);
 
@@ -129,13 +126,11 @@ export default class Tips extends Component
             //console.log("tips-mouseover:"+e.fromTarget)
         });
         this._tipDom.addEventListener("mousemove" , function(e){
-            console.log("tips-mousemove+++targetId:"+e.target.id+"-====currentTargetId"+e.currentTarget.id)
-            
+            //console.log("tips-mousemove+++targetId:"+e.target.id+"-====currentTargetId"+e.currentTarget.id)
         });
         this._tipDom.addEventListener("mouseout" , function(e){
-            console.log("tips-mouseout")
-        })
-
+            //console.log("tips-mouseout")
+        });
     }
 
     _removeContent()
@@ -185,7 +180,6 @@ export default class Tips extends Component
         var str  = "<table style='border:none'>";
         var self = this;
         _.each( info.nodesInfoList , function( node , i ){
-
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
             var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
             var prefixName = self.prefix[i];

@@ -6,11 +6,11 @@ var BrokenLine = Canvax.Shapes.BrokenLine;
 var Sprite = Canvax.Display.Sprite;
 var Text = Canvax.Display.Text;
 
-export default class markLine extends Component
+export default class Legend extends Component
 {
     constructor()
     {
-    	super();
+        super();
 
         this._yAxis = _yAxis;
         this.w      = 0;
@@ -32,7 +32,7 @@ export default class markLine extends Component
         };
 
         this.text = {
-            enabled  : false,
+            enabled  : true,
             content  : '',
             fillStyle: '#999999',
             fontSize : 12,
@@ -63,16 +63,13 @@ export default class markLine extends Component
                 y : this.origin.y
             }
         });
-        //setTimeout( function(){
-            me.widget();
-        //} , 10 );
+        me.widget();    
     }
 
     draw()
     {
 
     }
-
     widget()
     {
         var me = this;
@@ -124,6 +121,4 @@ export default class markLine extends Component
         this._line.context.strokeStyle = this.line.strokeStyle;
         this._txt && this._txt.resetText( this.text.context );
     }
-
-
 }

@@ -11,7 +11,13 @@ export default class Legend extends Component
     {
         super();
 
+        /* data的数据结构为
+        [
+        {field: "uv", fillStyle: "#ff8533", activate: true} //外部只需要传field和fillStyle就行了 activate是内部状态
+        ]
+        */
         this.data = data || [];
+
         this.width = 0;
         this.height = 0;
         this.tag = {
@@ -33,7 +39,7 @@ export default class Legend extends Component
 
         this._labelColor = "#999";
 
-        //this.label = null; //label格式化函数配置
+        //this.label = null; // label 格式化函数配置
 
         this.layoutType = "h"; //横向 horizontal--> h
 
@@ -67,6 +73,8 @@ export default class Legend extends Component
 
     _showTips(e)
     {
+        if( !this.tips.enabled ) return;
+        
         if( this._hideTimer ){
             clearTimeout( this._hideTimer );
         };
@@ -87,7 +95,7 @@ export default class Legend extends Component
         this._tips.show(e);
     }
 
-    _hide(e)
+    _hideTips(e)
     {
         var me = this;
         this._hideTimer = setTimeout(function(){
@@ -95,10 +103,10 @@ export default class Legend extends Component
         } , 300);
     }
 
-    //label格式化函数配置
+    // label 格式化函数配置
     label( info )
     {
-        return info.field+"："+info.value;
+        return info.field;
     }
 
     setStyle( field , style )
@@ -151,15 +159,18 @@ export default class Legend extends Component
                     cursor: "pointer"
                 }
             });
+            
             icon.hover(function( e ){
                 me._showTips( me._getInfoHandler(e,obj) );
             } , function(e){
-                me._hide(e);
+                me._hideTips(e);
             });
             icon.on("mousemove" , function( e ){
                 me._showTips( me._getInfoHandler(e,obj) );
             });
+            
             icon.on("click" , function(){});
+            
             
             var content= me.label(obj);
             var txt    = new Canvax.Display.Text( content , {
@@ -174,10 +185,11 @@ export default class Legend extends Component
                 }
             } );
         
+           
             txt.hover(function( e ){
                 me._showTips( me._getInfoHandler(e,obj) );
             } , function(e){
-                me._hide(e);
+                me._hideTips(e);
             });
             txt.on("mousemove" , function( e ){
                 me._showTips( me._getInfoHandler(e,obj) );
@@ -240,9 +252,6 @@ export default class Legend extends Component
         e.eventInfo = {
             field : data.field,
             fillStyle : data.fillStyle
-        };
-        if( data.value ) {
-            e.eventInfo.value = data.value;
         };
         return e;
     }

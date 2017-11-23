@@ -415,10 +415,14 @@ export default class dataZoom extends Component
             context: {
                 x: o.x || 0,
                 y: o.y || 0,
-                xStart : o.xStart || 0,
-                yStart : o.yStart || 0,
-                xEnd: o.xEnd || 0,
-                yEnd: o.yEnd || 6,
+                start : {
+                    x : o.xStart || 0,
+                    y : o.yStart || 0
+                },
+                end : {
+                    x : o.xEnd || 0,
+                    y : o.yEnd || 6
+                },
                 lineWidth: o.lineWidth || 1,
                 strokeStyle: o.strokeStyle || '#ffffff'
             }

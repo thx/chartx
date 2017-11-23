@@ -8,13 +8,13 @@ var Line = Canvax.Shapes.Line;
 
 export default class yAxis extends Component
 {
-	constructor( opt, data )
-	{
-		super();
-        this._opt = opt;
+	constructor( opt, data ){
+        super();
 
+        this._opt = opt;
+        
         this.width   = null;
-        this.enabled = 1;    //true false 1,0都可以
+        this.display = true; //true false 1,0都可以
         this.dis     = 6;    //线到文本的距离
         this.maxW    = 0;    //最大文本的 width
         this.field   = [];   //这个 轴 上面的 field
@@ -50,7 +50,7 @@ export default class yAxis extends Component
         //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
         this.middleweight = null; 
 
-        this.dataOrg = []; //源数据
+        this.dataOrg = data.org || []; //源数据
 
         this.sprite = null;
         //this.x           = 0;
@@ -61,8 +61,7 @@ export default class yAxis extends Component
 
         this.baseNumber = null; //为非负number
         this.basePoint = null; //value为 baseNumber 的point {x,y}
-
-        this.bottomNumber = null;
+        this.bottomNumber = null; //如果手动设置了 bottomNumber 为负数，则baseNumber＝0，否则baseNumber 就 等于设置的 bottomNumber
 
         this._yOriginTrans = 0;//当设置的 baseNumber 和datasection的min不同的时候，
         
@@ -81,10 +80,10 @@ export default class yAxis extends Component
         this.layoutType = "proportion"; // rule , peak, proportion
 
         this.init(opt, data );
-	}
+    }
 
-	init(opt, data ) 
-	{
+    init(opt, data )
+    {
         _.deepExtend(this, opt);
 
         if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
@@ -102,31 +101,35 @@ export default class yAxis extends Component
     }
 
     //配置和数据变化
-    reset(opt, data) 
+    reset(opt, data)
     {
         this.dataSection = [];
         this.dataSectionGroup = [];
 
         opt && _.deepExtend(this, opt);
 
+        if( data.org ){
+            this.dataOrg = data.org; //这里必须是data.org
+        };
+        
         this._initData(data);
         this._trimYAxis();
         this._widget();
     }
 
-    setX($n) 
+    setX($n)
     {
         this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
         this.pos.x = $n;
     }
 
-    setY($n) 
+    setY($n)
     {
         this.sprite.context.y = $n;
         this.pos.y = $n;
     }
 
-    setAllStyle(sty) 
+    setAllStyle(sty)
     {
         _.each(this.rulesSprite.children, function(s) {
             _.each(s.children, function(cel) {
@@ -139,9 +142,8 @@ export default class yAxis extends Component
         });
     }
 
-    _getLabel() 
+    _getLabel()
     {
-
         var _label = "";
         if(_.isArray(this.label)){
             _label = this.label[ this.place == "left" ? 0 : 1 ];
@@ -162,7 +164,7 @@ export default class yAxis extends Component
         }
     }
 
-    draw(opt) 
+    draw(opt)
     {
         opt && _.deepExtend(this, opt);
         this._getLabel();
@@ -231,7 +233,7 @@ export default class yAxis extends Component
         };
         //返回的y是以最底端为坐标原点的坐标值，所以就是负数
         if( this.sort == "desc" ){
-            y = this.yGraphsHeight - y;
+            y = Math.abs(this.yGraphsHeight - Math.abs(y));
         }
         return -y;
     }
@@ -264,10 +266,16 @@ export default class yAxis extends Component
         };
 
         y = isNaN(y) ? 0 : parseInt(y);
+
+        if( this.sort == "desc" ){
+            //如果是倒序的
+            y = -(yGroupHeight - Math.abs(y));
+        };
+
         return y;
     }
 
-    _trimYAxis() 
+    _trimYAxis()
     {
         
         var tmpData = [];
@@ -312,9 +320,37 @@ export default class yAxis extends Component
         return dis
     }
 
-    _setDataSection(data) 
+    _setDataSection(data)
     {
+        var vLen = 1;
+        var field = data.field;
 
+        //如果没有传field，那么就默认按照一维数据获取section
+        if( field ){
+            if( !_.isArray( field ) ){
+                field = [field];
+            };
+            _.each( data.field, function( f ){
+                vLen = Math.max( vLen, 1 );
+                if( _.isArray( f ) ){
+                    _.each( f, function( _f ){
+                        vLen = Math.max( vLen, 2 );
+                    } );
+                }
+            } );
+        };
+
+        if( vLen == 1 ){
+            return this._oneDimensional( data );
+        };
+        if( vLen == 2 ){
+            return this._twoDimensional( data );
+        };
+        
+    }
+
+    _oneDimensional(data)
+    {
         var arr = [];
         var d = (data.org || data.data || data);
         if (!this.biaxial) {
@@ -335,7 +371,55 @@ export default class yAxis extends Component
         return arr;
     }
 
-    _initData(data) 
+    //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
+    _twoDimensional(data)
+    {
+        var arr = [];
+        var min;
+        _.each(data.org, function(d, i) {
+            if (!d.length) {
+                return
+            };
+
+            //有数据的情况下 
+            if (!_.isArray(d[0])) {
+                arr.push(d);
+                return;
+            };
+
+            var varr = [];
+            var len = d[0].length;
+            var vLen = d.length;
+
+            for (var i = 0; i < len; i++) {
+                var up_count = 0;
+                var up_i = 0;
+
+                var down_count = 0;
+                var down_i = 0;
+
+                for (var ii = 0; ii < vLen; ii++) {
+                    !min && (min = d[ii][i])
+                    min = Math.min(min, d[ii][i]);
+
+                    if (d[ii][i] >= 0) {
+                        up_count += d[ii][i];
+                        up_i++
+                    } else {
+                        down_count += d[ii][i];
+                        down_i++
+                    }
+                }
+                up_i && varr.push(up_count);
+                down_i && varr.push(down_count);
+            };
+            arr.push(varr);
+        });
+        arr.push(min);
+        return _.flatten(arr);
+    }
+
+    _initData(data)
     {
 
         //TODO:begin 临时解决多y轴的情况下，有两个自定义datasection的情况
@@ -357,8 +441,7 @@ export default class yAxis extends Component
         };
         if( arr.length == 1 ){
             arr.push( arr[0]*2 );
-        }
-        this.dataOrg = (data.org || data.data); //这里必须是data.org
+        };
         
         //如果用户传入了自定义的dataSection， 那么优先级最高
         if ( !this._opt.dataSection ) {
@@ -381,6 +464,7 @@ export default class yAxis extends Component
                     al--;
                 }
             };
+
             this.dataSection = DataSection.section(arr, 3);
         };
 
@@ -400,9 +484,10 @@ export default class yAxis extends Component
     resetDataSection( yVal )
     {
 
-        if( yVal > _.min(this.dataSection) || yVal < _.max(this.dataSection) ){
+        if( yVal < _.min(this.dataSection) || yVal > _.max(this.dataSection) ){
             this.dataSection.push( yVal );
             this._initData( {
+                //field: this.field,
                 org : this.dataSection
             } );
         };
@@ -410,7 +495,6 @@ export default class yAxis extends Component
 
     _sort()
     {
-
         if (this.sort) {
             var sort = this._getSortType();
             if (sort == "desc") {
@@ -507,7 +591,7 @@ export default class yAxis extends Component
         };                
     }
 
-    resetWidth(width) 
+    resetWidth(width)
     {
         var self = this;
         self.width = width;
@@ -518,13 +602,14 @@ export default class yAxis extends Component
         }
     }
 
-    _widget() 
+    _widget()
     {
         var self = this;
-        if (!self.enabled) {
+        if (!self.display) {
             self.width = 0;
             return;
-        }
+        };
+        
         var arr = this.layoutData;
         self.maxW = 0;
         self._label && self.sprite.addChild(self._label);
@@ -599,7 +684,7 @@ export default class yAxis extends Component
 
                 //文字
                 var txt = new Canvax.Display.Text(content, {
-                    id: "yAxis_txt_" + a,
+                    id: "yAxis_txt_" + self.place + "_" + a,
                     context: {
                         x: x + (self.place == "left" ? -5 : 5),
                         y: posy + aniDis,
@@ -626,7 +711,7 @@ export default class yAxis extends Component
                         context: {
                             x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
                             y: y,
-                            end: {
+                            end : {
                                 x : self.line.width,
                                 y : 0
                             },
@@ -686,7 +771,7 @@ export default class yAxis extends Component
         };
     }
 
-    _getProp(s) 
+    _getProp(s)
     {
         var res = s;
         if (_.isFunction(s)) {
@@ -697,4 +782,4 @@ export default class yAxis extends Component
         }
         return res
     }
-};
+}

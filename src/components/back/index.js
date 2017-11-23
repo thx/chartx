@@ -8,9 +8,9 @@ var Rect = Canvax.Shapes.Rect;
 
 export default class Back extends Component
 {
-	constructor( opt, root )
-	{
-		super();
+    constructor( opt, root )
+    {
+        super( opt, root);
 
         this.w       = 0;   
         this.h       = 0;
@@ -67,11 +67,10 @@ export default class Back extends Component
         this.resize = false;
 
         this.init(opt);
-	}
+    }
 
-
-	init(opt)
-	{
+    init(opt)
+    {
         _.deepExtend(this , opt); 
         this.sprite = new Canvax.Display.Sprite();
     }
@@ -95,7 +94,12 @@ export default class Back extends Component
         this.setY(this.pos.y);
     }
 
-    update( opt )
+    clean()
+    {
+        this.sprite.removeAllChildren();
+    }
+
+    reset( opt )
     {
         this.sprite.removeAllChildren();
         this.draw( opt );
@@ -103,6 +107,7 @@ export default class Back extends Component
 
     _widget()
     {
+        
         var self  = this;
         if(!this.enabled){
             return
@@ -121,7 +126,7 @@ export default class Back extends Component
                         width : self.w,
                         height : -yGroupHeight,
                         fillStyle : self.fill.fillStyle || "#000",
-                        globalAlpha : self.fill.alpha || 0.025 * (g%2)
+                        fillAlpha : self.fill.alpha || 0.025 * (g%2)
                     }
                 });
                 
@@ -132,22 +137,15 @@ export default class Back extends Component
         self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp);
         self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
         
-
         //x轴方向的线集合
         var arr = self.xAxis.data;
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a];
+          
             var line = new Line({
                 id : "back_line_"+a,
                 context : {
-                    start       : {
-                    	x : 0,
-                    	y : o.y
-                    },
-                    end         : {
-                        x : 0,
-                        y : o.y
-                    },
+                    y : o.y,
                     lineType    : self.xAxis.lineType,
                     lineWidth   : self.xAxis.lineWidth,
                     strokeStyle : self.xAxis.strokeStyle  
@@ -162,7 +160,6 @@ export default class Back extends Component
                 self.xAxisSp.addChild(line);
                 
                 if( this.animation && !this.resize ){
-                    
                     line.animate({
                         start : {
                         	x : 0
@@ -176,10 +173,9 @@ export default class Back extends Component
                         delay : (al-a) * 80,
                         id : line.id
                     });
-                    
                 } else {
-                    line.context.start.x = 0;
-                    line.context.end.x   = self.w;
+                    line.context.xStart = 0;
+                    line.context.xEnd = self.w;
                 }
 
 
@@ -192,15 +188,15 @@ export default class Back extends Component
             var o = arr[a]
             var line = new Line({
                 context : {
+                    x : o.x,
                     start       : {
-                        x : o.x,
+                        x : 0,
                         y : 0
                     },
                     end         : {
-                        x : o.x,
+                        x : 0,
                         y : -self.h
                     },
-
                     lineType    : self.yAxis.lineType,
                     lineWidth   : self.yAxis.lineWidth,
                     strokeStyle : self.yAxis.strokeStyle,
@@ -274,8 +270,9 @@ export default class Back extends Component
                 strokeStyle : self.xOrigin.strokeStyle
             }
         })
-        
-        self.xOrigin.enabled && self.sprite.addChild(line)
-    }
+        if(self.xOrigin.enabled)
+            self.sprite.addChild(line)
 
+
+    }
 }

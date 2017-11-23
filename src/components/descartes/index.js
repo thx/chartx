@@ -1,17 +1,18 @@
 import Component from "../component"
+import _ from "underscore"
 import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
 import Back from "../back/index"
 
-export default class Descartes extends Component
+export default class Descartes_Component extends Component
 {
-	constructor( opt , root )
-	{
-		super();
+    constructor( opt, root )
+    {
+        super();
 
-		this._root  = root;
-
+        this._root  = root;
+        
         this._xAxis = null;
         this._yAxis = [];
 
@@ -24,25 +25,59 @@ export default class Descartes extends Component
         this.graphsX = 0;
         this.graphsY = 0;
 
-        //所有yAxis的fields 打平后的集合
-        this.yAxisFields = [];
-
         this.dataFrame = this._root.dataFrame;
 
-        this.init(opt);
-	}
+        this.xAxis = {
+            field : this.dataFrame.fields[0]
+        };
+        this.yAxis = {
+            field : this.dataFrame.fields.slice(1)
+        };
+        this.back = {
 
-	init(opt)
-	{
+        };
+
+        if( "display" in opt ){
+            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，back三个子组件
+            this.xAxis.display = opt.display;
+            this.yAxis.display = opt.display;
+            this.back.enabled = opt.display;
+        };
+        
+
+        //所有yAxis的fields 打平后的集合
+        //这个集合不是dataFrame.fields，而是从用户的 coordinate 配置中获取，因为位置之类的会不一样
+        this.yAxisFields = [];
+
+        //吧原始的field转换为对应结构的显示树
+        //["uv"] --> [{field:'uv',enabled:true , fillStyle: }]
+        this.fieldsDisplayMap = null; //this._opts.yAxis.field || this._opts.yAxis.bar.field );
+
+        this.init(opt);
+    }
+
+    init(opt)
+    {
         var me = this;
         _.deepExtend(this, opt);
+
         me.sprite = new Canvax.Display.Sprite({
             id : "coordinate"
         });
         me._initModules();
+
+        //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
+        // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
+        this.fieldsDisplayMap = this._setFieldsDisplay( );
+
+        //回写xAxis和yAxis到opt上面。如果用户没有传入任何xAxis 和yAxis的话，
+        //这回写很有必要
+        opt.xAxis = this.xAxis;
+        opt.yAxis = this.yAxis;
+
     }
 
-    //@opt --> coordinate节点配置
+    //@opt --> coordinate 节点配置
     reset( opt, dataFrame )
     {
         var me = this;
@@ -80,7 +115,7 @@ export default class Descartes extends Component
                     } ) || yAxis[1];
                 }
 
-                if( _opt.field ){
+                if( _opt && _opt.field ){
                     //有配置新的field进来的话，就说明要切换字段了
                     newYaxisFields = newYaxisFields.concat( _.flatten( [_opt.field] ) );
 
@@ -96,13 +131,20 @@ export default class Descartes extends Component
             }
         } );
 
+        this._back.reset({
+            animation:false,
+            xAxis: {
+                data: this._yAxisLeft.layoutData
+            }
+        });
+
     }
 
     draw( opt )
     {
         var _padding = this._root.padding;
-        var h = this._root.height;
-        var w = this._root.width;
+        var h = opt.h || this._root.height;
+        var w = opt.w || this._root.width;
 
         var y = h - this._xAxis.height;
         var graphsH = y - _padding.top - _padding.bottom;
@@ -232,7 +274,8 @@ export default class Descartes extends Component
         this.sprite.addChild( this._back.sprite );
     }
 
-    getPosX( opt ){
+    getPosX( opt )
+    {
         return this._xAxis.getPosX( opt );
     }
 
@@ -279,7 +322,8 @@ export default class Descartes extends Component
         } );
 
         //然后yAxis更新后，对应的背景也要更新
-        this._back.update({
+        this._back.reset({
+            animation:false,
             xAxis: {
                 data: this._yAxisLeft.layoutData
             }
@@ -338,12 +382,136 @@ export default class Descartes extends Component
             
             //然后yAxis更新后，对应的背景也要更新,目前被添加到了left才需要updata back
             if( _yAxis.place == "left" ){
-                this._back.update({
+                this._back.reset({
+                    animation:false,
                     xAxis: {
                         data: this._yAxisLeft.layoutData
                     }
                 });
             }
         }
+    }
+
+    //查询field在哪个yAxis上面
+    getYaxisOfField( field )
+    {
+        var me = this;
+        var Axis;
+        _.each( this._yAxis , function( _yAxis , i ){
+            var fs = _yAxis.field;
+            var _fs = _.flatten( [fs] );
+            var ind = _.indexOf( _fs , field );
+            if( ind >-1 ){
+                //那么说明这个yAxis轴上面有这个字段，这个yaxis需要reset
+                Axis = _yAxis;
+                return false;
+            }
+        } );
+        return Axis;
+    }
+
+    //和原始field结构保持一致，但是对应的field换成 {field: , enabled:}结构
+    _setFieldsDisplay( fields )
+    {
+        if(!fields){
+            var yAxis = this.yAxis;
+            if( !_.isArray( yAxis ) ){
+                yAxis = [yAxis];
+            };
+
+            fields = [];
+
+            _.each( yAxis, function( item, i ){
+                fields = fields.concat( item.field );
+            } );
+        };
+
+        if( _.isString(fields) ){
+            fields = [fields];
+        };
+        var clone_fields = _.clone( fields );
+        for(var i = 0 , l=fields.length ; i<l ; i++) {
+            if( _.isString( fields[i] ) ){
+                clone_fields[i] = {
+                    field : fields[i],
+                    enabled : true,
+                    yAxis : this.getYaxisOfField( fields[i] )
+                }
+            }
+            if( _.isArray( fields[i] ) ){
+                clone_fields[i] = this._setFieldsDisplay( fields[i] );
+            }
+        };
+        return clone_fields;
+    }
+
+    //从 fieldsDisplayMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+    getFieldsOfDisplay( maps )
+    {
+        var fmap = {
+            left: [], right:[]
+        };
+
+        _.each( this.fieldsDisplayMap, function( bamboo, b ){
+            if( _.isArray( bamboo ) ){
+                //多节竹子
+
+                var place;
+                var fields = [];
+                
+                //设置完fields后，返回这个group属于left还是right的axis
+                _.each( bamboo, function( obj, v ){
+                    if( obj.field && obj.enabled ){
+                        place = obj.yAxis.place;
+                        fields.push( obj.field );
+                    }
+                } );
+
+                fields.length && fmap[ place ].push( fields );
+
+            } else {
+                //单节棍
+                if( bamboo.field && bamboo.enabled ){
+                    fmap[ bamboo.yAxis.place ].push( bamboo.field );
+                }
+            };
+        } );
+
+        return fmap;
+    }
+
+    //设置 fieldsDisplayMap 中对应field 的 enabled状态
+    setFieldDisplay( field )
+    {
+        var me = this;
+        function set( maps ){
+            _.each( maps , function( map , i ){
+                if( _.isArray( map ) ){
+                    set( map )
+                } else if( map.field && map.field == field ) {
+                    map.enabled = !map.enabled;
+                }
+            } );
+        }
+        set( me.fieldsDisplayMap );
+    }
+
+    getDisplayObjectOfField( field )
+    {
+        var me = this;
+        var obj = null;
+        function get( maps ){
+            _.each( maps , function( map , i ){
+                if( _.isArray( map ) ){
+                    get( map )
+                } else if( map.field && map.field == field ) {
+                    obj = map;
+                    return false;
+                }
+            } );
+        }
+        get( me.fieldsDisplayMap );
+        return obj;
     }
 }
