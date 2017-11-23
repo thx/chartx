@@ -389,17 +389,17 @@ export default class Pie
             },
             duration: 500,
             //easing: "Back.In",
-            onUpdate: function () {
+            onUpdate: function ( status ) {
                 for (var i = 0; i < self.sectors.length; i++) {
                     var sec = self.sectors[i];
                     var secc = sec.context;
                     if (secc) {
-                        secc.r = this.r;
-                        secc.r0 = this.r0;
-                        secc.globalAlpha = this.process;
+                        secc.r = status.r;
+                        secc.r0 = status.r0;
+                        secc.globalAlpha = status.process;
                         if (i == 0) {
                             secc.startAngle = sec.startAngle;
-                            secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * this.process;
+                            secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * status.process;
                         } else {
                             var lastEndAngle = function (index) {
                                 var lastIndex = index - 1;
@@ -414,7 +414,7 @@ export default class Pie
                                 }
                             } (i);
                             secc.startAngle = lastEndAngle;
-                            secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * this.process;
+                            secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * status.process;
                         }
 
                         //如果已经被选中，有一个选中态

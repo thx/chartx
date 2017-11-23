@@ -175,3 +175,44 @@ export function getEl(el){
     }
     return null;
 }
+
+//在一个数组中 返回比对$arr中的值离$n最近的值的索引
+export function getDisMinATArr($n, $arr) {
+    var index = 0
+    var n = Math.abs($n - $arr[0])
+    for (var a = 1, al = $arr.length ; a < al; a++ ) {
+        if (n > Math.abs($n - $arr[a])) {
+            n = Math.abs($n - $arr[a])
+            index = a
+        }
+    }
+    return index
+}
+
+/**
+ * 获取一个path路径
+ * @param  {[Array]} $arr    [数组]
+ * @return {[String]}        [path字符串]
+ */
+export function getPath($arr){
+    var M = 'M', L = 'L', Z = 'z'
+    var s = '';
+     if( _.isArray( $arr[0] ) ){
+         s = M + $arr[0][0] + ' ' + $arr[0][1]
+     } else {
+         s = M + $arr[0].x + ' ' + $arr[0].y
+     }
+    for(var a = 1,al = $arr.length; a < al ; a++){
+         var x = 0 , y = 0 , item = $arr[a]; 
+         if( _.isArray( item ) ){
+             x = item[0];
+             y = item[1];
+         } else {
+             x = item.x;
+             y = item.y;
+         }
+        s += ' ' + L + x + ' ' + y
+    }
+    // s += ' ' + Z
+    return s
+}

@@ -62,7 +62,7 @@ export default class Graphs
         };
 
         this.hoverRect = {
-            globalAlpha: 0.2,
+            globalAlpha: 0.15,
             fillStyle: "#333"
         }
 
@@ -480,7 +480,7 @@ export default class Graphs
                         rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {
                             e.eventInfo = me._getInfoHandler(this, e);
                             if (e.type == "mouseover") {
-                                this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = 0.1;
+                                this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = me.hoverRect.globalAlpha;
                             }
                             if (e.type == "mouseout") {
                                 this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = 0;
@@ -801,8 +801,8 @@ export default class Graphs
                                         },
                                         duration: options.duration + 300,
                                         delay: h * options.delay,
-                                        onUpdate: function() {
-                                            var content = this.v;
+                                        onUpdate: function( obj ) {
+                                            var content = obj.v;
 
                                             if (_.isFunction(me.text.format)) {
                                                 var _formatc = me.text.format.apply( me , [content , txt._data]);

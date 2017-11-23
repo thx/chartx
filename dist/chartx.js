@@ -2593,6 +2593,7 @@ TWEEN.Interpolation = {
 })(commonjsGlobal$$1);
 });
 
+//import Tween from "./Tween"
 /**
  * 设置 AnimationFrame begin
  */
@@ -2713,21 +2714,25 @@ function registTween(options) {
             };
 
             tween = new Tween.Tween(opt.from).to(opt.to, opt.duration).onStart(function () {
-                opt.onStart.apply(this);
+                //opt.onStart.apply( this )
+                opt.onStart(opt.from);
             }).onUpdate(function () {
-                opt.onUpdate.apply(this);
+                //opt.onUpdate.apply( this );
+                opt.onUpdate(opt.from);
             }).onComplete(function () {
                 destroyFrame({
                     id: tid
                 });
                 tween._isCompleteed = true;
-                opt.onComplete.apply(this, [this]); //执行用户的conComplete
+                //opt.onComplete.apply( this , [this] ); //执行用户的conComplete
+                opt.onComplete(opt.from);
             }).onStop(function () {
                 destroyFrame({
                     id: tid
                 });
                 tween._isStoped = true;
-                opt.onStop.apply(this, [this]);
+                //opt.onStop.apply( this , [this] );
+                opt.onStop(opt.from);
             }).repeat(opt.repeat).delay(opt.delay).easing(Tween.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
 
             tween.id = tid;
@@ -3530,23 +3535,24 @@ var DisplayObject = function (_EventDispatcher) {
                 upFun = options.onUpdate;
             }
             var tween;
-            options.onUpdate = function () {
+            options.onUpdate = function (status) {
                 //如果context不存在说明该obj已经被destroy了，那么要把他的tween给destroy
                 if (!context && tween) {
                     AnimationFrame.destroyTween(tween);
                     tween = null;
                     return;
                 }
-                for (var p in this) {
-                    context[p] = this[p];
+                for (var p in status) {
+                    context[p] = status[p];
                 }
-                upFun.apply(self, [this]);
+                upFun.apply(self, [status]);
             };
+
             var compFun = function compFun() {};
             if (options.onComplete) {
                 compFun = options.onComplete;
             }
-            options.onComplete = function (opt) {
+            options.onComplete = function (status) {
                 compFun.apply(self, arguments);
             };
             tween = AnimationFrame.registTween(options);
@@ -9957,17 +9963,17 @@ var Pie$1 = function () {
                 },
                 duration: 500,
                 //easing: "Back.In",
-                onUpdate: function onUpdate() {
+                onUpdate: function onUpdate(status) {
                     for (var i = 0; i < self.sectors.length; i++) {
                         var sec = self.sectors[i];
                         var secc = sec.context;
                         if (secc) {
-                            secc.r = this.r;
-                            secc.r0 = this.r0;
-                            secc.globalAlpha = this.process;
+                            secc.r = status.r;
+                            secc.r0 = status.r0;
+                            secc.globalAlpha = status.process;
                             if (i == 0) {
                                 secc.startAngle = sec.startAngle;
-                                secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * this.process;
+                                secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * status.process;
                             } else {
                                 var lastEndAngle = function (index) {
                                     var lastIndex = index - 1;
@@ -9982,7 +9988,7 @@ var Pie$1 = function () {
                                     }
                                 }(i);
                                 secc.startAngle = lastEndAngle;
-                                secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * this.process;
+                                secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * status.process;
                             }
 
                             //如果已经被选中，有一个选中态
@@ -13228,7 +13234,7 @@ var Graphs = function () {
         };
 
         this.hoverRect = {
-            globalAlpha: 0.2,
+            globalAlpha: 0.15,
             fillStyle: "#333"
         };
 
@@ -13643,7 +13649,7 @@ var Graphs = function () {
                             rectEl.on("panstart mouseover mousemove mouseout click dblclick", function (e) {
                                 e.eventInfo = me._getInfoHandler(this, e);
                                 if (e.type == "mouseover") {
-                                    this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = 0.1;
+                                    this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = me.hoverRect.globalAlpha;
                                 }
                                 if (e.type == "mouseout") {
                                     this.parent.getChildById("bhr_hoverRect_" + this.iNode).context.globalAlpha = 0;
@@ -13956,8 +13962,8 @@ var Graphs = function () {
                                             },
                                             duration: options.duration + 300,
                                             delay: h * options.delay,
-                                            onUpdate: function onUpdate() {
-                                                var content = this.v;
+                                            onUpdate: function onUpdate(obj) {
+                                                var content = obj.v;
 
                                                 if (underscore.isFunction(me.text.format)) {
                                                     var _formatc = me.text.format.apply(me, [content, txt._data]);
