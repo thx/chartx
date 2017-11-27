@@ -12396,25 +12396,49 @@ var Descartes = function (_Chart) {
 
     function Descartes(node, data, opts) {
         classCallCheck$1(this, Descartes);
-        return possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts));
+
+        //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
+        //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，
+        //通过parse2MatrixData最终转换的是data = [ ['xfield','yfield'] , ['2016', 111]] 这样 chartx的数据格式
+        data = parse2MatrixData(data);
+
+        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts));
+
+        _this._node = node;
+        _this._data = data;
+        _this._opts = opts;
+
+        //坐标系统
+        _this._coordinate = null;
+        _this.coordinate = {
+            xAxis: {
+                //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
+                layoutType: "peak",
+                //默认为false，x轴的计量是否需要取整， 这样 比如某些情况下得柱状图的柱子间隔才均匀。
+                //比如一像素间隔的柱状图，如果需要精确的绘制出来每个柱子的间距是1px， 就必须要把这里设置为true
+                posParseToInt: false
+            }
+        };
+
+        //直角坐标系的绘图模块
+        _this._graphs = null;
+
+        //直角坐标系的tooltip
+        _this._tip = null;
+
+        //预设dataZoom的区间数据
+        _this.dataZoom = {
+            h: 30,
+            range: {
+                start: 0,
+                end: data.length - 1 //因为第一行是title
+            }
+        };
+
+        return _this;
     }
 
-    //一些有必要的兼容代码，主要是兼容配置上面的变动
-
-
     createClass$1(Descartes, [{
-        key: "compatible",
-        value: function compatible(opts) {
-            //TODO 兼容老版配置代码
-            //等全部的xy 配置都迁移到了coordinate系统下面 后 弃用
-            if (!opts.coordinate) {
-                opts.coordinate = {};
-                if (opts.xAxis) opts.coordinate.xAxis = opts.xAxis;
-                if (opts.yAxis) opts.coordinate.yAxis = opts.yAxis;
-                if (opts.back) opts.coordinate.back = opts.back;
-            }
-        }
-    }, {
         key: "setStages",
         value: function setStages() {
             this.stageTip = new canvax.Display.Sprite({
@@ -12426,6 +12450,51 @@ var Descartes = function (_Chart) {
 
             this.stage.addChild(this.core);
             this.stage.addChild(this.stageTip);
+        }
+    }, {
+        key: "_horizontal",
+        value: function _horizontal() {
+            var me = this;
+
+            underscore.each([me._graphs], function (_graphs) {
+                var ctx = _graphs.sprite.context;
+                ctx.x += (me.width - me.height) / 2;
+                ctx.y += (me.height - me.width) / 2 + me.padding.top;
+                ctx.rotation = 90;
+                ctx.rotateOrigin.x = me.height / 2;
+                ctx.rotateOrigin.y = me.width / 2;
+                ctx.scaleOrigin.x = me.height / 2;
+                ctx.scaleOrigin.y = me.width / 2;
+                ctx.scaleX = -1;
+
+                underscore.each(_graphs.txtsSp.children, function (childSp) {
+                    underscore.each(childSp.children, function (cs) {
+                        var ctx = cs.context;
+                        var w = ctx.width;
+                        var h = ctx.height;
+
+                        ctx.scaleOrigin.x = w / 2;
+                        ctx.scaleOrigin.y = h / 2;
+                        ctx.scaleX = -1;
+
+                        ctx.rotation = 90;
+                        ctx.rotateOrigin.x = w / 2;
+                        ctx.rotateOrigin.y = h / 2;
+
+                        var _cfy = cs._finalY;
+                        cs._finalY -= w / 2 - h / 2;
+                        if (!cs.upOfYbaseNumber) {
+                            //不在基准线之上的话
+                            cs._finalY += w / 2;
+                        }
+
+                        //TODO:这里暂时还不是最准确的计算， 后续完善
+                        if (Math.abs(_cfy) + w > me._graphs.h) {
+                            cs._finalY = -me._graphs.h + w / 2;
+                        }
+                    });
+                });
+            });
         }
     }, {
         key: "initPlugsModules",
@@ -14658,10 +14727,12 @@ var Descartes_Component = function (_Component) {
         _this._yAxisRight = null;
         _this._back = null;
 
-        _this.graphsW = 0;
-        _this.graphsH = 0;
+        _this.graphsWidth = 0;
+        _this.graphsHeight = 0;
         _this.graphsX = 0;
         _this.graphsY = 0;
+
+        _this.horizontal = false;
 
         _this.dataFrame = _this._root.dataFrame;
 
@@ -14672,6 +14743,15 @@ var Descartes_Component = function (_Component) {
             field: _this.dataFrame.fields.slice(1)
         };
         _this.back = {};
+
+        if (opt.horizontal) {
+            _this.xAxis.text = {
+                rotation: 90
+            };
+            _this.yAxis.text = {
+                rotation: 90
+            };
+        }
 
         if ("display" in opt) {
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，back三个子组件
@@ -14783,6 +14863,13 @@ var Descartes_Component = function (_Component) {
             var h = opt.h || this._root.height;
             var w = opt.w || this._root.width;
 
+            if (this.horizontal) {
+                //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
+                var _num = w;
+                w = h;
+                h = _num;
+            }
+
             var y = h - this._xAxis.height;
             var graphsH = y - _padding.top - _padding.bottom;
 
@@ -14850,6 +14937,13 @@ var Descartes_Component = function (_Component) {
                 },
                 resize: opt.resize
             });
+
+            if (this.horizontal) {
+                this._horizontal({
+                    w: w,
+                    h: h
+                });
+            }
         }
     }, {
         key: "_initModules",
@@ -14907,6 +15001,53 @@ var Descartes_Component = function (_Component) {
 
             this._back = new Back(this.back, this);
             this.sprite.addChild(this._back.sprite);
+        }
+
+        /**
+         * 
+         * @param {x,y} size 
+         */
+
+    }, {
+        key: "_horizontal",
+        value: function _horizontal() {
+
+            var me = this;
+            var w = me._root.width;
+            var h = me._root.height;
+
+            underscore.each([me.sprite.context], function (ctx) {
+                ctx.x += (w - h) / 2;
+                ctx.y += (h - w) / 2 + me._root.padding.top;
+                ctx.rotation = 90;
+                ctx.rotateOrigin.x = h / 2;
+                ctx.rotateOrigin.y = w / 2;
+                ctx.scaleOrigin.x = h / 2;
+                ctx.scaleOrigin.y = w / 2;
+                ctx.scaleX = -1;
+            });
+
+            //把x轴文案做一次镜像反转
+            underscore.each(underscore.flatten([this._xAxis]), function (_xAxis) {
+                underscore.each(_xAxis.rulesSprite.children, function (xnode) {
+                    var ctx = xnode._txt.context;
+                    var rect = xnode._txt.getRect();
+                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
+                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                    ctx.scaleY = -1;
+                });
+            });
+
+            //把y轴文案做一次镜像反转
+            underscore.each(underscore.flatten([this._yAxis]), function (_yAxis) {
+                underscore.each(_yAxis.rulesSprite.children, function (ynode) {
+                    var ctx = ynode._txt.context;
+                    var rect = ynode._txt.getRect();
+                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
+                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                    ctx.scaleY = -1;
+                });
+            });
         }
     }, {
         key: "getPosX",
@@ -15173,8 +15314,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
         var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
 
         _this.data = [];
-        _this.w = 0;
-        _this.h = 0;
+
         _this.root = root;
         _this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
         _this._setyAxisFieldsMap(opt);
@@ -15241,6 +15381,12 @@ var Graphs = function (_Canvax$Event$EventDi) {
             this.sprite = new canvax.Display.Sprite({
                 id: "graphsEl"
             });
+
+            this.core = new canvax.Display.Sprite({
+                id: "bar_graphs_core"
+            });
+            this.sprite.addChild(this.core);
+
             this.barsSp = new canvax.Display.Sprite({
                 id: "barsSp"
             });
@@ -15253,16 +15399,6 @@ var Graphs = function (_Canvax$Event$EventDi) {
             this.checkedSp = new canvax.Display.Sprite({
                 id: "checkedSp"
             });
-        }
-    }, {
-        key: "setX",
-        value: function setX($n) {
-            this.sprite.context.x = $n;
-        }
-    }, {
-        key: "setY",
-        value: function setY($n) {
-            this.sprite.context.y = $n;
         }
     }, {
         key: "getInfo",
@@ -15760,19 +15896,19 @@ var Graphs = function (_Canvax$Event$EventDi) {
                 }
             });
 
-            this.sprite.addChild(this.barsSp);
+            this.core.addChild(this.barsSp);
 
-            this.sprite.addChild(this.checkedSp);
+            this.core.addChild(this.checkedSp);
 
             if (this.text.enabled) {
-                this.sprite.addChild(this.txtsSp);
+                this.core.addChild(this.txtsSp);
             }
 
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
+            this.core.context.x = this.pos.x;
+            this.core.context.y = this.pos.y;
 
             if (this.sort && this.sort == "desc") {
-                this.sprite.context.y -= this.h;
+                this.core.context.y -= this.h;
             }
 
             this.grow(function () {
@@ -16049,10 +16185,10 @@ var Graphs = function (_Canvax$Event$EventDi) {
                                             to: {
                                                 v: txt._text
                                             },
-                                            duration: options.duration + 300,
+                                            duration: options.duration + 100,
                                             delay: h * options.delay,
-                                            onUpdate: function onUpdate() {
-                                                var content = this.v;
+                                            onUpdate: function onUpdate(arg) {
+                                                var content = arg.v;
 
                                                 if (underscore.isFunction(me.text.format)) {
                                                     var _formatc = me.text.format.apply(me, [content, txt._data]);
@@ -16271,35 +16407,12 @@ var Bar = function (_Chart) {
         var _this = possibleConstructorReturn$1(this, (Bar.__proto__ || Object.getPrototypeOf(Bar)).call(this, node, data, opts));
 
         _this.type = "bar";
-        data = parse2MatrixData(data);
 
-        _this._node = node;
-        _this._data = data;
-        _this._opts = opts;
-
-        //坐标系统
-        _this._coordinate = null;
-        _this.coordinate = {
-            xAxis: {
-                layoutType: "peak", //波峰波谷布局模型
-                posParseToInt: false //true
-            }
-        };
-
-        _this._graphs = null;
-        _this._tip = null;
-
+        //目前只有 bar有 checked 设置
         _this._checkedList = []; //所有的选择对象
         _this._currCheckedList = []; //当前可可视范围内的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
-        _this.dataZoom = {
-            h: 30,
-            range: {
-                start: 0,
-                end: data.length - 1 //因为第一行是title
-            }
-        };
-
+        //如果需要绘制百分比的柱状图
         if (opts.graphs && opts.graphs.proportion) {
             _this._initProportion(node, data, opts);
         } else {
@@ -16307,10 +16420,8 @@ var Bar = function (_Chart) {
         }
 
         _this.dataFrame = _this._initData(data);
-
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，比如横向柱状图,柱折混合图...
         _this._init && _this._init(node, data, opts);
-
         _this.draw();
         return _this;
     }
@@ -16326,6 +16437,11 @@ var Bar = function (_Chart) {
             this._initModule(opt); //初始化模块  
             this.initPlugsModules(opt); //初始化组件
             this._startDraw(opt); //开始绘图
+
+            if (this._coordinate.horizontal) {
+                this._horizontal();
+            }
+
             this.drawPlugs(opt); //绘图完，开始绘制插件
             this.inited = true;
         }

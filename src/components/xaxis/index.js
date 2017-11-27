@@ -73,7 +73,6 @@ export default class xAxis extends Component
         this.animation = true;
         this.resize = false;
 
-
         //layoutType == "proportion"的时候才有效
         this.maxVal = null; 
         this.minVal = null; 

@@ -14,8 +14,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         super(opt, root);
 
         this.data = [];
-        this.w = 0;
-        this.h = 0;
+
         this.root = root;
         this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
         this._setyAxisFieldsMap( opt );
@@ -80,6 +79,12 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.sprite = new Canvax.Display.Sprite({
             id: "graphsEl"
         });
+
+        this.core = new Canvax.Display.Sprite({
+            id: "bar_graphs_core"
+        });
+        this.sprite.addChild( this.core );
+
         this.barsSp = new Canvax.Display.Sprite({
             id: "barsSp"
         });
@@ -92,16 +97,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.checkedSp = new Canvax.Display.Sprite({
             id: "checkedSp"
         });
-    }
-
-    setX($n) 
-    {
-        this.sprite.context.x = $n
-    }
-
-    setY($n) 
-    {
-        this.sprite.context.y = $n
     }
 
     getInfo(index) 
@@ -610,19 +605,19 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             }
         });
 
-        this.sprite.addChild(this.barsSp);
+        this.core.addChild(this.barsSp);
 
-        this.sprite.addChild(this.checkedSp)
+        this.core.addChild(this.checkedSp);
 
         if (this.text.enabled) {
-            this.sprite.addChild(this.txtsSp);
+            this.core.addChild(this.txtsSp);
         };
 
-        this.sprite.context.x = this.pos.x;
-        this.sprite.context.y = this.pos.y;
+        this.core.context.x = this.pos.x;
+        this.core.context.y = this.pos.y;
 
         if (this.sort && this.sort == "desc") {
-            this.sprite.context.y -= this.h;
+            this.core.context.y -= this.h;
         };
 
         this.grow(function() {
@@ -906,10 +901,10 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                                         to: {
                                             v: txt._text
                                         },
-                                        duration: options.duration + 300,
+                                        duration: options.duration + 100,
                                         delay: h * options.delay,
-                                        onUpdate: function() {
-                                            var content = this.v;
+                                        onUpdate: function( arg ) {
+                                            var content = arg.v;
 
                                             if (_.isFunction(me.text.format)) {
                                                 var _formatc = me.text.format.apply( me , [content , txt._data]);

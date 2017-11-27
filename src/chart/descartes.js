@@ -1,6 +1,7 @@
 import Chart from "./chart"
 import Canvax from "canvax2d"
 import _ from "underscore"
+import {parse2MatrixData} from "../utils/tools"
 
 import Legend from "../components/legend/index"
 import DataZoom from "../components/datazoom/index"
@@ -11,20 +12,44 @@ import Anchor from "../components/anchor/index"
 export default class Descartes extends Chart
 {
     constructor( node, data, opts ){
-        super( node, data, opts );
-    }
+        //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
+        //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，
+        //通过parse2MatrixData最终转换的是data = [ ['xfield','yfield'] , ['2016', 111]] 这样 chartx的数据格式
+        data = parse2MatrixData(data);
 
-    //一些有必要的兼容代码，主要是兼容配置上面的变动
-    compatible( opts )
-    {
-        //TODO 兼容老版配置代码
-        //等全部的xy 配置都迁移到了coordinate系统下面 后 弃用
-        if( !opts.coordinate ){
-            opts.coordinate = {}
-            if( opts.xAxis ) opts.coordinate.xAxis = opts.xAxis;
-            if( opts.yAxis ) opts.coordinate.yAxis = opts.yAxis;
-            if( opts.back ) opts.coordinate.back = opts.back;
-        }
+        super( node, data, opts );
+
+        this._node = node;
+        this._data = data;
+        this._opts = opts;
+
+        //坐标系统
+        this._coordinate = null;
+        this.coordinate = {
+            xAxis : {
+                //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
+                layoutType    : "peak",  
+                //默认为false，x轴的计量是否需要取整， 这样 比如某些情况下得柱状图的柱子间隔才均匀。
+                //比如一像素间隔的柱状图，如果需要精确的绘制出来每个柱子的间距是1px， 就必须要把这里设置为true
+                posParseToInt : false    
+            }
+        };
+
+        //直角坐标系的绘图模块
+        this._graphs = null;
+
+        //直角坐标系的tooltip
+        this._tip = null;
+
+        //预设dataZoom的区间数据
+        this.dataZoom = {
+            h: 30,
+            range: {
+                start: 0,
+                end: data.length - 1 //因为第一行是title
+            }
+        };
+
     }
 
     setStages()
@@ -38,6 +63,55 @@ export default class Descartes extends Chart
 
         this.stage.addChild(this.core);
         this.stage.addChild(this.stageTip);
+    }
+
+    _horizontal() 
+    {
+        var me = this;
+
+        _.each([me._graphs], function( _graphs ) {
+            var ctx = _graphs.sprite.context;
+            ctx.x += ((me.width - me.height) / 2);
+            ctx.y += ((me.height - me.width) / 2) + me.padding.top;
+            ctx.rotation = 90;
+            ctx.rotateOrigin.x = me.height / 2;
+            ctx.rotateOrigin.y = me.width / 2;
+            ctx.scaleOrigin.x = me.height / 2;
+            ctx.scaleOrigin.y = me.width / 2;
+            ctx.scaleX = -1;
+
+            _.each(_graphs.txtsSp.children, function(childSp) {
+                _.each(childSp.children, function(cs) {
+                    var ctx = cs.context;
+                    var w = ctx.width;
+                    var h = ctx.height;
+    
+                    ctx.scaleOrigin.x = w / 2;
+                    ctx.scaleOrigin.y = h / 2;
+                    ctx.scaleX = -1;
+    
+                    ctx.rotation = 90;
+                    ctx.rotateOrigin.x = w / 2;
+                    ctx.rotateOrigin.y = h / 2;
+    
+                    var _cfy = cs._finalY;
+                    cs._finalY -= w / 2 - h / 2;
+                    if( !cs.upOfYbaseNumber ){
+                        //不在基准线之上的话
+                        cs._finalY += w/2;
+                    };
+    
+                    //TODO:这里暂时还不是最准确的计算， 后续完善
+                    if( Math.abs(_cfy)+w > me._graphs.h ){
+                        cs._finalY = -me._graphs.h + w / 2;
+                    };
+                });
+            });
+        });
+
+
+        
+
     }
 
     initPlugsModules( opt )

@@ -20,10 +20,12 @@ export default class Descartes_Component extends Component
         this._yAxisRight = null;
         this._back  = null;
 
-        this.graphsW = 0;
-        this.graphsH = 0;
+        this.graphsWidth = 0;
+        this.graphsHeight = 0;
         this.graphsX = 0;
         this.graphsY = 0;
+
+        this.horizontal = false;
 
         this.dataFrame = this._root.dataFrame;
 
@@ -36,6 +38,15 @@ export default class Descartes_Component extends Component
         this.back = {
 
         };
+
+        if( opt.horizontal ){
+            this.xAxis.text = {    
+                rotation: 90
+            }
+            this.yAxis.text = {
+                rotation: 90
+            }
+        }
 
         if( "display" in opt ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，back三个子组件
@@ -146,6 +157,13 @@ export default class Descartes_Component extends Component
         var h = opt.h || this._root.height;
         var w = opt.w || this._root.width;
 
+        if( this.horizontal ){
+            //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
+            var _num = w;
+            w = h;
+            h = _num;
+        };
+
         var y = h - this._xAxis.height;
         var graphsH = y - _padding.top - _padding.bottom;
 
@@ -214,6 +232,14 @@ export default class Descartes_Component extends Component
             },
             resize: opt.resize
         } );
+
+        if( this.horizontal ){
+            this._horizontal({
+                w : w,
+                h : h
+            });
+        }
+
     }
    
     _initModules()
@@ -272,6 +298,52 @@ export default class Descartes_Component extends Component
 
         this._back = new Back( this.back, this );
         this.sprite.addChild( this._back.sprite );
+    }
+
+    /**
+     * 
+     * @param {x,y} size 
+     */
+    _horizontal( ) 
+    {
+        
+        var me = this;
+        var w = me._root.width;
+        var h = me._root.height;
+
+        _.each([me.sprite.context], function(ctx) {
+            ctx.x += ((w - h) / 2);
+            ctx.y += ((h - w) / 2) + me._root.padding.top;
+            ctx.rotation = 90;
+            ctx.rotateOrigin.x = h / 2;
+            ctx.rotateOrigin.y = w / 2;
+            ctx.scaleOrigin.x = h / 2;
+            ctx.scaleOrigin.y = w / 2;
+            ctx.scaleX = -1;
+        });
+
+        //把x轴文案做一次镜像反转
+        _.each( _.flatten( [ this._xAxis ] ), function( _xAxis ){
+            _.each( _xAxis.rulesSprite.children, function( xnode ){
+                var ctx = xnode._txt.context;
+                var rect = xnode._txt.getRect();
+                ctx.scaleOrigin.x = rect.x + rect.width / 2;
+                ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                ctx.scaleY = -1
+            } );
+        } );
+
+        //把y轴文案做一次镜像反转
+        _.each( _.flatten( [ this._yAxis ] ), function( _yAxis ) {
+            _.each( _yAxis.rulesSprite.children, function( ynode ){
+                var ctx = ynode._txt.context;
+                var rect = ynode._txt.getRect();
+                ctx.scaleOrigin.x = rect.x + rect.width / 2;
+                ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                ctx.scaleY = -1
+            } );
+        });
+
     }
 
     getPosX( opt )

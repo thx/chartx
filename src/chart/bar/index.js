@@ -13,51 +13,27 @@ export default class Bar extends Chart
         super( node, data, opts );
 
         this.type = "bar";
-        data = parse2MatrixData(data);
-
-        this._node = node;
-        this._data = data;
-        this._opts = opts;
-
-        //坐标系统
-        this._coordinate = null;
-        this.coordinate = {
-            xAxis : {
-                layoutType    : "peak",   //波峰波谷布局模型
-                posParseToInt : false    //true
-            }
-        };
-
-        this._graphs = null;
-        this._tip = null;
-
+        
+        //目前只有 bar有 checked 设置
         this._checkedList = []; //所有的选择对象
         this._currCheckedList = []; //当前可可视范围内的选择对象(根据dataZoom.start, dataZoom.end 过滤)
 
-        this.dataZoom = {
-            h: 30,
-            range: {
-                start: 0,
-                end: data.length - 1 //因为第一行是title
-            }
-        };
-
+        //如果需要绘制百分比的柱状图
         if (opts.graphs && opts.graphs.proportion) {
             this._initProportion(node, data, opts);
         } else {
             _.deepExtend(this, opts);
         };
 
+
         this.dataFrame = this._initData(data);
-        
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，比如横向柱状图,柱折混合图...
         this._init && this._init(node, data, opts);
-
         this.draw();
     }
 
 
-    draw( opt ) 
+    draw( opt )
     {
         !opt && (opt ={});
         this.setStages(opt);
@@ -67,6 +43,11 @@ export default class Bar extends Chart
         this._initModule( opt ); //初始化模块  
         this.initPlugsModules( opt ); //初始化组件
         this._startDraw( opt ); //开始绘图
+        
+        if( this._coordinate.horizontal ){
+            this._horizontal();
+        };
+
         this.drawPlugs( opt );  //绘图完，开始绘制插件
         this.inited = true;
     }
@@ -96,7 +77,6 @@ export default class Bar extends Chart
         });
 
         this.bindEvent();
-        
     }
     
     _initModule(opt)
