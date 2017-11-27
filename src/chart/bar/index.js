@@ -3,7 +3,7 @@ import _ from "underscore"
 import {parse2MatrixData,numAddSymbol} from "../../utils/tools"
 import Coordinate from "../../components/descartes/index"
 import Graphs from "./graphs"
-import Tip from "../../components/tips/index"
+import Tips from "../../components/tips/index"
 import dataFrame from "../../utils/dataframe"
 
 export default class Bar extends Chart
@@ -89,9 +89,9 @@ export default class Bar extends Chart
         this._graphs = new Graphs(this.graphs, this);
         this.core.addChild(this._graphs.sprite);
 
-        this._tip = new Tip(this.tips, this.canvax.domView);
+        this._tips = new Tips(this.tips, this.canvax.domView);
         
-        this.stageTip.addChild(this._tip.sprite);
+        this.stageTip.addChild(this._tips.sprite);
 
     }
 
@@ -652,16 +652,16 @@ export default class Bar extends Chart
         var me = this;
         this.core.on("panstart mouseover", function(e) {
             me._setTipsInfoHand(e);
-            me._tip.show(e);
+            me._tips.show(e);
             me.fire(e.type, e);
         });
         this.core.on("panmove mousemove", function(e) {
             me._setTipsInfoHand(e);
-            me._tip.move(e);
+            me._tips.move(e);
             me.fire(e.type, e);
         });
         this.core.on("panend mouseout", function(e) {
-            me._tip.hide(e);
+            me._tips.hide(e);
             me.fire(e.type, e);
         });
         this.core.on("tap click dblclick mousedown mouseup", function(e) {

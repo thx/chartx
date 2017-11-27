@@ -905,7 +905,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                                         delay: h * options.delay,
                                         onUpdate: function( arg ) {
                                             var content = arg.v;
-
                                             if (_.isFunction(me.text.format)) {
                                                 var _formatc = me.text.format.apply( me , [content , txt._data]);
                                                 if(!!_formatc || _formatc==="" || _formatc===0){

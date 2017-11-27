@@ -64,6 +64,7 @@ export default class Tips extends Component
         
         if( !this.enabled ) return;
         this.hide();
+
         var stage = e.target.getStage();
         this.cW   = stage.context.width;
         this.cH   = stage.context.height;
@@ -121,7 +122,8 @@ export default class Tips extends Component
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
         this.tipDomContainer.appendChild( this._tipDom );
         this._setContent(e);
-
+     
+        /*
         this._tipDom.addEventListener("mouseover" , function(e){
             //console.log("tips-mouseover:"+e.fromTarget)
         });
@@ -131,6 +133,7 @@ export default class Tips extends Component
         this._tipDom.addEventListener("mouseout" , function(e){
             //console.log("tips-mouseout")
         });
+        */
     }
 
     _removeContent()

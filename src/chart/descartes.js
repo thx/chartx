@@ -39,7 +39,7 @@ export default class Descartes extends Chart
         this._graphs = null;
 
         //直角坐标系的tooltip
-        this._tip = null;
+        this._tips = null;
 
         //预设dataZoom的区间数据
         this.dataZoom = {

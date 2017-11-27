@@ -32,7 +32,7 @@
     "dependencies": {
         "rollup-watch": "3.2.2",
         "earcut": "^2.0.7",
-        "canvax2d": "1.0.12",
+        "canvax2d": "file:../canvax",
         "underscore": "1.8.3"
     },
     "scripts": {
