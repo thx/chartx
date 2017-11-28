@@ -31,7 +31,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         //方便比如bar_line柱折混合的时候覆盖掉
         this._yAxis = this.root._coordinate._yAxis;
 
-        //field默认从 直角坐标系的yAxisFields中获取 获取
+        //field默认从 直角坐标系的 yAxisFields 中获取 获取
 
         //['uv','pv','click'] 这样的一维结构集合，哪怕是双轴的yAxis
         //就算是在混合图表里， 也是全量的集合

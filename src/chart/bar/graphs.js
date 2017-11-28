@@ -14,7 +14,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         super(opt, root);
 
         this.data = [];
-
         this.root = root;
         this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
         this._setyAxisFieldsMap( opt );

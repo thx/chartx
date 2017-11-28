@@ -15398,7 +15398,6 @@ var Graphs = function (_Canvax$Event$EventDi) {
         var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
 
         _this.data = [];
-
         _this.root = root;
         _this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
         _this._setyAxisFieldsMap(opt);
@@ -18384,7 +18383,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
         //方便比如bar_line柱折混合的时候覆盖掉
         _this._yAxis = _this.root._coordinate._yAxis;
 
-        //field默认从 直角坐标系的yAxisFields中获取 获取
+        //field默认从 直角坐标系的 yAxisFields 中获取 获取
 
         //['uv','pv','click'] 这样的一维结构集合，哪怕是双轴的yAxis
         //就算是在混合图表里， 也是全量的集合
