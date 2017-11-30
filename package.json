@@ -1,11 +1,12 @@
 {
-    "name": "chartx",
-    "title": "chartx.js",
+    "name": "visky",
+    "title": "visky.js",
     "description": "Data Visualization Chart Library",
-    "version": "1.0.3",
+    "version": "0.0.1",
     "homepage": "https://thx.github.io/chartx/",
     "license": "MIT",
     "keywords": [
+        "Visky",
         "chart",
         "canvas",
         "webgl",
