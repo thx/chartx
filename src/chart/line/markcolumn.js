@@ -1,8 +1,8 @@
 import Canvax from "canvax2d"
-import _ from "underscore"
 
-var Line = Canvax.Shapes.Line;
-var Circle = Canvax.Shapes.Circle;
+const _ = Canvax._;
+const Line = Canvax.Shapes.Line;
+const Circle = Canvax.Shapes.Circle;
 
 export default class markColumn extends Canvax.Event.EventDispatcher
 {
@@ -42,7 +42,7 @@ export default class markColumn extends Canvax.Event.EventDispatcher
 
     init(opt , data)
     {
-        _.deepExtend(this , opt);
+        _.extend(true, this , opt);
         this.sprite = new Canvax.Display.Sprite({
             id : "tips"
         });
@@ -53,7 +53,7 @@ export default class markColumn extends Canvax.Event.EventDispatcher
         this.eventInfo = e.eventInfo;
 
         if( e.eventInfo.markcolumn ){
-            _.deepExtend(this , e.eventInfo.markcolumn);
+            _.extend(true, this , e.eventInfo.markcolumn);
         };
         if( !this.enabled ){
             this.hide();
@@ -95,7 +95,7 @@ export default class markColumn extends Canvax.Event.EventDispatcher
     _showLine(pointInfo)
     {
         var me = this;
-        var lineOpt = _.deepExtend({
+        var lineOpt = _.extend(true, {
             x       : parseInt(pointInfo.x),
             y       : me.y,
             start : {

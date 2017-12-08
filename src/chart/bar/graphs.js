@@ -1,11 +1,11 @@
 import Canvax from "canvax2d"
-import _ from "underscore"
 import {numAddSymbol} from "../../utils/tools"
 import {colors as themeColors} from "../theme"
 
-var AnimationFrame = Canvax.AnimationFrame;
-var BrokenLine = Canvax.Shapes.BrokenLine;
-var Rect = Canvax.Shapes.Rect;
+const AnimationFrame = Canvax.AnimationFrame;
+const BrokenLine = Canvax.Shapes.BrokenLine;
+const Rect = Canvax.Shapes.Rect;
+const _ = Canvax._;
 
 export default class Graphs extends Canvax.Event.EventDispatcher
 {
@@ -68,7 +68,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.txtsSp = null;
         this.checkedSp = null;
 
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
 
         this.init();
     }
@@ -272,7 +272,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     draw(opt)
     { //第二个data参数去掉，直接trimgraphs获取最新的data
         
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
 
         var data = this._trimGraphs();
 

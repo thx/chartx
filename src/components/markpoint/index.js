@@ -1,9 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import _ from "underscore"
 
-var Circle = Canvax.Shapes.Circle;
-var Droplet = Canvax.Shapes.Droplet;
+const Circle = Canvax.Shapes.Circle;
+const Droplet = Canvax.Shapes.Droplet;
+const _ = Canvax._;
 
 export default class markPoint extends Component
 {
@@ -44,9 +44,9 @@ export default class markPoint extends Component
         this.filter  = function(){};//过滤函数
 
         if( "markPoint" in userOpts ){
-            _.deepExtend( this , userOpts.markPoint );
+            _.extend(true, this , userOpts.markPoint );
         };
-        chartOpts && _.deepExtend( this , chartOpts );
+        chartOpts && _.extend(true, this , chartOpts );
 
         this.init();
 	}

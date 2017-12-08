@@ -1,12 +1,11 @@
 import Canvax from "canvax2d"
-import _ from "underscore"
 import Group from "./group"
 import markColumn from "./markcolumn"
 import {getDisMinATArr} from "../../utils/tools"
 import {colors as themeColors} from "../theme"
 
-
-var Rect = Canvax.Shapes.Rect;
+const _ = Canvax._;
+const Rect = Canvax.Shapes.Rect;
 
 export default class LineGraphs extends Canvax.Event.EventDispatcher
 {
@@ -67,7 +66,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     init(opt)
     {
         this.opt = opt;
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
         this.sprite = new Canvax.Display.Sprite();
     }
 
@@ -93,7 +92,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
     draw(opt)
     {
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
 
         this.setX( this.x );
         this.setY( this.y );
@@ -123,7 +122,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         };
 
         if( opt ){
-            _.deepExtend(me, opt);
+            _.extend(true, me, opt);
             if( opt.yAxisChange ){
                 me.yAxisFieldChange( opt.yAxisChange , this.dataFrame);
             };

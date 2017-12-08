@@ -1,10 +1,12 @@
 import Chart from "../descartes"
-import _ from "underscore"
+import Canvax from "canvax2d"
 import {parse2MatrixData,numAddSymbol} from "../../utils/tools"
 import Coordinate from "../../components/descartes/index"
 import Graphs from "./graphs"
 import Tips from "./tips"
 import dataFrame from "../../utils/dataframe"
+
+const _ = Canvax._;
 
 export default class Line extends Chart
 {
@@ -14,7 +16,7 @@ export default class Line extends Chart
         this.type = "line";
         this.coordinate.xAxis.layoutType = "rule";
 
-        _.deepExtend(this, opts);
+        _.extend(true, this, opts);
         this.dataFrame = this._initData(data);
 
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，暂时没有场景，先和bar保持一致
@@ -42,7 +44,7 @@ export default class Line extends Chart
         var me = this;
         
         if (opt && opt.options) {
-            _.deepExtend(this, opt.options);
+            _.extend(true, this, opt.options);
 
             //如果有配置yAxis.field，说明要覆盖之前的yAxis.field配置
             if( opt.options.coordinate && opt.options.coordinate.yAxis && opt.options.coordinate.yAxis.field ){
@@ -150,11 +152,6 @@ export default class Line extends Chart
 
         this._tip = new Tips(this.tips, this.canvax.domView, this.dataFrame);
         this._tip._markColumn.on("mouseover" , function(e){
-        
-            //新版本(canvax2.0.0)的canvax中这里的e.target 为_markColumn对象（这是对的）
-            //所有需要用这个来修正下
-            e.target = e.toTarget? e.toTarget : e.target;
-
             me._setXaxisYaxisToTipsInfo(e);    
             me._tip.show( e );
         });
@@ -215,7 +212,7 @@ export default class Line extends Chart
     {
         var me = this;
 
-        var dataZoomOpt = _.deepExtend({
+        var dataZoomOpt = _.extend(true, {
             w: me._coordinate.graphsWidth,
             
             pos: {

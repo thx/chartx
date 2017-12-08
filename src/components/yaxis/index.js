@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import _ from "underscore"
 import {numAddSymbol} from "../../utils/tools"
 import DataSection from "../../utils/datasection"
 
-var Line = Canvax.Shapes.Line;
+const Line = Canvax.Shapes.Line;
+const _ = Canvax._;
 
 export default class yAxis extends Component
 {
@@ -84,7 +84,7 @@ export default class yAxis extends Component
 
     init(opt, data )
     {
-        _.deepExtend(this, opt);
+        _.extend(true , this, opt);
 
         if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
             this.isH = true;
@@ -106,7 +106,7 @@ export default class yAxis extends Component
         this.dataSection = [];
         this.dataSectionGroup = [];
 
-        opt && _.deepExtend(this, opt);
+        opt && _.extend(true, this, opt);
 
         if( data.org ){
             this.dataOrg = data.org; //这里必须是data.org
@@ -166,7 +166,7 @@ export default class yAxis extends Component
 
     draw(opt)
     {
-        opt && _.deepExtend(this, opt);
+        opt && _.extend(true, this, opt);
         this._getLabel();
         this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine();
 

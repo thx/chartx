@@ -1,18 +1,18 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import _ from "underscore"
 import {numAddSymbol} from "../../utils/tools"
 import DataSection from "../../utils/datasection"
 
-var Line = Canvax.Shapes.Line;
+const Line = Canvax.Shapes.Line;
+const _ = Canvax._;
 
 export default class xAxis extends Component
 {
-    constructor(opt, data, coordinate)
+    constructor(opt, data, _coordinate)
     {
         super();
 
-        this._coordinate = coordinate || {};
+        this._coordinate = _coordinate || {};
 
         //TODO:这个 graphw 目前是有问题的， 它实际是包括了yAxisW
         this.graphw = 0; 
@@ -111,7 +111,7 @@ export default class xAxis extends Component
         };
 
         if (opt) {
-            _.deepExtend(this, opt);
+            _.extend(true , this, opt);
             if( !opt.dataSection && this.dataOrg ){
                 //如果没有传入指定的dataSection，才需要计算dataSection
                 this.dataSection = this._initDataSection(this.dataOrg);
@@ -175,7 +175,7 @@ export default class xAxis extends Component
     reset(opt, data)
     {
         //先在field里面删除一个字段，然后重新计算
-        opt && _.deepExtend(this, opt);
+        opt && _.extend(true, this, opt);
 
         this._initHandle(opt, data);
 
@@ -257,7 +257,7 @@ export default class xAxis extends Component
     _initConfig(opt)
     {
         if (opt) {
-            _.deepExtend(this, opt);
+            _.extend(true, this, opt);
         };
 
         this.yAxisW = Math.max(this.yAxisW, this.leftDisX);

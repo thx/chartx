@@ -2,8 +2,9 @@ import Chart from "../chart"
 import Pie from "./pie"
 import Legend from "../../components/legend/index"
 import {parse2MatrixData} from "../../utils/tools"
-import _ from "underscore"
 import Canvax from "canvax2d"
+
+const _ = Canvax._;
 
 export default class extends Chart
 {
@@ -27,7 +28,7 @@ export default class extends Chart
         this.yAxis = {
             field: null
         };
-        _.deepExtend(this, opts);
+        _.extend(true, this, opts);
 
         this.dataFrame = this._initData(data, this);
         this._setLengend();
@@ -313,7 +314,7 @@ export default class extends Chart
         this.clear();
         this._pie.clear();
         var data = obj.data || this.data;
-        _.deepExtend(this, obj.options);
+        _.extend(true, this, obj.options);
         this.dataFrame = this._initData(data, this.options);
         this.draw();
     }
@@ -455,7 +456,7 @@ export default class extends Chart
         var me = this;
         if ( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
         //设置legendOpt
-        var legendOpt = _.deepExtend({
+        var legendOpt = _.extend(true, {
             legend:true,
             label: function (info) {
                 return info.field

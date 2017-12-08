@@ -1,4 +1,6 @@
-import _ from "underscore"
+import Canvax from "canvax2d"
+
+const _ = Canvax._;
 
 function normalizeTickInterval(interval, magnitude) {
     var normalized, i;

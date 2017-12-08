@@ -8,7 +8,9 @@
 * 这样的结构化数据格式。
 */
 import {parse2MatrixData} from "./tools"
-import _ from "underscore"
+import Canvax from "canvax2d"
+
+const _ = Canvax._;
 
 export default function( data ){
     

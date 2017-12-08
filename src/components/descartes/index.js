@@ -1,9 +1,10 @@
 import Component from "../component"
-import _ from "underscore"
 import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
 import Back from "../back/index"
+
+const _ = Canvax._;
 
 export default class Descartes_Component extends Component
 {
@@ -70,7 +71,7 @@ export default class Descartes_Component extends Component
     init(opt)
     {
         var me = this;
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
 
         me.sprite = new Canvax.Display.Sprite({
             id : "coordinate"
@@ -93,7 +94,7 @@ export default class Descartes_Component extends Component
     {
         var me = this;
         !opt && ( opt = {} );
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
         this.dataFrame = dataFrame;
 
         var _xAxisDataFrame = this._getXaxisDataFrame(this.xAxis.field);

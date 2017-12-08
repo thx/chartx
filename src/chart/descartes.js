@@ -1,6 +1,5 @@
 import Chart from "./chart"
 import Canvax from "canvax2d"
-import _ from "underscore"
 import {parse2MatrixData} from "../utils/tools"
 
 import Legend from "../components/legend/index"
@@ -8,6 +7,8 @@ import DataZoom from "../components/datazoom/index"
 import markLine from "../components/markline/index"
 import markpoint from "../components/markpoint/index"
 import Anchor from "../components/anchor/index"
+
+const _ = Canvax._;
 
 export default class Descartes extends Chart
 {
@@ -175,7 +176,7 @@ export default class Descartes extends Chart
         var me = this;
         //if( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
         //设置legendOpt
-        var legendOpt = _.deepExtend({
+        var legendOpt = _.extend(true, {
             enabled:true,
             label  : function( info ){
                return info.field
@@ -238,8 +239,8 @@ export default class Descartes extends Chart
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl);
 
-        var opts = _.deepExtend({}, me._opts);
-        _.deepExtend(opts, me.getCloneChart() );
+        var opts = _.extend(true, {}, me._opts);
+        _.extend(true, opts, me.getCloneChart() );
 
         delete opts.dataZoom;
 
@@ -361,7 +362,7 @@ export default class Descartes extends Chart
             field: field
         };
 
-        var _markLine = new MarkLine(_.deepExtend( ML, o) , _yAxis);
+        var _markLine = new MarkLine(_.extend( true, ML, o) , _yAxis);
         me.plugs.push( {
             type : "markLine",
             plug : _markLine

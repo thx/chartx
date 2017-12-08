@@ -3,12 +3,12 @@
 import Canvax from "canvax2d"
 import Tips from "../../components/tips/index"
 import {colors as themeColors} from "../theme"
-import _ from "underscore"
 
-var Sector = Canvax.Shapes.Sector
-var BrokenLine = Canvax.Shapes.BrokenLine
-var Rect = Canvax.Shapes.Rect
-var AnimationFrame = Canvax.AnimationFrame
+const Sector = Canvax.Shapes.Sector
+const BrokenLine = Canvax.Shapes.BrokenLine
+const Rect = Canvax.Shapes.Rect
+const AnimationFrame = Canvax.AnimationFrame
+const _ = Canvax._;
 
 
 export default class Pie
@@ -34,7 +34,7 @@ export default class Pie
             globalAlpha : 0.3
         }
 
-        this.tips = _.deepExtend({
+        this.tips = _.extend(true, {
             enabled: true
         }, tipsOpt); //tip的confit
         this.domContainer = domContainer;
@@ -53,7 +53,7 @@ export default class Pie
 
     init(opt)
     {
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
         this.sprite = new Canvax.Display.Sprite();
 
         this.sectorsSp = new Canvax.Display.Sprite();

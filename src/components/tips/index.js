@@ -1,7 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax2d"
 import {numAddSymbol} from "../../utils/tools"
-import _ from "underscore"
+
+const _ = Canvax._;
 
 export default class Tips extends Component
 {
@@ -49,7 +50,7 @@ export default class Tips extends Component
 
     init(opt)
     {
-        _.deepExtend( this , opt );
+        _.extend(true, this , opt );
         this.sprite = new Canvax.Display.Sprite({
             id : "TipSprite"
         });

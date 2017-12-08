@@ -1,9 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import _ from "underscore"
 
-var Line = Canvax.Shapes.Line;
-var Circle = Canvax.Shapes.Circle;
+const Line = Canvax.Shapes.Line;
+const Circle = Canvax.Shapes.Circle;
+const _ = Canvax._;
 
 export default class Anchor extends Component
 {
@@ -13,6 +13,7 @@ export default class Anchor extends Component
 
         this.w = 0;
         this.h = 0;
+        
         this.xAxis   = {
             lineWidth   : 1,
             fillStyle   : '#0088cf',
@@ -57,7 +58,7 @@ export default class Anchor extends Component
     init( opt )
     {
         if( opt ){
-            _.deepExtend( this , opt );
+            _.extend(true, this , opt );
         }
 
         this.sprite = new Canvax.Display.Sprite({
@@ -97,7 +98,7 @@ export default class Anchor extends Component
     _initConfig( opt )
     {
         if( opt ){
-            _.deepExtend( this , opt );
+            _.extend(true, this , opt );
         }
     }
 

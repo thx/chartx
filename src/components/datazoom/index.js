@@ -1,9 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import _ from "underscore"
 
-var Line = Canvax.Shapes.Line;
-var Rect = Canvax.Shapes.Rect;
+
+const Line = Canvax.Shapes.Line;
+const Rect = Canvax.Shapes.Rect;
+const _ = Canvax._;
 
 export default class dataZoom extends Component
 {
@@ -70,7 +71,7 @@ export default class dataZoom extends Component
 
         this.zoomBg = null;
 
-        opt && _.deepExtend(this, opt);
+        opt && _.extend( true, this, opt);
         this._computeAttrs( opt );
         this.init(opt);
 	}
@@ -106,7 +107,7 @@ export default class dataZoom extends Component
 
     reset( opt , zoomBgSp )
     {
-        opt && _.deepExtend(this, opt);
+        opt && _.extend(true, this, opt);
         this._computeAttrs(opt);
 
         this.widget();

@@ -1,7 +1,8 @@
 import Canvax from "canvax2d"
 import markColumn from "./markcolumn"
 import Tips from "../../components/tips/index"
-import _ from "underscore"
+
+const _ = Canvax._;
 
 export default class LineTips extends Canvax.Event.EventDispatcher
 {
@@ -26,7 +27,7 @@ export default class LineTips extends Canvax.Event.EventDispatcher
     {
         var me = this;
 
-        _.deepExtend(this , opt);
+        _.extend(true, this , opt);
         this.sprite = new Canvax.Display.Sprite({
             id : "tips"
         });
@@ -71,7 +72,7 @@ export default class LineTips extends Canvax.Event.EventDispatcher
 
     reset( opt )
     {
-        _.deepExtend(this._tips , opt);
+        _.extend(true, this._tips , opt);
     }
 
     //从柱状折图中传过来的tipsPoint参数会添加lineTop,lineH的属性用来绘制markCloumn

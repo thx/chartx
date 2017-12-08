@@ -1,9 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax2d"
 import Tips from "../tips/index"
-import _ from "underscore"
 
-var Circle = Canvax.Shapes.Circle
+const Circle = Canvax.Shapes.Circle
+const _ = Canvax._;
 
 export default class Legend extends Component
 {
@@ -51,7 +51,7 @@ export default class Legend extends Component
     init( opt )
     {
         if( opt ){
-            _.deepExtend( this , opt );
+            _.extend(true, this , opt );
         };
         this.sprite = new Canvax.Display.Sprite({
             id : "LegendSprite"
@@ -74,7 +74,7 @@ export default class Legend extends Component
     _showTips(e)
     {
         if( !this.tips.enabled ) return;
-        
+
         if( this._hideTimer ){
             clearTimeout( this._hideTimer );
         };

@@ -1,10 +1,13 @@
 import Chart from "../descartes"
-import _ from "underscore"
+import Canvax from "canvax2d"
+
 import {parse2MatrixData,numAddSymbol} from "../../utils/tools"
 import Coordinate from "../../components/descartes/index"
 import Graphs from "./graphs"
 import Tips from "../../components/tips/index"
 import dataFrame from "../../utils/dataframe"
+
+const _ = Canvax._;
 
 export default class Bar extends Chart
 {
@@ -22,16 +25,15 @@ export default class Bar extends Chart
         if (opts.graphs && opts.graphs.proportion) {
             this._initProportion(node, data, opts);
         } else {
-            _.deepExtend(this, opts);
+            _.extend( true, this, opts);
         };
-
 
         this.dataFrame = this._initData(data);
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，比如横向柱状图,柱折混合图...
         this._init && this._init(node, data, opts);
         this.draw();
-    }
 
+    }
 
     draw( opt )
     {
@@ -213,7 +215,7 @@ export default class Bar extends Chart
     {
         !opts.tips && (opts.tips = {});
 
-        opts.tips = _.deepExtend({
+        opts.tips = _.extend(true, {
             content: function(info) {
                 
                 var str = "<table style='border:none'>";
@@ -240,9 +242,9 @@ export default class Bar extends Chart
             }
         } , opts.tips );
 
-        _.deepExtend(this, opts);
+        _.extend(true, this, opts);
         _.each( _.flatten( [this.coordinate.yAxis] ) ,function( yAxis ){
-            _.deepExtend(yAxis, {
+            _.extend(true, yAxis, {
                 dataSection: [0, 20, 40, 60, 80, 100],
                 text: {
                     format: function(n) {
@@ -253,7 +255,7 @@ export default class Bar extends Chart
         });
        
         !this.graphs && (this.graphs = {});
-        _.deepExtend(this.graphs, {
+        _.extend(true, this.graphs, {
             bar: {
                 radius: 0
             }
@@ -281,7 +283,7 @@ export default class Bar extends Chart
         var me = this;
 
         //初始化 datazoom 模块
-        var dataZoomOpt = _.deepExtend({
+        var dataZoomOpt = _.extend(true, {
             w: me._coordinate.graphsWidth,
             count: me._data.length-1, //_data第一行是title，所以正式的count应该是 length-1
             //h : me._coordinate._xAxis.height,

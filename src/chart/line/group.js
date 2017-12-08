@@ -1,14 +1,15 @@
 import Canvax from "canvax2d"
-import _ from "underscore"
 import {getPath} from "../../utils/tools"
 import {colors as themeColors} from "../theme"
 import ColorFormat from "../../utils/colorformat"
 
-var AnimationFrame = Canvax.AnimationFrame;
-var BrokenLine = Canvax.Shapes.BrokenLine;
-var Rect = Canvax.Shapes.Rect;
-var Circle = Canvax.Shapes.Circle;
-var Path = Canvax.Shapes.Path;
+const AnimationFrame = Canvax.AnimationFrame;
+const BrokenLine = Canvax.Shapes.BrokenLine;
+const Rect = Canvax.Shapes.Rect;
+const Circle = Canvax.Shapes.Circle;
+const Path = Canvax.Shapes.Path;
+ 
+const _ = Canvax._; 
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
@@ -78,7 +79,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
     init(opt)
     {
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
 
         //如果opt中没有 node fill的设置，那么要把fill node 的style和line做同步
         //!this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
@@ -95,7 +96,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
     draw(opt)
     {
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
         this._widget();
     }
 
@@ -104,7 +105,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         if(!this._bline){
             return;
         };
-        _.deepExtend(this, opt);
+        _.extend(true, this, opt);
         if( opt.data ){
             this._pointList = this._getPointList(this.data);
             this._grow();
@@ -287,7 +288,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
     _grow(callback)
     {
-    
         var me = this;
         if (!me.animation || me.resize || me._currPointList.length == 0) {
             //TODO: 在禁止了animation的时候， 如果用户监听了complete事件，必须要加setTimeout，才能触发
@@ -317,6 +317,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 me._checkTextPos( text , i );
             });
         };
+
 
         this._growTween = AnimationFrame.registTween({
             from: me._getPointPosStr(me._currPointList),
@@ -448,6 +449,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 lineCap: "round"
             }
         });
+
         if (!this.line.enabled) {
             bline.context.visible = false
         };
@@ -464,6 +466,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha //me._getProp( me.fill.alpha )
             }
         });
+
         me.sprite.addChild(fill);
         me._fill = fill;
         me._createNodes();

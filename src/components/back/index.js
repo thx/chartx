@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax2d"
 import Tips from "../tips/index"
-import _ from "underscore"
 
-var Line = Canvax.Shapes.Line;
-var Rect = Canvax.Shapes.Rect;
+const Line = Canvax.Shapes.Line;
+const Rect = Canvax.Shapes.Rect;
+const _ = Canvax._;
 
 export default class Back extends Component
 {
@@ -71,7 +71,7 @@ export default class Back extends Component
 
     init(opt)
     {
-        _.deepExtend(this , opt); 
+        _.extend(true, this , opt); 
         this.sprite = new Canvax.Display.Sprite();
     }
 
@@ -87,7 +87,7 @@ export default class Back extends Component
 
     draw(opt)
     {
-        _.deepExtend( this , opt );
+        _.extend(true, this , opt );
         //this._configData(opt);
         this._widget();
         this.setX(this.pos.x);
@@ -241,10 +241,10 @@ export default class Back extends Component
                 context : {
                     start       : {
                         x : self.w,
-                        y : self.w
+                        y : 0
                     },
                     end         : {
-                        x : 0,
+                        x : self.w,
                         y : -self.h
                     },
                     lineWidth   : self.yOrigin.lineWidth,

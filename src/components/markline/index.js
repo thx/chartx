@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import _ from "underscore"
 
-var BrokenLine = Canvax.Shapes.BrokenLine;
-var Sprite = Canvax.Display.Sprite;
-var Text = Canvax.Display.Text;
+const BrokenLine = Canvax.Shapes.BrokenLine;
+const Sprite = Canvax.Display.Sprite;
+const Text = Canvax.Display.Text;
+const _ = Canvax._;
 
 export default class Legend extends Component
 {
@@ -49,7 +49,7 @@ export default class Legend extends Component
         this._txt = null;
         this._line = null;
        
-        opt && _.deepExtend(this, opt);
+        opt && _.extend(true, this, opt);
         this.init();
     }
 
@@ -109,7 +109,7 @@ export default class Legend extends Component
 
     reset(opt)
     {
-        opt && _.deepExtend(this, opt);
+        opt && _.extend(true, this, opt);
         if( this.line.y != this._line.context.y ){
             this._line.animate({
                 y: this.line.y

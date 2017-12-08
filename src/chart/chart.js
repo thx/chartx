@@ -1,13 +1,12 @@
 import Canvax from "canvax2d"
-import _ from "underscore"
-import {mixinUnderscore,getEl} from "../utils/tools.js"
+import { getEl } from "../utils/tools.js"
+
+const _ = Canvax._;
 
 export default class Chart extends Canvax.Event.EventDispatcher
 {
     constructor( node, data, opts )
     {
-        //先处理好undersocre的插件,主要是deepExtend
-        mixinUnderscore();
 
         super( node, data, opts );
 
@@ -123,7 +122,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this._reset && this._reset( obj );
         var d = ( this.dataFrame.org || [] );
         if (obj && obj.options) {
-            _.deepExtend(this, obj.options);
+            _.extend(true, this, obj.options);
         };
         if (obj && obj.data) {
             d = obj.data;
