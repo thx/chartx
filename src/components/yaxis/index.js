@@ -40,7 +40,7 @@ export default class yAxis extends Component
             y: 0
         };
         this.place = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
-        this.biaxial = false; //是否是双轴中的一份
+        
         this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
         this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
 
@@ -106,13 +106,22 @@ export default class yAxis extends Component
         this.dataSection = [];
         this.dataSectionGroup = [];
 
-        opt && _.extend(true, this, opt);
+        if( opt ){
+            _.extend(true, this, opt);
 
-        if( data.org ){
+            //有些用户主动配置是只有在_opt上面才有记录的，this上面的时融合了很多默认配置，无法区分
+            //所以这里也需要把主动配置也extend一次
+            _.extend(true, this._opt, opt);
+        }
+
+        if( data && data.org ){
             this.dataOrg = data.org; //这里必须是data.org
         };
         
-        this._initData(data);
+        this._initData({
+            org : this.dataOrg
+        });
+
         this._trimYAxis();
         this._widget();
     }
@@ -351,19 +360,11 @@ export default class yAxis extends Component
 
     _oneDimensional(data)
     {
-        var arr = [];
+        
         var d = (data.org || data.data || data);
-        if (!this.biaxial) {
-            arr = _.flatten( d ); //_.flatten( data.org );
-        } else {
-            if (this.place == "left") {
-                arr = _.flatten(d[0]);
-                this.field = _.flatten([this.field[0]]);
-            } else {
-                arr = _.flatten(d[1]);
-                this.field = _.flatten([this.field[1]]);
-            }
-        };
+        
+        var arr = _.flatten( d ); //_.flatten( data.org );
+
         for( var i = 0, il=arr.length; i<il ; i++ ){
             arr[i] =  arr[i] || 0;
         };
@@ -422,19 +423,11 @@ export default class yAxis extends Component
     _initData(data)
     {
 
-        //TODO:begin 临时解决多y轴的情况下，有两个自定义datasection的情况
-        if( _.isArray(this.dataSection) && this.dataSection.length && _.isArray(this.dataSection[0]) )
-        {
-            this.dataSection = this.dataSection[ this.place=="left"?0:1 ] || [];
-        }
-        //end
-
         //先要矫正子啊field确保一定是个array
         if( !_.isArray(this.field) ){
             this.field = [this.field];
         };
         
-    
         var arr = this._setDataSection(data);
         if( this.bottomNumber != null ){
             arr.push( this.bottomNumber )
@@ -466,6 +459,8 @@ export default class yAxis extends Component
             };
 
             this.dataSection = DataSection.section(arr, 3);
+        } else {
+            this.dataSection = this._opt.dataSection;
         };
 
         //如果还是0
@@ -650,25 +645,26 @@ export default class yAxis extends Component
 
             if( yNode ){
                 if(yNode._txt){
-                    if( yNode._txt.context.y != posy ){
-                        yNode._txt.animate({
-                            y: posy
-                        }, {
-                            duration: 500,
-                            delay: a*80,
-                            id: yNode._txt.id
-                        });
-                    };
+                    yNode._txt.animate({
+                        y: posy
+                    }, {
+                        duration: 500,
+                        delay: a*80,
+                        id: yNode._txt.id
+                    });
                     yNode._txt.resetText( content );
                 };
 
-                yNode._line && yNode._line.animate({
-                    y: y
-                }, {
-                    duration: 500,
-                    delay: a*80,
-                    id: yNode._line.id
-                });
+                if( yNode._line ){
+                    yNode._line.animate({
+                        y: y
+                    }, {
+                        duration: 500,
+                        delay: a*80,
+                        id: yNode._line.id
+                    });
+                };
+
             } else {
                 yNode = new Canvax.Display.Sprite({
                     id: "yNode" + a

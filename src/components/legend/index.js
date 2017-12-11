@@ -162,12 +162,17 @@ export default class Legend extends Component
             
             icon.hover(function( e ){
                 me._showTips( me._getInfoHandler(e,obj) );
+                e.stopPropagation();
             } , function(e){
                 me._hideTips(e);
+                e.stopPropagation();
             });
             icon.on("mousemove" , function( e ){
                 me._showTips( me._getInfoHandler(e,obj) );
+                e.stopPropagation();
             });
+            //阻止事件冒泡
+            
             
             icon.on("click" , function(){});
             

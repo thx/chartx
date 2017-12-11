@@ -1,11 +1,10 @@
 import Chart from "../descartes"
 import Canvax from "canvax2d"
 
-import {parse2MatrixData,numAddSymbol} from "../../utils/tools"
+import {numAddSymbol} from "../../utils/tools"
 import Coordinate from "../../components/descartes/index"
 import Graphs from "./graphs"
 import Tips from "../../components/tips/index"
-import dataFrame from "../../utils/dataframe"
 
 const _ = Canvax._;
 
@@ -28,7 +27,7 @@ export default class Bar extends Chart
             _.extend( true, this, opts);
         };
 
-        this.dataFrame = this._initData(data);
+        this.dataFrame = this.initData(data);
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，比如横向柱状图,柱折混合图...
         this._init && this._init(node, data, opts);
         this.draw();
@@ -95,30 +94,6 @@ export default class Bar extends Chart
         
         this.stageTip.addChild(this._tips.sprite);
 
-    }
-
-    _initData(data) 
-    {
-        var d;
-        if (this._opts.dataZoom) {
-            var datas = [data[0]];
-            datas = datas.concat(data.slice(this.dataZoom.range.start + 1, this.dataZoom.range.end + 1 + 1));
-            d = dataFrame(datas);
-        } else {
-            d = dataFrame(data);
-        };
-        return d;
-    }
-
-    /*
-     * 如果只有数据改动的情况
-     */
-    resetData(data , e)
-    {
-        this._data = parse2MatrixData( data );
-        this.dataFrame = this._initData(data);
-        this._reset( this , e );
-        this.fire("_resetData");
     }
 
     _reset( opt , e )
@@ -285,7 +260,7 @@ export default class Bar extends Chart
         //初始化 datazoom 模块
         var dataZoomOpt = _.extend(true, {
             w: me._coordinate.graphsWidth,
-            count: me._data.length-1, //_data第一行是title，所以正式的count应该是 length-1
+            count: me.dataFrame.org.length-1, //_data第一行是title，所以正式的count应该是 length-1
             //h : me._coordinate._xAxis.height,
             pos: {
                 x: me._coordinate.graphsX,
@@ -317,7 +292,7 @@ export default class Bar extends Chart
                 me.dataZoom.range.start = start;
                 me.dataZoom.range.end = end;
 
-                me.resetData( me._data , {
+                me.resetData( me.dataFrame.org , {
                     trigger : "dataZoom"
                 });
 

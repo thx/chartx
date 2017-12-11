@@ -123,9 +123,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         if( opt ){
             _.extend(true, me, opt);
-            if( opt.yAxisChange ){
-                me.yAxisFieldChange( opt.yAxisChange , this.dataFrame);
-            };
         };
 
         this.disX = this._getGraphsDisX();
@@ -244,58 +241,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 };
             }
         });
-    }
-
-    /*
-    * 如果配置的yAxis有修改
-    */
-    yAxisFieldChange( yAxisChange , dataFrame )
-    {
-        this.dataFrame = dataFrame;
-        this.data = this._trimGraphs();
-
-        var me = this;
-        _.isString( yAxisChange ) && (yAxisChange = [yAxisChange]);
-
-        //如果新的yAxis.field有需要del的
-        for( var i=0,l=me.field.length ; i<l ; i++ ){
-            var _f = me.field[i];
-            var dopy = _.find( yAxisChange , function( f ){
-                return f == _f
-            } );
-            if( !dopy ){
-                me.remove(i);
-                me.field.splice( i , 1 );
-                delete me._yAxisFieldsMap[ _f ];
-                i--;
-                l--;
-            };
-        };
-
-        //然后把新的field设置好
-        this.field = me.root._coordinate ? me.root._coordinate.yAxisFields : this.dataFrame.yAxis.field;
-        //remove掉被去掉的field后，重新整理下 _yAxisFieldsMap
-        me._setyAxisFieldsMap( this.field );
-
-
-        //新的field配置有需要add的
-        _.each( yAxisChange , function( opy , i ){
-            var fopy = _.find( me.groups ,function( f ){
-                return f.field == opy;
-            } );
-            if( !fopy ){
-                me.add(opy);
-            };
-
-        } );
-
-        _.each( me.groups , function( g , i ){
-            g.update( _.extend({
-                _groupInd : i
-            } , me.opt ));
-        } );
-
-        
     }
 
     //add 和 remove 都不涉及到 _yAxisFieldsMap 的操作,只有reset才会重新构建 _yAxisFieldsMap

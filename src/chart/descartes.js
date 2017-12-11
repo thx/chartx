@@ -1,6 +1,7 @@
 import Chart from "./chart"
 import Canvax from "canvax2d"
 import {parse2MatrixData} from "../utils/tools"
+import DataFrame from "../utils/dataframe"
 
 import Legend from "../components/legend/index"
 import DataZoom from "../components/datazoom/index"
@@ -64,6 +65,32 @@ export default class Descartes extends Chart
 
         this.stage.addChild(this.core);
         this.stage.addChild(this.stageTip);
+    }
+
+    /*
+     * 如果只有数据改动的情况
+     */
+    resetData(data , e)
+    {
+        this._data = parse2MatrixData( data );
+        this.dataFrame = this.initData(data);
+        this._reset( this , e );
+        this.fire("_resetData");
+    }
+
+    initData(data, opt) 
+    {
+        var d;
+        var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
+
+        if ( this._opts.dataZoom ) {
+            var datas = [data[0]];
+            datas = datas.concat(data.slice( parseInt(dataZoom.range.start) + 1, parseInt(dataZoom.range.end) + 1 + 1));
+            d = DataFrame.apply(this, [datas, opt]);
+        } else {
+            d = DataFrame.apply(this, arguments);
+        };
+        return d;
     }
 
     _horizontal() 

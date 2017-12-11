@@ -1,10 +1,8 @@
 import Chart from "../descartes"
 import Canvax from "canvax2d"
-import {parse2MatrixData,numAddSymbol} from "../../utils/tools"
 import Coordinate from "../../components/descartes/index"
 import Graphs from "./graphs"
 import Tips from "./tips"
-import dataFrame from "../../utils/dataframe"
 
 const _ = Canvax._;
 
@@ -17,14 +15,14 @@ export default class Line extends Chart
         this.coordinate.xAxis.layoutType = "rule";
 
         _.extend(true, this, opts);
-        this.dataFrame = this._initData(data);
+        this.dataFrame = this.initData(data);
 
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，暂时没有场景，先和bar保持一致
         this._init && this._init(node, data, opts);
         this.draw();
     }
 
-    draw( opt ) 
+    draw( opt )
     {
         !opt && (opt ={});
         this.setStages();
@@ -38,6 +36,7 @@ export default class Line extends Chart
         this.inited = true;
     }
 
+    //折线图的reset实现更加仔细，覆盖父类的reset
     reset(opt) 
     {
         
@@ -45,47 +44,26 @@ export default class Line extends Chart
         
         if (opt && opt.options) {
             _.extend(true, this, opt.options);
-
-            //如果有配置yAxis.field，说明要覆盖之前的yAxis.field配置
-            if( opt.options.coordinate && opt.options.coordinate.yAxis && opt.options.coordinate.yAxis.field ){
-                if( !opt.options.graphs ){
-                    opt.options.graphs = {};
-                };
-                opt.options.graphs.yAxisChange = opt.options.coordinate.yAxis.field
-            };
         };
 
         var d = ( this.dataFrame.org || [] );
         if (opt && opt.data) {
-            this._data = Tools.parse2MatrixData( opt.data );; //加上这句，用来更新datazoom
             d = opt.data;
         };
         
         //不管opt里面有没有传入数据，option的改变也会影响到 dataFrame 。
-        this.dataFrame = this._initData( d , this);
+        this.dataFrame = this.initData( d , this);
 
         this._reset( opt.options );
     }
 
-    /*
-     * 如果只有数据改动的情况
-     */
-    resetData(data , e) 
-    {
-        this._data = Tools.parse2MatrixData( data );
-        this.dataFrame = this._initData(data, this);
-        this._reset( this , e );
-    }
 
     _reset( opt , e )
     {
         var me = this;
         opt = !opt ? this : opt;
-        
         this._coordinate.reset( opt.coordinate, this.dataFrame );
-
         this._graphs.reset( opt.graphs , this.dataFrame);
-
         this.plugsReset( opt , e );
     }
 
@@ -125,20 +103,6 @@ export default class Line extends Chart
         this._graphs.remove(ind);
     }
 
-    _initData(data, opt) 
-    {
-        var d;
-        var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
-
-        if ( this._opts.dataZoom ) {
-            var datas = [data[0]];
-            datas = datas.concat(data.slice( parseInt(dataZoom.range.start) + 1, parseInt(dataZoom.range.end) + 1 + 1));
-            d = dataFrame.apply(this, [datas, opt]);
-        } else {
-            d = dataFrame.apply(this, arguments);
-        };
-        return d;
-    }
 
     _initModule(opt)
     {
@@ -219,7 +183,7 @@ export default class Line extends Chart
                 x: me._coordinate.graphsX,
                 y: me._coordinate.graphsY + me._coordinate._xAxis.height
             },
-            count : me._data.length-1-1,
+            count : me.dataFrame.org.length-1-1,
             dragIng : function( range , pixRange , count , width ){
 
                 //这个计算start end 和bar不同
@@ -244,7 +208,7 @@ export default class Line extends Chart
                 me.dataZoom.range.start = parseInt(start);
                 me.dataZoom.range.end = parseInt(end);
 
-                me.resetData( me._data , {
+                me.resetData( me.dataFrame.org , {
                     trigger : "dataZoom"
                 });
 

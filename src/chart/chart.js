@@ -1,5 +1,5 @@
 import Canvax from "canvax2d"
-import { getEl } from "../utils/tools.js"
+import { getEl } from "../utils/tools"
 
 const _ = Canvax._;
 
@@ -54,13 +54,15 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     init()
     {
-
     }
 
    
     draw()
     {
+    }
 
+    initData()
+    {
     }
 
     /*
@@ -120,6 +122,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     reset(obj)
     {
         this._reset && this._reset( obj );
+
         var d = ( this.dataFrame.org || [] );
         if (obj && obj.options) {
             _.extend(true, this, obj.options);
@@ -127,7 +130,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         if (obj && obj.data) {
             d = obj.data;
         };
+
+        //不放在上面的判断里，是因为options也可能会影响到 dataFrame，比如datazoom
         d && this.resetData(d);
+
         this.plugs = [];
         this.clean();
         this.canvax.getDomContainer().innerHTML = "";
@@ -137,7 +143,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //这个resetData一般会被具体的chart实例给覆盖实现
     resetData( data )
     {
-        this.dataFrame = this._initData( data );
+        this.dataFrame = this.initData( data );
     }
 
     _rotate(angle)

@@ -6,7 +6,7 @@ const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
-export default class Back extends Component
+export default class Grid extends Component
 {
     constructor( opt, root )
     {
@@ -24,35 +24,35 @@ export default class Back extends Component
         this.enabled = 1;
 
         this.xOrigin = {                                //原点开始的x轴线
-                enabled     : 1,
-                lineWidth   : 1,
-                strokeStyle : '#ccc'
+            enabled     : 1,
+            lineWidth   : 1,
+            strokeStyle : '#ccc'
         }
         this.yOrigin = {                                //原点开始的y轴线               
-                enabled     : 1,
-                lineWidth   : 1,
-                strokeStyle : '#ccc'
+            enabled     : 1,
+            lineWidth   : 1,
+            strokeStyle : '#ccc'
         }
         this.xAxis   = {                                //x轴上的线
-                enabled     : 1,
-                data        : [],                      //[{y:100},{}]
-                org         : null,                    //x轴坐标原点，默认为上面的data[0]
-                // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
-                lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
-                lineWidth   : 1,
-                strokeStyle : '#f0f0f0', //'#e5e5e5',
-                filter      : null 
+            enabled     : 1,
+            data        : [],                      //[{y:100},{}]
+            org         : null,                    //x轴坐标原点，默认为上面的data[0]
+            // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
+            lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
+            lineWidth   : 1,
+            strokeStyle : '#f0f0f0', //'#e5e5e5',
+            filter      : null 
         }
         this.yAxis = {                                //y轴上的线
-                enabled     : 0,
-                data        : [],                      //[{x:100},{}]
-                xDis        : 0,
-                org         : null,                    //y轴坐标原点，默认为上面的data[0]
-                // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
-                lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
-                lineWidth   : 1,
-                strokeStyle : '#f0f0f0',//'#e5e5e5',
-                filter      : null
+            enabled     : 0,
+            data        : [],                      //[{x:100},{}]
+            xDis        : 0,
+            org         : null,                    //y轴坐标原点，默认为上面的data[0]
+            // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
+            lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
+            lineWidth   : 1,
+            strokeStyle : '#f0f0f0',//'#e5e5e5',
+            filter      : null
         } 
         this.fill = {
             fillStyle : null,

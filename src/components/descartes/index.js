@@ -2,7 +2,7 @@ import Component from "../component"
 import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
-import Back from "../back/index"
+import Grid from "../grid/index"
 
 const _ = Canvax._;
 
@@ -36,7 +36,7 @@ export default class Descartes_Component extends Component
         this.yAxis = {
             field : this.dataFrame.fields.slice(1)
         };
-        this.back = {
+        this.grid = {
 
         };
 
@@ -53,7 +53,7 @@ export default class Descartes_Component extends Component
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，back三个子组件
             this.xAxis.display = opt.display;
             this.yAxis.display = opt.display;
-            this.back.enabled = opt.display;
+            this.grid.enabled = opt.display;
         };
         
 
@@ -297,7 +297,7 @@ export default class Descartes_Component extends Component
             this._yAxis.push( this._yAxisRight );
         };
 
-        this._back = new Back( this.back, this );
+        this._back = new Grid( this.grid, this );
         this.sprite.addChild( this._back.sprite );
     }
 
@@ -453,7 +453,7 @@ export default class Descartes_Component extends Component
             _fs = _.difference( _fs , _yAxis.enabledFields);
             _yAxis.reset( null , this._getYaxisDataFrame( _fs ));
             
-            //然后yAxis更新后，对应的背景也要更新,目前被添加到了left才需要updata back
+            //然后yAxis更新后，对应的背景也要更新,目前被添加到了left才需要updata grid
             if( _yAxis.place == "left" ){
                 this._back.reset({
                     animation:false,
