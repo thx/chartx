@@ -45,11 +45,12 @@ export default class Bar extends Chart
         this.initPlugsModules( opt ); //初始化组件
         this._startDraw( opt ); //开始绘图
         
+        this.drawPlugs( opt );  //绘图完，开始绘制插件
+
         if( this._coordinate.horizontal ){
             this._horizontal();
         };
 
-        this.drawPlugs( opt );  //绘图完，开始绘制插件
         this.inited = true;
     }
 
@@ -153,37 +154,7 @@ export default class Bar extends Chart
         }
     }
     
-    //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
-    //方便外部自定义 tip 是的content
-    _setXaxisYaxisToTipsInfo(e, isAddStart) 
-    {
-        if (!e.eventInfo) {
-            return;
-        };
-        e.eventInfo.xAxis = {
-            field: this._coordinate.xAxis.field,
-            value: this._coordinate._xAxis.dataOrg[0][e.eventInfo.iNode]
-        };
 
-        var me = this;
-
-        _.each(e.eventInfo.nodesInfoList, function(node, i) {
-            //把这个group当前是否选中状态记录
-            if (me._checkedList[node.iNode + me.dataZoom.range.start]) {
-                node.checked = true;
-            } else {
-                node.checked = false;
-            };
-        });
-
-        e.eventInfo.dataZoom = me.dataZoom;
-
-        e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
-       
-        if(!isAddStart){
-            e.eventInfo.iNode += this.dataZoom.range.start;
-        };
-    }
 
     //横向比例柱状图
     _initProportion(node, data, opts) 
@@ -197,19 +168,15 @@ export default class Bar extends Chart
                 var self = this;
                 _.each(info.nodesInfoList, function(node, i) {
                     str += "<tr style='color:" + (node.color || node.fillStyle) + "'>";
-                    var prefixName = self.prefix[i];
+                   
                     var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-                    if (prefixName) {
-                        str += "<td "+tsStyle+">" + prefixName + "：</td>";
-                    } else {
-                        if (node.field) {
-                            str += "<td "+tsStyle+">" + node.field + "：</td>";
-                        }
-                    };
+                
+                    str += "<td "+tsStyle+">" + node.field + "：</td>";
                     str += "<td "+tsStyle+">" + numAddSymbol(node.value);
                     if( node.vCount ){
                         str += "（" + Math.round(node.value / node.vCount * 100) + "%）";
                     };
+
                     str +="</td></tr>";
                 });
                 str += "</table>";
@@ -256,43 +223,16 @@ export default class Bar extends Chart
     {
         //TODO: 后续会修改在这里回掉一个_datazoom实例，然后在这里draw
         var me = this;
-
         //初始化 datazoom 模块
         var dataZoomOpt = _.extend(true, {
             w: me._coordinate.graphsWidth,
-            count: me.dataFrame.org.length-1, //_data第一行是title，所以正式的count应该是 length-1
-            //h : me._coordinate._xAxis.height,
             pos: {
                 x: me._coordinate.graphsX,
                 y: me._coordinate.graphsY + me._coordinate._xAxis.height
             },
             dragIng: function(range , pixRange , count , width) {
-
-                //完美解决dataZoom对柱状图的区间选择问题
-                var itemW = width/count;
-                var start = 0;
-                for( i = 0; i<count; i++ ){
-                    if((itemW*i + itemW/2) > pixRange.start){
-                        start = i;
-                        break;
-                    }
-                }
-                var end = 0;
-                for( i = count-1 ; i>=0 ; i-- ){
-                    if( (itemW*i + itemW/2) < pixRange.end ){
-                        end = i;
-                        break;
-                    }
-                }
-                //完美解决dataZoom对柱状图的区间选择问题
-
-                if( me.dataZoom.range.start == start && me.dataZoom.range.end == end ) {
-                    return;
-                };
-                me.dataZoom.range.start = start;
-                me.dataZoom.range.end = end;
-
-                me.resetData( me.dataFrame.org , {
+                me.dataZoom.range = range;
+                me.resetData( me._data , {
                     trigger : "dataZoom"
                 });
 
@@ -301,7 +241,7 @@ export default class Bar extends Chart
                 me.fire("dataZoomDragIng");
             },
             dragEnd: function(range) {
-                me._updateChecked()
+                me._updateChecked();
             }
         }, me.dataZoom);
 
@@ -320,81 +260,20 @@ export default class Bar extends Chart
                 text: {
                     enabled: false
                 }
-            },
-            dataZoom: {
-                enabled: false
             }
         }
     }
     //datazoom end
 
-    drawMarkLine( field, yVal, _yAxis , ML)
+    drawMarkLine( ML, yVal, _yAxis , field)
     {
-        var me = this;
 
-        var yPos=0, label='';
-        var label = "markline";
-        
-        if( yVal !== undefined && yVal !== null ){
-            yPos = _yAxis.getYposFromVal(yVal);
-            field && (label = field);
-        } else {
-            //没有配置y，则取均值
-            if( !field ){
-                //如果没有配置y值，也没有配置所属哪个field，那么就不画
-                return;
-            };
+        var _fstyle = field ? this._graphs._yAxisFieldsMap[field].fillStyle : "#999";
+        var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
+        var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
 
-            //获取均值
-            _.each( _yAxis.field, function( _field , i){
-                if( _field == field ){
-                    var arr = _yAxis.dataOrg[i];
-                    yVal = (_.max( arr ) - _.min( arr )) / 2;
-                }
-            } );
-            yPos = _yAxis.getYposFromVal(yVal);
-            label = field + '均值';
+        this.creatOneMarkLine( ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field );
 
-
-        };
-        label += ("："+yVal);
-
-        var o = {
-            value  : yVal,
-        };
-
-        if( field ){
-            if( !me._graphs._yAxisFieldsMap[field] ){
-                //如果markto 的目标field在_yAxisFieldsMap中没有，直接跳过
-                return;
-            }
-            o.i = me._graphs._yAxisFieldsMap[field].ind;
-            o.field = field;
-        }
-
-        if (ML.text && ML.text.enabled) {
-            if (_.isFunction(ML.text.format)) {
-                label = ML.text.format(o)
-            }
-        };
-
-        function getProp( obj , p , def){
-            var val;
-            if( !obj || ( obj && !obj[p] ) ){
-                return def;
-            };
-            if( _.isFunction( obj[p] ) ){
-                return obj[p]( o );
-            };
-            return obj[p];
-        };
-        
-        //TODO: 整个markline的设置里面。 就 下面这三行和 line chart的设置不同， 可以考虑统一处理
-        var _fstyle = field ? me._graphs._yAxisFieldsMap[field].fillStyle : "#999";
-        var lineStrokeStyle = getProp( ML.line, "strokeStyle" , _fstyle );
-        var textFillStyle = getProp( ML.text, "fillStyle" , _fstyle );
-
-        this.creatOneMarkLine( yVal, yPos, lineStrokeStyle, label, textFillStyle, field, ML, _yAxis);
     }
     //markLine end
 
@@ -410,8 +289,8 @@ export default class Bar extends Chart
 
                     var g = me._graphs;
                     var gOrigin = {
-                        x: g.sprite.context.x + g.bar._width / 2,
-                        y: g.sprite.context.y - 3
+                        x: me._coordinate.graphsX + g.bar._width / 2,
+                        y: me._coordinate.graphsY - 3
                     };
                     var _t = me.markPoint.markTo;
 
@@ -628,19 +507,26 @@ export default class Bar extends Chart
     {
         var me = this;
         this.core.on("panstart mouseover", function(e) {
-            me._setTipsInfoHand(e);
-            me._tips.show(e);
+            if( me._tips.enabled ){
+                me._setTipsInfoHand(e);
+                me._tips.show(e);
+            };
             me.fire(e.type, e);
         });
         this.core.on("panmove mousemove", function(e) {
-            me._setTipsInfoHand(e);
-            me._tips.move(e);
+            if( me._tips.enabled ){
+                me._setTipsInfoHand(e);
+                me._tips.move(e);
+            }
             me.fire(e.type, e);
         });
         this.core.on("panend mouseout", function(e) {
-            me._tips.hide(e);
+            if( me._tips.enabled ){
+                me._tips.hide(e);
+            }
             me.fire(e.type, e);
         });
+
         this.core.on("tap click dblclick mousedown mouseup", function(e) {
             var isAddStart = false;
             if (e.type == 'click') {
@@ -659,5 +545,28 @@ export default class Bar extends Chart
             me._setTipsInfoHand(e , isAddStart);
             me.fire(e.type, e);
         });
+    }
+
+    //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+    //方便外部自定义 tip 是的content
+    _setXaxisYaxisToTipsInfo(e) 
+    {
+        var me = this;
+        if (!e.eventInfo) {
+            return;
+        };
+
+        _.each(e.eventInfo.nodesInfoList, function(node, i) {
+            //把这个group当前是否选中状态记录
+            if (me._checkedList[node.iNode + me.dataZoom.range.start]) {
+                node.checked = true;
+            } else {
+                node.checked = false;
+            };
+        });
+        e.eventInfo.xAxis = this._coordinate._xAxis.data[ e.eventInfo.iNode ];
+        e.eventInfo.title = e.eventInfo.xAxis.field+"："+e.eventInfo.xAxis.layoutText;
+        e.eventInfo.dataZoom = me.dataZoom;
+        e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
     }
 }

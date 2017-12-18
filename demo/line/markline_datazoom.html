@@ -35,20 +35,20 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , null , undefined , null    ],
-    [ 2      , 0   , "" , ""    ],
-    [ 3      , 23   , 145 , undefined    ],
-    [ 4      , 232  , 135 , 123    ],
-    [ 5      , 0  , 173 , 71    ],
-    [ 6      , 0  , 154 , 39    ],
-    [ 7      , 0  , 168 , null    ],
-    [ 8      , 66   ,183 , 51    ],
-    [ 3      , 32   , 145 , 243    ],
-    [ 4      , 58  , 135 , 231    ],
-    [ 5      , 79  , 173 , 71    ],
+    ["xfield","uv"  ,"pv","click"],
+    [ 1      , null , undefined , 33    ],
+    [ 2      , 0    , "" , 26    ],
+    [ 3      , 123  , 145 , 243    ],
+    [ 4      , 232  , 135 , 231    ],
+    [ 5      , 320  , 173 , null    ],
+    [ 6      , 230  , 154 , 39    ],
+    [ 7      , 140  , 168 , 65    ],
+    [ 8      , 166  ,183 , 51    ],
+    [ 3      , 132  , 145 , 243    ],
+    [ 4      , 158  , 135 , 231    ],
+    [ 5      , 179  , 173 , 71    ],
     [ 6      , 188  , 154 , 39    ],
-    [ 7      , 55  , 168 , 65    ],
+    [ 7      , 55   , 168 , 65    ],
     [ 8      , undefined   ,183 , 51    ]
 ];
 
@@ -57,19 +57,49 @@ var options = {
         //横向的图表，是坐标系横向了
         //horizontal : true,
         yAxis : {
-            //field : [ "uv","pv" , "click"]
-            field: "click",
+            field : [ "uv","pv" , "click"]
+            //field: "click",
             //enabled : false
         },
         xAxis : {
             field : ["xfield"]
         }
     },
-    graphs : {
-        
-    },
-    legend : {
-        enabled : 1
+    markLine: [
+        {
+            markTo: "click",
+            text : {
+                enabled : true,
+                format : function( yval ){
+                    return 'click markline ：' + parseInt( yval )
+                },
+                fontSize : 14
+            },
+            y : 210
+        },
+        {
+            markTo: 'uv',
+            text : {
+                enabled : true,
+                fontSize : 14
+            }
+        },
+        {
+            text : {
+                enabled : true,
+                fillStyle : "#777"
+            },
+            line: {
+                strokeStyle : "#777"
+            },
+            y : 70
+        }
+    ],
+    dataZoom: {
+        range : {
+            start : 0,
+            end : 5
+        }
     }
 };
 

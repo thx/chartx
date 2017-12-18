@@ -32,11 +32,6 @@ export default class markColumn extends Canvax.Event.EventDispatcher
         this.y         = 0;
         this.h         = 0;
 
-        //TODO:
-        //暂时继承CanvaxEventDispatcher 只有 DisplayObject才行， 以为其他对象没有_eventMap
-        //临时加上
-        this._eventMap = {};
-
         this.init(opt , data);
     }
 

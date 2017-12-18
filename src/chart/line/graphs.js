@@ -54,11 +54,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         this.eventEnabled = true;
 
-        //TODO:
-        //暂时继承CanvaxEventDispatcher 只有 DisplayObject才行， 以为其他对象没有_eventMap
-        //临时加上
-        this._eventMap = {};
-
         this.init(this.opt);
     }
 
@@ -68,34 +63,17 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this.opt = opt;
         _.extend(true, this, opt);
         this.sprite = new Canvax.Display.Sprite();
-    }
 
-    setX($n)
-    {
-        this.sprite.context.x = $n
-    }
-
-    setY($n)
-    {
-        this.sprite.context.y = $n
-    }
-
-    getX()
-    {
-        return this.sprite.context.x
-    }
-
-    getY()
-    {
-        return this.sprite.context.y
+        this.core = new Canvax.Display.Sprite();
+        this.sprite.addChild( this.core );
     }
 
     draw(opt)
     {
         _.extend(true, this, opt);
 
-        this.setX( this.x );
-        this.setY( this.y );
+        this.core.context.x = this.x;
+        this.core.context.y = this.y;
 
         this.disX = this._getGraphsDisX();
 
@@ -132,14 +110,12 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             var group = _.find( me.groups , function(g){
                 return g.field == me.field[a]
             } );
-            group && group.reset({
-                data: me.data[ group.field ]
-            });
+            group && group.reset( {}, me.data[ group.field ].data );
         };
     }
 
     //_yAxis, dataFrame
-    _trimGraphs( )
+    _trimGraphs()
     {
         var self = this;
         var _dataFrame = self.dataFrame || self.root.dataFrame;
@@ -154,15 +130,15 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 _fields = [_fields];
             };
 
-
             _.each( _fields , function( field, i ){
-                var maxValue = 0;
+                //var maxValue = 0;
 
                 //单条line的全部data数据
                 var _lineData = _dataFrame.getFieldData(field);
                 if( !_lineData ) return;
 
-                var _groupData = [];
+                var _data = [];
+
                 for (var b = 0, bl = _lineData.length; b < bl; b++) {
                     var _xAxis = self.root._coordinate ? self.root._coordinate._xAxis : self.root._xAxis;
                     var x = _xAxis.getPosX( {
@@ -171,32 +147,27 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                         layoutType : self.root._coordinate ? self.root._coordinate.xAxis.layoutType : self.root._xAxis.layoutType
                     } );
                     
-                    var y = _yAxis.getYposFromVal( _lineData[b] );
-                    y = isNaN(y) ? 0 : y
-                    _groupData.push( {
+                    var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : _lineData[b];
+
+                    var node = {
                         value: _lineData[b],
                         x: x,
                         y: y
-                    } );
+                    };
 
-                    maxValue += _lineData[b]
+                    _data.push( node );
+                    
                 };
 
                 tmpData[ field ] = {
                     yAxis: _yAxis,
                     field: field,
-                    groupData: _groupData,
-                    average: {
-                        value: maxValue / bl,
-                        position: _yAxis.getYposFromVal( maxValue / bl )
-                    }
+                    data: _data
                 };
 
             } );
-            
         };
    
-
         //可能被外部覆盖的时候，没有赋值一个数组结构
         _.each( _.flatten( [this._yAxis] ) , function( axis , i ){
             __trimGraphs( axis );
@@ -248,9 +219,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     {
         
         this.data = this._trimGraphs();
-        
         this._setGroupsForYfield( this.data , field );
-        
         this.update();
     }
 
@@ -271,9 +240,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     {
         var self = this;
         _.each(this.groups, function(g, i) {
-            g.update({
-                data: self.data[ g.field ].groupData
-            });
+            g.update( {} , self.data[ g.field ].data );
         });
     }
 
@@ -310,9 +277,8 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             );
 
             group.draw({
-                data: g.groupData,
                 resize : self.resize
-            });
+            }, g.data );
 
             yfm.group = group;
 
@@ -323,7 +289,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
                     self.groups.splice( gi , 0 , group );
                     insert=true;
-                    self.sprite.addChildAt(group.sprite , gi);
+                    self.core.addChildAt(group.sprite , gi);
                     
                     break;
                 }
@@ -331,7 +297,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             //否则就只需要直接push就好了
             if( !insert ){
                 self.groups.push(group);
-                self.sprite.addChild(group.sprite);
+                self.core.addChild(group.sprite);
             };
 
         } );
@@ -355,10 +321,9 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             }
         });
 
-        self.sprite.addChild(self.induce);
+        self.core.addChild(self.induce);
 
-        if (self.eventEnabled) {
-
+        if(self.eventEnabled){
             self.induce.on("panstart mouseover", function(e) {
                 e.eventInfo = self._getInfoHandler(e);
             })
@@ -373,6 +338,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 e.eventInfo = self._getInfoHandler(e);
             })
         }
+        
         self.resize = false;
     }
 
@@ -423,7 +389,8 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     createMarkColumn( x , opt )
     {
         var ml = new markColumn( opt );
-        this.sprite.addChild( ml.sprite );
+        this.core.addChild( ml.sprite );
+
         ml.h = this.induce.context.height;
         ml.y = -ml.h;
         var e = {

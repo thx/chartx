@@ -127,7 +127,7 @@ export default function( data ){
         if( data ){
             return data.data;
         } else {
-            return [] 
+            return []
         }
     }
 

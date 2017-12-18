@@ -5,9 +5,10 @@ import DataFrame from "../utils/dataframe"
 
 import Legend from "../components/legend/index"
 import DataZoom from "../components/datazoom/index"
-import markLine from "../components/markline/index"
-import markpoint from "../components/markpoint/index"
+import MarkLine from "../components/markline/index"
+import MarkPoint from "../components/markpoint/index"
 import Anchor from "../components/anchor/index"
+
 
 const _ = Canvax._;
 
@@ -45,10 +46,10 @@ export default class Descartes extends Chart
 
         //预设dataZoom的区间数据
         this.dataZoom = {
-            h: 30,
+            h: 25,
             range: {
                 start: 0,
-                end: data.length - 1 //因为第一行是title
+                end: data.length - 1 -1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
             }
         };
 
@@ -165,31 +166,20 @@ export default class Descartes extends Chart
     plugsReset(opt , e)
     {
         var me = this;
+        opt = !opt ? this : opt;
         _.each(this.plugs , function( p , i ){
-            if( p.type == "markLine" ){
-                p.plug.reset({
-                    line: {
-                        y : p.plug._yAxis.getYposFromVal( p.plug.value )
-                    }
-                } ,i);
-                return
-            };
 
-            if( p.type == "markPoint" ){
-                p.plug.reset();
-                return
-            };
-            
             if( p.type == "dataZoom" ){
                 if(!e || (e && e.trigger != "dataZoom")){
                     me.__cloneChart = me._getCloneChart();
                     p.plug.reset( {
-                        count : me._data.length-1
-                    } , me.__cloneChart.thumbChart._graphs.sprite );
+                        //count : me._data.length-1
+                    } , me.__cloneChart );
                 }
                 return
             };
-            p.plug.reset && p.plug.reset(opt);
+            
+            p.plug.reset && p.plug.reset( opt[ p.type ] || {} );
             
         }); 
     }
@@ -256,7 +246,7 @@ export default class Descartes extends Chart
     _getCloneChart()
     {
         var me = this;
-        barConstructor = this.constructor;//(barConstructor || Bar);
+        var chartConstructor = this.constructor;//(barConstructor || Bar);
         var cloneEl = me.el.cloneNode();
         cloneEl.innerHTML = "";
         cloneEl.id = me.el.id + "_currclone";
@@ -266,13 +256,18 @@ export default class Descartes extends Chart
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl);
 
-        var opts = _.extend(true, {}, me._opts);
+        //var opts = _.extend(true, {}, me._opts);
+        //_.extend(true, opts, me.getCloneChart() );
+
+        //clone的chart只需要coordinate 和 graphs 配置就可以了
+        //因为画出来后也只需要拿graphs得sprite去贴图
+        var opts = {
+            coordinate : this.coordinate,
+            graphs : me._opts.graphs
+        };
         _.extend(true, opts, me.getCloneChart() );
 
-        delete opts.dataZoom;
-
-        var thumbChart = new barConstructor(cloneEl, me._data, opts);
-        thumbChart.draw();
+        var thumbChart = new chartConstructor(cloneEl, me._data, opts);
 
         return {
             thumbChart: thumbChart,
@@ -291,21 +286,7 @@ export default class Descartes extends Chart
             type : "once",
             plug : {
                 draw: function(){
-                    
-                    me._dataZoom = new DataZoom( me.drawDataZoom() );
-                    
-                    var graphssp = me.__cloneChart.thumbChart._graphs.sprite;
-                    graphssp.id = graphssp.id + "_datazoomthumbChartbg"
-                    graphssp.context.x = 0;
-                    graphssp.context.y = me._dataZoom.barH + me._dataZoom.barY;
-
-                    graphssp.context.scaleY = me._dataZoom.barH / me.__cloneChart.thumbChart._graphs.h;
-
-                    me._dataZoom.setZoomBg( graphssp );
-
-                    me.__cloneChart.thumbChart.destroy();
-                    me.__cloneChart.cloneEl.parentNode.removeChild(me.__cloneChart.cloneEl);
-
+                    me._dataZoom = new DataZoom( me.drawDataZoom() , me.__cloneChart );
                     me.plugs.push( {
                         type : "dataZoom",
                         plug : me._dataZoom
@@ -330,6 +311,12 @@ export default class Descartes extends Chart
         _.each( me.markLine, function( ML ){
             //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
             var field = ML.markTo;
+
+            if( field && _.indexOf( me.dataFrame.fields , field ) == -1 ){
+                //如果配置的字段不存在，则不绘制
+                return;
+            }
+
             var _yAxis = me._coordinate._yAxis[0]; //默认为左边的y轴
             
             if( field ){
@@ -345,37 +332,50 @@ export default class Descartes extends Chart
             var y;
             if( ML.y !== undefined && ML.y !== null ){
                 y = Number( ML.y );
-            };
-            if( !isNaN(y) ) {
-                _yAxis.resetDataSection( y );
+            } else {
+                //如果没有配置这个y的属性，就 自动计算出来均值
+                //但是均值是自动计算的，比如datazoom在draging的时候
+                y = function(){
+                    var _fdata = me.dataFrame.getFieldData( field );
+                    var _count = 0;
+                    _.each( _fdata, function( val ){
+                        if( Number( val ) ){
+                            _count += val;
+                        }
+                    } );
+                    return _count / _fdata.length;
+                }
             };
 
-            var name = field;
+            if( !isNaN(y) ) {
+                //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
+                _yAxis.setWaterLine( y );
+            };
 
             me.plugs.push( {
                 type : "once",
                 plug : {
                     draw : function(){
-                        me.drawMarkLine( name , y, _yAxis, ML);
+                        me.drawMarkLine( ML, y, _yAxis, field );
                     }
                 }
             } );
+
         } );
     }
 
-    creatOneMarkLine( yVal, yPos, lineStrokeStyle, label, textFillStyle, field, ML, _yAxis)
+    creatOneMarkLine( ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field )
     {
         var me = this;
         var o = {
             w: me._coordinate.graphsWidth,
             h: me._coordinate.graphsHeight,
-            value: yVal,
+            yVal: yVal,
             origin: {
                 x: me._coordinate.graphsX,
                 y: me._coordinate.graphsY
             },
             line: {
-                y: yPos,
                 list: [
                     [0, 0],
                     [me._coordinate.graphsWidth, 0]
@@ -383,13 +383,12 @@ export default class Descartes extends Chart
                 strokeStyle: lineStrokeStyle
             },
             text: {
-                content: label, 
                 fillStyle: textFillStyle
             },
             field: field
         };
 
-        var _markLine = new MarkLine(_.extend( true, ML, o) , _yAxis);
+        var _markLine = new MarkLine( _.extend( true, ML, o) , _yAxis );
         me.plugs.push( {
             type : "markLine",
             plug : _markLine
@@ -412,18 +411,18 @@ export default class Descartes extends Chart
         _mp.shape.hover(function(e) {
             this.context.hr++;
             this.context.cursor = "pointer";
-            e.stopPropagation();
+            //e.stopPropagation();
         }, function(e) {
             this.context.hr--;
-            e.stopPropagation();
+            //e.stopPropagation();
         });
         _mp.shape.on("mousemove", function(e) {
-            e.stopPropagation();
+            //e.stopPropagation();
         });
         _mp.shape.on("tap click", function(e) {
             e.stopPropagation();
             e.eventInfo = _mp;
-            me.fire("markpointclick", e);
+            //me.fire("markpointclick", e);
         });
 
         me.plugs.push( {
@@ -457,7 +456,7 @@ export default class Descartes extends Chart
                         w: _graphsW, 
                         h: _graphsH,
                         //cross: {
-                        //    x: 0,
+                        //    x: 0, 
                         //    y: _graphsH + 0
                         //},
                         pos: {

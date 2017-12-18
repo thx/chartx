@@ -171,7 +171,6 @@ export default class Bar_Tgi extends Bar
 
     _tgiGraphsDraw()
     {
-
         var me = this;
         _.each( this._tgiData , function( group , gi ){
             _.each( group.data , function( num, i ){

@@ -18,7 +18,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         super();
         this.field = field; //_groupInd 在yAxis.field中对应的值
         this._groupInd = a;
-        this._nodeInd = -1;
+        
         this._yAxis = yAxis;
         this.sort = sort;
         this.ctx = ctx;
@@ -58,12 +58,12 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
 
         this.fill = { //填充
+            enabled:1,
             fillStyle: null,
-            alpha: 0.05
+            alpha: 0.3
         };
 
-        this.dataOrg = []; //data的原始数据
-        this.data = []; //data会在wight中过滤一遍，把两边的空节点剔除
+        this.data = []; 
         this.sprite = null;
 
         this._pointList = []; //brokenline最终的状态
@@ -94,29 +94,14 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         });
     }
 
-    draw(opt)
+    draw(opt, data)
     {
         _.extend(true, this, opt);
+        this.data = data;
         this._widget();
     }
 
-    update(opt)
-    {
-        if(!this._bline){
-            return;
-        };
-        _.extend(true, this, opt);
-        if( opt.data ){
-            this._pointList = this._getPointList(this.data);
-            this._grow();
-        };
-        if( opt._groupInd !== undefined ){
-            var _strokeStyle = this._getLineStrokeStyle();
-            this._bline.context.strokeStyle = _strokeStyle;
-            this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
-            this._setNodesStyle();
-        };
-    }
+
 
     //自我销毁
     destroy()
@@ -126,7 +111,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             globalAlpha : 0
         } , {
             duration: 300,
-            complate: function(){
+            onComplete: function(){
                 me.sprite.remove();
             }
         });
@@ -142,7 +127,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return color;
     }
 
-    _getProp(s)
+    _getProp(s, nodeInd)
     {
         if (_.isArray(s)) {
             return s[this._groupInd]
@@ -150,11 +135,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         if (_.isFunction(s)) {
             var obj = {
                 iGroup: this._groupInd,
-                iNode: this._nodeInd,
+                iNode: this.nodeInd,
                 field: this.field
             };
-            if( this._nodeInd >= 0 ){
-                obj.value = this.dataOrg[ this._nodeInd ].value;
+            if( nodeInd >= 0 ){
+                obj.value = this.data[ nodeInd ].value;
             };
 
             return s.apply( this , [obj] );
@@ -162,16 +147,16 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return s
     }
 
-    _createNodeInfo()
+    _createNodeInfo( ind )
     {
         var me = this;
         var obj = {};
-        obj.r = me._getProp(me.node.r);
-        obj.fillStyle = me._getProp(me.node.fillStyle) || "#ffffff";
-        obj.strokeStyle = me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle();
+        obj.r = me._getProp(me.node.r, ind);
+        obj.fillStyle = me._getProp(me.node.fillStyle, ind) || "#ffffff";
+        obj.strokeStyle = me._getProp(me.node.strokeStyle, ind) || me._getLineStrokeStyle();
         obj.color = obj.strokeStyle;
-        obj.lineWidth = me._getProp(me.node.lineWidth) || 2;
-        obj.alpha = me._getProp(me.fill.alpha);
+        obj.lineWidth = me._getProp(me.node.lineWidth, ind) || 2;
+        obj.alpha = me._getProp(me.fill.alpha, ind);
         obj.field = me.field;
         obj._groupInd = me._groupInd;
         return obj
@@ -181,11 +166,9 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     //这个是tips需要用到的 
     getNodeInfoAt($index)
     {
-        var me = this;
-        me._nodeInd = $index;
-        var o = _.clone(me.dataOrg[$index]);
+        var o = _.clone(this.data[$index]);
         if (o && o.value != null && o.value != undefined && o.value !== "") {
-            return _.extend(o , me._createNodeInfo());
+            return _.extend(o , this._createNodeInfo( $index ));
         } else {
             return null;
         }
@@ -196,8 +179,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     {
         var me = this;
         var nodeInfo;
-        for( var i = 0,l = this.dataOrg.length; i<l; i++ ){
-            if( Math.abs( this.dataOrg[i].x - x) <= 1 ){
+        for( var i = 0,l = this.data.length; i<l; i++ ){
+            if( Math.abs( this.data[i].x - x) <= 1 ){
                 //左右相差不到1px的，都算
                 nodeInfo = this.getNodeInfoAt(i);
                 return nodeInfo;
@@ -252,14 +235,15 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         }
 
         point.value = me._yAxis.getValFromYpos( point.y ); //null;
-        me._nodeInd = -1;
-        return _.extend( point, me._createNodeInfo());
+        
+        //TODO:这里要优化下，这个x值可能刚好对应上了某个具体的index，，，而现在强制为-1是不对的
+        return _.extend( point, me._createNodeInfo( -1 ));
     }
 
-    reset(opt)
+    reset(opt, data)
     {
         var me = this;
-        me._pointList = this._getPointList( opt.data.groupData );
+        me._pointList = this._getPointList( data );
         var plen = me._pointList.length;
         var cplen = me._currPointList.length;
         if (plen < cplen) {
@@ -273,7 +257,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
 
         if (plen > cplen) {
-            diffLen = plen - cplen;
+            var diffLen = plen - cplen;
             for (var i = 0; i < diffLen; i++) {
                 me._currPointList.push(_.clone(me._currPointList[cplen - 1]));
             }
@@ -284,6 +268,24 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         me._createNodes();
         me._createTexts();
         me._grow();
+    }
+
+    update(opt, date)
+    {
+        if(!this._bline){
+            return;
+        };
+        _.extend(true, this, opt);
+        if( data ){
+            this._pointList = this._getPointList( data );
+            this._grow();
+        };
+        if( opt._groupInd !== undefined ){
+            var _strokeStyle = this._getLineStrokeStyle();
+            this._bline.context.strokeStyle = _strokeStyle;
+            this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
+            this._setNodesStyle();
+        };
     }
 
     _grow(callback)
@@ -346,6 +348,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     {
         var obj = {};
         _.each(list, function(p, i) {
+            if( !p ){
+                //折线图中这个节点可能没有
+                return;
+            };
+
             obj["p_1_" + i] = p[1]; //p_y==p_1
             obj["p_0_" + i] = p[0]; //p_x==p_0
         });
@@ -357,38 +364,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return val === undefined || isNaN(val) || val === null || val === ""
     }
 
-    _filterEmptyValue(list)
-    {
-
-        //从左边开始 删除 value为非number的item
-        for (var i = 0, l = list.length; i < l; i++) {
-            if (this._isNotNum(list[i].value)) {
-                list.shift();
-                l--;
-                i--;
-            } else {
-                break;
-            }
-        };
-
-        //从右边开始删除 value为非number的item
-        for (var i = list.length - 1; i > 0; i--) {
-            if (this._isNotNum(list[i].value)) {
-                list.pop();
-            } else {
-                break;
-            }
-        };
-    }
-
     _getPointList(data)
     {
-    
-        var me = this;
-
-        me.dataOrg = _.clone(data);
-        me._filterEmptyValue(data);
-
         var list = [];
         for (var a = 0, al = data.length; a < al; a++) {
             var o = data[a];
@@ -412,16 +389,12 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
         var list = [];
         if (me.animation && !me.resize) {
+            var firstY = this._getFirstNode().y;
             for (var a = 0, al = me.data.length; a < al; a++) {
                 var o = me.data[a];
-                var sourceInd = 0;
-                //如果是属于双轴中的右轴。
-                if (me._yAxis.place == "right") {
-                    sourceInd = al - 1;
-                };
                 list.push([
                     o.x,
-                    me.data[sourceInd].y
+                    _.isNumber( o.y ) ? firstY : o.y
                 ]);
             };
         } else {
@@ -462,15 +435,37 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var fill = new Path({ //填充
             context: {
                 path: me._fillLine(bline),
-                fillStyle: me._getFillStyle() || _strokeStyle, //fill_gradient || me._getColor(me.fill.fillStyle),
-                globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha //me._getProp( me.fill.alpha )
+                fillStyle: me._getFillStyle() || _strokeStyle, 
+                globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha
             }
         });
 
+        if( !this.fill.enabled ){
+            fill.context.visible = false
+        }
         me.sprite.addChild(fill);
         me._fill = fill;
+
         me._createNodes();
         me._createTexts();
+    }
+
+    _getFirstNode() 
+    {
+        var _firstNode = null;
+        for( var i=0,l=this.data.length; i<l; i++ ){
+            var nodeData = this.data[i];
+            if( _.isNumber( nodeData.y ) ){
+                if( _firstNode === null || ( this._yAxis.place == "right" ) ){
+                    //_yAxis为右轴的话，
+                    _firstNode = nodeData;
+                }
+                if( this._yAxis.place !== "right" && _firstNode !== null ){
+                    break;
+                }
+            };
+        } 
+        return _firstNode;    
     }
 
     _getFillStyle( )
@@ -559,13 +554,19 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var list = me._currPointList;
         if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
             for (var a = 0, al = list.length; a < al; a++) {
-                me._nodeInd = a;
+                
                 var nodeEl = me._circles.getChildAt( a );
-                var strokeStyle = me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle(); 
-                nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : me._getProp(me.node.fillStyle) || "#ffffff";
+
+                if( !nodeEl ){
+                    //折线图中这个节点可能没有
+                    continue;
+                }
+
+                var strokeStyle = me._getProp(me.node.strokeStyle, a) || me._getLineStrokeStyle(); 
+                nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : me._getProp(me.node.fillStyle, a) || "#ffffff";
                 nodeEl.context.strokeStyle = strokeStyle;
 
-                me._nodeInd = -1;
+            
             }
         }
     }
@@ -581,16 +582,23 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 this.sprite.addChild(this._circles);
             }
             
+            var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
             for (var a = 0, al = list.length; a < al; a++) {
+                var _point = me._currPointList[a];
+                if( !_point || !_.isNumber( _point[1] ) ){
+                    //折线图中有可能这个point为undefined
+                    continue;
+                };
+
                 var context = {
-                    x: me._currPointList[a][0],
-                    y: me._currPointList[a][1],
-                    r: me._getProp(me.node.r),
-                    lineWidth: me._getProp(me.node.lineWidth) || 2,
+                    x: _point[0],
+                    y: _point[1],
+                    r: me._getProp(me.node.r, a),
+                    lineWidth: me._getProp(me.node.lineWidth, a) || 2,
                     fillStyle: me.node.fillStyle
                 };
 
-                var circle = me._circles.children[a];
+                var circle = me._circles.children[ nodeInd ];
                 if( circle ){
                     _.extend( circle.context , context );
                 } else {
@@ -612,8 +620,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                         }
                     }
                 };
+
+                nodeInd++;
                 
-            }
+            };
+
             if( me._circles.children.length > list.length ){
                 for( var i = me._circles.children.length,l=list.length ; i<l; i++ ){
                     me._circles.children[i].destroy();
@@ -637,14 +648,19 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 this.sprite.addChild(this._texts);
             }
             
-            
+            var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
             for (var a = 0, al = list.length; a < al; a++) {
-                me._nodeInd = a;
-                var fontFillStyle = me._getProp(me.text.fillStyle) || me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle();
-                me._nodeInd = -1;
+                var _point = list[a];
+                if( !_point || !_.isNumber( _point[1] ) ){
+                    //折线图中有可能这个point为undefined
+                    continue;
+                };
+            
+                var fontFillStyle = me._getProp(me.text.fillStyle, a) || me._getProp(me.node.strokeStyle, a) || me._getLineStrokeStyle();
+                
                 var context = {
-                    x: me._currPointList[a][0],
-                    y: me._currPointList[a][1] - 3,
+                    x: _point[0],
+                    y: _point[1] - 3,
                     fontSize: this.text.fontSize,
                     textAlign: "center",
                     textBaseline: "bottom",
@@ -658,7 +674,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     content = (me.text.format.apply( me , [content , a]) || content );
                 };
 
-                var text = this._texts.children[a];
+                var text = this._texts.children[ nodeInd ];
                 if( text ){
                     text.resetText( content );
                     _.extend( text.context, context );
@@ -670,7 +686,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     me._texts.addChild(text);
                     me._checkTextPos( text , a );
                 }
-            }
+                nodeInd++;
+            };
 
             if( me._texts.children.length > list.length ){
                 for( var i = me._texts.children.length,l=list.length ; i<l; i++ ){
@@ -678,7 +695,9 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     i--;
                     l--;
                 }
-            }
+            };
+
+            
         };
         this._setNodesStyle();
     }
@@ -689,12 +708,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var list = me._currPointList;
         var pre = list[ ind - 1 ];
         var next = list[ ind + 1 ];
-        if( ind == 0 ){
-            text.context.textAlign = "left"
-        }; 
-        if( ind == list.length-1 ){
-            text.context.textAlign = "right"
-        };
 
         if( 
             pre && next &&
@@ -709,6 +722,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     _fillLine(bline)
     { //填充直线
         var fillPath = _.clone(bline.context.pointList);
+
+        if( !fillPath[0] || !fillPath[fillPath.length - 1] ){
+            return ""
+        }
+
         if( fillPath.length == 0 ){
             return "";
         }
@@ -716,9 +734,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         if (this.sort == "desc") {
             baseY = -this.h;
         }
+
         fillPath.push(
             [fillPath[fillPath.length - 1][0], baseY], [fillPath[0][0], baseY], [fillPath[0][0], fillPath[0][1]]
         );
+
         return getPath(fillPath);
     }
 

@@ -90,9 +90,16 @@ export function getDisMinATArr($n, $arr) {
 export function getPath($arr){
     var M = 'M', L = 'L', Z = 'z'
     var s = '';
+    var start = {
+        x : 0,
+        y : 0
+    }
     if( _.isArray( $arr[0] ) ){
+        start.x = $arr[0][0];
+        start.y = $arr[0][1];
         s = M + $arr[0][0] + ' ' + $arr[0][1]
     } else {
+        start = $arr[0];
         s = M + $arr[0].x + ' ' + $arr[0].y
     }
     for(var a = 1,al = $arr.length; a < al ; a++){
@@ -104,7 +111,12 @@ export function getPath($arr){
             x = item.x;
             y = item.y;
         }
-        s += ' ' + L + x + ' ' + y
+        //s += ' ' + L + x + ' ' + y
+        if( x == start.x && y == start.y ){
+            s += ' ' + Z
+        } else {
+            s += ' ' + L + x + ' ' + y
+        }
     }
     // s += ' ' + Z
     return s

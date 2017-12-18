@@ -174,8 +174,8 @@ export default class Grid extends Component
                         id : line.id
                     });
                 } else {
-                    line.context.xStart = 0;
-                    line.context.xEnd = self.w;
+                    line.context.start.x = 0;
+                    line.context.end.x = self.w;
                 }
 
 

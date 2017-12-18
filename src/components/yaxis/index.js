@@ -9,6 +9,7 @@ const _ = Canvax._;
 export default class yAxis extends Component
 {
 	constructor( opt, data ){
+
         super();
 
         this._opt = opt;
@@ -43,6 +44,7 @@ export default class yAxis extends Component
         
         this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
         this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
+        this.waterLine = null; //水位data，需要混入 计算 dataSection， 如果有设置waterLineData， dataSection的最高水位不会低于这个值
 
         //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
         this.dataSectionGroup = []; 
@@ -86,11 +88,18 @@ export default class yAxis extends Component
     {
         _.extend(true , this, opt);
 
+        //extend会设置好this.field
+        //先要矫正子啊field确保一定是个array
+        if( !_.isArray(this.field) ){
+            this.field = [this.field];
+        };
+
         if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
             this.isH = true;
         };
 
-        this._initData(data);
+        this._initData();
+
         this.sprite = new Canvax.Display.Sprite({
             id: "yAxisSprite_"+new Date().getTime()
         });
@@ -118,9 +127,7 @@ export default class yAxis extends Component
             this.dataOrg = data.org; //这里必须是data.org
         };
         
-        this._initData({
-            org : this.dataOrg
-        });
+        this._initData();
 
         this._trimYAxis();
         this._widget();
@@ -329,25 +336,21 @@ export default class yAxis extends Component
         return dis
     }
 
-    _setDataSection(data)
+    _setDataSection( data )
     {
+        //如果有堆叠，比如[ ["uv","pv"], "click" ]
+        //vLen就会等于2
         var vLen = 1;
-        var field = data.field;
 
-        //如果没有传field，那么就默认按照一维数据获取section
-        if( field ){
-            if( !_.isArray( field ) ){
-                field = [field];
-            };
-            _.each( data.field, function( f ){
-                vLen = Math.max( vLen, 1 );
-                if( _.isArray( f ) ){
-                    _.each( f, function( _f ){
-                        vLen = Math.max( vLen, 2 );
-                    } );
-                }
-            } );
-        };
+        _.each( this.field, function( f ){
+            vLen = Math.max( vLen, 1 );
+            if( _.isArray( f ) ){
+                _.each( f, function( _f ){
+                    vLen = Math.max( vLen, 2 );
+                } );
+            }
+        } );
+
 
         if( vLen == 1 ){
             return this._oneDimensional( data );
@@ -358,10 +361,8 @@ export default class yAxis extends Component
         
     }
 
-    _oneDimensional(data)
+    _oneDimensional( d )
     {
-        
-        var d = (data.org || data.data || data);
         
         var arr = _.flatten( d ); //_.flatten( data.org );
 
@@ -373,11 +374,11 @@ export default class yAxis extends Component
     }
 
     //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
-    _twoDimensional(data)
+    _twoDimensional( d )
     {
         var arr = [];
         var min;
-        _.each(data.org, function(d, i) {
+        _.each( d , function(d, i) {
             if (!d.length) {
                 return
             };
@@ -420,15 +421,15 @@ export default class yAxis extends Component
         return _.flatten(arr);
     }
 
-    _initData(data)
+    _initData()
     {
-
-        //先要矫正子啊field确保一定是个array
-        if( !_.isArray(this.field) ){
-            this.field = [this.field];
-        };
         
-        var arr = this._setDataSection(data);
+        var arr = this._setDataSection( this.dataOrg );
+
+        if( this.waterLine != null ){
+            arr.push( this.waterLine )
+        }
+
         if( this.bottomNumber != null ){
             arr.push( this.bottomNumber )
         };
@@ -476,15 +477,13 @@ export default class yAxis extends Component
     }
 
     //yVal 要被push到datasection 中去的 值
-    resetDataSection( yVal )
+    setWaterLine( yVal )
     {
-
+        if( yVal <= this.waterLine) return;
+        
         if( yVal < _.min(this.dataSection) || yVal > _.max(this.dataSection) ){
-            this.dataSection.push( yVal );
-            this._initData( {
-                //field: this.field,
-                org : this.dataSection
-            } );
+            this.waterLine = yVal;
+            this._initData();
         };
     }
 
@@ -644,7 +643,7 @@ export default class yAxis extends Component
             var yNode = this.rulesSprite.getChildAt(a);
 
             if( yNode ){
-                if(yNode._txt){
+                if( yNode._txt ){
                     yNode._txt.animate({
                         y: posy
                     }, {

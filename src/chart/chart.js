@@ -136,7 +136,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         this.plugs = [];
         this.clean();
-        this.canvax.getDomContainer().innerHTML = "";
+        this.canvax.domView.innerHTML = "";
         this.draw();
     }
 
@@ -184,10 +184,23 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     drawPlugs()
     {
+        /*
         do {
             var p = this.plugs.shift();
             p && p.plug && p.plug.draw && p.plug.draw();
         } while ( this.plugs.length > 0 ); 
+        */
+        for( var i=0,l=this.plugs.length; i<l; i++ ){
+            var p = this.plugs[i];
+            p.plug && p.plug.draw && p.plug.draw();
+            if( p.type == "once" ){
+                this.plugs.splice( i, 1 );
+                i--;
+            }
+
+            //p.plug.draw() 可能有新的plug被push进来
+            l=this.plugs.length;
+        }
     }
 
     //插件相关代码end

@@ -42,29 +42,7 @@ var data= [
 
 ];
 var options = {
-    coordinate : {
-        //横向的图表，是坐标系横向了
-        horizontal : true,
-        yAxis : {
-            field : [ ["uv","pv"] , "click"]
-            //field: "click",
-            //enabled : false
-        },
-        xAxis : {
-            field : ["xfield"]
-        }
-    },
-    graphs : {
-        
-    },
-    legend : {
-        tips : {
-            enabled:true,
-            content : function(e){
 
-            }
-        }
-    }
 };
 
 window.bar = new Chartx.Bar("canvasTest" , data , options)

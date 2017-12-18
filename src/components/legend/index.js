@@ -1,6 +1,6 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import Tips from "../tips/index"
+//import Tips from "../tips/index"
 
 const Circle = Canvax.Shapes.Circle
 const _ = Canvax._;
@@ -57,50 +57,13 @@ export default class Legend extends Component
             id : "LegendSprite"
         });
 
-        this._widget();
+        this.draw();
     }
 
     pos( pos )
     {
         pos.x && (this.sprite.context.x = pos.x);
         pos.y && (this.sprite.context.y = pos.y);
-    }
-
-    draw(opt)
-    {
-        //this._widget();
-    }
-
-    _showTips(e)
-    {
-        if( !this.tips.enabled ) return;
-
-        if( this._hideTimer ){
-            clearTimeout( this._hideTimer );
-        };
-        this._hideTimer = null;
-
-        if( !this._legendTip ){
-            this._legendTip = new Canvax.Display.Sprite({
-                id: 'legend_tip'
-            });
-            var stage = this.sprite.getStage();
-            stage.addChild( this._legendTip );
-            this._tips = new Tips(this.tips, stage.parent.domView);
-            this._tips._getDefaultContent = function(info) {
-                return info.field;
-            };
-            this._legendTip.addChild( this._tips.sprite );
-        };
-        this._tips.show(e);
-    }
-
-    _hideTips(e)
-    {
-        var me = this;
-        this._hideTimer = setTimeout(function(){
-            me._tips.hide();
-        } , 300);
     }
 
     // label 格式化函数配置
@@ -135,7 +98,7 @@ export default class Legend extends Component
         return data;
     }
 
-    _widget()
+    draw()
     {
         var me = this;
 
@@ -161,21 +124,16 @@ export default class Legend extends Component
             });
             
             icon.hover(function( e ){
-                me._showTips( me._getInfoHandler(e,obj) );
-                e.stopPropagation();
+                e.eventInfo = me._getInfoHandler(e,obj);
             } , function(e){
-                me._hideTips(e);
-                e.stopPropagation();
+                delete e.eventInfo;
             });
             icon.on("mousemove" , function( e ){
-                me._showTips( me._getInfoHandler(e,obj) );
-                e.stopPropagation();
+                e.eventInfo = me._getInfoHandler(e,obj);
             });
             //阻止事件冒泡
             
-            
             icon.on("click" , function(){});
-            
             
             var content= me.label(obj);
             var txt    = new Canvax.Display.Text( content , {
@@ -190,14 +148,13 @@ export default class Legend extends Component
                 }
             } );
         
-           
             txt.hover(function( e ){
-                me._showTips( me._getInfoHandler(e,obj) );
+                e.eventInfo = me._getInfoHandler(e,obj);
             } , function(e){
-                me._hideTips(e);
+                delete e.eventInfo;
             });
             txt.on("mousemove" , function( e ){
-                me._showTips( me._getInfoHandler(e,obj) );
+                e.eventInfo = me._getInfoHandler(e,obj);
             });
             txt.on("click" , function(){});
 
@@ -254,10 +211,15 @@ export default class Legend extends Component
 
     _getInfoHandler(e , data)
     {
-        e.eventInfo = {
-            field : data.field,
-            fillStyle : data.fillStyle
+        return {
+            type : "legend",
+            title : data.field,
+            nodesInfoList: [
+                {
+                    field : data.field,
+                    fillStyle : data.fillStyle
+                }
+            ]
         };
-        return e;
     }
 }

@@ -35,14 +35,16 @@ export default class Tips extends Component
 
         this.offset = 10; //tips内容到鼠标位置的偏移量
     
-        //所有调用tip的 event 上面 要附带有符合下面结构的tipsInfo属性
+        //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
         //会deepExtend到this.indo上面来
-        this.tipsInfo    = {
+        this.eventInfo    = null; 
+        //{
             //nodesInfoList : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
             //iGroup        : 0, //数据组的索引对应二维数据map的x
             //iNode         : 0  //数据点的索引对应二维数据map的y
-        };
-        this.prefix  = [];
+        //};
+
+        
         this.positionInRange = false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
         this.init(opt);
@@ -62,8 +64,7 @@ export default class Tips extends Component
 
     show(e)
     {
-        
-        if( !this.enabled ) return;
+        if( !this.enabled || !e.eventInfo ) return;
         this.hide();
 
         var stage = e.target.getStage();
@@ -79,14 +80,15 @@ export default class Tips extends Component
 
     move(e)
     {
-        if( !this.enabled ) return;
+        if( !this.enabled || !e.eventInfo ) return;
         this._setContent(e);
         this.setPosition(e);
     }
 
     hide()
     {
-        if( !this.enabled ) return;
+        if( !this.enabled || !this.eventInfo ) return;
+        this.eventInfo = null;
         this.sprite.removeAllChildren();
         this._removeContent();
     }
@@ -114,7 +116,6 @@ export default class Tips extends Component
      */
     _initContent(e)
     {
-
         var me = this;
         this._tipDom = document.createElement("div");
         this._tipDom.className = "chart-tips";
@@ -152,7 +153,7 @@ export default class Tips extends Component
             return;
         };
         var tipxContent = this._getContent(e);
-        if( tipxContent === "_hide_" || tipxContent === "" ){
+        if( !tipxContent && tipxContent!==0 ){
             this.hide();
             return;
         };
@@ -164,18 +165,16 @@ export default class Tips extends Component
 
     _getContent(e)
     {
-        //_.extend( this.tipsInfo , (e.tipsInfo || e.eventInfo || {}) );
-        var _info = e.tipsInfo || e.eventInfo;
-        if( _info ){
-            this.tipsInfo = _info;
-        }
-        //this.tipsInfo = e.tipsInfo || e.eventInfo || {};
+        
+        this.eventInfo = e.eventInfo;
+        var tipsContent;
 
-        var tipsContent = _.isFunction(this.content) ? this.content( this.tipsInfo ) : this.content ;
-        //只有undefined false null才会继续走默认配置， "" 0 都会认为是用户的意思
-        if( !tipsContent && tipsContent != 0 ){
-            tipsContent = this._getDefaultContent( this.tipsInfo );
-        }
+        if( this.content ){
+            tipsContent = _.isFunction(this.content) ? this.content( this.eventInfo ) : this.content;
+        } else {
+            tipsContent = this._getDefaultContent( this.eventInfo );
+        };
+
         return tipsContent;
     }
 
@@ -183,17 +182,19 @@ export default class Tips extends Component
     {
         var str  = "<table style='border:none'>";
         var self = this;
+
+        if( info.title ){
+            str += "<tr><td colspan='2'>"+ info.title +"</td></tr>"
+        };
+
         _.each( info.nodesInfoList , function( node , i ){
+            if( node.value === undefined || node.value === null ){
+                return;
+            };
+
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
             var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-            var prefixName = self.prefix[i];
-            if( prefixName ) {
-                str+="<td "+tsStyle+">"+ prefixName +"：</td>";
-            } else {
-                if( node.field ){
-                    str+="<td "+tsStyle+">"+ node.field +"：</td>";
-                }
-            };
+            str+="<td "+tsStyle+">"+ (node.name || node.field || "") +"：</td>";
             str += "<td "+tsStyle+">"+ numAddSymbol(node.value) +"</td></tr>";
         });
         str+="</table>";

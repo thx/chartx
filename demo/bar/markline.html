@@ -36,44 +36,44 @@
 //第一行是表头。
 var data= [
     ["xfield","uv" ,"pv","click"],
-    [ 1      , null , undefined , null    ],
-    [ 2      , 0   , "" , ""    ],
-    [ 3      , 23   , 145 , undefined    ],
-    [ 4      , 232  , 135 , 123    ],
-    [ 5      , 0  , 173 , 71    ],
-    [ 6      , 0  , 154 , 39    ],
-    [ 7      , 0  , 168 , null    ],
-    [ 8      , 66   ,183 , 51    ],
-    [ 3      , 32   , 145 , 243    ],
-    [ 4      , 58  , 135 , 231    ],
-    [ 5      , 79  , 173 , 71    ],
-    [ 6      , 188  , 154 , 39    ],
-    [ 7      , 55  , 168 , 65    ],
-    [ 8      , undefined   ,183 , 51    ]
-];
+    [ 3      , 100 , 50 , 150   ],
+    [ 2      , 167 , 51 , 26    ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 3      , 100 , 50 , 150   ],
+    [ 2      , 167 , 51 , 26    ]
 
+];
 var options = {
-    coordinate : {
-        //横向的图表，是坐标系横向了
+    coordinate: {
         //horizontal : true,
         yAxis : {
-            //field : [ "uv","pv" , "click"]
-            field: "click",
-            //enabled : false
+            field : ["uv","pv"]
         },
         xAxis : {
             field : ["xfield"]
         }
     },
-    graphs : {
-        
-    },
-    legend : {
-        enabled : 1
-    }
+    markLine :  [{
+        markTo: 'uv',
+        text : {
+            enabled : true,
+            format : function( yVal ){
+                return 'UV 均值 ：' + parseInt( yVal )
+            },
+            fontSize : 14
+        }
+        //y : 30 //不设置y，就会自动设置为均线
+    },{
+        markTo: 'pv',
+        text : {
+            enabled : true,
+            fontSize : 14
+        },
+        y : 180
+    }]
 };
 
-window.line = new Chartx.Line("canvasTest" , data , options)
+window.bar = new Chartx.Bar("canvasTest" , data , options)
 
             </textarea></form>
         </td>
@@ -82,7 +82,7 @@ window.line = new Chartx.Line("canvasTest" , data , options)
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（bar chart）</h4>
+                <h4>柱状图（bar chart）</h4>
                 <p>
                     联系人：@释剑
                 </p>

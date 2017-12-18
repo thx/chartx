@@ -8,18 +8,23 @@ const _ = Canvax._;
 
 export default class dataZoom extends Component
 {
-	constructor(opt)
+	constructor(opt, cloneChart)
 	{
-		super();
+        super(opt, cloneChart);
+        
+        this._cloneChart = cloneChart;
 
 		//0-1
         this.range = {
             start: 0,
             end: '',
-            max : 1,
-            min : 0
+            max : 1, //可以外围控制智能在哪个区间拖动
+            min : 1  //最少至少选中了一个数据
         };
-        this.count = 1;
+        
+        this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
+        this.layoutType = cloneChart.thumbChart._coordinate._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+
         this.pos = {
             x: 0,
             y: 0
@@ -31,6 +36,7 @@ export default class dataZoom extends Component
             eventEnabled : true
         };
         this.center = {
+            eventEnabled: true,
             fillStyle : '#ffffff',
             globalAlpha : 0
         };
@@ -57,8 +63,6 @@ export default class dataZoom extends Component
         this.dragEnd = function(){};
 
         
-        this.range.max = 0;
-        this.range.end = 0;
         this.disPart = {};
         this.barAddH = 8;
         this.barH = this.h - this.barAddH;
@@ -98,6 +102,12 @@ export default class dataZoom extends Component
 
         me.widget();
         me._setLines();
+        this.setZoomBg();
+    }
+
+    draw()
+    {
+        //这个组件可以在init的时候就绘制好
     }
 
     destroy()
@@ -105,34 +115,51 @@ export default class dataZoom extends Component
         this.sprite.destroy();
     }
 
-    reset( opt , zoomBgSp )
+    reset( opt , cloneChart )
     {
+        !opt && ( opt = {} );
+
+        var _preCount = this.count;
+        var _preStart = this.range.start;
+        var _preEnd = this.range.end;
+
         opt && _.extend(true, this, opt);
+        this._cloneChart = cloneChart;
         this._computeAttrs(opt);
 
-        this.widget();
-        //this._setLines();
-        this.setZoomBg( zoomBgSp );
+        if( 
+            _preCount != this.count ||
+            ( opt.range && ( opt.range.start != _preStart || opt.range.end != _preEnd ) )
+        ){
+            this.widget();
+            this._setLines();
+        };
+
+        this.setZoomBg( );
+    }
+
+    _getCount()
+    {
+        //this.layoutType = _cloneChart._coordinate._xAxis.layoutType;
+        //count是会变的，layoutType不会变，所以layoutType就可以直接在constructor计算
+        var _cloneChart = this._cloneChart.thumbChart;
+        return this.layoutType == "rule" ? _cloneChart._data.length-2 : _cloneChart._data.length-1;
     }
 
     //计算属性
     _computeAttrs(opt)
     {
+        var _cloneChart = this._cloneChart.thumbChart
+
+        this.count = this._getCount();
         
         if(!opt.range || !opt.range.max){
             this.range.max = this.count;
         }
 
-        if(
-            (this.range.end == '' && (!opt.range || !opt.range.end)) ||
-            (parseInt(this.range.end) > this.count-1)
-        ){
-            this.range.end = this.count - 1;
+        if( !this.range.end || this.range.end > this.count ){
+            this.range.end = this.count;
         }
-
-        //这里为了避免外面没有传入number
-        this.range.start = parseInt(this.range.start);
-        this.range.end   = parseInt(this.range.end);
         
         this.disPart = this._getDisPart();
         this.barH = this.h - this.barAddH;
@@ -169,10 +196,14 @@ export default class dataZoom extends Component
 
         if(me.underline.enabled){
             var underlineCtx = {
-                xStart : me.range.start / me.count * me.w + me.btnW / 2,
-                yStart : me.barY + me.barH + 2,
-                xEnd   : (me.range.end + 1) / me.count * me.w  - me.btnW / 2,
-                yEnd   : me.barY + me.barH + 2,
+                start : {
+                    x : me.range.start / me.count * me.w + me.btnW / 2,
+                    y : me.barY + me.barH + 2
+                },
+                end : {
+                    x : me.range.end / me.count * me.w  - me.btnW / 2,
+                    y : me.barY + me.barH + 2
+                },
                 lineWidth : me.underline.lineWidth,
                 strokeStyle : me.underline.strokeStyle
             };
@@ -207,32 +238,36 @@ export default class dataZoom extends Component
                 dragEnabled : me.left.eventEnabled,
                 context: btnLeftCtx
             });
-            me._btnLeft.on("draging" , function(){
-               this.context.y = me.barY - me.barAddH / 2 + 1
-               if(this.context.x < 0){
-                   this.context.x = 0;
-               };
-               if(this.context.x > (me._btnRight.context.x - me.btnW - 2)){
-                   this.context.x = me._btnRight.context.x - me.btnW - 2
-               };
-               if(me._btnRight.context.x + me.btnW - this.context.x > me.disPart.max){
-                   this.context.x = me._btnRight.context.x + me.btnW - me.disPart.max
-               }
-               if(me._btnRight.context.x + me.btnW - this.context.x < me.disPart.min){
-                   this.context.x = me._btnRight.context.x + me.btnW - me.disPart.min
-               }
-               me.rangeRect.context.width = me._btnRight.context.x - this.context.x - me.btnW;
-               me.rangeRect.context.x = this.context.x + me.btnW;
-               me._setRange();
+            me._btnLeft.on("draging" , function(e){
+                
+                this.context.y = me.barY - me.barAddH / 2 + 1
+                if(this.context.x < 0){
+                    this.context.x = 0;
+                };
+                if(this.context.x > (me._btnRight.context.x - me.btnW - 2)){
+                    this.context.x = me._btnRight.context.x - me.btnW - 2
+                };
+                if(me._btnRight.context.x + me.btnW - this.context.x > me.disPart.max){
+                    this.context.x = me._btnRight.context.x + me.btnW - me.disPart.max
+                }
+                if(me._btnRight.context.x + me.btnW - this.context.x < me.disPart.min){
+                    this.context.x = me._btnRight.context.x + me.btnW - me.disPart.min
+                }
+                me.rangeRect.context.width = me._btnRight.context.x - this.context.x - me.btnW;
+                me.rangeRect.context.x = this.context.x + me.btnW;
+
+                me._setRange();
+
             });
-            me._btnLeft.on("dragend" , function(){
-               me.dragEnd( me.range );
+            me._btnLeft.on("dragend" , function(e){
+                
+                me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnLeft );
         };
 
         var btnRightCtx = {
-            x: (me.range.end + 1) / me.count * me.w - me.btnW,
+            x: me.range.end / me.count * me.w - me.btnW,
             y: me.barY - me.barAddH / 2 + 1,
             width: me.btnW,
             height: me.barH + me.barAddH ,
@@ -250,21 +285,24 @@ export default class dataZoom extends Component
                 dragEnabled : me.right.eventEnabled,
                 context: btnRightCtx
             });
-            me._btnRight.on("draging" , function(){
+
+            me._btnRight.on("draging" , function(e){
+                
                 this.context.y = me.barY - me.barAddH / 2 + 1
                 if( this.context.x > me.w - me.btnW ){
                     this.context.x = me.w - me.btnW;
                 };
                 if( this.context.x + me.btnW - me._btnLeft.context.x > me.disPart.max){
                     this.context.x = me.disPart.max - (me.btnW - me._btnLeft.context.x)
-                }
-                if( this.context.x + me.btnW - me._btnLeft.context.x < me.disPart.min){
-                    this.context.x = me.disPart.min - (me.btnW - me._btnLeft.context.x)
-                }
+                };
+                if( this.context.x - me.btnW - me._btnLeft.context.x - 2 < me.disPart.min){
+                    this.context.x = me.disPart.min + me.btnW + me._btnLeft.context.x + 2;
+                };
                 me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnW;
                 me._setRange();
             });
-            me._btnRight.on("dragend" , function(){
+            me._btnRight.on("dragend" , function(e){
+                
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnRight );
@@ -292,6 +330,7 @@ export default class dataZoom extends Component
                 context : rangeRectCtx
             });
             this.rangeRect.on("draging" , function(e){
+                
                 this.context.y = me.barY + 1;
                 if( this.context.x < me.btnW ){
                     this.context.x = me.btnW; 
@@ -301,9 +340,11 @@ export default class dataZoom extends Component
                 };
                 me._btnLeft.context.x  = this.context.x - me.btnW;
                 me._btnRight.context.x = this.context.x + this.context.width;
-                me._setRange();
+                me._setRange( "btnCenter" );
+
             });
-            this.rangeRect.on("dragend" , function(){
+            this.rangeRect.on("dragend" , function(e){
+                
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this.rangeRect );
@@ -350,19 +391,34 @@ export default class dataZoom extends Component
         }
     }
 
-    _setRange()
+    _setRange( trigger )
     {
         var me = this;
+        var _preDis = me.range.end - me.range.start;
+
+        var start = parseInt( (me._btnLeft.context.x / me.w) * me.count ) ;
+        var end = parseInt( ( (me._btnRight.context.x + me.btnW) / me.w) * me.count );
+
+        if( trigger == "btnCenter" ){
+            //如果是拖动中间部分，那么要保持 end-start的总量一致
+            if( (end - start) != _preDis ){
+                end = start + _preDis;
+            }
+        };
         
-        var start = (me._btnLeft.context.x / me.w) * (me.count - 1) ;
-        var end = ( (me._btnRight.context.x + me.btnW) / me.w) * (me.count - 1);
-        me.range.start = start;
-        me.range.end = end;
-        //@比例range @像素range @单位总数 @width
-        me.dragIng( me.range , {
-            start: me._btnLeft.context.x,
-            end: me._btnRight.context.x + me.btnW
-        } , me.count , me.w);
+        
+
+        if( start != me.range.start || end != me.range.end ){
+            me.range.start = start;
+            me.range.end = end;
+            //@比例range @像素range @单位总数 @width
+            //console.log( me.range.start+"|"+me.range.end )
+            me.dragIng( me.range , {
+                start: me._btnLeft.context.x,
+                end: me._btnRight.context.x + me.btnW
+            } , me.count , me.w);
+        };
+
         me._setLines();
     }
 
@@ -387,9 +443,9 @@ export default class dataZoom extends Component
         linesCenter.context.x = btnCenter.context.x + (btnCenter.context.width - linesCenter.context.width ) / 2
         linesCenter.context.y = btnCenter.context.y + (btnCenter.context.height - linesCenter.context.height ) / 2
 
-        if(me.underline.enabled){
-            me._underline.context.xStart = linesLeft.context.x + me.btnW / 2
-            me._underline.context.xEnd   = linesRight.context.x + me.btnW / 2
+        if( me.underline.enabled ){
+            me._underline.context.start.x = linesLeft.context.x + me.btnW / 2;
+            me._underline.context.end.x =linesRight.context.x + me.btnW / 2;
         }
     }
 
@@ -417,12 +473,12 @@ export default class dataZoom extends Component
                 x: o.x || 0,
                 y: o.y || 0,
                 start : {
-                    x : o.xStart || 0,
-                    y : o.yStart || 0
+                    x : o.start ? o.start.x : 0,
+                    y : o.start ? o.start.y : 0
                 },
                 end : {
-                    x : o.xEnd || 0,
-                    y : o.yEnd || 6
+                    x : o.end ? o.end.x : 0,
+                    y : o.end ? o.end.y : 6
                 },
                 lineWidth: o.lineWidth || 1,
                 strokeStyle: o.strokeStyle || '#ffffff'
@@ -431,17 +487,20 @@ export default class dataZoom extends Component
         return line
     }
 
-    setZoomBg( zoomBgSp )
+    setZoomBg()
     {
-        
-        if( this.zoomBg ){
-            zoomBgSp.context.x = this.zoomBg.context.x;
-            zoomBgSp.context.y = this.zoomBg.context.y;
-            zoomBgSp.context.scaleY = this.zoomBg.context.scaleY;
-            this.zoomBg.destroy();
-        }
-        this.zoomBg = zoomBgSp;
-        this.dataZoomBg.addChild( zoomBgSp );
+        //这里不是直接获取_graphs.sprite 而是获取 _graphs.core，切记切记
+        var graphssp = this._cloneChart.thumbChart._graphs.core;
+
+        graphssp.id = graphssp.id + "_datazoomthumbChartbg"
+        graphssp.context.x = 0;
+        graphssp.context.y = this.barH + this.barY;
+        graphssp.context.scaleY = this.barH / this._cloneChart.thumbChart._graphs.h;
+
+        this.dataZoomBg.addChild( graphssp );
+
+        this._cloneChart.thumbChart.destroy();
+        this._cloneChart.cloneEl.parentNode.removeChild( this._cloneChart.cloneEl );
     }
 
 }

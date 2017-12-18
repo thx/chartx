@@ -19,7 +19,7 @@ export default class Descartes_Component extends Component
 
         this._yAxisLeft = null;
         this._yAxisRight = null;
-        this._back  = null;
+        this._grid  = null;
 
         this.graphsWidth = 0;
         this.graphsHeight = 0;
@@ -50,7 +50,7 @@ export default class Descartes_Component extends Component
         }
 
         if( "display" in opt ){
-            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，back三个子组件
+            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             this.xAxis.display = opt.display;
             this.yAxis.display = opt.display;
             this.grid.enabled = opt.display;
@@ -143,7 +143,7 @@ export default class Descartes_Component extends Component
             }
         } );
 
-        this._back.reset({
+        this._grid.reset({
             animation:false,
             xAxis: {
                 data: this._yAxisLeft.layoutData
@@ -215,7 +215,7 @@ export default class Descartes_Component extends Component
         this.graphsY = y - _padding.bottom;
 
         //绘制背景网格
-        this._back.draw({
+        this._grid.draw({
             w: this.graphsWidth,
             h: this.graphsHeight,
             xAxis: {
@@ -297,8 +297,8 @@ export default class Descartes_Component extends Component
             this._yAxis.push( this._yAxisRight );
         };
 
-        this._back = new Grid( this.grid, this );
-        this.sprite.addChild( this._back.sprite );
+        this._grid = new Grid( this.grid, this );
+        this.sprite.addChild( this._grid.sprite );
     }
 
     /**
@@ -395,7 +395,7 @@ export default class Descartes_Component extends Component
         } );
 
         //然后yAxis更新后，对应的背景也要更新
-        this._back.reset({
+        this._grid.reset({
             animation:false,
             xAxis: {
                 data: this._yAxisLeft.layoutData
@@ -455,7 +455,7 @@ export default class Descartes_Component extends Component
             
             //然后yAxis更新后，对应的背景也要更新,目前被添加到了left才需要updata grid
             if( _yAxis.place == "left" ){
-                this._back.reset({
+                this._grid.reset({
                     animation:false,
                     xAxis: {
                         data: this._yAxisLeft.layoutData

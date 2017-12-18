@@ -57,7 +57,7 @@ export default class xAxis extends Component
         this.dataOrg = []; //源数据
         this.dataSection = []; //默认就等于源数据
         this._layoutDataSection = []; //dataSection的 format 后的数据
-        this.data = []; //{x:100, content:'1000'}
+        this.data = []; //{x:100, value:'1000',visible:true}
         this.layoutData = []; //this.data(可能数据过多),重新编排过滤后的数据集合, 并根据此数组展现文字和线条
         this.sprite = null;
 
@@ -89,6 +89,9 @@ export default class xAxis extends Component
         this.posParseToInt = false; //主要是柱状图里面有需要 要均匀间隔1px的时候需要
 
         this.init(opt, data);
+
+        //xAxis的field只有一个值
+        this.field = _.flatten( [ this.field ] )[0];
     }
 
     init(opt, data) 
@@ -161,36 +164,12 @@ export default class xAxis extends Component
         return arr;
     }
 
-    setX($n) 
-    {
-        this.sprite.context.x = $n
-    }
-
-    setY($n)
-    {
-        this.sprite.context.y = $n
-    }
-
     //配置和数据变化
     reset(opt, data)
     {
-        //先在field里面删除一个字段，然后重新计算
+        //先在 field 里面删除一个字段，然后重新计算
         opt && _.extend(true, this, opt);
-
         this._initHandle(opt, data);
-
-        this.draw();
-
-    }
-
-    //数据变化，配置没变的情况
-    resetData(data)
-    {
-        this.sprite.removeAllChildren();
-        this.dataSection = [];
-
-        this._initHandle(null, data);
-
         this.draw();
     }
 
@@ -199,7 +178,7 @@ export default class xAxis extends Component
         var i;
         for( var ii=0,il=this.data.length ; ii<il ; ii++ ){
             var obj = this.data[ii];
-            if(obj.content == xvalue){
+            if(obj.value == xvalue){
                 i = ii;
                 break;
             }
@@ -210,28 +189,19 @@ export default class xAxis extends Component
     
     draw(opt)
     {
-
-        // this.data = [{x:0,content:'0000'},{x:100,content:'10000'},{x:200,content:'20000'},{x:300,content:'30000'},{x:400,content:'0000'},{x:500,content:'10000'},{x:600,content:'20000'}]
-        if( this.data.length == 0 ){
-
-        };
+        //首次渲染从 直角坐标系组件中会传入 opt
         this._getLabel();
-        this._initConfig(opt);
+        this._computerConfit(opt);
         this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
-        var me = this;
-        _.each(this.data, function(obj, i) {
-            obj.layoutText = me._layoutDataSection[i];
-        });
 
         this._trimLayoutData();
 
-        this.setX(this.pos.x);
-        this.setY(this.pos.y);
+        this.sprite.context.x = this.pos.x;
+        this.sprite.context.y = this.pos.y;
 
         this._widget();
 
         this.resize = false;
-        // this.data = this.layoutData
     }
 
     _getLabel()
@@ -254,7 +224,7 @@ export default class xAxis extends Component
     }
 
     //初始化配置
-    _initConfig(opt)
+    _computerConfit(opt)
     {
         if (opt) {
             _.extend(true, this, opt);
@@ -332,7 +302,7 @@ export default class xAxis extends Component
         this.xDis = xGraphsWidth / data.length;//这个属性目前主要是柱状图有分组柱状图的场景在用
 
         for (var a = 0, al  = data.length; a < al; a++ ) {
-            var layoutText = this._getFormatText(data[a])
+            var layoutText = this._getFormatText( data[a] )
             var txt = new Canvax.Display.Text( layoutText , {
                 context: {
                     fontSize: this.text.fontSize
@@ -340,14 +310,16 @@ export default class xAxis extends Component
             });
             
             var o = {
-                'content':data[a], 
-                'x': this.getPosX({
+                value   : data[a],
+                layoutText : layoutText,
+                x       : this.getPosX({
                     val : data[a],
                     ind : a,
                     dataLen: al,
                     xGraphsWidth : xGraphsWidth
                 }),
-                'textWidth': txt.getTextWidth()
+                textWidth: txt.getTextWidth(),
+                field : this.field
             };
 
             tmpData.push( o );

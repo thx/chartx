@@ -126,7 +126,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         var index = $o.iNode
         var group = me.barsSp.getChildById('barGroup_' + index)
         if (!group) {
-            return
+            return;
         }
 
         me.checkedSp.removeChildById('line_' + index)

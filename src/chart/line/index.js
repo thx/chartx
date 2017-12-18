@@ -75,6 +75,7 @@ export default class Line extends Chart
     {
         this._coordinate.addField( field, targetYAxis );
         this._graphs.add( field );
+        this.plugsReset(  );
     }
 
     /*
@@ -101,6 +102,7 @@ export default class Line extends Chart
         this._coordinate.removeField( target );
         //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
         this._graphs.remove(ind);
+        this.plugsReset(  );
     }
 
 
@@ -114,13 +116,13 @@ export default class Line extends Chart
         this._graphs = new Graphs(this.graphs, this);
         this.core.addChild(this._graphs.sprite);
 
-        this._tip = new Tips(this.tips, this.canvax.domView, this.dataFrame);
-        this._tip._markColumn.on("mouseover" , function(e){
-            me._setXaxisYaxisToTipsInfo(e);    
-            me._tip.show( e );
+        this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame);
+        this._tips._markColumn.on("mouseover" , function(e){
+            me._setXaxisYaxisToTipsInfo(e);
+            me._tips.show( e );
         });
         
-        this.stageTip.addChild(this._tip.sprite);
+        this.stageTip.addChild(this._tips.sprite);
 
         //initModule 里面全部都是只数据和module的设置，
         //所以_initPlugsModules里的plug还有可以修改layout的机会
@@ -147,12 +149,12 @@ export default class Line extends Chart
             me.fire("complete");
         });
 
-        //绘制完grapsh后，要把induce 给到 _tips.induce
-        this._tip.setInduce( this._graphs.induce );
+        //绘制完grapsh后，要把induce 给到 _tipss.induce
+        this._tips.setInduce( this._graphs.induce );
 
         var me = this;
-        this.bindEvent(this.core);
-        this._tip.sprite.on('nodeclick', function(e) {
+        this.bindEvent();
+        this._tips.sprite.on('nodeclick', function(e) {
             me._setXaxisYaxisToTipsInfo(e);
             me.fire("nodeclick", e.eventInfo);
         });
@@ -178,37 +180,15 @@ export default class Line extends Chart
 
         var dataZoomOpt = _.extend(true, {
             w: me._coordinate.graphsWidth,
-            
             pos: {
                 x: me._coordinate.graphsX,
                 y: me._coordinate.graphsY + me._coordinate._xAxis.height
             },
-            count : me.dataFrame.org.length-1-1,
             dragIng : function( range , pixRange , count , width ){
 
-                //这个计算start end 和bar不同
-                var itemW = width/count;
-                var start = null, end = null;
-                for( var i = 0; i<=count; i++ ){
-                    if( start === null && (itemW*i + itemW/2) > pixRange.start){
-                        start = i;
-                    };
-                    if( end === null && (itemW*i + itemW/2) > pixRange.end){
-                        end = i;
-                    };
-                    if( end !== null ){
-                        break;
-                    }
-                };
-
-                if (start == me.dataZoom.range.start && end == me.dataZoom.range.end) {
-                    return;
-                };
-
-                me.dataZoom.range.start = parseInt(start);
-                me.dataZoom.range.end = parseInt(end);
-
-                me.resetData( me.dataFrame.org , {
+                me.dataZoom.range = range;
+                
+                me.resetData( me._data , {
                     trigger : "dataZoom"
                 });
 
@@ -216,9 +196,6 @@ export default class Line extends Chart
             }
         }, me.dataZoom);
 
-        //这样里和bar不一样，需要减一个
-        dataZoomOpt.range.end = parseInt(dataZoomOpt.range.end);
-        dataZoomOpt.range.end --;
 
         return dataZoomOpt;
     }
@@ -310,61 +287,13 @@ export default class Line extends Chart
     //markpoint end
 
     //markline begin
-    drawMarkLine( field, yVal, _yAxis , ML)
+    drawMarkLine( ML, yVal, _yAxis , field )
     {
-        var me = this;
+        var _fstyle = field ? this._graphs._yAxisFieldsMap[field].group.line.strokeStyle : "#999";
+        var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
+        var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
 
-        var yPos=0, label='';
-        var label = "markline";
-        
-        if( yVal !== undefined && yVal !== null ){
-            yPos = _yAxis.getYposFromVal(yVal);
-            field && (label = field);
-        } else {
-            //没有配置y，则取均值
-            if( !field ){
-                //如果没有配置y值，也没有配置所属哪个field，那么就不画
-                return;
-            };
-
-            var average = me._graphs.data[field].average;
-            yVal = average.value;
-            if( yVal === undefined || yVal === null ) return;
-            yPos = parseInt( average.position );
-            label = field + '均值';
-        };
-        label += ("："+yVal);
-
-        var o = {
-            value  : yVal,
-        };
-
-        if( field ){
-            o.i = me._graphs._yAxisFieldsMap[field].ind;
-            o.field = field;
-        }
-
-        if (ML.text && ML.text.enabled) {
-            if (_.isFunction(ML.text.format)) {
-                label = ML.text.format(o)
-            }
-        };
-
-        function getProp( obj , p , def){
-            var val;
-            if( !obj || ( obj && !obj[p] ) ){
-                return def;
-            };
-            if( _.isFunction( obj[p] ) ){
-                return obj[p]( o );
-            };
-            return obj[p];
-        };
-        var g = field && me._graphs._yAxisFieldsMap[field].group;
-        var lineStrokeStyle = getProp( ML.line, "strokeStyle" , (g ? g.line.strokeStyle : "#999") );
-        var textFillStyle = getProp( ML.text, "fillStyle" , (g ? g.line.strokeStyle : "#999") );
-    
-        this.creatOneMarkLine( yVal, yPos, lineStrokeStyle, label, textFillStyle, field, ML, _yAxis);
+        this.creatOneMarkLine( ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field );
     }
     //markline end
 
@@ -378,50 +307,43 @@ export default class Line extends Chart
     }
 
     
-    bindEvent(spt, _setXaxisYaxisToTipsInfo)
+    bindEvent( _setXaxisYaxisToTipsInfo )
     {
     
         var me = this;
         _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = me._setXaxisYaxisToTipsInfo);
-        spt.on("panstart mouseover", function(e) {
-            if (me._tip.enabled && e.eventInfo && e.eventInfo.nodesInfoList.length > 0) {
-                //me._tip.hide(e);
+        this.core.on("panstart mouseover", function(e) {
+            if ( me._tips.enabled ) {
                 _setXaxisYaxisToTipsInfo.apply(me, [e]);
-                me._tip.show(e);
+                me._tips.show(e);
+            };
+            me.fire(e.type, e);
+        });
+        this.core.on("panmove mousemove", function(e) {
+            if ( me._tips.enabled ) {
+                _setXaxisYaxisToTipsInfo.apply(me, [e]);
+                me._tips.move(e);
+                me.fire(e.type, e);
             }
         });
-        spt.on("panmove mousemove", function(e) {
-            if (me._tip.enabled && e.eventInfo) {
-                if (e.eventInfo.nodesInfoList.length > 0) {
-                    _setXaxisYaxisToTipsInfo.apply(me, [e]);
-                    if (me._tip._isShow) {
-                        me._tip.move(e);
-                    } else {
-                        me._tip.show(e);
-                    }
-                } else {
-                    if (me._tip._isShow) {
-                        me._tip.hide(e);
-                    }
-                }
-            }
-        });
-        spt.on("panend mouseout", function(e) {
+        this.core.on("panend mouseout", function(e) {
+            /*
             if (e.toTarget && ( e.toTarget.name == '_markcolumn_node' || e.toTarget.name == '_markcolumn_line')) {
                 return
-            }
-            if (me._tip.enabled) {
-                me._tip.hide(e);
+            };
+            */
+            if (me._tips.enabled) {
+                me._tips.hide(e);
             }
         });
-        spt.on("tap", function(e) {
-            if (me._tip.enabled && e.eventInfo && e.eventInfo.nodesInfoList.length > 0) {
-                me._tip.hide(e);
+        this.core.on("tap", function(e) {
+            if (me._tips.enabled) {
+                me._tips.hide(e);
                 _setXaxisYaxisToTipsInfo.apply(me, [e]);
-                me._tip.show(e);
+                me._tips.show(e);
             }
         });
-        spt.on("click", function(e) {
+        this.core.on("click", function(e) {
             _setXaxisYaxisToTipsInfo.apply(me, [e]);
             me.fire("click", e.eventInfo);
         });
@@ -432,29 +354,16 @@ export default class Line extends Chart
     _setXaxisYaxisToTipsInfo(e)
     {
 
-        if (!e.eventInfo || !this._coordinate._xAxis.dataOrg.length) {
+        if (!e.eventInfo) {
             return;
         };
 
-        var value;
+        e.eventInfo.xAxis = this._coordinate._xAxis.data[ e.eventInfo.iNode ]; 
+        e.eventInfo.title = e.eventInfo.xAxis.field+"："+e.eventInfo.xAxis.layoutText;
 
-        if( e.eventInfo.xAxis && e.eventInfo.xAxis.value ){
-            value = e.eventInfo.xAxis.value;
-        } else {
-            value = this._coordinate._xAxis.dataOrg[0][e.eventInfo.iNode];
-        }
-
-        var me = this;
-        e.eventInfo.xAxis = _.extend({
-            field: this._coordinate._xAxis.field[0],
-            value: value
-        } , e.eventInfo.xAxis);
-
-        e.eventInfo.dataZoom = me.dataZoom;
-
+        e.eventInfo.dataZoom = this.dataZoom;
         e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
 
-        e.eventInfo.iNode += parseInt(this.dataZoom.range.start);
     }
     
     createMarkColumn( xVal , opt)

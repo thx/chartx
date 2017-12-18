@@ -5,11 +5,11 @@ const Circle = Canvax.Shapes.Circle;
 const Droplet = Canvax.Shapes.Droplet;
 const _ = Canvax._;
 
-export default class markPoint extends Component
+export default class MarkPoint extends Component
 {
-	constructor()
+	constructor(userOpts , chartOpts , data)
 	{
-		super();
+		super(userOpts , chartOpts , data);
 		
 		this.markTo      = null; 
         this.data        = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
@@ -190,5 +190,4 @@ export default class markPoint extends Component
             
         
     }
-
 }
