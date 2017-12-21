@@ -87,7 +87,7 @@ chartx2.0 代码规范
 
   ** Chart 图表基类
 
-     和1.xx 版本比， 这次添加了组件管理机制 components
-
-     然后，对于reset 和 resetData两个接口，这次做了绝对清晰的划分，也就是reset 实质上和重新绘制是一回事，而resetData却仅仅是数据的变化，然后调用各个组价的resetData 来实现整体数据的更新（ 之前版本里做的太复杂，reset会去计算用户reset的意图，比如reset里少了个yAxis的字段，那么就会自动remove掉一条线，这是个大坑，而且性价比非常低，但是代码量和可维护性非常低 ）
+     1，这次添加了组件管理机制 components
+     
+     2，然后，对于reset 和 resetData两个接口，这次做了绝对清晰的划分，也就是reset 实质上和重新绘制是一回事，而resetData却仅仅是数据的变化，然后调用各个组价的resetData 来实现整体数据的更新（ 之前版本里做的太复杂，reset会去计算用户reset的意图，比如reset里少了个yAxis的字段，那么就会自动remove掉一条线，这是个大坑，而且性价比非常低，但是代码量和可维护性非常低 ）
 
