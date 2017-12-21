@@ -15,16 +15,8 @@ const _ = Canvax._;
 export default class Descartes extends Chart
 {
     constructor( node, data, opts ){
-        //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
-        //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，
-        //通过parse2MatrixData最终转换的是data = [ ['xfield','yfield'] , ['2016', 111]] 这样 chartx的数据格式
-        data = parse2MatrixData(data);
 
         super( node, data, opts );
-
-        this._node = node;
-        this._data = data;
-        this._opts = opts;
 
         //坐标系统
         this._coordinate = null;
@@ -68,18 +60,16 @@ export default class Descartes extends Chart
         this.stage.addChild(this.stageTip);
     }
 
-    /*
-     * 如果只有数据改动的情况
-     */
-    resetData(data , e)
+    //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
+    _resetData( e )
     {
-        this._data = parse2MatrixData( data );
-        this.dataFrame = this.initData(data);
-        this._reset( this , e );
-        this.fire("_resetData");
+        var me = this;
+        this._coordinate.reset( me.coordinate, this.dataFrame );
+        this._graphs.reset( me.graphs , this.dataFrame);
+        this.plugsReset( e );
     }
 
-    initData(data, opt) 
+    initData(data, opt)
     {
         var d;
         var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
@@ -163,10 +153,9 @@ export default class Descartes extends Chart
     }
 
     //所有plug触发更新
-    plugsReset(opt , e)
+    plugsReset(e)
     {
         var me = this;
-        opt = !opt ? this : opt;
         _.each(this.plugs , function( p , i ){
 
             if( p.type == "dataZoom" ){
@@ -179,7 +168,7 @@ export default class Descartes extends Chart
                 return
             };
             
-            p.plug.reset && p.plug.reset( opt[ p.type ] || {} );
+            p.plug.reset && p.plug.reset( me[ p.type ] || {} );
             
         }); 
     }

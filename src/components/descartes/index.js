@@ -89,58 +89,19 @@ export default class Descartes_Component extends Component
 
     }
 
-    //@opt --> coordinate 节点配置
-    reset( opt, dataFrame )
+
+    resetData( dataFrame )
     {
         var me = this;
-        !opt && ( opt = {} );
-        _.extend(true, this, opt);
         this.dataFrame = dataFrame;
 
         var _xAxisDataFrame = this._getXaxisDataFrame(this.xAxis.field);
-        this._xAxis.reset( opt.xAxis , _xAxisDataFrame );
-
-        var newYaxisFields = [];
+        this._xAxis.resetData( _xAxisDataFrame );
 
         _.each( this._yAxis , function( _yAxis ){
             //这个_yAxis是具体的y轴实例
             var yAxisDataFrame = me._getYaxisDataFrame( _yAxis.field );
-            var _opt = {};
-
-            if( opt && opt.yAxis ){
-                //TODO: 其实这个场景很少的，一般都是resetData
-                //说明reset有配置的修改
-                var yAxis = opt.yAxis;
-                if( !_.isArray( yAxis ) ){
-                    yAxis = [ yAxis ];
-                };
-
-                if( _yAxis.place == "left" ){
-                    //当前是left的话，要从opt里面找到对应的配置
-                    _opt = _.find( yAxis , function( ya ){
-                        return ya.place == "left"
-                    } ) || yAxis[0];
-                } else {
-                    //当前是right的话
-                    _opt = _.find( yAxis , function( ya ){
-                        return ya.place == "right"
-                    } ) || yAxis[1];
-                }
-
-                if( _opt && _opt.field ){
-                    //有配置新的field进来的话，就说明要切换字段了
-                    newYaxisFields = newYaxisFields.concat( _.flatten( [_opt.field] ) );
-
-                    //那么 dataFrame 也要重新获取
-                    yAxisDataFrame = me._getYaxisDataFrame( _opt.field );
-                }
-            };
-            
-            _yAxis.reset( _opt, yAxisDataFrame );
-
-            if( newYaxisFields.length > 0 ){
-                me.yAxisFields = newYaxisFields;
-            }
+            _yAxis.resetData( yAxisDataFrame );
         } );
 
         this._grid.reset({
@@ -390,7 +351,7 @@ export default class Descartes_Component extends Component
                     _yAxis.enabledFields.push( field );
                 };
                 _fs = _.difference( _fs , _yAxis.enabledFields);
-                _yAxis.reset( null , me._getYaxisDataFrame( _fs ));
+                _yAxis.resetData( me._getYaxisDataFrame( _fs ));
             }
         } );
 
@@ -451,7 +412,7 @@ export default class Descartes_Component extends Component
 
             //然后重新设置该yAxisDataFrame
             _fs = _.difference( _fs , _yAxis.enabledFields);
-            _yAxis.reset( null , this._getYaxisDataFrame( _fs ));
+            _yAxis.resetData( this._getYaxisDataFrame( _fs ));
             
             //然后yAxis更新后，对应的背景也要更新,目前被添加到了left才需要updata grid
             if( _yAxis.place == "left" ){
@@ -520,7 +481,7 @@ export default class Descartes_Component extends Component
 
     //从 fieldsDisplayMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
-    getFieldsOfDisplay( maps )
+    getFieldsOfDisplay( )
     {
         var fmap = {
             left: [], right:[]

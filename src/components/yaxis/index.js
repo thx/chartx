@@ -110,18 +110,10 @@ export default class yAxis extends Component
     }
 
     //配置和数据变化
-    reset(opt, data)
+    resetData( data )
     {
         this.dataSection = [];
         this.dataSectionGroup = [];
-
-        if( opt ){
-            _.extend(true, this, opt);
-
-            //有些用户主动配置是只有在_opt上面才有记录的，this上面的时融合了很多默认配置，无法区分
-            //所以这里也需要把主动配置也extend一次
-            _.extend(true, this._opt, opt);
-        }
 
         if( data && data.org ){
             this.dataOrg = data.org; //这里必须是data.org

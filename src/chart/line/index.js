@@ -36,37 +36,6 @@ export default class Line extends Chart
         this.inited = true;
     }
 
-    //折线图的reset实现更加仔细，覆盖父类的reset
-    reset(opt) 
-    {
-        
-        var me = this;
-        
-        if (opt && opt.options) {
-            _.extend(true, this, opt.options);
-        };
-
-        var d = ( this.dataFrame.org || [] );
-        if (opt && opt.data) {
-            d = opt.data;
-        };
-        
-        //不管opt里面有没有传入数据，option的改变也会影响到 dataFrame 。
-        this.dataFrame = this.initData( d , this);
-
-        this._reset( opt.options );
-    }
-
-
-    _reset( opt , e )
-    {
-        var me = this;
-        opt = !opt ? this : opt;
-        this._coordinate.reset( opt.coordinate, this.dataFrame );
-        this._graphs.reset( opt.graphs , this.dataFrame);
-        this.plugsReset( opt , e );
-    }
-
     /*
      *添加一个yAxis字段，也就是添加一条brokenline折线
      *@params field 添加的字段
@@ -186,10 +155,15 @@ export default class Line extends Chart
             },
             dragIng : function( range , pixRange , count , width ){
 
-                me.dataZoom.range = range;
-                
+                var trigger = {
+                    name : "dataZoom",
+                    left :  me.dataZoom.range.start - range.start,
+                    right : range.end - me.dataZoom.range.end
+                }
+
+                _.extend( me.dataZoom.range , range );
                 me.resetData( me._data , {
-                    trigger : "dataZoom"
+                    trigger : trigger
                 });
 
                 me.fire("dataZoomDragIng");
@@ -202,6 +176,8 @@ export default class Line extends Chart
 
     getCloneChart(lineConstructor)
     {
+        this._coordinate
+        debugger
         return {
             graphs: {
                 line: {
@@ -289,7 +265,7 @@ export default class Line extends Chart
     //markline begin
     drawMarkLine( ML, yVal, _yAxis , field )
     {
-        var _fstyle = field ? this._graphs._yAxisFieldsMap[field].group.line.strokeStyle : "#999";
+        var _fstyle = (field && this._graphs._yAxisFieldsMap[field]) ? this._graphs._yAxisFieldsMap[field].group.line.strokeStyle : "#999";
         var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
         var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
 
@@ -359,11 +335,9 @@ export default class Line extends Chart
         };
 
         e.eventInfo.xAxis = this._coordinate._xAxis.data[ e.eventInfo.iNode ]; 
-        e.eventInfo.title = e.eventInfo.xAxis.field+"："+e.eventInfo.xAxis.layoutText;
-
+        e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
         e.eventInfo.dataZoom = this.dataZoom;
         e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
-
     }
     
     createMarkColumn( xVal , opt)

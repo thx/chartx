@@ -1,5 +1,5 @@
 import Canvax from "canvax2d"
-import { getEl } from "../utils/tools"
+import { getEl,parse2MatrixData } from "../utils/tools"
 
 const _ = Canvax._;
 
@@ -11,6 +11,15 @@ export default class Chart extends Canvax.Event.EventDispatcher
         super( node, data, opts );
 
         this.Canvax = Canvax;
+
+        this._node = node;
+        //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
+        //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，
+        //通过parse2MatrixData最终转换的是data = [ ['xfield','yfield'] , ['2016', 111]] 这样 chartx的数据格式
+        //后面有些地方比如 一些graphs中会使用dataFrame.org，， 那么这个dataFrame.org和_data的区别是，
+        //_data是全量数据， dataFrame.org是_data经过dataZoom运算过后的子集
+        this._data = parse2MatrixData(data);
+        this._opts = opts;
 
         this.el = getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width = parseInt(this.el.offsetWidth) //图表区域宽
@@ -107,43 +116,66 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.height = _h;
         this.canvax.resize();
         this.inited = false;
-        this.draw({
-            resize : true
-        });
+
+        this.reset();
+
         this.inited = true;
     }
 
     /**
-     * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
-     * @param obj {data , options}
-     * 这个是最简单粗暴的reset方式，全部叉掉重新画，但是如果有些需要比较细腻的reset，比如
-     * line，bar数据变化是在原有的原件上面做平滑的变动的话，需要在各自图表的构造函数中重置该函数
+     * reset 其实就是重新绘制整个图表，不再做详细的拆分opts中有哪些变化，来做对应的细致的变化，简单粗暴的全部重新创立
      */
-    reset(obj)
+    reset(opts, data)
     {
-        this._reset && this._reset( obj );
+        !opts && (opts={});
 
-        var d = ( this.dataFrame.org || [] );
-        if (obj && obj.options) {
-            _.extend(true, this, obj.options);
-        };
-        if (obj && obj.data) {
-            d = obj.data;
+        _.extend(true, this._opts, opts);
+        //和上面的不同this._opts存储的都是用户设置的配置
+        //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
+        _.extend(true, this , opts);
+
+        if(data) {
+            this._data = parse2MatrixData(data);
         };
 
-        //不放在上面的判断里，是因为options也可能会影响到 dataFrame，比如datazoom
-        d && this.resetData(d);
+        this.dataFrame = this.initData( this._data );
 
         this.plugs = [];
         this.clean();
         this.canvax.domView.innerHTML = "";
+
+        //padding数据也要重置为起始值
+        this.padding = {
+            top: 10,
+            right: 10,
+            bottom: 10,
+            left: 10
+        };
+        this._init && this._init(this._node, this._data, this._opts);
         this.draw();
+
+        if( opts.waterMark ){
+            //添加水印的临时解决方案
+            setTimeout( function(){
+                me._initWaterMark( opts.waterMark );
+            } , 50);
+        };
     }
 
-    //这个resetData一般会被具体的chart实例给覆盖实现
-    resetData( data )
+
+    /*
+     * 只响应数据的变化，不涉及配置变化
+     */
+    resetData(data , e)
     {
-        this.dataFrame = this.initData( data );
+        this._data = parse2MatrixData( data );
+        this.dataFrame = this.initData( this._data );
+        if( e ){
+            //e一般是触发这个data reset的一些场景数据，比如如果是 datazoom触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
+            _.extend( this.dataFrame, e );
+        };
+        this._resetData && this._resetData( e );
+        this.fire("resetData");
     }
 
     _rotate(angle)
@@ -210,14 +242,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var text = waterMarkOpt.content || "waterMark";
         var sp = new Canvax.Display.Sprite({
-            id : "watermark",
-            context : {
-                //rotation : 45,
-                //rotateOrigin : {
-                //    x : this.width/2,
-                //    y : this.height/2
-                //}
-            }
+            id : "watermark"
         });
         var textEl = new Canvax.Display.Text( text , {
             context: {

@@ -117,6 +117,7 @@ export default class dataZoom extends Component
 
     reset( opt , cloneChart )
     {
+        
         !opt && ( opt = {} );
 
         var _preCount = this.count;
@@ -490,6 +491,11 @@ export default class dataZoom extends Component
     setZoomBg()
     {
         //这里不是直接获取_graphs.sprite 而是获取 _graphs.core，切记切记
+        debugger
+        if( this.__graphssp ){
+            this.__graphssp.destroy();
+        };
+
         var graphssp = this._cloneChart.thumbChart._graphs.core;
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg"
@@ -498,6 +504,8 @@ export default class dataZoom extends Component
         graphssp.context.scaleY = this.barH / this._cloneChart.thumbChart._graphs.h;
 
         this.dataZoomBg.addChild( graphssp );
+
+        this.__graphssp = graphssp;
 
         this._cloneChart.thumbChart.destroy();
         this._cloneChart.cloneEl.parentNode.removeChild( this._cloneChart.cloneEl );

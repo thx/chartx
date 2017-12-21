@@ -94,13 +94,14 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         
         var me = this;
 
-        if(dataFrame){
+        if( dataFrame ){
             me.dataFrame = dataFrame;
             me.data = me._trimGraphs();
         };
 
         if( opt ){
             _.extend(true, me, opt);
+            _.extend(true, me.opt, opt);
         };
 
         this.disX = this._getGraphsDisX();
@@ -110,7 +111,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             var group = _.find( me.groups , function(g){
                 return g.field == me.field[a]
             } );
-            group && group.reset( {}, me.data[ group.field ].data );
+            group && group.reset( this.opt , me.data[ group.field ].data , dataFrame.trigger );
         };
     }
 
@@ -147,7 +148,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                         layoutType : self.root._coordinate ? self.root._coordinate.xAxis.layoutType : self.root._xAxis.layoutType
                     } );
                     
-                    var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : _lineData[b];
+                    var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                     var node = {
                         value: _lineData[b],
@@ -217,10 +218,14 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     //add 和 remove 都不涉及到 _yAxisFieldsMap 的操作,只有reset才会重新构建 _yAxisFieldsMap
     add( field )
     {
+        var self = this;
         
         this.data = this._trimGraphs();
         this._setGroupsForYfield( this.data , field );
-        this.update();
+        
+        _.each(this.groups, function(g, i) {
+            g.reset( {} , self.data[ g.field ].data );
+        });
     }
 
     /*
@@ -228,25 +233,18 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
      **/
     remove(i)
     {
+        var self = this;
+
         this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
-        this.update();
-    }
 
-    /*
-     * 更新下最新的状态
-     **/
-    update(opt)
-    {
-        var self = this;
         _.each(this.groups, function(g, i) {
-            g.update( {} , self.data[ g.field ].data );
+            g.reset( {} , self.data[ g.field ].data );
         });
     }
 
     _setGroupsForYfield(data , fields)
     {
-
         var self = this;
 
         if( fields ){

@@ -256,6 +256,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
     reset(opt)
     {
+        this.removeAllChecked()
         this.draw( opt );
     }
 

@@ -7665,6 +7665,15 @@ var Chart = function (_Canvax$Event$EventDi) {
 
         _this.Canvax = canvax;
 
+        _this._node = node;
+        //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
+        //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，
+        //通过parse2MatrixData最终转换的是data = [ ['xfield','yfield'] , ['2016', 111]] 这样 chartx的数据格式
+        //后面有些地方比如 一些graphs中会使用dataFrame.org，， 那么这个dataFrame.org和_data的区别是，
+        //_data是全量数据， dataFrame.org是_data经过dataZoom运算过后的子集
+        _this._data = parse2MatrixData(data);
+        _this._opts = opts;
+
         _this.el = getEl(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
         _this.height = parseInt(_this.el.offsetHeight); //图表区域高
@@ -7763,47 +7772,69 @@ var Chart = function (_Canvax$Event$EventDi) {
             this.height = _h;
             this.canvax.resize();
             this.inited = false;
-            this.draw({
-                resize: true
-            });
+
+            this.reset();
+
             this.inited = true;
         }
 
         /**
-         * reset有两种情况，一是data数据源改变， 一个options的参数配置改变。
-         * @param obj {data , options}
-         * 这个是最简单粗暴的reset方式，全部叉掉重新画，但是如果有些需要比较细腻的reset，比如
-         * line，bar数据变化是在原有的原件上面做平滑的变动的话，需要在各自图表的构造函数中重置该函数
+         * reset 其实就是重新绘制整个图表，不再做详细的拆分opts中有哪些变化，来做对应的细致的变化，简单粗暴的全部重新创立
          */
 
     }, {
         key: "reset",
-        value: function reset(obj) {
-            this._reset && this._reset(obj);
+        value: function reset(opts, data) {
+            !opts && (opts = {});
 
-            var d = this.dataFrame.org || [];
-            if (obj && obj.options) {
-                _$1.extend(true, this, obj.options);
-            }
-            if (obj && obj.data) {
-                d = obj.data;
+            _$1.extend(true, this._opts, opts);
+            //和上面的不同this._opts存储的都是用户设置的配置
+            //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
+            _$1.extend(true, this, opts);
+
+            if (data) {
+                this._data = parse2MatrixData(data);
             }
 
-            //不放在上面的判断里，是因为options也可能会影响到 dataFrame，比如datazoom
-            d && this.resetData(d);
+            this.dataFrame = this.initData(this._data);
 
             this.plugs = [];
             this.clean();
             this.canvax.domView.innerHTML = "";
+
+            //padding数据也要重置为起始值
+            this.padding = {
+                top: 10,
+                right: 10,
+                bottom: 10,
+                left: 10
+            };
+            this._init && this._init(this._node, this._data, this._opts);
             this.draw();
+
+            if (opts.waterMark) {
+                //添加水印的临时解决方案
+                setTimeout(function () {
+                    me._initWaterMark(opts.waterMark);
+                }, 50);
+            }
         }
 
-        //这个resetData一般会被具体的chart实例给覆盖实现
+        /*
+         * 只响应数据的变化，不涉及配置变化
+         */
 
     }, {
         key: "resetData",
-        value: function resetData(data) {
-            this.dataFrame = this.initData(data);
+        value: function resetData(data, e) {
+            this._data = parse2MatrixData(data);
+            this.dataFrame = this.initData(this._data);
+            if (e) {
+                //e一般是触发这个data reset的一些场景数据，比如如果是 datazoom触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
+                _$1.extend(this.dataFrame, e);
+            }
+            this._resetData && this._resetData(e);
+            this.fire("resetData");
         }
     }, {
         key: "_rotate",
@@ -7873,14 +7904,7 @@ var Chart = function (_Canvax$Event$EventDi) {
         value: function _initWaterMark(waterMarkOpt) {
             var text = waterMarkOpt.content || "waterMark";
             var sp = new canvax.Display.Sprite({
-                id: "watermark",
-                context: {
-                    //rotation : 45,
-                    //rotateOrigin : {
-                    //    x : this.width/2,
-                    //    y : this.height/2
-                    //}
-                }
+                id: "watermark"
             });
             var textEl = new canvax.Display.Text(text, {
                 context: {
@@ -10196,6 +10220,7 @@ var dataZoom = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt, cloneChart) {
+
             !opt && (opt = {});
 
             var _preCount = this.count;
@@ -10559,6 +10584,11 @@ var dataZoom = function (_Component) {
         key: "setZoomBg",
         value: function setZoomBg() {
             //这里不是直接获取_graphs.sprite 而是获取 _graphs.core，切记切记
+            debugger;
+            if (this.__graphssp) {
+                this.__graphssp.destroy();
+            }
+
             var graphssp = this._cloneChart.thumbChart._graphs.core;
 
             graphssp.id = graphssp.id + "_datazoomthumbChartbg";
@@ -10567,6 +10597,8 @@ var dataZoom = function (_Component) {
             graphssp.context.scaleY = this.barH / this._cloneChart.thumbChart._graphs.h;
 
             this.dataZoomBg.addChild(graphssp);
+
+            this.__graphssp = graphssp;
 
             this._cloneChart.thumbChart.destroy();
             this._cloneChart.cloneEl.parentNode.removeChild(this._cloneChart.cloneEl);
@@ -11166,18 +11198,9 @@ var Descartes = function (_Chart) {
     function Descartes(node, data, opts) {
         classCallCheck$1(this, Descartes);
 
-        //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
-        //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，
-        //通过parse2MatrixData最终转换的是data = [ ['xfield','yfield'] , ['2016', 111]] 这样 chartx的数据格式
-        data = parse2MatrixData(data);
-
+        //坐标系统
         var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts));
 
-        _this._node = node;
-        _this._data = data;
-        _this._opts = opts;
-
-        //坐标系统
         _this._coordinate = null;
         _this.coordinate = {
             xAxis: {
@@ -11221,17 +11244,15 @@ var Descartes = function (_Chart) {
             this.stage.addChild(this.stageTip);
         }
 
-        /*
-         * 如果只有数据改动的情况
-         */
+        //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
 
     }, {
-        key: "resetData",
-        value: function resetData(data, e) {
-            this._data = parse2MatrixData(data);
-            this.dataFrame = this.initData(data);
-            this._reset(this, e);
-            this.fire("_resetData");
+        key: "_resetData",
+        value: function _resetData(e) {
+            var me = this;
+            this._coordinate.reset(me.coordinate, this.dataFrame);
+            this._graphs.reset(me.graphs, this.dataFrame);
+            this.plugsReset(e);
         }
     }, {
         key: "initData",
@@ -11317,9 +11338,8 @@ var Descartes = function (_Chart) {
 
     }, {
         key: "plugsReset",
-        value: function plugsReset(opt, e) {
+        value: function plugsReset(e) {
             var me = this;
-            opt = !opt ? this : opt;
             _$8.each(this.plugs, function (p, i) {
 
                 if (p.type == "dataZoom") {
@@ -11332,7 +11352,7 @@ var Descartes = function (_Chart) {
                     return;
                 }
 
-                p.plug.reset && p.plug.reset(opt[p.type] || {});
+                p.plug.reset && p.plug.reset(me[p.type] || {});
             });
         }
 
@@ -11924,11 +11944,9 @@ var xAxis = function (_Component) {
         //配置和数据变化
 
     }, {
-        key: "reset",
-        value: function reset(opt, data) {
-            //先在 field 里面删除一个字段，然后重新计算
-            opt && _$15.extend(true, this, opt);
-            this._initHandle(opt, data);
+        key: "resetData",
+        value: function resetData(data) {
+            this._initHandle(null, data);
             this.draw();
         }
     }, {
@@ -12541,18 +12559,10 @@ var yAxis = function (_Component) {
         //配置和数据变化
 
     }, {
-        key: "reset",
-        value: function reset(opt, data) {
+        key: "resetData",
+        value: function resetData(data) {
             this.dataSection = [];
             this.dataSectionGroup = [];
-
-            if (opt) {
-                _$17.extend(true, this, opt);
-
-                //有些用户主动配置是只有在_opt上面才有记录的，this上面的时融合了很多默认配置，无法区分
-                //所以这里也需要把主动配置也extend一次
-                _$17.extend(true, this._opt, opt);
-            }
 
             if (data && data.org) {
                 this.dataOrg = data.org; //这里必须是data.org
@@ -13560,61 +13570,19 @@ var Descartes_Component = function (_Component) {
             opt.xAxis = this.xAxis;
             opt.yAxis = this.yAxis;
         }
-
-        //@opt --> coordinate 节点配置
-
     }, {
-        key: "reset",
-        value: function reset(opt, dataFrame) {
+        key: "resetData",
+        value: function resetData(dataFrame) {
             var me = this;
-            !opt && (opt = {});
-            _$14.extend(true, this, opt);
             this.dataFrame = dataFrame;
 
             var _xAxisDataFrame = this._getXaxisDataFrame(this.xAxis.field);
-            this._xAxis.reset(opt.xAxis, _xAxisDataFrame);
-
-            var newYaxisFields = [];
+            this._xAxis.resetData(_xAxisDataFrame);
 
             _$14.each(this._yAxis, function (_yAxis) {
                 //这个_yAxis是具体的y轴实例
                 var yAxisDataFrame = me._getYaxisDataFrame(_yAxis.field);
-                var _opt = {};
-
-                if (opt && opt.yAxis) {
-                    //TODO: 其实这个场景很少的，一般都是resetData
-                    //说明reset有配置的修改
-                    var yAxis$$1 = opt.yAxis;
-                    if (!_$14.isArray(yAxis$$1)) {
-                        yAxis$$1 = [yAxis$$1];
-                    }
-
-                    if (_yAxis.place == "left") {
-                        //当前是left的话，要从opt里面找到对应的配置
-                        _opt = _$14.find(yAxis$$1, function (ya) {
-                            return ya.place == "left";
-                        }) || yAxis$$1[0];
-                    } else {
-                        //当前是right的话
-                        _opt = _$14.find(yAxis$$1, function (ya) {
-                            return ya.place == "right";
-                        }) || yAxis$$1[1];
-                    }
-
-                    if (_opt && _opt.field) {
-                        //有配置新的field进来的话，就说明要切换字段了
-                        newYaxisFields = newYaxisFields.concat(_$14.flatten([_opt.field]));
-
-                        //那么 dataFrame 也要重新获取
-                        yAxisDataFrame = me._getYaxisDataFrame(_opt.field);
-                    }
-                }
-
-                _yAxis.reset(_opt, yAxisDataFrame);
-
-                if (newYaxisFields.length > 0) {
-                    me.yAxisFields = newYaxisFields;
-                }
+                _yAxis.resetData(yAxisDataFrame);
             });
 
             this._grid.reset({
@@ -13861,7 +13829,7 @@ var Descartes_Component = function (_Component) {
                         _yAxis.enabledFields.push(field);
                     }
                     _fs = _$14.difference(_fs, _yAxis.enabledFields);
-                    _yAxis.reset(null, me._getYaxisDataFrame(_fs));
+                    _yAxis.resetData(me._getYaxisDataFrame(_fs));
                 }
             });
 
@@ -13922,7 +13890,7 @@ var Descartes_Component = function (_Component) {
 
                 //然后重新设置该yAxisDataFrame
                 _fs = _$14.difference(_fs, _yAxis.enabledFields);
-                _yAxis.reset(null, this._getYaxisDataFrame(_fs));
+                _yAxis.resetData(this._getYaxisDataFrame(_fs));
 
                 //然后yAxis更新后，对应的背景也要更新,目前被添加到了left才需要updata grid
                 if (_yAxis.place == "left") {
@@ -13998,7 +13966,7 @@ var Descartes_Component = function (_Component) {
 
     }, {
         key: "getFieldsOfDisplay",
-        value: function getFieldsOfDisplay(maps) {
+        value: function getFieldsOfDisplay() {
             var fmap = {
                 left: [], right: []
             };
@@ -14322,6 +14290,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "reset",
         value: function reset(opt) {
+            this.removeAllChecked();
             this.draw(opt);
         }
     }, {
@@ -15125,16 +15094,6 @@ var Bar = function (_Chart) {
 
             this.stageTip.addChild(this._tips.sprite);
         }
-    }, {
-        key: "_reset",
-        value: function _reset(opt, e) {
-            var me = this;
-            opt = !opt ? this : opt;
-            me._removeChecked();
-            this._coordinate.reset(opt.coordinate, this.dataFrame);
-            this._graphs.reset(opt.graphs);
-            this.plugsReset(opt, e);
-        }
 
         //TODO：bar中用来改变yAxis.field的临时 方案
 
@@ -15267,12 +15226,17 @@ var Bar = function (_Chart) {
                     y: me._coordinate.graphsY + me._coordinate._xAxis.height
                 },
                 dragIng: function dragIng(range, pixRange, count, width) {
-                    me.dataZoom.range = range;
-                    me.resetData(me._data, {
-                        trigger: "dataZoom"
-                    });
 
-                    me._removeChecked();
+                    var trigger = {
+                        name: "dataZoom",
+                        left: me.dataZoom.range.start - range.start,
+                        right: range.end - me.dataZoom.range.end
+                    };
+
+                    _$7.extend(me.dataZoom.range, range);
+                    me.resetData(me._data, {
+                        trigger: trigger
+                    });
 
                     me.fire("dataZoomDragIng");
                 },
@@ -15304,8 +15268,7 @@ var Bar = function (_Chart) {
     }, {
         key: "drawMarkLine",
         value: function drawMarkLine(ML, yVal, _yAxis, field) {
-
-            var _fstyle = field ? this._graphs._yAxisFieldsMap[field].fillStyle : "#999";
+            var _fstyle = field && this._graphs._yAxisFieldsMap[field] ? this._graphs._yAxisFieldsMap[field].fillStyle : "#999";
             var lineStrokeStyle = ML.line && ML.line.strokeStyle || _fstyle;
             var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
 
@@ -15454,11 +15417,6 @@ var Bar = function (_Chart) {
                 }
             });
             return checked;
-        }
-    }, {
-        key: "_removeChecked",
-        value: function _removeChecked() {
-            this._graphs.removeAllChecked();
         }
     }, {
         key: "_updateChecked",
@@ -15613,7 +15571,7 @@ var Bar = function (_Chart) {
                 }
             });
             e.eventInfo.xAxis = this._coordinate._xAxis.data[e.eventInfo.iNode];
-            e.eventInfo.title = e.eventInfo.xAxis.field + "：" + e.eventInfo.xAxis.layoutText;
+            e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
             e.eventInfo.dataZoom = me.dataZoom;
             e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
         }
@@ -15956,7 +15914,8 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     }, {
         key: "getNodeInfoAt",
         value: function getNodeInfoAt($index) {
-            var o = _$22.clone(this.data[$index]);
+            var o = this.data[$index];
+
             if (o && o.value != null && o.value != undefined && o.value !== "") {
                 return _$22.extend(o, this._createNodeInfo($index));
             } else {
@@ -16030,53 +15989,90 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             //TODO:这里要优化下，这个x值可能刚好对应上了某个具体的index，，，而现在强制为-1是不对的
             return _$22.extend(point, me._createNodeInfo(-1));
         }
+
+        /**
+         * 
+         * @param {object} opt 
+         * @param {data} data 
+         * 
+         * 触发这次reset的触发原因比如{name : 'datazoom', left:-1,right:1},  
+         * dataTrigger 描述了数据变化的原因和变化的过程，比如上面的数据 left少了一个数据，right多了一个数据
+         * @param {object} dataTrigger 
+         */
+
     }, {
         key: "reset",
-        value: function reset(opt, data) {
+        value: function reset(opt, data, dataTrigger) {
             var me = this;
-            me._pointList = this._getPointList(data);
+
+            if (data) {
+                this.data = data;
+            }
+
+            me._pointList = this._getPointList(this.data);
             var plen = me._pointList.length;
             var cplen = me._currPointList.length;
+
+            if (!dataTrigger) {
+                dataTrigger = {
+                    name: 'normal',
+                    left: 0, //默认左边数据没变
+                    right: plen - cplen
+                };
+            }
+
+            if (dataTrigger.left) {
+                if (dataTrigger.left > 0) {
+                    this._currPointList = this._pointList.slice(0, dataTrigger.left).concat(this._currPointList);
+                }
+                if (dataTrigger.left < 0) {
+                    this._currPointList.splice(0, Math.abs(dataTrigger.left));
+                }
+            }
+
+            if (dataTrigger.right) {
+                if (dataTrigger.right > 0) {
+                    this._currPointList = this._currPointList.concat(this._pointList.slice(-dataTrigger.right));
+                }
+                if (dataTrigger.right < 0) {
+                    this._currPointList.splice(this._currPointList.length - Math.abs(dataTrigger.right));
+                }
+            }
+
+            /*
             if (plen < cplen) {
                 for (var i = plen, l = cplen; i < l; i++) {
-                    me._circles && me._circles.removeChildAt(i);
-                    me._texts && me._texts.removeChildAt(i);
-                    l--;
-                    i--;
-                }
+                    if( _.isNumber(me._currPointList[i][1]) ){
+                        //如果这个点得y轴是个number，是有效的数据，那么
+                        //删除_circles，_texts 中一个
+                        //随便删一个就可以，不需要对应的那个
+                        me._circles && me._circles.removeChildAt( 0 );
+                        me._texts && me._texts.removeChildAt( 0 );
+                    }
+                };
                 me._currPointList.length = plen;
-            }
-
-            if (plen > cplen) {
+            };
+             if (plen > cplen) {
                 var diffLen = plen - cplen;
                 for (var i = 0; i < diffLen; i++) {
-                    me._currPointList.push(_$22.clone(me._currPointList[cplen - 1]));
+                    me._currPointList.push(_.clone( me._pointList[cplen + i] ));
                 }
-            }
+            };
+            */
 
-            //me._circles && me._circles.removeAllChildren();
-            //me._texts && me._texts.removeAllChildren();
+            //从被移除了得update中截留过来的，目前没发现有用途，先注释掉
+            /*
+            if( opt._groupInd !== undefined ){
+                var _strokeStyle = this._getLineStrokeStyle();
+                this._bline.context.strokeStyle = _strokeStyle;
+                this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
+                this._setNodesStyle();
+            };
+            */
+
             me._createNodes();
             me._createTexts();
             me._grow();
-        }
-    }, {
-        key: "update",
-        value: function update(opt, date) {
-            if (!this._bline) {
-                return;
-            }
-            _$22.extend(true, this, opt);
-            if (data) {
-                this._pointList = this._getPointList(data);
-                this._grow();
-            }
-            if (opt._groupInd !== undefined) {
-                var _strokeStyle = this._getLineStrokeStyle();
-                this._bline.context.strokeStyle = _strokeStyle;
-                this._fill.context.fillStyle = this._getFillStyle() || _strokeStyle;
-                this._setNodesStyle();
-            }
         }
     }, {
         key: "_grow",
@@ -16097,17 +16093,25 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
                 me._fill.context.path = me._fillLine(me._bline);
                 me._fill.context.fillStyle = me._getFillStyle() || _strokeStyle;
-                me._circles && _$22.each(me._circles.children, function (circle, i) {
-                    var ind = parseInt(circle.id.split("_")[1]);
-                    circle.context.y = list[ind][1];
-                    circle.context.x = list[ind][0];
-                });
 
-                me._texts && _$22.each(me._texts.children, function (text, i) {
-                    var ind = parseInt(text.id.split("_")[1]);
-                    text.context.y = list[ind][1] - 3;
-                    text.context.x = list[ind][0];
-                    me._checkTextPos(text, i);
+                var nodeInd = 0;
+                _$22.each(list, function (point, i) {
+                    if (_$22.isNumber(point[1])) {
+                        if (me._circles) {
+                            var _circle = me._circles.getChildAt(nodeInd);
+                            if (_circle) {
+                                _circle.context.x = point[0];
+                                _circle.context.y = point[1];
+                            }
+                        }
+                        if (me._texts) {
+                            var _text = me._texts.getChildAt(nodeInd);
+                            _text.context.x = point[0];
+                            _text.context.y = point[1] - 3;
+                            me._checkTextPos(_text, i);
+                        }
+                        nodeInd++;
+                    }
                 });
             }
 
@@ -16249,6 +16253,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     }
                 }
             }
+
             return _firstNode;
         }
     }, {
@@ -16386,7 +16391,6 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                         _$22.extend(circle.context, context);
                     } else {
                         circle = new Circle$4({
-                            id: "circle_" + a,
                             context: context
                         });
                         me._circles.addChild(circle);
@@ -16407,8 +16411,9 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     nodeInd++;
                 }
 
-                if (me._circles.children.length > list.length) {
-                    for (var i = me._circles.children.length, l = list.length; i < l; i++) {
+                //把过多的circle节点删除了
+                if (me._circles.children.length > nodeInd) {
+                    for (var i = nodeInd, l = me._circles.children.length; i < l; i++) {
                         me._circles.children[i].destroy();
                         i--;
                         l--;
@@ -16463,7 +16468,6 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                         _$22.extend(text.context, context);
                     } else {
                         text = new canvax.Display.Text(content, {
-                            id: "text_" + a,
                             context: context
                         });
                         me._texts.addChild(text);
@@ -16472,8 +16476,9 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     nodeInd++;
                 }
 
-                if (me._texts.children.length > list.length) {
-                    for (var i = me._texts.children.length, l = list.length; i < l; i++) {
+                //把过多的circle节点删除了
+                if (me._texts.children.length > nodeInd) {
+                    for (var i = nodeInd, l = me._texts.children.length; i < l; i++) {
                         me._texts.children[i].destroy();
                         i--;
                         l--;
@@ -16501,21 +16506,36 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             //填充直线
             var fillPath = _$22.clone(bline.context.pointList);
 
-            if (!fillPath[0] || !fillPath[fillPath.length - 1]) {
-                return "";
+            var path = "";
+            var baseY = this._yAxis.basePoint.y;
+
+            var _currPath = null;
+
+            _$22.each(fillPath, function (point, i) {
+                if (_$22.isNumber(point[1])) {
+                    if (_currPath === null) {
+                        _currPath = [];
+                    }
+                    _currPath.push(point);
+                } else {
+                    // not a number
+                    if (_currPath && _currPath.length) {
+                        getOnePath();
+                    }
+                }
+
+                if (i == fillPath.length - 1 && _$22.isNumber(point[1])) {
+                    getOnePath();
+                }
+            });
+
+            function getOnePath() {
+                _currPath.push([_currPath[_currPath.length - 1][0], baseY], [_currPath[0][0], baseY], [_currPath[0][0], _currPath[0][1]]);
+                path += getPath(_currPath);
+                _currPath = null;
             }
 
-            if (fillPath.length == 0) {
-                return "";
-            }
-            var baseY = 0;
-            if (this.sort == "desc") {
-                baseY = -this.h;
-            }
-
-            fillPath.push([fillPath[fillPath.length - 1][0], baseY], [fillPath[0][0], baseY], [fillPath[0][0], fillPath[0][1]]);
-
-            return getPath(fillPath);
+            return path;
         }
     }]);
     return LineGraphsGroup;
@@ -16904,6 +16924,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
 
             if (opt) {
                 _$21.extend(true, me, opt);
+                _$21.extend(true, me.opt, opt);
             }
 
             this.disX = this._getGraphsDisX();
@@ -16913,7 +16934,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                 var group = _$21.find(me.groups, function (g) {
                     return g.field == me.field[a];
                 });
-                group && group.reset({}, me.data[group.field].data);
+                group && group.reset(this.opt, me.data[group.field].data, dataFrame.trigger);
             }
         }
 
@@ -16952,7 +16973,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                             layoutType: self.root._coordinate ? self.root._coordinate.xAxis.layoutType : self.root._xAxis.layoutType
                         });
 
-                        var y = _$21.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : _lineData[b];
+                        var y = _$21.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                         var node = {
                             value: _lineData[b],
@@ -17024,10 +17045,14 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "add",
         value: function add(field) {
+            var self = this;
 
             this.data = this._trimGraphs();
             this._setGroupsForYfield(this.data, field);
-            this.update();
+
+            _$21.each(this.groups, function (g, i) {
+                g.reset({}, self.data[g.field].data);
+            });
         }
 
         /*
@@ -17037,27 +17062,18 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "remove",
         value: function remove(i) {
+            var self = this;
+
             this.groups.splice(i, 1)[0].destroy();
             this.data = this._trimGraphs();
-            this.update();
-        }
 
-        /*
-         * 更新下最新的状态
-         **/
-
-    }, {
-        key: "update",
-        value: function update(opt) {
-            var self = this;
             _$21.each(this.groups, function (g, i) {
-                g.update({}, self.data[g.field].data);
+                g.reset({}, self.data[g.field].data);
             });
         }
     }, {
         key: "_setGroupsForYfield",
         value: function _setGroupsForYfield(data, fields) {
-
             var self = this;
 
             if (fields) {
@@ -17387,38 +17403,6 @@ var Line$6 = function (_Chart) {
             this.inited = true;
         }
 
-        //折线图的reset实现更加仔细，覆盖父类的reset
-
-    }, {
-        key: "reset",
-        value: function reset(opt) {
-
-            var me = this;
-
-            if (opt && opt.options) {
-                _$20.extend(true, this, opt.options);
-            }
-
-            var d = this.dataFrame.org || [];
-            if (opt && opt.data) {
-                d = opt.data;
-            }
-
-            //不管opt里面有没有传入数据，option的改变也会影响到 dataFrame 。
-            this.dataFrame = this.initData(d, this);
-
-            this._reset(opt.options);
-        }
-    }, {
-        key: "_reset",
-        value: function _reset(opt, e) {
-            var me = this;
-            opt = !opt ? this : opt;
-            this._coordinate.reset(opt.coordinate, this.dataFrame);
-            this._graphs.reset(opt.graphs, this.dataFrame);
-            this.plugsReset(opt, e);
-        }
-
         /*
          *添加一个yAxis字段，也就是添加一条brokenline折线
          *@params field 添加的字段
@@ -17541,10 +17525,15 @@ var Line$6 = function (_Chart) {
                 },
                 dragIng: function dragIng(range, pixRange, count, width) {
 
-                    me.dataZoom.range = range;
+                    var trigger = {
+                        name: "dataZoom",
+                        left: me.dataZoom.range.start - range.start,
+                        right: range.end - me.dataZoom.range.end
+                    };
 
+                    _$20.extend(me.dataZoom.range, range);
                     me.resetData(me._data, {
-                        trigger: "dataZoom"
+                        trigger: trigger
                     });
 
                     me.fire("dataZoomDragIng");
@@ -17556,6 +17545,8 @@ var Line$6 = function (_Chart) {
     }, {
         key: "getCloneChart",
         value: function getCloneChart(lineConstructor) {
+            this._coordinate;
+            debugger;
             return {
                 graphs: {
                     line: {
@@ -17644,7 +17635,7 @@ var Line$6 = function (_Chart) {
     }, {
         key: "drawMarkLine",
         value: function drawMarkLine(ML, yVal, _yAxis, field) {
-            var _fstyle = field ? this._graphs._yAxisFieldsMap[field].group.line.strokeStyle : "#999";
+            var _fstyle = field && this._graphs._yAxisFieldsMap[field] ? this._graphs._yAxisFieldsMap[field].group.line.strokeStyle : "#999";
             var lineStrokeStyle = ML.line && ML.line.strokeStyle || _fstyle;
             var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
 
@@ -17716,8 +17707,7 @@ var Line$6 = function (_Chart) {
             }
 
             e.eventInfo.xAxis = this._coordinate._xAxis.data[e.eventInfo.iNode];
-            e.eventInfo.title = e.eventInfo.xAxis.field + "：" + e.eventInfo.xAxis.layoutText;
-
+            e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
             e.eventInfo.dataZoom = this.dataZoom;
             e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
         }

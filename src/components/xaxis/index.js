@@ -165,11 +165,9 @@ export default class xAxis extends Component
     }
 
     //配置和数据变化
-    reset(opt, data)
+    resetData( data )
     {
-        //先在 field 里面删除一个字段，然后重新计算
-        opt && _.extend(true, this, opt);
-        this._initHandle(opt, data);
+        this._initHandle(null, data);
         this.draw();
     }
 

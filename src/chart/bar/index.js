@@ -97,15 +97,6 @@ export default class Bar extends Chart
 
     }
 
-    _reset( opt , e )
-    {
-        var me = this;
-        opt = !opt ? this : opt;
-        me._removeChecked();
-        this._coordinate.reset( opt.coordinate, this.dataFrame );
-        this._graphs.reset( opt.graphs );
-        this.plugsReset( opt , e );
-    }
 
     //TODO：bar中用来改变yAxis.field的临时 方案
     add( field )
@@ -231,14 +222,20 @@ export default class Bar extends Chart
                 y: me._coordinate.graphsY + me._coordinate._xAxis.height
             },
             dragIng: function(range , pixRange , count , width) {
-                me.dataZoom.range = range;
+
+                var trigger = {
+                    name : "dataZoom",
+                    left :  me.dataZoom.range.start - range.start,
+                    right : range.end - me.dataZoom.range.end
+                }
+
+                _.extend( me.dataZoom.range , range );
                 me.resetData( me._data , {
-                    trigger : "dataZoom"
+                    trigger : trigger
                 });
 
-                me._removeChecked();
-
                 me.fire("dataZoomDragIng");
+
             },
             dragEnd: function(range) {
                 me._updateChecked();
@@ -267,13 +264,11 @@ export default class Bar extends Chart
 
     drawMarkLine( ML, yVal, _yAxis , field)
     {
-
-        var _fstyle = field ? this._graphs._yAxisFieldsMap[field].fillStyle : "#999";
+        var _fstyle = (field && this._graphs._yAxisFieldsMap[field] ) ? this._graphs._yAxisFieldsMap[field].fillStyle : "#999";
         var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
         var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
 
         this.creatOneMarkLine( ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field );
-
     }
     //markLine end
 
@@ -414,11 +409,6 @@ export default class Bar extends Chart
             }
         });
         return checked
-    }
-
-    _removeChecked()
-    {
-        this._graphs.removeAllChecked()
     }
 
     _updateChecked()
@@ -565,7 +555,7 @@ export default class Bar extends Chart
             };
         });
         e.eventInfo.xAxis = this._coordinate._xAxis.data[ e.eventInfo.iNode ];
-        e.eventInfo.title = e.eventInfo.xAxis.field+"："+e.eventInfo.xAxis.layoutText;
+        e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
         e.eventInfo.dataZoom = me.dataZoom;
         e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
     }
