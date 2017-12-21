@@ -44,9 +44,9 @@ export default class Bar_Line extends Bar
             this._rotate(this.rotate);
         };
         this._initBarModule( opt ); //初始化模块  
-        this.initPlugsModules( opt ); //初始化组件
+        this.initComponents( opt ); //初始化组件
         this._startDraw( opt ); //开始绘图
-        this.drawPlugs( opt );  //绘图完，开始绘制插件
+        this.drawComponents( opt );  //绘图完，开始绘制插件
         this.drawLineGraphs( opt ); //开始绘制折线图的graphs
         this.inited = true;
     }
@@ -75,7 +75,7 @@ export default class Bar_Line extends Bar
         this._coordinate.reset( opt.coordinate, this.dataFrame );
         this._graphs.reset( opt.graphs );
         this._lineChart._graphs.reset( opt.graphs , this.dataFrame);
-        this.plugsReset( opt , e );
+        this.componentsReset( opt , e );
     }
 
     //绘制line部分

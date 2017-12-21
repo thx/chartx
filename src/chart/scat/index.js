@@ -33,9 +33,9 @@ export default class Scat extends Chart
         };
 
         this._initModule( opt ); //初始化模块  
-        this.initPlugsModules( opt ); // 初始化组件
+        this.initComponents( opt ); // 初始化组件
         this._startDraw( opt ); //开始绘图
-        this.drawPlugs( opt ); //开始绘制插件
+        this.drawComponents( opt ); //开始绘制插件
         this.inited = true;
     }
 

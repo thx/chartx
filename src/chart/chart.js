@@ -43,9 +43,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
 		});
 		this.canvax.addChild( this.stage );
 
-
         //组件管理机制
-        this.plugs = [];
+        this.components = [];
 
         this.inited = false;
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
@@ -140,7 +139,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         this.dataFrame = this.initData( this._data );
 
-        this.plugs = [];
+        this.components = [];
         this.clean();
         this.canvax.domView.innerHTML = "";
 
@@ -203,35 +202,35 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
 
     //插件管理相关代码begin
-    initPlugsModules( opt )
+    initComponents( opt )
     {
 
     }
 
     //所有plug触发更新
-    plugsReset(opt , e)
+    componentsReset(opt , e)
     {
 
     }
 
-    drawPlugs()
+    drawComponents()
     {
         /*
         do {
-            var p = this.plugs.shift();
+            var p = this.components.shift();
             p && p.plug && p.plug.draw && p.plug.draw();
-        } while ( this.plugs.length > 0 ); 
+        } while ( this.components.length > 0 ); 
         */
-        for( var i=0,l=this.plugs.length; i<l; i++ ){
-            var p = this.plugs[i];
+        for( var i=0,l=this.components.length; i<l; i++ ){
+            var p = this.components[i];
             p.plug && p.plug.draw && p.plug.draw();
             if( p.type == "once" ){
-                this.plugs.splice( i, 1 );
+                this.components.splice( i, 1 );
                 i--;
             }
 
             //p.plug.draw() 可能有新的plug被push进来
-            l=this.plugs.length;
+            l=this.components.length;
         }
     }
 

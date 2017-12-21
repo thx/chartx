@@ -42,10 +42,10 @@ export default class Bar extends Chart
             this._rotate(this.rotate);
         };
         this._initModule( opt ); //初始化模块  
-        this.initPlugsModules( opt ); //初始化组件
+        this.initComponents( opt ); //初始化组件
         this._startDraw( opt ); //开始绘图
         
-        this.drawPlugs( opt );  //绘图完，开始绘制插件
+        this.drawComponents( opt );  //绘图完，开始绘制插件
 
         if( this._coordinate.horizontal ){
             this._horizontal();
@@ -94,7 +94,6 @@ export default class Bar extends Chart
         this._tips = new Tips(this.tips, this.canvax.domView);
         
         this.stageTip.addChild(this._tips.sprite);
-
     }
 
 
@@ -277,7 +276,7 @@ export default class Bar extends Chart
     {
         var me = this;
 
-        me.plugs.push({
+        me.components.push({
             type: "once",
             plug: {
                 draw: function() {

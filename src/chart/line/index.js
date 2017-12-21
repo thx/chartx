@@ -30,9 +30,9 @@ export default class Line extends Chart
             this._rotate(this.rotate);
         };
         this._initModule( opt ); //初始化模块  
-        this.initPlugsModules( opt ); // 初始化组件
+        this.initComponents( opt ); // 初始化组件
         this._startDraw( opt ); //开始绘图
-        this.drawPlugs( opt ); //开始绘制插件
+        this.drawComponents( opt ); //开始绘制插件
         this.inited = true;
     }
 
@@ -44,7 +44,7 @@ export default class Line extends Chart
     {
         this._coordinate.addField( field, targetYAxis );
         this._graphs.add( field );
-        this.plugsReset(  );
+        this.componentsReset(  );
     }
 
     /*
@@ -71,7 +71,7 @@ export default class Line extends Chart
         this._coordinate.removeField( target );
         //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
         this._graphs.remove(ind);
-        this.plugsReset(  );
+        this.componentsReset(  );
     }
 
 
@@ -94,7 +94,7 @@ export default class Line extends Chart
         this.stageTip.addChild(this._tips.sprite);
 
         //initModule 里面全部都是只数据和module的设置，
-        //所以_initPlugsModules里的plug还有可以修改layout的机会
+        //所以_initComponents里的plug还有可以修改layout的机会
         
     }
 
@@ -217,7 +217,7 @@ export default class Line extends Chart
                     return;
                 };
 
-                me.plugs.push( {
+                me.components.push( {
                     type : "once",
                     plug : {
                         draw : function(){

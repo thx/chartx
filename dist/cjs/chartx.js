@@ -7693,7 +7693,7 @@ var Chart = function (_Canvax$Event$EventDi) {
         _this.canvax.addChild(_this.stage);
 
         //组件管理机制
-        _this.plugs = [];
+        _this.components = [];
 
         _this.inited = false;
         _this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
@@ -7794,7 +7794,7 @@ var Chart = function (_Canvax$Event$EventDi) {
 
             this.dataFrame = this.initData(this._data);
 
-            this.plugs = [];
+            this.components = [];
             this.clean();
             this.canvax.domView.innerHTML = "";
 
@@ -7861,33 +7861,33 @@ var Chart = function (_Canvax$Event$EventDi) {
         //插件管理相关代码begin
 
     }, {
-        key: "initPlugsModules",
-        value: function initPlugsModules(opt) {}
+        key: "initComponents",
+        value: function initComponents(opt) {}
 
         //所有plug触发更新
 
     }, {
-        key: "plugsReset",
-        value: function plugsReset(opt, e) {}
+        key: "componentsReset",
+        value: function componentsReset(opt, e) {}
     }, {
-        key: "drawPlugs",
-        value: function drawPlugs() {
+        key: "drawComponents",
+        value: function drawComponents() {
             /*
             do {
-                var p = this.plugs.shift();
+                var p = this.components.shift();
                 p && p.plug && p.plug.draw && p.plug.draw();
-            } while ( this.plugs.length > 0 ); 
+            } while ( this.components.length > 0 ); 
             */
-            for (var i = 0, l = this.plugs.length; i < l; i++) {
-                var p = this.plugs[i];
+            for (var i = 0, l = this.components.length; i < l; i++) {
+                var p = this.components[i];
                 p.plug && p.plug.draw && p.plug.draw();
                 if (p.type == "once") {
-                    this.plugs.splice(i, 1);
+                    this.components.splice(i, 1);
                     i--;
                 }
 
                 //p.plug.draw() 可能有新的plug被push进来
-                l = this.plugs.length;
+                l = this.components.length;
             }
         }
 
@@ -11248,7 +11248,7 @@ var Descartes = function (_Chart) {
             var me = this;
             this._coordinate.reset(me.coordinate, this.dataFrame);
             this._graphs.reset(me.graphs, this.dataFrame);
-            this.plugsReset(e);
+            this.componentsReset(e);
         }
     }, {
         key: "initData",
@@ -11311,8 +11311,8 @@ var Descartes = function (_Chart) {
             });
         }
     }, {
-        key: "initPlugsModules",
-        value: function initPlugsModules(opt) {
+        key: "initComponents",
+        value: function initComponents(opt) {
             if (this._opts.legend && this._initLegend) {
                 this._initLegend(opt);
             }
@@ -11333,10 +11333,10 @@ var Descartes = function (_Chart) {
         //所有plug触发更新
 
     }, {
-        key: "plugsReset",
-        value: function plugsReset(e) {
+        key: "componentsReset",
+        value: function componentsReset(e) {
             var me = this;
-            _$8.each(this.plugs, function (p, i) {
+            _$8.each(this.components, function (p, i) {
 
                 if (p.type == "dataZoom") {
                     if (!e || e && e.trigger != "dataZoom") {
@@ -11387,7 +11387,7 @@ var Descartes = function (_Chart) {
 
             !e.resize && (me.padding.top += _legend.height);
 
-            this.plugs.push({
+            this.components.push({
                 type: "legend",
                 plug: _legend
             });
@@ -11454,12 +11454,12 @@ var Descartes = function (_Chart) {
             me.padding.bottom += me.dataZoom.h;
             me.__cloneChart = me._getCloneChart();
 
-            this.plugs.push({
+            this.components.push({
                 type: "once",
                 plug: {
                     draw: function draw() {
                         me._dataZoom = new dataZoom(me.drawDataZoom(), me.__cloneChart);
-                        me.plugs.push({
+                        me.components.push({
                             type: "dataZoom",
                             plug: me._dataZoom
                         });
@@ -11526,7 +11526,7 @@ var Descartes = function (_Chart) {
                     _yAxis.setWaterLine(y);
                 }
 
-                me.plugs.push({
+                me.components.push({
                     type: "once",
                     plug: {
                         draw: function draw() {
@@ -11559,7 +11559,7 @@ var Descartes = function (_Chart) {
             };
 
             var _markLine = new MarkLine(_$8.extend(true, ML, o), _yAxis);
-            me.plugs.push({
+            me.components.push({
                 type: "markLine",
                 plug: _markLine
             });
@@ -11596,7 +11596,7 @@ var Descartes = function (_Chart) {
                 //me.fire("markpointclick", e);
             });
 
-            me.plugs.push({
+            me.components.push({
                 type: "markPoint",
                 plug: _mp
             });
@@ -11611,7 +11611,7 @@ var Descartes = function (_Chart) {
 
             var me = this;
 
-            this.plugs.push({
+            this.components.push({
                 type: "once",
                 plug: {
                     draw: function draw() {
@@ -11639,7 +11639,7 @@ var Descartes = function (_Chart) {
 
                         me.drawAnchor(_anchor);
 
-                        me.plugs.push({
+                        me.components.push({
                             type: "anchor",
                             plug: {
                                 draw: function draw() {
@@ -15037,10 +15037,10 @@ var Bar = function (_Chart) {
                 this._rotate(this.rotate);
             }
             this._initModule(opt); //初始化模块  
-            this.initPlugsModules(opt); //初始化组件
+            this.initComponents(opt); //初始化组件
             this._startDraw(opt); //开始绘图
 
-            this.drawPlugs(opt); //绘图完，开始绘制插件
+            this.drawComponents(opt); //绘图完，开始绘制插件
 
             if (this._coordinate.horizontal) {
                 this._horizontal();
@@ -15279,7 +15279,7 @@ var Bar = function (_Chart) {
         value: function drawMarkPoint() {
             var me = this;
 
-            me.plugs.push({
+            me.components.push({
                 type: "once",
                 plug: {
                     draw: function draw() {
@@ -17393,9 +17393,9 @@ var Line$6 = function (_Chart) {
                 this._rotate(this.rotate);
             }
             this._initModule(opt); //初始化模块  
-            this.initPlugsModules(opt); // 初始化组件
+            this.initComponents(opt); // 初始化组件
             this._startDraw(opt); //开始绘图
-            this.drawPlugs(opt); //开始绘制插件
+            this.drawComponents(opt); //开始绘制插件
             this.inited = true;
         }
 
@@ -17409,7 +17409,7 @@ var Line$6 = function (_Chart) {
         value: function add(field, targetYAxis) {
             this._coordinate.addField(field, targetYAxis);
             this._graphs.add(field);
-            this.plugsReset();
+            this.componentsReset();
         }
 
         /*
@@ -17438,7 +17438,7 @@ var Line$6 = function (_Chart) {
             this._coordinate.removeField(target);
             //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
             this._graphs.remove(ind);
-            this.plugsReset();
+            this.componentsReset();
         }
     }, {
         key: "_initModule",
@@ -17460,7 +17460,7 @@ var Line$6 = function (_Chart) {
             this.stageTip.addChild(this._tips.sprite);
 
             //initModule 里面全部都是只数据和module的设置，
-            //所以_initPlugsModules里的plug还有可以修改layout的机会
+            //所以_initComponents里的plug还有可以修改layout的机会
         }
     }, {
         key: "_startDraw",
@@ -17584,7 +17584,7 @@ var Line$6 = function (_Chart) {
                         return;
                     }
 
-                    me.plugs.push({
+                    me.components.push({
                         type: "once",
                         plug: {
                             draw: function draw() {
@@ -17763,9 +17763,9 @@ var Bar_Line = function (_Bar) {
                 this._rotate(this.rotate);
             }
             this._initBarModule(opt); //初始化模块  
-            this.initPlugsModules(opt); //初始化组件
+            this.initComponents(opt); //初始化组件
             this._startDraw(opt); //开始绘图
-            this.drawPlugs(opt); //绘图完，开始绘制插件
+            this.drawComponents(opt); //绘图完，开始绘制插件
             this.drawLineGraphs(opt); //开始绘制折线图的graphs
             this.inited = true;
         }
@@ -17793,7 +17793,7 @@ var Bar_Line = function (_Bar) {
             this._coordinate.reset(opt.coordinate, this.dataFrame);
             this._graphs.reset(opt.graphs);
             this._lineChart._graphs.reset(opt.graphs, this.dataFrame);
-            this.plugsReset(opt, e);
+            this.componentsReset(opt, e);
         }
 
         //绘制line部分
@@ -17920,9 +17920,9 @@ var Bar_Tgi = function (_Bar) {
                 this._rotate(this.rotate);
             }
             this._initBarModule(opt); //初始化模块  
-            this.initPlugsModules(opt); //初始化组件
+            this.initComponents(opt); //初始化组件
             this._startDraw(opt); //开始绘图
-            this.drawPlugs(opt); //绘图完，开始绘制插件
+            this.drawComponents(opt); //绘图完，开始绘制插件
 
             this._tgiDraw(); //开始绘制 Tgi
 
@@ -18019,7 +18019,7 @@ var Bar_Tgi = function (_Bar) {
             this._tgiGraphsDraw();
 
             var me = this;
-            this.plugs.push({
+            this.components.push({
                 type: "tgi",
                 plug: {
                     reset: function reset() {
@@ -18518,9 +18518,9 @@ var Scat = function (_Chart) {
             }
 
             this._initModule(opt); //初始化模块  
-            this.initPlugsModules(opt); // 初始化组件
+            this.initComponents(opt); // 初始化组件
             this._startDraw(opt); //开始绘图
-            this.drawPlugs(opt); //开始绘制插件
+            this.drawComponents(opt); //开始绘制插件
             this.inited = true;
         }
     }, {

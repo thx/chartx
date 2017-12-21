@@ -65,24 +65,29 @@ chartx2.0 代码规范
   }
   ```
 
-  * 图表类试图规划
+  * 图表类视图规划
 
     2.0中，把图表区 按照坐标系类别分类，而不在是单独个图表类型，各自写各自的逻辑代码
 
-    + Descartes(笛卡尔坐标系)
-      - bar 
-      - line
-      - bar_line
-      - bar_tgi
-      - scat
-    + Polar(极坐标系)
-      - Pie
-      - Dingle（丁格尔玫瑰图）
-      - Planet （星云图）
-    + Other
-
+    + Chart
+        + Descartes(笛卡尔坐标系)
+            - bar 
+            - line
+            - bar_line
+            - bar_tgi
+            - scat
+        + Polar(极坐标系)
+            - Pie
+            - Dingle（丁格尔玫瑰图）
+            - Planet （星云图）
+        + Other
 
 
   * 接口约定规范
 
-  ** chart.js 图表基类
+  ** Chart 图表基类
+
+     和1.xx 版本比， 这次添加了组件管理机制 components
+
+     然后，对于reset 和 resetData两个接口，这次做了绝对清晰的划分，也就是reset 实质上和重新绘制是一回事，而resetData却仅仅是数据的变化，然后调用各个组价的resetData 来实现整体数据的更新（ 之前版本里做的太复杂，reset会去计算用户reset的意图，比如reset里少了个yAxis的字段，那么就会自动remove掉一条线，这是个大坑，而且性价比非常低，但是代码量和可维护性非常低 ）
+

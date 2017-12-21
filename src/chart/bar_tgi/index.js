@@ -46,9 +46,9 @@ export default class Bar_Tgi extends Bar
             this._rotate(this.rotate);
         };
         this._initBarModule( opt ); //初始化模块  
-        this.initPlugsModules( opt ); //初始化组件
+        this.initComponents( opt ); //初始化组件
         this._startDraw( opt ); //开始绘图
-        this.drawPlugs( opt );  //绘图完，开始绘制插件
+        this.drawComponents( opt );  //绘图完，开始绘制插件
 
         this._tgiDraw(); //开始绘制 Tgi
 
@@ -147,7 +147,7 @@ export default class Bar_Tgi extends Bar
         this._tgiGraphsDraw();
 
         var me = this;
-        this.plugs.push({
+        this.components.push({
             type : "tgi",
             plug : {
                 reset : function(){

@@ -66,7 +66,7 @@ export default class Descartes extends Chart
         var me = this;
         this._coordinate.reset( me.coordinate, this.dataFrame );
         this._graphs.reset( me.graphs , this.dataFrame);
-        this.plugsReset( e );
+        this.componentsReset( e );
     }
 
     initData(data, opt)
@@ -133,7 +133,7 @@ export default class Descartes extends Chart
 
     }
 
-    initPlugsModules( opt )
+    initComponents( opt )
     {
         if(this._opts.legend && this._initLegend){
             this._initLegend( opt );
@@ -153,10 +153,10 @@ export default class Descartes extends Chart
     }
 
     //所有plug触发更新
-    plugsReset(e)
+    componentsReset(e)
     {
         var me = this;
-        _.each(this.plugs , function( p , i ){
+        _.each(this.components , function( p , i ){
 
             if( p.type == "dataZoom" ){
                 if(!e || (e && e.trigger != "dataZoom")){
@@ -208,7 +208,7 @@ export default class Descartes extends Chart
 
         !e.resize && (me.padding.top += _legend.height);
 
-        this.plugs.push( {
+        this.components.push( {
             type : "legend",
             plug : _legend
         } );
@@ -271,12 +271,12 @@ export default class Descartes extends Chart
         me.padding.bottom += me.dataZoom.h;
         me.__cloneChart = me._getCloneChart();
 
-        this.plugs.push( {
+        this.components.push( {
             type : "once",
             plug : {
                 draw: function(){
                     me._dataZoom = new DataZoom( me.drawDataZoom() , me.__cloneChart );
-                    me.plugs.push( {
+                    me.components.push( {
                         type : "dataZoom",
                         plug : me._dataZoom
                     } ); 
@@ -341,7 +341,7 @@ export default class Descartes extends Chart
                 _yAxis.setWaterLine( y );
             };
 
-            me.plugs.push( {
+            me.components.push( {
                 type : "once",
                 plug : {
                     draw : function(){
@@ -378,7 +378,7 @@ export default class Descartes extends Chart
         };
 
         var _markLine = new MarkLine( _.extend( true, ML, o) , _yAxis );
-        me.plugs.push( {
+        me.components.push( {
             type : "markLine",
             plug : _markLine
         } );
@@ -414,7 +414,7 @@ export default class Descartes extends Chart
             //me.fire("markpointclick", e);
         });
 
-        me.plugs.push( {
+        me.components.push( {
             type : "markPoint",
             plug : _mp
         } );
@@ -430,7 +430,7 @@ export default class Descartes extends Chart
         
         var me = this;
 
-        this.plugs.push( {
+        this.components.push( {
             type : "once",
             plug : {
                 draw: function(){
@@ -458,7 +458,7 @@ export default class Descartes extends Chart
 
                     me.drawAnchor( _anchor );
 
-                    me.plugs.push( {
+                    me.components.push( {
                         type : "anchor",
                         plug : {
                             draw : function(){
