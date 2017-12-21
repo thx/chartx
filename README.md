@@ -64,3 +64,25 @@ chartx2.0 代码规范
       }
   }
   ```
+
+  * 图表类试图规划
+
+    2.0中，把图表区 按照坐标系类别分类，而不在是单独个图表类型，各自写各自的逻辑代码
+
+    + Descartes(笛卡尔坐标系)
+      - bar 
+      - line
+      - bar_line
+      - bar_tgi
+      - scat
+    + Polar(极坐标系)
+      - Pie
+      - Dingle（丁格尔玫瑰图）
+      - Planet （星云图）
+    + Other
+
+
+
+  * 接口约定规范
+
+  ** chart.js 图表基类
