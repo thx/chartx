@@ -40,7 +40,7 @@ export default class Line extends Chart
      *添加一个yAxis字段，也就是添加一条brokenline折线
      *@params field 添加的字段
      **/
-    add( field , targetYAxis) 
+    add( field , targetYAxis)
     {
         this._coordinate.addField( field, targetYAxis );
         this._graphs.add( field );

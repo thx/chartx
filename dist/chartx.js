@@ -17735,7 +17735,11 @@ var Bar_Line = function (_Bar) {
 
     function Bar_Line(node, data, opts) {
         classCallCheck$1(this, Bar_Line);
-        return possibleConstructorReturn$1(this, (Bar_Line.__proto__ || Object.getPrototypeOf(Bar_Line)).call(this, node, data, opts));
+
+        var _this = possibleConstructorReturn$1(this, (Bar_Line.__proto__ || Object.getPrototypeOf(Bar_Line)).call(this, node, data, opts));
+
+        _this.type = "bar_line";
+        return _this;
     }
 
     createClass$1(Bar_Line, [{

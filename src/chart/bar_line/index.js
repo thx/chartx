@@ -14,6 +14,7 @@ export default class Bar_Line extends Bar
     constructor( node, data, opts )
     {
         super( node, data, opts ); 
+        this.type = "bar_line"
     }
 
     _init(node, data, opts)
