@@ -89,7 +89,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         
     }
 
-    reset(opt , dataFrame)
+    resetData(dataFrame)
     {
         
         var me = this;
@@ -99,11 +99,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             me.data = me._trimGraphs();
         };
 
-        if( opt ){
-            _.extend(true, me, opt);
-            _.extend(true, me.opt, opt);
-        };
-
         this.disX = this._getGraphsDisX();
 
         for (var a = 0, al = me.field.length; a < al; a++) {
@@ -111,7 +106,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             var group = _.find( me.groups , function(g){
                 return g.field == me.field[a]
             } );
-            group && group.reset( this.opt , me.data[ group.field ].data , dataFrame.trigger );
+            group && group.resetData( me.data[ group.field ].data , dataFrame.trigger );
         };
     }
 

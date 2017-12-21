@@ -28,6 +28,7 @@ export default class Bar extends Chart
         };
 
         this.dataFrame = this.initData(data);
+
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，比如横向柱状图,柱折混合图...
         this._init && this._init(node, data, opts);
         this.draw();
@@ -553,7 +554,7 @@ export default class Bar extends Chart
                 node.checked = false;
             };
         });
-        e.eventInfo.xAxis = this._coordinate._xAxis.data[ e.eventInfo.iNode ];
+        e.eventInfo.xAxis = this._coordinate._xAxis.layoutData[ e.eventInfo.iNode ];
         e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
         e.eventInfo.dataZoom = me.dataZoom;
         e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);

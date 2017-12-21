@@ -64,8 +64,8 @@ export default class Descartes extends Chart
     _resetData( e )
     {
         var me = this;
-        this._coordinate.reset( me.coordinate, this.dataFrame );
-        this._graphs.reset( me.graphs , this.dataFrame);
+        this._coordinate.resetData( this.dataFrame );
+        this._graphs.resetData( this.dataFrame);
         this.componentsReset( e );
     }
 
@@ -159,7 +159,7 @@ export default class Descartes extends Chart
         _.each(this.components , function( p , i ){
 
             if( p.type == "dataZoom" ){
-                if(!e || (e && e.trigger != "dataZoom")){
+                if(!e || (e && e.trigger.name != "dataZoom")){
                     me.__cloneChart = me._getCloneChart();
                     p.plug.reset( {
                         //count : me._data.length-1

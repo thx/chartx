@@ -155,7 +155,7 @@ export default class Bar_Line extends Bar
         e.eventInfo.nodesInfoList = e.eventInfo.nodesInfoList.concat(_nodesInfoList);
         e.eventInfo.tipsLine = {
             x: this._coordinate._xAxis.sprite.localToGlobal({
-                x: this._coordinate._xAxis.data[iNode].x,
+                x: this._coordinate._xAxis.layoutData[iNode].x,
                 y: 0
             }).x
         }

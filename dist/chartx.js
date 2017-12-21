@@ -7833,23 +7833,6 @@ var Chart = function (_Canvax$Event$EventDi) {
             this._resetData && this._resetData(e);
             this.fire("resetData");
         }
-    }, {
-        key: "_rotate",
-        value: function _rotate(angle) {
-            var currW = this.width;
-            var currH = this.height;
-            this.width = currH;
-            this.height = currW;
-
-            var self = this;
-            _$1.each(self.stage.children, function (sprite) {
-                sprite.context.rotation = angle || -90;
-                sprite.context.x = (currW - currH) / 2;
-                sprite.context.y = (currH - currW) / 2;
-                sprite.context.rotateOrigin.x = self.width * sprite.context.$model.scaleX / 2;
-                sprite.context.rotateOrigin.y = self.height * sprite.context.$model.scaleY / 2;
-            });
-        }
 
         //默认每个chart都要内部实现一个_initData
 
@@ -7873,21 +7856,14 @@ var Chart = function (_Canvax$Event$EventDi) {
     }, {
         key: "drawComponents",
         value: function drawComponents() {
-            /*
-            do {
-                var p = this.components.shift();
-                p && p.plug && p.plug.draw && p.plug.draw();
-            } while ( this.components.length > 0 ); 
-            */
             for (var i = 0, l = this.components.length; i < l; i++) {
                 var p = this.components[i];
                 p.plug && p.plug.draw && p.plug.draw();
                 if (p.type == "once") {
                     this.components.splice(i, 1);
                     i--;
+                    //l--; l重新计算p.plug.draw 可能会改变components
                 }
-
-                //p.plug.draw() 可能有新的plug被push进来
                 l = this.components.length;
             }
         }
@@ -7959,6 +7935,9 @@ var component = function (_Canvax$Event$EventDi) {
     createClass$1(component, [{
         key: "init",
         value: function init(opt, data) {}
+    }, {
+        key: "draw",
+        value: function draw() {}
 
         //组件的销毁
 
@@ -10581,7 +10560,7 @@ var dataZoom = function (_Component) {
         key: "setZoomBg",
         value: function setZoomBg() {
             //这里不是直接获取_graphs.sprite 而是获取 _graphs.core，切记切记
-            debugger;
+
             if (this.__graphssp) {
                 this.__graphssp.destroy();
             }
@@ -11247,8 +11226,8 @@ var Descartes = function (_Chart) {
         key: "_resetData",
         value: function _resetData(e) {
             var me = this;
-            this._coordinate.reset(me.coordinate, this.dataFrame);
-            this._graphs.reset(me.graphs, this.dataFrame);
+            this._coordinate.resetData(this.dataFrame);
+            this._graphs.resetData(this.dataFrame);
             this.componentsReset(e);
         }
     }, {
@@ -11340,7 +11319,7 @@ var Descartes = function (_Chart) {
             _$8.each(this.components, function (p, i) {
 
                 if (p.type == "dataZoom") {
-                    if (!e || e && e.trigger != "dataZoom") {
+                    if (!e || e && e.trigger.name != "dataZoom") {
                         me.__cloneChart = me._getCloneChart();
                         p.plug.reset({
                             //count : me._data.length-1
@@ -11778,10 +11757,12 @@ var _$15 = canvax._;
 var xAxis = function (_Component) {
     inherits$1(xAxis, _Component);
 
-    function xAxis(opt, data, _coordinate) {
+    function xAxis(opts, data, _coordinate) {
         classCallCheck$1(this, xAxis);
 
         var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this));
+
+        _this._opts = opts;
 
         _this._coordinate = _coordinate || {};
 
@@ -11826,10 +11807,11 @@ var xAxis = function (_Component) {
         _this.xGraphsWidth = 0; //x轴宽(去掉两端)
 
         _this.dataOrg = []; //源数据
-        _this.dataSection = []; //默认就等于源数据
+        _this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
+
         _this._layoutDataSection = []; //dataSection的 format 后的数据
-        _this.data = []; //{x:100, value:'1000',visible:true}
-        _this.layoutData = []; //this.data(可能数据过多),重新编排过滤后的数据集合, 并根据此数组展现文字和线条
+        _this.layoutData = []; //{x:100, value:'1000',visible:true}
+
         _this.sprite = null;
 
         _this._textMaxWidth = 0;
@@ -11859,7 +11841,9 @@ var xAxis = function (_Component) {
 
         _this.posParseToInt = false; //主要是柱状图里面有需要 要均匀间隔1px的时候需要
 
-        _this.init(opt, data);
+        _$15.extend(true, _this, opts);
+
+        _this.init(opts, data);
 
         //xAxis的field只有一个值
         _this.field = _$15.flatten([_this.field])[0];
@@ -11868,7 +11852,7 @@ var xAxis = function (_Component) {
 
     createClass$1(xAxis, [{
         key: "init",
-        value: function init(opt, data) {
+        value: function init(opts, data) {
             this.sprite = new canvax.Display.Sprite({
                 id: "xAxisSprite"
             });
@@ -11876,22 +11860,19 @@ var xAxis = function (_Component) {
                 id: "rulesSprite"
             });
             this.sprite.addChild(this.rulesSprite);
-            this._initHandle(opt, data);
+            this._initHandle(data);
         }
     }, {
         key: "_initHandle",
-        value: function _initHandle(opt, data) {
+        value: function _initHandle(data) {
 
             if (data && data.org) {
                 this.dataOrg = data.org;
             }
 
-            if (opt) {
-                _$15.extend(true, this, opt);
-                if (!opt.dataSection && this.dataOrg) {
-                    //如果没有传入指定的dataSection，才需要计算dataSection
-                    this.dataSection = this._initDataSection(this.dataOrg);
-                }
+            if (!this._opts.dataSection && this.dataOrg) {
+                //如果没有传入指定的dataSection，才需要计算dataSection
+                this.dataSection = this._initDataSection(this.dataOrg);
             }
 
             if (this.text.rotation != 0) {
@@ -11943,15 +11924,15 @@ var xAxis = function (_Component) {
     }, {
         key: "resetData",
         value: function resetData(data) {
-            this._initHandle(null, data);
+            this._initHandle(data);
             this.draw();
         }
     }, {
         key: "getIndexOfVal",
         value: function getIndexOfVal(xvalue) {
             var i;
-            for (var ii = 0, il = this.data.length; ii < il; ii++) {
-                var obj = this.data[ii];
+            for (var ii = 0, il = this.layoutData.length; ii < il; ii++) {
+                var obj = this.layoutData[ii];
                 if (obj.value == xvalue) {
                     i = ii;
                     break;
@@ -11962,11 +11943,11 @@ var xAxis = function (_Component) {
         }
     }, {
         key: "draw",
-        value: function draw(opt) {
-            //首次渲染从 直角坐标系组件中会传入 opt
+        value: function draw(opts) {
+            //首次渲染从 直角坐标系组件中会传入 opts
             this._getLabel();
-            this._computerConfit(opt);
-            this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
+            this._computerConfit(opts);
+            this.layoutData = this._trimXAxis(this.dataSection, this.xGraphsWidth);
 
             this._trimLayoutData();
 
@@ -12001,9 +11982,9 @@ var xAxis = function (_Component) {
 
     }, {
         key: "_computerConfit",
-        value: function _computerConfit(opt) {
-            if (opt) {
-                _$15.extend(true, this, opt);
+        value: function _computerConfit(opts) {
+            if (opts) {
+                _$15.extend(true, this, opts);
             }
 
             this.yAxisW = Math.max(this.yAxisW, this.leftDisX);
@@ -12031,13 +12012,13 @@ var xAxis = function (_Component) {
 
     }, {
         key: "getPosX",
-        value: function getPosX(opt) {
+        value: function getPosX(opts) {
             var x = 0;
-            var val = opt.val;
-            var ind = "ind" in opt ? opt.ind : _$15.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
-            var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
-            var xGraphsWidth = "xGraphsWidth" in opt ? opt.xGraphsWidth : this.xGraphsWidth;
-            var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
+            var val = opts.val;
+            var ind = "ind" in opts ? opts.ind : _$15.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
+            var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
+            var xGraphsWidth = "xGraphsWidth" in opts ? opts.xGraphsWidth : this.xGraphsWidth;
+            var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
 
             if (dataLen == 1) {
                 x = xGraphsWidth / 2;
@@ -12338,7 +12319,7 @@ var xAxis = function (_Component) {
         key: "_trimLayoutData",
         value: function _trimLayoutData() {
             var me = this;
-            var arr = this.data;
+            var arr = this.layoutData;
             var l = arr.length;
 
             if (!this.display || !l) return;
@@ -12370,14 +12351,13 @@ var xAxis = function (_Component) {
         key: "_checkOver",
         value: function _checkOver() {
             var me = this;
-            var arr = me.data;
+            var arr = me.layoutData;
 
             //现在的柱状图的自定义datasection有缺陷
             if (me.trimLayout) {
                 //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
                 //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
                 me.trimLayout(arr);
-                me.layoutData = me.data;
                 return;
             }
 
@@ -12436,8 +12416,6 @@ var xAxis = function (_Component) {
             }
 
             checkOver(0);
-
-            this.layoutData = this.data;
         }
     }]);
     return xAxis;
@@ -14249,7 +14227,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
                     value: value,
                     xAxis: {
                         field: this._xAxis.field,
-                        value: this._xAxis.data[h].content
+                        value: this._xAxis.layoutData[h].content
                     }
                 }]);
             }
@@ -14285,10 +14263,10 @@ var Graphs = function (_Canvax$Event$EventDi) {
         key: "remove",
         value: function remove(field) {}
     }, {
-        key: "reset",
-        value: function reset(opt) {
+        key: "resetData",
+        value: function resetData(dataFrame) {
             this.removeAllChecked();
-            this.draw(opt);
+            this.draw();
         }
     }, {
         key: "clean",
@@ -14660,7 +14638,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
             var _xAxis = this._xAxis;
             var _yAxis = this._yAxis;
 
-            var xArr = _xAxis.data;
+            var xArr = _xAxis.layoutData;
             var hLen = 0;
             _$19.each(_yAxis, function (_yaxis) {
                 hLen += _yaxis.field.length;
@@ -15022,6 +15000,7 @@ var Bar = function (_Chart) {
         }
 
         _this.dataFrame = _this.initData(data);
+
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，比如横向柱状图,柱折混合图...
         _this._init && _this._init(node, data, opts);
         _this.draw();
@@ -15567,7 +15546,7 @@ var Bar = function (_Chart) {
                     node.checked = false;
                 }
             });
-            e.eventInfo.xAxis = this._coordinate._xAxis.data[e.eventInfo.iNode];
+            e.eventInfo.xAxis = this._coordinate._xAxis.layoutData[e.eventInfo.iNode];
             e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
             e.eventInfo.dataZoom = me.dataZoom;
             e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
@@ -15998,8 +15977,8 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
          */
 
     }, {
-        key: "reset",
-        value: function reset(opt, data, dataTrigger) {
+        key: "resetData",
+        value: function resetData(data, dataTrigger) {
             var me = this;
 
             if (data) {
@@ -16035,37 +16014,6 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     this._currPointList.splice(this._currPointList.length - Math.abs(dataTrigger.right));
                 }
             }
-
-            /*
-            if (plen < cplen) {
-                for (var i = plen, l = cplen; i < l; i++) {
-                    if( _.isNumber(me._currPointList[i][1]) ){
-                        //如果这个点得y轴是个number，是有效的数据，那么
-                        //删除_circles，_texts 中一个
-                        //随便删一个就可以，不需要对应的那个
-                        me._circles && me._circles.removeChildAt( 0 );
-                        me._texts && me._texts.removeChildAt( 0 );
-                    }
-                };
-                me._currPointList.length = plen;
-            };
-             if (plen > cplen) {
-                var diffLen = plen - cplen;
-                for (var i = 0; i < diffLen; i++) {
-                    me._currPointList.push(_.clone( me._pointList[cplen + i] ));
-                }
-            };
-            */
-
-            //从被移除了得update中截留过来的，目前没发现有用途，先注释掉
-            /*
-            if( opt._groupInd !== undefined ){
-                var _strokeStyle = this._getLineStrokeStyle();
-                this._bline.context.strokeStyle = _strokeStyle;
-                this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
-                this._setNodesStyle();
-            };
-            */
 
             me._createNodes();
             me._createTexts();
@@ -16909,19 +16857,14 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             return this;
         }
     }, {
-        key: "reset",
-        value: function reset(opt, dataFrame) {
+        key: "resetData",
+        value: function resetData(dataFrame) {
 
             var me = this;
 
             if (dataFrame) {
                 me.dataFrame = dataFrame;
                 me.data = me._trimGraphs();
-            }
-
-            if (opt) {
-                _$21.extend(true, me, opt);
-                _$21.extend(true, me.opt, opt);
             }
 
             this.disX = this._getGraphsDisX();
@@ -16931,7 +16874,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                 var group = _$21.find(me.groups, function (g) {
                     return g.field == me.field[a];
                 });
-                group && group.reset(this.opt, me.data[group.field].data, dataFrame.trigger);
+                group && group.resetData(me.data[group.field].data, dataFrame.trigger);
             }
         }
 
@@ -17542,8 +17485,6 @@ var Line$6 = function (_Chart) {
     }, {
         key: "getCloneChart",
         value: function getCloneChart(lineConstructor) {
-            this._coordinate;
-            debugger;
             return {
                 graphs: {
                     line: {
@@ -17644,7 +17585,7 @@ var Line$6 = function (_Chart) {
         key: "drawAnchor",
         value: function drawAnchor(_anchor) {
             var pos = {
-                x: this._coordinate._xAxis.data[this.anchor.xIndex].x,
+                x: this._coordinate._xAxis.layoutData[this.anchor.xIndex].x,
                 y: this._coordinate.graphsHeight + this._graphs.data[this._coordinate._yAxis[0].field[0]].groupData[this.anchor.xIndex].y
             };
             _anchor.aim(pos);
@@ -17703,7 +17644,7 @@ var Line$6 = function (_Chart) {
                 return;
             }
 
-            e.eventInfo.xAxis = this._coordinate._xAxis.data[e.eventInfo.iNode];
+            e.eventInfo.xAxis = this._coordinate._xAxis.layoutData[e.eventInfo.iNode];
             e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
             e.eventInfo.dataZoom = this.dataZoom;
             e.eventInfo.rowData = this.dataFrame.getRowData(e.eventInfo.iNode);
@@ -17877,7 +17818,7 @@ var Bar_Line = function (_Bar) {
             e.eventInfo.nodesInfoList = e.eventInfo.nodesInfoList.concat(_nodesInfoList);
             e.eventInfo.tipsLine = {
                 x: this._coordinate._xAxis.sprite.localToGlobal({
-                    x: this._coordinate._xAxis.data[iNode].x,
+                    x: this._coordinate._xAxis.layoutData[iNode].x,
                     y: 0
                 }).x
             };

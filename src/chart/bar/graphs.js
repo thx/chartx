@@ -216,7 +216,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                 value: value,
                 xAxis: {
                     field: this._xAxis.field,
-                    value: this._xAxis.data[h].content
+                    value: this._xAxis.layoutData[h].content
                 }
             }]);
         };
@@ -254,10 +254,10 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
     }
 
-    reset(opt)
+    resetData( dataFrame )
     {
         this.removeAllChecked()
-        this.draw( opt );
+        this.draw( );
     }
 
     clean()
@@ -636,7 +636,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         var _xAxis = this._xAxis;
         var _yAxis = this._yAxis;
 
-        var xArr = _xAxis.data;
+        var xArr = _xAxis.layoutData;
         var hLen = 0;
         _.each( _yAxis, function( _yaxis ){
             hLen += _yaxis.field.length;

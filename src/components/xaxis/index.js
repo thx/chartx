@@ -8,9 +8,11 @@ const _ = Canvax._;
 
 export default class xAxis extends Component
 {
-    constructor(opt, data, _coordinate)
+    constructor(opts, data, _coordinate)
     {
         super();
+
+        this._opts = opts;
 
         this._coordinate = _coordinate || {};
 
@@ -55,10 +57,11 @@ export default class xAxis extends Component
         this.xGraphsWidth = 0; //x轴宽(去掉两端)
 
         this.dataOrg = []; //源数据
-        this.dataSection = []; //默认就等于源数据
+        this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
+
         this._layoutDataSection = []; //dataSection的 format 后的数据
-        this.data = []; //{x:100, value:'1000',visible:true}
-        this.layoutData = []; //this.data(可能数据过多),重新编排过滤后的数据集合, 并根据此数组展现文字和线条
+        this.layoutData = []; //{x:100, value:'1000',visible:true}
+
         this.sprite = null;
 
         this._textMaxWidth = 0;
@@ -88,13 +91,15 @@ export default class xAxis extends Component
 
         this.posParseToInt = false; //主要是柱状图里面有需要 要均匀间隔1px的时候需要
 
-        this.init(opt, data);
+        _.extend(true , this, opts);
+
+        this.init(opts, data);
 
         //xAxis的field只有一个值
         this.field = _.flatten( [ this.field ] )[0];
     }
 
-    init(opt, data) 
+    init(opts, data) 
     {
         this.sprite = new Canvax.Display.Sprite({
             id: "xAxisSprite"
@@ -103,23 +108,20 @@ export default class xAxis extends Component
             id: "rulesSprite"
         });
         this.sprite.addChild( this.rulesSprite );
-        this._initHandle(opt, data);
+        this._initHandle( data );
     }
 
-    _initHandle(opt, data)
+    _initHandle( data )
     {
 
         if(data && data.org){
             this.dataOrg = data.org;
         };
 
-        if (opt) {
-            _.extend(true , this, opt);
-            if( !opt.dataSection && this.dataOrg ){
-                //如果没有传入指定的dataSection，才需要计算dataSection
-                this.dataSection = this._initDataSection(this.dataOrg);
-            }
-        };
+        if( !this._opts.dataSection && this.dataOrg ){
+            //如果没有传入指定的dataSection，才需要计算dataSection
+            this.dataSection = this._initDataSection(this.dataOrg);
+        };        
 
         if (this.text.rotation != 0 ) {
             if(this.text.rotation % 90 == 0){
@@ -167,15 +169,15 @@ export default class xAxis extends Component
     //配置和数据变化
     resetData( data )
     {
-        this._initHandle(null, data);
+        this._initHandle( data );
         this.draw();
     }
 
     getIndexOfVal(xvalue)
     {
         var i;
-        for( var ii=0,il=this.data.length ; ii<il ; ii++ ){
-            var obj = this.data[ii];
+        for( var ii=0,il=this.layoutData.length ; ii<il ; ii++ ){
+            var obj = this.layoutData[ii];
             if(obj.value == xvalue){
                 i = ii;
                 break;
@@ -185,12 +187,12 @@ export default class xAxis extends Component
         return i;
     }
     
-    draw(opt)
+    draw(opts)
     {
-        //首次渲染从 直角坐标系组件中会传入 opt
+        //首次渲染从 直角坐标系组件中会传入 opts
         this._getLabel();
-        this._computerConfit(opt);
-        this.data = this._trimXAxis(this.dataSection, this.xGraphsWidth);
+        this._computerConfit(opts);
+        this.layoutData = this._trimXAxis(this.dataSection, this.xGraphsWidth);
 
         this._trimLayoutData();
 
@@ -222,10 +224,10 @@ export default class xAxis extends Component
     }
 
     //初始化配置
-    _computerConfit(opt)
+    _computerConfit(opts)
     {
-        if (opt) {
-            _.extend(true, this, opt);
+        if (opts) {
+            _.extend(true, this, opts);
         };
 
         this.yAxisW = Math.max(this.yAxisW, this.leftDisX);
@@ -250,14 +252,14 @@ export default class xAxis extends Component
 
     //获取x对应的位置
     //val ind 至少要有一个
-    getPosX( opt )
+    getPosX( opts )
     {
         var x = 0;
-        var val = opt.val; 
-        var ind = "ind" in opt ? opt.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
-        var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
-        var xGraphsWidth = "xGraphsWidth" in opt ? opt.xGraphsWidth : this.xGraphsWidth;
-        var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
+        var val = opts.val; 
+        var ind = "ind" in opts ? opts.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
+        var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
+        var xGraphsWidth = "xGraphsWidth" in opts ? opts.xGraphsWidth : this.xGraphsWidth;
+        var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
 
         if( dataLen == 1 ){
             x =  xGraphsWidth / 2;
@@ -561,7 +563,7 @@ export default class xAxis extends Component
     _trimLayoutData()
     {
         var me = this;
-        var arr = this.data;
+        var arr = this.layoutData;
         var l = arr.length;
 
         if( !this.display || !l ) return;
@@ -594,14 +596,13 @@ export default class xAxis extends Component
     _checkOver()
     {
         var me = this;
-        var arr = me.data;
+        var arr = me.layoutData;
 
         //现在的柱状图的自定义datasection有缺陷
         if( me.trimLayout ){
             //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
             //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
             me.trimLayout( arr );
-            me.layoutData = me.data;
             return;
         }
 
@@ -661,7 +662,5 @@ export default class xAxis extends Component
         };
 
         checkOver(0);
-
-        this.layoutData = this.data;
     }
 }

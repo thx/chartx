@@ -14,6 +14,11 @@ export default class component extends Canvax.Event.EventDispatcher
               
     }
 
+    draw()
+    {
+
+    }
+
     //组件的销毁
     destroy()
     {

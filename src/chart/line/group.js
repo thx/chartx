@@ -250,7 +250,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
      * dataTrigger 描述了数据变化的原因和变化的过程，比如上面的数据 left少了一个数据，right多了一个数据
      * @param {object} dataTrigger 
      */
-    reset(opt, data, dataTrigger)
+    resetData(data, dataTrigger)
     {
         var me = this;
 
@@ -287,39 +287,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 this._currPointList.splice( this._currPointList.length - Math.abs( dataTrigger.right ) );
             }
         };
-        
-        /*
-        if (plen < cplen) {
-            for (var i = plen, l = cplen; i < l; i++) {
-                if( _.isNumber(me._currPointList[i][1]) ){
-                    //如果这个点得y轴是个number，是有效的数据，那么
-                    //删除_circles，_texts 中一个
-                    //随便删一个就可以，不需要对应的那个
-                    me._circles && me._circles.removeChildAt( 0 );
-                    me._texts && me._texts.removeChildAt( 0 );
-                }
-            };
-            me._currPointList.length = plen;
-        };
-
-        if (plen > cplen) {
-            var diffLen = plen - cplen;
-            for (var i = 0; i < diffLen; i++) {
-                me._currPointList.push(_.clone( me._pointList[cplen + i] ));
-            }
-        };
-        */
-
-        //从被移除了得update中截留过来的，目前没发现有用途，先注释掉
-        /*
-        if( opt._groupInd !== undefined ){
-            var _strokeStyle = this._getLineStrokeStyle();
-            this._bline.context.strokeStyle = _strokeStyle;
-            this._fill.context.fillStyle = (this._getFillStyle() || _strokeStyle);
-            this._setNodesStyle();
-        };
-        */
-
 
         me._createNodes();
         me._createTexts();

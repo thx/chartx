@@ -175,9 +175,7 @@ export default class Line extends Chart
     }
 
     getCloneChart(lineConstructor)
-    {
-        this._coordinate
-        debugger
+    {   
         return {
             graphs: {
                 line: {
@@ -276,7 +274,7 @@ export default class Line extends Chart
     drawAnchor( _anchor )
     {
         var pos = {
-            x : this._coordinate._xAxis.data[ this.anchor.xIndex ].x,
+            x : this._coordinate._xAxis.layoutData[ this.anchor.xIndex ].x,
             y : this._coordinate.graphsHeight + this._graphs.data[ this._coordinate._yAxis[0].field[0] ].groupData[ this.anchor.xIndex ].y
         };
         _anchor.aim( pos );
@@ -334,7 +332,7 @@ export default class Line extends Chart
             return;
         };
 
-        e.eventInfo.xAxis = this._coordinate._xAxis.data[ e.eventInfo.iNode ]; 
+        e.eventInfo.xAxis = this._coordinate._xAxis.layoutData[ e.eventInfo.iNode ]; 
         e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
         e.eventInfo.dataZoom = this.dataZoom;
         e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );

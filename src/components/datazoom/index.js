@@ -491,7 +491,7 @@ export default class dataZoom extends Component
     setZoomBg()
     {
         //这里不是直接获取_graphs.sprite 而是获取 _graphs.core，切记切记
-        debugger
+        
         if( this.__graphssp ){
             this.__graphssp.destroy();
         };

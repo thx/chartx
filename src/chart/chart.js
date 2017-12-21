@@ -177,23 +177,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.fire("resetData");
     }
 
-    _rotate(angle)
-    {
-        var currW = this.width;
-        var currH = this.height;
-        this.width = currH;
-        this.height = currW;
-
-        var self = this;
-        _.each(self.stage.children, function(sprite) {
-            sprite.context.rotation = angle || -90;
-            sprite.context.x = (currW - currH) / 2;
-            sprite.context.y = (currH - currW) / 2;
-            sprite.context.rotateOrigin.x = self.width * sprite.context.$model.scaleX / 2;
-            sprite.context.rotateOrigin.y = self.height * sprite.context.$model.scaleY / 2;
-        });
-    }
-
     //默认每个chart都要内部实现一个_initData
     _initData(data)
     {
@@ -206,7 +189,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
 
     }
-
+    
     //所有plug触发更新
     componentsReset(opt , e)
     {
@@ -215,21 +198,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     drawComponents()
     {
-        /*
-        do {
-            var p = this.components.shift();
-            p && p.plug && p.plug.draw && p.plug.draw();
-        } while ( this.components.length > 0 ); 
-        */
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
             p.plug && p.plug.draw && p.plug.draw();
             if( p.type == "once" ){
                 this.components.splice( i, 1 );
                 i--;
+                //l--; l重新计算p.plug.draw 可能会改变components
             }
-
-            //p.plug.draw() 可能有新的plug被push进来
             l=this.components.length;
         }
     }
