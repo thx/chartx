@@ -26,9 +26,7 @@ export default class Line extends Chart
     {
         !opt && (opt ={});
         this.setStages();
-        if (this.rotate) {
-            this._rotate(this.rotate);
-        };
+
         this._initModule( opt ); //初始化模块  
         this.initComponents( opt ); // 初始化组件
         this._startDraw( opt ); //开始绘图

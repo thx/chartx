@@ -127,10 +127,6 @@ export default class Descartes extends Chart
                 });
             });
         });
-
-
-        
-
     }
 
     initComponents( opt )
@@ -161,9 +157,7 @@ export default class Descartes extends Chart
             if( p.type == "dataZoom" ){
                 if(!e || (e && e.trigger.name != "dataZoom")){
                     me.__cloneChart = me._getCloneChart();
-                    p.plug.reset( {
-                        //count : me._data.length-1
-                    } , me.__cloneChart );
+                    p.plug.reset( {} , me.__cloneChart );
                 }
                 return
             };

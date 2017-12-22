@@ -93,3 +93,11 @@ chartx2.0 代码规范
 
   ** descartes 笛卡尔系统类（ bar,line,scat 等都继承自该类 ）
 
+
+  简单代码约定规范
+
+  _coordinate 为实例
+  coordinate 为配置
+
+  
+

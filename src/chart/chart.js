@@ -78,8 +78,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
      */
     destroy() 
     {
-        this.clean();
-        if(this.el){
+        this._clean();
+        if( this.el ){
             this.el.innerHTML = "";
             this.el = null;
         };
@@ -90,7 +90,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     /*
      * 清除整个图表
      **/
-    clean()
+    _clean()
     {
         for (var i=0,l=this.canvax.children.length;i<l;i++){
             var stage = this.canvax.getChildAt(i);
@@ -110,7 +110,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         var _w = parseInt(this.el.offsetWidth);
         var _h = parseInt(this.el.offsetHeight);
         if( _w == this.width && _h == this.height ) return;
-        this.clean();
+        this._clean();
         this.width = _w;
         this.height = _h;
         this.canvax.resize();
@@ -133,14 +133,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
         _.extend(true, this , opts);
 
-        if(data) {
+        if( data ) {
             this._data = parse2MatrixData(data);
         };
 
         this.dataFrame = this.initData( this._data );
 
         this.components = [];
-        this.clean();
+        this._clean();
         this.canvax.domView.innerHTML = "";
 
         //padding数据也要重置为起始值
@@ -150,6 +150,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             bottom: 10,
             left: 10
         };
+
         this._init && this._init(this._node, this._data, this._opts);
         this.draw();
 
@@ -206,10 +207,9 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 i--;
                 //l--; l重新计算p.plug.draw 可能会改变components
             }
-            l=this.components.length;
+            l = this.components.length;
         }
     }
-
     //插件相关代码end
 
     //添加水印
@@ -255,5 +255,4 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         this.stage.addChild( sp );
     }
-
 }

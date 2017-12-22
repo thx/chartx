@@ -7731,7 +7731,7 @@ var Chart = function (_Canvax$Event$EventDi) {
     }, {
         key: "destroy",
         value: function destroy() {
-            this.clean();
+            this._clean();
             if (this.el) {
                 this.el.innerHTML = "";
                 this.el = null;
@@ -7745,8 +7745,8 @@ var Chart = function (_Canvax$Event$EventDi) {
          **/
 
     }, {
-        key: "clean",
-        value: function clean() {
+        key: "_clean",
+        value: function _clean() {
             for (var i = 0, l = this.canvax.children.length; i < l; i++) {
                 var stage = this.canvax.getChildAt(i);
                 for (var s = 0, sl = stage.children.length; s < sl; s++) {
@@ -7767,7 +7767,7 @@ var Chart = function (_Canvax$Event$EventDi) {
             var _w = parseInt(this.el.offsetWidth);
             var _h = parseInt(this.el.offsetHeight);
             if (_w == this.width && _h == this.height) return;
-            this.clean();
+            this._clean();
             this.width = _w;
             this.height = _h;
             this.canvax.resize();
@@ -7799,7 +7799,7 @@ var Chart = function (_Canvax$Event$EventDi) {
             this.dataFrame = this.initData(this._data);
 
             this.components = [];
-            this.clean();
+            this._clean();
             this.canvax.domView.innerHTML = "";
 
             //padding数据也要重置为起始值
@@ -7809,6 +7809,7 @@ var Chart = function (_Canvax$Event$EventDi) {
                 bottom: 10,
                 left: 10
             };
+
             this._init && this._init(this._node, this._data, this._opts);
             this.draw();
 
@@ -7870,7 +7871,6 @@ var Chart = function (_Canvax$Event$EventDi) {
                 l = this.components.length;
             }
         }
-
         //插件相关代码end
 
         //添加水印
@@ -11324,9 +11324,7 @@ var Descartes = function (_Chart) {
                 if (p.type == "dataZoom") {
                     if (!e || e && e.trigger.name != "dataZoom") {
                         me.__cloneChart = me._getCloneChart();
-                        p.plug.reset({
-                            //count : me._data.length-1
-                        }, me.__cloneChart);
+                        p.plug.reset({}, me.__cloneChart);
                     }
                     return;
                 }
@@ -15016,9 +15014,6 @@ var Bar = function (_Chart) {
         value: function draw(opt) {
             !opt && (opt = {});
             this.setStages(opt);
-            if (this.rotate) {
-                this._rotate(this.rotate);
-            }
             this._initModule(opt); //初始化模块  
             this.initComponents(opt); //初始化组件
             this._startDraw(opt); //开始绘图
@@ -17336,9 +17331,7 @@ var Line$6 = function (_Chart) {
         value: function draw(opt) {
             !opt && (opt = {});
             this.setStages();
-            if (this.rotate) {
-                this._rotate(this.rotate);
-            }
+
             this._initModule(opt); //初始化模块  
             this.initComponents(opt); // 初始化组件
             this._startDraw(opt); //开始绘图
@@ -17708,9 +17701,6 @@ var Bar_Line = function (_Bar) {
         value: function draw(opt) {
             !opt && (opt = {});
             this.setStages(opt);
-            if (this.rotate) {
-                this._rotate(this.rotate);
-            }
             this._initBarModule(opt); //初始化模块  
             this.initComponents(opt); //初始化组件
             this._startDraw(opt); //开始绘图
@@ -17865,9 +17855,6 @@ var Bar_Tgi = function (_Bar) {
         value: function draw(opt) {
             !opt && (opt = {});
             this.setStages(opt);
-            if (this.rotate) {
-                this._rotate(this.rotate);
-            }
             this._initBarModule(opt); //初始化模块  
             this.initComponents(opt); //初始化组件
             this._startDraw(opt); //开始绘图
@@ -18462,9 +18449,6 @@ var Scat = function (_Chart) {
         value: function draw(opt) {
             !opt && (opt = {});
             this.setStages();
-            if (this.rotate) {
-                this._rotate(this.rotate);
-            }
 
             this._initModule(opt); //初始化模块  
             this.initComponents(opt); // 初始化组件
