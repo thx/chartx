@@ -1,5 +1,6 @@
 import Canvax from "canvax2d"
 import { getEl,parse2MatrixData } from "../utils/tools"
+import DataFrame from "../utils/dataframe"
 
 const _ = Canvax._;
 
@@ -66,10 +67,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
    
     draw()
-    {
-    }
-
-    initData()
     {
     }
 
@@ -165,23 +162,26 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     /*
      * 只响应数据的变化，不涉及配置变化
+     * 
+     * @dataTrigger 一般是触发这个data reset的一些场景数据，
+     * 比如如果是 datazoom 触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
      */
-    resetData(data , e)
+    resetData(data , dataTrigger)
     {
-        this._data = parse2MatrixData( data );
-        this.dataFrame = this.initData( this._data );
-        if( e ){
-            //e一般是触发这个data reset的一些场景数据，比如如果是 datazoom触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
-            _.extend( this.dataFrame, e );
+        if( data ){
+            this._data = parse2MatrixData( data );
         };
-        this._resetData && this._resetData( e );
+
+        this.dataFrame = this.initData( this._data );
+
+        this._resetData && this._resetData( dataTrigger );
         this.fire("resetData");
     }
 
     //默认每个chart都要内部实现一个_initData
-    _initData(data)
+    initData(data)
     {
-        return data;
+        return DataFrame.apply(this, arguments);
     }
 
 
@@ -252,7 +252,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 sp.addChild( _textEl );
             }
         }
-
         this.stage.addChild( sp );
     }
 }

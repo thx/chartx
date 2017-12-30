@@ -22,57 +22,6 @@ export default class Line extends Chart
         this.draw();
     }
 
-    draw( opt )
-    {
-        !opt && (opt ={});
-        this.setStages();
-
-        this._initModule( opt ); //初始化模块  
-        this.initComponents( opt ); // 初始化组件
-        this._startDraw( opt ); //开始绘图
-        this.drawComponents( opt ); //开始绘制插件
-        this.inited = true;
-    }
-
-    /*
-     *添加一个yAxis字段，也就是添加一条brokenline折线
-     *@params field 添加的字段
-     **/
-    add( field , targetYAxis)
-    {
-        this._coordinate.addField( field, targetYAxis );
-        this._graphs.add( field );
-        this.componentsReset(  );
-    }
-
-    /*
-     *删除一个yaxis字段，也就是删除一条brokenline线
-     *@params target 也可以是字段名字，也可以是 index
-     **/
-    remove(target , _ind)
-    {
-        var ind = null;
-        if (_.isNumber(target)) {
-            //说明是索引
-            ind = target;
-        } else {
-            //说明是名字，转换为索引
-            ind = this._graphs.getIndexOfField( target );
-        };
-        if ( ind > -1 ) {
-            this._remove(ind, target);
-        };
-    }
-
-    _remove(ind, target)
-    {
-        this._coordinate.removeField( target );
-        //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
-        this._graphs.remove(ind);
-        this.componentsReset(  );
-    }
-
-
     _initModule(opt)
     {
         var me = this
@@ -90,9 +39,6 @@ export default class Line extends Chart
         });
         
         this.stageTip.addChild(this._tips.sprite);
-
-        //initModule 里面全部都是只数据和module的设置，
-        //所以_initComponents里的plug还有可以修改layout的机会
         
     }
 
@@ -128,53 +74,12 @@ export default class Line extends Chart
         
     }
 
-    drawLegend( _legend )
-    {
-        _legend.pos( {
-            x : this._coordinate.graphsX
-        } );
-        _.each( this._graphs.groups , function( g ){
-            _legend.setStyle( g.field , {
-                fillStyle : g.__lineStrokeStyle
-            } );
-        } );
-    }
+
 
     //datazoom begin
-    drawDataZoom()
-    {
-        var me = this;
-
-        var dataZoomOpt = _.extend(true, {
-            w: me._coordinate.graphsWidth,
-            pos: {
-                x: me._coordinate.graphsX,
-                y: me._coordinate.graphsY + me._coordinate._xAxis.height
-            },
-            dragIng : function( range , pixRange , count , width ){
-
-                var trigger = {
-                    name : "dataZoom",
-                    left :  me.dataZoom.range.start - range.start,
-                    right : range.end - me.dataZoom.range.end
-                }
-
-                _.extend( me.dataZoom.range , range );
-                me.resetData( me._data , {
-                    trigger : trigger
-                });
-
-                me.fire("dataZoomDragIng");
-            }
-        }, me.dataZoom);
-
-
-        return dataZoomOpt;
-    }
-
-    getCloneChart(lineConstructor)
+    getDataZoomChartOpt()
     {   
-        return {
+        var opt = {
             graphs: {
                 line: {
                     lineWidth: 1,
@@ -194,8 +99,8 @@ export default class Line extends Chart
                 }
             }
         }
+        return opt;
     }
-
     //datazoom end
 
 
@@ -203,71 +108,9 @@ export default class Line extends Chart
     drawMarkPoint(e)
     {
 
-        var me = this;
-        var _t = me.markPoint.markTo;
-
-        _.each( me._coordinate._yAxis , function( _yAxis , yi ){
-            var fs = _.flatten([ _yAxis.field ]);
-            _.each( fs , function( field , i ){
-                if( _t && !( ( _.isArray(_t) && _.indexOf( _t , field )>=0 ) || (_t === field) || _.isFunction(_t) ) ){
-                    return;
-                };
-
-                me.components.push( {
-                    type : "once",
-                    plug : {
-                        draw : function(){
-                            
-                            var g = me._graphs._yAxisFieldsMap[field].group;
-                            _.each(g.data, function(node, i) {
-
-                                var circle = g._circles.children[i];
-                                var mpCtx = {
-                                    value: node.value,
-                                    field: g.field,
-                                    point: circle.localToGlobal(),
-                                    r: circle.context.r + 2,
-                                    groupLen: g.data.length,
-                                    iNode: i,
-                                    iGroup: g._groupInd
-                                };
-
-                                if( _.isFunction(_t) && !_t( mpCtx ) ){
-                                    //如果MarkTo是个表达式函数，返回为false的话
-                                    return;
-                                };
-
-                                if (me._opts.markPoint && me._opts.markPoint.shapeType != "circle") {
-                                    mpCtx.point.y -= circle.context.r + 3
-                                };
-
-                                var _mp = me.creatOneMarkPoint(me._opts, mpCtx);
-
-                                circle.on("heartBeat" , function(){
-                                    _mp.rePosition( this.localToGlobal() )
-                                });
-                                
-                            });
-
-                        }
-                    }
-                } );
-
-            } );
-        } );
     }
     //markpoint end
 
-    //markline begin
-    drawMarkLine( ML, yVal, _yAxis , field )
-    {
-        var _fstyle = (field && this._graphs._yAxisFieldsMap[field]) ? this._graphs._yAxisFieldsMap[field].group.line.strokeStyle : "#999";
-        var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
-        var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
-
-        this.creatOneMarkLine( ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field );
-    }
-    //markline end
 
     drawAnchor( _anchor )
     {

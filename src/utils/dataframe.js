@@ -130,6 +130,5 @@ export default function( data ){
             return []
         }
     }
-
     return dataFrame;
 }

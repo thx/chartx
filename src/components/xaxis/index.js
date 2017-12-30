@@ -113,6 +113,9 @@ export default class xAxis extends Component
 
     _initHandle( data )
     {
+        if( data && data.field ){
+            this.field = data.field;
+        }
 
         if(data && data.org){
             this.dataOrg = data.org;

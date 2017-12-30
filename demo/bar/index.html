@@ -42,7 +42,21 @@ var data= [
 
 ];
 var options = {
-
+    coordinate : {
+        xAxis : {
+            field : "xfield"
+        }
+    },
+    graphs : [
+        {
+            field : [ [ "uv","pv" ] ],
+            yAxisAlign : "left"
+        },
+        {
+            field : [ "click" ],
+            yAxisAlign : "left"
+        }
+    ]
 };
 
 window.bar = new Chartx.Bar("canvasTest" , data , options)

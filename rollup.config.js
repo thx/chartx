@@ -9,7 +9,7 @@ rollup.rollup({
       babel({
         exclude: 'node_modules/**'
       }),
-      resolve({ jsnext: true, main: true, browser: true, }), 
+      resolve({ jsnext: true, main: true, browser: true }), 
       commonjs()
     ]
 }).then(function(bundle) {

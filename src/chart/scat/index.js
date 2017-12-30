@@ -35,8 +35,7 @@ export default class Scat extends Chart
         this.drawComponents( opt ); //开始绘制插件
         this.inited = true;
     }
-
-
+    
     _initModule(opt)
     {
         var me = this

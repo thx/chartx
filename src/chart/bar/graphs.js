@@ -1,6 +1,5 @@
 import Canvax from "canvax2d"
 import {numAddSymbol} from "../../utils/tools"
-import {colors as themeColors} from "../theme"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;
@@ -15,10 +14,11 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         this.data = [];
         this.root = root;
-        this._yAxisFieldsMap = {}; //{"uv":{index:0,fillStyle:"" , ...} ...}
-        this._setyAxisFieldsMap( opt );
 
-        //存储graphs对应的xAxis 和 yAxis实例，后续柱折混合图里对修改传入的yAxis实例
+        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
+        this.field = null; 
+
+        //后续 一个graphs只对应一个_yAxis
         this._xAxis = this.root._coordinate._xAxis;
         this._yAxis = this.root._coordinate._yAxis;
 
@@ -28,8 +28,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             x: 0,
             y: 0
         };
-
-        this.colors = themeColors;
 
         this.bar = {
             width: 0,
@@ -172,40 +170,32 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         me.checkedSp.removeAllChildren()
     }
 
+    //dataZoom中用
     setBarStyle($o)
     {
         var me = this
         var index = $o.iNode
         var group = me.barsSp.getChildById('barGroup_' + index)
         
-        var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
+        var fillStyle = $o.fillStyle || me._getStyle(me.bar.fillStyle)
         for (var a = 0, al = group.getNumChildren(); a < al; a++) {
             var rectEl = group.getChildAt(a)
             rectEl.context.fillStyle = fillStyle
         }
     }
 
-    _setyAxisFieldsMap( opt )
+    _getStyle(c, groups, vLen, i, h, v, value, field)
     {
-        var me = this;
-        !opt && ( opt = {} );
-        //柱折混合图，会再opt里传入一份yAxisFields
-        var yAxisFields = opt.yAxisFields || this.root._coordinate.yAxisFields;
-        _.each( yAxisFields , function(field, i) {
-            me._yAxisFieldsMap[field] = {
-                index: i
-            };
-        });
-    }
+        var fieldMap = this.root._coordinate.getFieldMapOf(field);
+        var style = fieldMap.style;
 
-    _getColor(c, groups, vLen, i, h, v, value, field)
-    {
-        var style = null;
+        //field对应的索引，， 取颜色这里不要用i
+        var fieldInd = fieldMap.ind;//this._yAxisFieldsMap[field].index;
         if (_.isString(c)) {
             style = c
         };
         if (_.isArray(c)) {
-            style = _.flatten(c)[this._yAxisFieldsMap[field].index];
+            style = _.flatten(c)[ fieldInd ];
         };
         if (_.isFunction(c)) {
             style = c.apply(this, [{
@@ -220,9 +210,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                 }
             }]);
         };
-        if (!style || style == "") {
-            style = this.colors[this._yAxisFieldsMap[field].index];
-        };
+
         return style;
     }
 
@@ -247,14 +235,17 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     }
 
     add( field ){
-
+        this.clean();
+        this.draw();
     }
+
     remove( field )
     {
-
+        this.clean();
+        this.draw();
     }
 
-    resetData( dataFrame )
+    resetData( dataFrame , dataTrigger )
     {
         this.removeAllChecked()
         this.draw();
@@ -397,15 +388,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                     var rectData = h_group[v][h];
                     rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                    var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
-
-                    //根据第一行数据来配置下_yAxisFieldsMap中对应field的fillStyle
-                    if ( h == 0 ) {
-                        var _yMap = me._yAxisFieldsMap[ rectData.field ];
-                        if (!_yMap.fillStyle) {
-                            _yMap.fillStyle = fillStyle;
-                        };
-                    };
+                    var fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
 
                     rectData.fillStyle = fillStyle;
 
@@ -632,14 +615,16 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
     _trimGraphs()
     {
-        
         var _xAxis = this._xAxis;
         var _yAxis = this._yAxis;
+        var _coor = this.root._coordinate;
+
+        var enabledFields = _coor.getEnabledFields();
 
         var xArr = _xAxis.layoutData;
         var hLen = 0;
-        _.each( _yAxis, function( _yaxis ){
-            hLen += _yaxis.field.length;
+        _.each( enabledFields, function( obj ){
+            hLen += obj.length;
         } );
 
         var xDis1 = _xAxis.xDis;
@@ -970,7 +955,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                     for (var v = 0; v < vLen; v++) {
                         if ((iGroup == i || iGroup == -1) && (iLay == v || iLay == -1)) {
                             node = h_group[v][h]
-                            node.fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, node.value, node.field);
+                            node.fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, node.value, node.field);
                             arr.push(node)
                         }
                     }

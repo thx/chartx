@@ -17,12 +17,13 @@ export default class dataZoom extends Component
 		//0-1
         this.range = {
             start: 0,
-            end: '',
-            max : 1, //可以外围控制智能在哪个区间拖动
+            end : null,
+            max : null, //可以外围控制智能在哪个区间拖动
             min : 1  //最少至少选中了一个数据
         };
         
         this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
+        this.dataLen = 1;
         this.layoutType = cloneChart.thumbChart._coordinate._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this.pos = {
@@ -138,32 +139,34 @@ export default class dataZoom extends Component
 
         this.setZoomBg( );
     }
-
-    _getCount()
-    {
-        //this.layoutType = _cloneChart._coordinate._xAxis.layoutType;
-        //count是会变的，layoutType不会变，所以layoutType就可以直接在constructor计算
-        var _cloneChart = this._cloneChart.thumbChart;
-        return this.layoutType == "rule" ? _cloneChart._data.length-2 : _cloneChart._data.length-1;
-    }
-
     //计算属性
     _computeAttrs(opt)
     {
         var _cloneChart = this._cloneChart.thumbChart
 
-        this.count = this._getCount();
+        this.dataLen = _cloneChart._data.length - 1;
+        this.count = this.layoutType == "rule" ? this.dataLen-1 : this.dataLen;
         
-        if(!opt.range || !opt.range.max){
+        if(!this.range.max || this.range.max > this.count){
             this.range.max = this.count;
         }
-
-        if( !this.range.end || this.range.end > this.count ){
-            this.range.end = this.count;
+        if( !this.range.end || this.range.end > this.dataLen - 1 ){
+            this.range.end = this.dataLen - 1;
         }
         
         this.disPart = this._getDisPart();
         this.barH = this.h - this.barAddH;
+    }
+
+    _getRangeEnd( end )
+    {
+        if( end === undefined ){
+            end = this.range.end;
+        }
+        if( this.layoutType == "peak" ){
+            end += 1;
+        };
+        return end
     }
 
     widget() 
@@ -172,6 +175,7 @@ export default class dataZoom extends Component
         var setLines = function(){
             me._setLines.apply(me, arguments);
         };
+
         if(me.bg.enabled){
             var bgRectCtx = {
                 x: 0,
@@ -202,7 +206,7 @@ export default class dataZoom extends Component
                     y : me.barY + me.barH + 2
                 },
                 end : {
-                    x : me.range.end / me.count * me.w  - me.btnW / 2,
+                    x : me._getRangeEnd() / me.count * me.w  - me.btnW / 2,
                     y : me.barY + me.barH + 2
                 },
                 lineWidth : me.underline.lineWidth,
@@ -261,14 +265,13 @@ export default class dataZoom extends Component
 
             });
             me._btnLeft.on("dragend" , function(e){
-                
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnLeft );
         };
 
         var btnRightCtx = {
-            x: me.range.end / me.count * me.w - me.btnW,
+            x: me._getRangeEnd() / me.count * me.w - me.btnW,
             y: me.barY - me.barAddH / 2 + 1,
             width: me.btnW,
             height: me.barH + me.barAddH ,
@@ -296,8 +299,8 @@ export default class dataZoom extends Component
                 if( this.context.x + me.btnW - me._btnLeft.context.x > me.disPart.max){
                     this.context.x = me.disPart.max - (me.btnW - me._btnLeft.context.x)
                 };
-                if( this.context.x - me.btnW - me._btnLeft.context.x - 2 < me.disPart.min){
-                    this.context.x = me.disPart.min + me.btnW + me._btnLeft.context.x + 2;
+                if( this.context.x + me.btnW - me._btnLeft.context.x < me.disPart.min){
+                    this.context.x = me.disPart.min - me.btnW + me._btnLeft.context.x;
                 };
                 me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnW;
                 me._setRange();
@@ -373,7 +376,7 @@ export default class dataZoom extends Component
         if(!this.linesCenter){
             this.linesCenter = new Canvax.Display.Sprite({ id : "linesCenter" });
             this._addLines({
-                count  : 6,
+                count  : 3,
                 // dis    : 1,
                 sprite : this.linesCenter,
                 strokeStyle : this.btnFillStyle
@@ -385,20 +388,35 @@ export default class dataZoom extends Component
 
     _getDisPart()
     {
-        var me = this
+        var me = this;
+        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.w), 23 );
+        //柱状图用得这种x轴布局，不需要 /2
+        if( this.layoutType == "peak" ){
+            min = Math.max( parseInt(me.range.min / me.count * me.w), 23 );
+        };
+
         return {
-            min : me.range.min / me.count * me.w,
-            max : me.range.max / me.count * me.w
+            min : min,
+            max : parseInt(me.range.max / me.count * me.w)
         }
     }
 
     _setRange( trigger )
     {
         var me = this;
-        var _preDis = me.range.end - me.range.start;
+        var _end = me._getRangeEnd();
+        var _preDis = _end - me.range.start;
 
-        var start = parseInt( (me._btnLeft.context.x / me.w) * me.count ) ;
-        var end = parseInt( ( (me._btnRight.context.x + me.btnW) / me.w) * me.count );
+        var start = (me._btnLeft.context.x / me.w) * me.count;
+        var end =  ((me._btnRight.context.x + me.btnW) / me.w) * me.count;
+
+        if( this.layoutType == "peak" ){
+            start = Math.round( start );
+            end = Math.round( end );
+        } else {
+            start = parseInt(start);
+            end = parseInt(end);
+        }
 
         if( trigger == "btnCenter" ){
             //如果是拖动中间部分，那么要保持 end-start的总量一致
@@ -409,15 +427,14 @@ export default class dataZoom extends Component
         
         
 
-        if( start != me.range.start || end != me.range.end ){
+        if( start != me.range.start || end != _end ){
             me.range.start = start;
+            if( me.layoutType == "peak" ){
+                end -= 1;
+            };
             me.range.end = end;
-            //@比例range @像素range @单位总数 @width
-            //console.log( me.range.start+"|"+me.range.end )
-            me.dragIng( me.range , {
-                start: me._btnLeft.context.x,
-                end: me._btnRight.context.x + me.btnW
-            } , me.count , me.w);
+
+            me.dragIng( me.range );
         };
 
         me._setLines();

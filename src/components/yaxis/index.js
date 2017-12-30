@@ -40,7 +40,7 @@ export default class yAxis extends Component
             x: 0,
             y: 0
         };
-        this.place = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
+        this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
         
         this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
         this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
@@ -115,6 +115,10 @@ export default class yAxis extends Component
         this.dataSection = [];
         this.dataSectionGroup = [];
 
+        if( data && data.field ){
+            this.field = data.field;
+        }
+
         if( data && data.org ){
             this.dataOrg = data.org; //这里必须是data.org
         };
@@ -127,7 +131,7 @@ export default class yAxis extends Component
 
     setX($n)
     {
-        this.sprite.context.x = $n + (this.place == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
+        this.sprite.context.x = $n + (this.align == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
         this.pos.x = $n;
     }
 
@@ -154,7 +158,7 @@ export default class yAxis extends Component
     {
         var _label = "";
         if(_.isArray(this.label)){
-            _label = this.label[ this.place == "left" ? 0 : 1 ];
+            _label = this.label[ this.align == "left" ? 0 : 1 ];
         } else {
             _label = this.label;
         };
@@ -163,7 +167,7 @@ export default class yAxis extends Component
             this._label = new Canvax.Display.Text(_label, {
                 context: {
                     fontSize: this.text.fontSize,
-                    textAlign: this.place,//"left",
+                    textAlign: this.align,//"left",
                     textBaseline: this.isH ? "top" : "bottom",
                     fillStyle: this.text.fillStyle,
                     rotation: this.isH ? -90 : 0
@@ -328,9 +332,10 @@ export default class yAxis extends Component
         return dis
     }
 
-    _setDataSection( data )
+    _setDataSection()
     {
         //如果有堆叠，比如[ ["uv","pv"], "click" ]
+        //那么这个 this.dataOrg， 也是个对应的结构
         //vLen就会等于2
         var vLen = 1;
 
@@ -345,18 +350,17 @@ export default class yAxis extends Component
 
 
         if( vLen == 1 ){
-            return this._oneDimensional( data );
+            return this._oneDimensional( );
         };
         if( vLen == 2 ){
-            return this._twoDimensional( data );
+            return this._twoDimensional( );
         };
         
     }
 
-    _oneDimensional( d )
+    _oneDimensional()
     {
-        
-        var arr = _.flatten( d ); //_.flatten( data.org );
+        var arr = _.flatten( this.dataOrg ); //_.flatten( data.org );
 
         for( var i = 0, il=arr.length; i<il ; i++ ){
             arr[i] =  arr[i] || 0;
@@ -366,8 +370,9 @@ export default class yAxis extends Component
     }
 
     //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
-    _twoDimensional( d )
+    _twoDimensional()
     {
+        var d = this.dataOrg;
         var arr = [];
         var min;
         _.each( d , function(d, i) {
@@ -416,7 +421,7 @@ export default class yAxis extends Component
     _initData()
     {
         
-        var arr = this._setDataSection( this.dataOrg );
+        var arr = this._setDataSection();
 
         if( this.waterLine != null ){
             arr.push( this.waterLine )
@@ -503,7 +508,7 @@ export default class yAxis extends Component
             _sort = this.sort;
         }
         if( _.isArray(this.sort) ){
-            _sort = this.sort[ this.place == "left" ? 0 : 1 ];
+            _sort = this.sort[ this.align == "left" ? 0 : 1 ];
         }
         if( !_sort ){
             _sort = "asc";
@@ -613,7 +618,7 @@ export default class yAxis extends Component
             };  
 
         
-            var textAlign = (self.place == "left" ? "right" : "left");
+            var textAlign = (self.align == "left" ? "right" : "left");
             //为横向图表把y轴反转后的 逻辑
             if (self.text.rotation == 90 || self.text.rotation == -90) {
                 textAlign = "center";
@@ -671,9 +676,9 @@ export default class yAxis extends Component
 
                 //文字
                 var txt = new Canvax.Display.Text(content, {
-                    id: "yAxis_txt_" + self.place + "_" + a,
+                    id: "yAxis_txt_" + self.align + "_" + a,
                     context: {
-                        x: x + (self.place == "left" ? -5 : 5),
+                        x: x + (self.align == "left" ? -5 : 5),
                         y: posy + aniDis,
                         fillStyle: self._getProp(self.text.fillStyle),
                         fontSize: self.text.fontSize,
@@ -696,7 +701,7 @@ export default class yAxis extends Component
                     //线条
                     var line = new Line({
                         context: {
-                            x: 0 + (self.place == "left" ? +1 : -1) * self.dis - 2,
+                            x: 0 + (self.align == "left" ? +1 : -1) * self.dis - 2,
                             y: y,
                             end : {
                                 x : self.line.width,

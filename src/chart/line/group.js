@@ -1,6 +1,5 @@
 import Canvax from "canvax2d"
 import {getPath} from "../../utils/tools"
-import {colors as themeColors} from "../theme"
 import ColorFormat from "../../utils/colorformat"
 
 const AnimationFrame = Canvax.AnimationFrame;
@@ -9,11 +8,11 @@ const Rect = Canvax.Shapes.Rect;
 const Circle = Canvax.Shapes.Circle;
 const Path = Canvax.Shapes.Path;
  
-const _ = Canvax._; 
+const _ = Canvax._;
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
-    constructor( field, a, opt, ctx, sort, yAxis, h, w )
+    constructor( field, a, opt, ctx, sort, yAxis, h, w , style)
     {
         super();
         this.field = field; //_groupInd 在yAxis.field中对应的值
@@ -26,14 +25,14 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this.h = h;
         this.y = 0;
 
+        this.style = style;
+
         this.animation = true;
         this.resize = false;
 
-        this.colors = themeColors;
-
         this.line = { //线
             enabled: 1,
-            strokeStyle: this.colors[this._groupInd],
+            strokeStyle: this.style,
             lineWidth: 2,
             lineType: "solid",
             smooth: true
@@ -122,7 +121,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     {
         var color = this._getProp(s);
         if (!color || color == "") {
-            color = this.colors[this._groupInd];
+            color = this.style;
         };
         return color;
     }

@@ -29,21 +29,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         //而是先用this._yAxis存储起来
         //方便比如bar_line柱折混合的时候覆盖掉
         this._yAxis = this.root._coordinate._yAxis;
-
-        //field默认从 直角坐标系的 yAxisFields 中获取 获取
-
-        //['uv','pv','click'] 这样的一维结构集合，哪怕是双轴的yAxis
-        //就算是在混合图表里， 也是全量的集合
-        this.field = this.root._coordinate.yAxisFields;//this.dataFrame.yAxis.field;
-
-
-        //一个记录了原始yAxis.field 一些基本信息的map
-        //{ "uv" : {ind : 0 , _yAxis : , line} ...}
-        this._yAxisFieldsMap = {};
-        this._setyAxisFieldsMap( this.field );
-
         
-        this.disX = 0; //点与点之间的间距
         this.groups = []; //群组集合     
 
         this.iGroup = 0; //群组索引(哪条线)
@@ -75,8 +61,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this.core.context.x = this.x;
         this.core.context.y = this.y;
 
-        this.disX = this._getGraphsDisX();
-
         this.data = this._trimGraphs();
 
         this._setGroupsForYfield( this.data );
@@ -89,7 +73,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         
     }
 
-    resetData(dataFrame)
+    resetData(dataFrame, dataTrigger)
     {
         
         var me = this;
@@ -99,15 +83,9 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             me.data = me._trimGraphs();
         };
 
-        this.disX = this._getGraphsDisX();
-
-        for (var a = 0, al = me.field.length; a < al; a++) {
-            //var group = me.groups[a];
-            var group = _.find( me.groups , function(g){
-                return g.field == me.field[a]
-            } );
-            group && group.resetData( me.data[ group.field ].data , dataFrame.trigger );
-        };
+        _.each( me.groups, function(g){
+            g.resetData( me.data[ g.field ].data , dataTrigger );
+        } );
     }
 
     //_yAxis, dataFrame
@@ -192,25 +170,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         return this;
     }
 
-    _setyAxisFieldsMap( fields )
-    {
-        var me = this;
-        //me._yAxisFieldsMap = {};
-        _.each(_.flatten( fields ), function(field, i) {
-            var _yAxisF = me._yAxisFieldsMap[field];
-            if( _yAxisF ){
-                me._yAxisFieldsMap[field].ind = i;
-            } else {
-                me._yAxisFieldsMap[field] = {
-                    group: null,
-                    ind: i,
-                    yAxisInd: 0 //0为依赖左边的y轴，1为右边的y轴
-                };
-            }
-        });
-    }
-
-    //add 和 remove 都不涉及到 _yAxisFieldsMap 的操作,只有reset才会重新构建 _yAxisFieldsMap
     add( field )
     {
         var self = this;
@@ -219,23 +178,42 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this._setGroupsForYfield( this.data , field );
         
         _.each(this.groups, function(g, i) {
-            g.reset( {} , self.data[ g.field ].data );
+            g.resetData( self.data[ g.field ].data );
         });
     }
 
     /*
      *删除 ind
      **/
-    remove(i)
+    remove( field )
     {
         var self = this;
+
+        var i = self.getGroupIndex( field );
 
         this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
 
         _.each(this.groups, function(g, i) {
-            g.reset( {} , self.data[ g.field ].data );
+            g.resetData( self.data[ g.field ].data );
         });
+    }
+
+    getGroupIndex( field )
+    {
+        var ind = -1;
+        for( var i=0,l=this.groups.length; i<l; i++  ){
+            if( this.groups[i].field === field ){
+                ind = i;
+                break;
+            }
+        }
+        return ind
+    }
+
+    getGroup( field )
+    {
+       return this.groups[ this.getGroupIndex(field) ]
     }
 
     _setGroupsForYfield(data , fields)
@@ -254,9 +232,9 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 //说明该group已经在graphs里面了
                 return;
             }
-            //记录起来该字段对应的应该是哪个_yAxis
-            var yfm = self._yAxisFieldsMap[ field ];
-            var _groupInd = yfm.ind;
+
+            var fieldMap = self.root._coordinate.getFieldMapOf( field );
+            var _groupInd = fieldMap.ind;
 
             var group = new Group(
                 field,
@@ -266,14 +244,13 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 g.yAxis.sort,
                 g.yAxis,
                 self.h,
-                self.w
+                self.w,
+                fieldMap.style
             );
 
             group.draw({
                 resize : self.resize
             }, g.data );
-
-            yfm.group = group;
 
             var insert = false;
             //在groups数组中插入到比自己_groupInd小的元素前面去
@@ -343,7 +320,9 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         //todo:底层加判断
         x = x > this.w ? this.w : x;
 
-        var tmpINode = this.disX == 0 ? 0 : parseInt((x + (this.disX / 2)) / this.disX);
+        var _disX = this._getGraphsDisX();
+
+        var tmpINode = _disX == 0 ? 0 : parseInt((x + (_disX / 2)) / _disX);
 
         var _nodesInfoList = []; //节点信息集合
 
@@ -362,6 +341,17 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             nodesInfoList: _.clone(_nodesInfoList)
         };
         return node;
+    }
+
+    //每两个点之间的距离
+    _getGraphsDisX()
+    {
+        var dsl = this.dataFrame.org.length - 1;
+        var n = this.w / (dsl - 1);
+        if (dsl == 1) {
+            n = 0
+        }
+        return n
     }
 
     getNodesInfoOfx( x )
@@ -393,30 +383,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         ml.data = e.eventInfo;
 
         return ml;
-    }
-
-    //每两个点之间的距离
-    _getGraphsDisX()
-    {
-        var dsl = this.dataFrame.org.length - 1;
-        var n = this.w / (dsl - 1);
-        if (dsl == 1) {
-            n = 0
-        }
-        return n
-    }
-
-    //这里得到的ind 和 groundInd不同，这里是真实的索引
-    getIndexOfField( field )
-    {
-        var i = -1;
-        _.each( this.groups , function( g , ii ){
-            if( g.field == field ){
-                i = ii;
-                return false;
-            }
-        } );
-        return i;
     }
 
 }

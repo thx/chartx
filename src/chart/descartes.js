@@ -30,6 +30,8 @@ export default class Descartes extends Chart
             }
         };
 
+        debugger
+
         //直角坐标系的绘图模块
         this._graphs = null;
 
@@ -47,6 +49,23 @@ export default class Descartes extends Chart
 
     }
 
+    draw( opt )
+    {
+        !opt && (opt ={});
+        this.setStages(opt);
+        this._initModule( opt ); //初始化模块  
+        this.initComponents( opt ); //初始化组件
+        this._startDraw( opt ); //开始绘图
+        
+        this.drawComponents( opt );  //绘图完，开始绘制插件
+
+        if( this._coordinate.horizontal ){
+            this._horizontal();
+        };
+
+        this.inited = true;
+    }
+
     setStages()
     {
         this.stageTip = new Canvax.Display.Sprite({
@@ -61,12 +80,12 @@ export default class Descartes extends Chart
     }
 
     //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
-    _resetData( e )
+    _resetData( dataTrigger )
     {
         var me = this;
-        this._coordinate.resetData( this.dataFrame );
-        this._graphs.resetData( this.dataFrame);
-        this.componentsReset( e );
+        this._coordinate.resetData( this.dataFrame , dataTrigger);
+        this._graphs.resetData( this.dataFrame , dataTrigger);
+        this.componentsReset( dataTrigger );
     }
 
     initData(data, opt)
@@ -82,6 +101,25 @@ export default class Descartes extends Chart
             d = DataFrame.apply(this, arguments);
         };
         return d;
+    }
+
+    /*
+     *添加一个yAxis字段，也就是添加一条brokenline折线
+     *@params field 添加的字段
+     **/
+    add( field , targetYAxis)
+    {
+        this._coordinate.addField( field, targetYAxis );
+        this._graphs.add( field );
+        this.componentsReset();
+    }
+
+    remove( field )
+    {
+        this._coordinate.removeField( field );
+        //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
+        this._graphs.remove( field );
+        this.componentsReset();
     }
 
     _horizontal() 
@@ -149,24 +187,21 @@ export default class Descartes extends Chart
     }
 
     //所有plug触发更新
-    componentsReset(e)
+    componentsReset( trigger )
     {
         var me = this;
         _.each(this.components , function( p , i ){
 
             if( p.type == "dataZoom" ){
-                if(!e || (e && e.trigger.name != "dataZoom")){
+                if( !trigger || trigger.name != "dataZoom" ){
                     me.__cloneChart = me._getCloneChart();
                     p.plug.reset( {} , me.__cloneChart );
                 }
                 return
             };
-            
             p.plug.reset && p.plug.reset( me[ p.type ] || {} );
-            
         }); 
     }
-
 
 
     //设置图例 begin
@@ -192,7 +227,11 @@ export default class Descartes extends Chart
         var _legend = new Legend( me._getLegendData() , legendOpt );
        
         _legend.draw = function(){
-            me.drawLegend( _legend );
+
+            _legend.pos( { 
+                x : me._coordinate.graphsX 
+            } );
+
         };
         
         _legend.pos( {
@@ -214,11 +253,15 @@ export default class Descartes extends Chart
     {
         var me   = this;
         var data = [];
-        _.each( me._coordinate.yAxisFields , function( f , i ){
-            data.push({
-                field : f,
-                fillStyle : null
-            });
+        
+        _.each( _.flatten(me._coordinate.fieldsMap) , function( map , i ){
+            data.push( {
+                enabled : map.enabled,
+                field : map.field,
+                ind : map.ind,
+                style : map.style,
+                yAxis : map.yAxis
+            } );
         });
         return data;
     }
@@ -248,7 +291,7 @@ export default class Descartes extends Chart
             coordinate : this.coordinate,
             graphs : me._opts.graphs
         };
-        _.extend(true, opts, me.getCloneChart() );
+        _.extend(true, opts, me.getDataZoomChartOpt() );
 
         var thumbChart = new chartConstructor(cloneEl, me._data, opts);
 
@@ -269,7 +312,7 @@ export default class Descartes extends Chart
             type : "once",
             plug : {
                 draw: function(){
-                    me._dataZoom = new DataZoom( me.drawDataZoom() , me.__cloneChart );
+                    me._dataZoom = new DataZoom( me._getDataZoomOpt() , me.__cloneChart );
                     me.components.push( {
                         type : "dataZoom",
                         plug : me._dataZoom
@@ -278,6 +321,36 @@ export default class Descartes extends Chart
                 }
             }
         } );
+    }
+
+    _getDataZoomOpt()
+    {
+        var me = this;
+        //初始化 datazoom 模块
+        var dataZoomOpt = _.extend(true, {
+            w: me._coordinate.graphsWidth,
+            pos: {
+                x: me._coordinate.graphsX,
+                y: me._coordinate.graphsY + me._coordinate._xAxis.height
+            },
+            dragIng: function(range) {
+                var trigger = {
+                    name : "dataZoom",
+                    left :  me.dataZoom.range.start - range.start,
+                    right : range.end - me.dataZoom.range.end
+                };
+
+                _.extend( me.dataZoom.range , range );
+                me.resetData( me._data , trigger );
+                me.fire("dataZoomDragIng");
+            },
+            dragEnd: function(range) {
+                me.updateChecked && me.updateChecked();
+                me.fire("dataZoomDragEnd");
+            }
+        }, me.dataZoom);
+
+        return dataZoomOpt
     }
     //datazoom end
 
@@ -339,7 +412,16 @@ export default class Descartes extends Chart
                 type : "once",
                 plug : {
                     draw : function(){
-                        me.drawMarkLine( ML, y, _yAxis, field );
+
+                        var _fstyle;
+                        var fieldMap = me._coordinate.getFieldMapOf( field );
+                        if( fieldMap ){
+                            _fstyle = fieldMap.style;
+                        };
+                        var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
+                        var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
+        
+                        me.creatOneMarkLine( ML, y, _yAxis, lineStrokeStyle, textFillStyle, field );
                     }
                 }
             } );
@@ -362,14 +444,18 @@ export default class Descartes extends Chart
                 list: [
                     [0, 0],
                     [me._coordinate.graphsWidth, 0]
-                ],
-                strokeStyle: lineStrokeStyle
+                ]
+                //strokeStyle: lineStrokeStyle
             },
             text: {
                 fillStyle: textFillStyle
             },
             field: field
         };
+
+        if( lineStrokeStyle ){
+            o.line.strokeStyle = lineStrokeStyle;
+        }
 
         var _markLine = new MarkLine( _.extend( true, ML, o) , _yAxis );
         me.components.push( {

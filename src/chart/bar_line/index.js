@@ -37,6 +37,7 @@ export default class Bar_Line extends Bar
         };
     }
 
+    //覆盖掉descartes父类中得draw
     draw( opt )
     {
         !opt && (opt ={});

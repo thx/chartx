@@ -32,32 +32,32 @@
         <td id="td-vl">
             <form><textarea id="code" name="code">
 
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
-var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 130 , 50 , 150    ]
-
-];
-var options = {
-    coordinate : {
-        yAxis : {
-            field : [ ["uv", "pv" ] , "click" ]
-        }
-    },
-    legend : {
-        tips : {
-            enabled:true,
-            content : function(e){
-
-            }
-        }
-    }
-};
-
-window.bar = new Chartx.Bar("canvasTest" , data , options)
+                //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+                //第一行是表头。
+                var data= [
+                    ["xfield","uv" ,"pv","click"],
+                    [ 1      , 101 , 20 , 33    ],
+                    [ 2      , 67  , 51 , 26    ],
+                    [ 3      , 100 , 50 , 150    ]
+                
+                ];
+                var options = {
+                    graphs : {
+                        checked : {
+                            enabled   : true,
+                            fillStyle : '#00A8E6',
+                            strokeStyle : '#00A8E6',
+                            globalAlpha : 0.1
+                        }
+                    },
+                    dataZoom: {
+                        
+                    }
+                };
+                
+                window.bar = new Chartx.Bar("canvasTest" , data , options)
+                
+                            
 
             </textarea></form>
         </td>

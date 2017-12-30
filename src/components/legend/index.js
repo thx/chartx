@@ -13,7 +13,7 @@ export default class Legend extends Component
 
         /* data的数据结构为
         [
-        {field: "uv", fillStyle: "#ff8533", activate: true} //外部只需要传field和fillStyle就行了 activate是内部状态
+        {field: "uv", style: "#ff8533", enabled: true} //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
         this.data = data || [];
@@ -72,32 +72,6 @@ export default class Legend extends Component
         return info.field;
     }
 
-    setStyle( field , style )
-    {
-        var me = this;
-        _.each( this.data , function( obj , i ){
-            if( obj.field == field ){
-                if( style.fillStyle ){
-                    obj.fillStyle = style.fillStyle;
-                    var icon = me.sprite.getChildById("lenend_field_"+i).getChildById("lenend_field_icon_"+i);
-                    icon.context.fillStyle = style.fillStyle;
-                };
-            };
-        } );
-    }
-
-    getStyle( field )
-    {
-        var me = this;
-        var data = null;
-        _.each( this.data , function( obj , i ){
-            if( obj.field == field ){
-                data = obj;
-            };
-        } );
-        return data;
-    }
-
     draw()
     {
         var me = this;
@@ -105,19 +79,12 @@ export default class Legend extends Component
         var width = 0,height = 0;
         _.each( this.data , function( obj , i ){
 
-            //如果外面没有设置过，就默认为激活状态
-            if( obj.activate == undefined || obj.activate ){
-                obj.activate = true;
-            } else {
-                obj.activate = false;
-            };
-
             var icon   = new Circle({
                 id : "lenend_field_icon_"+i,
                 context : {
                     x     : 0,
                     y     : me.tag.height/2 ,
-                    fillStyle : obj.activate ? "#ccc" : (obj.fillStyle || me._labelColor),
+                    fillStyle : !obj.enabled ? "#ccc" : (obj.style || me._labelColor),
                     r : me.icon.r,
                     cursor: "pointer"
                 }
@@ -143,7 +110,7 @@ export default class Legend extends Component
                     y : me.tag.height / 2,
                     textAlign : "left",
                     textBaseline : "middle",
-                    fillStyle : "#333", //obj.fillStyle
+                    fillStyle : "#333", //obj.style
                     cursor: "pointer"
                 }
             } );
@@ -187,15 +154,19 @@ export default class Legend extends Component
             sprite.on("click" , function( e ){
 
                 //只有一个field的时候，不支持取消
-                if( _.filter( me.data , function(obj){return obj.activate} ).length == 1 ){
-                    if( obj.activate ){
+                if( _.filter( me.data , function(obj){return obj.enabled} ).length == 1 ){
+                    if( obj.enabled ){
                         return;
                     }
                 };
                 
-                icon.context.fillStyle = obj.activate ? "#ccc" : (obj.fillStyle || me._labelColor)
-                obj.activate = !obj.activate;
-                if( obj.activate ){
+                obj.enabled = !obj.enabled;
+
+                icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.style || me._labelColor);
+
+                
+
+                if( obj.enabled ){
                     me.onChecked( obj.field );
                 } else {
                     me.onUnChecked( obj.field );
@@ -217,7 +188,7 @@ export default class Legend extends Component
             nodesInfoList: [
                 {
                     field : data.field,
-                    fillStyle : data.fillStyle
+                    fillStyle : data.style
                 }
             ]
         };

@@ -118,6 +118,7 @@ export function getPath($arr){
             s += ' ' + L + x + ' ' + y
         }
     }
+    
     // s += ' ' + Z
     return s
 }

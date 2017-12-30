@@ -18,7 +18,7 @@ export default class Bar_Tgi extends Bar
     _init( node, data, opts ) 
     {
         var me = this;
-
+    
         //兼容下没有传任何参数的情况下，默认把第一个field作为x，第二个作为柱状图，第三个作为折线图
         if( !this.coordinate.xAxis.field ){
             this.coordinate.xAxis.field = this.dataFrame.fields[0];
@@ -38,6 +38,7 @@ export default class Bar_Tgi extends Bar
     
     }
 
+    //覆盖掉descartes父类中得draw
     draw( opt ) 
     {
         !opt && (opt ={});

@@ -35,29 +35,46 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 130 , 50 , 150    ]
-
+    ["xfield","uv"  ,"pv","click"],
+    [ 1      , null , undefined , 33    ],
+    [ 2      , 0    , "" , 26    ],
+    [ 3      , 123  , 145 , 243    ],
+    [ 4      , 232  , 135 , 231    ],
+    [ 5      , 320  , 173 , 71    ],
+    [ 6      , 230  , 154 , 39    ],
+    [ 7      , 140  , 168 , 65    ],
+    [ 8      , 166  ,183 , 51    ],
+    [ 3      , 132  , 145 , 243    ],
+    [ 4      , 158  , 135 , 231    ],
+    [ 5      , 179  , 173 , 71    ],
+    [ 6      , 188  , 154 , 39    ],
+    [ 7      , 55   , 168 , 65    ],
+    [ 8      , undefined   ,183 , 51    ]
 ];
+
 var options = {
-    coordinate : {
+    coordinate: {
         yAxis : {
-            field : [ ["uv", "pv" ] , "click" ]
+            //这里说明会显示 uv 和pv 两个维度的 折线
+            field : ["uv" , "pv" ]
+        },
+        xAxis : {
+            field : "xfield"
         }
     },
-    legend : {
-        tips : {
-            enabled:true,
-            content : function(e){
-
+    
+    markPoint : { 
+        markTo: function( obj ){
+            if( obj.field == "uv" && obj.iNode == obj.groupLen-1 ){
+                return true;
             }
-        }
+        },
+        realTime: true,
+        shapeType:"circle"
     }
 };
 
-window.bar = new Chartx.Bar("canvasTest" , data , options)
+window.line = new Chartx.Line("canvasTest" , data , options)
 
             </textarea></form>
         </td>
@@ -66,7 +83,7 @@ window.bar = new Chartx.Bar("canvasTest" , data , options)
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>柱状图（bar chart）</h4>
+                <h4>折线图（bar chart）</h4>
                 <p>
                     联系人：@释剑
                 </p>

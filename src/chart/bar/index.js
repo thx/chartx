@@ -35,22 +35,7 @@ export default class Bar extends Chart
 
     }
 
-    draw( opt )
-    {
-        !opt && (opt ={});
-        this.setStages(opt);
-        this._initModule( opt ); //初始化模块  
-        this.initComponents( opt ); //初始化组件
-        this._startDraw( opt ); //开始绘图
-        
-        this.drawComponents( opt );  //绘图完，开始绘制插件
 
-        if( this._coordinate.horizontal ){
-            this._horizontal();
-        };
-
-        this.inited = true;
-    }
 
     _startDraw(opt)
     {
@@ -93,56 +78,6 @@ export default class Bar extends Chart
         
         this.stageTip.addChild(this._tips.sprite);
     }
-
-
-    //TODO：bar中用来改变yAxis.field的临时 方案
-    add( field )
-    {
-        var displayObj = this._coordinate.getDisplayObjectOfField( field );
-        if( !displayObj ) return;
-        if( displayObj.enabled ) return;
-
-        this._fieldChange(field , displayObj.yAxis );
-
-        this._graphs.clean();
-        this._reset( this );
-    }
-
-    remove( field )
-    {
-        var displayObj = this._coordinate.getDisplayObjectOfField( field );
-        if( !displayObj ) return;
-        if( !displayObj.enabled ) return;
-
-        this._fieldChange(field, displayObj.yAxis);
-
-        this._graphs.clean();
-        this._reset( this );
-    }
-
-    //TODO: 这里目前是把graphs删除了重新绘制， 后续会在graphs提供add和remove来实现更加精细的操作
-    //field改变的字段， _yAxis改变的字段对应的y轴
-    _fieldChange(field, _yAxis)
-    {
-        //先设置好yAxis.field
-        this._coordinate.setFieldDisplay( field );
-        var newDisplayFieldsMap = this._coordinate.getFieldsOfDisplay();
-
-
-        if( _yAxis ){
-            if( _.isArray( this.coordinate.yAxis ) ){
-                if( _yAxis.place == "left" ){
-                    this.coordinate.yAxis[0].field =  newDisplayFieldsMap.left;
-                } else {
-                    this.coordinate.yAxis[1].field =  newDisplayFieldsMap.right;
-                }
-            } else {
-                this.coordinate.yAxis.field = newDisplayFieldsMap.left;
-            };
-        }
-    }
-    
-
 
     //横向比例柱状图
     _initProportion(node, data, opts) 
@@ -192,59 +127,11 @@ export default class Bar extends Chart
         });
     }
 
-    //绘制图例
-    drawLegend( _legend )
+
+    //获取datazoom的 clone chart 需要的options
+    getDataZoomChartOpt() 
     {
-        _legend.pos( { 
-            x : this._coordinate.graphsX 
-        } );
-        for (var f in this._graphs._yAxisFieldsMap) {
-            var ffill = this._graphs._yAxisFieldsMap[f].fillStyle;
-            _legend.setStyle(f, {
-                fillStyle: ffill
-            });
-        };
-    }
-
-    //datazoom begin
-    drawDataZoom( _datazoom ) 
-    {
-        //TODO: 后续会修改在这里回掉一个_datazoom实例，然后在这里draw
-        var me = this;
-        //初始化 datazoom 模块
-        var dataZoomOpt = _.extend(true, {
-            w: me._coordinate.graphsWidth,
-            pos: {
-                x: me._coordinate.graphsX,
-                y: me._coordinate.graphsY + me._coordinate._xAxis.height
-            },
-            dragIng: function(range , pixRange , count , width) {
-
-                var trigger = {
-                    name : "dataZoom",
-                    left :  me.dataZoom.range.start - range.start,
-                    right : range.end - me.dataZoom.range.end
-                }
-
-                _.extend( me.dataZoom.range , range );
-                me.resetData( me._data , {
-                    trigger : trigger
-                });
-
-                me.fire("dataZoomDragIng");
-
-            },
-            dragEnd: function(range) {
-                me._updateChecked();
-            }
-        }, me.dataZoom);
-
-        return dataZoomOpt
-    }
-
-    getCloneChart() 
-    {
-        return {
+        var opt = {
             graphs: {
                 bar: {
                     fillStyle: this.dataZoom.normalColor || "#ececec"
@@ -256,18 +143,10 @@ export default class Bar extends Chart
                 }
             }
         }
+        return opt
     }
     //datazoom end
 
-    drawMarkLine( ML, yVal, _yAxis , field)
-    {
-        var _fstyle = (field && this._graphs._yAxisFieldsMap[field] ) ? this._graphs._yAxisFieldsMap[field].fillStyle : "#999";
-        var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
-        var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
-
-        this.creatOneMarkLine( ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field );
-    }
-    //markLine end
 
     //markpoint begin
     drawMarkPoint() 
@@ -279,47 +158,7 @@ export default class Bar extends Chart
             plug: {
                 draw: function() {
 
-                    var g = me._graphs;
-                    var gOrigin = {
-                        x: me._coordinate.graphsX + g.bar._width / 2,
-                        y: me._coordinate.graphsY - 3
-                    };
-                    var _t = me.markPoint.markTo;
-
-                    _.each(g.data, function(group, i) {
-                        _.each(group, function(hgroup) {
-                            _.each(hgroup, function(bar) {
-                                if (_t && !((_.isArray(_t) && _.indexOf(_t, bar.field) >= 0) || (_t === bar.field) || _.isFunction(_t))) {
-                                    return;
-                                };
-
-                                var barObj = _.clone(bar);
-                                barObj.x += gOrigin.x;
-                                barObj.y += gOrigin.y;
-                                var mpCtx = {
-                                    value: barObj.value,
-                                    shapeType: "droplet",
-                                    markTo: barObj.field,
-                                    //注意，这里视觉上面的分组和数据上面的分组不一样，所以inode 和 iNode 给出去的时候要反过来
-                                    iGroup: barObj.iGroup,
-                                    iNode: barObj.iNode,
-                                    iLay: barObj.iLay,
-                                    point: {
-                                        x: barObj.x,
-                                        y: barObj.y
-                                    }
-                                };
-
-                                if (_.isFunction(_t) && !_t(mpCtx)) {
-                                    //如果MarkTo是个表达式函数，返回为false的话
-                                    return;
-                                };
-
-                                me.creatOneMarkPoint(me._opts, mpCtx);
-
-                            });
-                        });
-                    });
+                    
 
                 }
             }
@@ -408,7 +247,7 @@ export default class Bar extends Chart
         return checked
     }
 
-    _updateChecked()
+    updateChecked()
     {
         var me = this
         me._currCheckedList = me._getCurrCheckedList()
