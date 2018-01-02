@@ -13,22 +13,28 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     {
         super();
 
-        this.w = 0;
-        this.h = 0;
-        this.x = 0;
-        this.y = 0;
+        this.type = "line";
+
+        this.width = 0;
+        this.height = 0;
+
+        this.pos = {
+            x : 0,
+            y : 0
+        }
 
         //这里所有的opt都要透传给 group
         this.opt = opt || {};
         this.root = root;
-        this.ctx = root.stage.context2D;
+
+        //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
+        this.ctx = root.stage.canvas.getContext("2d");
         this.dataFrame = this.opt.dataFrame || root.dataFrame; //root.dataFrame的引用
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
 
-        //这里在用的时候不直接使用 root._coordinate._yAxis
-        //而是先用this._yAxis存储起来
-        //方便比如bar_line柱折混合的时候覆盖掉
-        this._yAxis = this.root._coordinate._yAxis;
+        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
+        this.field = null;
+        this.enabledField = null;
         
         this.groups = []; //群组集合     
 
@@ -36,7 +42,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this.iNode = -1; //节点索引(那个点)
 
         this.sprite = null;
-        this.induce = null;
+        //this.induce = null;
 
         this.eventEnabled = true;
 
@@ -58,8 +64,8 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     {
         _.extend(true, this, opt);
 
-        this.core.context.x = this.x;
-        this.core.context.y = this.y;
+        this.core.context.x = this.pos.x;
+        this.core.context.y = this.pos.y;
 
         this.data = this._trimGraphs();
 
@@ -88,65 +94,63 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         } );
     }
 
+    setEnabledFields()
+    {
+        //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+        this.enabledField = this.root._coordinate.getEnabledFields( this.field );
+    }
+
     //_yAxis, dataFrame
     _trimGraphs()
     {
         var self = this;
-        var _dataFrame = self.dataFrame || self.root.dataFrame;
+        var _coor = this.root._coordinate;
         
         //{"uv":{}.. ,"click": "pv":]}
         //这样按照字段摊平的一维结构
         var tmpData = {}; 
 
-        function __trimGraphs(_yAxis ) {
-            var _fields = _yAxis.field;
-            if( !_.isArray( _fields ) ){
-                _fields = [_fields];
+        self.setEnabledFields();
+
+        var _yAxis = this.yAxisAlign == "right" ? _coor._yAxisRight : _coor._yAxisLeft;
+
+        _.each( _.flatten( self.enabledField ) , function( field, i ){
+            //var maxValue = 0;
+
+            //单条line的全部data数据
+            var _lineData = self.root.dataFrame.getFieldData(field);
+            if( !_lineData ) return;
+
+            var _data = [];
+
+            for (var b = 0, bl = _lineData.length; b < bl; b++) {
+                var _xAxis = self.root._coordinate ? self.root._coordinate._xAxis : self.root._xAxis;
+                var x = _xAxis.getPosX( {
+                    ind : b,
+                    dataLen : bl,
+                    layoutType : self.root._coordinate ? self.root._coordinate.xAxis.layoutType : self.root._xAxis.layoutType
+                } );
+                
+                var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+
+                var node = {
+                    value: _lineData[b],
+                    x: x,
+                    y: y
+                };
+
+                _data.push( node );
+                
             };
 
-            _.each( _fields , function( field, i ){
-                //var maxValue = 0;
+            tmpData[ field ] = {
+                yAxis: _yAxis,
+                field: field,
+                data: _data
+            };
 
-                //单条line的全部data数据
-                var _lineData = _dataFrame.getFieldData(field);
-                if( !_lineData ) return;
-
-                var _data = [];
-
-                for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                    var _xAxis = self.root._coordinate ? self.root._coordinate._xAxis : self.root._xAxis;
-                    var x = _xAxis.getPosX( {
-                        ind : b,
-                        dataLen : bl,
-                        layoutType : self.root._coordinate ? self.root._coordinate.xAxis.layoutType : self.root._xAxis.layoutType
-                    } );
-                    
-                    var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
-
-                    var node = {
-                        value: _lineData[b],
-                        x: x,
-                        y: y
-                    };
-
-                    _data.push( node );
-                    
-                };
-
-                tmpData[ field ] = {
-                    yAxis: _yAxis,
-                    field: field,
-                    data: _data
-                };
-
-            } );
-        };
-   
-        //可能被外部覆盖的时候，没有赋值一个数组结构
-        _.each( _.flatten( [this._yAxis] ) , function( axis , i ){
-            __trimGraphs( axis );
         } );
-        
+    
         return tmpData;
     }
 
@@ -174,6 +178,11 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     {
         var self = this;
         
+        //这个field不再这个graphs里面的，不相关
+        if( _.indexOf( _.flatten( [self.field] ), field ) == -1 ){
+            return;
+        }
+
         this.data = this._trimGraphs();
         this._setGroupsForYfield( this.data , field );
         
@@ -187,9 +196,13 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
      **/
     remove( field )
     {
+        
         var self = this;
-
         var i = self.getGroupIndex( field );
+
+        if( !this.groups.length || i < 0 ){
+            return;
+        }
 
         this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
@@ -227,6 +240,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         }
 
         _.each( data , function( g, field ){
+        
             if( fields && _.indexOf( fields, field ) == -1 ){
                 //如果有传入fields，但是当前field不在fields里面的话，不需要处理
                 //说明该group已经在graphs里面了
@@ -243,8 +257,8 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 self.ctx,
                 g.yAxis.sort,
                 g.yAxis,
-                self.h,
-                self.w,
+                self.height,
+                self.width,
                 fieldMap.style
             );
 
@@ -277,48 +291,27 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     _widget(opt)
     {
         var self = this;
-
-        
-        self.induce = new Rect({
-            id: "induce",
-            context: {
-                y: -self.h,
-                width: self.w,
-                height: self.h,
-                fillStyle: '#000000',
-                globalAlpha: 0,
-                cursor: 'pointer'
-            }
-        });
-
-        self.core.addChild(self.induce);
-
-        if(self.eventEnabled){
-            self.induce.on("panstart mouseover", function(e) {
-                e.eventInfo = self._getInfoHandler(e);
-            })
-            self.induce.on("panmove mousemove", function(e) {
-                e.eventInfo = self._getInfoHandler(e);
-            })
-            self.induce.on("panend mouseout", function(e) {
-                e.eventInfo = self._getInfoHandler(e);
-                self.iGroup = 0, self.iNode = -1
-            })
-            self.induce.on("tap click", function(e) {
-                e.eventInfo = self._getInfoHandler(e);
-            })
-        }
-        
         self.resize = false;
     }
 
+    getNodesAt( ind )
+    {
+        var _nodesInfoList = []; //节点信息集合
+        _.each( this.groups, function( group ){
+            var node = group.getNodeInfoAt( ind );
+            node && _nodesInfoList.push( node );
+        } );
+        return _nodesInfoList;
+    }
+
+    //废除
     _getInfoHandler(e)
     {
         
         var x = e.point.x,
-            y = e.point.y - this.h;
+            y = e.point.y - this.height;
         //todo:底层加判断
-        x = x > this.w ? this.w : x;
+        x = x > this.width ? this.width : x;
 
         var _disX = this._getGraphsDisX();
 
@@ -347,7 +340,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     _getGraphsDisX()
     {
         var dsl = this.dataFrame.org.length - 1;
-        var n = this.w / (dsl - 1);
+        var n = this.width / (dsl - 1);
         if (dsl == 1) {
             n = 0
         }

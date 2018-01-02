@@ -14,9 +14,9 @@ export default class yAxis extends Component
 
         this._opt = opt;
         
-        this.width   = null;
+        this.width   = null; //第一次计算后就会有值
         this.display = true; //true false 1,0都可以
-        this.dis     = 6;    //线到文本的距离
+
         this.maxW    = 0;    //最大文本的 width
         this.field   = [];   //这个 轴 上面的 field
 
@@ -27,14 +27,16 @@ export default class yAxis extends Component
             enabled: 1,      //是否有line
             width: 4,
             lineWidth: 1,
-            strokeStyle: '#cccccc'
+            strokeStyle: '#cccccc',
+            marginToLine: 2
         };
 
         this.text = {
             fillStyle: '#999',
             fontSize: 12,
             format: null,
-            rotation: 0
+            rotation: 0,
+            marginToLine: 3 //和刻度线的距离
         };
         this.pos = {
             x: 0,
@@ -55,9 +57,7 @@ export default class yAxis extends Component
         this.dataOrg = data.org || []; //源数据
 
         this.sprite = null;
-        //this.x           = 0;
-        //this.y           = 0;
-        this.disYAxisTopLine = 6; //y轴顶端预留的最小值
+        
         this.yMaxHeight = 0; //y轴最大高
         this.yGraphsHeight = 0; //y轴第一条线到原点的高
 
@@ -110,17 +110,17 @@ export default class yAxis extends Component
     }
 
     //配置和数据变化
-    resetData( data )
+    resetData( dataFrame )
     {
         this.dataSection = [];
         this.dataSectionGroup = [];
 
-        if( data && data.field ){
-            this.field = data.field;
+        if( dataFrame && dataFrame.field ){
+            this.field = dataFrame.field;
         }
 
-        if( data && data.org ){
-            this.dataOrg = data.org; //这里必须是data.org
+        if( dataFrame && dataFrame.org ){
+            this.dataOrg = dataFrame.org; //这里必须是data.org
         };
         
         this._initData();
@@ -131,7 +131,7 @@ export default class yAxis extends Component
 
     setX($n)
     {
-        this.sprite.context.x = $n + (this.align == "left" ? Math.max(this.maxW , (this.width - this.pos.x - this.dis - this.line.width) ) : 0);
+        this.sprite.context.x = $n;
         this.pos.x = $n;
     }
 
@@ -324,7 +324,7 @@ export default class yAxis extends Component
 
     _getYAxisDisLine() 
     { //获取y轴顶高到第一条线之间的距离         
-        var disMin = this.disYAxisTopLine
+        var disMin = 0
         var disMax = 2 * disMin
         var dis = disMin
         dis = disMin + this.yMaxHeight % this.dataSection.length;
@@ -586,10 +586,8 @@ export default class yAxis extends Component
     {
         var self = this;
         self.width = width;
-        if (self.line.enabled) {
-            self.sprite.context.x = width - self.dis - self.line.width;
-        } else {
-            self.sprite.context.x = width - self.dis;
+        if( self.align == "left" ){
+            self.rulesSprite.context.x = self.width;
         }
     }
 
@@ -606,8 +604,7 @@ export default class yAxis extends Component
         self._label && self.sprite.addChild(self._label);
         for (var a = 0, al = arr.length; a < al; a++) {
             var o = arr[a];
-            var x = 0,
-                y = o.y;
+            var y = o.y;
             var content = o.content;
             
             if (_.isFunction(self.text.format)) {
@@ -619,18 +616,14 @@ export default class yAxis extends Component
 
         
             var textAlign = (self.align == "left" ? "right" : "left");
+ 
+            var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
             if (self.text.rotation == 90 || self.text.rotation == -90) {
                 textAlign = "center";
                 if (a == arr.length - 1) {
-                    textAlign = "right";
-                }
-            };
-            var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
-            //为横向图表把y轴反转后的 逻辑
-            if (self.text.rotation == 90 || self.text.rotation == -90) {
-                if (a == arr.length - 1) {
                     posy = y - 2;
+                    textAlign = "right";
                 }
                 if (a == 0) {
                     posy = y;
@@ -666,20 +659,42 @@ export default class yAxis extends Component
                     id: "yNode" + a
                 });
 
-                var aniDis = 20;
+                var aniFrom = 20;
                 if( content == self.baseNumber ){
-                    aniDis = 0;
+                    aniFrom = 0;
                 }
                 if( content < self.baseNumber ){
-                    aniDis = -20;
+                    aniFrom = -20;
                 }
 
+                
+                var lineX = 0
+                if (self.line.enabled) {
+                    //线条
+                    lineX = self.align == "left" ? - self.line.width - self.line.marginToLine : self.line.marginToLine;
+                    var line = new Line({
+                        context: {
+                            x: lineX ,
+                            y: y,
+                            end : {
+                                x : self.line.width,
+                                y : 0
+                            },
+                            lineWidth: self.line.lineWidth,
+                            strokeStyle: self._getProp(self.line.strokeStyle)
+                        }
+                    });
+                    yNode.addChild(line);
+                    yNode._line = line;
+                };
+
                 //文字
+                var txtX = self.align == "left" ? lineX - self.text.marginToLine : lineX + self.line.width + self.text.marginToLine;
                 var txt = new Canvax.Display.Text(content, {
                     id: "yAxis_txt_" + self.align + "_" + a,
                     context: {
-                        x: x + (self.align == "left" ? -5 : 5),
-                        y: posy + aniDis,
+                        x: txtX,
+                        y: posy + aniFrom,
                         fillStyle: self._getProp(self.text.fillStyle),
                         fontSize: self.text.fontSize,
                         rotation: -Math.abs(this.text.rotation),
@@ -696,24 +711,6 @@ export default class yAxis extends Component
                     self.maxW = Math.max(self.maxW, txt.getTextHeight());
                 };
 
-
-                if (self.line.enabled) {
-                    //线条
-                    var line = new Line({
-                        context: {
-                            x: 0 + (self.align == "left" ? +1 : -1) * self.dis - 2,
-                            y: y,
-                            end : {
-                                x : self.line.width,
-                                y : 0
-                            },
-                            lineWidth: self.line.lineWidth,
-                            strokeStyle: self._getProp(self.line.strokeStyle)
-                        }
-                    });
-                    yNode.addChild(line);
-                    yNode._line = line;
-                };
                 //这里可以由用户来自定义过滤 来 决定 该node的样式
                 _.isFunction(self.filter) && self.filter({
                     layoutData: self.layoutData,
@@ -728,7 +725,7 @@ export default class yAxis extends Component
                 if (self.animation && !self.resize) {
                     txt.animate({
                         globalAlpha: 1,
-                        y: txt.context.y - aniDis
+                        y: txt.context.y - aniFrom
                     }, {
                         duration: 500,
                         easing: 'Back.Out', //Tween.Easing.Elastic.InOut
@@ -736,7 +733,7 @@ export default class yAxis extends Component
                         id: txt.id
                     });
                 } else {
-                    txt.context.y = txt.context.y - aniDis;
+                    txt.context.y = txt.context.y - aniFrom;
                     txt.context.globalAlpha = 1;
                 }
             }
@@ -750,17 +747,17 @@ export default class yAxis extends Component
             };
         };
 
-        self.maxW += self.dis;
-
-        //self.rulesSprite.context.x = self.maxW + self.pos.x;
-        //self.pos.x = self.maxW + self.pos.x;
-        if( self.width == null ){
+        self.maxW += self.text.marginToLine;
+        if( self.width === null ){
+            self.width = parseInt( self.maxW + self.text.marginToLine  );
             if (self.line.enabled) {
-                self.width = self.maxW + self.dis + self.line.width + self.pos.x;
-            } else {
-                self.width = self.maxW + self.dis + self.pos.x;
+                self.width += parseInt( self.line.width + self.line.marginToLine );
             }
-        };
+        }
+
+        if( self.align == "left" ){
+            self.rulesSprite.context.x = self.width;
+        }
     }
 
     _getProp(s)

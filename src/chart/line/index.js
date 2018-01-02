@@ -29,49 +29,52 @@ export default class Line extends Chart
         this._coordinate = new Coordinate( this.coordinate, this );
         this.core.addChild( this._coordinate.sprite );
 
-        this._graphs = new Graphs(this.graphs, this);
-        this.core.addChild(this._graphs.sprite);
+        _.each( this.graphs , function( graphs ){
+            var _g = new Graphs( graphs, me );
+            me._graphs.push( _g );
+            me.graphsSprite.addChild( _g.sprite );
+        } );
+        this.core.addChild(this.graphsSprite);
 
-        this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame);
-        this._tips._markColumn.on("mouseover" , function(e){
-            me._setXaxisYaxisToTipsInfo(e);
-            me._tips.show( e );
-        });
+        this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
         
         this.stageTip.addChild(this._tips.sprite);
-        
     }
 
     _startDraw(opt)
     {
         var me = this;
+        !opt && (opt ={});
 
-        //初始化一些在开始绘制的时候就要处理的plug，这些plug可能会影响到布局，比如legend，datazoom
+        var _coor = this._coordinate;
 
-        this._coordinate.draw( opt );
+        //先绘制好坐标系统
+        _coor.draw( opt );
 
-        this._graphs.draw({
-            x: this._coordinate.graphsX,
-            y: this._coordinate.graphsY,
-            w: this._coordinate.graphsWidth,
-            h: this._coordinate.graphsHeight,
-            smooth: this.smooth,
-            inited: this.inited,
-            resize: opt.resize
-        }).on("complete" , function(){
-            me.fire("complete");
-        });
+        var graphsCount = this._graphs.length;
+        var completeNum = 0;
+        _.each( this._graphs, function( _g ){
+            _g.on( "complete", function(g) {
+                completeNum ++;
+                if( completeNum == graphsCount ){
+                    me.fire("complete");
+                }
+            });
+            
+            _g.draw({
+                width: _coor.graphsWidth,
+                height: _coor.graphsHeight,
+                pos: {
+                    x: _coor.graphsX,
+                    y: _coor.graphsY
+                },
+                sort: _coor._yAxis.sort,
+                inited: me.inited,
+                resize: opt.resize
+            });
+        } );
 
-        //绘制完grapsh后，要把induce 给到 _tipss.induce
-        this._tips.setInduce( this._graphs.induce );
-
-        var me = this;
         this.bindEvent();
-        this._tips.sprite.on('nodeclick', function(e) {
-            me._setXaxisYaxisToTipsInfo(e);
-            me.fire("nodeclick", e.eventInfo);
-        });
-        
     }
 
 
@@ -122,62 +125,7 @@ export default class Line extends Chart
     }
 
     
-    bindEvent( _setXaxisYaxisToTipsInfo )
-    {
     
-        var me = this;
-        _setXaxisYaxisToTipsInfo || (_setXaxisYaxisToTipsInfo = me._setXaxisYaxisToTipsInfo);
-        this.core.on("panstart mouseover", function(e) {
-            if ( me._tips.enabled ) {
-                _setXaxisYaxisToTipsInfo.apply(me, [e]);
-                me._tips.show(e);
-            };
-            me.fire(e.type, e);
-        });
-        this.core.on("panmove mousemove", function(e) {
-            if ( me._tips.enabled ) {
-                _setXaxisYaxisToTipsInfo.apply(me, [e]);
-                me._tips.move(e);
-                me.fire(e.type, e);
-            }
-        });
-        this.core.on("panend mouseout", function(e) {
-            /*
-            if (e.toTarget && ( e.toTarget.name == '_markcolumn_node' || e.toTarget.name == '_markcolumn_line')) {
-                return
-            };
-            */
-            if (me._tips.enabled) {
-                me._tips.hide(e);
-            }
-        });
-        this.core.on("tap", function(e) {
-            if (me._tips.enabled) {
-                me._tips.hide(e);
-                _setXaxisYaxisToTipsInfo.apply(me, [e]);
-                me._tips.show(e);
-            }
-        });
-        this.core.on("click", function(e) {
-            _setXaxisYaxisToTipsInfo.apply(me, [e]);
-            me.fire("click", e.eventInfo);
-        });
-    }
-
-    //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
-    //方便外部自定义tip是的content
-    _setXaxisYaxisToTipsInfo(e)
-    {
-
-        if (!e.eventInfo) {
-            return;
-        };
-
-        e.eventInfo.xAxis = this._coordinate._xAxis.layoutData[ e.eventInfo.iNode ]; 
-        e.eventInfo.xAxis && (e.eventInfo.title = e.eventInfo.xAxis.layoutText);
-        e.eventInfo.dataZoom = this.dataZoom;
-        e.eventInfo.rowData = this.dataFrame.getRowData( e.eventInfo.iNode );
-    }
     
     createMarkColumn( xVal , opt)
     {

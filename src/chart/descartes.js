@@ -30,10 +30,54 @@ export default class Descartes extends Chart
             }
         };
 
-        debugger
+        //根据opt中得Graphs配置，来设置 coordinate.yAxis
+        if( opts.graphs ){
 
-        //直角坐标系的绘图模块
-        this._graphs = null;
+            if( !opts.coordinate.yAxis ){
+                opts.coordinate.yAxis = [];
+            } else {
+                //如果有配置yAxis，就先delete掉用户可能在上面配置的field信息
+                //chartx1.0的习惯
+                opts.coordinate.yAxis = _.flatten([opts.coordinate.yAxis])
+                _.each( opts.coordinate.yAxis , function( yAxis ){
+                    yAxis.field = [];
+                } );
+            }
+
+            opts.graphs = _.flatten( [ opts.graphs ] );
+
+            //有graphs的就要用找到这个graphs.field来设置coordinate.yAxis
+            _.each( opts.graphs, function( graphs ){
+                if( graphs.field ){
+                    //没有配置field的话就不绘制这个 graphs了
+                    var align = "left"; //默认left
+                    if( graphs.yAxisAlign == "right" ){
+                        align = "right"
+                    };
+
+                    var optsYaxisObj = null;
+                    optsYaxisObj = _.find( opts.coordinate.yAxis, function( obj, i ){
+                        return obj.align == align || i == ( align == "left" ? 0 : 1 );
+                    } );
+                    if( !optsYaxisObj ){
+                        optsYaxisObj = {
+                            align : align,
+                            field : []
+                        }
+                        opts.coordinate.yAxis.push( optsYaxisObj );
+                    } else {
+                        if( !optsYaxisObj.align ){
+                            optsYaxisObj.align = align;
+                        }
+                    }
+
+                    optsYaxisObj.field = optsYaxisObj.field.concat( graphs.field );
+                }
+            } );
+        };
+
+        //直角坐标系的绘图模块,是个数组，支持多模块
+        this._graphs = [];
 
         //直角坐标系的tooltip
         this._tips = null;
@@ -74,8 +118,12 @@ export default class Descartes extends Chart
         this.core = new Canvax.Display.Sprite({
             id: 'core'
         });
+        this.graphsSprite = new Canvax.Display.Sprite({
+            id: 'graphsSprite'
+        });
 
         this.stage.addChild(this.core);
+        //this.core.addChild(this.graphsSprite);
         this.stage.addChild(this.stageTip);
     }
 
@@ -84,7 +132,9 @@ export default class Descartes extends Chart
     {
         var me = this;
         this._coordinate.resetData( this.dataFrame , dataTrigger);
-        this._graphs.resetData( this.dataFrame , dataTrigger);
+        _.each( this._graphs, function( _g ){
+            _g.resetData( me.dataFrame , dataTrigger);
+        } );
         this.componentsReset( dataTrigger );
     }
 
@@ -109,16 +159,21 @@ export default class Descartes extends Chart
      **/
     add( field , targetYAxis)
     {
+        var me = this;
         this._coordinate.addField( field, targetYAxis );
-        this._graphs.add( field );
+        _.each( this._graphs, function( _g ){
+            _g.add( field, targetYAxis );
+        } );
         this.componentsReset();
     }
 
     remove( field )
     {
+        var me = this;
         this._coordinate.removeField( field );
-        //然后就是删除graphs中对应的brokenline，并且把剩下的brokenline缓动到对应的位置
-        this._graphs.remove( field );
+        _.each( this._graphs, function( _g ){
+            _g.remove( field );
+        } );
         this.componentsReset();
     }
 
@@ -550,5 +605,57 @@ export default class Descartes extends Chart
                 }
             }
         } );
+    }
+
+    bindEvent( )
+    {
+    
+        var me = this;
+    
+        this._coordinate.on("panstart mouseover", function(e) {
+            if ( me._tips.enabled ) {
+                me._setTipsInfo.apply(me, [e]);
+                me._tips.show(e);
+            };
+            me.fire(e.type, e);
+        });
+        this._coordinate.on("panmove mousemove", function(e) {
+            if ( me._tips.enabled ) {
+                me._setTipsInfo.apply(me, [e]);
+                me._tips.move(e);
+                me.fire(e.type, e);
+            }
+        });
+        this._coordinate.on("panend mouseout", function(e) {
+            if ( me._tips.enabled && !me._coordinate.induce.containsPoint( e.target.localToGlobal(e.point) ) ) {
+                me._tips.hide(e);
+            }
+        });
+        this._coordinate.on("tap", function(e) {
+            if (me._tips.enabled) {
+                me._tips.hide(e);
+                me._setTipsInfo.apply(me, [e]);
+                me._tips.show(e);
+            }
+        });
+        this._coordinate.on("click", function(e) {
+            me._setTipsInfo.apply(me, [e]);
+            me.fire("click", e.eventInfo);
+        });
+    }
+
+    //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+    //方便外部自定义tip是的content
+    _setTipsInfo(e)
+    {
+        var nodes = [];
+        var iNode = e.eventInfo.xAxis.ind;
+        _.each( this._graphs, function( _g ){
+            nodes = nodes.concat( _g.getNodesAt( iNode ) );
+        } );
+        
+        e.eventInfo.nodes = nodes;
+        e.eventInfo.dataZoom = this.dataZoom;
+        e.eventInfo.rowData = this.dataFrame.getRowData( iNode );
     }
 }

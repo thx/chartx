@@ -6,7 +6,7 @@ const _ = Canvax._;
 
 export default class LineTips extends Canvax.Event.EventDispatcher
 {
-    constructor( opt, tipDomContainer, data )
+    constructor( opt, tipDomContainer, data , _coordinate)
     {
         super();
 
@@ -18,7 +18,7 @@ export default class LineTips extends Canvax.Event.EventDispatcher
         this._isShow     = false;
         this.enabled     = true;
 
-        this.induce      = null; //graphs中的induce，用来触发事件系统
+        this._coordinate = _coordinate;
 
         this.init(opt, tipDomContainer, data);
     }
@@ -35,39 +35,8 @@ export default class LineTips extends Canvax.Event.EventDispatcher
         this._tips = new Tips( opt , tipDomContainer );
         this.sprite.addChild(this._tips.sprite);
 
-        this._markColumn = new markColumn( _.extend({
-            line : {
-                eventEnabled: false
-            }
-        }, opt) );
+        this._markColumn = new markColumn( opt);
         this.sprite.addChild( this._markColumn.sprite );
-
-        this._markColumn.on("mouseover", function(e){
-            //因为柱折混合图中得 bar的tips移动到 折线的圆点上面的时候会  hide掉 tip
-            //所以这里再show回去
-            setTimeout(function(){
-                if( me._isShow == false ){
-                    //单独的在line中是不会执行到这里的，line中调用的show 始终会把_isShow 设置为 true
-                    me.show(e);
-                }
-            }, 6)
-        });
-
-    }
-
-    setInduce( induce )
-    {
-        this.induce = induce;
-        var ictx = induce.context;
-        var ictxLocPos = induce.localToGlobal();
-        this.layout = {
-            x : ictxLocPos.x,
-            y : ictxLocPos.y,
-            width : ictx.width,
-            height : ictx.height
-        };
-        this._markColumn.y = this.layout.y;
-        this._markColumn.h = this.layout.height;
     }
 
     reset( opt )
@@ -79,10 +48,15 @@ export default class LineTips extends Canvax.Event.EventDispatcher
     show(e)
     {
         if( !this.enabled || !e.eventInfo ) return;
-      
+    
         var tipsPoint = this._getTipsPoint(e);
+
         this._tips.show(e , tipsPoint);
-        this._markColumn.show(e , tipsPoint );
+
+        this._markColumn.show(e , tipsPoint , {
+            y : this._coordinate.induce.localToGlobal().y,
+            h : this._coordinate.induce.context.height
+        });
         this._isShow = true;
     }
 
@@ -90,6 +64,7 @@ export default class LineTips extends Canvax.Event.EventDispatcher
     {
         if( !this.enabled  || !e.eventInfo) return;
         var tipsPoint = this._getTipsPoint(e);
+
         this._markColumn.move(e , tipsPoint);
         this._tips.move(e);
     }
@@ -104,11 +79,9 @@ export default class LineTips extends Canvax.Event.EventDispatcher
 
     _getTipsPoint(e)
     {
-        var target = this.induce || e.target;
-        var point = target.localToGlobal( e.eventInfo.nodesInfoList[e.eventInfo.iGroup] );
-        if( e.eventInfo.tipsLine ){
-            point.x = e.eventInfo.tipsLine.x;
+        if( !e.eventInfo.nodes.length ){
+            return;
         }
-        return point;
+        return e.target.localToGlobal( e.eventInfo.nodes[0] );
     }
 }

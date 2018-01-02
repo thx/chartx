@@ -14,6 +14,9 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
     constructor( field, a, opt, ctx, sort, yAxis, h, w , style)
     {
+        //直接用第一个参数的field
+        delete opt.field;
+
         super();
         this.field = field; //_groupInd 在yAxis.field中对应的值
         this._groupInd = a;
@@ -150,6 +153,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     {
         var me = this;
         var obj = {};
+        obj.type = "line";
         obj.r = me._getProp(me.node.r, ind);
         obj.fillStyle = me._getProp(me.node.fillStyle, ind) || "#ffffff";
         obj.strokeStyle = me._getProp(me.node.strokeStyle, ind) || me._getLineStrokeStyle();

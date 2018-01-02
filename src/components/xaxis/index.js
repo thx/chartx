@@ -16,15 +16,8 @@ export default class xAxis extends Component
 
         this._coordinate = _coordinate || {};
 
-        //TODO:这个 graphw 目前是有问题的， 它实际是包括了yAxisW
-        this.graphw = 0; 
-        this.graphh = 0;
-        this.yAxisW = 0;
         this.width = 0;
         this.height = 0;
-
-        this.disY = 1;
-        this.dis = 6; //线到文本的距离
 
         this.label = "";
         this._label = null; //this.label对应的文本对象
@@ -33,6 +26,7 @@ export default class xAxis extends Component
             enabled: 1, //是否有line
             width: 1,
             height: 4,
+            marginTop : 2,
             strokeStyle: '#cccccc'
         };
 
@@ -41,20 +35,17 @@ export default class xAxis extends Component
             fontSize: 12,
             rotation: 0,
             format: null,
+            marginTop : 2,
             textAlign: "center"
         };
         this.maxTxtH = 0;
 
         this.pos = {
-            x: null,
-            y: null
+            x: 0,
+            y: 0
         };
 
         this.display = true; //是否需要位置来绘制
-
-        this.disXAxisLine = 6; //x轴两端预留的最小值
-        this.disOriginX = 0; //背景中原点开始的x轴线与x轴的第一条竖线的偏移量
-        this.xGraphsWidth = 0; //x轴宽(去掉两端)
 
         this.dataOrg = []; //源数据
         this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
@@ -65,7 +56,6 @@ export default class xAxis extends Component
         this.sprite = null;
 
         this._textMaxWidth = 0;
-        this.leftDisX = 0; //x轴最左边需要的间距。默认等于第一个x value字符串长度的一半
 
         //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
         //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
@@ -80,7 +70,7 @@ export default class xAxis extends Component
         this.maxVal = null; 
         this.minVal = null; 
 
-        this.xDis = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
+        this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
 
         this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
 
@@ -95,7 +85,7 @@ export default class xAxis extends Component
 
         this.init(opts, data);
 
-        //xAxis的field只有一个值
+        //xAxis的field只有一个值,
         this.field = _.flatten( [ this.field ] )[0];
     }
 
@@ -118,7 +108,7 @@ export default class xAxis extends Component
         }
 
         if(data && data.org){
-            this.dataOrg = data.org;
+            this.dataOrg = _.flatten( data.org );
         };
 
         if( !this._opts.dataSection && this.dataOrg ){
@@ -133,9 +123,6 @@ export default class xAxis extends Component
             this.text.textAlign = "right";
         };
 
-        if (!this.line.enabled) {
-            this.line.height = 1
-        };
 
         //先计算出来显示文本
         this._layoutDataSection = this._formatDataSectionText(this.dataSection);
@@ -170,9 +157,9 @@ export default class xAxis extends Component
     }
 
     //配置和数据变化
-    resetData( data )
+    resetData( dataFrame )
     {
-        this._initHandle( data );
+        this._initHandle( dataFrame );
         this.draw();
     }
 
@@ -189,13 +176,28 @@ export default class xAxis extends Component
 
         return i;
     }
+
+    getIndexOfX( x )
+    {
+        var iNode = 0;
+        if( this.layoutType == "peak" ){
+            iNode = parseInt( x / this.ceilWidth );
+            if( iNode == this.dataOrg.length ){
+                iNode = this.dataOrg.length - 1;
+            }
+        }
+        if( this.layoutType == "rule" ){
+            iNode = parseInt((x + (this.ceilWidth / 2)) / this.ceilWidth);
+        }
+        return iNode
+    }
     
     draw(opts)
     {
         //首次渲染从 直角坐标系组件中会传入 opts
         this._getLabel();
         this._computerConfit(opts);
-        this.layoutData = this._trimXAxis(this.dataSection, this.xGraphsWidth);
+        this.layoutData = this._trimXAxis(this.dataSection);
 
         this._trimLayoutData();
 
@@ -233,24 +235,20 @@ export default class xAxis extends Component
             _.extend(true, this, opts);
         };
 
-        this.yAxisW = Math.max(this.yAxisW, this.leftDisX);
-        this.width = this.graphw - this.yAxisW;
-        if (this.pos.x == null) {
-            this.pos.x = this.yAxisW + this.disOriginX;
-        };
-        if (this.pos.y == null) {
-            this.pos.y = this.graphh - this.height;
-        };
-        this.xGraphsWidth = parseInt(this.width - this._getXAxisDisLine());
+        //先计算下单元格宽度， 和总体的width
+        var ceilCount = this.dataOrg.length;
+        if( this.layoutType == "rule" ){
+            ceilCount = this.dataOrg.length - 1;
+        }
+        this.width = parseInt( this.width - this.width % ceilCount );
 
         if (this._label) {
             if (this.isH) {
-                this.xGraphsWidth -= this._label.getTextHeight() + 5
+                this.width -= this._label.getTextHeight() + 5
             } else {
-                this.xGraphsWidth -= this._label.getTextWidth() + 5
+                this.width -= this._label.getTextWidth() + 5
             }
         };
-        this.disOriginX = parseInt((this.width - this.xGraphsWidth) / 2);
     }
 
     //获取x对应的位置
@@ -261,30 +259,27 @@ export default class xAxis extends Component
         var val = opts.val; 
         var ind = "ind" in opts ? opts.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
         var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
-        var xGraphsWidth = "xGraphsWidth" in opts ? opts.xGraphsWidth : this.xGraphsWidth;
+        var width = "width" in opts ? opts.width : this.width;
         var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
 
         if( dataLen == 1 ){
-            x =  xGraphsWidth / 2;
+            x =  width / 2;
         } else {
             if( layoutType == "rule" ){
                 //折线图的xyaxis就是 rule
-                x = ind / (dataLen - 1) * xGraphsWidth;
+                x = ind / (dataLen - 1) * width;
             };
             if( layoutType == "proportion" ){
                 //按照数据真实的值在minVal - maxVal 区间中的比例值
                 if( val == undefined ){
                     val = (ind * (this.maxVal - this.minVal)/(dataLen-1)) + this.minVal;
                 };
-                x = xGraphsWidth * ( (val - this.minVal) / (this.maxVal - this.minVal) );
+                x = width * ( (val - this.minVal) / (this.maxVal - this.minVal) );
             };
             if( layoutType == "peak" ){
                 //柱状图的就是peak 
-                x = this.xDis * (ind+1) - this.xDis/2;
-            }; 
-            //if( layoutType == "step" ){
-            //    x = (xGraphsWidth / (dataLen + 1)) * (ind + 1);
-            //};
+                x = this.ceilWidth * (ind+1) - this.ceilWidth/2;
+            };
         };
 
         if( this.posParseToInt ){
@@ -295,14 +290,17 @@ export default class xAxis extends Component
         
     }
 
-    _trimXAxis($data, $xGraphsWidth) 
+    _trimXAxis($data) 
     {
-        
         var tmpData = [];
         var data = $data || this.dataSection;
-        var xGraphsWidth = xGraphsWidth || this.xGraphsWidth;
+        var width = this.width;
 
-        this.xDis = xGraphsWidth / data.length;//这个属性目前主要是柱状图有分组柱状图的场景在用
+        //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
+        this.ceilWidth = width / this.dataOrg.length;
+        if( this.layoutType == "rule" ){
+            this.ceilWidth = width / ( this.dataOrg.length - 1 )
+        }
 
         for (var a = 0, al  = data.length; a < al; a++ ) {
             var layoutText = this._getFormatText( data[a] )
@@ -319,7 +317,7 @@ export default class xAxis extends Component
                     val : data[a],
                     ind : a,
                     dataLen: al,
-                    xGraphsWidth : xGraphsWidth
+                    width : width
                 }),
                 textWidth: txt.getTextWidth(),
                 field : this.field
@@ -343,22 +341,11 @@ export default class xAxis extends Component
         return currArr;
     }
 
-    _getXAxisDisLine()
-    { //获取x轴两端预留的距离
-        var disMin = this.disXAxisLine
-        var disMax = 2 * disMin
-        var dis = disMin
-        dis = disMin + this.width % _.flatten(this.dataOrg).length
-        dis = dis > disMax ? disMax : dis
-        dis = isNaN(dis) ? 0 : dis
-        return dis
-    }
 
     _setXAxisHeight()
     { //检测下文字的高等
-        if (!this.display) { //this.display == "none"
-            this.dis = 0;
-            this.height = 3; //this.dis;//this.max.txtH;
+        if (!this.display) {
+            this.height = 3; 
         } else {
             var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
                 context: {
@@ -370,17 +357,17 @@ export default class xAxis extends Component
 
             if (!!this.text.rotation) {
                 if (this.text.rotation % 90 == 0) {
-                    this.height = this._textMaxWidth + this.line.height + this.disY + this.dis + 3;
+                    this.height = parseInt( this._textMaxWidth );
                 } else {
                     var sinR = Math.sin(Math.abs(this.text.rotation) * Math.PI / 180);
                     var cosR = Math.cos(Math.abs(this.text.rotation) * Math.PI / 180);
-                    this.height = sinR * this._textMaxWidth + txt.getTextHeight() + 5;
-                    this.leftDisX = cosR * txt.getTextWidth() + 8;
+                    this.height = parseInt(sinR * this._textMaxWidth + txt.getTextHeight() + 5);
                 }
             } else {
-                this.height = this.disY + this.line.height + this.dis + this.maxTxtH;
-                this.leftDisX = txt.getTextWidth() / 2;
+                this.height = parseInt( this.maxTxtH );
             }
+
+            this.height += this.line.height + this.line.marginTop + this.text.marginTop;
         }
     }
 
@@ -408,7 +395,7 @@ export default class xAxis extends Component
         var arr = this.layoutData
 
         if (this._label) {
-            this._label.context.x = this.xGraphsWidth + 5;
+            this._label.context.x = this.width + 5;
             this.sprite.addChild(this._label);
         };
 
@@ -430,7 +417,7 @@ export default class xAxis extends Component
 
             var o = arr[a]
             var x = o.x,
-                y = this.disY + this.line.height + this.dis;
+                y = this.line.height + this.line.marginTop + this.text.marginTop;
 
             //文字
             var textContext = {
@@ -492,10 +479,10 @@ export default class xAxis extends Component
             if (this.line.enabled) {
                 var lineContext = {
                     x: x,
-                    y: this.disY,
+                    y: this.line.marginTop,
                     end : {
                         x : 0,
-                        y : this.line.height + this.disY
+                        y : this.line.height
                     },
                     lineWidth: this.line.width,
                     strokeStyle: this.line.strokeStyle

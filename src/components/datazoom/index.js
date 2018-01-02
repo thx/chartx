@@ -513,12 +513,12 @@ export default class dataZoom extends Component
             this.__graphssp.destroy();
         };
 
-        var graphssp = this._cloneChart.thumbChart._graphs.core;
+        var graphssp = this._cloneChart.thumbChart.graphsSprite;
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg"
         graphssp.context.x = 0;
         graphssp.context.y = this.barH + this.barY;
-        graphssp.context.scaleY = this.barH / this._cloneChart.thumbChart._graphs.h;
+        graphssp.context.scaleY = this.barH / this._cloneChart.thumbChart._coordinate.graphsHeight;
 
         this.dataZoomBg.addChild( graphssp );
 

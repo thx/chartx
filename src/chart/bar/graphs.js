@@ -15,25 +15,34 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.data = [];
         this.root = root;
 
+        this.type = "bar";
+
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        this.field = null; 
+        this.field = null;
+        this.enabledField = null;
 
-        //后续 一个graphs只对应一个_yAxis
-        this._xAxis = this.root._coordinate._xAxis;
-        this._yAxis = this.root._coordinate._yAxis;
-
-        this.animation = true;
-
+        this.width = 0;
+        this.height = 0;
         this.pos = {
             x: 0,
             y: 0
         };
+
+        this.yAxisAlign = "left";
+        this._xAxis = this.root._coordinate._xAxis;
+
+        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
+        //和css中得absolute概念一致，脱离文档流的绝对定位
+        this.absolute = false; 
+
+        this.animation = true;
 
         this.bar = {
             width: 0,
             _width: 0,
             radius: 4,
             fillStyle : null,
+            fillAlpha : 0.9,
             filter : function(){}, //用来定制bar的样式
             count: 0, //总共有多少个bar
             xDis: null
@@ -48,14 +57,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             strokeStyle: 'white'
         };
 
-        this.checked = {
-            enabled: false,
-            fillStyle: '#00A8E6',
-            strokeStyle: '#00A8E6',
-            fillAlpha: 0.1,
-            lineWidth: 2
-        }
-
         this.sort = null;
 
         this._barsLen = 0;
@@ -64,7 +65,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         this.sprite = null;
         this.txtsSp = null;
-        this.checkedSp = null;
 
         _.extend(true, this, opt);
 
@@ -91,17 +91,27 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                 //visible: false
             }
         });
-        this.checkedSp = new Canvax.Display.Sprite({
-            id: "checkedSp"
-        });
     }
 
-    getInfo(index) 
+    getNodesAt(index) 
     {
         //该index指当前
-        return this._getInfoHandler({
-            iNode: index
-        })
+        var data = this.data;
+        var _nodesInfoList = []; //节点信息集合
+        _.each( this.enabledField, function( fs, i ){
+            if( _.isArray(fs) ){
+                _.each( fs, function( _fs, ii ){
+                    //fs的结构两层到顶了
+                    var node = data[ i ][ ii ][ index ];
+                    node && _nodesInfoList.push( node );
+                } );
+            } else {
+                var node = data[ i ][ 0 ][ index ];
+                node && _nodesInfoList.push( node );
+            }
+        } );
+        
+        return _nodesInfoList;
     }
 
     _getTargetField(b, v, i, field) 
@@ -118,57 +128,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         }
     }
 
-    checkedAt($o)
-    {
-        var me = this
-        var index = $o.iNode
-        var group = me.barsSp.getChildById('barGroup_' + index)
-        if (!group) {
-            return;
-        }
-
-        me.checkedSp.removeChildById('line_' + index)
-        me.checkedSp.removeChildById('rect_' + index)
-        var hoverRect = group.getChildAt(0)
-        var x0 = hoverRect.context.x
-        var x1 = hoverRect.context.x + hoverRect.context.width,
-            y = -me.h
-
-        if ($o.checked && !me.checkedSp.getChildById("rect_" + index)) {
-            var rect = new Rect({
-                id: "rect_" + index,
-                pointChkPriority: false,
-                context: {
-                    x: x0,
-                    y: y,
-                    width: hoverRect.context.width,
-                    height: hoverRect.context.height,
-                    fillStyle: me.checked.fillStyle,
-                    fillAlpha: me.checked.fillAlpha
-                }
-            });
-            me.checkedSp.addChild(rect)
-
-            var line = new BrokenLine({
-                id: "line_" + index,
-                context: {
-                    pointList: [
-                        [x0, y],
-                        [x1, y]
-                    ],
-                    strokeStyle: me.checked.strokeStyle,
-                    lineWidth: me.checked.lineWidth
-                }
-            });
-            me.checkedSp.addChild(line)
-        }
-    }
-
-    removeAllChecked()
-    {
-        var me = this
-        me.checkedSp.removeAllChildren()
-    }
 
     //dataZoom中用
     setBarStyle($o)
@@ -190,7 +149,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         var style = fieldMap.style;
 
         //field对应的索引，， 取颜色这里不要用i
-        var fieldInd = fieldMap.ind;//this._yAxisFieldsMap[field].index;
+        var fieldInd = fieldMap.ind;
         if (_.isString(c)) {
             style = c
         };
@@ -214,20 +173,20 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         return style;
     }
 
-    _getBarWidth(xDis1, xDis2)
+    _getBarWidth(ceilWidth, ceilWidth2)
     {
         if (this.bar.width) {
             if (_.isFunction(this.bar.width)) {
-                this.bar._width = this.bar.width(xDis1);
+                this.bar._width = this.bar.width(ceilWidth);
             } else {
                 this.bar._width = this.bar.width;
             }
         } else {
-            this.bar._width = parseInt(xDis2) - (parseInt(Math.max(1, xDis2 * 0.3)));
+            this.bar._width = parseInt(ceilWidth2) - (parseInt(Math.max(1, ceilWidth2 * 0.3)));
 
             //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
-            if (this.bar._width == 1 && xDis1 > 3) {
-                this.bar._width = parseInt(xDis1) - 2;
+            if (this.bar._width == 1 && ceilWidth > 3) {
+                this.bar._width = parseInt(ceilWidth) - 2;
             };
         };
         this.bar._width < 1 && (this.bar._width = 1);
@@ -247,7 +206,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
     resetData( dataFrame , dataTrigger )
     {
-        this.removeAllChecked()
         this.draw();
     }
 
@@ -255,15 +213,14 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     {
         this.data = [];
         this.barsSp.removeAllChildren();
-        this.checkedSp.removeAllChildren();
         if (this.text.enabled) {
             this.txtsSp.removeAllChildren();
         };
     }
 
     draw(opt)
-    { //第二个data参数去掉，直接trimgraphs获取最新的data
-        
+    { 
+        //第二个data参数去掉，直接trimgraphs获取最新的data
         _.extend(true, this, opt);
 
         var data = this._trimGraphs();
@@ -305,7 +262,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             var hLen = h_group[0].length; 
 
             //itemW 还是要跟着xAxis的xDis保持一致
-            itemW = me.w / hLen;
+            itemW = me.width / hLen;
 
             me._barsLen = hLen * groups;
 
@@ -321,44 +278,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                         });
                         me.barsSp.addChild(groupH);
                         groupH.iNode = h;
-                        groupH.on("click dblclick mousedown mousemove mouseup", function(e) {
-                            if (!e.eventInfo) {
-                                e.eventInfo = me._getInfoHandler(this);
-                            };
-                        });
-                    };
-
-                    if (me.eventEnabled) {
-                        var hoverRect;
-                        if (h <= preLen - 1) {
-                            hoverRect = groupH.getChildById("bhr_" + h);
-                            hoverRect.context.width = itemW;
-                            hoverRect.context.x = itemW * h;
-                        } else {
-                            hoverRect = new Rect({
-                                id: "bhr_" + h,
-                                pointChkPriority: false,
-                                hoverClone: false,
-                                context: {
-                                    x: itemW * h,
-                                    y: (me.sort && me.sort == "desc") ? 0 : -me.h,
-                                    width: itemW,
-                                    height: me.h,
-                                    fillStyle: "#ccc",
-                                    fillAlpha: 0
-                                }
-                            });
-                            groupH.addChild(hoverRect);
-                            hoverRect.hover(function(e) {
-                                this.context.fillAlpha = 0.1;
-                            }, function(e) {
-                                this.context.fillAlpha = 0;
-                            });
-                            hoverRect.iGroup = -1, hoverRect.iNode = h, hoverRect.iLay = -1;
-                            hoverRect.on("panstart mouseover mousemove mouseout click", function(e) {
-                                e.eventInfo = me._getInfoHandler(this, e);
-                            });
-                        }
                     };
                 } else {
                     groupH = me.barsSp.getChildById("barGroup_" + h);
@@ -404,6 +323,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                         width: parseInt(me.bar._width),
                         height: rectH,
                         fillStyle: fillStyle,
+                        fillAlpha: me.bar.fillAlpha,
                         scaleY: -1
                     };
                     rectData.width = finalPos.width;
@@ -414,6 +334,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                         width: finalPos.width,
                         height: finalPos.height,
                         fillStyle: finalPos.fillStyle,
+                        fillAlpha: me.bar.fillAlpha,
                         scaleY: 0
                     };
                     
@@ -447,18 +368,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                     rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
 
                     me.bar.filter.apply( rectEl, [ rectData , me] );
-
-                    if (me.eventEnabled) {
-                        rectEl.on("panstart mouseover mousemove mouseout click dblclick", function(e) {
-                            e.eventInfo = me._getInfoHandler(this, e);
-                            if (e.type == "mouseover") {
-                                this.parent.getChildById("bhr_" + this.iNode).context.fillAlpha = 0.1;
-                            }
-                            if (e.type == "mouseout") {
-                                this.parent.getChildById("bhr_" + this.iNode).context.fillAlpha = 0;
-                            }
-                        });
-                    };
 
                     //叶子节点上面放置info
                     if (rectData.isLeaf && me.text.enabled) {
@@ -590,8 +499,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         this.core.addChild(this.barsSp);
 
-        this.core.addChild(this.checkedSp);
-
         if (this.text.enabled) {
             this.core.addChild(this.txtsSp);
         };
@@ -600,7 +507,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.core.context.y = this.pos.y;
 
         if (this.sort && this.sort == "desc") {
-            this.core.context.y -= this.h;
+            this.core.context.y -= this.height;
         };
 
         this.grow(function() {
@@ -613,141 +520,170 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
     }
 
+    setEnabledFields()
+    {
+        //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+        this.enabledField = this.root._coordinate.getEnabledFields( this.field );
+    }
+
     _trimGraphs()
     {
+        var me = this;
         var _xAxis = this._xAxis;
-        var _yAxis = this._yAxis;
+        var xArr = _xAxis.layoutData;
+
         var _coor = this.root._coordinate;
 
-        var enabledFields = _coor.getEnabledFields();
+        //用来计算下面的hLen
+        this.setEnabledFields();
+        var layoutGraphs = [];
+        var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
+        var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
+        var _preHLenOver = false;
 
-        var xArr = _xAxis.layoutData;
-        var hLen = 0;
-        _.each( enabledFields, function( obj ){
-            hLen += obj.length;
-        } );
+        if( !this.absolute ){
+            _.each( this.root._graphs , function( _g ){
+                if( !_g.absolute && _g.type == "bar" ) {
+                    if( _g === me ){
+                        _preHLenOver = true;
+                    };
+                    if( _preHLenOver ){
+                        //排在me后面的 graphs，需要计算setEnabledFields，才能计算出来 全部的hLen
+                        _g.setEnabledFields();
+                    } else {
+                        preHLen += _g.enabledField.length
+                    }
+                    hLen += _g.enabledField.length;
+                    layoutGraphs.push( _g );
+                }
+            } );
+        } else {
+            layoutGraphs = [ this ];
+            hLen = this.enabledField.length;
+        }
 
-        var xDis1 = _xAxis.xDis;
+        var ceilWidth = _xAxis.ceilWidth;
         //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
-        var xDis2 = xDis1 / (hLen + 1);
-        //知道了xDis2 后 检测下 barW是否需要调整
-        var barW = this._getBarWidth(xDis1, xDis2);
-        var barDis = xDis2 - barW;
+        var ceilWidth2 = ceilWidth / (hLen + 1);
+
+        //知道了ceilWidth2 后 检测下 barW是否需要调整
+        var barW = this._getBarWidth(ceilWidth, ceilWidth2);
+        var barDis = ceilWidth2 - barW;
         if( this.bar.xDis != null ){
             barDis = this.bar.xDis;
         };
         
-        var disLeft,disRight;
-        disLeft = disRight = (xDis1 - barW*hLen - barDis*(hLen-1) ) / 2;
+        var disLeft = (ceilWidth - barW*hLen - barDis*(hLen-1) ) / 2;
+        if( preHLen ){
+            disLeft += (barDis + barW) * preHLen;
+        };
 
         var tmpData = [];
-        var me = this;
+        var _yAxis = this.yAxisAlign == "left" ? _coor._yAxisLeft : _coor._yAxisRight;
 
-        
-        _.each( _yAxis, function( _yaxis , yind ){
-            //dataOrg和field是一一对应的
-            _.each( _yaxis.dataOrg, function( hData, b ){
-                //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
+        //然后计算出对于结构的dataOrg
+        var dataOrg = this.root.dataFrame.getDataOrg( this.enabledField );
 
-                //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
-                var tempBarData = [];
-                _.each( hData, function( vSectionData, v ){
-                    tempBarData[v] = [];
-                    //vSectionData 代表某个字段下面的一组数据比如 uv
-                    _.each(vSectionData, function(val, i) {
-                        if (!xArr[i]) {
-                            return;
+        //dataOrg和field是一一对应的
+        _.each( dataOrg, function( hData, b ){
+            //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
+
+            //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
+            var tempBarData = [];
+            _.each( hData, function( vSectionData, v ){
+                tempBarData[v] = [];
+                //vSectionData 代表某个字段下面的一组数据比如 uv
+                _.each(vSectionData, function(val, i) {
+                    if (!xArr[i]) {
+                        return;
+                    };
+
+                    var vCount = 0;
+                    if (me.proportion) {
+                        //先计算总量
+                        _.each( hData, function(team, ti) {
+                            vCount += team[i]
+                        });
+                    };
+                    
+                    var x = xArr[i].x - ceilWidth / 2 + disLeft + (barW + barDis)*b;
+
+                    var y = 0;
+                    if (me.proportion) {
+                        y = -val / vCount * _yAxis.yGraphsHeight;
+                    } else {
+                        y = _yAxis.getYposFromVal( val );
+                    };
+
+                    function _getFromY( tempBarData, v, i, val, y, yBasePoint ){
+                        var preData = tempBarData[v - 1];
+                        if( !preData ){
+                            return yBasePoint.y;
                         };
 
-                        var vCount = 0;
-                        if (me.proportion) {
-                            //先计算总量
-                            _.each( hData, function(team, ti) {
-                                vCount += team[i]
-                            });
-                        };
-                        
-                        var x = xArr[i].x - xDis1 / 2 + disLeft + (barW + barDis)*b;
-                        if( yind>0 ){
-                            x += (barW + barDis)*(_yAxis[yind-1].dataOrg.length);
-                        };
-
-                        var y = 0;
-                        if (me.proportion) {
-                            y = -val / vCount * _yaxis.yGraphsHeight;
-                        } else {
-                            y = _yaxis.getYposFromVal( val );
-                        };
-
-                        function _getFromY( tempBarData, v, i, val, y, yBasePoint ){
-                            var preData = tempBarData[v - 1];
-                            if( !preData ){
-                                return yBasePoint.y;
-                            };
-
-                            var preY = preData[i].y;
-                            var preVal = preData[i].value;
-                            var yBaseNumber = yBasePoint.content;
-                            if( val >= yBaseNumber ){
-                                //如果大于基线的，那么就寻找之前所有大于基线的
-                                if( preVal >= yBaseNumber ){
-                                    //能找到，先把pre的isLeaf设置为false
-                                    preData[i].isLeaf = false;
-                                    return preY;
-                                } else {
-                                    return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
-                                }
+                        var preY = preData[i].y;
+                        var preVal = preData[i].value;
+                        var yBaseNumber = yBasePoint.content;
+                        if( val >= yBaseNumber ){
+                            //如果大于基线的，那么就寻找之前所有大于基线的
+                            if( preVal >= yBaseNumber ){
+                                //能找到，先把pre的isLeaf设置为false
+                                preData[i].isLeaf = false;
+                                return preY;
                             } else {
-                                if( preVal < yBaseNumber ){
-                                    //能找到，先把pre的isLeaf设置为false
-                                    preData[i].isLeaf = false;
-                                    return preY;
-                                } else {
-                                    return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
-                                }
+                                return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
+                            }
+                        } else {
+                            if( preVal < yBaseNumber ){
+                                //能找到，先把pre的isLeaf设置为false
+                                preData[i].isLeaf = false;
+                                return preY;
+                            } else {
+                                return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
                             }
                         }
+                    }
 
-                        //找到其着脚点,一般就是 yAxis.basePoint
-                        var fromY = _getFromY(tempBarData, v, i, val, y, _yaxis.basePoint);
-                        y += fromY - _yaxis.basePoint.y;
+                    //找到其着脚点,一般就是 yAxis.basePoint
+                    var fromY = _getFromY(tempBarData, v, i, val, y, _yAxis.basePoint);
+                    y += fromY - _yAxis.basePoint.y;
 
 
-                        //如果有排序的话
-                        //TODO:这个逻辑好像有问题
-                        if (_yaxis.sort && _yaxis.sort == "desc") {
-                            y = -(_yaxis.yGraphsHeight - Math.abs(y));
-                        };
+                    //如果有排序的话
+                    //TODO:这个逻辑好像有问题
+                    if (_yAxis.sort && _yAxis.sort == "desc") {
+                        y = -(_yAxis.yGraphsHeight - Math.abs(y));
+                    };
 
-                        var node = {
-                            value: val,
-                            field: me._getTargetField(b, v, i, _yaxis.field),
-                            fromX: x,
-                            fromY: fromY,
-                            x: x,
-                            y: y,
-                            yBasePoint: _yaxis.basePoint,
-                            isLeaf: true,
-                            xAxis: {
-                                field: me._xAxis.field,
-                                value: xArr[i].content,
-                                layoutText: xArr[i].layoutText
-                            }
-                        };
+                    var node = {
+                        value: val,
+                        field: me._getTargetField(b, v, i, me.enabledField),
+                        fromX: x,
+                        fromY: fromY,
+                        x: x,
+                        y: y,
+                        width : barW,
+                        yBasePoint: _yAxis.basePoint,
+                        isLeaf: true,
+                        xAxis: {
+                            field: me._xAxis.field,
+                            value: xArr[i].content,
+                            layoutText: xArr[i].layoutText
+                        }
+                    };
 
-                        if (me.proportion) {
-                            node.vCount = vCount;
-                        };
+                    if (me.proportion) {
+                        node.vCount = vCount;
+                    };
 
-                        tempBarData[v].push(node);
+                    tempBarData[v].push(node);
 
-                    });
-                } );
-                
-                tempBarData.length && tmpData.push( tempBarData );
+                });
             } );
             
+            tempBarData.length && tmpData.push( tempBarData );
         } );
+            
         return tmpData;
     }
 
@@ -916,52 +852,5 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                 
             };
         });
-        //callback && callback(me);
-        /*
-        window.setTimeout(function() {
-            callback && callback(me);
-        }, 300 * (this.barsSp.children.length - 1));
-        */
-    }
-
-    _getInfoHandler(target) 
-    {
-        var node = {
-            iGroup: target.iGroup,
-            iNode: target.iNode,
-            iLay: target.iLay,
-            nodesInfoList: this._getNodeInfo(target.iGroup, target.iNode, target.iLay)
-        };
-        return node;
-    }
-
-    _getNodeInfo(iGroup, iNode, iLay) 
-    {
-        var arr = [];
-        var me = this;
-        var groups = me.data.length;
-
-        iGroup == undefined && (iGroup = -1);
-        iNode == undefined && (iNode = 0);
-        iLay == undefined && (iLay = -1);
-
-        _.each(me.data, function(h_group, i) {
-            var node;
-            var vLen = h_group.length;
-            if (vLen == 0) return;
-            var hLen = h_group[0].length;
-            for (var h = 0; h < hLen; h++) {
-                if (h == iNode) {
-                    for (var v = 0; v < vLen; v++) {
-                        if ((iGroup == i || iGroup == -1) && (iLay == v || iLay == -1)) {
-                            node = h_group[v][h]
-                            node.fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, node.value, node.field);
-                            arr.push(node)
-                        }
-                    }
-                }
-            }
-        });
-        return arr;
     }
 }

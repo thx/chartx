@@ -39,7 +39,7 @@ export default class Tips extends Component
         //会deepExtend到this.indo上面来
         this.eventInfo    = null; 
         //{
-            //nodesInfoList : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
+            //nodes : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
             //iGroup        : 0, //数据组的索引对应二维数据map的x
             //iNode         : 0  //数据点的索引对应二维数据map的y
         //};
@@ -71,8 +71,8 @@ export default class Tips extends Component
         this.cW   = stage.context.width;
         this.cH   = stage.context.height;
 
-        this._initContent(e);
-        
+        //this._creatTipDom(e);
+        this._setContent(e);
         this.setPosition(e);
 
         this.sprite.toFront();
@@ -114,7 +114,7 @@ export default class Tips extends Component
     /**
      *content相关-------------------------
      */
-    _initContent(e)
+    _creatTipDom(e)
     {
         var me = this;
         this._tipDom = document.createElement("div");
@@ -123,7 +123,7 @@ export default class Tips extends Component
         this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px "+this.strokeStyle+"; -webkit-box-shadow:1px 1px 3px "+this.strokeStyle+"; box-shadow:1px 1px 3px "+this.strokeStyle+";"
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
         this.tipDomContainer.appendChild( this._tipDom );
-        this._setContent(e);
+        //this._setContent(e);
      
         /*
         this._tipDom.addEventListener("mouseover" , function(e){
@@ -149,13 +149,15 @@ export default class Tips extends Component
 
     _setContent(e)
     {
-        if (!this._tipDom){
-            return;
-        };
+
         var tipxContent = this._getContent(e);
         if( !tipxContent && tipxContent!==0 ){
             this.hide();
             return;
+        };
+
+        if( !this._tipDom ){
+            this._creatTipDom(e)
         };
 
         this._tipDom.innerHTML = tipxContent;
@@ -180,6 +182,10 @@ export default class Tips extends Component
 
     _getDefaultContent( info )
     {
+        if( !info.title && !info.nodes.length ){
+            return null;
+        }
+
         var str  = "<table style='border:none'>";
         var self = this;
 
@@ -187,7 +193,7 @@ export default class Tips extends Component
             str += "<tr><td colspan='2'>"+ info.title +"</td></tr>"
         };
 
-        _.each( info.nodesInfoList , function( node , i ){
+        _.each( info.nodes , function( node , i ){
             if( node.value === undefined || node.value === null ){
                 return;
             };

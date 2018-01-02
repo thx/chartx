@@ -113,7 +113,10 @@ export default class Grid extends Component
             return
         };
 
-        var _yAxis = self.root._yAxisLeft || self.root._yAxis || self.root;
+        //不管怎么样，grid的布局依赖 只依赖_yAxis的第一个对象
+        //TODO: 这里应该是要获取第一个有显示field的_yAxis对象。
+        //也就是说当第一个_yAxis上面的field都enabled为false了后，就要取_yAxis[1],后面改
+        var _yAxis = self.root._yAxis[ 0 ];
         
         if( self.root && _yAxis && _yAxis.dataSectionGroup ){
             self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);

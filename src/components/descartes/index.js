@@ -6,6 +6,7 @@ import Grid from "../grid/index"
 import {colors as themeColors} from "../../chart/theme"
 
 const _ = Canvax._;
+const Rect = Canvax.Shapes.Rect;
 
 export default class Descartes_Component extends Component
 {
@@ -41,6 +42,8 @@ export default class Descartes_Component extends Component
 
         };
 
+        this.induce = null;
+
         if( opt.horizontal ){
             this.xAxis.text = {    
                 rotation: 90
@@ -69,6 +72,7 @@ export default class Descartes_Component extends Component
     init(opt)
     {
         var me = this;
+        
         _.extend(true, this, opt);
 
         me.sprite = new Canvax.Display.Sprite({
@@ -113,10 +117,11 @@ export default class Descartes_Component extends Component
 
     draw( opt )
     {
+        //在绘制的时候，是已经能拿到xAxis的height了得
         var _padding = this._root.padding;
-        var h = opt.h || this._root.height;
-        var w = opt.w || this._root.width;
 
+        var h = opt.height || this._root.height;
+        var w = opt.width || this._root.width;
         if( this.horizontal ){
             //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
             var _num = w;
@@ -124,67 +129,62 @@ export default class Descartes_Component extends Component
             h = _num;
         };
 
-        var y = h - this._xAxis.height;
-        var graphsH = y - _padding.top - _padding.bottom;
+        var y = h - this._xAxis.height - _padding.bottom;
+        var _yAxisW = 0;
+        var _yAxisRW = 0;
 
         //绘制yAxis
-        this._yAxisLeft.draw({
-            pos: {
-                x: _padding.left,
-                y: y - _padding.bottom
-            },
-            yMaxHeight: graphsH,
-            resize : opt.resize
-        });
-
-        var _yAxisW = this._yAxisLeft.width;
+        if( this._yAxisLeft ){
+            this._yAxisLeft.draw({
+                pos: {
+                    x: _padding.left,
+                    y: y
+                },
+                yMaxHeight: y - _padding.top,
+                resize : opt.resize
+            });
+            _yAxisW = this._yAxisLeft.width;
+        }
 
         //如果有双轴
-        var _yAxisRW = 0;
         if (this._yAxisRight) {
             this._yAxisRight.draw({
                 pos: {
                     x: 0,
-                    y: y - _padding.bottom
+                    y: y
                 },
-                yMaxHeight: graphsH,
+                yMaxHeight: y - _padding.top,
                 resize : opt.resize
             });
             _yAxisRW = this._yAxisRight.width;
-            this._yAxisRight.setX( w - _yAxisRW - _padding.right + 1);
         };
 
         //绘制x轴
         this._xAxis.draw({
-            graphh: h - _padding.bottom,
-            graphw: w - _yAxisRW - _padding.right,
-            yAxisW: _yAxisW + _padding.left, //左边的yAxisWidth
+            pos : {
+                x : _padding.left + _yAxisW,
+                y : y
+            },
+            width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
             resize: opt.resize
         });
-        if (this._xAxis.yAxisW != _yAxisW) {
-            //说明在xaxis里面的时候被修改过了。那么要同步到yaxis
-            this._yAxisLeft.resetWidth(this._xAxis.yAxisW);
-            _yAxisW = this._xAxis.yAxisW;
-        };
+        
+        this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
 
-
-        this.graphsWidth = this._xAxis.xGraphsWidth;
-        this.graphsHeight = this._yAxisLeft.yGraphsHeight;
-        this.graphsX = _yAxisW;
-        this.graphsY = y - _padding.bottom;
+        this.graphsWidth = this._xAxis.width;
+        this.graphsHeight = this._yAxis[0].yGraphsHeight;
+        this.graphsX = _yAxisW + _padding.left;
+        this.graphsY = y;
 
         //绘制背景网格
         this._grid.draw({
             w: this.graphsWidth,
             h: this.graphsHeight,
             xAxis: {
-                data: this._yAxisLeft.layoutData
+                data: this._yAxis[0].layoutData
             },
             yAxis: {
                 data: this._xAxis.layoutData
-            },
-            yOrigin: {
-                biaxial: this.biaxial
             },
             pos: {
                 x: this.graphsX,
@@ -200,20 +200,21 @@ export default class Descartes_Component extends Component
             });
         }
 
+        this._initInduce();
     }
    
     _initModules()
     {
-
         var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
         this._xAxis = new xAxisConstructor(this.xAxis, _xAxisDataFrame, this);
         this.sprite.addChild(this._xAxis.sprite);
 
         //这里定义的是配置
         var yAxis = this.yAxis;
-        var yAxisLeft, yAxisRight; 
+        var yAxisLeft, yAxisRight;
         var yAxisLeftDataFrame, yAxisRightDataFrame;
 
+        //从chart/descartes.js中重新设定了后的yAxis 肯定是个数组
         if( !_.isArray( yAxis ) ){
             yAxis = [ yAxis ];
         };
@@ -221,27 +222,21 @@ export default class Descartes_Component extends Component
         //left是一定有的
         yAxisLeft = _.find( yAxis , function( ya ){
             return ya.align == "left"
-        } ) || yAxis[0];
-        yAxisLeft.align = "left";
-
-        yAxisLeftDataFrame = this._getAxisDataFrame( yAxisLeft.field );
-
-        //如果过_yAxis配置是个数组，就说明要配置两个y轴对象，就是拥有左右双轴了
-        if( yAxis.length > 1 ){
-            yAxisRight = _.find( yAxis , function( ya ){
-                return ya.align == "right"
-            } ) || yAxis[1];
-
-            yAxisRight.align = "right";
-            yAxisRightDataFrame = this._getAxisDataFrame( yAxisRight.field );
-        };
-
-        this._yAxisLeft = new yAxisConstructor( yAxisLeft, yAxisLeftDataFrame );
-        this._yAxisLeft.axis = yAxisLeft;
-        this.sprite.addChild( this._yAxisLeft.sprite );
-        this._yAxis.push( this._yAxisLeft );
-
+        } );
+    
+        if( yAxisLeft ){
+            yAxisLeftDataFrame = this._getAxisDataFrame( yAxisLeft.field );
+            this._yAxisLeft = new yAxisConstructor( yAxisLeft, yAxisLeftDataFrame );
+            this._yAxisLeft.axis = yAxisLeft;
+            this.sprite.addChild( this._yAxisLeft.sprite );
+            this._yAxis.push( this._yAxisLeft );
+        }
+       
+        yAxisRight = _.find( yAxis , function( ya ){
+            return ya.align == "right"
+        } );
         if( yAxisRight ){
+            yAxisRightDataFrame = this._getAxisDataFrame( yAxisRight.field )
             this._yAxisRight = new yAxisConstructor( yAxisRight, yAxisRightDataFrame );
             this._yAxisRight.axis = yAxisRight;
             this.sprite.addChild( this._yAxisRight.sprite );
@@ -409,8 +404,14 @@ export default class Descartes_Component extends Component
 
     //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
-    getEnabledFields( )
+    getEnabledFields( fields )
     {
+        if( fields ){
+            //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+            //只留下enabled的field 结构
+            return this._filterEnabledFields( fields );
+        }
+
         var fmap = {
             left: [], right:[]
         };
@@ -441,6 +442,33 @@ export default class Descartes_Component extends Component
         } );
 
         return fmap;
+    }
+
+    //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+    //只留下enabled的field 结构
+    _filterEnabledFields( fields ){
+        var me = this;
+        var arr = [];
+        if( !_.isArray( fields ) ) fields = [ fields ];
+        _.each( fields, function( f ){
+            if( !_.isArray( f ) ){
+                if( me.getFieldMapOf(f).enabled ){
+                    arr.push( f );
+                }
+            } else {
+                //如果这个是个纵向数据，说明就是堆叠配置
+                var varr = [];
+                _.each( f, function( v_f ){
+                    if( me.getFieldMapOf( v_f ).enabled ){
+                        varr.push( v_f );
+                    }
+                } );
+                if( varr.length ){
+                    arr.push( varr )
+                }
+            }
+        } );
+        return arr;
     }
 
     //设置 fieldsMap 中对应field 的 enabled状态
@@ -475,5 +503,48 @@ export default class Descartes_Component extends Component
         }
         get( me.fieldsMap );
         return fieldMap;
+    }
+
+    _initInduce()
+    {
+        var me = this;
+        me.induce = new Rect({
+            id: "induce",
+            context: {
+                x: me.graphsX,
+                y: me.graphsY-me.graphsHeight,
+                width: me.graphsWidth,
+                height: me.graphsHeight,
+                fillStyle: '#000000',
+                globalAlpha: 0,
+                cursor: 'pointer'
+            }
+        });
+
+        if( !me.sprite.getChildById("induce") ){
+            me.sprite.addChild(me.induce);
+        }
+        
+        me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+            e.eventInfo = me._getInfoHandler(e);
+            me.fire( e.type, e );
+        })        
+    }
+
+    _getInfoHandler( e )
+    {
+        //这里只获取xAxis的刻度信息
+        var xNodeInd = this._xAxis.getIndexOfX( e.point.x );
+        var obj = {
+            xAxis : {
+                field : this._xAxis.field,
+                value : this._xAxis.dataOrg[ xNodeInd ],
+                ind : xNodeInd
+            },
+            nodes : [
+                //遍历_graphs 去拿东西
+            ]
+        }
+        return obj
     }
 }

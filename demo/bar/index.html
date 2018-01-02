@@ -38,24 +38,36 @@ var data= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , 101 , 20 , 33    ],
     [ 2      , 67  , 51 , 26    ],
-    [ 3      , 100 , 50 , 150    ]
+    [ 3      , 130 , 50 , 150    ]
 
 ];
 var options = {
     coordinate : {
         xAxis : {
             field : "xfield"
+        },
+        yAxis : [{
+            title : "left"
+        },
+        {
+            title : "right"
         }
+        ]
     },
+    legend : {},
     graphs : [
+    
         {
             field : [ [ "uv","pv" ] ],
             yAxisAlign : "left"
-        },
+        }
+        
+        ,
         {
             field : [ "click" ],
-            yAxisAlign : "left"
+            yAxisAlign : "right"
         }
+        
     ]
 };
 
