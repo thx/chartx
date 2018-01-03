@@ -79,42 +79,6 @@ export default class Line extends Chart
 
 
 
-    //datazoom begin
-    getDataZoomChartOpt()
-    {   
-        var opt = {
-            graphs: {
-                line: {
-                    lineWidth: 1,
-                    strokeStyle: "#ececec"
-                },
-                node: {
-                    enabled: false
-                },
-                fill: {
-                    alpha: 0.5,
-                    fillStyle: "#ececec"
-                },
-                animation: false,
-                eventEnabled: false,
-                text: {
-                    enabled: false
-                }
-            }
-        }
-        return opt;
-    }
-    //datazoom end
-
-
-    //markpoint begin
-    drawMarkPoint(e)
-    {
-
-    }
-    //markpoint end
-
-
     drawAnchor( _anchor )
     {
         var pos = {
@@ -124,22 +88,4 @@ export default class Line extends Chart
         _anchor.aim( pos );
     }
 
-    
-    
-    
-    createMarkColumn( xVal , opt)
-    {
-        return this._graphs.createMarkColumn( this._coordinate.getPosX( {val : xVal} ) , _.extend(opt,{xVal: xVal}));
-    }
-
-    moveMarkColumnTo( mcl , xval , opt )
-    {
-        var x = this._coordinate.getPosX( {val : xval} );
-        return mcl.move( {
-            eventInfo: this._graphs.getNodesInfoOfx( x )
-        } , {
-            x: x,
-            xVal: xval
-        });
-    }
 }

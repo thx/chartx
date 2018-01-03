@@ -44,6 +44,7 @@ export default class Tips extends Component
             //iNode         : 0  //数据点的索引对应二维数据map的y
         //};
 
+        this.track = true;//是否开启跟踪鼠标模式
         
         this.positionInRange = false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
@@ -82,7 +83,7 @@ export default class Tips extends Component
     {
         if( !this.enabled || !e.eventInfo ) return;
         this._setContent(e);
-        this.setPosition(e);
+        this.track && this.setPosition(e);
     }
 
     hide()
@@ -125,17 +126,22 @@ export default class Tips extends Component
         this.tipDomContainer.appendChild( this._tipDom );
         //this._setContent(e);
      
-        /*
-        this._tipDom.addEventListener("mouseover" , function(e){
-            //console.log("tips-mouseover:"+e.fromTarget)
-        });
-        this._tipDom.addEventListener("mousemove" , function(e){
-            //console.log("tips-mousemove+++targetId:"+e.target.id+"-====currentTargetId"+e.currentTarget.id)
-        });
-        this._tipDom.addEventListener("mouseout" , function(e){
-            //console.log("tips-mouseout")
-        });
-        */
+        
+        if( !this.track ){
+            this._tipDom.addEventListener("mouseover" , function(e){
+                //console.log("tips-mouseover:"+e.fromTarget)
+                e.stopPropagation();
+            });
+            this._tipDom.addEventListener("mousemove" , function(e){
+                //console.log("tips-mousemove+++targetId:"+e.target.id+"-====currentTargetId"+e.currentTarget.id)
+                e.stopPropagation();
+            });
+            this._tipDom.addEventListener("mouseout" , function(e){
+                //console.log("tips-mouseout")
+                e.stopPropagation();
+            });
+        }
+        
     }
 
     _removeContent()

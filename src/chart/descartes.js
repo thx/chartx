@@ -342,11 +342,55 @@ export default class Descartes extends Chart
 
         //clone的chart只需要coordinate 和 graphs 配置就可以了
         //因为画出来后也只需要拿graphs得sprite去贴图
+        var graphsOpt = [];
+        _.each( this._graphs, function( _g ){
+            var _field = _g.enabledField || _g.field;
+            
+            if( _.flatten([_field]).length ) {
+
+                var _opt = _.extend( true, {} , _g._opt );
+                
+                _opt.field = _field;
+                if( _g.type == "bar" ){
+                    _.extend(true, _opt , {
+                        bar: {
+                            fillStyle: me.dataZoom.normalColor || "#ececec"
+                        },
+                        animation: false,
+                        eventEnabled: false,
+                        text: {
+                            enabled: false
+                        }
+                    } )
+                }
+                if( _g.type == "line" ){
+                    _.extend( true,  _opt , {
+                        line: {
+                            //lineWidth: 1,
+                            strokeStyle: "#ececec"
+                        },
+                        node: {
+                            enabled: false
+                        },
+                        fill: {
+                            alpha: 0.6,
+                            fillStyle: "#ececec"
+                        },
+                        animation: false,
+                        eventEnabled: false,
+                        text: {
+                            enabled: false
+                        }
+                    } )
+                }
+
+                graphsOpt.push( _opt );
+            }
+        } );
         var opts = {
             coordinate : this.coordinate,
-            graphs : me._opts.graphs
+            graphs : graphsOpt
         };
-        _.extend(true, opts, me.getDataZoomChartOpt() );
 
         var thumbChart = new chartConstructor(cloneEl, me._data, opts);
 
@@ -609,7 +653,6 @@ export default class Descartes extends Chart
 
     bindEvent( )
     {
-    
         var me = this;
     
         this._coordinate.on("panstart mouseover", function(e) {
@@ -627,7 +670,9 @@ export default class Descartes extends Chart
             }
         });
         this._coordinate.on("panend mouseout", function(e) {
-            if ( me._tips.enabled && !me._coordinate.induce.containsPoint( e.target.localToGlobal(e.point) ) ) {
+            //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
+            //那么就不要执行hide，顶多只显示这个点得tips数据
+            if ( me._tips.enabled && !( e.toTarget && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 me._tips.hide(e);
             }
         });

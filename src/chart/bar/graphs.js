@@ -12,6 +12,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     {
         super(opt, root);
 
+        this._opt = opt;
+
         this.data = [];
         this.root = root;
 
@@ -76,11 +78,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.sprite = new Canvax.Display.Sprite({
             id: "graphsEl"
         });
-
-        this.core = new Canvax.Display.Sprite({
-            id: "bar_graphs_core"
-        });
-        this.sprite.addChild( this.core );
 
         this.barsSp = new Canvax.Display.Sprite({
             id: "barsSp"
@@ -497,17 +494,17 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             }
         });
 
-        this.core.addChild(this.barsSp);
+        this.sprite.addChild(this.barsSp);
 
         if (this.text.enabled) {
-            this.core.addChild(this.txtsSp);
+            this.sprite.addChild(this.txtsSp);
         };
 
-        this.core.context.x = this.pos.x;
-        this.core.context.y = this.pos.y;
+        this.sprite.context.x = this.pos.x;
+        this.sprite.context.y = this.pos.y;
 
         if (this.sort && this.sort == "desc") {
-            this.core.context.y -= this.height;
+            this.sprite.context.y -= this.height;
         };
 
         this.grow(function() {
@@ -520,7 +517,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
     }
 
-    setEnabledFields()
+    setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
         this.enabledField = this.root._coordinate.getEnabledFields( this.field );
@@ -535,7 +532,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         var _coor = this.root._coordinate;
 
         //用来计算下面的hLen
-        this.setEnabledFields();
+        this.setEnabledField();
         var layoutGraphs = [];
         var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
         var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
@@ -548,8 +545,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                         _preHLenOver = true;
                     };
                     if( _preHLenOver ){
-                        //排在me后面的 graphs，需要计算setEnabledFields，才能计算出来 全部的hLen
-                        _g.setEnabledFields();
+                        //排在me后面的 graphs，需要计算setEnabledField，才能计算出来 全部的hLen
+                        _g.setEnabledField();
                     } else {
                         preHLen += _g.enabledField.length
                     }

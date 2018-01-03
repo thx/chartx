@@ -15,6 +15,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         this.type = "line";
 
+
         this.width = 0;
         this.height = 0;
 
@@ -24,12 +25,12 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         }
 
         //这里所有的opt都要透传给 group
-        this.opt = opt || {};
+        this._opt = opt || {};
         this.root = root;
 
         //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
         this.ctx = root.stage.canvas.getContext("2d");
-        this.dataFrame = this.opt.dataFrame || root.dataFrame; //root.dataFrame的引用
+        this.dataFrame = this._opt.dataFrame || root.dataFrame; //root.dataFrame的引用
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
@@ -46,26 +47,23 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         this.eventEnabled = true;
 
-        this.init(this.opt);
+        this.init(this._opt);
     }
 
 
     init(opt)
     {
-        this.opt = opt;
+        this._opt = opt;
         _.extend(true, this, opt);
         this.sprite = new Canvax.Display.Sprite();
-
-        this.core = new Canvax.Display.Sprite();
-        this.sprite.addChild( this.core );
     }
 
     draw(opt)
     {
         _.extend(true, this, opt);
 
-        this.core.context.x = this.pos.x;
-        this.core.context.y = this.pos.y;
+        this.sprite.context.x = this.pos.x;
+        this.sprite.context.y = this.pos.y;
 
         this.data = this._trimGraphs();
 
@@ -94,7 +92,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         } );
     }
 
-    setEnabledFields()
+    setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
         this.enabledField = this.root._coordinate.getEnabledFields( this.field );
@@ -110,7 +108,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         //这样按照字段摊平的一维结构
         var tmpData = {}; 
 
-        self.setEnabledFields();
+        self.setEnabledField();
 
         var _yAxis = this.yAxisAlign == "right" ? _coor._yAxisRight : _coor._yAxisLeft;
 
@@ -253,7 +251,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             var group = new Group(
                 field,
                 _groupInd,
-                self.opt,
+                self._opt,
                 self.ctx,
                 g.yAxis.sort,
                 g.yAxis,
@@ -273,7 +271,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
                     self.groups.splice( gi , 0 , group );
                     insert=true;
-                    self.core.addChildAt(group.sprite , gi);
+                    self.sprite.addChildAt(group.sprite , gi);
                     
                     break;
                 }
@@ -281,7 +279,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             //否则就只需要直接push就好了
             if( !insert ){
                 self.groups.push(group);
-                self.core.addChild(group.sprite);
+                self.sprite.addChild(group.sprite);
             };
 
         } );
@@ -365,7 +363,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     createMarkColumn( x , opt )
     {
         var ml = new markColumn( opt );
-        this.core.addChild( ml.sprite );
+        this.sprite.addChild( ml.sprite );
 
         ml.h = this.induce.context.height;
         ml.y = -ml.h;

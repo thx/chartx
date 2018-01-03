@@ -77,9 +77,7 @@ export default class xAxis extends Component
         //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
         //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
         //function
-        this.trimLayout = null; 
-
-        this.posParseToInt = false; //主要是柱状图里面有需要 要均匀间隔1px的时候需要
+        this.trimLayout = null;
 
         _.extend(true , this, opts);
 
@@ -235,13 +233,6 @@ export default class xAxis extends Component
             _.extend(true, this, opts);
         };
 
-        //先计算下单元格宽度， 和总体的width
-        var ceilCount = this.dataOrg.length;
-        if( this.layoutType == "rule" ){
-            ceilCount = this.dataOrg.length - 1;
-        }
-        this.width = parseInt( this.width - this.width % ceilCount );
-
         if (this._label) {
             if (this.isH) {
                 this.width -= this._label.getTextHeight() + 5
@@ -282,11 +273,11 @@ export default class xAxis extends Component
             };
         };
 
-        if( this.posParseToInt ){
+        //if( this.posParseToInt ){
             return parseInt( x , 10 );
-        } else { 
-            return x;
-        }
+        //} else { 
+            //return x;
+        //}
         
     }
 

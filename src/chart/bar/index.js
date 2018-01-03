@@ -13,13 +13,8 @@ export default class Bar extends Chart
     constructor( node, data, opts )
     {
         super( node, data, opts );
-
         this.type = "bar";
         
-        //目前只有 bar有 checked 设置
-        this._checkedList = []; //所有的选择对象
-        this._currCheckedList = []; //当前可可视范围内的选择对象(根据dataZoom.start, dataZoom.end 过滤)
-
         //如果需要绘制百分比的柱状图
         if (opts.graphs && opts.graphs.proportion) {
             this._initProportion(node, data, opts);
@@ -32,11 +27,8 @@ export default class Bar extends Chart
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，比如横向柱状图,柱折混合图...
         this._init && this._init(node, data, opts);
         this.draw();
-
     }
-
-
-
+    
     _startDraw(opt)
     {
         var me = this;
@@ -138,42 +130,5 @@ export default class Bar extends Chart
             }
         });
     }
-
-
-    //获取datazoom的 clone chart 需要的options
-    getDataZoomChartOpt() 
-    {
-        var opt = {
-            graphs: {
-                bar: {
-                    fillStyle: this.dataZoom.normalColor || "#ececec"
-                },
-                animation: false,
-                eventEnabled: false,
-                text: {
-                    enabled: false
-                }
-            }
-        }
-        return opt
-    }
-    //datazoom end
-
-
-    //markpoint begin
-    drawMarkPoint() 
-    {
-        var me = this;
-
-        me.components.push({
-            type: "once",
-            plug: {
-                draw: function() {
-
-                }
-            }
-        });
-    }
-    //markpoint end
 
 }

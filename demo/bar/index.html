@@ -35,10 +35,16 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 101 , 20 , 33    ],
-    [ 2      , 67  , 51 , 26    ],
-    [ 3      , 130 , 50 , 150    ]
+    ["xfield","uv" ,"pv" ,"click"],
+    [ 1      , 101 , 20  , 33    ],
+    [ 2      , 67  , 51  , 26    ],
+    [ 3      , 130 , 50  , 50    ],
+    [ 1      , 101 , 60  , 33    ],
+    [ 2      , 67  , 91  , 126    ],
+    [ 3      , 30  , 50 , 90    ],
+    [ 1      , 51  , 120 , 33    ],
+    [ 2      , 67  , 51  , 86    ],
+    [ 3      , 120 , 90  , 150    ]
 
 ];
 var options = {
@@ -68,7 +74,13 @@ var options = {
             yAxisAlign : "right"
         }
         
-    ]
+    ],
+    dataZoom: {
+        range : {
+            start :1,
+            end : 5
+        }
+    }
 };
 
 window.bar = new Chartx.Bar("canvasTest" , data , options)
