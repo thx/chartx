@@ -79,8 +79,38 @@ var options = {
         }
     },
     tips : {
-        track : false
-    }
+        track : true
+    },
+    markLine: [
+        {
+            markTo: "click",
+            text : {
+                enabled : true,
+                format : function( yval ){
+                    return 'click markline ：' + parseInt( yval )
+                },
+                fontSize : 14
+            },
+            y : 210
+        },
+        {
+            markTo: 'uv',
+            text : {
+                enabled : true,
+                fontSize : 14
+            }
+        },
+        {
+            text : {
+                enabled : true,
+                fillStyle : "#777"
+            },
+            line: {
+                strokeStyle : "#777"
+            },
+            y : 70
+        }
+    ]   
 };
 
 window.line = new Chartx.Line("canvasTest" , data , options)
