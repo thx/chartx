@@ -100,4 +100,4 @@ chartx2.0 代码规范
   coordinate 为配置
 
   
-
+file:../canvax
