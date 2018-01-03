@@ -4,85 +4,57 @@ var Chartx = (function () {
 var commonjsGlobal$1 = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
+    return typeof obj;
 } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
-
-
-
-
-
-
-
-
-
-
 var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
 };
 
 var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
+        }
     }
-  }
 
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
+    return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);
+        if (staticProps) defineProperties(Constructor, staticProps);
+        return Constructor;
+    };
 }();
 
-
-
-
-
-
-
-
-
 var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
     }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+            value: subClass,
+            enumerable: false,
+            writable: true,
+            configurable: true
+        }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
 
-
-
-
-
-
-
-
-
-
-
 var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
 
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
 var _$2 = {};
@@ -109,279 +81,279 @@ var nativeIsArray = Array.isArray;
 var nativeKeys = Object.keys;
 
 _$2.values = function (obj) {
-  var keys = _$2.keys(obj);
-  var length = keys.length;
-  var values = new Array(length);
-  for (var i = 0; i < length; i++) {
-    values[i] = obj[keys[i]];
-  }
-  return values;
+    var keys = _$2.keys(obj);
+    var length = keys.length;
+    var values = new Array(length);
+    for (var i = 0; i < length; i++) {
+        values[i] = obj[keys[i]];
+    }
+    return values;
 };
 
 _$2.keys = nativeKeys || function (obj) {
-  if (obj !== Object(obj)) throw new TypeError('Invalid object');
-  var keys = [];
-  for (var key in obj) {
-    if (_$2.has(obj, key)) keys.push(key);
-  }return keys;
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) {
+        if (_$2.has(obj, key)) keys.push(key);
+    }return keys;
 };
 
 _$2.has = function (obj, key) {
-  return hasOwnProperty.call(obj, key);
+    return hasOwnProperty.call(obj, key);
 };
 
 var each = _$2.each = _$2.forEach = function (obj, iterator, context) {
-  if (obj == null) return;
-  if (nativeForEach && obj.forEach === nativeForEach) {
-    obj.forEach(iterator, context);
-  } else if (obj.length === +obj.length) {
-    for (var i = 0, length = obj.length; i < length; i++) {
-      if (iterator.call(context, obj[i], i, obj) === breaker) return;
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+        obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+        for (var i = 0, length = obj.length; i < length; i++) {
+            if (iterator.call(context, obj[i], i, obj) === breaker) return;
+        }
+    } else {
+        var keys = _$2.keys(obj);
+        for (var i = 0, length = keys.length; i < length; i++) {
+            if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+        }
     }
-  } else {
-    var keys = _$2.keys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
-      if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-    }
-  }
 };
 
 _$2.compact = function (array) {
-  return _$2.filter(array, _$2.identity);
+    return _$2.filter(array, _$2.identity);
 };
 
 _$2.filter = _$2.select = function (obj, iterator, context) {
-  var results = [];
-  if (obj == null) return results;
-  if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
-  each(obj, function (value, index, list) {
-    if (iterator.call(context, value, index, list)) results.push(value);
-  });
-  return results;
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function (value, index, list) {
+        if (iterator.call(context, value, index, list)) results.push(value);
+    });
+    return results;
 };
 
 each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function (name) {
-  _$2['is' + name] = function (obj) {
-    return toString.call(obj) == '[object ' + name + ']';
-  };
+    _$2['is' + name] = function (obj) {
+        return toString.call(obj) == '[object ' + name + ']';
+    };
 });
 
 if (!_$2.isArguments(arguments)) {
-  _$2.isArguments = function (obj) {
-    return !!(obj && _$2.has(obj, 'callee'));
-  };
+    _$2.isArguments = function (obj) {
+        return !!(obj && _$2.has(obj, 'callee'));
+    };
 }
 
 {
-  _$2.isFunction = function (obj) {
-    return typeof obj === 'function';
-  };
+    _$2.isFunction = function (obj) {
+        return typeof obj === 'function';
+    };
 }
 
 _$2.isFinite = function (obj) {
-  return isFinite(obj) && !isNaN(parseFloat(obj));
+    return isFinite(obj) && !isNaN(parseFloat(obj));
 };
 
 _$2.isNaN = function (obj) {
-  return _$2.isNumber(obj) && obj != +obj;
+    return _$2.isNumber(obj) && obj != +obj;
 };
 
 _$2.isBoolean = function (obj) {
-  return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
 };
 
 _$2.isNull = function (obj) {
-  return obj === null;
+    return obj === null;
 };
 
 _$2.isEmpty = function (obj) {
-  if (obj == null) return true;
-  if (_$2.isArray(obj) || _$2.isString(obj)) return obj.length === 0;
-  for (var key in obj) {
-    if (_$2.has(obj, key)) return false;
-  }return true;
+    if (obj == null) return true;
+    if (_$2.isArray(obj) || _$2.isString(obj)) return obj.length === 0;
+    for (var key in obj) {
+        if (_$2.has(obj, key)) return false;
+    }return true;
 };
 
 _$2.isElement = function (obj) {
-  return !!(obj && obj.nodeType === 1);
+    return !!(obj && obj.nodeType === 1);
 };
 
 _$2.isArray = nativeIsArray || function (obj) {
-  return toString.call(obj) == '[object Array]';
+    return toString.call(obj) == '[object Array]';
 };
 
 _$2.isObject = function (obj) {
-  return obj === Object(obj);
+    return obj === Object(obj);
 };
 
 _$2.identity = function (value) {
-  return value;
+    return value;
 };
 
 _$2.indexOf = function (array, item, isSorted) {
-  if (array == null) return -1;
-  var i = 0,
-      length = array.length;
-  if (isSorted) {
-    if (typeof isSorted == 'number') {
-      i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
-    } else {
-      i = _$2.sortedIndex(array, item);
-      return array[i] === item ? i : -1;
+    if (array == null) return -1;
+    var i = 0,
+        length = array.length;
+    if (isSorted) {
+        if (typeof isSorted == 'number') {
+            i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
+        } else {
+            i = _$2.sortedIndex(array, item);
+            return array[i] === item ? i : -1;
+        }
     }
-  }
-  if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-  for (; i < length; i++) {
-    if (array[i] === item) return i;
-  }return -1;
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < length; i++) {
+        if (array[i] === item) return i;
+    }return -1;
 };
 
 _$2.isWindow = function (obj) {
-  return obj != null && obj == obj.window;
+    return obj != null && obj == obj.window;
 };
 
 // Internal implementation of a recursive `flatten` function.
 var flatten = function flatten(input, shallow, output) {
-  if (shallow && _$2.every(input, _$2.isArray)) {
-    return concat.apply(output, input);
-  }
-  each(input, function (value) {
-    if (_$2.isArray(value) || _$2.isArguments(value)) {
-      shallow ? push.apply(output, value) : flatten(value, shallow, output);
-    } else {
-      output.push(value);
+    if (shallow && _$2.every(input, _$2.isArray)) {
+        return concat.apply(output, input);
     }
-  });
-  return output;
+    each(input, function (value) {
+        if (_$2.isArray(value) || _$2.isArguments(value)) {
+            shallow ? push.apply(output, value) : flatten(value, shallow, output);
+        } else {
+            output.push(value);
+        }
+    });
+    return output;
 };
 
 // Flatten out an array, either recursively (by default), or just one level.
 _$2.flatten = function (array, shallow) {
-  return flatten(array, shallow, []);
+    return flatten(array, shallow, []);
 };
 
 _$2.every = _$2.all = function (obj, iterator, context) {
-  iterator || (iterator = _$2.identity);
-  var result = true;
-  if (obj == null) return result;
-  if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
-  each(obj, function (value, index, list) {
-    if (!(result = result && iterator.call(context, value, index, list))) return breaker;
-  });
-  return !!result;
+    iterator || (iterator = _$2.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function (value, index, list) {
+        if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
 };
 
 // Return the minimum element (or element-based computation).
 _$2.min = function (obj, iterator, context) {
-  if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-    return Math.min.apply(Math, obj);
-  }
-  if (!iterator && _$2.isEmpty(obj)) return Infinity;
-  var result = { computed: Infinity, value: Infinity };
-  each(obj, function (value, index, list) {
-    var computed = iterator ? iterator.call(context, value, index, list) : value;
-    computed < result.computed && (result = { value: value, computed: computed });
-  });
-  return result.value;
+    if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+        return Math.min.apply(Math, obj);
+    }
+    if (!iterator && _$2.isEmpty(obj)) return Infinity;
+    var result = { computed: Infinity, value: Infinity };
+    each(obj, function (value, index, list) {
+        var computed = iterator ? iterator.call(context, value, index, list) : value;
+        computed < result.computed && (result = { value: value, computed: computed });
+    });
+    return result.value;
 };
 // Return the maximum element or (element-based computation).
 // Can't optimize arrays of integers longer than 65,535 elements.
 // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
 _$2.max = function (obj, iterator, context) {
-  if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-    return Math.max.apply(Math, obj);
-  }
-  if (!iterator && _$2.isEmpty(obj)) return -Infinity;
-  var result = { computed: -Infinity, value: -Infinity };
-  each(obj, function (value, index, list) {
-    var computed = iterator ? iterator.call(context, value, index, list) : value;
-    computed > result.computed && (result = { value: value, computed: computed });
-  });
-  return result.value;
+    if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+        return Math.max.apply(Math, obj);
+    }
+    if (!iterator && _$2.isEmpty(obj)) return -Infinity;
+    var result = { computed: -Infinity, value: -Infinity };
+    each(obj, function (value, index, list) {
+        var computed = iterator ? iterator.call(context, value, index, list) : value;
+        computed > result.computed && (result = { value: value, computed: computed });
+    });
+    return result.value;
 };
 
 // Return the first value which passes a truth test. Aliased as `detect`.
 _$2.find = _$2.detect = function (obj, iterator, context) {
-  var result;
-  any(obj, function (value, index, list) {
-    if (iterator.call(context, value, index, list)) {
-      result = value;
-      return true;
-    }
-  });
-  return result;
+    var result;
+    any(obj, function (value, index, list) {
+        if (iterator.call(context, value, index, list)) {
+            result = value;
+            return true;
+        }
+    });
+    return result;
 };
 // Determine if at least one element in the object matches a truth test.
 // Delegates to **ECMAScript 5**'s native `some` if available.
 // Aliased as `any`.
 var any = _$2.some = _$2.any = function (obj, iterator, context) {
-  iterator || (iterator = _$2.identity);
-  var result = false;
-  if (obj == null) return result;
-  if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
-  each(obj, function (value, index, list) {
-    if (result || (result = iterator.call(context, value, index, list))) return breaker;
-  });
-  return !!result;
+    iterator || (iterator = _$2.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function (value, index, list) {
+        if (result || (result = iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
 };
 // Return a version of the array that does not contain the specified value(s).
 _$2.without = function (array) {
-  return _$2.difference(array, slice.call(arguments, 1));
+    return _$2.difference(array, slice.call(arguments, 1));
 };
 // Take the difference between one array and a number of other arrays.
 // Only the elements present in just the first array will remain.
 _$2.difference = function (array) {
-  var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-  return _$2.filter(array, function (value) {
-    return !_$2.contains(rest, value);
-  });
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _$2.filter(array, function (value) {
+        return !_$2.contains(rest, value);
+    });
 };
 // Produce a duplicate-free version of the array. If the array has already
 // been sorted, you have the option of using a faster algorithm.
 // Aliased as `unique`.
 _$2.uniq = _$2.unique = function (array, isSorted, iterator, context) {
-  if (_$2.isFunction(isSorted)) {
-    context = iterator;
-    iterator = isSorted;
-    isSorted = false;
-  }
-  var initial = iterator ? _$2.map(array, iterator, context) : array;
-  var results = [];
-  var seen = [];
-  each(initial, function (value, index) {
-    if (isSorted ? !index || seen[seen.length - 1] !== value : !_$2.contains(seen, value)) {
-      seen.push(value);
-      results.push(array[index]);
+    if (_$2.isFunction(isSorted)) {
+        context = iterator;
+        iterator = isSorted;
+        isSorted = false;
     }
-  });
-  return results;
+    var initial = iterator ? _$2.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function (value, index) {
+        if (isSorted ? !index || seen[seen.length - 1] !== value : !_$2.contains(seen, value)) {
+            seen.push(value);
+            results.push(array[index]);
+        }
+    });
+    return results;
 };
 // Return the results of applying the iterator to each element.
 // Delegates to **ECMAScript 5**'s native `map` if available.
 _$2.map = _$2.collect = function (obj, iterator, context) {
-  var results = [];
-  if (obj == null) return results;
-  if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-  each(obj, function (value, index, list) {
-    results.push(iterator.call(context, value, index, list));
-  });
-  return results;
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function (value, index, list) {
+        results.push(iterator.call(context, value, index, list));
+    });
+    return results;
 };
 // Determine if the array or object contains a given value (using `===`).
 // Aliased as `include`.
 _$2.contains = _$2.include = function (obj, target) {
-  if (obj == null) return false;
-  if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-  return any(obj, function (value) {
-    return value === target;
-  });
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function (value) {
+        return value === target;
+    });
 };
 
 // Convenience version of a common use case of `map`: fetching a property.
 _$2.pluck = function (obj, key) {
-  return _$2.map(obj, function (value) {
-    return value[key];
-  });
+    return _$2.map(obj, function (value) {
+        return value[key];
+    });
 };
 
 /**
@@ -389,49 +361,49 @@ _$2.pluck = function (obj, key) {
 *如果是深度extend，第一个参数就设置为true
 */
 _$2.extend = function () {
-  var options,
-      name,
-      src,
-      copy,
-      target = arguments[0] || {},
-      i = 1,
-      length = arguments.length,
-      deep = false;
-  if (typeof target === "boolean") {
-    deep = target;
-    target = arguments[1] || {};
-    i = 2;
-  }
-  if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$2.isFunction(target)) {
-    target = {};
-  }
-  if (length === i) {
-    target = this;
-    --i;
-  }
-  for (; i < length; i++) {
-    if ((options = arguments[i]) != null) {
-      for (name in options) {
-        src = target[name];
-        copy = options[name];
-        if (target === copy) {
-          continue;
-        }
-
-        if (deep && copy && _$2.isObject(copy) && !_$2.isArray(copy) && !_$2.isFunction(copy)) {
-          target[name] = _$2.extend(deep, src, copy);
-        } else {
-          target[name] = copy;
-        }
-      }
+    var options,
+        name,
+        src,
+        copy,
+        target = arguments[0] || {},
+        i = 1,
+        length = arguments.length,
+        deep = false;
+    if (typeof target === "boolean") {
+        deep = target;
+        target = arguments[1] || {};
+        i = 2;
     }
-  }
-  return target;
+    if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$2.isFunction(target)) {
+        target = {};
+    }
+    if (length === i) {
+        target = this;
+        --i;
+    }
+    for (; i < length; i++) {
+        if ((options = arguments[i]) != null) {
+            for (name in options) {
+                src = target[name];
+                copy = options[name];
+                if (target === copy) {
+                    continue;
+                }
+
+                if (deep && copy && _$2.isObject(copy) && !_$2.isArray(copy) && !_$2.isFunction(copy)) {
+                    target[name] = _$2.extend(deep, src, copy);
+                } else {
+                    target[name] = copy;
+                }
+            }
+        }
+    }
+    return target;
 };
 
 _$2.clone = function (obj) {
-  if (!_$2.isObject(obj)) return obj;
-  return _$2.isArray(obj) ? obj.slice() : _$2.extend(true, {}, obj);
+    if (!_$2.isObject(obj)) return obj;
+    return _$2.isArray(obj) ? obj.slice() : _$2.extend(true, {}, obj);
 };
 
 /**
@@ -602,65 +574,65 @@ CanvaxEvent.prototype = {
 };
 
 var settings = {
-  //设备分辨率
-  RESOLUTION: window.devicePixelRatio || 1,
+    //设备分辨率
+    RESOLUTION: window.devicePixelRatio || 1,
 
-  /**
-   * Target frames per millisecond.
-   */
-  TARGET_FPMS: 0.06,
+    /**
+     * Target frames per millisecond.
+     */
+    TARGET_FPMS: 0.06,
 
-  /**
-   * If set to true WebGL will attempt make textures mimpaped by default.
-   * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
-   */
-  MIPMAP_TEXTURES: true,
+    /**
+     * If set to true WebGL will attempt make textures mimpaped by default.
+     * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
+     */
+    MIPMAP_TEXTURES: true,
 
-  /**
-   * Default filter resolution.
-   */
-  FILTER_RESOLUTION: 1,
+    /**
+     * Default filter resolution.
+     */
+    FILTER_RESOLUTION: 1,
 
-  // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
-  // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
+    // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
+    // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
 
-  /**
-   * The default sprite batch size.
-   *
-   * The default aims to balance desktop and mobile devices.
-   */
-  SPRITE_BATCH_SIZE: 4096,
+    /**
+     * The default sprite batch size.
+     *
+     * The default aims to balance desktop and mobile devices.
+     */
+    SPRITE_BATCH_SIZE: 4096,
 
-  /**
-   * The prefix that denotes a URL is for a retina asset.
-   */
-  RETINA_PREFIX: /@(.+)x/,
+    /**
+     * The prefix that denotes a URL is for a retina asset.
+     */
+    RETINA_PREFIX: /@(.+)x/,
 
-  RENDER_OPTIONS: {
-    view: null,
-    antialias: true,
-    forceFXAA: false,
-    autoResize: false,
-    transparent: true,
-    backgroundColor: 0x000000,
-    clearBeforeRender: true,
-    preserveDrawingBuffer: false,
-    roundPixels: false
-  },
+    RENDER_OPTIONS: {
+        view: null,
+        antialias: true,
+        forceFXAA: false,
+        autoResize: false,
+        transparent: true,
+        backgroundColor: 0x000000,
+        clearBeforeRender: true,
+        preserveDrawingBuffer: false,
+        roundPixels: false
+    },
 
-  TRANSFORM_MODE: 0,
+    TRANSFORM_MODE: 0,
 
-  GC_MODE: 0,
+    GC_MODE: 0,
 
-  GC_MAX_IDLE: 60 * 60,
+    GC_MAX_IDLE: 60 * 60,
 
-  GC_MAX_CHECK_COUNT: 60 * 10,
+    GC_MAX_CHECK_COUNT: 60 * 10,
 
-  WRAP_MODE: 0,
+    WRAP_MODE: 0,
 
-  SCALE_MODE: 0,
+    SCALE_MODE: 0,
 
-  PRECISION: 'mediump'
+    PRECISION: 'mediump'
 
 };
 
@@ -677,7 +649,6 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
                 }
             };
 
-            
             return {
                 v: eventDomFn
             };
@@ -698,7 +669,6 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
                 }
             };
 
-            
             return {
                 v: eventFn
             };
@@ -1718,920 +1688,834 @@ Matrix.prototype = {
 
 var commonjsGlobal$$1 = typeof window !== 'undefined' ? window : typeof commonjsGlobal$1 !== 'undefined' ? commonjsGlobal$1 : typeof self !== 'undefined' ? self : {};
 
-
-
-
-
 function createCommonjsModule$$1(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
+    return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
 var Tween = createCommonjsModule$$1(function (module, exports) {
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */
+    /**
+     * Tween.js - Licensed under the MIT license
+     * https://github.com/tweenjs/tween.js
+     * ----------------------------------------------
+     *
+     * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+     * Thank you all, you're awesome!
+     */
+
+    var _Group = function () {
+        this._tweens = {};
+        this._tweensAddedDuringUpdate = {};
+    };
+
+    _Group.prototype = {
+        getAll: function () {
+
+            return Object.keys(this._tweens).map(function (tweenId) {
+                return this._tweens[tweenId];
+            }.bind(this));
+        },
+
+        removeAll: function () {
+
+            this._tweens = {};
+        },
+
+        add: function (tween) {
+
+            this._tweens[tween.getId()] = tween;
+            this._tweensAddedDuringUpdate[tween.getId()] = tween;
+        },
+
+        remove: function (tween) {
+
+            delete this._tweens[tween.getId()];
+            delete this._tweensAddedDuringUpdate[tween.getId()];
+        },
+
+        update: function (time, preserve) {
+
+            var tweenIds = Object.keys(this._tweens);
+
+            if (tweenIds.length === 0) {
+                return false;
+            }
+
+            time = time !== undefined ? time : TWEEN.now();
+
+            // Tweens are updated in "batches". If you add a new tween during an update, then the
+            // new tween will be updated in the next batch.
+            // If you remove a tween during an update, it will normally still be updated. However,
+            // if the removed tween was added during the current batch, then it will not be updated.
+            while (tweenIds.length > 0) {
+                this._tweensAddedDuringUpdate = {};
+
+                for (var i = 0; i < tweenIds.length; i++) {
+
+                    if (this._tweens[tweenIds[i]].update(time) === false) {
+                        this._tweens[tweenIds[i]]._isPlaying = false;
+
+                        if (!preserve) {
+                            delete this._tweens[tweenIds[i]];
+                        }
+                    }
+                }
+
+                tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+            }
+
+            return true;
+        }
+    };
+
+    var TWEEN = new _Group();
+
+    TWEEN.Group = _Group;
+    TWEEN._nextId = 0;
+    TWEEN.nextId = function () {
+        return TWEEN._nextId++;
+    };
+
+    // Include a performance.now polyfill.
+    // In node.js, use process.hrtime.
+    if (typeof window === 'undefined' && typeof process !== 'undefined') {
+        TWEEN.now = function () {
+            var time = process.hrtime();
+
+            // Convert [seconds, nanoseconds] to milliseconds.
+            return time[0] * 1000 + time[1] / 1000000;
+        };
+    }
+    // In a browser, use window.performance.now if it is available.
+    else if (typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined) {
+            // This must be bound, because directly assigning this function
+            // leads to an invocation exception in Chrome.
+            TWEEN.now = window.performance.now.bind(window.performance);
+        }
+        // Use Date.now if it is available.
+        else if (Date.now !== undefined) {
+                TWEEN.now = Date.now;
+            }
+            // Otherwise, use 'new Date().getTime()'.
+            else {
+                    TWEEN.now = function () {
+                        return new Date().getTime();
+                    };
+                }
+
+    TWEEN.Tween = function (object, group) {
+        this._object = object;
+        this._valuesStart = {};
+        this._valuesEnd = {};
+        this._valuesStartRepeat = {};
+        this._duration = 1000;
+        this._repeat = 0;
+        this._repeatDelayTime = undefined;
+        this._yoyo = false;
+        this._isPlaying = false;
+        this._reversed = false;
+        this._delayTime = 0;
+        this._startTime = null;
+        this._easingFunction = TWEEN.Easing.Linear.None;
+        this._interpolationFunction = TWEEN.Interpolation.Linear;
+        this._chainedTweens = [];
+        this._onStartCallback = null;
+        this._onStartCallbackFired = false;
+        this._onUpdateCallback = null;
+        this._onCompleteCallback = null;
+        this._onStopCallback = null;
+        this._group = group || TWEEN;
+        this._id = TWEEN.nextId();
+    };
+
+    TWEEN.Tween.prototype = {
+        getId: function getId() {
+            return this._id;
+        },
+
+        isPlaying: function isPlaying() {
+            return this._isPlaying;
+        },
 
+        to: function to(properties, duration) {
 
-var _Group = function () {
-	this._tweens = {};
-	this._tweensAddedDuringUpdate = {};
-};
+            this._valuesEnd = properties;
 
-_Group.prototype = {
-	getAll: function () {
+            if (duration !== undefined) {
+                this._duration = duration;
+            }
 
-		return Object.keys(this._tweens).map(function (tweenId) {
-			return this._tweens[tweenId];
-		}.bind(this));
+            return this;
+        },
 
-	},
+        start: function start(time) {
 
-	removeAll: function () {
+            this._group.add(this);
 
-		this._tweens = {};
+            this._isPlaying = true;
 
-	},
-
-	add: function (tween) {
-
-		this._tweens[tween.getId()] = tween;
-		this._tweensAddedDuringUpdate[tween.getId()] = tween;
-
-	},
-
-	remove: function (tween) {
-
-		delete this._tweens[tween.getId()];
-		delete this._tweensAddedDuringUpdate[tween.getId()];
-
-	},
-
-	update: function (time, preserve) {
-
-		var tweenIds = Object.keys(this._tweens);
-
-		if (tweenIds.length === 0) {
-			return false;
-		}
-
-		time = time !== undefined ? time : TWEEN.now();
-
-		// Tweens are updated in "batches". If you add a new tween during an update, then the
-		// new tween will be updated in the next batch.
-		// If you remove a tween during an update, it will normally still be updated. However,
-		// if the removed tween was added during the current batch, then it will not be updated.
-		while (tweenIds.length > 0) {
-			this._tweensAddedDuringUpdate = {};
-
-			for (var i = 0; i < tweenIds.length; i++) {
-
-				if (this._tweens[tweenIds[i]].update(time) === false) {
-					this._tweens[tweenIds[i]]._isPlaying = false;
-
-					if (!preserve) {
-						delete this._tweens[tweenIds[i]];
-					}
-				}
-			}
+            this._onStartCallbackFired = false;
 
-			tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-		}
+            this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
+            this._startTime += this._delayTime;
 
-		return true;
+            for (var property in this._valuesEnd) {
 
-	}
-};
+                // Check if an Array was provided as property value
+                if (this._valuesEnd[property] instanceof Array) {
 
-var TWEEN = new _Group();
+                    if (this._valuesEnd[property].length === 0) {
+                        continue;
+                    }
 
-TWEEN.Group = _Group;
-TWEEN._nextId = 0;
-TWEEN.nextId = function () {
-	return TWEEN._nextId++;
-};
+                    // Create a local copy of the Array with the start value at the front
+                    this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+                }
 
+                // If `to()` specifies a property that doesn't exist in the source object,
+                // we should not set that property in the object
+                if (this._object[property] === undefined) {
+                    continue;
+                }
 
-// Include a performance.now polyfill.
-// In node.js, use process.hrtime.
-if (typeof (window) === 'undefined' && typeof (process) !== 'undefined') {
-	TWEEN.now = function () {
-		var time = process.hrtime();
+                // Save the starting value.
+                this._valuesStart[property] = this._object[property];
 
-		// Convert [seconds, nanoseconds] to milliseconds.
-		return time[0] * 1000 + time[1] / 1000000;
-	};
-}
-// In a browser, use window.performance.now if it is available.
-else if (typeof (window) !== 'undefined' &&
-         window.performance !== undefined &&
-		 window.performance.now !== undefined) {
-	// This must be bound, because directly assigning this function
-	// leads to an invocation exception in Chrome.
-	TWEEN.now = window.performance.now.bind(window.performance);
-}
-// Use Date.now if it is available.
-else if (Date.now !== undefined) {
-	TWEEN.now = Date.now;
-}
-// Otherwise, use 'new Date().getTime()'.
-else {
-	TWEEN.now = function () {
-		return new Date().getTime();
-	};
-}
-
+                if (this._valuesStart[property] instanceof Array === false) {
+                    this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+                }
 
-TWEEN.Tween = function (object, group) {
-	this._object = object;
-	this._valuesStart = {};
-	this._valuesEnd = {};
-	this._valuesStartRepeat = {};
-	this._duration = 1000;
-	this._repeat = 0;
-	this._repeatDelayTime = undefined;
-	this._yoyo = false;
-	this._isPlaying = false;
-	this._reversed = false;
-	this._delayTime = 0;
-	this._startTime = null;
-	this._easingFunction = TWEEN.Easing.Linear.None;
-	this._interpolationFunction = TWEEN.Interpolation.Linear;
-	this._chainedTweens = [];
-	this._onStartCallback = null;
-	this._onStartCallbackFired = false;
-	this._onUpdateCallback = null;
-	this._onCompleteCallback = null;
-	this._onStopCallback = null;
-	this._group = group || TWEEN;
-	this._id = TWEEN.nextId();
+                this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+            }
 
-};
+            return this;
+        },
 
-TWEEN.Tween.prototype = {
-	getId: function getId() {
-		return this._id;
-	},
+        stop: function stop() {
 
-	isPlaying: function isPlaying() {
-		return this._isPlaying;
-	},
+            if (!this._isPlaying) {
+                return this;
+            }
 
-	to: function to(properties, duration) {
+            this._group.remove(this);
+            this._isPlaying = false;
 
-		this._valuesEnd = properties;
+            if (this._onStopCallback !== null) {
+                this._onStopCallback(this._object);
+            }
 
-		if (duration !== undefined) {
-			this._duration = duration;
-		}
+            this.stopChainedTweens();
+            return this;
+        },
 
-		return this;
+        end: function end() {
 
-	},
+            this.update(this._startTime + this._duration);
+            return this;
+        },
 
-	start: function start(time) {
+        stopChainedTweens: function stopChainedTweens() {
 
-		this._group.add(this);
+            for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+                this._chainedTweens[i].stop();
+            }
+        },
 
-		this._isPlaying = true;
+        delay: function delay(amount) {
 
-		this._onStartCallbackFired = false;
+            this._delayTime = amount;
+            return this;
+        },
 
-		this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
-		this._startTime += this._delayTime;
+        repeat: function repeat(times) {
 
-		for (var property in this._valuesEnd) {
+            this._repeat = times;
+            return this;
+        },
 
-			// Check if an Array was provided as property value
-			if (this._valuesEnd[property] instanceof Array) {
+        repeatDelay: function repeatDelay(amount) {
 
-				if (this._valuesEnd[property].length === 0) {
-					continue;
-				}
+            this._repeatDelayTime = amount;
+            return this;
+        },
 
-				// Create a local copy of the Array with the start value at the front
-				this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+        yoyo: function yoyo(yoyo) {
 
-			}
+            this._yoyo = yoyo;
+            return this;
+        },
 
-			// If `to()` specifies a property that doesn't exist in the source object,
-			// we should not set that property in the object
-			if (this._object[property] === undefined) {
-				continue;
-			}
+        easing: function easing(easing) {
 
-			// Save the starting value.
-			this._valuesStart[property] = this._object[property];
+            this._easingFunction = easing;
+            return this;
+        },
 
-			if ((this._valuesStart[property] instanceof Array) === false) {
-				this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
-			}
+        interpolation: function interpolation(interpolation) {
 
-			this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+            this._interpolationFunction = interpolation;
+            return this;
+        },
 
-		}
+        chain: function chain() {
 
-		return this;
+            this._chainedTweens = arguments;
+            return this;
+        },
 
-	},
+        onStart: function onStart(callback) {
 
-	stop: function stop() {
+            this._onStartCallback = callback;
+            return this;
+        },
 
-		if (!this._isPlaying) {
-			return this;
-		}
+        onUpdate: function onUpdate(callback) {
 
-		this._group.remove(this);
-		this._isPlaying = false;
+            this._onUpdateCallback = callback;
+            return this;
+        },
 
-		if (this._onStopCallback !== null) {
-			this._onStopCallback(this._object);
-		}
+        onComplete: function onComplete(callback) {
 
-		this.stopChainedTweens();
-		return this;
+            this._onCompleteCallback = callback;
+            return this;
+        },
 
-	},
+        onStop: function onStop(callback) {
 
-	end: function end() {
+            this._onStopCallback = callback;
+            return this;
+        },
 
-		this.update(this._startTime + this._duration);
-		return this;
+        update: function update(time) {
 
-	},
+            var property;
+            var elapsed;
+            var value;
 
-	stopChainedTweens: function stopChainedTweens() {
+            if (time < this._startTime) {
+                return true;
+            }
 
-		for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-			this._chainedTweens[i].stop();
-		}
+            if (this._onStartCallbackFired === false) {
 
-	},
+                if (this._onStartCallback !== null) {
+                    this._onStartCallback(this._object);
+                }
 
-	delay: function delay(amount) {
+                this._onStartCallbackFired = true;
+            }
 
-		this._delayTime = amount;
-		return this;
+            elapsed = (time - this._startTime) / this._duration;
+            elapsed = elapsed > 1 ? 1 : elapsed;
 
-	},
+            value = this._easingFunction(elapsed);
 
-	repeat: function repeat(times) {
+            for (property in this._valuesEnd) {
 
-		this._repeat = times;
-		return this;
+                // Don't update properties that do not exist in the source object
+                if (this._valuesStart[property] === undefined) {
+                    continue;
+                }
 
-	},
+                var start = this._valuesStart[property] || 0;
+                var end = this._valuesEnd[property];
 
-	repeatDelay: function repeatDelay(amount) {
+                if (end instanceof Array) {
 
-		this._repeatDelayTime = amount;
-		return this;
+                    this._object[property] = this._interpolationFunction(end, value);
+                } else {
 
-	},
+                    // Parses relative end values with start as base (e.g.: +10, -3)
+                    if (typeof end === 'string') {
 
-	yoyo: function yoyo(yoyo) {
+                        if (end.charAt(0) === '+' || end.charAt(0) === '-') {
+                            end = start + parseFloat(end);
+                        } else {
+                            end = parseFloat(end);
+                        }
+                    }
 
-		this._yoyo = yoyo;
-		return this;
+                    // Protect against non numeric properties.
+                    if (typeof end === 'number') {
+                        this._object[property] = start + (end - start) * value;
+                    }
+                }
+            }
 
-	},
+            if (this._onUpdateCallback !== null) {
+                this._onUpdateCallback(this._object);
+            }
 
-	easing: function easing(easing) {
+            if (elapsed === 1) {
 
-		this._easingFunction = easing;
-		return this;
+                if (this._repeat > 0) {
 
-	},
+                    if (isFinite(this._repeat)) {
+                        this._repeat--;
+                    }
 
-	interpolation: function interpolation(interpolation) {
+                    // Reassign starting values, restart by making startTime = now
+                    for (property in this._valuesStartRepeat) {
 
-		this._interpolationFunction = interpolation;
-		return this;
+                        if (typeof this._valuesEnd[property] === 'string') {
+                            this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+                        }
 
-	},
+                        if (this._yoyo) {
+                            var tmp = this._valuesStartRepeat[property];
 
-	chain: function chain() {
+                            this._valuesStartRepeat[property] = this._valuesEnd[property];
+                            this._valuesEnd[property] = tmp;
+                        }
 
-		this._chainedTweens = arguments;
-		return this;
+                        this._valuesStart[property] = this._valuesStartRepeat[property];
+                    }
 
-	},
+                    if (this._yoyo) {
+                        this._reversed = !this._reversed;
+                    }
 
-	onStart: function onStart(callback) {
+                    if (this._repeatDelayTime !== undefined) {
+                        this._startTime = time + this._repeatDelayTime;
+                    } else {
+                        this._startTime = time + this._delayTime;
+                    }
 
-		this._onStartCallback = callback;
-		return this;
+                    return true;
+                } else {
 
-	},
+                    if (this._onCompleteCallback !== null) {
 
-	onUpdate: function onUpdate(callback) {
+                        this._onCompleteCallback(this._object);
+                    }
 
-		this._onUpdateCallback = callback;
-		return this;
+                    for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+                        // Make the chained tweens start exactly at the time they should,
+                        // even if the `update()` method was called way past the duration of the tween
+                        this._chainedTweens[i].start(this._startTime + this._duration);
+                    }
 
-	},
+                    return false;
+                }
+            }
 
-	onComplete: function onComplete(callback) {
+            return true;
+        }
+    };
 
-		this._onCompleteCallback = callback;
-		return this;
+    TWEEN.Easing = {
 
-	},
+        Linear: {
 
-	onStop: function onStop(callback) {
+            None: function (k) {
 
-		this._onStopCallback = callback;
-		return this;
+                return k;
+            }
 
-	},
+        },
 
-	update: function update(time) {
+        Quadratic: {
 
-		var property;
-		var elapsed;
-		var value;
+            In: function (k) {
 
-		if (time < this._startTime) {
-			return true;
-		}
+                return k * k;
+            },
 
-		if (this._onStartCallbackFired === false) {
+            Out: function (k) {
 
-			if (this._onStartCallback !== null) {
-				this._onStartCallback(this._object);
-			}
+                return k * (2 - k);
+            },
 
-			this._onStartCallbackFired = true;
-		}
+            InOut: function (k) {
 
-		elapsed = (time - this._startTime) / this._duration;
-		elapsed = elapsed > 1 ? 1 : elapsed;
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k;
+                }
 
-		value = this._easingFunction(elapsed);
+                return -0.5 * (--k * (k - 2) - 1);
+            }
 
-		for (property in this._valuesEnd) {
+        },
 
-			// Don't update properties that do not exist in the source object
-			if (this._valuesStart[property] === undefined) {
-				continue;
-			}
+        Cubic: {
 
-			var start = this._valuesStart[property] || 0;
-			var end = this._valuesEnd[property];
+            In: function (k) {
 
-			if (end instanceof Array) {
+                return k * k * k;
+            },
 
-				this._object[property] = this._interpolationFunction(end, value);
+            Out: function (k) {
 
-			} else {
+                return --k * k * k + 1;
+            },
 
-				// Parses relative end values with start as base (e.g.: +10, -3)
-				if (typeof (end) === 'string') {
+            InOut: function (k) {
 
-					if (end.charAt(0) === '+' || end.charAt(0) === '-') {
-						end = start + parseFloat(end);
-					} else {
-						end = parseFloat(end);
-					}
-				}
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k;
+                }
 
-				// Protect against non numeric properties.
-				if (typeof (end) === 'number') {
-					this._object[property] = start + (end - start) * value;
-				}
+                return 0.5 * ((k -= 2) * k * k + 2);
+            }
 
-			}
+        },
 
-		}
+        Quartic: {
 
-		if (this._onUpdateCallback !== null) {
-			this._onUpdateCallback(this._object);
-		}
+            In: function (k) {
 
-		if (elapsed === 1) {
+                return k * k * k * k;
+            },
 
-			if (this._repeat > 0) {
+            Out: function (k) {
 
-				if (isFinite(this._repeat)) {
-					this._repeat--;
-				}
+                return 1 - --k * k * k * k;
+            },
 
-				// Reassign starting values, restart by making startTime = now
-				for (property in this._valuesStartRepeat) {
+            InOut: function (k) {
 
-					if (typeof (this._valuesEnd[property]) === 'string') {
-						this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-					}
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k * k;
+                }
 
-					if (this._yoyo) {
-						var tmp = this._valuesStartRepeat[property];
+                return -0.5 * ((k -= 2) * k * k * k - 2);
+            }
 
-						this._valuesStartRepeat[property] = this._valuesEnd[property];
-						this._valuesEnd[property] = tmp;
-					}
+        },
 
-					this._valuesStart[property] = this._valuesStartRepeat[property];
+        Quintic: {
 
-				}
+            In: function (k) {
 
-				if (this._yoyo) {
-					this._reversed = !this._reversed;
-				}
+                return k * k * k * k * k;
+            },
 
-				if (this._repeatDelayTime !== undefined) {
-					this._startTime = time + this._repeatDelayTime;
-				} else {
-					this._startTime = time + this._delayTime;
-				}
+            Out: function (k) {
 
-				return true;
+                return --k * k * k * k * k + 1;
+            },
 
-			} else {
+            InOut: function (k) {
 
-				if (this._onCompleteCallback !== null) {
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k * k * k;
+                }
 
-					this._onCompleteCallback(this._object);
-				}
+                return 0.5 * ((k -= 2) * k * k * k * k + 2);
+            }
 
-				for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-					// Make the chained tweens start exactly at the time they should,
-					// even if the `update()` method was called way past the duration of the tween
-					this._chainedTweens[i].start(this._startTime + this._duration);
-				}
+        },
 
-				return false;
+        Sinusoidal: {
 
-			}
+            In: function (k) {
 
-		}
+                return 1 - Math.cos(k * Math.PI / 2);
+            },
 
-		return true;
+            Out: function (k) {
 
-	}
-};
+                return Math.sin(k * Math.PI / 2);
+            },
 
+            InOut: function (k) {
 
-TWEEN.Easing = {
+                return 0.5 * (1 - Math.cos(Math.PI * k));
+            }
 
-	Linear: {
+        },
 
-		None: function (k) {
+        Exponential: {
 
-			return k;
+            In: function (k) {
 
-		}
+                return k === 0 ? 0 : Math.pow(1024, k - 1);
+            },
 
-	},
+            Out: function (k) {
 
-	Quadratic: {
+                return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return k * k;
+                if (k === 0) {
+                    return 0;
+                }
 
-		},
+                if (k === 1) {
+                    return 1;
+                }
 
-		Out: function (k) {
+                if ((k *= 2) < 1) {
+                    return 0.5 * Math.pow(1024, k - 1);
+                }
 
-			return k * (2 - k);
+                return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+            }
 
-		},
+        },
 
-		InOut: function (k) {
+        Circular: {
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k;
-			}
+            In: function (k) {
 
-			return - 0.5 * (--k * (k - 2) - 1);
+                return 1 - Math.sqrt(1 - k * k);
+            },
 
-		}
+            Out: function (k) {
 
-	},
+                return Math.sqrt(1 - --k * k);
+            },
 
-	Cubic: {
+            InOut: function (k) {
 
-		In: function (k) {
+                if ((k *= 2) < 1) {
+                    return -0.5 * (Math.sqrt(1 - k * k) - 1);
+                }
 
-			return k * k * k;
+                return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+            }
 
-		},
+        },
 
-		Out: function (k) {
+        Elastic: {
 
-			return --k * k * k + 1;
+            In: function (k) {
 
-		},
+                if (k === 0) {
+                    return 0;
+                }
 
-		InOut: function (k) {
+                if (k === 1) {
+                    return 1;
+                }
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k;
-			}
+                return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+            },
 
-			return 0.5 * ((k -= 2) * k * k + 2);
+            Out: function (k) {
 
-		}
+                if (k === 0) {
+                    return 0;
+                }
 
-	},
+                if (k === 1) {
+                    return 1;
+                }
 
-	Quartic: {
+                return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return k * k * k * k;
+                if (k === 0) {
+                    return 0;
+                }
 
-		},
+                if (k === 1) {
+                    return 1;
+                }
 
-		Out: function (k) {
+                k *= 2;
 
-			return 1 - (--k * k * k * k);
+                if (k < 1) {
+                    return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+                }
 
-		},
+                return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+            }
 
-		InOut: function (k) {
+        },
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k;
-			}
+        Back: {
 
-			return - 0.5 * ((k -= 2) * k * k * k - 2);
+            In: function (k) {
 
-		}
+                var s = 1.70158;
 
-	},
+                return k * k * ((s + 1) * k - s);
+            },
 
-	Quintic: {
+            Out: function (k) {
 
-		In: function (k) {
+                var s = 1.70158;
 
-			return k * k * k * k * k;
+                return --k * k * ((s + 1) * k + s) + 1;
+            },
 
-		},
+            InOut: function (k) {
 
-		Out: function (k) {
+                var s = 1.70158 * 1.525;
 
-			return --k * k * k * k * k + 1;
+                if ((k *= 2) < 1) {
+                    return 0.5 * (k * k * ((s + 1) * k - s));
+                }
 
-		},
+                return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+            }
 
-		InOut: function (k) {
+        },
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k * k;
-			}
+        Bounce: {
 
-			return 0.5 * ((k -= 2) * k * k * k * k + 2);
+            In: function (k) {
 
-		}
+                return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+            },
 
-	},
+            Out: function (k) {
 
-	Sinusoidal: {
+                if (k < 1 / 2.75) {
+                    return 7.5625 * k * k;
+                } else if (k < 2 / 2.75) {
+                    return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+                } else if (k < 2.5 / 2.75) {
+                    return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+                } else {
+                    return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+                }
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return 1 - Math.cos(k * Math.PI / 2);
+                if (k < 0.5) {
+                    return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
+                }
 
-		},
+                return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+            }
 
-		Out: function (k) {
+        }
 
-			return Math.sin(k * Math.PI / 2);
+    };
 
-		},
+    TWEEN.Interpolation = {
 
-		InOut: function (k) {
+        Linear: function (v, k) {
 
-			return 0.5 * (1 - Math.cos(Math.PI * k));
+            var m = v.length - 1;
+            var f = m * k;
+            var i = Math.floor(f);
+            var fn = TWEEN.Interpolation.Utils.Linear;
 
-		}
+            if (k < 0) {
+                return fn(v[0], v[1], f);
+            }
 
-	},
+            if (k > 1) {
+                return fn(v[m], v[m - 1], m - f);
+            }
 
-	Exponential: {
+            return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+        },
 
-		In: function (k) {
+        Bezier: function (v, k) {
 
-			return k === 0 ? 0 : Math.pow(1024, k - 1);
+            var b = 0;
+            var n = v.length - 1;
+            var pw = Math.pow;
+            var bn = TWEEN.Interpolation.Utils.Bernstein;
 
-		},
+            for (var i = 0; i <= n; i++) {
+                b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+            }
 
-		Out: function (k) {
+            return b;
+        },
 
-			return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+        CatmullRom: function (v, k) {
 
-		},
+            var m = v.length - 1;
+            var f = m * k;
+            var i = Math.floor(f);
+            var fn = TWEEN.Interpolation.Utils.CatmullRom;
 
-		InOut: function (k) {
+            if (v[0] === v[m]) {
 
-			if (k === 0) {
-				return 0;
-			}
+                if (k < 0) {
+                    i = Math.floor(f = m * (1 + k));
+                }
 
-			if (k === 1) {
-				return 1;
-			}
+                return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+            } else {
 
-			if ((k *= 2) < 1) {
-				return 0.5 * Math.pow(1024, k - 1);
-			}
+                if (k < 0) {
+                    return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+                }
 
-			return 0.5 * (- Math.pow(2, - 10 * (k - 1)) + 2);
+                if (k > 1) {
+                    return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+                }
 
-		}
+                return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+            }
+        },
 
-	},
+        Utils: {
 
-	Circular: {
+            Linear: function (p0, p1, t) {
 
-		In: function (k) {
+                return (p1 - p0) * t + p0;
+            },
 
-			return 1 - Math.sqrt(1 - k * k);
+            Bernstein: function (n, i) {
 
-		},
+                var fc = TWEEN.Interpolation.Utils.Factorial;
 
-		Out: function (k) {
+                return fc(n) / fc(i) / fc(n - i);
+            },
 
-			return Math.sqrt(1 - (--k * k));
+            Factorial: function () {
 
-		},
+                var a = [1];
 
-		InOut: function (k) {
+                return function (n) {
 
-			if ((k *= 2) < 1) {
-				return - 0.5 * (Math.sqrt(1 - k * k) - 1);
-			}
+                    var s = 1;
 
-			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+                    if (a[n]) {
+                        return a[n];
+                    }
 
-		}
+                    for (var i = n; i > 1; i--) {
+                        s *= i;
+                    }
 
-	},
+                    a[n] = s;
+                    return s;
+                };
+            }(),
 
-	Elastic: {
+            CatmullRom: function (p0, p1, p2, p3, t) {
 
-		In: function (k) {
+                var v0 = (p2 - p0) * 0.5;
+                var v1 = (p3 - p1) * 0.5;
+                var t2 = t * t;
+                var t3 = t * t2;
 
-			if (k === 0) {
-				return 0;
-			}
+                return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+            }
 
-			if (k === 1) {
-				return 1;
-			}
+        }
 
-			return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+    };
 
-		},
+    // UMD (Universal Module Definition)
+    (function (root) {
 
-		Out: function (k) {
+        if (typeof undefined === 'function' && undefined.amd) {
 
-			if (k === 0) {
-				return 0;
-			}
+            // AMD
+            undefined([], function () {
+                return TWEEN;
+            });
+        } else {
 
-			if (k === 1) {
-				return 1;
-			}
-
-			return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			if (k === 0) {
-				return 0;
-			}
-
-			if (k === 1) {
-				return 1;
-			}
-
-			k *= 2;
-
-			if (k < 1) {
-				return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
-			}
-
-			return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
-
-		}
-
-	},
-
-	Back: {
-
-		In: function (k) {
-
-			var s = 1.70158;
-
-			return k * k * ((s + 1) * k - s);
-
-		},
-
-		Out: function (k) {
-
-			var s = 1.70158;
-
-			return --k * k * ((s + 1) * k + s) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			var s = 1.70158 * 1.525;
-
-			if ((k *= 2) < 1) {
-				return 0.5 * (k * k * ((s + 1) * k - s));
-			}
-
-			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
-
-		}
-
-	},
-
-	Bounce: {
-
-		In: function (k) {
-
-			return 1 - TWEEN.Easing.Bounce.Out(1 - k);
-
-		},
-
-		Out: function (k) {
-
-			if (k < (1 / 2.75)) {
-				return 7.5625 * k * k;
-			} else if (k < (2 / 2.75)) {
-				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
-			} else if (k < (2.5 / 2.75)) {
-				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
-			} else {
-				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
-			}
-
-		},
-
-		InOut: function (k) {
-
-			if (k < 0.5) {
-				return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
-			}
-
-			return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
-
-		}
-
-	}
-
-};
-
-TWEEN.Interpolation = {
-
-	Linear: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.Linear;
-
-		if (k < 0) {
-			return fn(v[0], v[1], f);
-		}
-
-		if (k > 1) {
-			return fn(v[m], v[m - 1], m - f);
-		}
-
-		return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-
-	},
-
-	Bezier: function (v, k) {
-
-		var b = 0;
-		var n = v.length - 1;
-		var pw = Math.pow;
-		var bn = TWEEN.Interpolation.Utils.Bernstein;
-
-		for (var i = 0; i <= n; i++) {
-			b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-		}
-
-		return b;
-
-	},
-
-	CatmullRom: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.CatmullRom;
-
-		if (v[0] === v[m]) {
-
-			if (k < 0) {
-				i = Math.floor(f = m * (1 + k));
-			}
-
-			return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-
-		} else {
-
-			if (k < 0) {
-				return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-			}
-
-			if (k > 1) {
-				return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-			}
-
-			return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-
-		}
-
-	},
-
-	Utils: {
-
-		Linear: function (p0, p1, t) {
-
-			return (p1 - p0) * t + p0;
-
-		},
-
-		Bernstein: function (n, i) {
-
-			var fc = TWEEN.Interpolation.Utils.Factorial;
-
-			return fc(n) / fc(i) / fc(n - i);
-
-		},
-
-		Factorial: (function () {
-
-			var a = [1];
-
-			return function (n) {
-
-				var s = 1;
-
-				if (a[n]) {
-					return a[n];
-				}
-
-				for (var i = n; i > 1; i--) {
-					s *= i;
-				}
-
-				a[n] = s;
-				return s;
-
-			};
-
-		})(),
-
-		CatmullRom: function (p0, p1, p2, p3, t) {
-
-			var v0 = (p2 - p0) * 0.5;
-			var v1 = (p3 - p1) * 0.5;
-			var t2 = t * t;
-			var t3 = t * t2;
-
-			return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (- 3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-
-		}
-
-	}
-
-};
-
-// UMD (Universal Module Definition)
-(function (root) {
-
-	if (typeof undefined === 'function' && undefined.amd) {
-
-		// AMD
-		undefined([], function () {
-			return TWEEN;
-		});
-
-	} else {
-
-		// Node.js
-		module.exports = TWEEN;
-
-	}
-
-})(commonjsGlobal$$1);
+            // Node.js
+            module.exports = TWEEN;
+        }
+    })(commonjsGlobal$$1);
 });
 
 //import Tween from "./Tween"
@@ -2779,7 +2663,6 @@ function registTween(options) {
             tween.id = tid;
             tween.start();
 
-            
             animate();
         })();
     }
@@ -2813,11 +2696,14 @@ function Observe(scope) {
     var stopRepeatAssign = true;
 
     var pmodel = {},
-        //要返回的对象
+
+    //要返回的对象
     accessores = {},
-        //内部用于转换的对象
+
+    //内部用于转换的对象
     _Publics = ["$watch", "$model"],
-        //公共属性，不需要get set 化的
+
+    //公共属性，不需要get set 化的
     model = {}; //这是pmodel上的$model属性
 
     var Publics = _Publics;
@@ -2969,19 +2855,12 @@ var RENDERER_TYPE = {
     CANVAS: 2
 };
 
-
-
 var SHAPES = {
     POLY: 0,
     RECT: 1,
     CIRC: 2,
     ELIP: 3
 };
-
-
-
-
-
 
 //会影响到transform改变的context属性
 var TRANSFORM_PROPS = ["x", "y", "scaleX", "scaleY", "rotation", "scaleOrigin", "rotateOrigin"];
@@ -3876,7 +3755,6 @@ var Stage = function (_DisplayObjectContain) {
     function Stage(opt) {
         classCallCheck(this, Stage);
 
-
         opt.type = "stage";
 
         var _this = possibleConstructorReturn(this, (Stage.__proto__ || Object.getPrototypeOf(Stage)).call(this, opt));
@@ -4097,7 +3975,6 @@ var CanvasGraphicsRenderer = function () {
     * @param displayObject
     * @stage 也可以displayObject.getStage()获取。
     */
-
 
     createClass(CanvasGraphicsRenderer, [{
         key: 'render',
@@ -4578,17 +4455,17 @@ var Application = function (_DisplayObjectContain) {
  * 模拟as3 中 的sprite类，目前还只是个简单的容易。
  */
 var Sprite = function (_DisplayObjectContain) {
-  inherits(Sprite, _DisplayObjectContain);
+    inherits(Sprite, _DisplayObjectContain);
 
-  function Sprite(opt) {
-    classCallCheck(this, Sprite);
+    function Sprite(opt) {
+        classCallCheck(this, Sprite);
 
-    opt = Utils.checkOpt(opt);
-    opt.type = "sprite";
-    return possibleConstructorReturn(this, (Sprite.__proto__ || Object.getPrototypeOf(Sprite)).call(this, opt));
-  }
+        opt = Utils.checkOpt(opt);
+        opt.type = "sprite";
+        return possibleConstructorReturn(this, (Sprite.__proto__ || Object.getPrototypeOf(Sprite)).call(this, opt));
+    }
 
-  return Sprite;
+    return Sprite;
 }(DisplayObjectContainer);
 
 var GraphicsData = function () {
@@ -4675,101 +4552,101 @@ var _join = Array.prototype.join;
  * http://mozilla.org/MPL/2.0/
  */
 function arcToSegments(toX, toY, rx, ry, large, sweep, rotateX) {
-  var argsString = _join.call(arguments);
-  if (arcToSegmentsCache[argsString]) {
-    return arcToSegmentsCache[argsString];
-  }
+    var argsString = _join.call(arguments);
+    if (arcToSegmentsCache[argsString]) {
+        return arcToSegmentsCache[argsString];
+    }
 
-  var PI = Math.PI,
-      th = rotateX * PI / 180,
-      sinTh = Math.sin(th),
-      cosTh = Math.cos(th),
-      fromX = 0,
-      fromY = 0;
+    var PI = Math.PI,
+        th = rotateX * PI / 180,
+        sinTh = Math.sin(th),
+        cosTh = Math.cos(th),
+        fromX = 0,
+        fromY = 0;
 
-  rx = Math.abs(rx);
-  ry = Math.abs(ry);
+    rx = Math.abs(rx);
+    ry = Math.abs(ry);
 
-  var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
-      py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
-      rx2 = rx * rx,
-      ry2 = ry * ry,
-      py2 = py * py,
-      px2 = px * px,
-      pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
-      root = 0;
+    var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
+        py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
+        rx2 = rx * rx,
+        ry2 = ry * ry,
+        py2 = py * py,
+        px2 = px * px,
+        pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
+        root = 0;
 
-  if (pl < 0) {
-    var s = Math.sqrt(1 - pl / (rx2 * ry2));
-    rx *= s;
-    ry *= s;
-  } else {
-    root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
-  }
+    if (pl < 0) {
+        var s = Math.sqrt(1 - pl / (rx2 * ry2));
+        rx *= s;
+        ry *= s;
+    } else {
+        root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
+    }
 
-  var cx = root * rx * py / ry,
-      cy = -root * ry * px / rx,
-      cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
-      cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
-      mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
-      dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
+    var cx = root * rx * py / ry,
+        cy = -root * ry * px / rx,
+        cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
+        cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
+        mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
+        dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
 
-  if (sweep === 0 && dtheta > 0) {
-    dtheta -= 2 * PI;
-  } else if (sweep === 1 && dtheta < 0) {
-    dtheta += 2 * PI;
-  }
+    if (sweep === 0 && dtheta > 0) {
+        dtheta -= 2 * PI;
+    } else if (sweep === 1 && dtheta < 0) {
+        dtheta += 2 * PI;
+    }
 
-  // Convert into cubic bezier segments <= 90deg
-  var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
-      result = [],
-      mDelta = dtheta / segments,
-      mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
-      th3 = mTheta + mDelta;
+    // Convert into cubic bezier segments <= 90deg
+    var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
+        result = [],
+        mDelta = dtheta / segments,
+        mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
+        th3 = mTheta + mDelta;
 
-  for (var i = 0; i < segments; i++) {
-    result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
-    fromX = result[i][4];
-    fromY = result[i][5];
-    mTheta = th3;
-    th3 += mDelta;
-  }
-  arcToSegmentsCache[argsString] = result;
-  return result;
+    for (var i = 0; i < segments; i++) {
+        result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
+        fromX = result[i][4];
+        fromY = result[i][5];
+        mTheta = th3;
+        th3 += mDelta;
+    }
+    arcToSegmentsCache[argsString] = result;
+    return result;
 }
 
 function segmentToBezier(th2, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY) {
-  var argsString2 = _join.call(arguments);
-  if (segmentToBezierCache[argsString2]) {
+    var argsString2 = _join.call(arguments);
+    if (segmentToBezierCache[argsString2]) {
+        return segmentToBezierCache[argsString2];
+    }
+
+    var costh2 = Math.cos(th2),
+        sinth2 = Math.sin(th2),
+        costh3 = Math.cos(th3),
+        sinth3 = Math.sin(th3),
+        toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
+        toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
+        cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
+        cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
+        cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
+        cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
+
+    segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
     return segmentToBezierCache[argsString2];
-  }
-
-  var costh2 = Math.cos(th2),
-      sinth2 = Math.sin(th2),
-      costh3 = Math.cos(th3),
-      sinth3 = Math.sin(th3),
-      toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
-      toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
-      cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
-      cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
-      cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
-      cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
-
-  segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
-  return segmentToBezierCache[argsString2];
 }
 
 /*
  * Private
  */
 function calcVectorAngle(ux, uy, vx, vy) {
-  var ta = Math.atan2(uy, ux),
-      tb = Math.atan2(vy, vx);
-  if (tb >= ta) {
-    return tb - ta;
-  } else {
-    return 2 * Math.PI - (ta - tb);
-  }
+    var ta = Math.atan2(uy, ux),
+        tb = Math.atan2(vy, vx);
+    if (tb >= ta) {
+        return tb - ta;
+    } else {
+        return 2 * Math.PI - (ta - tb);
+    }
 }
 
 /**
@@ -4780,25 +4657,25 @@ function calcVectorAngle(ux, uy, vx, vy) {
  * @param {Array} coords
  */
 var drawArc = function drawArc(graphics, fx, fy, coords) {
-  var rx = coords[0],
-      ry = coords[1],
-      rot = coords[2],
-      large = coords[3],
-      sweep = coords[4],
-      tx = coords[5],
-      ty = coords[6],
-      segs = [[], [], [], []],
-      segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+    var rx = coords[0],
+        ry = coords[1],
+        rot = coords[2],
+        large = coords[3],
+        sweep = coords[4],
+        tx = coords[5],
+        ty = coords[6],
+        segs = [[], [], [], []],
+        segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
 
-  for (var i = 0, len = segsNorm.length; i < len; i++) {
-    segs[i][0] = segsNorm[i][0] + fx;
-    segs[i][1] = segsNorm[i][1] + fy;
-    segs[i][2] = segsNorm[i][2] + fx;
-    segs[i][3] = segsNorm[i][3] + fy;
-    segs[i][4] = segsNorm[i][4] + fx;
-    segs[i][5] = segsNorm[i][5] + fy;
-    graphics.bezierCurveTo.apply(graphics, segs[i]);
-  }
+    for (var i = 0, len = segsNorm.length; i < len; i++) {
+        segs[i][0] = segsNorm[i][0] + fx;
+        segs[i][1] = segsNorm[i][1] + fy;
+        segs[i][2] = segsNorm[i][2] + fx;
+        segs[i][3] = segsNorm[i][3] + fy;
+        segs[i][4] = segsNorm[i][4] + fx;
+        segs[i][5] = segsNorm[i][5] + fy;
+        graphics.bezierCurveTo.apply(graphics, segs[i]);
+    }
 };
 
 /**
@@ -4815,20 +4692,20 @@ var drawArc = function drawArc(graphics, fx, fy, coords) {
  */
 var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, tx, ty) {
 
-  var fromX = 0,
-      fromY = 0,
-      bound,
-      bounds = [],
-      segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+    var fromX = 0,
+        fromY = 0,
+        bound,
+        bounds = [],
+        segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
 
-  for (var i = 0, len = segs.length; i < len; i++) {
-    bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
-    bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
-    bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
-    fromX = segs[i][4];
-    fromY = segs[i][5];
-  }
-  return bounds;
+    for (var i = 0, len = segs.length; i < len; i++) {
+        bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
+        bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
+        bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
+        fromX = segs[i][4];
+        fromY = segs[i][5];
+    }
+    return bounds;
 };
 
 /**
@@ -4844,96 +4721,96 @@ var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, 
  */
 // taken from http://jsbin.com/ivomiq/56/edit  no credits available for that.
 function getBoundsOfCurve(x0, y0, x1, y1, x2, y2, x3, y3) {
-  var argsString = _join.call(arguments);
-  if (boundsOfCurveCache[argsString]) {
-    return boundsOfCurveCache[argsString];
-  }
-
-  var sqrt = Math.sqrt,
-      min = Math.min,
-      max = Math.max,
-      abs = Math.abs,
-      tvalues = [],
-      bounds = [[], []],
-      a,
-      b,
-      c,
-      t,
-      t1,
-      t2,
-      b2ac,
-      sqrtb2ac;
-
-  b = 6 * x0 - 12 * x1 + 6 * x2;
-  a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
-  c = 3 * x1 - 3 * x0;
-
-  for (var i = 0; i < 2; ++i) {
-    if (i > 0) {
-      b = 6 * y0 - 12 * y1 + 6 * y2;
-      a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
-      c = 3 * y1 - 3 * y0;
+    var argsString = _join.call(arguments);
+    if (boundsOfCurveCache[argsString]) {
+        return boundsOfCurveCache[argsString];
     }
 
-    if (abs(a) < 1e-12) {
-      if (abs(b) < 1e-12) {
-        continue;
-      }
-      t = -c / b;
-      if (0 < t && t < 1) {
-        tvalues.push(t);
-      }
-      continue;
-    }
-    b2ac = b * b - 4 * c * a;
-    if (b2ac < 0) {
-      continue;
-    }
-    sqrtb2ac = sqrt(b2ac);
-    t1 = (-b + sqrtb2ac) / (2 * a);
-    if (0 < t1 && t1 < 1) {
-      tvalues.push(t1);
-    }
-    t2 = (-b - sqrtb2ac) / (2 * a);
-    if (0 < t2 && t2 < 1) {
-      tvalues.push(t2);
-    }
-  }
+    var sqrt = Math.sqrt,
+        min = Math.min,
+        max = Math.max,
+        abs = Math.abs,
+        tvalues = [],
+        bounds = [[], []],
+        a,
+        b,
+        c,
+        t,
+        t1,
+        t2,
+        b2ac,
+        sqrtb2ac;
 
-  var x,
-      y,
-      j = tvalues.length,
-      jlen = j,
-      mt;
-  while (j--) {
-    t = tvalues[j];
-    mt = 1 - t;
-    x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
-    bounds[0][j] = x;
+    b = 6 * x0 - 12 * x1 + 6 * x2;
+    a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
+    c = 3 * x1 - 3 * x0;
 
-    y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
-    bounds[1][j] = y;
-  }
+    for (var i = 0; i < 2; ++i) {
+        if (i > 0) {
+            b = 6 * y0 - 12 * y1 + 6 * y2;
+            a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
+            c = 3 * y1 - 3 * y0;
+        }
 
-  bounds[0][jlen] = x0;
-  bounds[1][jlen] = y0;
-  bounds[0][jlen + 1] = x3;
-  bounds[1][jlen + 1] = y3;
-  var result = [{
-    x: min.apply(null, bounds[0]),
-    y: min.apply(null, bounds[1])
-  }, {
-    x: max.apply(null, bounds[0]),
-    y: max.apply(null, bounds[1])
-  }];
-  boundsOfCurveCache[argsString] = result;
-  return result;
+        if (abs(a) < 1e-12) {
+            if (abs(b) < 1e-12) {
+                continue;
+            }
+            t = -c / b;
+            if (0 < t && t < 1) {
+                tvalues.push(t);
+            }
+            continue;
+        }
+        b2ac = b * b - 4 * c * a;
+        if (b2ac < 0) {
+            continue;
+        }
+        sqrtb2ac = sqrt(b2ac);
+        t1 = (-b + sqrtb2ac) / (2 * a);
+        if (0 < t1 && t1 < 1) {
+            tvalues.push(t1);
+        }
+        t2 = (-b - sqrtb2ac) / (2 * a);
+        if (0 < t2 && t2 < 1) {
+            tvalues.push(t2);
+        }
+    }
+
+    var x,
+        y,
+        j = tvalues.length,
+        jlen = j,
+        mt;
+    while (j--) {
+        t = tvalues[j];
+        mt = 1 - t;
+        x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
+        bounds[0][j] = x;
+
+        y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+        bounds[1][j] = y;
+    }
+
+    bounds[0][jlen] = x0;
+    bounds[1][jlen] = y0;
+    bounds[0][jlen + 1] = x3;
+    bounds[1][jlen + 1] = y3;
+    var result = [{
+        x: min.apply(null, bounds[0]),
+        y: min.apply(null, bounds[1])
+    }, {
+        x: max.apply(null, bounds[0]),
+        y: max.apply(null, bounds[1])
+    }];
+    boundsOfCurveCache[argsString] = result;
+    return result;
 }
 
 var Arc = {
-  drawArc: drawArc,
-  getBoundsOfCurve: getBoundsOfCurve,
-  getBoundsOfArc: getBoundsOfArc
+    drawArc: drawArc,
+    getBoundsOfCurve: getBoundsOfCurve,
+    getBoundsOfArc: getBoundsOfArc
 };
 
 var Rectangle = function () {
@@ -6602,7 +6479,6 @@ var Path = function (_Shape) {
 
     function Path(opt) {
         classCallCheck(this, Path);
-
 
         var _context = _$2.extend({
             pointList: [], //从下面的path中计算得到的边界点的集合
@@ -11281,7 +11157,7 @@ var Descartes = function (_Chart) {
             h: 25,
             range: {
                 start: 0,
-                end: data.length - 1 - 1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
+                end: _this._data.length - 1 - 1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
             }
         };
 
@@ -12973,8 +12849,6 @@ var yAxis = function (_Component) {
             var tmpData = [];
             //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
             //this._yOriginTrans = this._getYOriginTrans( 0 );
-
-
             var originVal = _$17.min(this.dataSection);
             if (originVal < 0) {
                 originVal = 0;
@@ -16894,10 +16768,12 @@ var Line$6 = function (_Chart) {
         _this.coordinate.xAxis.layoutType = "rule";
 
         _$20.extend(true, _this, opts);
-        _this.dataFrame = _this.initData(data);
+
+        //这里不要直接用data，而要用 this._data
+        _this.dataFrame = _this.initData(_this._data);
 
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，暂时没有场景，先和bar保持一致
-        _this._init && _this._init(node, data, opts);
+        _this._init && _this._init(node, _this._data, _this._opts);
         _this.draw();
         return _this;
     }

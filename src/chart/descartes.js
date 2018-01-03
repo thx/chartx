@@ -87,7 +87,7 @@ export default class Descartes extends Chart
             h: 25,
             range: {
                 start: 0,
-                end: data.length - 1 -1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
+                end: this._data.length - 1 -1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
             }
         };
 

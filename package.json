@@ -1,44 +1,44 @@
 {
-    "name": "visky",
-    "title": "visky.js",
-    "description": "Data Visualization Chart Library",
-    "version": "0.0.1",
-    "homepage": "https://thx.github.io/chartx/",
-    "license": "MIT",
-    "keywords": [
-        "Visky",
-        "chart",
-        "canvas",
-        "webgl",
-        "2d",
-        "Data",
-        "Visualization"
-    ],
-    "author": {
-        "name": "nickli",
-        "email": "252759102@qq.com"
-    },
-    "repository": "git",
-    "main": "./dist/cjs/chartx.js",
-    "devDependencies": {
-        "babel-core": "^6.13.0",
-        "babel-preset-es2015-rollup": "^1.1.1",
-        "rollup": "^0.41.4",
-        "rollup-plugin-babel": "^2.6.1",
-        "rollup-plugin-commonjs": "^8.0.2",
-        "rollup-plugin-node-resolve": "^2.0.0",
-        "rollup-plugin-uglify": "^1.0.1",
-        "onchange": "^3.0.2"
-    },
-    "dependencies": {
-        "rollup-watch": "3.2.2",
-        "earcut": "^2.0.7",
-        "canvax2d": "file:../canvax",
-        "underscore": "1.8.3"
-    },
-    "scripts": {
-        "rollup": "node rollup.config.js",
-        "build": "npm run rollup",
-        "build:watch": "onchange 'src/**/**' -- npm run build"
-    }
+  "name": "chartx",
+  "title": "chartx.js",
+  "description": "Data Visualization Chart Library",
+  "version": "0.0.1",
+  "homepage": "https://thx.github.io/chartx/",
+  "license": "MIT",
+  "keywords": [
+    "chartx",
+    "chart",
+    "canvas",
+    "webgl",
+    "2d",
+    "Data",
+    "Visualization"
+  ],
+  "author": {
+    "name": "nickli",
+    "email": "252759102@qq.com"
+  },
+  "repository": "git",
+  "main": "./dist/cjs/chartx.js",
+  "devDependencies": {
+    "babel-core": "^6.13.0",
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "onchange": "^3.0.2",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-uglify": "^1.0.2"
+  },
+  "dependencies": {
+    "rollup-watch": "3.2.2",
+    "earcut": "^2.0.7",
+    "canvax2d": "file:../canvax",
+    "underscore": "1.8.3"
+  },
+  "scripts": {
+    "rollup": "node rollup.config.js",
+    "build": "npm run rollup",
+    "build:watch": "onchange 'src/**/**' -- npm run build"
+  }
 }

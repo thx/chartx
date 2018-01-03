@@ -80,7 +80,25 @@ var options = {
             start :1,
             end : 5
         }
-    }
+    },
+    markLine :  [{
+        markTo: 'uv',
+        text : {
+            enabled : true,
+            format : function( yVal ){
+                return 'UV 均值 ：' + parseInt( yVal )
+            },
+            fontSize : 14
+        }
+        //y : 30 //不设置y，就会自动设置为均线
+    },{
+        markTo: 'pv',
+        text : {
+            enabled : true,
+            fontSize : 14
+        },
+        y : 180
+    }]
 };
 
 window.bar = new Chartx.Bar("canvasTest" , data , options)

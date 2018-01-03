@@ -2,6 +2,7 @@ var rollup = require('rollup');
 var babel = require('rollup-plugin-babel');
 var commonjs = require('rollup-plugin-commonjs');
 var resolve = require('rollup-plugin-node-resolve');
+var uglify = require('rollup-plugin-uglify');
 
 rollup.rollup({
     entry: 'src/index.js',
@@ -11,6 +12,7 @@ rollup.rollup({
       }),
       resolve({ jsnext: true, main: true, browser: true }), 
       commonjs()
+      //uglify()
     ]
 }).then(function(bundle) {
 

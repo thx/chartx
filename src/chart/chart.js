@@ -8,11 +8,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
 {
     constructor( node, data, opts )
     {
-
         super( node, data, opts );
 
         this.Canvax = Canvax;
-
+     
         this._node = node;
         //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
         //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，

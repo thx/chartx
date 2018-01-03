@@ -293,8 +293,6 @@ export default class yAxis extends Component
         var tmpData = [];
         //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
         //this._yOriginTrans = this._getYOriginTrans( 0 );
-
-
         var originVal = _.min(this.dataSection);
         if( originVal < 0  ){
             originVal = 0;

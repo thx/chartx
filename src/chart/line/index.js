@@ -15,10 +15,12 @@ export default class Line extends Chart
         this.coordinate.xAxis.layoutType = "rule";
 
         _.extend(true, this, opts);
-        this.dataFrame = this.initData(data);
+
+        //这里不要直接用data，而要用 this._data
+        this.dataFrame = this.initData( this._data );
 
         //一些继承自该类的 constructor 会拥有_init来做一些覆盖，暂时没有场景，先和bar保持一致
-        this._init && this._init(node, data, opts);
+        this._init && this._init(node, this._data, this._opts);
         this.draw();
     }
 
@@ -77,8 +79,6 @@ export default class Line extends Chart
         this.bindEvent();
     }
 
-
-
     drawAnchor( _anchor )
     {
         var pos = {
@@ -87,5 +87,4 @@ export default class Line extends Chart
         };
         _anchor.aim( pos );
     }
-
 }
