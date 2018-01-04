@@ -411,7 +411,6 @@ export default class Descartes_Component extends Component
             //只留下enabled的field 结构
             return this._filterEnabledFields( fields );
         }
-
         var fmap = {
             left: [], right:[]
         };
@@ -541,6 +540,7 @@ export default class Descartes_Component extends Component
                 value : this._xAxis.dataOrg[ xNodeInd ],
                 ind : xNodeInd
             },
+            title : this._xAxis.layoutData[ xNodeInd ].layoutText,
             nodes : [
                 //遍历_graphs 去拿东西
             ]

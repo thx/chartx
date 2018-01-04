@@ -156,18 +156,13 @@ export default class yAxis extends Component
 
     _getLabel()
     {
-        var _label = "";
-        if(_.isArray(this.label)){
-            _label = this.label[ this.align == "left" ? 0 : 1 ];
-        } else {
-            _label = this.label;
-        };
+        var _label = this.label;
         
         if (_label && _label != "") {
             this._label = new Canvax.Display.Text(_label, {
                 context: {
                     fontSize: this.text.fontSize,
-                    textAlign: this.align,//"left",
+                    textAlign: this.align == "left" ? "right" : "left",//"left",
                     textBaseline: this.isH ? "top" : "bottom",
                     fillStyle: this.text.fillStyle,
                     rotation: this.isH ? -90 : 0
@@ -196,6 +191,12 @@ export default class yAxis extends Component
 
         this.setX(this.pos.x);
         this.setY(this.pos.y);
+
+        if (this._label) {
+            if(this.align == "left"){
+                this._label.context.x += this.width; 
+            }
+        }
 
         this.resize = false;
     }
@@ -299,7 +300,6 @@ export default class yAxis extends Component
         };
 
         //originVal = this.baseNumber;
-        
         this._yOriginTrans = this._getYOriginTrans( originVal );
 
 
@@ -425,7 +425,7 @@ export default class yAxis extends Component
             arr.push( this.waterLine )
         }
 
-        if( this.bottomNumber != null ){
+        if( this._opt.bottomNumber != null ){
             arr.push( this.bottomNumber )
         };
         if( arr.length == 1 ){

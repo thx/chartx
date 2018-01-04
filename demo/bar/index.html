@@ -53,10 +53,11 @@ var options = {
             field : "xfield"
         },
         yAxis : [{
-            title : "left"
+            
+            label : "left"
         },
         {
-            title : "right"
+            label : "right"
         }
         ]
     },
@@ -64,14 +65,15 @@ var options = {
     graphs : [
     
         {
-            field : [ [ "uv","pv" ] ],
-            yAxisAlign : "left"
-        }
-        
-        ,
-        {
             field : [ "click" ],
-            yAxisAlign : "right"
+            yAxisAlign : "left"
+        },
+        {
+            field : [ [ "uv","pv" ] ],
+            yAxisAlign : "right",
+            bar : {
+                fillStyle : ["red" , "blue"]
+            }
         }
         
     ],

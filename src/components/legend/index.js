@@ -13,7 +13,8 @@ export default class Legend extends Component
 
         /* data的数据结构为
         [
-        {field: "uv", style: "#ff8533", enabled: true} //外部只需要传field和fillStyle就行了 activate是内部状态
+            //descartes中用到的时候还会带入yAxis
+        {field: "uv", style: "#ff8533", enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
         this.data = data || [];

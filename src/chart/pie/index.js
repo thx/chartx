@@ -3,6 +3,7 @@ import Pie from "./pie"
 import Legend from "../../components/legend/index"
 import {parse2MatrixData} from "../../utils/tools"
 import Canvax from "canvax2d"
+import {colors as themeColors} from "../theme"
 
 const _ = Canvax._;
 
@@ -402,6 +403,8 @@ export default class extends Chart
         this._pie.draw(this);
         var me = this;                
         //如果有legend，调整下位置,和设置下颜色
+
+        /*
         if (this._legend && !this._legend.inited) {
             _.each(this.getList(), function (item, i) {
                 var ffill = item.color;
@@ -409,6 +412,7 @@ export default class extends Chart
             });
             this._legend.inited = true;
         };
+        */
     }
 
     _drawEnd()
@@ -487,7 +491,9 @@ export default class extends Chart
             data.push({
                 field: obj.name,
                 value: obj.y,
-                fillStyle: null
+                style: themeColors[i],
+                enabled : true,
+                ind : i
             });
         });
 

@@ -140,18 +140,17 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         }
     }
 
-    _getStyle(c, groups, vLen, i, h, v, value, field)
+    _getStyle(c, groups, vLen, i, h, v, value, field, _flattenField)
     {
         var fieldMap = this.root._coordinate.getFieldMapOf(field);
         var style = fieldMap.style;
 
         //field对应的索引，， 取颜色这里不要用i
-        var fieldInd = fieldMap.ind;
         if (_.isString(c)) {
             style = c
         };
         if (_.isArray(c)) {
-            style = _.flatten(c)[ fieldInd ];
+            style = _.flatten(c)[ _.indexOf( _flattenField, field ) ];
         };
         if (_.isFunction(c)) {
             style = c.apply(this, [{
@@ -237,6 +236,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         me.bar.count = 0;
 
+        var _flattenField = _.flatten( [ this.field ] );
+
         _.each(data, function(h_group, i) {
             /*
             //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
@@ -304,7 +305,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                     var rectData = h_group[v][h];
                     rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                    var fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field);
+                    var fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
 
                     rectData.fillStyle = fillStyle;
 

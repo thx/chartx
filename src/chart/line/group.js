@@ -12,30 +12,31 @@ const _ = Canvax._;
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
-    constructor( field, a, opt, ctx, sort, yAxis, h, w , style)
+    constructor( fieldMap, groupInd, opt, ctx, h, w )
     {
         //直接用第一个参数的field
         delete opt.field;
 
         super();
-        this.field = field; //_groupInd 在yAxis.field中对应的值
-        this._groupInd = a;
+
+        this._opt = opt;
+        this.fieldMap = fieldMap;
+        this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
+        this.groupInd = groupInd;
         
-        this._yAxis = yAxis;
-        this.sort = sort;
+        this._yAxis = fieldMap.yAxis;
+        
         this.ctx = ctx;
         this.w = w;
         this.h = h;
         this.y = 0;
-
-        this.style = style;
 
         this.animation = true;
         this.resize = false;
 
         this.line = { //线
             enabled: 1,
-            strokeStyle: this.style,
+            strokeStyle: fieldMap.style,
             lineWidth: 2,
             lineType: "solid",
             smooth: true
@@ -72,20 +73,12 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
-
-        //从配置里面转换后的一些私有属性
-        this.__lineStrokeStyle = null;
-
         this.init(opt)
     }
 
     init(opt)
     {
         _.extend(true, this, opt);
-
-        //如果opt中没有 node fill的设置，那么要把fill node 的style和line做同步
-        //!this.node.strokeStyle && (this.node.strokeStyle = this._getLineStrokeStyle());
-        //!this.fill.fillStyle && (this.fill.fillStyle = this._getLineStrokeStyle());
 
         this.sprite = new Canvax.Display.Sprite();
         var me = this;
@@ -132,11 +125,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     _getProp(s, nodeInd)
     {
         if (_.isArray(s)) {
-            return s[this._groupInd]
+            return s[this.groupInd]
         }
         if (_.isFunction(s)) {
             var obj = {
-                iGroup: this._groupInd,
+                iGroup: this.groupInd,
                 iNode: this.nodeInd,
                 field: this.field
             };
@@ -161,7 +154,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         obj.lineWidth = me._getProp(me.node.lineWidth, ind) || 2;
         obj.alpha = me._getProp(me.fill.alpha, ind);
         obj.field = me.field;
-        obj._groupInd = me._groupInd;
+        obj.groupInd = me.groupInd;
         return obj
     }
 
@@ -308,13 +301,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
 
         function _update( list ){
-            var _strokeStyle = me._getLineStrokeStyle();
             me._bline.context.pointList = _.clone( list );
-            me._bline.context.strokeStyle = _strokeStyle;
+            me._bline.context.strokeStyle = me._getLineStrokeStyle( list );
 
             me._fill.context.path = me._fillLine(me._bline);
-            me._fill.context.fillStyle = me._getFillStyle() || _strokeStyle;
-
+            me._fill.context.fillStyle = me._getFillStyle();
 
             var nodeInd=0;
             _.each( list, function( point, i ){
@@ -423,13 +414,13 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var bline = new BrokenLine({ //线条
             context: {
                 pointList: list,
-                //strokeStyle: me._getLineStrokeStyle(),
                 lineWidth: me.line.lineWidth,
                 y: me.y,
+                strokeStyle : me._getLineStrokeStyle( list ), //_getLineStrokeStyle 在配置线性渐变的情况下会需要
                 smooth: me.line.smooth,
                 lineType: me._getProp(me.line.lineType),
-                //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
                 smoothFilter: function(rp) {
+                    //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
                     if (rp[1] > 0) {
                         rp[1] = 0;
                     } else if( Math.abs(rp[1]) > me.h ) {
@@ -445,14 +436,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
         me.sprite.addChild(bline);
         me._bline = bline;
-        
-        var _strokeStyle = me._getLineStrokeStyle();
-        bline.context.strokeStyle = _strokeStyle;
 
         var fill = new Path({ //填充
             context: {
                 path: me._fillLine(bline),
-                fillStyle: me._getFillStyle() || _strokeStyle, 
+                fillStyle: me._getFillStyle(), 
                 globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha
             }
         });
@@ -486,20 +474,12 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return _firstNode;    
     }
 
-    _getFillStyle( )
+    _getFillStyle()
     {
-
         var me = this;
     
         var fill_gradient = null;
-        var _fillStyle = me.fill.fillStyle;
-
-        if( !_fillStyle ){
-            //如果没有配置的fillStyle，那么就取对应的line.strokeStyle
-            _fillStyle = me._getLineStrokeStyle("fillStyle")
-        }
-
-        _fillStyle && (_fillStyle = me._getColor(me.fill.fillStyle));
+        var _fillStyle = me._getColor(me.fill.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
 
         if (_.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
             //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -532,38 +512,50 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return _fillStyle;
     }
 
-    _getLineStrokeStyle( from )
+    _getLineStrokeStyle( pointList, from )
     {
         var me = this;
-        
-        if( this.line.strokeStyle.lineargradient ){
-            //如果填充是一个线性渐变
+        var _style
+        if( !this._opt.line || !this._opt.line.strokeStyle ){
+            //如果用户没有配置line.strokeStyle，那么就用默认的
+            return this.line.strokeStyle;
+        }
+
+        if( this._opt.line.strokeStyle.lineargradient ){
+            //如果用户配置 填充是一个线性渐变
             //从bline中找到最高的点
-            var topP = _.min(me._bline.context.pointList, function(p) {
+            !pointList && ( pointList = this._bline.context.pointList );
+            
+            var topP = _.min(pointList, function(p) {
                 return p[1]
             });
-            var bottomP = _.max(me._bline.context.pointList, function(p) {
+            var bottomP = _.max(pointList, function(p) {
                 return p[1]
             });
             if( from == "fillStyle" ){
                 bottomP = [ 0 , 0 ];
             };
+       
             //var bottomP = [ 0 , 0 ];
             //创建一个线性渐变
-            this.__lineStrokeStyle = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
-
-            if( !_.isArray( this.line.strokeStyle.lineargradient ) ){
-                this.line.strokeStyle.lineargradient = [this.line.strokeStyle.lineargradient];
-            };
-
-            _.each(this.line.strokeStyle.lineargradient , function( item , i ){
-                me.__lineStrokeStyle.addColorStop( item.position , item.color);
+            console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
+            _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+            _.each( this._opt.line.strokeStyle.lineargradient , function( item , i ){
+                _style.addColorStop( item.position , item.color);
             });
 
+            return _style;
+
         } else {
-            this.__lineStrokeStyle = this._getColor(this.line.strokeStyle);
+            //构造函数中执行的这个方法，还没有line属性
+            //if( this.line && this.line.strokeStyle ){
+            //    _style = this.line.strokeStyle
+            //} else {
+                _style = this._getColor( this._opt.line.strokeStyle );
+            //}
+            return _style;
         }
-        return this.__lineStrokeStyle;
+        
     }
 
     _setNodesStyle()
@@ -776,4 +768,5 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     }
 
 }
+
 

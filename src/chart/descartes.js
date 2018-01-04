@@ -282,11 +282,10 @@ export default class Descartes extends Chart
         var _legend = new Legend( me._getLegendData() , legendOpt );
        
         _legend.draw = function(){
-
             _legend.pos( { 
-                x : me._coordinate.graphsX 
+                x : me._coordinate.graphsX
+                //y : me.padding.top + ( e.resize ? - _legend.height : 0 )
             } );
-
         };
         
         _legend.pos( {

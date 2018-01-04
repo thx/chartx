@@ -15,14 +15,15 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         this.type = "line";
 
-
         this.width = 0;
         this.height = 0;
-
         this.pos = {
             x : 0,
             y : 0
-        }
+        };
+
+        //默认给左轴
+        this.yAxisAlign = "left";
 
         //这里所有的opt都要透传给 group
         this._opt = opt || {};
@@ -34,16 +35,12 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        this.field = null;
+        this.field = opt.field;
         this.enabledField = null;
         
-        this.groups = []; //群组集合     
-
-        this.iGroup = 0; //群组索引(哪条线)
-        this.iNode = -1; //节点索引(那个点)
+        this.groups = []; //群组集合
 
         this.sprite = null;
-        //this.induce = null;
 
         this.eventEnabled = true;
 
@@ -51,16 +48,22 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     }
 
 
+
+
     init(opt)
     {
         this._opt = opt;
-        _.extend(true, this, opt);
+        opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
+        //_.extend(true, this, opt);
         this.sprite = new Canvax.Display.Sprite();
     }
 
     draw(opt)
     {
-        _.extend(true, this, opt);
+        //_.extend(true, this, opt);
+        this.width = opt.width;
+        this.height = opt.height;
+        _.extend( true, this.pos, opt.pos );
 
         this.sprite.context.x = this.pos.x;
         this.sprite.context.y = this.pos.y;
@@ -101,32 +104,32 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     //_yAxis, dataFrame
     _trimGraphs()
     {
-        var self = this;
+        var me = this;
         var _coor = this.root._coordinate;
         
         //{"uv":{}.. ,"click": "pv":]}
         //这样按照字段摊平的一维结构
         var tmpData = {}; 
 
-        self.setEnabledField();
+        me.setEnabledField();
 
         var _yAxis = this.yAxisAlign == "right" ? _coor._yAxisRight : _coor._yAxisLeft;
 
-        _.each( _.flatten( self.enabledField ) , function( field, i ){
+        _.each( _.flatten( me.enabledField ) , function( field, i ){
             //var maxValue = 0;
 
             //单条line的全部data数据
-            var _lineData = self.root.dataFrame.getFieldData(field);
+            var _lineData = me.root.dataFrame.getFieldData(field);
             if( !_lineData ) return;
 
             var _data = [];
 
             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                var _xAxis = self.root._coordinate ? self.root._coordinate._xAxis : self.root._xAxis;
+                var _xAxis = me.root._coordinate ? me.root._coordinate._xAxis : me.root._xAxis;
                 var x = _xAxis.getPosX( {
                     ind : b,
                     dataLen : bl,
-                    layoutType : self.root._coordinate ? self.root._coordinate.xAxis.layoutType : self.root._xAxis.layoutType
+                    layoutType : me.root._coordinate ? me.root._coordinate.xAxis.layoutType : me.root._xAxis.layoutType
                 } );
                 
                 var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
@@ -174,10 +177,10 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
     add( field )
     {
-        var self = this;
+        var me = this;
         
         //这个field不再这个graphs里面的，不相关
-        if( _.indexOf( _.flatten( [self.field] ), field ) == -1 ){
+        if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
             return;
         }
 
@@ -185,7 +188,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this._setGroupsForYfield( this.data , field );
         
         _.each(this.groups, function(g, i) {
-            g.resetData( self.data[ g.field ].data );
+            g.resetData( me.data[ g.field ].data );
         });
     }
 
@@ -195,8 +198,8 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
     remove( field )
     {
         
-        var self = this;
-        var i = self.getGroupIndex( field );
+        var me = this;
+        var i = me.getGroupIndex( field );
 
         if( !this.groups.length || i < 0 ){
             return;
@@ -206,7 +209,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this.data = this._trimGraphs();
 
         _.each(this.groups, function(g, i) {
-            g.resetData( self.data[ g.field ].data );
+            g.resetData( me.data[ g.field ].data );
         });
     }
 
@@ -229,13 +232,15 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
     _setGroupsForYfield(data , fields)
     {
-        var self = this;
+        var me = this;
 
         if( fields ){
             //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
             //一般用在add()执行的时候
             fields = _.flatten( [fields] );
         }
+
+        var _flattenField = _.flatten( [ this.field ] );
 
         _.each( data , function( g, field ){
         
@@ -245,41 +250,40 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 return;
             }
 
-            var fieldMap = self.root._coordinate.getFieldMapOf( field );
-            var _groupInd = fieldMap.ind;
+            var fieldMap = me.root._coordinate.getFieldMapOf( field );
+            
+            //groupInd 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
+            var groupInd = _.indexOf( _flattenField, field );
 
             var group = new Group(
-                field,
-                _groupInd,
-                self._opt,
-                self.ctx,
-                g.yAxis.sort,
-                g.yAxis,
-                self.height,
-                self.width,
-                fieldMap.style
+                fieldMap,
+                groupInd, //不同于fieldMap.ind
+                me._opt,
+                me.ctx,
+                me.height,
+                me.width
             );
 
             group.draw({
-                resize : self.resize
+                resize : me.resize
             }, g.data );
 
             var insert = false;
             //在groups数组中插入到比自己_groupInd小的元素前面去
-            for( var gi=0,gl=self.groups.length ; gi<gl ; gi++ ){
-                if( _groupInd < self.groups[gi]._groupInd ){
+            for( var gi=0,gl=me.groups.length ; gi<gl ; gi++ ){
+                if( groupInd < me.groups[gi].groupInd ){
 
-                    self.groups.splice( gi , 0 , group );
+                    me.groups.splice( gi , 0 , group );
                     insert=true;
-                    self.sprite.addChildAt(group.sprite , gi);
+                    me.sprite.addChildAt(group.sprite , gi);
                     
                     break;
                 }
             };
             //否则就只需要直接push就好了
             if( !insert ){
-                self.groups.push(group);
-                self.sprite.addChild(group.sprite);
+                me.groups.push(group);
+                me.sprite.addChild(group.sprite);
             };
 
         } );
@@ -288,8 +292,8 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
     _widget(opt)
     {
-        var self = this;
-        self.resize = false;
+        var me = this;
+        me.resize = false;
     }
 
     getNodesAt( ind )
@@ -300,80 +304,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             node && _nodesInfoList.push( node );
         } );
         return _nodesInfoList;
-    }
-
-    //废除
-    _getInfoHandler(e)
-    {
-        
-        var x = e.point.x,
-            y = e.point.y - this.height;
-        //todo:底层加判断
-        x = x > this.width ? this.width : x;
-
-        var _disX = this._getGraphsDisX();
-
-        var tmpINode = _disX == 0 ? 0 : parseInt((x + (_disX / 2)) / _disX);
-
-        var _nodesInfoList = []; //节点信息集合
-
-        for (var a = 0, al = this.groups.length; a < al; a++) {
-            var o = this.groups[a].getNodeInfoAt(tmpINode);
-            o && _nodesInfoList.push(o);
-        };
-
-        var tmpIGroup = getDisMinATArr(y, _.pluck(_nodesInfoList, "y"));
-
-        this.iGroup = tmpIGroup, this.iNode = tmpINode;
-        //iGroup 第几条线   iNode 第几个点   都从0开始
-        var node = {
-            iGroup: this.iGroup,
-            iNode: this.iNode,
-            nodesInfoList: _.clone(_nodesInfoList)
-        };
-        return node;
-    }
-
-    //每两个点之间的距离
-    _getGraphsDisX()
-    {
-        var dsl = this.dataFrame.org.length - 1;
-        var n = this.width / (dsl - 1);
-        if (dsl == 1) {
-            n = 0
-        }
-        return n
-    }
-
-    getNodesInfoOfx( x )
-    {
-        var _nodesInfoList = []; //节点信息集合
-        for (var a = 0, al = this.groups.length; a < al; a++) {
-            var o = this.groups[a].getNodeInfoOfX(x);
-            o && _nodesInfoList.push(o);
-        };
-        var node = {
-            iGroup: -1,
-            iNode: -1,
-            nodesInfoList: _.clone(_nodesInfoList)
-        };
-        return node;
-    }
-
-    createMarkColumn( x , opt )
-    {
-        var ml = new markColumn( opt );
-        this.sprite.addChild( ml.sprite );
-
-        ml.h = this.induce.context.height;
-        ml.y = -ml.h;
-        var e = {
-            eventInfo :  this.getNodesInfoOfx(x)
-        }
-        ml.show( e , {x : x} );
-        ml.data = e.eventInfo;
-
-        return ml;
     }
 
 }

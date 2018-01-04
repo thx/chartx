@@ -38,21 +38,21 @@ var data= [
     ["xfield","uv" ,"pv","click"],
     [ 1      , null , undefined , null    ],
     [ 2      , 0   , "" , ""    ],
-    [ 3      , 23   , 145 , undefined    ],
+    [ 3      , 23   , 15 , undefined    ],
     [ 4      , 232  , 135 , 123    ],
     [ 5      , 0  , 173 , 71    ],
     [ 6      , 0  , 154 , 39    ],
     [ 7      , 0  , 168 , null    ],
     [ 8      , 66   ,183 , 51    ],
     [ 3      , 32   , 145 , 243    ],
-    [ 4      , 58  , 135 , 231    ],
-    [ 5      , 79  , 173 , 71    ],
-    [ 6      , 188  , 154 , 39    ],
+    [ 4      , 58  , 85 , 231    ],
+    [ 5      , 79  , 53 , 71    ],
+    [ 6      , 188  , 104 , 39    ],
     [ 7      , 55  , 168 , 65    ],
     [ 8      , undefined   ,183 , 51    ]
 ];
 
-var data = [
+var dataJSON = [
     { xfield : 1, uv: null, pv: undefined, click: null },
     { xfield : 2, uv: 0, pv: "", click: ""},
     { xfield : 3, uv: 23, pv: 145, click : undefined },
@@ -78,17 +78,49 @@ var options = {
         //},
         xAxis : {
             field : ["xfield"]
-        }
+        },
+        yAxis : [{
+            label : "left"
+        },
+        {
+            label : "right"
+        }]
     },
     graphs : [
-        { field : ["uv","pv"] },
-        { field : "click" , yAxisAlign:"right" }
+    
+        { 
+            field : "uv" , 
+            yAxisAlign:"left" ,
+            line : {
+                strokeStyle : "#eeccdd"
+            },
+            fill : {
+                alpha : [ 0.5 , 0 ]
+            }
+        },
+        
+        {   
+            field : ["pv"] , 
+            yAxisAlign:"right",
+            line : {
+                lineType : "dashed",
+                strokeStyle : {
+                    lineargradient : [
+                        {position : 0    , color:"#ff7033"},
+                        {position : 0.05 , color:"#ff9933"},
+                        {position : 0.15 , color:"#2dafe3"},
+                        {position : 0.85 , color:"#449be3"},
+                        {position : 0.95 , color:"#7177e3"},
+                        {position : 1.0  , color:"#5744e3"}
+                    ]
+                }
+            } 
+        }
     ],
-    graphs: { field : ["uv","pv"] },
     legend : {
         enabled : 1
     },
-    dataZoom: {
+    dataZoom1: {
         range : {
             //start : 0,
             //end : 10
