@@ -37,14 +37,40 @@ export default class Chart extends Canvax.Event.EventDispatcher
 		    el : this.el,
 		    webGL : false
 		});
-		this.canvax.registEvent();
+        this.canvax.registEvent();
+        
+        //设置stage ---------------------------------------------------------begin
 		this.stage = new Canvax.Display.Stage({
-		    id: "main-chart-stage" + new Date().getTime()
+		    id: "main-chart-stage"
 		});
-		this.canvax.addChild( this.stage );
+        this.canvax.addChild( this.stage );
+        //所有的tips放在一个单独的tips中
+		this.stageTips = new Canvax.Display.Stage({
+		    id: "main-chart-stage-tips"
+		});
+        this.canvax.addChild( this.stageTips );
+        //设置stage ---------------------------------------------------------end
 
-        //组件管理机制
+
+
+        //坐标系存放的容器
+        this.coordinateSprite = new Canvax.Display.Sprite({
+            id: 'graphsSprite'
+        });
+        this.stage.addChild( this.coordinateSprite );
+        //graphs管理
+        this.graphsSprite = new Canvax.Display.Sprite({
+            id: 'graphsSprite'
+        });
+        this.stage.addChild( this.graphsSprite );
+        this._graphs = [];
+        //组件管理机制,所有的组件都绘制在这个地方
+    
         this.components = [];
+      
+
+
+
 
         this.inited = false;
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
@@ -64,7 +90,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
     }
 
-   
     draw()
     {
     }

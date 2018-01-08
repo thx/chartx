@@ -49,30 +49,34 @@ var data= [
 ];
 var options = {
     coordinate : {
+        horizontal : true,
         xAxis : {
             field : "xfield"
         },
-        yAxis : [{
-            
-            label : "left"
-        },
-        {
-            label : "right"
-        }
+        yAxis : [
+            {
+                label : "left"
+            },
+            {
+                label : "right"
+            }
         ]
     },
     legend : {},
     graphs : [
     
         {
-            field : [ "click" ],
-            yAxisAlign : "left"
+            field : "click",
+            yAxisAlign : "left",
+            text : {
+                enabled : true
+            }
         },
         {
             field : [ [ "uv","pv" ] ],
             yAxisAlign : "right",
             bar : {
-                fillStyle : ["red" , "blue"]
+                //fillStyle : ["red" , "blue"]
             }
         }
         

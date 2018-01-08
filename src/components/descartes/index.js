@@ -35,62 +35,62 @@ export default class Descartes_Component extends Component
         this.xAxis = {
             field : this.dataFrame.fields[0]
         };
-        this.yAxis = {
+        this.yAxis = [{
             field : this.dataFrame.fields.slice(1)
-        };
+        }];
         this.grid = {
-
         };
 
-        this.induce = null;
+        _.extend(true, this, opt);
 
         if( opt.horizontal ){
-            this.xAxis.text = {    
-                rotation: 90
-            }
-            this.yAxis.text = {
-                rotation: 90
-            }
-        }
+            _.extend( true, this.xAxis, {
+                text : {
+                    rotation: 90
+                },
+                isH : true
+            } );
+            _.each( this.yAxis , function( yAxis ){
+                _.extend( true, yAxis, {
+                    text : {
+                        rotation: 90
+                    },
+                    isH : true
+                } );
+            });
+        };
 
         if( "display" in opt ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             this.xAxis.display = opt.display;
-            this.yAxis.display = opt.display;
-            this.grid.enabled = opt.display;
+            _.each( this.yAxis , function( yAxis ){
+                yAxis.display = opt.display;
+            });
+            this.grid.display = opt.display;
         };
 
-        //吧原始的field转换为对应结构的显示树
-        //["uv"] --> [
-        //    {field:'uv',enabled:true ,yAxis: yAxisleft }
-        //    ...
-        //]
-        this.fieldsMap = null; //this._opts.yAxis.field || this._opts.yAxis.bar.field );
+        /*
+        吧原始的field转换为对应结构的显示树
+        ["uv"] --> [
+            {field:'uv',enabled:true ,yAxis: yAxisleft }
+            ...
+        ]
+        */
+        this.fieldsMap = null;
+        this.induce = null;
         this.init(opt);
     }
 
     init(opt)
     {
-        var me = this;
-        
-        _.extend(true, this, opt);
-
-        me.sprite = new Canvax.Display.Sprite({
+        this.sprite = new Canvax.Display.Sprite({
             id : "coordinate"
         });
-        me._initModules();
-
+        this._initModules();
         //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
         // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
         this.fieldsMap = this._setFieldsMap();
-
-        //回写xAxis和yAxis到opt上面。如果用户没有传入任何xAxis 和yAxis的话，
-        //这回写很有必要
-        opt.xAxis = this.xAxis;
-        opt.yAxis = this.yAxis;
-
     }
-
 
     resetData( dataFrame , dataTrigger )
     {
@@ -112,7 +112,6 @@ export default class Descartes_Component extends Component
                 data: this._yAxisLeft.layoutData
             }
         });
-
     }
 
     draw( opt )
@@ -253,14 +252,13 @@ export default class Descartes_Component extends Component
      */
     _horizontal( ) 
     {
-        
         var me = this;
         var w = me._root.width;
         var h = me._root.height;
 
         _.each([me.sprite.context], function(ctx) {
             ctx.x += ((w - h) / 2);
-            ctx.y += ((h - w) / 2) + me._root.padding.top;
+            ctx.y += ((h - w) / 2);
             ctx.rotation = 90;
             ctx.rotateOrigin.x = h / 2;
             ctx.rotateOrigin.y = w / 2;
@@ -540,7 +538,7 @@ export default class Descartes_Component extends Component
                 value : this._xAxis.dataOrg[ xNodeInd ],
                 ind : xNodeInd
             },
-            title : this._xAxis.layoutData[ xNodeInd ].layoutText,
+            title : xNodeInd >=0 ? this._xAxis.layoutData[ xNodeInd ].layoutText : "",
             nodes : [
                 //遍历_graphs 去拿东西
             ]

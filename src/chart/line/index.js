@@ -29,55 +29,19 @@ export default class Line extends Chart
         var me = this
         //首先是创建一个坐标系对象
         this._coordinate = new Coordinate( this.coordinate, this );
-        this.core.addChild( this._coordinate.sprite );
+        this.coordinateSprite.addChild( this._coordinate.sprite );
 
         _.each( this.graphs , function( graphs ){
             var _g = new Graphs( graphs, me );
             me._graphs.push( _g );
             me.graphsSprite.addChild( _g.sprite );
         } );
-        this.core.addChild(this.graphsSprite);
 
         this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
-        
-        this.stageTip.addChild(this._tips.sprite);
+        this.stageTips.addChild(this._tips.sprite);
     }
 
-    _startDraw(opt)
-    {
-        var me = this;
-        !opt && (opt ={});
-
-        var _coor = this._coordinate;
-
-        //先绘制好坐标系统
-        _coor.draw( opt );
-
-        var graphsCount = this._graphs.length;
-        var completeNum = 0;
-        _.each( this._graphs, function( _g ){
-            _g.on( "complete", function(g) {
-                completeNum ++;
-                if( completeNum == graphsCount ){
-                    me.fire("complete");
-                }
-            });
-            
-            _g.draw({
-                width: _coor.graphsWidth,
-                height: _coor.graphsHeight,
-                pos: {
-                    x: _coor.graphsX,
-                    y: _coor.graphsY
-                },
-                sort: _coor._yAxis.sort,
-                inited: me.inited,
-                resize: opt.resize
-            });
-        } );
-
-        this.bindEvent();
-    }
+    
 
     drawAnchor( _anchor )
     {

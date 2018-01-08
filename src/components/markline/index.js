@@ -123,14 +123,9 @@ export default class MarkLine extends Component
             this._txt = txt
             me.core.addChild(txt)
 
-            if(_.isNumber(me.text.x)){
-                txt.context.x = me.text.x, txt.context.y = me.text.y
-            }else{
-                txt.context.x = this.w - txt.getTextWidth() 
-                txt.context.y = y - txt.getTextHeight()
-            }
-        }
+            me._setTxtPos( y );
 
+        }
     
         this.line.y = y;
 
@@ -152,7 +147,8 @@ export default class MarkLine extends Component
                 onUpdate: function( obj ){
                     if( me.text.enabled ){
                         me._txt.resetText( me._getLabel() );
-                        me._txt.context.y = obj.y - me._txt.getTextHeight();
+                        me._setTxtPos( obj.y )
+                        //me._txt.context.y = obj.y - me._txt.getTextHeight();
                     }
                 }
                 //easing: 'Back.Out' //Tween.Easing.Elastic.InOut
@@ -163,5 +159,21 @@ export default class MarkLine extends Component
         this.line.y = y;
 
         me.filter( me );
+    }
+
+    _setTxtPos( y )
+    {
+        var me = this;
+        var txt = me._txt;
+        if(_.isNumber(me.text.x)){
+            txt.context.x = me.text.x
+        } else {
+            txt.context.x = this.w - txt.getTextWidth() - 5; 
+        }
+        if(_.isNumber(me.text.y)){
+            txt.context.y = me.text.y
+        } else {
+            txt.context.y = y - txt.getTextHeight() 
+        }
     }
 }

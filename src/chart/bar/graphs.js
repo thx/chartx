@@ -477,9 +477,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                             infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
                         } else {
                             infosp._finalY = rectData.y - infoHeight;
-                            infosp.upOfYbaseNumber = true;
                         }
-                        //if( rectData.value )
+                       
 
                         infosp._centerX = rectData.x+me.bar._width/2;
                         infosp.context.width = infoWidth;
@@ -803,7 +802,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                                 easing: options.easing,
                                 delay: h * options.delay,
                                 onUpdate: function() {
-                                    this.context.visible = true;
+                                    this.context && (this.context.visible = true);
                                 },
                                 onComplete: function() {}
                             });

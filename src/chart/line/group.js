@@ -113,11 +113,16 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     }
 
     //styleType , normals , groupInd
-    _getColor(s)
+    _getColor(s, nodeInd)
     {
-        var color = this._getProp(s);
+        var color = this._getProp(s, nodeInd);
         if (!color || color == "") {
-            color = this.style;
+            //这个时候可以先取线的style，和线保持一致
+            color = this._getLineStrokeStyle();
+            if( !color || color == "" || !_.isString( color ) ){
+                //那么最后，取this.fieldMap.style
+                color = this.fieldMap.style;
+            }
         };
         return color;
     }
@@ -125,19 +130,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     _getProp(s, nodeInd)
     {
         if (_.isArray(s)) {
-            return s[this.groupInd]
+            return s[ this.groupInd ]
         }
         if (_.isFunction(s)) {
-            var obj = {
-                iGroup: this.groupInd,
-                iNode: this.nodeInd,
-                field: this.field
-            };
-            if( nodeInd >= 0 ){
-                obj.value = this.data[ nodeInd ].value;
-            };
-
-            return s.apply( this , [obj] );
+            return s.apply( this , [ me.getNodeInfoAt( nodeInd ) ] );
         }
         return s
     }
@@ -319,9 +315,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     }
                     if( me._texts ){
                         var _text = me._texts.getChildAt(nodeInd);
-                        _text.context.x = point[0];
-                        _text.context.y = point[1] - 3;
-                        me._checkTextPos( _text , i );
+                        if( _text ){
+                            _text.context.x = point[0];
+                            _text.context.y = point[1] - 3;
+                            me._checkTextPos( _text , i );
+                        }
                     }
                     nodeInd++;
                 }
@@ -367,11 +365,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return obj;
     }
 
-    _isNotNum(val)
-    {
-        return val === undefined || isNaN(val) || val === null || val === ""
-    }
-
     _getPointList(data)
     {
         var list = [];
@@ -397,7 +390,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
         var list = [];
         if (me.animation && !me.resize) {
-            var firstY = this._getFirstNode().y;
+            var firstNode = this._getFirstNode();
+            var firstY = firstNode ? firstNode.y : undefined;
             for (var a = 0, al = me.data.length; a < al; a++) {
                 var o = me.data[a];
                 list.push([
@@ -479,7 +473,9 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var me = this;
     
         var fill_gradient = null;
-        var _fillStyle = me._getColor(me.fill.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
+
+        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+        var _fillStyle = me._getProp(me.fill.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
 
         if (_.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
             //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -496,6 +492,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             var topP = _.min(me._bline.context.pointList, function(p) {
                 return p[1]
             });
+
+            if( topP[0] === undefined || topP[1] === undefined ){
+                return null
+            };
+
             //创建一个线性渐变
             fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
@@ -535,10 +536,14 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             if( from == "fillStyle" ){
                 bottomP = [ 0 , 0 ];
             };
+
+            if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
+                return null;
+            }
        
             //var bottomP = [ 0 , 0 ];
             //创建一个线性渐变
-            console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
+            //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
             _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
             _.each( this._opt.line.strokeStyle.lineargradient , function( item , i ){
                 _style.addColorStop( item.position , item.color);
@@ -558,28 +563,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         
     }
 
-    _setNodesStyle()
-    {
-        var me = this;
-        var list = me._currPointList;
-        if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
-            for (var a = 0, al = list.length; a < al; a++) {
-                
-                var nodeEl = me._circles.getChildAt( a );
-
-                if( !nodeEl ){
-                    //折线图中这个节点可能没有
-                    continue;
-                }
-
-                var strokeStyle = me._getProp(me.node.strokeStyle, a) || me._getLineStrokeStyle(); 
-                nodeEl.context.fillStyle = list.length == 1 ? strokeStyle : me._getProp(me.node.fillStyle, a) || "#ffffff";
-                nodeEl.context.strokeStyle = strokeStyle;
-
-            
-            }
-        }
-    }
 
     _createNodes()
     {
@@ -605,6 +588,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     y: _point[1],
                     r: me._getProp(me.node.r, a),
                     lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+                    strokeStyle: me._getColor( me.node.strokeStyle, a ),
                     fillStyle: me.node.fillStyle
                 };
 
@@ -642,7 +626,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 }
             };
         };
-        this._setNodesStyle();
+      
     }
 
     _createTexts()
@@ -665,8 +649,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     continue;
                 };
             
-                var fontFillStyle = me._getProp(me.text.fillStyle, a) || me._getProp(me.node.strokeStyle, a) || me._getLineStrokeStyle();
-                
+                var fontFillStyle = me._getColor( me.text.fillStyle, a );
+
                 var context = {
                     x: _point[0],
                     y: _point[1] - 3,
@@ -682,6 +666,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 if (_.isFunction(me.text.format)) {
                     content = (me.text.format.apply( me , [content , a]) || content );
                 };
+
+                if( content == undefined || content == null ){
+                    continue;
+                }
 
                 var text = this._texts.children[ nodeInd ];
                 if( text ){
@@ -706,7 +694,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 }
             };            
         };
-        this._setNodesStyle();
+        
     }
 
     _checkTextPos( text , ind )

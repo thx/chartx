@@ -115,9 +115,7 @@ export default class xAxis extends Component
         };        
 
         if (this.text.rotation != 0 ) {
-            if(this.text.rotation % 90 == 0){
-                this.isH = true;
-            };
+            //如果是旋转的文本，那么以右边为旋转中心点
             this.text.textAlign = "right";
         };
 
@@ -186,6 +184,9 @@ export default class xAxis extends Component
         }
         if( this.layoutType == "rule" ){
             iNode = parseInt((x + (this.ceilWidth / 2)) / this.ceilWidth);
+        }
+        if( iNode >= this.dataOrg.length ){
+            iNode = this.dataOrg.length - 1;
         }
         return iNode
     }
@@ -281,17 +282,31 @@ export default class xAxis extends Component
         
     }
 
+    _computerCeilWidth(){
+        //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
+        var width = this.width;
+        if( this.dataOrg.length == 0 ){
+            this.ceilWidth = width;
+        } else {
+            this.ceilWidth = width / this.dataOrg.length;
+            if( this.layoutType == "rule" ){
+                if( this.dataOrg.length == 1 ){
+                    this.ceilWidth = width / 2;
+                } else {
+                    this.ceilWidth = width / ( this.dataOrg.length - 1 )
+                }
+            }
+        }
+        return this.ceilWidth;
+    }
+
     _trimXAxis($data) 
     {
         var tmpData = [];
         var data = $data || this.dataSection;
-        var width = this.width;
+        
 
-        //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
-        this.ceilWidth = width / this.dataOrg.length;
-        if( this.layoutType == "rule" ){
-            this.ceilWidth = width / ( this.dataOrg.length - 1 )
-        }
+        this.ceilWidth = this._computerCeilWidth();
 
         for (var a = 0, al  = data.length; a < al; a++ ) {
             var layoutText = this._getFormatText( data[a] )
@@ -308,7 +323,7 @@ export default class xAxis extends Component
                     val : data[a],
                     ind : a,
                     dataLen: al,
-                    width : width
+                    width : this.width
                 }),
                 textWidth: txt.getTextWidth(),
                 field : this.field

@@ -21,20 +21,20 @@ export default class Grid extends Component
             y : 0
         }
 
-        this.enabled = 1;
+        this.display = 1;
 
         this.xOrigin = {                                //原点开始的x轴线
-            enabled     : 1,
+            display     : 1,
             lineWidth   : 1,
             strokeStyle : '#ccc'
         }
         this.yOrigin = {                                //原点开始的y轴线               
-            enabled     : 1,
+            display     : 1,
             lineWidth   : 1,
             strokeStyle : '#ccc'
         }
         this.xAxis   = {                                //x轴上的线
-            enabled     : 1,
+            display     : 1,
             data        : [],                      //[{y:100},{}]
             org         : null,                    //x轴坐标原点，默认为上面的data[0]
             // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
@@ -44,7 +44,7 @@ export default class Grid extends Component
             filter      : null 
         }
         this.yAxis = {                                //y轴上的线
-            enabled     : 0,
+            display     : 0,
             data        : [],                      //[{x:100},{}]
             xDis        : 0,
             org         : null,                    //y轴坐标原点，默认为上面的data[0]
@@ -109,7 +109,7 @@ export default class Grid extends Component
     {
         
         var self  = this;
-        if(!this.enabled){
+        if(!this.display){
             return
         };
 
@@ -154,7 +154,7 @@ export default class Grid extends Component
                     strokeStyle : self.xAxis.strokeStyle  
                 }
             });
-            if(self.xAxis.enabled){
+            if(self.xAxis.display){
                 _.isFunction( self.xAxis.filter ) && self.xAxis.filter.apply( line , [{
                     layoutData : self.yAxis.data,
                     index      : a,
@@ -206,7 +206,7 @@ export default class Grid extends Component
                     visible     : o.x ? true : false
                 }
             })
-            if(self.yAxis.enabled){
+            if(self.yAxis.display){
                 _.isFunction( self.yAxis.filter ) && self.yAxis.filter.apply(line , [{
                     layoutData : self.xAxis.data,
                     index      : a,
@@ -236,7 +236,7 @@ export default class Grid extends Component
                 strokeStyle : self.yOrigin.strokeStyle
             }
         })
-        if(self.yOrigin.enabled)
+        if(self.yOrigin.display)
             self.sprite.addChild(line)
 
         if( this.root._yAxisRight ){
@@ -254,7 +254,7 @@ export default class Grid extends Component
                     strokeStyle : self.yOrigin.strokeStyle
                 }
             })
-            if(self.yOrigin.enabled)
+            if(self.yOrigin.display)
                 self.sprite.addChild(lineR)
 
         }
@@ -273,7 +273,7 @@ export default class Grid extends Component
                 strokeStyle : self.xOrigin.strokeStyle
             }
         })
-        if(self.xOrigin.enabled)
+        if(self.xOrigin.display)
             self.sprite.addChild(line)
 
 

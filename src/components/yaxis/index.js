@@ -94,10 +94,6 @@ export default class yAxis extends Component
             this.field = [this.field];
         };
 
-        if (this.text.rotation != 0 && this.text.rotation % 90 == 0) {
-            this.isH = true;
-        };
-
         this._initData();
 
         this.sprite = new Canvax.Display.Sprite({
@@ -228,8 +224,11 @@ export default class yAxis extends Component
                     var maxGroupDisABS = Math.max( Math.abs( max-_baseNumber ) , Math.abs( _baseNumber-min ) );
                     var amountABS = Math.abs( max - min );
                     var h = (maxGroupDisABS/amountABS) * yGroupHeight;
-                
                     y = (val - _baseNumber) / maxGroupDisABS * h + i*yGroupHeight;
+                    
+                    if( isNaN(y) ){
+                        y = i*yGroupHeight;
+                    }
                 }
                 if( this.layoutType == "rule" ){
                     //line 的xaxis就是 rule
@@ -302,7 +301,6 @@ export default class yAxis extends Component
         //originVal = this.baseNumber;
         this._yOriginTrans = this._getYOriginTrans( originVal );
 
-
         //设置 basePoint
         this.basePoint = {
             content: this.baseNumber,
@@ -314,10 +312,8 @@ export default class yAxis extends Component
                 content: this.dataSection[a],
                 y: this.getYposFromVal( this.dataSection[a] )
             };
-
         };
         this.layoutData = tmpData;
-        
     }
 
     _getYAxisDisLine() 
@@ -688,6 +684,9 @@ export default class yAxis extends Component
 
                 //文字
                 var txtX = self.align == "left" ? lineX - self.text.marginToLine : lineX + self.line.width + self.text.marginToLine;
+                if( this.isH ){
+                    txtX = txtX + (self.align == "left"?-1:1)* 4
+                };
                 var txt = new Canvax.Display.Text(content, {
                     id: "yAxis_txt_" + self.align + "_" + a,
                     context: {
