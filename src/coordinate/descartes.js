@@ -1,34 +1,37 @@
-import Chart from "./chart"
+import Chart from "../chart"
 import Canvax from "canvax2d"
 import {parse2MatrixData} from "../utils/tools"
 import DataFrame from "../utils/dataframe"
-
-import lineGraphs from "./line/graphs"
-import barGraphs from "./bar/graphs"
-import scatGraphs from "./scat/graphs"
-
 import Coordinate from "../components/descartes/index"
+
+/*
 import Legend from "../components/legend/index"
 import DataZoom from "../components/datazoom/index"
 import MarkLine from "../components/markline/index"
 import MarkPoint from "../components/markpoint/index"
 import Anchor from "../components/anchor/index"
 import Tips from "../components/tips/index"
+*/
 
 const _ = Canvax._;
 
 export default class Descartes extends Chart
 {
-    constructor( node, data, opts ){
+    constructor( node, data, opts, graphsMap, componentsMap ){
 
         super( node, data, opts );
+
+        this.graphsMap = graphsMap;
+        this.componentsMap = componentsMap;
+
+        var me = this;
 
         //坐标系统
         this._coordinate = null;
         this.coordinate = {
             xAxis : {
                 //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
-                layoutType    : "peak",  
+                layoutType    : "rule", //"peak",  
                 //默认为false，x轴的计量是否需要取整， 这样 比如某些情况下得柱状图的柱子间隔才均匀。
                 //比如一像素间隔的柱状图，如果需要精确的绘制出来每个柱子的间距是1px， 就必须要把这里设置为true
                 posParseToInt : false    
@@ -53,6 +56,10 @@ export default class Descartes extends Chart
 
             //有graphs的就要用找到这个graphs.field来设置coordinate.yAxis
             _.each( opts.graphs, function( graphs ){
+                if( graphs.type == "bar" ){
+                    //如果graphs里面有柱状图，那么就整个xAxis都强制使用 peak 的layoutType
+                    me.coordinate.xAxis.layoutType = "peak";
+                }
                 if( graphs.field ){
                     //没有配置field的话就不绘制这个 graphs了
                     var align = "left"; //默认left
@@ -96,16 +103,21 @@ export default class Descartes extends Chart
             }
         };
 
+        _.extend(true, this, opts);
+
+        //这里不要直接用data，而要用 this._data
+        this.dataFrame = this.initData( this._data );
+
+        this._draw();
     }
 
-    draw( opt )
+    _draw()
     {
-        !opt && (opt ={});
    
-        this._initModule( opt ); //初始化模块  
-        this.initComponents( opt ); //初始化组件
-        this._startDraw( opt ); //开始绘图
-        this.drawComponents( opt );  //绘图完，开始绘制插件
+        this._initModule(); //初始化模块  
+        this.initComponents(); //初始化组件
+        this._startDraw(); //开始绘图
+        this.drawComponents();  //绘图完，开始绘制插件
 
         if( this._coordinate.horizontal ){
             this._horizontal();
@@ -122,12 +134,12 @@ export default class Descartes extends Chart
         this.coordinateSprite.addChild( this._coordinate.sprite );
 
         _.each( this.graphs , function( graphs ){
-            var _g = new Graphs( graphs, me );
+            var _g = new me.graphsMap[ graphs.type ]( graphs, me );
             me._graphs.push( _g );
             me.graphsSprite.addChild( _g.sprite );
         } );
 
-        this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
+        this._tips = new me.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
         this.stageTips.addChild(this._tips.sprite);
     }
 
@@ -319,7 +331,7 @@ export default class Descartes extends Chart
             }
         } , me._opts.legend);
         
-        var _legend = new Legend( me._getLegendData() , legendOpt );
+        var _legend = new me.componentsMap.legend( me._getLegendData() , legendOpt );
        
         _legend.draw = function(){
             _legend.pos( { 
@@ -431,7 +443,7 @@ export default class Descartes extends Chart
             graphs : graphsOpt
         };
 
-        var thumbChart = new chartConstructor(cloneEl, me._data, opts);
+        var thumbChart = new chartConstructor(cloneEl, me._data, opts, me.graphsMap, me.componentsMap);
 
         return {
             thumbChart: thumbChart,
@@ -450,7 +462,7 @@ export default class Descartes extends Chart
             type : "once",
             plug : {
                 draw: function(){
-                    me._dataZoom = new DataZoom( me._getDataZoomOpt() , me.__cloneChart );
+                    me._dataZoom = new me.componentsMap.dataZoom( me._getDataZoomOpt() , me.__cloneChart );
                     me.components.push( {
                         type : "dataZoom",
                         plug : me._dataZoom
@@ -595,7 +607,7 @@ export default class Descartes extends Chart
             o.line.strokeStyle = lineStrokeStyle;
         }
 
-        var _markLine = new MarkLine( _.extend( true, ML, o) , _yAxis );
+        var _markLine = new me.componentsMap.markLine( _.extend( true, ML, o) , _yAxis );
         me.components.push( {
             type : "markLine",
             plug : _markLine
@@ -614,7 +626,7 @@ export default class Descartes extends Chart
     creatOneMarkPoint( opts, mpCtx )
     {
         var me = this;
-        var _mp = new MarkPoint( opts, mpCtx );
+        var _mp = new me.componentsMap.markPoint( opts, mpCtx );
         _mp.shape.hover(function(e) {
             this.context.hr++;
             this.context.cursor = "pointer";
@@ -653,7 +665,7 @@ export default class Descartes extends Chart
             plug : {
                 draw: function(){
 
-                    var _anchor = new Anchor( me.anchor );
+                    var _anchor = new me.componentsMap.anchor( me.anchor );
                     me.graphsSprite.addChild(_anchor.sprite);
                     
                     var _graphsH = me._coordinate.graphsHeight;

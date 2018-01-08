@@ -1,6 +1,6 @@
 import Canvax from "canvax2d"
-import { getEl,parse2MatrixData } from "../utils/tools"
-import DataFrame from "../utils/dataframe"
+import { getEl,parse2MatrixData } from "./utils/tools"
+import DataFrame from "./utils/dataframe"
 
 const _ = Canvax._;
 

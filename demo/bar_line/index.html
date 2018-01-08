@@ -32,36 +32,78 @@
         <td id="td-vl">
             <form><textarea id="code" name="code">
 
-                var data= [
-                ["xfield","uv"  ,"pv","click", "ctr"],
-                [ 1      , -101 , 20 , 33    , 23 ],
-                [ 2      , -31  , 30 , 53    , 31 ],
-                [ 3      , -52  , 25 , 13    , 53 ],
-                [ 4      , -234 , 100, 133   , 23 ],
-                [ 5      , -11  , -89 , 55   , 111],
-                [ 6      , -89  , -52 , 88   , 123],
-                [ 7      , -19  , -29 , 36   , 84 ],
-                [ 8      , -101 , -20 , 77   , 58 ],
-                [ 9      , -67  , 51 , 26    , 59 ]
-            
-            ];
-            var options = {
-                coordinate: {
-                    yAxis : [
-                        {
-                            field : [ ["uv","ctr"] ]
-                        },
-                        {
-                            field : ["click","pv"]
-                        }
-                    ],
-                    xAxis : {
-                        field : ["xfield"]
-                    }
-                }
-            }   
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv" ,"click"],
+    [ 1      , 101 , 20  , 33    ],
+    [ 2      , 67  , 51  , 26    ],
+    [ 3      , 130 , 50  , 50    ],
+    [ 1      , 101 , 60  , 33    ],
+    [ 2      , 67  , 91  , 126    ],
+    [ 3      , 30  , 50 , 90    ],
+    [ 1      , 51  , 120 , 33    ],
+    [ 2      , 67  , 51  , 86    ],
+    [ 3      , 120 , 90  , 150    ]
 
-            window.chart = new Chartx.Bar_Line("canvasTest" , data , options)
+];
+var options = {
+    coordinate : {
+        type : "descartes",
+        //horizontal : true,
+        xAxis : {
+            field : "xfield"
+        },
+        yAxis : [
+            {
+                label : "left"
+            },
+            {
+                label : "right"
+            }
+        ]
+    },
+    legend : {},
+    graphs : [
+        {
+            type : "bar",
+            field : "click",
+            yAxisAlign : "left"
+        },
+        {
+            type : "line",
+            field : [ [ "uv","pv" ] ],
+            yAxisAlign : "right"
+        }
+        
+    ],
+    dataZoom: {
+        range : {
+            start :1,
+            end : 5
+        }
+    },
+    markLine :  [{
+        markTo: 'uv',
+        text : {
+            enabled : true,
+            format : function( yVal ){
+                return 'UV 均值 ：' + parseInt( yVal )
+            },
+            fontSize : 14
+        }
+        //y : 30 //不设置y，就会自动设置为均线
+    },{
+        markTo: 'pv',
+        text : {
+            enabled : true,
+            fontSize : 14
+        },
+        y : 180
+    }]
+};
+
+window.bar = Chartx.create("canvasTest" , data , options)
 
             </textarea></form>
         </td>

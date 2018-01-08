@@ -471,9 +471,9 @@ export default class yAxis extends Component
     setWaterLine( yVal )
     {
         if( yVal <= this.waterLine) return;
-        
+        this.waterLine = yVal;
         if( yVal < _.min(this.dataSection) || yVal > _.max(this.dataSection) ){
-            this.waterLine = yVal;
+            //waterLine不再当前section的区间内，需要重新计算整个datasection    
             this._initData();
         };
     }
@@ -607,8 +607,7 @@ export default class yAxis extends Component
             if( content === undefined || content === null ){
                 content = Tools.numAddSymbol( o.content );
             };  
-
-        
+            
             var textAlign = (self.align == "left" ? "right" : "left");
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);

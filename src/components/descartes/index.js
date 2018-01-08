@@ -3,7 +3,7 @@ import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
 import Grid from "../grid/index"
-import {colors as themeColors} from "../../chart/theme"
+import {colors as themeColors} from "../../theme"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;

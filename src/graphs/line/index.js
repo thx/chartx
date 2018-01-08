@@ -1,8 +1,6 @@
 import Canvax from "canvax2d"
 import Group from "./group"
-import markColumn from "./markcolumn"
 import {getDisMinATArr} from "../../utils/tools"
-import {colors as themeColors} from "../theme"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;

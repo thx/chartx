@@ -1,5 +1,5 @@
 import Canvax from "canvax2d"
-import {colors as themeColors} from "../theme"
+import {colors as themeColors} from "../../theme"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;

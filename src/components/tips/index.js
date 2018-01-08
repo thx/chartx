@@ -38,11 +38,6 @@ export default class Tips extends Component
         //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
         //会deepExtend到this.indo上面来
         this.eventInfo    = null; 
-        //{
-            //nodes : [],//[{value: , fillStyle : ...} ...]符合iNode的所有Group上面的node的集合
-            //iGroup        : 0, //数据组的索引对应二维数据map的x
-            //iNode         : 0  //数据点的索引对应二维数据map的y
-        //};
 
         this.track = true;//是否开启跟踪鼠标模式
         
