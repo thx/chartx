@@ -487,7 +487,7 @@ export default class extends Chart
     {
         var me = this;
         var data = [];                
-        _.each(this.dataFrame.data, function (obj, i) {
+        this.dataFrame && _.each(this.dataFrame.data, function (obj, i) {
             data.push({
                 field: obj.name,
                 value: obj.y,

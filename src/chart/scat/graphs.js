@@ -15,9 +15,16 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.opt = opt || {};
         this.root = root;
         this.ctx = root.stage.context2D;
-        this.dataFrame = this.opt.dataFrame || root.dataFrame; //root.dataFrame的引用
+        
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
+
+        this.width = 0;
+        this.height = 0;
+        this.pos = {
+            x: 0,
+            y: 0
+        };
 
         this.node = {
             shapeType   : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
@@ -28,7 +35,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             fillStyle : null,
             strokeStyle : null,
             lineWidth : 0,
-            alpha : 0.8
+            alpha : 0.9
         };
         this.label = {
             field : null,
@@ -39,8 +46,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         this.animation = true;
 
-        this.xField = _.flatten( [ root.coordinate.xAxis.field ] )[0];
-        this.yField = _.flatten( [ root.coordinate.yAxis.field ] )[0];
+        this.field = null;
+
         this.groupField = null; //如果有多个分组的数据，按照这个字段分组，比如男女
 
         this.colors  = themeColors;
@@ -76,8 +83,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         
         this._widget();
 
-        this.sprite.context.x = this.x;
-        this.sprite.context.y = this.y;
+        this.sprite.context.x = this.pos.x;
+        this.sprite.context.y = this.pos.y;
 
         if( this.animation ){
             this.grow();
@@ -86,18 +93,25 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         return this;
     }
 
+    getNodesAt()
+    {
+        return []
+    }
+
     _trimGraphs()
     {
         var tmplData = [];
 
-        var dataLen  = this.dataFrame.org.length - 1; //减去title fields行
+        var dataLen  = this.root.dataFrame.org.length - 1; //减去title fields行
+        var xField = this.root._coordinate._xAxis.field;
+
         for( var i=0; i<dataLen; i++ ){
             
-            var rowData = this.dataFrame.getRowData(i);
-            var xValue = rowData[ this.xField ];
-            var yValue = rowData[ this.yField ];
+            var rowData = this.root.dataFrame.getRowData(i);
+            var xValue = rowData[ xField ];
+            var yValue = rowData[ this.field ];
             var xPos = this.root._coordinate._xAxis.getPosX({ val : xValue });
-            var yPos = this.root._coordinate._yAxisLeft.getYposFromVal( yValue );
+            var yPos = this.root._coordinate._getYaxisOfField( this.field ).getYposFromVal( yValue );
             var group = this.getGroup( rowData );
             var groupInd = this.getGroupInd( rowData );
 
@@ -112,8 +126,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                     x: xValue,
                     y: yValue
                 },
-                xField : this.xField,
-                yField : this.yField,
+                field : this.field,
                 groupName : rowData[ this.groupField ] || "",
 
                 //下面的属性都单独设置
@@ -150,7 +163,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             if( _.isString( this.node.r ) && rowData[ this.node.r ] ){
                 //如果配置了某个字段作为r，那么就要自动计算比例
                 if( !this._rData && !this._rMaxValue && !this._rMinValue ){
-                    this._rData = this.dataFrame.getFieldData( this.node.r );
+                    this._rData = this.root.dataFrame.getFieldData( this.node.r );
                     this._rMaxValue = _.max( this._rData );
                     this._rMinValue = _.min( this._rData );
                 };

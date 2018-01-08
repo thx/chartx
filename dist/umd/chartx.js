@@ -10100,7 +10100,7 @@ var _class = function (_Chart) {
         value: function _getLegendData() {
             var me = this;
             var data = [];
-            _.each(this.dataFrame.data, function (obj, i) {
+            this.dataFrame && _.each(this.dataFrame.data, function (obj, i) {
                 data.push({
                     field: obj.name,
                     value: obj.y,
@@ -10116,9 +10116,5100 @@ var _class = function (_Chart) {
     return _class;
 }(Chart);
 
+//十六进制颜色值的正则表达式 
+var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+
+/*16进制颜色转为RGB格式*/
+var colorRgb = function colorRgb(hex) {
+    var sColor = hex.toLowerCase();
+    if (sColor && reg.test(sColor)) {
+        if (sColor.length === 4) {
+            var sColorNew = "#";
+            for (var i = 1; i < 4; i += 1) {
+                sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+            }
+            sColor = sColorNew;
+        }
+        //处理六位的颜色值  
+        var sColorChange = [];
+        for (var i = 1; i < 7; i += 2) {
+            sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+        }
+        return "RGB(" + sColorChange.join(",") + ")";
+    } else {
+        return sColor;
+    }
+};
+
+var colorRgba = function colorRgba(hex, a) {
+    return colorRgb(hex).replace(')', ',' + a + ')').replace('RGB', 'RGBA');
+};
+
+/*RGB颜色转换为16进制*/
+var colorHex = function colorHex(rgb) {
+    var that = rgb;
+    if (/^(rgb|RGB)/.test(that)) {
+        var aColor = that.replace(/(?:||rgb|RGB)*/g, "").split(",");
+        var strHex = "#";
+        for (var i = 0; i < aColor.length; i++) {
+            var hex = Number(aColor[i]).toString(16);
+            if (hex === "0") {
+                hex += hex;
+            }
+            strHex += hex;
+        }
+        if (strHex.length !== 7) {
+            strHex = that;
+        }
+        return strHex;
+    } else if (reg.test(that)) {
+        var aNum = that.replace(/#/, "").split("");
+        if (aNum.length === 6) {
+            return that;
+        } else if (aNum.length === 3) {
+            var numHex = "#";
+            for (var i = 0; i < aNum.length; i += 1) {
+                numHex += aNum[i] + aNum[i];
+            }
+            return numHex;
+        }
+    } else {
+        return that;
+    }
+};
+
+/**增加颜色的明亮度
+ *hex: #ff00ff
+ *lum: 0.1 颜色#ff00ff明亮度增加0.1,-0.2明亮度减少0.2
+ */
+var colorLuminance = function colorLuminance(hex, lum) {
+    // Validate hex string
+    hex = String(hex).replace(/[^0-9a-f]/gi, "");
+    if (hex.length < 6) {
+        hex = hex.replace(/(.)/g, '$1$1');
+    }
+    lum = lum || 0;
+    // Convert to decimal and change luminosity
+    var rgb = "#",
+        c;
+    for (var i = 0; i < 3; ++i) {
+        c = parseInt(hex.substr(i * 2, 2), 16);
+        c = Math.round(Math.min(Math.max(0, c + c * lum), 255)).toString(16);
+        rgb += ("00" + c).substr(c.length);
+    }
+    return rgb;
+};
+/**
+ * HSL颜色值转换为RGB.
+ * 换算公式改编自 http://en.wikipedia.org/wiki/HSL_color_space.
+ * h, s, 和 l 设定在 [0, 1] 之间
+ * 返回的 r, g, 和 b 在 [0, 255]之间
+ *
+ * @param   Number  h       色相
+ * @param   Number  s       饱和度
+ * @param   Number  l       亮度
+ * @return  Array           RGB色值数值
+ */
+var hslToRgb = function hslToRgb(h, s, l) {
+    var r, g, b;
+
+    if (s == 0) {
+        r = g = b = l; // achromatic
+    } else {
+        var hue2rgb = function hue2rgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        };
+
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+};
+
+/**
+ * RGB 颜色值转换为 HSL.
+ * 转换公式参考自 http://en.wikipedia.org/wiki/HSL_color_space.
+ * r, g, 和 b 需要在 [0, 255] 范围内
+ * 返回的 h, s, 和 l 在 [0, 1] 之间
+ *
+ * @param   Number  r       红色色值
+ * @param   Number  g       绿色色值
+ * @param   Number  b       蓝色色值
+ * @return  Array           HSL各值数组
+ */
+var rgbToHsl = function rgbToHsl(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    var max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+    var h,
+        s,
+        l = (max + min) / 2;
+
+    if (max == min) {
+        h = s = 0; // achromatic
+    } else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);break;
+            case g:
+                h = (b - r) / d + 2;break;
+            case b:
+                h = (r - g) / d + 4;break;
+        }
+        h /= 6;
+    }
+
+    return [h, s, l];
+};
+
+var ColorFormat = {
+    colorRgb: colorRgb,
+    colorRgba: colorRgba,
+    colorHex: colorHex,
+    colorBrightness: colorLuminance,
+    hslToRgb: hslToRgb,
+    rgbToHsl: rgbToHsl
+};
+
+var AnimationFrame$2 = canvax.AnimationFrame;
+var BrokenLine$2 = canvax.Shapes.BrokenLine;
+var Circle$2$1 = canvax.Shapes.Circle;
+var Path$1 = canvax.Shapes.Path;
+
+var _$11 = canvax._;
+
+var LineGraphsGroup = function (_Canvax$Event$EventDi) {
+    inherits$1(LineGraphsGroup, _Canvax$Event$EventDi);
+
+    function LineGraphsGroup(fieldMap, groupInd, opt, ctx, h, w) {
+        classCallCheck$1(this, LineGraphsGroup);
+
+        //直接用第一个参数的field
+        delete opt.field;
+
+        var _this = possibleConstructorReturn$1(this, (LineGraphsGroup.__proto__ || Object.getPrototypeOf(LineGraphsGroup)).call(this));
+
+        _this._opt = opt;
+        _this.fieldMap = fieldMap;
+        _this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
+        _this.groupInd = groupInd;
+
+        _this._yAxis = fieldMap.yAxis;
+
+        _this.ctx = ctx;
+        _this.w = w;
+        _this.h = h;
+        _this.y = 0;
+
+        _this.animation = true;
+        _this.resize = false;
+
+        _this.line = { //线
+            enabled: 1,
+            strokeStyle: fieldMap.style,
+            lineWidth: 2,
+            lineType: "solid",
+            smooth: true
+        };
+
+        _this.node = { //节点 
+            enabled: 1, //是否有
+            corner: false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
+            r: 3, //半径 node 圆点的半径
+            fillStyle: '#ffffff',
+            strokeStyle: null,
+            lineWidth: 2
+        };
+
+        _this.text = {
+            enabled: 0,
+            fillStyle: null,
+            strokeStyle: null,
+            fontSize: 13,
+            format: null
+
+        };
+
+        _this.fill = { //填充
+            enabled: 1,
+            fillStyle: null,
+            alpha: 0.3
+        };
+
+        _this.data = [];
+        _this.sprite = null;
+
+        _this._pointList = []; //brokenline最终的状态
+        _this._currPointList = []; //brokenline 动画中的当前状态
+        _this._bline = null;
+
+        _this.init(opt);
+        return _this;
+    }
+
+    createClass$1(LineGraphsGroup, [{
+        key: "init",
+        value: function init(opt) {
+            _$11.extend(true, this, opt);
+
+            this.sprite = new canvax.Display.Sprite();
+            var me = this;
+            this.sprite.on("destroy", function () {
+                if (me._growTween) {
+                    AnimationFrame$2.destroyTween(me._growTween);
+                }
+            });
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt, data) {
+            _$11.extend(true, this, opt);
+            this.data = data;
+            this._widget();
+        }
+
+        //自我销毁
+
+    }, {
+        key: "destroy",
+        value: function destroy() {
+            var me = this;
+            me.sprite.animate({
+                globalAlpha: 0
+            }, {
+                duration: 300,
+                onComplete: function onComplete() {
+                    me.sprite.remove();
+                }
+            });
+        }
+
+        //styleType , normals , groupInd
+
+    }, {
+        key: "_getColor",
+        value: function _getColor(s, nodeInd) {
+            var color = this._getProp(s, nodeInd);
+            if (!color || color == "") {
+                //这个时候可以先取线的style，和线保持一致
+                color = this._getLineStrokeStyle();
+                if (!color || color == "" || !_$11.isString(color)) {
+                    //那么最后，取this.fieldMap.style
+                    color = this.fieldMap.style;
+                }
+            }
+            return color;
+        }
+    }, {
+        key: "_getProp",
+        value: function _getProp(s, nodeInd) {
+            if (_$11.isArray(s)) {
+                return s[this.groupInd];
+            }
+            if (_$11.isFunction(s)) {
+                return s.apply(this, [me.getNodeInfoAt(nodeInd)]);
+            }
+            return s;
+        }
+    }, {
+        key: "_createNodeInfo",
+        value: function _createNodeInfo(ind) {
+            var me = this;
+            var obj = {};
+            obj.type = "line";
+            obj.r = me._getProp(me.node.r, ind);
+            obj.fillStyle = me._getProp(me.node.fillStyle, ind) || "#ffffff";
+            obj.strokeStyle = me._getProp(me.node.strokeStyle, ind) || me._getLineStrokeStyle();
+            obj.color = obj.strokeStyle;
+            obj.lineWidth = me._getProp(me.node.lineWidth, ind) || 2;
+            obj.alpha = me._getProp(me.fill.alpha, ind);
+            obj.field = me.field;
+            obj.groupInd = me.groupInd;
+            return obj;
+        }
+
+        //这个是tips需要用到的 
+
+    }, {
+        key: "getNodeInfoAt",
+        value: function getNodeInfoAt($index) {
+            var o = this.data[$index];
+
+            if (o && o.value != null && o.value != undefined && o.value !== "") {
+                return _$11.extend(o, this._createNodeInfo($index));
+            } else {
+                return null;
+            }
+        }
+
+        //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
+
+    }, {
+        key: "getNodeInfoOfX",
+        value: function getNodeInfoOfX(x) {
+            var me = this;
+            var nodeInfo;
+            for (var i = 0, l = this.data.length; i < l; i++) {
+                if (Math.abs(this.data[i].x - x) <= 1) {
+                    //左右相差不到1px的，都算
+                    nodeInfo = this.getNodeInfoAt(i);
+                    return nodeInfo;
+                }
+            }
+
+            var getPointFromXInLine = function getPointFromXInLine(x, line) {
+                var p = { x: x, y: 0 };
+                p.y = line[0][1] + (line[1][1] - line[0][1]) / (line[1][0] - line[0][0]) * (x - line[0][0]);
+                return p;
+            };
+
+            var point;
+            var search = function search(points) {
+
+                if (x < points[0][0] || x > points.slice(-1)[0][0]) {
+                    return;
+                }
+
+                var midInd = parseInt(points.length / 2);
+                if (Math.abs(points[midInd][0] - x) <= 1) {
+                    point = {
+                        x: points[midInd][0],
+                        y: points[midInd][1]
+                    };
+                    return;
+                }
+                var _pl = [];
+                if (x > points[midInd][0]) {
+                    if (x < points[midInd + 1][0]) {
+                        point = getPointFromXInLine(x, [points[midInd], points[midInd + 1]]);
+                        return;
+                    } else {
+                        _pl = points.slice(midInd + 1);
+                    }
+                } else {
+                    if (x > points[midInd - 1][0]) {
+                        point = getPointFromXInLine(x, [points[midInd - 1], points[midInd]]);
+                        return;
+                    } else {
+                        _pl = points.slice(0, midInd);
+                    }
+                }
+                search(_pl);
+            };
+
+            search(this._bline.context.pointList);
+
+            if (!point) {
+                return null;
+            }
+
+            point.value = me._yAxis.getValFromYpos(point.y); //null;
+
+            //TODO:这里要优化下，这个x值可能刚好对应上了某个具体的index，，，而现在强制为-1是不对的
+            return _$11.extend(point, me._createNodeInfo(-1));
+        }
+
+        /**
+         * 
+         * @param {object} opt 
+         * @param {data} data 
+         * 
+         * 触发这次reset的触发原因比如{name : 'datazoom', left:-1,right:1},  
+         * dataTrigger 描述了数据变化的原因和变化的过程，比如上面的数据 left少了一个数据，right多了一个数据
+         * @param {object} dataTrigger 
+         */
+
+    }, {
+        key: "resetData",
+        value: function resetData(data, dataTrigger) {
+            var me = this;
+
+            if (data) {
+                this.data = data;
+            }
+
+            me._pointList = this._getPointList(this.data);
+            var plen = me._pointList.length;
+            var cplen = me._currPointList.length;
+
+            if (!dataTrigger) {
+                dataTrigger = {
+                    name: 'normal',
+                    left: 0, //默认左边数据没变
+                    right: plen - cplen
+                };
+            }
+
+            if (dataTrigger.left) {
+                if (dataTrigger.left > 0) {
+                    this._currPointList = this._pointList.slice(0, dataTrigger.left).concat(this._currPointList);
+                }
+                if (dataTrigger.left < 0) {
+                    this._currPointList.splice(0, Math.abs(dataTrigger.left));
+                }
+            }
+
+            if (dataTrigger.right) {
+                if (dataTrigger.right > 0) {
+                    this._currPointList = this._currPointList.concat(this._pointList.slice(-dataTrigger.right));
+                }
+                if (dataTrigger.right < 0) {
+                    this._currPointList.splice(this._currPointList.length - Math.abs(dataTrigger.right));
+                }
+            }
+
+            me._createNodes();
+            me._createTexts();
+            me._grow();
+        }
+    }, {
+        key: "_grow",
+        value: function _grow(callback) {
+            var me = this;
+            if (!me.animation || me.resize || me._currPointList.length == 0) {
+                //TODO: 在禁止了animation的时候， 如果用户监听了complete事件，必须要加setTimeout，才能触发
+                setTimeout(function () {
+                    callback && callback(me);
+                }, 10);
+                return;
+            }
+
+            function _update(list) {
+                me._bline.context.pointList = _$11.clone(list);
+                me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
+
+                me._fill.context.path = me._fillLine(me._bline);
+                me._fill.context.fillStyle = me._getFillStyle();
+
+                var nodeInd = 0;
+                _$11.each(list, function (point, i) {
+                    if (_$11.isNumber(point[1])) {
+                        if (me._circles) {
+                            var _circle = me._circles.getChildAt(nodeInd);
+                            if (_circle) {
+                                _circle.context.x = point[0];
+                                _circle.context.y = point[1];
+                            }
+                        }
+                        if (me._texts) {
+                            var _text = me._texts.getChildAt(nodeInd);
+                            if (_text) {
+                                _text.context.x = point[0];
+                                _text.context.y = point[1] - 3;
+                                me._checkTextPos(_text, i);
+                            }
+                        }
+                        nodeInd++;
+                    }
+                });
+            }
+
+            this._growTween = AnimationFrame$2.registTween({
+                from: me._getPointPosStr(me._currPointList),
+                to: me._getPointPosStr(me._pointList),
+                desc: me.field + ' animation',
+                onUpdate: function onUpdate(arg) {
+                    for (var p in arg) {
+                        var ind = parseInt(p.split("_")[2]);
+                        var xory = parseInt(p.split("_")[1]);
+                        me._currPointList[ind] && (me._currPointList[ind][xory] = arg[p]); //p_1_n中间的1代表x or y
+                    }
+                    _update(me._currPointList);
+                },
+                onComplete: function onComplete() {
+                    me._growTween = null;
+                    //在动画结束后强制把目标状态绘制一次。
+                    //解决在onUpdate中可能出现的异常会导致绘制有问题。
+                    //这样的话，至少最后的结果会是对的。
+                    _update(me._pointList);
+                    callback && callback(me);
+                }
+            });
+        }
+    }, {
+        key: "_getPointPosStr",
+        value: function _getPointPosStr(list) {
+            var obj = {};
+            _$11.each(list, function (p, i) {
+                if (!p) {
+                    //折线图中这个节点可能没有
+                    return;
+                }
+
+                obj["p_1_" + i] = p[1]; //p_y==p_1
+                obj["p_0_" + i] = p[0]; //p_x==p_0
+            });
+            return obj;
+        }
+    }, {
+        key: "_getPointList",
+        value: function _getPointList(data) {
+            var list = [];
+            for (var a = 0, al = data.length; a < al; a++) {
+                var o = data[a];
+                list.push([o.x, o.y]);
+            }
+            return list;
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            var me = this;
+
+            me._pointList = this._getPointList(me.data);
+
+            if (me._pointList.length == 0) {
+                //filter后，data可能length==0
+                return;
+            }
+            var list = [];
+            if (me.animation && !me.resize) {
+                var firstNode = this._getFirstNode();
+                var firstY = firstNode ? firstNode.y : undefined;
+                for (var a = 0, al = me.data.length; a < al; a++) {
+                    var o = me.data[a];
+                    list.push([o.x, _$11.isNumber(o.y) ? firstY : o.y]);
+                }
+            } else {
+                list = me._pointList;
+            }
+
+            me._currPointList = list;
+
+            var bline = new BrokenLine$2({ //线条
+                context: {
+                    pointList: list,
+                    lineWidth: me.line.lineWidth,
+                    y: me.y,
+                    strokeStyle: me._getLineStrokeStyle(list), //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+                    smooth: me.line.smooth,
+                    lineType: me._getProp(me.line.lineType),
+                    smoothFilter: function smoothFilter(rp) {
+                        //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
+                        if (rp[1] > 0) {
+                            rp[1] = 0;
+                        } else if (Math.abs(rp[1]) > me.h) {
+                            rp[1] = -me.h;
+                        }
+                    },
+                    lineCap: "round"
+                }
+            });
+
+            if (!this.line.enabled) {
+                bline.context.visible = false;
+            }
+            me.sprite.addChild(bline);
+            me._bline = bline;
+
+            var fill = new Path$1({ //填充
+                context: {
+                    path: me._fillLine(bline),
+                    fillStyle: me._getFillStyle(),
+                    globalAlpha: _$11.isArray(me.fill.alpha) ? 1 : me.fill.alpha
+                }
+            });
+
+            if (!this.fill.enabled) {
+                fill.context.visible = false;
+            }
+            me.sprite.addChild(fill);
+            me._fill = fill;
+
+            me._createNodes();
+            me._createTexts();
+        }
+    }, {
+        key: "_getFirstNode",
+        value: function _getFirstNode() {
+            var _firstNode = null;
+            for (var i = 0, l = this.data.length; i < l; i++) {
+                var nodeData = this.data[i];
+                if (_$11.isNumber(nodeData.y)) {
+                    if (_firstNode === null || this._yAxis.place == "right") {
+                        //_yAxis为右轴的话，
+                        _firstNode = nodeData;
+                    }
+                    if (this._yAxis.place !== "right" && _firstNode !== null) {
+                        break;
+                    }
+                }
+            }
+
+            return _firstNode;
+        }
+    }, {
+        key: "_getFillStyle",
+        value: function _getFillStyle() {
+            var me = this;
+
+            var fill_gradient = null;
+
+            // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+            var _fillStyle = me._getProp(me.fill.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
+
+            if (_$11.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+                //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
+                //如果拿回来的style已经是个gradient了，那么就不管了
+                me.fill.alpha.length = 2;
+                if (me.fill.alpha[0] == undefined) {
+                    me.fill.alpha[0] = 0;
+                }
+                if (me.fill.alpha[1] == undefined) {
+                    me.fill.alpha[1] = 0;
+                }
+
+                //从bline中找到最高的点
+                var topP = _$11.min(me._bline.context.pointList, function (p) {
+                    return p[1];
+                });
+
+                if (topP[0] === undefined || topP[1] === undefined) {
+                    return null;
+                }
+
+                //创建一个线性渐变
+                fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+
+                var rgb = ColorFormat.colorRgb(_fillStyle);
+                var rgba0 = rgb.replace(')', ', ' + me._getProp(me.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                fill_gradient.addColorStop(0, rgba0);
+
+                var rgba1 = rgb.replace(')', ', ' + me.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                fill_gradient.addColorStop(1, rgba1);
+
+                _fillStyle = fill_gradient;
+            }
+
+            return _fillStyle;
+        }
+    }, {
+        key: "_getLineStrokeStyle",
+        value: function _getLineStrokeStyle(pointList, from) {
+            var me = this;
+            var _style;
+            if (!this._opt.line || !this._opt.line.strokeStyle) {
+                //如果用户没有配置line.strokeStyle，那么就用默认的
+                return this.line.strokeStyle;
+            }
+
+            if (this._opt.line.strokeStyle.lineargradient) {
+                //如果用户配置 填充是一个线性渐变
+                //从bline中找到最高的点
+                !pointList && (pointList = this._bline.context.pointList);
+
+                var topP = _$11.min(pointList, function (p) {
+                    return p[1];
+                });
+                var bottomP = _$11.max(pointList, function (p) {
+                    return p[1];
+                });
+                if (from == "fillStyle") {
+                    bottomP = [0, 0];
+                }
+
+                if (topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined) {
+                    return null;
+                }
+
+                //var bottomP = [ 0 , 0 ];
+                //创建一个线性渐变
+                //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
+                _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+                _$11.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
+                    _style.addColorStop(item.position, item.color);
+                });
+
+                return _style;
+            } else {
+                //构造函数中执行的这个方法，还没有line属性
+                //if( this.line && this.line.strokeStyle ){
+                //    _style = this.line.strokeStyle
+                //} else {
+                _style = this._getColor(this._opt.line.strokeStyle);
+                //}
+                return _style;
+            }
+        }
+    }, {
+        key: "_createNodes",
+        value: function _createNodes() {
+            var me = this;
+            var list = me._currPointList;
+
+            if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) {
+                //拐角的圆点
+                if (!this._circles) {
+                    this._circles = new canvax.Display.Sprite({});
+                    this.sprite.addChild(this._circles);
+                }
+
+                var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+                for (var a = 0, al = list.length; a < al; a++) {
+                    var _point = me._currPointList[a];
+                    if (!_point || !_$11.isNumber(_point[1])) {
+                        //折线图中有可能这个point为undefined
+                        continue;
+                    }
+
+                    var context = {
+                        x: _point[0],
+                        y: _point[1],
+                        r: me._getProp(me.node.r, a),
+                        lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+                        strokeStyle: me._getColor(me.node.strokeStyle, a),
+                        fillStyle: me.node.fillStyle
+                    };
+
+                    var circle = me._circles.children[nodeInd];
+                    if (circle) {
+                        _$11.extend(circle.context, context);
+                    } else {
+                        circle = new Circle$2$1({
+                            context: context
+                        });
+                        me._circles.addChild(circle);
+                    }
+
+                    if (me.node.corner) {
+                        //拐角才有节点
+                        var y = me._pointList[a][1];
+                        var pre = me._pointList[a - 1];
+                        var next = me._pointList[a + 1];
+                        if (pre && next) {
+                            if (y == pre[1] && y == next[1]) {
+                                circle.context.visible = false;
+                            }
+                        }
+                    }
+
+                    nodeInd++;
+                }
+
+                //把过多的circle节点删除了
+                if (me._circles.children.length > nodeInd) {
+                    for (var i = nodeInd, l = me._circles.children.length; i < l; i++) {
+                        me._circles.children[i].destroy();
+                        i--;
+                        l--;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "_createTexts",
+        value: function _createTexts() {
+
+            var me = this;
+            var list = me._currPointList;
+
+            if (me.text.enabled) {
+                //节点上面的文本info
+                if (!this._texts) {
+                    this._texts = new canvax.Display.Sprite({});
+                    this.sprite.addChild(this._texts);
+                }
+
+                var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+                for (var a = 0, al = list.length; a < al; a++) {
+                    var _point = list[a];
+                    if (!_point || !_$11.isNumber(_point[1])) {
+                        //折线图中有可能这个point为undefined
+                        continue;
+                    }
+
+                    var fontFillStyle = me._getColor(me.text.fillStyle, a);
+
+                    var context = {
+                        x: _point[0],
+                        y: _point[1] - 3,
+                        fontSize: this.text.fontSize,
+                        textAlign: "center",
+                        textBaseline: "bottom",
+                        fillStyle: fontFillStyle,
+                        lineWidth: 1,
+                        strokeStyle: "#ffffff"
+                    };
+
+                    var content = me.data[a].value;
+                    if (_$11.isFunction(me.text.format)) {
+                        content = me.text.format.apply(me, [content, a]) || content;
+                    }
+
+                    if (content == undefined || content == null) {
+                        continue;
+                    }
+
+                    var text = this._texts.children[nodeInd];
+                    if (text) {
+                        text.resetText(content);
+                        _$11.extend(text.context, context);
+                    } else {
+                        text = new canvax.Display.Text(content, {
+                            context: context
+                        });
+                        me._texts.addChild(text);
+                        me._checkTextPos(text, a);
+                    }
+                    nodeInd++;
+                }
+
+                //把过多的circle节点删除了
+                if (me._texts.children.length > nodeInd) {
+                    for (var i = nodeInd, l = me._texts.children.length; i < l; i++) {
+                        me._texts.children[i].destroy();
+                        i--;
+                        l--;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "_checkTextPos",
+        value: function _checkTextPos(text, ind) {
+            var me = this;
+            var list = me._currPointList;
+            var pre = list[ind - 1];
+            var next = list[ind + 1];
+
+            if (pre && next && pre[1] < text.context.y && next[1] < text.context.y) {
+                text.context.y += 7;
+                text.context.textBaseline = "top";
+            }
+        }
+    }, {
+        key: "_fillLine",
+        value: function _fillLine(bline) {
+            //填充直线
+            var fillPath = _$11.clone(bline.context.pointList);
+
+            var path = "";
+            var baseY = this._yAxis.basePoint.y;
+
+            var _currPath = null;
+
+            _$11.each(fillPath, function (point, i) {
+                if (_$11.isNumber(point[1])) {
+                    if (_currPath === null) {
+                        _currPath = [];
+                    }
+                    _currPath.push(point);
+                } else {
+                    // not a number
+                    if (_currPath && _currPath.length) {
+                        getOnePath();
+                    }
+                }
+
+                if (i == fillPath.length - 1 && _$11.isNumber(point[1])) {
+                    getOnePath();
+                }
+            });
+
+            function getOnePath() {
+                _currPath.push([_currPath[_currPath.length - 1][0], baseY], [_currPath[0][0], baseY], [_currPath[0][0], _currPath[0][1]]);
+                path += getPath(_currPath);
+                _currPath = null;
+            }
+
+            return path;
+        }
+    }]);
+    return LineGraphsGroup;
+}(canvax.Event.EventDispatcher);
+
+var _$12 = canvax._;
 var Line$1 = canvax.Shapes.Line;
-var Rect$2 = canvax.Shapes.Rect;
+var Circle$3 = canvax.Shapes.Circle;
+
+var markColumn = function (_Canvax$Event$EventDi) {
+    inherits$1(markColumn, _Canvax$Event$EventDi);
+
+    function markColumn(opt, data) {
+        classCallCheck$1(this, markColumn);
+
+        var _this = possibleConstructorReturn$1(this, (markColumn.__proto__ || Object.getPrototypeOf(markColumn)).call(this));
+
+        _this.xVal = null;
+        _this.enabled = true;
+        _this.line = {
+            enabled: 1,
+            eventEnabled: false
+            //strokeStyle : null
+        };
+        _this.node = {
+            enabled: 1
+            //strokeStyle : null
+            //backFillStyle : null
+        };
+
+        _this.sprite = null;
+        _this._line = null;
+        _this._nodes = null;
+
+        _this._isShow = false;
+
+        _this.enabled = true;
+
+        _this.y = 0;
+        _this.h = 0;
+
+        _this.init(opt, data);
+        return _this;
+    }
+
+    createClass$1(markColumn, [{
+        key: "init",
+        value: function init(opt, data) {
+            _$12.extend(true, this, opt);
+            this.sprite = new canvax.Display.Sprite({
+                id: "tips"
+            });
+        }
+    }, {
+        key: "show",
+        value: function show(e, pointInfo, opt) {
+            this.eventInfo = e.eventInfo;
+
+            _$12.extend(true, this, opt);
+
+            if (!this.enabled || !pointInfo) {
+                this.hide();
+                return this;
+            }
+
+            this.sprite.context.visible = true;
+            this._showLine(pointInfo);
+            this._showNodes(e, pointInfo);
+            return this;
+        }
+    }, {
+        key: "hide",
+        value: function hide() {
+            this.sprite.context.visible = false;
+        }
+    }, {
+        key: "move",
+        value: function move(e, pointInfo) {
+            this.show(e, pointInfo);
+        }
+    }, {
+        key: "destroy",
+        value: function destroy() {
+            this.sprite.destroy();
+            this._line = null;
+            this._nodes = null;
+        }
+        /**
+         * line相关------------------------
+         */
+
+    }, {
+        key: "_showLine",
+        value: function _showLine(pointInfo) {
+            var me = this;
+            var lineOpt = _$12.extend(true, {
+                x: parseInt(pointInfo.x),
+                y: me.y,
+                start: {
+                    x: 0,
+                    y: me.h
+                },
+                end: {
+                    x: 0,
+                    y: 0
+                },
+                lineWidth: 1,
+                strokeStyle: this.line.strokeStyle || "#cccccc"
+            }, this.line);
+            if (this.line.enabled) {
+                if (this._line) {
+                    _$12.extend(this._line.context, lineOpt);
+                } else {
+                    this._line = new Line$1({
+                        id: "tipsLine",
+                        context: lineOpt
+                    });
+                    this._line.name = "_markcolumn_line";
+                    this.sprite.addChild(this._line);
+                }
+            }
+            return this;
+        }
+
+        /**
+         *nodes相关-------------------------
+         */
+
+    }, {
+        key: "_showNodes",
+        value: function _showNodes(e, pointInfo) {
+
+            var me = this;
+            if (!this.node.enabled) {
+                return;
+            }
+            if (this._nodes) {
+                this._resetNodesStatus(e, pointInfo);
+            } else {
+                this._nodes = new canvax.Display.Sprite({
+                    context: {
+                        x: parseInt(pointInfo.x),
+                        y: me.y
+                    }
+                });
+                var me = this;
+
+                _$12.each(this.getLineNodes(e.eventInfo.nodes), function (node) {
+                    var csp = new canvax.Display.Sprite({
+                        context: {
+                            y: me.h - Math.abs(node.y)
+                        }
+                    });
+
+                    var bigCircle = new Circle$3({
+                        context: {
+                            r: node.r + 2,
+                            fillStyle: me.node.backFillStyle || "white", //node.fillStyle,
+                            strokeStyle: me.node.strokeStyle || node.strokeStyle,
+                            lineWidth: node.lineWidth,
+                            cursor: 'pointer'
+                        }
+                    });
+
+                    bigCircle.name = '_markcolumn_node';
+                    bigCircle.eventInfo = {
+                        iGroup: 0, //node._groupInd,
+                        iNode: e.eventInfo.iNode,
+                        nodes: [node]
+                    };
+
+                    csp.addChild(bigCircle);
+                    me._nodes.addChild(csp);
+
+                    bigCircle.on("click", function (evt) {
+                        var o = {
+                            eventInfo: _$12.clone(evt.target.eventInfo)
+                        };
+                        if (me.xVal !== null) {
+                            o.eventInfo.xAxis = { value: me.xVal };
+                        }
+                        me.sprite.fire("nodeclick", o);
+                    });
+                });
+                this.sprite.addChild(this._nodes);
+            }
+
+            return this;
+        }
+
+        /**
+        * 重置nodes的状态
+        */
+
+    }, {
+        key: "_resetNodesStatus",
+        value: function _resetNodesStatus(e, pointInfo) {
+            if (!this.enabled || !this.node.enabled) {
+                return;
+            }
+            var me = this;
+            var lineNodes = this.getLineNodes(e.eventInfo.nodes);
+            if (this._nodes.children.length != lineNodes.length) {
+                this._nodes.removeAllChildren();
+                this._nodes = null;
+                this._showNodes(e, pointInfo);
+            }
+            this._nodes.context.x = parseInt(pointInfo.x);
+            _$12.each(lineNodes, function (node, i) {
+                var csps = me._nodes.getChildAt(i).context;
+                csps.y = me.h - Math.abs(node.y);
+
+                var bigCircle = me._nodes.getChildAt(i).getChildAt(0);
+                bigCircle.eventInfo = {
+                    iGroup: 0, //node._groupInd,
+                    iNode: e.eventInfo.iNode,
+                    nodes: [node]
+                };
+            });
+        }
+    }, {
+        key: "getLineNodes",
+        value: function getLineNodes(nodes) {
+            var arr = [];
+            for (var i = 0, l = nodes.length; i < l; i++) {
+                if (nodes[i].type == "line") {
+                    arr.push(nodes[i]);
+                }
+            }
+            return arr;
+        }
+    }]);
+    return markColumn;
+}(canvax.Event.EventDispatcher);
+
 var _$10 = canvax._;
+var LineGraphs = function (_Canvax$Event$EventDi) {
+    inherits$1(LineGraphs, _Canvax$Event$EventDi);
+
+    function LineGraphs(opt, root) {
+        classCallCheck$1(this, LineGraphs);
+
+        var _this = possibleConstructorReturn$1(this, (LineGraphs.__proto__ || Object.getPrototypeOf(LineGraphs)).call(this));
+
+        _this.type = "line";
+
+        _this.width = 0;
+        _this.height = 0;
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+
+        //默认给左轴
+        _this.yAxisAlign = "left";
+
+        //这里所有的opt都要透传给 group
+        _this._opt = opt || {};
+        _this.root = root;
+
+        //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
+        _this.ctx = root.stage.canvas.getContext("2d");
+        _this.dataFrame = _this._opt.dataFrame || root.dataFrame; //root.dataFrame的引用
+        _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
+
+        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
+        _this.field = opt.field;
+        _this.enabledField = null;
+
+        _this.groups = []; //群组集合
+
+        _this.sprite = null;
+
+        _this.eventEnabled = true;
+
+        _this.init(_this._opt);
+        return _this;
+    }
+
+    createClass$1(LineGraphs, [{
+        key: "init",
+        value: function init(opt) {
+            this._opt = opt;
+            opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
+            //_.extend(true, this, opt);
+            this.sprite = new canvax.Display.Sprite();
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            //_.extend(true, this, opt);
+            this.width = opt.width;
+            this.height = opt.height;
+            _$10.extend(true, this.pos, opt.pos);
+
+            this.sprite.context.x = this.pos.x;
+            this.sprite.context.y = this.pos.y;
+
+            this.data = this._trimGraphs();
+
+            this._setGroupsForYfield(this.data);
+
+            this._widget(opt, this.data);
+
+            this.grow();
+
+            return this;
+        }
+    }, {
+        key: "resetData",
+        value: function resetData(dataFrame, dataTrigger) {
+
+            var me = this;
+
+            if (dataFrame) {
+                me.dataFrame = dataFrame;
+                me.data = me._trimGraphs();
+            }
+
+            _$10.each(me.groups, function (g) {
+                g.resetData(me.data[g.field].data, dataTrigger);
+            });
+        }
+    }, {
+        key: "setEnabledField",
+        value: function setEnabledField() {
+            //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+            this.enabledField = this.root._coordinate.getEnabledFields(this.field);
+        }
+
+        //_yAxis, dataFrame
+
+    }, {
+        key: "_trimGraphs",
+        value: function _trimGraphs() {
+            var me = this;
+            var _coor = this.root._coordinate;
+
+            //{"uv":{}.. ,"click": "pv":]}
+            //这样按照字段摊平的一维结构
+            var tmpData = {};
+
+            me.setEnabledField();
+
+            var _yAxis = this.yAxisAlign == "right" ? _coor._yAxisRight : _coor._yAxisLeft;
+
+            _$10.each(_$10.flatten(me.enabledField), function (field, i) {
+                //var maxValue = 0;
+
+                //单条line的全部data数据
+                var _lineData = me.root.dataFrame.getFieldData(field);
+                if (!_lineData) return;
+
+                var _data = [];
+
+                for (var b = 0, bl = _lineData.length; b < bl; b++) {
+                    var _xAxis = me.root._coordinate ? me.root._coordinate._xAxis : me.root._xAxis;
+                    var x = _xAxis.getPosX({
+                        ind: b,
+                        dataLen: bl,
+                        layoutType: me.root._coordinate ? me.root._coordinate.xAxis.layoutType : me.root._xAxis.layoutType
+                    });
+
+                    var y = _$10.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+
+                    var node = {
+                        value: _lineData[b],
+                        x: x,
+                        y: y
+                    };
+
+                    _data.push(node);
+                }
+
+                tmpData[field] = {
+                    yAxis: _yAxis,
+                    field: field,
+                    data: _data
+                };
+            });
+
+            return tmpData;
+        }
+
+        /**
+         * 生长动画
+         */
+
+    }, {
+        key: "grow",
+        value: function grow(callback) {
+            var gi = 0;
+            var gl = this.groups.length;
+            var me = this;
+            _$10.each(this.groups, function (g, i) {
+                g._grow(function () {
+                    gi++;
+                    callback && callback(g);
+                    if (gi == gl) {
+                        me.fire("complete");
+                    }
+                });
+            });
+            return this;
+        }
+    }, {
+        key: "add",
+        value: function add(field) {
+            var me = this;
+
+            //这个field不再这个graphs里面的，不相关
+            if (_$10.indexOf(_$10.flatten([me.field]), field) == -1) {
+                return;
+            }
+
+            this.data = this._trimGraphs();
+            this._setGroupsForYfield(this.data, field);
+
+            _$10.each(this.groups, function (g, i) {
+                g.resetData(me.data[g.field].data);
+            });
+        }
+
+        /*
+         *删除 ind
+         **/
+
+    }, {
+        key: "remove",
+        value: function remove(field) {
+
+            var me = this;
+            var i = me.getGroupIndex(field);
+
+            if (!this.groups.length || i < 0) {
+                return;
+            }
+
+            this.groups.splice(i, 1)[0].destroy();
+            this.data = this._trimGraphs();
+
+            _$10.each(this.groups, function (g, i) {
+                g.resetData(me.data[g.field].data);
+            });
+        }
+    }, {
+        key: "getGroupIndex",
+        value: function getGroupIndex(field) {
+            var ind = -1;
+            for (var i = 0, l = this.groups.length; i < l; i++) {
+                if (this.groups[i].field === field) {
+                    ind = i;
+                    break;
+                }
+            }
+            return ind;
+        }
+    }, {
+        key: "getGroup",
+        value: function getGroup(field) {
+            return this.groups[this.getGroupIndex(field)];
+        }
+    }, {
+        key: "_setGroupsForYfield",
+        value: function _setGroupsForYfield(data, fields) {
+            var me = this;
+
+            if (fields) {
+                //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
+                //一般用在add()执行的时候
+                fields = _$10.flatten([fields]);
+            }
+
+            var _flattenField = _$10.flatten([this.field]);
+
+            _$10.each(data, function (g, field) {
+
+                if (fields && _$10.indexOf(fields, field) == -1) {
+                    //如果有传入fields，但是当前field不在fields里面的话，不需要处理
+                    //说明该group已经在graphs里面了
+                    return;
+                }
+
+                var fieldMap = me.root._coordinate.getFieldMapOf(field);
+
+                //groupInd 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
+                var groupInd = _$10.indexOf(_flattenField, field);
+
+                var group = new LineGraphsGroup(fieldMap, groupInd, //不同于fieldMap.ind
+                me._opt, me.ctx, me.height, me.width);
+
+                group.draw({
+                    resize: me.resize
+                }, g.data);
+
+                var insert = false;
+                //在groups数组中插入到比自己_groupInd小的元素前面去
+                for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
+                    if (groupInd < me.groups[gi].groupInd) {
+
+                        me.groups.splice(gi, 0, group);
+                        insert = true;
+                        me.sprite.addChildAt(group.sprite, gi);
+
+                        break;
+                    }
+                }
+                //否则就只需要直接push就好了
+                if (!insert) {
+                    me.groups.push(group);
+                    me.sprite.addChild(group.sprite);
+                }
+            });
+        }
+    }, {
+        key: "_widget",
+        value: function _widget(opt) {
+            var me = this;
+            me.resize = false;
+        }
+    }, {
+        key: "getNodesAt",
+        value: function getNodesAt(ind) {
+            var _nodesInfoList = []; //节点信息集合
+            _$10.each(this.groups, function (group) {
+                var node = group.getNodeInfoAt(ind);
+                node && _nodesInfoList.push(node);
+            });
+            return _nodesInfoList;
+        }
+    }]);
+    return LineGraphs;
+}(canvax.Event.EventDispatcher);
+
+var AnimationFrame$3 = canvax.AnimationFrame;
+var Rect$4 = canvax.Shapes.Rect;
+var _$13 = canvax._;
+
+var Graphs$1 = function (_Canvax$Event$EventDi) {
+    inherits$1(Graphs, _Canvax$Event$EventDi);
+
+    function Graphs(opt, root) {
+        classCallCheck$1(this, Graphs);
+
+        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
+
+        _this._opt = opt;
+
+        _this.data = [];
+        _this.root = root;
+
+        _this.type = "bar";
+
+        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
+        _this.field = null;
+        _this.enabledField = null;
+
+        _this.width = 0;
+        _this.height = 0;
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+
+        _this.yAxisAlign = "left";
+        _this._xAxis = _this.root._coordinate._xAxis;
+
+        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
+        //和css中得absolute概念一致，脱离文档流的绝对定位
+        _this.absolute = false;
+
+        _this.animation = true;
+
+        _this.bar = {
+            width: 0,
+            _width: 0,
+            radius: 4,
+            fillStyle: null,
+            fillAlpha: 0.9,
+            filter: function filter() {}, //用来定制bar的样式
+            count: 0, //总共有多少个bar
+            xDis: null
+        };
+
+        _this.text = {
+            enabled: false,
+            fillStyle: '#999',
+            fontSize: 12,
+            format: null,
+            lineWidth: 1,
+            strokeStyle: 'white'
+        };
+
+        _this.sort = null;
+
+        _this._barsLen = 0;
+
+        _this.eventEnabled = true;
+
+        _this.sprite = null;
+        _this.txtsSp = null;
+
+        _$13.extend(true, _this, opt);
+
+        _this.init();
+        return _this;
+    }
+
+    createClass$1(Graphs, [{
+        key: "init",
+        value: function init() {
+            this.sprite = new canvax.Display.Sprite({
+                id: "graphsEl"
+            });
+
+            this.barsSp = new canvax.Display.Sprite({
+                id: "barsSp"
+            });
+            this.txtsSp = new canvax.Display.Sprite({
+                id: "txtsSp",
+                context: {
+                    //visible: false
+                }
+            });
+        }
+    }, {
+        key: "getNodesAt",
+        value: function getNodesAt(index) {
+            //该index指当前
+            var data = this.data;
+            var _nodesInfoList = []; //节点信息集合
+            _$13.each(this.enabledField, function (fs, i) {
+                if (_$13.isArray(fs)) {
+                    _$13.each(fs, function (_fs, ii) {
+                        //fs的结构两层到顶了
+                        var node = data[i][ii][index];
+                        node && _nodesInfoList.push(node);
+                    });
+                } else {
+                    var node = data[i][0][index];
+                    node && _nodesInfoList.push(node);
+                }
+            });
+
+            return _nodesInfoList;
+        }
+    }, {
+        key: "_getTargetField",
+        value: function _getTargetField(b, v, i, field) {
+            if (_$13.isString(field)) {
+                return field;
+            } else if (_$13.isArray(field)) {
+                var res = field[b];
+                if (_$13.isString(res)) {
+                    return res;
+                } else if (_$13.isArray(res)) {
+                    return res[v];
+                }
+            }
+        }
+
+        //dataZoom中用
+
+    }, {
+        key: "setBarStyle",
+        value: function setBarStyle($o) {
+            var me = this;
+            var index = $o.iNode;
+            var group = me.barsSp.getChildById('barGroup_' + index);
+
+            var fillStyle = $o.fillStyle || me._getStyle(me.bar.fillStyle);
+            for (var a = 0, al = group.getNumChildren(); a < al; a++) {
+                var rectEl = group.getChildAt(a);
+                rectEl.context.fillStyle = fillStyle;
+            }
+        }
+    }, {
+        key: "_getStyle",
+        value: function _getStyle(c, groups, vLen, i, h, v, value, field, _flattenField) {
+            var fieldMap = this.root._coordinate.getFieldMapOf(field);
+            var style = fieldMap.style;
+
+            //field对应的索引，， 取颜色这里不要用i
+            if (_$13.isString(c)) {
+                style = c;
+            }
+            if (_$13.isArray(c)) {
+                style = _$13.flatten(c)[_$13.indexOf(_flattenField, field)];
+            }
+            if (_$13.isFunction(c)) {
+                style = c.apply(this, [{
+                    iGroup: i,
+                    iNode: h,
+                    iLay: v,
+                    field: field,
+                    value: value,
+                    xAxis: {
+                        field: this._xAxis.field,
+                        value: this._xAxis.layoutData[h].content
+                    }
+                }]);
+            }
+
+            return style;
+        }
+    }, {
+        key: "_getBarWidth",
+        value: function _getBarWidth(ceilWidth, ceilWidth2) {
+            if (this.bar.width) {
+                if (_$13.isFunction(this.bar.width)) {
+                    this.bar._width = this.bar.width(ceilWidth);
+                } else {
+                    this.bar._width = this.bar.width;
+                }
+            } else {
+                this.bar._width = parseInt(ceilWidth2) - parseInt(Math.max(1, ceilWidth2 * 0.3));
+
+                //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
+                if (this.bar._width == 1 && ceilWidth > 3) {
+                    this.bar._width = parseInt(ceilWidth) - 2;
+                }
+            }
+            this.bar._width < 1 && (this.bar._width = 1);
+            return this.bar._width;
+        }
+    }, {
+        key: "add",
+        value: function add(field) {
+            this.clean();
+            this.draw();
+        }
+    }, {
+        key: "remove",
+        value: function remove(field) {
+            this.clean();
+            this.draw();
+        }
+    }, {
+        key: "resetData",
+        value: function resetData(dataFrame, dataTrigger) {
+            this.draw();
+        }
+    }, {
+        key: "clean",
+        value: function clean() {
+            this.data = [];
+            this.barsSp.removeAllChildren();
+            if (this.text.enabled) {
+                this.txtsSp.removeAllChildren();
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            //第二个data参数去掉，直接trimgraphs获取最新的data
+            _$13.extend(true, this, opt);
+
+            var data = this._trimGraphs();
+
+            if (data.length == 0 || data[0].length == 0) {
+                this.clean();
+                return;
+            }
+
+            var preLen = 0; //纵向的分组，主要用于resetData的时候，对比前后data数量用
+            this.data[0] && (preLen = this.data[0][0].length);
+
+            this.data = data;
+            var me = this;
+            var groups = data.length;
+            var itemW = 0;
+
+            me.bar.count = 0;
+
+            var _flattenField = _$13.flatten([this.field]);
+
+            _$13.each(data, function (h_group, i) {
+                /*
+                //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
+                //h_group就会为两组，一组代表uv 一组代表pv。
+                var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+                */
+
+                //vLen 为一单元bar上面纵向堆叠的length
+                //比如yAxis.field = [?
+                //    ["uv","pv"],  vLen == 2
+                //    "click"       vLen == 1
+                //]
+
+                //if (h <= preLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
+
+                var vLen = h_group.length;
+                if (vLen == 0) return;
+
+                //hlen为数据有多长
+                var hLen = h_group[0].length;
+
+                //itemW 还是要跟着xAxis的xDis保持一致
+                itemW = me.width / hLen;
+
+                me._barsLen = hLen * groups;
+
+                for (var h = 0; h < hLen; h++) {
+                    var groupH;
+                    if (i == 0) {
+                        //横向的分组
+                        if (h <= preLen - 1) {
+                            groupH = me.barsSp.getChildById("barGroup_" + h);
+                        } else {
+                            groupH = new canvax.Display.Sprite({
+                                id: "barGroup_" + h
+                            });
+                            me.barsSp.addChild(groupH);
+                            groupH.iNode = h;
+                        }
+                    } else {
+                        groupH = me.barsSp.getChildById("barGroup_" + h);
+                    }
+
+                    //同上面，给txt做好分组
+                    var txtGroupH;
+                    if (i == 0) {
+                        if (h <= preLen - 1) {
+                            txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+                        } else {
+                            txtGroupH = new canvax.Display.Sprite({
+                                id: "txtGroup_" + h
+                            });
+                            me.txtsSp.addChild(txtGroupH);
+                            txtGroupH.iGroup = i;
+                        }
+                    } else {
+                        txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+                    }
+
+                    for (var v = 0; v < vLen; v++) {
+
+                        me.bar.count++;
+
+                        //单个的bar，从纵向的底部开始堆叠矩形
+                        var rectData = h_group[v][h];
+                        rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
+
+                        var fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+
+                        rectData.fillStyle = fillStyle;
+
+                        var rectH = rectData.y - rectData.fromY;
+
+                        if (isNaN(rectH) || Math.abs(rectH) < 1) {
+                            rectH = 0;
+                        }
+
+                        var finalPos = {
+                            x: Math.round(rectData.x),
+                            y: rectData.fromY,
+                            width: parseInt(me.bar._width),
+                            height: rectH,
+                            fillStyle: fillStyle,
+                            fillAlpha: me.bar.fillAlpha,
+                            scaleY: -1
+                        };
+                        rectData.width = finalPos.width;
+
+                        var rectCxt = {
+                            x: finalPos.x,
+                            y: rectData.yBasePoint.y, //0,
+                            width: finalPos.width,
+                            height: finalPos.height,
+                            fillStyle: finalPos.fillStyle,
+                            fillAlpha: me.bar.fillAlpha,
+                            scaleY: 0
+                        };
+
+                        if (!!me.bar.radius && rectData.isLeaf) {
+                            var radiusR = Math.min(me.bar._width / 2, Math.abs(rectH));
+                            radiusR = Math.min(radiusR, me.bar.radius);
+                            rectCxt.radius = [radiusR, radiusR, 0, 0];
+                        }
+
+                        if (!me.animation) {
+                            delete rectCxt.scaleY;
+                            rectCxt.y = finalPos.y;
+                        }
+
+                        var rectEl;
+                        if (h <= preLen - 1) {
+                            rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                            rectEl.context.fillStyle = fillStyle;
+                        } else {
+                            rectEl = new Rect$4({
+                                id: "bar_" + i + "_" + h + "_" + v,
+                                context: rectCxt
+                            });
+                            groupH.addChild(rectEl);
+                        }
+
+                        rectEl.finalPos = finalPos;
+
+                        rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                        me.bar.filter.apply(rectEl, [rectData, me]);
+
+                        //叶子节点上面放置info
+                        if (rectData.isLeaf && me.text.enabled) {
+
+                            //文字
+                            var infosp;
+                            if (h <= preLen - 1) {
+                                infosp = txtGroupH.getChildById("infosp_" + i + "_" + h + "_" + v);
+                            } else {
+                                //console.log("infosp_" + i + "_" + h + "_" + v);
+                                infosp = new canvax.Display.Sprite({
+                                    id: "infosp_" + i + "_" + h + "_" + v,
+                                    context: {
+                                        y: rectData.yBasePoint.y,
+                                        visible: false
+                                    }
+                                });
+                                infosp._hGroup = h;
+                                txtGroupH.addChild(infosp);
+                            }
+
+                            var contents = [];
+                            for (var c = vLen - 1; c >= 0; c--) {
+                                //在baseNumber同一侧的数据放在一个叶子节点上面显示
+                                if (rectData.value > rectData.yBasePoint.content === h_group[c][h].value > h_group[c][h].yBasePoint.content) {
+                                    contents.push(h_group[c][h]);
+                                }
+                            }
+
+                            var infoWidth = 0;
+                            var infoHeight = 0;
+
+                            _$13.each(contents, function (cdata, ci) {
+                                var content = cdata.value;
+                                if (_$13.isFunction(me.text.format)) {
+                                    var _formatc = me.text.format.apply(me, [content, cdata]);
+                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
+                                        content = _formatc;
+                                    }
+                                }
+                                if (!me.animation && _$13.isNumber(content)) {
+                                    content = numAddSymbol(content);
+                                }
+
+                                if (content === "") {
+                                    return;
+                                }
+
+                                if (ci > 0 && infosp.children.length > 0) {
+                                    txt = new canvax.Display.Text("/", {
+                                        context: {
+                                            x: infoWidth + 2,
+                                            fillStyle: "#999"
+                                        }
+                                    });
+                                    infoWidth += txt.getTextWidth() + 2;
+                                    infosp.addChild(txt);
+                                }
+
+                                var txt;
+                                if (h <= preLen - 1) {
+                                    txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                } else {
+                                    txt = new canvax.Display.Text(content, {
+                                        id: "info_txt_" + i + "_" + h + "_" + ci,
+                                        context: {
+                                            x: infoWidth + 2,
+                                            fillStyle: cdata.fillStyle,
+                                            fontSize: me.text.fontSize,
+                                            lineWidth: me.text.lineWidth,
+                                            strokeStyle: me.text.strokeStyle
+                                        }
+                                    });
+                                    infosp.addChild(txt);
+                                }
+                                txt._text = cdata.value;
+                                txt._data = cdata;
+                                infoWidth += txt.getTextWidth() + 2;
+                                infoHeight = Math.max(infoHeight, txt.getTextHeight());
+
+                                if (me.animation) {
+                                    var beginNumber = 0;
+                                    if (content >= 100) {
+                                        beginNumber = 100;
+                                    }
+                                    if (content >= 1000) {
+                                        beginNumber = 1000;
+                                    }
+                                    if (content >= 10000) {
+                                        beginNumber = 10000;
+                                    }
+                                    if (content >= 100000) {
+                                        beginNumber = 100900;
+                                    }
+                                    //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
+                                    txt.resetText(beginNumber);
+                                }
+                            });
+
+                            infosp._finalX = rectData.x + me.bar._width / 2 - infoWidth / 2;
+
+                            //如果数据在basepoint下方
+                            if (rectData.value < rectData.yBasePoint.content) {
+                                infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
+                            } else {
+                                infosp._finalY = rectData.y - infoHeight;
+                            }
+
+                            infosp._centerX = rectData.x + me.bar._width / 2;
+                            infosp.context.width = infoWidth;
+                            infosp.context.height = infoHeight;
+
+                            if (!me.animation) {
+                                infosp.context.y = infosp._finalY;
+                                infosp.context.x = infosp._finalX;
+                                infosp.context.visible = true;
+                            }
+                        }
+                    }
+                }
+            });
+
+            this.sprite.addChild(this.barsSp);
+
+            if (this.text.enabled) {
+                this.sprite.addChild(this.txtsSp);
+            }
+
+            this.sprite.context.x = this.pos.x;
+            this.sprite.context.y = this.pos.y;
+
+            if (this.sort && this.sort == "desc") {
+                this.sprite.context.y -= this.height;
+            }
+
+            this.grow(function () {
+                me.fire("complete");
+            }, {
+                delay: 0,
+                easing: me.proportion ? "Quadratic.Line" : "Quadratic.Out",
+                duration: 300
+            });
+        }
+    }, {
+        key: "setEnabledField",
+        value: function setEnabledField() {
+            //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+            this.enabledField = this.root._coordinate.getEnabledFields(this.field);
+        }
+    }, {
+        key: "_trimGraphs",
+        value: function _trimGraphs() {
+            var me = this;
+            var _xAxis = this._xAxis;
+            var xArr = _xAxis.layoutData;
+
+            var _coor = this.root._coordinate;
+
+            //用来计算下面的hLen
+            this.setEnabledField();
+            var layoutGraphs = [];
+            var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
+            var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
+            var _preHLenOver = false;
+
+            if (!this.absolute) {
+                _$13.each(this.root._graphs, function (_g) {
+                    if (!_g.absolute && _g.type == "bar") {
+                        if (_g === me) {
+                            _preHLenOver = true;
+                        }
+                        if (_preHLenOver) {
+                            //排在me后面的 graphs，需要计算setEnabledField，才能计算出来 全部的hLen
+                            _g.setEnabledField();
+                        } else {
+                            preHLen += _g.enabledField.length;
+                        }
+                        hLen += _g.enabledField.length;
+                        layoutGraphs.push(_g);
+                    }
+                });
+            } else {
+                layoutGraphs = [this];
+                hLen = this.enabledField.length;
+            }
+
+            var ceilWidth = _xAxis.ceilWidth;
+            //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
+            var ceilWidth2 = ceilWidth / (hLen + 1);
+
+            //知道了ceilWidth2 后 检测下 barW是否需要调整
+            var barW = this._getBarWidth(ceilWidth, ceilWidth2);
+            var barDis = ceilWidth2 - barW;
+            if (this.bar.xDis != null) {
+                barDis = this.bar.xDis;
+            }
+
+            var disLeft = (ceilWidth - barW * hLen - barDis * (hLen - 1)) / 2;
+            if (preHLen) {
+                disLeft += (barDis + barW) * preHLen;
+            }
+
+            var tmpData = [];
+            var _yAxis = this.yAxisAlign == "left" ? _coor._yAxisLeft : _coor._yAxisRight;
+
+            //然后计算出对于结构的dataOrg
+            var dataOrg = this.root.dataFrame.getDataOrg(this.enabledField);
+
+            //dataOrg和field是一一对应的
+            _$13.each(dataOrg, function (hData, b) {
+                //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
+
+                //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
+                var tempBarData = [];
+                _$13.each(hData, function (vSectionData, v) {
+                    tempBarData[v] = [];
+                    //vSectionData 代表某个字段下面的一组数据比如 uv
+                    _$13.each(vSectionData, function (val, i) {
+                        if (!xArr[i]) {
+                            return;
+                        }
+
+                        var vCount = 0;
+                        if (me.proportion) {
+                            //先计算总量
+                            _$13.each(hData, function (team, ti) {
+                                vCount += team[i];
+                            });
+                        }
+
+                        var x = xArr[i].x - ceilWidth / 2 + disLeft + (barW + barDis) * b;
+
+                        var y = 0;
+                        if (me.proportion) {
+                            y = -val / vCount * _yAxis.yGraphsHeight;
+                        } else {
+                            y = _yAxis.getYposFromVal(val);
+                        }
+
+                        function _getFromY(tempBarData, v, i, val, y, yBasePoint) {
+                            var preData = tempBarData[v - 1];
+                            if (!preData) {
+                                return yBasePoint.y;
+                            }
+
+                            var preY = preData[i].y;
+                            var preVal = preData[i].value;
+                            var yBaseNumber = yBasePoint.content;
+                            if (val >= yBaseNumber) {
+                                //如果大于基线的，那么就寻找之前所有大于基线的
+                                if (preVal >= yBaseNumber) {
+                                    //能找到，先把pre的isLeaf设置为false
+                                    preData[i].isLeaf = false;
+                                    return preY;
+                                } else {
+                                    return _getFromY(tempBarData, v - 1, i, val, y, yBasePoint);
+                                }
+                            } else {
+                                if (preVal < yBaseNumber) {
+                                    //能找到，先把pre的isLeaf设置为false
+                                    preData[i].isLeaf = false;
+                                    return preY;
+                                } else {
+                                    return _getFromY(tempBarData, v - 1, i, val, y, yBasePoint);
+                                }
+                            }
+                        }
+
+                        //找到其着脚点,一般就是 yAxis.basePoint
+                        var fromY = _getFromY(tempBarData, v, i, val, y, _yAxis.basePoint);
+                        y += fromY - _yAxis.basePoint.y;
+
+                        //如果有排序的话
+                        //TODO:这个逻辑好像有问题
+                        if (_yAxis.sort && _yAxis.sort == "desc") {
+                            y = -(_yAxis.yGraphsHeight - Math.abs(y));
+                        }
+
+                        var node = {
+                            value: val,
+                            field: me._getTargetField(b, v, i, me.enabledField),
+                            fromX: x,
+                            fromY: fromY,
+                            x: x,
+                            y: y,
+                            width: barW,
+                            yBasePoint: _yAxis.basePoint,
+                            isLeaf: true,
+                            xAxis: {
+                                field: me._xAxis.field,
+                                value: xArr[i].content,
+                                layoutText: xArr[i].layoutText
+                            }
+                        };
+
+                        if (me.proportion) {
+                            node.vCount = vCount;
+                        }
+
+                        tempBarData[v].push(node);
+                    });
+                });
+
+                tempBarData.length && tmpData.push(tempBarData);
+            });
+
+            return tmpData;
+        }
+    }, {
+        key: "_updateInfoTextPos",
+        value: function _updateInfoTextPos(el) {
+
+            var infoWidth = 0;
+            var infoHeight = 0;
+            var cl = el.children.length;
+            _$13.each(el.children, function (c, i) {
+                if (c.getTextWidth) {
+                    c.context.x = infoWidth;
+                    infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
+                    infoHeight = Math.max(infoHeight, c.getTextHeight());
+                }
+            });
+            el.context.x = el._centerX - infoWidth / 2;
+            el.context.width = infoWidth;
+            el.context.height = infoHeight;
+        }
+
+        /**
+         * 生长动画
+         */
+
+    }, {
+        key: "grow",
+        value: function grow(callback, opt) {
+
+            var me = this;
+            if (!this.animation) {
+                callback && callback(me);
+                return;
+            }
+            var sy = 1;
+            if (this.sort && this.sort == "desc") {
+                sy = -1;
+            }
+
+            //先把已经不在当前range范围内的元素destroy掉
+            if (me.data[0] && me.data[0].length && me.barsSp.children.length > me.data[0][0].length) {
+                for (var i = me.data[0][0].length, l = me.barsSp.children.length; i < l; i++) {
+                    me.barsSp.getChildAt(i).destroy();
+                    me.text.enabled && me.txtsSp.getChildAt(i).destroy();
+                    i--;
+                    l--;
+                }
+            }
+
+            var options = _$13.extend({
+                delay: Math.min(1000 / this._barsLen, 80),
+                easing: "Back.Out",
+                duration: 500
+            }, opt);
+
+            var barCount = 0;
+            _$13.each(me.data, function (h_group, g) {
+                var vLen = h_group.length;
+                if (vLen == 0) return;
+                var hLen = h_group[0].length;
+                for (var h = 0; h < hLen; h++) {
+                    for (var v = 0; v < vLen; v++) {
+
+                        var group = me.barsSp.getChildById("barGroup_" + h);
+
+                        var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
+                        //console.log("finalPos"+bar.finalPos.y)
+
+                        if (options.duration == 0) {
+                            bar.context.scaleY = sy;
+                            bar.context.y = sy * sy * bar.finalPos.y;
+                            bar.context.x = bar.finalPos.x;
+                            bar.context.width = bar.finalPos.width;
+                            bar.context.height = bar.finalPos.height;
+                        } else {
+                            if (bar._tweenObj) {
+                                AnimationFrame$3.destroyTween(bar._tweenObj);
+                            }
+                            bar._tweenObj = bar.animate({
+                                scaleY: sy,
+                                y: sy * bar.finalPos.y,
+                                x: bar.finalPos.x,
+                                width: bar.finalPos.width,
+                                height: bar.finalPos.height
+                            }, {
+                                duration: options.duration,
+                                easing: options.easing,
+                                delay: h * options.delay,
+                                onUpdate: function onUpdate(arg) {},
+                                onComplete: function onComplete(arg) {
+                                    if (arg.width < 3) {
+                                        this.context.radius = 0;
+                                    }
+
+                                    barCount++;
+
+                                    if (barCount === me.bar.count) {
+                                        callback && callback(me);
+                                    }
+                                },
+                                id: bar.id
+                            });
+                        }
+
+                        //txt grow
+                        if (me.text.enabled) {
+                            var txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+
+                            var infosp = txtGroupH.getChildById("infosp_" + g + "_" + h + "_" + v);
+                            if (infosp) {
+
+                                infosp.animate({
+                                    y: infosp._finalY,
+                                    x: infosp._finalX
+                                }, {
+                                    duration: options.duration,
+                                    easing: options.easing,
+                                    delay: h * options.delay,
+                                    onUpdate: function onUpdate() {
+                                        this.context && (this.context.visible = true);
+                                    },
+                                    onComplete: function onComplete() {}
+                                });
+
+                                _$13.each(infosp.children, function (txt) {
+                                    if (txt._text || txt._text === 0) {
+                                        if (txt._tweenObj) {
+                                            AnimationFrame$3.destroyTween(txt._tweenObj);
+                                        }
+                                        txt._tweenObj = AnimationFrame$3.registTween({
+                                            from: {
+                                                v: txt.text
+                                            },
+                                            to: {
+                                                v: txt._text
+                                            },
+                                            duration: options.duration + 100,
+                                            delay: h * options.delay,
+                                            onUpdate: function onUpdate(arg) {
+                                                var content = arg.v;
+                                                if (_$13.isFunction(me.text.format)) {
+                                                    var _formatc = me.text.format.apply(me, [content, txt._data]);
+                                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
+                                                        content = _formatc;
+                                                    }
+                                                } else if (_$13.isNumber(content)) {
+                                                    content = numAddSymbol(parseInt(content));
+                                                }
+                                                txt.resetText(content);
+                                                if (txt.parent) {
+                                                    me._updateInfoTextPos(txt.parent);
+                                                } else {
+                                                    txt.destroy();
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }]);
+    return Graphs;
+}(canvax.Event.EventDispatcher);
+
+var Circle$4 = canvax.Shapes.Circle;
+var Rect$5 = canvax.Shapes.Rect;
+var _$14 = canvax._;
+
+var Graphs$2 = function (_Canvax$Event$EventDi) {
+    inherits$1(Graphs, _Canvax$Event$EventDi);
+
+    function Graphs(opt, root) {
+        classCallCheck$1(this, Graphs);
+
+        //这里所有的opt都要透传给 group
+        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
+
+        _this.opt = opt || {};
+        _this.root = root;
+        _this.ctx = root.stage.context2D;
+
+        _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
+        _this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
+
+        _this.width = 0;
+        _this.height = 0;
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+
+        _this.node = {
+            shapeType: "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
+            maxR: 20, //圆圈默认最大半径
+            minR: 5,
+            r: null,
+            normalR: 10,
+            fillStyle: null,
+            strokeStyle: null,
+            lineWidth: 0,
+            alpha: 0.9
+        };
+        _this.label = {
+            field: null,
+            format: function format(label) {
+                return label;
+            },
+            fontSize: 12,
+            fontColor: "#777"
+        };
+
+        _this.animation = true;
+
+        _this.field = null;
+
+        _this.groupField = null; //如果有多个分组的数据，按照这个字段分组，比如男女
+
+        _this.colors = colors;
+
+        _this.sprite = null;
+
+        _$14.extend(true, _this, opt);
+
+        _this.init();
+
+        return _this;
+    }
+
+    createClass$1(Graphs, [{
+        key: "init",
+        value: function init() {
+            this.sprite = new canvax.Display.Sprite({
+                id: "graphsEl"
+            });
+
+            this._shapesp = new canvax.Display.Sprite({
+                id: "shapesp"
+            });
+            this._textsp = new canvax.Display.Sprite({
+                id: "textsp"
+            });
+            this.sprite.addChild(this._shapesp);
+            this.sprite.addChild(this._textsp);
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            _$14.extend(true, this, opt);
+            this.data = this._trimGraphs(); //groupsData也被自动设置完成
+
+            this._widget();
+
+            this.sprite.context.x = this.pos.x;
+            this.sprite.context.y = this.pos.y;
+
+            if (this.animation) {
+                this.grow();
+            }
+
+            return this;
+        }
+    }, {
+        key: "getNodesAt",
+        value: function getNodesAt() {
+            return [];
+        }
+    }, {
+        key: "_trimGraphs",
+        value: function _trimGraphs() {
+            var tmplData = [];
+
+            var dataLen = this.root.dataFrame.org.length - 1; //减去title fields行
+            var xField = this.root._coordinate._xAxis.field;
+
+            for (var i = 0; i < dataLen; i++) {
+
+                var rowData = this.root.dataFrame.getRowData(i);
+                var xValue = rowData[xField];
+                var yValue = rowData[this.field];
+                var xPos = this.root._coordinate._xAxis.getPosX({ val: xValue });
+                var yPos = this.root._coordinate._getYaxisOfField(this.field).getYposFromVal(yValue);
+                var group = this.getGroup(rowData);
+                var groupInd = this.getGroupInd(rowData);
+
+                var nodeLayoutData = {
+                    rowData: rowData,
+                    groupInd: groupInd,
+                    pos: {
+                        x: xPos,
+                        y: yPos
+                    },
+                    value: {
+                        x: xValue,
+                        y: yValue
+                    },
+                    field: this.field,
+                    groupName: rowData[this.groupField] || "",
+
+                    //下面的属性都单独设置
+                    r: null, //这里先不设置，在下面的_setR里单独设置
+                    fillStyle: null,
+                    strokeStyle: null,
+                    lineWidth: 0,
+                    shapeType: null,
+                    shape: null, //对应的canvax 节点， 在widget之后赋值
+                    label: null
+                };
+
+                this._setR(nodeLayoutData);
+                this._setFillStyle(nodeLayoutData);
+                this._setStrokeStyle(nodeLayoutData);
+                this._setLineWidth(nodeLayoutData);
+                this._setNodeType(nodeLayoutData);
+                this._setLabel(nodeLayoutData);
+
+                group.list.push(nodeLayoutData);
+                tmplData.push(nodeLayoutData);
+            }
+
+            return tmplData;
+        }
+    }, {
+        key: "_setR",
+        value: function _setR(nodeLayoutData) {
+
+            var r = this.node.normalR;
+            var rowData = nodeLayoutData.rowData;
+            if (this.node.r != null) {
+                if (_$14.isString(this.node.r) && rowData[this.node.r]) {
+                    //如果配置了某个字段作为r，那么就要自动计算比例
+                    if (!this._rData && !this._rMaxValue && !this._rMinValue) {
+                        this._rData = this.root.dataFrame.getFieldData(this.node.r);
+                        this._rMaxValue = _$14.max(this._rData);
+                        this._rMinValue = _$14.min(this._rData);
+                    }
+                    var rVal = rowData[this.node.r];
+                    r = this.node.minR + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxR - this.node.minR);
+                }
+                if (_$14.isFunction(this.node.r)) {
+                    r = this.node.r(rowData);
+                }
+                if (!isNaN(parseInt(this.node.r))) {
+                    r = parseInt(this.node.r);
+                }
+            }
+            nodeLayoutData.r = r;
+            return this;
+        }
+    }, {
+        key: "_setLabel",
+        value: function _setLabel(nodeLayoutData) {
+            if (this.label.field != null) {
+                if (_$14.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
+                    nodeLayoutData.label = nodeLayoutData.rowData[this.label.field];
+                }
+            }
+        }
+    }, {
+        key: "_setFillStyle",
+        value: function _setFillStyle(nodeLayoutData) {
+            nodeLayoutData.fillStyle = this._getStyle(this.node.fillStyle, nodeLayoutData);
+            return this;
+        }
+    }, {
+        key: "_setStrokeStyle",
+        value: function _setStrokeStyle(nodeLayoutData) {
+            nodeLayoutData.strokeStyle = this._getStyle(this.node.strokeStyle, nodeLayoutData);
+            return this;
+        }
+    }, {
+        key: "_getStyle",
+        value: function _getStyle(style, nodeLayoutData) {
+            var _style = style;
+            if (_$14.isArray(style)) {
+                _style = style[nodeLayoutData.groupInd];
+            }
+            if (_$14.isFunction(style)) {
+                _style = style(nodeLayoutData);
+            }
+            if (!_style) {
+                _style = this.colors[nodeLayoutData.groupInd];
+            }
+            return _style;
+        }
+    }, {
+        key: "_setLineWidth",
+        value: function _setLineWidth(nodeLayoutData) {
+            nodeLayoutData.lineWidth = this.node.lineWidth;
+            return this;
+        }
+    }, {
+        key: "_setNodeType",
+        value: function _setNodeType(nodeLayoutData) {
+            var shapeType = this.node.shapeType;
+            if (_$14.isArray(shapeType)) {
+                shapeType = shapeType[nodeLayoutData.groupInd];
+            }
+            if (_$14.isFunction(shapeType)) {
+                shapeType = shapeType(nodeLayoutData);
+            }
+            if (!shapeType) {
+                shapeType = "circle";
+            }
+            nodeLayoutData.shapeType = shapeType;
+            return this;
+        }
+    }, {
+        key: "getGroup",
+        value: function getGroup(rowData) {
+            var group;
+            var me = this;
+            if (this.groupField) {
+                //如果有设置分组字段
+                group = _$14.find(this.groupsData, function (group) {
+                    return group.groupName == rowData[me.groupField];
+                });
+                if (!group) {
+                    group = {
+                        groupName: rowData[this.groupField],
+                        list: []
+                    };
+                    this.groupsData.push(group);
+                }
+            } else {
+                if (this.groupsData.length == 0) {
+                    group = {
+                        groupName: "",
+                        list: []
+                    };
+                    this.groupsData.push(group);
+                } else {
+                    group = this.groupsData[0];
+                }
+            }
+            return group;
+        }
+
+        //必须要先执行了getGroup
+
+    }, {
+        key: "getGroupInd",
+        value: function getGroupInd(rowData) {
+            var i = 0;
+            var me = this;
+            _$14.each(this.groupsData, function (group, gi) {
+                if (group.groupName == rowData[me.groupField]) {
+                    i = gi;
+                }
+            });
+            return i;
+        }
+
+        //根据layoutdata开始绘制
+
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            var me = this;
+            _$14.each(this.groupsData, function (group, iGroup) {
+                var groupSprite = new canvax.Display.Sprite({ id: group.groupName });
+                me._shapesp.addChild(groupSprite);
+
+                _$14.each(group.list, function (nodeData, iNode) {
+
+                    var _context = me._getNodeContext(nodeData);
+                    var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$5;
+
+                    var _node = new Shape({
+                        id: "shape_" + iGroup + "_" + iNode,
+                        context: _context
+                    });
+                    groupSprite.addChild(_node);
+
+                    //数据和canvax原件相互引用
+                    _node.nodeData = nodeData;
+                    _node.iNode = iNode;
+                    nodeData.shape = _node;
+
+                    _node.on("panstart mouseover", function (e) {
+                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
+                    });
+                    _node.on("panmove mousemove", function (e) {
+                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
+                    });
+                    _node.on("panend mouseout", function (e) {
+                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
+                        me.iGroup = 0, me.iNode = -1;
+                    });
+                    _node.on("tap click", function (e) {
+                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
+                    });
+
+                    //如果有label
+                    if (nodeData.label) {
+                        var _label = nodeData.label;
+                        text = new canvax.Display.Text(_label, {
+                            id: "text_" + iGroup + "_" + iNode,
+                            context: me._getLabelContext(nodeData)
+                        });
+
+                        me._textsp.addChild(text);
+
+                        //图形节点和text文本相互引用
+                        _node.label = text;
+                        text.shape = _node;
+                    }
+                });
+            });
+        }
+    }, {
+        key: "_getLabelContext",
+        value: function _getLabelContext(nodeData) {
+            var ctx = {
+                x: nodeData.pos.x,
+                y: nodeData.pos.y,
+                fillStyle: this.label.fontColor,
+                fontSize: this.label.fontSize,
+                textAlign: 'center',
+                textBaseline: 'middle'
+            };
+            if (this.animation) {
+                ctx.x = 0;
+                ctx.y = 0;
+            }
+            return ctx;
+        }
+    }, {
+        key: "_getNodeContext",
+        value: function _getNodeContext(nodeData) {
+            if (nodeData.shapeType == "circle") {
+                return this._getCircleContext(nodeData);
+            }
+        }
+    }, {
+        key: "_getCircleContext",
+        value: function _getCircleContext(nodeData) {
+            var ctx = {
+                x: nodeData.pos.x,
+                y: nodeData.pos.y,
+                r: nodeData.r,
+                fillStyle: nodeData.fillStyle,
+                strokeStyle: nodeData.strokeStyle,
+                lineWidth: nodeData.lineWidth,
+                globalAlpha: this.node.alpha
+            };
+            if (this.animation) {
+                ctx.x = 0;
+                ctx.y = 0;
+                ctx.r = 1;
+            }
+            return ctx;
+        }
+    }, {
+        key: "_getEventInfo",
+        value: function _getEventInfo(e, nodeData, iNode) {
+            var info = {
+                iGroup: nodeData.groupInd,
+                iNode: iNode,
+                nodesInfoList: [nodeData]
+            };
+            return info;
+        }
+
+        /**
+         * 生长动画
+         */
+
+    }, {
+        key: "grow",
+        value: function grow() {
+            _$14.each(this.data, function (nodeData) {
+                nodeData.shape.animate({
+                    x: nodeData.pos.x,
+                    y: nodeData.pos.y,
+                    r: nodeData.r
+                }, {
+                    onUpdate: function onUpdate(opt) {
+                        if (this.label) {
+                            this.label.context.x = opt.x;
+                            this.label.context.y = opt.y;
+                        }
+                    },
+                    delay: Math.round(Math.random() * 300)
+                });
+            });
+        }
+    }]);
+    return Graphs;
+}(canvax.Event.EventDispatcher);
+
+var _$17 = canvax._;
+
+function normalizeTickInterval(interval, magnitude) {
+    var normalized, i;
+    // var multiples = [1, 2, 2.5, 5, 10];
+    var multiples = [1, 2, 5, 10];
+    // round to a tenfold of 1, 2, 2.5 or 5
+    normalized = interval / magnitude;
+
+    // normalize the interval to the nearest multiple
+    for (var i = 0; i < multiples.length; i++) {
+        interval = multiples[i];
+        if (normalized <= (multiples[i] + (multiples[i + 1] || multiples[i])) / 2) {
+            break;
+        }
+    }
+
+    // multiply back to the correct magnitude
+    interval *= magnitude;
+
+    return interval;
+}
+
+function correctFloat(num) {
+    return parseFloat(num.toPrecision(14));
+}
+
+function getLinearTickPositions(arr, $maxPart, $cfg) {
+
+    arr = _$17.without(arr, undefined, null, "");
+
+    var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) : 1;
+    //返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
+    var isInt = $cfg && $cfg.isInt ? 1 : 0;
+
+    if (isNaN(scale)) {
+        scale = 1;
+    }
+
+    var max = _$17.max(arr);
+    var initMax = max;
+    max *= scale;
+    var min = _$17.min(arr);
+
+    if (min == max) {
+        if (max > 0) {
+            min = 0;
+            return [min, max];
+            // min= Math.round(max/2);
+        } else if (max < 0) {
+            return [max, 0];
+            //min = max*2;
+        } else {
+            max = 1;
+            return [0, max];
+        }
+    }
+
+    var length = max - min;
+    if (length) {
+        var tempmin = min; //保证min>0的时候不会出现负数
+        min -= length * 0.05;
+        // S.log(min +":"+ tempmin)
+        if (min < 0 && tempmin >= 0) {
+            min = 0;
+        }
+        max += length * 0.05;
+    }
+
+    var tickInterval = (max - min) * 0.3; //72 / 365;
+    var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
+
+    tickInterval = normalizeTickInterval(tickInterval, magnitude);
+    if (isInt) {
+        tickInterval = Math.ceil(tickInterval);
+    }
+
+    var pos,
+        lastPos,
+        roundedMin = correctFloat(Math.floor(min / tickInterval) * tickInterval),
+        roundedMax = correctFloat(Math.ceil(max / tickInterval) * tickInterval),
+        tickPositions = [];
+
+    // Populate the intermediate values
+    pos = roundedMin;
+    while (pos <= roundedMax) {
+
+        // Place the tick on the rounded value
+        tickPositions.push(pos);
+
+        // Always add the raw tickInterval, not the corrected one.
+        pos = correctFloat(pos + tickInterval);
+
+        // If the interval is not big enough in the current min - max range to actually increase
+        // the loop variable, we need to break out to prevent endless loop. Issue #619
+        if (pos === lastPos) {
+            break;
+        }
+
+        // Record the last value
+        lastPos = pos;
+    }
+    if (tickPositions.length >= 3) {
+        if (tickPositions[tickPositions.length - 2] >= initMax) {
+            tickPositions.pop();
+        }
+    }
+    return tickPositions;
+}
+
+var DataSection = {
+    section: function section($arr, $maxPart, $cfg) {
+        return _$17.uniq(getLinearTickPositions($arr, $maxPart, $cfg));
+    }
+};
+
+var Line$2 = canvax.Shapes.Line;
+var _$16 = canvax._;
+
+var xAxis = function (_Component) {
+    inherits$1(xAxis, _Component);
+
+    function xAxis(opts, data, _coordinate) {
+        classCallCheck$1(this, xAxis);
+
+        var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this));
+
+        _this._opts = opts;
+
+        _this._coordinate = _coordinate || {};
+
+        _this.width = 0;
+        _this.height = 0;
+
+        _this.label = "";
+        _this._label = null; //this.label对应的文本对象
+
+        _this.line = {
+            enabled: 1, //是否有line
+            width: 1,
+            height: 4,
+            marginTop: 2,
+            strokeStyle: '#cccccc'
+        };
+
+        _this.text = {
+            fillStyle: '#999',
+            fontSize: 12,
+            rotation: 0,
+            format: null,
+            marginTop: 2,
+            textAlign: "center"
+        };
+        _this.maxTxtH = 0;
+
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+
+        _this.display = true; //是否需要位置来绘制
+
+        _this.dataOrg = []; //源数据
+        _this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
+
+        _this._layoutDataSection = []; //dataSection的 format 后的数据
+        _this.layoutData = []; //{x:100, value:'1000',visible:true}
+
+        _this.sprite = null;
+
+        _this._textMaxWidth = 0;
+
+        //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
+        //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
+        _this.filter = null; //function(params){}; 
+
+        _this.isH = false; //是否为横向转向的x轴
+
+        _this.animation = true;
+        _this.resize = false;
+
+        //layoutType == "proportion"的时候才有效
+        _this.maxVal = null;
+        _this.minVal = null;
+
+        _this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
+
+        _this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
+
+        //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
+        //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
+        //function
+        _this.trimLayout = null;
+
+        _$16.extend(true, _this, opts);
+
+        _this.init(opts, data);
+
+        //xAxis的field只有一个值,
+        _this.field = _$16.flatten([_this.field])[0];
+        return _this;
+    }
+
+    createClass$1(xAxis, [{
+        key: "init",
+        value: function init(opts, data) {
+            this.sprite = new canvax.Display.Sprite({
+                id: "xAxisSprite"
+            });
+            this.rulesSprite = new canvax.Display.Sprite({
+                id: "rulesSprite"
+            });
+            this.sprite.addChild(this.rulesSprite);
+            this._initHandle(data);
+        }
+    }, {
+        key: "_initHandle",
+        value: function _initHandle(data) {
+            if (data && data.field) {
+                this.field = data.field;
+            }
+
+            if (data && data.org) {
+                this.dataOrg = _$16.flatten(data.org);
+            }
+
+            if (!this._opts.dataSection && this.dataOrg) {
+                //如果没有传入指定的dataSection，才需要计算dataSection
+                this.dataSection = this._initDataSection(this.dataOrg);
+            }
+
+            if (this.text.rotation != 0) {
+                //如果是旋转的文本，那么以右边为旋转中心点
+                this.text.textAlign = "right";
+            }
+
+            //先计算出来显示文本
+            this._layoutDataSection = this._formatDataSectionText(this.dataSection);
+
+            //然后计算好最大的 width 和 最大的height，外部组件需要用
+            this._setTextMaxWidth();
+            this._setXAxisHeight();
+
+            //取第一个数据来判断xaxis的刻度值类型是否为 number
+            this.minVal == null && (this.minVal = _$16.min(this.dataSection));
+            if (isNaN(this.minVal) || this.minVal == Infinity) {
+                this.minVal = 0;
+            }
+            this.maxVal == null && (this.maxVal = _$16.max(this.dataSection));
+            if (isNaN(this.maxVal) || this.maxVal == Infinity) {
+                this.maxVal = 1;
+            }
+        }
+
+        /**
+         *return dataSection 默认为xAxis.dataOrg的的faltten
+         *即 [ [1,2,3,4] ] -- > [1,2,3,4]
+         */
+
+    }, {
+        key: "_initDataSection",
+        value: function _initDataSection(data) {
+            var arr = _$16.flatten(data);
+            if (this.layoutType == "proportion") {
+                arr = DataSection.section(arr);
+            }
+            return arr;
+        }
+
+        //配置和数据变化
+
+    }, {
+        key: "resetData",
+        value: function resetData(dataFrame) {
+            this._initHandle(dataFrame);
+            this.draw();
+        }
+    }, {
+        key: "getIndexOfVal",
+        value: function getIndexOfVal(xvalue) {
+            var i;
+            for (var ii = 0, il = this.layoutData.length; ii < il; ii++) {
+                var obj = this.layoutData[ii];
+                if (obj.value == xvalue) {
+                    i = ii;
+                    break;
+                }
+            }
+
+            return i;
+        }
+    }, {
+        key: "getIndexOfX",
+        value: function getIndexOfX(x) {
+            var iNode = 0;
+            if (this.layoutType == "peak") {
+                iNode = parseInt(x / this.ceilWidth);
+                if (iNode == this.dataOrg.length) {
+                    iNode = this.dataOrg.length - 1;
+                }
+            }
+            if (this.layoutType == "rule") {
+                iNode = parseInt((x + this.ceilWidth / 2) / this.ceilWidth);
+            }
+            if (iNode >= this.dataOrg.length) {
+                iNode = this.dataOrg.length - 1;
+            }
+            return iNode;
+        }
+    }, {
+        key: "draw",
+        value: function draw(opts) {
+            //首次渲染从 直角坐标系组件中会传入 opts
+            this._getLabel();
+            this._computerConfit(opts);
+            this.layoutData = this._trimXAxis(this.dataSection);
+
+            this._trimLayoutData();
+
+            this.sprite.context.x = this.pos.x;
+            this.sprite.context.y = this.pos.y;
+
+            this._widget();
+
+            this.resize = false;
+        }
+    }, {
+        key: "_getLabel",
+        value: function _getLabel() {
+            if (this.label && this.label != "") {
+                if (!this._label) {
+                    this._label = new canvax.Display.Text(this.label, {
+                        context: {
+                            fontSize: this.text.fontSize,
+                            textAlign: this.isH ? "center" : "left",
+                            textBaseline: this.isH ? "top" : "middle",
+                            fillStyle: this.text.fillStyle,
+                            rotation: this.isH ? -90 : 0
+                        }
+                    });
+                } else {
+                    this._label.resetText(this.label);
+                }
+            }
+        }
+
+        //初始化配置
+
+    }, {
+        key: "_computerConfit",
+        value: function _computerConfit(opts) {
+            if (opts) {
+                _$16.extend(true, this, opts);
+            }
+
+            if (this._label) {
+                if (this.isH) {
+                    this.width -= this._label.getTextHeight() + 5;
+                } else {
+                    this.width -= this._label.getTextWidth() + 5;
+                }
+            }
+        }
+
+        //获取x对应的位置
+        //val ind 至少要有一个
+
+    }, {
+        key: "getPosX",
+        value: function getPosX(opts) {
+            var x = 0;
+            var val = opts.val;
+            var ind = "ind" in opts ? opts.ind : _$16.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
+            var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
+            var width = "width" in opts ? opts.width : this.width;
+            var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
+
+            if (dataLen == 1) {
+                x = width / 2;
+            } else {
+                if (layoutType == "rule") {
+                    //折线图的xyaxis就是 rule
+                    x = ind / (dataLen - 1) * width;
+                }
+                if (layoutType == "proportion") {
+                    //按照数据真实的值在minVal - maxVal 区间中的比例值
+                    if (val == undefined) {
+                        val = ind * (this.maxVal - this.minVal) / (dataLen - 1) + this.minVal;
+                    }
+                    x = width * ((val - this.minVal) / (this.maxVal - this.minVal));
+                }
+                if (layoutType == "peak") {
+                    //柱状图的就是peak 
+                    x = this.ceilWidth * (ind + 1) - this.ceilWidth / 2;
+                }
+            }
+
+            //if( this.posParseToInt ){
+            return parseInt(x, 10);
+            //} else { 
+            //return x;
+            //}
+        }
+    }, {
+        key: "_computerCeilWidth",
+        value: function _computerCeilWidth() {
+            //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
+            var width = this.width;
+            if (this.dataOrg.length == 0) {
+                this.ceilWidth = width;
+            } else {
+                this.ceilWidth = width / this.dataOrg.length;
+                if (this.layoutType == "rule") {
+                    if (this.dataOrg.length == 1) {
+                        this.ceilWidth = width / 2;
+                    } else {
+                        this.ceilWidth = width / (this.dataOrg.length - 1);
+                    }
+                }
+            }
+            return this.ceilWidth;
+        }
+    }, {
+        key: "_trimXAxis",
+        value: function _trimXAxis($data) {
+            var tmpData = [];
+            var data = $data || this.dataSection;
+
+            this.ceilWidth = this._computerCeilWidth();
+
+            for (var a = 0, al = data.length; a < al; a++) {
+                var layoutText = this._getFormatText(data[a]);
+                var txt = new canvax.Display.Text(layoutText, {
+                    context: {
+                        fontSize: this.text.fontSize
+                    }
+                });
+
+                var o = {
+                    value: data[a],
+                    layoutText: layoutText,
+                    x: this.getPosX({
+                        val: data[a],
+                        ind: a,
+                        dataLen: al,
+                        width: this.width
+                    }),
+                    textWidth: txt.getTextWidth(),
+                    field: this.field
+                };
+
+                tmpData.push(o);
+            }
+            return tmpData;
+        }
+    }, {
+        key: "_formatDataSectionText",
+        value: function _formatDataSectionText(arr) {
+            if (!arr) {
+                arr = this.dataSection;
+            }
+            var me = this;
+            var currArr = [];
+            _$16.each(arr, function (val) {
+                currArr.push(me._getFormatText(val));
+            });
+            return currArr;
+        }
+    }, {
+        key: "_setXAxisHeight",
+        value: function _setXAxisHeight() {
+            //检测下文字的高等
+            if (!this.display) {
+                this.height = 3;
+            } else {
+                var txt = new canvax.Display.Text(this._layoutDataSection[0] || "test", {
+                    context: {
+                        fontSize: this.text.fontSize
+                    }
+                });
+
+                this.maxTxtH = txt.getTextHeight();
+
+                if (!!this.text.rotation) {
+                    if (this.text.rotation % 90 == 0) {
+                        this.height = parseInt(this._textMaxWidth);
+                    } else {
+                        var sinR = Math.sin(Math.abs(this.text.rotation) * Math.PI / 180);
+                        var cosR = Math.cos(Math.abs(this.text.rotation) * Math.PI / 180);
+                        this.height = parseInt(sinR * this._textMaxWidth + txt.getTextHeight() + 5);
+                    }
+                } else {
+                    this.height = parseInt(this.maxTxtH);
+                }
+
+                this.height += this.line.height + this.line.marginTop + this.text.marginTop;
+            }
+        }
+    }, {
+        key: "_getFormatText",
+        value: function _getFormatText(text) {
+            var res;
+            if (_$16.isFunction(this.text.format)) {
+                res = this.text.format(text);
+            } else {
+                res = text;
+            }
+            if (_$16.isArray(res)) {
+                res = Tools.numAddSymbol(res);
+            }
+            if (!res) {
+                res = text;
+            }
+            return res;
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            if (!this.display) return;
+
+            var arr = this.layoutData;
+
+            if (this._label) {
+                this._label.context.x = this.width + 5;
+                this.sprite.addChild(this._label);
+            }
+
+            var delay = Math.min(1000 / arr.length, 25);
+
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var xNodeId = "xNode" + a;
+
+                var xNode = this.rulesSprite.getChildById(xNodeId);
+                if (!xNode) {
+                    xNode = new canvax.Display.Sprite({
+                        id: xNodeId
+                    });
+                    this.rulesSprite.addChild(xNode);
+                }
+
+                xNode.context.visible = !!arr[a].visible;
+
+                var o = arr[a];
+                var x = o.x,
+                    y = this.line.height + this.line.marginTop + this.text.marginTop;
+
+                //文字
+                var textContext = {
+                    x: o.text_x || o.x,
+                    y: y + 20,
+                    fillStyle: this.text.fillStyle,
+                    fontSize: this.text.fontSize,
+                    rotation: -Math.abs(this.text.rotation),
+                    textAlign: this.text.textAlign,
+                    textBaseline: !!this.text.rotation ? "middle" : "top",
+                    globalAlpha: 0
+                };
+
+                if (!!this.text.rotation && this.text.rotation != 90) {
+                    textContext.x += 5;
+                    textContext.y += 3;
+                }
+
+                if (xNode._txt) {
+                    //_.extend( xNode._txt.context , textContext );
+                    //debugger
+                    xNode._txt.resetText(o.layoutText + "");
+                    if (this.animation) {
+                        xNode._txt.animate({
+                            x: textContext.x
+                        }, {
+                            duration: 300
+                        });
+                    } else {
+                        xNode._txt.context.x = textContext.x;
+                    }
+                } else {
+
+                    xNode._txt = new canvax.Display.Text(o.layoutText, {
+                        id: "xAxis_txt_" + a,
+                        context: textContext
+                    });
+                    xNode.addChild(xNode._txt);
+
+                    //新建的 txt的 动画方式
+                    if (this.animation && !this.resize) {
+                        xNode._txt.animate({
+                            globalAlpha: 1,
+                            y: xNode._txt.context.y - 20
+                        }, {
+                            duration: 500,
+                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                            delay: a * delay,
+                            id: xNode._txt.id
+                        });
+                    } else {
+                        xNode._txt.context.y = xNode._txt.context.y - 20;
+                        xNode._txt.context.globalAlpha = 1;
+                    }
+                }
+
+                if (this.line.enabled) {
+                    var lineContext = {
+                        x: x,
+                        y: this.line.marginTop,
+                        end: {
+                            x: 0,
+                            y: this.line.height
+                        },
+                        lineWidth: this.line.width,
+                        strokeStyle: this.line.strokeStyle
+                    };
+                    if (xNode._line) {
+                        //_.extend( xNode._txt.context , textContext );
+                        if (this.animation) {
+                            xNode._line.animate({
+                                x: lineContext.x
+                            }, {
+                                duration: 300
+                            });
+                        } else {
+                            xNode._line.context.x = lineContext.x;
+                        }
+                    } else {
+                        xNode._line = new Line$2({
+                            context: lineContext
+                        });
+                        xNode.addChild(xNode._line);
+                    }
+                }
+
+                //这里可以由用户来自定义过滤 来 决定 该node的样式
+                _$16.isFunction(this.filter) && this.filter({
+                    layoutData: arr,
+                    index: a,
+                    txt: xNode._txt,
+                    line: xNode._line || null
+                });
+            }
+
+            //把sprite.children中多余的给remove掉
+            if (this.rulesSprite.children.length > arr.length) {
+                for (var al = arr.length, pl = this.rulesSprite.children.length; al < pl; al++) {
+                    this.rulesSprite.getChildAt(al).remove();
+                    al--, pl--;
+                }
+            }
+        }
+    }, {
+        key: "_setTextMaxWidth",
+        value: function _setTextMaxWidth() {
+            var arr = this._layoutDataSection;
+            var maxLenText = arr[0];
+
+            for (var a = 0, l = arr.length; a < l; a++) {
+                if ((arr[a] + '').length > maxLenText.length) {
+                    maxLenText = arr[a];
+                }
+            }
+
+            var txt = new canvax.Display.Text(maxLenText || "test", {
+                context: {
+                    fillStyle: this.text.fillStyle,
+                    fontSize: this.text.fontSize
+                }
+            });
+
+            this._textMaxWidth = txt.getTextWidth();
+            this._textMaxHeight = txt.getTextHeight();
+
+            return this._textMaxWidth;
+        }
+    }, {
+        key: "_trimLayoutData",
+        value: function _trimLayoutData() {
+            var me = this;
+            var arr = this.layoutData;
+            var l = arr.length;
+
+            if (!this.display || !l) return;
+
+            // rule , peak, proportion
+            if (me.layoutType == "proportion") {
+                this._checkOver();
+            }
+            if (me.layoutType == "peak") {
+                //TODO: peak暂时沿用 _checkOver ，这是保险的万无一失的。
+                this._checkOver();
+            }
+
+            if (me.layoutType == "rule") {
+                this._checkOver();
+            }
+        }
+    }, {
+        key: "_getRootPR",
+        value: function _getRootPR() {
+            //找到paddingRight,在最后一个文本右移的时候需要用到
+            var rootPaddingRight = 0;
+            if (this._coordinate._root) {
+                rootPaddingRight = this._coordinate._root.padding.right;
+            }
+            return rootPaddingRight;
+        }
+    }, {
+        key: "_checkOver",
+        value: function _checkOver() {
+            var me = this;
+            var arr = me.layoutData;
+
+            //现在的柱状图的自定义datasection有缺陷
+            if (me.trimLayout) {
+                //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
+                //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
+                me.trimLayout(arr);
+                return;
+            }
+
+            var l = arr.length;
+
+            function checkOver(i) {
+                var curr = arr[i];
+
+                if (curr === undefined) {
+                    return;
+                }
+                curr.visible = true;
+                for (var ii = i; ii < l - 1; ii++) {
+                    var next = arr[ii + 1];
+
+                    var nextWidth = next.textWidth;
+                    var currWidth = curr.textWidth;
+
+                    //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
+                    if (!!me.text.rotation) {
+                        nextWidth = 35;
+                        currWidth = 35;
+                    }
+
+                    var next_x = next.x;
+                    if (me.text.textAlign == "center") {
+                        next_x = next.x - nextWidth / 2;
+                    }
+
+                    if (ii == l - 2) {
+                        //next是最后一个
+                        if (me.text.textAlign == "center" && next.x + nextWidth / 2 > me.width) {
+                            next_x = me.width - nextWidth;
+                            next.text_x = me.width - nextWidth / 2 + me._getRootPR();
+                        }
+                        if (me.text.textAlign == "left" && next.x + nextWidth > me.width) {
+                            next_x = me.width - nextWidth;
+                            next.text_x = me.width - nextWidth;
+                        }
+                    }
+
+                    if (next_x < curr.x + currWidth / 2) {
+                        if (ii == l - 2) {
+                            //最后一个的话，反把前面的给hide
+                            next.visible = true;
+                            curr.visible = false;
+                            return;
+                        } else {
+                            next.visible = false;
+                        }
+                    } else {
+                        checkOver(ii + 1);
+                        break;
+                    }
+                }
+            }
+
+            checkOver(0);
+        }
+    }]);
+    return xAxis;
+}(component);
+
+var Line$3 = canvax.Shapes.Line;
+var _$18 = canvax._;
+
+var yAxis = function (_Component) {
+    inherits$1(yAxis, _Component);
+
+    function yAxis(opt, data) {
+        classCallCheck$1(this, yAxis);
+
+        var _this = possibleConstructorReturn$1(this, (yAxis.__proto__ || Object.getPrototypeOf(yAxis)).call(this));
+
+        _this._opt = opt;
+
+        _this.width = null; //第一次计算后就会有值
+        _this.display = true; //true false 1,0都可以
+
+        _this.maxW = 0; //最大文本的 width
+        _this.field = []; //这个 轴 上面的 field
+
+        _this.label = "";
+        _this._label = null; //label 的text对象
+
+        _this.line = {
+            enabled: 1, //是否有line
+            width: 4,
+            lineWidth: 1,
+            strokeStyle: '#cccccc',
+            marginToLine: 2
+        };
+
+        _this.text = {
+            fillStyle: '#999',
+            fontSize: 12,
+            format: null,
+            rotation: 0,
+            marginToLine: 3 //和刻度线的距离
+        };
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+        _this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
+
+        _this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
+        _this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
+        _this.waterLine = null; //水位data，需要混入 计算 dataSection， 如果有设置waterLineData， dataSection的最高水位不会低于这个值
+
+        //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
+        _this.dataSectionGroup = [];
+
+        //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
+        _this.middleweight = null;
+
+        _this.dataOrg = data.org || []; //源数据
+
+        _this.sprite = null;
+
+        _this.yMaxHeight = 0; //y轴最大高
+        _this.yGraphsHeight = 0; //y轴第一条线到原点的高
+
+        _this.baseNumber = null; //为非负number
+        _this.basePoint = null; //value为 baseNumber 的point {x,y}
+        _this.bottomNumber = null; //如果手动设置了 bottomNumber 为负数，则baseNumber＝0，否则baseNumber 就 等于设置的 bottomNumber
+
+        _this._yOriginTrans = 0; //当设置的 baseNumber 和datasection的min不同的时候，
+
+
+        //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
+        //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
+        _this.filter = null; //function(params){}; 
+
+        _this.isH = false; //是否横向
+
+        _this.animation = true;
+        _this.resize = false;
+
+        _this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
+
+        _this.layoutType = "proportion"; // rule , peak, proportion
+
+        _this.init(opt, data);
+        return _this;
+    }
+
+    createClass$1(yAxis, [{
+        key: "init",
+        value: function init(opt, data) {
+            _$18.extend(true, this, opt);
+
+            //extend会设置好this.field
+            //先要矫正子啊field确保一定是个array
+            if (!_$18.isArray(this.field)) {
+                this.field = [this.field];
+            }
+
+            this._initData();
+
+            this.sprite = new canvax.Display.Sprite({
+                id: "yAxisSprite_" + new Date().getTime()
+            });
+            this.rulesSprite = new canvax.Display.Sprite({
+                id: "yRulesSprite_" + new Date().getTime()
+            });
+            this.sprite.addChild(this.rulesSprite);
+        }
+
+        //配置和数据变化
+
+    }, {
+        key: "resetData",
+        value: function resetData(dataFrame) {
+            this.dataSection = [];
+            this.dataSectionGroup = [];
+
+            if (dataFrame && dataFrame.field) {
+                this.field = dataFrame.field;
+            }
+
+            if (dataFrame && dataFrame.org) {
+                this.dataOrg = dataFrame.org; //这里必须是data.org
+            }
+
+            this._initData();
+
+            this._trimYAxis();
+            this._widget();
+        }
+    }, {
+        key: "setX",
+        value: function setX($n) {
+            this.sprite.context.x = $n;
+            this.pos.x = $n;
+        }
+    }, {
+        key: "setY",
+        value: function setY($n) {
+            this.sprite.context.y = $n;
+            this.pos.y = $n;
+        }
+    }, {
+        key: "setAllStyle",
+        value: function setAllStyle(sty) {
+            _$18.each(this.rulesSprite.children, function (s) {
+                _$18.each(s.children, function (cel) {
+                    if (cel.type == "text") {
+                        cel.context.fillStyle = sty;
+                    } else if (cel.type == "line") {
+                        cel.context.strokeStyle = sty;
+                    }
+                });
+            });
+        }
+    }, {
+        key: "_getLabel",
+        value: function _getLabel() {
+            var _label = this.label;
+
+            if (_label && _label != "") {
+                this._label = new canvax.Display.Text(_label, {
+                    context: {
+                        fontSize: this.text.fontSize,
+                        textAlign: this.align == "left" ? "right" : "left", //"left",
+                        textBaseline: this.isH ? "top" : "bottom",
+                        fillStyle: this.text.fillStyle,
+                        rotation: this.isH ? -90 : 0
+                    }
+                });
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            opt && _$18.extend(true, this, opt);
+            this._getLabel();
+            this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine();
+
+            if (this._label) {
+                if (this.isH) {
+                    this.yGraphsHeight -= this._label.getTextWidth();
+                } else {
+                    this.yGraphsHeight -= this._label.getTextHeight();
+                }
+                this._label.context.y = -this.yGraphsHeight - 5;
+            }
+
+            this._trimYAxis();
+            this._widget();
+
+            this.setX(this.pos.x);
+            this.setY(this.pos.y);
+
+            if (this._label) {
+                if (this.align == "left") {
+                    this._label.context.x += this.width;
+                }
+            }
+
+            this.resize = false;
+        }
+
+        //更具y轴的值来输出对应的在y轴上面的位置
+
+    }, {
+        key: "getYposFromVal",
+        value: function getYposFromVal(val) {
+
+            var y = 0;
+            var dsgLen = this.dataSectionGroup.length;
+            var yGroupHeight = this.yGraphsHeight / dsgLen;
+
+            for (var i = 0, l = dsgLen; i < l; i++) {
+                var ds = this.dataSectionGroup[i];
+                var min = _$18.min(ds);
+                var max = _$18.max(ds);
+                var valInd = _$18.indexOf(ds, val);
+
+                if (val >= min && val <= max || valInd >= 0) {
+                    if (this.layoutType == "proportion") {
+                        var _baseNumber = this.baseNumber;
+                        //如果 baseNumber 并不在这个区间
+                        if (_baseNumber < min || _baseNumber > max) {
+                            _baseNumber = min;
+                        } else {
+                            //如果刚好在这个区间Group
+
+                        }
+                        var maxGroupDisABS = Math.max(Math.abs(max - _baseNumber), Math.abs(_baseNumber - min));
+                        var amountABS = Math.abs(max - min);
+                        var h = maxGroupDisABS / amountABS * yGroupHeight;
+                        y = (val - _baseNumber) / maxGroupDisABS * h + i * yGroupHeight;
+
+                        if (isNaN(y)) {
+                            y = i * yGroupHeight;
+                        }
+                    }
+                    if (this.layoutType == "rule") {
+                        //line 的xaxis就是 rule
+                        y = valInd / (ds.length - 1) * yGroupHeight;
+                    }
+                    if (this.layoutType == "peak") {
+                        //bar的xaxis就是 peak
+                        y = yGroupHeight / ds.length * (valInd + 1) - yGroupHeight / ds.length / 2;
+                    }
+
+                    y += this._yOriginTrans;
+                    break;
+                }
+            }
+            //返回的y是以最底端为坐标原点的坐标值，所以就是负数
+            if (this.sort == "desc") {
+                y = Math.abs(this.yGraphsHeight - Math.abs(y));
+            }
+            return -y;
+        }
+    }, {
+        key: "getValFromYpos",
+        value: function getValFromYpos(y) {
+            var start = this.layoutData[0];
+            var end = this.layoutData.slice(-1)[0];
+            var val = (end.content - start.content) * ((y - start.y) / (end.y - start.y)) + start.content;
+            return val;
+        }
+    }, {
+        key: "_getYOriginTrans",
+        value: function _getYOriginTrans(baseNumber) {
+            var y = 0;
+            var dsgLen = this.dataSectionGroup.length;
+            var yGroupHeight = this.yGraphsHeight / dsgLen;
+
+            for (var i = 0, l = dsgLen; i < l; i++) {
+                var ds = this.dataSectionGroup[i];
+                var min = _$18.min(ds);
+                var max = _$18.max(ds);
+
+                var amountABS = Math.abs(max - min);
+
+                if (baseNumber >= min && baseNumber <= max) {
+                    y = (baseNumber - min) / amountABS * yGroupHeight + i * yGroupHeight;
+                    break;
+                }
+            }
+
+            y = isNaN(y) ? 0 : parseInt(y);
+
+            if (this.sort == "desc") {
+                //如果是倒序的
+                y = -(yGroupHeight - Math.abs(y));
+            }
+
+            return y;
+        }
+    }, {
+        key: "_trimYAxis",
+        value: function _trimYAxis() {
+
+            var tmpData = [];
+            //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
+            //this._yOriginTrans = this._getYOriginTrans( 0 );
+            var originVal = _$18.min(this.dataSection);
+            if (originVal < 0) {
+                originVal = 0;
+            }
+
+            //originVal = this.baseNumber;
+            this._yOriginTrans = this._getYOriginTrans(originVal);
+
+            //设置 basePoint
+            this.basePoint = {
+                content: this.baseNumber,
+                y: this.getYposFromVal(this.baseNumber)
+            };
+
+            for (var a = 0, al = this.dataSection.length; a < al; a++) {
+                tmpData[a] = {
+                    content: this.dataSection[a],
+                    y: this.getYposFromVal(this.dataSection[a])
+                };
+            }
+            this.layoutData = tmpData;
+        }
+    }, {
+        key: "_getYAxisDisLine",
+        value: function _getYAxisDisLine() {
+            //获取y轴顶高到第一条线之间的距离         
+            var disMin = 0;
+            var disMax = 2 * disMin;
+            var dis = disMin;
+            dis = disMin + this.yMaxHeight % this.dataSection.length;
+            dis = dis > disMax ? disMax : dis;
+            return dis;
+        }
+    }, {
+        key: "_setDataSection",
+        value: function _setDataSection() {
+            //如果有堆叠，比如[ ["uv","pv"], "click" ]
+            //那么这个 this.dataOrg， 也是个对应的结构
+            //vLen就会等于2
+            var vLen = 1;
+
+            _$18.each(this.field, function (f) {
+                vLen = Math.max(vLen, 1);
+                if (_$18.isArray(f)) {
+                    _$18.each(f, function (_f) {
+                        vLen = Math.max(vLen, 2);
+                    });
+                }
+            });
+
+            if (vLen == 1) {
+                return this._oneDimensional();
+            }
+            if (vLen == 2) {
+                return this._twoDimensional();
+            }
+        }
+    }, {
+        key: "_oneDimensional",
+        value: function _oneDimensional() {
+            var arr = _$18.flatten(this.dataOrg); //_.flatten( data.org );
+
+            for (var i = 0, il = arr.length; i < il; i++) {
+                arr[i] = arr[i] || 0;
+            }
+
+            return arr;
+        }
+
+        //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
+
+    }, {
+        key: "_twoDimensional",
+        value: function _twoDimensional() {
+            var d = this.dataOrg;
+            var arr = [];
+            var min;
+            _$18.each(d, function (d, i) {
+                if (!d.length) {
+                    return;
+                }
+
+                //有数据的情况下 
+                if (!_$18.isArray(d[0])) {
+                    arr.push(d);
+                    return;
+                }
+
+                var varr = [];
+                var len = d[0].length;
+                var vLen = d.length;
+
+                for (var i = 0; i < len; i++) {
+                    var up_count = 0;
+                    var up_i = 0;
+
+                    var down_count = 0;
+                    var down_i = 0;
+
+                    for (var ii = 0; ii < vLen; ii++) {
+                        !min && (min = d[ii][i]);
+                        min = Math.min(min, d[ii][i]);
+
+                        if (d[ii][i] >= 0) {
+                            up_count += d[ii][i];
+                            up_i++;
+                        } else {
+                            down_count += d[ii][i];
+                            down_i++;
+                        }
+                    }
+                    up_i && varr.push(up_count);
+                    down_i && varr.push(down_count);
+                }
+                arr.push(varr);
+            });
+            arr.push(min);
+            return _$18.flatten(arr);
+        }
+    }, {
+        key: "_initData",
+        value: function _initData() {
+
+            var arr = this._setDataSection();
+
+            if (this.waterLine != null) {
+                arr.push(this.waterLine);
+            }
+
+            if (this._opt.bottomNumber != null) {
+                arr.push(this.bottomNumber);
+            }
+            if (arr.length == 1) {
+                arr.push(arr[0] * 2);
+            }
+
+            //如果用户传入了自定义的dataSection， 那么优先级最高
+            if (!this._opt.dataSection) {
+
+                if (this._opt.baseNumber != undefined) {
+                    arr.push(this.baseNumber);
+                }
+                if (this._opt.minNumber != undefined) {
+                    arr.push(this.minNumber);
+                }
+                if (this._opt.maxNumber != undefined) {
+                    arr.push(this.maxNumber);
+                }
+
+                for (var ai = 0, al = arr.length; ai < al; ai++) {
+                    arr[ai] = Number(arr[ai]);
+                    if (isNaN(arr[ai])) {
+                        arr.splice(ai, 1);
+                        ai--;
+                        al--;
+                    }
+                }
+
+                this.dataSection = DataSection.section(arr, 3);
+            } else {
+                this.dataSection = this._opt.dataSection;
+            }
+
+            //如果还是0
+            if (this.dataSection.length == 0) {
+                this.dataSection = [0];
+            }
+            this.dataSectionGroup = [_$18.clone(this.dataSection)];
+
+            this._sort();
+            this._setBottomAndBaseNumber();
+
+            this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
+        }
+
+        //yVal 要被push到datasection 中去的 值
+
+    }, {
+        key: "setWaterLine",
+        value: function setWaterLine(yVal) {
+            if (yVal <= this.waterLine) return;
+
+            if (yVal < _$18.min(this.dataSection) || yVal > _$18.max(this.dataSection)) {
+                this.waterLine = yVal;
+                this._initData();
+            }
+        }
+    }, {
+        key: "_sort",
+        value: function _sort() {
+            if (this.sort) {
+                var sort = this._getSortType();
+                if (sort == "desc") {
+                    this.dataSection.reverse();
+
+                    //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
+                    _$18.each(this.dataSectionGroup, function (dsg, i) {
+                        dsg.reverse();
+                    });
+                    this.dataSectionGroup.reverse();
+                    //dataSectionGroup reverse end
+                }
+            }
+        }
+    }, {
+        key: "_getSortType",
+        value: function _getSortType() {
+            var _sort;
+            if (_$18.isString(this.sort)) {
+                _sort = this.sort;
+            }
+            if (_$18.isArray(this.sort)) {
+                _sort = this.sort[this.align == "left" ? 0 : 1];
+            }
+            if (!_sort) {
+                _sort = "asc";
+            }
+            return _sort;
+        }
+    }, {
+        key: "_setBottomAndBaseNumber",
+        value: function _setBottomAndBaseNumber() {
+            if (this.bottomNumber == null) {
+                this.bottomNumber = this.dataSection[0];
+            }
+
+            //没人情况下 baseNumber 就是datasection的最小值
+            if (this._opt.baseNumber == undefined || this._opt.baseNumber == null) {
+                this.baseNumber = this.dataSection[0]; //_.min( this.dataSection );
+                if (this.baseNumber < 0) {
+                    this.baseNumber = 0;
+                }
+            }
+        }
+    }, {
+        key: "_middleweight",
+        value: function _middleweight() {
+            if (this.middleweight) {
+                //支持多个量级的设置
+                //量级的设置只支持非sort的柱状图场景，否则这里修改过的datasection会和 _initData 中sort过的逻辑有冲突
+                if (!_$18.isArray(this.middleweight)) {
+                    this.middleweight = [this.middleweight];
+                }
+
+                //拿到dataSection中的min和 max 后，用middleweight数据重新设置一遍dataSection
+                var dMin = _$18.min(this.dataSection);
+                var dMax = _$18.max(this.dataSection);
+                var newDS = [dMin];
+                var newDSG = [];
+
+                for (var i = 0, l = this.middleweight.length; i < l; i++) {
+                    var preMiddleweight = dMin;
+                    if (i > 0) {
+                        preMiddleweight = this.middleweight[i - 1];
+                    }
+                    var middleVal = preMiddleweight + parseInt((this.middleweight[i] - preMiddleweight) / 2);
+
+                    newDS.push(middleVal);
+                    newDS.push(this.middleweight[i]);
+
+                    newDSG.push([preMiddleweight, middleVal, this.middleweight[i]]);
+                }
+                var lastMW = this.middleweight.slice(-1)[0];
+                newDS.push(lastMW + (dMax - lastMW) / 2);
+                newDS.push(dMax);
+
+                newDSG.push([lastMW, lastMW + (dMax - lastMW) / 2, dMax]);
+
+                //好了。 到这里用简单的规则重新拼接好了新的 dataSection
+                this.dataSection = newDS;
+                this.dataSectionGroup = newDSG;
+
+                //因为重新设置过了 dataSection 所以要重新排序和设置bottom and base 值
+                this._sort();
+                this._setBottomAndBaseNumber();
+            }
+        }
+    }, {
+        key: "resetWidth",
+        value: function resetWidth(width) {
+            var self = this;
+            self.width = width;
+            if (self.align == "left") {
+                self.rulesSprite.context.x = self.width;
+            }
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            var self = this;
+            if (!self.display) {
+                self.width = 0;
+                return;
+            }
+
+            var arr = this.layoutData;
+            self.maxW = 0;
+            self._label && self.sprite.addChild(self._label);
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var o = arr[a];
+                var y = o.y;
+                var content = o.content;
+
+                if (_$18.isFunction(self.text.format)) {
+                    content = self.text.format(content, self);
+                }
+                if (content === undefined || content === null) {
+                    content = Tools.numAddSymbol(o.content);
+                }
+
+                var textAlign = self.align == "left" ? "right" : "left";
+
+                var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
+                //为横向图表把y轴反转后的 逻辑
+                if (self.text.rotation == 90 || self.text.rotation == -90) {
+                    textAlign = "center";
+                    if (a == arr.length - 1) {
+                        posy = y - 2;
+                        textAlign = "right";
+                    }
+                    if (a == 0) {
+                        posy = y;
+                    }
+                }
+
+                var yNode = this.rulesSprite.getChildAt(a);
+
+                if (yNode) {
+                    if (yNode._txt) {
+                        yNode._txt.animate({
+                            y: posy
+                        }, {
+                            duration: 500,
+                            delay: a * 80,
+                            id: yNode._txt.id
+                        });
+                        yNode._txt.resetText(content);
+                    }
+
+                    if (yNode._line) {
+                        yNode._line.animate({
+                            y: y
+                        }, {
+                            duration: 500,
+                            delay: a * 80,
+                            id: yNode._line.id
+                        });
+                    }
+                } else {
+                    yNode = new canvax.Display.Sprite({
+                        id: "yNode" + a
+                    });
+
+                    var aniFrom = 20;
+                    if (content == self.baseNumber) {
+                        aniFrom = 0;
+                    }
+                    if (content < self.baseNumber) {
+                        aniFrom = -20;
+                    }
+
+                    var lineX = 0;
+                    if (self.line.enabled) {
+                        //线条
+                        lineX = self.align == "left" ? -self.line.width - self.line.marginToLine : self.line.marginToLine;
+                        var line = new Line$3({
+                            context: {
+                                x: lineX,
+                                y: y,
+                                end: {
+                                    x: self.line.width,
+                                    y: 0
+                                },
+                                lineWidth: self.line.lineWidth,
+                                strokeStyle: self._getProp(self.line.strokeStyle)
+                            }
+                        });
+                        yNode.addChild(line);
+                        yNode._line = line;
+                    }
+
+                    //文字
+                    var txtX = self.align == "left" ? lineX - self.text.marginToLine : lineX + self.line.width + self.text.marginToLine;
+                    if (this.isH) {
+                        txtX = txtX + (self.align == "left" ? -1 : 1) * 4;
+                    }
+                    var txt = new canvax.Display.Text(content, {
+                        id: "yAxis_txt_" + self.align + "_" + a,
+                        context: {
+                            x: txtX,
+                            y: posy + aniFrom,
+                            fillStyle: self._getProp(self.text.fillStyle),
+                            fontSize: self.text.fontSize,
+                            rotation: -Math.abs(this.text.rotation),
+                            textAlign: textAlign,
+                            textBaseline: "middle",
+                            globalAlpha: 0
+                        }
+                    });
+                    yNode.addChild(txt);
+                    yNode._txt = txt;
+
+                    self.maxW = Math.max(self.maxW, txt.getTextWidth());
+                    if (self.text.rotation == 90 || self.text.rotation == -90) {
+                        self.maxW = Math.max(self.maxW, txt.getTextHeight());
+                    }
+
+                    //这里可以由用户来自定义过滤 来 决定 该node的样式
+                    _$18.isFunction(self.filter) && self.filter({
+                        layoutData: self.layoutData,
+                        index: a,
+                        txt: txt,
+                        line: line
+                    });
+
+                    self.rulesSprite.addChild(yNode);
+
+                    //如果是resize的话也不要处理动画
+                    if (self.animation && !self.resize) {
+                        txt.animate({
+                            globalAlpha: 1,
+                            y: txt.context.y - aniFrom
+                        }, {
+                            duration: 500,
+                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                            delay: (a + 1) * 80,
+                            id: txt.id
+                        });
+                    } else {
+                        txt.context.y = txt.context.y - aniFrom;
+                        txt.context.globalAlpha = 1;
+                    }
+                }
+            }
+
+            //把 rulesSprite.children中多余的给remove掉
+            if (self.rulesSprite.children.length > arr.length) {
+                for (var al = arr.length, pl = self.rulesSprite.children.length; al < pl; al++) {
+                    self.rulesSprite.getChildAt(al).remove();
+                    al--, pl--;
+                }
+            }
+
+            self.maxW += self.text.marginToLine;
+            if (self.width === null) {
+                self.width = parseInt(self.maxW + self.text.marginToLine);
+                if (self.line.enabled) {
+                    self.width += parseInt(self.line.width + self.line.marginToLine);
+                }
+            }
+
+            if (self.align == "left") {
+                self.rulesSprite.context.x = self.width;
+            }
+        }
+    }, {
+        key: "_getProp",
+        value: function _getProp(s) {
+            var res = s;
+            if (_$18.isFunction(s)) {
+                res = s.call(this, this);
+            }
+            if (!s) {
+                res = "#999";
+            }
+            return res;
+        }
+    }]);
+    return yAxis;
+}(component);
+
+var Line$4 = canvax.Shapes.Line;
+var Rect$7 = canvax.Shapes.Rect;
+var _$19 = canvax._;
+
+var Grid = function (_Component) {
+    inherits$1(Grid, _Component);
+
+    function Grid(opt, root) {
+        classCallCheck$1(this, Grid);
+
+        var _this = possibleConstructorReturn$1(this, (Grid.__proto__ || Object.getPrototypeOf(Grid)).call(this, opt, root));
+
+        _this.w = 0;
+        _this.h = 0;
+        _this.root = root; //该组件被添加到的目标图表项目，
+
+        _this.pos = {
+            x: 0,
+            y: 0
+        };
+
+        _this.display = 1;
+
+        _this.xOrigin = { //原点开始的x轴线
+            display: 1,
+            lineWidth: 1,
+            strokeStyle: '#ccc'
+        };
+        _this.yOrigin = { //原点开始的y轴线               
+            display: 1,
+            lineWidth: 1,
+            strokeStyle: '#ccc'
+        };
+        _this.xAxis = { //x轴上的线
+            display: 1,
+            data: [], //[{y:100},{}]
+            org: null, //x轴坐标原点，默认为上面的data[0]
+            // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
+            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
+            lineWidth: 1,
+            strokeStyle: '#f0f0f0', //'#e5e5e5',
+            filter: null
+        };
+        _this.yAxis = { //y轴上的线
+            display: 0,
+            data: [], //[{x:100},{}]
+            xDis: 0,
+            org: null, //y轴坐标原点，默认为上面的data[0]
+            // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
+            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
+            lineWidth: 1,
+            strokeStyle: '#f0f0f0', //'#e5e5e5',
+            filter: null
+        };
+        _this.fill = {
+            fillStyle: null,
+            alpha: null
+        };
+
+        _this.sprite = null; //总的sprite
+        _this.xAxisSp = null; //x轴上的线集合
+        _this.yAxisSp = null; //y轴上的线集合
+
+        _this.animation = true;
+        _this.resize = false;
+
+        _this.init(opt);
+        return _this;
+    }
+
+    createClass$1(Grid, [{
+        key: "init",
+        value: function init(opt) {
+            _$19.extend(true, this, opt);
+            this.sprite = new canvax.Display.Sprite();
+        }
+    }, {
+        key: "setX",
+        value: function setX($n) {
+            this.sprite.context.x = $n;
+        }
+    }, {
+        key: "setY",
+        value: function setY($n) {
+            this.sprite.context.y = $n;
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            _$19.extend(true, this, opt);
+            //this._configData(opt);
+            this._widget();
+            this.setX(this.pos.x);
+            this.setY(this.pos.y);
+        }
+    }, {
+        key: "clean",
+        value: function clean() {
+            this.sprite.removeAllChildren();
+        }
+    }, {
+        key: "reset",
+        value: function reset(opt) {
+            this.sprite.removeAllChildren();
+            this.draw(opt);
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+
+            var self = this;
+            if (!this.display) {
+                return;
+            }
+
+            //不管怎么样，grid的布局依赖 只依赖_yAxis的第一个对象
+            //TODO: 这里应该是要获取第一个有显示field的_yAxis对象。
+            //也就是说当第一个_yAxis上面的field都enabled为false了后，就要取_yAxis[1],后面改
+            var _yAxis = self.root._yAxis[0];
+
+            if (self.root && _yAxis && _yAxis.dataSectionGroup) {
+                self.yGroupSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yGroupSp);
+                for (var g = 0, gl = _yAxis.dataSectionGroup.length; g < gl; g++) {
+                    var yGroupHeight = _yAxis.yGraphsHeight / gl;
+                    var groupRect = new Rect$7({
+                        context: {
+                            x: 0,
+                            y: -yGroupHeight * g,
+                            width: self.w,
+                            height: -yGroupHeight,
+                            fillStyle: self.fill.fillStyle || "#000",
+                            fillAlpha: self.fill.alpha || 0.025 * (g % 2)
+                        }
+                    });
+
+                    self.yGroupSp.addChild(groupRect);
+                }
+            }
+
+            self.xAxisSp = new canvax.Display.Sprite(), self.sprite.addChild(self.xAxisSp);
+            self.yAxisSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yAxisSp);
+
+            //x轴方向的线集合
+            var arr = self.xAxis.data;
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var o = arr[a];
+
+                var line = new Line$4({
+                    id: "back_line_" + a,
+                    context: {
+                        y: o.y,
+                        lineType: self.xAxis.lineType,
+                        lineWidth: self.xAxis.lineWidth,
+                        strokeStyle: self.xAxis.strokeStyle
+                    }
+                });
+                if (self.xAxis.display) {
+                    _$19.isFunction(self.xAxis.filter) && self.xAxis.filter.apply(line, [{
+                        layoutData: self.yAxis.data,
+                        index: a,
+                        line: line
+                    }, self]);
+                    self.xAxisSp.addChild(line);
+
+                    if (this.animation && !this.resize) {
+                        line.animate({
+                            start: {
+                                x: 0
+                            },
+                            end: {
+                                x: self.w
+                            }
+                        }, {
+                            duration: 500,
+                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
+                            delay: (al - a) * 80,
+                            id: line.id
+                        });
+                    } else {
+                        line.context.start.x = 0;
+                        line.context.end.x = self.w;
+                    }
+                }
+            }
+
+            //y轴方向的线集合
+            var arr = self.yAxis.data;
+            for (var a = 0, al = arr.length; a < al; a++) {
+                var o = arr[a];
+                var line = new Line$4({
+                    context: {
+                        x: o.x,
+                        start: {
+                            x: 0,
+                            y: 0
+                        },
+                        end: {
+                            x: 0,
+                            y: -self.h
+                        },
+                        lineType: self.yAxis.lineType,
+                        lineWidth: self.yAxis.lineWidth,
+                        strokeStyle: self.yAxis.strokeStyle,
+                        visible: o.x ? true : false
+                    }
+                });
+                if (self.yAxis.display) {
+                    _$19.isFunction(self.yAxis.filter) && self.yAxis.filter.apply(line, [{
+                        layoutData: self.xAxis.data,
+                        index: a,
+                        line: line
+                    }, self]);
+                    self.yAxisSp.addChild(line);
+                }
+            }
+
+            //原点开始的y轴线
+            var xAxisOrg = self.yAxis.org == null ? 0 : _$19.find(self.yAxis.data, function (obj) {
+                return obj.content == self.yAxis.org;
+            }).x;
+
+            //self.yAxis.org = xAxisOrg;
+            var line = new Line$4({
+                context: {
+                    start: {
+                        x: xAxisOrg,
+                        y: 0
+                    },
+                    end: {
+                        x: xAxisOrg,
+                        y: -self.h
+                    },
+                    lineWidth: self.yOrigin.lineWidth,
+                    strokeStyle: self.yOrigin.strokeStyle
+                }
+            });
+            if (self.yOrigin.display) self.sprite.addChild(line);
+
+            if (this.root._yAxisRight) {
+                var lineR = new Line$4({
+                    context: {
+                        start: {
+                            x: self.w,
+                            y: 0
+                        },
+                        end: {
+                            x: self.w,
+                            y: -self.h
+                        },
+                        lineWidth: self.yOrigin.lineWidth,
+                        strokeStyle: self.yOrigin.strokeStyle
+                    }
+                });
+                if (self.yOrigin.display) self.sprite.addChild(lineR);
+            }
+
+            var line = new Line$4({
+                context: {
+                    start: {
+                        x: 0,
+                        y: _yAxis.basePoint.y
+                    },
+                    end: {
+                        x: self.w,
+                        y: _yAxis.basePoint.y
+                    },
+                    lineWidth: self.xOrigin.lineWidth,
+                    strokeStyle: self.xOrigin.strokeStyle
+                }
+            });
+            if (self.xOrigin.display) self.sprite.addChild(line);
+        }
+    }]);
+    return Grid;
+}(component);
+
+var _$15 = canvax._;
+var Rect$6 = canvax.Shapes.Rect;
+
+var Descartes_Component = function (_Component) {
+    inherits$1(Descartes_Component, _Component);
+
+    function Descartes_Component(opt, root) {
+        classCallCheck$1(this, Descartes_Component);
+
+        var _this = possibleConstructorReturn$1(this, (Descartes_Component.__proto__ || Object.getPrototypeOf(Descartes_Component)).call(this));
+
+        _this._root = root;
+
+        _this._xAxis = null;
+        _this._yAxis = [];
+
+        _this._yAxisLeft = null;
+        _this._yAxisRight = null;
+        _this._grid = null;
+
+        _this.graphsWidth = 0;
+        _this.graphsHeight = 0;
+        _this.graphsX = 0;
+        _this.graphsY = 0;
+
+        _this.horizontal = false;
+
+        _this.dataFrame = _this._root.dataFrame;
+
+        _this.xAxis = {
+            field: _this.dataFrame.fields[0]
+        };
+        _this.yAxis = [{
+            field: _this.dataFrame.fields.slice(1)
+        }];
+        _this.grid = {};
+
+        _$15.extend(true, _this, opt);
+
+        if (opt.horizontal) {
+            _$15.extend(true, _this.xAxis, {
+                text: {
+                    rotation: 90
+                },
+                isH: true
+            });
+            _$15.each(_this.yAxis, function (yAxis$$1) {
+                _$15.extend(true, yAxis$$1, {
+                    text: {
+                        rotation: 90
+                    },
+                    isH: true
+                });
+            });
+        }
+
+        if ("display" in opt) {
+            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
+            _this.xAxis.display = opt.display;
+            _$15.each(_this.yAxis, function (yAxis$$1) {
+                yAxis$$1.display = opt.display;
+            });
+            _this.grid.display = opt.display;
+        }
+
+        /*
+        吧原始的field转换为对应结构的显示树
+        ["uv"] --> [
+            {field:'uv',enabled:true ,yAxis: yAxisleft }
+            ...
+        ]
+        */
+        _this.fieldsMap = null;
+        _this.induce = null;
+        _this.init(opt);
+        return _this;
+    }
+
+    createClass$1(Descartes_Component, [{
+        key: "init",
+        value: function init(opt) {
+            this.sprite = new canvax.Display.Sprite({
+                id: "coordinate"
+            });
+            this._initModules();
+            //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
+            // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
+            this.fieldsMap = this._setFieldsMap();
+        }
+    }, {
+        key: "resetData",
+        value: function resetData(dataFrame, dataTrigger) {
+            var me = this;
+            this.dataFrame = dataFrame;
+
+            var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
+            this._xAxis.resetData(_xAxisDataFrame);
+
+            _$15.each(this._yAxis, function (_yAxis) {
+                //这个_yAxis是具体的y轴实例
+                var yAxisDataFrame = me._getAxisDataFrame(_yAxis.field);
+                _yAxis.resetData(yAxisDataFrame);
+            });
+
+            this._grid.reset({
+                animation: false,
+                xAxis: {
+                    data: this._yAxisLeft.layoutData
+                }
+            });
+        }
+    }, {
+        key: "draw",
+        value: function draw(opt) {
+            //在绘制的时候，是已经能拿到xAxis的height了得
+            var _padding = this._root.padding;
+
+            var h = opt.height || this._root.height;
+            var w = opt.width || this._root.width;
+            if (this.horizontal) {
+                //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
+                var _num = w;
+                w = h;
+                h = _num;
+            }
+
+            var y = h - this._xAxis.height - _padding.bottom;
+            var _yAxisW = 0;
+            var _yAxisRW = 0;
+
+            //绘制yAxis
+            if (this._yAxisLeft) {
+                this._yAxisLeft.draw({
+                    pos: {
+                        x: _padding.left,
+                        y: y
+                    },
+                    yMaxHeight: y - _padding.top,
+                    resize: opt.resize
+                });
+                _yAxisW = this._yAxisLeft.width;
+            }
+
+            //如果有双轴
+            if (this._yAxisRight) {
+                this._yAxisRight.draw({
+                    pos: {
+                        x: 0,
+                        y: y
+                    },
+                    yMaxHeight: y - _padding.top,
+                    resize: opt.resize
+                });
+                _yAxisRW = this._yAxisRight.width;
+            }
+
+            //绘制x轴
+            this._xAxis.draw({
+                pos: {
+                    x: _padding.left + _yAxisW,
+                    y: y
+                },
+                width: w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
+                resize: opt.resize
+            });
+
+            this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width);
+
+            this.graphsWidth = this._xAxis.width;
+            this.graphsHeight = this._yAxis[0].yGraphsHeight;
+            this.graphsX = _yAxisW + _padding.left;
+            this.graphsY = y;
+
+            //绘制背景网格
+            this._grid.draw({
+                w: this.graphsWidth,
+                h: this.graphsHeight,
+                xAxis: {
+                    data: this._yAxis[0].layoutData
+                },
+                yAxis: {
+                    data: this._xAxis.layoutData
+                },
+                pos: {
+                    x: this.graphsX,
+                    y: this.graphsY
+                },
+                resize: opt.resize
+            });
+
+            if (this.horizontal) {
+                this._horizontal({
+                    w: w,
+                    h: h
+                });
+            }
+
+            this._initInduce();
+        }
+    }, {
+        key: "_initModules",
+        value: function _initModules() {
+            var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
+            this._xAxis = new xAxis(this.xAxis, _xAxisDataFrame, this);
+            this.sprite.addChild(this._xAxis.sprite);
+
+            //这里定义的是配置
+            var yAxis$$1 = this.yAxis;
+            var yAxisLeft, yAxisRight;
+            var yAxisLeftDataFrame, yAxisRightDataFrame;
+
+            //从chart/descartes.js中重新设定了后的yAxis 肯定是个数组
+            if (!_$15.isArray(yAxis$$1)) {
+                yAxis$$1 = [yAxis$$1];
+            }
+
+            //left是一定有的
+            yAxisLeft = _$15.find(yAxis$$1, function (ya) {
+                return ya.align == "left";
+            });
+
+            if (yAxisLeft) {
+                yAxisLeftDataFrame = this._getAxisDataFrame(yAxisLeft.field);
+                this._yAxisLeft = new yAxis(yAxisLeft, yAxisLeftDataFrame);
+                this._yAxisLeft.axis = yAxisLeft;
+                this.sprite.addChild(this._yAxisLeft.sprite);
+                this._yAxis.push(this._yAxisLeft);
+            }
+
+            yAxisRight = _$15.find(yAxis$$1, function (ya) {
+                return ya.align == "right";
+            });
+            if (yAxisRight) {
+                yAxisRightDataFrame = this._getAxisDataFrame(yAxisRight.field);
+                this._yAxisRight = new yAxis(yAxisRight, yAxisRightDataFrame);
+                this._yAxisRight.axis = yAxisRight;
+                this.sprite.addChild(this._yAxisRight.sprite);
+                this._yAxis.push(this._yAxisRight);
+            }
+
+            this._grid = new Grid(this.grid, this);
+            this.sprite.addChild(this._grid.sprite);
+        }
+
+        /**
+         * 
+         * @param {x,y} size 
+         */
+
+    }, {
+        key: "_horizontal",
+        value: function _horizontal() {
+            var me = this;
+            var w = me._root.width;
+            var h = me._root.height;
+
+            _$15.each([me.sprite.context], function (ctx) {
+                ctx.x += (w - h) / 2;
+                ctx.y += (h - w) / 2;
+                ctx.rotation = 90;
+                ctx.rotateOrigin.x = h / 2;
+                ctx.rotateOrigin.y = w / 2;
+                ctx.scaleOrigin.x = h / 2;
+                ctx.scaleOrigin.y = w / 2;
+                ctx.scaleX = -1;
+            });
+
+            //把x轴文案做一次镜像反转
+            _$15.each(_$15.flatten([this._xAxis]), function (_xAxis) {
+                _$15.each(_xAxis.rulesSprite.children, function (xnode) {
+                    var ctx = xnode._txt.context;
+                    var rect = xnode._txt.getRect();
+                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
+                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                    ctx.scaleY = -1;
+                });
+            });
+
+            //把y轴文案做一次镜像反转
+            _$15.each(_$15.flatten([this._yAxis]), function (_yAxis) {
+                _$15.each(_yAxis.rulesSprite.children, function (ynode) {
+                    var ctx = ynode._txt.context;
+                    var rect = ynode._txt.getRect();
+                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
+                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                    ctx.scaleY = -1;
+                });
+            });
+        }
+    }, {
+        key: "getPosX",
+        value: function getPosX(opt) {
+            return this._xAxis.getPosX(opt);
+        }
+    }, {
+        key: "_getAxisDataFrame",
+        value: function _getAxisDataFrame(fields) {
+            return {
+                field: fields,
+                org: this.dataFrame.getDataOrg(fields, function (val) {
+                    if (val === undefined || val === null || val == "") {
+                        return val;
+                    }
+                    return isNaN(Number(val)) ? val : Number(val);
+                })
+            };
+        }
+    }, {
+        key: "removeField",
+        value: function removeField(field) {
+            this.enabledField(field);
+        }
+    }, {
+        key: "addField",
+        value: function addField(field) {
+            this.enabledField(field);
+        }
+    }, {
+        key: "enabledField",
+        value: function enabledField(field) {
+            this.setFieldEnabled(field);
+            var fieldMap = this.getFieldMapOf(field);
+            var enabledFields = this.getEnabledFields()[fieldMap.yAxis.align];
+
+            fieldMap.yAxis.resetData(this._getAxisDataFrame(enabledFields));
+
+            //然后yAxis更新后，对应的背景也要更新
+            this._grid.reset({
+                animation: false,
+                xAxis: {
+                    data: this._yAxisLeft.layoutData
+                }
+            });
+        }
+
+        //查询field在哪个yAxis上面,外部查询的话直接用fieldMap._yAxis
+
+    }, {
+        key: "_getYaxisOfField",
+        value: function _getYaxisOfField(field) {
+            var me = this;
+            var Axis;
+            _$15.each(this._yAxis, function (_yAxis, i) {
+                var fs = _yAxis.field;
+                var _fs = _$15.flatten([fs]);
+                var ind = _$15.indexOf(_fs, field);
+                if (ind > -1) {
+                    //那么说明这个yAxis轴上面有这个字段，这个yaxis需要reset
+                    Axis = _yAxis;
+                    return false;
+                }
+            });
+            return Axis;
+        }
+
+        //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
+
+    }, {
+        key: "_setFieldsMap",
+        value: function _setFieldsMap() {
+            var me = this;
+            var fieldInd = 0;
+
+            function _set(fields) {
+                if (!fields) {
+                    var yAxis$$1 = me.yAxis;
+                    if (!_$15.isArray(yAxis$$1)) {
+                        yAxis$$1 = [yAxis$$1];
+                    }
+
+                    fields = [];
+
+                    _$15.each(yAxis$$1, function (item, i) {
+                        fields = fields.concat(item.field);
+                    });
+                }
+
+                if (_$15.isString(fields)) {
+                    fields = [fields];
+                }
+
+                var clone_fields = _$15.clone(fields);
+                for (var i = 0, l = fields.length; i < l; i++) {
+                    if (_$15.isString(fields[i])) {
+                        clone_fields[i] = {
+                            field: fields[i],
+                            enabled: true,
+                            yAxis: me._getYaxisOfField(fields[i]),
+                            style: colors[fieldInd],
+                            ind: fieldInd++
+                        };
+                    }
+                    if (_$15.isArray(fields[i])) {
+                        clone_fields[i] = _set(fields[i], fieldInd);
+                    }
+                }
+
+                return clone_fields;
+            }
+
+            return _set();
+        }
+
+        //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+        //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+
+    }, {
+        key: "getEnabledFields",
+        value: function getEnabledFields(fields) {
+            if (fields) {
+                //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+                //只留下enabled的field 结构
+                return this._filterEnabledFields(fields);
+            }
+            var fmap = {
+                left: [], right: []
+            };
+
+            _$15.each(this.fieldsMap, function (bamboo, b) {
+                if (_$15.isArray(bamboo)) {
+                    //多节竹子
+
+                    var align;
+                    var fields = [];
+
+                    //设置完fields后，返回这个group属于left还是right的axis
+                    _$15.each(bamboo, function (obj, v) {
+                        if (obj.field && obj.enabled) {
+                            align = obj.yAxis.align;
+                            fields.push(obj.field);
+                        }
+                    });
+
+                    fields.length && fmap[align].push(fields);
+                } else {
+                    //单节棍
+                    if (bamboo.field && bamboo.enabled) {
+                        fmap[bamboo.yAxis.align].push(bamboo.field);
+                    }
+                }
+            });
+
+            return fmap;
+        }
+
+        //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+        //只留下enabled的field 结构
+
+    }, {
+        key: "_filterEnabledFields",
+        value: function _filterEnabledFields(fields) {
+            var me = this;
+            var arr = [];
+            if (!_$15.isArray(fields)) fields = [fields];
+            _$15.each(fields, function (f) {
+                if (!_$15.isArray(f)) {
+                    if (me.getFieldMapOf(f).enabled) {
+                        arr.push(f);
+                    }
+                } else {
+                    //如果这个是个纵向数据，说明就是堆叠配置
+                    var varr = [];
+                    _$15.each(f, function (v_f) {
+                        if (me.getFieldMapOf(v_f).enabled) {
+                            varr.push(v_f);
+                        }
+                    });
+                    if (varr.length) {
+                        arr.push(varr);
+                    }
+                }
+            });
+            return arr;
+        }
+
+        //设置 fieldsMap 中对应field 的 enabled状态
+
+    }, {
+        key: "setFieldEnabled",
+        value: function setFieldEnabled(field) {
+            var me = this;
+            function set$$1(maps) {
+                _$15.each(maps, function (map, i) {
+                    if (_$15.isArray(map)) {
+                        set$$1(map);
+                    } else if (map.field && map.field == field) {
+                        map.enabled = !map.enabled;
+                    }
+                });
+            }
+            set$$1(me.fieldsMap);
+        }
+    }, {
+        key: "getFieldMapOf",
+        value: function getFieldMapOf(field) {
+            var me = this;
+            var fieldMap = null;
+            function get$$1(maps) {
+                _$15.each(maps, function (map, i) {
+                    if (_$15.isArray(map)) {
+                        get$$1(map);
+                    } else if (map.field && map.field == field) {
+                        fieldMap = map;
+                        return false;
+                    }
+                });
+            }
+            get$$1(me.fieldsMap);
+            return fieldMap;
+        }
+    }, {
+        key: "_initInduce",
+        value: function _initInduce() {
+            var me = this;
+            me.induce = new Rect$6({
+                id: "induce",
+                context: {
+                    x: me.graphsX,
+                    y: me.graphsY - me.graphsHeight,
+                    width: me.graphsWidth,
+                    height: me.graphsHeight,
+                    fillStyle: '#000000',
+                    globalAlpha: 0,
+                    cursor: 'pointer'
+                }
+            });
+
+            if (!me.sprite.getChildById("induce")) {
+                me.sprite.addChild(me.induce);
+            }
+
+            me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+                e.eventInfo = me._getInfoHandler(e);
+                me.fire(e.type, e);
+            });
+        }
+    }, {
+        key: "_getInfoHandler",
+        value: function _getInfoHandler(e) {
+            //这里只获取xAxis的刻度信息
+            var xNodeInd = this._xAxis.getIndexOfX(e.point.x);
+            var obj = {
+                xAxis: {
+                    field: this._xAxis.field,
+                    value: this._xAxis.dataOrg[xNodeInd],
+                    ind: xNodeInd
+                },
+                title: xNodeInd >= 0 ? this._xAxis.layoutData[xNodeInd].layoutText : "",
+                nodes: [
+                    //遍历_graphs 去拿东西
+                ]
+            };
+            return obj;
+        }
+    }]);
+    return Descartes_Component;
+}(component);
+
+var Line$5 = canvax.Shapes.Line;
+var Rect$8 = canvax.Shapes.Rect;
+var _$20 = canvax._;
 
 var dataZoom = function (_Component) {
     inherits$1(dataZoom, _Component);
@@ -10191,7 +15282,7 @@ var dataZoom = function (_Component) {
 
         _this.zoomBg = null;
 
-        opt && _$10.extend(true, _this, opt);
+        opt && _$20.extend(true, _this, opt);
         _this._computeAttrs(opt);
         _this.init(opt);
         return _this;
@@ -10242,7 +15333,7 @@ var dataZoom = function (_Component) {
             var _preStart = this.range.start;
             var _preEnd = this.range.end;
 
-            opt && _$10.extend(true, this, opt);
+            opt && _$20.extend(true, this, opt);
             this._cloneChart = cloneChart;
             this._computeAttrs(opt);
 
@@ -10307,7 +15398,7 @@ var dataZoom = function (_Component) {
                         onUpdate: setLines
                     });
                 } else {
-                    me._bgRect = new Rect$2({
+                    me._bgRect = new Rect$8({
                         context: bgRectCtx
                     });
                     me.dataZoomBg.addChild(me._bgRect);
@@ -10351,7 +15442,7 @@ var dataZoom = function (_Component) {
                     onUpdate: setLines
                 });
             } else {
-                me._btnLeft = new Rect$2({
+                me._btnLeft = new Rect$8({
                     id: 'btnLeft',
                     dragEnabled: me.left.eventEnabled,
                     context: btnLeftCtx
@@ -10396,7 +15487,7 @@ var dataZoom = function (_Component) {
                     onUpdate: setLines
                 });
             } else {
-                me._btnRight = new Rect$2({
+                me._btnRight = new Rect$8({
                     id: 'btnRight',
                     dragEnabled: me.right.eventEnabled,
                     context: btnRightCtx
@@ -10439,7 +15530,7 @@ var dataZoom = function (_Component) {
                 });
             } else {
                 //中间矩形拖拽区域
-                this.rangeRect = new Rect$2({
+                this.rangeRect = new Rect$8({
                     id: 'btnCenter',
                     dragEnabled: true,
                     context: rangeRectCtx
@@ -10592,7 +15683,7 @@ var dataZoom = function (_Component) {
         key: "_addLine",
         value: function _addLine($o) {
             var o = $o || {};
-            var line = new Line$1({
+            var line = new Line$5({
                 id: o.id || '',
                 context: {
                     x: o.x || 0,
@@ -10639,10 +15730,10 @@ var dataZoom = function (_Component) {
     return dataZoom;
 }(component);
 
-var BrokenLine$2 = canvax.Shapes.BrokenLine;
+var BrokenLine$4 = canvax.Shapes.BrokenLine;
 var Sprite$1 = canvax.Display.Sprite;
 var Text$1 = canvax.Display.Text;
-var _$11 = canvax._;
+var _$21 = canvax._;
 
 var MarkLine = function (_Component) {
     inherits$1(MarkLine, _Component);
@@ -10686,7 +15777,7 @@ var MarkLine = function (_Component) {
         _this._txt = null;
         _this._line = null;
 
-        opt && _$11.extend(true, _this, opt);
+        opt && _$21.extend(true, _this, opt);
 
         _this.init();
         return _this;
@@ -10714,7 +15805,7 @@ var MarkLine = function (_Component) {
         key: "_getYVal",
         value: function _getYVal() {
             var y = this.yVal;
-            if (_$11.isFunction(this.yVal)) {
+            if (_$21.isFunction(this.yVal)) {
                 y = this.yVal(this);
             }
 
@@ -10730,7 +15821,7 @@ var MarkLine = function (_Component) {
         value: function _getLabel() {
             var yVal = this._getYVal();
             var label = "markline：" + yVal;
-            if (_$11.isFunction(this.text.format)) {
+            if (_$21.isFunction(this.text.format)) {
                 label = this.text.format.apply(this, [yVal]);
             }
             return label;
@@ -10742,7 +15833,7 @@ var MarkLine = function (_Component) {
 
             var y = this._getYPos();
 
-            var line = new BrokenLine$2({ //线条
+            var line = new BrokenLine$4({ //线条
                 id: "line",
                 context: {
                     y: y,
@@ -10772,7 +15863,7 @@ var MarkLine = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            opt && _$11.extend(true, this, opt);
+            opt && _$21.extend(true, this, opt);
 
             var me = this;
             var y = this._getYPos();
@@ -10803,12 +15894,12 @@ var MarkLine = function (_Component) {
         value: function _setTxtPos(y) {
             var me = this;
             var txt = me._txt;
-            if (_$11.isNumber(me.text.x)) {
+            if (_$21.isNumber(me.text.x)) {
                 txt.context.x = me.text.x;
             } else {
                 txt.context.x = this.w - txt.getTextWidth() - 5;
             }
-            if (_$11.isNumber(me.text.y)) {
+            if (_$21.isNumber(me.text.y)) {
                 txt.context.y = me.text.y;
             } else {
                 txt.context.y = y - txt.getTextHeight();
@@ -10818,9 +15909,9 @@ var MarkLine = function (_Component) {
     return MarkLine;
 }(component);
 
-var Circle$2$1 = canvax.Shapes.Circle;
+var Circle$5 = canvax.Shapes.Circle;
 var Droplet$1 = canvax.Shapes.Droplet;
-var _$12 = canvax._;
+var _$22 = canvax._;
 
 var MarkPoint = function (_Component) {
     inherits$1(MarkPoint, _Component);
@@ -10863,9 +15954,9 @@ var MarkPoint = function (_Component) {
         _this.filter = function () {}; //过滤函数
 
         if ("markPoint" in userOpts) {
-            _$12.extend(true, _this, userOpts.markPoint);
+            _$22.extend(true, _this, userOpts.markPoint);
         }
-        chartOpts && _$12.extend(true, _this, chartOpts);
+        chartOpts && _$22.extend(true, _this, chartOpts);
 
         _this.init();
         return _this;
@@ -10910,7 +16001,7 @@ var MarkPoint = function (_Component) {
         key: "_getColor",
         value: function _getColor(c, data, normalColor) {
             var color = c;
-            if (_$12.isFunction(c)) {
+            if (_$22.isFunction(c)) {
                 color = c(data);
             }
             //缺省颜色
@@ -10930,7 +16021,7 @@ var MarkPoint = function (_Component) {
             this.shape.context.visible = true;
             this.shapeBg && (this.shapeBg.context.visible = true);
             this.shapeCircle && (this.shapeCircle.context.visible = true);
-            _$12.isFunction(this.filter) && this.filter(this);
+            _$22.isFunction(this.filter) && this.filter(this);
         }
     }, {
         key: "_initCircleMark",
@@ -10945,7 +16036,7 @@ var MarkPoint = function (_Component) {
                 cursor: "point",
                 visible: false
             };
-            me.shape = new Circle$2$1({
+            me.shape = new Circle$5({
                 context: ctx
             });
             me.sprite.addChild(me.shape);
@@ -10997,7 +16088,7 @@ var MarkPoint = function (_Component) {
                 fillStyle: "#fff",
                 visible: false
             };
-            me.shapeCircle = new Circle$2$1({
+            me.shapeCircle = new Circle$5({
                 context: circleCtx
             });
             me.sprite.addChild(me.shapeCircle);
@@ -11008,9 +16099,9 @@ var MarkPoint = function (_Component) {
     return MarkPoint;
 }(component);
 
-var Line$2 = canvax.Shapes.Line;
-var Circle$3 = canvax.Shapes.Circle;
-var _$13 = canvax._;
+var Line$6 = canvax.Shapes.Line;
+var Circle$6 = canvax.Shapes.Circle;
+var _$23 = canvax._;
 
 var Anchor = function (_Component) {
     inherits$1(Anchor, _Component);
@@ -11069,7 +16160,7 @@ var Anchor = function (_Component) {
         key: "init",
         value: function init(opt) {
             if (opt) {
-                _$13.extend(true, this, opt);
+                _$23.extend(true, this, opt);
             }
 
             this.sprite = new canvax.Display.Sprite({
@@ -11111,7 +16202,7 @@ var Anchor = function (_Component) {
         key: "_initConfig",
         value: function _initConfig(opt) {
             if (opt) {
-                _$13.extend(true, this, opt);
+                _$23.extend(true, this, opt);
             }
         }
 
@@ -11160,7 +16251,7 @@ var Anchor = function (_Component) {
         value: function _widget() {
             var self = this;
 
-            self._xLine = new Line$2({
+            self._xLine = new Line$6({
                 id: 'x',
                 context: {
                     start: {
@@ -11178,7 +16269,7 @@ var Anchor = function (_Component) {
             });
             self.sprite.addChild(self._xLine);
 
-            self._yLine = new Line$2({
+            self._yLine = new Line$6({
                 id: 'y',
                 context: {
                     start: {
@@ -11197,7 +16288,7 @@ var Anchor = function (_Component) {
             this.sprite.addChild(self._yLine);
 
             var nodepos = self.sprite.localToGlobal(self.cross);
-            self._circle = new Circle$3({
+            self._circle = new Circle$6({
                 context: {
                     x: parseInt(nodepos.x),
                     y: parseInt(nodepos.y),
@@ -11225,7 +16316,7 @@ var Anchor = function (_Component) {
     }, {
         key: "_getProp",
         value: function _getProp(s) {
-            if (_$13.isFunction(s)) {
+            if (_$23.isFunction(s)) {
                 return s();
             }
             return s;
@@ -11337,11 +16428,33 @@ var Descartes = function (_Chart) {
             this.inited = true;
         }
     }, {
+        key: "_initModule",
+        value: function _initModule(opt) {
+            var me = this;
+            //首先是创建一个坐标系对象
+            this._coordinate = new Descartes_Component(this.coordinate, this);
+            this.coordinateSprite.addChild(this._coordinate.sprite);
+
+            _$9.each(this.graphs, function (graphs) {
+                var _g = new Graphs(graphs, me);
+                me._graphs.push(_g);
+                me.graphsSprite.addChild(_g.sprite);
+            });
+
+            this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
+            this.stageTips.addChild(this._tips.sprite);
+        }
+    }, {
         key: "_startDraw",
         value: function _startDraw(opt) {
             var me = this;
             !opt && (opt = {});
             var _coor = this._coordinate;
+
+            if (!_coor._yAxis.length) {
+                //如果没有y轴数据
+                return;
+            }
 
             //先绘制好坐标系统
             _coor.draw(opt);
@@ -11883,13 +16996,13 @@ var Descartes = function (_Chart) {
 
                         me._anchor = _anchor;
 
-                        me.drawAnchor(_anchor);
+                        //me.drawAnchor( _anchor );
 
                         me.components.push({
                             type: "anchor",
                             plug: {
                                 draw: function draw() {
-                                    me.drawAnchor(_anchor);
+                                    //me.drawAnchor( _anchor );
                                 }
                             }
                         });
@@ -11901,7 +17014,6 @@ var Descartes = function (_Chart) {
         key: "bindEvent",
         value: function bindEvent() {
             var me = this;
-
             this._coordinate.on("panstart mouseover", function (e) {
                 if (me._tips.enabled) {
                     me._setTipsInfo.apply(me, [e]);
@@ -11930,10 +17042,12 @@ var Descartes = function (_Chart) {
                     me._tips.show(e);
                 }
             });
-            this._coordinate.on("click", function (e) {
+            /*
+            this._coordinate.on("click", function(e) {
                 me._setTipsInfo.apply(me, [e]);
                 me.fire("click", e.eventInfo);
             });
+            */
         }
 
         //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
@@ -11955,3229 +17069,6 @@ var Descartes = function (_Chart) {
     }]);
     return Descartes;
 }(Chart);
-
-var _$16 = canvax._;
-
-function normalizeTickInterval(interval, magnitude) {
-    var normalized, i;
-    // var multiples = [1, 2, 2.5, 5, 10];
-    var multiples = [1, 2, 5, 10];
-    // round to a tenfold of 1, 2, 2.5 or 5
-    normalized = interval / magnitude;
-
-    // normalize the interval to the nearest multiple
-    for (var i = 0; i < multiples.length; i++) {
-        interval = multiples[i];
-        if (normalized <= (multiples[i] + (multiples[i + 1] || multiples[i])) / 2) {
-            break;
-        }
-    }
-
-    // multiply back to the correct magnitude
-    interval *= magnitude;
-
-    return interval;
-}
-
-function correctFloat(num) {
-    return parseFloat(num.toPrecision(14));
-}
-
-function getLinearTickPositions(arr, $maxPart, $cfg) {
-
-    arr = _$16.without(arr, undefined, null, "");
-
-    var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) : 1;
-    //返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
-    var isInt = $cfg && $cfg.isInt ? 1 : 0;
-
-    if (isNaN(scale)) {
-        scale = 1;
-    }
-
-    var max = _$16.max(arr);
-    var initMax = max;
-    max *= scale;
-    var min = _$16.min(arr);
-
-    if (min == max) {
-        if (max > 0) {
-            min = 0;
-            return [min, max];
-            // min= Math.round(max/2);
-        } else if (max < 0) {
-            return [max, 0];
-            //min = max*2;
-        } else {
-            max = 1;
-            return [0, max];
-        }
-    }
-
-    var length = max - min;
-    if (length) {
-        var tempmin = min; //保证min>0的时候不会出现负数
-        min -= length * 0.05;
-        // S.log(min +":"+ tempmin)
-        if (min < 0 && tempmin >= 0) {
-            min = 0;
-        }
-        max += length * 0.05;
-    }
-
-    var tickInterval = (max - min) * 0.3; //72 / 365;
-    var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
-
-    tickInterval = normalizeTickInterval(tickInterval, magnitude);
-    if (isInt) {
-        tickInterval = Math.ceil(tickInterval);
-    }
-
-    var pos,
-        lastPos,
-        roundedMin = correctFloat(Math.floor(min / tickInterval) * tickInterval),
-        roundedMax = correctFloat(Math.ceil(max / tickInterval) * tickInterval),
-        tickPositions = [];
-
-    // Populate the intermediate values
-    pos = roundedMin;
-    while (pos <= roundedMax) {
-
-        // Place the tick on the rounded value
-        tickPositions.push(pos);
-
-        // Always add the raw tickInterval, not the corrected one.
-        pos = correctFloat(pos + tickInterval);
-
-        // If the interval is not big enough in the current min - max range to actually increase
-        // the loop variable, we need to break out to prevent endless loop. Issue #619
-        if (pos === lastPos) {
-            break;
-        }
-
-        // Record the last value
-        lastPos = pos;
-    }
-    if (tickPositions.length >= 3) {
-        if (tickPositions[tickPositions.length - 2] >= initMax) {
-            tickPositions.pop();
-        }
-    }
-    return tickPositions;
-}
-
-var DataSection = {
-    section: function section($arr, $maxPart, $cfg) {
-        return _$16.uniq(getLinearTickPositions($arr, $maxPart, $cfg));
-    }
-};
-
-var Line$3 = canvax.Shapes.Line;
-var _$15 = canvax._;
-
-var xAxis = function (_Component) {
-    inherits$1(xAxis, _Component);
-
-    function xAxis(opts, data, _coordinate) {
-        classCallCheck$1(this, xAxis);
-
-        var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this));
-
-        _this._opts = opts;
-
-        _this._coordinate = _coordinate || {};
-
-        _this.width = 0;
-        _this.height = 0;
-
-        _this.label = "";
-        _this._label = null; //this.label对应的文本对象
-
-        _this.line = {
-            enabled: 1, //是否有line
-            width: 1,
-            height: 4,
-            marginTop: 2,
-            strokeStyle: '#cccccc'
-        };
-
-        _this.text = {
-            fillStyle: '#999',
-            fontSize: 12,
-            rotation: 0,
-            format: null,
-            marginTop: 2,
-            textAlign: "center"
-        };
-        _this.maxTxtH = 0;
-
-        _this.pos = {
-            x: 0,
-            y: 0
-        };
-
-        _this.display = true; //是否需要位置来绘制
-
-        _this.dataOrg = []; //源数据
-        _this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
-
-        _this._layoutDataSection = []; //dataSection的 format 后的数据
-        _this.layoutData = []; //{x:100, value:'1000',visible:true}
-
-        _this.sprite = null;
-
-        _this._textMaxWidth = 0;
-
-        //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
-        //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
-        _this.filter = null; //function(params){}; 
-
-        _this.isH = false; //是否为横向转向的x轴
-
-        _this.animation = true;
-        _this.resize = false;
-
-        //layoutType == "proportion"的时候才有效
-        _this.maxVal = null;
-        _this.minVal = null;
-
-        _this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
-
-        _this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
-
-        //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
-        //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
-        //function
-        _this.trimLayout = null;
-
-        _$15.extend(true, _this, opts);
-
-        _this.init(opts, data);
-
-        //xAxis的field只有一个值,
-        _this.field = _$15.flatten([_this.field])[0];
-        return _this;
-    }
-
-    createClass$1(xAxis, [{
-        key: "init",
-        value: function init(opts, data) {
-            this.sprite = new canvax.Display.Sprite({
-                id: "xAxisSprite"
-            });
-            this.rulesSprite = new canvax.Display.Sprite({
-                id: "rulesSprite"
-            });
-            this.sprite.addChild(this.rulesSprite);
-            this._initHandle(data);
-        }
-    }, {
-        key: "_initHandle",
-        value: function _initHandle(data) {
-            if (data && data.field) {
-                this.field = data.field;
-            }
-
-            if (data && data.org) {
-                this.dataOrg = _$15.flatten(data.org);
-            }
-
-            if (!this._opts.dataSection && this.dataOrg) {
-                //如果没有传入指定的dataSection，才需要计算dataSection
-                this.dataSection = this._initDataSection(this.dataOrg);
-            }
-
-            if (this.text.rotation != 0) {
-                //如果是旋转的文本，那么以右边为旋转中心点
-                this.text.textAlign = "right";
-            }
-
-            //先计算出来显示文本
-            this._layoutDataSection = this._formatDataSectionText(this.dataSection);
-
-            //然后计算好最大的 width 和 最大的height，外部组件需要用
-            this._setTextMaxWidth();
-            this._setXAxisHeight();
-
-            //取第一个数据来判断xaxis的刻度值类型是否为 number
-            this.minVal == null && (this.minVal = _$15.min(this.dataSection));
-            if (isNaN(this.minVal) || this.minVal == Infinity) {
-                this.minVal = 0;
-            }
-            this.maxVal == null && (this.maxVal = _$15.max(this.dataSection));
-            if (isNaN(this.maxVal) || this.maxVal == Infinity) {
-                this.maxVal = 1;
-            }
-        }
-
-        /**
-         *return dataSection 默认为xAxis.dataOrg的的faltten
-         *即 [ [1,2,3,4] ] -- > [1,2,3,4]
-         */
-
-    }, {
-        key: "_initDataSection",
-        value: function _initDataSection(data) {
-            var arr = _$15.flatten(data);
-            if (this.layoutType == "proportion") {
-                arr = DataSection.section(arr);
-            }
-            return arr;
-        }
-
-        //配置和数据变化
-
-    }, {
-        key: "resetData",
-        value: function resetData(dataFrame) {
-            this._initHandle(dataFrame);
-            this.draw();
-        }
-    }, {
-        key: "getIndexOfVal",
-        value: function getIndexOfVal(xvalue) {
-            var i;
-            for (var ii = 0, il = this.layoutData.length; ii < il; ii++) {
-                var obj = this.layoutData[ii];
-                if (obj.value == xvalue) {
-                    i = ii;
-                    break;
-                }
-            }
-
-            return i;
-        }
-    }, {
-        key: "getIndexOfX",
-        value: function getIndexOfX(x) {
-            var iNode = 0;
-            if (this.layoutType == "peak") {
-                iNode = parseInt(x / this.ceilWidth);
-                if (iNode == this.dataOrg.length) {
-                    iNode = this.dataOrg.length - 1;
-                }
-            }
-            if (this.layoutType == "rule") {
-                iNode = parseInt((x + this.ceilWidth / 2) / this.ceilWidth);
-            }
-            if (iNode >= this.dataOrg.length) {
-                iNode = this.dataOrg.length - 1;
-            }
-            return iNode;
-        }
-    }, {
-        key: "draw",
-        value: function draw(opts) {
-            //首次渲染从 直角坐标系组件中会传入 opts
-            this._getLabel();
-            this._computerConfit(opts);
-            this.layoutData = this._trimXAxis(this.dataSection);
-
-            this._trimLayoutData();
-
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
-
-            this._widget();
-
-            this.resize = false;
-        }
-    }, {
-        key: "_getLabel",
-        value: function _getLabel() {
-            if (this.label && this.label != "") {
-                if (!this._label) {
-                    this._label = new canvax.Display.Text(this.label, {
-                        context: {
-                            fontSize: this.text.fontSize,
-                            textAlign: this.isH ? "center" : "left",
-                            textBaseline: this.isH ? "top" : "middle",
-                            fillStyle: this.text.fillStyle,
-                            rotation: this.isH ? -90 : 0
-                        }
-                    });
-                } else {
-                    this._label.resetText(this.label);
-                }
-            }
-        }
-
-        //初始化配置
-
-    }, {
-        key: "_computerConfit",
-        value: function _computerConfit(opts) {
-            if (opts) {
-                _$15.extend(true, this, opts);
-            }
-
-            if (this._label) {
-                if (this.isH) {
-                    this.width -= this._label.getTextHeight() + 5;
-                } else {
-                    this.width -= this._label.getTextWidth() + 5;
-                }
-            }
-        }
-
-        //获取x对应的位置
-        //val ind 至少要有一个
-
-    }, {
-        key: "getPosX",
-        value: function getPosX(opts) {
-            var x = 0;
-            var val = opts.val;
-            var ind = "ind" in opts ? opts.ind : _$15.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
-            var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
-            var width = "width" in opts ? opts.width : this.width;
-            var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
-
-            if (dataLen == 1) {
-                x = width / 2;
-            } else {
-                if (layoutType == "rule") {
-                    //折线图的xyaxis就是 rule
-                    x = ind / (dataLen - 1) * width;
-                }
-                if (layoutType == "proportion") {
-                    //按照数据真实的值在minVal - maxVal 区间中的比例值
-                    if (val == undefined) {
-                        val = ind * (this.maxVal - this.minVal) / (dataLen - 1) + this.minVal;
-                    }
-                    x = width * ((val - this.minVal) / (this.maxVal - this.minVal));
-                }
-                if (layoutType == "peak") {
-                    //柱状图的就是peak 
-                    x = this.ceilWidth * (ind + 1) - this.ceilWidth / 2;
-                }
-            }
-
-            //if( this.posParseToInt ){
-            return parseInt(x, 10);
-            //} else { 
-            //return x;
-            //}
-        }
-    }, {
-        key: "_computerCeilWidth",
-        value: function _computerCeilWidth() {
-            //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
-            var width = this.width;
-            if (this.dataOrg.length == 0) {
-                this.ceilWidth = width;
-            } else {
-                this.ceilWidth = width / this.dataOrg.length;
-                if (this.layoutType == "rule") {
-                    if (this.dataOrg.length == 1) {
-                        this.ceilWidth = width / 2;
-                    } else {
-                        this.ceilWidth = width / (this.dataOrg.length - 1);
-                    }
-                }
-            }
-            return this.ceilWidth;
-        }
-    }, {
-        key: "_trimXAxis",
-        value: function _trimXAxis($data) {
-            var tmpData = [];
-            var data = $data || this.dataSection;
-
-            this.ceilWidth = this._computerCeilWidth();
-
-            for (var a = 0, al = data.length; a < al; a++) {
-                var layoutText = this._getFormatText(data[a]);
-                var txt = new canvax.Display.Text(layoutText, {
-                    context: {
-                        fontSize: this.text.fontSize
-                    }
-                });
-
-                var o = {
-                    value: data[a],
-                    layoutText: layoutText,
-                    x: this.getPosX({
-                        val: data[a],
-                        ind: a,
-                        dataLen: al,
-                        width: this.width
-                    }),
-                    textWidth: txt.getTextWidth(),
-                    field: this.field
-                };
-
-                tmpData.push(o);
-            }
-            return tmpData;
-        }
-    }, {
-        key: "_formatDataSectionText",
-        value: function _formatDataSectionText(arr) {
-            if (!arr) {
-                arr = this.dataSection;
-            }
-            var me = this;
-            var currArr = [];
-            _$15.each(arr, function (val) {
-                currArr.push(me._getFormatText(val));
-            });
-            return currArr;
-        }
-    }, {
-        key: "_setXAxisHeight",
-        value: function _setXAxisHeight() {
-            //检测下文字的高等
-            if (!this.display) {
-                this.height = 3;
-            } else {
-                var txt = new canvax.Display.Text(this._layoutDataSection[0] || "test", {
-                    context: {
-                        fontSize: this.text.fontSize
-                    }
-                });
-
-                this.maxTxtH = txt.getTextHeight();
-
-                if (!!this.text.rotation) {
-                    if (this.text.rotation % 90 == 0) {
-                        this.height = parseInt(this._textMaxWidth);
-                    } else {
-                        var sinR = Math.sin(Math.abs(this.text.rotation) * Math.PI / 180);
-                        var cosR = Math.cos(Math.abs(this.text.rotation) * Math.PI / 180);
-                        this.height = parseInt(sinR * this._textMaxWidth + txt.getTextHeight() + 5);
-                    }
-                } else {
-                    this.height = parseInt(this.maxTxtH);
-                }
-
-                this.height += this.line.height + this.line.marginTop + this.text.marginTop;
-            }
-        }
-    }, {
-        key: "_getFormatText",
-        value: function _getFormatText(text) {
-            var res;
-            if (_$15.isFunction(this.text.format)) {
-                res = this.text.format(text);
-            } else {
-                res = text;
-            }
-            if (_$15.isArray(res)) {
-                res = Tools.numAddSymbol(res);
-            }
-            if (!res) {
-                res = text;
-            }
-            return res;
-        }
-    }, {
-        key: "_widget",
-        value: function _widget() {
-            if (!this.display) return;
-
-            var arr = this.layoutData;
-
-            if (this._label) {
-                this._label.context.x = this.width + 5;
-                this.sprite.addChild(this._label);
-            }
-
-            var delay = Math.min(1000 / arr.length, 25);
-
-            for (var a = 0, al = arr.length; a < al; a++) {
-                var xNodeId = "xNode" + a;
-
-                var xNode = this.rulesSprite.getChildById(xNodeId);
-                if (!xNode) {
-                    xNode = new canvax.Display.Sprite({
-                        id: xNodeId
-                    });
-                    this.rulesSprite.addChild(xNode);
-                }
-
-                xNode.context.visible = !!arr[a].visible;
-
-                var o = arr[a];
-                var x = o.x,
-                    y = this.line.height + this.line.marginTop + this.text.marginTop;
-
-                //文字
-                var textContext = {
-                    x: o.text_x || o.x,
-                    y: y + 20,
-                    fillStyle: this.text.fillStyle,
-                    fontSize: this.text.fontSize,
-                    rotation: -Math.abs(this.text.rotation),
-                    textAlign: this.text.textAlign,
-                    textBaseline: !!this.text.rotation ? "middle" : "top",
-                    globalAlpha: 0
-                };
-
-                if (!!this.text.rotation && this.text.rotation != 90) {
-                    textContext.x += 5;
-                    textContext.y += 3;
-                }
-
-                if (xNode._txt) {
-                    //_.extend( xNode._txt.context , textContext );
-                    //debugger
-                    xNode._txt.resetText(o.layoutText + "");
-                    if (this.animation) {
-                        xNode._txt.animate({
-                            x: textContext.x
-                        }, {
-                            duration: 300
-                        });
-                    } else {
-                        xNode._txt.context.x = textContext.x;
-                    }
-                } else {
-
-                    xNode._txt = new canvax.Display.Text(o.layoutText, {
-                        id: "xAxis_txt_" + a,
-                        context: textContext
-                    });
-                    xNode.addChild(xNode._txt);
-
-                    //新建的 txt的 动画方式
-                    if (this.animation && !this.resize) {
-                        xNode._txt.animate({
-                            globalAlpha: 1,
-                            y: xNode._txt.context.y - 20
-                        }, {
-                            duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * delay,
-                            id: xNode._txt.id
-                        });
-                    } else {
-                        xNode._txt.context.y = xNode._txt.context.y - 20;
-                        xNode._txt.context.globalAlpha = 1;
-                    }
-                }
-
-                if (this.line.enabled) {
-                    var lineContext = {
-                        x: x,
-                        y: this.line.marginTop,
-                        end: {
-                            x: 0,
-                            y: this.line.height
-                        },
-                        lineWidth: this.line.width,
-                        strokeStyle: this.line.strokeStyle
-                    };
-                    if (xNode._line) {
-                        //_.extend( xNode._txt.context , textContext );
-                        if (this.animation) {
-                            xNode._line.animate({
-                                x: lineContext.x
-                            }, {
-                                duration: 300
-                            });
-                        } else {
-                            xNode._line.context.x = lineContext.x;
-                        }
-                    } else {
-                        xNode._line = new Line$3({
-                            context: lineContext
-                        });
-                        xNode.addChild(xNode._line);
-                    }
-                }
-
-                //这里可以由用户来自定义过滤 来 决定 该node的样式
-                _$15.isFunction(this.filter) && this.filter({
-                    layoutData: arr,
-                    index: a,
-                    txt: xNode._txt,
-                    line: xNode._line || null
-                });
-            }
-
-            //把sprite.children中多余的给remove掉
-            if (this.rulesSprite.children.length > arr.length) {
-                for (var al = arr.length, pl = this.rulesSprite.children.length; al < pl; al++) {
-                    this.rulesSprite.getChildAt(al).remove();
-                    al--, pl--;
-                }
-            }
-        }
-    }, {
-        key: "_setTextMaxWidth",
-        value: function _setTextMaxWidth() {
-            var arr = this._layoutDataSection;
-            var maxLenText = arr[0];
-
-            for (var a = 0, l = arr.length; a < l; a++) {
-                if ((arr[a] + '').length > maxLenText.length) {
-                    maxLenText = arr[a];
-                }
-            }
-
-            var txt = new canvax.Display.Text(maxLenText || "test", {
-                context: {
-                    fillStyle: this.text.fillStyle,
-                    fontSize: this.text.fontSize
-                }
-            });
-
-            this._textMaxWidth = txt.getTextWidth();
-            this._textMaxHeight = txt.getTextHeight();
-
-            return this._textMaxWidth;
-        }
-    }, {
-        key: "_trimLayoutData",
-        value: function _trimLayoutData() {
-            var me = this;
-            var arr = this.layoutData;
-            var l = arr.length;
-
-            if (!this.display || !l) return;
-
-            // rule , peak, proportion
-            if (me.layoutType == "proportion") {
-                this._checkOver();
-            }
-            if (me.layoutType == "peak") {
-                //TODO: peak暂时沿用 _checkOver ，这是保险的万无一失的。
-                this._checkOver();
-            }
-
-            if (me.layoutType == "rule") {
-                this._checkOver();
-            }
-        }
-    }, {
-        key: "_getRootPR",
-        value: function _getRootPR() {
-            //找到paddingRight,在最后一个文本右移的时候需要用到
-            var rootPaddingRight = 0;
-            if (this._coordinate._root) {
-                rootPaddingRight = this._coordinate._root.padding.right;
-            }
-            return rootPaddingRight;
-        }
-    }, {
-        key: "_checkOver",
-        value: function _checkOver() {
-            var me = this;
-            var arr = me.layoutData;
-
-            //现在的柱状图的自定义datasection有缺陷
-            if (me.trimLayout) {
-                //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
-                //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
-                me.trimLayout(arr);
-                return;
-            }
-
-            var l = arr.length;
-
-            function checkOver(i) {
-                var curr = arr[i];
-
-                if (curr === undefined) {
-                    return;
-                }
-                curr.visible = true;
-                for (var ii = i; ii < l - 1; ii++) {
-                    var next = arr[ii + 1];
-
-                    var nextWidth = next.textWidth;
-                    var currWidth = curr.textWidth;
-
-                    //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-                    if (!!me.text.rotation) {
-                        nextWidth = 35;
-                        currWidth = 35;
-                    }
-
-                    var next_x = next.x;
-                    if (me.text.textAlign == "center") {
-                        next_x = next.x - nextWidth / 2;
-                    }
-
-                    if (ii == l - 2) {
-                        //next是最后一个
-                        if (me.text.textAlign == "center" && next.x + nextWidth / 2 > me.width) {
-                            next_x = me.width - nextWidth;
-                            next.text_x = me.width - nextWidth / 2 + me._getRootPR();
-                        }
-                        if (me.text.textAlign == "left" && next.x + nextWidth > me.width) {
-                            next_x = me.width - nextWidth;
-                            next.text_x = me.width - nextWidth;
-                        }
-                    }
-
-                    if (next_x < curr.x + currWidth / 2) {
-                        if (ii == l - 2) {
-                            //最后一个的话，反把前面的给hide
-                            next.visible = true;
-                            curr.visible = false;
-                            return;
-                        } else {
-                            next.visible = false;
-                        }
-                    } else {
-                        checkOver(ii + 1);
-                        break;
-                    }
-                }
-            }
-
-            checkOver(0);
-        }
-    }]);
-    return xAxis;
-}(component);
-
-var Line$4 = canvax.Shapes.Line;
-var _$17 = canvax._;
-
-var yAxis = function (_Component) {
-    inherits$1(yAxis, _Component);
-
-    function yAxis(opt, data) {
-        classCallCheck$1(this, yAxis);
-
-        var _this = possibleConstructorReturn$1(this, (yAxis.__proto__ || Object.getPrototypeOf(yAxis)).call(this));
-
-        _this._opt = opt;
-
-        _this.width = null; //第一次计算后就会有值
-        _this.display = true; //true false 1,0都可以
-
-        _this.maxW = 0; //最大文本的 width
-        _this.field = []; //这个 轴 上面的 field
-
-        _this.label = "";
-        _this._label = null; //label 的text对象
-
-        _this.line = {
-            enabled: 1, //是否有line
-            width: 4,
-            lineWidth: 1,
-            strokeStyle: '#cccccc',
-            marginToLine: 2
-        };
-
-        _this.text = {
-            fillStyle: '#999',
-            fontSize: 12,
-            format: null,
-            rotation: 0,
-            marginToLine: 3 //和刻度线的距离
-        };
-        _this.pos = {
-            x: 0,
-            y: 0
-        };
-        _this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
-
-        _this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
-        _this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
-        _this.waterLine = null; //水位data，需要混入 计算 dataSection， 如果有设置waterLineData， dataSection的最高水位不会低于这个值
-
-        //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
-        _this.dataSectionGroup = [];
-
-        //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
-        _this.middleweight = null;
-
-        _this.dataOrg = data.org || []; //源数据
-
-        _this.sprite = null;
-
-        _this.yMaxHeight = 0; //y轴最大高
-        _this.yGraphsHeight = 0; //y轴第一条线到原点的高
-
-        _this.baseNumber = null; //为非负number
-        _this.basePoint = null; //value为 baseNumber 的point {x,y}
-        _this.bottomNumber = null; //如果手动设置了 bottomNumber 为负数，则baseNumber＝0，否则baseNumber 就 等于设置的 bottomNumber
-
-        _this._yOriginTrans = 0; //当设置的 baseNumber 和datasection的min不同的时候，
-
-
-        //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
-        //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
-        _this.filter = null; //function(params){}; 
-
-        _this.isH = false; //是否横向
-
-        _this.animation = true;
-        _this.resize = false;
-
-        _this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
-
-        _this.layoutType = "proportion"; // rule , peak, proportion
-
-        _this.init(opt, data);
-        return _this;
-    }
-
-    createClass$1(yAxis, [{
-        key: "init",
-        value: function init(opt, data) {
-            _$17.extend(true, this, opt);
-
-            //extend会设置好this.field
-            //先要矫正子啊field确保一定是个array
-            if (!_$17.isArray(this.field)) {
-                this.field = [this.field];
-            }
-
-            this._initData();
-
-            this.sprite = new canvax.Display.Sprite({
-                id: "yAxisSprite_" + new Date().getTime()
-            });
-            this.rulesSprite = new canvax.Display.Sprite({
-                id: "yRulesSprite_" + new Date().getTime()
-            });
-            this.sprite.addChild(this.rulesSprite);
-        }
-
-        //配置和数据变化
-
-    }, {
-        key: "resetData",
-        value: function resetData(dataFrame) {
-            this.dataSection = [];
-            this.dataSectionGroup = [];
-
-            if (dataFrame && dataFrame.field) {
-                this.field = dataFrame.field;
-            }
-
-            if (dataFrame && dataFrame.org) {
-                this.dataOrg = dataFrame.org; //这里必须是data.org
-            }
-
-            this._initData();
-
-            this._trimYAxis();
-            this._widget();
-        }
-    }, {
-        key: "setX",
-        value: function setX($n) {
-            this.sprite.context.x = $n;
-            this.pos.x = $n;
-        }
-    }, {
-        key: "setY",
-        value: function setY($n) {
-            this.sprite.context.y = $n;
-            this.pos.y = $n;
-        }
-    }, {
-        key: "setAllStyle",
-        value: function setAllStyle(sty) {
-            _$17.each(this.rulesSprite.children, function (s) {
-                _$17.each(s.children, function (cel) {
-                    if (cel.type == "text") {
-                        cel.context.fillStyle = sty;
-                    } else if (cel.type == "line") {
-                        cel.context.strokeStyle = sty;
-                    }
-                });
-            });
-        }
-    }, {
-        key: "_getLabel",
-        value: function _getLabel() {
-            var _label = this.label;
-
-            if (_label && _label != "") {
-                this._label = new canvax.Display.Text(_label, {
-                    context: {
-                        fontSize: this.text.fontSize,
-                        textAlign: this.align == "left" ? "right" : "left", //"left",
-                        textBaseline: this.isH ? "top" : "bottom",
-                        fillStyle: this.text.fillStyle,
-                        rotation: this.isH ? -90 : 0
-                    }
-                });
-            }
-        }
-    }, {
-        key: "draw",
-        value: function draw(opt) {
-            opt && _$17.extend(true, this, opt);
-            this._getLabel();
-            this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine();
-
-            if (this._label) {
-                if (this.isH) {
-                    this.yGraphsHeight -= this._label.getTextWidth();
-                } else {
-                    this.yGraphsHeight -= this._label.getTextHeight();
-                }
-                this._label.context.y = -this.yGraphsHeight - 5;
-            }
-
-            this._trimYAxis();
-            this._widget();
-
-            this.setX(this.pos.x);
-            this.setY(this.pos.y);
-
-            if (this._label) {
-                if (this.align == "left") {
-                    this._label.context.x += this.width;
-                }
-            }
-
-            this.resize = false;
-        }
-
-        //更具y轴的值来输出对应的在y轴上面的位置
-
-    }, {
-        key: "getYposFromVal",
-        value: function getYposFromVal(val) {
-
-            var y = 0;
-            var dsgLen = this.dataSectionGroup.length;
-            var yGroupHeight = this.yGraphsHeight / dsgLen;
-
-            for (var i = 0, l = dsgLen; i < l; i++) {
-                var ds = this.dataSectionGroup[i];
-                var min = _$17.min(ds);
-                var max = _$17.max(ds);
-                var valInd = _$17.indexOf(ds, val);
-
-                if (val >= min && val <= max || valInd >= 0) {
-                    if (this.layoutType == "proportion") {
-                        var _baseNumber = this.baseNumber;
-                        //如果 baseNumber 并不在这个区间
-                        if (_baseNumber < min || _baseNumber > max) {
-                            _baseNumber = min;
-                        } else {
-                            //如果刚好在这个区间Group
-
-                        }
-                        var maxGroupDisABS = Math.max(Math.abs(max - _baseNumber), Math.abs(_baseNumber - min));
-                        var amountABS = Math.abs(max - min);
-                        var h = maxGroupDisABS / amountABS * yGroupHeight;
-                        y = (val - _baseNumber) / maxGroupDisABS * h + i * yGroupHeight;
-
-                        if (isNaN(y)) {
-                            y = i * yGroupHeight;
-                        }
-                    }
-                    if (this.layoutType == "rule") {
-                        //line 的xaxis就是 rule
-                        y = valInd / (ds.length - 1) * yGroupHeight;
-                    }
-                    if (this.layoutType == "peak") {
-                        //bar的xaxis就是 peak
-                        y = yGroupHeight / ds.length * (valInd + 1) - yGroupHeight / ds.length / 2;
-                    }
-
-                    y += this._yOriginTrans;
-                    break;
-                }
-            }
-            //返回的y是以最底端为坐标原点的坐标值，所以就是负数
-            if (this.sort == "desc") {
-                y = Math.abs(this.yGraphsHeight - Math.abs(y));
-            }
-            return -y;
-        }
-    }, {
-        key: "getValFromYpos",
-        value: function getValFromYpos(y) {
-            var start = this.layoutData[0];
-            var end = this.layoutData.slice(-1)[0];
-            var val = (end.content - start.content) * ((y - start.y) / (end.y - start.y)) + start.content;
-            return val;
-        }
-    }, {
-        key: "_getYOriginTrans",
-        value: function _getYOriginTrans(baseNumber) {
-            var y = 0;
-            var dsgLen = this.dataSectionGroup.length;
-            var yGroupHeight = this.yGraphsHeight / dsgLen;
-
-            for (var i = 0, l = dsgLen; i < l; i++) {
-                var ds = this.dataSectionGroup[i];
-                var min = _$17.min(ds);
-                var max = _$17.max(ds);
-
-                var amountABS = Math.abs(max - min);
-
-                if (baseNumber >= min && baseNumber <= max) {
-                    y = (baseNumber - min) / amountABS * yGroupHeight + i * yGroupHeight;
-                    break;
-                }
-            }
-
-            y = isNaN(y) ? 0 : parseInt(y);
-
-            if (this.sort == "desc") {
-                //如果是倒序的
-                y = -(yGroupHeight - Math.abs(y));
-            }
-
-            return y;
-        }
-    }, {
-        key: "_trimYAxis",
-        value: function _trimYAxis() {
-
-            var tmpData = [];
-            //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
-            //this._yOriginTrans = this._getYOriginTrans( 0 );
-            var originVal = _$17.min(this.dataSection);
-            if (originVal < 0) {
-                originVal = 0;
-            }
-
-            //originVal = this.baseNumber;
-            this._yOriginTrans = this._getYOriginTrans(originVal);
-
-            //设置 basePoint
-            this.basePoint = {
-                content: this.baseNumber,
-                y: this.getYposFromVal(this.baseNumber)
-            };
-
-            for (var a = 0, al = this.dataSection.length; a < al; a++) {
-                tmpData[a] = {
-                    content: this.dataSection[a],
-                    y: this.getYposFromVal(this.dataSection[a])
-                };
-            }
-            this.layoutData = tmpData;
-        }
-    }, {
-        key: "_getYAxisDisLine",
-        value: function _getYAxisDisLine() {
-            //获取y轴顶高到第一条线之间的距离         
-            var disMin = 0;
-            var disMax = 2 * disMin;
-            var dis = disMin;
-            dis = disMin + this.yMaxHeight % this.dataSection.length;
-            dis = dis > disMax ? disMax : dis;
-            return dis;
-        }
-    }, {
-        key: "_setDataSection",
-        value: function _setDataSection() {
-            //如果有堆叠，比如[ ["uv","pv"], "click" ]
-            //那么这个 this.dataOrg， 也是个对应的结构
-            //vLen就会等于2
-            var vLen = 1;
-
-            _$17.each(this.field, function (f) {
-                vLen = Math.max(vLen, 1);
-                if (_$17.isArray(f)) {
-                    _$17.each(f, function (_f) {
-                        vLen = Math.max(vLen, 2);
-                    });
-                }
-            });
-
-            if (vLen == 1) {
-                return this._oneDimensional();
-            }
-            if (vLen == 2) {
-                return this._twoDimensional();
-            }
-        }
-    }, {
-        key: "_oneDimensional",
-        value: function _oneDimensional() {
-            var arr = _$17.flatten(this.dataOrg); //_.flatten( data.org );
-
-            for (var i = 0, il = arr.length; i < il; i++) {
-                arr[i] = arr[i] || 0;
-            }
-
-            return arr;
-        }
-
-        //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
-
-    }, {
-        key: "_twoDimensional",
-        value: function _twoDimensional() {
-            var d = this.dataOrg;
-            var arr = [];
-            var min;
-            _$17.each(d, function (d, i) {
-                if (!d.length) {
-                    return;
-                }
-
-                //有数据的情况下 
-                if (!_$17.isArray(d[0])) {
-                    arr.push(d);
-                    return;
-                }
-
-                var varr = [];
-                var len = d[0].length;
-                var vLen = d.length;
-
-                for (var i = 0; i < len; i++) {
-                    var up_count = 0;
-                    var up_i = 0;
-
-                    var down_count = 0;
-                    var down_i = 0;
-
-                    for (var ii = 0; ii < vLen; ii++) {
-                        !min && (min = d[ii][i]);
-                        min = Math.min(min, d[ii][i]);
-
-                        if (d[ii][i] >= 0) {
-                            up_count += d[ii][i];
-                            up_i++;
-                        } else {
-                            down_count += d[ii][i];
-                            down_i++;
-                        }
-                    }
-                    up_i && varr.push(up_count);
-                    down_i && varr.push(down_count);
-                }
-                arr.push(varr);
-            });
-            arr.push(min);
-            return _$17.flatten(arr);
-        }
-    }, {
-        key: "_initData",
-        value: function _initData() {
-
-            var arr = this._setDataSection();
-
-            if (this.waterLine != null) {
-                arr.push(this.waterLine);
-            }
-
-            if (this._opt.bottomNumber != null) {
-                arr.push(this.bottomNumber);
-            }
-            if (arr.length == 1) {
-                arr.push(arr[0] * 2);
-            }
-
-            //如果用户传入了自定义的dataSection， 那么优先级最高
-            if (!this._opt.dataSection) {
-
-                if (this._opt.baseNumber != undefined) {
-                    arr.push(this.baseNumber);
-                }
-                if (this._opt.minNumber != undefined) {
-                    arr.push(this.minNumber);
-                }
-                if (this._opt.maxNumber != undefined) {
-                    arr.push(this.maxNumber);
-                }
-
-                for (var ai = 0, al = arr.length; ai < al; ai++) {
-                    arr[ai] = Number(arr[ai]);
-                    if (isNaN(arr[ai])) {
-                        arr.splice(ai, 1);
-                        ai--;
-                        al--;
-                    }
-                }
-
-                this.dataSection = DataSection.section(arr, 3);
-            } else {
-                this.dataSection = this._opt.dataSection;
-            }
-
-            //如果还是0
-            if (this.dataSection.length == 0) {
-                this.dataSection = [0];
-            }
-            this.dataSectionGroup = [_$17.clone(this.dataSection)];
-
-            this._sort();
-            this._setBottomAndBaseNumber();
-
-            this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
-        }
-
-        //yVal 要被push到datasection 中去的 值
-
-    }, {
-        key: "setWaterLine",
-        value: function setWaterLine(yVal) {
-            if (yVal <= this.waterLine) return;
-
-            if (yVal < _$17.min(this.dataSection) || yVal > _$17.max(this.dataSection)) {
-                this.waterLine = yVal;
-                this._initData();
-            }
-        }
-    }, {
-        key: "_sort",
-        value: function _sort() {
-            if (this.sort) {
-                var sort = this._getSortType();
-                if (sort == "desc") {
-                    this.dataSection.reverse();
-
-                    //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
-                    _$17.each(this.dataSectionGroup, function (dsg, i) {
-                        dsg.reverse();
-                    });
-                    this.dataSectionGroup.reverse();
-                    //dataSectionGroup reverse end
-                }
-            }
-        }
-    }, {
-        key: "_getSortType",
-        value: function _getSortType() {
-            var _sort;
-            if (_$17.isString(this.sort)) {
-                _sort = this.sort;
-            }
-            if (_$17.isArray(this.sort)) {
-                _sort = this.sort[this.align == "left" ? 0 : 1];
-            }
-            if (!_sort) {
-                _sort = "asc";
-            }
-            return _sort;
-        }
-    }, {
-        key: "_setBottomAndBaseNumber",
-        value: function _setBottomAndBaseNumber() {
-            if (this.bottomNumber == null) {
-                this.bottomNumber = this.dataSection[0];
-            }
-
-            //没人情况下 baseNumber 就是datasection的最小值
-            if (this._opt.baseNumber == undefined || this._opt.baseNumber == null) {
-                this.baseNumber = this.dataSection[0]; //_.min( this.dataSection );
-                if (this.baseNumber < 0) {
-                    this.baseNumber = 0;
-                }
-            }
-        }
-    }, {
-        key: "_middleweight",
-        value: function _middleweight() {
-            if (this.middleweight) {
-                //支持多个量级的设置
-                //量级的设置只支持非sort的柱状图场景，否则这里修改过的datasection会和 _initData 中sort过的逻辑有冲突
-                if (!_$17.isArray(this.middleweight)) {
-                    this.middleweight = [this.middleweight];
-                }
-
-                //拿到dataSection中的min和 max 后，用middleweight数据重新设置一遍dataSection
-                var dMin = _$17.min(this.dataSection);
-                var dMax = _$17.max(this.dataSection);
-                var newDS = [dMin];
-                var newDSG = [];
-
-                for (var i = 0, l = this.middleweight.length; i < l; i++) {
-                    var preMiddleweight = dMin;
-                    if (i > 0) {
-                        preMiddleweight = this.middleweight[i - 1];
-                    }
-                    var middleVal = preMiddleweight + parseInt((this.middleweight[i] - preMiddleweight) / 2);
-
-                    newDS.push(middleVal);
-                    newDS.push(this.middleweight[i]);
-
-                    newDSG.push([preMiddleweight, middleVal, this.middleweight[i]]);
-                }
-                var lastMW = this.middleweight.slice(-1)[0];
-                newDS.push(lastMW + (dMax - lastMW) / 2);
-                newDS.push(dMax);
-
-                newDSG.push([lastMW, lastMW + (dMax - lastMW) / 2, dMax]);
-
-                //好了。 到这里用简单的规则重新拼接好了新的 dataSection
-                this.dataSection = newDS;
-                this.dataSectionGroup = newDSG;
-
-                //因为重新设置过了 dataSection 所以要重新排序和设置bottom and base 值
-                this._sort();
-                this._setBottomAndBaseNumber();
-            }
-        }
-    }, {
-        key: "resetWidth",
-        value: function resetWidth(width) {
-            var self = this;
-            self.width = width;
-            if (self.align == "left") {
-                self.rulesSprite.context.x = self.width;
-            }
-        }
-    }, {
-        key: "_widget",
-        value: function _widget() {
-            var self = this;
-            if (!self.display) {
-                self.width = 0;
-                return;
-            }
-
-            var arr = this.layoutData;
-            self.maxW = 0;
-            self._label && self.sprite.addChild(self._label);
-            for (var a = 0, al = arr.length; a < al; a++) {
-                var o = arr[a];
-                var y = o.y;
-                var content = o.content;
-
-                if (_$17.isFunction(self.text.format)) {
-                    content = self.text.format(content, self);
-                }
-                if (content === undefined || content === null) {
-                    content = Tools.numAddSymbol(o.content);
-                }
-
-                var textAlign = self.align == "left" ? "right" : "left";
-
-                var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
-                //为横向图表把y轴反转后的 逻辑
-                if (self.text.rotation == 90 || self.text.rotation == -90) {
-                    textAlign = "center";
-                    if (a == arr.length - 1) {
-                        posy = y - 2;
-                        textAlign = "right";
-                    }
-                    if (a == 0) {
-                        posy = y;
-                    }
-                }
-
-                var yNode = this.rulesSprite.getChildAt(a);
-
-                if (yNode) {
-                    if (yNode._txt) {
-                        yNode._txt.animate({
-                            y: posy
-                        }, {
-                            duration: 500,
-                            delay: a * 80,
-                            id: yNode._txt.id
-                        });
-                        yNode._txt.resetText(content);
-                    }
-
-                    if (yNode._line) {
-                        yNode._line.animate({
-                            y: y
-                        }, {
-                            duration: 500,
-                            delay: a * 80,
-                            id: yNode._line.id
-                        });
-                    }
-                } else {
-                    yNode = new canvax.Display.Sprite({
-                        id: "yNode" + a
-                    });
-
-                    var aniFrom = 20;
-                    if (content == self.baseNumber) {
-                        aniFrom = 0;
-                    }
-                    if (content < self.baseNumber) {
-                        aniFrom = -20;
-                    }
-
-                    var lineX = 0;
-                    if (self.line.enabled) {
-                        //线条
-                        lineX = self.align == "left" ? -self.line.width - self.line.marginToLine : self.line.marginToLine;
-                        var line = new Line$4({
-                            context: {
-                                x: lineX,
-                                y: y,
-                                end: {
-                                    x: self.line.width,
-                                    y: 0
-                                },
-                                lineWidth: self.line.lineWidth,
-                                strokeStyle: self._getProp(self.line.strokeStyle)
-                            }
-                        });
-                        yNode.addChild(line);
-                        yNode._line = line;
-                    }
-
-                    //文字
-                    var txtX = self.align == "left" ? lineX - self.text.marginToLine : lineX + self.line.width + self.text.marginToLine;
-                    if (this.isH) {
-                        txtX = txtX + (self.align == "left" ? -1 : 1) * 4;
-                    }
-                    var txt = new canvax.Display.Text(content, {
-                        id: "yAxis_txt_" + self.align + "_" + a,
-                        context: {
-                            x: txtX,
-                            y: posy + aniFrom,
-                            fillStyle: self._getProp(self.text.fillStyle),
-                            fontSize: self.text.fontSize,
-                            rotation: -Math.abs(this.text.rotation),
-                            textAlign: textAlign,
-                            textBaseline: "middle",
-                            globalAlpha: 0
-                        }
-                    });
-                    yNode.addChild(txt);
-                    yNode._txt = txt;
-
-                    self.maxW = Math.max(self.maxW, txt.getTextWidth());
-                    if (self.text.rotation == 90 || self.text.rotation == -90) {
-                        self.maxW = Math.max(self.maxW, txt.getTextHeight());
-                    }
-
-                    //这里可以由用户来自定义过滤 来 决定 该node的样式
-                    _$17.isFunction(self.filter) && self.filter({
-                        layoutData: self.layoutData,
-                        index: a,
-                        txt: txt,
-                        line: line
-                    });
-
-                    self.rulesSprite.addChild(yNode);
-
-                    //如果是resize的话也不要处理动画
-                    if (self.animation && !self.resize) {
-                        txt.animate({
-                            globalAlpha: 1,
-                            y: txt.context.y - aniFrom
-                        }, {
-                            duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: (a + 1) * 80,
-                            id: txt.id
-                        });
-                    } else {
-                        txt.context.y = txt.context.y - aniFrom;
-                        txt.context.globalAlpha = 1;
-                    }
-                }
-            }
-
-            //把 rulesSprite.children中多余的给remove掉
-            if (self.rulesSprite.children.length > arr.length) {
-                for (var al = arr.length, pl = self.rulesSprite.children.length; al < pl; al++) {
-                    self.rulesSprite.getChildAt(al).remove();
-                    al--, pl--;
-                }
-            }
-
-            self.maxW += self.text.marginToLine;
-            if (self.width === null) {
-                self.width = parseInt(self.maxW + self.text.marginToLine);
-                if (self.line.enabled) {
-                    self.width += parseInt(self.line.width + self.line.marginToLine);
-                }
-            }
-
-            if (self.align == "left") {
-                self.rulesSprite.context.x = self.width;
-            }
-        }
-    }, {
-        key: "_getProp",
-        value: function _getProp(s) {
-            var res = s;
-            if (_$17.isFunction(s)) {
-                res = s.call(this, this);
-            }
-            if (!s) {
-                res = "#999";
-            }
-            return res;
-        }
-    }]);
-    return yAxis;
-}(component);
-
-var Line$5 = canvax.Shapes.Line;
-var Rect$4 = canvax.Shapes.Rect;
-var _$18 = canvax._;
-
-var Grid = function (_Component) {
-    inherits$1(Grid, _Component);
-
-    function Grid(opt, root) {
-        classCallCheck$1(this, Grid);
-
-        var _this = possibleConstructorReturn$1(this, (Grid.__proto__ || Object.getPrototypeOf(Grid)).call(this, opt, root));
-
-        _this.w = 0;
-        _this.h = 0;
-        _this.root = root; //该组件被添加到的目标图表项目，
-
-        _this.pos = {
-            x: 0,
-            y: 0
-        };
-
-        _this.display = 1;
-
-        _this.xOrigin = { //原点开始的x轴线
-            display: 1,
-            lineWidth: 1,
-            strokeStyle: '#ccc'
-        };
-        _this.yOrigin = { //原点开始的y轴线               
-            display: 1,
-            lineWidth: 1,
-            strokeStyle: '#ccc'
-        };
-        _this.xAxis = { //x轴上的线
-            display: 1,
-            data: [], //[{y:100},{}]
-            org: null, //x轴坐标原点，默认为上面的data[0]
-            // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
-            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
-            lineWidth: 1,
-            strokeStyle: '#f0f0f0', //'#e5e5e5',
-            filter: null
-        };
-        _this.yAxis = { //y轴上的线
-            display: 0,
-            data: [], //[{x:100},{}]
-            xDis: 0,
-            org: null, //y轴坐标原点，默认为上面的data[0]
-            // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
-            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
-            lineWidth: 1,
-            strokeStyle: '#f0f0f0', //'#e5e5e5',
-            filter: null
-        };
-        _this.fill = {
-            fillStyle: null,
-            alpha: null
-        };
-
-        _this.sprite = null; //总的sprite
-        _this.xAxisSp = null; //x轴上的线集合
-        _this.yAxisSp = null; //y轴上的线集合
-
-        _this.animation = true;
-        _this.resize = false;
-
-        _this.init(opt);
-        return _this;
-    }
-
-    createClass$1(Grid, [{
-        key: "init",
-        value: function init(opt) {
-            _$18.extend(true, this, opt);
-            this.sprite = new canvax.Display.Sprite();
-        }
-    }, {
-        key: "setX",
-        value: function setX($n) {
-            this.sprite.context.x = $n;
-        }
-    }, {
-        key: "setY",
-        value: function setY($n) {
-            this.sprite.context.y = $n;
-        }
-    }, {
-        key: "draw",
-        value: function draw(opt) {
-            _$18.extend(true, this, opt);
-            //this._configData(opt);
-            this._widget();
-            this.setX(this.pos.x);
-            this.setY(this.pos.y);
-        }
-    }, {
-        key: "clean",
-        value: function clean() {
-            this.sprite.removeAllChildren();
-        }
-    }, {
-        key: "reset",
-        value: function reset(opt) {
-            this.sprite.removeAllChildren();
-            this.draw(opt);
-        }
-    }, {
-        key: "_widget",
-        value: function _widget() {
-
-            var self = this;
-            if (!this.display) {
-                return;
-            }
-
-            //不管怎么样，grid的布局依赖 只依赖_yAxis的第一个对象
-            //TODO: 这里应该是要获取第一个有显示field的_yAxis对象。
-            //也就是说当第一个_yAxis上面的field都enabled为false了后，就要取_yAxis[1],后面改
-            var _yAxis = self.root._yAxis[0];
-
-            if (self.root && _yAxis && _yAxis.dataSectionGroup) {
-                self.yGroupSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yGroupSp);
-                for (var g = 0, gl = _yAxis.dataSectionGroup.length; g < gl; g++) {
-                    var yGroupHeight = _yAxis.yGraphsHeight / gl;
-                    var groupRect = new Rect$4({
-                        context: {
-                            x: 0,
-                            y: -yGroupHeight * g,
-                            width: self.w,
-                            height: -yGroupHeight,
-                            fillStyle: self.fill.fillStyle || "#000",
-                            fillAlpha: self.fill.alpha || 0.025 * (g % 2)
-                        }
-                    });
-
-                    self.yGroupSp.addChild(groupRect);
-                }
-            }
-
-            self.xAxisSp = new canvax.Display.Sprite(), self.sprite.addChild(self.xAxisSp);
-            self.yAxisSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yAxisSp);
-
-            //x轴方向的线集合
-            var arr = self.xAxis.data;
-            for (var a = 0, al = arr.length; a < al; a++) {
-                var o = arr[a];
-
-                var line = new Line$5({
-                    id: "back_line_" + a,
-                    context: {
-                        y: o.y,
-                        lineType: self.xAxis.lineType,
-                        lineWidth: self.xAxis.lineWidth,
-                        strokeStyle: self.xAxis.strokeStyle
-                    }
-                });
-                if (self.xAxis.display) {
-                    _$18.isFunction(self.xAxis.filter) && self.xAxis.filter.apply(line, [{
-                        layoutData: self.yAxis.data,
-                        index: a,
-                        line: line
-                    }, self]);
-                    self.xAxisSp.addChild(line);
-
-                    if (this.animation && !this.resize) {
-                        line.animate({
-                            start: {
-                                x: 0
-                            },
-                            end: {
-                                x: self.w
-                            }
-                        }, {
-                            duration: 500,
-                            //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                            delay: (al - a) * 80,
-                            id: line.id
-                        });
-                    } else {
-                        line.context.start.x = 0;
-                        line.context.end.x = self.w;
-                    }
-                }
-            }
-
-            //y轴方向的线集合
-            var arr = self.yAxis.data;
-            for (var a = 0, al = arr.length; a < al; a++) {
-                var o = arr[a];
-                var line = new Line$5({
-                    context: {
-                        x: o.x,
-                        start: {
-                            x: 0,
-                            y: 0
-                        },
-                        end: {
-                            x: 0,
-                            y: -self.h
-                        },
-                        lineType: self.yAxis.lineType,
-                        lineWidth: self.yAxis.lineWidth,
-                        strokeStyle: self.yAxis.strokeStyle,
-                        visible: o.x ? true : false
-                    }
-                });
-                if (self.yAxis.display) {
-                    _$18.isFunction(self.yAxis.filter) && self.yAxis.filter.apply(line, [{
-                        layoutData: self.xAxis.data,
-                        index: a,
-                        line: line
-                    }, self]);
-                    self.yAxisSp.addChild(line);
-                }
-            }
-
-            //原点开始的y轴线
-            var xAxisOrg = self.yAxis.org == null ? 0 : _$18.find(self.yAxis.data, function (obj) {
-                return obj.content == self.yAxis.org;
-            }).x;
-
-            //self.yAxis.org = xAxisOrg;
-            var line = new Line$5({
-                context: {
-                    start: {
-                        x: xAxisOrg,
-                        y: 0
-                    },
-                    end: {
-                        x: xAxisOrg,
-                        y: -self.h
-                    },
-                    lineWidth: self.yOrigin.lineWidth,
-                    strokeStyle: self.yOrigin.strokeStyle
-                }
-            });
-            if (self.yOrigin.display) self.sprite.addChild(line);
-
-            if (this.root._yAxisRight) {
-                var lineR = new Line$5({
-                    context: {
-                        start: {
-                            x: self.w,
-                            y: 0
-                        },
-                        end: {
-                            x: self.w,
-                            y: -self.h
-                        },
-                        lineWidth: self.yOrigin.lineWidth,
-                        strokeStyle: self.yOrigin.strokeStyle
-                    }
-                });
-                if (self.yOrigin.display) self.sprite.addChild(lineR);
-            }
-
-            var line = new Line$5({
-                context: {
-                    start: {
-                        x: 0,
-                        y: _yAxis.basePoint.y
-                    },
-                    end: {
-                        x: self.w,
-                        y: _yAxis.basePoint.y
-                    },
-                    lineWidth: self.xOrigin.lineWidth,
-                    strokeStyle: self.xOrigin.strokeStyle
-                }
-            });
-            if (self.xOrigin.display) self.sprite.addChild(line);
-        }
-    }]);
-    return Grid;
-}(component);
-
-var _$14 = canvax._;
-var Rect$3 = canvax.Shapes.Rect;
-
-var Descartes_Component = function (_Component) {
-    inherits$1(Descartes_Component, _Component);
-
-    function Descartes_Component(opt, root) {
-        classCallCheck$1(this, Descartes_Component);
-
-        var _this = possibleConstructorReturn$1(this, (Descartes_Component.__proto__ || Object.getPrototypeOf(Descartes_Component)).call(this));
-
-        _this._root = root;
-
-        _this._xAxis = null;
-        _this._yAxis = [];
-
-        _this._yAxisLeft = null;
-        _this._yAxisRight = null;
-        _this._grid = null;
-
-        _this.graphsWidth = 0;
-        _this.graphsHeight = 0;
-        _this.graphsX = 0;
-        _this.graphsY = 0;
-
-        _this.horizontal = false;
-
-        _this.dataFrame = _this._root.dataFrame;
-
-        _this.xAxis = {
-            field: _this.dataFrame.fields[0]
-        };
-        _this.yAxis = [{
-            field: _this.dataFrame.fields.slice(1)
-        }];
-        _this.grid = {};
-
-        _$14.extend(true, _this, opt);
-
-        if (opt.horizontal) {
-            _$14.extend(true, _this.xAxis, {
-                text: {
-                    rotation: 90
-                },
-                isH: true
-            });
-            _$14.each(_this.yAxis, function (yAxis$$1) {
-                _$14.extend(true, yAxis$$1, {
-                    text: {
-                        rotation: 90
-                    },
-                    isH: true
-                });
-            });
-        }
-
-        if ("display" in opt) {
-            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
-            _this.xAxis.display = opt.display;
-            _$14.each(_this.yAxis, function (yAxis$$1) {
-                yAxis$$1.display = opt.display;
-            });
-            _this.grid.display = opt.display;
-        }
-
-        /*
-        吧原始的field转换为对应结构的显示树
-        ["uv"] --> [
-            {field:'uv',enabled:true ,yAxis: yAxisleft }
-            ...
-        ]
-        */
-        _this.fieldsMap = null;
-        _this.induce = null;
-        _this.init(opt);
-        return _this;
-    }
-
-    createClass$1(Descartes_Component, [{
-        key: "init",
-        value: function init(opt) {
-            this.sprite = new canvax.Display.Sprite({
-                id: "coordinate"
-            });
-            this._initModules();
-            //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
-            // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
-            this.fieldsMap = this._setFieldsMap();
-        }
-    }, {
-        key: "resetData",
-        value: function resetData(dataFrame, dataTrigger) {
-            var me = this;
-            this.dataFrame = dataFrame;
-
-            var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
-            this._xAxis.resetData(_xAxisDataFrame);
-
-            _$14.each(this._yAxis, function (_yAxis) {
-                //这个_yAxis是具体的y轴实例
-                var yAxisDataFrame = me._getAxisDataFrame(_yAxis.field);
-                _yAxis.resetData(yAxisDataFrame);
-            });
-
-            this._grid.reset({
-                animation: false,
-                xAxis: {
-                    data: this._yAxisLeft.layoutData
-                }
-            });
-        }
-    }, {
-        key: "draw",
-        value: function draw(opt) {
-            //在绘制的时候，是已经能拿到xAxis的height了得
-            var _padding = this._root.padding;
-
-            var h = opt.height || this._root.height;
-            var w = opt.width || this._root.width;
-            if (this.horizontal) {
-                //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
-                var _num = w;
-                w = h;
-                h = _num;
-            }
-
-            var y = h - this._xAxis.height - _padding.bottom;
-            var _yAxisW = 0;
-            var _yAxisRW = 0;
-
-            //绘制yAxis
-            if (this._yAxisLeft) {
-                this._yAxisLeft.draw({
-                    pos: {
-                        x: _padding.left,
-                        y: y
-                    },
-                    yMaxHeight: y - _padding.top,
-                    resize: opt.resize
-                });
-                _yAxisW = this._yAxisLeft.width;
-            }
-
-            //如果有双轴
-            if (this._yAxisRight) {
-                this._yAxisRight.draw({
-                    pos: {
-                        x: 0,
-                        y: y
-                    },
-                    yMaxHeight: y - _padding.top,
-                    resize: opt.resize
-                });
-                _yAxisRW = this._yAxisRight.width;
-            }
-
-            //绘制x轴
-            this._xAxis.draw({
-                pos: {
-                    x: _padding.left + _yAxisW,
-                    y: y
-                },
-                width: w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
-                resize: opt.resize
-            });
-
-            this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width);
-
-            this.graphsWidth = this._xAxis.width;
-            this.graphsHeight = this._yAxis[0].yGraphsHeight;
-            this.graphsX = _yAxisW + _padding.left;
-            this.graphsY = y;
-
-            //绘制背景网格
-            this._grid.draw({
-                w: this.graphsWidth,
-                h: this.graphsHeight,
-                xAxis: {
-                    data: this._yAxis[0].layoutData
-                },
-                yAxis: {
-                    data: this._xAxis.layoutData
-                },
-                pos: {
-                    x: this.graphsX,
-                    y: this.graphsY
-                },
-                resize: opt.resize
-            });
-
-            if (this.horizontal) {
-                this._horizontal({
-                    w: w,
-                    h: h
-                });
-            }
-
-            this._initInduce();
-        }
-    }, {
-        key: "_initModules",
-        value: function _initModules() {
-            var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
-            this._xAxis = new xAxis(this.xAxis, _xAxisDataFrame, this);
-            this.sprite.addChild(this._xAxis.sprite);
-
-            //这里定义的是配置
-            var yAxis$$1 = this.yAxis;
-            var yAxisLeft, yAxisRight;
-            var yAxisLeftDataFrame, yAxisRightDataFrame;
-
-            //从chart/descartes.js中重新设定了后的yAxis 肯定是个数组
-            if (!_$14.isArray(yAxis$$1)) {
-                yAxis$$1 = [yAxis$$1];
-            }
-
-            //left是一定有的
-            yAxisLeft = _$14.find(yAxis$$1, function (ya) {
-                return ya.align == "left";
-            });
-
-            if (yAxisLeft) {
-                yAxisLeftDataFrame = this._getAxisDataFrame(yAxisLeft.field);
-                this._yAxisLeft = new yAxis(yAxisLeft, yAxisLeftDataFrame);
-                this._yAxisLeft.axis = yAxisLeft;
-                this.sprite.addChild(this._yAxisLeft.sprite);
-                this._yAxis.push(this._yAxisLeft);
-            }
-
-            yAxisRight = _$14.find(yAxis$$1, function (ya) {
-                return ya.align == "right";
-            });
-            if (yAxisRight) {
-                yAxisRightDataFrame = this._getAxisDataFrame(yAxisRight.field);
-                this._yAxisRight = new yAxis(yAxisRight, yAxisRightDataFrame);
-                this._yAxisRight.axis = yAxisRight;
-                this.sprite.addChild(this._yAxisRight.sprite);
-                this._yAxis.push(this._yAxisRight);
-            }
-
-            this._grid = new Grid(this.grid, this);
-            this.sprite.addChild(this._grid.sprite);
-        }
-
-        /**
-         * 
-         * @param {x,y} size 
-         */
-
-    }, {
-        key: "_horizontal",
-        value: function _horizontal() {
-            var me = this;
-            var w = me._root.width;
-            var h = me._root.height;
-
-            _$14.each([me.sprite.context], function (ctx) {
-                ctx.x += (w - h) / 2;
-                ctx.y += (h - w) / 2;
-                ctx.rotation = 90;
-                ctx.rotateOrigin.x = h / 2;
-                ctx.rotateOrigin.y = w / 2;
-                ctx.scaleOrigin.x = h / 2;
-                ctx.scaleOrigin.y = w / 2;
-                ctx.scaleX = -1;
-            });
-
-            //把x轴文案做一次镜像反转
-            _$14.each(_$14.flatten([this._xAxis]), function (_xAxis) {
-                _$14.each(_xAxis.rulesSprite.children, function (xnode) {
-                    var ctx = xnode._txt.context;
-                    var rect = xnode._txt.getRect();
-                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
-                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
-                    ctx.scaleY = -1;
-                });
-            });
-
-            //把y轴文案做一次镜像反转
-            _$14.each(_$14.flatten([this._yAxis]), function (_yAxis) {
-                _$14.each(_yAxis.rulesSprite.children, function (ynode) {
-                    var ctx = ynode._txt.context;
-                    var rect = ynode._txt.getRect();
-                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
-                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
-                    ctx.scaleY = -1;
-                });
-            });
-        }
-    }, {
-        key: "getPosX",
-        value: function getPosX(opt) {
-            return this._xAxis.getPosX(opt);
-        }
-    }, {
-        key: "_getAxisDataFrame",
-        value: function _getAxisDataFrame(fields) {
-            return {
-                field: fields,
-                org: this.dataFrame.getDataOrg(fields, function (val) {
-                    if (val === undefined || val === null || val == "") {
-                        return val;
-                    }
-                    return isNaN(Number(val)) ? val : Number(val);
-                })
-            };
-        }
-    }, {
-        key: "removeField",
-        value: function removeField(field) {
-            this.enabledField(field);
-        }
-    }, {
-        key: "addField",
-        value: function addField(field) {
-            this.enabledField(field);
-        }
-    }, {
-        key: "enabledField",
-        value: function enabledField(field) {
-            this.setFieldEnabled(field);
-            var fieldMap = this.getFieldMapOf(field);
-            var enabledFields = this.getEnabledFields()[fieldMap.yAxis.align];
-
-            fieldMap.yAxis.resetData(this._getAxisDataFrame(enabledFields));
-
-            //然后yAxis更新后，对应的背景也要更新
-            this._grid.reset({
-                animation: false,
-                xAxis: {
-                    data: this._yAxisLeft.layoutData
-                }
-            });
-        }
-
-        //查询field在哪个yAxis上面,外部查询的话直接用fieldMap._yAxis
-
-    }, {
-        key: "_getYaxisOfField",
-        value: function _getYaxisOfField(field) {
-            var me = this;
-            var Axis;
-            _$14.each(this._yAxis, function (_yAxis, i) {
-                var fs = _yAxis.field;
-                var _fs = _$14.flatten([fs]);
-                var ind = _$14.indexOf(_fs, field);
-                if (ind > -1) {
-                    //那么说明这个yAxis轴上面有这个字段，这个yaxis需要reset
-                    Axis = _yAxis;
-                    return false;
-                }
-            });
-            return Axis;
-        }
-
-        //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
-
-    }, {
-        key: "_setFieldsMap",
-        value: function _setFieldsMap() {
-            var me = this;
-            var fieldInd = 0;
-
-            function _set(fields) {
-                if (!fields) {
-                    var yAxis$$1 = me.yAxis;
-                    if (!_$14.isArray(yAxis$$1)) {
-                        yAxis$$1 = [yAxis$$1];
-                    }
-
-                    fields = [];
-
-                    _$14.each(yAxis$$1, function (item, i) {
-                        fields = fields.concat(item.field);
-                    });
-                }
-
-                if (_$14.isString(fields)) {
-                    fields = [fields];
-                }
-
-                var clone_fields = _$14.clone(fields);
-                for (var i = 0, l = fields.length; i < l; i++) {
-                    if (_$14.isString(fields[i])) {
-                        clone_fields[i] = {
-                            field: fields[i],
-                            enabled: true,
-                            yAxis: me._getYaxisOfField(fields[i]),
-                            style: colors[fieldInd],
-                            ind: fieldInd++
-                        };
-                    }
-                    if (_$14.isArray(fields[i])) {
-                        clone_fields[i] = _set(fields[i], fieldInd);
-                    }
-                }
-
-                return clone_fields;
-            }
-
-            return _set();
-        }
-
-        //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
-        //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
-
-    }, {
-        key: "getEnabledFields",
-        value: function getEnabledFields(fields) {
-            if (fields) {
-                //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-                //只留下enabled的field 结构
-                return this._filterEnabledFields(fields);
-            }
-            var fmap = {
-                left: [], right: []
-            };
-
-            _$14.each(this.fieldsMap, function (bamboo, b) {
-                if (_$14.isArray(bamboo)) {
-                    //多节竹子
-
-                    var align;
-                    var fields = [];
-
-                    //设置完fields后，返回这个group属于left还是right的axis
-                    _$14.each(bamboo, function (obj, v) {
-                        if (obj.field && obj.enabled) {
-                            align = obj.yAxis.align;
-                            fields.push(obj.field);
-                        }
-                    });
-
-                    fields.length && fmap[align].push(fields);
-                } else {
-                    //单节棍
-                    if (bamboo.field && bamboo.enabled) {
-                        fmap[bamboo.yAxis.align].push(bamboo.field);
-                    }
-                }
-            });
-
-            return fmap;
-        }
-
-        //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-        //只留下enabled的field 结构
-
-    }, {
-        key: "_filterEnabledFields",
-        value: function _filterEnabledFields(fields) {
-            var me = this;
-            var arr = [];
-            if (!_$14.isArray(fields)) fields = [fields];
-            _$14.each(fields, function (f) {
-                if (!_$14.isArray(f)) {
-                    if (me.getFieldMapOf(f).enabled) {
-                        arr.push(f);
-                    }
-                } else {
-                    //如果这个是个纵向数据，说明就是堆叠配置
-                    var varr = [];
-                    _$14.each(f, function (v_f) {
-                        if (me.getFieldMapOf(v_f).enabled) {
-                            varr.push(v_f);
-                        }
-                    });
-                    if (varr.length) {
-                        arr.push(varr);
-                    }
-                }
-            });
-            return arr;
-        }
-
-        //设置 fieldsMap 中对应field 的 enabled状态
-
-    }, {
-        key: "setFieldEnabled",
-        value: function setFieldEnabled(field) {
-            var me = this;
-            function set$$1(maps) {
-                _$14.each(maps, function (map, i) {
-                    if (_$14.isArray(map)) {
-                        set$$1(map);
-                    } else if (map.field && map.field == field) {
-                        map.enabled = !map.enabled;
-                    }
-                });
-            }
-            set$$1(me.fieldsMap);
-        }
-    }, {
-        key: "getFieldMapOf",
-        value: function getFieldMapOf(field) {
-            var me = this;
-            var fieldMap = null;
-            function get$$1(maps) {
-                _$14.each(maps, function (map, i) {
-                    if (_$14.isArray(map)) {
-                        get$$1(map);
-                    } else if (map.field && map.field == field) {
-                        fieldMap = map;
-                        return false;
-                    }
-                });
-            }
-            get$$1(me.fieldsMap);
-            return fieldMap;
-        }
-    }, {
-        key: "_initInduce",
-        value: function _initInduce() {
-            var me = this;
-            me.induce = new Rect$3({
-                id: "induce",
-                context: {
-                    x: me.graphsX,
-                    y: me.graphsY - me.graphsHeight,
-                    width: me.graphsWidth,
-                    height: me.graphsHeight,
-                    fillStyle: '#000000',
-                    globalAlpha: 0,
-                    cursor: 'pointer'
-                }
-            });
-
-            if (!me.sprite.getChildById("induce")) {
-                me.sprite.addChild(me.induce);
-            }
-
-            me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
-                e.eventInfo = me._getInfoHandler(e);
-                me.fire(e.type, e);
-            });
-        }
-    }, {
-        key: "_getInfoHandler",
-        value: function _getInfoHandler(e) {
-            //这里只获取xAxis的刻度信息
-            var xNodeInd = this._xAxis.getIndexOfX(e.point.x);
-            var obj = {
-                xAxis: {
-                    field: this._xAxis.field,
-                    value: this._xAxis.dataOrg[xNodeInd],
-                    ind: xNodeInd
-                },
-                title: xNodeInd >= 0 ? this._xAxis.layoutData[xNodeInd].layoutText : "",
-                nodes: [
-                    //遍历_graphs 去拿东西
-                ]
-            };
-            return obj;
-        }
-    }]);
-    return Descartes_Component;
-}(component);
-
-var AnimationFrame$2 = canvax.AnimationFrame;
-var Rect$5 = canvax.Shapes.Rect;
-var _$19 = canvax._;
-
-var Graphs = function (_Canvax$Event$EventDi) {
-    inherits$1(Graphs, _Canvax$Event$EventDi);
-
-    function Graphs(opt, root) {
-        classCallCheck$1(this, Graphs);
-
-        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
-
-        _this._opt = opt;
-
-        _this.data = [];
-        _this.root = root;
-
-        _this.type = "bar";
-
-        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        _this.field = null;
-        _this.enabledField = null;
-
-        _this.width = 0;
-        _this.height = 0;
-        _this.pos = {
-            x: 0,
-            y: 0
-        };
-
-        _this.yAxisAlign = "left";
-        _this._xAxis = _this.root._coordinate._xAxis;
-
-        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
-        //和css中得absolute概念一致，脱离文档流的绝对定位
-        _this.absolute = false;
-
-        _this.animation = true;
-
-        _this.bar = {
-            width: 0,
-            _width: 0,
-            radius: 4,
-            fillStyle: null,
-            fillAlpha: 0.9,
-            filter: function filter() {}, //用来定制bar的样式
-            count: 0, //总共有多少个bar
-            xDis: null
-        };
-
-        _this.text = {
-            enabled: false,
-            fillStyle: '#999',
-            fontSize: 12,
-            format: null,
-            lineWidth: 1,
-            strokeStyle: 'white'
-        };
-
-        _this.sort = null;
-
-        _this._barsLen = 0;
-
-        _this.eventEnabled = true;
-
-        _this.sprite = null;
-        _this.txtsSp = null;
-
-        _$19.extend(true, _this, opt);
-
-        _this.init();
-        return _this;
-    }
-
-    createClass$1(Graphs, [{
-        key: "init",
-        value: function init() {
-            this.sprite = new canvax.Display.Sprite({
-                id: "graphsEl"
-            });
-
-            this.barsSp = new canvax.Display.Sprite({
-                id: "barsSp"
-            });
-            this.txtsSp = new canvax.Display.Sprite({
-                id: "txtsSp",
-                context: {
-                    //visible: false
-                }
-            });
-        }
-    }, {
-        key: "getNodesAt",
-        value: function getNodesAt(index) {
-            //该index指当前
-            var data = this.data;
-            var _nodesInfoList = []; //节点信息集合
-            _$19.each(this.enabledField, function (fs, i) {
-                if (_$19.isArray(fs)) {
-                    _$19.each(fs, function (_fs, ii) {
-                        //fs的结构两层到顶了
-                        var node = data[i][ii][index];
-                        node && _nodesInfoList.push(node);
-                    });
-                } else {
-                    var node = data[i][0][index];
-                    node && _nodesInfoList.push(node);
-                }
-            });
-
-            return _nodesInfoList;
-        }
-    }, {
-        key: "_getTargetField",
-        value: function _getTargetField(b, v, i, field) {
-            if (_$19.isString(field)) {
-                return field;
-            } else if (_$19.isArray(field)) {
-                var res = field[b];
-                if (_$19.isString(res)) {
-                    return res;
-                } else if (_$19.isArray(res)) {
-                    return res[v];
-                }
-            }
-        }
-
-        //dataZoom中用
-
-    }, {
-        key: "setBarStyle",
-        value: function setBarStyle($o) {
-            var me = this;
-            var index = $o.iNode;
-            var group = me.barsSp.getChildById('barGroup_' + index);
-
-            var fillStyle = $o.fillStyle || me._getStyle(me.bar.fillStyle);
-            for (var a = 0, al = group.getNumChildren(); a < al; a++) {
-                var rectEl = group.getChildAt(a);
-                rectEl.context.fillStyle = fillStyle;
-            }
-        }
-    }, {
-        key: "_getStyle",
-        value: function _getStyle(c, groups, vLen, i, h, v, value, field, _flattenField) {
-            var fieldMap = this.root._coordinate.getFieldMapOf(field);
-            var style = fieldMap.style;
-
-            //field对应的索引，， 取颜色这里不要用i
-            if (_$19.isString(c)) {
-                style = c;
-            }
-            if (_$19.isArray(c)) {
-                style = _$19.flatten(c)[_$19.indexOf(_flattenField, field)];
-            }
-            if (_$19.isFunction(c)) {
-                style = c.apply(this, [{
-                    iGroup: i,
-                    iNode: h,
-                    iLay: v,
-                    field: field,
-                    value: value,
-                    xAxis: {
-                        field: this._xAxis.field,
-                        value: this._xAxis.layoutData[h].content
-                    }
-                }]);
-            }
-
-            return style;
-        }
-    }, {
-        key: "_getBarWidth",
-        value: function _getBarWidth(ceilWidth, ceilWidth2) {
-            if (this.bar.width) {
-                if (_$19.isFunction(this.bar.width)) {
-                    this.bar._width = this.bar.width(ceilWidth);
-                } else {
-                    this.bar._width = this.bar.width;
-                }
-            } else {
-                this.bar._width = parseInt(ceilWidth2) - parseInt(Math.max(1, ceilWidth2 * 0.3));
-
-                //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
-                if (this.bar._width == 1 && ceilWidth > 3) {
-                    this.bar._width = parseInt(ceilWidth) - 2;
-                }
-            }
-            this.bar._width < 1 && (this.bar._width = 1);
-            return this.bar._width;
-        }
-    }, {
-        key: "add",
-        value: function add(field) {
-            this.clean();
-            this.draw();
-        }
-    }, {
-        key: "remove",
-        value: function remove(field) {
-            this.clean();
-            this.draw();
-        }
-    }, {
-        key: "resetData",
-        value: function resetData(dataFrame, dataTrigger) {
-            this.draw();
-        }
-    }, {
-        key: "clean",
-        value: function clean() {
-            this.data = [];
-            this.barsSp.removeAllChildren();
-            if (this.text.enabled) {
-                this.txtsSp.removeAllChildren();
-            }
-        }
-    }, {
-        key: "draw",
-        value: function draw(opt) {
-            //第二个data参数去掉，直接trimgraphs获取最新的data
-            _$19.extend(true, this, opt);
-
-            var data = this._trimGraphs();
-
-            if (data.length == 0 || data[0].length == 0) {
-                this.clean();
-                return;
-            }
-
-            var preLen = 0; //纵向的分组，主要用于resetData的时候，对比前后data数量用
-            this.data[0] && (preLen = this.data[0][0].length);
-
-            this.data = data;
-            var me = this;
-            var groups = data.length;
-            var itemW = 0;
-
-            me.bar.count = 0;
-
-            var _flattenField = _$19.flatten([this.field]);
-
-            _$19.each(data, function (h_group, i) {
-                /*
-                //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
-                //h_group就会为两组，一组代表uv 一组代表pv。
-                var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
-                */
-
-                //vLen 为一单元bar上面纵向堆叠的length
-                //比如yAxis.field = [?
-                //    ["uv","pv"],  vLen == 2
-                //    "click"       vLen == 1
-                //]
-
-                //if (h <= preLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
-
-                var vLen = h_group.length;
-                if (vLen == 0) return;
-
-                //hlen为数据有多长
-                var hLen = h_group[0].length;
-
-                //itemW 还是要跟着xAxis的xDis保持一致
-                itemW = me.width / hLen;
-
-                me._barsLen = hLen * groups;
-
-                for (var h = 0; h < hLen; h++) {
-                    var groupH;
-                    if (i == 0) {
-                        //横向的分组
-                        if (h <= preLen - 1) {
-                            groupH = me.barsSp.getChildById("barGroup_" + h);
-                        } else {
-                            groupH = new canvax.Display.Sprite({
-                                id: "barGroup_" + h
-                            });
-                            me.barsSp.addChild(groupH);
-                            groupH.iNode = h;
-                        }
-                    } else {
-                        groupH = me.barsSp.getChildById("barGroup_" + h);
-                    }
-
-                    //同上面，给txt做好分组
-                    var txtGroupH;
-                    if (i == 0) {
-                        if (h <= preLen - 1) {
-                            txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
-                        } else {
-                            txtGroupH = new canvax.Display.Sprite({
-                                id: "txtGroup_" + h
-                            });
-                            me.txtsSp.addChild(txtGroupH);
-                            txtGroupH.iGroup = i;
-                        }
-                    } else {
-                        txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
-                    }
-
-                    for (var v = 0; v < vLen; v++) {
-
-                        me.bar.count++;
-
-                        //单个的bar，从纵向的底部开始堆叠矩形
-                        var rectData = h_group[v][h];
-                        rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
-
-                        var fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
-
-                        rectData.fillStyle = fillStyle;
-
-                        var rectH = rectData.y - rectData.fromY;
-
-                        if (isNaN(rectH) || Math.abs(rectH) < 1) {
-                            rectH = 0;
-                        }
-
-                        var finalPos = {
-                            x: Math.round(rectData.x),
-                            y: rectData.fromY,
-                            width: parseInt(me.bar._width),
-                            height: rectH,
-                            fillStyle: fillStyle,
-                            fillAlpha: me.bar.fillAlpha,
-                            scaleY: -1
-                        };
-                        rectData.width = finalPos.width;
-
-                        var rectCxt = {
-                            x: finalPos.x,
-                            y: rectData.yBasePoint.y, //0,
-                            width: finalPos.width,
-                            height: finalPos.height,
-                            fillStyle: finalPos.fillStyle,
-                            fillAlpha: me.bar.fillAlpha,
-                            scaleY: 0
-                        };
-
-                        if (!!me.bar.radius && rectData.isLeaf) {
-                            var radiusR = Math.min(me.bar._width / 2, Math.abs(rectH));
-                            radiusR = Math.min(radiusR, me.bar.radius);
-                            rectCxt.radius = [radiusR, radiusR, 0, 0];
-                        }
-
-                        if (!me.animation) {
-                            delete rectCxt.scaleY;
-                            rectCxt.y = finalPos.y;
-                        }
-
-                        var rectEl;
-                        if (h <= preLen - 1) {
-                            rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
-                            rectEl.context.fillStyle = fillStyle;
-                        } else {
-                            rectEl = new Rect$5({
-                                id: "bar_" + i + "_" + h + "_" + v,
-                                context: rectCxt
-                            });
-                            groupH.addChild(rectEl);
-                        }
-
-                        rectEl.finalPos = finalPos;
-
-                        rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
-
-                        me.bar.filter.apply(rectEl, [rectData, me]);
-
-                        //叶子节点上面放置info
-                        if (rectData.isLeaf && me.text.enabled) {
-
-                            //文字
-                            var infosp;
-                            if (h <= preLen - 1) {
-                                infosp = txtGroupH.getChildById("infosp_" + i + "_" + h + "_" + v);
-                            } else {
-                                //console.log("infosp_" + i + "_" + h + "_" + v);
-                                infosp = new canvax.Display.Sprite({
-                                    id: "infosp_" + i + "_" + h + "_" + v,
-                                    context: {
-                                        y: rectData.yBasePoint.y,
-                                        visible: false
-                                    }
-                                });
-                                infosp._hGroup = h;
-                                txtGroupH.addChild(infosp);
-                            }
-
-                            var contents = [];
-                            for (var c = vLen - 1; c >= 0; c--) {
-                                //在baseNumber同一侧的数据放在一个叶子节点上面显示
-                                if (rectData.value > rectData.yBasePoint.content === h_group[c][h].value > h_group[c][h].yBasePoint.content) {
-                                    contents.push(h_group[c][h]);
-                                }
-                            }
-
-                            var infoWidth = 0;
-                            var infoHeight = 0;
-
-                            _$19.each(contents, function (cdata, ci) {
-                                var content = cdata.value;
-                                if (_$19.isFunction(me.text.format)) {
-                                    var _formatc = me.text.format.apply(me, [content, cdata]);
-                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
-                                        content = _formatc;
-                                    }
-                                }
-                                if (!me.animation && _$19.isNumber(content)) {
-                                    content = numAddSymbol(content);
-                                }
-
-                                if (content === "") {
-                                    return;
-                                }
-
-                                if (ci > 0 && infosp.children.length > 0) {
-                                    txt = new canvax.Display.Text("/", {
-                                        context: {
-                                            x: infoWidth + 2,
-                                            fillStyle: "#999"
-                                        }
-                                    });
-                                    infoWidth += txt.getTextWidth() + 2;
-                                    infosp.addChild(txt);
-                                }
-
-                                var txt;
-                                if (h <= preLen - 1) {
-                                    txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
-                                } else {
-                                    txt = new canvax.Display.Text(content, {
-                                        id: "info_txt_" + i + "_" + h + "_" + ci,
-                                        context: {
-                                            x: infoWidth + 2,
-                                            fillStyle: cdata.fillStyle,
-                                            fontSize: me.text.fontSize,
-                                            lineWidth: me.text.lineWidth,
-                                            strokeStyle: me.text.strokeStyle
-                                        }
-                                    });
-                                    infosp.addChild(txt);
-                                }
-                                txt._text = cdata.value;
-                                txt._data = cdata;
-                                infoWidth += txt.getTextWidth() + 2;
-                                infoHeight = Math.max(infoHeight, txt.getTextHeight());
-
-                                if (me.animation) {
-                                    var beginNumber = 0;
-                                    if (content >= 100) {
-                                        beginNumber = 100;
-                                    }
-                                    if (content >= 1000) {
-                                        beginNumber = 1000;
-                                    }
-                                    if (content >= 10000) {
-                                        beginNumber = 10000;
-                                    }
-                                    if (content >= 100000) {
-                                        beginNumber = 100900;
-                                    }
-                                    //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
-                                    txt.resetText(beginNumber);
-                                }
-                            });
-
-                            infosp._finalX = rectData.x + me.bar._width / 2 - infoWidth / 2;
-
-                            //如果数据在basepoint下方
-                            if (rectData.value < rectData.yBasePoint.content) {
-                                infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
-                            } else {
-                                infosp._finalY = rectData.y - infoHeight;
-                            }
-
-                            infosp._centerX = rectData.x + me.bar._width / 2;
-                            infosp.context.width = infoWidth;
-                            infosp.context.height = infoHeight;
-
-                            if (!me.animation) {
-                                infosp.context.y = infosp._finalY;
-                                infosp.context.x = infosp._finalX;
-                                infosp.context.visible = true;
-                            }
-                        }
-                    }
-                }
-            });
-
-            this.sprite.addChild(this.barsSp);
-
-            if (this.text.enabled) {
-                this.sprite.addChild(this.txtsSp);
-            }
-
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
-
-            if (this.sort && this.sort == "desc") {
-                this.sprite.context.y -= this.height;
-            }
-
-            this.grow(function () {
-                me.fire("complete");
-            }, {
-                delay: 0,
-                easing: me.proportion ? "Quadratic.Line" : "Quadratic.Out",
-                duration: 300
-            });
-        }
-    }, {
-        key: "setEnabledField",
-        value: function setEnabledField() {
-            //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-            this.enabledField = this.root._coordinate.getEnabledFields(this.field);
-        }
-    }, {
-        key: "_trimGraphs",
-        value: function _trimGraphs() {
-            var me = this;
-            var _xAxis = this._xAxis;
-            var xArr = _xAxis.layoutData;
-
-            var _coor = this.root._coordinate;
-
-            //用来计算下面的hLen
-            this.setEnabledField();
-            var layoutGraphs = [];
-            var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
-            var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
-            var _preHLenOver = false;
-
-            if (!this.absolute) {
-                _$19.each(this.root._graphs, function (_g) {
-                    if (!_g.absolute && _g.type == "bar") {
-                        if (_g === me) {
-                            _preHLenOver = true;
-                        }
-                        if (_preHLenOver) {
-                            //排在me后面的 graphs，需要计算setEnabledField，才能计算出来 全部的hLen
-                            _g.setEnabledField();
-                        } else {
-                            preHLen += _g.enabledField.length;
-                        }
-                        hLen += _g.enabledField.length;
-                        layoutGraphs.push(_g);
-                    }
-                });
-            } else {
-                layoutGraphs = [this];
-                hLen = this.enabledField.length;
-            }
-
-            var ceilWidth = _xAxis.ceilWidth;
-            //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
-            var ceilWidth2 = ceilWidth / (hLen + 1);
-
-            //知道了ceilWidth2 后 检测下 barW是否需要调整
-            var barW = this._getBarWidth(ceilWidth, ceilWidth2);
-            var barDis = ceilWidth2 - barW;
-            if (this.bar.xDis != null) {
-                barDis = this.bar.xDis;
-            }
-
-            var disLeft = (ceilWidth - barW * hLen - barDis * (hLen - 1)) / 2;
-            if (preHLen) {
-                disLeft += (barDis + barW) * preHLen;
-            }
-
-            var tmpData = [];
-            var _yAxis = this.yAxisAlign == "left" ? _coor._yAxisLeft : _coor._yAxisRight;
-
-            //然后计算出对于结构的dataOrg
-            var dataOrg = this.root.dataFrame.getDataOrg(this.enabledField);
-
-            //dataOrg和field是一一对应的
-            _$19.each(dataOrg, function (hData, b) {
-                //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
-
-                //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
-                var tempBarData = [];
-                _$19.each(hData, function (vSectionData, v) {
-                    tempBarData[v] = [];
-                    //vSectionData 代表某个字段下面的一组数据比如 uv
-                    _$19.each(vSectionData, function (val, i) {
-                        if (!xArr[i]) {
-                            return;
-                        }
-
-                        var vCount = 0;
-                        if (me.proportion) {
-                            //先计算总量
-                            _$19.each(hData, function (team, ti) {
-                                vCount += team[i];
-                            });
-                        }
-
-                        var x = xArr[i].x - ceilWidth / 2 + disLeft + (barW + barDis) * b;
-
-                        var y = 0;
-                        if (me.proportion) {
-                            y = -val / vCount * _yAxis.yGraphsHeight;
-                        } else {
-                            y = _yAxis.getYposFromVal(val);
-                        }
-
-                        function _getFromY(tempBarData, v, i, val, y, yBasePoint) {
-                            var preData = tempBarData[v - 1];
-                            if (!preData) {
-                                return yBasePoint.y;
-                            }
-
-                            var preY = preData[i].y;
-                            var preVal = preData[i].value;
-                            var yBaseNumber = yBasePoint.content;
-                            if (val >= yBaseNumber) {
-                                //如果大于基线的，那么就寻找之前所有大于基线的
-                                if (preVal >= yBaseNumber) {
-                                    //能找到，先把pre的isLeaf设置为false
-                                    preData[i].isLeaf = false;
-                                    return preY;
-                                } else {
-                                    return _getFromY(tempBarData, v - 1, i, val, y, yBasePoint);
-                                }
-                            } else {
-                                if (preVal < yBaseNumber) {
-                                    //能找到，先把pre的isLeaf设置为false
-                                    preData[i].isLeaf = false;
-                                    return preY;
-                                } else {
-                                    return _getFromY(tempBarData, v - 1, i, val, y, yBasePoint);
-                                }
-                            }
-                        }
-
-                        //找到其着脚点,一般就是 yAxis.basePoint
-                        var fromY = _getFromY(tempBarData, v, i, val, y, _yAxis.basePoint);
-                        y += fromY - _yAxis.basePoint.y;
-
-                        //如果有排序的话
-                        //TODO:这个逻辑好像有问题
-                        if (_yAxis.sort && _yAxis.sort == "desc") {
-                            y = -(_yAxis.yGraphsHeight - Math.abs(y));
-                        }
-
-                        var node = {
-                            value: val,
-                            field: me._getTargetField(b, v, i, me.enabledField),
-                            fromX: x,
-                            fromY: fromY,
-                            x: x,
-                            y: y,
-                            width: barW,
-                            yBasePoint: _yAxis.basePoint,
-                            isLeaf: true,
-                            xAxis: {
-                                field: me._xAxis.field,
-                                value: xArr[i].content,
-                                layoutText: xArr[i].layoutText
-                            }
-                        };
-
-                        if (me.proportion) {
-                            node.vCount = vCount;
-                        }
-
-                        tempBarData[v].push(node);
-                    });
-                });
-
-                tempBarData.length && tmpData.push(tempBarData);
-            });
-
-            return tmpData;
-        }
-    }, {
-        key: "_updateInfoTextPos",
-        value: function _updateInfoTextPos(el) {
-
-            var infoWidth = 0;
-            var infoHeight = 0;
-            var cl = el.children.length;
-            _$19.each(el.children, function (c, i) {
-                if (c.getTextWidth) {
-                    c.context.x = infoWidth;
-                    infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
-                    infoHeight = Math.max(infoHeight, c.getTextHeight());
-                }
-            });
-            el.context.x = el._centerX - infoWidth / 2;
-            el.context.width = infoWidth;
-            el.context.height = infoHeight;
-        }
-
-        /**
-         * 生长动画
-         */
-
-    }, {
-        key: "grow",
-        value: function grow(callback, opt) {
-
-            var me = this;
-            if (!this.animation) {
-                callback && callback(me);
-                return;
-            }
-            var sy = 1;
-            if (this.sort && this.sort == "desc") {
-                sy = -1;
-            }
-
-            //先把已经不在当前range范围内的元素destroy掉
-            if (me.data[0] && me.data[0].length && me.barsSp.children.length > me.data[0][0].length) {
-                for (var i = me.data[0][0].length, l = me.barsSp.children.length; i < l; i++) {
-                    me.barsSp.getChildAt(i).destroy();
-                    me.text.enabled && me.txtsSp.getChildAt(i).destroy();
-                    i--;
-                    l--;
-                }
-            }
-
-            var options = _$19.extend({
-                delay: Math.min(1000 / this._barsLen, 80),
-                easing: "Back.Out",
-                duration: 500
-            }, opt);
-
-            var barCount = 0;
-            _$19.each(me.data, function (h_group, g) {
-                var vLen = h_group.length;
-                if (vLen == 0) return;
-                var hLen = h_group[0].length;
-                for (var h = 0; h < hLen; h++) {
-                    for (var v = 0; v < vLen; v++) {
-
-                        var group = me.barsSp.getChildById("barGroup_" + h);
-
-                        var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
-                        //console.log("finalPos"+bar.finalPos.y)
-
-                        if (options.duration == 0) {
-                            bar.context.scaleY = sy;
-                            bar.context.y = sy * sy * bar.finalPos.y;
-                            bar.context.x = bar.finalPos.x;
-                            bar.context.width = bar.finalPos.width;
-                            bar.context.height = bar.finalPos.height;
-                        } else {
-                            if (bar._tweenObj) {
-                                AnimationFrame$2.destroyTween(bar._tweenObj);
-                            }
-                            bar._tweenObj = bar.animate({
-                                scaleY: sy,
-                                y: sy * bar.finalPos.y,
-                                x: bar.finalPos.x,
-                                width: bar.finalPos.width,
-                                height: bar.finalPos.height
-                            }, {
-                                duration: options.duration,
-                                easing: options.easing,
-                                delay: h * options.delay,
-                                onUpdate: function onUpdate(arg) {},
-                                onComplete: function onComplete(arg) {
-                                    if (arg.width < 3) {
-                                        this.context.radius = 0;
-                                    }
-
-                                    barCount++;
-
-                                    if (barCount === me.bar.count) {
-                                        callback && callback(me);
-                                    }
-                                },
-                                id: bar.id
-                            });
-                        }
-
-                        //txt grow
-                        if (me.text.enabled) {
-                            var txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
-
-                            var infosp = txtGroupH.getChildById("infosp_" + g + "_" + h + "_" + v);
-                            if (infosp) {
-
-                                infosp.animate({
-                                    y: infosp._finalY,
-                                    x: infosp._finalX
-                                }, {
-                                    duration: options.duration,
-                                    easing: options.easing,
-                                    delay: h * options.delay,
-                                    onUpdate: function onUpdate() {
-                                        this.context && (this.context.visible = true);
-                                    },
-                                    onComplete: function onComplete() {}
-                                });
-
-                                _$19.each(infosp.children, function (txt) {
-                                    if (txt._text || txt._text === 0) {
-                                        if (txt._tweenObj) {
-                                            AnimationFrame$2.destroyTween(txt._tweenObj);
-                                        }
-                                        txt._tweenObj = AnimationFrame$2.registTween({
-                                            from: {
-                                                v: txt.text
-                                            },
-                                            to: {
-                                                v: txt._text
-                                            },
-                                            duration: options.duration + 100,
-                                            delay: h * options.delay,
-                                            onUpdate: function onUpdate(arg) {
-                                                var content = arg.v;
-                                                if (_$19.isFunction(me.text.format)) {
-                                                    var _formatc = me.text.format.apply(me, [content, txt._data]);
-                                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
-                                                        content = _formatc;
-                                                    }
-                                                } else if (_$19.isNumber(content)) {
-                                                    content = numAddSymbol(parseInt(content));
-                                                }
-                                                txt.resetText(content);
-                                                if (txt.parent) {
-                                                    me._updateInfoTextPos(txt.parent);
-                                                } else {
-                                                    txt.destroy();
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }]);
-    return Graphs;
-}(canvax.Event.EventDispatcher);
 
 var _$8 = canvax._;
 
@@ -15206,27 +17097,10 @@ var Bar = function (_Chart) {
         return _this;
     }
 
+    //比例柱状图
+
+
     createClass$1(Bar, [{
-        key: "_initModule",
-        value: function _initModule(opt) {
-            var me = this;
-            //首先是创建一个坐标系对象
-            this._coordinate = new Descartes_Component(this.coordinate, this);
-            this.coordinateSprite.addChild(this._coordinate.sprite);
-
-            _$8.each(this.graphs, function (graphs) {
-                var _g = new Graphs(graphs, me);
-                me._graphs.push(_g);
-                me.graphsSprite.addChild(_g.sprite);
-            });
-
-            this._tips = new Tips(this.tips, this.canvax.domView);
-            this.stageTips.addChild(this._tips.sprite);
-        }
-
-        //比例柱状图
-
-    }, {
         key: "_initProportion",
         value: function _initProportion(node, data, opts) {
             !opts.tips && (opts.tips = {});
@@ -15277,1449 +17151,34 @@ var Bar = function (_Chart) {
     return Bar;
 }(Descartes);
 
-//十六进制颜色值的正则表达式 
-var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+var _$24 = canvax._;
 
-/*16进制颜色转为RGB格式*/
-var colorRgb = function colorRgb(hex) {
-    var sColor = hex.toLowerCase();
-    if (sColor && reg.test(sColor)) {
-        if (sColor.length === 4) {
-            var sColorNew = "#";
-            for (var i = 1; i < 4; i += 1) {
-                sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
-            }
-            sColor = sColorNew;
-        }
-        //处理六位的颜色值  
-        var sColorChange = [];
-        for (var i = 1; i < 7; i += 2) {
-            sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
-        }
-        return "RGB(" + sColorChange.join(",") + ")";
-    } else {
-        return sColor;
-    }
-};
+var Line$7 = function (_Chart) {
+    inherits$1(Line, _Chart);
 
-var colorRgba = function colorRgba(hex, a) {
-    return colorRgb(hex).replace(')', ',' + a + ')').replace('RGB', 'RGBA');
-};
+    function Line(node, data, opts) {
+        classCallCheck$1(this, Line);
 
-/*RGB颜色转换为16进制*/
-var colorHex = function colorHex(rgb) {
-    var that = rgb;
-    if (/^(rgb|RGB)/.test(that)) {
-        var aColor = that.replace(/(?:||rgb|RGB)*/g, "").split(",");
-        var strHex = "#";
-        for (var i = 0; i < aColor.length; i++) {
-            var hex = Number(aColor[i]).toString(16);
-            if (hex === "0") {
-                hex += hex;
-            }
-            strHex += hex;
-        }
-        if (strHex.length !== 7) {
-            strHex = that;
-        }
-        return strHex;
-    } else if (reg.test(that)) {
-        var aNum = that.replace(/#/, "").split("");
-        if (aNum.length === 6) {
-            return that;
-        } else if (aNum.length === 3) {
-            var numHex = "#";
-            for (var i = 0; i < aNum.length; i += 1) {
-                numHex += aNum[i] + aNum[i];
-            }
-            return numHex;
-        }
-    } else {
-        return that;
-    }
-};
-
-/**增加颜色的明亮度
- *hex: #ff00ff
- *lum: 0.1 颜色#ff00ff明亮度增加0.1,-0.2明亮度减少0.2
- */
-var colorLuminance = function colorLuminance(hex, lum) {
-    // Validate hex string
-    hex = String(hex).replace(/[^0-9a-f]/gi, "");
-    if (hex.length < 6) {
-        hex = hex.replace(/(.)/g, '$1$1');
-    }
-    lum = lum || 0;
-    // Convert to decimal and change luminosity
-    var rgb = "#",
-        c;
-    for (var i = 0; i < 3; ++i) {
-        c = parseInt(hex.substr(i * 2, 2), 16);
-        c = Math.round(Math.min(Math.max(0, c + c * lum), 255)).toString(16);
-        rgb += ("00" + c).substr(c.length);
-    }
-    return rgb;
-};
-/**
- * HSL颜色值转换为RGB.
- * 换算公式改编自 http://en.wikipedia.org/wiki/HSL_color_space.
- * h, s, 和 l 设定在 [0, 1] 之间
- * 返回的 r, g, 和 b 在 [0, 255]之间
- *
- * @param   Number  h       色相
- * @param   Number  s       饱和度
- * @param   Number  l       亮度
- * @return  Array           RGB色值数值
- */
-var hslToRgb = function hslToRgb(h, s, l) {
-    var r, g, b;
-
-    if (s == 0) {
-        r = g = b = l; // achromatic
-    } else {
-        var hue2rgb = function hue2rgb(p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-        };
-
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-    }
-
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-};
-
-/**
- * RGB 颜色值转换为 HSL.
- * 转换公式参考自 http://en.wikipedia.org/wiki/HSL_color_space.
- * r, g, 和 b 需要在 [0, 255] 范围内
- * 返回的 h, s, 和 l 在 [0, 1] 之间
- *
- * @param   Number  r       红色色值
- * @param   Number  g       绿色色值
- * @param   Number  b       蓝色色值
- * @return  Array           HSL各值数组
- */
-var rgbToHsl = function rgbToHsl(r, g, b) {
-    r /= 255, g /= 255, b /= 255;
-    var max = Math.max(r, g, b),
-        min = Math.min(r, g, b);
-    var h,
-        s,
-        l = (max + min) / 2;
-
-    if (max == min) {
-        h = s = 0; // achromatic
-    } else {
-        var d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r:
-                h = (g - b) / d + (g < b ? 6 : 0);break;
-            case g:
-                h = (b - r) / d + 2;break;
-            case b:
-                h = (r - g) / d + 4;break;
-        }
-        h /= 6;
-    }
-
-    return [h, s, l];
-};
-
-var ColorFormat = {
-    colorRgb: colorRgb,
-    colorRgba: colorRgba,
-    colorHex: colorHex,
-    colorBrightness: colorLuminance,
-    hslToRgb: hslToRgb,
-    rgbToHsl: rgbToHsl
-};
-
-var AnimationFrame$3 = canvax.AnimationFrame;
-var BrokenLine$4 = canvax.Shapes.BrokenLine;
-var Circle$4 = canvax.Shapes.Circle;
-var Path$1 = canvax.Shapes.Path;
-
-var _$22 = canvax._;
-
-var LineGraphsGroup = function (_Canvax$Event$EventDi) {
-    inherits$1(LineGraphsGroup, _Canvax$Event$EventDi);
-
-    function LineGraphsGroup(fieldMap, groupInd, opt, ctx, h, w) {
-        classCallCheck$1(this, LineGraphsGroup);
-
-        //直接用第一个参数的field
-        delete opt.field;
-
-        var _this = possibleConstructorReturn$1(this, (LineGraphsGroup.__proto__ || Object.getPrototypeOf(LineGraphsGroup)).call(this));
-
-        _this._opt = opt;
-        _this.fieldMap = fieldMap;
-        _this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
-        _this.groupInd = groupInd;
-
-        _this._yAxis = fieldMap.yAxis;
-
-        _this.ctx = ctx;
-        _this.w = w;
-        _this.h = h;
-        _this.y = 0;
-
-        _this.animation = true;
-        _this.resize = false;
-
-        _this.line = { //线
-            enabled: 1,
-            strokeStyle: fieldMap.style,
-            lineWidth: 2,
-            lineType: "solid",
-            smooth: true
-        };
-
-        _this.node = { //节点 
-            enabled: 1, //是否有
-            corner: false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-            r: 3, //半径 node 圆点的半径
-            fillStyle: '#ffffff',
-            strokeStyle: null,
-            lineWidth: 2
-        };
-
-        _this.text = {
-            enabled: 0,
-            fillStyle: null,
-            strokeStyle: null,
-            fontSize: 13,
-            format: null
-
-        };
-
-        _this.fill = { //填充
-            enabled: 1,
-            fillStyle: null,
-            alpha: 0.3
-        };
-
-        _this.data = [];
-        _this.sprite = null;
-
-        _this._pointList = []; //brokenline最终的状态
-        _this._currPointList = []; //brokenline 动画中的当前状态
-        _this._bline = null;
-
-        _this.init(opt);
-        return _this;
-    }
-
-    createClass$1(LineGraphsGroup, [{
-        key: "init",
-        value: function init(opt) {
-            _$22.extend(true, this, opt);
-
-            this.sprite = new canvax.Display.Sprite();
-            var me = this;
-            this.sprite.on("destroy", function () {
-                if (me._growTween) {
-                    AnimationFrame$3.destroyTween(me._growTween);
-                }
-            });
-        }
-    }, {
-        key: "draw",
-        value: function draw(opt, data) {
-            _$22.extend(true, this, opt);
-            this.data = data;
-            this._widget();
-        }
-
-        //自我销毁
-
-    }, {
-        key: "destroy",
-        value: function destroy() {
-            var me = this;
-            me.sprite.animate({
-                globalAlpha: 0
-            }, {
-                duration: 300,
-                onComplete: function onComplete() {
-                    me.sprite.remove();
-                }
-            });
-        }
-
-        //styleType , normals , groupInd
-
-    }, {
-        key: "_getColor",
-        value: function _getColor(s, nodeInd) {
-            var color = this._getProp(s, nodeInd);
-            if (!color || color == "") {
-                //这个时候可以先取线的style，和线保持一致
-                color = this._getLineStrokeStyle();
-                if (!color || color == "" || !_$22.isString(color)) {
-                    //那么最后，取this.fieldMap.style
-                    color = this.fieldMap.style;
-                }
-            }
-            return color;
-        }
-    }, {
-        key: "_getProp",
-        value: function _getProp(s, nodeInd) {
-            if (_$22.isArray(s)) {
-                return s[this.groupInd];
-            }
-            if (_$22.isFunction(s)) {
-                return s.apply(this, [me.getNodeInfoAt(nodeInd)]);
-            }
-            return s;
-        }
-    }, {
-        key: "_createNodeInfo",
-        value: function _createNodeInfo(ind) {
-            var me = this;
-            var obj = {};
-            obj.type = "line";
-            obj.r = me._getProp(me.node.r, ind);
-            obj.fillStyle = me._getProp(me.node.fillStyle, ind) || "#ffffff";
-            obj.strokeStyle = me._getProp(me.node.strokeStyle, ind) || me._getLineStrokeStyle();
-            obj.color = obj.strokeStyle;
-            obj.lineWidth = me._getProp(me.node.lineWidth, ind) || 2;
-            obj.alpha = me._getProp(me.fill.alpha, ind);
-            obj.field = me.field;
-            obj.groupInd = me.groupInd;
-            return obj;
-        }
-
-        //这个是tips需要用到的 
-
-    }, {
-        key: "getNodeInfoAt",
-        value: function getNodeInfoAt($index) {
-            var o = this.data[$index];
-
-            if (o && o.value != null && o.value != undefined && o.value !== "") {
-                return _$22.extend(o, this._createNodeInfo($index));
-            } else {
-                return null;
-            }
-        }
-
-        //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
-
-    }, {
-        key: "getNodeInfoOfX",
-        value: function getNodeInfoOfX(x) {
-            var me = this;
-            var nodeInfo;
-            for (var i = 0, l = this.data.length; i < l; i++) {
-                if (Math.abs(this.data[i].x - x) <= 1) {
-                    //左右相差不到1px的，都算
-                    nodeInfo = this.getNodeInfoAt(i);
-                    return nodeInfo;
-                }
-            }
-
-            var getPointFromXInLine = function getPointFromXInLine(x, line) {
-                var p = { x: x, y: 0 };
-                p.y = line[0][1] + (line[1][1] - line[0][1]) / (line[1][0] - line[0][0]) * (x - line[0][0]);
-                return p;
-            };
-
-            var point;
-            var search = function search(points) {
-
-                if (x < points[0][0] || x > points.slice(-1)[0][0]) {
-                    return;
-                }
-
-                var midInd = parseInt(points.length / 2);
-                if (Math.abs(points[midInd][0] - x) <= 1) {
-                    point = {
-                        x: points[midInd][0],
-                        y: points[midInd][1]
-                    };
-                    return;
-                }
-                var _pl = [];
-                if (x > points[midInd][0]) {
-                    if (x < points[midInd + 1][0]) {
-                        point = getPointFromXInLine(x, [points[midInd], points[midInd + 1]]);
-                        return;
-                    } else {
-                        _pl = points.slice(midInd + 1);
-                    }
-                } else {
-                    if (x > points[midInd - 1][0]) {
-                        point = getPointFromXInLine(x, [points[midInd - 1], points[midInd]]);
-                        return;
-                    } else {
-                        _pl = points.slice(0, midInd);
-                    }
-                }
-                search(_pl);
-            };
-
-            search(this._bline.context.pointList);
-
-            if (!point) {
-                return null;
-            }
-
-            point.value = me._yAxis.getValFromYpos(point.y); //null;
-
-            //TODO:这里要优化下，这个x值可能刚好对应上了某个具体的index，，，而现在强制为-1是不对的
-            return _$22.extend(point, me._createNodeInfo(-1));
-        }
-
-        /**
-         * 
-         * @param {object} opt 
-         * @param {data} data 
-         * 
-         * 触发这次reset的触发原因比如{name : 'datazoom', left:-1,right:1},  
-         * dataTrigger 描述了数据变化的原因和变化的过程，比如上面的数据 left少了一个数据，right多了一个数据
-         * @param {object} dataTrigger 
-         */
-
-    }, {
-        key: "resetData",
-        value: function resetData(data, dataTrigger) {
-            var me = this;
-
-            if (data) {
-                this.data = data;
-            }
-
-            me._pointList = this._getPointList(this.data);
-            var plen = me._pointList.length;
-            var cplen = me._currPointList.length;
-
-            if (!dataTrigger) {
-                dataTrigger = {
-                    name: 'normal',
-                    left: 0, //默认左边数据没变
-                    right: plen - cplen
-                };
-            }
-
-            if (dataTrigger.left) {
-                if (dataTrigger.left > 0) {
-                    this._currPointList = this._pointList.slice(0, dataTrigger.left).concat(this._currPointList);
-                }
-                if (dataTrigger.left < 0) {
-                    this._currPointList.splice(0, Math.abs(dataTrigger.left));
-                }
-            }
-
-            if (dataTrigger.right) {
-                if (dataTrigger.right > 0) {
-                    this._currPointList = this._currPointList.concat(this._pointList.slice(-dataTrigger.right));
-                }
-                if (dataTrigger.right < 0) {
-                    this._currPointList.splice(this._currPointList.length - Math.abs(dataTrigger.right));
-                }
-            }
-
-            me._createNodes();
-            me._createTexts();
-            me._grow();
-        }
-    }, {
-        key: "_grow",
-        value: function _grow(callback) {
-            var me = this;
-            if (!me.animation || me.resize || me._currPointList.length == 0) {
-                //TODO: 在禁止了animation的时候， 如果用户监听了complete事件，必须要加setTimeout，才能触发
-                setTimeout(function () {
-                    callback && callback(me);
-                }, 10);
-                return;
-            }
-
-            function _update(list) {
-                me._bline.context.pointList = _$22.clone(list);
-                me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
-
-                me._fill.context.path = me._fillLine(me._bline);
-                me._fill.context.fillStyle = me._getFillStyle();
-
-                var nodeInd = 0;
-                _$22.each(list, function (point, i) {
-                    if (_$22.isNumber(point[1])) {
-                        if (me._circles) {
-                            var _circle = me._circles.getChildAt(nodeInd);
-                            if (_circle) {
-                                _circle.context.x = point[0];
-                                _circle.context.y = point[1];
-                            }
-                        }
-                        if (me._texts) {
-                            var _text = me._texts.getChildAt(nodeInd);
-                            if (_text) {
-                                _text.context.x = point[0];
-                                _text.context.y = point[1] - 3;
-                                me._checkTextPos(_text, i);
-                            }
-                        }
-                        nodeInd++;
-                    }
-                });
-            }
-
-            this._growTween = AnimationFrame$3.registTween({
-                from: me._getPointPosStr(me._currPointList),
-                to: me._getPointPosStr(me._pointList),
-                desc: me.field + ' animation',
-                onUpdate: function onUpdate(arg) {
-                    for (var p in arg) {
-                        var ind = parseInt(p.split("_")[2]);
-                        var xory = parseInt(p.split("_")[1]);
-                        me._currPointList[ind] && (me._currPointList[ind][xory] = arg[p]); //p_1_n中间的1代表x or y
-                    }
-                    _update(me._currPointList);
-                },
-                onComplete: function onComplete() {
-                    me._growTween = null;
-                    //在动画结束后强制把目标状态绘制一次。
-                    //解决在onUpdate中可能出现的异常会导致绘制有问题。
-                    //这样的话，至少最后的结果会是对的。
-                    _update(me._pointList);
-                    callback && callback(me);
-                }
-            });
-        }
-    }, {
-        key: "_getPointPosStr",
-        value: function _getPointPosStr(list) {
-            var obj = {};
-            _$22.each(list, function (p, i) {
-                if (!p) {
-                    //折线图中这个节点可能没有
-                    return;
-                }
-
-                obj["p_1_" + i] = p[1]; //p_y==p_1
-                obj["p_0_" + i] = p[0]; //p_x==p_0
-            });
-            return obj;
-        }
-    }, {
-        key: "_getPointList",
-        value: function _getPointList(data) {
-            var list = [];
-            for (var a = 0, al = data.length; a < al; a++) {
-                var o = data[a];
-                list.push([o.x, o.y]);
-            }
-            return list;
-        }
-    }, {
-        key: "_widget",
-        value: function _widget() {
-            var me = this;
-
-            me._pointList = this._getPointList(me.data);
-
-            if (me._pointList.length == 0) {
-                //filter后，data可能length==0
-                return;
-            }
-            var list = [];
-            if (me.animation && !me.resize) {
-                var firstNode = this._getFirstNode();
-                var firstY = firstNode ? firstNode.y : undefined;
-                for (var a = 0, al = me.data.length; a < al; a++) {
-                    var o = me.data[a];
-                    list.push([o.x, _$22.isNumber(o.y) ? firstY : o.y]);
-                }
-            } else {
-                list = me._pointList;
-            }
-
-            me._currPointList = list;
-
-            var bline = new BrokenLine$4({ //线条
-                context: {
-                    pointList: list,
-                    lineWidth: me.line.lineWidth,
-                    y: me.y,
-                    strokeStyle: me._getLineStrokeStyle(list), //_getLineStrokeStyle 在配置线性渐变的情况下会需要
-                    smooth: me.line.smooth,
-                    lineType: me._getProp(me.line.lineType),
-                    smoothFilter: function smoothFilter(rp) {
-                        //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
-                        if (rp[1] > 0) {
-                            rp[1] = 0;
-                        } else if (Math.abs(rp[1]) > me.h) {
-                            rp[1] = -me.h;
-                        }
-                    },
-                    lineCap: "round"
-                }
-            });
-
-            if (!this.line.enabled) {
-                bline.context.visible = false;
-            }
-            me.sprite.addChild(bline);
-            me._bline = bline;
-
-            var fill = new Path$1({ //填充
-                context: {
-                    path: me._fillLine(bline),
-                    fillStyle: me._getFillStyle(),
-                    globalAlpha: _$22.isArray(me.fill.alpha) ? 1 : me.fill.alpha
-                }
-            });
-
-            if (!this.fill.enabled) {
-                fill.context.visible = false;
-            }
-            me.sprite.addChild(fill);
-            me._fill = fill;
-
-            me._createNodes();
-            me._createTexts();
-        }
-    }, {
-        key: "_getFirstNode",
-        value: function _getFirstNode() {
-            var _firstNode = null;
-            for (var i = 0, l = this.data.length; i < l; i++) {
-                var nodeData = this.data[i];
-                if (_$22.isNumber(nodeData.y)) {
-                    if (_firstNode === null || this._yAxis.place == "right") {
-                        //_yAxis为右轴的话，
-                        _firstNode = nodeData;
-                    }
-                    if (this._yAxis.place !== "right" && _firstNode !== null) {
-                        break;
-                    }
-                }
-            }
-
-            return _firstNode;
-        }
-    }, {
-        key: "_getFillStyle",
-        value: function _getFillStyle() {
-            var me = this;
-
-            var fill_gradient = null;
-
-            // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-            var _fillStyle = me._getProp(me.fill.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
-
-            if (_$22.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
-                //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
-                //如果拿回来的style已经是个gradient了，那么就不管了
-                me.fill.alpha.length = 2;
-                if (me.fill.alpha[0] == undefined) {
-                    me.fill.alpha[0] = 0;
-                }
-                if (me.fill.alpha[1] == undefined) {
-                    me.fill.alpha[1] = 0;
-                }
-
-                //从bline中找到最高的点
-                var topP = _$22.min(me._bline.context.pointList, function (p) {
-                    return p[1];
-                });
-
-                if (topP[0] === undefined || topP[1] === undefined) {
-                    return null;
-                }
-
-                //创建一个线性渐变
-                fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
-
-                var rgb = ColorFormat.colorRgb(_fillStyle);
-                var rgba0 = rgb.replace(')', ', ' + me._getProp(me.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
-                fill_gradient.addColorStop(0, rgba0);
-
-                var rgba1 = rgb.replace(')', ', ' + me.fill.alpha[1] + ')').replace('RGB', 'RGBA');
-                fill_gradient.addColorStop(1, rgba1);
-
-                _fillStyle = fill_gradient;
-            }
-
-            return _fillStyle;
-        }
-    }, {
-        key: "_getLineStrokeStyle",
-        value: function _getLineStrokeStyle(pointList, from) {
-            var me = this;
-            var _style;
-            if (!this._opt.line || !this._opt.line.strokeStyle) {
-                //如果用户没有配置line.strokeStyle，那么就用默认的
-                return this.line.strokeStyle;
-            }
-
-            if (this._opt.line.strokeStyle.lineargradient) {
-                //如果用户配置 填充是一个线性渐变
-                //从bline中找到最高的点
-                !pointList && (pointList = this._bline.context.pointList);
-
-                var topP = _$22.min(pointList, function (p) {
-                    return p[1];
-                });
-                var bottomP = _$22.max(pointList, function (p) {
-                    return p[1];
-                });
-                if (from == "fillStyle") {
-                    bottomP = [0, 0];
-                }
-
-                if (topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined) {
-                    return null;
-                }
-
-                //var bottomP = [ 0 , 0 ];
-                //创建一个线性渐变
-                //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
-                _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
-                _$22.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
-                    _style.addColorStop(item.position, item.color);
-                });
-
-                return _style;
-            } else {
-                //构造函数中执行的这个方法，还没有line属性
-                //if( this.line && this.line.strokeStyle ){
-                //    _style = this.line.strokeStyle
-                //} else {
-                _style = this._getColor(this._opt.line.strokeStyle);
-                //}
-                return _style;
-            }
-        }
-    }, {
-        key: "_createNodes",
-        value: function _createNodes() {
-            var me = this;
-            var list = me._currPointList;
-
-            if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) {
-                //拐角的圆点
-                if (!this._circles) {
-                    this._circles = new canvax.Display.Sprite({});
-                    this.sprite.addChild(this._circles);
-                }
-
-                var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
-                for (var a = 0, al = list.length; a < al; a++) {
-                    var _point = me._currPointList[a];
-                    if (!_point || !_$22.isNumber(_point[1])) {
-                        //折线图中有可能这个point为undefined
-                        continue;
-                    }
-
-                    var context = {
-                        x: _point[0],
-                        y: _point[1],
-                        r: me._getProp(me.node.r, a),
-                        lineWidth: me._getProp(me.node.lineWidth, a) || 2,
-                        strokeStyle: me._getColor(me.node.strokeStyle, a),
-                        fillStyle: me.node.fillStyle
-                    };
-
-                    var circle = me._circles.children[nodeInd];
-                    if (circle) {
-                        _$22.extend(circle.context, context);
-                    } else {
-                        circle = new Circle$4({
-                            context: context
-                        });
-                        me._circles.addChild(circle);
-                    }
-
-                    if (me.node.corner) {
-                        //拐角才有节点
-                        var y = me._pointList[a][1];
-                        var pre = me._pointList[a - 1];
-                        var next = me._pointList[a + 1];
-                        if (pre && next) {
-                            if (y == pre[1] && y == next[1]) {
-                                circle.context.visible = false;
-                            }
-                        }
-                    }
-
-                    nodeInd++;
-                }
-
-                //把过多的circle节点删除了
-                if (me._circles.children.length > nodeInd) {
-                    for (var i = nodeInd, l = me._circles.children.length; i < l; i++) {
-                        me._circles.children[i].destroy();
-                        i--;
-                        l--;
-                    }
-                }
-            }
-        }
-    }, {
-        key: "_createTexts",
-        value: function _createTexts() {
-
-            var me = this;
-            var list = me._currPointList;
-
-            if (me.text.enabled) {
-                //节点上面的文本info
-                if (!this._texts) {
-                    this._texts = new canvax.Display.Sprite({});
-                    this.sprite.addChild(this._texts);
-                }
-
-                var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
-                for (var a = 0, al = list.length; a < al; a++) {
-                    var _point = list[a];
-                    if (!_point || !_$22.isNumber(_point[1])) {
-                        //折线图中有可能这个point为undefined
-                        continue;
-                    }
-
-                    var fontFillStyle = me._getColor(me.text.fillStyle, a);
-
-                    var context = {
-                        x: _point[0],
-                        y: _point[1] - 3,
-                        fontSize: this.text.fontSize,
-                        textAlign: "center",
-                        textBaseline: "bottom",
-                        fillStyle: fontFillStyle,
-                        lineWidth: 1,
-                        strokeStyle: "#ffffff"
-                    };
-
-                    var content = me.data[a].value;
-                    if (_$22.isFunction(me.text.format)) {
-                        content = me.text.format.apply(me, [content, a]) || content;
-                    }
-
-                    if (content == undefined || content == null) {
-                        continue;
-                    }
-
-                    var text = this._texts.children[nodeInd];
-                    if (text) {
-                        text.resetText(content);
-                        _$22.extend(text.context, context);
-                    } else {
-                        text = new canvax.Display.Text(content, {
-                            context: context
-                        });
-                        me._texts.addChild(text);
-                        me._checkTextPos(text, a);
-                    }
-                    nodeInd++;
-                }
-
-                //把过多的circle节点删除了
-                if (me._texts.children.length > nodeInd) {
-                    for (var i = nodeInd, l = me._texts.children.length; i < l; i++) {
-                        me._texts.children[i].destroy();
-                        i--;
-                        l--;
-                    }
-                }
-            }
-        }
-    }, {
-        key: "_checkTextPos",
-        value: function _checkTextPos(text, ind) {
-            var me = this;
-            var list = me._currPointList;
-            var pre = list[ind - 1];
-            var next = list[ind + 1];
-
-            if (pre && next && pre[1] < text.context.y && next[1] < text.context.y) {
-                text.context.y += 7;
-                text.context.textBaseline = "top";
-            }
-        }
-    }, {
-        key: "_fillLine",
-        value: function _fillLine(bline) {
-            //填充直线
-            var fillPath = _$22.clone(bline.context.pointList);
-
-            var path = "";
-            var baseY = this._yAxis.basePoint.y;
-
-            var _currPath = null;
-
-            _$22.each(fillPath, function (point, i) {
-                if (_$22.isNumber(point[1])) {
-                    if (_currPath === null) {
-                        _currPath = [];
-                    }
-                    _currPath.push(point);
-                } else {
-                    // not a number
-                    if (_currPath && _currPath.length) {
-                        getOnePath();
-                    }
-                }
-
-                if (i == fillPath.length - 1 && _$22.isNumber(point[1])) {
-                    getOnePath();
-                }
-            });
-
-            function getOnePath() {
-                _currPath.push([_currPath[_currPath.length - 1][0], baseY], [_currPath[0][0], baseY], [_currPath[0][0], _currPath[0][1]]);
-                path += getPath(_currPath);
-                _currPath = null;
-            }
-
-            return path;
-        }
-    }]);
-    return LineGraphsGroup;
-}(canvax.Event.EventDispatcher);
-
-var _$23 = canvax._;
-var Line$8 = canvax.Shapes.Line;
-var Circle$5 = canvax.Shapes.Circle;
-
-var markColumn = function (_Canvax$Event$EventDi) {
-    inherits$1(markColumn, _Canvax$Event$EventDi);
-
-    function markColumn(opt, data) {
-        classCallCheck$1(this, markColumn);
-
-        var _this = possibleConstructorReturn$1(this, (markColumn.__proto__ || Object.getPrototypeOf(markColumn)).call(this));
-
-        _this.xVal = null;
-        _this.enabled = true;
-        _this.line = {
-            enabled: 1,
-            eventEnabled: false
-            //strokeStyle : null
-        };
-        _this.node = {
-            enabled: 1
-            //strokeStyle : null
-            //backFillStyle : null
-        };
-
-        _this.sprite = null;
-        _this._line = null;
-        _this._nodes = null;
-
-        _this._isShow = false;
-
-        _this.enabled = true;
-
-        _this.y = 0;
-        _this.h = 0;
-
-        _this.init(opt, data);
-        return _this;
-    }
-
-    createClass$1(markColumn, [{
-        key: "init",
-        value: function init(opt, data) {
-            _$23.extend(true, this, opt);
-            this.sprite = new canvax.Display.Sprite({
-                id: "tips"
-            });
-        }
-    }, {
-        key: "show",
-        value: function show(e, pointInfo, opt) {
-            this.eventInfo = e.eventInfo;
-
-            _$23.extend(true, this, opt);
-
-            if (!this.enabled || !pointInfo) {
-                this.hide();
-                return this;
-            }
-
-            this.sprite.context.visible = true;
-            this._showLine(pointInfo);
-            this._showNodes(e, pointInfo);
-            return this;
-        }
-    }, {
-        key: "hide",
-        value: function hide() {
-            this.sprite.context.visible = false;
-        }
-    }, {
-        key: "move",
-        value: function move(e, pointInfo) {
-            this.show(e, pointInfo);
-        }
-    }, {
-        key: "destroy",
-        value: function destroy() {
-            this.sprite.destroy();
-            this._line = null;
-            this._nodes = null;
-        }
-        /**
-         * line相关------------------------
-         */
-
-    }, {
-        key: "_showLine",
-        value: function _showLine(pointInfo) {
-            var me = this;
-            var lineOpt = _$23.extend(true, {
-                x: parseInt(pointInfo.x),
-                y: me.y,
-                start: {
-                    x: 0,
-                    y: me.h
-                },
-                end: {
-                    x: 0,
-                    y: 0
-                },
-                lineWidth: 1,
-                strokeStyle: this.line.strokeStyle || "#cccccc"
-            }, this.line);
-            if (this.line.enabled) {
-                if (this._line) {
-                    _$23.extend(this._line.context, lineOpt);
-                } else {
-                    this._line = new Line$8({
-                        id: "tipsLine",
-                        context: lineOpt
-                    });
-                    this._line.name = "_markcolumn_line";
-                    this.sprite.addChild(this._line);
-                }
-            }
-            return this;
-        }
-
-        /**
-         *nodes相关-------------------------
-         */
-
-    }, {
-        key: "_showNodes",
-        value: function _showNodes(e, pointInfo) {
-
-            var me = this;
-            if (!this.node.enabled) {
-                return;
-            }
-            if (this._nodes) {
-                this._resetNodesStatus(e, pointInfo);
-            } else {
-                this._nodes = new canvax.Display.Sprite({
-                    context: {
-                        x: parseInt(pointInfo.x),
-                        y: me.y
-                    }
-                });
-                var me = this;
-
-                _$23.each(this.getLineNodes(e.eventInfo.nodes), function (node) {
-                    var csp = new canvax.Display.Sprite({
-                        context: {
-                            y: me.h - Math.abs(node.y)
-                        }
-                    });
-
-                    var bigCircle = new Circle$5({
-                        context: {
-                            r: node.r + 2,
-                            fillStyle: me.node.backFillStyle || "white", //node.fillStyle,
-                            strokeStyle: me.node.strokeStyle || node.strokeStyle,
-                            lineWidth: node.lineWidth,
-                            cursor: 'pointer'
-                        }
-                    });
-
-                    bigCircle.name = '_markcolumn_node';
-                    bigCircle.eventInfo = {
-                        iGroup: 0, //node._groupInd,
-                        iNode: e.eventInfo.iNode,
-                        nodes: [node]
-                    };
-
-                    csp.addChild(bigCircle);
-                    me._nodes.addChild(csp);
-
-                    bigCircle.on("click", function (evt) {
-                        var o = {
-                            eventInfo: _$23.clone(evt.target.eventInfo)
-                        };
-                        if (me.xVal !== null) {
-                            o.eventInfo.xAxis = { value: me.xVal };
-                        }
-                        me.sprite.fire("nodeclick", o);
-                    });
-                });
-                this.sprite.addChild(this._nodes);
-            }
-
-            return this;
-        }
-
-        /**
-        * 重置nodes的状态
-        */
-
-    }, {
-        key: "_resetNodesStatus",
-        value: function _resetNodesStatus(e, pointInfo) {
-            if (!this.enabled || !this.node.enabled) {
-                return;
-            }
-            var me = this;
-            var lineNodes = this.getLineNodes(e.eventInfo.nodes);
-            if (this._nodes.children.length != lineNodes.length) {
-                this._nodes.removeAllChildren();
-                this._nodes = null;
-                this._showNodes(e, pointInfo);
-            }
-            this._nodes.context.x = parseInt(pointInfo.x);
-            _$23.each(lineNodes, function (node, i) {
-                var csps = me._nodes.getChildAt(i).context;
-                csps.y = me.h - Math.abs(node.y);
-
-                var bigCircle = me._nodes.getChildAt(i).getChildAt(0);
-                bigCircle.eventInfo = {
-                    iGroup: 0, //node._groupInd,
-                    iNode: e.eventInfo.iNode,
-                    nodes: [node]
-                };
-            });
-        }
-    }, {
-        key: "getLineNodes",
-        value: function getLineNodes(nodes) {
-            var arr = [];
-            for (var i = 0, l = nodes.length; i < l; i++) {
-                if (nodes[i].type == "line") {
-                    arr.push(nodes[i]);
-                }
-            }
-            return arr;
-        }
-    }]);
-    return markColumn;
-}(canvax.Event.EventDispatcher);
-
-var _$21 = canvax._;
-var LineGraphs = function (_Canvax$Event$EventDi) {
-    inherits$1(LineGraphs, _Canvax$Event$EventDi);
-
-    function LineGraphs(opt, root) {
-        classCallCheck$1(this, LineGraphs);
-
-        var _this = possibleConstructorReturn$1(this, (LineGraphs.__proto__ || Object.getPrototypeOf(LineGraphs)).call(this));
+        var _this = possibleConstructorReturn$1(this, (Line.__proto__ || Object.getPrototypeOf(Line)).call(this, node, data, opts));
 
         _this.type = "line";
+        _this.coordinate.xAxis.layoutType = "rule";
 
-        _this.width = 0;
-        _this.height = 0;
-        _this.pos = {
-            x: 0,
-            y: 0
-        };
+        _$24.extend(true, _this, opts);
 
-        //默认给左轴
-        _this.yAxisAlign = "left";
+        //这里不要直接用data，而要用 this._data
+        _this.dataFrame = _this.initData(_this._data);
 
-        //这里所有的opt都要透传给 group
-        _this._opt = opt || {};
-        _this.root = root;
-
-        //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
-        _this.ctx = root.stage.canvas.getContext("2d");
-        _this.dataFrame = _this._opt.dataFrame || root.dataFrame; //root.dataFrame的引用
-        _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
-
-        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        _this.field = opt.field;
-        _this.enabledField = null;
-
-        _this.groups = []; //群组集合
-
-        _this.sprite = null;
-
-        _this.eventEnabled = true;
-
-        _this.init(_this._opt);
+        //一些继承自该类的 constructor 会拥有_init来做一些覆盖，暂时没有场景，先和bar保持一致
+        _this._init && _this._init(node, _this._data, _this._opts);
+        _this.draw();
         return _this;
     }
 
-    createClass$1(LineGraphs, [{
-        key: "init",
-        value: function init(opt) {
-            this._opt = opt;
-            opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
-            //_.extend(true, this, opt);
-            this.sprite = new canvax.Display.Sprite();
-        }
-    }, {
-        key: "draw",
-        value: function draw(opt) {
-            //_.extend(true, this, opt);
-            this.width = opt.width;
-            this.height = opt.height;
-            _$21.extend(true, this.pos, opt.pos);
+    return Line;
+}(Descartes);
 
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
-
-            this.data = this._trimGraphs();
-
-            this._setGroupsForYfield(this.data);
-
-            this._widget(opt, this.data);
-
-            this.grow();
-
-            return this;
-        }
-    }, {
-        key: "resetData",
-        value: function resetData(dataFrame, dataTrigger) {
-
-            var me = this;
-
-            if (dataFrame) {
-                me.dataFrame = dataFrame;
-                me.data = me._trimGraphs();
-            }
-
-            _$21.each(me.groups, function (g) {
-                g.resetData(me.data[g.field].data, dataTrigger);
-            });
-        }
-    }, {
-        key: "setEnabledField",
-        value: function setEnabledField() {
-            //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-            this.enabledField = this.root._coordinate.getEnabledFields(this.field);
-        }
-
-        //_yAxis, dataFrame
-
-    }, {
-        key: "_trimGraphs",
-        value: function _trimGraphs() {
-            var me = this;
-            var _coor = this.root._coordinate;
-
-            //{"uv":{}.. ,"click": "pv":]}
-            //这样按照字段摊平的一维结构
-            var tmpData = {};
-
-            me.setEnabledField();
-
-            var _yAxis = this.yAxisAlign == "right" ? _coor._yAxisRight : _coor._yAxisLeft;
-
-            _$21.each(_$21.flatten(me.enabledField), function (field, i) {
-                //var maxValue = 0;
-
-                //单条line的全部data数据
-                var _lineData = me.root.dataFrame.getFieldData(field);
-                if (!_lineData) return;
-
-                var _data = [];
-
-                for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                    var _xAxis = me.root._coordinate ? me.root._coordinate._xAxis : me.root._xAxis;
-                    var x = _xAxis.getPosX({
-                        ind: b,
-                        dataLen: bl,
-                        layoutType: me.root._coordinate ? me.root._coordinate.xAxis.layoutType : me.root._xAxis.layoutType
-                    });
-
-                    var y = _$21.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
-
-                    var node = {
-                        value: _lineData[b],
-                        x: x,
-                        y: y
-                    };
-
-                    _data.push(node);
-                }
-
-                tmpData[field] = {
-                    yAxis: _yAxis,
-                    field: field,
-                    data: _data
-                };
-            });
-
-            return tmpData;
-        }
-
-        /**
-         * 生长动画
-         */
-
-    }, {
-        key: "grow",
-        value: function grow(callback) {
-            var gi = 0;
-            var gl = this.groups.length;
-            var me = this;
-            _$21.each(this.groups, function (g, i) {
-                g._grow(function () {
-                    gi++;
-                    callback && callback(g);
-                    if (gi == gl) {
-                        me.fire("complete");
-                    }
-                });
-            });
-            return this;
-        }
-    }, {
-        key: "add",
-        value: function add(field) {
-            var me = this;
-
-            //这个field不再这个graphs里面的，不相关
-            if (_$21.indexOf(_$21.flatten([me.field]), field) == -1) {
-                return;
-            }
-
-            this.data = this._trimGraphs();
-            this._setGroupsForYfield(this.data, field);
-
-            _$21.each(this.groups, function (g, i) {
-                g.resetData(me.data[g.field].data);
-            });
-        }
-
-        /*
-         *删除 ind
-         **/
-
-    }, {
-        key: "remove",
-        value: function remove(field) {
-
-            var me = this;
-            var i = me.getGroupIndex(field);
-
-            if (!this.groups.length || i < 0) {
-                return;
-            }
-
-            this.groups.splice(i, 1)[0].destroy();
-            this.data = this._trimGraphs();
-
-            _$21.each(this.groups, function (g, i) {
-                g.resetData(me.data[g.field].data);
-            });
-        }
-    }, {
-        key: "getGroupIndex",
-        value: function getGroupIndex(field) {
-            var ind = -1;
-            for (var i = 0, l = this.groups.length; i < l; i++) {
-                if (this.groups[i].field === field) {
-                    ind = i;
-                    break;
-                }
-            }
-            return ind;
-        }
-    }, {
-        key: "getGroup",
-        value: function getGroup(field) {
-            return this.groups[this.getGroupIndex(field)];
-        }
-    }, {
-        key: "_setGroupsForYfield",
-        value: function _setGroupsForYfield(data, fields) {
-            var me = this;
-
-            if (fields) {
-                //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
-                //一般用在add()执行的时候
-                fields = _$21.flatten([fields]);
-            }
-
-            var _flattenField = _$21.flatten([this.field]);
-
-            _$21.each(data, function (g, field) {
-
-                if (fields && _$21.indexOf(fields, field) == -1) {
-                    //如果有传入fields，但是当前field不在fields里面的话，不需要处理
-                    //说明该group已经在graphs里面了
-                    return;
-                }
-
-                var fieldMap = me.root._coordinate.getFieldMapOf(field);
-
-                //groupInd 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
-                var groupInd = _$21.indexOf(_flattenField, field);
-
-                var group = new LineGraphsGroup(fieldMap, groupInd, //不同于fieldMap.ind
-                me._opt, me.ctx, me.height, me.width);
-
-                group.draw({
-                    resize: me.resize
-                }, g.data);
-
-                var insert = false;
-                //在groups数组中插入到比自己_groupInd小的元素前面去
-                for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
-                    if (groupInd < me.groups[gi].groupInd) {
-
-                        me.groups.splice(gi, 0, group);
-                        insert = true;
-                        me.sprite.addChildAt(group.sprite, gi);
-
-                        break;
-                    }
-                }
-                //否则就只需要直接push就好了
-                if (!insert) {
-                    me.groups.push(group);
-                    me.sprite.addChild(group.sprite);
-                }
-            });
-        }
-    }, {
-        key: "_widget",
-        value: function _widget(opt) {
-            var me = this;
-            me.resize = false;
-        }
-    }, {
-        key: "getNodesAt",
-        value: function getNodesAt(ind) {
-            var _nodesInfoList = []; //节点信息集合
-            _$21.each(this.groups, function (group) {
-                var node = group.getNodeInfoAt(ind);
-                node && _nodesInfoList.push(node);
-            });
-            return _nodesInfoList;
-        }
-    }]);
-    return LineGraphs;
-}(canvax.Event.EventDispatcher);
-
-var _$24 = canvax._;
+var _$26 = canvax._;
 
 var LineTips = function (_Canvax$Event$EventDi) {
     inherits$1(LineTips, _Canvax$Event$EventDi);
@@ -16748,7 +17207,7 @@ var LineTips = function (_Canvax$Event$EventDi) {
         value: function init(opt, tipDomContainer, data) {
             var me = this;
 
-            _$24.extend(true, this, opt);
+            _$26.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite({
                 id: "tips"
             });
@@ -16762,7 +17221,7 @@ var LineTips = function (_Canvax$Event$EventDi) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            _$24.extend(true, this._tips, opt);
+            _$26.extend(true, this._tips, opt);
         }
 
         //从柱状折图中传过来的tipsPoint参数会添加lineTop,lineH的属性用来绘制markCloumn
@@ -16810,60 +17269,6 @@ var LineTips = function (_Canvax$Event$EventDi) {
     }]);
     return LineTips;
 }(canvax.Event.EventDispatcher);
-
-var _$20 = canvax._;
-
-var Line$6 = function (_Chart) {
-    inherits$1(Line, _Chart);
-
-    function Line(node, data, opts) {
-        classCallCheck$1(this, Line);
-
-        var _this = possibleConstructorReturn$1(this, (Line.__proto__ || Object.getPrototypeOf(Line)).call(this, node, data, opts));
-
-        _this.type = "line";
-        _this.coordinate.xAxis.layoutType = "rule";
-
-        _$20.extend(true, _this, opts);
-
-        //这里不要直接用data，而要用 this._data
-        _this.dataFrame = _this.initData(_this._data);
-
-        //一些继承自该类的 constructor 会拥有_init来做一些覆盖，暂时没有场景，先和bar保持一致
-        _this._init && _this._init(node, _this._data, _this._opts);
-        _this.draw();
-        return _this;
-    }
-
-    createClass$1(Line, [{
-        key: "_initModule",
-        value: function _initModule(opt) {
-            var me = this;
-            //首先是创建一个坐标系对象
-            this._coordinate = new Descartes_Component(this.coordinate, this);
-            this.coordinateSprite.addChild(this._coordinate.sprite);
-
-            _$20.each(this.graphs, function (graphs) {
-                var _g = new LineGraphs(graphs, me);
-                me._graphs.push(_g);
-                me.graphsSprite.addChild(_g.sprite);
-            });
-
-            this._tips = new LineTips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
-            this.stageTips.addChild(this._tips.sprite);
-        }
-    }, {
-        key: "drawAnchor",
-        value: function drawAnchor(_anchor) {
-            var pos = {
-                x: this._coordinate._xAxis.layoutData[this.anchor.xIndex].x,
-                y: this._coordinate.graphsHeight + this._graphs.data[this._coordinate._yAxis[0].field[0]].groupData[this.anchor.xIndex].y
-            };
-            _anchor.aim(pos);
-        }
-    }]);
-    return Line;
-}(Descartes);
 
 var _$25 = canvax._;
 
@@ -16919,7 +17324,7 @@ var Bar_Line = function (_Bar) {
             this._coordinate = new Descartes_Component(this.coordinate, this);
             this.core.addChild(this._coordinate.sprite);
 
-            this._graphs = new Graphs(this.graphs, this);
+            this._graphs = new Graphs$1(this.graphs, this);
             this._graphs._yAxis = [this._coordinate._yAxis[0]];
             this.core.addChild(this._graphs.sprite);
 
@@ -17024,7 +17429,7 @@ var Bar_Line = function (_Bar) {
 }(Bar);
 
 var Line$9 = canvax.Shapes.Line;
-var _$26 = canvax._;
+var _$27 = canvax._;
 
 var Bar_Tgi = function (_Bar) {
     inherits$1(Bar_Tgi, _Bar);
@@ -17078,7 +17483,7 @@ var Bar_Tgi = function (_Bar) {
             this._coordinate = new Descartes_Component(this.coordinate, this);
             this.core.addChild(this._coordinate.sprite);
 
-            this._graphs = new Graphs(this.graphs, this);
+            this._graphs = new Graphs$1(this.graphs, this);
             this._graphs._yAxis = [this._coordinate._yAxis[0]];
             this.core.addChild(this._graphs.sprite);
 
@@ -17090,10 +17495,10 @@ var Bar_Tgi = function (_Bar) {
         value: function _getTgiData() {
             var me = this;
             this._tgiData = [];
-            var tgiFields = _$26.flatten([this.coordinate.yAxis[1].field]);
+            var tgiFields = _$27.flatten([this.coordinate.yAxis[1].field]);
 
-            _$26.each(tgiFields, function (field, i) {
-                me._tgiData.push(_$26.find(me.dataFrame.data, function (item) {
+            _$27.each(tgiFields, function (field, i) {
+                me._tgiData.push(_$27.find(me.dataFrame.data, function (item) {
                     return item.field == field;
                 }));
             });
@@ -17105,8 +17510,8 @@ var Bar_Tgi = function (_Bar) {
             var dataSection = [0, 100];
             var max = 200;
 
-            _$26.each(this._getTgiData(), function (td, i) {
-                _$26.each(td.data, function (d) {
+            _$27.each(this._getTgiData(), function (td, i) {
+                _$27.each(td.data, function (d) {
                     max = Math.max(max, Number(d));
                 });
             });
@@ -17186,9 +17591,9 @@ var Bar_Tgi = function (_Bar) {
         key: "_tgiGraphsDraw",
         value: function _tgiGraphsDraw() {
             var me = this;
-            _$26.each(this._tgiData, function (group, gi) {
-                _$26.each(group.data, function (num, i) {
-                    var rectData = _$26.flatten(me._graphs.data[gi])[i];
+            _$27.each(this._tgiData, function (group, gi) {
+                _$27.each(group.data, function (num, i) {
+                    var rectData = _$27.flatten(me._graphs.data[gi])[i];
                     if (!rectData) return;
 
                     var y = me._coordinate._yAxisRight.getYposFromVal(num);
@@ -17215,420 +17620,7 @@ var Bar_Tgi = function (_Bar) {
     return Bar_Tgi;
 }(Bar);
 
-var Circle$6 = canvax.Shapes.Circle;
-var Rect$8 = canvax.Shapes.Rect;
 var _$28 = canvax._;
-
-var Graphs$1 = function (_Canvax$Event$EventDi) {
-    inherits$1(Graphs, _Canvax$Event$EventDi);
-
-    function Graphs(opt, root) {
-        classCallCheck$1(this, Graphs);
-
-        //这里所有的opt都要透传给 group
-        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
-
-        _this.opt = opt || {};
-        _this.root = root;
-        _this.ctx = root.stage.context2D;
-        _this.dataFrame = _this.opt.dataFrame || root.dataFrame; //root.dataFrame的引用
-        _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
-        _this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
-
-        _this.node = {
-            shapeType: "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-            maxR: 20, //圆圈默认最大半径
-            minR: 5,
-            r: null,
-            normalR: 10,
-            fillStyle: null,
-            strokeStyle: null,
-            lineWidth: 0,
-            alpha: 0.8
-        };
-        _this.label = {
-            field: null,
-            format: function format(label) {
-                return label;
-            },
-            fontSize: 12,
-            fontColor: "#777"
-        };
-
-        _this.animation = true;
-
-        _this.xField = _$28.flatten([root.coordinate.xAxis.field])[0];
-        _this.yField = _$28.flatten([root.coordinate.yAxis.field])[0];
-        _this.groupField = null; //如果有多个分组的数据，按照这个字段分组，比如男女
-
-        _this.colors = colors;
-
-        _this.sprite = null;
-
-        _$28.extend(true, _this, opt);
-
-        _this.init();
-
-        return _this;
-    }
-
-    createClass$1(Graphs, [{
-        key: "init",
-        value: function init() {
-            this.sprite = new canvax.Display.Sprite({
-                id: "graphsEl"
-            });
-
-            this._shapesp = new canvax.Display.Sprite({
-                id: "shapesp"
-            });
-            this._textsp = new canvax.Display.Sprite({
-                id: "textsp"
-            });
-            this.sprite.addChild(this._shapesp);
-            this.sprite.addChild(this._textsp);
-        }
-    }, {
-        key: "draw",
-        value: function draw(opt) {
-            _$28.extend(true, this, opt);
-            this.data = this._trimGraphs(); //groupsData也被自动设置完成
-
-            this._widget();
-
-            this.sprite.context.x = this.x;
-            this.sprite.context.y = this.y;
-
-            if (this.animation) {
-                this.grow();
-            }
-
-            return this;
-        }
-    }, {
-        key: "_trimGraphs",
-        value: function _trimGraphs() {
-            var tmplData = [];
-
-            var dataLen = this.dataFrame.org.length - 1; //减去title fields行
-            for (var i = 0; i < dataLen; i++) {
-
-                var rowData = this.dataFrame.getRowData(i);
-                var xValue = rowData[this.xField];
-                var yValue = rowData[this.yField];
-                var xPos = this.root._coordinate._xAxis.getPosX({ val: xValue });
-                var yPos = this.root._coordinate._yAxisLeft.getYposFromVal(yValue);
-                var group = this.getGroup(rowData);
-                var groupInd = this.getGroupInd(rowData);
-
-                var nodeLayoutData = {
-                    rowData: rowData,
-                    groupInd: groupInd,
-                    pos: {
-                        x: xPos,
-                        y: yPos
-                    },
-                    value: {
-                        x: xValue,
-                        y: yValue
-                    },
-                    xField: this.xField,
-                    yField: this.yField,
-                    groupName: rowData[this.groupField] || "",
-
-                    //下面的属性都单独设置
-                    r: null, //这里先不设置，在下面的_setR里单独设置
-                    fillStyle: null,
-                    strokeStyle: null,
-                    lineWidth: 0,
-                    shapeType: null,
-                    shape: null, //对应的canvax 节点， 在widget之后赋值
-                    label: null
-                };
-
-                this._setR(nodeLayoutData);
-                this._setFillStyle(nodeLayoutData);
-                this._setStrokeStyle(nodeLayoutData);
-                this._setLineWidth(nodeLayoutData);
-                this._setNodeType(nodeLayoutData);
-                this._setLabel(nodeLayoutData);
-
-                group.list.push(nodeLayoutData);
-                tmplData.push(nodeLayoutData);
-            }
-
-            return tmplData;
-        }
-    }, {
-        key: "_setR",
-        value: function _setR(nodeLayoutData) {
-
-            var r = this.node.normalR;
-            var rowData = nodeLayoutData.rowData;
-            if (this.node.r != null) {
-                if (_$28.isString(this.node.r) && rowData[this.node.r]) {
-                    //如果配置了某个字段作为r，那么就要自动计算比例
-                    if (!this._rData && !this._rMaxValue && !this._rMinValue) {
-                        this._rData = this.dataFrame.getFieldData(this.node.r);
-                        this._rMaxValue = _$28.max(this._rData);
-                        this._rMinValue = _$28.min(this._rData);
-                    }
-                    var rVal = rowData[this.node.r];
-                    r = this.node.minR + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxR - this.node.minR);
-                }
-                if (_$28.isFunction(this.node.r)) {
-                    r = this.node.r(rowData);
-                }
-                if (!isNaN(parseInt(this.node.r))) {
-                    r = parseInt(this.node.r);
-                }
-            }
-            nodeLayoutData.r = r;
-            return this;
-        }
-    }, {
-        key: "_setLabel",
-        value: function _setLabel(nodeLayoutData) {
-            if (this.label.field != null) {
-                if (_$28.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
-                    nodeLayoutData.label = nodeLayoutData.rowData[this.label.field];
-                }
-            }
-        }
-    }, {
-        key: "_setFillStyle",
-        value: function _setFillStyle(nodeLayoutData) {
-            nodeLayoutData.fillStyle = this._getStyle(this.node.fillStyle, nodeLayoutData);
-            return this;
-        }
-    }, {
-        key: "_setStrokeStyle",
-        value: function _setStrokeStyle(nodeLayoutData) {
-            nodeLayoutData.strokeStyle = this._getStyle(this.node.strokeStyle, nodeLayoutData);
-            return this;
-        }
-    }, {
-        key: "_getStyle",
-        value: function _getStyle(style, nodeLayoutData) {
-            var _style = style;
-            if (_$28.isArray(style)) {
-                _style = style[nodeLayoutData.groupInd];
-            }
-            if (_$28.isFunction(style)) {
-                _style = style(nodeLayoutData);
-            }
-            if (!_style) {
-                _style = this.colors[nodeLayoutData.groupInd];
-            }
-            return _style;
-        }
-    }, {
-        key: "_setLineWidth",
-        value: function _setLineWidth(nodeLayoutData) {
-            nodeLayoutData.lineWidth = this.node.lineWidth;
-            return this;
-        }
-    }, {
-        key: "_setNodeType",
-        value: function _setNodeType(nodeLayoutData) {
-            var shapeType = this.node.shapeType;
-            if (_$28.isArray(shapeType)) {
-                shapeType = shapeType[nodeLayoutData.groupInd];
-            }
-            if (_$28.isFunction(shapeType)) {
-                shapeType = shapeType(nodeLayoutData);
-            }
-            if (!shapeType) {
-                shapeType = "circle";
-            }
-            nodeLayoutData.shapeType = shapeType;
-            return this;
-        }
-    }, {
-        key: "getGroup",
-        value: function getGroup(rowData) {
-            var group;
-            var me = this;
-            if (this.groupField) {
-                //如果有设置分组字段
-                group = _$28.find(this.groupsData, function (group) {
-                    return group.groupName == rowData[me.groupField];
-                });
-                if (!group) {
-                    group = {
-                        groupName: rowData[this.groupField],
-                        list: []
-                    };
-                    this.groupsData.push(group);
-                }
-            } else {
-                if (this.groupsData.length == 0) {
-                    group = {
-                        groupName: "",
-                        list: []
-                    };
-                    this.groupsData.push(group);
-                } else {
-                    group = this.groupsData[0];
-                }
-            }
-            return group;
-        }
-
-        //必须要先执行了getGroup
-
-    }, {
-        key: "getGroupInd",
-        value: function getGroupInd(rowData) {
-            var i = 0;
-            var me = this;
-            _$28.each(this.groupsData, function (group, gi) {
-                if (group.groupName == rowData[me.groupField]) {
-                    i = gi;
-                }
-            });
-            return i;
-        }
-
-        //根据layoutdata开始绘制
-
-    }, {
-        key: "_widget",
-        value: function _widget() {
-            var me = this;
-            _$28.each(this.groupsData, function (group, iGroup) {
-                var groupSprite = new canvax.Display.Sprite({ id: group.groupName });
-                me._shapesp.addChild(groupSprite);
-
-                _$28.each(group.list, function (nodeData, iNode) {
-
-                    var _context = me._getNodeContext(nodeData);
-                    var Shape = nodeData.shapeType == "circle" ? Circle$6 : Rect$8;
-
-                    var _node = new Shape({
-                        id: "shape_" + iGroup + "_" + iNode,
-                        context: _context
-                    });
-                    groupSprite.addChild(_node);
-
-                    //数据和canvax原件相互引用
-                    _node.nodeData = nodeData;
-                    _node.iNode = iNode;
-                    nodeData.shape = _node;
-
-                    _node.on("panstart mouseover", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
-                    });
-                    _node.on("panmove mousemove", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
-                    });
-                    _node.on("panend mouseout", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
-                        me.iGroup = 0, me.iNode = -1;
-                    });
-                    _node.on("tap click", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
-                    });
-
-                    //如果有label
-                    if (nodeData.label) {
-                        var _label = nodeData.label;
-                        text = new canvax.Display.Text(_label, {
-                            id: "text_" + iGroup + "_" + iNode,
-                            context: me._getLabelContext(nodeData)
-                        });
-
-                        me._textsp.addChild(text);
-
-                        //图形节点和text文本相互引用
-                        _node.label = text;
-                        text.shape = _node;
-                    }
-                });
-            });
-        }
-    }, {
-        key: "_getLabelContext",
-        value: function _getLabelContext(nodeData) {
-            var ctx = {
-                x: nodeData.pos.x,
-                y: nodeData.pos.y,
-                fillStyle: this.label.fontColor,
-                fontSize: this.label.fontSize,
-                textAlign: 'center',
-                textBaseline: 'middle'
-            };
-            if (this.animation) {
-                ctx.x = 0;
-                ctx.y = 0;
-            }
-            return ctx;
-        }
-    }, {
-        key: "_getNodeContext",
-        value: function _getNodeContext(nodeData) {
-            if (nodeData.shapeType == "circle") {
-                return this._getCircleContext(nodeData);
-            }
-        }
-    }, {
-        key: "_getCircleContext",
-        value: function _getCircleContext(nodeData) {
-            var ctx = {
-                x: nodeData.pos.x,
-                y: nodeData.pos.y,
-                r: nodeData.r,
-                fillStyle: nodeData.fillStyle,
-                strokeStyle: nodeData.strokeStyle,
-                lineWidth: nodeData.lineWidth,
-                globalAlpha: this.node.alpha
-            };
-            if (this.animation) {
-                ctx.x = 0;
-                ctx.y = 0;
-                ctx.r = 1;
-            }
-            return ctx;
-        }
-    }, {
-        key: "_getEventInfo",
-        value: function _getEventInfo(e, nodeData, iNode) {
-            var info = {
-                iGroup: nodeData.groupInd,
-                iNode: iNode,
-                nodesInfoList: [nodeData]
-            };
-            return info;
-        }
-
-        /**
-         * 生长动画
-         */
-
-    }, {
-        key: "grow",
-        value: function grow() {
-            _$28.each(this.data, function (nodeData) {
-                nodeData.shape.animate({
-                    x: nodeData.pos.x,
-                    y: nodeData.pos.y,
-                    r: nodeData.r
-                }, {
-                    onUpdate: function onUpdate(opt) {
-                        if (this.label) {
-                            this.label.context.x = opt.x;
-                            this.label.context.y = opt.y;
-                        }
-                    },
-                    delay: Math.round(Math.random() * 300)
-                });
-            });
-        }
-    }]);
-    return Graphs;
-}(canvax.Event.EventDispatcher);
-
-var _$27 = canvax._;
 
 var Scat = function (_Chart) {
     inherits$1(Scat, _Chart);
@@ -17643,7 +17635,7 @@ var Scat = function (_Chart) {
         //坐标系统
         _this.coordinate.xAxis.layoutType = "proportion";
 
-        _$27.extend(true, _this, opts);
+        _$28.extend(true, _this, opts);
         _this.dataFrame = _this.initData(data);
 
         _this.draw();
@@ -17651,61 +17643,21 @@ var Scat = function (_Chart) {
     }
 
     createClass$1(Scat, [{
-        key: "draw",
-        value: function draw(opt) {
-            !opt && (opt = {});
-            this.setStages();
-
-            this._initModule(opt); //初始化模块  
-            this.initComponents(opt); // 初始化组件
-            this._startDraw(opt); //开始绘图
-            this.drawComponents(opt); //开始绘制插件
-            this.inited = true;
-        }
-    }, {
         key: "_initModule",
         value: function _initModule(opt) {
             var me = this;
             //首先是创建一个坐标系对象
             this._coordinate = new Descartes_Component(this.coordinate, this);
-            this.core.addChild(this._coordinate.sprite);
+            this.coordinateSprite.addChild(this._coordinate.sprite);
 
-            this._graphs = new Graphs$1(this.graphs, this);
-            this.core.addChild(this._graphs.sprite);
-
-            this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame);
-            this._tips._getDefaultContent = this._getTipDefaultContent;
-            this.stageTip.addChild(this._tips.sprite);
-        }
-    }, {
-        key: "_getTipDefaultContent",
-        value: function _getTipDefaultContent(nodeInfo) {
-            var res = "";
-            _$27.each(nodeInfo.nodesInfoList, function (nodeData) {
-                res += nodeData.xField + "：" + nodeData.value.x + "<br />";
-                res += nodeData.yField + "：" + nodeData.value.y;
-            });
-            return res;
-        }
-    }, {
-        key: "_startDraw",
-        value: function _startDraw(opt) {
-            var me = this;
-
-            this._coordinate.draw(opt);
-
-            this._graphs.draw({
-                x: this._coordinate.graphsX,
-                y: this._coordinate.graphsY,
-                w: this._coordinate.graphsWidth,
-                h: this._coordinate.graphsHeight,
-                inited: this.inited,
-                resize: opt.resize
-            }).on("complete", function () {
-                me.fire("complete");
+            _$28.each(this.graphs, function (graphs) {
+                var _g = new Graphs$2(graphs, me);
+                me._graphs.push(_g);
+                me.graphsSprite.addChild(_g.sprite);
             });
 
-            this.bindEvent();
+            this._tips = new Tips(this.tips, this.canvax.domView);
+            this.stageTips.addChild(this._tips.sprite);
         }
     }, {
         key: "showLabel",
@@ -17717,66 +17669,6 @@ var Scat = function (_Chart) {
         value: function hideLabel() {
             this._graphs._textsp.context.visible = false;
         }
-    }, {
-        key: "bindEvent",
-        value: function bindEvent() {
-            var me = this;
-            this._graphs.sprite.on("panstart mouseover", function (e) {
-                me._setXaxisYaxisToTipsInfo(e);
-                me._tips.show(e);
-                me.fire(e.type, e);
-            });
-            this._graphs.sprite.on("panmove mousemove", function (e) {
-                me._setXaxisYaxisToTipsInfo(e);
-                me._tips.move(e);
-                me.fire(e.type, e);
-            });
-            this._graphs.sprite.on("panend mouseout", function (e) {
-                me._tips.hide(e);
-                me.fire(e.type, e);
-            });
-            this._graphs.sprite.on("tap click dblclick mousedown mouseup", function (e) {
-                me._setXaxisYaxisToTipsInfo(e);
-                me.fire(e.type, e);
-            });
-        }
-
-        //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
-        //方便外部自定义tip是的content
-
-    }, {
-        key: "_setXaxisYaxisToTipsInfo",
-        value: function _setXaxisYaxisToTipsInfo(e) {
-
-            if (!e.eventInfo) {
-                return;
-            }
-
-            var nodeData = e.eventInfo.nodesInfoList[0];
-
-            if (nodeData) {
-                e.eventInfo.xAxis = {
-                    field: nodeData.xField,
-                    value: nodeData.value.x
-                };
-            }
-        }
-
-        //插件部分
-
-    }, {
-        key: "drawAnchor",
-        value: function drawAnchor(_anchor) {
-
-            /*
-            var pos = {
-                x : 0,
-                y : 0
-            };
-            _anchor.aim( pos );
-            */
-
-        }
     }]);
     return Scat;
 }(Descartes);
@@ -17784,7 +17676,7 @@ var Scat = function (_Chart) {
 var Chartx = {
     Pie: _class,
     Bar: Bar,
-    Line: Line$6,
+    Line: Line$7,
     Bar_Line: Bar_Line,
     Bar_Tgi: Bar_Tgi,
     Scat: Scat

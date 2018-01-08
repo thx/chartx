@@ -95,17 +95,18 @@ var options = {
     coordinate: {
         xAxis : {
             field :  "age"
-        },
-        yAxis : {
-            field : "money"
         }
     },
-    graphs : {
-        groupField : "sex", //安装sex字段来分组
-        node : {
-            r : "house" //r可以配置为某个字段名字，就会自动计算比例
+    graphs : [
+        {
+            type : "scat",
+            field : "money",
+            groupField : "sex", //安装sex字段来分组
+            node : {
+                r : "house" //r可以配置为某个字段名字，就会自动计算比例
+            }
         }
-    }
+    ]
 };
 
 window.scat = new Chartx.Scat("canvasTest" , data , options)

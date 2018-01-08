@@ -3,12 +3,17 @@ import Canvax from "canvax2d"
 import {parse2MatrixData} from "../utils/tools"
 import DataFrame from "../utils/dataframe"
 
+import lineGraphs from "./line/graphs"
+import barGraphs from "./bar/graphs"
+import scatGraphs from "./scat/graphs"
+
+import Coordinate from "../components/descartes/index"
 import Legend from "../components/legend/index"
 import DataZoom from "../components/datazoom/index"
 import MarkLine from "../components/markline/index"
 import MarkPoint from "../components/markpoint/index"
 import Anchor from "../components/anchor/index"
-
+import Tips from "../components/tips/index"
 
 const _ = Canvax._;
 
@@ -109,11 +114,33 @@ export default class Descartes extends Chart
         this.inited = true;
     }
 
+    _initModule(opt)
+    {
+        var me = this
+        //首先是创建一个坐标系对象
+        this._coordinate = new Coordinate( this.coordinate, this );
+        this.coordinateSprite.addChild( this._coordinate.sprite );
+
+        _.each( this.graphs , function( graphs ){
+            var _g = new Graphs( graphs, me );
+            me._graphs.push( _g );
+            me.graphsSprite.addChild( _g.sprite );
+        } );
+
+        this._tips = new Tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
+        this.stageTips.addChild(this._tips.sprite);
+    }
+
     _startDraw(opt)
     {
         var me = this;
         !opt && (opt ={});
         var _coor = this._coordinate;
+
+        if( !_coor._yAxis.length ){
+            //如果没有y轴数据
+            return;
+        }
 
         //先绘制好坐标系统
         _coor.draw( opt );
@@ -647,13 +674,13 @@ export default class Descartes extends Chart
 
                     me._anchor = _anchor;
 
-                    me.drawAnchor( _anchor );
+                    //me.drawAnchor( _anchor );
 
                     me.components.push( {
                         type : "anchor",
                         plug : {
                             draw : function(){
-                                me.drawAnchor( _anchor );
+                                //me.drawAnchor( _anchor );
                             }
                         }
                     } );
@@ -666,7 +693,6 @@ export default class Descartes extends Chart
     bindEvent( )
     {
         var me = this;
-    
         this._coordinate.on("panstart mouseover", function(e) {
             if ( me._tips.enabled ) {
                 me._setTipsInfo.apply(me, [e]);
@@ -695,10 +721,12 @@ export default class Descartes extends Chart
                 me._tips.show(e);
             }
         });
+        /*
         this._coordinate.on("click", function(e) {
             me._setTipsInfo.apply(me, [e]);
             me.fire("click", e.eventInfo);
         });
+        */
     }
 
     //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
