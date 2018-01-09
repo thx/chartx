@@ -1,6 +1,5 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-import Tips from "../tips/index"
 
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
@@ -23,16 +22,6 @@ export default class Grid extends Component
 
         this.display = 1;
 
-        this.xOrigin = {                                //原点开始的x轴线
-            display     : 1,
-            lineWidth   : 1,
-            strokeStyle : '#ccc'
-        }
-        this.yOrigin = {                                //原点开始的y轴线               
-            display     : 1,
-            lineWidth   : 1,
-            strokeStyle : '#ccc'
-        }
         this.xAxis   = {                                //x轴上的线
             display     : 1,
             data        : [],                      //[{y:100},{}]
@@ -113,9 +102,6 @@ export default class Grid extends Component
             return
         };
 
-        //不管怎么样，grid的布局依赖 只依赖_yAxis的第一个对象
-        //TODO: 这里应该是要获取第一个有显示field的_yAxis对象。
-        //也就是说当第一个_yAxis上面的field都enabled为false了后，就要取_yAxis[1],后面改
         var _yAxis = self.root._yAxis[ 0 ];
         
         if( self.root && _yAxis && _yAxis.dataSectionGroup ){
@@ -160,28 +146,12 @@ export default class Grid extends Component
                     index      : a,
                     line       : line
                 } , self]);
+
                 self.xAxisSp.addChild(line);
+    
+                line.context.start.x = 0;
+                line.context.end.x = self.w;
                 
-                if( this.animation && !this.resize ){
-                    line.animate({
-                        start : {
-                        	x : 0
-                        },
-                        end : {
-                        	x : self.w
-                        }
-                    } , {
-                        duration : 500,
-                        //easing : 'Back.Out',//Tween.Easing.Elastic.InOut
-                        delay : (al-a) * 80,
-                        id : line.id
-                    });
-                } else {
-                    line.context.start.x = 0;
-                    line.context.end.x = self.w;
-                }
-
-
             };
         };
 
@@ -215,67 +185,6 @@ export default class Grid extends Component
                 self.yAxisSp.addChild(line);
             }
         };
-
-        //原点开始的y轴线
-        var xAxisOrg = (self.yAxis.org == null ? 0 : _.find( self.yAxis.data , function(obj){
-            return obj.content == self.yAxis.org
-        } ).x );
-    
-        //self.yAxis.org = xAxisOrg;
-        var line = new Line({
-            context : {
-                start       : {
-                    x : xAxisOrg,
-                    y : 0
-                },
-                end         : {
-                    x : xAxisOrg,
-                    y : -self.h
-                },
-                lineWidth   : self.yOrigin.lineWidth,
-                strokeStyle : self.yOrigin.strokeStyle
-            }
-        })
-        if(self.yOrigin.display)
-            self.sprite.addChild(line)
-
-        if( this.root._yAxisRight ){
-            var lineR = new Line({
-                context : {
-                    start       : {
-                        x : self.w,
-                        y : 0
-                    },
-                    end         : {
-                        x : self.w,
-                        y : -self.h
-                    },
-                    lineWidth   : self.yOrigin.lineWidth,
-                    strokeStyle : self.yOrigin.strokeStyle
-                }
-            })
-            if(self.yOrigin.display)
-                self.sprite.addChild(lineR)
-
-        }
-
-        var line = new Line({
-            context : {
-                start       : {
-                    x : 0,
-                    y : _yAxis.basePoint.y
-                },
-                end         : {
-                    x : self.w,
-                    y : _yAxis.basePoint.y
-                },
-                lineWidth   : self.xOrigin.lineWidth,
-                strokeStyle : self.xOrigin.strokeStyle
-            }
-        })
-        if(self.xOrigin.display)
-            self.sprite.addChild(line)
-
 
     }
 }

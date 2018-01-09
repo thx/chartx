@@ -38,22 +38,14 @@ export default class Descartes extends Chart
             }
         };
 
+        if( !opts.coordinate.yAxis ){
+            opts.coordinate.yAxis = [];
+        } else {
+            opts.coordinate.yAxis = _.flatten([opts.coordinate.yAxis])
+        }
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
         if( opts.graphs ){
-
-            if( !opts.coordinate.yAxis ){
-                opts.coordinate.yAxis = [];
-            } else {
-                //如果有配置yAxis，就先delete掉用户可能在上面配置的field信息
-                //chartx1.0的习惯
-                opts.coordinate.yAxis = _.flatten([opts.coordinate.yAxis])
-                _.each( opts.coordinate.yAxis , function( yAxis ){
-                    yAxis.field = [];
-                } );
-            }
-
             opts.graphs = _.flatten( [ opts.graphs ] );
-
             //有graphs的就要用找到这个graphs.field来设置coordinate.yAxis
             _.each( opts.graphs, function( graphs ){
                 if( graphs.type == "bar" ){
@@ -69,8 +61,9 @@ export default class Descartes extends Chart
 
                     var optsYaxisObj = null;
                     optsYaxisObj = _.find( opts.coordinate.yAxis, function( obj, i ){
-                        return obj.align == align || i == ( align == "left" ? 0 : 1 );
+                        return obj.align == align || ( !obj.align && i == ( align == "left" ? 0 : 1 ));
                     } );
+    
                     if( !optsYaxisObj ){
                         optsYaxisObj = {
                             align : align,
@@ -87,7 +80,22 @@ export default class Descartes extends Chart
                 }
             } );
         };
+        //再梳理一遍yAxis，get没有align的手动配置上align
+        //要手动把yAxis 按照 left , right的顺序做次排序
+        var _lys=[],_rys=[];
+        _.each( opts.coordinate.yAxis , function( yAxis , i ){
+            if( !yAxis.align ){
+                yAxis.align = i ?"right": "left";
+            }
+            if( yAxis.align == "left" ){
+                _lys.push( yAxis );
+            } else {
+                _rys.push( yAxis );
+            }
+        } );
+        opts.coordinate.yAxis = _lys.concat( _rys );
 
+        
         //直角坐标系的绘图模块,是个数组，支持多模块
         this._graphs = [];
 
@@ -434,6 +442,13 @@ export default class Descartes extends Chart
                         }
                     } )
                 }
+                if( _g.type == "scat" ){
+                    _.extend( true, _opt, {
+                        node : {
+                            fillStyle : "#ececec"
+                        }
+                    } )
+                }
 
                 graphsOpt.push( _opt );
             }
@@ -533,6 +548,11 @@ export default class Descartes extends Chart
                         _yAxis = $yAxis;
                     }
                 } );
+            }
+
+            if( ML.yAxisAlign ){
+                //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
+                _yAxis = me._coordinate._yAxis[ ML.yAxisAlign=="left"?0:1 ];
             }
 
             var y;

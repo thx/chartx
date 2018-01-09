@@ -25,7 +25,7 @@ export default class yAxis extends Component
 
         this.line = {
             enabled: 1,      //是否有line
-            width: 4,
+            width: 4,        //刻度线的宽度，和轴线无关
             lineWidth: 1,
             strokeStyle: '#cccccc',
             marginToLine: 2
@@ -556,15 +556,19 @@ export default class yAxis extends Component
                     this.middleweight[i]
                 ]);
             };
-            var lastMW =  this.middleweight.slice(-1)[0] ;
-            newDS.push( lastMW + (dMax - lastMW) / 2 ) ;
-            newDS.push( dMax );
+            var lastMW =  this.middleweight.slice(-1)[0];
 
-            newDSG.push([
-                lastMW,
-                lastMW +(dMax - lastMW) / 2 ,
-                dMax
-            ]);
+            if( dMax > lastMW ){
+                newDS.push( lastMW + (dMax - lastMW) / 2 ) ;
+                newDS.push( dMax );
+                newDSG.push([
+                    lastMW,
+                    lastMW +(dMax - lastMW) / 2 ,
+                    dMax
+                ]);
+            }
+
+            
 
             //好了。 到这里用简单的规则重新拼接好了新的 dataSection
             this.dataSection = newDS;
@@ -607,7 +611,7 @@ export default class yAxis extends Component
             if( content === undefined || content === null ){
                 content = Tools.numAddSymbol( o.content );
             };  
-            
+
             var textAlign = (self.align == "left" ? "right" : "left");
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
@@ -751,9 +755,28 @@ export default class yAxis extends Component
             }
         }
 
+        var _originX = 0;
         if( self.align == "left" ){
             self.rulesSprite.context.x = self.width;
+            _originX = self.width;
         }
+
+        //轴线
+        var _axisline = new Line({
+            context : {
+                start       : {
+                    x : _originX,
+                    y : 0
+                },
+                end         : {
+                    x : _originX,
+                    y : -self.yGraphsHeight
+                },
+                lineWidth   : this.line.lineWidth,
+                strokeStyle : self._getProp(self.line.strokeStyle)
+            }
+        });
+        this.sprite.addChild( _axisline );
     }
 
     _getProp(s)

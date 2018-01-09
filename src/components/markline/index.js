@@ -32,17 +32,13 @@ export default class MarkLine extends Component
         };
 
         this.text = {
-            enabled  : true,
+            enabled  : false,
             fillStyle: '#999999',
             fontSize : 12,
-            format   : null,
+            content  : null,
             lineType : 'dashed',
             lineWidth: 1,
             strokeStyle : "white"
-        };
-
-        this.filter = function( ){
-            
         };
 
         this._txt = null;
@@ -88,10 +84,14 @@ export default class MarkLine extends Component
 
     _getLabel()
     {
+        if( _.isString( this.text.content ) ){
+            return this.text.content;
+        };
+
         var yVal = this._getYVal();
         var label = "markline："+yVal;
-        if (_.isFunction(this.text.format)) {
-            label = this.text.format.apply( this, [ yVal ] )
+        if (_.isFunction(this.text.content)) {
+            label = this.text.content.apply( this, [ yVal ] )
         }
         return label;
     }
@@ -128,8 +128,6 @@ export default class MarkLine extends Component
         }
     
         this.line.y = y;
-
-        me.filter( me );
     }
 
     reset(opt)
@@ -157,8 +155,6 @@ export default class MarkLine extends Component
         this._line.context.strokeStyle = this.line.strokeStyle;
 
         this.line.y = y;
-
-        me.filter( me );
     }
 
     _setTxtPos( y )

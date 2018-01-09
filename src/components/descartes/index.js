@@ -204,6 +204,9 @@ export default class Descartes_Component extends Component
    
     _initModules()
     {
+        this._grid = new Grid( this.grid, this );
+        this.sprite.addChild( this._grid.sprite );
+
         var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
         this._xAxis = new xAxisConstructor(this.xAxis, _xAxisDataFrame, this);
         this.sprite.addChild(this._xAxis.sprite);
@@ -241,9 +244,6 @@ export default class Descartes_Component extends Component
             this.sprite.addChild( this._yAxisRight.sprite );
             this._yAxis.push( this._yAxisRight );
         };
-
-        this._grid = new Grid( this.grid, this );
-        this.sprite.addChild( this._grid.sprite );
     }
 
     /**

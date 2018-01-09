@@ -34,45 +34,79 @@
 
             var data= [
                 ["xfield"     ,"uv" ,"pv", "tgi", "tgi1"  ],
-                ["迈锐宝"      , 67  , 51 , 56   , 325  ],
+                ["迈锐宝"      , 67  , 51 , 56   , 35  ],
                 ["科鲁兹"      , 11  , 20 , 990  , 23  ],
                 ["帕萨特"      , 201 , 20 , 323  , 32  ],
                 ["蒙迪欧"      , 51  , 20 , 33   , 52  ],
-                ["天籁"        , 17  , 51 , 261  , 222  ],
-                ["迈锐宝"      , 67  , 51 , 56   , 124 ],
+                ["天籁"        , 17  , 51 , 261  , 22  ],
+                ["迈锐宝"      , 67  , 51 , 56   , 24 ],
                 ["科鲁兹"      , 11  , 20 , 990  , 53  ],
                 ["帕萨特"      , 201 , 20 , 323  , 62  ],
-                ["蒙迪欧"      , 51  , 20 , 33   , 223  ],
+                ["蒙迪欧"      , 51  , 20 , 33   , 23  ],
                 ["天籁"        , 17  , 51 , 261  , 34  ],
-                ["迈锐宝"      , 67  , 51 , 56   , 151  ],
-                ["科鲁兹"      , 11  , 20 , 990  , 534  ],
-                ["帕萨特"      , 201 , 20 , 323  , 323  ],
-                ["蒙迪欧"      , 51  , 20 , 33   , 222  ],
+                ["迈锐宝"      , 67  , 51 , 56   , 51  ],
+                ["科鲁兹"      , 11  , 20 , 990  , 34  ],
+                ["帕萨特"      , 201 , 20 , 323  , 23  ],
+                ["蒙迪欧"      , 51  , 20 , 33   , 22  ],
                 ["天籁"        , 17  , 51 , 261  , 22 ]
             ];;
             var options = {
                 coordinate: {
-                    yAxis : [
-                        {
-                            field : [ "uv", "pv" ]
-                        },
-                        {
-                            field : ["tgi", "tgi1"]
-                        }
-                    ],
+                    type : "descartes",
                     xAxis : {
                         field : ["xfield"]
+                    },
+                    yAxis : [
+                        { 
+                            align : "right",
+                            //label : "TGI",
+                            middleweight : 100,
+                            field : [ "tgi", "tgi1" ],
+                            text : {
+                                fillStyle : "#6a8db1"
+                            },
+                            line : {
+                                strokeStyle : "#6a8db1"
+                            }
+                        }
+                    ]
+                },
+                graphs : [
+                    {
+                        type : "bar",
+                        field : ["uv","pv"], 
+                        yAxisAlign: "left"
                     }
+                ],
+                legend : {
+
                 },
                 dataZoom: {
                     range : {
                         start : 0,
                         end   : 5
                     }
+                },
+                markLine: [
+                    {
+                        yAxisAlign: "right",
+                        y : 100,
+                        line : {
+                            lineType: "solid",
+                            strokeStyle : "#6a8db1"
+                        },
+                        text : {
+                            enabled : true,
+                            content : "TGI 水位线"
+                        }
+                    }
+                ],
+                bar_tgi : {
+                    
                 }
             }   
 
-            window.chart = new Chartx.Bar_Tgi("canvasTest" , data , options)
+            window.chart = Chartx.create("canvasTest" , data , options)
 
             </textarea></form>
         </td>

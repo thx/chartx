@@ -24,7 +24,7 @@ export default class xAxis extends Component
 
         this.line = {
             enabled: 1, //是否有line
-            width: 1,
+            lineWidth: 1,
             height: 4,
             marginTop : 2,
             strokeStyle: '#cccccc'
@@ -490,7 +490,7 @@ export default class xAxis extends Component
                         x : 0,
                         y : this.line.height
                     },
-                    lineWidth: this.line.width,
+                    lineWidth: this.line.lineWidth,
                     strokeStyle: this.line.strokeStyle
                 };
                 if( xNode._line ){
@@ -529,6 +529,23 @@ export default class xAxis extends Component
                 al--,pl--;
             };
         };
+
+        //轴线
+        var _axisline = new Line({
+            context : {
+                start       : {
+                    x : 0,
+                    y : 0
+                },
+                end         : {
+                    x : this.width,
+                    y : 0
+                },
+                lineWidth   : this.line.lineWidth,
+                strokeStyle : this.line.strokeStyle
+            }
+        });
+        this.sprite.addChild( _axisline );
 
     }
 

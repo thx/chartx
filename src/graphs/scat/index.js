@@ -11,8 +11,10 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     {
         super( opt, root );
 
+        this.type = "scat";
+
         //这里所有的opt都要透传给 group
-        this.opt = opt || {};
+        this._opt = opt || {};
         this.root = root;
         this.ctx = root.stage.context2D;
         
