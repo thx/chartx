@@ -10459,15 +10459,6 @@ var Descartes_Component = function (_Component) {
     return Descartes_Component;
 }(component);
 
-/*
-import Legend from "../components/legend/index"
-import DataZoom from "../components/datazoom/index"
-import MarkLine from "../components/markline/index"
-import MarkPoint from "../components/markpoint/index"
-import Anchor from "../components/anchor/index"
-import Tips from "../components/tips/index"
-*/
-
 var _$4 = canvax._;
 
 var Descartes = function (_Chart) {
@@ -10476,7 +10467,12 @@ var Descartes = function (_Chart) {
     function Descartes(node, data, opts, graphsMap, componentsMap) {
         classCallCheck$1(this, Descartes);
 
-        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts));
+
+        //因为后面会对opts做修改，所以存储在super中得this._opts必须一开始就clone了后存储
+        //这样，在有dataZoom等得时候需要拿真实的用户opts才拿得是对的
+        var _opts = _$4.extend(true, {}, opts);
+
+        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, _opts));
 
         _this.graphsMap = graphsMap;
         _this.componentsMap = componentsMap;
@@ -10498,8 +10494,9 @@ var Descartes = function (_Chart) {
         if (!opts.coordinate.yAxis) {
             opts.coordinate.yAxis = [];
         } else {
-            opts.coordinate.yAxis = _$4.flatten([opts.coordinate.yAxis]);
+            opts.coordinate.yAxis = _$4.extend(true, [], _$4.flatten([opts.coordinate.yAxis]));
         }
+
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
         if (opts.graphs) {
             opts.graphs = _$4.flatten([opts.graphs]);
@@ -10533,7 +10530,7 @@ var Descartes = function (_Chart) {
                         }
                     }
 
-                    optsYaxisObj.field = optsYaxisObj.field.concat(graphs.field);
+                    optsYaxisObj.field = optsYaxisObj.field ? optsYaxisObj.field.concat(graphs.field) : graphs.field;
                 }
             });
         }
@@ -10937,7 +10934,7 @@ var Descartes = function (_Chart) {
                 }
             });
             var opts = {
-                coordinate: this.coordinate,
+                coordinate: this._opts.coordinate,
                 graphs: graphsOpt
             };
 

@@ -4,22 +4,16 @@ import {parse2MatrixData} from "../utils/tools"
 import DataFrame from "../utils/dataframe"
 import Coordinate from "../components/descartes/index"
 
-/*
-import Legend from "../components/legend/index"
-import DataZoom from "../components/datazoom/index"
-import MarkLine from "../components/markline/index"
-import MarkPoint from "../components/markpoint/index"
-import Anchor from "../components/anchor/index"
-import Tips from "../components/tips/index"
-*/
-
 const _ = Canvax._;
 
 export default class Descartes extends Chart
 {
     constructor( node, data, opts, graphsMap, componentsMap ){
 
-        super( node, data, opts );
+        //因为后面会对opts做修改，所以存储在super中得this._opts必须一开始就clone了后存储
+        //这样，在有dataZoom等得时候需要拿真实的用户opts才拿得是对的
+        var _opts = _.extend( true, {}, opts );
+        super( node, data, _opts );
 
         this.graphsMap = graphsMap;
         this.componentsMap = componentsMap;
@@ -38,11 +32,13 @@ export default class Descartes extends Chart
             }
         };
 
+        
         if( !opts.coordinate.yAxis ){
             opts.coordinate.yAxis = [];
         } else {
-            opts.coordinate.yAxis = _.flatten([opts.coordinate.yAxis])
+            opts.coordinate.yAxis = _.extend( true, [], _.flatten([opts.coordinate.yAxis]) )
         }
+
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
         if( opts.graphs ){
             opts.graphs = _.flatten( [ opts.graphs ] );
@@ -76,7 +72,7 @@ export default class Descartes extends Chart
                         }
                     }
 
-                    optsYaxisObj.field = optsYaxisObj.field.concat( graphs.field );
+                    optsYaxisObj.field = optsYaxisObj.field ? optsYaxisObj.field.concat( graphs.field ) : graphs.field;
                 }
             } );
         };
@@ -468,7 +464,7 @@ export default class Descartes extends Chart
             }
         } );
         var opts = {
-            coordinate : this.coordinate,
+            coordinate : this._opts.coordinate,
             graphs : graphsOpt
         };
 
