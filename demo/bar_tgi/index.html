@@ -63,10 +63,10 @@
                             middleweight : 100,
                             field : [ "tgi", "tgi1" ],
                             text : {
-                                fillStyle : "#6a8db1"
+                                fillStyle : "#5d95d0"
                             },
                             line : {
-                                strokeStyle : "#6a8db1"
+                                strokeStyle : "#5d95d0"
                             }
                         }
                     ]
@@ -92,8 +92,8 @@
                         yAxisAlign: "right",
                         y : 100,
                         line : {
-                            lineType: "solid",
-                            strokeStyle : "#6a8db1"
+                            //lineType: "dashed",
+                            strokeStyle : "#5d95d0"
                         },
                         text : {
                             enabled : true,
@@ -101,9 +101,20 @@
                         }
                     }
                 ],
-                bar_tgi : {
+                barTgi : [
+                    {
+                        field : "tgi",
+                        barField : "uv",
+                        yAxisAlign : "right"
+                    },
+                    {
+                        field : "tgi1",
+                        barField : "pv",
+                        yAxisAlign : "right"
+                    }
+                ]
                     
-                }
+                
             }   
 
             window.chart = Chartx.create("canvasTest" , data , options)

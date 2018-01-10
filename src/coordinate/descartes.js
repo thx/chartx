@@ -299,6 +299,9 @@ export default class Descartes extends Chart
         if(this._opts.anchor && this._initAnchor) {
             this._initAnchor( opt );
         };
+        if(this._opts.barTgi && this._initBarTgi) {
+            this._initBarTgi( opt );
+        };
     }
 
     //所有plug触发更新
@@ -314,7 +317,7 @@ export default class Descartes extends Chart
                 }
                 return
             };
-            p.plug.reset && p.plug.reset( me[ p.type ] || {} );
+            p.plug.reset && p.plug.reset( me[ p.type ] || {} , me.dataFrame);
         }); 
     }
 
@@ -369,13 +372,24 @@ export default class Descartes extends Chart
         var data = [];
         
         _.each( _.flatten(me._coordinate.fieldsMap) , function( map , i ){
-            data.push( {
-                enabled : map.enabled,
-                field : map.field,
-                ind : map.ind,
-                style : map.style,
-                yAxis : map.yAxis
+            //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
+            var isGraphsField = false;
+            _.each( me.graphs, function( gopt ){
+                if( _.indexOf( _.flatten([ gopt.field ]), map.field ) > -1 ){
+                    isGraphsField = true;
+                    return false;
+                }
             } );
+
+            if( isGraphsField ){
+                data.push( {
+                    enabled : map.enabled,
+                    field : map.field,
+                    ind : map.ind,
+                    style : map.style,
+                    yAxis : map.yAxis
+                } );
+            }
         });
         return data;
     }
@@ -477,12 +491,12 @@ export default class Descartes extends Chart
             type : "once",
             plug : {
                 draw: function(){
-                    me._dataZoom = new me.componentsMap.dataZoom( me._getDataZoomOpt() , me.__cloneChart );
+                    var _dataZoom = new me.componentsMap.dataZoom( me._getDataZoomOpt() , me.__cloneChart );
                     me.components.push( {
                         type : "dataZoom",
-                        plug : me._dataZoom
+                        plug : _dataZoom
                     } ); 
-                    me.graphsSprite.addChild( me._dataZoom.sprite );
+                    me.graphsSprite.addChild( _dataZoom.sprite );
                 }
             }
         } );
@@ -521,7 +535,7 @@ export default class Descartes extends Chart
 
 
     //markLine begin
-    _initMarkLine() 
+    _initMarkLine()
     {
         var me = this;
 
@@ -639,43 +653,9 @@ export default class Descartes extends Chart
 
     _initMarkPoint() 
     {
-        //目前由bar和line各自覆盖
-        this.drawMarkPoint();
     }
 
-    creatOneMarkPoint( opts, mpCtx )
-    {
-        var me = this;
-        var _mp = new me.componentsMap.markPoint( opts, mpCtx );
-        _mp.shape.hover(function(e) {
-            this.context.hr++;
-            this.context.cursor = "pointer";
-            //e.stopPropagation();
-        }, function(e) {
-            this.context.hr--;
-            //e.stopPropagation();
-        });
-        _mp.shape.on("mousemove", function(e) {
-            //e.stopPropagation();
-        });
-        _mp.shape.on("tap click", function(e) {
-            e.stopPropagation();
-            e.eventInfo = _mp;
-            //me.fire("markpointclick", e);
-        });
-
-        me.components.push( {
-            type : "markPoint",
-            plug : _mp
-        } );
-
-        me.graphsSprite.addChild( _mp.sprite );
-
-        return _mp;
-    }
-
-
-    _initAnchor( e )
+    _initAnchor( )
     {
         
         var me = this;
@@ -719,6 +699,40 @@ export default class Descartes extends Chart
 
                 }
             }
+        } );
+    }
+
+    _initBarTgi()
+    {
+        var me = this;
+        
+        if( !_.isArray( me.barTgi ) ){
+            me.barTgi = [ me.barTgi ];
+        };
+
+        _.each( me.barTgi , function( barTgiOpt, i ){
+            me.components.push( {
+                type : "once",
+                plug : {
+                    draw: function(){
+
+                        barTgiOpt = _.extend( true, {
+                            origin: {
+                                x: me._coordinate.graphsX,
+                                y: me._coordinate.graphsY
+                            }
+                        } , barTgiOpt );
+
+                        var _barTgi = new me.componentsMap.barTgi( barTgiOpt, me );
+                        me.components.push( {
+                            type : "barTgi",
+                            plug : _barTgi
+                        } ); 
+                        me.graphsSprite.addChild( _barTgi.sprite );
+
+                    }
+                }
+            } );
         } );
     }
 

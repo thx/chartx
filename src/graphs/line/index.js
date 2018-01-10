@@ -303,5 +303,4 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         } );
         return _nodesInfoList;
     }
-
 }

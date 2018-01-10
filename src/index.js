@@ -1,22 +1,3 @@
-
-/*
-import Pie from "./chart/pie/index"
-import Bar from "./chart/bar/index"
-import Line from "./chart/line/index"
-import Bar_Line from "./chart/bar_line/index"
-import Bar_Tgi from "./chart/bar_tgi/index"
-import Scat from "./chart/scat/index"
-
-var Chartx = {
-    Pie : Pie,
-    Bar : Bar,
-    Line : Line,
-    Bar_Line : Bar_Line,
-    Bar_Tgi  : Bar_Tgi,
-    Scat : Scat
-};
-*/
-
 //图表基类
 import Chart from "./chart"
 
@@ -35,6 +16,7 @@ import MarkLine from "./components/markline/index"
 import MarkPoint from "./components/markpoint/index"
 import Anchor from "./components/anchor/index"
 import Tips from "./components/tips/index"
+import BarTgi from "./components/bartgi/index"
 
 var coordinate = {
     descartes : Descartes
@@ -52,7 +34,8 @@ var components = {
     markLine : MarkLine,
     markPoint : MarkPoint,
     anchor : Anchor,
-    tips : Tips
+    tips : Tips,
+    barTgi : BarTgi
 }
 
 var Chartx = {

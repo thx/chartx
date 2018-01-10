@@ -22,6 +22,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         this.field = null;
         this.enabledField = null;
+        this.enabledFieldData = {};
 
         this.width = 0;
         this.height = 0;
@@ -533,6 +534,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         //用来计算下面的hLen
         this.setEnabledField();
+        this.enabledFieldData = {};
+
         var layoutGraphs = [];
         var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
         var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
@@ -671,6 +674,10 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
                     if (me.proportion) {
                         node.vCount = vCount;
+                    };
+
+                    if( !me.enabledFieldData[ node.field ] ){
+                        me.enabledFieldData[ node.field ] = tempBarData[v];
                     };
 
                     tempBarData[v].push(node);
@@ -845,8 +852,6 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                     }
 
                 };
-
-                
             };
         });
     }

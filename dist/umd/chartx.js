@@ -10761,6 +10761,9 @@ var Descartes = function (_Chart) {
             if (this._opts.anchor && this._initAnchor) {
                 this._initAnchor(opt);
             }
+            if (this._opts.barTgi && this._initBarTgi) {
+                this._initBarTgi(opt);
+            }
         }
 
         //所有plug触发更新
@@ -10778,7 +10781,7 @@ var Descartes = function (_Chart) {
                     }
                     return;
                 }
-                p.plug.reset && p.plug.reset(me[p.type] || {});
+                p.plug.reset && p.plug.reset(me[p.type] || {}, me.dataFrame);
             });
         }
 
@@ -10836,13 +10839,24 @@ var Descartes = function (_Chart) {
             var data = [];
 
             _$4.each(_$4.flatten(me._coordinate.fieldsMap), function (map, i) {
-                data.push({
-                    enabled: map.enabled,
-                    field: map.field,
-                    ind: map.ind,
-                    style: map.style,
-                    yAxis: map.yAxis
+                //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
+                var isGraphsField = false;
+                _$4.each(me.graphs, function (gopt) {
+                    if (_$4.indexOf(_$4.flatten([gopt.field]), map.field) > -1) {
+                        isGraphsField = true;
+                        return false;
+                    }
                 });
+
+                if (isGraphsField) {
+                    data.push({
+                        enabled: map.enabled,
+                        field: map.field,
+                        ind: map.ind,
+                        style: map.style,
+                        yAxis: map.yAxis
+                    });
+                }
             });
             return data;
         }
@@ -10946,12 +10960,12 @@ var Descartes = function (_Chart) {
                 type: "once",
                 plug: {
                     draw: function draw() {
-                        me._dataZoom = new me.componentsMap.dataZoom(me._getDataZoomOpt(), me.__cloneChart);
+                        var _dataZoom = new me.componentsMap.dataZoom(me._getDataZoomOpt(), me.__cloneChart);
                         me.components.push({
                             type: "dataZoom",
-                            plug: me._dataZoom
+                            plug: _dataZoom
                         });
-                        me.graphsSprite.addChild(me._dataZoom.sprite);
+                        me.graphsSprite.addChild(_dataZoom.sprite);
                     }
                 }
             });
@@ -11106,44 +11120,10 @@ var Descartes = function (_Chart) {
 
     }, {
         key: "_initMarkPoint",
-        value: function _initMarkPoint() {
-            //目前由bar和line各自覆盖
-            this.drawMarkPoint();
-        }
-    }, {
-        key: "creatOneMarkPoint",
-        value: function creatOneMarkPoint(opts, mpCtx) {
-            var me = this;
-            var _mp = new me.componentsMap.markPoint(opts, mpCtx);
-            _mp.shape.hover(function (e) {
-                this.context.hr++;
-                this.context.cursor = "pointer";
-                //e.stopPropagation();
-            }, function (e) {
-                this.context.hr--;
-                //e.stopPropagation();
-            });
-            _mp.shape.on("mousemove", function (e) {
-                //e.stopPropagation();
-            });
-            _mp.shape.on("tap click", function (e) {
-                e.stopPropagation();
-                e.eventInfo = _mp;
-                //me.fire("markpointclick", e);
-            });
-
-            me.components.push({
-                type: "markPoint",
-                plug: _mp
-            });
-
-            me.graphsSprite.addChild(_mp.sprite);
-
-            return _mp;
-        }
+        value: function _initMarkPoint() {}
     }, {
         key: "_initAnchor",
-        value: function _initAnchor(e) {
+        value: function _initAnchor() {
 
             var me = this;
 
@@ -11185,6 +11165,39 @@ var Descartes = function (_Chart) {
                         });
                     }
                 }
+            });
+        }
+    }, {
+        key: "_initBarTgi",
+        value: function _initBarTgi() {
+            var me = this;
+
+            if (!_$4.isArray(me.barTgi)) {
+                me.barTgi = [me.barTgi];
+            }
+
+            _$4.each(me.barTgi, function (barTgiOpt, i) {
+                me.components.push({
+                    type: "once",
+                    plug: {
+                        draw: function draw() {
+
+                            barTgiOpt = _$4.extend(true, {
+                                origin: {
+                                    x: me._coordinate.graphsX,
+                                    y: me._coordinate.graphsY
+                                }
+                            }, barTgiOpt);
+
+                            var _barTgi = new me.componentsMap.barTgi(barTgiOpt, me);
+                            me.components.push({
+                                type: "barTgi",
+                                plug: _barTgi
+                            });
+                            me.graphsSprite.addChild(_barTgi.sprite);
+                        }
+                    }
+                });
             });
         }
     }, {
@@ -11269,6 +11282,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         _this.field = null;
         _this.enabledField = null;
+        _this.enabledFieldData = {};
 
         _this.width = 0;
         _this.height = 0;
@@ -11775,6 +11789,8 @@ var Graphs = function (_Canvax$Event$EventDi) {
 
             //用来计算下面的hLen
             this.setEnabledField();
+            this.enabledFieldData = {};
+
             var layoutGraphs = [];
             var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
             var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
@@ -11912,6 +11928,10 @@ var Graphs = function (_Canvax$Event$EventDi) {
 
                         if (me.proportion) {
                             node.vCount = vCount;
+                        }
+
+                        if (!me.enabledFieldData[node.field]) {
+                            me.enabledFieldData[node.field] = tempBarData[v];
                         }
 
                         tempBarData[v].push(node);
@@ -15303,23 +15323,123 @@ var Tips = function (_Component) {
     return Tips;
 }(component);
 
-/*
-import Pie from "./chart/pie/index"
-import Bar from "./chart/bar/index"
-import Line from "./chart/line/index"
-import Bar_Line from "./chart/bar_line/index"
-import Bar_Tgi from "./chart/bar_tgi/index"
-import Scat from "./chart/scat/index"
+var Line$7 = canvax.Shapes.Line;
+var _$20 = canvax._;
 
-var Chartx = {
-    Pie : Pie,
-    Bar : Bar,
-    Line : Line,
-    Bar_Line : Bar_Line,
-    Bar_Tgi  : Bar_Tgi,
-    Scat : Scat
-};
-*/
+var barTgi = function (_Component) {
+    inherits$1(barTgi, _Component);
+
+    function barTgi(opt, root) {
+        classCallCheck$1(this, barTgi);
+
+        var _this = possibleConstructorReturn$1(this, (barTgi.__proto__ || Object.getPrototypeOf(barTgi)).call(this));
+
+        _this._opt = opt;
+        _this.root = root;
+
+        _this.field = null;
+        _this.barField = null;
+
+        _this.data = null;
+        _this.barDatas = null;
+        _this._yAxis = null;
+
+        _this.yAxisAlign = "left";
+
+        _this.sprite = null;
+
+        _this.standardVal = 100;
+        _this.origin = {
+            x: 0,
+            y: 0
+        };
+        _this.line = {
+            lineWidth: 3,
+            strokeStyle: function strokeStyle(val, i) {
+                if (val >= this.standardVal) {
+                    return "#43cbb5";
+                } else {
+                    return "#ff6060";
+                }
+            }
+        };
+
+        _this.init(opt);
+        return _this;
+    }
+
+    createClass$1(barTgi, [{
+        key: "init",
+        value: function init(opt) {
+            _$20.extend(true, this, opt);
+            this._yAxis = this.root._coordinate._yAxis[this.yAxisAlign == "left" ? 0 : 1];
+            this.sprite = new canvax.Display.Sprite({
+                id: "barTgiSprite",
+                context: {
+                    x: this.origin.x,
+                    y: this.origin.y
+                }
+            });
+        }
+    }, {
+        key: "reset",
+        value: function reset(opt) {
+            _$20.extend(true, this, opt);
+            this.barDatas = null;
+            this.data = null;
+            this.sprite.removeAllChildren();
+            this.draw();
+        }
+    }, {
+        key: "draw",
+        value: function draw() {
+            var me = this;
+
+            _$20.each(me.root._graphs, function (_g) {
+                if (_g.type == "bar" && _g.enabledFieldData[me.barField]) {
+                    me.barDatas = _g.enabledFieldData[me.barField];
+                    return false;
+                }
+            });
+            this.data = _$20.flatten(me.root.dataFrame.getDataOrg(me.field));
+
+            if (!this.barDatas) {
+                return;
+            }
+
+            _$20.each(this.data, function (tgi, i) {
+                var y = me._yAxis.getYposFromVal(tgi);
+                var barData = me.barDatas[i];
+
+                var _tgiLine = new Line$7({
+                    context: {
+                        start: {
+                            x: barData.x,
+                            y: y
+                        },
+                        end: {
+                            x: barData.x + barData.width,
+                            y: y
+                        },
+                        lineWidth: 2,
+                        strokeStyle: me._getProp(me.line.strokeStyle, tgi, i)
+                    }
+                });
+                me.sprite.addChild(_tgiLine);
+            });
+        }
+    }, {
+        key: "_getProp",
+        value: function _getProp(val, tgi, i) {
+            var res = val;
+            if (_$20.isFunction(val)) {
+                res = val.apply(this, [tgi, i]);
+            }
+            return res;
+        }
+    }]);
+    return barTgi;
+}(component);
 
 //图表基类
 //坐标系
@@ -15341,7 +15461,8 @@ var components = {
     markLine: MarkLine,
     markPoint: MarkPoint,
     anchor: Anchor,
-    tips: Tips
+    tips: Tips,
+    barTgi: barTgi
 };
 
 var Chartx = {
