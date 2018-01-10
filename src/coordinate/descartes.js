@@ -36,6 +36,9 @@ export default class Descartes extends Chart
         if( !opts.coordinate.yAxis ){
             opts.coordinate.yAxis = [];
         } else {
+            //TODO这里的 extend不能省，extend的设计有一定问题。
+            //后续在查
+            //不用extend的话，带dataZoom的柱折混合图里会有问题，getCloneChart的时候，拿得coordinate是已经被下面处理过的，而不是真实的用户最原始的配置
             opts.coordinate.yAxis = _.extend( true, [], _.flatten([opts.coordinate.yAxis]) )
         }
 
