@@ -38,8 +38,6 @@ export default class Tips extends Component
         //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
         //会deepExtend到this.indo上面来
         this.eventInfo    = null; 
-
-        this.track = true;//是否开启跟踪鼠标模式
         
         this.positionInRange = false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
@@ -78,7 +76,7 @@ export default class Tips extends Component
     {
         if( !this.enabled || !e.eventInfo ) return;
         this._setContent(e);
-        this.track && this.setPosition(e);
+        this.setPosition(e);
     }
 
     hide()
@@ -118,39 +116,18 @@ export default class Tips extends Component
         this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";border:1px solid "+this.strokeStyle+";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:"+this.text.fillStyle+";line-height:1.5"
         this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px "+this.strokeStyle+"; -webkit-box-shadow:1px 1px 3px "+this.strokeStyle+"; box-shadow:1px 1px 3px "+this.strokeStyle+";"
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
-        this.tipDomContainer.appendChild( this._tipDom );
-        //this._setContent(e);
-     
-        
-        if( !this.track ){
-            this._tipDom.addEventListener("mouseover" , function(e){
-                //console.log("tips-mouseover:"+e.fromTarget)
-                e.stopPropagation();
-            });
-            this._tipDom.addEventListener("mousemove" , function(e){
-                //console.log("tips-mousemove+++targetId:"+e.target.id+"-====currentTargetId"+e.currentTarget.id)
-                e.stopPropagation();
-            });
-            this._tipDom.addEventListener("mouseout" , function(e){
-                //console.log("tips-mouseout")
-                e.stopPropagation();
-            });
-        }
-        
+        this.tipDomContainer.appendChild( this._tipDom );        
     }
 
     _removeContent()
     {
-        if(!this._tipDom){
-            return;
-        };
+        if(!this._tipDom) return;
         this.tipDomContainer.removeChild( this._tipDom );
         this._tipDom = null;
     }
 
     _setContent(e)
     {
-
         var tipxContent = this._getContent(e);
         if( !tipxContent && tipxContent!==0 ){
             this.hide();
@@ -168,7 +145,6 @@ export default class Tips extends Component
 
     _getContent(e)
     {
-        
         this.eventInfo = e.eventInfo;
         var tipsContent;
 
@@ -183,14 +159,14 @@ export default class Tips extends Component
 
     _getDefaultContent( info )
     {
-        if( !info.title && !info.nodes.length ){
+        if( !info.nodes.length ){
             return null;
         }
 
         var str  = "<table style='border:none'>";
         var self = this;
 
-        if( info.title ){
+        if( info.title !== undefined && info.title !== null &&info.title !== "" ){
             str += "<tr><td colspan='2'>"+ info.title +"</td></tr>"
         };
 
@@ -202,7 +178,7 @@ export default class Tips extends Component
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
             var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
             str+="<td "+tsStyle+">"+ (node.name || node.field || "") +"：</td>";
-            str += "<td "+tsStyle+">"+ numAddSymbol(node.value) +"</td></tr>";
+            str += "<td "+tsStyle+">"+ (typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) +"</td></tr>";
         });
         str+="</table>";
         return str;

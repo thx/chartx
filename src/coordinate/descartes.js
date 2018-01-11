@@ -10,10 +10,7 @@ export default class Descartes extends Chart
 {
     constructor( node, data, opts, graphsMap, componentsMap ){
 
-        //因为后面会对opts做修改，所以存储在super中得this._opts必须一开始就clone了后存储
-        //这样，在有dataZoom等得时候需要拿真实的用户opts才拿得是对的
-        var _opts = _.extend( true, {}, opts );
-        super( node, data, _opts );
+        super( node, data, opts );
 
         this.graphsMap = graphsMap;
         this.componentsMap = componentsMap;
@@ -33,13 +30,11 @@ export default class Descartes extends Chart
         };
 
         
-        if( !opts.coordinate.yAxis ){
-            opts.coordinate.yAxis = [];
-        } else {
-            //TODO这里的 extend不能省，extend的设计有一定问题。
-            //后续在查
-            //不用extend的话，带dataZoom的柱折混合图里会有问题，getCloneChart的时候，拿得coordinate是已经被下面处理过的，而不是真实的用户最原始的配置
-            opts.coordinate.yAxis = _.extend( true, [], _.flatten([opts.coordinate.yAxis]) )
+        opts.coordinate.yAxis = [];
+        if( opts.coordinate.yAxis ){
+            _.each( _.flatten([opts.coordinate.yAxis]) , function( yopt ){
+                opts.coordinate.yAxis.push( _.extend( true, {} , yopt ) );
+            });
         }
 
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
@@ -98,9 +93,6 @@ export default class Descartes extends Chart
         //直角坐标系的绘图模块,是个数组，支持多模块
         this._graphs = [];
 
-        //直角坐标系的tooltip
-        this._tips = null;
-
         //预设dataZoom的区间数据
         this.dataZoom = {
             h: 25,
@@ -145,9 +137,6 @@ export default class Descartes extends Chart
             me._graphs.push( _g );
             me.graphsSprite.addChild( _g.sprite );
         } );
-
-        this._tips = new me.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
-        this.stageTips.addChild(this._tips.sprite);
     }
 
     _startDraw(opt)
@@ -283,6 +272,9 @@ export default class Descartes extends Chart
 
     initComponents( opt )
     {
+        if(this._opts.tips && this._initTips){
+            this._initTips( opt );
+        }
         if(this._opts.legend && this._initLegend){
             this._initLegend( opt );
         };
@@ -738,53 +730,56 @@ export default class Descartes extends Chart
     bindEvent( )
     {
         var me = this;
-        this._coordinate.on("panstart mouseover", function(e) {
-            if ( me._tips.enabled ) {
+        this.on("panstart mouseover", function(e) {
+            var _tips = me.getComponentById("tips");
+            if ( _tips && _tips.enabled ) {
                 me._setTipsInfo.apply(me, [e]);
-                me._tips.show(e);
+                _tips.show(e);
             };
-            me.fire(e.type, e);
         });
-        this._coordinate.on("panmove mousemove", function(e) {
-            if ( me._tips.enabled ) {
+        this.on("panmove mousemove", function(e) {
+            var _tips = me.getComponentById("tips");
+            if ( _tips && _tips.enabled ) {
                 me._setTipsInfo.apply(me, [e]);
-                me._tips.move(e);
-                me.fire(e.type, e);
+                _tips.move(e);
             }
         });
-        this._coordinate.on("panend mouseout", function(e) {
+        this.on("panend mouseout", function(e) {
             //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
             //那么就不要执行hide，顶多只显示这个点得tips数据
-            if ( me._tips.enabled && !( e.toTarget && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
-                me._tips.hide(e);
+            var _tips = me.getComponentById("tips");
+            if ( _tips && _tips.enabled && !( e.toTarget && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
+                _tips.hide(e);
             }
         });
-        this._coordinate.on("tap", function(e) {
-            if (me._tips.enabled) {
-                me._tips.hide(e);
+        this.on("tap", function(e) {
+            var _tips = me.getComponentById("tips");
+            if ( _tips && _tips.enabled ) {
+                _tips.hide(e);
                 me._setTipsInfo.apply(me, [e]);
-                me._tips.show(e);
+                _tips.show(e);
             }
         });
-        /*
-        this._coordinate.on("click", function(e) {
-            me._setTipsInfo.apply(me, [e]);
-            me.fire("click", e.eventInfo);
-        });
-        */
     }
 
     //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
     //方便外部自定义tip是的content
     _setTipsInfo(e)
     {
-        var nodes = [];
-        var iNode = e.eventInfo.xAxis.ind;
-        _.each( this._graphs, function( _g ){
-            nodes = nodes.concat( _g.getNodesAt( iNode ) );
-        } );
-        
-        e.eventInfo.nodes = nodes;
+        e.eventInfo = this._coordinate.getTipsInfoHandler(e);
+
+        //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
+        //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
+        //那么tips就只显示这个bardata的数据
+        if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
+            var nodes = [];
+            var iNode = e.eventInfo.xAxis.ind;
+            _.each( this._graphs, function( _g ){
+                nodes = nodes.concat( _g.getNodesAt( iNode ) );
+            } );
+            e.eventInfo.nodes = nodes;
+        }
+
         e.eventInfo.dataZoom = this.dataZoom;
         e.eventInfo.rowData = this.dataFrame.getRowData( iNode );
     }

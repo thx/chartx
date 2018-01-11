@@ -7731,6 +7731,22 @@ var DataFrame = function (data) {
     return dataFrame;
 };
 
+var _typeof$1 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
 var classCallCheck$1 = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -7841,11 +7857,7 @@ var Chart = function (_Canvax$Event$EventDi) {
             id: "main-chart-stage"
         });
         _this.canvax.addChild(_this.stage);
-        //所有的tips放在一个单独的tips中
-        _this.stageTips = new canvax.Display.Stage({
-            id: "main-chart-stage-tips"
-        });
-        _this.canvax.addChild(_this.stageTips);
+
         //设置stage ---------------------------------------------------------end
 
 
@@ -8036,7 +8048,48 @@ var Chart = function (_Canvax$Event$EventDi) {
                 l = this.components.length;
             }
         }
+    }, {
+        key: "getComponentsByType",
+        value: function getComponentsByType(type) {
+            var arr = [];
+            _.each(this.components, function (c) {
+                if (c.type == type) {
+                    arr.push(c.plug);
+                }
+            });
+            return arr;
+        }
+    }, {
+        key: "getComponentById",
+        value: function getComponentById(id) {
+            var comp;
+            _.each(this.components, function (c) {
+                if (c.id == id) {
+                    comp = c;
+                    return false;
+                }
+            });
+            return comp ? comp.plug : null;
+        }
         //插件相关代码end
+
+    }, {
+        key: "_initTips",
+        value: function _initTips() {
+            //所有的tips放在一个单独的tips中
+            this.stageTips = new canvax.Display.Stage({
+                id: "main-chart-stage-tips"
+            });
+            this.canvax.addChild(this.stageTips);
+
+            var _tips = new this.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
+            this.stageTips.addChild(_tips.sprite);
+            this.components.push({
+                type: "tips",
+                id: "tips",
+                plug: _tips
+            });
+        }
 
         //添加水印
 
@@ -10429,15 +10482,22 @@ var Descartes_Component = function (_Component) {
             }
 
             me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
-                e.eventInfo = me._getInfoHandler(e);
+                //e.eventInfo = me._getInfoHandler(e);
                 me.fire(e.type, e);
+                //图表触发，用来处理Tips
+                me._root.fire(e.type, e);
             });
         }
     }, {
-        key: "_getInfoHandler",
-        value: function _getInfoHandler(e) {
-            //这里只获取xAxis的刻度信息
-            var xNodeInd = this._xAxis.getIndexOfX(e.point.x);
+        key: "getTipsInfoHandler",
+        value: function getTipsInfoHandler(e) {
+            //这里只获取xAxis的刻度信息;
+            var induceX = e.point.x;
+            if (e.target !== this.induce) {
+                induceX = this.induce.globalToLocal(e.target.localToGlobal(e.point)).x;
+            }
+
+            var xNodeInd = this._xAxis.getIndexOfX(induceX);
             var obj = {
                 xAxis: {
                     field: this._xAxis.field,
@@ -10449,6 +10509,9 @@ var Descartes_Component = function (_Component) {
                     //遍历_graphs 去拿东西
                 ]
             };
+            if (e.eventInfo) {
+                obj = _$5.extend(obj, e.eventInfo);
+            }
             return obj;
         }
     }]);
@@ -10463,12 +10526,7 @@ var Descartes = function (_Chart) {
     function Descartes(node, data, opts, graphsMap, componentsMap) {
         classCallCheck$1(this, Descartes);
 
-
-        //因为后面会对opts做修改，所以存储在super中得this._opts必须一开始就clone了后存储
-        //这样，在有dataZoom等得时候需要拿真实的用户opts才拿得是对的
-        var _opts = _$4.extend(true, {}, opts);
-
-        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, _opts));
+        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts));
 
         _this.graphsMap = graphsMap;
         _this.componentsMap = componentsMap;
@@ -10487,13 +10545,11 @@ var Descartes = function (_Chart) {
             }
         };
 
-        if (!opts.coordinate.yAxis) {
-            opts.coordinate.yAxis = [];
-        } else {
-            //TODO这里的 extend不能省，extend的设计有一定问题。
-            //后续在查
-            //不用extend的话，带dataZoom的柱折混合图里会有问题，getCloneChart的时候，拿得coordinate是已经被下面处理过的，而不是真实的用户最原始的配置
-            opts.coordinate.yAxis = _$4.extend(true, [], _$4.flatten([opts.coordinate.yAxis]));
+        opts.coordinate.yAxis = [];
+        if (opts.coordinate.yAxis) {
+            _$4.each(_$4.flatten([opts.coordinate.yAxis]), function (yopt) {
+                opts.coordinate.yAxis.push(_$4.extend(true, {}, yopt));
+            });
         }
 
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
@@ -10552,9 +10608,6 @@ var Descartes = function (_Chart) {
         //直角坐标系的绘图模块,是个数组，支持多模块
         _this._graphs = [];
 
-        //直角坐标系的tooltip
-        _this._tips = null;
-
         //预设dataZoom的区间数据
         _this.dataZoom = {
             h: 25,
@@ -10601,9 +10654,6 @@ var Descartes = function (_Chart) {
                 me._graphs.push(_g);
                 me.graphsSprite.addChild(_g.sprite);
             });
-
-            this._tips = new me.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
-            this.stageTips.addChild(this._tips.sprite);
         }
     }, {
         key: "_startDraw",
@@ -10742,6 +10792,9 @@ var Descartes = function (_Chart) {
     }, {
         key: "initComponents",
         value: function initComponents(opt) {
+            if (this._opts.tips && this._initTips) {
+                this._initTips(opt);
+            }
             if (this._opts.legend && this._initLegend) {
                 this._initLegend(opt);
             }
@@ -11200,40 +11253,36 @@ var Descartes = function (_Chart) {
         key: "bindEvent",
         value: function bindEvent() {
             var me = this;
-            this._coordinate.on("panstart mouseover", function (e) {
-                if (me._tips.enabled) {
+            this.on("panstart mouseover", function (e) {
+                var _tips = me.getComponentById("tips");
+                if (_tips && _tips.enabled) {
                     me._setTipsInfo.apply(me, [e]);
-                    me._tips.show(e);
-                }
-                me.fire(e.type, e);
-            });
-            this._coordinate.on("panmove mousemove", function (e) {
-                if (me._tips.enabled) {
-                    me._setTipsInfo.apply(me, [e]);
-                    me._tips.move(e);
-                    me.fire(e.type, e);
+                    _tips.show(e);
                 }
             });
-            this._coordinate.on("panend mouseout", function (e) {
+            this.on("panmove mousemove", function (e) {
+                var _tips = me.getComponentById("tips");
+                if (_tips && _tips.enabled) {
+                    me._setTipsInfo.apply(me, [e]);
+                    _tips.move(e);
+                }
+            });
+            this.on("panend mouseout", function (e) {
                 //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
                 //那么就不要执行hide，顶多只显示这个点得tips数据
-                if (me._tips.enabled && !(e.toTarget && me._coordinate.induce.containsPoint(me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
-                    me._tips.hide(e);
+                var _tips = me.getComponentById("tips");
+                if (_tips && _tips.enabled && !(e.toTarget && me._coordinate.induce.containsPoint(me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
+                    _tips.hide(e);
                 }
             });
-            this._coordinate.on("tap", function (e) {
-                if (me._tips.enabled) {
-                    me._tips.hide(e);
+            this.on("tap", function (e) {
+                var _tips = me.getComponentById("tips");
+                if (_tips && _tips.enabled) {
+                    _tips.hide(e);
                     me._setTipsInfo.apply(me, [e]);
-                    me._tips.show(e);
+                    _tips.show(e);
                 }
             });
-            /*
-            this._coordinate.on("click", function(e) {
-                me._setTipsInfo.apply(me, [e]);
-                me.fire("click", e.eventInfo);
-            });
-            */
         }
 
         //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
@@ -11242,13 +11291,20 @@ var Descartes = function (_Chart) {
     }, {
         key: "_setTipsInfo",
         value: function _setTipsInfo(e) {
-            var nodes = [];
-            var iNode = e.eventInfo.xAxis.ind;
-            _$4.each(this._graphs, function (_g) {
-                nodes = nodes.concat(_g.getNodesAt(iNode));
-            });
+            e.eventInfo = this._coordinate.getTipsInfoHandler(e);
 
-            e.eventInfo.nodes = nodes;
+            //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
+            //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
+            //那么tips就只显示这个bardata的数据
+            if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
+                var nodes = [];
+                var iNode = e.eventInfo.xAxis.ind;
+                _$4.each(this._graphs, function (_g) {
+                    nodes = nodes.concat(_g.getNodesAt(iNode));
+                });
+                e.eventInfo.nodes = nodes;
+            }
+
             e.eventInfo.dataZoom = this.dataZoom;
             e.eventInfo.rowData = this.dataFrame.getRowData(iNode);
         }
@@ -13324,17 +13380,17 @@ var _$13 = canvax._;
 var Graphs$1 = function (_Canvax$Event$EventDi) {
     inherits$1(Graphs, _Canvax$Event$EventDi);
 
-    function Graphs(opt, root) {
+    function Graphs(opt, _root) {
         classCallCheck$1(this, Graphs);
 
-        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
+        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, _root));
 
         _this.type = "scat";
 
         //这里所有的opt都要透传给 group
         _this._opt = opt || {};
-        _this.root = root;
-        _this.ctx = root.stage.context2D;
+        _this._root = _root;
+        _this.ctx = _root.stage.context2D;
 
         _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         _this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
@@ -13356,6 +13412,8 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
             strokeStyle: null,
             lineWidth: 0,
             alpha: 0.9
+
+            //onclick ondblclick 注册的事件都是小写
         };
         _this.label = {
             field: null,
@@ -13426,26 +13484,24 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         value: function _trimGraphs() {
             var tmplData = [];
 
-            var dataLen = this.root.dataFrame.org.length - 1; //减去title fields行
-            var xField = this.root._coordinate._xAxis.field;
+            var dataLen = this._root.dataFrame.org.length - 1; //减去title fields行
+            var xField = this._root._coordinate._xAxis.field;
 
             for (var i = 0; i < dataLen; i++) {
 
-                var rowData = this.root.dataFrame.getRowData(i);
+                var rowData = this._root.dataFrame.getRowData(i);
                 var xValue = rowData[xField];
                 var yValue = rowData[this.field];
-                var xPos = this.root._coordinate._xAxis.getPosX({ val: xValue });
-                var yPos = this.root._coordinate._getYaxisOfField(this.field).getYposFromVal(yValue);
+                var xPos = this._root._coordinate._xAxis.getPosX({ val: xValue });
+                var yPos = this._root._coordinate._getYaxisOfField(this.field).getYposFromVal(yValue);
                 var group = this.getGroup(rowData);
                 var groupInd = this.getGroupInd(rowData);
 
                 var nodeLayoutData = {
                     rowData: rowData,
                     groupInd: groupInd,
-                    pos: {
-                        x: xPos,
-                        y: yPos
-                    },
+                    x: xPos,
+                    y: yPos,
                     value: {
                         x: xValue,
                         y: yValue
@@ -13486,7 +13542,7 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
                 if (_$13.isString(this.node.r) && rowData[this.node.r]) {
                     //如果配置了某个字段作为r，那么就要自动计算比例
                     if (!this._rData && !this._rMaxValue && !this._rMinValue) {
-                        this._rData = this.root.dataFrame.getFieldData(this.node.r);
+                        this._rData = this._root.dataFrame.getFieldData(this.node.r);
                         this._rMaxValue = _$13.max(this._rData);
                         this._rMinValue = _$13.min(this._rData);
                     }
@@ -13633,18 +13689,8 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
                     _node.iNode = iNode;
                     nodeData.shape = _node;
 
-                    _node.on("panstart mouseover", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
-                    });
-                    _node.on("panmove mousemove", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
-                    });
-                    _node.on("panend mouseout", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
-                        me.iGroup = 0, me.iNode = -1;
-                    });
-                    _node.on("tap click", function (e) {
-                        e.eventInfo = me._getEventInfo(e, this.nodeData, this.iNode);
+                    _node.on("mouseover mousemove mouseout tap click", function (e) {
+                        me._nodeEventHendle(e, this);
                     });
 
                     //如果有label
@@ -13668,8 +13714,8 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         key: "_getLabelContext",
         value: function _getLabelContext(nodeData) {
             var ctx = {
-                x: nodeData.pos.x,
-                y: nodeData.pos.y,
+                x: nodeData.x,
+                y: nodeData.y,
                 fillStyle: this.label.fontColor,
                 fontSize: this.label.fontSize,
                 textAlign: 'center',
@@ -13692,13 +13738,14 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         key: "_getCircleContext",
         value: function _getCircleContext(nodeData) {
             var ctx = {
-                x: nodeData.pos.x,
-                y: nodeData.pos.y,
+                x: nodeData.x,
+                y: nodeData.y,
                 r: nodeData.r,
                 fillStyle: nodeData.fillStyle,
                 strokeStyle: nodeData.strokeStyle,
                 lineWidth: nodeData.lineWidth,
-                globalAlpha: this.node.alpha
+                globalAlpha: this.node.alpha,
+                cursor: "pointer"
             };
             if (this.animation) {
                 ctx.x = 0;
@@ -13708,14 +13755,19 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
             return ctx;
         }
     }, {
-        key: "_getEventInfo",
-        value: function _getEventInfo(e, nodeData, iNode) {
-            var info = {
-                iGroup: nodeData.groupInd,
-                iNode: iNode,
-                nodesInfoList: [nodeData]
+        key: "_nodeEventHendle",
+        value: function _nodeEventHendle(e, node) {
+            e.eventInfo = {
+                title: null,
+                nodes: [node.nodeData]
             };
-            return info;
+            if (this.node["on" + e.type]) {
+                //如果用户有注册了节点上面执行这个事件,那么就要执行
+                this.node["on" + e.type].apply(node, [node.nodeData, this]);
+            }
+
+            //fire到root上面去的是为了让root去处理tips
+            this._root.fire(e.type, e);
         }
 
         /**
@@ -13727,8 +13779,8 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         value: function grow() {
             _$13.each(this.data, function (nodeData) {
                 nodeData.shape.animate({
-                    x: nodeData.pos.x,
-                    y: nodeData.pos.y,
+                    x: nodeData.x,
+                    y: nodeData.y,
                     r: nodeData.r
                 }, {
                     onUpdate: function onUpdate(opt) {
@@ -14458,6 +14510,7 @@ var dataZoom = function (_Component) {
             graphssp.context.x = -_coor.graphsX; //0;
             graphssp.context.y = this.barY; //this.barH + this.barY;
             graphssp.context.scaleY = this.barH / _coor.graphsHeight;
+            graphssp.context.scaleX = this.w / _coor.graphsWidth;
 
             this.dataZoomBg.addChild(graphssp);
 
@@ -15102,8 +15155,6 @@ var Tips = function (_Component) {
         //会deepExtend到this.indo上面来
         _this.eventInfo = null;
 
-        _this.track = true; //是否开启跟踪鼠标模式
-
         _this.positionInRange = false; //tip的浮层是否限定在画布区域
         _this.enabled = true; //tips是默认显示的
         _this.init(opt);
@@ -15143,7 +15194,7 @@ var Tips = function (_Component) {
         value: function move(e) {
             if (!this.enabled || !e.eventInfo) return;
             this._setContent(e);
-            this.track && this.setPosition(e);
+            this.setPosition(e);
         }
     }, {
         key: "hide",
@@ -15188,37 +15239,17 @@ var Tips = function (_Component) {
             this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px " + this.strokeStyle + "; -webkit-box-shadow:1px 1px 3px " + this.strokeStyle + "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
             this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
             this.tipDomContainer.appendChild(this._tipDom);
-            //this._setContent(e);
-
-
-            if (!this.track) {
-                this._tipDom.addEventListener("mouseover", function (e) {
-                    //console.log("tips-mouseover:"+e.fromTarget)
-                    e.stopPropagation();
-                });
-                this._tipDom.addEventListener("mousemove", function (e) {
-                    //console.log("tips-mousemove+++targetId:"+e.target.id+"-====currentTargetId"+e.currentTarget.id)
-                    e.stopPropagation();
-                });
-                this._tipDom.addEventListener("mouseout", function (e) {
-                    //console.log("tips-mouseout")
-                    e.stopPropagation();
-                });
-            }
         }
     }, {
         key: "_removeContent",
         value: function _removeContent() {
-            if (!this._tipDom) {
-                return;
-            }
+            if (!this._tipDom) return;
             this.tipDomContainer.removeChild(this._tipDom);
             this._tipDom = null;
         }
     }, {
         key: "_setContent",
         value: function _setContent(e) {
-
             var tipxContent = this._getContent(e);
             if (!tipxContent && tipxContent !== 0) {
                 this.hide();
@@ -15236,7 +15267,6 @@ var Tips = function (_Component) {
     }, {
         key: "_getContent",
         value: function _getContent(e) {
-
             this.eventInfo = e.eventInfo;
             var tipsContent;
 
@@ -15251,14 +15281,14 @@ var Tips = function (_Component) {
     }, {
         key: "_getDefaultContent",
         value: function _getDefaultContent(info) {
-            if (!info.title && !info.nodes.length) {
+            if (!info.nodes.length) {
                 return null;
             }
 
             var str = "<table style='border:none'>";
             var self = this;
 
-            if (info.title) {
+            if (info.title !== undefined && info.title !== null && info.title !== "") {
                 str += "<tr><td colspan='2'>" + info.title + "</td></tr>";
             }
 
@@ -15270,7 +15300,7 @@ var Tips = function (_Component) {
                 str += "<tr style='color:" + (node.color || node.fillStyle || node.strokeStyle) + "'>";
                 var tsStyle = "style='border:none;white-space:nowrap;word-wrap:normal;'";
                 str += "<td " + tsStyle + ">" + (node.name || node.field || "") + "：</td>";
-                str += "<td " + tsStyle + ">" + numAddSymbol(node.value) + "</td></tr>";
+                str += "<td " + tsStyle + ">" + (_typeof$1(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) + "</td></tr>";
             });
             str += "</table>";
             return str;

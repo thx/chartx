@@ -95,7 +95,8 @@ var options = {
     coordinate: {
         type : "descartes",
         xAxis : {
-            field :  "age"
+            field :  "age",
+            layoutType : "proportion" //注意：scat的layoutType必须是proportion，位置计算才会对
         }
     },
     graphs : [
@@ -104,7 +105,10 @@ var options = {
             field : "money",
             groupField : "sex", //安装sex字段来分组
             node : {
-                r : "house" //r可以配置为某个字段名字，就会自动计算比例
+                r : "house", //r可以配置为某个字段名字，就会自动计算比例
+                onclick : function( nodeData, Graphs ){
+                    debugger
+                }
             }
         }
     ]

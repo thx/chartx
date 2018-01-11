@@ -520,6 +520,8 @@ export default class dataZoom extends Component
         graphssp.context.x = -_coor.graphsX; //0;
         graphssp.context.y = this.barY;//this.barH + this.barY;
         graphssp.context.scaleY = this.barH / _coor.graphsHeight;
+        graphssp.context.scaleX = this.w / _coor.graphsWidth;
+
 
         this.dataZoomBg.addChild( graphssp );
 

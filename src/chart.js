@@ -44,11 +44,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 		    id: "main-chart-stage"
 		});
         this.canvax.addChild( this.stage );
-        //所有的tips放在一个单独的tips中
-		this.stageTips = new Canvax.Display.Stage({
-		    id: "main-chart-stage-tips"
-		});
-        this.canvax.addChild( this.stageTips );
+        
         //设置stage ---------------------------------------------------------end
 
 
@@ -68,10 +64,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
     
         this.components = [];
       
-
-
-
-
         this.inited = false;
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
 
@@ -234,7 +226,47 @@ export default class Chart extends Canvax.Event.EventDispatcher
             l = this.components.length;
         }
     }
+
+    getComponentsByType( type )
+    {
+        var arr = [];
+        _.each( this.components, function( c ){
+            if( c.type == type ){
+                arr.push( c.plug )
+            }
+        } );
+        return arr;
+    }
+
+    getComponentById( id )
+    {
+        var comp;
+        _.each( this.components, function( c ){
+            if( c.id == id ){
+                comp = c;
+                return false;
+            }
+        } );
+        return comp ? comp.plug : null;
+    }
     //插件相关代码end
+
+    _initTips()
+    {
+        //所有的tips放在一个单独的tips中
+		this.stageTips = new Canvax.Display.Stage({
+		    id: "main-chart-stage-tips"
+		});
+        this.canvax.addChild( this.stageTips );
+
+        var _tips = new this.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
+        this.stageTips.addChild(_tips.sprite);
+        this.components.push({
+            type : "tips",
+            id : "tips",
+            plug : _tips
+        });
+    }
 
     //添加水印
     _initWaterMark( waterMarkOpt )

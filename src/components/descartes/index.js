@@ -523,15 +523,22 @@ export default class Descartes_Component extends Component
         }
         
         me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
-            e.eventInfo = me._getInfoHandler(e);
+            //e.eventInfo = me._getInfoHandler(e);
             me.fire( e.type, e );
-        })        
+            //图表触发，用来处理Tips
+            me._root.fire( e.type, e );
+        })
     }
 
-    _getInfoHandler( e )
+    getTipsInfoHandler( e )
     {
-        //这里只获取xAxis的刻度信息
-        var xNodeInd = this._xAxis.getIndexOfX( e.point.x );
+        //这里只获取xAxis的刻度信息;
+        var induceX = e.point.x;
+        if( e.target !== this.induce ){
+            induceX = this.induce.globalToLocal( e.target.localToGlobal( e.point ) ).x
+        }
+
+        var xNodeInd = this._xAxis.getIndexOfX( induceX );
         var obj = {
             xAxis : {
                 field : this._xAxis.field,
@@ -542,7 +549,10 @@ export default class Descartes_Component extends Component
             nodes : [
                 //遍历_graphs 去拿东西
             ]
-        }
-        return obj
+        };
+        if( e.eventInfo ){
+            obj = _.extend(obj, e.eventInfo);
+        };
+        return obj;
     }
 }

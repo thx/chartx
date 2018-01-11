@@ -7,16 +7,16 @@ const _ = Canvax._;
 
 export default class Graphs extends Canvax.Event.EventDispatcher
 {
-    constructor(opt, root)
+    constructor(opt, _root)
     {
-        super( opt, root );
+        super( opt, _root );
 
         this.type = "scat";
 
         //这里所有的opt都要透传给 group
         this._opt = opt || {};
-        this.root = root;
-        this.ctx = root.stage.context2D;
+        this._root = _root;
+        this.ctx = _root.stage.context2D;
         
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
@@ -37,7 +37,9 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             fillStyle : null,
             strokeStyle : null,
             lineWidth : 0,
-            alpha : 0.9
+            alpha : 0.9,
+            
+            //onclick ondblclick 注册的事件都是小写
         };
         this.label = {
             field : null,
@@ -104,26 +106,24 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     {
         var tmplData = [];
 
-        var dataLen  = this.root.dataFrame.org.length - 1; //减去title fields行
-        var xField = this.root._coordinate._xAxis.field;
+        var dataLen  = this._root.dataFrame.org.length - 1; //减去title fields行
+        var xField = this._root._coordinate._xAxis.field;
 
         for( var i=0; i<dataLen; i++ ){
             
-            var rowData = this.root.dataFrame.getRowData(i);
+            var rowData = this._root.dataFrame.getRowData(i);
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
-            var xPos = this.root._coordinate._xAxis.getPosX({ val : xValue });
-            var yPos = this.root._coordinate._getYaxisOfField( this.field ).getYposFromVal( yValue );
+            var xPos = this._root._coordinate._xAxis.getPosX({ val : xValue });
+            var yPos = this._root._coordinate._getYaxisOfField( this.field ).getYposFromVal( yValue );
             var group = this.getGroup( rowData );
             var groupInd = this.getGroupInd( rowData );
 
             var nodeLayoutData = {
                 rowData : rowData,
                 groupInd : groupInd,
-                pos : {
-                    x: xPos,
-                    y: yPos   
-                },
+                x: xPos,
+                y: yPos,
                 value : {
                     x: xValue,
                     y: yValue
@@ -165,7 +165,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             if( _.isString( this.node.r ) && rowData[ this.node.r ] ){
                 //如果配置了某个字段作为r，那么就要自动计算比例
                 if( !this._rData && !this._rMaxValue && !this._rMinValue ){
-                    this._rData = this.root.dataFrame.getFieldData( this.node.r );
+                    this._rData = this._root.dataFrame.getFieldData( this.node.r );
                     this._rMaxValue = _.max( this._rData );
                     this._rMinValue = _.min( this._rData );
                 };
@@ -310,19 +310,9 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                 _node.iNode = iNode;
                 nodeData.shape = _node;
 
-                _node.on("panstart mouseover", function(e) {
-                    e.eventInfo = me._getEventInfo(e , this.nodeData, this.iNode);
-                })
-                _node.on("panmove mousemove", function(e) {
-                    e.eventInfo = me._getEventInfo(e , this.nodeData, this.iNode);
-                })
-                _node.on("panend mouseout", function(e) {
-                    e.eventInfo = me._getEventInfo(e , this.nodeData, this.iNode);
-                    me.iGroup = 0, me.iNode = -1
-                })
-                _node.on("tap click", function(e) {
-                    e.eventInfo = me._getEventInfo(e , this.nodeData, this.iNode);
-                })
+                _node.on("mouseover mousemove mouseout tap click", function(e) {
+                    me._nodeEventHendle(e, this);
+                });
 
                 //如果有label
                 if( nodeData.label ){
@@ -346,8 +336,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     _getLabelContext( nodeData )
     {
         var ctx = {
-            x: nodeData.pos.x,
-            y: nodeData.pos.y,
+            x: nodeData.x,
+            y: nodeData.y,
             fillStyle: this.label.fontColor,
             fontSize: this.label.fontSize,
             textAlign : 'center',
@@ -370,13 +360,14 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     _getCircleContext( nodeData )
     {
         var ctx = {
-            x : nodeData.pos.x,
-            y : nodeData.pos.y,
+            x : nodeData.x,
+            y : nodeData.y,
             r : nodeData.r,
             fillStyle : nodeData.fillStyle,
             strokeStyle : nodeData.strokeStyle,
             lineWidth : nodeData.lineWidth,
-            globalAlpha : this.node.alpha
+            globalAlpha : this.node.alpha,
+            cursor : "pointer"
         }
         if( this.animation ){
             ctx.x = 0;
@@ -386,14 +377,19 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         return ctx;
     }
 
-    _getEventInfo( e , nodeData, iNode )
+    _nodeEventHendle( e , node )
     {
-        var info = {
-            iGroup: nodeData.groupInd,
-            iNode: iNode,
-            nodesInfoList: [ nodeData ]
+        e.eventInfo = {
+            title : null,
+            nodes : [ node.nodeData ]
         };
-        return info;
+        if( this.node[ "on"+e.type ] ){
+            //如果用户有注册了节点上面执行这个事件,那么就要执行
+            this.node[ "on"+e.type ].apply( node, [ node.nodeData, this ] )
+        };
+
+        //fire到root上面去的是为了让root去处理tips
+        this._root.fire( e.type, e );
     }
 
     /**
@@ -403,8 +399,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     {
         _.each( this.data , function( nodeData ){
             nodeData.shape.animate({
-                x : nodeData.pos.x,
-                y : nodeData.pos.y,
+                x : nodeData.x,
+                y : nodeData.y,
                 r : nodeData.r
             }, {
                 onUpdate: function( opt ){

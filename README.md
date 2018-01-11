@@ -99,5 +99,31 @@ chartx2.0 代码规范
   _coordinate 为实例
   coordinate 为配置
 
+
+  交互事件的规范
+  1.xx 版本中，所有的事件都是在 chart.on("nodeclick") 等这样的层面实现的
+
+  2.0中，所有的事件都写入到配置中去
+
+  比如在scat中得节点点击事件
+
+ ```javascript
+  graphs : [
+        {
+            type : "scat",
+            field : "money",
+            groupField : "sex",
+            node : {
+                r : "house", 
+
+                //事件直接注册到对于的配置中来，这样，减少了命名的麻烦，统一的命名，而且直观, 
+                //一眼就知道在那些元素上面注册了事件
+                onclick : function( nodeData, Graphs ){
+                    debugger
+                }
+            }
+        }
+    ]
+ ```
   
 file:../canvax
