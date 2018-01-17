@@ -30,12 +30,19 @@ export default class Descartes extends Chart
         };
 
         
-        opts.coordinate.yAxis = [];
+        opts = _.clone( opts );
         if( opts.coordinate.yAxis ){
+            var _nyarr = [];
+            //TODO: 因为我们的deep extend 对于数组是整个对象引用过去，所以，这里需要
+            //把每个子元素单独clone一遍，恩恩恩， 在canvax中优化extend对于array的处理
             _.each( _.flatten([opts.coordinate.yAxis]) , function( yopt ){
-                opts.coordinate.yAxis.push( _.extend( true, {} , yopt ) );
-            });
+                _nyarr.push( _.clone( yopt ) );
+            } );
+            opts.coordinate.yAxis = _nyarr;
+        } else {
+            opts.coordinate.yAxis = [];
         }
+
 
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
         if( opts.graphs ){
@@ -107,12 +114,11 @@ export default class Descartes extends Chart
         //这里不要直接用data，而要用 this._data
         this.dataFrame = this.initData( this._data );
 
-        this._draw();
+        this.draw();
     }
 
-    _draw()
+    draw()
     {
-   
         this._initModule(); //初始化模块  
         this.initComponents(); //初始化组件
         this._startDraw(); //开始绘图
@@ -164,11 +170,11 @@ export default class Descartes extends Chart
             });
             
             _g.draw({
-                width: _coor.graphsWidth,
-                height: _coor.graphsHeight,
-                pos: {
-                    x: _coor.graphsX,
-                    y: _coor.graphsY
+                width: _coor.width,
+                height: _coor.height,
+                origin: {
+                    x: _coor.origin.x,
+                    y: _coor.origin.y
                 },
                 sort: _coor._yAxis.sort,
                 inited: me.inited,
@@ -337,7 +343,7 @@ export default class Descartes extends Chart
        
         _legend.draw = function(){
             _legend.pos( { 
-                x : me._coordinate.graphsX
+                x : me._coordinate.origin.x
                 //y : me.padding.top + ( e.resize ? - _legend.height : 0 )
             } );
         };
@@ -412,11 +418,11 @@ export default class Descartes extends Chart
             
             if( _.flatten([_field]).length ) {
 
-                var _opt = _.extend( true, {} , _g._opt );
+                var _opts = _.extend( true, {} , _g._opts );
                 
-                _opt.field = _field;
+                _opts.field = _field;
                 if( _g.type == "bar" ){
-                    _.extend(true, _opt , {
+                    _.extend(true, _opts , {
                         bar: {
                             fillStyle: me.dataZoom.normalColor || "#ececec"
                         },
@@ -428,7 +434,7 @@ export default class Descartes extends Chart
                     } )
                 }
                 if( _g.type == "line" ){
-                    _.extend( true,  _opt , {
+                    _.extend( true,  _opts , {
                         line: {
                             //lineWidth: 1,
                             strokeStyle: "#ececec"
@@ -448,14 +454,14 @@ export default class Descartes extends Chart
                     } )
                 }
                 if( _g.type == "scat" ){
-                    _.extend( true, _opt, {
+                    _.extend( true, _opts, {
                         node : {
                             fillStyle : "#ececec"
                         }
                     } )
                 }
 
-                graphsOpt.push( _opt );
+                graphsOpt.push( _opts );
             }
         } );
         var opts = {
@@ -498,10 +504,10 @@ export default class Descartes extends Chart
         var me = this;
         //初始化 datazoom 模块
         var dataZoomOpt = _.extend(true, {
-            w: me._coordinate.graphsWidth,
+            w: me._coordinate.width,
             pos: {
-                x: me._coordinate.graphsX,
-                y: me._coordinate.graphsY + me._coordinate._xAxis.height
+                x: me._coordinate.origin.x,
+                y: me._coordinate.origin.y + me._coordinate._xAxis.height
             },
             dragIng: function(range) {
                 var trigger = {
@@ -608,17 +614,17 @@ export default class Descartes extends Chart
     {
         var me = this;
         var o = {
-            w: me._coordinate.graphsWidth,
-            h: me._coordinate.graphsHeight,
+            w: me._coordinate.width,
+            h: me._coordinate.height,
             yVal: yVal,
             origin: {
-                x: me._coordinate.graphsX,
-                y: me._coordinate.graphsY
+                x: me._coordinate.origin.x,
+                y: me._coordinate.origin.y
             },
             line: {
                 list: [
                     [0, 0],
-                    [me._coordinate.graphsWidth, 0]
+                    [me._coordinate.width, 0]
                 ]
                 //strokeStyle: lineStrokeStyle
             },
@@ -648,49 +654,7 @@ export default class Descartes extends Chart
 
     _initAnchor( )
     {
-        
-        var me = this;
 
-        this.components.push( {
-            type : "once",
-            plug : {
-                draw: function(){
-
-                    var _anchor = new me.componentsMap.anchor( me.anchor );
-                    me.graphsSprite.addChild(_anchor.sprite);
-                    
-                    var _graphsH = me._coordinate.graphsHeight;
-                    var _graphsW = me._coordinate.graphsWidth;
-
-                    _anchor.draw({
-                        w: _graphsW, 
-                        h: _graphsH,
-                        //cross: {
-                        //    x: 0, 
-                        //    y: _graphsH + 0
-                        //},
-                        pos: {
-                            x: me._coordinate.graphsX,
-                            y: me._coordinate.graphsY - _graphsH
-                        }
-                    });
-
-                    me._anchor = _anchor;
-
-                    //me.drawAnchor( _anchor );
-
-                    me.components.push( {
-                        type : "anchor",
-                        plug : {
-                            draw : function(){
-                                //me.drawAnchor( _anchor );
-                            }
-                        }
-                    } );
-
-                }
-            }
-        } );
     }
 
     _initBarTgi()
@@ -709,8 +673,8 @@ export default class Descartes extends Chart
 
                         barTgiOpt = _.extend( true, {
                             origin: {
-                                x: me._coordinate.graphsX,
-                                y: me._coordinate.graphsY
+                                x: me._coordinate.origin.x,
+                                y: me._coordinate.origin.y
                             }
                         } , barTgiOpt );
 
@@ -732,14 +696,14 @@ export default class Descartes extends Chart
         var me = this;
         this.on("panstart mouseover", function(e) {
             var _tips = me.getComponentById("tips");
-            if ( _tips && _tips.enabled ) {
+            if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
                 _tips.show(e);
             };
         });
         this.on("panmove mousemove", function(e) {
             var _tips = me.getComponentById("tips");
-            if ( _tips && _tips.enabled ) {
+            if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
                 _tips.move(e);
             }
@@ -748,13 +712,13 @@ export default class Descartes extends Chart
             //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
             //那么就不要执行hide，顶多只显示这个点得tips数据
             var _tips = me.getComponentById("tips");
-            if ( _tips && _tips.enabled && !( e.toTarget && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
+            if ( _tips && !( e.toTarget && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
             }
         });
         this.on("tap", function(e) {
             var _tips = me.getComponentById("tips");
-            if ( _tips && _tips.enabled ) {
+            if ( _tips ) {
                 _tips.hide(e);
                 me._setTipsInfo.apply(me, [e]);
                 _tips.show(e);

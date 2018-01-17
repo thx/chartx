@@ -1,502 +1,262 @@
-import Chart from "../chart"
-import Pie from "./pie"
-import Legend from "../../components/legend/index"
-import {parse2MatrixData} from "../../utils/tools"
 import Canvax from "canvax2d"
-import {colors as themeColors} from "../theme"
+import Pie from "./pie"
+
 
 const _ = Canvax._;
 
-export default class extends Chart
+export default class PieGraphs extends Canvax.Event.EventDispatcher
 {
-    constructor( node, data, opts )
+    constructor( opts, root )
     {
-        // this.element = node;
-        super(node , data, opts);
+        super( opts, root );
 
         this.type = "pie";
-        
-        this.data = data;
-        this.ignoreFields = [];
-        this._opts = opts;
-        this.options = opts;
-        this.event = {
-            enabled : true
+
+        //这里所有的opts都要透传给 group
+        this._opts = opts || {};
+        this.root = root;
+
+        this.valueField = null;
+        this.nameField = null;
+        this.rField = null;//如果有配置rField，那么每个pie的outRadius都会不一样
+
+
+        this.width = 0;
+        this.height = 0;
+        this.origin = {
+            x : 0,
+            y : 0
         }
-        this.xAxis = {
-            field: null
-        };
-        this.yAxis = {
-            field: null
-        };
+
+        this.innerRadius = 0;
+        this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
+        this.minSectorRadius = 20; //outRadius - innerRadius 的最小值
+
+        this.startAngle = -90;
+        //要预留moveDis位置来hover sector 的时候外扩
+        this.moveDis = 15;
+
+        this.groups = [];
+
+        this.init( opts );
+    }
+
+    init( opts )
+    {
         _.extend(true, this, opts);
-
-        this.dataFrame = this._initData(data, this);
-        this._setLengend();
-
-        this.stageBg = new Canvax.Display.Sprite({
-            id: 'bg'
-        });
-        this.core = new Canvax.Display.Sprite({
-            id: 'core'
-        });
-        this.stageTip = new Canvax.Display.Stage({
-            id: 'stageTip'
-        });
-        this.canvax.addChild(this.stageTip);
-        this.stageTip.toFront();
-
-        this.draw();
+        this.sprite = new Canvax.Display.Sprite();
     }
 
-    draw() 
+    _computerProps()
     {
-        this._initModule(); //初始化模块
-        this._startDraw(); //开始绘图
-        this._drawEnd(); //绘制结束，添加到舞台  
-        this.inited = true;
-    }
+        var w = this.width;
+        var h = this.height;
 
-    getByIndex() 
-    {
-        return this._pie._getByIndex(index);
-    }
-
-    getList()
-    {
-        var self = this;
-        var list = [];
-        var item;
-        if (self._pie) {
-            var sectorList = self._pie.getList();
-            if (sectorList.length > 0) {
-                for (var i = 0; i < sectorList.length; i++) {
-                    item = sectorList[i];
-                    var idata = self._pie.data.data[i];
-
-                    list.push({
-                        name: item.name,
-                        index: item.index,
-                        iNode: item.index, //和上面一样的意思，向后兼容，后面慢慢取消掉index
-                        color: item.color,
-                        r: item.r,
-                        value: item.value,
-                        percentage: item.percentage,
-                        checked: idata.checked
-                    });
-                }
-            }
+        //TODO：如果用户有配置outRadius的话，就按照用户的来，目前不做修正
+        if( !this.outRadius ){
+            var outRadius = Math.min(w, h) / 2;
+            if (this.label && this.label.enabled) {
+                //要预留moveDis位置来hover sector 的时候外扩
+                outRadius -= this.moveDis;
+            };
+            this.outRadius = parseInt( outRadius );
         };
-        return list;
+
+        //要保证sec具有一个最小的radius
+        if( this.outRadius - this.innerRadius < this.minSectorRadius ){
+            this.innerRadius = this.outRadius - this.minSectorRadius;
+        };
+
     }
 
-    getCheckedList() 
+    /**
+     * opts ==> {width,height,origin}
+     */
+    draw( opts ) 
     {
-        var cl = [];
-        _.each(this.getList(), function (item) {
-            if (item.checked) {
-                cl.push(item);
-            }
-        });
-        return cl;
+        _.extend(true, this, opts);
+        this._computerProps();
+        this.data = this._trimGraphs();
+    
+        this._pie = new Pie( this._opts, this );
+        this.groups.push( this._pie );
+        this._pie.draw( opts, this.data );
+        this.sprite.addChild( this._pie.sprite );
     }
 
-    focusAt(index) 
-    {
-        if (this._pie) {
-            this._pie.focus(index);
-        }
-    }
-
-    unfocusAt(index) 
-    {
-        if (this._pie) {
-            this._pie.unfocus(index);
-        }
-    }
-
-    checkAt(index)
-    {
-        if (this._pie) {
-            this._pie.check(index);
-        }
-    }
-
-    uncheckAt(index) 
-    {
-        if (this._pie) {
-            this._pie.uncheck(index);
-        }
-    }
-
-    uncheckAll() 
-    {
-        if (this._pie) {
-            this._pie.uncheckAll();
-        }
-    }
-
-    checkOf(xvalue) 
-    {
-        this.checkAt(this.getIndexOf(xvalue));
-    }
-
-    uncheckOf(xvalue) 
-    {
-        this.uncheckAt(this.getIndexOf(xvalue));
-    }
-
-    getLabelList() 
-    {
-        return this._pie.getLabelList();
-    }
-
-    showLabelAt( index )
-    {
-        this._pie && this._pie._showLabel( index );
-    }
-
-    hideLabelAt( index )
-    {
-        this._pie && this._pie._hideLabel( index );
-    }
-
-    showLabelOf( xvalue )
-    {
-        this.showLabelAt( this.getIndexOf(xvalue) );
-    }
-
-    hideLabelOf( xvalue )
-    {
-        this.hideLabelAt( this.getIndexOf(xvalue) );
-    }
-
-    showLabelAll()
+    _trimGraphs()
     {
         var me = this;
-        _.each( this.getLabelList() , function( label , i ){
-            me.showLabelAt(i);
-        } );
-    }
-
-    hideLabelAll()
-    {
-        var me = this;
-        _.each( this.getLabelList() , function( label , i ){
-            me.hideLabelAt(i);
-        } );
-    }
-
-    getIndexOf(xvalue) 
-    {
-        var i;
-        var list = this.getList();
-        for (var ii = 0, il = list.length; ii < il; ii++) {
-            if (list[ii].name == xvalue) {
-                i = ii;
-                break;
-            }
-        }
-        return i;
-    }
-
-    _initData(arr, opt) 
-    {
-        if( !arr || arr.length == 0 ){
-            return dataFrame
-        };
-
-        //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
-        if( arr.length > 0 && !_.isArray( arr[0] ) ){
-            arr = parse2MatrixData(arr);
-        };
+        var _coor = this.root._coordinate;
 
         var data = [];
-        var arr = _.clone(arr);
-    
-        /*
-        * @释剑
-        * 用校正处理， 把pie的data入参规范和chartx数据格式一致
-        **/
-        if (!this.xAxis.field) {
-            data = arr;
-        } else {
+        var dataFrame = me.root.dataFrame;
+        
+        for( var i=0,l=dataFrame.org.length-1; i<l; i++ ){
+            var rowData = dataFrame.getRowData(i);
+            var layoutData = {
+                rowData : rowData,//把这一行数据给到layoutData引用起来
+                sliced  : false,  //是否获取焦点，外扩
+                checked : false,  //是否选中
+                enabled : true,   //是否启用，显示在列表中
+                value   : rowData[ this.valueField ],
+                label   : null    //绘制的时候再设置
+            }
+            data.push( layoutData );
+        };
 
-            var titles = arr.shift();
-            var xFieldInd = _.indexOf(titles, this.xAxis.field);
-            var yFieldInd = xFieldInd + 1;
-            if (yFieldInd >= titles.length) {
-                yFieldInd = 0;
-            };
-            if (this.yAxis.field) {
-                yFieldInd = _.indexOf(titles, this.yAxis.field);
-            };
-            _.each(arr, function(row) {
-                var rowData = [];
-                if (_.isArray(row)) {
-                    rowData.push(row[xFieldInd]);
-                    rowData.push(row[yFieldInd]);
-                } else if (typeof row == 'object') {
-                    rowData.push(row['name']);
-                    rowData.push(row['y']);
+        if( data.length && this.sort ){
+            data.sort(function (a, b) {
+                if (me.sort == 'desc') {
+                    return a.value - b.value;
+                } else {
+                    return b.value - a.value;
                 }
-                data.push(rowData);
             });
         };
 
-        //矫正结束                    
-        var dataFrame = {};
-        dataFrame.org = data;
-        dataFrame.data = [];
-        if (_.isArray(data)) {
+        return this._configData(data);
+    }
+
+    _configData( data ) 
+    {
+        var me = this;
+        var total = 0;
+
+        me.currentAngle = 0 + me.startAngle % 360;
+        var limitAngle = 360 + me.startAngle % 360;
+
+        var percentFixedNum = 2;     
+        
+        var maxRval = 0;
+        var minRval = 0;
+
+        if ( data.length ) {
+            //先计算出来value的总量
             for (var i = 0; i < data.length; i++) {
-                var obj = {};
-                if (_.isArray(data[i])) {
-
-                    obj.name = data[i][0];
-                    obj.y = parseFloat(data[i][1]);
-                    obj.sliced = false;
-                    obj.selected = false;
-
-                } else if (typeof data[i] == 'object') {
-
-                    obj.name = data[i].name;
-                    obj.y = parseFloat(data[i].y);
-                    obj.sliced = data[i].sliced || false;
-                    obj.selected = data[i].selected || false;
-
+                total += data[i].value;
+                if( me.rField ){
+                    maxRval = Math.max( maxRval, data[i].rowData[ me.rField ]);
+                    minRval = Math.min( minRval, data[i].rowData[ me.rField ]);
                 }
+            };
 
-                if (obj.name) dataFrame.data.push(obj);
+            if (total > 0) {
+          
+                for (var j = 0; j < data.length; j++) {
+                    var percentage = data[j].value / total;
+                    var fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
+
+                    var angle = 360 * percentage;
+                    var endAngle = me.currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
+                    var cosV = Math.cos((me.currentAngle + angle / 2) / 180 * Math.PI);
+                    var sinV = Math.sin((me.currentAngle + angle / 2) / 180 * Math.PI);
+                    var midAngle = me.currentAngle + angle / 2;
+                    cosV = cosV.toFixed(5);
+                    sinV = sinV.toFixed(5);
+                    var quadrant = function (ang) {
+                        if (ang >= limitAngle) {
+                            ang = limitAngle;
+                        }
+                        ang = ang % 360;
+                        var angleRatio = parseInt(ang / 90);
+                        if (ang >= 0) {
+                            switch (angleRatio) {
+                                case 0:
+                                    return 1;
+                                    break;
+                                case 1:
+                                    return 2;
+                                    break;
+                                case 2:
+                                    return 3;
+                                    break;
+                                case 3:
+                                case 4:
+                                    return 4;
+                                    break;
+                            }
+                        } else if (ang < 0) {
+                            switch (angleRatio) {
+                                case 0:
+                                    return 4;
+                                    break;
+                                case -1:
+                                    return 3;
+                                    break;
+                                case -2:
+                                    return 2;
+                                    break;
+                                case -3:
+                                case -4:
+                                    return 1;
+                                    break;
+                            }
+                        }
+                    } (midAngle);
+
+                    var outRadius = me.outRadius;
+
+                    if( me.rField ){
+                        outRadius = parseInt( (me.outRadius - me.innerRadius) * ( (data[j].rowData[me.rField] - minRval)/(maxRval-minRval)  ) + me.innerRadius );
+                    }
+
+                    _.extend(data[j], {
+                        outRadius : outRadius,
+                        innerRadius : me.innerRadius,
+                        start: me.currentAngle, //起始角度
+                        end: endAngle, //结束角度
+                        midAngle: midAngle,  //中间角度
+
+                        outOffsetx: me.moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
+                        outOffsety: me.moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
+
+                        centerx: outRadius * cosV,
+                        centery: outRadius * sinV,
+                        outx: (outRadius + me.moveDis) * cosV,
+                        outy: (outRadius + me.moveDis) * sinV,
+                        edgex: (outRadius + me.moveDis) * cosV,
+                        edgey: (outRadius + me.moveDis) * sinV,
+
+                        orginPercentage: percentage,
+                        percentage: fixedPercentage,
+                    
+                        quadrant: quadrant, //象限
+                        labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
+                        index: j
+                    });
+
+                    //这个时候可以计算下label，因为很多时候外部label如果是配置的
+                    data[j].label = me._getLabel( data[j] );
+                    
+                    me.currentAngle += angle;
+                    
+                    if (me.currentAngle > limitAngle) {
+                        me.currentAngle = limitAngle;
+                    }
+                };
+
             }
         }
-        if (data.length > 0 && opt.sort == 'asc' || opt.sort == 'desc') {
-            dataFrame.org.sort(function (a, b) {
-                if (opt.sort == 'desc') {
-                    return a[1] - b[1];
-                } else if (opt.sort == 'asc') {
-                    return b[1] - a[1];
-                }
-            });
-            dataFrame.data.sort(function (a, b) {
-                if (opt.sort == 'desc') {
-                    return a.y - b.y;
-                } else if (opt.sort == 'asc') {
-                    return b.y - a.y;
-                }
-            });
-        }
 
-        if (dataFrame.data.length > 0) {
-            for (var i = 0; i < dataFrame.data.length; i++) {
-                if (_.contains(this.ignoreFields, dataFrame.data[i].name)) {
-                    dataFrame.data[i].ignored = true;
-                    dataFrame.data[i].y = 0;
-                }
+        return {
+            list : data,
+            total : total
+        };
+    }
+
+    _getLabel( itemData )
+    {
+        var label;
+        if( this.label.enabled ){
+            if( this.nameField ){
+                label = itemData.rowData[ this.nameField ];
             }
-
-
-        }
-
-        return dataFrame;
-
-    }
-
-    clear() 
-    {
-        this.stageBg.removeAllChildren()
-        this.core.removeAllChildren()
-        this.stageTip.removeAllChildren();
-    }
-
-    reset(obj) 
-    {
-        obj = obj || {};
-        this.clear();
-        this._pie.clear();
-        var data = obj.data || this.data;
-        _.extend(true, this, obj.options);
-        this.dataFrame = this._initData(data, this.options);
-        this.draw();
-    }
-
-    _initModule() 
-    {
-        var self = this;
-        var w = self.width;
-        var h = self.height;
-        w -= (this.padding.left + this.padding.right);
-        h -= (this.padding.top + this.padding.bottom);
-
-        var r = Math.min(w, h) * 2 / 3 / 2;
-        if (self.dataLabel && self.dataLabel.enabled == false) {
-            r = Math.min(w, h) / 2;
-            //要预留moveDis位置来hover sector 的时候外扩
-            r -= r / 11;
-        };
-        r = parseInt( r );
-
-        //某些情况下容器没有高宽等，导致r计算为负数，会报错
-        if( r < 0 ){
-            r = 1;
-        };
-
-        var r0 = parseInt(self.innerRadius || 0);
-        var maxInnerRadius = r - 10;
-        r0 = r0 >= 0 ? r0 : 0;
-        r0 = r0 <= maxInnerRadius ? r0 : maxInnerRadius;
-        if( r0 < 0 ){
-            r0 = 0;
-        };
-
-        var pieX = w / 2 + this.padding.left;
-        var pieY = h / 2 + this.padding.top;
-        self.pie = {
-            x: pieX,
-            y: pieY,
-            r0: r0,
-            r: r,
-            boundWidth: w,
-            boundHeight: h,
-            data: self.dataFrame,
-            //dataLabel: self.dataLabel, 
-            animation: self.animation,
-            event: self.event,
-            startAngle: parseInt(self.startAngle),
-            colors: self.colors,
-            focusCallback: {
-                focus: function (e, index) {
-                    self.fire('focus', e);
-                },
-                unfocus: function (e, index) {
-                    self.fire('unfocus', e);
-                }
-            },
-            moveDis: self.moveDis,
-            checked: (self.checked ? _.extend({
-                enabled : true,
-                checkedCallBack: function(e){
-                    self.fire("checked", e);
-                },
-                checkedBeforCallBack: function(e){
-                    self.fire("checkedBefor", e);
-                },
-                uncheckedCallBack: function(e){
-                    self.fire("unchecked", e);
-                }
-            } , self.checked ): { enabled: false })
-        };
-
-        if (self.dataLabel) {
-            self.pie.dataLabel = self.dataLabel;
-        };
-
-        self._pie = new Pie( self.pie, self.tips, self.canvax.domView );
-
-        self.event.enabled && self._pie.sprite.on("mousedown mousemove mouseup click dblclick", function (e) {
-            self.fire(e.type, e);
-        });
-    }
-
-    _startDraw() 
-    {
-        this._pie.draw(this);
-        var me = this;                
-        //如果有legend，调整下位置,和设置下颜色
-
-        /*
-        if (this._legend && !this._legend.inited) {
-            _.each(this.getList(), function (item, i) {
-                var ffill = item.color;
-                me._legend.setStyle(item.name, { fillStyle: ffill });
-            });
-            this._legend.inited = true;
-        };
-        */
-    }
-
-    _drawEnd()
-    {
-        this.core.addChild(this._pie.sprite);
-        if (this._tip) this.stageTip.addChild(this._tip.sprite);
-        this.fire('complete', {
-            data: this.getList()
-        });
-        this.stage.addChild(this.core);
-    }
-
-    remove(field)
-    {
-        var me = this;
-        var data = me.data;
-        if (field && data.length > 1) {
-            for (var i = 1; i < data.length; i++) {
-                if (data[i][0] == field && !_.contains(me.ignoreFields, field)) {
-                    me.ignoreFields.push(field);
-                    //console.log(me.ignoreFields.toString());
-                }
+            if( _.isFunction( this.label.format ) ){
+                label = this.label.format( itemData )
             }
         }
-        me.reset();
+        return label;
     }
 
-    add(field)
-    {
-        var me = this;
-        var data = me.data;
-        if (field && data.length > 1) {
-            for (var i = 1; i < data.length; i++) {
-                if (data[i][0] == field && _.contains(me.ignoreFields, field)) {
-                    me.ignoreFields.splice(_.indexOf(me.ignoreFields, field), 1);
-                }
-            }
-        }
-        me.reset();
-    }
-
-    //设置图例 begin
-    _setLengend() 
-    {
-        var me = this;
-        if ( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
-        //设置legendOpt
-        var legendOpt = _.extend(true, {
-            legend:true,
-            label: function (info) {
-                return info.field
-            },
-            onChecked: function (field) {
-                me.add(field);
-            },
-            onUnChecked: function (field) {
-                me.remove(field);
-            },
-            layoutType: "v"
-        }, this._opts.legend);
-        this._legend = new Legend(this._getLegendData(), legendOpt);
-        this.stage.addChild(this._legend.sprite);
-        this._legend.pos({
-            x: this.width - this._legend.width,
-            y: this.height / 2 - this._legend.h / 2
-        });
-
-        this.padding.right += this._legend.width;
-    }
-
-    _getLegendData()
-    {
-        var me = this;
-        var data = [];                
-        this.dataFrame && _.each(this.dataFrame.data, function (obj, i) {
-            data.push({
-                field: obj.name,
-                value: obj.y,
-                style: themeColors[i],
-                enabled : true,
-                ind : i
-            });
-        });
-
-        return data;
-    }
 }

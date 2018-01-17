@@ -185,6 +185,5 @@ export default class Grid extends Component
                 self.yAxisSp.addChild(line);
             }
         };
-
     }
 }

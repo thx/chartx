@@ -14,7 +14,7 @@ export default class Descartes_Component extends Component
     {
         super();
 
-        this._root  = root;
+        this.root  = root;
         
         this._xAxis = null;
         this._yAxis = [];
@@ -23,14 +23,20 @@ export default class Descartes_Component extends Component
         this._yAxisRight = null;
         this._grid  = null;
 
-        this.graphsWidth = 0;
-        this.graphsHeight = 0;
-        this.graphsX = 0;
-        this.graphsY = 0;
+        this.width = 0;
+        this.height = 0;
+        this.origin = {
+            x : 0,
+            y : 0
+        };
+
+        this.margin = {
+            top:0, right:0, bottom:0, left:0
+        };
 
         this.horizontal = false;
 
-        this.dataFrame = this._root.dataFrame;
+        this.dataFrame = this.root.dataFrame;
 
         this.xAxis = {
             field : this.dataFrame.fields[0]
@@ -117,10 +123,10 @@ export default class Descartes_Component extends Component
     draw( opt )
     {
         //在绘制的时候，是已经能拿到xAxis的height了得
-        var _padding = this._root.padding;
+        var _padding = this.root.padding;
 
-        var h = opt.height || this._root.height;
-        var w = opt.width || this._root.width;
+        var h = opt.height || this.root.height;
+        var w = opt.width || this.root.width;
         if( this.horizontal ){
             //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
             var _num = w;
@@ -170,15 +176,15 @@ export default class Descartes_Component extends Component
         
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
 
-        this.graphsWidth = this._xAxis.width;
-        this.graphsHeight = this._yAxis[0].yGraphsHeight;
-        this.graphsX = _yAxisW + _padding.left;
-        this.graphsY = y;
+        this.width = this._xAxis.width;
+        this.height = this._yAxis[0].yGraphsHeight;
+        this.origin.x = _yAxisW + _padding.left;
+        this.origin.y = y;
 
         //绘制背景网格
         this._grid.draw({
-            w: this.graphsWidth,
-            h: this.graphsHeight,
+            w: this.width,
+            h: this.height,
             xAxis: {
                 data: this._yAxis[0].layoutData
             },
@@ -186,8 +192,8 @@ export default class Descartes_Component extends Component
                 data: this._xAxis.layoutData
             },
             pos: {
-                x: this.graphsX,
-                y: this.graphsY
+                x: this.origin.x,
+                y: this.origin.y
             },
             resize: opt.resize
         } );
@@ -253,8 +259,8 @@ export default class Descartes_Component extends Component
     _horizontal( ) 
     {
         var me = this;
-        var w = me._root.width;
-        var h = me._root.height;
+        var w = me.root.width;
+        var h = me.root.height;
 
         _.each([me.sprite.context], function(ctx) {
             ctx.x += ((w - h) / 2);
@@ -331,7 +337,7 @@ export default class Descartes_Component extends Component
         this._grid.reset({
             animation:false,
             xAxis: {
-                data: this._yAxisLeft.layoutData
+                data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
             }
         });
     }
@@ -508,10 +514,10 @@ export default class Descartes_Component extends Component
         me.induce = new Rect({
             id: "induce",
             context: {
-                x: me.graphsX,
-                y: me.graphsY-me.graphsHeight,
-                width: me.graphsWidth,
-                height: me.graphsHeight,
+                x: me.origin.x,
+                y: me.origin.y-me.height,
+                width: me.width,
+                height: me.height,
                 fillStyle: '#000000',
                 globalAlpha: 0,
                 cursor: 'pointer'
@@ -526,7 +532,7 @@ export default class Descartes_Component extends Component
             //e.eventInfo = me._getInfoHandler(e);
             me.fire( e.type, e );
             //图表触发，用来处理Tips
-            me._root.fire( e.type, e );
+            me.root.fire( e.type, e );
         })
     }
 

@@ -5,25 +5,25 @@ const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
-export default class Graphs extends Canvax.Event.EventDispatcher
+export default class ScatGraphs extends Canvax.Event.EventDispatcher
 {
-    constructor(opt, _root)
+    constructor(opts, root)
     {
-        super( opt, _root );
+        super( opts, root );
 
         this.type = "scat";
 
-        //这里所有的opt都要透传给 group
-        this._opt = opt || {};
-        this._root = _root;
-        this.ctx = _root.stage.context2D;
+        //这里所有的opts都要透传给 group
+        this._opts = opts || {};
+        this.root = root;
+        this.ctx = root.stage.context2D;
         
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
 
         this.width = 0;
         this.height = 0;
-        this.pos = {
+        this.origin = {
             x: 0,
             y: 0
         };
@@ -58,7 +58,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         this.sprite   = null;
 
-        _.extend( true, this , opt );
+        _.extend( true, this , opts );
 
         this.init( );
 
@@ -80,15 +80,13 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.sprite.addChild( this._textsp )
     }
 
-    draw(opt)
+    draw(opts)
     {
-        _.extend( true, this , opt );
+        _.extend( true, this , opts );
         this.data = this._trimGraphs(); //groupsData也被自动设置完成
-        
         this._widget();
-
-        this.sprite.context.x = this.pos.x;
-        this.sprite.context.y = this.pos.y;
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
 
         if( this.animation ){
             this.grow();
@@ -106,16 +104,16 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     {
         var tmplData = [];
 
-        var dataLen  = this._root.dataFrame.org.length - 1; //减去title fields行
-        var xField = this._root._coordinate._xAxis.field;
+        var dataLen  = this.root.dataFrame.org.length - 1; //减去title fields行
+        var xField = this.root._coordinate._xAxis.field;
 
         for( var i=0; i<dataLen; i++ ){
             
-            var rowData = this._root.dataFrame.getRowData(i);
+            var rowData = this.root.dataFrame.getRowData(i);
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
-            var xPos = this._root._coordinate._xAxis.getPosX({ val : xValue });
-            var yPos = this._root._coordinate._getYaxisOfField( this.field ).getYposFromVal( yValue );
+            var xPos = this.root._coordinate._xAxis.getPosX({ val : xValue });
+            var yPos = this.root._coordinate._getYaxisOfField( this.field ).getYposFromVal( yValue );
             var group = this.getGroup( rowData );
             var groupInd = this.getGroupInd( rowData );
 
@@ -165,7 +163,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             if( _.isString( this.node.r ) && rowData[ this.node.r ] ){
                 //如果配置了某个字段作为r，那么就要自动计算比例
                 if( !this._rData && !this._rMaxValue && !this._rMinValue ){
-                    this._rData = this._root.dataFrame.getFieldData( this.node.r );
+                    this._rData = this.root.dataFrame.getFieldData( this.node.r );
                     this._rMaxValue = _.max( this._rData );
                     this._rMinValue = _.min( this._rData );
                 };
@@ -389,7 +387,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         };
 
         //fire到root上面去的是为了让root去处理tips
-        this._root.fire( e.type, e );
+        this.root.fire( e.type, e );
     }
 
     /**
@@ -403,10 +401,10 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                 y : nodeData.y,
                 r : nodeData.r
             }, {
-                onUpdate: function( opt ){
+                onUpdate: function( opts ){
                     if( this.label ){
-                        this.label.context.x = opt.x;
-                        this.label.context.y = opt.y;
+                        this.label.context.x = opts.x;
+                        this.label.context.y = opts.y;
                     }
                 },
                 delay : Math.round(Math.random()*300)

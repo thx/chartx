@@ -7,15 +7,19 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class LineGraphs extends Canvax.Event.EventDispatcher
 {
-    constructor(opt, root)
+    constructor(opts, root)
     {
         super();
 
         this.type = "line";
 
+        //这里所有的opts都要透传给 group
+        this._opts = opts || {};
+        this.root = root;
+
         this.width = 0;
         this.height = 0;
-        this.pos = {
+        this.origin = {
             x : 0,
             y : 0
         };
@@ -23,17 +27,13 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         //默认给左轴
         this.yAxisAlign = "left";
 
-        //这里所有的opt都要透传给 group
-        this._opt = opt || {};
-        this.root = root;
-
         //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
         this.ctx = root.stage.canvas.getContext("2d");
-        this.dataFrame = this._opt.dataFrame || root.dataFrame; //root.dataFrame的引用
+        this.dataFrame = root.dataFrame; //root.dataFrame的引用
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        this.field = opt.field;
+        this.field = opts.field;
         this.enabledField = null;
         
         this.groups = []; //群组集合
@@ -42,35 +42,29 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         this.eventEnabled = true;
 
-        this.init(this._opt);
+        this.init(this._opts);
     }
 
-
-
-
-    init(opt)
+    init(opts)
     {
-        this._opt = opt;
-        opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
-        //_.extend(true, this, opt);
+        opts.yAxisAlign && (this.yAxisAlign = opts.yAxisAlign);
         this.sprite = new Canvax.Display.Sprite();
     }
 
-    draw(opt)
+    draw(opts)
     {
-        //_.extend(true, this, opt);
-        this.width = opt.width;
-        this.height = opt.height;
-        _.extend( true, this.pos, opt.pos );
+        this.width = opts.width;
+        this.height = opts.height;
+        _.extend( true, this.origin, opts.origin );
 
-        this.sprite.context.x = this.pos.x;
-        this.sprite.context.y = this.pos.y;
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
 
         this.data = this._trimGraphs();
 
         this._setGroupsForYfield( this.data );
         
-        this._widget(opt, this.data);
+        this._widget(opts, this.data);
 
         this.grow();
 
@@ -256,7 +250,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
             var group = new Group(
                 fieldMap,
                 groupInd, //不同于fieldMap.ind
-                me._opt,
+                me._opts,
                 me.ctx,
                 me.height,
                 me.width
@@ -288,7 +282,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
     }
 
-    _widget(opt)
+    _widget(opts)
     {
         var me = this;
         me.resize = false;

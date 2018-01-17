@@ -754,7 +754,4 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
         return path;
     }
-
 }
-
-

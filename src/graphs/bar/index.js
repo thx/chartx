@@ -6,18 +6,19 @@ const BrokenLine = Canvax.Shapes.BrokenLine;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
-export default class Graphs extends Canvax.Event.EventDispatcher
+export default class BarGraphs extends Canvax.Event.EventDispatcher
 {
-    constructor(opt, root)
+    constructor(opts, root)
     {
-        super(opt, root);
-
-        this._opt = opt;
-
-        this.data = [];
-        this.root = root;
+        super(opts, root);
 
         this.type = "bar";
+
+        //这里所有的opts都要透传给 group
+        this._opts = opts || {};
+        this.root = root;
+
+        this.data = [];
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         this.field = null;
@@ -26,7 +27,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
 
         this.width = 0;
         this.height = 0;
-        this.pos = {
+        this.origin = {
             x: 0,
             y: 0
         };
@@ -69,7 +70,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         this.sprite = null;
         this.txtsSp = null;
 
-        _.extend(true, this, opt);
+        _.extend(true, this, opts);
 
         this.init();
     }
@@ -215,10 +216,10 @@ export default class Graphs extends Canvax.Event.EventDispatcher
         };
     }
 
-    draw(opt)
+    draw(opts)
     { 
         //第二个data参数去掉，直接trimgraphs获取最新的data
-        _.extend(true, this, opt);
+        _.extend(true, this, opts);
 
         var data = this._trimGraphs();
 
@@ -501,8 +502,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             this.sprite.addChild(this.txtsSp);
         };
 
-        this.sprite.context.x = this.pos.x;
-        this.sprite.context.y = this.pos.y;
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
 
         if (this.sort && this.sort == "desc") {
             this.sprite.context.y -= this.height;
@@ -672,7 +673,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                         }
                     };
 
-                    if (me.proportion) {
+                    if( me.proportion ) {
                         node.vCount = vCount;
                     };
 
@@ -712,7 +713,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
     /**
      * 生长动画
      */
-    grow(callback, opt) 
+    grow(callback, opts) 
     {
 
         var me = this;
@@ -735,11 +736,11 @@ export default class Graphs extends Canvax.Event.EventDispatcher
             };
         };
 
-        var options = _.extend({
+        var optsions = _.extend({
             delay: Math.min(1000 / this._barsLen, 80),
             easing: "Back.Out",
             duration: 500
-        }, opt);
+        }, opts);
 
         var barCount = 0;
         _.each(me.data, function(h_group, g) {
@@ -754,7 +755,7 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                     var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
                     //console.log("finalPos"+bar.finalPos.y)
 
-                    if (options.duration == 0) {
+                    if (optsions.duration == 0) {
                         bar.context.scaleY = sy;
                         bar.context.y = sy * sy * bar.finalPos.y;
                         bar.context.x = bar.finalPos.x;
@@ -771,9 +772,9 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                             width: bar.finalPos.width,
                             height: bar.finalPos.height
                         }, {
-                            duration: options.duration,
-                            easing: options.easing,
-                            delay: h * options.delay,
+                            duration: optsions.duration,
+                            easing: optsions.easing,
+                            delay: h * optsions.delay,
                             onUpdate: function(arg) {
 
                             },
@@ -805,9 +806,9 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                                 y: infosp._finalY,
                                 x: infosp._finalX
                             }, {
-                                duration: options.duration,
-                                easing: options.easing,
-                                delay: h * options.delay,
+                                duration: optsions.duration,
+                                easing: optsions.easing,
+                                delay: h * optsions.delay,
                                 onUpdate: function() {
                                     this.context && (this.context.visible = true);
                                 },
@@ -826,8 +827,8 @@ export default class Graphs extends Canvax.Event.EventDispatcher
                                         to: {
                                             v: txt._text
                                         },
-                                        duration: options.duration + 100,
-                                        delay: h * options.delay,
+                                        duration: optsions.duration + 100,
+                                        delay: h * optsions.delay,
                                         onUpdate: function( arg ) {
                                             var content = arg.v;
                                             if (_.isFunction(me.text.format)) {

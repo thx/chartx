@@ -33,58 +33,71 @@
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组
 var data= [
-    ["node"   , "value"],
-    ["ie"     , 500   ],
-    ["firefox", 300   ],
-    ["safari" , 100   ],
-    ["其他"   , 200   ]    
+    ["name"   , "value", "r" , "city"],
+    ["ie"     , 320    , 122 , "杭州"],
+    ["firefox", 213    , 132 , "杭州"],
+    ["safari" , 12    , 321 , "杭州"],
+    ["chrome" , 12    , 192  , "杭州"],
+    ["其他"    , 10    , 382 , "杭州"],
+    ["uc"     , 10    , 232 , "北京"],
+    ["百度"    , 200    , 321 , "北京"],
+    ["腾讯"    , 80     , 89 , "北京"]    
 ];
 
 var options = {
-    xAxis : {
-        field : "node"
+    coordinate : {
+        type : "polar",
+        grid : {
+
+        }
     },
-    yAxis : {
-        field : "value"
-    },
+    graphs : [
+        {
+            type : "pie",
+            valueField : "value", //决定了这个pie的角度
+            nameField : "name",
+
+            //rField : "r", //如果是丁格尔玫瑰，就有半径的Field
+            groupField : "group",//如果有两圈或者多圈的pie ， 和scat的思路一样，采用分组的方式来实现比较灵活
+            
+            //周边tip
+            label : {
+                enabled: true,
+                //是否绘制连接线(注意：此配置仅限于扇形块比较分散，若扇形比较紧密时，无连线会导致识别混淆)
+                //allowLine:false,
+                format : function( data ){
+                    var rowData = data.rowData;
+                    return "<div><span>"+rowData.name+"</span>：<span>"+rowData.value+"（"+ data.percentage +"%）</span></div>"
+                }
+            },
+            //饼图的起始角度[有效值范围0-360度，默认值0度
+            //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
+            startAngle:-90,
+            //数据排序，默认按用户给定顺序[desc/asc]
+            sort: 'desc',
+            //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
+            allowPointSelect: true,
+            //是否允许动画
+            animation: true,
+            //内圆半径
+            //innerRadius: 50,
+            //outRadius: 70,
+            //颜色序列,若不设置，会有默认的颜色序列
+            //colors:['red', 'yellow', 'blue']
+            checked : {
+                enabled : true
+            }
+        }
+    ],
     tips : {
-        //enabled  : false,
         content : function(info){
             return info.name+"："+info.percentage+"%"
         }
     },
-    //周边tip
-    dataLabel: {
-        //enabled: false,
-        //是否绘制连接线(注意：此配置仅限于扇形块比较分散，若扇形比较紧密时，无连线会导致识别混淆)
-        //allowLine:false,
-        //format: '{point.name} : {point.y}' //和下面等价
-        format : function( data ){
-            return "<div><span>"+data.name+"</span>：<span>"+data.y+"（"+ data.percentage +"%）</span></div>"
-        }
-
-    },
-    //饼图的起始角度[有效值范围0-360度，默认值0度
-    //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
-    startAngle:-90,
-    //数据排序，默认按用户给定顺序[desc/asc]
-    sort: 'desc',
-    //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
-    allowPointSelect: true,
-    //是否允许动画
-    animation: true,
-    //内圆半径
-    innerRadius: 50,
-    //颜色序列,若不设置，会有默认的颜色序列
-    //colors:['red', 'yellow', 'blue']
-
-    checked : {
-        enabled : true
-    },
     legend : {}
 };
 
-window.pie = new Chartx.Pie("canvasTest" , data , options);
+window.chart = Chartx.create("canvasTest" , data , options);
 
 
 </textarea></form>

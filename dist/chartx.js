@@ -4,85 +4,57 @@ var Chartx = (function () {
 var commonjsGlobal$1 = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
+    return typeof obj;
 } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
-
-
-
-
-
-
-
-
-
-
 var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
 };
 
 var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
+        }
     }
-  }
 
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
+    return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);
+        if (staticProps) defineProperties(Constructor, staticProps);
+        return Constructor;
+    };
 }();
 
-
-
-
-
-
-
-
-
 var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
     }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+            value: subClass,
+            enumerable: false,
+            writable: true,
+            configurable: true
+        }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
 
-
-
-
-
-
-
-
-
-
-
 var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
 
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
 var _$1 = {};
@@ -109,279 +81,279 @@ var nativeIsArray = Array.isArray;
 var nativeKeys = Object.keys;
 
 _$1.values = function (obj) {
-  var keys = _$1.keys(obj);
-  var length = keys.length;
-  var values = new Array(length);
-  for (var i = 0; i < length; i++) {
-    values[i] = obj[keys[i]];
-  }
-  return values;
+    var keys = _$1.keys(obj);
+    var length = keys.length;
+    var values = new Array(length);
+    for (var i = 0; i < length; i++) {
+        values[i] = obj[keys[i]];
+    }
+    return values;
 };
 
 _$1.keys = nativeKeys || function (obj) {
-  if (obj !== Object(obj)) throw new TypeError('Invalid object');
-  var keys = [];
-  for (var key in obj) {
-    if (_$1.has(obj, key)) keys.push(key);
-  }return keys;
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) {
+        if (_$1.has(obj, key)) keys.push(key);
+    }return keys;
 };
 
 _$1.has = function (obj, key) {
-  return hasOwnProperty.call(obj, key);
+    return hasOwnProperty.call(obj, key);
 };
 
 var each = _$1.each = _$1.forEach = function (obj, iterator, context) {
-  if (obj == null) return;
-  if (nativeForEach && obj.forEach === nativeForEach) {
-    obj.forEach(iterator, context);
-  } else if (obj.length === +obj.length) {
-    for (var i = 0, length = obj.length; i < length; i++) {
-      if (iterator.call(context, obj[i], i, obj) === breaker) return;
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+        obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+        for (var i = 0, length = obj.length; i < length; i++) {
+            if (iterator.call(context, obj[i], i, obj) === breaker) return;
+        }
+    } else {
+        var keys = _$1.keys(obj);
+        for (var i = 0, length = keys.length; i < length; i++) {
+            if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+        }
     }
-  } else {
-    var keys = _$1.keys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
-      if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-    }
-  }
 };
 
 _$1.compact = function (array) {
-  return _$1.filter(array, _$1.identity);
+    return _$1.filter(array, _$1.identity);
 };
 
 _$1.filter = _$1.select = function (obj, iterator, context) {
-  var results = [];
-  if (obj == null) return results;
-  if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
-  each(obj, function (value, index, list) {
-    if (iterator.call(context, value, index, list)) results.push(value);
-  });
-  return results;
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function (value, index, list) {
+        if (iterator.call(context, value, index, list)) results.push(value);
+    });
+    return results;
 };
 
 each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function (name) {
-  _$1['is' + name] = function (obj) {
-    return toString.call(obj) == '[object ' + name + ']';
-  };
+    _$1['is' + name] = function (obj) {
+        return toString.call(obj) == '[object ' + name + ']';
+    };
 });
 
 if (!_$1.isArguments(arguments)) {
-  _$1.isArguments = function (obj) {
-    return !!(obj && _$1.has(obj, 'callee'));
-  };
+    _$1.isArguments = function (obj) {
+        return !!(obj && _$1.has(obj, 'callee'));
+    };
 }
 
 {
-  _$1.isFunction = function (obj) {
-    return typeof obj === 'function';
-  };
+    _$1.isFunction = function (obj) {
+        return typeof obj === 'function';
+    };
 }
 
 _$1.isFinite = function (obj) {
-  return isFinite(obj) && !isNaN(parseFloat(obj));
+    return isFinite(obj) && !isNaN(parseFloat(obj));
 };
 
 _$1.isNaN = function (obj) {
-  return _$1.isNumber(obj) && obj != +obj;
+    return _$1.isNumber(obj) && obj != +obj;
 };
 
 _$1.isBoolean = function (obj) {
-  return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
 };
 
 _$1.isNull = function (obj) {
-  return obj === null;
+    return obj === null;
 };
 
 _$1.isEmpty = function (obj) {
-  if (obj == null) return true;
-  if (_$1.isArray(obj) || _$1.isString(obj)) return obj.length === 0;
-  for (var key in obj) {
-    if (_$1.has(obj, key)) return false;
-  }return true;
+    if (obj == null) return true;
+    if (_$1.isArray(obj) || _$1.isString(obj)) return obj.length === 0;
+    for (var key in obj) {
+        if (_$1.has(obj, key)) return false;
+    }return true;
 };
 
 _$1.isElement = function (obj) {
-  return !!(obj && obj.nodeType === 1);
+    return !!(obj && obj.nodeType === 1);
 };
 
 _$1.isArray = nativeIsArray || function (obj) {
-  return toString.call(obj) == '[object Array]';
+    return toString.call(obj) == '[object Array]';
 };
 
 _$1.isObject = function (obj) {
-  return obj === Object(obj);
+    return obj === Object(obj);
 };
 
 _$1.identity = function (value) {
-  return value;
+    return value;
 };
 
 _$1.indexOf = function (array, item, isSorted) {
-  if (array == null) return -1;
-  var i = 0,
-      length = array.length;
-  if (isSorted) {
-    if (typeof isSorted == 'number') {
-      i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
-    } else {
-      i = _$1.sortedIndex(array, item);
-      return array[i] === item ? i : -1;
+    if (array == null) return -1;
+    var i = 0,
+        length = array.length;
+    if (isSorted) {
+        if (typeof isSorted == 'number') {
+            i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
+        } else {
+            i = _$1.sortedIndex(array, item);
+            return array[i] === item ? i : -1;
+        }
     }
-  }
-  if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-  for (; i < length; i++) {
-    if (array[i] === item) return i;
-  }return -1;
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < length; i++) {
+        if (array[i] === item) return i;
+    }return -1;
 };
 
 _$1.isWindow = function (obj) {
-  return obj != null && obj == obj.window;
+    return obj != null && obj == obj.window;
 };
 
 // Internal implementation of a recursive `flatten` function.
 var flatten = function flatten(input, shallow, output) {
-  if (shallow && _$1.every(input, _$1.isArray)) {
-    return concat.apply(output, input);
-  }
-  each(input, function (value) {
-    if (_$1.isArray(value) || _$1.isArguments(value)) {
-      shallow ? push.apply(output, value) : flatten(value, shallow, output);
-    } else {
-      output.push(value);
+    if (shallow && _$1.every(input, _$1.isArray)) {
+        return concat.apply(output, input);
     }
-  });
-  return output;
+    each(input, function (value) {
+        if (_$1.isArray(value) || _$1.isArguments(value)) {
+            shallow ? push.apply(output, value) : flatten(value, shallow, output);
+        } else {
+            output.push(value);
+        }
+    });
+    return output;
 };
 
 // Flatten out an array, either recursively (by default), or just one level.
 _$1.flatten = function (array, shallow) {
-  return flatten(array, shallow, []);
+    return flatten(array, shallow, []);
 };
 
 _$1.every = _$1.all = function (obj, iterator, context) {
-  iterator || (iterator = _$1.identity);
-  var result = true;
-  if (obj == null) return result;
-  if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
-  each(obj, function (value, index, list) {
-    if (!(result = result && iterator.call(context, value, index, list))) return breaker;
-  });
-  return !!result;
+    iterator || (iterator = _$1.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function (value, index, list) {
+        if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
 };
 
 // Return the minimum element (or element-based computation).
 _$1.min = function (obj, iterator, context) {
-  if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-    return Math.min.apply(Math, obj);
-  }
-  if (!iterator && _$1.isEmpty(obj)) return Infinity;
-  var result = { computed: Infinity, value: Infinity };
-  each(obj, function (value, index, list) {
-    var computed = iterator ? iterator.call(context, value, index, list) : value;
-    computed < result.computed && (result = { value: value, computed: computed });
-  });
-  return result.value;
+    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+        return Math.min.apply(Math, obj);
+    }
+    if (!iterator && _$1.isEmpty(obj)) return Infinity;
+    var result = { computed: Infinity, value: Infinity };
+    each(obj, function (value, index, list) {
+        var computed = iterator ? iterator.call(context, value, index, list) : value;
+        computed < result.computed && (result = { value: value, computed: computed });
+    });
+    return result.value;
 };
 // Return the maximum element or (element-based computation).
 // Can't optimize arrays of integers longer than 65,535 elements.
 // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
 _$1.max = function (obj, iterator, context) {
-  if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-    return Math.max.apply(Math, obj);
-  }
-  if (!iterator && _$1.isEmpty(obj)) return -Infinity;
-  var result = { computed: -Infinity, value: -Infinity };
-  each(obj, function (value, index, list) {
-    var computed = iterator ? iterator.call(context, value, index, list) : value;
-    computed > result.computed && (result = { value: value, computed: computed });
-  });
-  return result.value;
+    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+        return Math.max.apply(Math, obj);
+    }
+    if (!iterator && _$1.isEmpty(obj)) return -Infinity;
+    var result = { computed: -Infinity, value: -Infinity };
+    each(obj, function (value, index, list) {
+        var computed = iterator ? iterator.call(context, value, index, list) : value;
+        computed > result.computed && (result = { value: value, computed: computed });
+    });
+    return result.value;
 };
 
 // Return the first value which passes a truth test. Aliased as `detect`.
 _$1.find = _$1.detect = function (obj, iterator, context) {
-  var result;
-  any(obj, function (value, index, list) {
-    if (iterator.call(context, value, index, list)) {
-      result = value;
-      return true;
-    }
-  });
-  return result;
+    var result;
+    any(obj, function (value, index, list) {
+        if (iterator.call(context, value, index, list)) {
+            result = value;
+            return true;
+        }
+    });
+    return result;
 };
 // Determine if at least one element in the object matches a truth test.
 // Delegates to **ECMAScript 5**'s native `some` if available.
 // Aliased as `any`.
 var any = _$1.some = _$1.any = function (obj, iterator, context) {
-  iterator || (iterator = _$1.identity);
-  var result = false;
-  if (obj == null) return result;
-  if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
-  each(obj, function (value, index, list) {
-    if (result || (result = iterator.call(context, value, index, list))) return breaker;
-  });
-  return !!result;
+    iterator || (iterator = _$1.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function (value, index, list) {
+        if (result || (result = iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
 };
 // Return a version of the array that does not contain the specified value(s).
 _$1.without = function (array) {
-  return _$1.difference(array, slice.call(arguments, 1));
+    return _$1.difference(array, slice.call(arguments, 1));
 };
 // Take the difference between one array and a number of other arrays.
 // Only the elements present in just the first array will remain.
 _$1.difference = function (array) {
-  var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-  return _$1.filter(array, function (value) {
-    return !_$1.contains(rest, value);
-  });
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _$1.filter(array, function (value) {
+        return !_$1.contains(rest, value);
+    });
 };
 // Produce a duplicate-free version of the array. If the array has already
 // been sorted, you have the option of using a faster algorithm.
 // Aliased as `unique`.
 _$1.uniq = _$1.unique = function (array, isSorted, iterator, context) {
-  if (_$1.isFunction(isSorted)) {
-    context = iterator;
-    iterator = isSorted;
-    isSorted = false;
-  }
-  var initial = iterator ? _$1.map(array, iterator, context) : array;
-  var results = [];
-  var seen = [];
-  each(initial, function (value, index) {
-    if (isSorted ? !index || seen[seen.length - 1] !== value : !_$1.contains(seen, value)) {
-      seen.push(value);
-      results.push(array[index]);
+    if (_$1.isFunction(isSorted)) {
+        context = iterator;
+        iterator = isSorted;
+        isSorted = false;
     }
-  });
-  return results;
+    var initial = iterator ? _$1.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function (value, index) {
+        if (isSorted ? !index || seen[seen.length - 1] !== value : !_$1.contains(seen, value)) {
+            seen.push(value);
+            results.push(array[index]);
+        }
+    });
+    return results;
 };
 // Return the results of applying the iterator to each element.
 // Delegates to **ECMAScript 5**'s native `map` if available.
 _$1.map = _$1.collect = function (obj, iterator, context) {
-  var results = [];
-  if (obj == null) return results;
-  if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-  each(obj, function (value, index, list) {
-    results.push(iterator.call(context, value, index, list));
-  });
-  return results;
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function (value, index, list) {
+        results.push(iterator.call(context, value, index, list));
+    });
+    return results;
 };
 // Determine if the array or object contains a given value (using `===`).
 // Aliased as `include`.
 _$1.contains = _$1.include = function (obj, target) {
-  if (obj == null) return false;
-  if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-  return any(obj, function (value) {
-    return value === target;
-  });
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function (value) {
+        return value === target;
+    });
 };
 
 // Convenience version of a common use case of `map`: fetching a property.
 _$1.pluck = function (obj, key) {
-  return _$1.map(obj, function (value) {
-    return value[key];
-  });
+    return _$1.map(obj, function (value) {
+        return value[key];
+    });
 };
 
 /**
@@ -389,49 +361,49 @@ _$1.pluck = function (obj, key) {
 *如果是深度extend，第一个参数就设置为true
 */
 _$1.extend = function () {
-  var options,
-      name,
-      src,
-      copy,
-      target = arguments[0] || {},
-      i = 1,
-      length = arguments.length,
-      deep = false;
-  if (typeof target === "boolean") {
-    deep = target;
-    target = arguments[1] || {};
-    i = 2;
-  }
-  if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$1.isFunction(target)) {
-    target = {};
-  }
-  if (length === i) {
-    target = this;
-    --i;
-  }
-  for (; i < length; i++) {
-    if ((options = arguments[i]) != null) {
-      for (name in options) {
-        src = target[name];
-        copy = options[name];
-        if (target === copy) {
-          continue;
-        }
-
-        if (deep && copy && _$1.isObject(copy) && !_$1.isArray(copy) && !_$1.isFunction(copy)) {
-          target[name] = _$1.extend(deep, src, copy);
-        } else {
-          target[name] = copy;
-        }
-      }
+    var options,
+        name,
+        src,
+        copy,
+        target = arguments[0] || {},
+        i = 1,
+        length = arguments.length,
+        deep = false;
+    if (typeof target === "boolean") {
+        deep = target;
+        target = arguments[1] || {};
+        i = 2;
     }
-  }
-  return target;
+    if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$1.isFunction(target)) {
+        target = {};
+    }
+    if (length === i) {
+        target = this;
+        --i;
+    }
+    for (; i < length; i++) {
+        if ((options = arguments[i]) != null) {
+            for (name in options) {
+                src = target[name];
+                copy = options[name];
+                if (target === copy) {
+                    continue;
+                }
+
+                if (deep && copy && _$1.isObject(copy) && !_$1.isArray(copy) && !_$1.isFunction(copy)) {
+                    target[name] = _$1.extend(deep, src, copy);
+                } else {
+                    target[name] = copy;
+                }
+            }
+        }
+    }
+    return target;
 };
 
 _$1.clone = function (obj) {
-  if (!_$1.isObject(obj)) return obj;
-  return _$1.isArray(obj) ? obj.slice() : _$1.extend(true, {}, obj);
+    if (!_$1.isObject(obj)) return obj;
+    return _$1.isArray(obj) ? obj.slice() : _$1.extend(true, {}, obj);
 };
 
 /**
@@ -602,65 +574,65 @@ CanvaxEvent.prototype = {
 };
 
 var settings = {
-  //设备分辨率
-  RESOLUTION: window.devicePixelRatio || 1,
+    //设备分辨率
+    RESOLUTION: window.devicePixelRatio || 1,
 
-  /**
-   * Target frames per millisecond.
-   */
-  TARGET_FPMS: 0.06,
+    /**
+     * Target frames per millisecond.
+     */
+    TARGET_FPMS: 0.06,
 
-  /**
-   * If set to true WebGL will attempt make textures mimpaped by default.
-   * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
-   */
-  MIPMAP_TEXTURES: true,
+    /**
+     * If set to true WebGL will attempt make textures mimpaped by default.
+     * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
+     */
+    MIPMAP_TEXTURES: true,
 
-  /**
-   * Default filter resolution.
-   */
-  FILTER_RESOLUTION: 1,
+    /**
+     * Default filter resolution.
+     */
+    FILTER_RESOLUTION: 1,
 
-  // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
-  // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
+    // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
+    // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
 
-  /**
-   * The default sprite batch size.
-   *
-   * The default aims to balance desktop and mobile devices.
-   */
-  SPRITE_BATCH_SIZE: 4096,
+    /**
+     * The default sprite batch size.
+     *
+     * The default aims to balance desktop and mobile devices.
+     */
+    SPRITE_BATCH_SIZE: 4096,
 
-  /**
-   * The prefix that denotes a URL is for a retina asset.
-   */
-  RETINA_PREFIX: /@(.+)x/,
+    /**
+     * The prefix that denotes a URL is for a retina asset.
+     */
+    RETINA_PREFIX: /@(.+)x/,
 
-  RENDER_OPTIONS: {
-    view: null,
-    antialias: true,
-    forceFXAA: false,
-    autoResize: false,
-    transparent: true,
-    backgroundColor: 0x000000,
-    clearBeforeRender: true,
-    preserveDrawingBuffer: false,
-    roundPixels: false
-  },
+    RENDER_OPTIONS: {
+        view: null,
+        antialias: true,
+        forceFXAA: false,
+        autoResize: false,
+        transparent: true,
+        backgroundColor: 0x000000,
+        clearBeforeRender: true,
+        preserveDrawingBuffer: false,
+        roundPixels: false
+    },
 
-  TRANSFORM_MODE: 0,
+    TRANSFORM_MODE: 0,
 
-  GC_MODE: 0,
+    GC_MODE: 0,
 
-  GC_MAX_IDLE: 60 * 60,
+    GC_MAX_IDLE: 60 * 60,
 
-  GC_MAX_CHECK_COUNT: 60 * 10,
+    GC_MAX_CHECK_COUNT: 60 * 10,
 
-  WRAP_MODE: 0,
+    WRAP_MODE: 0,
 
-  SCALE_MODE: 0,
+    SCALE_MODE: 0,
 
-  PRECISION: 'mediump'
+    PRECISION: 'mediump'
 
 };
 
@@ -677,7 +649,6 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
                 }
             };
 
-            
             return {
                 v: eventDomFn
             };
@@ -698,7 +669,6 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
                 }
             };
 
-            
             return {
                 v: eventFn
             };
@@ -1718,920 +1688,834 @@ Matrix.prototype = {
 
 var commonjsGlobal$$1 = typeof window !== 'undefined' ? window : typeof commonjsGlobal$1 !== 'undefined' ? commonjsGlobal$1 : typeof self !== 'undefined' ? self : {};
 
-
-
-
-
 function createCommonjsModule$$1(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
+    return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
 var Tween = createCommonjsModule$$1(function (module, exports) {
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */
+    /**
+     * Tween.js - Licensed under the MIT license
+     * https://github.com/tweenjs/tween.js
+     * ----------------------------------------------
+     *
+     * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+     * Thank you all, you're awesome!
+     */
+
+    var _Group = function () {
+        this._tweens = {};
+        this._tweensAddedDuringUpdate = {};
+    };
+
+    _Group.prototype = {
+        getAll: function () {
+
+            return Object.keys(this._tweens).map(function (tweenId) {
+                return this._tweens[tweenId];
+            }.bind(this));
+        },
+
+        removeAll: function () {
+
+            this._tweens = {};
+        },
+
+        add: function (tween) {
+
+            this._tweens[tween.getId()] = tween;
+            this._tweensAddedDuringUpdate[tween.getId()] = tween;
+        },
+
+        remove: function (tween) {
+
+            delete this._tweens[tween.getId()];
+            delete this._tweensAddedDuringUpdate[tween.getId()];
+        },
+
+        update: function (time, preserve) {
+
+            var tweenIds = Object.keys(this._tweens);
+
+            if (tweenIds.length === 0) {
+                return false;
+            }
+
+            time = time !== undefined ? time : TWEEN.now();
+
+            // Tweens are updated in "batches". If you add a new tween during an update, then the
+            // new tween will be updated in the next batch.
+            // If you remove a tween during an update, it will normally still be updated. However,
+            // if the removed tween was added during the current batch, then it will not be updated.
+            while (tweenIds.length > 0) {
+                this._tweensAddedDuringUpdate = {};
+
+                for (var i = 0; i < tweenIds.length; i++) {
+
+                    if (this._tweens[tweenIds[i]].update(time) === false) {
+                        this._tweens[tweenIds[i]]._isPlaying = false;
+
+                        if (!preserve) {
+                            delete this._tweens[tweenIds[i]];
+                        }
+                    }
+                }
+
+                tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+            }
+
+            return true;
+        }
+    };
+
+    var TWEEN = new _Group();
+
+    TWEEN.Group = _Group;
+    TWEEN._nextId = 0;
+    TWEEN.nextId = function () {
+        return TWEEN._nextId++;
+    };
+
+    // Include a performance.now polyfill.
+    // In node.js, use process.hrtime.
+    if (typeof window === 'undefined' && typeof process !== 'undefined') {
+        TWEEN.now = function () {
+            var time = process.hrtime();
+
+            // Convert [seconds, nanoseconds] to milliseconds.
+            return time[0] * 1000 + time[1] / 1000000;
+        };
+    }
+    // In a browser, use window.performance.now if it is available.
+    else if (typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined) {
+            // This must be bound, because directly assigning this function
+            // leads to an invocation exception in Chrome.
+            TWEEN.now = window.performance.now.bind(window.performance);
+        }
+        // Use Date.now if it is available.
+        else if (Date.now !== undefined) {
+                TWEEN.now = Date.now;
+            }
+            // Otherwise, use 'new Date().getTime()'.
+            else {
+                    TWEEN.now = function () {
+                        return new Date().getTime();
+                    };
+                }
+
+    TWEEN.Tween = function (object, group) {
+        this._object = object;
+        this._valuesStart = {};
+        this._valuesEnd = {};
+        this._valuesStartRepeat = {};
+        this._duration = 1000;
+        this._repeat = 0;
+        this._repeatDelayTime = undefined;
+        this._yoyo = false;
+        this._isPlaying = false;
+        this._reversed = false;
+        this._delayTime = 0;
+        this._startTime = null;
+        this._easingFunction = TWEEN.Easing.Linear.None;
+        this._interpolationFunction = TWEEN.Interpolation.Linear;
+        this._chainedTweens = [];
+        this._onStartCallback = null;
+        this._onStartCallbackFired = false;
+        this._onUpdateCallback = null;
+        this._onCompleteCallback = null;
+        this._onStopCallback = null;
+        this._group = group || TWEEN;
+        this._id = TWEEN.nextId();
+    };
+
+    TWEEN.Tween.prototype = {
+        getId: function getId() {
+            return this._id;
+        },
+
+        isPlaying: function isPlaying() {
+            return this._isPlaying;
+        },
 
+        to: function to(properties, duration) {
 
-var _Group = function () {
-	this._tweens = {};
-	this._tweensAddedDuringUpdate = {};
-};
+            this._valuesEnd = properties;
 
-_Group.prototype = {
-	getAll: function () {
+            if (duration !== undefined) {
+                this._duration = duration;
+            }
 
-		return Object.keys(this._tweens).map(function (tweenId) {
-			return this._tweens[tweenId];
-		}.bind(this));
+            return this;
+        },
 
-	},
+        start: function start(time) {
 
-	removeAll: function () {
+            this._group.add(this);
 
-		this._tweens = {};
+            this._isPlaying = true;
 
-	},
-
-	add: function (tween) {
-
-		this._tweens[tween.getId()] = tween;
-		this._tweensAddedDuringUpdate[tween.getId()] = tween;
-
-	},
-
-	remove: function (tween) {
-
-		delete this._tweens[tween.getId()];
-		delete this._tweensAddedDuringUpdate[tween.getId()];
-
-	},
-
-	update: function (time, preserve) {
-
-		var tweenIds = Object.keys(this._tweens);
-
-		if (tweenIds.length === 0) {
-			return false;
-		}
-
-		time = time !== undefined ? time : TWEEN.now();
-
-		// Tweens are updated in "batches". If you add a new tween during an update, then the
-		// new tween will be updated in the next batch.
-		// If you remove a tween during an update, it will normally still be updated. However,
-		// if the removed tween was added during the current batch, then it will not be updated.
-		while (tweenIds.length > 0) {
-			this._tweensAddedDuringUpdate = {};
-
-			for (var i = 0; i < tweenIds.length; i++) {
-
-				if (this._tweens[tweenIds[i]].update(time) === false) {
-					this._tweens[tweenIds[i]]._isPlaying = false;
-
-					if (!preserve) {
-						delete this._tweens[tweenIds[i]];
-					}
-				}
-			}
+            this._onStartCallbackFired = false;
 
-			tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-		}
+            this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
+            this._startTime += this._delayTime;
 
-		return true;
+            for (var property in this._valuesEnd) {
 
-	}
-};
+                // Check if an Array was provided as property value
+                if (this._valuesEnd[property] instanceof Array) {
 
-var TWEEN = new _Group();
+                    if (this._valuesEnd[property].length === 0) {
+                        continue;
+                    }
 
-TWEEN.Group = _Group;
-TWEEN._nextId = 0;
-TWEEN.nextId = function () {
-	return TWEEN._nextId++;
-};
+                    // Create a local copy of the Array with the start value at the front
+                    this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+                }
 
+                // If `to()` specifies a property that doesn't exist in the source object,
+                // we should not set that property in the object
+                if (this._object[property] === undefined) {
+                    continue;
+                }
 
-// Include a performance.now polyfill.
-// In node.js, use process.hrtime.
-if (typeof (window) === 'undefined' && typeof (process) !== 'undefined') {
-	TWEEN.now = function () {
-		var time = process.hrtime();
+                // Save the starting value.
+                this._valuesStart[property] = this._object[property];
 
-		// Convert [seconds, nanoseconds] to milliseconds.
-		return time[0] * 1000 + time[1] / 1000000;
-	};
-}
-// In a browser, use window.performance.now if it is available.
-else if (typeof (window) !== 'undefined' &&
-         window.performance !== undefined &&
-		 window.performance.now !== undefined) {
-	// This must be bound, because directly assigning this function
-	// leads to an invocation exception in Chrome.
-	TWEEN.now = window.performance.now.bind(window.performance);
-}
-// Use Date.now if it is available.
-else if (Date.now !== undefined) {
-	TWEEN.now = Date.now;
-}
-// Otherwise, use 'new Date().getTime()'.
-else {
-	TWEEN.now = function () {
-		return new Date().getTime();
-	};
-}
-
+                if (this._valuesStart[property] instanceof Array === false) {
+                    this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+                }
 
-TWEEN.Tween = function (object, group) {
-	this._object = object;
-	this._valuesStart = {};
-	this._valuesEnd = {};
-	this._valuesStartRepeat = {};
-	this._duration = 1000;
-	this._repeat = 0;
-	this._repeatDelayTime = undefined;
-	this._yoyo = false;
-	this._isPlaying = false;
-	this._reversed = false;
-	this._delayTime = 0;
-	this._startTime = null;
-	this._easingFunction = TWEEN.Easing.Linear.None;
-	this._interpolationFunction = TWEEN.Interpolation.Linear;
-	this._chainedTweens = [];
-	this._onStartCallback = null;
-	this._onStartCallbackFired = false;
-	this._onUpdateCallback = null;
-	this._onCompleteCallback = null;
-	this._onStopCallback = null;
-	this._group = group || TWEEN;
-	this._id = TWEEN.nextId();
+                this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+            }
 
-};
+            return this;
+        },
 
-TWEEN.Tween.prototype = {
-	getId: function getId() {
-		return this._id;
-	},
+        stop: function stop() {
 
-	isPlaying: function isPlaying() {
-		return this._isPlaying;
-	},
+            if (!this._isPlaying) {
+                return this;
+            }
 
-	to: function to(properties, duration) {
+            this._group.remove(this);
+            this._isPlaying = false;
 
-		this._valuesEnd = properties;
+            if (this._onStopCallback !== null) {
+                this._onStopCallback(this._object);
+            }
 
-		if (duration !== undefined) {
-			this._duration = duration;
-		}
+            this.stopChainedTweens();
+            return this;
+        },
 
-		return this;
+        end: function end() {
 
-	},
+            this.update(this._startTime + this._duration);
+            return this;
+        },
 
-	start: function start(time) {
+        stopChainedTweens: function stopChainedTweens() {
 
-		this._group.add(this);
+            for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+                this._chainedTweens[i].stop();
+            }
+        },
 
-		this._isPlaying = true;
+        delay: function delay(amount) {
 
-		this._onStartCallbackFired = false;
+            this._delayTime = amount;
+            return this;
+        },
 
-		this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
-		this._startTime += this._delayTime;
+        repeat: function repeat(times) {
 
-		for (var property in this._valuesEnd) {
+            this._repeat = times;
+            return this;
+        },
 
-			// Check if an Array was provided as property value
-			if (this._valuesEnd[property] instanceof Array) {
+        repeatDelay: function repeatDelay(amount) {
 
-				if (this._valuesEnd[property].length === 0) {
-					continue;
-				}
+            this._repeatDelayTime = amount;
+            return this;
+        },
 
-				// Create a local copy of the Array with the start value at the front
-				this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+        yoyo: function yoyo(yoyo) {
 
-			}
+            this._yoyo = yoyo;
+            return this;
+        },
 
-			// If `to()` specifies a property that doesn't exist in the source object,
-			// we should not set that property in the object
-			if (this._object[property] === undefined) {
-				continue;
-			}
+        easing: function easing(easing) {
 
-			// Save the starting value.
-			this._valuesStart[property] = this._object[property];
+            this._easingFunction = easing;
+            return this;
+        },
 
-			if ((this._valuesStart[property] instanceof Array) === false) {
-				this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
-			}
+        interpolation: function interpolation(interpolation) {
 
-			this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+            this._interpolationFunction = interpolation;
+            return this;
+        },
 
-		}
+        chain: function chain() {
 
-		return this;
+            this._chainedTweens = arguments;
+            return this;
+        },
 
-	},
+        onStart: function onStart(callback) {
 
-	stop: function stop() {
+            this._onStartCallback = callback;
+            return this;
+        },
 
-		if (!this._isPlaying) {
-			return this;
-		}
+        onUpdate: function onUpdate(callback) {
 
-		this._group.remove(this);
-		this._isPlaying = false;
+            this._onUpdateCallback = callback;
+            return this;
+        },
 
-		if (this._onStopCallback !== null) {
-			this._onStopCallback(this._object);
-		}
+        onComplete: function onComplete(callback) {
 
-		this.stopChainedTweens();
-		return this;
+            this._onCompleteCallback = callback;
+            return this;
+        },
 
-	},
+        onStop: function onStop(callback) {
 
-	end: function end() {
+            this._onStopCallback = callback;
+            return this;
+        },
 
-		this.update(this._startTime + this._duration);
-		return this;
+        update: function update(time) {
 
-	},
+            var property;
+            var elapsed;
+            var value;
 
-	stopChainedTweens: function stopChainedTweens() {
+            if (time < this._startTime) {
+                return true;
+            }
 
-		for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-			this._chainedTweens[i].stop();
-		}
+            if (this._onStartCallbackFired === false) {
 
-	},
+                if (this._onStartCallback !== null) {
+                    this._onStartCallback(this._object);
+                }
 
-	delay: function delay(amount) {
+                this._onStartCallbackFired = true;
+            }
 
-		this._delayTime = amount;
-		return this;
+            elapsed = (time - this._startTime) / this._duration;
+            elapsed = elapsed > 1 ? 1 : elapsed;
 
-	},
+            value = this._easingFunction(elapsed);
 
-	repeat: function repeat(times) {
+            for (property in this._valuesEnd) {
 
-		this._repeat = times;
-		return this;
+                // Don't update properties that do not exist in the source object
+                if (this._valuesStart[property] === undefined) {
+                    continue;
+                }
 
-	},
+                var start = this._valuesStart[property] || 0;
+                var end = this._valuesEnd[property];
 
-	repeatDelay: function repeatDelay(amount) {
+                if (end instanceof Array) {
 
-		this._repeatDelayTime = amount;
-		return this;
+                    this._object[property] = this._interpolationFunction(end, value);
+                } else {
 
-	},
+                    // Parses relative end values with start as base (e.g.: +10, -3)
+                    if (typeof end === 'string') {
 
-	yoyo: function yoyo(yoyo) {
+                        if (end.charAt(0) === '+' || end.charAt(0) === '-') {
+                            end = start + parseFloat(end);
+                        } else {
+                            end = parseFloat(end);
+                        }
+                    }
 
-		this._yoyo = yoyo;
-		return this;
+                    // Protect against non numeric properties.
+                    if (typeof end === 'number') {
+                        this._object[property] = start + (end - start) * value;
+                    }
+                }
+            }
 
-	},
+            if (this._onUpdateCallback !== null) {
+                this._onUpdateCallback(this._object);
+            }
 
-	easing: function easing(easing) {
+            if (elapsed === 1) {
 
-		this._easingFunction = easing;
-		return this;
+                if (this._repeat > 0) {
 
-	},
+                    if (isFinite(this._repeat)) {
+                        this._repeat--;
+                    }
 
-	interpolation: function interpolation(interpolation) {
+                    // Reassign starting values, restart by making startTime = now
+                    for (property in this._valuesStartRepeat) {
 
-		this._interpolationFunction = interpolation;
-		return this;
+                        if (typeof this._valuesEnd[property] === 'string') {
+                            this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+                        }
 
-	},
+                        if (this._yoyo) {
+                            var tmp = this._valuesStartRepeat[property];
 
-	chain: function chain() {
+                            this._valuesStartRepeat[property] = this._valuesEnd[property];
+                            this._valuesEnd[property] = tmp;
+                        }
 
-		this._chainedTweens = arguments;
-		return this;
+                        this._valuesStart[property] = this._valuesStartRepeat[property];
+                    }
 
-	},
+                    if (this._yoyo) {
+                        this._reversed = !this._reversed;
+                    }
 
-	onStart: function onStart(callback) {
+                    if (this._repeatDelayTime !== undefined) {
+                        this._startTime = time + this._repeatDelayTime;
+                    } else {
+                        this._startTime = time + this._delayTime;
+                    }
 
-		this._onStartCallback = callback;
-		return this;
+                    return true;
+                } else {
 
-	},
+                    if (this._onCompleteCallback !== null) {
 
-	onUpdate: function onUpdate(callback) {
+                        this._onCompleteCallback(this._object);
+                    }
 
-		this._onUpdateCallback = callback;
-		return this;
+                    for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+                        // Make the chained tweens start exactly at the time they should,
+                        // even if the `update()` method was called way past the duration of the tween
+                        this._chainedTweens[i].start(this._startTime + this._duration);
+                    }
 
-	},
+                    return false;
+                }
+            }
 
-	onComplete: function onComplete(callback) {
+            return true;
+        }
+    };
 
-		this._onCompleteCallback = callback;
-		return this;
+    TWEEN.Easing = {
 
-	},
+        Linear: {
 
-	onStop: function onStop(callback) {
+            None: function (k) {
 
-		this._onStopCallback = callback;
-		return this;
+                return k;
+            }
 
-	},
+        },
 
-	update: function update(time) {
+        Quadratic: {
 
-		var property;
-		var elapsed;
-		var value;
+            In: function (k) {
 
-		if (time < this._startTime) {
-			return true;
-		}
+                return k * k;
+            },
 
-		if (this._onStartCallbackFired === false) {
+            Out: function (k) {
 
-			if (this._onStartCallback !== null) {
-				this._onStartCallback(this._object);
-			}
+                return k * (2 - k);
+            },
 
-			this._onStartCallbackFired = true;
-		}
+            InOut: function (k) {
 
-		elapsed = (time - this._startTime) / this._duration;
-		elapsed = elapsed > 1 ? 1 : elapsed;
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k;
+                }
 
-		value = this._easingFunction(elapsed);
+                return -0.5 * (--k * (k - 2) - 1);
+            }
 
-		for (property in this._valuesEnd) {
+        },
 
-			// Don't update properties that do not exist in the source object
-			if (this._valuesStart[property] === undefined) {
-				continue;
-			}
+        Cubic: {
 
-			var start = this._valuesStart[property] || 0;
-			var end = this._valuesEnd[property];
+            In: function (k) {
 
-			if (end instanceof Array) {
+                return k * k * k;
+            },
 
-				this._object[property] = this._interpolationFunction(end, value);
+            Out: function (k) {
 
-			} else {
+                return --k * k * k + 1;
+            },
 
-				// Parses relative end values with start as base (e.g.: +10, -3)
-				if (typeof (end) === 'string') {
+            InOut: function (k) {
 
-					if (end.charAt(0) === '+' || end.charAt(0) === '-') {
-						end = start + parseFloat(end);
-					} else {
-						end = parseFloat(end);
-					}
-				}
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k;
+                }
 
-				// Protect against non numeric properties.
-				if (typeof (end) === 'number') {
-					this._object[property] = start + (end - start) * value;
-				}
+                return 0.5 * ((k -= 2) * k * k + 2);
+            }
 
-			}
+        },
 
-		}
+        Quartic: {
 
-		if (this._onUpdateCallback !== null) {
-			this._onUpdateCallback(this._object);
-		}
+            In: function (k) {
 
-		if (elapsed === 1) {
+                return k * k * k * k;
+            },
 
-			if (this._repeat > 0) {
+            Out: function (k) {
 
-				if (isFinite(this._repeat)) {
-					this._repeat--;
-				}
+                return 1 - --k * k * k * k;
+            },
 
-				// Reassign starting values, restart by making startTime = now
-				for (property in this._valuesStartRepeat) {
+            InOut: function (k) {
 
-					if (typeof (this._valuesEnd[property]) === 'string') {
-						this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-					}
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k * k;
+                }
 
-					if (this._yoyo) {
-						var tmp = this._valuesStartRepeat[property];
+                return -0.5 * ((k -= 2) * k * k * k - 2);
+            }
 
-						this._valuesStartRepeat[property] = this._valuesEnd[property];
-						this._valuesEnd[property] = tmp;
-					}
+        },
 
-					this._valuesStart[property] = this._valuesStartRepeat[property];
+        Quintic: {
 
-				}
+            In: function (k) {
 
-				if (this._yoyo) {
-					this._reversed = !this._reversed;
-				}
+                return k * k * k * k * k;
+            },
 
-				if (this._repeatDelayTime !== undefined) {
-					this._startTime = time + this._repeatDelayTime;
-				} else {
-					this._startTime = time + this._delayTime;
-				}
+            Out: function (k) {
 
-				return true;
+                return --k * k * k * k * k + 1;
+            },
 
-			} else {
+            InOut: function (k) {
 
-				if (this._onCompleteCallback !== null) {
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k * k * k;
+                }
 
-					this._onCompleteCallback(this._object);
-				}
+                return 0.5 * ((k -= 2) * k * k * k * k + 2);
+            }
 
-				for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-					// Make the chained tweens start exactly at the time they should,
-					// even if the `update()` method was called way past the duration of the tween
-					this._chainedTweens[i].start(this._startTime + this._duration);
-				}
+        },
 
-				return false;
+        Sinusoidal: {
 
-			}
+            In: function (k) {
 
-		}
+                return 1 - Math.cos(k * Math.PI / 2);
+            },
 
-		return true;
+            Out: function (k) {
 
-	}
-};
+                return Math.sin(k * Math.PI / 2);
+            },
 
+            InOut: function (k) {
 
-TWEEN.Easing = {
+                return 0.5 * (1 - Math.cos(Math.PI * k));
+            }
 
-	Linear: {
+        },
 
-		None: function (k) {
+        Exponential: {
 
-			return k;
+            In: function (k) {
 
-		}
+                return k === 0 ? 0 : Math.pow(1024, k - 1);
+            },
 
-	},
+            Out: function (k) {
 
-	Quadratic: {
+                return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return k * k;
+                if (k === 0) {
+                    return 0;
+                }
 
-		},
+                if (k === 1) {
+                    return 1;
+                }
 
-		Out: function (k) {
+                if ((k *= 2) < 1) {
+                    return 0.5 * Math.pow(1024, k - 1);
+                }
 
-			return k * (2 - k);
+                return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+            }
 
-		},
+        },
 
-		InOut: function (k) {
+        Circular: {
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k;
-			}
+            In: function (k) {
 
-			return - 0.5 * (--k * (k - 2) - 1);
+                return 1 - Math.sqrt(1 - k * k);
+            },
 
-		}
+            Out: function (k) {
 
-	},
+                return Math.sqrt(1 - --k * k);
+            },
 
-	Cubic: {
+            InOut: function (k) {
 
-		In: function (k) {
+                if ((k *= 2) < 1) {
+                    return -0.5 * (Math.sqrt(1 - k * k) - 1);
+                }
 
-			return k * k * k;
+                return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+            }
 
-		},
+        },
 
-		Out: function (k) {
+        Elastic: {
 
-			return --k * k * k + 1;
+            In: function (k) {
 
-		},
+                if (k === 0) {
+                    return 0;
+                }
 
-		InOut: function (k) {
+                if (k === 1) {
+                    return 1;
+                }
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k;
-			}
+                return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+            },
 
-			return 0.5 * ((k -= 2) * k * k + 2);
+            Out: function (k) {
 
-		}
+                if (k === 0) {
+                    return 0;
+                }
 
-	},
+                if (k === 1) {
+                    return 1;
+                }
 
-	Quartic: {
+                return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return k * k * k * k;
+                if (k === 0) {
+                    return 0;
+                }
 
-		},
+                if (k === 1) {
+                    return 1;
+                }
 
-		Out: function (k) {
+                k *= 2;
 
-			return 1 - (--k * k * k * k);
+                if (k < 1) {
+                    return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+                }
 
-		},
+                return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+            }
 
-		InOut: function (k) {
+        },
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k;
-			}
+        Back: {
 
-			return - 0.5 * ((k -= 2) * k * k * k - 2);
+            In: function (k) {
 
-		}
+                var s = 1.70158;
 
-	},
+                return k * k * ((s + 1) * k - s);
+            },
 
-	Quintic: {
+            Out: function (k) {
 
-		In: function (k) {
+                var s = 1.70158;
 
-			return k * k * k * k * k;
+                return --k * k * ((s + 1) * k + s) + 1;
+            },
 
-		},
+            InOut: function (k) {
 
-		Out: function (k) {
+                var s = 1.70158 * 1.525;
 
-			return --k * k * k * k * k + 1;
+                if ((k *= 2) < 1) {
+                    return 0.5 * (k * k * ((s + 1) * k - s));
+                }
 
-		},
+                return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+            }
 
-		InOut: function (k) {
+        },
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k * k;
-			}
+        Bounce: {
 
-			return 0.5 * ((k -= 2) * k * k * k * k + 2);
+            In: function (k) {
 
-		}
+                return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+            },
 
-	},
+            Out: function (k) {
 
-	Sinusoidal: {
+                if (k < 1 / 2.75) {
+                    return 7.5625 * k * k;
+                } else if (k < 2 / 2.75) {
+                    return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+                } else if (k < 2.5 / 2.75) {
+                    return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+                } else {
+                    return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+                }
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return 1 - Math.cos(k * Math.PI / 2);
+                if (k < 0.5) {
+                    return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
+                }
 
-		},
+                return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+            }
 
-		Out: function (k) {
+        }
 
-			return Math.sin(k * Math.PI / 2);
+    };
 
-		},
+    TWEEN.Interpolation = {
 
-		InOut: function (k) {
+        Linear: function (v, k) {
 
-			return 0.5 * (1 - Math.cos(Math.PI * k));
+            var m = v.length - 1;
+            var f = m * k;
+            var i = Math.floor(f);
+            var fn = TWEEN.Interpolation.Utils.Linear;
 
-		}
+            if (k < 0) {
+                return fn(v[0], v[1], f);
+            }
 
-	},
+            if (k > 1) {
+                return fn(v[m], v[m - 1], m - f);
+            }
 
-	Exponential: {
+            return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+        },
 
-		In: function (k) {
+        Bezier: function (v, k) {
 
-			return k === 0 ? 0 : Math.pow(1024, k - 1);
+            var b = 0;
+            var n = v.length - 1;
+            var pw = Math.pow;
+            var bn = TWEEN.Interpolation.Utils.Bernstein;
 
-		},
+            for (var i = 0; i <= n; i++) {
+                b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+            }
 
-		Out: function (k) {
+            return b;
+        },
 
-			return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+        CatmullRom: function (v, k) {
 
-		},
+            var m = v.length - 1;
+            var f = m * k;
+            var i = Math.floor(f);
+            var fn = TWEEN.Interpolation.Utils.CatmullRom;
 
-		InOut: function (k) {
+            if (v[0] === v[m]) {
 
-			if (k === 0) {
-				return 0;
-			}
+                if (k < 0) {
+                    i = Math.floor(f = m * (1 + k));
+                }
 
-			if (k === 1) {
-				return 1;
-			}
+                return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+            } else {
 
-			if ((k *= 2) < 1) {
-				return 0.5 * Math.pow(1024, k - 1);
-			}
+                if (k < 0) {
+                    return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+                }
 
-			return 0.5 * (- Math.pow(2, - 10 * (k - 1)) + 2);
+                if (k > 1) {
+                    return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+                }
 
-		}
+                return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+            }
+        },
 
-	},
+        Utils: {
 
-	Circular: {
+            Linear: function (p0, p1, t) {
 
-		In: function (k) {
+                return (p1 - p0) * t + p0;
+            },
 
-			return 1 - Math.sqrt(1 - k * k);
+            Bernstein: function (n, i) {
 
-		},
+                var fc = TWEEN.Interpolation.Utils.Factorial;
 
-		Out: function (k) {
+                return fc(n) / fc(i) / fc(n - i);
+            },
 
-			return Math.sqrt(1 - (--k * k));
+            Factorial: function () {
 
-		},
+                var a = [1];
 
-		InOut: function (k) {
+                return function (n) {
 
-			if ((k *= 2) < 1) {
-				return - 0.5 * (Math.sqrt(1 - k * k) - 1);
-			}
+                    var s = 1;
 
-			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+                    if (a[n]) {
+                        return a[n];
+                    }
 
-		}
+                    for (var i = n; i > 1; i--) {
+                        s *= i;
+                    }
 
-	},
+                    a[n] = s;
+                    return s;
+                };
+            }(),
 
-	Elastic: {
+            CatmullRom: function (p0, p1, p2, p3, t) {
 
-		In: function (k) {
+                var v0 = (p2 - p0) * 0.5;
+                var v1 = (p3 - p1) * 0.5;
+                var t2 = t * t;
+                var t3 = t * t2;
 
-			if (k === 0) {
-				return 0;
-			}
+                return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+            }
 
-			if (k === 1) {
-				return 1;
-			}
+        }
 
-			return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+    };
 
-		},
+    // UMD (Universal Module Definition)
+    (function (root) {
 
-		Out: function (k) {
+        if (typeof undefined === 'function' && undefined.amd) {
 
-			if (k === 0) {
-				return 0;
-			}
+            // AMD
+            undefined([], function () {
+                return TWEEN;
+            });
+        } else {
 
-			if (k === 1) {
-				return 1;
-			}
-
-			return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			if (k === 0) {
-				return 0;
-			}
-
-			if (k === 1) {
-				return 1;
-			}
-
-			k *= 2;
-
-			if (k < 1) {
-				return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
-			}
-
-			return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
-
-		}
-
-	},
-
-	Back: {
-
-		In: function (k) {
-
-			var s = 1.70158;
-
-			return k * k * ((s + 1) * k - s);
-
-		},
-
-		Out: function (k) {
-
-			var s = 1.70158;
-
-			return --k * k * ((s + 1) * k + s) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			var s = 1.70158 * 1.525;
-
-			if ((k *= 2) < 1) {
-				return 0.5 * (k * k * ((s + 1) * k - s));
-			}
-
-			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
-
-		}
-
-	},
-
-	Bounce: {
-
-		In: function (k) {
-
-			return 1 - TWEEN.Easing.Bounce.Out(1 - k);
-
-		},
-
-		Out: function (k) {
-
-			if (k < (1 / 2.75)) {
-				return 7.5625 * k * k;
-			} else if (k < (2 / 2.75)) {
-				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
-			} else if (k < (2.5 / 2.75)) {
-				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
-			} else {
-				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
-			}
-
-		},
-
-		InOut: function (k) {
-
-			if (k < 0.5) {
-				return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
-			}
-
-			return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
-
-		}
-
-	}
-
-};
-
-TWEEN.Interpolation = {
-
-	Linear: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.Linear;
-
-		if (k < 0) {
-			return fn(v[0], v[1], f);
-		}
-
-		if (k > 1) {
-			return fn(v[m], v[m - 1], m - f);
-		}
-
-		return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-
-	},
-
-	Bezier: function (v, k) {
-
-		var b = 0;
-		var n = v.length - 1;
-		var pw = Math.pow;
-		var bn = TWEEN.Interpolation.Utils.Bernstein;
-
-		for (var i = 0; i <= n; i++) {
-			b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-		}
-
-		return b;
-
-	},
-
-	CatmullRom: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.CatmullRom;
-
-		if (v[0] === v[m]) {
-
-			if (k < 0) {
-				i = Math.floor(f = m * (1 + k));
-			}
-
-			return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-
-		} else {
-
-			if (k < 0) {
-				return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-			}
-
-			if (k > 1) {
-				return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-			}
-
-			return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-
-		}
-
-	},
-
-	Utils: {
-
-		Linear: function (p0, p1, t) {
-
-			return (p1 - p0) * t + p0;
-
-		},
-
-		Bernstein: function (n, i) {
-
-			var fc = TWEEN.Interpolation.Utils.Factorial;
-
-			return fc(n) / fc(i) / fc(n - i);
-
-		},
-
-		Factorial: (function () {
-
-			var a = [1];
-
-			return function (n) {
-
-				var s = 1;
-
-				if (a[n]) {
-					return a[n];
-				}
-
-				for (var i = n; i > 1; i--) {
-					s *= i;
-				}
-
-				a[n] = s;
-				return s;
-
-			};
-
-		})(),
-
-		CatmullRom: function (p0, p1, p2, p3, t) {
-
-			var v0 = (p2 - p0) * 0.5;
-			var v1 = (p3 - p1) * 0.5;
-			var t2 = t * t;
-			var t3 = t * t2;
-
-			return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (- 3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-
-		}
-
-	}
-
-};
-
-// UMD (Universal Module Definition)
-(function (root) {
-
-	if (typeof undefined === 'function' && undefined.amd) {
-
-		// AMD
-		undefined([], function () {
-			return TWEEN;
-		});
-
-	} else {
-
-		// Node.js
-		module.exports = TWEEN;
-
-	}
-
-})(commonjsGlobal$$1);
+            // Node.js
+            module.exports = TWEEN;
+        }
+    })(commonjsGlobal$$1);
 });
 
 //import Tween from "./Tween"
@@ -2779,7 +2663,6 @@ function registTween(options) {
             tween.id = tid;
             tween.start();
 
-            
             animate();
         })();
     }
@@ -2813,11 +2696,14 @@ function Observe(scope) {
     var stopRepeatAssign = true;
 
     var pmodel = {},
-        //要返回的对象
+
+    //要返回的对象
     accessores = {},
-        //内部用于转换的对象
+
+    //内部用于转换的对象
     _Publics = ["$watch", "$model"],
-        //公共属性，不需要get set 化的
+
+    //公共属性，不需要get set 化的
     model = {}; //这是pmodel上的$model属性
 
     var Publics = _Publics;
@@ -2969,19 +2855,12 @@ var RENDERER_TYPE = {
     CANVAS: 2
 };
 
-
-
 var SHAPES = {
     POLY: 0,
     RECT: 1,
     CIRC: 2,
     ELIP: 3
 };
-
-
-
-
-
 
 //会影响到transform改变的context属性
 var TRANSFORM_PROPS = ["x", "y", "scaleX", "scaleY", "rotation", "scaleOrigin", "rotateOrigin"];
@@ -3144,6 +3023,10 @@ var DisplayObject = function (_EventDispatcher) {
                     //如果这个obj的context已经不存在了，那么就什么都不处理，
                     //TODO:后续还要把自己给destroy 并且要把在 动画队列里面的动画也干掉
                     return;
+                }
+
+                if (name == "globalGalpha") {
+                    obj._globalAlphaChange = true;
                 }
 
                 if (_$1.indexOf(TRANSFORM_PROPS, name) > -1) {
@@ -3876,7 +3759,6 @@ var Stage = function (_DisplayObjectContain) {
     function Stage(opt) {
         classCallCheck(this, Stage);
 
-
         opt.type = "stage";
 
         var _this = possibleConstructorReturn(this, (Stage.__proto__ || Object.getPrototypeOf(Stage)).call(this, opt));
@@ -4098,7 +3980,6 @@ var CanvasGraphicsRenderer = function () {
     * @stage 也可以displayObject.getStage()获取。
     */
 
-
     createClass(CanvasGraphicsRenderer, [{
         key: 'render',
         value: function render(displayObject, stage, globalAlpha) {
@@ -4248,19 +4129,12 @@ var CanvasRenderer = function (_SystemRenderer) {
             stage.stageRending = true;
             stage.setWorldTransform();
             this._clear(stage);
-            this._render(stage);
+            this._render(stage, stage, stage.context.globalAlpha);
             stage.stageRending = false;
         }
     }, {
         key: '_render',
         value: function _render(stage, displayObject, globalAlpha) {
-            if (!displayObject) {
-                displayObject = stage;
-            }
-            if (!globalAlpha) {
-                globalAlpha = 1;
-            }
-
             var $MC = displayObject.context.$model;
 
             if (!displayObject.worldTransform || displayObject._transformChange || displayObject.parent._transformChange) {
@@ -4578,17 +4452,17 @@ var Application = function (_DisplayObjectContain) {
  * 模拟as3 中 的sprite类，目前还只是个简单的容易。
  */
 var Sprite = function (_DisplayObjectContain) {
-  inherits(Sprite, _DisplayObjectContain);
+    inherits(Sprite, _DisplayObjectContain);
 
-  function Sprite(opt) {
-    classCallCheck(this, Sprite);
+    function Sprite(opt) {
+        classCallCheck(this, Sprite);
 
-    opt = Utils.checkOpt(opt);
-    opt.type = "sprite";
-    return possibleConstructorReturn(this, (Sprite.__proto__ || Object.getPrototypeOf(Sprite)).call(this, opt));
-  }
+        opt = Utils.checkOpt(opt);
+        opt.type = "sprite";
+        return possibleConstructorReturn(this, (Sprite.__proto__ || Object.getPrototypeOf(Sprite)).call(this, opt));
+    }
 
-  return Sprite;
+    return Sprite;
 }(DisplayObjectContainer);
 
 var GraphicsData = function () {
@@ -4675,101 +4549,101 @@ var _join = Array.prototype.join;
  * http://mozilla.org/MPL/2.0/
  */
 function arcToSegments(toX, toY, rx, ry, large, sweep, rotateX) {
-  var argsString = _join.call(arguments);
-  if (arcToSegmentsCache[argsString]) {
-    return arcToSegmentsCache[argsString];
-  }
+    var argsString = _join.call(arguments);
+    if (arcToSegmentsCache[argsString]) {
+        return arcToSegmentsCache[argsString];
+    }
 
-  var PI = Math.PI,
-      th = rotateX * PI / 180,
-      sinTh = Math.sin(th),
-      cosTh = Math.cos(th),
-      fromX = 0,
-      fromY = 0;
+    var PI = Math.PI,
+        th = rotateX * PI / 180,
+        sinTh = Math.sin(th),
+        cosTh = Math.cos(th),
+        fromX = 0,
+        fromY = 0;
 
-  rx = Math.abs(rx);
-  ry = Math.abs(ry);
+    rx = Math.abs(rx);
+    ry = Math.abs(ry);
 
-  var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
-      py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
-      rx2 = rx * rx,
-      ry2 = ry * ry,
-      py2 = py * py,
-      px2 = px * px,
-      pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
-      root = 0;
+    var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
+        py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
+        rx2 = rx * rx,
+        ry2 = ry * ry,
+        py2 = py * py,
+        px2 = px * px,
+        pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
+        root = 0;
 
-  if (pl < 0) {
-    var s = Math.sqrt(1 - pl / (rx2 * ry2));
-    rx *= s;
-    ry *= s;
-  } else {
-    root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
-  }
+    if (pl < 0) {
+        var s = Math.sqrt(1 - pl / (rx2 * ry2));
+        rx *= s;
+        ry *= s;
+    } else {
+        root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
+    }
 
-  var cx = root * rx * py / ry,
-      cy = -root * ry * px / rx,
-      cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
-      cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
-      mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
-      dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
+    var cx = root * rx * py / ry,
+        cy = -root * ry * px / rx,
+        cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
+        cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
+        mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
+        dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
 
-  if (sweep === 0 && dtheta > 0) {
-    dtheta -= 2 * PI;
-  } else if (sweep === 1 && dtheta < 0) {
-    dtheta += 2 * PI;
-  }
+    if (sweep === 0 && dtheta > 0) {
+        dtheta -= 2 * PI;
+    } else if (sweep === 1 && dtheta < 0) {
+        dtheta += 2 * PI;
+    }
 
-  // Convert into cubic bezier segments <= 90deg
-  var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
-      result = [],
-      mDelta = dtheta / segments,
-      mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
-      th3 = mTheta + mDelta;
+    // Convert into cubic bezier segments <= 90deg
+    var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
+        result = [],
+        mDelta = dtheta / segments,
+        mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
+        th3 = mTheta + mDelta;
 
-  for (var i = 0; i < segments; i++) {
-    result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
-    fromX = result[i][4];
-    fromY = result[i][5];
-    mTheta = th3;
-    th3 += mDelta;
-  }
-  arcToSegmentsCache[argsString] = result;
-  return result;
+    for (var i = 0; i < segments; i++) {
+        result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
+        fromX = result[i][4];
+        fromY = result[i][5];
+        mTheta = th3;
+        th3 += mDelta;
+    }
+    arcToSegmentsCache[argsString] = result;
+    return result;
 }
 
 function segmentToBezier(th2, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY) {
-  var argsString2 = _join.call(arguments);
-  if (segmentToBezierCache[argsString2]) {
+    var argsString2 = _join.call(arguments);
+    if (segmentToBezierCache[argsString2]) {
+        return segmentToBezierCache[argsString2];
+    }
+
+    var costh2 = Math.cos(th2),
+        sinth2 = Math.sin(th2),
+        costh3 = Math.cos(th3),
+        sinth3 = Math.sin(th3),
+        toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
+        toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
+        cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
+        cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
+        cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
+        cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
+
+    segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
     return segmentToBezierCache[argsString2];
-  }
-
-  var costh2 = Math.cos(th2),
-      sinth2 = Math.sin(th2),
-      costh3 = Math.cos(th3),
-      sinth3 = Math.sin(th3),
-      toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
-      toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
-      cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
-      cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
-      cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
-      cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
-
-  segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
-  return segmentToBezierCache[argsString2];
 }
 
 /*
  * Private
  */
 function calcVectorAngle(ux, uy, vx, vy) {
-  var ta = Math.atan2(uy, ux),
-      tb = Math.atan2(vy, vx);
-  if (tb >= ta) {
-    return tb - ta;
-  } else {
-    return 2 * Math.PI - (ta - tb);
-  }
+    var ta = Math.atan2(uy, ux),
+        tb = Math.atan2(vy, vx);
+    if (tb >= ta) {
+        return tb - ta;
+    } else {
+        return 2 * Math.PI - (ta - tb);
+    }
 }
 
 /**
@@ -4780,25 +4654,25 @@ function calcVectorAngle(ux, uy, vx, vy) {
  * @param {Array} coords
  */
 var drawArc = function drawArc(graphics, fx, fy, coords) {
-  var rx = coords[0],
-      ry = coords[1],
-      rot = coords[2],
-      large = coords[3],
-      sweep = coords[4],
-      tx = coords[5],
-      ty = coords[6],
-      segs = [[], [], [], []],
-      segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+    var rx = coords[0],
+        ry = coords[1],
+        rot = coords[2],
+        large = coords[3],
+        sweep = coords[4],
+        tx = coords[5],
+        ty = coords[6],
+        segs = [[], [], [], []],
+        segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
 
-  for (var i = 0, len = segsNorm.length; i < len; i++) {
-    segs[i][0] = segsNorm[i][0] + fx;
-    segs[i][1] = segsNorm[i][1] + fy;
-    segs[i][2] = segsNorm[i][2] + fx;
-    segs[i][3] = segsNorm[i][3] + fy;
-    segs[i][4] = segsNorm[i][4] + fx;
-    segs[i][5] = segsNorm[i][5] + fy;
-    graphics.bezierCurveTo.apply(graphics, segs[i]);
-  }
+    for (var i = 0, len = segsNorm.length; i < len; i++) {
+        segs[i][0] = segsNorm[i][0] + fx;
+        segs[i][1] = segsNorm[i][1] + fy;
+        segs[i][2] = segsNorm[i][2] + fx;
+        segs[i][3] = segsNorm[i][3] + fy;
+        segs[i][4] = segsNorm[i][4] + fx;
+        segs[i][5] = segsNorm[i][5] + fy;
+        graphics.bezierCurveTo.apply(graphics, segs[i]);
+    }
 };
 
 /**
@@ -4815,20 +4689,20 @@ var drawArc = function drawArc(graphics, fx, fy, coords) {
  */
 var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, tx, ty) {
 
-  var fromX = 0,
-      fromY = 0,
-      bound,
-      bounds = [],
-      segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+    var fromX = 0,
+        fromY = 0,
+        bound,
+        bounds = [],
+        segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
 
-  for (var i = 0, len = segs.length; i < len; i++) {
-    bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
-    bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
-    bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
-    fromX = segs[i][4];
-    fromY = segs[i][5];
-  }
-  return bounds;
+    for (var i = 0, len = segs.length; i < len; i++) {
+        bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
+        bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
+        bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
+        fromX = segs[i][4];
+        fromY = segs[i][5];
+    }
+    return bounds;
 };
 
 /**
@@ -4844,96 +4718,96 @@ var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, 
  */
 // taken from http://jsbin.com/ivomiq/56/edit  no credits available for that.
 function getBoundsOfCurve(x0, y0, x1, y1, x2, y2, x3, y3) {
-  var argsString = _join.call(arguments);
-  if (boundsOfCurveCache[argsString]) {
-    return boundsOfCurveCache[argsString];
-  }
-
-  var sqrt = Math.sqrt,
-      min = Math.min,
-      max = Math.max,
-      abs = Math.abs,
-      tvalues = [],
-      bounds = [[], []],
-      a,
-      b,
-      c,
-      t,
-      t1,
-      t2,
-      b2ac,
-      sqrtb2ac;
-
-  b = 6 * x0 - 12 * x1 + 6 * x2;
-  a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
-  c = 3 * x1 - 3 * x0;
-
-  for (var i = 0; i < 2; ++i) {
-    if (i > 0) {
-      b = 6 * y0 - 12 * y1 + 6 * y2;
-      a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
-      c = 3 * y1 - 3 * y0;
+    var argsString = _join.call(arguments);
+    if (boundsOfCurveCache[argsString]) {
+        return boundsOfCurveCache[argsString];
     }
 
-    if (abs(a) < 1e-12) {
-      if (abs(b) < 1e-12) {
-        continue;
-      }
-      t = -c / b;
-      if (0 < t && t < 1) {
-        tvalues.push(t);
-      }
-      continue;
-    }
-    b2ac = b * b - 4 * c * a;
-    if (b2ac < 0) {
-      continue;
-    }
-    sqrtb2ac = sqrt(b2ac);
-    t1 = (-b + sqrtb2ac) / (2 * a);
-    if (0 < t1 && t1 < 1) {
-      tvalues.push(t1);
-    }
-    t2 = (-b - sqrtb2ac) / (2 * a);
-    if (0 < t2 && t2 < 1) {
-      tvalues.push(t2);
-    }
-  }
+    var sqrt = Math.sqrt,
+        min = Math.min,
+        max = Math.max,
+        abs = Math.abs,
+        tvalues = [],
+        bounds = [[], []],
+        a,
+        b,
+        c,
+        t,
+        t1,
+        t2,
+        b2ac,
+        sqrtb2ac;
 
-  var x,
-      y,
-      j = tvalues.length,
-      jlen = j,
-      mt;
-  while (j--) {
-    t = tvalues[j];
-    mt = 1 - t;
-    x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
-    bounds[0][j] = x;
+    b = 6 * x0 - 12 * x1 + 6 * x2;
+    a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
+    c = 3 * x1 - 3 * x0;
 
-    y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
-    bounds[1][j] = y;
-  }
+    for (var i = 0; i < 2; ++i) {
+        if (i > 0) {
+            b = 6 * y0 - 12 * y1 + 6 * y2;
+            a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
+            c = 3 * y1 - 3 * y0;
+        }
 
-  bounds[0][jlen] = x0;
-  bounds[1][jlen] = y0;
-  bounds[0][jlen + 1] = x3;
-  bounds[1][jlen + 1] = y3;
-  var result = [{
-    x: min.apply(null, bounds[0]),
-    y: min.apply(null, bounds[1])
-  }, {
-    x: max.apply(null, bounds[0]),
-    y: max.apply(null, bounds[1])
-  }];
-  boundsOfCurveCache[argsString] = result;
-  return result;
+        if (abs(a) < 1e-12) {
+            if (abs(b) < 1e-12) {
+                continue;
+            }
+            t = -c / b;
+            if (0 < t && t < 1) {
+                tvalues.push(t);
+            }
+            continue;
+        }
+        b2ac = b * b - 4 * c * a;
+        if (b2ac < 0) {
+            continue;
+        }
+        sqrtb2ac = sqrt(b2ac);
+        t1 = (-b + sqrtb2ac) / (2 * a);
+        if (0 < t1 && t1 < 1) {
+            tvalues.push(t1);
+        }
+        t2 = (-b - sqrtb2ac) / (2 * a);
+        if (0 < t2 && t2 < 1) {
+            tvalues.push(t2);
+        }
+    }
+
+    var x,
+        y,
+        j = tvalues.length,
+        jlen = j,
+        mt;
+    while (j--) {
+        t = tvalues[j];
+        mt = 1 - t;
+        x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
+        bounds[0][j] = x;
+
+        y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+        bounds[1][j] = y;
+    }
+
+    bounds[0][jlen] = x0;
+    bounds[1][jlen] = y0;
+    bounds[0][jlen + 1] = x3;
+    bounds[1][jlen + 1] = y3;
+    var result = [{
+        x: min.apply(null, bounds[0]),
+        y: min.apply(null, bounds[1])
+    }, {
+        x: max.apply(null, bounds[0]),
+        y: max.apply(null, bounds[1])
+    }];
+    boundsOfCurveCache[argsString] = result;
+    return result;
 }
 
 var Arc = {
-  drawArc: drawArc,
-  getBoundsOfCurve: getBoundsOfCurve,
-  getBoundsOfArc: getBoundsOfArc
+    drawArc: drawArc,
+    getBoundsOfCurve: getBoundsOfCurve,
+    getBoundsOfArc: getBoundsOfArc
 };
 
 var Rectangle = function () {
@@ -6603,7 +6477,6 @@ var Path = function (_Shape) {
     function Path(opt) {
         classCallCheck(this, Path);
 
-
         var _context = _$1.extend({
             pointList: [], //从下面的path中计算得到的边界点的集合
             path: "" //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
@@ -7839,6 +7712,8 @@ var Chart = function (_Canvax$Event$EventDi) {
         _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
         _this.height = parseInt(_this.el.offsetHeight); //图表区域高
 
+        //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
+        //legend如果在top，就会把图表的padding.top修改，减去legend的height
         _this.padding = {
             top: 10,
             right: 10,
@@ -7948,7 +7823,9 @@ var Chart = function (_Canvax$Event$EventDi) {
             this.canvax.resize();
             this.inited = false;
 
-            this.reset();
+            this.reset({
+                resize: true
+            });
 
             this.inited = true;
         }
@@ -8097,7 +7974,7 @@ var Chart = function (_Canvax$Event$EventDi) {
     }, {
         key: "_initWaterMark",
         value: function _initWaterMark(waterMarkOpt) {
-            var text = waterMarkOpt.content || "waterMark";
+            var text = waterMarkOpt.content || "chartx";
             var sp = new canvax.Display.Sprite({
                 id: "watermark"
             });
@@ -9962,7 +9839,7 @@ var Descartes_Component = function (_Component) {
 
         var _this = possibleConstructorReturn$1(this, (Descartes_Component.__proto__ || Object.getPrototypeOf(Descartes_Component)).call(this));
 
-        _this._root = root;
+        _this.root = root;
 
         _this._xAxis = null;
         _this._yAxis = [];
@@ -9971,14 +9848,20 @@ var Descartes_Component = function (_Component) {
         _this._yAxisRight = null;
         _this._grid = null;
 
-        _this.graphsWidth = 0;
-        _this.graphsHeight = 0;
-        _this.graphsX = 0;
-        _this.graphsY = 0;
+        _this.width = 0;
+        _this.height = 0;
+        _this.origin = {
+            x: 0,
+            y: 0
+        };
+
+        _this.margin = {
+            top: 0, right: 0, bottom: 0, left: 0
+        };
 
         _this.horizontal = false;
 
-        _this.dataFrame = _this._root.dataFrame;
+        _this.dataFrame = _this.root.dataFrame;
 
         _this.xAxis = {
             field: _this.dataFrame.fields[0]
@@ -10066,10 +9949,10 @@ var Descartes_Component = function (_Component) {
         key: "draw",
         value: function draw(opt) {
             //在绘制的时候，是已经能拿到xAxis的height了得
-            var _padding = this._root.padding;
+            var _padding = this.root.padding;
 
-            var h = opt.height || this._root.height;
-            var w = opt.width || this._root.width;
+            var h = opt.height || this.root.height;
+            var w = opt.width || this.root.width;
             if (this.horizontal) {
                 //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
                 var _num = w;
@@ -10119,15 +10002,15 @@ var Descartes_Component = function (_Component) {
 
             this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width);
 
-            this.graphsWidth = this._xAxis.width;
-            this.graphsHeight = this._yAxis[0].yGraphsHeight;
-            this.graphsX = _yAxisW + _padding.left;
-            this.graphsY = y;
+            this.width = this._xAxis.width;
+            this.height = this._yAxis[0].yGraphsHeight;
+            this.origin.x = _yAxisW + _padding.left;
+            this.origin.y = y;
 
             //绘制背景网格
             this._grid.draw({
-                w: this.graphsWidth,
-                h: this.graphsHeight,
+                w: this.width,
+                h: this.height,
                 xAxis: {
                     data: this._yAxis[0].layoutData
                 },
@@ -10135,8 +10018,8 @@ var Descartes_Component = function (_Component) {
                     data: this._xAxis.layoutData
                 },
                 pos: {
-                    x: this.graphsX,
-                    y: this.graphsY
+                    x: this.origin.x,
+                    y: this.origin.y
                 },
                 resize: opt.resize
             });
@@ -10204,8 +10087,8 @@ var Descartes_Component = function (_Component) {
         key: "_horizontal",
         value: function _horizontal() {
             var me = this;
-            var w = me._root.width;
-            var h = me._root.height;
+            var w = me.root.width;
+            var h = me.root.height;
 
             _$5.each([me.sprite.context], function (ctx) {
                 ctx.x += (w - h) / 2;
@@ -10281,7 +10164,7 @@ var Descartes_Component = function (_Component) {
             this._grid.reset({
                 animation: false,
                 xAxis: {
-                    data: this._yAxisLeft.layoutData
+                    data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
                 }
             });
         }
@@ -10468,10 +10351,10 @@ var Descartes_Component = function (_Component) {
             me.induce = new Rect$1({
                 id: "induce",
                 context: {
-                    x: me.graphsX,
-                    y: me.graphsY - me.graphsHeight,
-                    width: me.graphsWidth,
-                    height: me.graphsHeight,
+                    x: me.origin.x,
+                    y: me.origin.y - me.height,
+                    width: me.width,
+                    height: me.height,
                     fillStyle: '#000000',
                     globalAlpha: 0,
                     cursor: 'pointer'
@@ -10486,7 +10369,7 @@ var Descartes_Component = function (_Component) {
                 //e.eventInfo = me._getInfoHandler(e);
                 me.fire(e.type, e);
                 //图表触发，用来处理Tips
-                me._root.fire(e.type, e);
+                me.root.fire(e.type, e);
             });
         }
     }, {
@@ -10546,11 +10429,17 @@ var Descartes = function (_Chart) {
             }
         };
 
-        opts.coordinate.yAxis = [];
+        opts = _$4.clone(opts);
         if (opts.coordinate.yAxis) {
+            var _nyarr = [];
+            //TODO: 因为我们的deep extend 对于数组是整个对象引用过去，所以，这里需要
+            //把每个子元素单独clone一遍，恩恩恩， 在canvax中优化extend对于array的处理
             _$4.each(_$4.flatten([opts.coordinate.yAxis]), function (yopt) {
-                opts.coordinate.yAxis.push(_$4.extend(true, {}, yopt));
+                _nyarr.push(_$4.clone(yopt));
             });
+            opts.coordinate.yAxis = _nyarr;
+        } else {
+            opts.coordinate.yAxis = [];
         }
 
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
@@ -10623,14 +10512,13 @@ var Descartes = function (_Chart) {
         //这里不要直接用data，而要用 this._data
         _this.dataFrame = _this.initData(_this._data);
 
-        _this._draw();
+        _this.draw();
         return _this;
     }
 
     createClass$1(Descartes, [{
-        key: "_draw",
-        value: function _draw() {
-
+        key: "draw",
+        value: function draw() {
             this._initModule(); //初始化模块  
             this.initComponents(); //初始化组件
             this._startDraw(); //开始绘图
@@ -10682,11 +10570,11 @@ var Descartes = function (_Chart) {
                 });
 
                 _g.draw({
-                    width: _coor.graphsWidth,
-                    height: _coor.graphsHeight,
-                    pos: {
-                        x: _coor.graphsX,
-                        y: _coor.graphsY
+                    width: _coor.width,
+                    height: _coor.height,
+                    origin: {
+                        x: _coor.origin.x,
+                        y: _coor.origin.y
                     },
                     sort: _coor._yAxis.sort,
                     inited: me.inited,
@@ -10861,7 +10749,7 @@ var Descartes = function (_Chart) {
 
             _legend.draw = function () {
                 _legend.pos({
-                    x: me._coordinate.graphsX
+                    x: me._coordinate.origin.x
                     //y : me.padding.top + ( e.resize ? - _legend.height : 0 )
                 });
             };
@@ -10940,11 +10828,11 @@ var Descartes = function (_Chart) {
 
                 if (_$4.flatten([_field]).length) {
 
-                    var _opt = _$4.extend(true, {}, _g._opt);
+                    var _opts = _$4.extend(true, {}, _g._opts);
 
-                    _opt.field = _field;
+                    _opts.field = _field;
                     if (_g.type == "bar") {
-                        _$4.extend(true, _opt, {
+                        _$4.extend(true, _opts, {
                             bar: {
                                 fillStyle: me.dataZoom.normalColor || "#ececec"
                             },
@@ -10956,7 +10844,7 @@ var Descartes = function (_Chart) {
                         });
                     }
                     if (_g.type == "line") {
-                        _$4.extend(true, _opt, {
+                        _$4.extend(true, _opts, {
                             line: {
                                 //lineWidth: 1,
                                 strokeStyle: "#ececec"
@@ -10976,14 +10864,14 @@ var Descartes = function (_Chart) {
                         });
                     }
                     if (_g.type == "scat") {
-                        _$4.extend(true, _opt, {
+                        _$4.extend(true, _opts, {
                             node: {
                                 fillStyle: "#ececec"
                             }
                         });
                     }
 
-                    graphsOpt.push(_opt);
+                    graphsOpt.push(_opts);
                 }
             });
             var opts = {
@@ -11026,10 +10914,10 @@ var Descartes = function (_Chart) {
             var me = this;
             //初始化 datazoom 模块
             var dataZoomOpt = _$4.extend(true, {
-                w: me._coordinate.graphsWidth,
+                w: me._coordinate.width,
                 pos: {
-                    x: me._coordinate.graphsX,
-                    y: me._coordinate.graphsY + me._coordinate._xAxis.height
+                    x: me._coordinate.origin.x,
+                    y: me._coordinate.origin.y + me._coordinate._xAxis.height
                 },
                 dragIng: function dragIng(range) {
                     var trigger = {
@@ -11137,15 +11025,15 @@ var Descartes = function (_Chart) {
         value: function creatOneMarkLine(ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field) {
             var me = this;
             var o = {
-                w: me._coordinate.graphsWidth,
-                h: me._coordinate.graphsHeight,
+                w: me._coordinate.width,
+                h: me._coordinate.height,
                 yVal: yVal,
                 origin: {
-                    x: me._coordinate.graphsX,
-                    y: me._coordinate.graphsY
+                    x: me._coordinate.origin.x,
+                    y: me._coordinate.origin.y
                 },
                 line: {
-                    list: [[0, 0], [me._coordinate.graphsWidth, 0]]
+                    list: [[0, 0], [me._coordinate.width, 0]]
                     //strokeStyle: lineStrokeStyle
                 },
                 text: {
@@ -11173,50 +11061,7 @@ var Descartes = function (_Chart) {
         value: function _initMarkPoint() {}
     }, {
         key: "_initAnchor",
-        value: function _initAnchor() {
-
-            var me = this;
-
-            this.components.push({
-                type: "once",
-                plug: {
-                    draw: function draw() {
-
-                        var _anchor = new me.componentsMap.anchor(me.anchor);
-                        me.graphsSprite.addChild(_anchor.sprite);
-
-                        var _graphsH = me._coordinate.graphsHeight;
-                        var _graphsW = me._coordinate.graphsWidth;
-
-                        _anchor.draw({
-                            w: _graphsW,
-                            h: _graphsH,
-                            //cross: {
-                            //    x: 0, 
-                            //    y: _graphsH + 0
-                            //},
-                            pos: {
-                                x: me._coordinate.graphsX,
-                                y: me._coordinate.graphsY - _graphsH
-                            }
-                        });
-
-                        me._anchor = _anchor;
-
-                        //me.drawAnchor( _anchor );
-
-                        me.components.push({
-                            type: "anchor",
-                            plug: {
-                                draw: function draw() {
-                                    //me.drawAnchor( _anchor );
-                                }
-                            }
-                        });
-                    }
-                }
-            });
-        }
+        value: function _initAnchor() {}
     }, {
         key: "_initBarTgi",
         value: function _initBarTgi() {
@@ -11234,8 +11079,8 @@ var Descartes = function (_Chart) {
 
                             barTgiOpt = _$4.extend(true, {
                                 origin: {
-                                    x: me._coordinate.graphsX,
-                                    y: me._coordinate.graphsY
+                                    x: me._coordinate.origin.x,
+                                    y: me._coordinate.origin.y
                                 }
                             }, barTgiOpt);
 
@@ -11256,14 +11101,14 @@ var Descartes = function (_Chart) {
             var me = this;
             this.on("panstart mouseover", function (e) {
                 var _tips = me.getComponentById("tips");
-                if (_tips && _tips.enabled) {
+                if (_tips) {
                     me._setTipsInfo.apply(me, [e]);
                     _tips.show(e);
                 }
             });
             this.on("panmove mousemove", function (e) {
                 var _tips = me.getComponentById("tips");
-                if (_tips && _tips.enabled) {
+                if (_tips) {
                     me._setTipsInfo.apply(me, [e]);
                     _tips.move(e);
                 }
@@ -11272,13 +11117,13 @@ var Descartes = function (_Chart) {
                 //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
                 //那么就不要执行hide，顶多只显示这个点得tips数据
                 var _tips = me.getComponentById("tips");
-                if (_tips && _tips.enabled && !(e.toTarget && me._coordinate.induce.containsPoint(me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
+                if (_tips && !(e.toTarget && me._coordinate.induce.containsPoint(me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
                     _tips.hide(e);
                 }
             });
             this.on("tap", function (e) {
                 var _tips = me.getComponentById("tips");
-                if (_tips && _tips.enabled) {
+                if (_tips) {
                     _tips.hide(e);
                     me._setTipsInfo.apply(me, [e]);
                     _tips.show(e);
@@ -11313,24 +11158,388 @@ var Descartes = function (_Chart) {
     return Descartes;
 }(Chart);
 
-var AnimationFrame$1 = canvax.AnimationFrame;
-var Rect$3 = canvax.Shapes.Rect;
-var _$10 = canvax._;
+//极坐标 坐标轴
+//极坐标系目前对外抛出三个方法
+//获取极坐标系内任意半径上的弧度集合
+//[ [{point , radian} , {point , radian}] ... ]
+//getRadiansAtR
 
-var Graphs = function (_Canvax$Event$EventDi) {
-    inherits$1(Graphs, _Canvax$Event$EventDi);
+//获取某个点相对圆心的弧度值
+//getRadianInPoint
 
-    function Graphs(opt, root) {
-        classCallCheck$1(this, Graphs);
+//获取某个弧度方向，半径为r的时候的point坐标点位置
+//getPointInRadian
 
-        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, root));
+//应用场景中一般需要用到的属性有
+//width, height, origin(默认为width/2,height/2)
 
-        _this._opt = opt;
+var _$11 = canvax._;
 
-        _this.data = [];
+var polar = function (_Component) {
+    inherits$1(polar, _Component);
+
+    function polar(opts, root) {
+        classCallCheck$1(this, polar);
+
+        var _this = possibleConstructorReturn$1(this, (polar.__proto__ || Object.getPrototypeOf(polar)).call(this, opts));
+
         _this.root = root;
 
+        //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
+        _this.width = 0;
+        _this.height = 0;
+        _this.origin = {
+            x: 0,
+            y: 0
+        };
+
+        _this.maxR = null;
+
+        _this.grid = {
+            enabled: false, // 蜘蛛网，比如pie饼图中不需要
+            type: "poly", // 可选 "circle"
+            lineWidth: 1,
+            strokeStyle: "#ccc",
+            fillStyle: null
+        };
+
+        _this.scale = {
+            enabled: false //刻度尺
+        };
+
+        _this.sprite = null;
+
+        _this.init(opts);
+        return _this;
+    }
+
+    createClass$1(polar, [{
+        key: "init",
+        value: function init(opts) {
+            this.sprite = new canvax.Display.Sprite({
+                id: "coordinate"
+            });
+
+            _$11.extend(true, this, opts);
+
+            var _padding = this.root.padding;
+            var rootWidth = this.root.width;
+            var rootHeight = this.root.height;
+
+            if (!("width" in opts)) {
+                this.width = rootWidth - _padding.left - _padding.right;
+            }
+            if (!("height" in opts)) {
+                this.height = rootHeight - _padding.top - _padding.bottom;
+            }
+            if (!("origin" in opts)) {
+                //如果没有传入任何origin数据，则默认为中心点
+                //origin是相对画布左上角的
+                this.origin = {
+                    x: this.width / 2 + _padding.left,
+                    y: this.height / 2 + _padding.top
+                };
+            }
+
+            this._computeMaxR();
+        }
+    }, {
+        key: "draw",
+        value: function draw() {
+            if (this.grid.enabled) {
+                //绘制蜘蛛网格
+
+            }
+            if (this.scale.enabled) {
+                //绘制刻度尺
+            }
+        }
+
+        //重新计算 maxR
+
+    }, {
+        key: "_computeMaxR",
+        value: function _computeMaxR() {
+            //如果外面要求过 maxR，
+            var origin = this.origin;
+            var _maxR;
+            if (origin.x != this.width / 2 || origin.y != this.height / 2) {
+                var _distances = [origin.x, this.width - origin.x, origin.y, this.height - origin.y];
+                _maxR = _$11.max(_distances);
+            } else {
+                _maxR = Math.max(this.width / 2, this.height / 2);
+            }
+
+            if (this.maxR != null && this.maxR <= _maxR) {
+                return;
+            } else {
+                this.maxR = _maxR;
+            }
+        }
+
+        //获取极坐标系内任意半径上的弧度集合
+        //[ [{point , radian} , {point , radian}] ... ]
+
+    }, {
+        key: "getRadiansAtR",
+        value: function getRadiansAtR(r) {
+            var me = this;
+            var _rs = [];
+            if (r > this.maxR) {
+                return [];
+            } else {
+                //下面的坐标点都是已经origin为原点的坐标系统里
+
+                //矩形的4边框线段
+                var origin = this.origin;
+                var x, y;
+
+                //于上边界的相交点
+                //最多有两个交点
+                var distanceT = origin.y;
+                if (distanceT < r) {
+                    x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceT, 2));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: -x, y: -distanceT }, { x: x, y: -distanceT }]));
+                }
+
+                //于右边界的相交点
+                //最多有两个交点
+                var distanceR = this.width - origin.x;
+                if (distanceR < r) {
+                    y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceR, 2));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: distanceR, y: -y }, { x: distanceR, y: y }]));
+                }
+                //于下边界的相交点
+                //最多有两个交点
+                var distanceB = this.height - origin.y;
+                if (distanceB < r) {
+                    x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceB, 2));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: x, y: distanceB }, { x: -x, y: distanceB }]));
+                }
+                //于左边界的相交点
+                //最多有两个交点
+                var distanceL = origin.x;
+                if (distanceL < r) {
+                    y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceL, 2));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: -distanceL, y: y }, { x: -distanceL, y: -y }]));
+                }
+
+                var arcs = []; //[ [{point , radian} , {point , radian}] ... ]
+                //根据相交点的集合，分割弧段
+                if (_rs.length == 0) {
+                    //说明整圆都在画布内
+                    //[ [0 , 2*Math.PI] ];
+                    arcs.push([{ point: { x: r, y: 0 }, radian: 0 }, { point: { x: r, y: 0 }, radian: Math.PI * 2 }]);
+                } else {
+                    //分割多段
+                    _$11.each(_rs, function (point, i) {
+                        var nextInd = i == _rs.length - 1 ? 0 : i + 1;
+                        var nextPoint = _rs.slice(nextInd, nextInd + 1)[0];
+                        arcs.push([{ point: point, radian: me.getRadianInPoint(point) }, { point: nextPoint, radian: me.getRadianInPoint(nextPoint) }]);
+                    });
+                }
+
+                //过滤掉不在rect内的弧线段
+                for (var i = 0, l = arcs.length; i < l; i++) {
+                    if (!this._checkArcInRect(arcs[i], r)) {
+                        arcs.splice(i, 1);
+                        i--, l--;
+                    }
+                }
+                return arcs;
+            }
+        }
+    }, {
+        key: "_filterPointsInRect",
+        value: function _filterPointsInRect(points) {
+            for (var i = 0, l = points.length; i < l; i++) {
+                if (!this._checkPointInRect(points[i])) {
+                    //该点不在root rect范围内，去掉
+                    points.splice(i, 1);
+                    i--, l--;
+                }
+            }
+            return points;
+        }
+    }, {
+        key: "_checkPointInRect",
+        value: function _checkPointInRect(p) {
+            var origin = this.origin;
+            var _tansRoot = { x: p.x + origin.x, y: p.y + origin.y };
+            return !(_tansRoot.x < 0 || _tansRoot.x > this.width || _tansRoot.y < 0 || _tansRoot.y > this.height);
+        }
+
+        //检查由n个相交点分割出来的圆弧是否在rect内
+
+    }, {
+        key: "_checkArcInRect",
+        value: function _checkArcInRect(arc, r) {
+            var start = arc[0];
+            var to = arc[1];
+            var differenceR = to.radian - start.radian;
+            if (to.radian < start.radian) {
+                differenceR = Math.PI * 2 + to.radian - start.radian;
+            }
+            var middleR = (start.radian + differenceR / 2) % (Math.PI * 2);
+            return this._checkPointInRect(this.getPointInRadian(middleR, r));
+        }
+
+        //获取某个点相对圆心的弧度值
+
+    }, {
+        key: "getRadianInPoint",
+        value: function getRadianInPoint(point) {
+            var pi2 = Math.PI * 2;
+            return (Math.atan2(point.y, point.x) + pi2) % pi2;
+        }
+
+        //获取某个弧度方向，半径为r的时候的point坐标点位置
+
+    }, {
+        key: "getPointInRadian",
+        value: function getPointInRadian(radian, r) {
+            var pi = Math.PI;
+            var x = Math.cos(radian) * r;
+            if (radian == pi / 2 || radian == pi * 3 / 2) {
+                //90度或者270度的时候
+                x = 0;
+            }
+            var y = Math.sin(radian) * r;
+            if (radian % pi == 0) {
+                y = 0;
+            }
+            return {
+                x: x,
+                y: y
+            };
+        }
+    }]);
+    return polar;
+}(component);
+
+var _$10 = canvax._;
+
+var Polar = function (_Chart) {
+    inherits$1(Polar, _Chart);
+
+    function Polar(node, data, opts, graphsMap, componentsMap) {
+        classCallCheck$1(this, Polar);
+
+        var _this = possibleConstructorReturn$1(this, (Polar.__proto__ || Object.getPrototypeOf(Polar)).call(this, node, data, opts));
+
+        _this.graphsMap = graphsMap;
+        _this.componentsMap = componentsMap;
+
+        var me = _this;
+
+        _$10.extend(true, _this, opts);
+
+        //强制把graphs设置为数组
+        _this.graphs = _$10.flatten([_this.graphs]);
+
+        //这里不要直接用data，而要用 this._data
+        _this.dataFrame = _this.initData(_this._data);
+
+        _this.draw();
+        return _this;
+    }
+
+    createClass$1(Polar, [{
+        key: "draw",
+        value: function draw() {
+            this._initModule(); //初始化模块  
+            this.initComponents(); //初始化组件
+            this._startDraw(); //开始绘图
+            this.drawComponents(); //绘图完，开始绘制插件
+            this.inited = true;
+        }
+    }, {
+        key: "_initModule",
+        value: function _initModule(opt) {
+            var me = this;
+            //首先是创建一个坐标系对象
+            this._coordinate = new polar(this.coordinate, this);
+            this.coordinateSprite.addChild(this._coordinate.sprite);
+
+            _$10.each(this.graphs, function (graphs) {
+                var _g = new me.graphsMap[graphs.type](graphs, me);
+                me._graphs.push(_g);
+                me.graphsSprite.addChild(_g.sprite);
+            });
+        }
+    }, {
+        key: "initComponents",
+        value: function initComponents(opt) {
+            if (this._opts.tips && this._initTips) {
+                this._initTips(opt);
+            }
+            if (this._opts.legend && this._initLegend) {
+                this._initLegend(opt);
+            }
+        }
+
+        //所有plug触发更新
+
+    }, {
+        key: "componentsReset",
+        value: function componentsReset(trigger) {
+            var me = this;
+            _$10.each(this.components, function (p, i) {
+                p.plug.reset && p.plug.reset(me[p.type] || {}, me.dataFrame);
+            });
+        }
+    }, {
+        key: "_startDraw",
+        value: function _startDraw(opt) {
+            var me = this;
+            !opt && (opt = {});
+            var _coor = this._coordinate;
+
+            //先绘制好坐标系统
+            _coor.draw(opt);
+
+            var graphsCount = this._graphs.length;
+            var completeNum = 0;
+            _$10.each(this._graphs, function (_g) {
+                _g.on("complete", function (g) {
+                    completeNum++;
+                    if (completeNum == graphsCount) {
+                        me.fire("complete");
+                    }
+                });
+
+                _g.draw({
+                    width: _coor.width,
+                    height: _coor.height,
+                    origin: _coor.origin //坐标系圆心
+                });
+            });
+
+            //this.bindEvent();
+        }
+    }]);
+    return Polar;
+}(Chart);
+
+var AnimationFrame$1 = canvax.AnimationFrame;
+var Rect$3 = canvax.Shapes.Rect;
+var _$12 = canvax._;
+
+var BarGraphs = function (_Canvax$Event$EventDi) {
+    inherits$1(BarGraphs, _Canvax$Event$EventDi);
+
+    function BarGraphs(opts, root) {
+        classCallCheck$1(this, BarGraphs);
+
+        var _this = possibleConstructorReturn$1(this, (BarGraphs.__proto__ || Object.getPrototypeOf(BarGraphs)).call(this, opts, root));
+
         _this.type = "bar";
+
+        //这里所有的opts都要透传给 group
+        _this._opts = opts || {};
+        _this.root = root;
+
+        _this.data = [];
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         _this.field = null;
@@ -11339,7 +11548,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
 
         _this.width = 0;
         _this.height = 0;
-        _this.pos = {
+        _this.origin = {
             x: 0,
             y: 0
         };
@@ -11382,13 +11591,13 @@ var Graphs = function (_Canvax$Event$EventDi) {
         _this.sprite = null;
         _this.txtsSp = null;
 
-        _$10.extend(true, _this, opt);
+        _$12.extend(true, _this, opts);
 
         _this.init();
         return _this;
     }
 
-    createClass$1(Graphs, [{
+    createClass$1(BarGraphs, [{
         key: "init",
         value: function init() {
             this.sprite = new canvax.Display.Sprite({
@@ -11411,9 +11620,9 @@ var Graphs = function (_Canvax$Event$EventDi) {
             //该index指当前
             var data = this.data;
             var _nodesInfoList = []; //节点信息集合
-            _$10.each(this.enabledField, function (fs, i) {
-                if (_$10.isArray(fs)) {
-                    _$10.each(fs, function (_fs, ii) {
+            _$12.each(this.enabledField, function (fs, i) {
+                if (_$12.isArray(fs)) {
+                    _$12.each(fs, function (_fs, ii) {
                         //fs的结构两层到顶了
                         var node = data[i][ii][index];
                         node && _nodesInfoList.push(node);
@@ -11429,13 +11638,13 @@ var Graphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "_getTargetField",
         value: function _getTargetField(b, v, i, field) {
-            if (_$10.isString(field)) {
+            if (_$12.isString(field)) {
                 return field;
-            } else if (_$10.isArray(field)) {
+            } else if (_$12.isArray(field)) {
                 var res = field[b];
-                if (_$10.isString(res)) {
+                if (_$12.isString(res)) {
                     return res;
-                } else if (_$10.isArray(res)) {
+                } else if (_$12.isArray(res)) {
                     return res[v];
                 }
             }
@@ -11463,13 +11672,13 @@ var Graphs = function (_Canvax$Event$EventDi) {
             var style = fieldMap.style;
 
             //field对应的索引，， 取颜色这里不要用i
-            if (_$10.isString(c)) {
+            if (_$12.isString(c)) {
                 style = c;
             }
-            if (_$10.isArray(c)) {
-                style = _$10.flatten(c)[_$10.indexOf(_flattenField, field)];
+            if (_$12.isArray(c)) {
+                style = _$12.flatten(c)[_$12.indexOf(_flattenField, field)];
             }
-            if (_$10.isFunction(c)) {
+            if (_$12.isFunction(c)) {
                 style = c.apply(this, [{
                     iGroup: i,
                     iNode: h,
@@ -11489,7 +11698,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
         key: "_getBarWidth",
         value: function _getBarWidth(ceilWidth, ceilWidth2) {
             if (this.bar.width) {
-                if (_$10.isFunction(this.bar.width)) {
+                if (_$12.isFunction(this.bar.width)) {
                     this.bar._width = this.bar.width(ceilWidth);
                 } else {
                     this.bar._width = this.bar.width;
@@ -11533,9 +11742,9 @@ var Graphs = function (_Canvax$Event$EventDi) {
         }
     }, {
         key: "draw",
-        value: function draw(opt) {
+        value: function draw(opts) {
             //第二个data参数去掉，直接trimgraphs获取最新的data
-            _$10.extend(true, this, opt);
+            _$12.extend(true, this, opts);
 
             var data = this._trimGraphs();
 
@@ -11554,9 +11763,9 @@ var Graphs = function (_Canvax$Event$EventDi) {
 
             me.bar.count = 0;
 
-            var _flattenField = _$10.flatten([this.field]);
+            var _flattenField = _$12.flatten([this.field]);
 
-            _$10.each(data, function (h_group, i) {
+            _$12.each(data, function (h_group, i) {
                 /*
                 //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
                 //h_group就会为两组，一组代表uv 一组代表pv。
@@ -11714,15 +11923,15 @@ var Graphs = function (_Canvax$Event$EventDi) {
                             var infoWidth = 0;
                             var infoHeight = 0;
 
-                            _$10.each(contents, function (cdata, ci) {
+                            _$12.each(contents, function (cdata, ci) {
                                 var content = cdata.value;
-                                if (_$10.isFunction(me.text.format)) {
+                                if (_$12.isFunction(me.text.format)) {
                                     var _formatc = me.text.format.apply(me, [content, cdata]);
                                     if (!!_formatc || _formatc === "" || _formatc === 0) {
                                         content = _formatc;
                                     }
                                 }
-                                if (!me.animation && _$10.isNumber(content)) {
+                                if (!me.animation && _$12.isNumber(content)) {
                                     content = numAddSymbol(content);
                                 }
 
@@ -11810,8 +12019,8 @@ var Graphs = function (_Canvax$Event$EventDi) {
                 this.sprite.addChild(this.txtsSp);
             }
 
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
+            this.sprite.context.x = this.origin.x;
+            this.sprite.context.y = this.origin.y;
 
             if (this.sort && this.sort == "desc") {
                 this.sprite.context.y -= this.height;
@@ -11850,7 +12059,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
             var _preHLenOver = false;
 
             if (!this.absolute) {
-                _$10.each(this.root._graphs, function (_g) {
+                _$12.each(this.root._graphs, function (_g) {
                     if (!_g.absolute && _g.type == "bar") {
                         if (_g === me) {
                             _preHLenOver = true;
@@ -11893,15 +12102,15 @@ var Graphs = function (_Canvax$Event$EventDi) {
             var dataOrg = this.root.dataFrame.getDataOrg(this.enabledField);
 
             //dataOrg和field是一一对应的
-            _$10.each(dataOrg, function (hData, b) {
+            _$12.each(dataOrg, function (hData, b) {
                 //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
 
                 //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
                 var tempBarData = [];
-                _$10.each(hData, function (vSectionData, v) {
+                _$12.each(hData, function (vSectionData, v) {
                     tempBarData[v] = [];
                     //vSectionData 代表某个字段下面的一组数据比如 uv
-                    _$10.each(vSectionData, function (val, i) {
+                    _$12.each(vSectionData, function (val, i) {
                         if (!xArr[i]) {
                             return;
                         }
@@ -11909,7 +12118,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
                         var vCount = 0;
                         if (me.proportion) {
                             //先计算总量
-                            _$10.each(hData, function (team, ti) {
+                            _$12.each(hData, function (team, ti) {
                                 vCount += team[i];
                             });
                         }
@@ -12003,7 +12212,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
             var infoWidth = 0;
             var infoHeight = 0;
             var cl = el.children.length;
-            _$10.each(el.children, function (c, i) {
+            _$12.each(el.children, function (c, i) {
                 if (c.getTextWidth) {
                     c.context.x = infoWidth;
                     infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
@@ -12021,7 +12230,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
 
     }, {
         key: "grow",
-        value: function grow(callback, opt) {
+        value: function grow(callback, opts) {
 
             var me = this;
             if (!this.animation) {
@@ -12043,14 +12252,14 @@ var Graphs = function (_Canvax$Event$EventDi) {
                 }
             }
 
-            var options = _$10.extend({
+            var optsions = _$12.extend({
                 delay: Math.min(1000 / this._barsLen, 80),
                 easing: "Back.Out",
                 duration: 500
-            }, opt);
+            }, opts);
 
             var barCount = 0;
-            _$10.each(me.data, function (h_group, g) {
+            _$12.each(me.data, function (h_group, g) {
                 var vLen = h_group.length;
                 if (vLen == 0) return;
                 var hLen = h_group[0].length;
@@ -12062,7 +12271,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
                         var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
                         //console.log("finalPos"+bar.finalPos.y)
 
-                        if (options.duration == 0) {
+                        if (optsions.duration == 0) {
                             bar.context.scaleY = sy;
                             bar.context.y = sy * sy * bar.finalPos.y;
                             bar.context.x = bar.finalPos.x;
@@ -12079,9 +12288,9 @@ var Graphs = function (_Canvax$Event$EventDi) {
                                 width: bar.finalPos.width,
                                 height: bar.finalPos.height
                             }, {
-                                duration: options.duration,
-                                easing: options.easing,
-                                delay: h * options.delay,
+                                duration: optsions.duration,
+                                easing: optsions.easing,
+                                delay: h * optsions.delay,
                                 onUpdate: function onUpdate(arg) {},
                                 onComplete: function onComplete(arg) {
                                     if (arg.width < 3) {
@@ -12109,16 +12318,16 @@ var Graphs = function (_Canvax$Event$EventDi) {
                                     y: infosp._finalY,
                                     x: infosp._finalX
                                 }, {
-                                    duration: options.duration,
-                                    easing: options.easing,
-                                    delay: h * options.delay,
+                                    duration: optsions.duration,
+                                    easing: optsions.easing,
+                                    delay: h * optsions.delay,
                                     onUpdate: function onUpdate() {
                                         this.context && (this.context.visible = true);
                                     },
                                     onComplete: function onComplete() {}
                                 });
 
-                                _$10.each(infosp.children, function (txt) {
+                                _$12.each(infosp.children, function (txt) {
                                     if (txt._text || txt._text === 0) {
                                         if (txt._tweenObj) {
                                             AnimationFrame$1.destroyTween(txt._tweenObj);
@@ -12130,16 +12339,16 @@ var Graphs = function (_Canvax$Event$EventDi) {
                                             to: {
                                                 v: txt._text
                                             },
-                                            duration: options.duration + 100,
-                                            delay: h * options.delay,
+                                            duration: optsions.duration + 100,
+                                            delay: h * optsions.delay,
                                             onUpdate: function onUpdate(arg) {
                                                 var content = arg.v;
-                                                if (_$10.isFunction(me.text.format)) {
+                                                if (_$12.isFunction(me.text.format)) {
                                                     var _formatc = me.text.format.apply(me, [content, txt._data]);
                                                     if (!!_formatc || _formatc === "" || _formatc === 0) {
                                                         content = _formatc;
                                                     }
-                                                } else if (_$10.isNumber(content)) {
+                                                } else if (_$12.isNumber(content)) {
                                                     content = numAddSymbol(parseInt(content));
                                                 }
                                                 txt.resetText(content);
@@ -12159,7 +12368,7 @@ var Graphs = function (_Canvax$Event$EventDi) {
             });
         }
     }]);
-    return Graphs;
+    return BarGraphs;
 }(canvax.Event.EventDispatcher);
 
 //十六进制颜色值的正则表达式 
@@ -12333,7 +12542,7 @@ var BrokenLine$2 = canvax.Shapes.BrokenLine;
 var Circle$1 = canvax.Shapes.Circle;
 var Path$1 = canvax.Shapes.Path;
 
-var _$12 = canvax._;
+var _$14 = canvax._;
 
 var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     inherits$1(LineGraphsGroup, _Canvax$Event$EventDi);
@@ -12407,7 +12616,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     createClass$1(LineGraphsGroup, [{
         key: "init",
         value: function init(opt) {
-            _$12.extend(true, this, opt);
+            _$14.extend(true, this, opt);
 
             this.sprite = new canvax.Display.Sprite();
             var me = this;
@@ -12420,7 +12629,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     }, {
         key: "draw",
         value: function draw(opt, data) {
-            _$12.extend(true, this, opt);
+            _$14.extend(true, this, opt);
             this.data = data;
             this._widget();
         }
@@ -12450,7 +12659,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             if (!color || color == "") {
                 //这个时候可以先取线的style，和线保持一致
                 color = this._getLineStrokeStyle();
-                if (!color || color == "" || !_$12.isString(color)) {
+                if (!color || color == "" || !_$14.isString(color)) {
                     //那么最后，取this.fieldMap.style
                     color = this.fieldMap.style;
                 }
@@ -12460,10 +12669,10 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     }, {
         key: "_getProp",
         value: function _getProp(s, nodeInd) {
-            if (_$12.isArray(s)) {
+            if (_$14.isArray(s)) {
                 return s[this.groupInd];
             }
-            if (_$12.isFunction(s)) {
+            if (_$14.isFunction(s)) {
                 return s.apply(this, [me.getNodeInfoAt(nodeInd)]);
             }
             return s;
@@ -12493,7 +12702,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             var o = this.data[$index];
 
             if (o && o.value != null && o.value != undefined && o.value !== "") {
-                return _$12.extend(o, this._createNodeInfo($index));
+                return _$14.extend(o, this._createNodeInfo($index));
             } else {
                 return null;
             }
@@ -12563,7 +12772,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             point.value = me._yAxis.getValFromYpos(point.y); //null;
 
             //TODO:这里要优化下，这个x值可能刚好对应上了某个具体的index，，，而现在强制为-1是不对的
-            return _$12.extend(point, me._createNodeInfo(-1));
+            return _$14.extend(point, me._createNodeInfo(-1));
         }
 
         /**
@@ -12632,15 +12841,15 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             }
 
             function _update(list) {
-                me._bline.context.pointList = _$12.clone(list);
+                me._bline.context.pointList = _$14.clone(list);
                 me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
 
                 me._fill.context.path = me._fillLine(me._bline);
                 me._fill.context.fillStyle = me._getFillStyle();
 
                 var nodeInd = 0;
-                _$12.each(list, function (point, i) {
-                    if (_$12.isNumber(point[1])) {
+                _$14.each(list, function (point, i) {
+                    if (_$14.isNumber(point[1])) {
                         if (me._circles) {
                             var _circle = me._circles.getChildAt(nodeInd);
                             if (_circle) {
@@ -12687,7 +12896,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         key: "_getPointPosStr",
         value: function _getPointPosStr(list) {
             var obj = {};
-            _$12.each(list, function (p, i) {
+            _$14.each(list, function (p, i) {
                 if (!p) {
                     //折线图中这个节点可能没有
                     return;
@@ -12725,7 +12934,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 var firstY = firstNode ? firstNode.y : undefined;
                 for (var a = 0, al = me.data.length; a < al; a++) {
                     var o = me.data[a];
-                    list.push([o.x, _$12.isNumber(o.y) ? firstY : o.y]);
+                    list.push([o.x, _$14.isNumber(o.y) ? firstY : o.y]);
                 }
             } else {
                 list = me._pointList;
@@ -12763,7 +12972,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 context: {
                     path: me._fillLine(bline),
                     fillStyle: me._getFillStyle(),
-                    globalAlpha: _$12.isArray(me.fill.alpha) ? 1 : me.fill.alpha
+                    globalAlpha: _$14.isArray(me.fill.alpha) ? 1 : me.fill.alpha
                 }
             });
 
@@ -12782,7 +12991,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             var _firstNode = null;
             for (var i = 0, l = this.data.length; i < l; i++) {
                 var nodeData = this.data[i];
-                if (_$12.isNumber(nodeData.y)) {
+                if (_$14.isNumber(nodeData.y)) {
                     if (_firstNode === null || this._yAxis.place == "right") {
                         //_yAxis为右轴的话，
                         _firstNode = nodeData;
@@ -12805,7 +13014,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
             var _fillStyle = me._getProp(me.fill.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
 
-            if (_$12.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+            if (_$14.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
                 //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
                 //如果拿回来的style已经是个gradient了，那么就不管了
                 me.fill.alpha.length = 2;
@@ -12817,7 +13026,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 }
 
                 //从bline中找到最高的点
-                var topP = _$12.min(me._bline.context.pointList, function (p) {
+                var topP = _$14.min(me._bline.context.pointList, function (p) {
                     return p[1];
                 });
 
@@ -12855,10 +13064,10 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 //从bline中找到最高的点
                 !pointList && (pointList = this._bline.context.pointList);
 
-                var topP = _$12.min(pointList, function (p) {
+                var topP = _$14.min(pointList, function (p) {
                     return p[1];
                 });
-                var bottomP = _$12.max(pointList, function (p) {
+                var bottomP = _$14.max(pointList, function (p) {
                     return p[1];
                 });
                 if (from == "fillStyle") {
@@ -12873,7 +13082,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 //创建一个线性渐变
                 //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
                 _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
-                _$12.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
+                _$14.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
                     _style.addColorStop(item.position, item.color);
                 });
 
@@ -12904,7 +13113,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
                 for (var a = 0, al = list.length; a < al; a++) {
                     var _point = me._currPointList[a];
-                    if (!_point || !_$12.isNumber(_point[1])) {
+                    if (!_point || !_$14.isNumber(_point[1])) {
                         //折线图中有可能这个point为undefined
                         continue;
                     }
@@ -12920,7 +13129,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
                     var circle = me._circles.children[nodeInd];
                     if (circle) {
-                        _$12.extend(circle.context, context);
+                        _$14.extend(circle.context, context);
                     } else {
                         circle = new Circle$1({
                             context: context
@@ -12970,7 +13179,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
                 for (var a = 0, al = list.length; a < al; a++) {
                     var _point = list[a];
-                    if (!_point || !_$12.isNumber(_point[1])) {
+                    if (!_point || !_$14.isNumber(_point[1])) {
                         //折线图中有可能这个point为undefined
                         continue;
                     }
@@ -12989,7 +13198,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     };
 
                     var content = me.data[a].value;
-                    if (_$12.isFunction(me.text.format)) {
+                    if (_$14.isFunction(me.text.format)) {
                         content = me.text.format.apply(me, [content, a]) || content;
                     }
 
@@ -13000,7 +13209,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     var text = this._texts.children[nodeInd];
                     if (text) {
                         text.resetText(content);
-                        _$12.extend(text.context, context);
+                        _$14.extend(text.context, context);
                     } else {
                         text = new canvax.Display.Text(content, {
                             context: context
@@ -13038,15 +13247,15 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         key: "_fillLine",
         value: function _fillLine(bline) {
             //填充直线
-            var fillPath = _$12.clone(bline.context.pointList);
+            var fillPath = _$14.clone(bline.context.pointList);
 
             var path = "";
             var baseY = this._yAxis.basePoint.y;
 
             var _currPath = null;
 
-            _$12.each(fillPath, function (point, i) {
-                if (_$12.isNumber(point[1])) {
+            _$14.each(fillPath, function (point, i) {
+                if (_$14.isNumber(point[1])) {
                     if (_currPath === null) {
                         _currPath = [];
                     }
@@ -13058,7 +13267,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     }
                 }
 
-                if (i == fillPath.length - 1 && _$12.isNumber(point[1])) {
+                if (i == fillPath.length - 1 && _$14.isNumber(point[1])) {
                     getOnePath();
                 }
             });
@@ -13075,20 +13284,24 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     return LineGraphsGroup;
 }(canvax.Event.EventDispatcher);
 
-var _$11 = canvax._;
+var _$13 = canvax._;
 var LineGraphs = function (_Canvax$Event$EventDi) {
     inherits$1(LineGraphs, _Canvax$Event$EventDi);
 
-    function LineGraphs(opt, root) {
+    function LineGraphs(opts, root) {
         classCallCheck$1(this, LineGraphs);
 
         var _this = possibleConstructorReturn$1(this, (LineGraphs.__proto__ || Object.getPrototypeOf(LineGraphs)).call(this));
 
         _this.type = "line";
 
+        //这里所有的opts都要透传给 group
+        _this._opts = opts || {};
+        _this.root = root;
+
         _this.width = 0;
         _this.height = 0;
-        _this.pos = {
+        _this.origin = {
             x: 0,
             y: 0
         };
@@ -13096,17 +13309,13 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
         //默认给左轴
         _this.yAxisAlign = "left";
 
-        //这里所有的opt都要透传给 group
-        _this._opt = opt || {};
-        _this.root = root;
-
         //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
         _this.ctx = root.stage.canvas.getContext("2d");
-        _this.dataFrame = _this._opt.dataFrame || root.dataFrame; //root.dataFrame的引用
+        _this.dataFrame = root.dataFrame; //root.dataFrame的引用
         _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        _this.field = opt.field;
+        _this.field = opts.field;
         _this.enabledField = null;
 
         _this.groups = []; //群组集合
@@ -13115,34 +13324,31 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
 
         _this.eventEnabled = true;
 
-        _this.init(_this._opt);
+        _this.init(_this._opts);
         return _this;
     }
 
     createClass$1(LineGraphs, [{
         key: "init",
-        value: function init(opt) {
-            this._opt = opt;
-            opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
-            //_.extend(true, this, opt);
+        value: function init(opts) {
+            opts.yAxisAlign && (this.yAxisAlign = opts.yAxisAlign);
             this.sprite = new canvax.Display.Sprite();
         }
     }, {
         key: "draw",
-        value: function draw(opt) {
-            //_.extend(true, this, opt);
-            this.width = opt.width;
-            this.height = opt.height;
-            _$11.extend(true, this.pos, opt.pos);
+        value: function draw(opts) {
+            this.width = opts.width;
+            this.height = opts.height;
+            _$13.extend(true, this.origin, opts.origin);
 
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
+            this.sprite.context.x = this.origin.x;
+            this.sprite.context.y = this.origin.y;
 
             this.data = this._trimGraphs();
 
             this._setGroupsForYfield(this.data);
 
-            this._widget(opt, this.data);
+            this._widget(opts, this.data);
 
             this.grow();
 
@@ -13159,7 +13365,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                 me.data = me._trimGraphs();
             }
 
-            _$11.each(me.groups, function (g) {
+            _$13.each(me.groups, function (g) {
                 g.resetData(me.data[g.field].data, dataTrigger);
             });
         }
@@ -13186,7 +13392,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
 
             var _yAxis = this.yAxisAlign == "right" ? _coor._yAxisRight : _coor._yAxisLeft;
 
-            _$11.each(_$11.flatten(me.enabledField), function (field, i) {
+            _$13.each(_$13.flatten(me.enabledField), function (field, i) {
                 //var maxValue = 0;
 
                 //单条line的全部data数据
@@ -13203,7 +13409,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                         layoutType: me.root._coordinate ? me.root._coordinate.xAxis.layoutType : me.root._xAxis.layoutType
                     });
 
-                    var y = _$11.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+                    var y = _$13.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                     var node = {
                         value: _lineData[b],
@@ -13234,7 +13440,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             var gi = 0;
             var gl = this.groups.length;
             var me = this;
-            _$11.each(this.groups, function (g, i) {
+            _$13.each(this.groups, function (g, i) {
                 g._grow(function () {
                     gi++;
                     callback && callback(g);
@@ -13251,14 +13457,14 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             var me = this;
 
             //这个field不再这个graphs里面的，不相关
-            if (_$11.indexOf(_$11.flatten([me.field]), field) == -1) {
+            if (_$13.indexOf(_$13.flatten([me.field]), field) == -1) {
                 return;
             }
 
             this.data = this._trimGraphs();
             this._setGroupsForYfield(this.data, field);
 
-            _$11.each(this.groups, function (g, i) {
+            _$13.each(this.groups, function (g, i) {
                 g.resetData(me.data[g.field].data);
             });
         }
@@ -13281,7 +13487,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             this.groups.splice(i, 1)[0].destroy();
             this.data = this._trimGraphs();
 
-            _$11.each(this.groups, function (g, i) {
+            _$13.each(this.groups, function (g, i) {
                 g.resetData(me.data[g.field].data);
             });
         }
@@ -13310,14 +13516,14 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             if (fields) {
                 //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
                 //一般用在add()执行的时候
-                fields = _$11.flatten([fields]);
+                fields = _$13.flatten([fields]);
             }
 
-            var _flattenField = _$11.flatten([this.field]);
+            var _flattenField = _$13.flatten([this.field]);
 
-            _$11.each(data, function (g, field) {
+            _$13.each(data, function (g, field) {
 
-                if (fields && _$11.indexOf(fields, field) == -1) {
+                if (fields && _$13.indexOf(fields, field) == -1) {
                     //如果有传入fields，但是当前field不在fields里面的话，不需要处理
                     //说明该group已经在graphs里面了
                     return;
@@ -13326,10 +13532,10 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                 var fieldMap = me.root._coordinate.getFieldMapOf(field);
 
                 //groupInd 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
-                var groupInd = _$11.indexOf(_flattenField, field);
+                var groupInd = _$13.indexOf(_flattenField, field);
 
                 var group = new LineGraphsGroup(fieldMap, groupInd, //不同于fieldMap.ind
-                me._opt, me.ctx, me.height, me.width);
+                me._opts, me.ctx, me.height, me.width);
 
                 group.draw({
                     resize: me.resize
@@ -13356,7 +13562,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
         }
     }, {
         key: "_widget",
-        value: function _widget(opt) {
+        value: function _widget(opts) {
             var me = this;
             me.resize = false;
         }
@@ -13364,7 +13570,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
         key: "getNodesAt",
         value: function getNodesAt(ind) {
             var _nodesInfoList = []; //节点信息集合
-            _$11.each(this.groups, function (group) {
+            _$13.each(this.groups, function (group) {
                 var node = group.getNodeInfoAt(ind);
                 node && _nodesInfoList.push(node);
             });
@@ -13376,29 +13582,29 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
 
 var Circle$2$1 = canvax.Shapes.Circle;
 var Rect$6 = canvax.Shapes.Rect;
-var _$13 = canvax._;
+var _$15 = canvax._;
 
-var Graphs$1 = function (_Canvax$Event$EventDi) {
-    inherits$1(Graphs, _Canvax$Event$EventDi);
+var ScatGraphs = function (_Canvax$Event$EventDi) {
+    inherits$1(ScatGraphs, _Canvax$Event$EventDi);
 
-    function Graphs(opt, _root) {
-        classCallCheck$1(this, Graphs);
+    function ScatGraphs(opts, root) {
+        classCallCheck$1(this, ScatGraphs);
 
-        var _this = possibleConstructorReturn$1(this, (Graphs.__proto__ || Object.getPrototypeOf(Graphs)).call(this, opt, _root));
+        var _this = possibleConstructorReturn$1(this, (ScatGraphs.__proto__ || Object.getPrototypeOf(ScatGraphs)).call(this, opts, root));
 
         _this.type = "scat";
 
-        //这里所有的opt都要透传给 group
-        _this._opt = opt || {};
-        _this._root = _root;
-        _this.ctx = _root.stage.context2D;
+        //这里所有的opts都要透传给 group
+        _this._opts = opts || {};
+        _this.root = root;
+        _this.ctx = root.stage.context2D;
 
         _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         _this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
 
         _this.width = 0;
         _this.height = 0;
-        _this.pos = {
+        _this.origin = {
             x: 0,
             y: 0
         };
@@ -13435,14 +13641,14 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
 
         _this.sprite = null;
 
-        _$13.extend(true, _this, opt);
+        _$15.extend(true, _this, opts);
 
         _this.init();
 
         return _this;
     }
 
-    createClass$1(Graphs, [{
+    createClass$1(ScatGraphs, [{
         key: "init",
         value: function init() {
             this.sprite = new canvax.Display.Sprite({
@@ -13460,14 +13666,12 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         }
     }, {
         key: "draw",
-        value: function draw(opt) {
-            _$13.extend(true, this, opt);
+        value: function draw(opts) {
+            _$15.extend(true, this, opts);
             this.data = this._trimGraphs(); //groupsData也被自动设置完成
-
             this._widget();
-
-            this.sprite.context.x = this.pos.x;
-            this.sprite.context.y = this.pos.y;
+            this.sprite.context.x = this.origin.x;
+            this.sprite.context.y = this.origin.y;
 
             if (this.animation) {
                 this.grow();
@@ -13485,16 +13689,16 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         value: function _trimGraphs() {
             var tmplData = [];
 
-            var dataLen = this._root.dataFrame.org.length - 1; //减去title fields行
-            var xField = this._root._coordinate._xAxis.field;
+            var dataLen = this.root.dataFrame.org.length - 1; //减去title fields行
+            var xField = this.root._coordinate._xAxis.field;
 
             for (var i = 0; i < dataLen; i++) {
 
-                var rowData = this._root.dataFrame.getRowData(i);
+                var rowData = this.root.dataFrame.getRowData(i);
                 var xValue = rowData[xField];
                 var yValue = rowData[this.field];
-                var xPos = this._root._coordinate._xAxis.getPosX({ val: xValue });
-                var yPos = this._root._coordinate._getYaxisOfField(this.field).getYposFromVal(yValue);
+                var xPos = this.root._coordinate._xAxis.getPosX({ val: xValue });
+                var yPos = this.root._coordinate._getYaxisOfField(this.field).getYposFromVal(yValue);
                 var group = this.getGroup(rowData);
                 var groupInd = this.getGroupInd(rowData);
 
@@ -13540,17 +13744,17 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
             var r = this.node.normalR;
             var rowData = nodeLayoutData.rowData;
             if (this.node.r != null) {
-                if (_$13.isString(this.node.r) && rowData[this.node.r]) {
+                if (_$15.isString(this.node.r) && rowData[this.node.r]) {
                     //如果配置了某个字段作为r，那么就要自动计算比例
                     if (!this._rData && !this._rMaxValue && !this._rMinValue) {
-                        this._rData = this._root.dataFrame.getFieldData(this.node.r);
-                        this._rMaxValue = _$13.max(this._rData);
-                        this._rMinValue = _$13.min(this._rData);
+                        this._rData = this.root.dataFrame.getFieldData(this.node.r);
+                        this._rMaxValue = _$15.max(this._rData);
+                        this._rMinValue = _$15.min(this._rData);
                     }
                     var rVal = rowData[this.node.r];
                     r = this.node.minR + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxR - this.node.minR);
                 }
-                if (_$13.isFunction(this.node.r)) {
+                if (_$15.isFunction(this.node.r)) {
                     r = this.node.r(rowData);
                 }
                 if (!isNaN(parseInt(this.node.r))) {
@@ -13564,7 +13768,7 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         key: "_setLabel",
         value: function _setLabel(nodeLayoutData) {
             if (this.label.field != null) {
-                if (_$13.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
+                if (_$15.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
                     nodeLayoutData.label = nodeLayoutData.rowData[this.label.field];
                 }
             }
@@ -13585,10 +13789,10 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         key: "_getStyle",
         value: function _getStyle(style, nodeLayoutData) {
             var _style = style;
-            if (_$13.isArray(style)) {
+            if (_$15.isArray(style)) {
                 _style = style[nodeLayoutData.groupInd];
             }
-            if (_$13.isFunction(style)) {
+            if (_$15.isFunction(style)) {
                 _style = style(nodeLayoutData);
             }
             if (!_style) {
@@ -13606,10 +13810,10 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         key: "_setNodeType",
         value: function _setNodeType(nodeLayoutData) {
             var shapeType = this.node.shapeType;
-            if (_$13.isArray(shapeType)) {
+            if (_$15.isArray(shapeType)) {
                 shapeType = shapeType[nodeLayoutData.groupInd];
             }
-            if (_$13.isFunction(shapeType)) {
+            if (_$15.isFunction(shapeType)) {
                 shapeType = shapeType(nodeLayoutData);
             }
             if (!shapeType) {
@@ -13625,7 +13829,7 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
             var me = this;
             if (this.groupField) {
                 //如果有设置分组字段
-                group = _$13.find(this.groupsData, function (group) {
+                group = _$15.find(this.groupsData, function (group) {
                     return group.groupName == rowData[me.groupField];
                 });
                 if (!group) {
@@ -13656,7 +13860,7 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         value: function getGroupInd(rowData) {
             var i = 0;
             var me = this;
-            _$13.each(this.groupsData, function (group, gi) {
+            _$15.each(this.groupsData, function (group, gi) {
                 if (group.groupName == rowData[me.groupField]) {
                     i = gi;
                 }
@@ -13670,11 +13874,11 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
         key: "_widget",
         value: function _widget() {
             var me = this;
-            _$13.each(this.groupsData, function (group, iGroup) {
+            _$15.each(this.groupsData, function (group, iGroup) {
                 var groupSprite = new canvax.Display.Sprite({ id: group.groupName });
                 me._shapesp.addChild(groupSprite);
 
-                _$13.each(group.list, function (nodeData, iNode) {
+                _$15.each(group.list, function (nodeData, iNode) {
 
                     var _context = me._getNodeContext(nodeData);
                     var Shape = nodeData.shapeType == "circle" ? Circle$2$1 : Rect$6;
@@ -13768,7 +13972,7 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
             }
 
             //fire到root上面去的是为了让root去处理tips
-            this._root.fire(e.type, e);
+            this.root.fire(e.type, e);
         }
 
         /**
@@ -13778,16 +13982,16 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
     }, {
         key: "grow",
         value: function grow() {
-            _$13.each(this.data, function (nodeData) {
+            _$15.each(this.data, function (nodeData) {
                 nodeData.shape.animate({
                     x: nodeData.x,
                     y: nodeData.y,
                     r: nodeData.r
                 }, {
-                    onUpdate: function onUpdate(opt) {
+                    onUpdate: function onUpdate(opts) {
                         if (this.label) {
-                            this.label.context.x = opt.x;
-                            this.label.context.y = opt.y;
+                            this.label.context.x = opts.x;
+                            this.label.context.y = opts.y;
                         }
                     },
                     delay: Math.round(Math.random() * 300)
@@ -13795,13 +13999,1012 @@ var Graphs$1 = function (_Canvax$Event$EventDi) {
             });
         }
     }]);
-    return Graphs;
+    return ScatGraphs;
+}(canvax.Event.EventDispatcher);
+
+//单环pie
+
+var Sector$1 = canvax.Shapes.Sector;
+var Path$2 = canvax.Shapes.Path;
+var AnimationFrame$3 = canvax.AnimationFrame;
+var _$17 = canvax._;
+
+var Pie$1 = function (_Canvax$Event$EventDi) {
+    inherits$1(Pie, _Canvax$Event$EventDi);
+
+    function Pie(opts, _graphs) {
+        classCallCheck$1(this, Pie);
+
+        var _this = possibleConstructorReturn$1(this, (Pie.__proto__ || Object.getPrototypeOf(Pie)).call(this));
+
+        _this._opts = opts;
+
+        _this.width = 0;
+        _this.height = 0;
+        _this.origin = {
+            x: 0,
+            y: 0
+        };
+
+        //这个pie所属的graphs对象
+        _this._graphs = _graphs;
+        _this.moveDis = _graphs.moveDis;
+        _this.innerRadius = _graphs.innerRadius;
+        //this.outRadius = _graphs.outRadius;
+        _this.domContainer = _graphs.root.canvax.domView;
+
+        _this.data = null;
+
+        _this.sprite = null;
+        _this.labelSp = null;
+        _this.sectorsSp = null;
+        _this.checkedSp = null;
+        _this.branchTxt = null;
+
+        _this.label = {
+            enabled: true,
+            allowLine: true,
+            format: null
+        };
+
+        _this.focus = {
+            enabled: true
+        };
+
+        _this.checked = {
+            enabled: true,
+            r: 5,
+            globalAlpha: 0.7
+        };
+
+        _this.colors = colors;
+
+        _this.init(opts);
+
+        _this.colorIndex = 0;
+        _this.sectors = [];
+        _this.sectorMap = [];
+        _this.labelMaxCount = 15;
+        _this.labelList = [];
+        _this.completed = false; //首次加载动画是否完成
+        return _this;
+    }
+
+    createClass$1(Pie, [{
+        key: "init",
+        value: function init(opts) {
+            _$17.extend(true, this, opts);
+
+            this.sprite = new canvax.Display.Sprite();
+
+            this.sectorsSp = new canvax.Display.Sprite();
+            this.sprite.addChild(this.sectorsSp);
+
+            this.checkedSp = new canvax.Display.Sprite();
+            this.sprite.addChild(this.checkedSp);
+
+            if (this.label.enabled) {
+                this.labelSp = new canvax.Display.Sprite();
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw(opts, data) {
+            var me = this;
+
+            _$17.extend(true, this, opts);
+
+            this.sprite.context.x = me.origin.x;
+            this.sprite.context.y = me.origin.y;
+
+            this.data = data;
+
+            me._widget();
+
+            if (this.animation) {
+                me.grow();
+            }
+        }
+    }, {
+        key: "_widget",
+        value: function _widget() {
+            var me = this;
+            var data = me.data;
+            var total = data.total;
+
+            var moreSecData;
+            if (data.list.length > 0 && total > 0) {
+                me.labelSp && me.sprite.addChild(me.labelSp);
+                for (var i = 0; i < data.list.length; i++) {
+                    var item = data.list[i];
+
+                    if (me.colorIndex >= me.colors.length) me.colorIndex = 0;
+                    var fillColor = me.getColorByIndex(me.colors, i);
+                    //扇形主体          
+                    var sector = new Sector$1({
+                        hoverClone: false,
+                        xyToInt: false, //扇形不需要自动取整
+                        context: {
+                            x: item.sliced ? item.outOffsetx : 0,
+                            y: item.sliced ? item.outOffsety : 0,
+                            r0: me.innerRadius,
+                            r: item.outRadius,
+                            startAngle: item.start,
+                            endAngle: item.end,
+                            fillStyle: fillColor,
+                            index: item.index,
+                            cursor: "pointer"
+                        },
+                        id: 'sector' + i
+                    });
+                    sector.__data = item;
+                    sector.__colorIndex = i;
+                    sector.__dataIndex = i;
+                    sector.__isSliced = item.sliced;
+
+                    //扇形slice
+                    me.focus.enabled && sector.hover(function (e) {
+                        var secData = me.data.list[this.__dataIndex];
+                        if (!secData.checked) {
+                            me.focusAt(this.__dataIndex);
+                        }
+                    }, function (e) {
+                        var secData = me.data.list[this.__dataIndex];
+                        if (!secData.checked) {
+                            me.unfocusAt(this.__dataIndex);
+                        }
+                    });
+
+                    //扇形checked
+                    me.checked.enabled && sector.on('mousedown mouseup click mousemove dblclick', function (e) {
+                        //me._geteventInfo(e, this.__dataIndex);
+                        if (e.type == "click") {
+                            me.secClick(this, e);
+                        }
+                    });
+
+                    me.sectorsSp.addChildAt(sector, 0);
+
+                    moreSecData = {
+                        name: item.name,
+                        value: item.value,
+                        sector: sector,
+                        context: sector.context,
+                        originx: sector.context.x,
+                        originy: sector.context.y,
+                        r: item.outRadius,
+                        startAngle: sector.context.startAngle,
+                        endAngle: sector.context.endAngle,
+                        color: fillColor,
+                        index: i,
+                        percentage: item.percentage
+                    };
+
+                    me.sectors.push(moreSecData);
+                }
+
+                if (me.sectors.length > 0) {
+                    me.sectorMap = [];
+                    for (var i = 0; i < me.sectors.length; i++) {
+                        me.sectorMap[me.sectors[i].index] = me.sectors[i];
+                    }
+                }
+
+                if (me.label.enabled) {
+                    me._startWidgetLabel();
+                }
+            }
+        }
+    }, {
+        key: "focusAt",
+        value: function focusAt(index, callback) {
+            var me = this;
+            var sec = me.sectorMap[index].sector;
+            var secData = me.data.list[index];
+            secData._selected = true;
+            sec.animate({
+                x: secData.outOffsetx,
+                y: secData.outOffsety
+            }, {
+                duration: 100,
+                onComplete: function onComplete() {
+                    //secData.checked = true;
+                    callback && callback();
+                }
+            });
+        }
+    }, {
+        key: "unfocusAt",
+        value: function unfocusAt(index, callback) {
+            var me = this;
+            var sec = me.sectorMap[index].sector;
+            var secData = me.data.list[index];
+            secData._selected = false;
+            sec.animate({
+                x: 0,
+                y: 0
+            }, {
+                duration: 100,
+                onComplete: function onComplete() {
+                    callback && callback();
+                    //secData.checked = false;
+                }
+            });
+        }
+    }, {
+        key: "check",
+        value: function check(index) {
+            var me = this;
+            if (!this.sectorMap.length) {
+                return;
+            }
+            var e = {};
+            me._geteventInfo(e, index);
+            me.checked.checkedBeforCallBack(e);
+            if (e.eventInfo.iNode == -1) {
+                return;
+            }
+
+            var sec = this.sectorMap[index].sector;
+            var secData = this.data.list[index];
+            if (secData.checked) {
+                return;
+            }
+
+            if (!secData._selected) {
+                this.focus(index, function () {
+                    me.addCheckedSec(sec);
+                });
+            } else {
+                this.addCheckedSec(sec);
+            }
+            secData.checked = true;
+
+            me.checked.checkedCallBack(e);
+        }
+    }, {
+        key: "uncheck",
+        value: function uncheck(index) {
+            var sec = this.sectorMap[index].sector;
+            var secData = this.data.list[index];
+            if (!secData.checked) {
+                return;
+            }
+            var me = this;
+            me.cancelCheckedSec(sec, function () {
+                me.unfocus(index);
+            });
+            secData.checked = false;
+
+            var e = {};
+            me._geteventInfo(e, index);
+            me.checked.uncheckedCallBack(e);
+        }
+    }, {
+        key: "uncheckAll",
+        value: function uncheckAll() {
+            var me = this;
+            _$17.each(this.sectorMap, function (sm, i) {
+                var sec = sm.sector;
+                var secData = me.data.list[i];
+                if (secData.checked) {
+                    me.uncheck(i);
+                    //me.cancelCheckedSec(sec);
+                    //secData.checked = false;
+                }
+            });
+        }
+    }, {
+        key: "secClick",
+        value: function secClick(sectorEl, e) {
+            if (!this.checked.enabled) return;
+
+            var secData = this.data.list[sectorEl.__dataIndex];
+            if (sectorEl.clickIng) {
+                return;
+            }
+
+            sectorEl.clickIng = true;
+            secData.checked = !secData.checked;
+
+            if (secData.checked) {
+                this.addCheckedSec(sectorEl, function () {
+                    sectorEl.clickIng = false;
+                });
+            } else {
+                this.cancelCheckedSec(sectorEl, function () {
+                    sectorEl.clickIng = false;
+                });
+            }
+        }
+    }, {
+        key: "addCheckedSec",
+        value: function addCheckedSec(sec, callback) {
+            var secc = sec.context;
+            if (!secc) return;
+
+            var sector = new Sector$1({
+                xyToInt: false,
+                context: {
+                    x: secc.x,
+                    y: secc.y,
+                    r0: secc.r - 1,
+                    r: secc.r + this.checked.r,
+                    startAngle: secc.startAngle,
+                    endAngle: secc.startAngle, //secc.endAngle,
+                    fillStyle: secc.fillStyle,
+                    globalAlpha: this.checked.globalAlpha
+                },
+                id: 'checked_' + sec.id
+            });
+            sec._checkedSec = sector;
+
+            this.checkedSp.addChild(sector);
+
+            if (this.completed) {
+                sector.animate({
+                    endAngle: secc.endAngle
+                }, {
+                    duration: this._getAngleTime(secc),
+                    onComplete: function onComplete() {
+                        callback && callback();
+                    }
+                });
+            } else {
+                sector.context.endAngle = secc.endAngle;
+            }
+        }
+    }, {
+        key: "cancelCheckedSec",
+        value: function cancelCheckedSec(sec, callback) {
+            var checkedSec = sec._checkedSec;
+
+            checkedSec.animate({
+                startAngle: checkedSec.context.endAngle - 0.5
+            }, {
+                onUpdate: function onUpdate() {},
+                onComplete: function onComplete() {
+                    delete sec._checkedSec;
+                    checkedSec.destroy();
+                    callback && callback();
+                }
+            });
+        }
+    }, {
+        key: "_getAngleTime",
+        value: function _getAngleTime(secc) {
+            return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500;
+        }
+    }, {
+        key: "getColorByIndex",
+        value: function getColorByIndex(colors$$1, index) {
+            if (index >= colors$$1.length) {
+                //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
+                if ((this.data.list.length - 1) % colors$$1.length == 0 && index % colors$$1.length == 0) {
+                    index = index % colors$$1.length + 1;
+                } else {
+                    index = index % colors$$1.length;
+                }
+            }
+            return colors$$1[index];
+        }
+    }, {
+        key: "grow",
+        value: function grow() {
+            var me = this;
+            _$17.each(me.sectors, function (sec, index) {
+                if (sec.context) {
+                    sec._r0 = sec.context.r0;
+                    sec._r = sec.context.r;
+
+                    sec.context.r0 = 0;
+                    sec.context.r = 0;
+                    sec.context.startAngle = me._graphs.startAngle;
+                    sec.context.endAngle = me._graphs.startAngle;
+                }
+            });
+
+            me._hideGrowLabel();
+
+            AnimationFrame$3.registTween({
+                from: {
+                    process: 0
+                },
+                to: {
+                    process: 1
+                },
+                duration: 500,
+                onUpdate: function onUpdate(status) {
+                    for (var i = 0; i < me.sectors.length; i++) {
+                        var sec = me.sectors[i];
+
+                        var secc = sec.context;
+                        if (secc) {
+                            secc.r = sec._r * status.process;
+                            secc.r0 = sec._r0 * status.process;
+                            //secc.globalAlpha = status.process;
+                            if (i == 0) {
+                                secc.startAngle = sec.startAngle;
+                                secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * status.process;
+                            } else {
+                                var lastEndAngle = function (index) {
+                                    var lastIndex = index - 1;
+                                    var lastSecc = me.sectors[lastIndex].context;
+                                    if (lastIndex == 0) {
+                                        return lastSecc ? lastSecc.endAngle : 0;
+                                    }
+                                    if (lastSecc) {
+                                        return lastSecc.endAngle;
+                                    } else {
+                                        return arguments.callee(lastIndex);
+                                    }
+                                }(i);
+                                secc.startAngle = lastEndAngle;
+                                secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * status.process;
+                            }
+
+                            //如果已经被选中，有一个选中态
+                            if (sec.sector._checkedSec) {
+                                sec.sector._checkedSec.context.r0 = secc.r - 1;
+                                sec.sector._checkedSec.context.r = secc.r + me.checked.r;
+                                sec.sector._checkedSec.context.startAngle = secc.startAngle;
+                                sec.sector._checkedSec.context.endAngle = secc.endAngle;
+                            }
+                        }
+                    }
+                },
+
+                onComplete: function onComplete() {
+                    me._showGrowLabel();
+                    me.completed = true;
+                }
+            });
+        }
+    }, {
+        key: "_widgetLabel",
+        value: function _widgetLabel(quadrant, indexs, lmin, rmin, isEnd, ySpaceInfo) {
+            var me = this;
+            var count = 0;
+            var data = me.data.list;
+            var sectorMap = me.sectorMap;
+            var minTxtDis = 15;
+            var labelOffsetX = 5;
+
+            var currentIndex;
+            var preY, currentY, adjustX, txtDis, branchTxt, bwidth, bheight, bx, by;
+            var yBound, remainingNum, remainingY;
+
+            var clockwise = quadrant == 2 || quadrant == 4;
+            var isleft = quadrant == 2 || quadrant == 3;
+            var isup = quadrant == 3 || quadrant == 4;
+            var minY = isleft ? lmin : rmin;
+
+            //label的绘制顺序做修正，label的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
+            if (indexs.length > 0) {
+                indexs.sort(function (a, b) {
+                    return isup ? data[a].edgey - data[b].edgey : data[b].edgey - data[a].edgey;
+                });
+            }
+
+            for (var i = 0; i < indexs.length; i++) {
+                currentIndex = indexs[i];
+                var itemData = data[currentIndex];
+                var outCircleRadius = itemData.outRadius + me.moveDis;
+
+                //若Y值小于最小值，不画label    
+                if (!itemData.enabled || itemData.y < minY || count >= me.labelMaxCount) continue;
+                count++;
+                currentY = itemData.edgey;
+                adjustX = Math.abs(itemData.edgex);
+                txtDis = currentY - preY;
+
+                if (i != 0 && (Math.abs(txtDis) < minTxtDis || isup && txtDis < 0 || !isup && txtDis > 0)) {
+                    currentY = isup ? preY + minTxtDis : preY - minTxtDis;
+                    if (outCircleRadius - Math.abs(currentY) > 0) {
+                        adjustX = Math.sqrt(Math.pow(outCircleRadius, 2) - Math.pow(currentY, 2));
+                    }
+
+                    if (isleft && -adjustX > itemData.edgex || !isleft && adjustX < itemData.edgex) {
+                        adjustX = Math.abs(itemData.edgex);
+                    }
+                }
+
+                if (isEnd) {
+                    yBound = isleft ? ySpaceInfo.left : ySpaceInfo.right;
+                    remainingNum = indexs.length - i;
+                    remainingY = isup ? yBound - remainingNum * minTxtDis : yBound + remainingNum * minTxtDis;
+                    if (isup && currentY > remainingY || !isup && currentY < remainingY) {
+                        currentY = remainingY;
+                    }
+                }
+
+                preY = currentY;
+                if (!isEnd) {
+                    if (isleft) {
+                        ySpaceInfo.left = preY;
+                    } else {
+                        ySpaceInfo.right = preY;
+                    }
+                }
+
+                //指示线
+                /**
+                [
+                    [ itemData.centerx , itemData.centery ], //start
+                    [ itemData.outx , itemData.outy ],  //二次贝塞尔控制点
+                    [ isleft ? -adjustX-labelOffsetX : adjustX+labelOffsetX, currentY] //end
+                ]
+                */
+                var pathStr = "M" + itemData.centerx + "," + itemData.centery;
+                pathStr += "Q" + itemData.outx + "," + itemData.outy + "," + (isleft ? -adjustX - labelOffsetX : adjustX + labelOffsetX) + "," + currentY;
+
+                var path = new Path$2({
+                    context: {
+                        lineType: 'solid',
+                        path: pathStr,
+                        lineWidth: 1,
+                        strokeStyle: sectorMap[currentIndex].color
+                    }
+                });
+
+                //指示文字
+
+                var labelTxt = itemData.label;
+                //如果用户format过，那么就用用户指定的格式
+                //如果没有就默认拼接
+                if (!this.label.format) {
+                    if (labelTxt) {
+                        labelTxt = labelTxt + "：" + itemData.percentage + "%";
+                    } else {
+                        labelTxt = itemData.percentage + "%";
+                    }
+                }
+
+                branchTxt = document.createElement("div");
+                branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + sectorMap[currentIndex].color + "";
+                branchTxt.innerHTML = labelTxt;
+                me.domContainer.appendChild(branchTxt);
+                bwidth = branchTxt.offsetWidth;
+                bheight = branchTxt.offsetHeight;
+
+                this.branchTxt = branchTxt;
+
+                bx = isleft ? -adjustX : adjustX;
+                by = currentY;
+
+                switch (quadrant) {
+                    case 1:
+                        bx += labelOffsetX;
+                        by -= bheight / 2;
+                        break;
+                    case 2:
+                        bx -= bwidth + labelOffsetX;
+                        by -= bheight / 2;
+                        break;
+                    case 3:
+                        bx -= bwidth + labelOffsetX;
+                        by -= bheight / 2;
+                        break;
+                    case 4:
+                        bx += labelOffsetX;
+                        by -= bheight / 2;
+                        break;
+                }
+
+                branchTxt.style.left = bx + me.origin.x + "px";
+                branchTxt.style.top = by + me.origin.y + "px";
+
+                if (me.label.allowLine) {
+                    me.labelSp.addChild(path);
+                }
+
+                me.sectorMap[currentIndex].label = {
+                    line: path,
+                    label: branchTxt
+                };
+
+                me.labelList.push({
+                    width: bwidth,
+                    height: bheight,
+                    x: bx + me.origin.x,
+                    y: by + me.origin.y,
+                    data: itemData,
+                    labelTxt: labelTxt,
+                    labelEle: branchTxt
+                });
+            }
+        }
+    }, {
+        key: "_startWidgetLabel",
+        value: function _startWidgetLabel() {
+            var me = this;
+            var data = me.data.list;
+            var rMinPercentage = 0,
+                lMinPercentage = 0,
+                rMinY = 0,
+                lMinY = 0;
+            var quadrantsOrder = [];
+
+            var quadrantInfo = [{
+                indexs: [],
+                count: 0
+            }, {
+                indexs: [],
+                count: 0
+            }, {
+                indexs: [],
+                count: 0
+            }, {
+                indexs: [],
+                count: 0
+            }];
+
+            //默认从top开始画
+            var widgetInfo = {
+                right: {
+                    startQuadrant: 4,
+                    endQuadrant: 1,
+                    clockwise: true,
+                    indexs: []
+                },
+                left: {
+                    startQuadrant: 3,
+                    endQuadrant: 2,
+                    clockwise: false,
+                    indexs: []
+                }
+            };
+
+            for (var i = 0; i < data.length; i++) {
+                var cur = data[i].quadrant;
+                quadrantInfo[cur - 1].indexs.push(i);
+                quadrantInfo[cur - 1].count++;
+            }
+
+            //1,3象限的绘制顺序需要反转
+            if (quadrantInfo[0].count > 1) quadrantInfo[0].indexs.reverse();
+            if (quadrantInfo[2].count > 1) quadrantInfo[2].indexs.reverse();
+
+            if (quadrantInfo[0].count > quadrantInfo[3].count) {
+                widgetInfo.right.startQuadrant = 1;
+                widgetInfo.right.endQuadrant = 4;
+                widgetInfo.right.clockwise = false;
+            }
+
+            if (quadrantInfo[1].count > quadrantInfo[2].count) {
+                widgetInfo.left.startQuadrant = 2;
+                widgetInfo.left.endQuadrant = 3;
+                widgetInfo.left.clockwise = true;
+            }
+
+            widgetInfo.right.indexs = quadrantInfo[widgetInfo.right.startQuadrant - 1].indexs.concat(quadrantInfo[widgetInfo.right.endQuadrant - 1].indexs);
+            widgetInfo.left.indexs = quadrantInfo[widgetInfo.left.startQuadrant - 1].indexs.concat(quadrantInfo[widgetInfo.left.endQuadrant - 1].indexs);
+
+            var overflowIndexs, sortedIndexs;
+
+            if (widgetInfo.right.indexs.length > me.labelMaxCount) {
+                sortedIndexs = widgetInfo.right.indexs.slice(0);
+                sortedIndexs.sort(function (a, b) {
+                    return data[b].y - data[a].y;
+                });
+                overflowIndexs = sortedIndexs.slice(me.labelMaxCount);
+                rMinPercentage = data[overflowIndexs[0]].percentage;
+                rMinY = data[overflowIndexs[0]].y;
+            }
+            if (widgetInfo.left.indexs.length > me.labelMaxCount) {
+                sortedIndexs = widgetInfo.left.indexs.slice(0);
+                sortedIndexs.sort(function (a, b) {
+                    return data[b].y - data[a].y;
+                });
+                overflowIndexs = sortedIndexs.slice(me.labelMaxCount);
+                lMinPercentage = data[overflowIndexs[0]].percentage;
+                lMinY = data[overflowIndexs[0]].y;
+            }
+
+            quadrantsOrder.push(widgetInfo.right.startQuadrant);
+            quadrantsOrder.push(widgetInfo.right.endQuadrant);
+            quadrantsOrder.push(widgetInfo.left.startQuadrant);
+            quadrantsOrder.push(widgetInfo.left.endQuadrant);
+
+            var ySpaceInfo = {};
+
+            for (var i = 0; i < quadrantsOrder.length; i++) {
+                var isEnd = i == 1 || i == 3;
+                me._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo);
+            }
+        }
+    }, {
+        key: "_showGrowLabel",
+        value: function _showGrowLabel() {
+            if (this.labelSp) {
+                this.labelSp.context.globalAlpha = 1;
+                _$17.each(this.labelList, function (lab) {
+                    lab.labelEle.style.visibility = "visible";
+                });
+            }
+        }
+    }, {
+        key: "_hideGrowLabel",
+        value: function _hideGrowLabel() {
+            if (this.labelSp) {
+                this.labelSp.context.globalAlpha = 0;
+                _$17.each(this.labelList, function (lab) {
+                    lab.labelEle.style.visibility = "hidden";
+                });
+            }
+        }
+    }]);
+    return Pie;
+}(canvax.Event.EventDispatcher);
+
+var _$16 = canvax._;
+
+var PieGraphs = function (_Canvax$Event$EventDi) {
+    inherits$1(PieGraphs, _Canvax$Event$EventDi);
+
+    function PieGraphs(opts, root) {
+        classCallCheck$1(this, PieGraphs);
+
+        var _this = possibleConstructorReturn$1(this, (PieGraphs.__proto__ || Object.getPrototypeOf(PieGraphs)).call(this, opts, root));
+
+        _this.type = "pie";
+
+        //这里所有的opts都要透传给 group
+        _this._opts = opts || {};
+        _this.root = root;
+
+        _this.valueField = null;
+        _this.nameField = null;
+        _this.rField = null; //如果有配置rField，那么每个pie的outRadius都会不一样
+
+
+        _this.width = 0;
+        _this.height = 0;
+        _this.origin = {
+            x: 0,
+            y: 0
+        };
+
+        _this.innerRadius = 0;
+        _this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
+        _this.minSectorRadius = 20; //outRadius - innerRadius 的最小值
+
+        _this.startAngle = -90;
+        //要预留moveDis位置来hover sector 的时候外扩
+        _this.moveDis = 15;
+
+        _this.groups = [];
+
+        _this.init(opts);
+        return _this;
+    }
+
+    createClass$1(PieGraphs, [{
+        key: "init",
+        value: function init(opts) {
+            _$16.extend(true, this, opts);
+            this.sprite = new canvax.Display.Sprite();
+        }
+    }, {
+        key: "_computerProps",
+        value: function _computerProps() {
+            var w = this.width;
+            var h = this.height;
+
+            //TODO：如果用户有配置outRadius的话，就按照用户的来，目前不做修正
+            if (!this.outRadius) {
+                var outRadius = Math.min(w, h) / 2;
+                if (this.label && this.label.enabled) {
+                    //要预留moveDis位置来hover sector 的时候外扩
+                    outRadius -= this.moveDis;
+                }
+                this.outRadius = parseInt(outRadius);
+            }
+
+            //要保证sec具有一个最小的radius
+            if (this.outRadius - this.innerRadius < this.minSectorRadius) {
+                this.innerRadius = this.outRadius - this.minSectorRadius;
+            }
+        }
+
+        /**
+         * opts ==> {width,height,origin}
+         */
+
+    }, {
+        key: "draw",
+        value: function draw(opts) {
+            _$16.extend(true, this, opts);
+            this._computerProps();
+            this.data = this._trimGraphs();
+
+            this._pie = new Pie$1(this._opts, this);
+            this.groups.push(this._pie);
+            this._pie.draw(opts, this.data);
+            this.sprite.addChild(this._pie.sprite);
+        }
+    }, {
+        key: "_trimGraphs",
+        value: function _trimGraphs() {
+            var me = this;
+            var _coor = this.root._coordinate;
+
+            var data = [];
+            var dataFrame = me.root.dataFrame;
+
+            for (var i = 0, l = dataFrame.org.length - 1; i < l; i++) {
+                var rowData = dataFrame.getRowData(i);
+                var layoutData = {
+                    rowData: rowData, //把这一行数据给到layoutData引用起来
+                    sliced: false, //是否获取焦点，外扩
+                    checked: false, //是否选中
+                    enabled: true, //是否启用，显示在列表中
+                    value: rowData[this.valueField],
+                    label: null //绘制的时候再设置
+                };
+                data.push(layoutData);
+            }
+
+            if (data.length && this.sort) {
+                data.sort(function (a, b) {
+                    if (me.sort == 'desc') {
+                        return a.value - b.value;
+                    } else {
+                        return b.value - a.value;
+                    }
+                });
+            }
+
+            return this._configData(data);
+        }
+    }, {
+        key: "_configData",
+        value: function _configData(data) {
+            var me = this;
+            var total = 0;
+
+            me.currentAngle = 0 + me.startAngle % 360;
+            var limitAngle = 360 + me.startAngle % 360;
+
+            var percentFixedNum = 2;
+
+            var maxRval = 0;
+            var minRval = 0;
+
+            if (data.length) {
+                //先计算出来value的总量
+                for (var i = 0; i < data.length; i++) {
+                    total += data[i].value;
+                    if (me.rField) {
+                        maxRval = Math.max(maxRval, data[i].rowData[me.rField]);
+                        minRval = Math.min(minRval, data[i].rowData[me.rField]);
+                    }
+                }
+
+                if (total > 0) {
+
+                    for (var j = 0; j < data.length; j++) {
+                        var percentage = data[j].value / total;
+                        var fixedPercentage = +(percentage * 100).toFixed(percentFixedNum);
+
+                        var angle = 360 * percentage;
+                        var endAngle = me.currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
+                        var cosV = Math.cos((me.currentAngle + angle / 2) / 180 * Math.PI);
+                        var sinV = Math.sin((me.currentAngle + angle / 2) / 180 * Math.PI);
+                        var midAngle = me.currentAngle + angle / 2;
+                        cosV = cosV.toFixed(5);
+                        sinV = sinV.toFixed(5);
+                        var quadrant = function (ang) {
+                            if (ang >= limitAngle) {
+                                ang = limitAngle;
+                            }
+                            ang = ang % 360;
+                            var angleRatio = parseInt(ang / 90);
+                            if (ang >= 0) {
+                                switch (angleRatio) {
+                                    case 0:
+                                        return 1;
+                                        break;
+                                    case 1:
+                                        return 2;
+                                        break;
+                                    case 2:
+                                        return 3;
+                                        break;
+                                    case 3:
+                                    case 4:
+                                        return 4;
+                                        break;
+                                }
+                            } else if (ang < 0) {
+                                switch (angleRatio) {
+                                    case 0:
+                                        return 4;
+                                        break;
+                                    case -1:
+                                        return 3;
+                                        break;
+                                    case -2:
+                                        return 2;
+                                        break;
+                                    case -3:
+                                    case -4:
+                                        return 1;
+                                        break;
+                                }
+                            }
+                        }(midAngle);
+
+                        var outRadius = me.outRadius;
+
+                        if (me.rField) {
+                            outRadius = parseInt((me.outRadius - me.innerRadius) * ((data[j].rowData[me.rField] - minRval) / (maxRval - minRval)) + me.innerRadius);
+                        }
+
+                        _$16.extend(data[j], {
+                            outRadius: outRadius,
+                            innerRadius: me.innerRadius,
+                            start: me.currentAngle, //起始角度
+                            end: endAngle, //结束角度
+                            midAngle: midAngle, //中间角度
+
+                            outOffsetx: me.moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
+                            outOffsety: me.moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
+
+                            centerx: outRadius * cosV,
+                            centery: outRadius * sinV,
+                            outx: (outRadius + me.moveDis) * cosV,
+                            outy: (outRadius + me.moveDis) * sinV,
+                            edgex: (outRadius + me.moveDis) * cosV,
+                            edgey: (outRadius + me.moveDis) * sinV,
+
+                            orginPercentage: percentage,
+                            percentage: fixedPercentage,
+
+                            quadrant: quadrant, //象限
+                            labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
+                            index: j
+                        });
+
+                        //这个时候可以计算下label，因为很多时候外部label如果是配置的
+                        data[j].label = me._getLabel(data[j]);
+
+                        me.currentAngle += angle;
+
+                        if (me.currentAngle > limitAngle) {
+                            me.currentAngle = limitAngle;
+                        }
+                    }
+                }
+            }
+
+            return {
+                list: data,
+                total: total
+            };
+        }
+    }, {
+        key: "_getLabel",
+        value: function _getLabel(itemData) {
+            var label;
+            if (this.label.enabled) {
+                if (this.nameField) {
+                    label = itemData.rowData[this.nameField];
+                }
+                if (_$16.isFunction(this.label.format)) {
+                    label = this.label.format(itemData);
+                }
+            }
+            return label;
+        }
+    }]);
+    return PieGraphs;
 }(canvax.Event.EventDispatcher);
 
 //import Tips from "../tips/index"
 
 var Circle$3 = canvax.Shapes.Circle;
-var _$14 = canvax._;
+var _$18 = canvax._;
 
 var Legend = function (_Component) {
     inherits$1(Legend, _Component);
@@ -13854,7 +15057,7 @@ var Legend = function (_Component) {
         key: "init",
         value: function init(opt) {
             if (opt) {
-                _$14.extend(true, this, opt);
+                _$18.extend(true, this, opt);
             }
             this.sprite = new canvax.Display.Sprite({
                 id: "LegendSprite"
@@ -13883,7 +15086,7 @@ var Legend = function (_Component) {
 
             var width = 0,
                 height = 0;
-            _$14.each(this.data, function (obj, i) {
+            _$18.each(this.data, function (obj, i) {
 
                 var icon = new Circle$3({
                     id: "lenend_field_icon_" + i,
@@ -13960,7 +15163,7 @@ var Legend = function (_Component) {
                 sprite.on("click", function (e) {
 
                     //只有一个field的时候，不支持取消
-                    if (_$14.filter(me.data, function (obj) {
+                    if (_$18.filter(me.data, function (obj) {
                         return obj.enabled;
                     }).length == 1) {
                         if (obj.enabled) {
@@ -14001,8 +15204,8 @@ var Legend = function (_Component) {
 }(component);
 
 var Line$5 = canvax.Shapes.Line;
-var Rect$7 = canvax.Shapes.Rect;
-var _$15 = canvax._;
+var Rect$8 = canvax.Shapes.Rect;
+var _$19 = canvax._;
 
 var dataZoom = function (_Component) {
     inherits$1(dataZoom, _Component);
@@ -14075,7 +15278,7 @@ var dataZoom = function (_Component) {
 
         _this.zoomBg = null;
 
-        opt && _$15.extend(true, _this, opt);
+        opt && _$19.extend(true, _this, opt);
         _this._computeAttrs(opt);
         _this.init(opt);
         return _this;
@@ -14126,7 +15329,7 @@ var dataZoom = function (_Component) {
             var _preStart = this.range.start;
             var _preEnd = this.range.end;
 
-            opt && _$15.extend(true, this, opt);
+            opt && _$19.extend(true, this, opt);
             this._cloneChart = cloneChart;
             this._computeAttrs(opt);
 
@@ -14191,7 +15394,7 @@ var dataZoom = function (_Component) {
                         onUpdate: setLines
                     });
                 } else {
-                    me._bgRect = new Rect$7({
+                    me._bgRect = new Rect$8({
                         context: bgRectCtx
                     });
                     me.dataZoomBg.addChild(me._bgRect);
@@ -14235,7 +15438,7 @@ var dataZoom = function (_Component) {
                     onUpdate: setLines
                 });
             } else {
-                me._btnLeft = new Rect$7({
+                me._btnLeft = new Rect$8({
                     id: 'btnLeft',
                     dragEnabled: me.left.eventEnabled,
                     context: btnLeftCtx
@@ -14280,7 +15483,7 @@ var dataZoom = function (_Component) {
                     onUpdate: setLines
                 });
             } else {
-                me._btnRight = new Rect$7({
+                me._btnRight = new Rect$8({
                     id: 'btnRight',
                     dragEnabled: me.right.eventEnabled,
                     context: btnRightCtx
@@ -14323,7 +15526,7 @@ var dataZoom = function (_Component) {
                 });
             } else {
                 //中间矩形拖拽区域
-                this.rangeRect = new Rect$7({
+                this.rangeRect = new Rect$8({
                     id: 'btnCenter',
                     dragEnabled: true,
                     context: rangeRectCtx
@@ -14508,10 +15711,10 @@ var dataZoom = function (_Component) {
             var _coor = this._cloneChart.thumbChart._coordinate;
 
             graphssp.id = graphssp.id + "_datazoomthumbChartbg";
-            graphssp.context.x = -_coor.graphsX; //0;
+            graphssp.context.x = -_coor.origin.x; //0;
             graphssp.context.y = this.barY; //this.barH + this.barY;
-            graphssp.context.scaleY = this.barH / _coor.graphsHeight;
-            graphssp.context.scaleX = this.w / _coor.graphsWidth;
+            graphssp.context.scaleY = this.barH / _coor.height;
+            graphssp.context.scaleX = this.w / _coor.width;
 
             this.dataZoomBg.addChild(graphssp);
 
@@ -14527,7 +15730,7 @@ var dataZoom = function (_Component) {
 var BrokenLine$3 = canvax.Shapes.BrokenLine;
 var Sprite$1 = canvax.Display.Sprite;
 var Text$1 = canvax.Display.Text;
-var _$16 = canvax._;
+var _$20 = canvax._;
 
 var MarkLine = function (_Component) {
     inherits$1(MarkLine, _Component);
@@ -14569,7 +15772,7 @@ var MarkLine = function (_Component) {
         _this._txt = null;
         _this._line = null;
 
-        opt && _$16.extend(true, _this, opt);
+        opt && _$20.extend(true, _this, opt);
 
         _this.init();
         return _this;
@@ -14597,7 +15800,7 @@ var MarkLine = function (_Component) {
         key: "_getYVal",
         value: function _getYVal() {
             var y = this.yVal;
-            if (_$16.isFunction(this.yVal)) {
+            if (_$20.isFunction(this.yVal)) {
                 y = this.yVal(this);
             }
 
@@ -14611,13 +15814,13 @@ var MarkLine = function (_Component) {
     }, {
         key: "_getLabel",
         value: function _getLabel() {
-            if (_$16.isString(this.text.content)) {
+            if (_$20.isString(this.text.content)) {
                 return this.text.content;
             }
 
             var yVal = this._getYVal();
             var label = "markline：" + yVal;
-            if (_$16.isFunction(this.text.content)) {
+            if (_$20.isFunction(this.text.content)) {
                 label = this.text.content.apply(this, [yVal]);
             }
             return label;
@@ -14657,7 +15860,7 @@ var MarkLine = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            opt && _$16.extend(true, this, opt);
+            opt && _$20.extend(true, this, opt);
 
             var me = this;
             var y = this._getYPos();
@@ -14686,12 +15889,12 @@ var MarkLine = function (_Component) {
         value: function _setTxtPos(y) {
             var me = this;
             var txt = me._txt;
-            if (_$16.isNumber(me.text.x)) {
+            if (_$20.isNumber(me.text.x)) {
                 txt.context.x = me.text.x;
             } else {
                 txt.context.x = this.w - txt.getTextWidth() - 5;
             }
-            if (_$16.isNumber(me.text.y)) {
+            if (_$20.isNumber(me.text.y)) {
                 txt.context.y = me.text.y;
             } else {
                 txt.context.y = y - txt.getTextHeight();
@@ -14703,7 +15906,7 @@ var MarkLine = function (_Component) {
 
 var Circle$4 = canvax.Shapes.Circle;
 var Droplet$1 = canvax.Shapes.Droplet;
-var _$17 = canvax._;
+var _$21 = canvax._;
 
 var MarkPoint = function (_Component) {
     inherits$1(MarkPoint, _Component);
@@ -14746,9 +15949,9 @@ var MarkPoint = function (_Component) {
         _this.filter = function () {}; //过滤函数
 
         if ("markPoint" in userOpts) {
-            _$17.extend(true, _this, userOpts.markPoint);
+            _$21.extend(true, _this, userOpts.markPoint);
         }
-        chartOpts && _$17.extend(true, _this, chartOpts);
+        chartOpts && _$21.extend(true, _this, chartOpts);
 
         _this.init();
         return _this;
@@ -14793,7 +15996,7 @@ var MarkPoint = function (_Component) {
         key: "_getColor",
         value: function _getColor(c, data, normalColor) {
             var color = c;
-            if (_$17.isFunction(c)) {
+            if (_$21.isFunction(c)) {
                 color = c(data);
             }
             //缺省颜色
@@ -14813,7 +16016,7 @@ var MarkPoint = function (_Component) {
             this.shape.context.visible = true;
             this.shapeBg && (this.shapeBg.context.visible = true);
             this.shapeCircle && (this.shapeCircle.context.visible = true);
-            _$17.isFunction(this.filter) && this.filter(this);
+            _$21.isFunction(this.filter) && this.filter(this);
         }
     }, {
         key: "_initCircleMark",
@@ -14893,7 +16096,7 @@ var MarkPoint = function (_Component) {
 
 var Line$6 = canvax.Shapes.Line;
 var Circle$5 = canvax.Shapes.Circle;
-var _$18 = canvax._;
+var _$22 = canvax._;
 
 var Anchor = function (_Component) {
     inherits$1(Anchor, _Component);
@@ -14952,7 +16155,7 @@ var Anchor = function (_Component) {
         key: "init",
         value: function init(opt) {
             if (opt) {
-                _$18.extend(true, this, opt);
+                _$22.extend(true, this, opt);
             }
 
             this.sprite = new canvax.Display.Sprite({
@@ -14994,7 +16197,7 @@ var Anchor = function (_Component) {
         key: "_initConfig",
         value: function _initConfig(opt) {
             if (opt) {
-                _$18.extend(true, this, opt);
+                _$22.extend(true, this, opt);
             }
         }
 
@@ -15108,7 +16311,7 @@ var Anchor = function (_Component) {
     }, {
         key: "_getProp",
         value: function _getProp(s) {
-            if (_$18.isFunction(s)) {
+            if (_$22.isFunction(s)) {
                 return s();
             }
             return s;
@@ -15117,7 +16320,7 @@ var Anchor = function (_Component) {
     return Anchor;
 }(component);
 
-var _$19 = canvax._;
+var _$23 = canvax._;
 
 var Tips = function (_Component) {
     inherits$1(Tips, _Component);
@@ -15165,7 +16368,7 @@ var Tips = function (_Component) {
     createClass$1(Tips, [{
         key: "init",
         value: function init(opt) {
-            _$19.extend(true, this, opt);
+            _$23.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite({
                 id: "TipSprite"
             });
@@ -15272,7 +16475,7 @@ var Tips = function (_Component) {
             var tipsContent;
 
             if (this.content) {
-                tipsContent = _$19.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
+                tipsContent = _$23.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
             } else {
                 tipsContent = this._getDefaultContent(this.eventInfo);
             }
@@ -15293,7 +16496,7 @@ var Tips = function (_Component) {
                 str += "<tr><td colspan='2'>" + info.title + "</td></tr>";
             }
 
-            _$19.each(info.nodes, function (node, i) {
+            _$23.each(info.nodes, function (node, i) {
                 if (node.value === undefined || node.value === null) {
                     return;
                 }
@@ -15351,7 +16554,7 @@ var Tips = function (_Component) {
 }(component);
 
 var Line$7 = canvax.Shapes.Line;
-var _$20 = canvax._;
+var _$24 = canvax._;
 
 var barTgi = function (_Component) {
     inherits$1(barTgi, _Component);
@@ -15398,7 +16601,7 @@ var barTgi = function (_Component) {
     createClass$1(barTgi, [{
         key: "init",
         value: function init(opt) {
-            _$20.extend(true, this, opt);
+            _$24.extend(true, this, opt);
             this._yAxis = this.root._coordinate._yAxis[this.yAxisAlign == "left" ? 0 : 1];
             this.sprite = new canvax.Display.Sprite({
                 id: "barTgiSprite",
@@ -15411,7 +16614,7 @@ var barTgi = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            _$20.extend(true, this, opt);
+            _$24.extend(true, this, opt);
             this.barDatas = null;
             this.data = null;
             this.sprite.removeAllChildren();
@@ -15422,19 +16625,19 @@ var barTgi = function (_Component) {
         value: function draw() {
             var me = this;
 
-            _$20.each(me.root._graphs, function (_g) {
+            _$24.each(me.root._graphs, function (_g) {
                 if (_g.type == "bar" && _g.enabledFieldData[me.barField]) {
                     me.barDatas = _g.enabledFieldData[me.barField];
                     return false;
                 }
             });
-            this.data = _$20.flatten(me.root.dataFrame.getDataOrg(me.field));
+            this.data = _$24.flatten(me.root.dataFrame.getDataOrg(me.field));
 
             if (!this.barDatas) {
                 return;
             }
 
-            _$20.each(this.data, function (tgi, i) {
+            _$24.each(this.data, function (tgi, i) {
                 var y = me._yAxis.getYposFromVal(tgi);
                 var barData = me.barDatas[i];
 
@@ -15459,7 +16662,7 @@ var barTgi = function (_Component) {
         key: "_getProp",
         value: function _getProp(val, tgi, i) {
             var res = val;
-            if (_$20.isFunction(val)) {
+            if (_$24.isFunction(val)) {
                 res = val.apply(this, [tgi, i]);
             }
             return res;
@@ -15473,13 +16676,15 @@ var barTgi = function (_Component) {
 //graphs
 //components
 var coordinate = {
-    descartes: Descartes
+    descartes: Descartes,
+    polar: Polar
 };
 
 var graphs = {
-    bar: Graphs,
+    bar: BarGraphs,
     line: LineGraphs,
-    scat: Graphs$1
+    scat: ScatGraphs,
+    pie: PieGraphs
 };
 
 var components = {
