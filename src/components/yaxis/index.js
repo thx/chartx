@@ -609,7 +609,7 @@ export default class yAxis extends Component
                 content = self.text.format(content, self);
             };
             if( content === undefined || content === null ){
-                content = Tools.numAddSymbol( o.content );
+                content = numAddSymbol( o.content );
             };  
 
             var textAlign = (self.align == "left" ? "right" : "left");

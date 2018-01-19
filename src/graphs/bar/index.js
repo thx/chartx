@@ -244,7 +244,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
             //h_group就会为两组，一组代表uv 一组代表pv。
             var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
             */
-
+            
             //vLen 为一单元bar上面纵向堆叠的length
             //比如yAxis.field = [?
             //    ["uv","pv"],  vLen == 2

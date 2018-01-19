@@ -25,7 +25,7 @@ rollup.rollup({
 
     bundle.write({
         format: 'iife',
-        moduleName: 'Chartx2',
+        moduleName: 'Chartx',
         dest: 'dist/chartx.js',
         //sourceMap: 'inline'
     });

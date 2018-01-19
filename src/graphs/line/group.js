@@ -14,14 +14,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
     constructor( fieldMap, groupInd, opt, ctx, h, w )
     {
-        //直接用第一个参数的field
-        delete opt.field;
-
         super();
 
         this._opt = opt;
         this.fieldMap = fieldMap;
-        this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
+        this.field = null; //在extend之后要重新设置
         this.groupInd = groupInd;
         
         this._yAxis = fieldMap.yAxis;
@@ -73,12 +70,18 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
+        _.extend(true, this, opt );
+
+        //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+        //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
+        this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
+
         this.init(opt)
     }
 
     init(opt)
     {
-        _.extend(true, this, opt);
+        
 
         this.sprite = new Canvax.Display.Sprite();
         var me = this;

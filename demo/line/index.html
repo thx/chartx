@@ -96,7 +96,7 @@ var options = {
         { 
             type : "line",
             field : "uv" , 
-            yAxisAlign:"left" ,
+            //yAxisAlign:"left" ,
             line : {
                 strokeStyle : "#eeccdd"
             },
@@ -115,7 +115,7 @@ var options = {
         {   
             type : "line",
             field : ["pv"] , 
-            yAxisAlign:"right",
+            //yAxisAlign:"right",
             line : {
                 lineType : "dashed",
                 strokeStyle : {
@@ -179,6 +179,10 @@ var options = {
 };
 
 window.line = Chartx.create("canvasTest" , data , options)
+
+setTimeout( function(){
+    Chartx.create("canvasTest" , data , options)
+} , 3000)
 
             </textarea></form>
         </td>

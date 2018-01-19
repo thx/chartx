@@ -77,7 +77,23 @@ export default class Descartes extends CoordinateBase
                         }
                     }
 
-                    optsYaxisObj.field = optsYaxisObj.field ? optsYaxisObj.field.concat( graphs.field ) : graphs.field;
+                    if( !optsYaxisObj.field ){
+                        optsYaxisObj.field = [];
+                    } else {
+                        if( !_.isArray( optsYaxisObj.field ) ){
+                            optsYaxisObj.field = [ optsYaxisObj.field ];
+                        }
+                    }
+
+                    if( graphs.field ){
+                        if( _.isArray( graphs.field ) ){
+                            optsYaxisObj.field = optsYaxisObj.field.concat( graphs.field )
+                        } else {
+                            optsYaxisObj.field.push( graphs.field )
+                        }
+                    }
+
+                    //optsYaxisObj.field = optsYaxisObj.field ? optsYaxisObj.field.concat( graphs.field ) : graphs.field;
                 }
             } );
         };

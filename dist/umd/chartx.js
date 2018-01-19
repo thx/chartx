@@ -9572,7 +9572,7 @@ var yAxis = function (_Component) {
                     content = self.text.format(content, self);
                 }
                 if (content === undefined || content === null) {
-                    content = Tools.numAddSymbol(o.content);
+                    content = numAddSymbol(o.content);
                 }
 
                 var textAlign = self.align == "left" ? "right" : "left";
@@ -10600,7 +10600,23 @@ var Descartes = function (_CoordinateBase) {
                         }
                     }
 
-                    optsYaxisObj.field = optsYaxisObj.field ? optsYaxisObj.field.concat(graphs.field) : graphs.field;
+                    if (!optsYaxisObj.field) {
+                        optsYaxisObj.field = [];
+                    } else {
+                        if (!_$4.isArray(optsYaxisObj.field)) {
+                            optsYaxisObj.field = [optsYaxisObj.field];
+                        }
+                    }
+
+                    if (graphs.field) {
+                        if (_$4.isArray(graphs.field)) {
+                            optsYaxisObj.field = optsYaxisObj.field.concat(graphs.field);
+                        } else {
+                            optsYaxisObj.field.push(graphs.field);
+                        }
+                    }
+
+                    //optsYaxisObj.field = optsYaxisObj.field ? optsYaxisObj.field.concat( graphs.field ) : graphs.field;
                 }
             });
         }
@@ -12599,14 +12615,11 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     function LineGraphsGroup(fieldMap, groupInd, opt, ctx, h, w) {
         classCallCheck$1(this, LineGraphsGroup);
 
-        //直接用第一个参数的field
-        delete opt.field;
-
         var _this = possibleConstructorReturn$1(this, (LineGraphsGroup.__proto__ || Object.getPrototypeOf(LineGraphsGroup)).call(this));
 
         _this._opt = opt;
         _this.fieldMap = fieldMap;
-        _this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
+        _this.field = null; //在extend之后要重新设置
         _this.groupInd = groupInd;
 
         _this._yAxis = fieldMap.yAxis;
@@ -12658,6 +12671,12 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         _this._currPointList = []; //brokenline 动画中的当前状态
         _this._bline = null;
 
+        _$15.extend(true, _this, opt);
+
+        //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+        //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
+        _this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
+
         _this.init(opt);
         return _this;
     }
@@ -12665,7 +12684,6 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     createClass$1(LineGraphsGroup, [{
         key: "init",
         value: function init(opt) {
-            _$15.extend(true, this, opt);
 
             this.sprite = new canvax.Display.Sprite();
             var me = this;
