@@ -1,12 +1,12 @@
-import Chart from "../chart"
+import CoordinateBase from "./index"
 import Canvax from "canvax2d"
 import {parse2MatrixData} from "../utils/tools"
 import DataFrame from "../utils/dataframe"
-import Coordinate from "../components/descartes/index"
+import CoordinateComponents from "../components/descartes/index"
 
 const _ = Canvax._;
 
-export default class Descartes extends Chart
+export default class Descartes extends CoordinateBase
 {
     constructor( node, data, opts, graphsMap, componentsMap ){
 
@@ -25,7 +25,7 @@ export default class Descartes extends Chart
                 layoutType    : "rule", //"peak",  
                 //默认为false，x轴的计量是否需要取整， 这样 比如某些情况下得柱状图的柱子间隔才均匀。
                 //比如一像素间隔的柱状图，如果需要精确的绘制出来每个柱子的间距是1px， 就必须要把这里设置为true
-                posParseToInt : false    
+                posParseToInt : false
             }
         };
 
@@ -57,7 +57,7 @@ export default class Descartes extends Chart
                     //没有配置field的话就不绘制这个 graphs了
                     var align = "left"; //默认left
                     if( graphs.yAxisAlign == "right" ){
-                        align = "right"
+                        align = "right";
                     };
 
                     var optsYaxisObj = null;
@@ -114,15 +114,16 @@ export default class Descartes extends Chart
         //这里不要直接用data，而要用 this._data
         this.dataFrame = this.initData( this._data );
 
-        this.draw();
+        //this.draw();
     }
 
+    //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
     draw()
     {
-        this._initModule(); //初始化模块  
+        this.initModule();    //初始化模块  
         this.initComponents(); //初始化组件
-        this._startDraw(); //开始绘图
-        this.drawComponents();  //绘图完，开始绘制插件
+        this.startDraw();     //开始绘图
+        this.drawComponents(); //绘图完，开始绘制插件
 
         if( this._coordinate.horizontal ){
             this._horizontal();
@@ -131,11 +132,11 @@ export default class Descartes extends Chart
         this.inited = true;
     }
 
-    _initModule(opt)
+    initModule(opt)
     {
         var me = this
         //首先是创建一个坐标系对象
-        this._coordinate = new Coordinate( this.coordinate, this );
+        this._coordinate = new CoordinateComponents( this.coordinate, this );
         this.coordinateSprite.addChild( this._coordinate.sprite );
 
         _.each( this.graphs , function( graphs ){
@@ -145,7 +146,7 @@ export default class Descartes extends Chart
         } );
     }
 
-    _startDraw(opt)
+    startDraw(opt)
     {
         var me = this;
         !opt && (opt ={});
@@ -222,7 +223,6 @@ export default class Descartes extends Chart
         _.each( this._graphs, function( _g ){
             _g.add( field, targetYAxis );
         } );
-        this.componentsReset();
     }
 
     remove( field )
@@ -232,7 +232,6 @@ export default class Descartes extends Chart
         _.each( this._graphs, function( _g ){
             _g.remove( field );
         } );
-        this.componentsReset();
     }
 
     _horizontal() 
@@ -276,92 +275,6 @@ export default class Descartes extends Chart
         });
     }
 
-    initComponents( opt )
-    {
-        if(this._opts.tips && this._initTips){
-            this._initTips( opt );
-        }
-        if(this._opts.legend && this._initLegend){
-            this._initLegend( opt );
-        };
-        if(this._opts.markLine && this._initMarkLine) {
-            this._initMarkLine( opt );
-        };
-        if(this._opts.markPoint && this._initMarkPoint) {
-            this._initMarkPoint( opt );
-        };
-        if(this._opts.dataZoom && this._initDataZoom) {
-            this._initDataZoom( opt );
-        };
-        if(this._opts.anchor && this._initAnchor) {
-            this._initAnchor( opt );
-        };
-        if(this._opts.barTgi && this._initBarTgi) {
-            this._initBarTgi( opt );
-        };
-    }
-
-    //所有plug触发更新
-    componentsReset( trigger )
-    {
-        var me = this;
-        _.each(this.components , function( p , i ){
-
-            if( p.type == "dataZoom" ){
-                if( !trigger || trigger.name != "dataZoom" ){
-                    me.__cloneChart = me._getCloneChart();
-                    p.plug.reset( {} , me.__cloneChart );
-                }
-                return
-            };
-            p.plug.reset && p.plug.reset( me[ p.type ] || {} , me.dataFrame);
-        }); 
-    }
-
-
-    //设置图例 begin
-    _initLegend( e )
-    {
-        !e && (e={});
-        var me = this;
-        //if( !this.legend || (this.legend && "enabled" in this.legend && !this.legend.enabled) ) return;
-        //设置legendOpt
-        var legendOpt = _.extend(true, {
-            enabled:true,
-            label  : function( info ){
-               return info.field
-            },
-            onChecked : function( field ){
-               me.add( field );
-            },
-            onUnChecked : function( field ){
-               me.remove( field );
-            }
-        } , me._opts.legend);
-        
-        var _legend = new me.componentsMap.legend( me._getLegendData() , legendOpt );
-       
-        _legend.draw = function(){
-            _legend.pos( { 
-                x : me._coordinate.origin.x
-                //y : me.padding.top + ( e.resize ? - _legend.height : 0 )
-            } );
-        };
-        
-        _legend.pos( {
-            x : 0,
-            y : me.padding.top + ( e.resize ? - _legend.height : 0 )
-        } );
-
-        !e.resize && (me.padding.top += _legend.height);
-
-        this.components.push( {
-            type : "legend",
-            plug : _legend
-        } );
-        me.stage.addChild( _legend.sprite );
-    }
-
     //只有field为多组数据的时候才需要legend
     _getLegendData()
     {
@@ -381,17 +294,16 @@ export default class Descartes extends Chart
             if( isGraphsField ){
                 data.push( {
                     enabled : map.enabled,
-                    field : map.field,
-                    ind : map.ind,
-                    style : map.style,
-                    yAxis : map.yAxis
+                    name    : map.field,
+                    ind     : map.ind,
+                    style   : map.style,
+                    yAxis   : map.yAxis
                 } );
             }
         });
         return data;
     }
     ////设置图例end
-
 
     //datazoom begin
     _getCloneChart()
@@ -470,6 +382,7 @@ export default class Descartes extends Chart
         };
 
         var thumbChart = new chartConstructor(cloneEl, me._data, opts, me.graphsMap, me.componentsMap);
+        thumbChart.draw();
 
         return {
             thumbChart: thumbChart,
@@ -477,18 +390,17 @@ export default class Descartes extends Chart
         }
     }
 
-    _initDataZoom()
+    _init_components_datazoom()
     {
         var me = this;
 
         me.padding.bottom += me.dataZoom.h;
-        me.__cloneChart = me._getCloneChart();
 
         this.components.push( {
             type : "once",
             plug : {
                 draw: function(){
-                    var _dataZoom = new me.componentsMap.dataZoom( me._getDataZoomOpt() , me.__cloneChart );
+                    var _dataZoom = new me.componentsMap.dataZoom( me._getDataZoomOpt() , me._getCloneChart() );
                     me.components.push( {
                         type : "dataZoom",
                         plug : _dataZoom
@@ -532,7 +444,7 @@ export default class Descartes extends Chart
 
 
     //markLine begin
-    _initMarkLine()
+    _init_components_markline()
     {
         var me = this;
 
@@ -648,16 +560,16 @@ export default class Descartes extends Chart
     //markLine end
 
 
-    _initMarkPoint() 
+    _init_components_markpoint() 
     {
     }
 
-    _initAnchor( )
+    _init_components_anchor( )
     {
 
     }
 
-    _initBarTgi()
+    _init_components_bartgi()
     {
         var me = this;
         
@@ -691,13 +603,14 @@ export default class Descartes extends Chart
         } );
     }
 
-    bindEvent( )
+    bindEvent()
     {
         var me = this;
         this.on("panstart mouseover", function(e) {
             var _tips = me.getComponentById("tips");
             if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
+
                 _tips.show(e);
             };
         });

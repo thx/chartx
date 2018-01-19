@@ -38,7 +38,6 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
             strokeStyle : null,
             lineWidth : 0,
             alpha : 0.9,
-            
             //onclick ondblclick 注册的事件都是小写
         };
         this.label = {

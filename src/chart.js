@@ -75,7 +75,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         if( opts.waterMark ){
             //添加水印的临时解决方案
             setTimeout( function(){
-                me._initWaterMark( opts.waterMark );
+                me._init_components_matermark( opts.waterMark );
             } , 50);
         }
     }
@@ -86,6 +86,11 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     draw()
     {
+        this.initModule(); //初始化模块
+        this.initComponents(); //初始化组件
+        this.startDraw(); //开始绘图
+        this.drawComponents();  //绘图完，开始绘制插件
+        this.inited = true;
     }
 
     /*
@@ -174,7 +179,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         if( opts.waterMark ){
             //添加水印的临时解决方案
             setTimeout( function(){
-                me._initWaterMark( opts.waterMark );
+                me._init_components_matermark( opts.waterMark );
             } , 50);
         };
     }
@@ -206,15 +211,37 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
 
     //插件管理相关代码begin
-    initComponents( opt )
+    initComponents()
     {
-
+        var notComponents = [ "coordinate", "graphs" ];
+        for( var _p in this._opts ){
+            var p = _p.toLocaleLowerCase();
+            if( _.indexOf( notComponents, p ) == -1 ){
+                if( this[ "_init_components_"+p ] ){
+                    this[ "_init_components_"+p ]( this._opts[ _p ] );
+                };
+            }
+        }
     }
-    
-    //所有plug触发更新
-    componentsReset(opt , e)
-    {
 
+    //所有plug触发更新
+    componentsReset( trigger )
+    {
+        var me = this;
+        _.each(this.components , function( p , i ){
+
+            if( trigger && trigger.name == p.type ){
+                //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
+                return;
+            };
+
+            if( p.type == "dataZoom" ){
+                p.plug.reset( {} , me._getCloneChart() );
+                return;
+            };
+
+            p.plug.reset && p.plug.reset( me[ p.type ] || {} , me.dataFrame);
+        }); 
     }
 
     drawComponents()
@@ -255,7 +282,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
     //插件相关代码end
 
-    _initTips()
+    _init_components_tips ()
     {
         //所有的tips放在一个单独的tips中
 		this.stageTips = new Canvax.Display.Stage({
@@ -273,7 +300,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
     //添加水印
-    _initWaterMark( waterMarkOpt )
+    _init_components_matermark( waterMarkOpt )
     {
         var text = waterMarkOpt.content || "chartx";
         var sp = new Canvax.Display.Sprite({

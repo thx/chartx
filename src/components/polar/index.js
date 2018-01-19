@@ -24,6 +24,9 @@ export default class polar extends Component
     {
         super( opts );
 
+        this.type = "polar";
+        
+        this._opts = opts;
         this.root = root;
 
         //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
@@ -56,22 +59,38 @@ export default class polar extends Component
     init(opts)
     {
         this.sprite = new Canvax.Display.Sprite({
-            id : "coordinate"
+            id : "coordinate_polar"
         });
 
         _.extend(true, this, opts);
+    }
 
+    draw()
+    {
+        this._computeAttr();
+
+        if( this.grid.enabled ){
+            //绘制蜘蛛网格
+
+        }
+        if( this.scale.enabled ){
+            //绘制刻度尺
+        }
+    }
+
+    _computeAttr()
+    {
         var _padding = this.root.padding;
         var rootWidth = this.root.width;
         var rootHeight = this.root.height;
 
-        if( !("width" in opts) ){
+        if( !("width" in this._opts) ){
             this.width = rootWidth-_padding.left-_padding.right;
         };
-        if( !("height" in opts) ){
+        if( !("height" in this._opts) ){
             this.height = rootHeight-_padding.top-_padding.bottom;
         };
-        if( !("origin" in opts) ){
+        if( !("origin" in this._opts) ){
             //如果没有传入任何origin数据，则默认为中心点
             //origin是相对画布左上角的
             this.origin = {
@@ -81,17 +100,6 @@ export default class polar extends Component
         };
 
         this._computeMaxR();
-    }
-
-    draw()
-    {
-        if( this.grid.enabled ){
-            //绘制蜘蛛网格
-
-        }
-        if( this.scale.enabled ){
-            //绘制刻度尺
-        }
     }
 
     //重新计算 maxR

@@ -14,6 +14,8 @@ export default class Descartes_Component extends Component
     {
         super();
 
+        this.type = "descartes";
+
         this.root  = root;
         
         this._xAxis = null;
@@ -376,7 +378,9 @@ export default class Descartes_Component extends Component
                 fields = [];
     
                 _.each( yAxis, function( item, i ){
-                    fields = fields.concat( item.field );
+                    if( item.field ){
+                        fields = fields.concat( item.field );
+                    };
                 } );
             };
     

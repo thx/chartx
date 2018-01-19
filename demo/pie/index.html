@@ -84,8 +84,14 @@ var options = {
             //outRadius: 70,
             //颜色序列,若不设置，会有默认的颜色序列
             //colors:['red', 'yellow', 'blue']
-            checked : {
-                enabled : true
+
+
+            //checked的实现不再用配置的方式然后内部实现，而是提供接口，在click 或 dblclick里自己调用
+            //checked : {
+            //    enabled : true
+            //}
+            onclick : function( e ){
+                debugger
             }
         }
     ],
@@ -114,7 +120,7 @@ window.chart = Chartx.create("canvasTest" , data , options);
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:400px;height:300px;position:relative;'></div>
             </div>
 
             </div>

@@ -1,6 +1,6 @@
 import Canvax from "canvax2d"
 import Pie from "./pie"
-
+import {colors as themeColors} from "../../theme"
 
 const _ = Canvax._;
 
@@ -20,13 +20,28 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
         this.nameField = null;
         this.rField = null;//如果有配置rField，那么每个pie的outRadius都会不一样
 
-
         this.width = 0;
         this.height = 0;
         this.origin = {
             x : 0,
             y : 0
-        }
+        };
+
+        this.colors = themeColors;
+
+        this.label = {
+            enabled: false,
+            format: null
+        };
+
+        this.focus = {
+            enabled : true
+        };
+
+        this.checked = {
+            r: 5,
+            globalAlpha : 0.7
+        };
 
         this.innerRadius = 0;
         this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
@@ -45,6 +60,9 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
     {
         _.extend(true, this, opts);
         this.sprite = new Canvax.Display.Sprite();
+
+        //初步设置下data，主要legend等需要用到
+        this.data = this._dataHandle();
     }
 
     _computerProps()
@@ -76,15 +94,40 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
     {
         _.extend(true, this, opts);
         this._computerProps();
-        this.data = this._trimGraphs();
-    
-        this._pie = new Pie( this._opts, this );
-        this.groups.push( this._pie );
-        this._pie.draw( opts, this.data );
-        this.sprite.addChild( this._pie.sprite );
+
+        //这个时候就是真正的计算布局用得layoutdata了
+        var _pie = new Pie( this._opts, this , this._trimGraphs( this.data ) );
+        this.groups.push( _pie );
+        _pie.draw( opts );
+        this.sprite.addChild( _pie.sprite );
     }
 
-    _trimGraphs()
+    add( name )
+    {
+        this._setEnabled( name, true );
+    }
+
+    remove( name )
+    {
+        this._setEnabled( name, false );
+    }
+
+    _setEnabled( name, status )
+    {
+        var me = this;
+
+        _.each( this.data, function( item ){
+            if( item.name === name ){
+                item.enabled = status;
+                return false;
+            }
+        } );
+        _.each( this.groups, function( group ){
+            group.resetData( me._trimGraphs( me.data ) );
+        } );
+    }
+
+    _dataHandle()
     {
         var me = this;
         var _coor = this.root._coordinate;
@@ -100,7 +143,10 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
                 checked : false,  //是否选中
                 enabled : true,   //是否启用，显示在列表中
                 value   : rowData[ this.valueField ],
-                label   : null    //绘制的时候再设置
+                name    : rowData[ this.nameField ],
+                fillStyle : me.getColorByIndex(me.colors, i, l),
+                label   : null,    //绘制的时候再设置
+                ind     : i
             }
             data.push( layoutData );
         };
@@ -113,12 +159,17 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
                     return b.value - a.value;
                 }
             });
+
+            //重新设定下ind
+            _.each( data, function( d, i ){
+                d.ind = i;
+            } )
         };
 
-        return this._configData(data);
+        return data;
     }
 
-    _configData( data ) 
+    _trimGraphs( data ) 
     {
         var me = this;
         var total = 0;
@@ -134,6 +185,9 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
         if ( data.length ) {
             //先计算出来value的总量
             for (var i = 0; i < data.length; i++) {
+                //enabled为false的secData不参与计算
+                if( !data[i].enabled ) continue;
+
                 total += data[i].value;
                 if( me.rField ){
                     maxRval = Math.max( maxRval, data[i].rowData[ me.rField ]);
@@ -141,10 +195,16 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
                 }
             };
 
-            if (total > 0) {
+            if ( total > 0 ) {
           
                 for (var j = 0; j < data.length; j++) {
                     var percentage = data[j].value / total;
+
+                    //enabled为false的sec，比率就设置为0
+                    if( !data[j].enabled ){
+                        percentage = 0;
+                    };
+                    
                     var fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
 
                     var angle = 360 * percentage;
@@ -204,8 +264,8 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
                     _.extend(data[j], {
                         outRadius : outRadius,
                         innerRadius : me.innerRadius,
-                        start: me.currentAngle, //起始角度
-                        end: endAngle, //结束角度
+                        startAngle: me.currentAngle, //起始角度
+                        endAngle: endAngle, //结束角度
                         midAngle: midAngle,  //中间角度
 
                         outOffsetx: me.moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
@@ -223,7 +283,7 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
                     
                         quadrant: quadrant, //象限
                         labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
-                        index: j
+                        ind: j
                     });
 
                     //这个时候可以计算下label，因为很多时候外部label如果是配置的
@@ -235,14 +295,26 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
                         me.currentAngle = limitAngle;
                     }
                 };
-
             }
         }
 
         return {
-            list : data,
+            list  : data,
             total : total
         };
+    }
+
+    getColorByIndex(colors, ind, len) 
+    {
+        if (ind >= colors.length) {
+            //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
+            if ((len - 1) % colors.length == 0 && (ind % colors.length == 0)) {
+                ind = ind % colors.length + 1;
+            } else {
+                ind = ind % colors.length;
+            }
+        };
+        return colors[ind];
     }
 
     _getLabel( itemData )
@@ -259,4 +331,8 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
         return label;
     }
 
+    getList()
+    {
+        return this.data;
+    }
 }

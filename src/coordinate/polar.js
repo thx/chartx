@@ -1,12 +1,12 @@
-import Chart from "../chart"
+import CoordinateBase from "./index"
 import Canvax from "canvax2d"
 import {parse2MatrixData} from "../utils/tools"
 import DataFrame from "../utils/dataframe"
-import Coordinate from "../components/polar/index"
+import CoordinateComponents from "../components/polar/index"
 
 const _ = Canvax._;
 
-export default class Polar extends Chart
+export default class Polar extends CoordinateBase
 {
     constructor( node, data, opts, graphsMap, componentsMap )
     {
@@ -24,24 +24,13 @@ export default class Polar extends Chart
         
         //这里不要直接用data，而要用 this._data
         this.dataFrame = this.initData( this._data );
-
-        this.draw();
     }
 
-    draw()
-    {
-        this._initModule(); //初始化模块  
-        this.initComponents(); //初始化组件
-        this._startDraw(); //开始绘图
-        this.drawComponents();  //绘图完，开始绘制插件
-        this.inited = true;
-    }
-
-    _initModule(opt)
+    initModule(opt)
     {
         var me = this
         //首先是创建一个坐标系对象
-        this._coordinate = new Coordinate( this.coordinate, this );
+        this._coordinate = new CoordinateComponents( this.coordinate, this );
         this.coordinateSprite.addChild( this._coordinate.sprite );
 
         _.each( this.graphs , function( graphs ){
@@ -51,27 +40,7 @@ export default class Polar extends Chart
         } );
     }
 
-    initComponents( opt )
-    {
-        if(this._opts.tips && this._initTips){
-            this._initTips( opt );
-        }
-        if(this._opts.legend && this._initLegend){
-            this._initLegend( opt );
-        };
-
-    }
-
-    //所有plug触发更新
-    componentsReset( trigger )
-    {
-        var me = this;
-        _.each(this.components , function( p , i ){
-            p.plug.reset && p.plug.reset( me[ p.type ] || {} , me.dataFrame);
-        }); 
-    }
-
-    _startDraw(opt)
+    startDraw(opt)
     {
         var me = this;
         !opt && (opt ={});
@@ -98,6 +67,44 @@ export default class Polar extends Chart
         } );
 
         //this.bindEvent();
+    }
+
+    _getLegendData()
+    {
+        var legendData = [
+            //{name: "uv", style: "#ff8533", enabled: true, ind: 0}
+        ];
+        _.each( this._graphs, function( _g ){
+            _.each( _g.getList(), function( item ){
+                
+                if( _.find( legendData , function( d ){
+                    return d.name == item.name
+                } ) ) return;
+
+                legendData.push({
+                    name    : item.name,
+                    style   : item.fillStyle,
+                    enabled : item.enabled,
+                    ind     : item.ind
+                })
+            } );
+        } );
+
+        return legendData;
+    }
+
+    add( name )
+    {
+        _.each( this._graphs, function( _g ){
+            _g.add( name )
+        });
+    }
+
+    remove( name )
+    {
+        _.each( this._graphs, function( _g ){
+            _g.remove( name )
+        });
     }
 
 }

@@ -65,8 +65,6 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
 
         this._barsLen = 0;
 
-        this.eventEnabled = true;
-
         this.sprite = null;
         this.txtsSp = null;
 
@@ -92,7 +90,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
         });
     }
 
-    getNodesAt(index) 
+    getNodesAt(index)
     {
         //该index指当前
         var data = this.data;

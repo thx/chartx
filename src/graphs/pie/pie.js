@@ -1,7 +1,7 @@
 //单环pie
 
 import Canvax from "canvax2d"
-import {colors as themeColors} from "../../theme"
+
 
 const Sector = Canvax.Shapes.Sector
 const Path = Canvax.Shapes.Path
@@ -12,7 +12,7 @@ const _ = Canvax._;
 
 export default class Pie extends Canvax.Event.EventDispatcher
 {
-    constructor( opts, _graphs )
+    constructor( opts, _graphs, data )
     {
         super();
 
@@ -32,39 +32,19 @@ export default class Pie extends Canvax.Event.EventDispatcher
         //this.outRadius = _graphs.outRadius;
         this.domContainer = _graphs.root.canvax.domView;
 
-        this.data = null;
+        this.data = data;
 
         this.sprite = null;
         this.labelSp = null;
         this.sectorsSp = null;
         this.checkedSp = null;
-        this.branchTxt = null;
-
-        this.label = {
-            enabled: true,
-            allowLine: true,
-            format: null
-        };
-
-        this.focus = {
-            enabled : true
-        };
-
-        this.checked = {
-            enabled: true,
-            r: 5,
-            globalAlpha : 0.7
-        };
-
-        this.colors = themeColors;
 
         this.init(opts);
 
-        this.colorIndex = 0;
         this.sectors = [];
-        this.sectorMap = [];
         this.labelMaxCount = 15;
         this.labelList = [];
+
         this.completed = false;//首次加载动画是否完成
     }
 
@@ -80,13 +60,13 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.checkedSp = new Canvax.Display.Sprite();
         this.sprite.addChild(this.checkedSp);
 
-        if (this.label.enabled) {
+        if (this._graphs.label.enabled) {
             this.labelSp = new Canvax.Display.Sprite();
         };
 
     }
 
-    draw(opts, data)
+    draw(opts)
     {
         var me = this;
 
@@ -94,31 +74,58 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
         this.sprite.context.x = me.origin.x;
         this.sprite.context.y = me.origin.y;
-
-        this.data = data;
  
         me._widget();
             
         if (this.animation) {
             me.grow();
+        } else {
+            me.completed = true;
+        }
+    }
+
+    resetData( data )
+    {
+        var me = this;
+        this.data = data;
+        
+        me.destroyLabel();
+
+        var completedNum = 0;
+        for (var i = 0; i < me.sectors.length; i++) {
+            var sec = me.sectors[i];
+            var secData = this.data.list[i];
+
+            sec.animate({
+                r : secData.outRadius,
+                startAngle : secData.startAngle,
+                endAngle : secData.endAngle
+            },{
+                duration : 280,
+                onComplete : function(){
+                    completedNum++;
+                    if( completedNum == me.sectors.length ){
+                        if ( me._graphs.label.enabled ) {
+                            me._startWidgetLabel();
+                        };
+                    }
+                }
+            });
         }
     }
 
     _widget() 
     {
         var me = this;
-        var data = me.data;
-        var total = data.total;
+        var list = me.data.list;
+        var total = me.data.total;
 
         var moreSecData;
-        if (data.list.length > 0 && total > 0) {
+        if ( list.length > 0 && total > 0 ) {
             me.labelSp && me.sprite.addChild(me.labelSp);
-            for (var i = 0; i < data.list.length; i++) {
-                var item = data.list[i];
+            for (var i = 0; i < list.length; i++) {
+                var item = list[i];
             
-
-                if (me.colorIndex >= me.colors.length) me.colorIndex = 0;
-                var fillColor = me.getColorByIndex(me.colors, i);
                 //扇形主体          
                 var sector = new Sector({
                     hoverClone: false,
@@ -128,97 +135,70 @@ export default class Pie extends Canvax.Event.EventDispatcher
                         y: item.sliced ? item.outOffsety : 0,
                         r0: me.innerRadius,
                         r: item.outRadius,
-                        startAngle: item.start,
-                        endAngle: item.end,
-                        fillStyle: fillColor,
-                        index: item.index,
+                        startAngle: item.startAngle,
+                        endAngle: item.endAngle,
+                        fillStyle: item.fillStyle,
+                        //ind: item.ind,
                         cursor: "pointer"
                     },
                     id: 'sector' + i
                 });
-                sector.__data = item;
-                sector.__colorIndex = i;
-                sector.__dataIndex = i;
-                sector.__isSliced = item.sliced;
-
+            
+                sector.data = item;
+               
                 //扇形slice
-                me.focus.enabled && sector.hover(function (e) {
-                    var secData = me.data.list[this.__dataIndex];
+                me._graphs.focus.enabled && sector.hover(function (e) {
+                    var secData = this.data;
                     if (!secData.checked) {
-                        me.focusAt(this.__dataIndex);
+                        me.focusAt( secData.ind );
                     }
                 }, function (e) {
-                    var secData = me.data.list[this.__dataIndex];
+                    var secData = this.data;
                     if (!secData.checked) {
-                        me.unfocusAt(this.__dataIndex);
+                        me.unfocusAt( secData.ind );
                     }
                 });
 
-                //扇形checked
-                me.checked.enabled && sector.on('mousedown mouseup click mousemove dblclick', function (e) {
-                    //me._geteventInfo(e, this.__dataIndex);
-                    if (e.type == "click") {
-                        me.secClick(this, e);
-                    };
+                //触发注册的事件
+                sector.on('mousedown mouseup click mousemove dblclick', function (e) {
+                    if( me[ "on"+e.type ] && _.isFunction( me[ "on"+e.type ] ) ){
+                        //如果有在pie的配置上面注册对应的事件，则触发
+                        me[ "on"+e.type ]( e ,);
+                    }
                 });
-
                 me.sectorsSp.addChildAt(sector, 0);
-      
-                moreSecData = {
-                    name: item.name,
-                    value: item.value,
-                    sector: sector,
-                    context: sector.context,
-                    originx: sector.context.x,
-                    originy: sector.context.y,
-                    r: item.outRadius,
-                    startAngle: sector.context.startAngle,
-                    endAngle: sector.context.endAngle,
-                    color: fillColor,
-                    index: i,
-                    percentage: item.percentage
-                };
+                me.sectors.push( sector );
+            };
 
-                me.sectors.push(moreSecData);
-            }
-
-            if (me.sectors.length > 0) {
-                me.sectorMap = [];
-                for (var i = 0; i < me.sectors.length; i++) {
-                    me.sectorMap[me.sectors[i].index] = me.sectors[i];
-                }
-            }
-
-            if (me.label.enabled) {
+            if (me._graphs.label.enabled) {
                 me._startWidgetLabel();
-            }
+            };
         }
     }
 
-    focusAt (index, callback) 
+    focusAt (ind, callback) 
     {
         var me = this;
-        var sec = me.sectorMap[index].sector;
-        var secData = me.data.list[index];
-        secData._selected = true;
+        var sec = me.sectors[ind];
+        var secData = me.data.list[ind];
+        secData.sliced = true;
         sec.animate({
             x: secData.outOffsetx,
             y: secData.outOffsety
         }, {
             duration: 100,
             onComplete: function () {
-                //secData.checked = true;
                 callback && callback();
             }
         });
     }
 
-    unfocusAt (index, callback) 
+    unfocusAt (ind, callback) 
     {
         var me = this;
-        var sec = me.sectorMap[index].sector;
-        var secData = me.data.list[index];
-        secData._selected = false;
+        var sec = me.sectors[ind];
+        var secData = me.data.list[ind];
+        secData.sliced = false;
         sec.animate({
             x: 0,
             y: 0
@@ -226,96 +206,55 @@ export default class Pie extends Canvax.Event.EventDispatcher
             duration: 100,
             onComplete: function () {
                 callback && callback();
-                //secData.checked = false;
             }
         });
     }
 
-    check (index) 
+    checkAt (ind) 
     {
         var me = this;
-        if( !this.sectorMap.length ){
+        if( !this.sectors.length ){
             return;
         };
-        var e = {};
-        me._geteventInfo(e, index);
-        me.checked.checkedBeforCallBack(e);
-        if( e.eventInfo.iNode == -1 ){
-                return;
-        };
 
-        var sec = this.sectorMap[index].sector;
-        var secData = this.data.list[index];
+        var sec = this.sectors[ind];
+        var secData = this.data.list[ind];
         if (secData.checked) {
             return
         };
         
-        if (!secData._selected) {
-            this.focus(index, function () {
+        if (!secData.sliced) {
+            this.focusAt(ind, function () {
                 me.addCheckedSec(sec);
             });
         } else {
             this.addCheckedSec(sec);
         };
         secData.checked = true;
-
-
-        me.checked.checkedCallBack(e);
     }
 
-    uncheck (index) 
+    uncheckAt (ind) 
     {
-        var sec = this.sectorMap[index].sector;
-        var secData = this.data.list[index];
+        var sec = this.sectors[ind];
+        var secData = this.data.list[ind];
         if (!secData.checked) {
             return
         };
         var me = this;
         me.cancelCheckedSec(sec, function () {
-            me.unfocus(index);
+            me.unfocus(ind);
         });
         secData.checked = false;
-        
-        var e = {};
-        me._geteventInfo(e, index);
-        me.checked.uncheckedCallBack(e);
     }
 
     uncheckAll () {
         var me = this;
-        _.each(this.sectorMap, function (sm, i) {
-            var sec = sm.sector;
+        _.each(this.sectors, function (sec, i) {
             var secData = me.data.list[i];
             if (secData.checked) {
-                me.uncheck( i );
-                //me.cancelCheckedSec(sec);
-                //secData.checked = false;
+                me.uncheckAt( i );
             }
         });
-    }
-
-    secClick (sectorEl, e) 
-    {
-        if (!this.checked.enabled) return;
-
-        var secData = this.data.list[sectorEl.__dataIndex];
-        if (sectorEl.clickIng) {
-            return;
-        };
-
-        sectorEl.clickIng = true;
-        secData.checked = !secData.checked;
-
-        if ( secData.checked ) {
-            this.addCheckedSec(sectorEl, function () {
-                sectorEl.clickIng = false;
-            });
-        } else {
-            this.cancelCheckedSec(sectorEl, function () {
-                sectorEl.clickIng = false;
-            });
-        };
-        
     }
 
     addCheckedSec(sec, callback)
@@ -362,8 +301,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         checkedSec.animate({
             startAngle: checkedSec.context.endAngle - 0.5
         }, {
-            onUpdate: function(){
-            },
+            duration: this._getAngleTime( sec.context ),
             onComplete: function () {
                 delete sec._checkedSec;
                 checkedSec.destroy();
@@ -377,27 +315,14 @@ export default class Pie extends Canvax.Event.EventDispatcher
         return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500
     }
 
-    getColorByIndex(colors, index) 
-    {
-        if (index >= colors.length) {
-            //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
-            if ((this.data.list.length - 1) % colors.length == 0 && (index % colors.length == 0)) {
-                index = index % colors.length + 1;
-            } else {
-                index = index % colors.length;
-            }
-        };
-        return colors[index];
-    }
+
 
     grow() 
     {
         var me = this;
-        _.each(me.sectors, function (sec, index) {
+        
+        _.each(me.sectors, function (sec, ind) {
             if (sec.context) {
-                sec._r0 = sec.context.r0;
-                sec._r = sec.context.r;
-
                 sec.context.r0 = 0;
                 sec.context.r = 0;
                 sec.context.startAngle = me._graphs.startAngle;
@@ -418,18 +343,22 @@ export default class Pie extends Canvax.Event.EventDispatcher
             onUpdate: function ( status ) {
                 for (var i = 0; i < me.sectors.length; i++) {
                     var sec = me.sectors[i];
-                    
                     var secc = sec.context;
+
+                    var _startAngle = sec.data.startAngle;
+                    var _endAngle = sec.data.endAngle;
+                    var _r = sec.data.outRadius;
+                    var _r0 = sec.data.innerRadius;
+
                     if (secc) {
-                        secc.r = sec._r * status.process;
-                        secc.r0 = sec._r0 * status.process;
-                        //secc.globalAlpha = status.process;
+                        secc.r = _r * status.process;
+                        secc.r0 = _r0 * status.process;
                         if (i == 0) {
-                            secc.startAngle = sec.startAngle;
-                            secc.endAngle = sec.startAngle + (sec.endAngle - sec.startAngle) * status.process;
+                            secc.startAngle = _startAngle;
+                            secc.endAngle = _startAngle + (_endAngle - _startAngle) * status.process;
                         } else {
-                            var lastEndAngle = function (index) {
-                                var lastIndex = index - 1;
+                            var lastEndAngle = function (ind) {
+                                var lastIndex = ind - 1;
                                 var lastSecc = me.sectors[lastIndex].context;
                                 if (lastIndex == 0) {
                                     return lastSecc ? lastSecc.endAngle : 0;
@@ -441,15 +370,14 @@ export default class Pie extends Canvax.Event.EventDispatcher
                                 }
                             } (i);
                             secc.startAngle = lastEndAngle;
-                            secc.endAngle = secc.startAngle + (sec.endAngle - sec.startAngle) * status.process;
+                            secc.endAngle = secc.startAngle + ( _endAngle - _startAngle ) * status.process;
                         }
-
                         //如果已经被选中，有一个选中态
-                        if( sec.sector._checkedSec ){
-                            sec.sector._checkedSec.context.r0 = secc.r - 1;
-                            sec.sector._checkedSec.context.r  = secc.r + me.checked.r;
-                            sec.sector._checkedSec.context.startAngle = secc.startAngle;
-                            sec.sector._checkedSec.context.endAngle = secc.endAngle;
+                        if( sec._checkedSec ){
+                            sec._checkedSec.context.r0 = secc.r - 1;
+                            sec._checkedSec.context.r  = secc.r + me.checked.r;
+                            sec._checkedSec.context.startAngle = secc.startAngle;
+                            sec._checkedSec.context.endAngle = secc.endAngle;
                         }
                     }
                 }
@@ -468,12 +396,11 @@ export default class Pie extends Canvax.Event.EventDispatcher
         var me = this;
         var count = 0;
         var data = me.data.list;
-        var sectorMap = me.sectorMap;
         var minTxtDis = 15;
         var labelOffsetX = 5;
         
         var currentIndex;
-        var preY, currentY, adjustX, txtDis, branchTxt, bwidth, bheight, bx, by;
+        var preY, currentY, adjustX, txtDis, bwidth, bheight, bx, by;
         var yBound, remainingNum, remainingY;
         
         var clockwise = quadrant == 2 || quadrant == 4;
@@ -533,9 +460,9 @@ export default class Pie extends Canvax.Event.EventDispatcher
             //指示线
             /**
             [
-                [ itemData.centerx , itemData.centery ], //start
+                [ itemData.centerx , itemData.centery ], //startAngle
                 [ itemData.outx , itemData.outy ],  //二次贝塞尔控制点
-                [ isleft ? -adjustX-labelOffsetX : adjustX+labelOffsetX, currentY] //end
+                [ isleft ? -adjustX-labelOffsetX : adjustX+labelOffsetX, currentY] //endAngle
             ]
             */
             var pathStr = "M"+itemData.centerx+","+itemData.centery;
@@ -546,7 +473,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     lineType: 'solid',
                     path : pathStr,
                     lineWidth: 1,
-                    strokeStyle: sectorMap[currentIndex].color
+                    strokeStyle: itemData.fillStyle
                 }
             });
 
@@ -557,7 +484,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
             var labelTxt = itemData.label;
             //如果用户format过，那么就用用户指定的格式
             //如果没有就默认拼接
-            if( !this.label.format ){
+            if( !this._graphs.label.format ){
                 if( labelTxt ){
                     labelTxt = labelTxt + "：" + itemData.percentage + "%" 
                 } else {
@@ -565,14 +492,12 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 }
             };
 
-            branchTxt = document.createElement("div");
-            branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + sectorMap[currentIndex].color + ""
+            var branchTxt = document.createElement("div");
+            branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + ""
             branchTxt.innerHTML = labelTxt;
             me.domContainer.appendChild(branchTxt);
             bwidth = branchTxt.offsetWidth;
             bheight = branchTxt.offsetHeight;
-
-            this.branchTxt = branchTxt;
 
             bx = isleft ? -adjustX : adjustX;
             by = currentY;
@@ -599,15 +524,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
             branchTxt.style.left = bx + me.origin.x + "px";
             branchTxt.style.top = by + me.origin.y + "px";
 
-            if (me.label.allowLine) {
-                me.labelSp.addChild( path );
-            };
-
-            me.sectorMap[currentIndex].label = {
-                line: path,
-                label: branchTxt
-            };
-
+            me.labelSp.addChild( path );
+            
             me.labelList.push({
                 width: bwidth,
                 height: bheight,
@@ -619,8 +537,6 @@ export default class Pie extends Canvax.Event.EventDispatcher
             });
         }
     }
-
-
 
     _startWidgetLabel()
     {
@@ -721,6 +637,18 @@ export default class Pie extends Canvax.Event.EventDispatcher
             var isEnd = i == 1 || i == 3;
             me._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo)
         }
+    }
+
+    destroyLabel()
+    {
+        var me = this;
+        if (this.labelSp) {
+            this.labelSp.removeAllChildren();
+        };
+        _.each(this.labelList, function (lab) {
+            me.domContainer.removeChild( lab.labelEle );
+        });
+        this.labelList = [];
     }
 
     _showGrowLabel()

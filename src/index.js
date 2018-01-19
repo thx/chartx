@@ -1,6 +1,8 @@
 //图表基类
 import Chart from "./chart"
 
+
+
 //坐标系
 import Descartes from "./coordinate/descartes"
 import Polar from "./coordinate/polar"
@@ -46,8 +48,9 @@ var Chartx = {
     create : function( el, data, opts ){
         var chart = null;
         if( opts.coordinate.type ){
-            chart = new coordinate[ opts.coordinate.type ]( el, data, opts, graphs, components )
-        }
+            chart = new coordinate[ opts.coordinate.type ]( el, data, opts, graphs, components );
+        };
+        chart && chart.draw();
         return chart;
     }
 }
