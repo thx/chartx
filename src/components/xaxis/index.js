@@ -317,6 +317,7 @@ export default class xAxis extends Component
             });
             
             var o = {
+                ind : a,
                 value   : data[a],
                 layoutText : layoutText,
                 x       : this.getPosX({

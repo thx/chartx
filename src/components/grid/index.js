@@ -107,7 +107,7 @@ export default class Grid extends Component
         if( self.root && _yAxis && _yAxis.dataSectionGroup ){
             self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
             for( var g = 0 , gl=_yAxis.dataSectionGroup.length ; g < gl ; g++ ){
-                var yGroupHeight = _yAxis.yGraphsHeight / gl ;
+                var yGroupHeight = _yAxis.height / gl ;
                 var groupRect = new Rect({
                     context : {
                         x : 0,

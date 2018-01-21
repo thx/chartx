@@ -179,7 +179,7 @@ export default class Descartes_Component extends Component
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
 
         this.width = this._xAxis.width;
-        this.height = this._yAxis[0].yGraphsHeight;
+        this.height = this._yAxis[0].height;
         this.origin.x = _yAxisW + _padding.left;
         this.origin.y = y;
 
@@ -549,13 +549,11 @@ export default class Descartes_Component extends Component
         }
 
         var xNodeInd = this._xAxis.getIndexOfX( induceX );
+        var xNode = this._xAxis.layoutData[ xNodeInd ];
+        
         var obj = {
-            xAxis : {
-                field : this._xAxis.field,
-                value : this._xAxis.dataOrg[ xNodeInd ],
-                ind : xNodeInd
-            },
-            title : xNodeInd >=0 ? this._xAxis.layoutData[ xNodeInd ].layoutText : "",
+            xAxis : xNode,
+            title : xNodeInd >=0 ? xNode.layoutText : "",
             nodes : [
                 //遍历_graphs 去拿东西
             ]

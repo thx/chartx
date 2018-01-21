@@ -5,6 +5,8 @@ import DataFrame from "../utils/dataframe"
 import CoordinateComponents from "../components/descartes/index"
 
 const _ = Canvax._;
+const Rect = Canvax.Shapes.Rect;
+const Line = Canvax.Shapes.Line;
 
 export default class Descartes extends CoordinateBase
 {
@@ -42,7 +44,6 @@ export default class Descartes extends CoordinateBase
         } else {
             opts.coordinate.yAxis = [];
         }
-
 
         //根据opt中得Graphs配置，来设置 coordinate.yAxis
         if( opts.graphs ){
@@ -131,14 +132,15 @@ export default class Descartes extends CoordinateBase
         this.dataFrame = this.initData( this._data );
 
         //this.draw();
+        this.tipsPointer = null;
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
     draw()
     {
-        this.initModule();    //初始化模块  
+        this.initModule();     //初始化模块  
         this.initComponents(); //初始化组件
-        this.startDraw();     //开始绘图
+        this.startDraw();      //开始绘图
         this.drawComponents(); //绘图完，开始绘制插件
 
         if( this._coordinate.horizontal ){
@@ -626,8 +628,8 @@ export default class Descartes extends CoordinateBase
             var _tips = me.getComponentById("tips");
             if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
-
                 _tips.show(e);
+                me._tipsPointerShow( e, _tips, me._coordinate );
             };
         });
         this.on("panmove mousemove", function(e) {
@@ -635,6 +637,7 @@ export default class Descartes extends CoordinateBase
             if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
                 _tips.move(e);
+                me._tipsPointerMove( e, _tips, me._coordinate );
             }
         });
         this.on("panend mouseout", function(e) {
@@ -643,6 +646,7 @@ export default class Descartes extends CoordinateBase
             var _tips = me.getComponentById("tips");
             if ( _tips && !( e.toTarget && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
+                me._tipsPointerHide( e, _tips, me._coordinate );
             }
         });
         this.on("tap", function(e) {
@@ -651,6 +655,7 @@ export default class Descartes extends CoordinateBase
                 _tips.hide(e);
                 me._setTipsInfo.apply(me, [e]);
                 _tips.show(e);
+                me._tipsPointerShow( e, _tips, me._coordinate );
             }
         });
     }
@@ -675,5 +680,96 @@ export default class Descartes extends CoordinateBase
 
         e.eventInfo.dataZoom = this.dataZoom;
         e.eventInfo.rowData = this.dataFrame.getRowData( iNode );
+    }
+
+    _tipsPointerShow( e, _tips, _coor )
+    {
+        if( !_tips.pointer ) return;
+        var el = this.tipsPointer;        
+        var y = _coor.origin.y - _coor.height;
+
+        if( !el ){
+            if( _tips.pointer == "line" ){
+                var x = _coor.origin.x + e.eventInfo.xAxis.x;
+                el = new Line({
+                    //xyToInt : false,
+                    context : {
+                        x : x,
+                        y : y,
+                        start : {
+                            x : 0,
+                            y : 0
+                        },
+                        end : {
+                            x : 0,
+                            y : _coor.height
+                        },
+                        lineWidth : 1,
+                        strokeStyle : "#cccccc"
+                    }
+                });
+            };
+            if( _tips.pointer == "shadow" ){
+                var x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth/2;
+                el = new Rect({
+                    //xyToInt : false,
+                    context : {
+                        width : _coor._xAxis.ceilWidth,
+                        height : _coor.height,
+                        x : x,
+                        y : y,
+                        fillStyle : "#cccccc",
+                        globalAlpha : 0.3
+                    }
+                });
+            };
+            
+            this.graphsSprite.addChild( el, 0 );
+            this.tipsPointer = el;
+        } else {
+            el.animate( {
+                x : x,
+                y : y
+            } , {
+                duration : 200
+            });
+        }
+    }
+
+    _tipsPointerHide( e, _tips, _coor )
+    {
+        if( !_tips.pointer  || !this.tipsPointer ) return;
+        this.tipsPointer.destroy();
+        this.tipsPointer = null;
+    }
+
+    _tipsPointerMove( e, _tips, _coor )
+    {
+        if( !_tips.pointer ) return;
+        var el = this.tipsPointer;
+        var x = _coor.origin.x + e.eventInfo.xAxis.x;
+        if( _tips.pointer == "shadow" ){
+            x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth/2;
+        };
+        var y = _coor.origin.y - _coor.height;
+
+        if( x == el.__targetX ){
+            return;
+        };
+
+        if( el.__animation ){
+            el.__animation.stop();
+        };
+        el.__targetX = x;
+        el.__animation = el.animate( {
+            x : x,
+            y : y
+        } , {
+            duration : 200,
+            onComplete : function(){
+                delete el.__targetX;
+                delete el.__animation;
+            }
+        })
     }
 }

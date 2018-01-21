@@ -59,7 +59,7 @@ export default class yAxis extends Component
         this.sprite = null;
         
         this.yMaxHeight = 0; //y轴最大高
-        this.yGraphsHeight = 0; //y轴第一条线到原点的高
+        this.height = 0; //y轴第一条线到原点的高
 
         this.baseNumber = null; //为非负number
         this.basePoint = null; //value为 baseNumber 的point {x,y}
@@ -171,16 +171,18 @@ export default class yAxis extends Component
     {
         opt && _.extend(true, this, opt);
         this._getLabel();
-        this.yGraphsHeight = this.yMaxHeight - this._getYAxisDisLine();
+        this.height = this.yMaxHeight - this._getYAxisDisLine();
 
         if (this._label) {
             if (this.isH) {
-                this.yGraphsHeight -= this._label.getTextWidth();
+                this.height -= this._label.getTextWidth();
             } else {
-                this.yGraphsHeight -= this._label.getTextHeight();
+                this.height -= this._label.getTextHeight();
             }
-            this._label.context.y = -this.yGraphsHeight - 5;
+            this._label.context.y = -this.height - 5;
         };
+
+        this.height = parseInt( this.height );
         
         this._trimYAxis();
         this._widget();
@@ -203,7 +205,7 @@ export default class yAxis extends Component
 
         var y = 0;
         var dsgLen = this.dataSectionGroup.length;
-        var yGroupHeight = this.yGraphsHeight / dsgLen ;
+        var yGroupHeight = this.height / dsgLen ;
 
         for( var i=0,l=dsgLen ; i<l ; i++ ){
             var ds = this.dataSectionGroup[i];
@@ -245,7 +247,7 @@ export default class yAxis extends Component
         };
         //返回的y是以最底端为坐标原点的坐标值，所以就是负数
         if( this.sort == "desc" ){
-            y = Math.abs(this.yGraphsHeight - Math.abs(y));
+            y = Math.abs(this.height - Math.abs(y));
         }
         return -y;
     }
@@ -262,7 +264,7 @@ export default class yAxis extends Component
     {
         var y = 0;
         var dsgLen = this.dataSectionGroup.length;
-        var yGroupHeight = this.yGraphsHeight / dsgLen ;
+        var yGroupHeight = this.height / dsgLen ;
 
         for( var i=0,l=dsgLen ; i<l ; i++ ){
             var ds = this.dataSectionGroup[i];
@@ -770,7 +772,7 @@ export default class yAxis extends Component
                 },
                 end         : {
                     x : _originX,
-                    y : -self.yGraphsHeight
+                    y : -self.height
                 },
                 lineWidth   : this.line.lineWidth,
                 strokeStyle : self._getProp(self.line.strokeStyle)

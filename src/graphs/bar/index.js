@@ -46,7 +46,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
             _width: 0,
             radius: 4,
             fillStyle : null,
-            fillAlpha : 0.9,
+            fillAlpha : 0.95,
             filter : function(){}, //用来定制bar的样式
             count: 0, //总共有多少个bar
             xDis: null
@@ -244,7 +244,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
             //h_group就会为两组，一组代表uv 一组代表pv。
             var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
             */
-            
+
             //vLen 为一单元bar上面纵向堆叠的length
             //比如yAxis.field = [?
             //    ["uv","pv"],  vLen == 2
@@ -609,7 +609,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
 
                     var y = 0;
                     if (me.proportion) {
-                        y = -val / vCount * _yAxis.yGraphsHeight;
+                        y = -val / vCount * _yAxis.height;
                     } else {
                         y = _yAxis.getYposFromVal( val );
                     };
@@ -651,20 +651,21 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                     //如果有排序的话
                     //TODO:这个逻辑好像有问题
                     if (_yAxis.sort && _yAxis.sort == "desc") {
-                        y = -(_yAxis.yGraphsHeight - Math.abs(y));
+                        y = -(_yAxis.height - Math.abs(y));
                     };
 
                     var node = {
-                        value: val,
-                        field: me._getTargetField(b, v, i, me.enabledField),
-                        fromX: x,
-                        fromY: fromY,
-                        x: x,
-                        y: y,
-                        width : barW,
-                        yBasePoint: _yAxis.basePoint,
-                        isLeaf: true,
-                        xAxis: {
+                        type   : "bar",
+                        value  : val,
+                        field  : me._getTargetField(b, v, i, me.enabledField),
+                        fromX  : x,
+                        fromY  : fromY,
+                        x      : x,
+                        y      : y,
+                        width  : barW,
+                        yBasePoint : _yAxis.basePoint,
+                        isLeaf : true,
+                        xAxis  : {
                             field: me._xAxis.field,
                             value: xArr[i].content,
                             layoutText: xArr[i].layoutText
