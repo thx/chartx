@@ -47,7 +47,7 @@ var components = {
 var Chartx = {
     create : function( el, data, opts ){
         var chart = null;
-        if( opts.coordinate.type ){
+        if( opts.coordinate && opts.coordinate.type ){
             chart = new coordinate[ opts.coordinate.type ]( el, data, opts, graphs, components );
         };
         chart && chart.draw();
