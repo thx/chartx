@@ -147,7 +147,6 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
 
             group.list.push( nodeLayoutData );
             tmplData.push( nodeLayoutData );
-
         };
 
         return tmplData;

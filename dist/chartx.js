@@ -4431,7 +4431,8 @@ var Application = function (_DisplayObjectContain) {
     }, {
         key: "toDataURL",
         value: function toDataURL() {
-            var canvas = Base._createCanvas("curr_base64_canvas", this.width, this.height);
+            //var canvas = Base._createCanvas( "curr_base64_canvas" , this.width , this.height );
+            var canvas = $.createCanvas(this.width, this.height, "curr_base64_canvas");
             var ctx = canvas.getContext("2d");
 
             _$1.each(this.children, function (stage) {
