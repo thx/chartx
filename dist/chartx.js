@@ -7851,7 +7851,8 @@ var Chart = function (_Canvax$Event$EventDi) {
 
             this.dataFrame = this.initData(this._data);
 
-            this.components = [];
+            this.components = []; //组件清空
+            this._graphs = []; //绘图组件清空
             this._clean();
             this.canvax.domView.innerHTML = "";
 
