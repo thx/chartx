@@ -647,7 +647,6 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                     var fromY = _getFromY(tempBarData, v, i, val, y, _yAxis.basePoint);
                     y += fromY - _yAxis.basePoint.y;
 
-
                     //如果有排序的话
                     //TODO:这个逻辑好像有问题
                     if (_yAxis.sort && _yAxis.sort == "desc") {
