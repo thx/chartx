@@ -10661,11 +10661,11 @@ var Descartes = function (_CoordinateBase) {
 
     createClass$1(Descartes, [{
         key: "draw",
-        value: function draw() {
-            this.initModule(); //初始化模块  
-            this.initComponents(); //初始化组件
-            this.startDraw(); //开始绘图
-            this.drawComponents(); //绘图完，开始绘制插件
+        value: function draw(opts) {
+            this.initModule(opts); //初始化模块  
+            this.initComponents(opts); //初始化组件
+            this.startDraw(opts); //开始绘图
+            this.drawComponents(opts); //绘图完，开始绘制插件
 
             if (this._coordinate.horizontal) {
                 this._horizontal();
@@ -11904,26 +11904,27 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
             //第二个data参数去掉，直接trimgraphs获取最新的data
             _$13.extend(true, this, opts);
 
-            var data = this._trimGraphs();
+            var me = this;
 
-            if (data.length == 0 || data[0].length == 0) {
+            this.data = this._trimGraphs();
+
+            if (this.data.length == 0 || this.data[0].length == 0) {
+                me.__dataLen = 0;
                 this.clean();
                 return;
             }
 
-            var preLen = 0; //纵向的分组，主要用于resetData的时候，对比前后data数量用
-            this.data[0] && (preLen = this.data[0][0].length);
+            var preDataLen = me.__dataLen; //纵向的分组，主要用于resetData的时候，对比前后data数量用
+            //this.data[0] && (preDataLen = this.data[0][0].length);
 
-            this.data = data;
-            var me = this;
-            var groups = data.length;
+            var groups = this.data.length;
             var itemW = 0;
 
             me.bar.count = 0;
 
             var _flattenField = _$13.flatten([this.field]);
 
-            _$13.each(data, function (h_group, i) {
+            _$13.each(this.data, function (h_group, i) {
                 /*
                 //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
                 //h_group就会为两组，一组代表uv 一组代表pv。
@@ -11936,13 +11937,14 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                 //    "click"       vLen == 1
                 //]
 
-                //if (h <= preLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
+                //if (h <= preDataLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
 
                 var vLen = h_group.length;
                 if (vLen == 0) return;
 
                 //hlen为数据有多长
                 var hLen = h_group[0].length;
+                me.__dataLen = hLen;
 
                 //itemW 还是要跟着xAxis的xDis保持一致
                 itemW = me.width / hLen;
@@ -11953,7 +11955,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                     var groupH;
                     if (i == 0) {
                         //横向的分组
-                        if (h <= preLen - 1) {
+                        if (h <= preDataLen - 1) {
                             groupH = me.barsSp.getChildById("barGroup_" + h);
                         } else {
                             groupH = new canvax.Display.Sprite({
@@ -11969,7 +11971,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                     //同上面，给txt做好分组
                     var txtGroupH;
                     if (i == 0) {
-                        if (h <= preLen - 1) {
+                        if (h <= preDataLen - 1) {
                             txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
                         } else {
                             txtGroupH = new canvax.Display.Sprite({
@@ -12033,7 +12035,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                         }
 
                         var rectEl;
-                        if (h <= preLen - 1) {
+                        if (h <= preDataLen - 1) {
                             rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
                             rectEl.context.fillStyle = fillStyle;
                         } else {
@@ -12055,7 +12057,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
 
                             //文字
                             var infosp;
-                            if (h <= preLen - 1) {
+                            if (h <= preDataLen - 1) {
                                 infosp = txtGroupH.getChildById("infosp_" + i + "_" + h + "_" + v);
                             } else {
                                 //console.log("infosp_" + i + "_" + h + "_" + v);
@@ -12109,7 +12111,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                                 }
 
                                 var txt;
-                                if (h <= preLen - 1) {
+                                if (h <= preDataLen - 1) {
                                     txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
                                 } else {
                                     txt = new canvax.Display.Text(content, {

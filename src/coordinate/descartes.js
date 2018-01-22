@@ -136,12 +136,12 @@ export default class Descartes extends CoordinateBase
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
-    draw()
+    draw( opts )
     {
-        this.initModule();     //初始化模块  
-        this.initComponents(); //初始化组件
-        this.startDraw();      //开始绘图
-        this.drawComponents(); //绘图完，开始绘制插件
+        this.initModule( opts );     //初始化模块  
+        this.initComponents( opts ); //初始化组件
+        this.startDraw( opts );      //开始绘图
+        this.drawComponents( opts ); //绘图完，开始绘制插件
 
         if( this._coordinate.horizontal ){
             this._horizontal();

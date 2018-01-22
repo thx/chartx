@@ -219,26 +219,27 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
         //第二个data参数去掉，直接trimgraphs获取最新的data
         _.extend(true, this, opts);
 
-        var data = this._trimGraphs();
+        var me = this;
 
-        if (data.length == 0 || data[0].length == 0) {
+        this.data = this._trimGraphs();;
+
+        if ( this.data.length == 0 || this.data[0].length == 0) {
+            me.__dataLen = 0;
             this.clean();
             return;
         };
 
-        var preLen = 0; //纵向的分组，主要用于resetData的时候，对比前后data数量用
-        this.data[0] && (preLen = this.data[0][0].length);
+        var preDataLen = me.__dataLen; //纵向的分组，主要用于resetData的时候，对比前后data数量用
+        //this.data[0] && (preDataLen = this.data[0][0].length);
 
-        this.data = data;
-        var me = this;
-        var groups = data.length;
+        var groups = this.data.length;
         var itemW = 0;
 
         me.bar.count = 0;
 
         var _flattenField = _.flatten( [ this.field ] );
 
-        _.each(data, function(h_group, i) {
+        _.each( this.data, function(h_group, i) {
             /*
             //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
             //h_group就会为两组，一组代表uv 一组代表pv。
@@ -251,13 +252,14 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
             //    "click"       vLen == 1
             //]
 
-            //if (h <= preLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
+            //if (h <= preDataLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
 
             var vLen = h_group.length;
             if (vLen == 0) return;
 
             //hlen为数据有多长
             var hLen = h_group[0].length; 
+            me.__dataLen = hLen;
 
             //itemW 还是要跟着xAxis的xDis保持一致
             itemW = me.width / hLen;
@@ -268,7 +270,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                 var groupH;
                 if (i == 0) {
                     //横向的分组
-                    if (h <= preLen - 1) {
+                    if (h <= preDataLen - 1) {
                         groupH = me.barsSp.getChildById("barGroup_" + h);
                     } else {
                         groupH = new Canvax.Display.Sprite({
@@ -284,7 +286,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                 //同上面，给txt做好分组
                 var txtGroupH;
                 if (i == 0) {
-                    if (h <= preLen - 1) {
+                    if (h <= preDataLen - 1) {
                         txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
                     } else {
                         txtGroupH = new Canvax.Display.Sprite({
@@ -348,7 +350,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                     };
 
                     var rectEl;
-                    if (h <= preLen - 1) {
+                    if (h <= preDataLen - 1) {
                         rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
                         rectEl.context.fillStyle = fillStyle;
                     } else {
@@ -372,7 +374,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                         
                         //文字
                         var infosp;
-                        if (h <= preLen - 1) {
+                        if (h <= preDataLen - 1) {
                             infosp = txtGroupH.getChildById("infosp_" + i + "_" + h + "_" + v);
                         } else {
                             //console.log("infosp_" + i + "_" + h + "_" + v);
@@ -430,7 +432,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                             };
 
                             var txt;
-                            if (h <= preLen - 1) {
+                            if (h <= preDataLen - 1) {
                                 txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
                             } else {
                                 txt = new Canvax.Display.Text( content , {
