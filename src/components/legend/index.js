@@ -99,7 +99,7 @@ export default class Legend extends Component
         _.each( this.data , function( obj , i ){
 
             var icon   = new Circle({
-                id : "lenend_field_icon_"+i,
+                id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
                     y     : me.tag.height/2 ,
@@ -123,7 +123,7 @@ export default class Legend extends Component
             
             var content= me.label(obj);
             var txt    = new Canvax.Display.Text( content , {
-                id: "lenend_field_txt_"+i,
+                id: "legend_field_txt_"+i,
                 context : {
                     x : me.icon.r + 3 ,
                     y : me.tag.height / 2,
@@ -173,7 +173,7 @@ export default class Legend extends Component
                 x += itemW;
             };
             var sprite = new Canvax.Display.Sprite({
-                id : "lenend_field_"+i,
+                id : "legend_field_"+i,
                 context : spItemC
             });
             sprite.addChild( icon );

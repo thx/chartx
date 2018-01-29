@@ -53,7 +53,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         //坐标系存放的容器
         this.coordinateSprite = new Canvax.Display.Sprite({
-            id: 'graphsSprite'
+            id: 'coordinateSprite'
         });
         this.stage.addChild( this.coordinateSprite );
         //graphs管理
@@ -137,7 +137,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.inited = false;
 
         this.reset({
-            resize : true
+            trigger : "resize"
         });
 
         this.inited = true;

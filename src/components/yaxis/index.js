@@ -75,7 +75,6 @@ export default class yAxis extends Component
         this.isH = false; //是否横向
 
         this.animation = true;
-        this.resize = false;
 
         this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
@@ -196,7 +195,6 @@ export default class yAxis extends Component
             }
         }
 
-        this.resize = false;
     }
 
     //更具y轴的值来输出对应的在y轴上面的位置
@@ -723,8 +721,8 @@ export default class yAxis extends Component
 
                 self.rulesSprite.addChild(yNode);
 
-                //如果是resize的话也不要处理动画
-                if (self.animation && !self.resize) {
+           
+                if (self.animation) {
                     txt.animate({
                         globalAlpha: 1,
                         y: txt.context.y - aniFrom

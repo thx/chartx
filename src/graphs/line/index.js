@@ -63,8 +63,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         this.data = this._trimGraphs();
 
         this._setGroupsForYfield( this.data );
-        
-        this._widget(opts, this.data);
 
         this.grow();
 
@@ -256,9 +254,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 me.width
             );
 
-            group.draw({
-                resize : me.resize
-            }, g.data );
+            group.draw( {}, g.data );
 
             var insert = false;
             //在groups数组中插入到比自己_groupInd小的元素前面去
@@ -280,12 +276,6 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         } );
 
-    }
-
-    _widget(opts)
-    {
-        var me = this;
-        me.resize = false;
     }
 
     getNodesAt( ind )

@@ -196,8 +196,7 @@ export default class Descartes extends CoordinateBase
                     y: _coor.origin.y
                 },
                 sort: _coor._yAxis.sort,
-                inited: me.inited,
-                resize: opt.resize
+                inited: me.inited
             });
         } );
 

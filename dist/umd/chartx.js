@@ -7737,7 +7737,7 @@ var Chart = function (_Canvax$Event$EventDi) {
 
         //坐标系存放的容器
         _this.coordinateSprite = new canvax.Display.Sprite({
-            id: 'graphsSprite'
+            id: 'coordinateSprite'
         });
         _this.stage.addChild(_this.coordinateSprite);
         //graphs管理
@@ -7828,7 +7828,7 @@ var Chart = function (_Canvax$Event$EventDi) {
             this.inited = false;
 
             this.reset({
-                resize: true
+                trigger: "resize"
             });
 
             this.inited = true;
@@ -9036,7 +9036,6 @@ var yAxis = function (_Component) {
         _this.isH = false; //是否横向
 
         _this.animation = true;
-        _this.resize = false;
 
         _this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
 
@@ -9160,8 +9159,6 @@ var yAxis = function (_Component) {
                     this._label.context.x += this.width;
                 }
             }
-
-            this.resize = false;
         }
 
         //更具y轴的值来输出对应的在y轴上面的位置
@@ -9681,8 +9678,7 @@ var yAxis = function (_Component) {
 
                     self.rulesSprite.addChild(yNode);
 
-                    //如果是resize的话也不要处理动画
-                    if (self.animation && !self.resize) {
+                    if (self.animation) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - aniFrom
@@ -9808,7 +9804,6 @@ var Grid = function (_Component) {
         _this.yAxisSp = null; //y轴上的线集合
 
         _this.animation = true;
-        _this.resize = false;
 
         _this.init(opt);
         return _this;
@@ -10093,8 +10088,7 @@ var Descartes_Component = function (_Component) {
                         x: _padding.left,
                         y: y
                     },
-                    yMaxHeight: y - _padding.top,
-                    resize: opt.resize
+                    yMaxHeight: y - _padding.top
                 });
                 _yAxisW = this._yAxisLeft.width;
             }
@@ -10106,8 +10100,7 @@ var Descartes_Component = function (_Component) {
                         x: 0,
                         y: y
                     },
-                    yMaxHeight: y - _padding.top,
-                    resize: opt.resize
+                    yMaxHeight: y - _padding.top
                 });
                 _yAxisRW = this._yAxisRight.width;
             }
@@ -10118,8 +10111,7 @@ var Descartes_Component = function (_Component) {
                     x: _padding.left + _yAxisW,
                     y: y
                 },
-                width: w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
-                resize: opt.resize
+                width: w - _yAxisW - _padding.left - _yAxisRW - _padding.right
             });
 
             this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width);
@@ -10142,8 +10134,7 @@ var Descartes_Component = function (_Component) {
                 pos: {
                     x: this.origin.x,
                     y: this.origin.y
-                },
-                resize: opt.resize
+                }
             });
 
             if (this.horizontal) {
@@ -10721,8 +10712,7 @@ var Descartes = function (_CoordinateBase) {
                         y: _coor.origin.y
                     },
                     sort: _coor._yAxis.sort,
-                    inited: me.inited,
-                    resize: opt.resize
+                    inited: me.inited
                 });
             });
 
@@ -12727,7 +12717,6 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         _this.y = 0;
 
         _this.animation = true;
-        _this.resize = false;
 
         _this.line = { //线
             enabled: 1,
@@ -12996,7 +12985,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         key: "_grow",
         value: function _grow(callback) {
             var me = this;
-            if (!me.animation || me.resize || me._currPointList.length == 0) {
+            if (!me.animation || me._currPointList.length == 0) {
                 //TODO: 在禁止了animation的时候， 如果用户监听了complete事件，必须要加setTimeout，才能触发
                 setTimeout(function () {
                     callback && callback(me);
@@ -13093,7 +13082,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 return;
             }
             var list = [];
-            if (me.animation && !me.resize) {
+            if (me.animation) {
                 var firstNode = this._getFirstNode();
                 var firstY = firstNode ? firstNode.y : undefined;
                 for (var a = 0, al = me.data.length; a < al; a++) {
@@ -13512,8 +13501,6 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
 
             this._setGroupsForYfield(this.data);
 
-            this._widget(opts, this.data);
-
             this.grow();
 
             return this;
@@ -13701,9 +13688,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                 var group = new LineGraphsGroup(fieldMap, groupInd, //不同于fieldMap.ind
                 me._opts, me.ctx, me.height, me.width);
 
-                group.draw({
-                    resize: me.resize
-                }, g.data);
+                group.draw({}, g.data);
 
                 var insert = false;
                 //在groups数组中插入到比自己_groupInd小的元素前面去
@@ -13723,12 +13708,6 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                     me.sprite.addChild(group.sprite);
                 }
             });
-        }
-    }, {
-        key: "_widget",
-        value: function _widget(opts) {
-            var me = this;
-            me.resize = false;
         }
     }, {
         key: "getNodesAt",
@@ -15281,7 +15260,7 @@ var Legend = function (_Component) {
             _$19.each(this.data, function (obj, i) {
 
                 var icon = new Circle$3({
-                    id: "lenend_field_icon_" + i,
+                    id: "legend_field_icon_" + i,
                     context: {
                         x: 0,
                         y: me.tag.height / 2,
@@ -15305,7 +15284,7 @@ var Legend = function (_Component) {
 
                 var content = me.label(obj);
                 var txt = new canvax.Display.Text(content, {
-                    id: "lenend_field_txt_" + i,
+                    id: "legend_field_txt_" + i,
                     context: {
                         x: me.icon.r + 3,
                         y: me.tag.height / 2,
@@ -15355,7 +15334,7 @@ var Legend = function (_Component) {
                     x += itemW;
                 }
                 var sprite = new canvax.Display.Sprite({
-                    id: "lenend_field_" + i,
+                    id: "legend_field_" + i,
                     context: spItemC
                 });
                 sprite.addChild(icon);

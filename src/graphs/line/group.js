@@ -29,7 +29,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this.y = 0;
 
         this.animation = true;
-        this.resize = false;
 
         this.line = { //线
             enabled: 1,
@@ -291,7 +290,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     _grow(callback)
     {
         var me = this;
-        if (!me.animation || me.resize || me._currPointList.length == 0) {
+        if (!me.animation || me._currPointList.length == 0) {
             //TODO: 在禁止了animation的时候， 如果用户监听了complete事件，必须要加setTimeout，才能触发
             setTimeout( function(){
                 callback && callback(me);
@@ -392,7 +391,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             return;
         };
         var list = [];
-        if (me.animation && !me.resize) {
+        if (me.animation) {
             var firstNode = this._getFirstNode();
             var firstY = firstNode ? firstNode.y : undefined;
             for (var a = 0, al = me.data.length; a < al; a++) {

@@ -53,7 +53,6 @@ export default class Grid extends Component
         this.yAxisSp      = null;                       //y轴上的线集合
 
         this.animation = true;
-        this.resize = false;
 
         this.init(opt);
     }

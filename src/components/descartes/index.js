@@ -147,8 +147,7 @@ export default class Descartes_Component extends Component
                     x: _padding.left,
                     y: y
                 },
-                yMaxHeight: y - _padding.top,
-                resize : opt.resize
+                yMaxHeight: y - _padding.top
             });
             _yAxisW = this._yAxisLeft.width;
         }
@@ -160,8 +159,7 @@ export default class Descartes_Component extends Component
                     x: 0,
                     y: y
                 },
-                yMaxHeight: y - _padding.top,
-                resize : opt.resize
+                yMaxHeight: y - _padding.top
             });
             _yAxisRW = this._yAxisRight.width;
         };
@@ -172,8 +170,7 @@ export default class Descartes_Component extends Component
                 x : _padding.left + _yAxisW,
                 y : y
             },
-            width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
-            resize: opt.resize
+            width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right
         });
         
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
@@ -196,8 +193,7 @@ export default class Descartes_Component extends Component
             pos: {
                 x: this.origin.x,
                 y: this.origin.y
-            },
-            resize: opt.resize
+            }
         } );
 
         if( this.horizontal ){
