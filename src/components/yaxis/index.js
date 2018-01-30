@@ -15,7 +15,7 @@ export default class yAxis extends Component
         this._opt = opt;
         
         this.width   = null; //第一次计算后就会有值
-        this.display = true; //true false 1,0都可以
+        this.enabled = true; //true false 1,0都可以
 
         this.maxW    = 0;    //最大文本的 width
         this.field   = [];   //这个 轴 上面的 field
@@ -592,7 +592,7 @@ export default class yAxis extends Component
     _widget()
     {
         var self = this;
-        if (!self.display) {
+        if (!self.enabled) {
             self.width = 0;
             return;
         };

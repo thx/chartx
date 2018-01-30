@@ -6,7 +6,6 @@ export default class component extends Canvax.Event.EventDispatcher
     {
         super( opt, data );
         this.enabled = false; //是否加载该组件
-        this.display = true;  //该组件是否显示，不显示的话就不占据物理空间
     }
 
     init( opt, data ) 

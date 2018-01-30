@@ -45,7 +45,7 @@ export default class xAxis extends Component
             y: 0
         };
 
-        this.display = true; //是否需要位置来绘制
+        this.enabled = true; //是否需要位置来绘制
 
         this.dataOrg = []; //源数据
         this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
@@ -379,7 +379,7 @@ export default class xAxis extends Component
 
     _setXAxisHeight()
     { //检测下文字的高等
-        if (!this.display) {
+        if (!this.enabled) {
             this.height = 3; 
         } else {
             var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
@@ -425,7 +425,7 @@ export default class xAxis extends Component
 
     _widget()
     {
-        if( !this.display ) return;
+        if( !this.enabled ) return;
 
         var arr = this.layoutData
 
@@ -608,7 +608,7 @@ export default class xAxis extends Component
         var arr = this.layoutData;
         var l = arr.length;
 
-        if( !this.display || !l ) return;
+        if( !this.enabled || !l ) return;
 
         // rule , peak, proportion
         if( me.layoutType == "proportion" ){

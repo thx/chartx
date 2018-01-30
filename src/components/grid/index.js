@@ -20,10 +20,10 @@ export default class Grid extends Component
             y : 0
         }
 
-        this.display = 1;
+        this.enabled = 1;
 
         this.xAxis   = {                                //x轴上的线
-            display     : 1,
+            enabled     : 1,
             data        : [],                      //[{y:100},{}]
             org         : null,                    //x轴坐标原点，默认为上面的data[0]
             // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
@@ -33,7 +33,7 @@ export default class Grid extends Component
             filter      : null 
         }
         this.yAxis = {                                //y轴上的线
-            display     : 0,
+            enabled     : 0,
             data        : [],                      //[{x:100},{}]
             xDis        : 0,
             org         : null,                    //y轴坐标原点，默认为上面的data[0]
@@ -97,7 +97,7 @@ export default class Grid extends Component
     {
         
         var self  = this;
-        if(!this.display){
+        if(!this.enabled){
             return
         };
 
@@ -139,7 +139,7 @@ export default class Grid extends Component
                     strokeStyle : self.xAxis.strokeStyle  
                 }
             });
-            if(self.xAxis.display){
+            if(self.xAxis.enabled){
                 _.isFunction( self.xAxis.filter ) && self.xAxis.filter.apply( line , [{
                     layoutData : self.yAxis.data,
                     index      : a,
@@ -175,7 +175,7 @@ export default class Grid extends Component
                     visible     : o.x ? true : false
                 }
             })
-            if(self.yAxis.display){
+            if(self.yAxis.enabled){
                 _.isFunction( self.yAxis.filter ) && self.yAxis.filter.apply(line , [{
                     layoutData : self.xAxis.data,
                     index      : a,

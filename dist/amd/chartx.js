@@ -8139,7 +8139,6 @@ var component = function (_Canvax$Event$EventDi) {
         var _this = possibleConstructorReturn$1(this, (component.__proto__ || Object.getPrototypeOf(component)).call(this, opt, data));
 
         _this.enabled = false; //是否加载该组件
-        _this.display = true; //该组件是否显示，不显示的话就不占据物理空间
         return _this;
     }
 
@@ -8322,7 +8321,7 @@ var xAxis = function (_Component) {
             y: 0
         };
 
-        _this.display = true; //是否需要位置来绘制
+        _this.enabled = true; //是否需要位置来绘制
 
         _this.dataOrg = []; //源数据
         _this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
@@ -8664,7 +8663,7 @@ var xAxis = function (_Component) {
         key: "_setXAxisHeight",
         value: function _setXAxisHeight() {
             //检测下文字的高等
-            if (!this.display) {
+            if (!this.enabled) {
                 this.height = 3;
             } else {
                 var txt = new canvax.Display.Text(this._layoutDataSection[0] || "test", {
@@ -8710,7 +8709,7 @@ var xAxis = function (_Component) {
     }, {
         key: "_widget",
         value: function _widget() {
-            if (!this.display) return;
+            if (!this.enabled) return;
 
             var arr = this.layoutData;
 
@@ -8888,7 +8887,7 @@ var xAxis = function (_Component) {
             var arr = this.layoutData;
             var l = arr.length;
 
-            if (!this.display || !l) return;
+            if (!this.enabled || !l) return;
 
             // rule , peak, proportion
             if (me.layoutType == "proportion") {
@@ -9001,7 +9000,7 @@ var yAxis = function (_Component) {
         _this._opt = opt;
 
         _this.width = null; //第一次计算后就会有值
-        _this.display = true; //true false 1,0都可以
+        _this.enabled = true; //true false 1,0都可以
 
         _this.maxW = 0; //最大文本的 width
         _this.field = []; //这个 轴 上面的 field
@@ -9576,7 +9575,7 @@ var yAxis = function (_Component) {
         key: "_widget",
         value: function _widget() {
             var self = this;
-            if (!self.display) {
+            if (!self.enabled) {
                 self.width = 0;
                 return;
             }
@@ -9796,10 +9795,10 @@ var Grid = function (_Component) {
             y: 0
         };
 
-        _this.display = 1;
+        _this.enabled = 1;
 
         _this.xAxis = { //x轴上的线
-            display: 1,
+            enabled: 1,
             data: [], //[{y:100},{}]
             org: null, //x轴坐标原点，默认为上面的data[0]
             // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
@@ -9809,7 +9808,7 @@ var Grid = function (_Component) {
             filter: null
         };
         _this.yAxis = { //y轴上的线
-            display: 0,
+            enabled: 0,
             data: [], //[{x:100},{}]
             xDis: 0,
             org: null, //y轴坐标原点，默认为上面的data[0]
@@ -9875,7 +9874,7 @@ var Grid = function (_Component) {
         value: function _widget() {
 
             var self = this;
-            if (!this.display) {
+            if (!this.enabled) {
                 return;
             }
 
@@ -9917,7 +9916,7 @@ var Grid = function (_Component) {
                         strokeStyle: self.xAxis.strokeStyle
                     }
                 });
-                if (self.xAxis.display) {
+                if (self.xAxis.enabled) {
                     _$10.isFunction(self.xAxis.filter) && self.xAxis.filter.apply(line, [{
                         layoutData: self.yAxis.data,
                         index: a,
@@ -9952,7 +9951,7 @@ var Grid = function (_Component) {
                         visible: o.x ? true : false
                     }
                 });
-                if (self.yAxis.display) {
+                if (self.yAxis.enabled) {
                     _$10.isFunction(self.yAxis.filter) && self.yAxis.filter.apply(line, [{
                         layoutData: self.xAxis.data,
                         index: a,
@@ -10032,13 +10031,13 @@ var Descartes_Component = function (_Component) {
             });
         }
 
-        if ("display" in opt) {
+        if ("enabled" in opt) {
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
-            _this.xAxis.display = opt.display;
+            _this.xAxis.enabled = opt.enabled;
             _$6.each(_this.yAxis, function (yAxis$$1) {
-                yAxis$$1.display = opt.display;
+                yAxis$$1.enabled = opt.enabled;
             });
-            _this.grid.display = opt.display;
+            _this.grid.enabled = opt.enabled;
         }
 
         /*
@@ -16655,7 +16654,7 @@ var Tips = function (_Component) {
             var me = this;
             this._tipDom = document.createElement("div");
             this._tipDom.className = "chart-tips";
-            this._tipDom.style.cssText += "；-moz-border-radius:" + this.backR + "; -webkit-border-radius:" + this.backR + "; border-radius:" + this.backR + ";background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;display:inline-block;*display:inline;*zoom:1;padding:6px;color:" + this.text.fillStyle + ";line-height:1.5";
+            this._tipDom.style.cssText += "；-moz-border-radius:" + this.backR + "; -webkit-border-radius:" + this.backR + "; border-radius:" + this.backR + ";background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.text.fillStyle + ";line-height:1.5";
             this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px " + this.strokeStyle + "; -webkit-box-shadow:1px 1px 3px " + this.strokeStyle + "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
             this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
             this.tipDomContainer.appendChild(this._tipDom);
