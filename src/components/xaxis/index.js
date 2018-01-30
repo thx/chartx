@@ -79,6 +79,8 @@ export default class xAxis extends Component
         //function
         this.trimLayout = null;
 
+        this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
+
         _.extend(true , this, opts);
 
         this.init(opts, data);
@@ -299,11 +301,7 @@ export default class xAxis extends Component
             };
         };
 
-        //if( this.posParseToInt ){
-            return parseInt( x , 10 );
-        //} else { 
-            //return x;
-        //}
+        return parseInt( x , 10 );
         
     }
 
@@ -321,7 +319,12 @@ export default class xAxis extends Component
                     this.ceilWidth = width / ( this.dataOrg.length - 1 )
                 }
             }
-        }
+        };
+
+        if( this.posParseToInt ){
+            this.ceilWidth = parseInt( this.ceilWidth );
+        };
+        
         return this.ceilWidth;
     }
 

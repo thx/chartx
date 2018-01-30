@@ -8357,6 +8357,8 @@ var xAxis = function (_Component) {
         //function
         _this.trimLayout = null;
 
+        _this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
+
         _$7.extend(true, _this, opts);
 
         _this.init(opts, data);
@@ -8586,11 +8588,7 @@ var xAxis = function (_Component) {
                 }
             }
 
-            //if( this.posParseToInt ){
             return parseInt(x, 10);
-            //} else { 
-            //return x;
-            //}
         }
     }, {
         key: "_computerCeilWidth",
@@ -8609,6 +8607,11 @@ var xAxis = function (_Component) {
                     }
                 }
             }
+
+            if (this.posParseToInt) {
+                this.ceilWidth = parseInt(this.ceilWidth);
+            }
+
             return this.ceilWidth;
         }
     }, {
