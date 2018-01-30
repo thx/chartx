@@ -12360,7 +12360,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                             isLeaf: true,
                             xAxis: {
                                 field: me._xAxis.field,
-                                value: xArr[i].content,
+                                value: xArr[i].value,
                                 layoutText: xArr[i].layoutText
                             }
                         };

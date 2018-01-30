@@ -668,7 +668,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                         isLeaf : true,
                         xAxis  : {
                             field: me._xAxis.field,
-                            value: xArr[i].content,
+                            value: xArr[i].value,
                             layoutText: xArr[i].layoutText
                         }
                     };
