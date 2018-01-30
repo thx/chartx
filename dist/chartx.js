@@ -8473,6 +8473,32 @@ var xAxis = function (_Component) {
             return iNode;
         }
     }, {
+        key: "getNodeInfoOfX",
+        value: function getNodeInfoOfX(x) {
+            //nodeInfo 一般是给tips用，和data中得数据比就是少了个textWidth
+            //这里和用 data 计算 layoutData的 trimgraphs 中不一样得是
+            //这里的val获取必须在dataOrg中获取，统一的dataLen 也必须是用的 this.dataOrg.length
+            var ind = this.getIndexOfX(x);
+            var val = this.dataOrg[ind];
+            var layoutText = this._getFormatText(val);
+            var dataLen = this.dataOrg.length;
+
+            var o = {
+                ind: ind,
+                value: val,
+                layoutText: layoutText,
+                x: this.getPosX({
+                    val: val,
+                    ind: ind,
+                    dataLen: dataLen,
+                    width: this.width
+                }),
+                field: this.field
+            };
+
+            return o;
+        }
+    }, {
         key: "draw",
         value: function draw(opts) {
             //首次渲染从 直角坐标系组件中会传入 opts
@@ -10493,12 +10519,11 @@ var Descartes_Component = function (_Component) {
                 induceX = this.induce.globalToLocal(e.target.localToGlobal(e.point)).x;
             }
 
-            var xNodeInd = this._xAxis.getIndexOfX(induceX);
-            var xNode = this._xAxis.layoutData[xNodeInd];
+            var xNode = this._xAxis.getNodeInfoOfX(induceX);
 
             var obj = {
                 xAxis: xNode,
-                title: xNodeInd >= 0 ? xNode.layoutText : "",
+                title: xNode.layoutText,
                 nodes: [
                     //遍历_graphs 去拿东西
                 ]

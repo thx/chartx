@@ -190,6 +190,31 @@ export default class xAxis extends Component
         }
         return iNode
     }
+
+    getNodeInfoOfX( x ){
+        //nodeInfo 一般是给tips用，和data中得数据比就是少了个textWidth
+        //这里和用 data 计算 layoutData的 trimgraphs 中不一样得是
+        //这里的val获取必须在dataOrg中获取，统一的dataLen 也必须是用的 this.dataOrg.length
+        var ind = this.getIndexOfX( x );
+        var val = this.dataOrg[ ind ];
+        var layoutText = this._getFormatText( val );
+        var dataLen = this.dataOrg.length;
+
+        var o = {
+            ind        : ind,
+            value      : val,
+            layoutText : layoutText,
+            x          : this.getPosX({
+                val : val,
+                ind : ind,
+                dataLen: dataLen,
+                width : this.width
+            }),
+            field      : this.field
+        };
+
+        return o;
+    }
     
     draw(opts)
     {

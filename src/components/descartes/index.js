@@ -542,14 +542,13 @@ export default class Descartes_Component extends Component
         var induceX = e.point.x;
         if( e.target !== this.induce ){
             induceX = this.induce.globalToLocal( e.target.localToGlobal( e.point ) ).x
-        }
+        };
 
-        var xNodeInd = this._xAxis.getIndexOfX( induceX );
-        var xNode = this._xAxis.layoutData[ xNodeInd ];
+        var xNode = this._xAxis.getNodeInfoOfX( induceX );
         
         var obj = {
             xAxis : xNode,
-            title : xNodeInd >=0 ? xNode.layoutText : "",
+            title : xNode.layoutText,
             nodes : [
                 //遍历_graphs 去拿东西
             ]
