@@ -12507,10 +12507,8 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                         //txt grow
                         if (me.text.enabled) {
                             var txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
-
-                            var infosp = txtGroupH.getChildById("infosp_" + g + "_" + h + "_" + v);
+                            var infosp = txtGroupH.getChildById("infosp_" + h + "_" + rectData.field);
                             if (infosp) {
-
                                 infosp.animate({
                                     y: infosp._finalY,
                                     x: infosp._finalX
