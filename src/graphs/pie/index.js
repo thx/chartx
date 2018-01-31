@@ -1,6 +1,6 @@
 import Canvax from "canvax2d"
 import Pie from "./pie"
-import {colors as themeColors} from "../../theme"
+import Theme from "../../theme"
 
 const _ = Canvax._;
 
@@ -27,7 +27,7 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
             y : 0
         };
 
-        this.colors = themeColors;
+        this.colors = Theme.colors;
 
         this.label = {
             enabled: false,

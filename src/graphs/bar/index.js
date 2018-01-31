@@ -178,11 +178,11 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                 this.bar._width = this.bar.width;
             }
         } else {
-            this.bar._width = parseInt(ceilWidth2) - (parseInt(Math.max(1, ceilWidth2 * 0.3)));
+            this.bar._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
 
             //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
             if (this.bar._width == 1 && ceilWidth > 3) {
-                this.bar._width = parseInt(ceilWidth) - 2;
+                this.bar._width = ceilWidth - 2;
             };
         };
         this.bar._width < 1 && (this.bar._width = 1);
@@ -190,13 +190,16 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
     }
 
     add( field ){
-        this.clean();
         this.draw();
     }
 
     remove( field )
     {
-        this.clean();
+        _.each( this.barsSp.children , function( h_groupSp, h ){
+            var bar = h_groupSp.getChildById("bar_"+h+"_"+field);
+            bar && bar.destroy();
+        } );
+ 
         this.draw();
     }
 
@@ -267,7 +270,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
             me._barsLen = hLen * groups;
 
             for (var h = 0; h < hLen; h++) {
-                var groupH;
+                var groupH = null;
                 if (i == 0) {
                     //横向的分组
                     if (h <= preDataLen - 1) {
@@ -284,7 +287,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                 };
 
                 //同上面，给txt做好分组
-                var txtGroupH;
+                var txtGroupH = null;
                 if (i == 0) {
                     if (h <= preDataLen - 1) {
                         txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
@@ -320,7 +323,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                     var finalPos = {
                         x: Math.round(rectData.x),
                         y: rectData.fromY, 
-                        width: parseInt(me.bar._width),
+                        width: me.bar._width,
                         height: rectH,
                         fillStyle: fillStyle,
                         fillAlpha: me.bar.fillAlpha,
@@ -349,22 +352,23 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                         rectCxt.y = finalPos.y;
                     };
 
-                    var rectEl;
+                    var rectEl = null;
+                    var barId = "bar_"+h+"_"+rectData.field;
                     if (h <= preDataLen - 1) {
-                        rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                        rectEl = groupH.getChildById( barId );
+                    };
+                    if( rectEl ){
                         rectEl.context.fillStyle = fillStyle;
                     } else {
                         rectEl = new Rect({
-                            id: "bar_" + i + "_" + h + "_" + v,
+                            id: barId,
                             context: rectCxt
                         });
+                        rectEl.field = rectData.field;
                         groupH.addChild(rectEl);
                     };
 
-
-
                     rectEl.finalPos = finalPos;
-
                     rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
 
                     me.bar.filter.apply( rectEl, [ rectData , me] );
@@ -373,13 +377,16 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                     if (rectData.isLeaf && me.text.enabled) {
                         
                         //文字
-                        var infosp;
+                        var infosp = null;
+                        var infospId = "infosp_" + h + "_" + rectData.field;
                         if (h <= preDataLen - 1) {
-                            infosp = txtGroupH.getChildById("infosp_" + i + "_" + h + "_" + v);
+                            infosp = txtGroupH.getChildById( infospId );
+                        } 
+                        if( infosp ){
+                            //do something
                         } else {
-                            //console.log("infosp_" + i + "_" + h + "_" + v);
                             infosp = new Canvax.Display.Sprite({
-                                id: "infosp_" + i + "_" + h + "_" + v,
+                                id: infospId,
                                 context: {
                                     y : rectData.yBasePoint.y,
                                     visible: false
@@ -431,9 +438,12 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                                 infosp.addChild(txt);
                             };
 
-                            var txt;
+                            var txt = null;
                             if (h <= preDataLen - 1) {
                                 txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                            }
+                            if( txt ){
+                                //do something
                             } else {
                                 txt = new Canvax.Display.Text( content , {
                                     id: "info_txt_" + i + "_" + h + "_" + ci,
@@ -473,7 +483,6 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
 
                         infosp._finalX = rectData.x + me.bar._width/2 - infoWidth / 2;
 
-                        
                         //如果数据在basepoint下方
                         if( rectData.value < rectData.yBasePoint.content ){
                             infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
@@ -481,7 +490,6 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                             infosp._finalY = rectData.y - infoHeight;
                         }
                        
-
                         infosp._centerX = rectData.x+me.bar._width/2;
                         infosp.context.width = infoWidth;
                         infosp.context.height = infoHeight;
@@ -498,6 +506,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
 
         this.sprite.addChild(this.barsSp);
 
+        //如果有text设置， 就要吧text的txtsSp也添加到sprite
         if (this.text.enabled) {
             this.sprite.addChild(this.txtsSp);
         };
@@ -717,15 +726,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
     {
 
         var me = this;
-        if (!this.animation) {
-            callback && callback(me);
-            return;
-        };
-        var sy = 1;
-        if (this.sort && this.sort == "desc") {
-            sy = -1;
-        };
-
+        
         //先把已经不在当前range范围内的元素destroy掉
         if ( me.data[0] && me.data[0].length && me.barsSp.children.length > me.data[0][0].length) {
             for (var i = me.data[0][0].length, l = me.barsSp.children.length; i < l; i++) {
@@ -734,6 +735,15 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                 i--;
                 l--;
             };
+        };
+
+        if (!this.animation) {
+            callback && callback(me);
+            return;
+        };
+        var sy = 1;
+        if (this.sort && this.sort == "desc") {
+            sy = -1;
         };
 
         var optsions = _.extend({
@@ -750,10 +760,11 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
             for (var h = 0; h < hLen; h++) {
                 for (var v = 0; v < vLen; v++) {
 
+                    var rectData = h_group[v][h];
+
                     var group = me.barsSp.getChildById("barGroup_" + h);
 
-                    var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
-                    //console.log("finalPos"+bar.finalPos.y)
+                    var bar = group.getChildById("bar_" + h + "_" + rectData.field);
 
                     if (optsions.duration == 0) {
                         bar.context.scaleY = sy;
@@ -792,8 +803,6 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                             id: bar.id
                         });
                     };
-
-
 
                     //txt grow
                     if (me.text.enabled) {

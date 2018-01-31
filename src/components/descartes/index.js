@@ -3,7 +3,7 @@ import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
 import Grid from "../grid/index"
-import {colors as themeColors} from "../../theme"
+import Theme from "../../theme"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
@@ -391,7 +391,7 @@ export default class Descartes_Component extends Component
                         field : fields[i],
                         enabled : true,
                         yAxis : me._getYaxisOfField( fields[i] ),
-                        style : themeColors[ fieldInd ],
+                        style : Theme.colors[ fieldInd ],
                         ind : fieldInd++
                     }
                 }

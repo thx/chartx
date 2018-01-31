@@ -1,5 +1,5 @@
 import Canvax from "canvax2d"
-import {colors as themeColors} from "../../theme"
+import Theme from "../../theme"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
@@ -53,7 +53,7 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
 
         this.groupField = null; //如果有多个分组的数据，按照这个字段分组，比如男女
 
-        this.colors  = themeColors;
+        this.colors  = Theme.colors;
 
         this.sprite   = null;
 

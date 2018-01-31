@@ -8045,6 +8045,14 @@ var Chart = function (_Canvax$Event$EventDi) {
     return Chart;
 }(canvax.Event.EventDispatcher);
 
+var _colors = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
+var Theme = {
+    colors: _colors,
+    set: function set(colors) {
+        this.colors = colors;
+    }
+};
+
 var _$5 = canvax._;
 
 /**
@@ -9966,8 +9974,6 @@ var Grid = function (_Component) {
     return Grid;
 }(component);
 
-var colors = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
-
 var _$6 = canvax._;
 var Rect$2 = canvax.Shapes.Rect;
 
@@ -10362,7 +10368,7 @@ var Descartes_Component = function (_Component) {
                             field: fields[i],
                             enabled: true,
                             yAxis: me._getYaxisOfField(fields[i]),
-                            style: colors[fieldInd],
+                            style: Theme.colors[fieldInd],
                             ind: fieldInd++
                         };
                     }
@@ -11877,11 +11883,11 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                     this.bar._width = this.bar.width;
                 }
             } else {
-                this.bar._width = parseInt(ceilWidth2) - parseInt(Math.max(1, ceilWidth2 * 0.3));
+                this.bar._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
 
                 //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
                 if (this.bar._width == 1 && ceilWidth > 3) {
-                    this.bar._width = parseInt(ceilWidth) - 2;
+                    this.bar._width = ceilWidth - 2;
                 }
             }
             this.bar._width < 1 && (this.bar._width = 1);
@@ -11890,13 +11896,16 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "add",
         value: function add(field) {
-            this.clean();
             this.draw();
         }
     }, {
         key: "remove",
         value: function remove(field) {
-            this.clean();
+            _$13.each(this.barsSp.children, function (h_groupSp, h) {
+                var bar = h_groupSp.getChildById("bar_" + h + "_" + field);
+                bar && bar.destroy();
+            });
+
             this.draw();
         }
     }, {
@@ -11967,7 +11976,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                 me._barsLen = hLen * groups;
 
                 for (var h = 0; h < hLen; h++) {
-                    var groupH;
+                    var groupH = null;
                     if (i == 0) {
                         //横向的分组
                         if (h <= preDataLen - 1) {
@@ -11984,7 +11993,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                     }
 
                     //同上面，给txt做好分组
-                    var txtGroupH;
+                    var txtGroupH = null;
                     if (i == 0) {
                         if (h <= preDataLen - 1) {
                             txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
@@ -12020,7 +12029,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                         var finalPos = {
                             x: Math.round(rectData.x),
                             y: rectData.fromY,
-                            width: parseInt(me.bar._width),
+                            width: me.bar._width,
                             height: rectH,
                             fillStyle: fillStyle,
                             fillAlpha: me.bar.fillAlpha,
@@ -12049,20 +12058,23 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                             rectCxt.y = finalPos.y;
                         }
 
-                        var rectEl;
+                        var rectEl = null;
+                        var barId = "bar_" + h + "_" + rectData.field;
                         if (h <= preDataLen - 1) {
-                            rectEl = groupH.getChildById("bar_" + i + "_" + h + "_" + v);
+                            rectEl = groupH.getChildById(barId);
+                        }
+                        if (rectEl) {
                             rectEl.context.fillStyle = fillStyle;
                         } else {
                             rectEl = new Rect$4({
-                                id: "bar_" + i + "_" + h + "_" + v,
+                                id: barId,
                                 context: rectCxt
                             });
+                            rectEl.field = rectData.field;
                             groupH.addChild(rectEl);
                         }
 
                         rectEl.finalPos = finalPos;
-
                         rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
 
                         me.bar.filter.apply(rectEl, [rectData, me]);
@@ -12071,13 +12083,16 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                         if (rectData.isLeaf && me.text.enabled) {
 
                             //文字
-                            var infosp;
+                            var infosp = null;
+                            var infospId = "infosp_" + h + "_" + rectData.field;
                             if (h <= preDataLen - 1) {
-                                infosp = txtGroupH.getChildById("infosp_" + i + "_" + h + "_" + v);
+                                infosp = txtGroupH.getChildById(infospId);
+                            }
+                            if (infosp) {
+                                //do something
                             } else {
-                                //console.log("infosp_" + i + "_" + h + "_" + v);
                                 infosp = new canvax.Display.Sprite({
-                                    id: "infosp_" + i + "_" + h + "_" + v,
+                                    id: infospId,
                                     context: {
                                         y: rectData.yBasePoint.y,
                                         visible: false
@@ -12125,9 +12140,12 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                                     infosp.addChild(txt);
                                 }
 
-                                var txt;
+                                var txt = null;
                                 if (h <= preDataLen - 1) {
                                     txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                }
+                                if (txt) {
+                                    //do something
                                 } else {
                                     txt = new canvax.Display.Text(content, {
                                         id: "info_txt_" + i + "_" + h + "_" + ci,
@@ -12190,6 +12208,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
 
             this.sprite.addChild(this.barsSp);
 
+            //如果有text设置， 就要吧text的txtsSp也添加到sprite
             if (this.text.enabled) {
                 this.sprite.addChild(this.txtsSp);
             }
@@ -12409,14 +12428,6 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
         value: function grow(callback, opts) {
 
             var me = this;
-            if (!this.animation) {
-                callback && callback(me);
-                return;
-            }
-            var sy = 1;
-            if (this.sort && this.sort == "desc") {
-                sy = -1;
-            }
 
             //先把已经不在当前range范围内的元素destroy掉
             if (me.data[0] && me.data[0].length && me.barsSp.children.length > me.data[0][0].length) {
@@ -12426,6 +12437,15 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                     i--;
                     l--;
                 }
+            }
+
+            if (!this.animation) {
+                callback && callback(me);
+                return;
+            }
+            var sy = 1;
+            if (this.sort && this.sort == "desc") {
+                sy = -1;
             }
 
             var optsions = _$13.extend({
@@ -12442,10 +12462,11 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                 for (var h = 0; h < hLen; h++) {
                     for (var v = 0; v < vLen; v++) {
 
+                        var rectData = h_group[v][h];
+
                         var group = me.barsSp.getChildById("barGroup_" + h);
 
-                        var bar = group.getChildById("bar_" + g + "_" + h + "_" + v);
-                        //console.log("finalPos"+bar.finalPos.y)
+                        var bar = group.getChildById("bar_" + h + "_" + rectData.field);
 
                         if (optsions.duration == 0) {
                             bar.context.scaleY = sy;
@@ -13803,7 +13824,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
 
         _this.groupField = null; //如果有多个分组的数据，按照这个字段分组，比如男女
 
-        _this.colors = colors;
+        _this.colors = Theme.colors;
 
         _this.sprite = null;
 
@@ -14862,7 +14883,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
             y: 0
         };
 
-        _this.colors = colors;
+        _this.colors = Theme.colors;
 
         _this.label = {
             enabled: false,
@@ -15143,16 +15164,16 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
         }
     }, {
         key: "getColorByIndex",
-        value: function getColorByIndex(colors$$1, ind, len) {
-            if (ind >= colors$$1.length) {
+        value: function getColorByIndex(colors, ind, len) {
+            if (ind >= colors.length) {
                 //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
-                if ((len - 1) % colors$$1.length == 0 && ind % colors$$1.length == 0) {
-                    ind = ind % colors$$1.length + 1;
+                if ((len - 1) % colors.length == 0 && ind % colors.length == 0) {
+                    ind = ind % colors.length + 1;
                 } else {
-                    ind = ind % colors$$1.length;
+                    ind = ind % colors.length;
                 }
             }
-            return colors$$1[ind];
+            return colors[ind];
         }
     }, {
         key: "_getLabel",
@@ -16888,6 +16909,7 @@ var barTgi = function (_Component) {
 }(component);
 
 //图表基类
+//图表皮肤类
 //坐标系
 //graphs
 //components
@@ -16911,7 +16933,15 @@ var components = {
     anchor: Anchor,
     tips: Tips,
     barTgi: barTgi
-};
+
+    //皮肤设定begin ---------------
+    //如果数据库中有项目皮肤
+};var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
+if (projectTheme && projectTheme.length) {
+    Theme.set(projectTheme);
+}
+//皮肤设定end -----------------
+
 
 var Chartx = {
     create: function create(el, data, opts) {

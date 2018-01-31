@@ -1,7 +1,8 @@
 //图表基类
 import Chart from "./chart"
 
-
+//图表皮肤类
+import Theme from "./theme"
 
 //坐标系
 import Descartes from "./coordinate/descartes"
@@ -44,6 +45,15 @@ var components = {
     barTgi : BarTgi
 }
 
+//皮肤设定begin ---------------
+//如果数据库中有项目皮肤
+var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
+if( projectTheme && projectTheme.length ){
+    Theme.set( projectTheme );
+};
+//皮肤设定end -----------------
+
+
 var Chartx = {
     create : function( el, data, opts ){
         var chart = null;
@@ -53,6 +63,6 @@ var Chartx = {
         chart && chart.draw();
         return chart;
     }
-}
+};
 
 export default Chartx;
