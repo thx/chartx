@@ -11770,6 +11770,8 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
         _this.sprite = null;
         _this.txtsSp = null;
 
+        _this.proportion = false; //比例柱状图，比例图首先肯定是个堆叠图
+
         _$13.extend(true, _this, opts);
 
         _this.init();
@@ -11891,6 +11893,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                 }
             }
             this.bar._width < 1 && (this.bar._width = 1);
+            this.bar._width = parseInt(this.bar._width);
             return this.bar._width;
         }
     }, {
@@ -12047,7 +12050,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                             scaleY: 0
                         };
 
-                        if (!!me.bar.radius && rectData.isLeaf) {
+                        if (!!me.bar.radius && rectData.isLeaf && !me.proportion) {
                             var radiusR = Math.min(me.bar._width / 2, Math.abs(rectH));
                             radiusR = Math.min(radiusR, me.bar.radius);
                             rectCxt.radius = [radiusR, radiusR, 0, 0];
@@ -12224,7 +12227,6 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                 me.fire("complete");
             }, {
                 delay: 0,
-                easing: me.proportion ? "Quadratic.Line" : "Quadratic.Out",
                 duration: 300
             });
         }
@@ -12309,9 +12311,10 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                             return;
                         }
 
-                        var vCount = 0;
+                        var vCount = val;
                         if (me.proportion) {
                             //先计算总量
+                            vCount = 0;
                             _$13.each(hData, function (team, ti) {
                                 vCount += team[i];
                             });
@@ -12368,6 +12371,8 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                         var node = {
                             type: "bar",
                             value: val,
+                            vInd: v, //如果是堆叠图的话，这个node在堆叠中得位置
+                            vCount: vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
                             field: me._getTargetField(b, v, i, me.enabledField),
                             fromX: x,
                             fromY: fromY,
@@ -12382,10 +12387,6 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                                 layoutText: xArr[i].layoutText
                             }
                         };
-
-                        if (me.proportion) {
-                            node.vCount = vCount;
-                        }
 
                         if (!me.enabledFieldData[node.field]) {
                             me.enabledFieldData[node.field] = tempBarData[v];
@@ -12450,7 +12451,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
 
             var optsions = _$13.extend({
                 delay: Math.min(1000 / this._barsLen, 80),
-                easing: "Back.Out",
+                easing: "Linear.None", //"Back.Out",
                 duration: 500
             }, opts);
 

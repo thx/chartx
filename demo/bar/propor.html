@@ -53,7 +53,7 @@ var options = {
         //horizontal : true,
         xAxis : {
             field : "xfield",
-            //dataSection : [1,3,5,7,9]
+            dataSection : [1,3,5,7,9]
         },
         yAxis : [
             {
@@ -64,10 +64,7 @@ var options = {
             }
         ]
     },
-    legend : {},
-    tips : {
-        pointer : "shadow"
-    },
+
     graphs : [
     
         {
@@ -80,38 +77,15 @@ var options = {
         },
         {
             type : "bar",
-            field : [ [ "uv","pv" ],"ppc" ],
+            field : [ [ "uv","pv" ]],
+            proportion: true,
             yAxisAlign : "right",
             bar : {
                 //fillStyle : ["red" , "blue"]
             }
         }
         
-    ],
-    dataZoom: {
-        range : {
-            //start :1,
-            //end : 5
-        }
-    },
-    markLine :  [{
-        markTo: 'uv',
-        text : {
-            enabled : true,
-            content : function( yVal ){
-                return 'UV 均值 ：' + parseInt( yVal )
-            },
-            fontSize : 14
-        }
-        //y : 30 //不设置y，就会自动设置为均线
-    },{
-        markTo: 'pv',
-        text : {
-            enabled : true,
-            fontSize : 14
-        },
-        y : 180
-    }]
+    ]
 };
 
 window.bar = Chartx.create("canvasTest" , data , options)
