@@ -47,25 +47,26 @@ export default class polarComponent extends Component
             layoutType : "average", // average 弧度均分， proportion 和直角坐标中的一样
             data : [],
             radians : [],
-            beginAngle : -90
+            beginAngle : -90,
+            scale : {
+                //刻度尺,在最外沿的蜘蛛网上面
+                enabled : true
+            }
         };
 
         this.rAxis = {
             field : [],
-            dataSection : null
+            dataSection : null,
+            scale : {
+                //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
+                enabled : false 
+            }
         };
         
         this.maxR = null;
 
         this.grid = {
-            enabled : false,
-            label : {
-                enabled : true
-            },
-            scale : {
-                //刻度尺
-                enabled : false
-            }
+            enabled : false
         };
 
         this.rectRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
@@ -76,6 +77,11 @@ export default class polarComponent extends Component
 
         this.fieldsMap = null;
         this.induce = null; //有grid得话，就等于_grid.induce
+
+        if( !this.aAxis.field ){
+            //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
+            this.grid.enabled = false;
+        };
 
         this.init(opts);
     }
@@ -107,9 +113,12 @@ export default class polarComponent extends Component
                 pos    : this.origin,
                 width  : this.width,
                 height : this.height,
-                dataSection : this.rAxis.dataSection,
-                aAxisData :  this.aAxis.data //用来绘制label
+                dataSection : this.rAxis.dataSection
             } , this);
+        };
+
+        if( this.aAxis.scale.enabled && this.grid.enabled ){
+            this._drawAAxisScale();
         };
 
     }
@@ -169,8 +178,16 @@ export default class polarComponent extends Component
 
     _initModules()
     {
-        this._grid = new Grid( this.grid, this );
-        this.sprite.addChild( this._grid.sprite );
+        if( this.grid.enabled ){
+            this._grid = new Grid( this.grid, this );
+            this.sprite.addChild( this._grid.sprite );
+        };
+        if( this.aAxis.scale.enabled && this.grid.enabled ){
+            this._aAxisScaleSp = new Canvax.Display.Sprite({
+                id : "aAxisScaleSp"
+            });
+            this.sprite.addChild( this._aAxisScaleSp );
+        };
     }
 
     _computeAttr()
@@ -194,7 +211,8 @@ export default class polarComponent extends Component
         if( !("height" in this._opts) ){
             this.height = rootHeight - _padding.top-_padding.bottom;
         };
-        if( this.grid.label.enabled ){
+
+        if( this.aAxis.scale.enabled ){
             this.width -= 20*2;
             this.height -= 20*2;
         };
@@ -401,11 +419,15 @@ export default class polarComponent extends Component
             for( var i=0, l=this.aAxis.data.length; i<l; i++ ){
                 aAxisArr.push( i );
             }
-        }
+        };
+
+        var allAngle = this.allAngle;
 
         var min = 0;
         var max = _.max( aAxisArr );
-        var allAngle = this.allAngle;
+        if( this.aAxis.layoutType == "average" ){
+            max ++;
+        };
 
         _.each( aAxisArr, function( p ){
             //角度
@@ -416,5 +438,82 @@ export default class polarComponent extends Component
             points.push( point )
         } );
         return points;
+    }
+
+    _drawAAxisScale()
+    {
+        //绘制aAxis刻度尺
+        var me = this;
+        var r = me.getROfNum( _.max( this.rAxis.dataSection ) );
+        var points = me.getPointsOfR( r + 3 );
+
+        me._aAxisScaleSp.context.x = this.origin.x;
+        me._aAxisScaleSp.context.y = this.origin.y;
+
+        _.each( this.aAxis.data , function( label, i ){
+            
+            var point = points[i];
+            var c = {
+                x : point.x,
+                y : point.y,
+                fillStyle : "#ccc"
+            }
+
+            _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
+            me._aAxisScaleSp.addChild(new Canvax.Display.Text( label , {
+                context : c
+            }));
+            
+        } );
+    }
+
+    /**
+     *把弧度分为4大块区域-90 --> 0 , 0-->90 , 90-->180, -180-->-90
+     **/
+    _getTextAlignForPoint(r)
+    {
+        var textAlign    = "center";
+        var textBaseline = "bottom";
+
+        /* 默认的就不用判断了
+        if(r==-Math.PI/2){
+            return {
+                textAlign    : "center",
+                textBaseline : "bottom"
+            }
+        }
+        */
+        if(r>-Math.PI/2 && r<0){
+            textAlign    = "left";
+            textBaseline = "bottom";
+        }
+        if(r==0){
+            textAlign    = "left";
+            textBaseline = "middle";
+        }
+        if(r>0 && r<Math.PI/2){
+            textAlign    = "left";
+            textBaseline = "top";
+        }
+        if(r==Math.PI/2){
+            textAlign    = "center";
+            textBaseline = "top";
+        }
+        if(r>Math.PI/2 && r<Math.PI){
+            textAlign    = "right";
+            textBaseline = "top";
+        }
+        if(r==Math.PI || r == -Math.PI){
+            textAlign    = "right";
+            textBaseline = "middle";
+        }
+        if(r>-Math.PI && r < -Math.PI/2){
+            textAlign    = "right";
+            textBaseline = "bottom";
+        }
+        return {
+            textAlign    : textAlign,
+            textBaseline : textBaseline
+        }
     }
 }

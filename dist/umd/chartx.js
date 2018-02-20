@@ -8310,30 +8310,31 @@ var xAxis = function (_Component) {
         _this.label = "";
         _this._label = null; //this.label对应的文本对象
 
-        _this.line = {
-            enabled: 1, //是否有line
-            lineWidth: 1,
-            height: 4,
-            marginTop: 2,
-            strokeStyle: '#cccccc'
+        _this.scale = {
+            enabled: true,
+            line: {
+                enabled: 1, //是否有line
+                lineWidth: 1,
+                height: 4,
+                marginTop: 2,
+                strokeStyle: '#cccccc'
+            },
+            text: {
+                fillStyle: '#999',
+                fontSize: 12,
+                rotation: 0,
+                format: null,
+                marginTop: 2,
+                textAlign: "center"
+            }
         };
 
-        _this.text = {
-            fillStyle: '#999',
-            fontSize: 12,
-            rotation: 0,
-            format: null,
-            marginTop: 2,
-            textAlign: "center"
-        };
         _this.maxTxtH = 0;
 
         _this.pos = {
             x: 0,
             y: 0
         };
-
-        _this.enabled = true; //是否需要位置来绘制
 
         _this.dataOrg = []; //源数据
         _this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
@@ -8406,9 +8407,9 @@ var xAxis = function (_Component) {
                 this.dataSection = this._initDataSection(this.dataOrg);
             }
 
-            if (this.text.rotation != 0) {
+            if (this.scale.text.rotation != 0) {
                 //如果是旋转的文本，那么以右边为旋转中心点
-                this.text.textAlign = "right";
+                this.scale.text.textAlign = "right";
             }
 
             //先计算出来显示文本
@@ -8534,10 +8535,10 @@ var xAxis = function (_Component) {
                 if (!this._label) {
                     this._label = new canvax.Display.Text(this.label, {
                         context: {
-                            fontSize: this.text.fontSize,
+                            fontSize: this.scale.text.fontSize,
                             textAlign: this.isH ? "center" : "left",
                             textBaseline: this.isH ? "top" : "middle",
-                            fillStyle: this.text.fillStyle,
+                            fillStyle: this.scale.text.fillStyle,
                             rotation: this.isH ? -90 : 0
                         }
                     });
@@ -8636,7 +8637,7 @@ var xAxis = function (_Component) {
                 var layoutText = this._getFormatText(data[a]);
                 var txt = new canvax.Display.Text(layoutText, {
                     context: {
-                        fontSize: this.text.fontSize
+                        fontSize: this.scale.text.fontSize
                     }
                 });
 
@@ -8675,38 +8676,38 @@ var xAxis = function (_Component) {
         key: "_setXAxisHeight",
         value: function _setXAxisHeight() {
             //检测下文字的高等
-            if (!this.enabled) {
+            if (!this.scale.enabled) {
                 this.height = 3;
             } else {
                 var txt = new canvax.Display.Text(this._layoutDataSection[0] || "test", {
                     context: {
-                        fontSize: this.text.fontSize
+                        fontSize: this.scale.text.fontSize
                     }
                 });
 
                 this.maxTxtH = txt.getTextHeight();
 
-                if (!!this.text.rotation) {
-                    if (this.text.rotation % 90 == 0) {
+                if (!!this.scale.text.rotation) {
+                    if (this.scale.text.rotation % 90 == 0) {
                         this.height = parseInt(this._textMaxWidth);
                     } else {
-                        var sinR = Math.sin(Math.abs(this.text.rotation) * Math.PI / 180);
-                        var cosR = Math.cos(Math.abs(this.text.rotation) * Math.PI / 180);
+                        var sinR = Math.sin(Math.abs(this.scale.text.rotation) * Math.PI / 180);
+                        var cosR = Math.cos(Math.abs(this.scale.text.rotation) * Math.PI / 180);
                         this.height = parseInt(sinR * this._textMaxWidth + txt.getTextHeight() + 5);
                     }
                 } else {
                     this.height = parseInt(this.maxTxtH);
                 }
 
-                this.height += this.line.height + this.line.marginTop + this.text.marginTop;
+                this.height += this.scale.line.height + this.scale.line.marginTop + this.scale.text.marginTop;
             }
         }
     }, {
         key: "_getFormatText",
         value: function _getFormatText(text) {
             var res;
-            if (_$7.isFunction(this.text.format)) {
-                res = this.text.format(text);
+            if (_$7.isFunction(this.scale.text.format)) {
+                res = this.scale.text.format(text);
             } else {
                 res = text;
             }
@@ -8721,7 +8722,7 @@ var xAxis = function (_Component) {
     }, {
         key: "_widget",
         value: function _widget() {
-            if (!this.enabled) return;
+            if (!this.scale.enabled) return;
 
             var arr = this.layoutData;
 
@@ -8747,21 +8748,21 @@ var xAxis = function (_Component) {
 
                 var o = arr[a];
                 var x = o.x,
-                    y = this.line.height + this.line.marginTop + this.text.marginTop;
+                    y = this.scale.line.height + this.scale.line.marginTop + this.scale.text.marginTop;
 
                 //文字
                 var textContext = {
                     x: o.text_x || o.x,
                     y: y + 20,
-                    fillStyle: this.text.fillStyle,
-                    fontSize: this.text.fontSize,
-                    rotation: -Math.abs(this.text.rotation),
-                    textAlign: this.text.textAlign,
-                    textBaseline: !!this.text.rotation ? "middle" : "top",
+                    fillStyle: this.scale.text.fillStyle,
+                    fontSize: this.scale.text.fontSize,
+                    rotation: -Math.abs(this.scale.text.rotation),
+                    textAlign: this.scale.text.textAlign,
+                    textBaseline: !!this.scale.text.rotation ? "middle" : "top",
                     globalAlpha: 0
                 };
 
-                if (!!this.text.rotation && this.text.rotation != 90) {
+                if (!!this.scale.text.rotation && this.scale.text.rotation != 90) {
                     textContext.x += 5;
                     textContext.y += 3;
                 }
@@ -8804,16 +8805,16 @@ var xAxis = function (_Component) {
                     }
                 }
 
-                if (this.line.enabled) {
+                if (this.scale.line.enabled) {
                     var lineContext = {
                         x: x,
-                        y: this.line.marginTop,
+                        y: this.scale.line.marginTop,
                         end: {
                             x: 0,
-                            y: this.line.height
+                            y: this.scale.line.height
                         },
-                        lineWidth: this.line.lineWidth,
-                        strokeStyle: this.line.strokeStyle
+                        lineWidth: this.scale.line.lineWidth,
+                        strokeStyle: this.scale.line.strokeStyle
                     };
                     if (xNode._line) {
                         //_.extend( xNode._txt.context , textContext );
@@ -8862,8 +8863,8 @@ var xAxis = function (_Component) {
                         x: this.width,
                         y: 0
                     },
-                    lineWidth: this.line.lineWidth,
-                    strokeStyle: this.line.strokeStyle
+                    lineWidth: this.scale.line.lineWidth,
+                    strokeStyle: this.scale.line.strokeStyle
                 }
             });
             this.sprite.addChild(_axisline);
@@ -8882,8 +8883,8 @@ var xAxis = function (_Component) {
 
             var txt = new canvax.Display.Text(maxLenText || "test", {
                 context: {
-                    fillStyle: this.text.fillStyle,
-                    fontSize: this.text.fontSize
+                    fillStyle: this.scale.text.fillStyle,
+                    fontSize: this.scale.text.fontSize
                 }
             });
 
@@ -8899,7 +8900,7 @@ var xAxis = function (_Component) {
             var arr = this.layoutData;
             var l = arr.length;
 
-            if (!this.enabled || !l) return;
+            if (!this.scale.enabled || !l) return;
 
             // rule , peak, proportion
             if (me.layoutType == "proportion") {
@@ -8954,23 +8955,23 @@ var xAxis = function (_Component) {
                     var currWidth = curr.textWidth;
 
                     //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-                    if (!!me.text.rotation) {
+                    if (!!me.scale.text.rotation) {
                         nextWidth = 35;
                         currWidth = 35;
                     }
 
                     var next_x = next.x;
-                    if (me.text.textAlign == "center") {
+                    if (me.scale.text.textAlign == "center") {
                         next_x = next.x - nextWidth / 2;
                     }
 
                     if (ii == l - 2) {
                         //next是最后一个
-                        if (me.text.textAlign == "center" && next.x + nextWidth / 2 > me.width) {
+                        if (me.scale.text.textAlign == "center" && next.x + nextWidth / 2 > me.width) {
                             next_x = me.width - nextWidth;
                             next.text_x = me.width - nextWidth / 2 + me._getRootPR();
                         }
-                        if (me.text.textAlign == "left" && next.x + nextWidth > me.width) {
+                        if (me.scale.text.textAlign == "left" && next.x + nextWidth > me.width) {
                             next_x = me.width - nextWidth;
                             next.text_x = me.width - nextWidth;
                         }
@@ -9012,7 +9013,6 @@ var yAxis = function (_Component) {
         _this._opt = opt;
 
         _this.width = null; //第一次计算后就会有值
-        _this.enabled = true; //true false 1,0都可以
 
         _this.maxW = 0; //最大文本的 width
         _this.field = []; //这个 轴 上面的 field
@@ -9020,21 +9020,24 @@ var yAxis = function (_Component) {
         _this.label = "";
         _this._label = null; //label 的text对象
 
-        _this.line = {
-            enabled: 1, //是否有line
-            width: 4, //刻度线的宽度，和轴线无关
-            lineWidth: 1,
-            strokeStyle: '#cccccc',
-            marginToLine: 2
+        _this.scale = {
+            enabled: true,
+            line: {
+                enabled: 1, //是否有line
+                width: 4, //刻度线的宽度，和轴线无关
+                lineWidth: 1,
+                strokeStyle: '#cccccc',
+                marginToLine: 2
+            },
+            text: {
+                fillStyle: '#999',
+                fontSize: 12,
+                format: null,
+                rotation: 0,
+                marginToLine: 3 //和刻度线的距离
+            }
         };
 
-        _this.text = {
-            fillStyle: '#999',
-            fontSize: 12,
-            format: null,
-            rotation: 0,
-            marginToLine: 3 //和刻度线的距离
-        };
         _this.pos = {
             x: 0,
             y: 0
@@ -9157,10 +9160,10 @@ var yAxis = function (_Component) {
             if (_label && _label != "") {
                 this._label = new canvax.Display.Text(_label, {
                     context: {
-                        fontSize: this.text.fontSize,
+                        fontSize: this.scale.text.fontSize,
                         textAlign: this.align == "left" ? "right" : "left", //"left",
                         textBaseline: this.isH ? "top" : "bottom",
-                        fillStyle: this.text.fillStyle,
+                        fillStyle: this.scale.text.fillStyle,
                         rotation: this.isH ? -90 : 0
                     }
                 });
@@ -9587,7 +9590,7 @@ var yAxis = function (_Component) {
         key: "_widget",
         value: function _widget() {
             var self = this;
-            if (!self.enabled) {
+            if (!self.scale.enabled) {
                 self.width = 0;
                 return;
             }
@@ -9600,8 +9603,8 @@ var yAxis = function (_Component) {
                 var y = o.y;
                 var content = o.content;
 
-                if (_$9.isFunction(self.text.format)) {
-                    content = self.text.format(content, self);
+                if (_$9.isFunction(self.scale.text.format)) {
+                    content = self.scale.text.format(content, self);
                 }
                 if (content === undefined || content === null) {
                     content = numAddSymbol(o.content);
@@ -9611,7 +9614,7 @@ var yAxis = function (_Component) {
 
                 var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
                 //为横向图表把y轴反转后的 逻辑
-                if (self.text.rotation == 90 || self.text.rotation == -90) {
+                if (self.scale.text.rotation == 90 || self.scale.text.rotation == -90) {
                     textAlign = "center";
                     if (a == arr.length - 1) {
                         posy = y - 2;
@@ -9654,24 +9657,25 @@ var yAxis = function (_Component) {
                     if (content == self.baseNumber) {
                         aniFrom = 0;
                     }
+
                     if (content < self.baseNumber) {
                         aniFrom = -20;
                     }
 
                     var lineX = 0;
-                    if (self.line.enabled) {
+                    if (self.scale.line.enabled) {
                         //线条
-                        lineX = self.align == "left" ? -self.line.width - self.line.marginToLine : self.line.marginToLine;
+                        lineX = self.align == "left" ? -self.scale.line.width - self.scale.line.marginToLine : self.scale.line.marginToLine;
                         var line = new Line$3({
                             context: {
                                 x: lineX,
                                 y: y,
                                 end: {
-                                    x: self.line.width,
+                                    x: self.scale.line.width,
                                     y: 0
                                 },
-                                lineWidth: self.line.lineWidth,
-                                strokeStyle: self._getProp(self.line.strokeStyle)
+                                lineWidth: self.scale.line.lineWidth,
+                                strokeStyle: self._getProp(self.scale.line.strokeStyle)
                             }
                         });
                         yNode.addChild(line);
@@ -9679,7 +9683,7 @@ var yAxis = function (_Component) {
                     }
 
                     //文字
-                    var txtX = self.align == "left" ? lineX - self.text.marginToLine : lineX + self.line.width + self.text.marginToLine;
+                    var txtX = self.align == "left" ? lineX - self.scale.text.marginToLine : lineX + self.scale.line.width + self.scale.text.marginToLine;
                     if (this.isH) {
                         txtX = txtX + (self.align == "left" ? -1 : 1) * 4;
                     }
@@ -9688,9 +9692,9 @@ var yAxis = function (_Component) {
                         context: {
                             x: txtX,
                             y: posy + aniFrom,
-                            fillStyle: self._getProp(self.text.fillStyle),
-                            fontSize: self.text.fontSize,
-                            rotation: -Math.abs(this.text.rotation),
+                            fillStyle: self._getProp(self.scale.text.fillStyle),
+                            fontSize: self.scale.text.fontSize,
+                            rotation: -Math.abs(this.scale.text.rotation),
                             textAlign: textAlign,
                             textBaseline: "middle",
                             globalAlpha: 0
@@ -9700,7 +9704,7 @@ var yAxis = function (_Component) {
                     yNode._txt = txt;
 
                     self.maxW = Math.max(self.maxW, txt.getTextWidth());
-                    if (self.text.rotation == 90 || self.text.rotation == -90) {
+                    if (self.scale.text.rotation == 90 || self.scale.text.rotation == -90) {
                         self.maxW = Math.max(self.maxW, txt.getTextHeight());
                     }
 
@@ -9739,11 +9743,11 @@ var yAxis = function (_Component) {
                 }
             }
 
-            self.maxW += self.text.marginToLine;
+            self.maxW += self.scale.text.marginToLine;
             if (self.width === null) {
-                self.width = parseInt(self.maxW + self.text.marginToLine);
-                if (self.line.enabled) {
-                    self.width += parseInt(self.line.width + self.line.marginToLine);
+                self.width = parseInt(self.maxW + self.scale.text.marginToLine);
+                if (self.scale.line.enabled) {
+                    self.width += parseInt(self.scale.line.width + self.scale.line.marginToLine);
                 }
             }
 
@@ -9764,8 +9768,8 @@ var yAxis = function (_Component) {
                         x: _originX,
                         y: -self.height
                     },
-                    lineWidth: this.line.lineWidth,
-                    strokeStyle: self._getProp(self.line.strokeStyle)
+                    lineWidth: this.scale.line.lineWidth,
+                    strokeStyle: self._getProp(self.scale.line.strokeStyle)
                 }
             });
             this.sprite.addChild(_axisline);
@@ -10043,10 +10047,26 @@ var Descartes_Component = function (_Component) {
 
         if ("enabled" in opt) {
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
-            _this.xAxis.enabled = opt.enabled;
-            _$6.each(_this.yAxis, function (yAxis$$1) {
-                yAxis$$1.enabled = opt.enabled;
+            _$6.extend(true, _this.xAxis, {
+                scale: {
+                    enabled: opt.enabled
+                }
             });
+            _$6.each(_this.yAxis, function (yAxis$$1) {
+                _$6.extend(true, yAxis$$1, {
+                    scale: {
+                        enabled: opt.enabled
+                    }
+                });
+            });
+
+            /*
+            this.xAxis.enabled = opt.enabled;
+            _.each( this.yAxis , function( yAxis ){
+                yAxis.enabled = opt.enabled;
+            });
+            */
+
             _this.grid.enabled = opt.enabled;
         }
 
@@ -11359,16 +11379,7 @@ var polarGrid = function (_Component) {
             fillStyle: ["#f9f9f9", "#f3f3f3"],
             alpha: 0.8
         };
-        _this.label = {
-            enabled: true,
-            points: [] //会被设置为induce对应的points，用来绘制label
-        };
-        _this.scale = {
-            enabled: false
-        };
-
         _this.dataSection = [];
-        _this.aAxisData = []; //用来绘制label
 
         _this.sprite = null; //总的sprite
 
@@ -11459,7 +11470,6 @@ var polarGrid = function (_Component) {
 
                     if (i == me.dataSection.length - 1) {
                         me.induce = _ring;
-                        me.label.points = me.root.getPointsOfR(r + 3);
                     }
 
                     //绘制中心出发的蜘蛛网线
@@ -11477,22 +11487,6 @@ var polarGrid = function (_Component) {
                     });
                 }
             });
-
-            //绘制label
-            _$13.each(this.aAxisData, function (label, i) {
-
-                var point = me.label.points[i];
-                var c = {
-                    x: point.x,
-                    y: point.y,
-                    fillStyle: "#ccc"
-                };
-
-                _$13.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
-                me.sprite.addChild(new canvax.Display.Text(label, {
-                    context: c
-                }));
-            });
         }
     }, {
         key: "_bindEvent",
@@ -11508,58 +11502,6 @@ var polarGrid = function (_Component) {
                 return style[i % style.length];
             }
             return style;
-        }
-
-        /**
-         *把弧度分为4大块区域-90 --> 0 , 0-->90 , 90-->180, -180-->-90
-         **/
-
-    }, {
-        key: "_getTextAlignForPoint",
-        value: function _getTextAlignForPoint(r) {
-            var textAlign = "center";
-            var textBaseline = "bottom";
-
-            /* 默认的就不用判断了
-            if(r==-Math.PI/2){
-                return {
-                    textAlign    : "center",
-                    textBaseline : "bottom"
-                }
-            }
-            */
-            if (r > -Math.PI / 2 && r < 0) {
-                textAlign = "left";
-                textBaseline = "bottom";
-            }
-            if (r == 0) {
-                textAlign = "left";
-                textBaseline = "middle";
-            }
-            if (r > 0 && r < Math.PI / 2) {
-                textAlign = "left";
-                textBaseline = "top";
-            }
-            if (r == Math.PI / 2) {
-                textAlign = "center";
-                textBaseline = "top";
-            }
-            if (r > Math.PI / 2 && r < Math.PI) {
-                textAlign = "right";
-                textBaseline = "top";
-            }
-            if (r == Math.PI || r == -Math.PI) {
-                textAlign = "right";
-                textBaseline = "middle";
-            }
-            if (r > -Math.PI && r < -Math.PI / 2) {
-                textAlign = "right";
-                textBaseline = "bottom";
-            }
-            return {
-                textAlign: textAlign,
-                textBaseline: textBaseline
-            };
         }
     }]);
     return polarGrid;
@@ -11610,25 +11552,26 @@ var polarComponent = function (_Component) {
             layoutType: "average", // average 弧度均分， proportion 和直角坐标中的一样
             data: [],
             radians: [],
-            beginAngle: -90
+            beginAngle: -90,
+            scale: {
+                //刻度尺,在最外沿的蜘蛛网上面
+                enabled: true
+            }
         };
 
         _this.rAxis = {
             field: [],
-            dataSection: null
+            dataSection: null,
+            scale: {
+                //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
+                enabled: false
+            }
         };
 
         _this.maxR = null;
 
         _this.grid = {
-            enabled: false,
-            label: {
-                enabled: true
-            },
-            scale: {
-                //刻度尺
-                enabled: false
-            }
+            enabled: false
         };
 
         _this.rectRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
@@ -11639,6 +11582,11 @@ var polarComponent = function (_Component) {
 
         _this.fieldsMap = null;
         _this.induce = null; //有grid得话，就等于_grid.induce
+
+        if (!_this.aAxis.field) {
+            //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
+            _this.grid.enabled = false;
+        }
 
         _this.init(opts);
         return _this;
@@ -11671,9 +11619,12 @@ var polarComponent = function (_Component) {
                     pos: this.origin,
                     width: this.width,
                     height: this.height,
-                    dataSection: this.rAxis.dataSection,
-                    aAxisData: this.aAxis.data //用来绘制label
+                    dataSection: this.rAxis.dataSection
                 }, this);
+            }
+
+            if (this.aAxis.scale.enabled && this.grid.enabled) {
+                this._drawAAxisScale();
             }
         }
 
@@ -11735,8 +11686,16 @@ var polarComponent = function (_Component) {
     }, {
         key: "_initModules",
         value: function _initModules() {
-            this._grid = new polarGrid(this.grid, this);
-            this.sprite.addChild(this._grid.sprite);
+            if (this.grid.enabled) {
+                this._grid = new polarGrid(this.grid, this);
+                this.sprite.addChild(this._grid.sprite);
+            }
+            if (this.aAxis.scale.enabled && this.grid.enabled) {
+                this._aAxisScaleSp = new canvax.Display.Sprite({
+                    id: "aAxisScaleSp"
+                });
+                this.sprite.addChild(this._aAxisScaleSp);
+            }
         }
     }, {
         key: "_computeAttr",
@@ -11760,7 +11719,8 @@ var polarComponent = function (_Component) {
             if (!("height" in this._opts)) {
                 this.height = rootHeight - _padding.top - _padding.bottom;
             }
-            if (this.grid.label.enabled) {
+
+            if (this.aAxis.scale.enabled) {
                 this.width -= 20 * 2;
                 this.height -= 20 * 2;
             }
@@ -11963,9 +11923,13 @@ var polarComponent = function (_Component) {
                 }
             }
 
+            var allAngle = this.allAngle;
+
             var min = 0;
             var max = _$12.max(aAxisArr);
-            var allAngle = this.allAngle;
+            if (this.aAxis.layoutType == "average") {
+                max++;
+            }
 
             _$12.each(aAxisArr, function (p) {
                 //角度
@@ -11976,6 +11940,84 @@ var polarComponent = function (_Component) {
                 points.push(point);
             });
             return points;
+        }
+    }, {
+        key: "_drawAAxisScale",
+        value: function _drawAAxisScale() {
+            //绘制aAxis刻度尺
+            var me = this;
+            var r = me.getROfNum(_$12.max(this.rAxis.dataSection));
+            var points = me.getPointsOfR(r + 3);
+
+            me._aAxisScaleSp.context.x = this.origin.x;
+            me._aAxisScaleSp.context.y = this.origin.y;
+
+            _$12.each(this.aAxis.data, function (label, i) {
+
+                var point = points[i];
+                var c = {
+                    x: point.x,
+                    y: point.y,
+                    fillStyle: "#ccc"
+                };
+
+                _$12.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
+                me._aAxisScaleSp.addChild(new canvax.Display.Text(label, {
+                    context: c
+                }));
+            });
+        }
+
+        /**
+         *把弧度分为4大块区域-90 --> 0 , 0-->90 , 90-->180, -180-->-90
+         **/
+
+    }, {
+        key: "_getTextAlignForPoint",
+        value: function _getTextAlignForPoint(r) {
+            var textAlign = "center";
+            var textBaseline = "bottom";
+
+            /* 默认的就不用判断了
+            if(r==-Math.PI/2){
+                return {
+                    textAlign    : "center",
+                    textBaseline : "bottom"
+                }
+            }
+            */
+            if (r > -Math.PI / 2 && r < 0) {
+                textAlign = "left";
+                textBaseline = "bottom";
+            }
+            if (r == 0) {
+                textAlign = "left";
+                textBaseline = "middle";
+            }
+            if (r > 0 && r < Math.PI / 2) {
+                textAlign = "left";
+                textBaseline = "top";
+            }
+            if (r == Math.PI / 2) {
+                textAlign = "center";
+                textBaseline = "top";
+            }
+            if (r > Math.PI / 2 && r < Math.PI) {
+                textAlign = "right";
+                textBaseline = "top";
+            }
+            if (r == Math.PI || r == -Math.PI) {
+                textAlign = "right";
+                textBaseline = "middle";
+            }
+            if (r > -Math.PI && r < -Math.PI / 2) {
+                textAlign = "right";
+                textBaseline = "bottom";
+            }
+            return {
+                textAlign: textAlign,
+                textBaseline: textBaseline
+            };
         }
     }]);
     return polarComponent;

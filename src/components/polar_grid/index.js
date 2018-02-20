@@ -34,16 +34,7 @@ export default class polarGrid extends Component
             fillStyle : ["#f9f9f9", "#f3f3f3"],
             alpha : 0.8
         };
-        this.label = {
-            enabled : true,
-            points : [] //会被设置为induce对应的points，用来绘制label
-        };
-        this.scale = {
-            enabled : false
-        };
-
         this.dataSection = [];
-        this.aAxisData = []; //用来绘制label
 
         this.sprite = null;//总的sprite
 
@@ -132,7 +123,6 @@ export default class polarGrid extends Component
 
                 if( i == me.dataSection.length-1 ){
                     me.induce = _ring;
-                    me.label.points = me.root.getPointsOfR( r + 3 );;
                 };
 
                 //绘制中心出发的蜘蛛网线
@@ -150,24 +140,6 @@ export default class polarGrid extends Component
                 } );
             }
         } );
-
-        //绘制label
-        _.each( this.aAxisData , function( label, i ){
-
-            var point = me.label.points[i];
-            var c = {
-                x : point.x,
-                y : point.y,
-                fillStyle : "#ccc"
-            }
-
-            _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
-            me.sprite.addChild(new Canvax.Display.Text( label , {
-                context : c
-            }));
-            
-        } );
-
     }
 
     _bindEvent()
@@ -183,56 +155,5 @@ export default class polarGrid extends Component
             return style[ i%style.length ]
         }
         return style;
-    }
-
-
-    /**
-     *把弧度分为4大块区域-90 --> 0 , 0-->90 , 90-->180, -180-->-90
-     **/
-    _getTextAlignForPoint(r)
-    {
-        var textAlign    = "center";
-        var textBaseline = "bottom";
-
-        /* 默认的就不用判断了
-        if(r==-Math.PI/2){
-            return {
-                textAlign    : "center",
-                textBaseline : "bottom"
-            }
-        }
-        */
-        if(r>-Math.PI/2 && r<0){
-            textAlign    = "left";
-            textBaseline = "bottom";
-        }
-        if(r==0){
-            textAlign    = "left";
-            textBaseline = "middle";
-        }
-        if(r>0 && r<Math.PI/2){
-            textAlign    = "left";
-            textBaseline = "top";
-        }
-        if(r==Math.PI/2){
-            textAlign    = "center";
-            textBaseline = "top";
-        }
-        if(r>Math.PI/2 && r<Math.PI){
-            textAlign    = "right";
-            textBaseline = "top";
-        }
-        if(r==Math.PI || r == -Math.PI){
-            textAlign    = "right";
-            textBaseline = "middle";
-        }
-        if(r>-Math.PI && r < -Math.PI/2){
-            textAlign    = "right";
-            textBaseline = "bottom";
-        }
-        return {
-            textAlign    : textAlign,
-            textBaseline : textBaseline
-        }
     }
 }

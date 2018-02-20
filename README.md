@@ -128,3 +128,5 @@ chartx2.0 代码规范
   
 file:../canvax
 
+直角坐标系的两类轴（xAxis,yAxis）,和极坐标系的两类轴（aAxis,rAxis ）， 都至少有field和scale
+scale用来表示刻度ui，axis上面别的所有的属性都是逻辑属性，scale用来控制是否有ui。
