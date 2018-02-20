@@ -5,14 +5,14 @@ const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
-export default class Grid extends Component
+export default class descartesGrid extends Component
 {
     constructor( opt, root )
     {
         super( opt, root);
 
-        this.w       = 0;   
-        this.h       = 0;
+        this.width       = 0;   
+        this.height      = 0;
         this.root    = root; //该组件被添加到的目标图表项目，
 
         this.pos     = {
@@ -111,7 +111,7 @@ export default class Grid extends Component
                     context : {
                         x : 0,
                         y : -yGroupHeight * g,
-                        width : self.w,
+                        width : self.width,
                         height : -yGroupHeight,
                         fillStyle : self.fill.fillStyle || "#000",
                         fillAlpha : self.fill.alpha || 0.025 * (g%2)
@@ -149,7 +149,7 @@ export default class Grid extends Component
                 self.xAxisSp.addChild(line);
     
                 line.context.start.x = 0;
-                line.context.end.x = self.w;
+                line.context.end.x = self.width;
                 
             };
         };
@@ -167,14 +167,14 @@ export default class Grid extends Component
                     },
                     end         : {
                         x : 0,
-                        y : -self.h
+                        y : -self.height
                     },
                     lineType    : self.yAxis.lineType,
                     lineWidth   : self.yAxis.lineWidth,
                     strokeStyle : self.yAxis.strokeStyle,
                     visible     : o.x ? true : false
                 }
-            })
+            });
             if(self.yAxis.enabled){
                 _.isFunction( self.yAxis.filter ) && self.yAxis.filter.apply(line , [{
                     layoutData : self.xAxis.data,

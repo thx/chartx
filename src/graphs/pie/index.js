@@ -335,4 +335,9 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
     {
         return this.data;
     }
+
+    getLegendData()
+    {
+        return this.data;
+    }
 }

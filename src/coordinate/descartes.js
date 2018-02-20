@@ -86,15 +86,12 @@ export default class Descartes extends CoordinateBase
                         }
                     }
 
-                    if( graphs.field ){
-                        if( _.isArray( graphs.field ) ){
-                            optsYaxisObj.field = optsYaxisObj.field.concat( graphs.field )
-                        } else {
-                            optsYaxisObj.field.push( graphs.field )
-                        }
+                    if( _.isArray( graphs.field ) ){
+                        optsYaxisObj.field = optsYaxisObj.field.concat( graphs.field )
+                    } else {
+                        optsYaxisObj.field.push( graphs.field )
                     }
-
-                    //optsYaxisObj.field = optsYaxisObj.field ? optsYaxisObj.field.concat( graphs.field ) : graphs.field;
+                        
                 }
             } );
         };

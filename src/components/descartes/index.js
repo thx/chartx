@@ -2,7 +2,7 @@ import Component from "../component"
 import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
-import Grid from "../grid/index"
+import Grid from "../descartes_grid/index"
 import Theme from "../../theme"
 
 const _ = Canvax._;
@@ -182,17 +182,17 @@ export default class Descartes_Component extends Component
 
         //绘制背景网格
         this._grid.draw({
-            w: this.width,
-            h: this.height,
-            xAxis: {
+            width   : this.width,
+            height  : this.height,
+            xAxis   : {
                 data: this._yAxis[0].layoutData
             },
-            yAxis: {
+            yAxis   : {
                 data: this._xAxis.layoutData
             },
-            pos: {
-                x: this.origin.x,
-                y: this.origin.y
+            pos     : {
+                x   : this.origin.x,
+                y   : this.origin.y
             }
         } );
 

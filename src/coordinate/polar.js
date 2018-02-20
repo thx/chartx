@@ -17,11 +17,41 @@ export default class Polar extends CoordinateBase
 
         var me = this;
 
+        //坐标系统
+        this._coordinate = null;
+        this.coordinate = {
+            rAxis : {
+                field : []
+            }
+        };
+
         _.extend(true, this, opts);
 
         //强制把graphs设置为数组
         this.graphs = _.flatten( [ this.graphs ] );
-        
+
+
+        //根据graphs.field 来 配置 this.coordinate.rAxis.field -------------------
+        if( !_.isArray( this.coordinate.rAxis.field ) ){
+            this.coordinate.rAxis.field = [this.coordinate.rAxis.field ];
+        };
+        if( opts.graphs ){
+            //有graphs的就要用找到这个graphs.field来设置coordinate.rAxis
+            var arrs = [];
+            _.each( this.graphs, function( graphs ){
+                if( graphs.field ){
+                    //没有配置field的话就不绘制这个 graphs了
+                    var _fs = graphs.field;
+                    if( !_.isArray( _fs ) ){
+                        _fs = [ _fs ];
+                    };
+                    arrs = arrs.concat( _fs );
+                };
+            } );
+        };
+        this.coordinate.rAxis.field = this.coordinate.rAxis.field.concat( arrs );
+        //----------------------------------------------------------------------
+
         //这里不要直接用data，而要用 this._data
         this.dataFrame = this.initData( this._data );
     }
@@ -75,7 +105,7 @@ export default class Polar extends CoordinateBase
             //{name: "uv", style: "#ff8533", enabled: true, ind: 0}
         ];
         _.each( this._graphs, function( _g ){
-            _.each( _g.getList(), function( item ){
+            _.each( _g.getLegendData(), function( item ){
                 
                 if( _.find( legendData , function( d ){
                     return d.name == item.name
@@ -89,7 +119,6 @@ export default class Polar extends CoordinateBase
                 })
             } );
         } );
-
         return legendData;
     }
 
@@ -107,4 +136,4 @@ export default class Polar extends CoordinateBase
         });
     }
 
-}
+};

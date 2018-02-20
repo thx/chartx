@@ -15,43 +15,67 @@
 
 import Component from "../component"
 import Canvax from "canvax2d"
+import Grid from "../polar_grid/index"
+import DataSection from "../../utils/datasection"
+import Theme from "../../theme"
 
 const _ = Canvax._;
 
-export default class polar extends Component
+export default class polarComponent extends Component
 {
     constructor( opts , root )
     {
         super( opts );
 
-        this.type = "polar";
+        this.type  = "polar";
         
         this._opts = opts;
-        this.root = root;
+        this.root  = root;
 
         //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
-        this.width = 0;
+        this.width  = 0;
         this.height = 0;
         this.origin = {
-            x: 0,
-            y: 0
+            x : 0,
+            y : 0
+        };
+
+        this.allAngle = 360; //默认是个周园
+
+        this.aAxis = {
+            field : null,
+            layoutType : "average", // average 弧度均分， proportion 和直角坐标中的一样
+            data : [],
+            radians : [],
+            beginAngle : -90
+        };
+
+        this.rAxis = {
+            field : [],
+            dataSection : null
         };
         
         this.maxR = null;
 
         this.grid = {
-            enabled : false, // 蜘蛛网，比如pie饼图中不需要
-            type : "poly",  // 可选 "circle"
-            lineWidth : 1,
-            strokeStyle : "#ccc",
-            fillStyle : null
+            enabled : false,
+            label : {
+                enabled : true
+            },
+            scale : {
+                //刻度尺
+                enabled : false
+            }
         };
 
-        this.scale = {
-            enabled : false //刻度尺
-        };
+        this.rectRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
+
+        _.extend(true, this, opts);
 
         this.sprite = null;
+
+        this.fieldsMap = null;
+        this.induce = null; //有grid得话，就等于_grid.induce
 
         this.init(opts);
     }
@@ -62,20 +86,91 @@ export default class polar extends Component
             id : "coordinate_polar"
         });
 
-        _.extend(true, this, opts);
+        this._initModules();
+
+        //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
+        // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
+        this.fieldsMap = this._setFieldsMap();
+
     }
 
     draw()
     {
+        //先计算好要绘制的width,height, origin
         this._computeAttr();
 
-        if( this.grid.enabled ){
-            //绘制蜘蛛网格
+        this.rAxis.dataSection = this._getRDataSection();
+        this.aAxis.data = this.root.dataFrame.getFieldData( this.aAxis.field );
 
+        if( this.grid.enabled ){
+            this._grid.draw( {
+                pos    : this.origin,
+                width  : this.width,
+                height : this.height,
+                dataSection : this.rAxis.dataSection,
+                aAxisData :  this.aAxis.data //用来绘制label
+            } , this);
+        };
+
+    }
+
+    //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
+    //目前没用到二维堆叠的功能，但是这段代码和直角坐标系中得保持一致，具备这样得能力
+    _setFieldsMap()
+    {
+        var me = this;
+        var fieldInd = 0;
+
+        function _set( fields ){
+            if(!fields){
+                fields = me.rAxis.field;
+            };
+    
+            if( _.isString(fields) ){
+                fields = [fields];
+            };
+
+            var clone_fields = _.clone( fields );
+            for(var i = 0 , l=fields.length ; i<l ; i++) {
+                if( _.isString( fields[i] ) ){
+                    clone_fields[i] = {
+                        field : fields[i],
+                        enabled : true,
+                        style : Theme.colors[ fieldInd ],
+                        ind : fieldInd++
+                    }
+                }
+                if( _.isArray( fields[i] ) ){
+                    clone_fields[i] = _set( fields[i], fieldInd );
+                }
+            };
+
+            return clone_fields;
+        };
+
+        return _set();
+    }
+
+    _getRDataSection(){
+        var me = this;
+        //如果用户有主动配置了dataSection,是不需要计算dataSection的
+        //目前没有做堆叠的dataSection，后面有需要直接从yAxis的模块中拿
+        if( !this._opts.rAxis.dataSection ){
+            var arr = [];
+            _.each( _.flatten( [me.rAxis.field] ), function( field ){
+                arr = arr.concat( me.root.dataFrame.getFieldData( field ) );
+            } );
+            
+            var _dataSection = DataSection.section(arr, 3);
+
+            return _dataSection;
         }
-        if( this.scale.enabled ){
-            //绘制刻度尺
-        }
+    }
+
+    _initModules()
+    {
+        this._grid = new Grid( this.grid, this );
+        this.sprite.addChild( this._grid.sprite );
     }
 
     _computeAttr()
@@ -84,19 +179,30 @@ export default class polar extends Component
         var rootWidth = this.root.width;
         var rootHeight = this.root.height;
 
-        if( !("width" in this._opts) ){
-            this.width = rootWidth-_padding.left-_padding.right;
-        };
-        if( !("height" in this._opts) ){
-            this.height = rootHeight-_padding.top-_padding.bottom;
-        };
         if( !("origin" in this._opts) ){
             //如果没有传入任何origin数据，则默认为中心点
             //origin是相对画布左上角的
             this.origin = {
-                x : this.width/2 + _padding.left,
-                y : this.height/2 + _padding.top
+                x : rootWidth/2,
+                y : rootHeight/2
             };
+        };
+
+        if( !("width" in this._opts) ){
+            this.width = rootWidth - _padding.left-_padding.right;
+        };
+        if( !("height" in this._opts) ){
+            this.height = rootHeight - _padding.top-_padding.bottom;
+        };
+        if( this.grid.label.enabled ){
+            this.width -= 20*2;
+            this.height -= 20*2;
+        };
+
+        //重置width和height ， 不能和上面的计算origin调换位置
+        if( this.rectRange ){
+            var _num = Math.min( this.width, this.height );
+            this.width = this.height = _num;
         };
 
         this._computeMaxR();
@@ -252,7 +358,7 @@ export default class polar extends Component
     }
 
     //获取某个弧度方向，半径为r的时候的point坐标点位置
-    getPointInRadian(radian , r)
+    getPointInRadianOfR(radian , r)
     {
         var pi = Math.PI;
         var x = Math.cos( radian ) * r;
@@ -268,5 +374,47 @@ export default class polar extends Component
             x : x,
             y : y
         };
+    }
+
+
+    //获取这个num在dataSectio中对应的半径
+    getROfNum( num )
+    {
+        var r = 0;
+        var maxNum = _.max( this.rAxis.dataSection );
+        var minNum = 0; //Math.min( this.rAxis.dataSection );
+        var maxR = parseInt( Math.max( this.width, this.height ) / 2 );
+
+        r = maxR * ( (num-minNum) / (maxNum-minNum) );
+        return r;
+    }
+
+    //获取在r的半径上面，沿aAxis的points
+    getPointsOfR( r )
+    {
+        var me = this;
+        var points = [];
+
+        var aAxisArr = this.aAxis.data;
+        if( this.aAxis.layoutType == "average" ){
+            aAxisArr = [];
+            for( var i=0, l=this.aAxis.data.length; i<l; i++ ){
+                aAxisArr.push( i );
+            }
+        }
+
+        var min = 0;
+        var max = _.max( aAxisArr );
+        var allAngle = this.allAngle;
+
+        _.each( aAxisArr, function( p ){
+            //角度
+            var _a = ((allAngle * ( (p-min)/(max-min) ) + me.aAxis.beginAngle) + allAngle)%allAngle;
+            //弧度
+            var _r = Math.PI*_a / 180;
+            var point = me.getPointInRadianOfR( _r, r );
+            points.push( point )
+        } );
+        return points;
     }
 }
