@@ -15,6 +15,7 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
         //这里所有的opts都要透传给 group
         this._opts = opts || {};
         this.root = root;
+        this.ctx = root.stage.canvas.getContext("2d");
 
         this.valueField = null;
         this.nameField = null;

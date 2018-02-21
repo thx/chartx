@@ -8169,7 +8169,155 @@ var component = function (_Canvax$Event$EventDi) {
     return component;
 }(canvax.Event.EventDispatcher);
 
-var _$8 = canvax._;
+var _$7 = canvax._;
+
+var coorBase = function (_Component) {
+    inherits$1(coorBase, _Component);
+
+    function coorBase(opts, root) {
+        classCallCheck$1(this, coorBase);
+
+        var _this = possibleConstructorReturn$1(this, (coorBase.__proto__ || Object.getPrototypeOf(coorBase)).call(this, opts, root));
+
+        _this._opts = opts;
+        _this.root = root;
+        _this.dataFrame = _this.root.dataFrame;
+
+        //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
+        _this.width = 0;
+        _this.height = 0;
+        _this.origin = {
+            x: 0,
+            y: 0
+        };
+
+        _this.sprite = null;
+
+        /*
+        吧原始的field转换为对应结构的显示树
+        ["uv"] --> [
+            {field:'uv',enabled:true ,yAxis: yAxisleft }
+            ...
+        ]
+        */
+        _this.fieldsMap = null;
+        _this.induce = null;
+        return _this;
+    }
+
+    //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+
+
+    createClass$1(coorBase, [{
+        key: "getEnabledFields",
+        value: function getEnabledFields(fields) {
+            if (fields) {
+                //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+                //只留下enabled的field 结构
+                return this._filterEnabledFields(fields);
+            }
+            var fmap = {
+                left: [], right: []
+            };
+
+            _$7.each(this.fieldsMap, function (bamboo, b) {
+                if (_$7.isArray(bamboo)) {
+                    //多节竹子
+
+                    var align;
+                    var fields = [];
+
+                    //设置完fields后，返回这个group属于left还是right的axis
+                    _$7.each(bamboo, function (obj, v) {
+                        if (obj.field && obj.enabled) {
+                            align = obj.yAxis.align;
+                            fields.push(obj.field);
+                        }
+                    });
+
+                    fields.length && fmap[align].push(fields);
+                } else {
+                    //单节棍
+                    if (bamboo.field && bamboo.enabled) {
+                        fmap[bamboo.yAxis.align].push(bamboo.field);
+                    }
+                }
+            });
+
+            return fmap;
+        }
+
+        //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+        //只留下enabled的field 结构
+
+    }, {
+        key: "_filterEnabledFields",
+        value: function _filterEnabledFields(fields) {
+            var me = this;
+            var arr = [];
+            if (!_$7.isArray(fields)) fields = [fields];
+            _$7.each(fields, function (f) {
+                if (!_$7.isArray(f)) {
+                    if (me.getFieldMapOf(f).enabled) {
+                        arr.push(f);
+                    }
+                } else {
+                    //如果这个是个纵向数据，说明就是堆叠配置
+                    var varr = [];
+                    _$7.each(f, function (v_f) {
+                        if (me.getFieldMapOf(v_f).enabled) {
+                            varr.push(v_f);
+                        }
+                    });
+                    if (varr.length) {
+                        arr.push(varr);
+                    }
+                }
+            });
+            return arr;
+        }
+
+        //设置 fieldsMap 中对应field 的 enabled状态
+
+    }, {
+        key: "setFieldEnabled",
+        value: function setFieldEnabled(field) {
+            var me = this;
+            function set$$1(maps) {
+                _$7.each(maps, function (map, i) {
+                    if (_$7.isArray(map)) {
+                        set$$1(map);
+                    } else if (map.field && map.field == field) {
+                        map.enabled = !map.enabled;
+                    }
+                });
+            }
+            set$$1(me.fieldsMap);
+        }
+    }, {
+        key: "getFieldMapOf",
+        value: function getFieldMapOf(field) {
+            var me = this;
+            var fieldMap = null;
+            function get$$1(maps) {
+                _$7.each(maps, function (map, i) {
+                    if (_$7.isArray(map)) {
+                        get$$1(map);
+                    } else if (map.field && map.field == field) {
+                        fieldMap = map;
+                        return false;
+                    }
+                });
+            }
+            get$$1(me.fieldsMap);
+            return fieldMap;
+        }
+    }]);
+    return coorBase;
+}(component);
+
+var _$9 = canvax._;
 
 function normalizeTickInterval(interval, magnitude) {
     var normalized, i;
@@ -8198,7 +8346,7 @@ function correctFloat(num) {
 
 function getLinearTickPositions(arr, $maxPart, $cfg) {
 
-    arr = _$8.without(arr, undefined, null, "");
+    arr = _$9.without(arr, undefined, null, "");
 
     var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) : 1;
     //返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
@@ -8208,10 +8356,10 @@ function getLinearTickPositions(arr, $maxPart, $cfg) {
         scale = 1;
     }
 
-    var max = _$8.max(arr);
+    var max = _$9.max(arr);
     var initMax = max;
     max *= scale;
-    var min = _$8.min(arr);
+    var min = _$9.min(arr);
 
     if (min == max) {
         if (max > 0) {
@@ -8281,12 +8429,12 @@ function getLinearTickPositions(arr, $maxPart, $cfg) {
 
 var DataSection = {
     section: function section($arr, $maxPart, $cfg) {
-        return _$8.uniq(getLinearTickPositions($arr, $maxPart, $cfg));
+        return _$9.uniq(getLinearTickPositions($arr, $maxPart, $cfg));
     }
 };
 
 var Line$2 = canvax.Shapes.Line;
-var _$7 = canvax._;
+var _$8 = canvax._;
 
 var xAxis = function (_Component) {
     inherits$1(xAxis, _Component);
@@ -8366,12 +8514,12 @@ var xAxis = function (_Component) {
 
         _this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
 
-        _$7.extend(true, _this, opts);
+        _$8.extend(true, _this, opts);
 
         _this.init(opts, data);
 
         //xAxis的field只有一个值,
-        _this.field = _$7.flatten([_this.field])[0];
+        _this.field = _$8.flatten([_this.field])[0];
         return _this;
     }
 
@@ -8395,7 +8543,7 @@ var xAxis = function (_Component) {
             }
 
             if (data && data.org) {
-                this.dataOrg = _$7.flatten(data.org);
+                this.dataOrg = _$8.flatten(data.org);
             }
 
             if (!this._opts.dataSection && this.dataOrg) {
@@ -8416,11 +8564,11 @@ var xAxis = function (_Component) {
             this._setXAxisHeight();
 
             //取第一个数据来判断xaxis的刻度值类型是否为 number
-            this.minVal == null && (this.minVal = _$7.min(this.dataSection));
+            this.minVal == null && (this.minVal = _$8.min(this.dataSection));
             if (isNaN(this.minVal) || this.minVal == Infinity) {
                 this.minVal = 0;
             }
-            this.maxVal == null && (this.maxVal = _$7.max(this.dataSection));
+            this.maxVal == null && (this.maxVal = _$8.max(this.dataSection));
             if (isNaN(this.maxVal) || this.maxVal == Infinity) {
                 this.maxVal = 1;
             }
@@ -8434,7 +8582,7 @@ var xAxis = function (_Component) {
     }, {
         key: "_initDataSection",
         value: function _initDataSection(data) {
-            var arr = _$7.flatten(data);
+            var arr = _$8.flatten(data);
             if (this.layoutType == "proportion") {
                 arr = DataSection.section(arr);
             }
@@ -8550,7 +8698,7 @@ var xAxis = function (_Component) {
         key: "_computerConfit",
         value: function _computerConfit(opts) {
             if (opts) {
-                _$7.extend(true, this, opts);
+                _$8.extend(true, this, opts);
             }
 
             if (this._label) {
@@ -8570,7 +8718,7 @@ var xAxis = function (_Component) {
         value: function getPosX(opts) {
             var x = 0;
             var val = opts.val;
-            var ind = "ind" in opts ? opts.ind : _$7.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
+            var ind = "ind" in opts ? opts.ind : _$8.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
             var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
             var width = "width" in opts ? opts.width : this.width;
             var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
@@ -8663,7 +8811,7 @@ var xAxis = function (_Component) {
             }
             var me = this;
             var currArr = [];
-            _$7.each(arr, function (val) {
+            _$8.each(arr, function (val) {
                 currArr.push(me._getFormatText(val));
             });
             return currArr;
@@ -8702,12 +8850,12 @@ var xAxis = function (_Component) {
         key: "_getFormatText",
         value: function _getFormatText(text) {
             var res;
-            if (_$7.isFunction(this.scale.text.format)) {
+            if (_$8.isFunction(this.scale.text.format)) {
                 res = this.scale.text.format(text);
             } else {
                 res = text;
             }
-            if (_$7.isArray(res)) {
+            if (_$8.isArray(res)) {
                 res = Tools.numAddSymbol(res);
             }
             if (!res) {
@@ -8832,7 +8980,7 @@ var xAxis = function (_Component) {
                 }
 
                 //这里可以由用户来自定义过滤 来 决定 该node的样式
-                _$7.isFunction(this.filter) && this.filter({
+                _$8.isFunction(this.filter) && this.filter({
                     layoutData: arr,
                     index: a,
                     txt: xNode._txt,
@@ -8996,7 +9144,7 @@ var xAxis = function (_Component) {
 }(component);
 
 var Line$3 = canvax.Shapes.Line;
-var _$9 = canvax._;
+var _$10 = canvax._;
 
 var yAxis = function (_Component) {
     inherits$1(yAxis, _Component);
@@ -9083,11 +9231,11 @@ var yAxis = function (_Component) {
     createClass$1(yAxis, [{
         key: "init",
         value: function init(opt, data) {
-            _$9.extend(true, this, opt);
+            _$10.extend(true, this, opt);
 
             //extend会设置好this.field
             //先要矫正子啊field确保一定是个array
-            if (!_$9.isArray(this.field)) {
+            if (!_$10.isArray(this.field)) {
                 this.field = [this.field];
             }
 
@@ -9138,8 +9286,8 @@ var yAxis = function (_Component) {
     }, {
         key: "setAllStyle",
         value: function setAllStyle(sty) {
-            _$9.each(this.rulesSprite.children, function (s) {
-                _$9.each(s.children, function (cel) {
+            _$10.each(this.rulesSprite.children, function (s) {
+                _$10.each(s.children, function (cel) {
                     if (cel.type == "text") {
                         cel.context.fillStyle = sty;
                     } else if (cel.type == "line") {
@@ -9168,7 +9316,7 @@ var yAxis = function (_Component) {
     }, {
         key: "draw",
         value: function draw(opt) {
-            opt && _$9.extend(true, this, opt);
+            opt && _$10.extend(true, this, opt);
             this._getLabel();
             this.height = this.yMaxHeight - this._getYAxisDisLine();
 
@@ -9208,9 +9356,9 @@ var yAxis = function (_Component) {
 
             for (var i = 0, l = dsgLen; i < l; i++) {
                 var ds = this.dataSectionGroup[i];
-                var min = _$9.min(ds);
-                var max = _$9.max(ds);
-                var valInd = _$9.indexOf(ds, val);
+                var min = _$10.min(ds);
+                var max = _$10.max(ds);
+                var valInd = _$10.indexOf(ds, val);
 
                 if (val >= min && val <= max || valInd >= 0) {
                     if (this.layoutType == "proportion") {
@@ -9267,8 +9415,8 @@ var yAxis = function (_Component) {
 
             for (var i = 0, l = dsgLen; i < l; i++) {
                 var ds = this.dataSectionGroup[i];
-                var min = _$9.min(ds);
-                var max = _$9.max(ds);
+                var min = _$10.min(ds);
+                var max = _$10.max(ds);
 
                 var amountABS = Math.abs(max - min);
 
@@ -9294,7 +9442,7 @@ var yAxis = function (_Component) {
             var tmpData = [];
             //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
             //this._yOriginTrans = this._getYOriginTrans( 0 );
-            var originVal = _$9.min(this.dataSection);
+            var originVal = _$10.min(this.dataSection);
             if (originVal < 0) {
                 originVal = 0;
             }
@@ -9335,10 +9483,10 @@ var yAxis = function (_Component) {
             //vLen就会等于2
             var vLen = 1;
 
-            _$9.each(this.field, function (f) {
+            _$10.each(this.field, function (f) {
                 vLen = Math.max(vLen, 1);
-                if (_$9.isArray(f)) {
-                    _$9.each(f, function (_f) {
+                if (_$10.isArray(f)) {
+                    _$10.each(f, function (_f) {
                         vLen = Math.max(vLen, 2);
                     });
                 }
@@ -9354,7 +9502,7 @@ var yAxis = function (_Component) {
     }, {
         key: "_oneDimensional",
         value: function _oneDimensional() {
-            var arr = _$9.flatten(this.dataOrg); //_.flatten( data.org );
+            var arr = _$10.flatten(this.dataOrg); //_.flatten( data.org );
 
             for (var i = 0, il = arr.length; i < il; i++) {
                 arr[i] = arr[i] || 0;
@@ -9371,13 +9519,13 @@ var yAxis = function (_Component) {
             var d = this.dataOrg;
             var arr = [];
             var min;
-            _$9.each(d, function (d, i) {
+            _$10.each(d, function (d, i) {
                 if (!d.length) {
                     return;
                 }
 
                 //有数据的情况下 
-                if (!_$9.isArray(d[0])) {
+                if (!_$10.isArray(d[0])) {
                     arr.push(d);
                     return;
                 }
@@ -9411,7 +9559,7 @@ var yAxis = function (_Component) {
                 arr.push(varr);
             });
             arr.push(min);
-            return _$9.flatten(arr);
+            return _$10.flatten(arr);
         }
     }, {
         key: "_initData",
@@ -9461,7 +9609,7 @@ var yAxis = function (_Component) {
             if (this.dataSection.length == 0) {
                 this.dataSection = [0];
             }
-            this.dataSectionGroup = [_$9.clone(this.dataSection)];
+            this.dataSectionGroup = [_$10.clone(this.dataSection)];
 
             this._sort();
             this._setBottomAndBaseNumber();
@@ -9476,7 +9624,7 @@ var yAxis = function (_Component) {
         value: function setWaterLine(yVal) {
             if (yVal <= this.waterLine) return;
             this.waterLine = yVal;
-            if (yVal < _$9.min(this.dataSection) || yVal > _$9.max(this.dataSection)) {
+            if (yVal < _$10.min(this.dataSection) || yVal > _$10.max(this.dataSection)) {
                 //waterLine不再当前section的区间内，需要重新计算整个datasection    
                 this._initData();
             }
@@ -9490,7 +9638,7 @@ var yAxis = function (_Component) {
                     this.dataSection.reverse();
 
                     //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
-                    _$9.each(this.dataSectionGroup, function (dsg, i) {
+                    _$10.each(this.dataSectionGroup, function (dsg, i) {
                         dsg.reverse();
                     });
                     this.dataSectionGroup.reverse();
@@ -9502,10 +9650,10 @@ var yAxis = function (_Component) {
         key: "_getSortType",
         value: function _getSortType() {
             var _sort;
-            if (_$9.isString(this.sort)) {
+            if (_$10.isString(this.sort)) {
                 _sort = this.sort;
             }
-            if (_$9.isArray(this.sort)) {
+            if (_$10.isArray(this.sort)) {
                 _sort = this.sort[this.align == "left" ? 0 : 1];
             }
             if (!_sort) {
@@ -9534,13 +9682,13 @@ var yAxis = function (_Component) {
             if (this.middleweight) {
                 //支持多个量级的设置
                 //量级的设置只支持非sort的柱状图场景，否则这里修改过的datasection会和 _initData 中sort过的逻辑有冲突
-                if (!_$9.isArray(this.middleweight)) {
+                if (!_$10.isArray(this.middleweight)) {
                     this.middleweight = [this.middleweight];
                 }
 
                 //拿到dataSection中的min和 max 后，用middleweight数据重新设置一遍dataSection
-                var dMin = _$9.min(this.dataSection);
-                var dMax = _$9.max(this.dataSection);
+                var dMin = _$10.min(this.dataSection);
+                var dMax = _$10.max(this.dataSection);
                 var newDS = [dMin];
                 var newDSG = [];
 
@@ -9599,7 +9747,7 @@ var yAxis = function (_Component) {
                 var y = o.y;
                 var content = o.content;
 
-                if (_$9.isFunction(self.scale.text.format)) {
+                if (_$10.isFunction(self.scale.text.format)) {
                     content = self.scale.text.format(content, self);
                 }
                 if (content === undefined || content === null) {
@@ -9705,7 +9853,7 @@ var yAxis = function (_Component) {
                     }
 
                     //这里可以由用户来自定义过滤 来 决定 该node的样式
-                    _$9.isFunction(self.filter) && self.filter({
+                    _$10.isFunction(self.filter) && self.filter({
                         layoutData: self.layoutData,
                         index: a,
                         txt: txt,
@@ -9774,7 +9922,7 @@ var yAxis = function (_Component) {
         key: "_getProp",
         value: function _getProp(s) {
             var res = s;
-            if (_$9.isFunction(s)) {
+            if (_$10.isFunction(s)) {
                 res = s.call(this, this);
             }
             if (!s) {
@@ -9788,7 +9936,7 @@ var yAxis = function (_Component) {
 
 var Line$4 = canvax.Shapes.Line;
 var Rect$3 = canvax.Shapes.Rect;
-var _$10 = canvax._;
+var _$11 = canvax._;
 
 var descartesGrid = function (_Component) {
     inherits$1(descartesGrid, _Component);
@@ -9848,7 +9996,7 @@ var descartesGrid = function (_Component) {
     createClass$1(descartesGrid, [{
         key: "init",
         value: function init(opt) {
-            _$10.extend(true, this, opt);
+            _$11.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite();
         }
     }, {
@@ -9864,7 +10012,7 @@ var descartesGrid = function (_Component) {
     }, {
         key: "draw",
         value: function draw(opt) {
-            _$10.extend(true, this, opt);
+            _$11.extend(true, this, opt);
             //this._configData(opt);
             this._widget();
             this.setX(this.pos.x);
@@ -9929,7 +10077,7 @@ var descartesGrid = function (_Component) {
                     }
                 });
                 if (self.xAxis.enabled) {
-                    _$10.isFunction(self.xAxis.filter) && self.xAxis.filter.apply(line, [{
+                    _$11.isFunction(self.xAxis.filter) && self.xAxis.filter.apply(line, [{
                         layoutData: self.yAxis.data,
                         index: a,
                         line: line
@@ -9964,7 +10112,7 @@ var descartesGrid = function (_Component) {
                     }
                 });
                 if (self.yAxis.enabled) {
-                    _$10.isFunction(self.yAxis.filter) && self.yAxis.filter.apply(line, [{
+                    _$11.isFunction(self.yAxis.filter) && self.yAxis.filter.apply(line, [{
                         layoutData: self.xAxis.data,
                         index: a,
                         line: line
@@ -9980,17 +10128,15 @@ var descartesGrid = function (_Component) {
 var _$6 = canvax._;
 var Rect$2 = canvax.Shapes.Rect;
 
-var Descartes_Component = function (_Component) {
-    inherits$1(Descartes_Component, _Component);
+var Descartes_Component = function (_coorBase) {
+    inherits$1(Descartes_Component, _coorBase);
 
-    function Descartes_Component(opt, root) {
+    function Descartes_Component(opts, root) {
         classCallCheck$1(this, Descartes_Component);
 
-        var _this = possibleConstructorReturn$1(this, (Descartes_Component.__proto__ || Object.getPrototypeOf(Descartes_Component)).call(this));
+        var _this = possibleConstructorReturn$1(this, (Descartes_Component.__proto__ || Object.getPrototypeOf(Descartes_Component)).call(this, opts, root));
 
         _this.type = "descartes";
-
-        _this.root = root;
 
         _this._xAxis = null;
         _this._yAxis = [];
@@ -9999,20 +10145,7 @@ var Descartes_Component = function (_Component) {
         _this._yAxisRight = null;
         _this._grid = null;
 
-        _this.width = 0;
-        _this.height = 0;
-        _this.origin = {
-            x: 0,
-            y: 0
-        };
-
-        _this.margin = {
-            top: 0, right: 0, bottom: 0, left: 0
-        };
-
         _this.horizontal = false;
-
-        _this.dataFrame = _this.root.dataFrame;
 
         _this.xAxis = {
             field: _this.dataFrame.fields[0]
@@ -10022,9 +10155,9 @@ var Descartes_Component = function (_Component) {
         }];
         _this.grid = {};
 
-        _$6.extend(true, _this, opt);
+        _$6.extend(true, _this, opts);
 
-        if (opt.horizontal) {
+        if (opts.horizontal) {
             _$6.extend(true, _this.xAxis, {
                 text: {
                     rotation: 90
@@ -10041,47 +10174,37 @@ var Descartes_Component = function (_Component) {
             });
         }
 
-        if ("enabled" in opt) {
+        if ("enabled" in opts) {
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _$6.extend(true, _this.xAxis, {
                 scale: {
-                    enabled: opt.enabled
+                    enabled: opts.enabled
                 }
             });
             _$6.each(_this.yAxis, function (yAxis$$1) {
                 _$6.extend(true, yAxis$$1, {
                     scale: {
-                        enabled: opt.enabled
+                        enabled: opts.enabled
                     }
                 });
             });
 
             /*
-            this.xAxis.enabled = opt.enabled;
+            this.xAxis.enabled = opts.enabled;
             _.each( this.yAxis , function( yAxis ){
-                yAxis.enabled = opt.enabled;
+                yAxis.enabled = opts.enabled;
             });
             */
-
-            _this.grid.enabled = opt.enabled;
+            _this.grid.enabled = opts.enabled;
         }
 
-        /*
-        吧原始的field转换为对应结构的显示树
-        ["uv"] --> [
-            {field:'uv',enabled:true ,yAxis: yAxisleft }
-            ...
-        ]
-        */
-        _this.fieldsMap = null;
-        _this.induce = null;
-        _this.init(opt);
+        _this.init(opts);
         return _this;
     }
 
     createClass$1(Descartes_Component, [{
         key: "init",
-        value: function init(opt) {
+        value: function init(opts) {
             this.sprite = new canvax.Display.Sprite({
                 id: "coordinate"
             });
@@ -10114,12 +10237,12 @@ var Descartes_Component = function (_Component) {
         }
     }, {
         key: "draw",
-        value: function draw(opt) {
+        value: function draw(opts) {
             //在绘制的时候，是已经能拿到xAxis的height了得
             var _padding = this.root.padding;
 
-            var h = opt.height || this.root.height;
-            var w = opt.width || this.root.width;
+            var h = opts.height || this.root.height;
+            var w = opts.width || this.root.width;
             if (this.horizontal) {
                 //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
                 var _num = w;
@@ -10288,8 +10411,8 @@ var Descartes_Component = function (_Component) {
         }
     }, {
         key: "getPosX",
-        value: function getPosX(opt) {
-            return this._xAxis.getPosX(opt);
+        value: function getPosX(opts) {
+            return this._xAxis.getPosX(opts);
         }
     }, {
         key: "_getAxisDataFrame",
@@ -10366,9 +10489,7 @@ var Descartes_Component = function (_Component) {
                     if (!_$6.isArray(yAxis$$1)) {
                         yAxis$$1 = [yAxis$$1];
                     }
-
                     fields = [];
-
                     _$6.each(yAxis$$1, function (item, i) {
                         if (item.field) {
                             fields = fields.concat(item.field);
@@ -10400,114 +10521,6 @@ var Descartes_Component = function (_Component) {
             }
 
             return _set();
-        }
-
-        //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
-        //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
-
-    }, {
-        key: "getEnabledFields",
-        value: function getEnabledFields(fields) {
-            if (fields) {
-                //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-                //只留下enabled的field 结构
-                return this._filterEnabledFields(fields);
-            }
-            var fmap = {
-                left: [], right: []
-            };
-
-            _$6.each(this.fieldsMap, function (bamboo, b) {
-                if (_$6.isArray(bamboo)) {
-                    //多节竹子
-
-                    var align;
-                    var fields = [];
-
-                    //设置完fields后，返回这个group属于left还是right的axis
-                    _$6.each(bamboo, function (obj, v) {
-                        if (obj.field && obj.enabled) {
-                            align = obj.yAxis.align;
-                            fields.push(obj.field);
-                        }
-                    });
-
-                    fields.length && fmap[align].push(fields);
-                } else {
-                    //单节棍
-                    if (bamboo.field && bamboo.enabled) {
-                        fmap[bamboo.yAxis.align].push(bamboo.field);
-                    }
-                }
-            });
-
-            return fmap;
-        }
-
-        //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-        //只留下enabled的field 结构
-
-    }, {
-        key: "_filterEnabledFields",
-        value: function _filterEnabledFields(fields) {
-            var me = this;
-            var arr = [];
-            if (!_$6.isArray(fields)) fields = [fields];
-            _$6.each(fields, function (f) {
-                if (!_$6.isArray(f)) {
-                    if (me.getFieldMapOf(f).enabled) {
-                        arr.push(f);
-                    }
-                } else {
-                    //如果这个是个纵向数据，说明就是堆叠配置
-                    var varr = [];
-                    _$6.each(f, function (v_f) {
-                        if (me.getFieldMapOf(v_f).enabled) {
-                            varr.push(v_f);
-                        }
-                    });
-                    if (varr.length) {
-                        arr.push(varr);
-                    }
-                }
-            });
-            return arr;
-        }
-
-        //设置 fieldsMap 中对应field 的 enabled状态
-
-    }, {
-        key: "setFieldEnabled",
-        value: function setFieldEnabled(field) {
-            var me = this;
-            function set$$1(maps) {
-                _$6.each(maps, function (map, i) {
-                    if (_$6.isArray(map)) {
-                        set$$1(map);
-                    } else if (map.field && map.field == field) {
-                        map.enabled = !map.enabled;
-                    }
-                });
-            }
-            set$$1(me.fieldsMap);
-        }
-    }, {
-        key: "getFieldMapOf",
-        value: function getFieldMapOf(field) {
-            var me = this;
-            var fieldMap = null;
-            function get$$1(maps) {
-                _$6.each(maps, function (map, i) {
-                    if (_$6.isArray(map)) {
-                        get$$1(map);
-                    } else if (map.field && map.field == field) {
-                        fieldMap = map;
-                        return false;
-                    }
-                });
-            }
-            get$$1(me.fieldsMap);
-            return fieldMap;
         }
     }, {
         key: "_initInduce",
@@ -10562,7 +10575,7 @@ var Descartes_Component = function (_Component) {
         }
     }]);
     return Descartes_Component;
-}(component);
+}(coorBase);
 
 var _$4 = canvax._;
 var Rect$1 = canvax.Shapes.Rect;
@@ -11344,7 +11357,7 @@ var Line$5 = canvax.Shapes.Line;
 var Circle$1 = canvax.Shapes.Circle;
 var Polygon$1 = canvax.Shapes.Polygon;
 
-var _$13 = canvax._;
+var _$14 = canvax._;
 
 var polarGrid = function (_Component) {
     inherits$1(polarGrid, _Component);
@@ -11390,7 +11403,7 @@ var polarGrid = function (_Component) {
     createClass$1(polarGrid, [{
         key: "init",
         value: function init(opt) {
-            _$13.extend(true, this, opt);
+            _$14.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite();
         }
     }, {
@@ -11406,10 +11419,9 @@ var polarGrid = function (_Component) {
     }, {
         key: "draw",
         value: function draw(opt) {
-            _$13.extend(true, this, opt);
+            _$14.extend(true, this, opt);
 
             this._widget();
-            this._bindEvent();
 
             this.setX(this.pos.x);
             this.setY(this.pos.y);
@@ -11430,7 +11442,7 @@ var polarGrid = function (_Component) {
         value: function _widget() {
 
             var me = this;
-            _$13.each(this.dataSection, function (num, i) {
+            _$14.each(this.dataSection, function (num, i) {
 
                 if (num) {
                     var r = me.root.getROfNum(num);
@@ -11452,7 +11464,7 @@ var polarGrid = function (_Component) {
                         });
                     } else {
                         ctx.pointList = [];
-                        _$13.each(points, function (point, i) {
+                        _$14.each(points, function (point, i) {
                             if (i < points.length) {
                                 ctx.pointList.push([point.x, point.y]);
                             }
@@ -11471,7 +11483,7 @@ var polarGrid = function (_Component) {
                     //绘制中心出发的蜘蛛网线
                     var aAxisLayoutData = [];
 
-                    _$13.each(points, function (point) {
+                    _$14.each(points, function (point) {
                         var _line = new Line$5({
                             context: {
                                 end: point,
@@ -11485,16 +11497,9 @@ var polarGrid = function (_Component) {
             });
         }
     }, {
-        key: "_bindEvent",
-        value: function _bindEvent() {
-            this.induce.on("click", function (e) {
-                var point = e.point; //相对圆心的坐标
-            });
-        }
-    }, {
         key: "_getFillStyle",
         value: function _getFillStyle(style, i) {
-            if (_$13.isArray(style)) {
+            if (_$14.isArray(style)) {
                 return style[i % style.length];
             }
             return style;
@@ -11518,28 +11523,17 @@ var polarGrid = function (_Component) {
 //应用场景中一般需要用到的属性有
 //width, height, origin(默认为width/2,height/2)
 
-var _$12 = canvax._;
+var _$13 = canvax._;
 
-var polarComponent = function (_Component) {
-    inherits$1(polarComponent, _Component);
+var polarComponent = function (_coorBase) {
+    inherits$1(polarComponent, _coorBase);
 
     function polarComponent(opts, root) {
         classCallCheck$1(this, polarComponent);
 
-        var _this = possibleConstructorReturn$1(this, (polarComponent.__proto__ || Object.getPrototypeOf(polarComponent)).call(this, opts));
+        var _this = possibleConstructorReturn$1(this, (polarComponent.__proto__ || Object.getPrototypeOf(polarComponent)).call(this, opts, root));
 
         _this.type = "polar";
-
-        _this._opts = opts;
-        _this.root = root;
-
-        //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
-        _this.width = 0;
-        _this.height = 0;
-        _this.origin = {
-            x: 0,
-            y: 0
-        };
 
         _this.allAngle = 360; //默认是个周园
 
@@ -11564,20 +11558,14 @@ var polarComponent = function (_Component) {
             }
         };
 
-        _this.maxR = null;
-
         _this.grid = {
             enabled: false
         };
 
+        _this.maxR = null;
         _this.rectRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
 
-        _$12.extend(true, _this, opts);
-
-        _this.sprite = null;
-
-        _this.fieldsMap = null;
-        _this.induce = null; //有grid得话，就等于_grid.induce
+        _$13.extend(true, _this, opts);
 
         if (!_this.aAxis.field) {
             //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
@@ -11611,16 +11599,19 @@ var polarComponent = function (_Component) {
             this.aAxis.data = this.root.dataFrame.getFieldData(this.aAxis.field);
 
             if (this.grid.enabled) {
+
                 this._grid.draw({
                     pos: this.origin,
                     width: this.width,
                     height: this.height,
                     dataSection: this.rAxis.dataSection
                 }, this);
-            }
 
-            if (this.aAxis.scale.enabled && this.grid.enabled) {
-                this._drawAAxisScale();
+                if (this.aAxis.scale.enabled) {
+                    this._drawAAxisScale();
+                }
+
+                this._initInduce();
             }
         }
 
@@ -11638,13 +11629,13 @@ var polarComponent = function (_Component) {
                     fields = me.rAxis.field;
                 }
 
-                if (_$12.isString(fields)) {
+                if (_$13.isString(fields)) {
                     fields = [fields];
                 }
 
-                var clone_fields = _$12.clone(fields);
+                var clone_fields = _$13.clone(fields);
                 for (var i = 0, l = fields.length; i < l; i++) {
-                    if (_$12.isString(fields[i])) {
+                    if (_$13.isString(fields[i])) {
                         clone_fields[i] = {
                             field: fields[i],
                             enabled: true,
@@ -11652,7 +11643,7 @@ var polarComponent = function (_Component) {
                             ind: fieldInd++
                         };
                     }
-                    if (_$12.isArray(fields[i])) {
+                    if (_$13.isArray(fields[i])) {
                         clone_fields[i] = _set(fields[i], fieldInd);
                     }
                 }
@@ -11670,7 +11661,7 @@ var polarComponent = function (_Component) {
             //目前没有做堆叠的dataSection，后面有需要直接从yAxis的模块中拿
             if (!this._opts.rAxis.dataSection) {
                 var arr = [];
-                _$12.each(_$12.flatten([me.rAxis.field]), function (field) {
+                _$13.each(_$13.flatten([me.rAxis.field]), function (field) {
                     arr = arr.concat(me.root.dataFrame.getFieldData(field));
                 });
 
@@ -11727,27 +11718,18 @@ var polarComponent = function (_Component) {
                 this.width = this.height = _num;
             }
 
-            this._computeMaxR();
-        }
-
-        //重新计算 maxR
-
-    }, {
-        key: "_computeMaxR",
-        value: function _computeMaxR() {
+            //计算maxR
             //如果外面要求过 maxR，
             var origin = this.origin;
             var _maxR;
             if (origin.x != this.width / 2 || origin.y != this.height / 2) {
                 var _distances = [origin.x, this.width - origin.x, origin.y, this.height - origin.y];
-                _maxR = _$12.max(_distances);
+                _maxR = _$13.max(_distances);
             } else {
                 _maxR = Math.max(this.width / 2, this.height / 2);
             }
 
-            if (this.maxR != null && this.maxR <= _maxR) {
-                return;
-            } else {
+            if (!(this.maxR != null && this.maxR <= _maxR)) {
                 this.maxR = _maxR;
             }
         }
@@ -11807,7 +11789,7 @@ var polarComponent = function (_Component) {
                     arcs.push([{ point: { x: r, y: 0 }, radian: 0 }, { point: { x: r, y: 0 }, radian: Math.PI * 2 }]);
                 } else {
                     //分割多段
-                    _$12.each(_rs, function (point, i) {
+                    _$13.each(_rs, function (point, i) {
                         var nextInd = i == _rs.length - 1 ? 0 : i + 1;
                         var nextPoint = _rs.slice(nextInd, nextInd + 1)[0];
                         arcs.push([{ point: point, radian: me.getRadianInPoint(point) }, { point: nextPoint, radian: me.getRadianInPoint(nextPoint) }]);
@@ -11895,7 +11877,7 @@ var polarComponent = function (_Component) {
         key: "getROfNum",
         value: function getROfNum(num) {
             var r = 0;
-            var maxNum = _$12.max(this.rAxis.dataSection);
+            var maxNum = _$13.max(this.rAxis.dataSection);
             var minNum = 0; //Math.min( this.rAxis.dataSection );
             var maxR = parseInt(Math.max(this.width, this.height) / 2);
 
@@ -11922,12 +11904,12 @@ var polarComponent = function (_Component) {
             var allAngle = this.allAngle;
 
             var min = 0;
-            var max = _$12.max(aAxisArr);
+            var max = _$13.max(aAxisArr);
             if (this.aAxis.layoutType == "average") {
                 max++;
             }
 
-            _$12.each(aAxisArr, function (p) {
+            _$13.each(aAxisArr, function (p) {
                 //角度
                 var _a = (allAngle * ((p - min) / (max - min)) + me.aAxis.beginAngle + allAngle) % allAngle;
                 //弧度
@@ -11942,13 +11924,13 @@ var polarComponent = function (_Component) {
         value: function _drawAAxisScale() {
             //绘制aAxis刻度尺
             var me = this;
-            var r = me.getROfNum(_$12.max(this.rAxis.dataSection));
+            var r = me.getROfNum(_$13.max(this.rAxis.dataSection));
             var points = me.getPointsOfR(r + 3);
 
             me._aAxisScaleSp.context.x = this.origin.x;
             me._aAxisScaleSp.context.y = this.origin.y;
 
-            _$12.each(this.aAxis.data, function (label, i) {
+            _$13.each(this.aAxis.data, function (label, i) {
 
                 var point = points[i];
                 var c = {
@@ -11957,7 +11939,7 @@ var polarComponent = function (_Component) {
                     fillStyle: "#ccc"
                 };
 
-                _$12.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
+                _$13.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
                 me._aAxisScaleSp.addChild(new canvax.Display.Text(label, {
                     context: c
                 }));
@@ -12015,11 +11997,22 @@ var polarComponent = function (_Component) {
                 textBaseline: textBaseline
             };
         }
+    }, {
+        key: "_initInduce",
+        value: function _initInduce() {
+            var me = this;
+            me.induce = this._grid.induce;
+            me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+                me.fire(e.type, e);
+                //图表触发，用来处理Tips
+                me.root.fire(e.type, e);
+            });
+        }
     }]);
     return polarComponent;
-}(component);
+}(coorBase);
 
-var _$11 = canvax._;
+var _$12 = canvax._;
 
 var Polar = function (_CoordinateBase) {
     inherits$1(Polar, _CoordinateBase);
@@ -12042,23 +12035,23 @@ var Polar = function (_CoordinateBase) {
             }
         };
 
-        _$11.extend(true, _this, opts);
+        _$12.extend(true, _this, opts);
 
         //强制把graphs设置为数组
-        _this.graphs = _$11.flatten([_this.graphs]);
+        _this.graphs = _$12.flatten([_this.graphs]);
 
         //根据graphs.field 来 配置 this.coordinate.rAxis.field -------------------
-        if (!_$11.isArray(_this.coordinate.rAxis.field)) {
+        if (!_$12.isArray(_this.coordinate.rAxis.field)) {
             _this.coordinate.rAxis.field = [_this.coordinate.rAxis.field];
         }
         if (opts.graphs) {
             //有graphs的就要用找到这个graphs.field来设置coordinate.rAxis
             var arrs = [];
-            _$11.each(_this.graphs, function (graphs) {
+            _$12.each(_this.graphs, function (graphs) {
                 if (graphs.field) {
                     //没有配置field的话就不绘制这个 graphs了
                     var _fs = graphs.field;
-                    if (!_$11.isArray(_fs)) {
+                    if (!_$12.isArray(_fs)) {
                         _fs = [_fs];
                     }
                     arrs = arrs.concat(_fs);
@@ -12081,7 +12074,7 @@ var Polar = function (_CoordinateBase) {
             this._coordinate = new polarComponent(this.coordinate, this);
             this.coordinateSprite.addChild(this._coordinate.sprite);
 
-            _$11.each(this.graphs, function (graphs) {
+            _$12.each(this.graphs, function (graphs) {
                 var _g = new me.graphsMap[graphs.type](graphs, me);
                 me._graphs.push(_g);
                 me.graphsSprite.addChild(_g.sprite);
@@ -12099,7 +12092,7 @@ var Polar = function (_CoordinateBase) {
 
             var graphsCount = this._graphs.length;
             var completeNum = 0;
-            _$11.each(this._graphs, function (_g) {
+            _$12.each(this._graphs, function (_g) {
                 _g.on("complete", function (g) {
                     completeNum++;
                     if (completeNum == graphsCount) {
@@ -12122,10 +12115,10 @@ var Polar = function (_CoordinateBase) {
             var legendData = [
                 //{name: "uv", style: "#ff8533", enabled: true, ind: 0}
             ];
-            _$11.each(this._graphs, function (_g) {
-                _$11.each(_g.getLegendData(), function (item) {
+            _$12.each(this._graphs, function (_g) {
+                _$12.each(_g.getLegendData(), function (item) {
 
-                    if (_$11.find(legendData, function (d) {
+                    if (_$12.find(legendData, function (d) {
                         return d.name == item.name;
                     })) return;
 
@@ -12142,14 +12135,14 @@ var Polar = function (_CoordinateBase) {
     }, {
         key: "add",
         value: function add(name) {
-            _$11.each(this._graphs, function (_g) {
+            _$12.each(this._graphs, function (_g) {
                 _g.add(name);
             });
         }
     }, {
         key: "remove",
         value: function remove(name) {
-            _$11.each(this._graphs, function (_g) {
+            _$12.each(this._graphs, function (_g) {
                 _g.remove(name);
             });
         }
@@ -12159,7 +12152,7 @@ var Polar = function (_CoordinateBase) {
 
 var AnimationFrame$1 = canvax.AnimationFrame;
 var Rect$4 = canvax.Shapes.Rect;
-var _$14 = canvax._;
+var _$15 = canvax._;
 
 var BarGraphs = function (_Canvax$Event$EventDi) {
     inherits$1(BarGraphs, _Canvax$Event$EventDi);
@@ -12174,13 +12167,14 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
         //这里所有的opts都要透传给 group
         _this._opts = opts || {};
         _this.root = root;
+        _this.ctx = root.stage.canvas.getContext("2d");
 
         _this.data = [];
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         _this.field = null;
         _this.enabledField = null;
-        _this.enabledFieldData = {};
+        _this.enabledFieldData = {}; //{uv:[],pv:[]...} 目前该属性主要是在enabledFieldData中又用到，本模块中没有用到
 
         _this.width = 0;
         _this.height = 0;
@@ -12227,7 +12221,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
 
         _this.proportion = false; //比例柱状图，比例图首先肯定是个堆叠图
 
-        _$14.extend(true, _this, opts);
+        _$15.extend(true, _this, opts);
 
         _this.init();
         return _this;
@@ -12256,9 +12250,9 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
             //该index指当前
             var data = this.data;
             var _nodesInfoList = []; //节点信息集合
-            _$14.each(this.enabledField, function (fs, i) {
-                if (_$14.isArray(fs)) {
-                    _$14.each(fs, function (_fs, ii) {
+            _$15.each(this.enabledField, function (fs, i) {
+                if (_$15.isArray(fs)) {
+                    _$15.each(fs, function (_fs, ii) {
                         //fs的结构两层到顶了
                         var node = data[i][ii][index];
                         node && _nodesInfoList.push(node);
@@ -12274,13 +12268,13 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "_getTargetField",
         value: function _getTargetField(b, v, i, field) {
-            if (_$14.isString(field)) {
+            if (_$15.isString(field)) {
                 return field;
-            } else if (_$14.isArray(field)) {
+            } else if (_$15.isArray(field)) {
                 var res = field[b];
-                if (_$14.isString(res)) {
+                if (_$15.isString(res)) {
                     return res;
-                } else if (_$14.isArray(res)) {
+                } else if (_$15.isArray(res)) {
                     return res[v];
                 }
             }
@@ -12308,13 +12302,13 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
             var style = fieldMap.style;
 
             //field对应的索引，， 取颜色这里不要用i
-            if (_$14.isString(c)) {
+            if (_$15.isString(c)) {
                 style = c;
             }
-            if (_$14.isArray(c)) {
-                style = _$14.flatten(c)[_$14.indexOf(_flattenField, field)];
+            if (_$15.isArray(c)) {
+                style = _$15.flatten(c)[_$15.indexOf(_flattenField, field)];
             }
-            if (_$14.isFunction(c)) {
+            if (_$15.isFunction(c)) {
                 style = c.apply(this, [{
                     iGroup: i,
                     iNode: h,
@@ -12334,7 +12328,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
         key: "_getBarWidth",
         value: function _getBarWidth(ceilWidth, ceilWidth2) {
             if (this.bar.width) {
-                if (_$14.isFunction(this.bar.width)) {
+                if (_$15.isFunction(this.bar.width)) {
                     this.bar._width = this.bar.width(ceilWidth);
                 } else {
                     this.bar._width = this.bar.width;
@@ -12359,7 +12353,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "remove",
         value: function remove(field) {
-            _$14.each(this.barsSp.children, function (h_groupSp, h) {
+            _$15.each(this.barsSp.children, function (h_groupSp, h) {
                 var bar = h_groupSp.getChildById("bar_" + h + "_" + field);
                 bar && bar.destroy();
             });
@@ -12384,7 +12378,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
         key: "draw",
         value: function draw(opts) {
             //第二个data参数去掉，直接trimgraphs获取最新的data
-            _$14.extend(true, this, opts);
+            _$15.extend(true, this, opts);
 
             var me = this;
 
@@ -12404,9 +12398,9 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
 
             me.bar.count = 0;
 
-            var _flattenField = _$14.flatten([this.field]);
+            var _flattenField = _$15.flatten([this.field]);
 
-            _$14.each(this.data, function (h_group, i) {
+            _$15.each(this.data, function (h_group, i) {
                 /*
                 //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
                 //h_group就会为两组，一组代表uv 一组代表pv。
@@ -12571,15 +12565,15 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                             var infoWidth = 0;
                             var infoHeight = 0;
 
-                            _$14.each(contents, function (cdata, ci) {
+                            _$15.each(contents, function (cdata, ci) {
                                 var content = cdata.value;
-                                if (_$14.isFunction(me.text.format)) {
+                                if (_$15.isFunction(me.text.format)) {
                                     var _formatc = me.text.format.apply(me, [content, cdata]);
                                     if (!!_formatc || _formatc === "" || _formatc === 0) {
                                         content = _formatc;
                                     }
                                 }
-                                if (!me.animation && _$14.isNumber(content)) {
+                                if (!me.animation && _$15.isNumber(content)) {
                                     content = numAddSymbol(content);
                                 }
 
@@ -12710,7 +12704,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
             var _preHLenOver = false;
 
             if (!this.absolute) {
-                _$14.each(this.root._graphs, function (_g) {
+                _$15.each(this.root._graphs, function (_g) {
                     if (!_g.absolute && _g.type == "bar") {
                         if (_g === me) {
                             _preHLenOver = true;
@@ -12753,15 +12747,15 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
             var dataOrg = this.root.dataFrame.getDataOrg(this.enabledField);
 
             //dataOrg和field是一一对应的
-            _$14.each(dataOrg, function (hData, b) {
+            _$15.each(dataOrg, function (hData, b) {
                 //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
 
                 //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
                 var tempBarData = [];
-                _$14.each(hData, function (vSectionData, v) {
+                _$15.each(hData, function (vSectionData, v) {
                     tempBarData[v] = [];
                     //vSectionData 代表某个字段下面的一组数据比如 uv
-                    _$14.each(vSectionData, function (val, i) {
+                    _$15.each(vSectionData, function (val, i) {
                         if (!xArr[i]) {
                             return;
                         }
@@ -12770,7 +12764,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                         if (me.proportion) {
                             //先计算总量
                             vCount = 0;
-                            _$14.each(hData, function (team, ti) {
+                            _$15.each(hData, function (team, ti) {
                                 vCount += team[i];
                             });
                         }
@@ -12863,7 +12857,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
             var infoWidth = 0;
             var infoHeight = 0;
             var cl = el.children.length;
-            _$14.each(el.children, function (c, i) {
+            _$15.each(el.children, function (c, i) {
                 if (c.getTextWidth) {
                     c.context.x = infoWidth;
                     infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
@@ -12904,14 +12898,14 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                 sy = -1;
             }
 
-            var optsions = _$14.extend({
+            var optsions = _$15.extend({
                 delay: Math.min(1000 / this._barsLen, 80),
                 easing: "Linear.None", //"Back.Out",
                 duration: 500
             }, opts);
 
             var barCount = 0;
-            _$14.each(me.data, function (h_group, g) {
+            _$15.each(me.data, function (h_group, g) {
                 var vLen = h_group.length;
                 if (vLen == 0) return;
                 var hLen = h_group[0].length;
@@ -12978,7 +12972,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                                     onComplete: function onComplete() {}
                                 });
 
-                                _$14.each(infosp.children, function (txt) {
+                                _$15.each(infosp.children, function (txt) {
                                     if (txt._text || txt._text === 0) {
                                         if (txt._tweenObj) {
                                             AnimationFrame$1.destroyTween(txt._tweenObj);
@@ -12994,12 +12988,12 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                                             delay: h * optsions.delay,
                                             onUpdate: function onUpdate(arg) {
                                                 var content = arg.v;
-                                                if (_$14.isFunction(me.text.format)) {
+                                                if (_$15.isFunction(me.text.format)) {
                                                     var _formatc = me.text.format.apply(me, [content, txt._data]);
                                                     if (!!_formatc || _formatc === "" || _formatc === 0) {
                                                         content = _formatc;
                                                     }
-                                                } else if (_$14.isNumber(content)) {
+                                                } else if (_$15.isNumber(content)) {
                                                     content = numAddSymbol(parseInt(content));
                                                 }
                                                 txt.resetText(content);
@@ -13193,7 +13187,7 @@ var BrokenLine$2 = canvax.Shapes.BrokenLine;
 var Circle$2$1 = canvax.Shapes.Circle;
 var Path$1 = canvax.Shapes.Path;
 
-var _$16 = canvax._;
+var _$17 = canvax._;
 
 var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     inherits$1(LineGraphsGroup, _Canvax$Event$EventDi);
@@ -13256,7 +13250,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         _this._currPointList = []; //brokenline 动画中的当前状态
         _this._bline = null;
 
-        _$16.extend(true, _this, opt);
+        _$17.extend(true, _this, opt);
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
@@ -13281,7 +13275,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     }, {
         key: "draw",
         value: function draw(opt, data) {
-            _$16.extend(true, this, opt);
+            _$17.extend(true, this, opt);
             this.data = data;
             this._widget();
         }
@@ -13311,7 +13305,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             if (!color || color == "") {
                 //这个时候可以先取线的style，和线保持一致
                 color = this._getLineStrokeStyle();
-                if (!color || color == "" || !_$16.isString(color)) {
+                if (!color || color == "" || !_$17.isString(color)) {
                     //那么最后，取this.fieldMap.style
                     color = this.fieldMap.style;
                 }
@@ -13321,10 +13315,10 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     }, {
         key: "_getProp",
         value: function _getProp(s, nodeInd) {
-            if (_$16.isArray(s)) {
+            if (_$17.isArray(s)) {
                 return s[this.groupInd];
             }
-            if (_$16.isFunction(s)) {
+            if (_$17.isFunction(s)) {
                 return s.apply(this, [me.getNodeInfoAt(nodeInd)]);
             }
             return s;
@@ -13354,7 +13348,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             var o = this.data[$index];
 
             if (o && o.value != null && o.value != undefined && o.value !== "") {
-                return _$16.extend(o, this._createNodeInfo($index));
+                return _$17.extend(o, this._createNodeInfo($index));
             } else {
                 return null;
             }
@@ -13424,7 +13418,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             point.value = me._yAxis.getValFromYpos(point.y); //null;
 
             //TODO:这里要优化下，这个x值可能刚好对应上了某个具体的index，，，而现在强制为-1是不对的
-            return _$16.extend(point, me._createNodeInfo(-1));
+            return _$17.extend(point, me._createNodeInfo(-1));
         }
 
         /**
@@ -13493,15 +13487,15 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             }
 
             function _update(list) {
-                me._bline.context.pointList = _$16.clone(list);
+                me._bline.context.pointList = _$17.clone(list);
                 me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
 
                 me._fill.context.path = me._fillLine(me._bline);
                 me._fill.context.fillStyle = me._getFillStyle();
 
                 var nodeInd = 0;
-                _$16.each(list, function (point, i) {
-                    if (_$16.isNumber(point[1])) {
+                _$17.each(list, function (point, i) {
+                    if (_$17.isNumber(point[1])) {
                         if (me._circles) {
                             var _circle = me._circles.getChildAt(nodeInd);
                             if (_circle) {
@@ -13548,7 +13542,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         key: "_getPointPosStr",
         value: function _getPointPosStr(list) {
             var obj = {};
-            _$16.each(list, function (p, i) {
+            _$17.each(list, function (p, i) {
                 if (!p) {
                     //折线图中这个节点可能没有
                     return;
@@ -13586,7 +13580,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 var firstY = firstNode ? firstNode.y : undefined;
                 for (var a = 0, al = me.data.length; a < al; a++) {
                     var o = me.data[a];
-                    list.push([o.x, _$16.isNumber(o.y) ? firstY : o.y]);
+                    list.push([o.x, _$17.isNumber(o.y) ? firstY : o.y]);
                 }
             } else {
                 list = me._pointList;
@@ -13624,7 +13618,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 context: {
                     path: me._fillLine(bline),
                     fillStyle: me._getFillStyle(),
-                    globalAlpha: _$16.isArray(me.fill.alpha) ? 1 : me.fill.alpha
+                    globalAlpha: _$17.isArray(me.fill.alpha) ? 1 : me.fill.alpha
                 }
             });
 
@@ -13643,7 +13637,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             var _firstNode = null;
             for (var i = 0, l = this.data.length; i < l; i++) {
                 var nodeData = this.data[i];
-                if (_$16.isNumber(nodeData.y)) {
+                if (_$17.isNumber(nodeData.y)) {
                     if (_firstNode === null || this._yAxis.place == "right") {
                         //_yAxis为右轴的话，
                         _firstNode = nodeData;
@@ -13666,7 +13660,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
             var _fillStyle = me._getProp(me.fill.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
 
-            if (_$16.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+            if (_$17.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
                 //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
                 //如果拿回来的style已经是个gradient了，那么就不管了
                 me.fill.alpha.length = 2;
@@ -13678,7 +13672,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 }
 
                 //从bline中找到最高的点
-                var topP = _$16.min(me._bline.context.pointList, function (p) {
+                var topP = _$17.min(me._bline.context.pointList, function (p) {
                     return p[1];
                 });
 
@@ -13716,10 +13710,10 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 //从bline中找到最高的点
                 !pointList && (pointList = this._bline.context.pointList);
 
-                var topP = _$16.min(pointList, function (p) {
+                var topP = _$17.min(pointList, function (p) {
                     return p[1];
                 });
-                var bottomP = _$16.max(pointList, function (p) {
+                var bottomP = _$17.max(pointList, function (p) {
                     return p[1];
                 });
                 if (from == "fillStyle") {
@@ -13734,7 +13728,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 //创建一个线性渐变
                 //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
                 _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
-                _$16.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
+                _$17.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
                     _style.addColorStop(item.position, item.color);
                 });
 
@@ -13765,7 +13759,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
                 for (var a = 0, al = list.length; a < al; a++) {
                     var _point = me._currPointList[a];
-                    if (!_point || !_$16.isNumber(_point[1])) {
+                    if (!_point || !_$17.isNumber(_point[1])) {
                         //折线图中有可能这个point为undefined
                         continue;
                     }
@@ -13781,7 +13775,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
                     var circle = me._circles.children[nodeInd];
                     if (circle) {
-                        _$16.extend(circle.context, context);
+                        _$17.extend(circle.context, context);
                     } else {
                         circle = new Circle$2$1({
                             context: context
@@ -13831,7 +13825,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
                 for (var a = 0, al = list.length; a < al; a++) {
                     var _point = list[a];
-                    if (!_point || !_$16.isNumber(_point[1])) {
+                    if (!_point || !_$17.isNumber(_point[1])) {
                         //折线图中有可能这个point为undefined
                         continue;
                     }
@@ -13850,7 +13844,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     };
 
                     var content = me.data[a].value;
-                    if (_$16.isFunction(me.text.format)) {
+                    if (_$17.isFunction(me.text.format)) {
                         content = me.text.format.apply(me, [content, a]) || content;
                     }
 
@@ -13861,7 +13855,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     var text = this._texts.children[nodeInd];
                     if (text) {
                         text.resetText(content);
-                        _$16.extend(text.context, context);
+                        _$17.extend(text.context, context);
                     } else {
                         text = new canvax.Display.Text(content, {
                             context: context
@@ -13899,15 +13893,15 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         key: "_fillLine",
         value: function _fillLine(bline) {
             //填充直线
-            var fillPath = _$16.clone(bline.context.pointList);
+            var fillPath = _$17.clone(bline.context.pointList);
 
             var path = "";
             var baseY = this._yAxis.basePoint.y;
 
             var _currPath = null;
 
-            _$16.each(fillPath, function (point, i) {
-                if (_$16.isNumber(point[1])) {
+            _$17.each(fillPath, function (point, i) {
+                if (_$17.isNumber(point[1])) {
                     if (_currPath === null) {
                         _currPath = [];
                     }
@@ -13919,7 +13913,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                     }
                 }
 
-                if (i == fillPath.length - 1 && _$16.isNumber(point[1])) {
+                if (i == fillPath.length - 1 && _$17.isNumber(point[1])) {
                     getOnePath();
                 }
             });
@@ -13936,7 +13930,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
     return LineGraphsGroup;
 }(canvax.Event.EventDispatcher);
 
-var _$15 = canvax._;
+var _$16 = canvax._;
 var LineGraphs = function (_Canvax$Event$EventDi) {
     inherits$1(LineGraphs, _Canvax$Event$EventDi);
 
@@ -13991,7 +13985,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
         value: function draw(opts) {
             this.width = opts.width;
             this.height = opts.height;
-            _$15.extend(true, this.origin, opts.origin);
+            _$16.extend(true, this.origin, opts.origin);
 
             this.sprite.context.x = this.origin.x;
             this.sprite.context.y = this.origin.y;
@@ -14015,7 +14009,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                 me.data = me._trimGraphs();
             }
 
-            _$15.each(me.groups, function (g) {
+            _$16.each(me.groups, function (g) {
                 g.resetData(me.data[g.field].data, dataTrigger);
             });
         }
@@ -14042,7 +14036,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
 
             var _yAxis = this.yAxisAlign == "right" ? _coor._yAxisRight : _coor._yAxisLeft;
 
-            _$15.each(_$15.flatten(me.enabledField), function (field, i) {
+            _$16.each(_$16.flatten(me.enabledField), function (field, i) {
                 //var maxValue = 0;
 
                 //单条line的全部data数据
@@ -14059,7 +14053,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                         layoutType: me.root._coordinate ? me.root._coordinate.xAxis.layoutType : me.root._xAxis.layoutType
                     });
 
-                    var y = _$15.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+                    var y = _$16.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                     var node = {
                         value: _lineData[b],
@@ -14090,7 +14084,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             var gi = 0;
             var gl = this.groups.length;
             var me = this;
-            _$15.each(this.groups, function (g, i) {
+            _$16.each(this.groups, function (g, i) {
                 g._grow(function () {
                     gi++;
                     callback && callback(g);
@@ -14107,14 +14101,14 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             var me = this;
 
             //这个field不再这个graphs里面的，不相关
-            if (_$15.indexOf(_$15.flatten([me.field]), field) == -1) {
+            if (_$16.indexOf(_$16.flatten([me.field]), field) == -1) {
                 return;
             }
 
             this.data = this._trimGraphs();
             this._setGroupsForYfield(this.data, field);
 
-            _$15.each(this.groups, function (g, i) {
+            _$16.each(this.groups, function (g, i) {
                 g.resetData(me.data[g.field].data);
             });
         }
@@ -14137,7 +14131,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             this.groups.splice(i, 1)[0].destroy();
             this.data = this._trimGraphs();
 
-            _$15.each(this.groups, function (g, i) {
+            _$16.each(this.groups, function (g, i) {
                 g.resetData(me.data[g.field].data);
             });
         }
@@ -14166,14 +14160,14 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
             if (fields) {
                 //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
                 //一般用在add()执行的时候
-                fields = _$15.flatten([fields]);
+                fields = _$16.flatten([fields]);
             }
 
-            var _flattenField = _$15.flatten([this.field]);
+            var _flattenField = _$16.flatten([this.field]);
 
-            _$15.each(data, function (g, field) {
+            _$16.each(data, function (g, field) {
 
-                if (fields && _$15.indexOf(fields, field) == -1) {
+                if (fields && _$16.indexOf(fields, field) == -1) {
                     //如果有传入fields，但是当前field不在fields里面的话，不需要处理
                     //说明该group已经在graphs里面了
                     return;
@@ -14182,7 +14176,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
                 var fieldMap = me.root._coordinate.getFieldMapOf(field);
 
                 //groupInd 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
-                var groupInd = _$15.indexOf(_flattenField, field);
+                var groupInd = _$16.indexOf(_flattenField, field);
 
                 var group = new LineGraphsGroup(fieldMap, groupInd, //不同于fieldMap.ind
                 me._opts, me.ctx, me.height, me.width);
@@ -14212,7 +14206,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
         key: "getNodesAt",
         value: function getNodesAt(ind) {
             var _nodesInfoList = []; //节点信息集合
-            _$15.each(this.groups, function (group) {
+            _$16.each(this.groups, function (group) {
                 var node = group.getNodeInfoAt(ind);
                 node && _nodesInfoList.push(node);
             });
@@ -14224,7 +14218,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
 
 var Circle$3 = canvax.Shapes.Circle;
 var Rect$7 = canvax.Shapes.Rect;
-var _$17 = canvax._;
+var _$18 = canvax._;
 
 var ScatGraphs = function (_Canvax$Event$EventDi) {
     inherits$1(ScatGraphs, _Canvax$Event$EventDi);
@@ -14239,7 +14233,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
         //这里所有的opts都要透传给 group
         _this._opts = opts || {};
         _this.root = root;
-        _this.ctx = root.stage.context2D;
+        _this.ctx = root.stage.canvas.getContext("2d");
 
         _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         _this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
@@ -14282,7 +14276,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
 
         _this.sprite = null;
 
-        _$17.extend(true, _this, opts);
+        _$18.extend(true, _this, opts);
 
         _this.init();
 
@@ -14308,7 +14302,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "draw",
         value: function draw(opts) {
-            _$17.extend(true, this, opts);
+            _$18.extend(true, this, opts);
             this.data = this._trimGraphs(); //groupsData也被自动设置完成
             this._widget();
             this.sprite.context.x = this.origin.x;
@@ -14385,17 +14379,17 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
             var r = this.node.normalR;
             var rowData = nodeLayoutData.rowData;
             if (this.node.r != null) {
-                if (_$17.isString(this.node.r) && rowData[this.node.r]) {
+                if (_$18.isString(this.node.r) && rowData[this.node.r]) {
                     //如果配置了某个字段作为r，那么就要自动计算比例
                     if (!this._rData && !this._rMaxValue && !this._rMinValue) {
                         this._rData = this.root.dataFrame.getFieldData(this.node.r);
-                        this._rMaxValue = _$17.max(this._rData);
-                        this._rMinValue = _$17.min(this._rData);
+                        this._rMaxValue = _$18.max(this._rData);
+                        this._rMinValue = _$18.min(this._rData);
                     }
                     var rVal = rowData[this.node.r];
                     r = this.node.minR + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxR - this.node.minR);
                 }
-                if (_$17.isFunction(this.node.r)) {
+                if (_$18.isFunction(this.node.r)) {
                     r = this.node.r(rowData);
                 }
                 if (!isNaN(parseInt(this.node.r))) {
@@ -14409,7 +14403,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
         key: "_setLabel",
         value: function _setLabel(nodeLayoutData) {
             if (this.label.field != null) {
-                if (_$17.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
+                if (_$18.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
                     nodeLayoutData.label = nodeLayoutData.rowData[this.label.field];
                 }
             }
@@ -14430,10 +14424,10 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
         key: "_getStyle",
         value: function _getStyle(style, nodeLayoutData) {
             var _style = style;
-            if (_$17.isArray(style)) {
+            if (_$18.isArray(style)) {
                 _style = style[nodeLayoutData.groupInd];
             }
-            if (_$17.isFunction(style)) {
+            if (_$18.isFunction(style)) {
                 _style = style(nodeLayoutData);
             }
             if (!_style) {
@@ -14451,10 +14445,10 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
         key: "_setNodeType",
         value: function _setNodeType(nodeLayoutData) {
             var shapeType = this.node.shapeType;
-            if (_$17.isArray(shapeType)) {
+            if (_$18.isArray(shapeType)) {
                 shapeType = shapeType[nodeLayoutData.groupInd];
             }
-            if (_$17.isFunction(shapeType)) {
+            if (_$18.isFunction(shapeType)) {
                 shapeType = shapeType(nodeLayoutData);
             }
             if (!shapeType) {
@@ -14470,7 +14464,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
             var me = this;
             if (this.groupField) {
                 //如果有设置分组字段
-                group = _$17.find(this.groupsData, function (group) {
+                group = _$18.find(this.groupsData, function (group) {
                     return group.groupName == rowData[me.groupField];
                 });
                 if (!group) {
@@ -14501,7 +14495,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
         value: function getGroupInd(rowData) {
             var i = 0;
             var me = this;
-            _$17.each(this.groupsData, function (group, gi) {
+            _$18.each(this.groupsData, function (group, gi) {
                 if (group.groupName == rowData[me.groupField]) {
                     i = gi;
                 }
@@ -14515,11 +14509,11 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
         key: "_widget",
         value: function _widget() {
             var me = this;
-            _$17.each(this.groupsData, function (group, iGroup) {
+            _$18.each(this.groupsData, function (group, iGroup) {
                 var groupSprite = new canvax.Display.Sprite({ id: group.groupName });
                 me._shapesp.addChild(groupSprite);
 
-                _$17.each(group.list, function (nodeData, iNode) {
+                _$18.each(group.list, function (nodeData, iNode) {
 
                     var _context = me._getNodeContext(nodeData);
                     var Shape = nodeData.shapeType == "circle" ? Circle$3 : Rect$7;
@@ -14623,7 +14617,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "grow",
         value: function grow() {
-            _$17.each(this.data, function (nodeData) {
+            _$18.each(this.data, function (nodeData) {
                 nodeData.shape.animate({
                     x: nodeData.x,
                     y: nodeData.y,
@@ -14648,7 +14642,7 @@ var ScatGraphs = function (_Canvax$Event$EventDi) {
 var Sector$1 = canvax.Shapes.Sector;
 var Path$2 = canvax.Shapes.Path;
 var AnimationFrame$3 = canvax.AnimationFrame;
-var _$19 = canvax._;
+var _$20 = canvax._;
 
 var Pie$1 = function (_Canvax$Event$EventDi) {
     inherits$1(Pie, _Canvax$Event$EventDi);
@@ -14694,7 +14688,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
     createClass$1(Pie, [{
         key: "init",
         value: function init(opts) {
-            _$19.extend(true, this, opts);
+            _$20.extend(true, this, opts);
 
             this.sprite = new canvax.Display.Sprite();
 
@@ -14713,7 +14707,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         value: function draw(opts) {
             var me = this;
 
-            _$19.extend(true, this, opts);
+            _$20.extend(true, this, opts);
 
             this.sprite.context.x = me.origin.x;
             this.sprite.context.y = me.origin.y;
@@ -14803,12 +14797,13 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                     });
 
                     //触发注册的事件
-                    sector.on('mousedown mouseup click mousemove dblclick', function (e) {
-                        if (me["on" + e.type] && _$19.isFunction(me["on" + e.type])) {
+                    sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
+                        if (me["on" + e.type] && _$20.isFunction(me["on" + e.type])) {
                             //如果有在pie的配置上面注册对应的事件，则触发
                             me["on" + e.type](e);
                         }
                     });
+
                     me.sectorsSp.addChildAt(sector, 0);
                     me.sectors.push(sector);
                 }
@@ -14893,7 +14888,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         key: "uncheckAll",
         value: function uncheckAll() {
             var me = this;
-            _$19.each(this.sectors, function (sec, i) {
+            _$20.each(this.sectors, function (sec, i) {
                 var secData = me.data.list[i];
                 if (secData.checked) {
                     me.uncheckAt(i);
@@ -14963,7 +14958,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         value: function grow() {
             var me = this;
 
-            _$19.each(me.sectors, function (sec, ind) {
+            _$20.each(me.sectors, function (sec, ind) {
                 if (sec.context) {
                     sec.context.r0 = 0;
                     sec.context.r = 0;
@@ -15281,7 +15276,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             if (this.labelSp) {
                 this.labelSp.removeAllChildren();
             }
-            _$19.each(this.labelList, function (lab) {
+            _$20.each(this.labelList, function (lab) {
                 me.domContainer.removeChild(lab.labelEle);
             });
             this.labelList = [];
@@ -15291,7 +15286,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         value: function _showGrowLabel() {
             if (this.labelSp) {
                 this.labelSp.context.globalAlpha = 1;
-                _$19.each(this.labelList, function (lab) {
+                _$20.each(this.labelList, function (lab) {
                     lab.labelEle.style.visibility = "visible";
                 });
             }
@@ -15301,7 +15296,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         value: function _hideGrowLabel() {
             if (this.labelSp) {
                 this.labelSp.context.globalAlpha = 0;
-                _$19.each(this.labelList, function (lab) {
+                _$20.each(this.labelList, function (lab) {
                     lab.labelEle.style.visibility = "hidden";
                 });
             }
@@ -15310,7 +15305,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
     return Pie;
 }(canvax.Event.EventDispatcher);
 
-var _$18 = canvax._;
+var _$19 = canvax._;
 
 var PieGraphs = function (_Canvax$Event$EventDi) {
     inherits$1(PieGraphs, _Canvax$Event$EventDi);
@@ -15325,6 +15320,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
         //这里所有的opts都要透传给 group
         _this._opts = opts || {};
         _this.root = root;
+        _this.ctx = root.stage.canvas.getContext("2d");
 
         _this.valueField = null;
         _this.nameField = null;
@@ -15370,7 +15366,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
     createClass$1(PieGraphs, [{
         key: "init",
         value: function init(opts) {
-            _$18.extend(true, this, opts);
+            _$19.extend(true, this, opts);
             this.sprite = new canvax.Display.Sprite();
 
             //初步设置下data，主要legend等需要用到
@@ -15405,7 +15401,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "draw",
         value: function draw(opts) {
-            _$18.extend(true, this, opts);
+            _$19.extend(true, this, opts);
             this._computerProps();
 
             //这个时候就是真正的计算布局用得layoutdata了
@@ -15429,13 +15425,13 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
         value: function _setEnabled(name, status) {
             var me = this;
 
-            _$18.each(this.data, function (item) {
+            _$19.each(this.data, function (item) {
                 if (item.name === name) {
                     item.enabled = status;
                     return false;
                 }
             });
-            _$18.each(this.groups, function (group) {
+            _$19.each(this.groups, function (group) {
                 group.resetData(me._trimGraphs(me.data));
             });
         }
@@ -15474,7 +15470,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
                 });
 
                 //重新设定下ind
-                _$18.each(data, function (d, i) {
+                _$19.each(data, function (d, i) {
                     d.ind = i;
                 });
             }
@@ -15574,7 +15570,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
                             outRadius = parseInt((me.outRadius - me.innerRadius) * ((data[j].rowData[me.rField] - minRval) / (maxRval - minRval)) + me.innerRadius);
                         }
 
-                        _$18.extend(data[j], {
+                        _$19.extend(data[j], {
                             outRadius: outRadius,
                             innerRadius: me.innerRadius,
                             startAngle: me.currentAngle, //起始角度
@@ -15637,7 +15633,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
                 if (this.nameField) {
                     label = itemData.rowData[this.nameField];
                 }
-                if (_$18.isFunction(this.label.format)) {
+                if (_$19.isFunction(this.label.format)) {
                     label = this.label.format(itemData);
                 }
             }
@@ -15657,7 +15653,7 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
     return PieGraphs;
 }(canvax.Event.EventDispatcher);
 
-var _$20 = canvax._;
+var _$21 = canvax._;
 
 var RadarGraphs = function (_Canvax$Event$EventDi) {
     inherits$1(RadarGraphs, _Canvax$Event$EventDi);
@@ -15668,14 +15664,14 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
         var _this = possibleConstructorReturn$1(this, (RadarGraphs.__proto__ || Object.getPrototypeOf(RadarGraphs)).call(this, opts, root));
 
         _this.type = "radar";
-
+        debugger;
         //这里所有的opts都要透传给 group
         _this._opts = opts || {};
         _this.root = root;
-        _this.ctx = root.stage.context2D;
+        _this.ctx = root.stage.canvas.getContext("2d");
 
         _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
-        _this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
+        _this.enabledField = null;
 
         _this.width = 0;
         _this.height = 0;
@@ -15688,11 +15684,9 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
 
         _this.field = null;
 
-        _this.colors = Theme.colors;
-
         _this.sprite = null;
 
-        _$20.extend(true, _this, opts);
+        _$21.extend(true, _this, opts);
 
         _this.init();
         return _this;
@@ -15708,6 +15702,26 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "draw",
         value: function draw(opts) {
+            _$21.extend(true, this, opts);
+
+            var me = this;
+
+            this.data = this._trimGraphs();
+        }
+    }, {
+        key: "setEnabledField",
+        value: function setEnabledField() {
+            //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+            this.enabledField = this.root._coordinate.getEnabledFields(this.field);
+        }
+    }, {
+        key: "_trimGraphs",
+        value: function _trimGraphs() {
+            var me = this;
+            var _coor = this.root._coordinate;
+
+            //用来计算下面的hLen
+            this.setEnabledField();
             debugger;
         }
     }]);
@@ -15717,7 +15731,7 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
 //import Tips from "../tips/index"
 
 var Circle$4 = canvax.Shapes.Circle;
-var _$21 = canvax._;
+var _$22 = canvax._;
 
 var Legend = function (_Component) {
     inherits$1(Legend, _Component);
@@ -15774,7 +15788,7 @@ var Legend = function (_Component) {
         key: "init",
         value: function init(tops) {
             if (tops) {
-                _$21.extend(true, this, tops);
+                _$22.extend(true, this, tops);
             }
 
             if (this.position == "left" || this.position == "right") {
@@ -15818,7 +15832,7 @@ var Legend = function (_Component) {
                 y = 0;
             var rows = 1;
 
-            _$21.each(this.data, function (obj, i) {
+            _$22.each(this.data, function (obj, i) {
 
                 var icon = new Circle$4({
                     id: "legend_field_icon_" + i,
@@ -15907,7 +15921,7 @@ var Legend = function (_Component) {
                 sprite.on("click", function (e) {
 
                     //只有一个field的时候，不支持取消
-                    if (_$21.filter(me.data, function (obj) {
+                    if (_$22.filter(me.data, function (obj) {
                         return obj.enabled;
                     }).length == 1) {
                         if (obj.enabled) {
@@ -15955,7 +15969,7 @@ var Legend = function (_Component) {
 
 var Line$7 = canvax.Shapes.Line;
 var Rect$9 = canvax.Shapes.Rect;
-var _$22 = canvax._;
+var _$23 = canvax._;
 
 var dataZoom = function (_Component) {
     inherits$1(dataZoom, _Component);
@@ -16028,7 +16042,7 @@ var dataZoom = function (_Component) {
 
         _this.zoomBg = null;
 
-        opt && _$22.extend(true, _this, opt);
+        opt && _$23.extend(true, _this, opt);
         _this._computeAttrs(opt);
         _this.init(opt);
         return _this;
@@ -16079,7 +16093,7 @@ var dataZoom = function (_Component) {
             var _preStart = this.range.start;
             var _preEnd = this.range.end;
 
-            opt && _$22.extend(true, this, opt);
+            opt && _$23.extend(true, this, opt);
             this._cloneChart = cloneChart;
             this._computeAttrs(opt);
 
@@ -16480,7 +16494,7 @@ var dataZoom = function (_Component) {
 var BrokenLine$3 = canvax.Shapes.BrokenLine;
 var Sprite$1 = canvax.Display.Sprite;
 var Text$1 = canvax.Display.Text;
-var _$23 = canvax._;
+var _$24 = canvax._;
 
 var MarkLine = function (_Component) {
     inherits$1(MarkLine, _Component);
@@ -16522,7 +16536,7 @@ var MarkLine = function (_Component) {
         _this._txt = null;
         _this._line = null;
 
-        opt && _$23.extend(true, _this, opt);
+        opt && _$24.extend(true, _this, opt);
 
         _this.init();
         return _this;
@@ -16550,7 +16564,7 @@ var MarkLine = function (_Component) {
         key: "_getYVal",
         value: function _getYVal() {
             var y = this.yVal;
-            if (_$23.isFunction(this.yVal)) {
+            if (_$24.isFunction(this.yVal)) {
                 y = this.yVal(this);
             }
 
@@ -16564,13 +16578,13 @@ var MarkLine = function (_Component) {
     }, {
         key: "_getLabel",
         value: function _getLabel() {
-            if (_$23.isString(this.text.content)) {
+            if (_$24.isString(this.text.content)) {
                 return this.text.content;
             }
 
             var yVal = this._getYVal();
             var label = "markline：" + yVal;
-            if (_$23.isFunction(this.text.content)) {
+            if (_$24.isFunction(this.text.content)) {
                 label = this.text.content.apply(this, [yVal]);
             }
             return label;
@@ -16610,7 +16624,7 @@ var MarkLine = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            opt && _$23.extend(true, this, opt);
+            opt && _$24.extend(true, this, opt);
 
             var me = this;
             var y = this._getYPos();
@@ -16639,12 +16653,12 @@ var MarkLine = function (_Component) {
         value: function _setTxtPos(y) {
             var me = this;
             var txt = me._txt;
-            if (_$23.isNumber(me.text.x)) {
+            if (_$24.isNumber(me.text.x)) {
                 txt.context.x = me.text.x;
             } else {
                 txt.context.x = this.w - txt.getTextWidth() - 5;
             }
-            if (_$23.isNumber(me.text.y)) {
+            if (_$24.isNumber(me.text.y)) {
                 txt.context.y = me.text.y;
             } else {
                 txt.context.y = y - txt.getTextHeight();
@@ -16656,7 +16670,7 @@ var MarkLine = function (_Component) {
 
 var Circle$5 = canvax.Shapes.Circle;
 var Droplet$1 = canvax.Shapes.Droplet;
-var _$24 = canvax._;
+var _$25 = canvax._;
 
 var MarkPoint = function (_Component) {
     inherits$1(MarkPoint, _Component);
@@ -16699,9 +16713,9 @@ var MarkPoint = function (_Component) {
         _this.filter = function () {}; //过滤函数
 
         if ("markPoint" in userOpts) {
-            _$24.extend(true, _this, userOpts.markPoint);
+            _$25.extend(true, _this, userOpts.markPoint);
         }
-        chartOpts && _$24.extend(true, _this, chartOpts);
+        chartOpts && _$25.extend(true, _this, chartOpts);
 
         _this.init();
         return _this;
@@ -16746,7 +16760,7 @@ var MarkPoint = function (_Component) {
         key: "_getColor",
         value: function _getColor(c, data, normalColor) {
             var color = c;
-            if (_$24.isFunction(c)) {
+            if (_$25.isFunction(c)) {
                 color = c(data);
             }
             //缺省颜色
@@ -16766,7 +16780,7 @@ var MarkPoint = function (_Component) {
             this.shape.context.visible = true;
             this.shapeBg && (this.shapeBg.context.visible = true);
             this.shapeCircle && (this.shapeCircle.context.visible = true);
-            _$24.isFunction(this.filter) && this.filter(this);
+            _$25.isFunction(this.filter) && this.filter(this);
         }
     }, {
         key: "_initCircleMark",
@@ -16846,7 +16860,7 @@ var MarkPoint = function (_Component) {
 
 var Line$8 = canvax.Shapes.Line;
 var Circle$6 = canvax.Shapes.Circle;
-var _$25 = canvax._;
+var _$26 = canvax._;
 
 var Anchor = function (_Component) {
     inherits$1(Anchor, _Component);
@@ -16905,7 +16919,7 @@ var Anchor = function (_Component) {
         key: "init",
         value: function init(opt) {
             if (opt) {
-                _$25.extend(true, this, opt);
+                _$26.extend(true, this, opt);
             }
 
             this.sprite = new canvax.Display.Sprite({
@@ -16947,7 +16961,7 @@ var Anchor = function (_Component) {
         key: "_initConfig",
         value: function _initConfig(opt) {
             if (opt) {
-                _$25.extend(true, this, opt);
+                _$26.extend(true, this, opt);
             }
         }
 
@@ -17061,7 +17075,7 @@ var Anchor = function (_Component) {
     }, {
         key: "_getProp",
         value: function _getProp(s) {
-            if (_$25.isFunction(s)) {
+            if (_$26.isFunction(s)) {
                 return s();
             }
             return s;
@@ -17070,7 +17084,7 @@ var Anchor = function (_Component) {
     return Anchor;
 }(component);
 
-var _$26 = canvax._;
+var _$27 = canvax._;
 
 var Tips = function (_Component) {
     inherits$1(Tips, _Component);
@@ -17121,7 +17135,7 @@ var Tips = function (_Component) {
     createClass$1(Tips, [{
         key: "init",
         value: function init(opt) {
-            _$26.extend(true, this, opt);
+            _$27.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite({
                 id: "TipSprite"
             });
@@ -17228,7 +17242,7 @@ var Tips = function (_Component) {
             var tipsContent;
 
             if (this.content) {
-                tipsContent = _$26.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
+                tipsContent = _$27.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
             } else {
                 tipsContent = this._getDefaultContent(this.eventInfo);
             }
@@ -17249,7 +17263,7 @@ var Tips = function (_Component) {
                 str += "<tr><td colspan='2'>" + info.title + "</td></tr>";
             }
 
-            _$26.each(info.nodes, function (node, i) {
+            _$27.each(info.nodes, function (node, i) {
                 if (node.value === undefined || node.value === null) {
                     return;
                 }
@@ -17307,7 +17321,7 @@ var Tips = function (_Component) {
 }(component);
 
 var Line$9 = canvax.Shapes.Line;
-var _$27 = canvax._;
+var _$28 = canvax._;
 
 var barTgi = function (_Component) {
     inherits$1(barTgi, _Component);
@@ -17354,7 +17368,7 @@ var barTgi = function (_Component) {
     createClass$1(barTgi, [{
         key: "init",
         value: function init(opt) {
-            _$27.extend(true, this, opt);
+            _$28.extend(true, this, opt);
             this._yAxis = this.root._coordinate._yAxis[this.yAxisAlign == "left" ? 0 : 1];
             this.sprite = new canvax.Display.Sprite({
                 id: "barTgiSprite",
@@ -17367,7 +17381,7 @@ var barTgi = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            _$27.extend(true, this, opt);
+            _$28.extend(true, this, opt);
             this.barDatas = null;
             this.data = null;
             this.sprite.removeAllChildren();
@@ -17378,19 +17392,19 @@ var barTgi = function (_Component) {
         value: function draw() {
             var me = this;
 
-            _$27.each(me.root._graphs, function (_g) {
+            _$28.each(me.root._graphs, function (_g) {
                 if (_g.type == "bar" && _g.enabledFieldData[me.barField]) {
                     me.barDatas = _g.enabledFieldData[me.barField];
                     return false;
                 }
             });
-            this.data = _$27.flatten(me.root.dataFrame.getDataOrg(me.field));
+            this.data = _$28.flatten(me.root.dataFrame.getDataOrg(me.field));
 
             if (!this.barDatas) {
                 return;
             }
 
-            _$27.each(this.data, function (tgi, i) {
+            _$28.each(this.data, function (tgi, i) {
                 var y = me._yAxis.getYposFromVal(tgi);
                 var barData = me.barDatas[i];
 
@@ -17415,7 +17429,7 @@ var barTgi = function (_Component) {
         key: "_getProp",
         value: function _getProp(val, tgi, i) {
             var res = val;
-            if (_$27.isFunction(val)) {
+            if (_$28.isFunction(val)) {
                 res = val.apply(this, [tgi, i]);
             }
             return res;

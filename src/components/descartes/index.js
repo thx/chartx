@@ -1,4 +1,4 @@
-import Component from "../component"
+import coorBase from "../coor_base/index"
 import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
@@ -8,15 +8,13 @@ import Theme from "../../theme"
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 
-export default class Descartes_Component extends Component
+export default class Descartes_Component extends coorBase
 {
-    constructor( opt, root )
+    constructor( opts, root )
     {
-        super();
+        super( opts, root );
 
         this.type = "descartes";
-
-        this.root  = root;
         
         this._xAxis = null;
         this._yAxis = [];
@@ -25,20 +23,7 @@ export default class Descartes_Component extends Component
         this._yAxisRight = null;
         this._grid  = null;
 
-        this.width = 0;
-        this.height = 0;
-        this.origin = {
-            x : 0,
-            y : 0
-        };
-
-        this.margin = {
-            top:0, right:0, bottom:0, left:0
-        };
-
         this.horizontal = false;
-
-        this.dataFrame = this.root.dataFrame;
 
         this.xAxis = {
             field : this.dataFrame.fields[0]
@@ -49,9 +34,9 @@ export default class Descartes_Component extends Component
         this.grid = {
         };
 
-        _.extend(true, this, opt);
+        _.extend(true, this, opts);
 
-        if( opt.horizontal ){
+        if( opts.horizontal ){
             _.extend( true, this.xAxis, {
                 text : {
                     rotation: 90
@@ -68,46 +53,34 @@ export default class Descartes_Component extends Component
             });
         };
 
-
-        
-        if( "enabled" in opt ){
+        if( "enabled" in opts ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _.extend( true, this.xAxis, {
                 scale : {
-                    enabled : opt.enabled
+                    enabled : opts.enabled
                 }
             } );
             _.each( this.yAxis , function( yAxis ){
                 _.extend( true, yAxis, {
                     scale : {
-                        enabled : opt.enabled
+                        enabled : opts.enabled
                     }
                 } );
             });
 
             /*
-            this.xAxis.enabled = opt.enabled;
+            this.xAxis.enabled = opts.enabled;
             _.each( this.yAxis , function( yAxis ){
-                yAxis.enabled = opt.enabled;
+                yAxis.enabled = opts.enabled;
             });
             */
-
-            this.grid.enabled = opt.enabled;
+            this.grid.enabled = opts.enabled;
         };
 
-        /*
-        吧原始的field转换为对应结构的显示树
-        ["uv"] --> [
-            {field:'uv',enabled:true ,yAxis: yAxisleft }
-            ...
-        ]
-        */
-        this.fieldsMap = null;
-        this.induce = null;
-        this.init(opt);
+        this.init(opts);
     }
 
-    init(opt)
+    init(opts)
     {
         this.sprite = new Canvax.Display.Sprite({
             id : "coordinate"
@@ -140,13 +113,13 @@ export default class Descartes_Component extends Component
         });
     }
 
-    draw( opt )
+    draw( opts )
     {
         //在绘制的时候，是已经能拿到xAxis的height了得
         var _padding = this.root.padding;
 
-        var h = opt.height || this.root.height;
-        var w = opt.width || this.root.width;
+        var h = opts.height || this.root.height;
+        var w = opts.width || this.root.width;
         if( this.horizontal ){
             //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
             var _num = w;
@@ -313,9 +286,9 @@ export default class Descartes_Component extends Component
 
     }
 
-    getPosX( opt )
+    getPosX( opts )
     {
-        return this._xAxis.getPosX( opt );
+        return this._xAxis.getPosX( opts );
     }
 
     _getAxisDataFrame( fields )
@@ -388,9 +361,7 @@ export default class Descartes_Component extends Component
                 if( !_.isArray( yAxis ) ){
                     yAxis = [yAxis];
                 };
-    
                 fields = [];
-    
                 _.each( yAxis, function( item, i ){
                     if( item.field ){
                         fields = fields.concat( item.field );
@@ -422,108 +393,6 @@ export default class Descartes_Component extends Component
         };
 
         return _set();
-    }
-
-    //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
-    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
-    getEnabledFields( fields )
-    {
-        if( fields ){
-            //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-            //只留下enabled的field 结构
-            return this._filterEnabledFields( fields );
-        }
-        var fmap = {
-            left: [], right:[]
-        };
-
-        _.each( this.fieldsMap, function( bamboo, b ){
-            if( _.isArray( bamboo ) ){
-                //多节竹子
-
-                var align;
-                var fields = [];
-                
-                //设置完fields后，返回这个group属于left还是right的axis
-                _.each( bamboo, function( obj, v ){
-                    if( obj.field && obj.enabled ){
-                        align = obj.yAxis.align;
-                        fields.push( obj.field );
-                    }
-                } );
-
-                fields.length && fmap[ align ].push( fields );
-
-            } else {
-                //单节棍
-                if( bamboo.field && bamboo.enabled ){
-                    fmap[ bamboo.yAxis.align ].push( bamboo.field );
-                }
-            };
-        } );
-
-        return fmap;
-    }
-
-    //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-    //只留下enabled的field 结构
-    _filterEnabledFields( fields ){
-        var me = this;
-        var arr = [];
-        if( !_.isArray( fields ) ) fields = [ fields ];
-        _.each( fields, function( f ){
-            if( !_.isArray( f ) ){
-                if( me.getFieldMapOf(f).enabled ){
-                    arr.push( f );
-                }
-            } else {
-                //如果这个是个纵向数据，说明就是堆叠配置
-                var varr = [];
-                _.each( f, function( v_f ){
-                    if( me.getFieldMapOf( v_f ).enabled ){
-                        varr.push( v_f );
-                    }
-                } );
-                if( varr.length ){
-                    arr.push( varr )
-                }
-            }
-        } );
-        return arr;
-    }
-
-    //设置 fieldsMap 中对应field 的 enabled状态
-    setFieldEnabled( field )
-    {
-        var me = this;
-        function set( maps ){
-            _.each( maps , function( map , i ){
-                if( _.isArray( map ) ){
-                    set( map )
-                } else if( map.field && map.field == field ) {
-                    map.enabled = !map.enabled;
-                }
-            } );
-        }
-        set( me.fieldsMap );
-    }
-
-    getFieldMapOf( field )
-    {
-        var me = this;
-        var fieldMap = null;
-        function get( maps ){
-            _.each( maps , function( map , i ){
-                if( _.isArray( map ) ){
-                    get( map )
-                } else if( map.field && map.field == field ) {
-                    fieldMap = map;
-                    return false;
-                }
-            } );
-        }
-        get( me.fieldsMap );
-        return fieldMap;
     }
 
     _initInduce()

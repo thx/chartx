@@ -160,14 +160,16 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 });
 
                 //触发注册的事件
-                sector.on('mousedown mouseup click mousemove dblclick', function (e) {
+                sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
                     if( me[ "on"+e.type ] && _.isFunction( me[ "on"+e.type ] ) ){
                         //如果有在pie的配置上面注册对应的事件，则触发
-                        me[ "on"+e.type ]( e ,);
-                    }
+                        me[ "on"+e.type ]( e );
+                    };
                 });
+
                 me.sectorsSp.addChildAt(sector, 0);
                 me.sectors.push( sector );
+                
             };
 
             if (me._graphs.label.enabled) {

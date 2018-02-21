@@ -17,13 +17,14 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
         //这里所有的opts都要透传给 group
         this._opts = opts || {};
         this.root = root;
+        this.ctx = root.stage.canvas.getContext("2d");
 
         this.data = [];
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         this.field = null;
         this.enabledField = null;
-        this.enabledFieldData = {};
+        this.enabledFieldData = {}; //{uv:[],pv:[]...} 目前该属性主要是在enabledFieldData中又用到，本模块中没有用到
 
         this.width = 0;
         this.height = 0;
@@ -227,7 +228,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
 
         var me = this;
 
-        this.data = this._trimGraphs();;
+        this.data = this._trimGraphs();
 
         if ( this.data.length == 0 || this.data[0].length == 0) {
             me.__dataLen = 0;

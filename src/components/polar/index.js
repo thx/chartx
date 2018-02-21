@@ -13,7 +13,7 @@
 //应用场景中一般需要用到的属性有
 //width, height, origin(默认为width/2,height/2)
 
-import Component from "../component"
+import coorBase from "../coor_base/index"
 import Canvax from "canvax2d"
 import Grid from "../polar_grid/index"
 import DataSection from "../../utils/datasection"
@@ -21,25 +21,14 @@ import Theme from "../../theme"
 
 const _ = Canvax._;
 
-export default class polarComponent extends Component
+export default class polarComponent extends coorBase
 {
     constructor( opts , root )
     {
-        super( opts );
+        super( opts , root );
 
         this.type  = "polar";
         
-        this._opts = opts;
-        this.root  = root;
-
-        //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
-        this.width  = 0;
-        this.height = 0;
-        this.origin = {
-            x : 0,
-            y : 0
-        };
-
         this.allAngle = 360; //默认是个周园
 
         this.aAxis = {
@@ -62,21 +51,15 @@ export default class polarComponent extends Component
                 enabled : false 
             }
         };
-        
-        this.maxR = null;
 
         this.grid = {
             enabled : false
         };
 
+        this.maxR = null;
         this.rectRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
 
         _.extend(true, this, opts);
-
-        this.sprite = null;
-
-        this.fieldsMap = null;
-        this.induce = null; //有grid得话，就等于_grid.induce
 
         if( !this.aAxis.field ){
             //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
@@ -97,7 +80,6 @@ export default class polarComponent extends Component
         //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
         // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
         this.fieldsMap = this._setFieldsMap();
-
     }
 
     draw()
@@ -109,16 +91,20 @@ export default class polarComponent extends Component
         this.aAxis.data = this.root.dataFrame.getFieldData( this.aAxis.field );
 
         if( this.grid.enabled ){
+
             this._grid.draw( {
                 pos    : this.origin,
                 width  : this.width,
                 height : this.height,
                 dataSection : this.rAxis.dataSection
             } , this);
-        };
 
-        if( this.aAxis.scale.enabled && this.grid.enabled ){
-            this._drawAAxisScale();
+            if( this.aAxis.scale.enabled ){
+                this._drawAAxisScale();
+            };
+    
+            this._initInduce();
+
         };
 
     }
@@ -223,12 +209,7 @@ export default class polarComponent extends Component
             this.width = this.height = _num;
         };
 
-        this._computeMaxR();
-    }
-
-    //重新计算 maxR
-    _computeMaxR()
-    {
+        //计算maxR
         //如果外面要求过 maxR，
         var origin = this.origin;
         var _maxR;
@@ -239,9 +220,7 @@ export default class polarComponent extends Component
             _maxR = Math.max( this.width / 2 , this.height / 2 );
         };
 
-        if( this.maxR != null && this.maxR <= _maxR ){
-            return
-        } else {
+        if( !(this.maxR != null && this.maxR <= _maxR) ){
             this.maxR = _maxR
         };
     }
@@ -515,5 +494,17 @@ export default class polarComponent extends Component
             textAlign    : textAlign,
             textBaseline : textBaseline
         }
+    }
+
+
+    _initInduce()
+    {
+        var me = this;
+        me.induce = this._grid.induce;
+        me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+            me.fire( e.type, e );
+            //图表触发，用来处理Tips
+            me.root.fire( e.type, e );
+        });
     }
 }

@@ -16,8 +16,8 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
         //这里所有的opts都要透传给 group
         this._opts = opts || {};
         this.root = root;
-        this.ctx = root.stage.context2D;
-        
+        this.ctx = root.stage.canvas.getContext("2d");
+                
         this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
 

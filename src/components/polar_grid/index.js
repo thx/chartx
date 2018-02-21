@@ -66,7 +66,6 @@ export default class polarGrid extends Component
         _.extend(true, this , opt );
         
         this._widget();
-        this._bindEvent();
 
         this.setX(this.pos.x);
         this.setY(this.pos.y);
@@ -140,13 +139,6 @@ export default class polarGrid extends Component
                 } );
             }
         } );
-    }
-
-    _bindEvent()
-    {
-        this.induce.on("click" , function(e){
-            var point = e.point; //相对圆心的坐标
-        });
     }
 
     _getFillStyle( style , i )
