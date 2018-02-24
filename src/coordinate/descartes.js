@@ -226,28 +226,6 @@ export default class Descartes extends CoordinateBase
         return d;
     }
 
-    /*
-     *添加一个yAxis字段，也就是添加一条brokenline折线
-     *@params field 添加的字段
-     **/
-    add( field , targetYAxis)
-    {
-        var me = this;
-        this._coordinate.addField( field, targetYAxis );
-        _.each( this._graphs, function( _g ){
-            _g.add( field, targetYAxis );
-        } );
-    }
-
-    remove( field )
-    {
-        var me = this;
-        this._coordinate.removeField( field );
-        _.each( this._graphs, function( _g ){
-            _g.remove( field );
-        } );
-    }
-
     _horizontal() 
     {
         var me = this;
@@ -523,7 +501,7 @@ export default class Descartes extends CoordinateBase
                         var _fstyle = "#777";
                         var fieldMap = me._coordinate.getFieldMapOf( field );
                         if( fieldMap ){
-                            _fstyle = fieldMap.style;
+                            _fstyle = fieldMap.color;
                         };
                         var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
                         var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;

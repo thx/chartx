@@ -79,4 +79,26 @@ export default class Coordinate extends Chart
         } );
         me.stage.addChild( _legend.sprite );
     }
+
+    /*
+     *添加一个yAxis字段，也就是添加一条brokenline折线
+     *@params field 添加的字段
+     **/
+    add( field )
+    {
+        var me = this;
+        this._coordinate.addField( field );
+        _.each( this._graphs, function( _g ){
+            _g.add( field );
+        } );
+    }
+
+    remove( field )
+    {
+        var me = this;
+        this._coordinate.removeField( field );
+        _.each( this._graphs, function( _g ){
+            _g.remove( field );
+        } );
+    }
 }

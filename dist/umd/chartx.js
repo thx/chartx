@@ -8138,6 +8138,30 @@ var Coordinate = function (_Chart) {
             });
             me.stage.addChild(_legend.sprite);
         }
+
+        /*
+         *添加一个yAxis字段，也就是添加一条brokenline折线
+         *@params field 添加的字段
+         **/
+
+    }, {
+        key: "add",
+        value: function add(field) {
+            var me = this;
+            this._coordinate.addField(field);
+            _$5.each(this._graphs, function (_g) {
+                _g.add(field);
+            });
+        }
+    }, {
+        key: "remove",
+        value: function remove(field) {
+            var me = this;
+            this._coordinate.removeField(field);
+            _$5.each(this._graphs, function (_g) {
+                _g.remove(field);
+            });
+        }
     }]);
     return Coordinate;
 }(Chart);
@@ -8209,82 +8233,10 @@ var coorBase = function (_Component) {
         return _this;
     }
 
-    //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
-    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+    //设置 fieldsMap 中对应field 的 enabled状态
 
 
     createClass$1(coorBase, [{
-        key: "getEnabledFields",
-        value: function getEnabledFields(fields) {
-            if (fields) {
-                //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-                //只留下enabled的field 结构
-                return this._filterEnabledFields(fields);
-            }
-            var fmap = {
-                left: [], right: []
-            };
-
-            _$7.each(this.fieldsMap, function (bamboo, b) {
-                if (_$7.isArray(bamboo)) {
-                    //多节竹子
-
-                    var align;
-                    var fields = [];
-
-                    //设置完fields后，返回这个group属于left还是right的axis
-                    _$7.each(bamboo, function (obj, v) {
-                        if (obj.field && obj.enabled) {
-                            align = obj.yAxis.align;
-                            fields.push(obj.field);
-                        }
-                    });
-
-                    fields.length && fmap[align].push(fields);
-                } else {
-                    //单节棍
-                    if (bamboo.field && bamboo.enabled) {
-                        fmap[bamboo.yAxis.align].push(bamboo.field);
-                    }
-                }
-            });
-
-            return fmap;
-        }
-
-        //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-        //只留下enabled的field 结构
-
-    }, {
-        key: "_filterEnabledFields",
-        value: function _filterEnabledFields(fields) {
-            var me = this;
-            var arr = [];
-            if (!_$7.isArray(fields)) fields = [fields];
-            _$7.each(fields, function (f) {
-                if (!_$7.isArray(f)) {
-                    if (me.getFieldMapOf(f).enabled) {
-                        arr.push(f);
-                    }
-                } else {
-                    //如果这个是个纵向数据，说明就是堆叠配置
-                    var varr = [];
-                    _$7.each(f, function (v_f) {
-                        if (me.getFieldMapOf(v_f).enabled) {
-                            varr.push(v_f);
-                        }
-                    });
-                    if (varr.length) {
-                        arr.push(varr);
-                    }
-                }
-            });
-            return arr;
-        }
-
-        //设置 fieldsMap 中对应field 的 enabled状态
-
-    }, {
         key: "setFieldEnabled",
         value: function setFieldEnabled(field) {
             var me = this;
@@ -8316,6 +8268,46 @@ var coorBase = function (_Component) {
             }
             get$$1(me.fieldsMap);
             return fieldMap;
+        }
+
+        //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+        //只留下enabled的field 结构
+
+    }, {
+        key: "filterEnabledFields",
+        value: function filterEnabledFields(fields) {
+            var me = this;
+            var arr = [];
+            if (!_$7.isArray(fields)) fields = [fields];
+            _$7.each(fields, function (f) {
+                if (!_$7.isArray(f)) {
+                    if (me.getFieldMapOf(f).enabled) {
+                        arr.push(f);
+                    }
+                } else {
+                    //如果这个是个纵向数据，说明就是堆叠配置
+                    var varr = [];
+                    _$7.each(f, function (v_f) {
+                        if (me.getFieldMapOf(v_f).enabled) {
+                            varr.push(v_f);
+                        }
+                    });
+                    if (varr.length) {
+                        arr.push(varr);
+                    }
+                }
+            });
+            return arr;
+        }
+    }, {
+        key: "removeField",
+        value: function removeField(field) {
+            this.changeFieldEnabled(field);
+        }
+    }, {
+        key: "addField",
+        value: function addField(field) {
+            this.changeFieldEnabled(field);
         }
     }]);
     return coorBase;
@@ -8468,7 +8460,7 @@ var xAxis = function (_Component) {
                 strokeStyle: '#cccccc'
             },
             text: {
-                fillStyle: '#999',
+                fontColor: '#999',
                 fontSize: 12,
                 rotation: 0,
                 format: null,
@@ -8686,7 +8678,7 @@ var xAxis = function (_Component) {
                             fontSize: this.scale.text.fontSize,
                             textAlign: this.isH ? "center" : "left",
                             textBaseline: this.isH ? "top" : "middle",
-                            fillStyle: this.scale.text.fillStyle,
+                            fillStyle: this.scale.text.fontColor,
                             rotation: this.isH ? -90 : 0
                         }
                     });
@@ -8902,7 +8894,7 @@ var xAxis = function (_Component) {
                 var textContext = {
                     x: o.text_x || o.x,
                     y: y + 20,
-                    fillStyle: this.scale.text.fillStyle,
+                    fillStyle: this.scale.text.fontColor,
                     fontSize: this.scale.text.fontSize,
                     rotation: -Math.abs(this.scale.text.rotation),
                     textAlign: this.scale.text.textAlign,
@@ -9031,7 +9023,7 @@ var xAxis = function (_Component) {
 
             var txt = new canvax.Display.Text(maxLenText || "test", {
                 context: {
-                    fillStyle: this.scale.text.fillStyle,
+                    fillStyle: this.scale.text.fontColor,
                     fontSize: this.scale.text.fontSize
                 }
             });
@@ -9178,7 +9170,7 @@ var yAxis = function (_Component) {
                 marginToLine: 2
             },
             text: {
-                fillStyle: '#999',
+                fontColor: '#999',
                 fontSize: 12,
                 format: null,
                 rotation: 0,
@@ -9293,7 +9285,7 @@ var yAxis = function (_Component) {
             _$10.each(this.rulesSprite.children, function (s) {
                 _$10.each(s.children, function (cel) {
                     if (cel.type == "text") {
-                        cel.context.fillStyle = sty;
+                        cel.context.fontColor = sty;
                     } else if (cel.type == "line") {
                         cel.context.strokeStyle = sty;
                     }
@@ -9311,7 +9303,7 @@ var yAxis = function (_Component) {
                         fontSize: this.scale.text.fontSize,
                         textAlign: this.align == "left" ? "right" : "left", //"left",
                         textBaseline: this.isH ? "top" : "bottom",
-                        fillStyle: this.scale.text.fillStyle,
+                        fillStyle: this.scale.text.fontColor,
                         rotation: this.isH ? -90 : 0
                     }
                 });
@@ -9840,7 +9832,7 @@ var yAxis = function (_Component) {
                         context: {
                             x: txtX,
                             y: posy + aniFrom,
-                            fillStyle: self._getProp(self.scale.text.fillStyle),
+                            fillStyle: self._getProp(self.scale.text.fontColor),
                             fontSize: self.scale.text.fontSize,
                             rotation: -Math.abs(this.scale.text.rotation),
                             textAlign: textAlign,
@@ -9982,6 +9974,7 @@ var descartesGrid = function (_Component) {
             strokeStyle: '#f0f0f0', //'#e5e5e5',
             filter: null
         };
+
         _this.fill = {
             fillStyle: null,
             alpha: null
@@ -10431,23 +10424,57 @@ var Descartes_Component = function (_coorBase) {
                 })
             };
         }
+
+        //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+        //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+
     }, {
-        key: "removeField",
-        value: function removeField(field) {
-            this.enabledField(field);
+        key: "getEnabledFields",
+        value: function getEnabledFields(fields) {
+            if (fields) {
+                //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+                //只留下enabled的field 结构
+                return this.filterEnabledFields(fields);
+            }
+            var fmap = {
+                left: [], right: []
+            };
+
+            _$6.each(this.fieldsMap, function (bamboo, b) {
+                if (_$6.isArray(bamboo)) {
+                    //多节竹子，堆叠
+
+                    var align;
+                    var fields = [];
+
+                    //设置完fields后，返回这个group属于left还是right的axis
+                    _$6.each(bamboo, function (obj, v) {
+                        if (obj.field && obj.enabled) {
+                            align = obj.yAxis.align;
+                            fields.push(obj.field);
+                        }
+                    });
+
+                    fields.length && fmap[align].push(fields);
+                } else {
+                    //单节棍
+                    if (bamboo.field && bamboo.enabled) {
+                        fmap[bamboo.yAxis.align].push(bamboo.field);
+                    }
+                }
+            });
+
+            return fmap;
         }
+
+        //由coor_base中得addField removeField来调用
+
     }, {
-        key: "addField",
-        value: function addField(field) {
-            this.enabledField(field);
-        }
-    }, {
-        key: "enabledField",
-        value: function enabledField(field) {
+        key: "changeFieldEnabled",
+        value: function changeFieldEnabled(field) {
             this.setFieldEnabled(field);
             var fieldMap = this.getFieldMapOf(field);
             var enabledFields = this.getEnabledFields()[fieldMap.yAxis.align];
-
             fieldMap.yAxis.resetData(this._getAxisDataFrame(enabledFields));
 
             //然后yAxis更新后，对应的背景也要更新
@@ -10512,7 +10539,7 @@ var Descartes_Component = function (_coorBase) {
                             field: fields[i],
                             enabled: true,
                             yAxis: me._getYaxisOfField(fields[i]),
-                            style: Theme.colors[fieldInd],
+                            color: Theme.colors[fieldInd],
                             ind: fieldInd++
                         };
                     }
@@ -10808,30 +10835,6 @@ var Descartes = function (_CoordinateBase) {
             }
             return d;
         }
-
-        /*
-         *添加一个yAxis字段，也就是添加一条brokenline折线
-         *@params field 添加的字段
-         **/
-
-    }, {
-        key: "add",
-        value: function add(field, targetYAxis) {
-            var me = this;
-            this._coordinate.addField(field, targetYAxis);
-            _$4.each(this._graphs, function (_g) {
-                _g.add(field, targetYAxis);
-            });
-        }
-    }, {
-        key: "remove",
-        value: function remove(field) {
-            var me = this;
-            this._coordinate.removeField(field);
-            _$4.each(this._graphs, function (_g) {
-                _g.remove(field);
-            });
-        }
     }, {
         key: "_horizontal",
         value: function _horizontal() {
@@ -11113,7 +11116,7 @@ var Descartes = function (_CoordinateBase) {
                             var _fstyle = "#777";
                             var fieldMap = me._coordinate.getFieldMapOf(field);
                             if (fieldMap) {
-                                _fstyle = fieldMap.style;
+                                _fstyle = fieldMap.color;
                             }
                             var lineStrokeStyle = ML.line && ML.line.strokeStyle || _fstyle;
                             var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
@@ -11386,11 +11389,11 @@ var polarGrid = function (_Component) {
         _this.line = {
             lineType: "sold",
             lineWidth: 1,
-            strokeStyle: "#ccc"
+            strokeStyle: "#e5e5e5"
         };
         _this.fill = {
-            fillStyle: ["#f9f9f9", "#f3f3f3"],
-            alpha: 0.8
+            fillStyle: null, //["#f9f9f9", "#f7f7f7"],
+            alpha: 0.5
         };
         _this.dataSection = [];
 
@@ -11444,7 +11447,6 @@ var polarGrid = function (_Component) {
     }, {
         key: "_widget",
         value: function _widget() {
-
             var me = this;
             _$14.each(this.dataSection, function (num, i) {
 
@@ -11461,9 +11463,10 @@ var polarGrid = function (_Component) {
                     };
 
                     var _ring;
+                    var ringType = Circle$1;
                     if (me.type == "circle") {
                         ctx.r = r;
-                        _ring = new Circle$1({
+                        _ring = new ringType({
                             context: ctx
                         });
                     } else {
@@ -11473,15 +11476,20 @@ var polarGrid = function (_Component) {
                                 ctx.pointList.push([point.x, point.y]);
                             }
                         });
-
-                        _ring = new Polygon$1({
+                        ringType = Polygon$1;
+                        _ring = new ringType({
                             context: ctx
                         });
                     }
                     me.sprite.addChildAt(_ring, 0);
 
                     if (i == me.dataSection.length - 1) {
-                        me.induce = _ring;
+                        ctx.fillAlpha = 0;
+                        ctx.fillStyle = "#ffffff";
+                        me.induce = new ringType({
+                            context: ctx
+                        });
+                        me.sprite.addChild(me.induce);
                     }
 
                     //绘制中心出发的蜘蛛网线
@@ -11502,11 +11510,11 @@ var polarGrid = function (_Component) {
         }
     }, {
         key: "_getFillStyle",
-        value: function _getFillStyle(style, i) {
-            if (_$14.isArray(style)) {
-                return style[i % style.length];
+        value: function _getFillStyle(color, i) {
+            if (_$14.isArray(color)) {
+                return color[i % color.length];
             }
-            return style;
+            return color;
         }
     }]);
     return polarGrid;
@@ -11545,11 +11553,18 @@ var polarComponent = function (_coorBase) {
             field: null,
             layoutType: "average", // average 弧度均分， proportion 和直角坐标中的一样
             data: [],
-            radians: [],
+            angleList: [], //对应layoutType下的角度list
             beginAngle: -90,
             scale: {
                 //刻度尺,在最外沿的蜘蛛网上面
-                enabled: true
+                data: [], //aAxis.data的 text.format后版本
+                enabled: true,
+                text: {
+                    format: function format(v) {
+                        return v;
+                    },
+                    fontColor: "#666"
+                }
             }
         };
 
@@ -11594,6 +11609,9 @@ var polarComponent = function (_coorBase) {
             this.fieldsMap = this._setFieldsMap();
         }
     }, {
+        key: "resetData",
+        value: function resetData(dataFrame, dataTrigger) {}
+    }, {
         key: "draw",
         value: function draw() {
             //先计算好要绘制的width,height, origin
@@ -11601,6 +11619,8 @@ var polarComponent = function (_coorBase) {
 
             this.rAxis.dataSection = this._getRDataSection();
             this.aAxis.data = this.root.dataFrame.getFieldData(this.aAxis.field);
+
+            this._setAAxisAngleList();
 
             if (this.grid.enabled) {
 
@@ -11617,6 +11637,60 @@ var polarComponent = function (_coorBase) {
 
                 this._initInduce();
             }
+        }
+    }, {
+        key: "changeFieldEnabled",
+        value: function changeFieldEnabled(field) {
+
+            this.setFieldEnabled(field);
+
+            this.rAxis.dataSection = this._getRDataSection();
+            this.aAxis.data = this.root.dataFrame.getFieldData(this.aAxis.field);
+
+            if (this.grid.enabled) {
+
+                this._grid.reset({
+                    dataSection: this.rAxis.dataSection
+                }, this);
+            }
+        }
+
+        //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+        //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+
+    }, {
+        key: "getEnabledFields",
+        value: function getEnabledFields(fields) {
+            if (fields) {
+                //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+                //只留下enabled的field 结构
+                return this.filterEnabledFields(fields);
+            }
+
+            var fmap = [];
+
+            _$13.each(this.fieldsMap, function (bamboo, b) {
+                if (_$13.isArray(bamboo)) {
+                    //多节竹子
+                    var fields = [];
+
+                    //设置完fields后，返回这个group属于left还是right的axis
+                    _$13.each(bamboo, function (obj, v) {
+                        if (obj.field && obj.enabled) {
+                            fields.push(obj.field);
+                        }
+                    });
+
+                    fields.length && fmap.push(fields);
+                } else {
+                    //单节棍
+                    if (bamboo.field && bamboo.enabled) {
+                        fmap.push(bamboo.field);
+                    }
+                }
+            });
+
+            return fmap;
         }
 
         //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
@@ -11643,8 +11717,9 @@ var polarComponent = function (_coorBase) {
                         clone_fields[i] = {
                             field: fields[i],
                             enabled: true,
-                            style: Theme.colors[fieldInd],
-                            ind: fieldInd++
+                            color: Theme.colors[fieldInd],
+                            ind: fieldInd++,
+                            group: null //这个field对应的ui分组
                         };
                     }
                     if (_$13.isArray(fields[i])) {
@@ -11896,6 +11971,20 @@ var polarComponent = function (_coorBase) {
         value: function getPointsOfR(r) {
             var me = this;
             var points = [];
+            _$13.each(me.aAxis.angleList, function (_a) {
+                //弧度
+                var _r = Math.PI * _a / 180;
+                var point = me.getPointInRadianOfR(_r, r);
+                points.push(point);
+            });
+            return points;
+        }
+    }, {
+        key: "_setAAxisAngleList",
+        value: function _setAAxisAngleList() {
+            var me = this;
+
+            me.aAxis.angleList = [];
 
             var aAxisArr = this.aAxis.data;
             if (this.aAxis.layoutType == "average") {
@@ -11916,12 +12005,8 @@ var polarComponent = function (_coorBase) {
             _$13.each(aAxisArr, function (p) {
                 //角度
                 var _a = (allAngle * ((p - min) / (max - min)) + me.aAxis.beginAngle + allAngle) % allAngle;
-                //弧度
-                var _r = Math.PI * _a / 180;
-                var point = me.getPointInRadianOfR(_r, r);
-                points.push(point);
+                me.aAxis.angleList.push(_a);
             });
-            return points;
         }
     }, {
         key: "_drawAAxisScale",
@@ -11940,13 +12025,16 @@ var polarComponent = function (_coorBase) {
                 var c = {
                     x: point.x,
                     y: point.y,
-                    fillStyle: "#ccc"
+                    fillStyle: me.aAxis.scale.text.fontColor
                 };
 
+                label = me.aAxis.scale.text.format(label);
                 _$13.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
                 me._aAxisScaleSp.addChild(new canvax.Display.Text(label, {
                     context: c
                 }));
+
+                me.aAxis.scale.data.push(label);
             });
         }
 
@@ -12002,6 +12090,62 @@ var polarComponent = function (_coorBase) {
             };
         }
     }, {
+        key: "getAxisNodeAt",
+        value: function getAxisNodeAt(i) {
+            var me = this;
+            var node = {
+                ind: i,
+                value: me.aAxis.data[i],
+                text: me.aAxis.scale.data[i],
+                angle: me.aAxis.angleList[i]
+            };
+            return node;
+        }
+
+        //从event中计算出来这个e.point对应origin的index分段索引值
+
+    }, {
+        key: "getAAxisIndOf",
+        value: function getAAxisIndOf(e) {
+            var me = this;
+
+            if (e.aAxisInd !== undefined) {
+                return e.aAxisInd;
+            }
+
+            var point = e.point;
+
+            //angle全部都换算到0-360范围内
+            var angle = (me.getRadianInPoint(point) * 180 / Math.PI - me.aAxis.beginAngle) % me.allAngle;
+            var r = Math.sqrt(Math.pow(point.x, 2) + Math.pow(point.y, 2));
+
+            var aAxisInd = 0;
+            var aLen = me.aAxis.angleList.length;
+            _$13.each(me.aAxis.angleList, function (_a, i) {
+
+                _a = (_a - me.aAxis.beginAngle) % me.allAngle;
+
+                var nextInd = i + 1;
+                var nextAngle = (me.aAxis.angleList[nextInd] - me.aAxis.beginAngle) % me.allAngle;
+                if (i == aLen - 1) {
+                    nextInd = 0;
+                    nextAngle = me.allAngle;
+                }
+
+                //把两个极角坐标都缩放到r所在的维度上面
+                if (angle >= _a && angle <= nextAngle) {
+                    //说明就再这个angle区间
+                    if (angle - _a < nextAngle - angle) {
+                        aAxisInd = i;
+                    } else {
+                        aAxisInd = nextInd;
+                    }
+                    return false;
+                }
+            });
+            return aAxisInd;
+        }
+    }, {
         key: "_initInduce",
         value: function _initInduce() {
             var me = this;
@@ -12011,6 +12155,27 @@ var polarComponent = function (_coorBase) {
                 //图表触发，用来处理Tips
                 me.root.fire(e.type, e);
             });
+        }
+    }, {
+        key: "getTipsInfoHandler",
+        value: function getTipsInfoHandler(e) {
+            //这里只获取xAxis的刻度信息;
+            var me = this;
+            var aAxisInd = me.getAAxisIndOf(e);
+
+            var aNode = me.getAxisNodeAt(aAxisInd);
+
+            var obj = {
+                aAxis: aNode,
+                title: aNode.text,
+                nodes: [
+                    //遍历_graphs 去拿东西
+                ]
+            };
+            if (e.eventInfo) {
+                obj = _$13.extend(obj, e.eventInfo);
+            }
+            return obj;
         }
     }]);
     return polarComponent;
@@ -12111,7 +12276,7 @@ var Polar = function (_CoordinateBase) {
                 });
             });
 
-            //this.bindEvent();
+            this.bindEvent();
         }
     }, {
         key: "_getLegendData",
@@ -12137,18 +12302,59 @@ var Polar = function (_CoordinateBase) {
             return legendData;
         }
     }, {
-        key: "add",
-        value: function add(name) {
-            _$12.each(this._graphs, function (_g) {
-                _g.add(name);
+        key: "bindEvent",
+        value: function bindEvent() {
+            var me = this;
+            this.on("panstart mouseover", function (e) {
+                var _tips = me.getComponentById("tips");
+                if (_tips) {
+                    me._setTipsInfo.apply(me, [e]);
+                    _tips.show(e);
+                }
+            });
+            this.on("panmove mousemove", function (e) {
+                var _tips = me.getComponentById("tips");
+                if (_tips) {
+                    me._setTipsInfo.apply(me, [e]);
+                    _tips.move(e);
+                }
+            });
+            this.on("panend mouseout", function (e) {
+                //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
+                //那么就不要执行hide，顶多只显示这个点得tips数据
+                var _tips = me.getComponentById("tips");
+                if (_tips && !(e.toTarget && me._coordinate.induce && me._coordinate.induce.containsPoint(me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
+                    _tips.hide(e);
+                }
+            });
+            this.on("tap", function (e) {
+                var _tips = me.getComponentById("tips");
+                if (_tips) {
+                    _tips.hide(e);
+                    me._setTipsInfo.apply(me, [e]);
+                    _tips.show(e);
+                }
             });
         }
+
+        //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+        //方便外部自定义tip是的content
+
     }, {
-        key: "remove",
-        value: function remove(name) {
-            _$12.each(this._graphs, function (_g) {
-                _g.remove(name);
-            });
+        key: "_setTipsInfo",
+        value: function _setTipsInfo(e) {
+            e.eventInfo = this._coordinate.getTipsInfoHandler(e);
+
+            //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
+            if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
+                var nodes = [];
+                var iNode = e.eventInfo.aAxis.ind;
+                _$12.each(this._graphs, function (_g) {
+                    nodes = nodes.concat(_g.getNodesAt(iNode));
+                });
+                e.eventInfo.nodes = nodes;
+            }
+            e.eventInfo.rowData = this.dataFrame.getRowData(iNode);
         }
     }]);
     return Polar;
@@ -12293,27 +12499,27 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
             var index = $o.iNode;
             var group = me.barsSp.getChildById('barGroup_' + index);
 
-            var fillStyle = $o.fillStyle || me._getStyle(me.bar.fillStyle);
+            var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle);
             for (var a = 0, al = group.getNumChildren(); a < al; a++) {
                 var rectEl = group.getChildAt(a);
                 rectEl.context.fillStyle = fillStyle;
             }
         }
     }, {
-        key: "_getStyle",
-        value: function _getStyle(c, groups, vLen, i, h, v, value, field, _flattenField) {
+        key: "_getColor",
+        value: function _getColor(c, groups, vLen, i, h, v, value, field, _flattenField) {
             var fieldMap = this.root._coordinate.getFieldMapOf(field);
-            var style = fieldMap.style;
+            var color = fieldMap.color;
 
             //field对应的索引，， 取颜色这里不要用i
             if (_$15.isString(c)) {
-                style = c;
+                color = c;
             }
             if (_$15.isArray(c)) {
-                style = _$15.flatten(c)[_$15.indexOf(_flattenField, field)];
+                color = _$15.flatten(c)[_$15.indexOf(_flattenField, field)];
             }
             if (_$15.isFunction(c)) {
-                style = c.apply(this, [{
+                color = c.apply(this, [{
                     iGroup: i,
                     iNode: h,
                     iLay: v,
@@ -12326,7 +12532,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                 }]);
             }
 
-            return style;
+            return color;
         }
     }, {
         key: "_getBarWidth",
@@ -12472,7 +12678,7 @@ var BarGraphs = function (_Canvax$Event$EventDi) {
                         var rectData = h_group[v][h];
                         rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                        var fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+                        var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
 
                         rectData.fillStyle = fillStyle;
 
@@ -13217,7 +13423,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
         _this.line = { //线
             enabled: 1,
-            strokeStyle: fieldMap.style,
+            strokeStyle: fieldMap.color,
             lineWidth: 2,
             lineType: "solid",
             smooth: true
@@ -13241,7 +13447,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
         };
 
-        _this.fill = { //填充
+        _this.area = { //填充
             enabled: 1,
             fillStyle: null,
             alpha: 0.3
@@ -13310,8 +13516,8 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 //这个时候可以先取线的style，和线保持一致
                 color = this._getLineStrokeStyle();
                 if (!color || color == "" || !_$17.isString(color)) {
-                    //那么最后，取this.fieldMap.style
-                    color = this.fieldMap.style;
+                    //那么最后，取this.fieldMap.color
+                    color = this.fieldMap.color;
                 }
             }
             return color;
@@ -13338,7 +13544,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             obj.strokeStyle = me._getProp(me.node.strokeStyle, ind) || me._getLineStrokeStyle();
             obj.color = obj.strokeStyle;
             obj.lineWidth = me._getProp(me.node.lineWidth, ind) || 2;
-            obj.alpha = me._getProp(me.fill.alpha, ind);
+            obj.alpha = me._getProp(me.area.alpha, ind);
             obj.field = me.field;
             obj.groupInd = me.groupInd;
             return obj;
@@ -13494,8 +13700,8 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 me._bline.context.pointList = _$17.clone(list);
                 me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
 
-                me._fill.context.path = me._fillLine(me._bline);
-                me._fill.context.fillStyle = me._getFillStyle();
+                me._area.context.path = me._fillLine(me._bline);
+                me._area.context.fillStyle = me._getFillStyle();
 
                 var nodeInd = 0;
                 _$17.each(list, function (point, i) {
@@ -13618,19 +13824,19 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             me.sprite.addChild(bline);
             me._bline = bline;
 
-            var fill = new Path$1({ //填充
+            var area = new Path$1({ //填充
                 context: {
                     path: me._fillLine(bline),
                     fillStyle: me._getFillStyle(),
-                    globalAlpha: _$17.isArray(me.fill.alpha) ? 1 : me.fill.alpha
+                    globalAlpha: _$17.isArray(me.area.alpha) ? 1 : me.area.alpha
                 }
             });
 
-            if (!this.fill.enabled) {
-                fill.context.visible = false;
+            if (!this.area.enabled) {
+                area.context.visible = false;
             }
-            me.sprite.addChild(fill);
-            me._fill = fill;
+            me.sprite.addChild(area);
+            me._area = area;
 
             me._createNodes();
             me._createTexts();
@@ -13662,17 +13868,17 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             var fill_gradient = null;
 
             // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-            var _fillStyle = me._getProp(me.fill.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
+            var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
 
-            if (_$17.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+            if (_$17.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
                 //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
                 //如果拿回来的style已经是个gradient了，那么就不管了
-                me.fill.alpha.length = 2;
-                if (me.fill.alpha[0] == undefined) {
-                    me.fill.alpha[0] = 0;
+                me.area.alpha.length = 2;
+                if (me.area.alpha[0] == undefined) {
+                    me.area.alpha[0] = 0;
                 }
-                if (me.fill.alpha[1] == undefined) {
-                    me.fill.alpha[1] = 0;
+                if (me.area.alpha[1] == undefined) {
+                    me.area.alpha[1] = 0;
                 }
 
                 //从bline中找到最高的点
@@ -13688,10 +13894,10 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
                 var rgb = ColorFormat.colorRgb(_fillStyle);
-                var rgba0 = rgb.replace(')', ', ' + me._getProp(me.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+                var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
                 fill_gradient.addColorStop(0, rgba0);
 
-                var rgba1 = rgb.replace(')', ', ' + me.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+                var rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
                 fill_gradient.addColorStop(1, rgba1);
 
                 _fillStyle = fill_gradient;
@@ -13962,7 +14168,7 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
         //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
         _this.ctx = root.stage.canvas.getContext("2d");
         _this.dataFrame = root.dataFrame; //root.dataFrame的引用
-        _this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
+        _this.data = []; //{"uv":{}.. ,"click": "pv":]}，这样按照字段摊平的一维结构
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         _this.field = opts.field;
@@ -14124,7 +14330,6 @@ var LineGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "remove",
         value: function remove(field) {
-
             var me = this;
             var i = me.getGroupIndex(field);
 
@@ -15657,6 +15862,8 @@ var PieGraphs = function (_Canvax$Event$EventDi) {
     return PieGraphs;
 }(canvax.Event.EventDispatcher);
 
+var Polygon$2$1 = canvax.Shapes.Polygon;
+var Circle$4 = canvax.Shapes.Circle;
 var _$21 = canvax._;
 
 var RadarGraphs = function (_Canvax$Event$EventDi) {
@@ -15668,7 +15875,7 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
         var _this = possibleConstructorReturn$1(this, (RadarGraphs.__proto__ || Object.getPrototypeOf(RadarGraphs)).call(this, opts, root));
 
         _this.type = "radar";
-        debugger;
+
         //这里所有的opts都要透传给 group
         _this._opts = opts || {};
         _this.root = root;
@@ -15684,11 +15891,35 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
             y: 0
         };
 
+        _this.line = {
+            enabled: true,
+            lineWidth: 2,
+            strokeStyle: null
+        };
+        _this.area = {
+            enabled: true,
+            fillStyle: null,
+            fillAlpha: 0.1
+        };
+        _this.node = {
+            enabled: true,
+            r: 4,
+            strokeStyle: "#ffffff",
+            lineWidth: 1
+        };
+
         _this.animation = true;
 
         _this.field = null;
 
         _this.sprite = null;
+
+        _this.groups = {
+            //uv : {
+            //   area : ,
+            //   nodes: 
+            //}
+        };
 
         _$21.extend(true, _this, opts);
 
@@ -15706,18 +15937,105 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
     }, {
         key: "draw",
         value: function draw(opts) {
-            _$21.extend(true, this, opts);
-
             var me = this;
-
+            _$21.extend(true, this, opts);
             this.data = this._trimGraphs();
+
+            this._widget();
+
+            this.sprite.context.x = this.origin.x;
+            this.sprite.context.y = this.origin.y;
         }
     }, {
-        key: "setEnabledField",
-        value: function setEnabledField() {
-            //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-            this.enabledField = this.root._coordinate.getEnabledFields(this.field);
+        key: "_widget",
+        value: function _widget() {
+            var me = this;
+            var _coor = this.root._coordinate;
+
+            var groupInd = 0;
+            _$21.each(this.data, function (list, field) {
+
+                var group = {};
+
+                var pointList = [];
+                _$21.each(list, function (node, i) {
+                    pointList.push([node.point.x, node.point.y]);
+                });
+
+                var fieldMap = _coor.getFieldMapOf(field);
+
+                var _strokeStyle = me._getStyle(me.line.strokeStyle, groupInd, fieldMap.color, fieldMap);
+
+                var polyCtx = {
+                    pointList: pointList
+                };
+
+                if (me.line.enabled) {
+                    polyCtx.lineWidth = me.line.lineWidth;
+                    polyCtx.strokeStyle = _strokeStyle;
+                }
+                if (me.area.enabled) {
+                    polyCtx.fillStyle = me._getStyle(me.area.fillStyle, groupInd, fieldMap.color, fieldMap);
+                    polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, groupInd, 1, fieldMap);
+                }
+
+                var _poly = new Polygon$2$1({
+                    context: polyCtx
+                });
+                group.area = _poly;
+                me.sprite.addChild(_poly);
+
+                _poly.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+                    me.fire(e.type, e);
+                    //图表触发，用来处理Tips
+                    me.root.fire(e.type, e);
+                });
+
+                if (me.node.enabled) {
+                    //绘制圆点
+                    var _nodes = [];
+                    _$21.each(list, function (node, i) {
+                        pointList.push([node.point.x, node.point.y]);
+                        var _node = new Circle$4({
+                            context: {
+                                x: node.point.x,
+                                y: node.point.y,
+                                r: me.node.r,
+                                lineWidth: me.node.lineWidth,
+                                strokeStyle: me.node.strokeStyle,
+                                fillStyle: _strokeStyle
+                            }
+                        });
+                        me.sprite.addChild(_node);
+                        _node.nodeInd = i;
+                        _node.nodeData = node;
+                        _node.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+                            me.fire(e.type, e);
+                            //图表触发，用来处理Tips
+
+                            //这样就会直接用这个aAxisInd了，不会用e.point去做计算
+                            e.aAxisInd = this.nodeInd;
+                            e.eventInfo = {
+                                nodes: [this.nodeData]
+                            };
+                            me.root.fire(e.type, e);
+                        });
+                        _nodes.push(_node);
+                    });
+                    group.nodes = _nodes;
+                }
+
+                me.groups[field] = group;
+
+                groupInd++;
+            });
         }
+    }, {
+        key: "remove",
+        value: function remove(field) {}
+    }, {
+        key: "add",
+        value: function add(field) {}
     }, {
         key: "_trimGraphs",
         value: function _trimGraphs() {
@@ -15725,8 +16043,66 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
             var _coor = this.root._coordinate;
 
             //用来计算下面的hLen
-            this.setEnabledField();
-            debugger;
+            this.enabledField = this.root._coordinate.getEnabledFields(this.field);
+
+            var data = {};
+            _$21.each(this.enabledField, function (field) {
+                var dataOrg = me.root.dataFrame.getFieldData(field);
+                var fieldMap = _coor.getFieldMapOf(field);
+                var arr = [];
+
+                _$21.each(_coor.aAxis.angleList, function (_a, i) {
+                    //弧度
+                    var _r = Math.PI * _a / 180;
+                    var point = _coor.getPointInRadianOfR(_r, _coor.getROfNum(dataOrg[i]));
+                    arr.push({
+                        field: field,
+                        value: dataOrg[i],
+                        point: point,
+                        color: fieldMap.color
+                    });
+                });
+                data[field] = arr;
+            });
+
+            return data;
+        }
+    }, {
+        key: "_getStyle",
+        value: function _getStyle(style, groupInd, def, fieldMap) {
+            var _s = def;
+            if (_$21.isString(style) || _$21.isNumber(style)) {
+                _s = style;
+            }
+            if (_$21.isArray(style)) {
+                _s = style[groupInd];
+            }
+            if (_$21.isFunction(style)) {
+                _s = style(groupInd, fieldMap);
+            }
+            return _s;
+        }
+    }, {
+        key: "getNodesAt",
+        value: function getNodesAt(index) {
+            //该index指当前
+            var data = this.data;
+            var _nodesInfoList = []; //节点信息集合
+
+            _$21.each(this.enabledField, function (fs, i) {
+                if (_$21.isArray(fs)) {
+                    _$21.each(fs, function (_fs, ii) {
+                        //fs的结构两层到顶了
+                        var node = data[_fs][index];
+                        node && _nodesInfoList.push(node);
+                    });
+                } else {
+                    var node = data[fs][index];
+                    node && _nodesInfoList.push(node);
+                }
+            });
+
+            return _nodesInfoList;
         }
     }]);
     return RadarGraphs;
@@ -15734,7 +16110,7 @@ var RadarGraphs = function (_Canvax$Event$EventDi) {
 
 //import Tips from "../tips/index"
 
-var Circle$4 = canvax.Shapes.Circle;
+var Circle$5 = canvax.Shapes.Circle;
 var _$22 = canvax._;
 
 var Legend = function (_Component) {
@@ -15838,7 +16214,7 @@ var Legend = function (_Component) {
 
             _$22.each(this.data, function (obj, i) {
 
-                var icon = new Circle$4({
+                var icon = new Circle$5({
                     id: "legend_field_icon_" + i,
                     context: {
                         x: 0,
@@ -16672,7 +17048,7 @@ var MarkLine = function (_Component) {
     return MarkLine;
 }(component);
 
-var Circle$5 = canvax.Shapes.Circle;
+var Circle$6 = canvax.Shapes.Circle;
 var Droplet$1 = canvax.Shapes.Droplet;
 var _$25 = canvax._;
 
@@ -16799,7 +17175,7 @@ var MarkPoint = function (_Component) {
                 cursor: "point",
                 visible: false
             };
-            me.shape = new Circle$5({
+            me.shape = new Circle$6({
                 context: ctx
             });
             me.sprite.addChild(me.shape);
@@ -16851,7 +17227,7 @@ var MarkPoint = function (_Component) {
                 fillStyle: "#fff",
                 visible: false
             };
-            me.shapeCircle = new Circle$5({
+            me.shapeCircle = new Circle$6({
                 context: circleCtx
             });
             me.sprite.addChild(me.shapeCircle);
@@ -16863,7 +17239,7 @@ var MarkPoint = function (_Component) {
 }(component);
 
 var Line$8 = canvax.Shapes.Line;
-var Circle$6 = canvax.Shapes.Circle;
+var Circle$7 = canvax.Shapes.Circle;
 var _$26 = canvax._;
 
 var Anchor = function (_Component) {
@@ -17051,7 +17427,7 @@ var Anchor = function (_Component) {
             this.sprite.addChild(self._yLine);
 
             var nodepos = self.sprite.localToGlobal(self.cross);
-            self._circle = new Circle$6({
+            self._circle = new Circle$7({
                 context: {
                     x: parseInt(nodepos.x),
                     y: parseInt(nodepos.y),

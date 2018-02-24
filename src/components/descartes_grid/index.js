@@ -43,6 +43,7 @@ export default class descartesGrid extends Component
             strokeStyle : '#f0f0f0',//'#e5e5e5',
             filter      : null
         } 
+        
         this.fill = {
             fillStyle : null,
             alpha : null

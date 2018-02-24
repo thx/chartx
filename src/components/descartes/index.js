@@ -304,22 +304,53 @@ export default class Descartes_Component extends coorBase
         }
     }
 
-    removeField( field )
+    //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+    getEnabledFields( fields )
     {
-        this.enabledField( field );
+        if( fields ){
+            //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+            //只留下enabled的field 结构
+            return this.filterEnabledFields( fields );
+        }
+        var fmap = {
+            left: [], right:[]
+        };
+
+        _.each( this.fieldsMap, function( bamboo, b ){
+            if( _.isArray( bamboo ) ){
+                //多节竹子，堆叠
+
+                var align;
+                var fields = [];
+                
+                //设置完fields后，返回这个group属于left还是right的axis
+                _.each( bamboo, function( obj, v ){
+                    if( obj.field && obj.enabled ){
+                        align = obj.yAxis.align;
+                        fields.push( obj.field );
+                    }
+                } );
+
+                fields.length && fmap[ align ].push( fields );
+
+            } else {
+                //单节棍
+                if( bamboo.field && bamboo.enabled ){
+                    fmap[ bamboo.yAxis.align ].push( bamboo.field );
+                }
+            };
+        } );
+
+        return fmap;
     }
 
-    addField( field )
-    {
-        this.enabledField( field );
-    }
-
-    enabledField( field )
+    //由coor_base中得addField removeField来调用
+    changeFieldEnabled( field )
     {
         this.setFieldEnabled( field );
         var fieldMap = this.getFieldMapOf(field);
         var enabledFields = this.getEnabledFields()[ fieldMap.yAxis.align ];
-
         fieldMap.yAxis.resetData( this._getAxisDataFrame( enabledFields ) );
 
         //然后yAxis更新后，对应的背景也要更新
@@ -380,7 +411,7 @@ export default class Descartes_Component extends coorBase
                         field : fields[i],
                         enabled : true,
                         yAxis : me._getYaxisOfField( fields[i] ),
-                        style : Theme.colors[ fieldInd ],
+                        color : Theme.colors[ fieldInd ],
                         ind : fieldInd++
                     }
                 }

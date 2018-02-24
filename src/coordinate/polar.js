@@ -30,7 +30,6 @@ export default class Polar extends CoordinateBase
         //强制把graphs设置为数组
         this.graphs = _.flatten( [ this.graphs ] );
 
-
         //根据graphs.field 来 配置 this.coordinate.rAxis.field -------------------
         if( !_.isArray( this.coordinate.rAxis.field ) ){
             this.coordinate.rAxis.field = [this.coordinate.rAxis.field ];
@@ -96,7 +95,7 @@ export default class Polar extends CoordinateBase
             } );
         } );
 
-        //this.bindEvent();
+        this.bindEvent();
     }
 
     _getLegendData()
@@ -122,18 +121,56 @@ export default class Polar extends CoordinateBase
         return legendData;
     }
 
-    add( name )
+    bindEvent()
     {
-        _.each( this._graphs, function( _g ){
-            _g.add( name )
+        var me = this;
+        this.on("panstart mouseover", function(e) {
+            var _tips = me.getComponentById("tips");
+            if ( _tips ) {
+                me._setTipsInfo.apply(me, [e]);
+                _tips.show(e);
+            };
+        });
+        this.on("panmove mousemove", function(e) {
+            var _tips = me.getComponentById("tips");
+            if ( _tips ) {
+                me._setTipsInfo.apply(me, [e]);
+                _tips.move(e);
+            }
+        });
+        this.on("panend mouseout", function(e) {
+            //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
+            //那么就不要执行hide，顶多只显示这个点得tips数据
+            var _tips = me.getComponentById("tips");
+            if ( _tips && !( e.toTarget && me._coordinate.induce && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
+                _tips.hide(e);
+            }
+        });
+        this.on("tap", function(e) {
+            var _tips = me.getComponentById("tips");
+            if ( _tips ) {
+                _tips.hide(e);
+                me._setTipsInfo.apply(me, [e]);
+                _tips.show(e);
+            }
         });
     }
 
-    remove( name )
+    //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
+    //方便外部自定义tip是的content
+    _setTipsInfo(e)
     {
-        _.each( this._graphs, function( _g ){
-            _g.remove( name )
-        });
-    }
+        e.eventInfo = this._coordinate.getTipsInfoHandler(e);
 
+        //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
+        if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
+            var nodes = [];
+            var iNode = e.eventInfo.aAxis.ind;
+            _.each( this._graphs, function( _g ){
+                nodes = nodes.concat( _g.getNodesAt( iNode ) );
+            } );
+            e.eventInfo.nodes = nodes;
+        };
+        e.eventInfo.rowData = this.dataFrame.getRowData( iNode );
+    }
 };

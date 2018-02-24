@@ -32,7 +32,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
         this.line = { //线
             enabled: 1,
-            strokeStyle: fieldMap.style,
+            strokeStyle: fieldMap.color,
             lineWidth: 2,
             lineType: "solid",
             smooth: true
@@ -56,7 +56,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
         };
 
-        this.fill = { //填充
+        this.area = { //填充
             enabled:1,
             fillStyle: null,
             alpha: 0.3
@@ -122,8 +122,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             //这个时候可以先取线的style，和线保持一致
             color = this._getLineStrokeStyle();
             if( !color || color == "" || !_.isString( color ) ){
-                //那么最后，取this.fieldMap.style
-                color = this.fieldMap.style;
+                //那么最后，取this.fieldMap.color
+                color = this.fieldMap.color;
             }
         };
         return color;
@@ -150,7 +150,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         obj.strokeStyle = me._getProp(me.node.strokeStyle, ind) || me._getLineStrokeStyle();
         obj.color = obj.strokeStyle;
         obj.lineWidth = me._getProp(me.node.lineWidth, ind) || 2;
-        obj.alpha = me._getProp(me.fill.alpha, ind);
+        obj.alpha = me._getProp(me.area.alpha, ind);
         obj.field = me.field;
         obj.groupInd = me.groupInd;
         return obj
@@ -302,8 +302,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             me._bline.context.pointList = _.clone( list );
             me._bline.context.strokeStyle = me._getLineStrokeStyle( list );
 
-            me._fill.context.path = me._fillLine(me._bline);
-            me._fill.context.fillStyle = me._getFillStyle();
+            me._area.context.path = me._fillLine(me._bline);
+            me._area.context.fillStyle = me._getFillStyle();
 
             var nodeInd=0;
             _.each( list, function( point, i ){
@@ -433,19 +433,19 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         me.sprite.addChild(bline);
         me._bline = bline;
 
-        var fill = new Path({ //填充
+        var area = new Path({ //填充
             context: {
                 path: me._fillLine(bline),
                 fillStyle: me._getFillStyle(), 
-                globalAlpha: _.isArray(me.fill.alpha) ? 1 : me.fill.alpha
+                globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
             }
         });
 
-        if( !this.fill.enabled ){
-            fill.context.visible = false
+        if( !this.area.enabled ){
+            area.context.visible = false
         }
-        me.sprite.addChild(fill);
-        me._fill = fill;
+        me.sprite.addChild(area);
+        me._area = area;
 
         me._createNodes();
         me._createTexts();
@@ -477,17 +477,17 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var fill_gradient = null;
 
         // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-        var _fillStyle = me._getProp(me.fill.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
+        var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
 
-        if (_.isArray(me.fill.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+        if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
             //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
             //如果拿回来的style已经是个gradient了，那么就不管了
-            me.fill.alpha.length = 2;
-            if (me.fill.alpha[0] == undefined) {
-                me.fill.alpha[0] = 0;
+            me.area.alpha.length = 2;
+            if (me.area.alpha[0] == undefined) {
+                me.area.alpha[0] = 0;
             };
-            if (me.fill.alpha[1] == undefined) {
-                me.fill.alpha[1] = 0;
+            if (me.area.alpha[1] == undefined) {
+                me.area.alpha[1] = 0;
             };
 
             //从bline中找到最高的点
@@ -503,10 +503,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
             var rgb = ColorFormat.colorRgb( _fillStyle );
-            var rgba0 = rgb.replace(')', ', ' + me._getProp(me.fill.alpha[0]) + ')').replace('RGB', 'RGBA');
+            var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(0, rgba0);
 
-            var rgba1 = rgb.replace(')', ', ' + me.fill.alpha[1] + ')').replace('RGB', 'RGBA');
+            var rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(1, rgba1);
 
             _fillStyle = fill_gradient;
@@ -628,7 +628,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 }
             };
         };
-      
     }
 
     _createTexts()

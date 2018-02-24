@@ -35,11 +35,16 @@ export default class polarComponent extends coorBase
             field : null,
             layoutType : "average", // average 弧度均分， proportion 和直角坐标中的一样
             data : [],
-            radians : [],
+            angleList : [], //对应layoutType下的角度list
             beginAngle : -90,
             scale : {
                 //刻度尺,在最外沿的蜘蛛网上面
-                enabled : true
+                data : [], //aAxis.data的 text.format后版本
+                enabled : true,
+                text : {
+                    format : function( v ){ return v },
+                    fontColor : "#666"
+                }
             }
         };
 
@@ -82,6 +87,11 @@ export default class polarComponent extends coorBase
         this.fieldsMap = this._setFieldsMap();
     }
 
+    resetData( dataFrame , dataTrigger )
+    {
+
+    }
+
     draw()
     {
         //先计算好要绘制的width,height, origin
@@ -89,6 +99,8 @@ export default class polarComponent extends coorBase
 
         this.rAxis.dataSection = this._getRDataSection();
         this.aAxis.data = this.root.dataFrame.getFieldData( this.aAxis.field );
+
+        this._setAAxisAngleList();
 
         if( this.grid.enabled ){
 
@@ -104,9 +116,62 @@ export default class polarComponent extends coorBase
             };
     
             this._initInduce();
+        };
+    }
 
+    changeFieldEnabled( field )
+    {
+    
+        this.setFieldEnabled( field );
+
+        this.rAxis.dataSection = this._getRDataSection();
+        this.aAxis.data = this.root.dataFrame.getFieldData( this.aAxis.field );
+
+        if( this.grid.enabled ){
+
+            this._grid.reset( {
+                dataSection : this.rAxis.dataSection
+            } , this);
+    
         };
 
+    }
+
+    //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+    getEnabledFields( fields )
+    {
+        if( fields ){
+            //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+            //只留下enabled的field 结构
+            return this.filterEnabledFields( fields );
+        };
+
+        var fmap = [];
+
+        _.each( this.fieldsMap, function( bamboo, b ){
+            if( _.isArray( bamboo ) ){
+                //多节竹子
+                var fields = [];
+                
+                //设置完fields后，返回这个group属于left还是right的axis
+                _.each( bamboo, function( obj, v ){
+                    if( obj.field && obj.enabled ){
+                        fields.push( obj.field );
+                    }
+                } );
+
+                fields.length && fmap.push( fields );
+
+            } else {
+                //单节棍
+                if( bamboo.field && bamboo.enabled ){
+                    fmap.push( bamboo.field );
+                }
+            };
+        } );
+
+        return fmap;
     }
 
     //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
@@ -131,8 +196,9 @@ export default class polarComponent extends coorBase
                     clone_fields[i] = {
                         field : fields[i],
                         enabled : true,
-                        style : Theme.colors[ fieldInd ],
-                        ind : fieldInd++
+                        color : Theme.colors[ fieldInd ],
+                        ind : fieldInd++,
+                        group : null //这个field对应的ui分组
                     }
                 }
                 if( _.isArray( fields[i] ) ){
@@ -391,6 +457,20 @@ export default class polarComponent extends coorBase
     {
         var me = this;
         var points = [];
+        _.each( me.aAxis.angleList, function( _a ){
+            //弧度
+            var _r = Math.PI*_a / 180;
+            var point = me.getPointInRadianOfR( _r, r );
+            points.push( point )
+        } );
+        return points;
+    }
+
+    _setAAxisAngleList()
+    {
+        var me = this;
+
+        me.aAxis.angleList = [];
 
         var aAxisArr = this.aAxis.data;
         if( this.aAxis.layoutType == "average" ){
@@ -411,12 +491,9 @@ export default class polarComponent extends coorBase
         _.each( aAxisArr, function( p ){
             //角度
             var _a = ((allAngle * ( (p-min)/(max-min) ) + me.aAxis.beginAngle) + allAngle)%allAngle;
-            //弧度
-            var _r = Math.PI*_a / 180;
-            var point = me.getPointInRadianOfR( _r, r );
-            points.push( point )
+            me.aAxis.angleList.push( _a );
         } );
-        return points;
+        
     }
 
     _drawAAxisScale()
@@ -435,13 +512,16 @@ export default class polarComponent extends coorBase
             var c = {
                 x : point.x,
                 y : point.y,
-                fillStyle : "#ccc"
-            }
+                fillStyle : me.aAxis.scale.text.fontColor
+            };
 
+            label = me.aAxis.scale.text.format( label );
             _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
             me._aAxisScaleSp.addChild(new Canvax.Display.Text( label , {
                 context : c
             }));
+
+            me.aAxis.scale.data.push( label );
             
         } );
     }
@@ -497,6 +577,63 @@ export default class polarComponent extends coorBase
     }
 
 
+
+
+    getAxisNodeAt( i )
+    {
+        var me = this;
+        var node = {
+            ind   : i,
+            value : me.aAxis.data[i],
+            text  : me.aAxis.scale.data[i],
+            angle : me.aAxis.angleList[i]
+        };
+        return node;
+    }
+
+    //从event中计算出来这个e.point对应origin的index分段索引值
+    getAAxisIndOf( e )
+    {
+        var me = this;
+
+        if( e.aAxisInd !== undefined ){
+            return e.aAxisInd;
+        };
+
+        var point = e.point;
+
+        //angle全部都换算到0-360范围内
+        var angle = (me.getRadianInPoint( point ) * 180 / Math.PI - me.aAxis.beginAngle) % me.allAngle;
+        var r = Math.sqrt( Math.pow( point.x, 2 ) + Math.pow( point.y, 2 ) );
+
+        var aAxisInd = 0;
+        var aLen = me.aAxis.angleList.length;
+        _.each( me.aAxis.angleList , function( _a, i ){
+
+            _a = (_a - me.aAxis.beginAngle) % me.allAngle;
+
+            var nextInd = i+1;
+            var nextAngle = (me.aAxis.angleList[ nextInd ] - me.aAxis.beginAngle) % me.allAngle;
+            if( i == aLen - 1 ){
+                nextInd = 0;
+                nextAngle = me.allAngle;
+            };
+            
+            //把两个极角坐标都缩放到r所在的维度上面
+            if( angle >= _a && angle <= nextAngle ){
+                //说明就再这个angle区间
+                if( angle - _a < nextAngle - angle ){
+                    aAxisInd = i;
+                } else {
+                    aAxisInd = nextInd;
+                }
+                return false;
+            };
+
+        } ); 
+        return aAxisInd;
+    }
+
     _initInduce()
     {
         var me = this;
@@ -506,5 +643,26 @@ export default class polarComponent extends coorBase
             //图表触发，用来处理Tips
             me.root.fire( e.type, e );
         });
+    }
+
+    getTipsInfoHandler( e )
+    {
+        //这里只获取xAxis的刻度信息;
+        var me = this;
+        var aAxisInd = me.getAAxisIndOf( e );
+
+        var aNode = me.getAxisNodeAt(aAxisInd)
+        
+        var obj = {
+            aAxis : aNode,
+            title : aNode.text,
+            nodes : [
+                //遍历_graphs 去拿东西
+            ]
+        };
+        if( e.eventInfo ){
+            obj = _.extend(obj, e.eventInfo);
+        };
+        return obj;
     }
 }

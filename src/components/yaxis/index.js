@@ -25,18 +25,18 @@ export default class yAxis extends Component
         this.scale = {
             enabled : true,
             line : {
-                enabled: 1,      //是否有line
-                width: 4,        //刻度线的宽度，和轴线无关
-                lineWidth: 1,
-                strokeStyle: '#cccccc',
-                marginToLine: 2
+                enabled      : 1,      //是否有line
+                width        : 4,      //刻度线的宽度，和轴线无关
+                lineWidth    : 1,
+                strokeStyle  : '#cccccc',
+                marginToLine : 2
             },
             text : {
-                fillStyle: '#999',
-                fontSize: 12,
-                format: null,
-                rotation: 0,
-                marginToLine: 3 //和刻度线的距离
+                fontColor    : '#999',
+                fontSize     : 12,
+                format       : null,
+                rotation     : 0,
+                marginToLine : 3 //和刻度线的距离
             }
         };
 
@@ -143,7 +143,7 @@ export default class yAxis extends Component
         _.each(this.rulesSprite.children, function(s) {
             _.each(s.children, function(cel) {
                 if (cel.type == "text") {
-                    cel.context.fillStyle = sty;
+                    cel.context.fontColor = sty;
                 } else if (cel.type == "line") {
                     cel.context.strokeStyle = sty;
                 }
@@ -161,7 +161,7 @@ export default class yAxis extends Component
                     fontSize: this.scale.text.fontSize,
                     textAlign: this.align == "left" ? "right" : "left",//"left",
                     textBaseline: this.isH ? "top" : "bottom",
-                    fillStyle: this.scale.text.fillStyle,
+                    fillStyle: this.scale.text.fontColor,
                     rotation: this.isH ? -90 : 0
                 }
             });
@@ -697,7 +697,7 @@ export default class yAxis extends Component
                     context: {
                         x: txtX,
                         y: posy + aniFrom,
-                        fillStyle: self._getProp(self.scale.text.fillStyle),
+                        fillStyle: self._getProp(self.scale.text.fontColor),
                         fontSize: self.scale.text.fontSize,
                         rotation: -Math.abs(this.scale.text.rotation),
                         textAlign: textAlign,

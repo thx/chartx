@@ -69,16 +69,16 @@ var options = {
         },
         {
             type : "radar",
-            field : ["click"]
+            field : "click"
         }
-    ]
+    ],
+    tips : {
+        content1 : function(info){
+            return "xx" //info.name+"："+info.percentage+"%"
+        }
+    }
     /*
     ,
-    tips : {
-        content : function(info){
-            return info.name+"："+info.percentage+"%"
-        }
-    },
     legend : {
 
     }

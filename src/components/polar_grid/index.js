@@ -28,11 +28,11 @@ export default class polarGrid extends Component
         this.line = {
             lineType : "sold",
             lineWidth : 1,
-            strokeStyle : "#ccc"
+            strokeStyle : "#e5e5e5"
         };
         this.fill = {
-            fillStyle : ["#f9f9f9", "#f3f3f3"],
-            alpha : 0.8
+            fillStyle : null, //["#f9f9f9", "#f7f7f7"],
+            alpha : 0.5
         };
         this.dataSection = [];
 
@@ -77,14 +77,13 @@ export default class polarGrid extends Component
     }
 
     reset( opt )
-    {
+    {    
         this.sprite.removeAllChildren();
         this.draw( opt );
     }
 
     _widget()
     {
-    
         var me = this;
         _.each( this.dataSection, function( num, i ){
             
@@ -101,9 +100,10 @@ export default class polarGrid extends Component
                 };
 
                 var _ring;
+                var ringType = Circle;
                 if( me.type == "circle" ){
                     ctx.r = r;
-                    _ring = new Circle({
+                    _ring = new ringType({
                         context : ctx
                     });
                 } else {
@@ -113,15 +113,20 @@ export default class polarGrid extends Component
                             ctx.pointList.push( [ point.x, point.y ] );
                         }
                     } );
-                    
-                    _ring = new Polygon({
+                    ringType = Polygon;
+                    _ring = new ringType({
                         context : ctx
                     });
                 };
                 me.sprite.addChildAt( _ring , 0 );
 
                 if( i == me.dataSection.length-1 ){
-                    me.induce = _ring;
+                    ctx.fillAlpha = 0;
+                    ctx.fillStyle = "#ffffff";
+                    me.induce = new ringType({
+                        context : ctx
+                    });
+                    me.sprite.addChild( me.induce );
                 };
 
                 //绘制中心出发的蜘蛛网线
@@ -141,11 +146,11 @@ export default class polarGrid extends Component
         } );
     }
 
-    _getFillStyle( style , i )
+    _getFillStyle( color , i )
     {
-        if( _.isArray(style) ){
-            return style[ i%style.length ]
+        if( _.isArray(color) ){
+            return color[ i%color.length ]
         }
-        return style;
+        return color;
     }
 }

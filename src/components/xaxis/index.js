@@ -32,7 +32,7 @@ export default class xAxis extends Component
                 strokeStyle: '#cccccc'
             },
             text : {
-                fillStyle: '#999',
+                fontColor: '#999',
                 fontSize: 12,
                 rotation: 0,
                 format: null,
@@ -245,7 +245,7 @@ export default class xAxis extends Component
                         fontSize: this.scale.text.fontSize,
                         textAlign: this.isH ? "center" : "left",
                         textBaseline: this.isH ? "top" : "middle",
-                        fillStyle: this.scale.text.fillStyle,
+                        fillStyle: this.scale.text.fontColor,
                         rotation: this.isH ? -90 : 0
                     }
                 });
@@ -459,7 +459,7 @@ export default class xAxis extends Component
             var textContext = {
                 x: o.text_x || o.x,
                 y: y + 20,
-                fillStyle: this.scale.text.fillStyle,
+                fillStyle: this.scale.text.fontColor,
                 fontSize: this.scale.text.fontSize,
                 rotation: -Math.abs(this.scale.text.rotation),
                 textAlign: this.scale.text.textAlign,
@@ -592,7 +592,7 @@ export default class xAxis extends Component
 
         var txt = new Canvax.Display.Text(maxLenText || "test", {
             context: {
-                fillStyle: this.scale.text.fillStyle,
+                fillStyle: this.scale.text.fontColor,
                 fontSize: this.scale.text.fontSize
             }
         });

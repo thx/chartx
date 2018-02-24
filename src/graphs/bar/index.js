@@ -136,27 +136,27 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
         var index = $o.iNode
         var group = me.barsSp.getChildById('barGroup_' + index)
         
-        var fillStyle = $o.fillStyle || me._getStyle(me.bar.fillStyle)
+        var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
         for (var a = 0, al = group.getNumChildren(); a < al; a++) {
             var rectEl = group.getChildAt(a)
             rectEl.context.fillStyle = fillStyle
         }
     }
 
-    _getStyle(c, groups, vLen, i, h, v, value, field, _flattenField)
+    _getColor(c, groups, vLen, i, h, v, value, field, _flattenField)
     {
         var fieldMap = this.root._coordinate.getFieldMapOf(field);
-        var style = fieldMap.style;
+        var color = fieldMap.color;
 
         //field对应的索引，， 取颜色这里不要用i
         if (_.isString(c)) {
-            style = c
+            color = c
         };
         if (_.isArray(c)) {
-            style = _.flatten(c)[ _.indexOf( _flattenField, field ) ];
+            color = _.flatten(c)[ _.indexOf( _flattenField, field ) ];
         };
         if (_.isFunction(c)) {
-            style = c.apply(this, [{
+            color = c.apply(this, [{
                 iGroup: i,
                 iNode: h,
                 iLay: v,
@@ -169,7 +169,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
             }]);
         };
 
-        return style;
+        return color;
     }
 
     _getBarWidth(ceilWidth, ceilWidth2)
@@ -314,7 +314,7 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
                     var rectData = h_group[v][h];
                     rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                    var fillStyle = me._getStyle(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+                    var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
 
                     rectData.fillStyle = fillStyle;
 

@@ -30,7 +30,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
         this.ctx = root.stage.canvas.getContext("2d");
         this.dataFrame = root.dataFrame; //root.dataFrame的引用
-        this.data = []; //二维 [[{x:0,y:-100,...},{}],[]]
+        this.data = []; //{"uv":{}.. ,"click": "pv":]}，这样按照字段摊平的一维结构
 
         //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
         this.field = opts.field;
@@ -172,7 +172,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
         //这个field不再这个graphs里面的，不相关
         if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
             return;
-        }
+        };
 
         this.data = this._trimGraphs();
         this._setGroupsForYfield( this.data , field );
@@ -187,13 +187,12 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
      **/
     remove( field )
     {
-        
         var me = this;
         var i = me.getGroupIndex( field );
 
         if( !this.groups.length || i < 0 ){
             return;
-        }
+        };
 
         this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
@@ -238,7 +237,7 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
                 //如果有传入fields，但是当前field不在fields里面的话，不需要处理
                 //说明该group已经在graphs里面了
                 return;
-            }
+            };
 
             var fieldMap = me.root._coordinate.getFieldMapOf( field );
             
