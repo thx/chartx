@@ -112,7 +112,7 @@ export default class Polar extends CoordinateBase
 
                 legendData.push({
                     name    : item.name,
-                    style   : item.fillStyle,
+                    color   : item.fillStyle,
                     enabled : item.enabled,
                     ind     : item.ind
                 })
@@ -121,44 +121,9 @@ export default class Polar extends CoordinateBase
         return legendData;
     }
 
-    bindEvent()
-    {
-        var me = this;
-        this.on("panstart mouseover", function(e) {
-            var _tips = me.getComponentById("tips");
-            if ( _tips ) {
-                me._setTipsInfo.apply(me, [e]);
-                _tips.show(e);
-            };
-        });
-        this.on("panmove mousemove", function(e) {
-            var _tips = me.getComponentById("tips");
-            if ( _tips ) {
-                me._setTipsInfo.apply(me, [e]);
-                _tips.move(e);
-            }
-        });
-        this.on("panend mouseout", function(e) {
-            //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
-            //那么就不要执行hide，顶多只显示这个点得tips数据
-            var _tips = me.getComponentById("tips");
-            if ( _tips && !( e.toTarget && me._coordinate.induce && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
-                _tips.hide(e);
-            }
-        });
-        this.on("tap", function(e) {
-            var _tips = me.getComponentById("tips");
-            if ( _tips ) {
-                _tips.hide(e);
-                me._setTipsInfo.apply(me, [e]);
-                _tips.show(e);
-            }
-        });
-    }
-
     //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
     //方便外部自定义tip是的content
-    _setTipsInfo(e)
+    setTipsInfo(e)
     {
         e.eventInfo = this._coordinate.getTipsInfoHandler(e);
 
@@ -172,5 +137,20 @@ export default class Polar extends CoordinateBase
             e.eventInfo.nodes = nodes;
         };
         e.eventInfo.rowData = this.dataFrame.getRowData( iNode );
+    }
+
+    _tipsPointerShow( e, _tips, _coor )
+    {
+        
+    }
+
+    _tipsPointerHide( e, _tips, _coor )
+    {
+
+    }
+
+    _tipsPointerMove( e, _tips, _coor )
+    {
+        
     }
 };

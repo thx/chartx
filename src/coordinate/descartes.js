@@ -288,7 +288,7 @@ export default class Descartes extends CoordinateBase
                     enabled : map.enabled,
                     name    : map.field,
                     ind     : map.ind,
-                    style   : map.style,
+                    color   : map.color,
                     yAxis   : map.yAxis
                 } );
             }
@@ -595,48 +595,11 @@ export default class Descartes extends CoordinateBase
         } );
     }
 
-    bindEvent()
-    {
-        var me = this;
-        this.on("panstart mouseover", function(e) {
-            var _tips = me.getComponentById("tips");
-            if ( _tips ) {
-                me._setTipsInfo.apply(me, [e]);
-                _tips.show(e);
-                me._tipsPointerShow( e, _tips, me._coordinate );
-            };
-        });
-        this.on("panmove mousemove", function(e) {
-            var _tips = me.getComponentById("tips");
-            if ( _tips ) {
-                me._setTipsInfo.apply(me, [e]);
-                _tips.move(e);
-                me._tipsPointerMove( e, _tips, me._coordinate );
-            }
-        });
-        this.on("panend mouseout", function(e) {
-            //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
-            //那么就不要执行hide，顶多只显示这个点得tips数据
-            var _tips = me.getComponentById("tips");
-            if ( _tips && !( e.toTarget && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
-                _tips.hide(e);
-                me._tipsPointerHide( e, _tips, me._coordinate );
-            }
-        });
-        this.on("tap", function(e) {
-            var _tips = me.getComponentById("tips");
-            if ( _tips ) {
-                _tips.hide(e);
-                me._setTipsInfo.apply(me, [e]);
-                _tips.show(e);
-                me._tipsPointerShow( e, _tips, me._coordinate );
-            }
-        });
-    }
+
 
     //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
     //方便外部自定义tip是的content
-    _setTipsInfo(e)
+    setTipsInfo(e)
     {
         e.eventInfo = this._coordinate.getTipsInfoHandler(e);
 

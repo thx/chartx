@@ -1,10 +1,11 @@
 import Canvax from "canvax2d"
 import Pie from "./pie"
 import Theme from "../../theme"
+import GraphsBase from "../index"
 
 const _ = Canvax._;
 
-export default class PieGraphs extends Canvax.Event.EventDispatcher
+export default class PieGraphs extends GraphsBase
 {
     constructor( opts, root )
     {
@@ -12,21 +13,9 @@ export default class PieGraphs extends Canvax.Event.EventDispatcher
 
         this.type = "pie";
 
-        //这里所有的opts都要透传给 group
-        this._opts = opts || {};
-        this.root = root;
-        this.ctx = root.stage.canvas.getContext("2d");
-
         this.valueField = null;
         this.nameField = null;
         this.rField = null;//如果有配置rField，那么每个pie的outRadius都会不一样
-
-        this.width = 0;
-        this.height = 0;
-        this.origin = {
-            x : 0,
-            y : 0
-        };
 
         this.colors = Theme.colors;
 

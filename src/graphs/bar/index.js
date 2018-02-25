@@ -1,12 +1,13 @@
 import Canvax from "canvax2d"
 import {numAddSymbol} from "../../utils/tools"
+import GraphsBase from "../index"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
-export default class BarGraphs extends Canvax.Event.EventDispatcher
+export default class BarGraphs extends GraphsBase
 {
     constructor(opts, root)
     {
@@ -14,33 +15,15 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
 
         this.type = "bar";
 
-        //这里所有的opts都要透传给 group
-        this._opts = opts || {};
-        this.root = root;
-        this.ctx = root.stage.canvas.getContext("2d");
-
-        this.data = [];
-
-        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        this.field = null;
         this.enabledField = null;
-        this.enabledFieldData = {}; //{uv:[],pv:[]...} 目前该属性主要是在enabledFieldData中又用到，本模块中没有用到
+        this.enabledFieldData = {}; //{uv:[],pv:[]...} 目前该属性主要是在 bartgi组件 中用到，本模块中没有用到
 
-        this.width = 0;
-        this.height = 0;
-        this.origin = {
-            x: 0,
-            y: 0
-        };
-
-        this.yAxisAlign = "left";
+        this.yAxisAlign = "left"; //默认设置为左y轴
         this._xAxis = this.root._coordinate._xAxis;
 
         //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
         this.absolute = false; 
-
-        this.animation = true;
 
         this.bar = {
             width: 0,
@@ -66,7 +49,6 @@ export default class BarGraphs extends Canvax.Event.EventDispatcher
 
         this._barsLen = 0;
 
-        this.sprite = null;
         this.txtsSp = null;
 
         this.proportion = false;//比例柱状图，比例图首先肯定是个堆叠图

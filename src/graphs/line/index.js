@@ -1,11 +1,12 @@
 import Canvax from "canvax2d"
 import Group from "./group"
 import {getDisMinATArr} from "../../utils/tools"
+import GraphsBase from "../index"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 
-export default class LineGraphs extends Canvax.Event.EventDispatcher
+export default class LineGraphs extends GraphsBase
 {
     constructor(opts, root)
     {
@@ -13,32 +14,12 @@ export default class LineGraphs extends Canvax.Event.EventDispatcher
 
         this.type = "line";
 
-        //这里所有的opts都要透传给 group
-        this._opts = opts || {};
-        this.root = root;
-
-        this.width = 0;
-        this.height = 0;
-        this.origin = {
-            x : 0,
-            y : 0
-        };
-
         //默认给左轴
         this.yAxisAlign = "left";
 
-        //TODO: 这里应该是root.stage.ctx 由canvax提供，先这样
-        this.ctx = root.stage.canvas.getContext("2d");
-        this.dataFrame = root.dataFrame; //root.dataFrame的引用
-        this.data = []; //{"uv":{}.. ,"click": "pv":]}，这样按照字段摊平的一维结构
-
-        //chartx 2.0版本，yAxis的field配置移到了每个图表的Graphs对象上面来
-        this.field = opts.field;
         this.enabledField = null;
         
         this.groups = []; //群组集合
-
-        this.sprite = null;
 
         this.eventEnabled = true;
 

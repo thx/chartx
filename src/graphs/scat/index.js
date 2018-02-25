@@ -1,11 +1,11 @@
 import Canvax from "canvax2d"
-import Theme from "../../theme"
+import GraphsBase from "../index"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
-export default class ScatGraphs extends Canvax.Event.EventDispatcher
+export default class ScatGraphs extends GraphsBase
 {
     constructor(opts, root)
     {
@@ -13,20 +13,7 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
 
         this.type = "scat";
 
-        //这里所有的opts都要透传给 group
-        this._opts = opts || {};
-        this.root = root;
-        this.ctx = root.stage.canvas.getContext("2d");
-                
-        this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
-
-        this.width = 0;
-        this.height = 0;
-        this.origin = {
-            x: 0,
-            y: 0
-        };
 
         this.node = {
             shapeType   : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
@@ -47,20 +34,11 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
             fontColor: "#777"
         };
 
-        this.animation = true;
-
-        this.field = null;
-
         this.groupField = null; //如果有多个分组的数据，按照这个字段分组，比如男女
-
-        this.colors  = Theme.colors;
-
-        this.sprite   = null;
 
         _.extend( true, this , opts );
 
         this.init( );
-
     }
 
     init()
@@ -116,6 +94,8 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
             var group = this.getGroup( rowData );
             var groupInd = this.getGroupInd( rowData );
 
+            var fieldMap = this.root._coordinate.getFieldMapOf( this.field );
+
             var nodeLayoutData = {
                 rowData : rowData,
                 groupInd : groupInd,
@@ -126,6 +106,7 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
                     y: yValue
                 },
                 field : this.field,
+                color : fieldMap.color,
                 groupName : rowData[ this.groupField ] || "",
 
                 //下面的属性都单独设置
@@ -212,7 +193,7 @@ export default class ScatGraphs extends Canvax.Event.EventDispatcher
             _style = style( nodeLayoutData );
         };
         if( !_style ){
-            _style = this.colors[ nodeLayoutData.groupInd ]
+            _style = nodeLayoutData.color;
         };
         return _style;
     }

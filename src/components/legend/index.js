@@ -1,6 +1,5 @@
 import Component from "../component"
 import Canvax from "canvax2d"
-//import Tips from "../tips/index"
 
 const Circle = Canvax.Shapes.Circle
 const _ = Canvax._;
@@ -97,13 +96,13 @@ export default class Legend extends Component
         var rows = 1;
 
         _.each( this.data , function( obj , i ){
-
+debugger
             var icon   = new Circle({
                 id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
                     y     : me.tag.height/2 ,
-                    fillStyle : !obj.enabled ? "#ccc" : (obj.style || me._labelColor),
+                    fillStyle : !obj.enabled ? "#ccc" : (obj.color || me._labelColor),
                     r : me.icon.r,
                     cursor: "pointer"
                 }
@@ -129,7 +128,7 @@ export default class Legend extends Component
                     y : me.tag.height / 2,
                     textAlign : "left",
                     textBaseline : "middle",
-                    fillStyle : "#333", //obj.style
+                    fillStyle : "#333", //obj.color
                     cursor: "pointer"
                 }
             } );
@@ -193,7 +192,7 @@ export default class Legend extends Component
                 
                 obj.enabled = !obj.enabled;
 
-                icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.style || me._labelColor);
+                icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || me._labelColor);
 
                 if( obj.enabled ){
                     me.onChecked( obj.name );
@@ -223,7 +222,7 @@ export default class Legend extends Component
             nodes : [
                 {
                     name : data.name,
-                    fillStyle : data.style
+                    fillStyle : data.color
                 }
             ]
         };

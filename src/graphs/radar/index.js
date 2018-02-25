@@ -1,32 +1,20 @@
 import Canvax from "canvax2d"
 import Theme from "../../theme"
+import GraphsBase from "../index"
 
 const Polygon = Canvax.Shapes.Polygon;
 const Circle = Canvax.Shapes.Circle;
 const _ = Canvax._;
 
-export default class RadarGraphs extends Canvax.Event.EventDispatcher
+export default class RadarGraphs extends GraphsBase
 {
     constructor(opts, root)
     {
         super( opts, root );
 
         this.type = "radar";
-
-        //这里所有的opts都要透传给 group
-        this._opts = opts || {};
-        this.root = root;
-        this.ctx = root.stage.canvas.getContext("2d");
         
-        this.data = []; //二维 [[{x:0,y:-100,...},{}],[]] ,所有的grapsh里面的data都存储的是layout数据
         this.enabledField = null;
-
-        this.width = 0;
-        this.height = 0;
-        this.origin = {
-            x: 0,
-            y: 0
-        };
 
         this.line = {
             enabled : true,
@@ -44,12 +32,6 @@ export default class RadarGraphs extends Canvax.Event.EventDispatcher
             strokeStyle : "#ffffff",
             lineWidth : 1
         };
-
-        this.animation = true;
-
-        this.field = null;
-
-        this.sprite   = null;
 
         this.groups = {
             //uv : {
@@ -115,12 +97,21 @@ export default class RadarGraphs extends Canvax.Event.EventDispatcher
             };
 
             var _poly = new Polygon({
-                context : polyCtx
+                hoverClone : false,
+                context    : polyCtx
             });
             group.area = _poly;
             me.sprite.addChild( _poly );
 
             _poly.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                
+                if( e.type == "mouseover" ){
+                    this.context.fillAlpha += 0.2
+                };
+                if( e.type == "mouseout" ){
+                    this.context.fillAlpha -= 0.2
+                };
+                
                 me.fire( e.type, e );
                 //图表触发，用来处理Tips
                 me.root.fire( e.type, e );
@@ -133,6 +124,7 @@ export default class RadarGraphs extends Canvax.Event.EventDispatcher
                     pointList.push([ node.point.x, node.point.y ]);
                     var _node = new Circle({
                         context : {
+                            cursor : "pointer",
                             x : node.point.x,
                             y : node.point.y,
                             r : me.node.r,
@@ -144,7 +136,20 @@ export default class RadarGraphs extends Canvax.Event.EventDispatcher
                     me.sprite.addChild( _node );
                     _node.nodeInd = i;
                     _node.nodeData = node;
+                    _node._strokeStyle = _strokeStyle;
                     _node.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                        
+                        if( e.type == "mouseover" ){
+                            this.context.r += 1;
+                            this.context.fillStyle = me.node.strokeStyle;
+                            this.context.strokeStyle = this._strokeStyle;
+                        };
+                        if( e.type == "mouseout" ){
+                            this.context.r -= 1;
+                            this.context.fillStyle = this._strokeStyle;
+                            this.context.strokeStyle = me.node.strokeStyle;
+                        };
+
                         me.fire( e.type, e );
                         //图表触发，用来处理Tips
 
@@ -164,6 +169,35 @@ export default class RadarGraphs extends Canvax.Event.EventDispatcher
 
             groupInd++;
         } );
+    }
+
+    _tipsPointerHandOf( e )
+    {
+        var me = this;
+        if( e.eventInfo && e.eventInfo.nodes ){
+            _.each( e.eventInfo.nodes, function( node ){
+                if( me.groups[ node.field ] ){
+                    var _node = me.groups[ node.field ].nodes[ node.nodeInd ];
+                    _node.context.r += 1;
+                    _node.context.fillStyle = me.node.strokeStyle;
+                    _node.context.strokeStyle = _node._strokeStyle;
+                };
+            } );
+        }
+    }
+
+    _tipsPointerHideOf( e )
+    {
+
+    }
+
+    focusIn()
+    {
+
+    }
+    focusOut()
+    {
+
     }
 
     remove( field )
@@ -196,6 +230,8 @@ export default class RadarGraphs extends Canvax.Event.EventDispatcher
                 var point = _coor.getPointInRadianOfR( _r, _coor.getROfNum(dataOrg[i]) );
                 arr.push( {
                     field : field,
+                    nodeInd : i,
+                    focesed : false,
                     value : dataOrg[i],
                     point : point,
                     color : fieldMap.color
@@ -203,7 +239,6 @@ export default class RadarGraphs extends Canvax.Event.EventDispatcher
             } );
             data[ field ] = arr;
         } );
-
         return data;
     }
 
