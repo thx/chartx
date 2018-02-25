@@ -12494,11 +12494,11 @@ var BarGraphs = function (_GraphsBase) {
                 if (_$15.isArray(fs)) {
                     _$15.each(fs, function (_fs, ii) {
                         //fs的结构两层到顶了
-                        var node = data[i][ii][index];
+                        var node = data[_fs][index];
                         node && _nodesInfoList.push(node);
                     });
                 } else {
-                    var node = data[i][0][index];
+                    var node = data[fs][index];
                     node && _nodesInfoList.push(node);
                 }
             });
@@ -12537,7 +12537,7 @@ var BarGraphs = function (_GraphsBase) {
         }
     }, {
         key: "_getColor",
-        value: function _getColor(c, groups, vLen, i, h, v, value, field, _flattenField) {
+        value: function _getColor(c, groupsLen, vLen, i, h, v, value, field, _flattenField) {
             var fieldMap = this.root._coordinate.getFieldMapOf(field);
             var color = fieldMap.color;
 
@@ -12608,7 +12608,7 @@ var BarGraphs = function (_GraphsBase) {
     }, {
         key: "clean",
         value: function clean() {
-            this.data = [];
+            this.data = {};
             this.barsSp.removeAllChildren();
             if (this.text.enabled) {
                 this.txtsSp.removeAllChildren();
@@ -12624,23 +12624,23 @@ var BarGraphs = function (_GraphsBase) {
 
             this.data = this._trimGraphs();
 
-            if (this.data.length == 0 || this.data[0].length == 0) {
-                me.__dataLen = 0;
+            if (this.enabledField.length == 0 || this._dataLen == 0) {
+                me._preDataLen = 0;
                 this.clean();
                 return;
             }
 
-            var preDataLen = me.__dataLen; //纵向的分组，主要用于resetData的时候，对比前后data数量用
-            //this.data[0] && (preDataLen = this.data[0][0].length);
+            var preDataLen = me._preDataLen; //纵向的分组，主要用于resetData的时候，对比前后data数量用
 
-            var groups = this.data.length;
+            var groupsLen = this.enabledField.length;
             var itemW = 0;
 
             me.bar.count = 0;
 
             var _flattenField = _$15.flatten([this.field]);
-            debugger;
-            _$15.each(this.data, function (h_group, i) {
+
+            _$15.each(this.enabledField, function (h_group, i) {
+                h_group = _$15.flatten([h_group]);
                 /*
                 //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
                 //h_group就会为两组，一组代表uv 一组代表pv。
@@ -12658,16 +12658,12 @@ var BarGraphs = function (_GraphsBase) {
                 var vLen = h_group.length;
                 if (vLen == 0) return;
 
-                //hlen为数据有多长
-                var hLen = h_group[0].length;
-                me.__dataLen = hLen;
-
                 //itemW 还是要跟着xAxis的xDis保持一致
-                itemW = me.width / hLen;
+                itemW = me.width / me._dataLen;
 
-                me._barsLen = hLen * groups;
+                me._barsLen = me._dataLen * groupsLen;
 
-                for (var h = 0; h < hLen; h++) {
+                for (var h = 0; h < me._dataLen; h++) {
                     var groupH = null;
                     if (i == 0) {
                         //横向的分组
@@ -12705,10 +12701,11 @@ var BarGraphs = function (_GraphsBase) {
                         me.bar.count++;
 
                         //单个的bar，从纵向的底部开始堆叠矩形
-                        var rectData = h_group[v][h];
+                        var rectData = me.data[h_group[v]][h];
+
                         rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                        var fillStyle = me._getColor(me.bar.fillStyle, groups, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+                        var fillStyle = me._getColor(me.bar.fillStyle, groupsLen, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
 
                         rectData.fillStyle = fillStyle;
 
@@ -12797,8 +12794,8 @@ var BarGraphs = function (_GraphsBase) {
                             var contents = [];
                             for (var c = vLen - 1; c >= 0; c--) {
                                 //在baseNumber同一侧的数据放在一个叶子节点上面显示
-                                if (rectData.value > rectData.yBasePoint.content === h_group[c][h].value > h_group[c][h].yBasePoint.content) {
-                                    contents.push(h_group[c][h]);
+                                if (rectData.value > rectData.yBasePoint.content === me.data[h_group[c]][h].value > me.data[h_group[c]][h].yBasePoint.content) {
+                                    contents.push(me.data[h_group[c]][h]);
                                 }
                             }
 
@@ -12918,6 +12915,8 @@ var BarGraphs = function (_GraphsBase) {
                 delay: 0,
                 duration: 300
             });
+
+            me._preDataLen = me._dataLen;
         }
     }, {
         key: "setEnabledField",
@@ -12995,6 +12994,9 @@ var BarGraphs = function (_GraphsBase) {
                 _$15.each(hData, function (vSectionData, v) {
                     tempBarData[v] = [];
                     //vSectionData 代表某个字段下面的一组数据比如 uv
+
+                    me._dataLen = vSectionData.length;
+
                     _$15.each(vSectionData, function (val, i) {
                         if (!xArr[i]) {
                             return;
@@ -13088,7 +13090,8 @@ var BarGraphs = function (_GraphsBase) {
                 tempBarData.length && tmpData.push(tempBarData);
             });
 
-            return tmpData;
+            return me.enabledFieldData;
+            //return tmpData;
         }
     }, {
         key: "_updateInfoTextPos",
@@ -13120,8 +13123,8 @@ var BarGraphs = function (_GraphsBase) {
             var me = this;
 
             //先把已经不在当前range范围内的元素destroy掉
-            if (me.data[0] && me.data[0].length && me.barsSp.children.length > me.data[0][0].length) {
-                for (var i = me.data[0][0].length, l = me.barsSp.children.length; i < l; i++) {
+            if (me._preDataLen > me._dataLen) {
+                for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
                     me.barsSp.getChildAt(i).destroy();
                     me.text.enabled && me.txtsSp.getChildAt(i).destroy();
                     i--;
@@ -13145,14 +13148,15 @@ var BarGraphs = function (_GraphsBase) {
             }, opts);
 
             var barCount = 0;
-            _$15.each(me.data, function (h_group, g) {
+            _$15.each(me.enabledField, function (h_group, g) {
+                h_group = _$15.flatten([h_group]);
                 var vLen = h_group.length;
                 if (vLen == 0) return;
-                var hLen = h_group[0].length;
-                for (var h = 0; h < hLen; h++) {
+
+                for (var h = 0; h < me._dataLen; h++) {
                     for (var v = 0; v < vLen; v++) {
 
-                        var rectData = h_group[v][h];
+                        var rectData = me.data[h_group[v]][h];
 
                         var group = me.barsSp.getChildById("barGroup_" + h);
 
