@@ -70,8 +70,8 @@ export default class barTgi extends Component
         var me = this;
 
         _.each( me.root._graphs, function( _g ){
-            if( _g.type == "bar" && _g.enabledFieldData[ me.barField ] ){
-                me.barDatas = _g.enabledFieldData[ me.barField ];
+            if( _g.type == "bar" && _g.data[ me.barField ] ){
+                me.barDatas = _g.data[ me.barField ];
                 return false;
             }
         } );

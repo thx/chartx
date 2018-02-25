@@ -12369,7 +12369,7 @@ var GraphsBase = function (_Canvax$Event$EventDi) {
         _this.ctx = root.stage.canvas.getContext("2d");
         _this.dataFrame = root.dataFrame; //root.dataFrame的引用
 
-        _this.data = null;
+        _this.data = null; //{ ur : [] , pv : [] } 平铺hash结构
         _this.field = null;
         _this.sprite = null;
 
@@ -12427,7 +12427,6 @@ var BarGraphs = function (_GraphsBase) {
         _this.type = "bar";
 
         _this.enabledField = null;
-        _this.enabledFieldData = {}; //{uv:[],pv:[]...} 目前该属性主要是在 bartgi组件 中用到，本模块中没有用到
 
         _this.yAxisAlign = "left"; //默认设置为左y轴
         _this._xAxis = _this.root._coordinate._xAxis;
@@ -12938,7 +12937,7 @@ var BarGraphs = function (_GraphsBase) {
 
             //用来计算下面的hLen
             this.setEnabledField();
-            this.enabledFieldData = {};
+            this.data = {};
 
             var layoutGraphs = [];
             var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
@@ -12982,7 +12981,7 @@ var BarGraphs = function (_GraphsBase) {
                 disLeft += (barDis + barW) * preHLen;
             }
 
-            var tmpData = [];
+            //var tmpData = [];
             var _yAxis = this.yAxisAlign == "left" ? _coor._yAxisLeft : _coor._yAxisRight;
 
             //然后计算出对于结构的dataOrg
@@ -13082,18 +13081,18 @@ var BarGraphs = function (_GraphsBase) {
                             }
                         };
 
-                        if (!me.enabledFieldData[node.field]) {
-                            me.enabledFieldData[node.field] = tempBarData[v];
+                        if (!me.data[node.field]) {
+                            me.data[node.field] = tempBarData[v];
                         }
 
                         tempBarData[v].push(node);
                     });
                 });
 
-                tempBarData.length && tmpData.push(tempBarData);
+                //tempBarData.length && tmpData.push( tempBarData );
             });
 
-            return me.enabledFieldData;
+            return me.data;
             //return tmpData;
         }
     }, {
@@ -17745,8 +17744,8 @@ var barTgi = function (_Component) {
             var me = this;
 
             _$29.each(me.root._graphs, function (_g) {
-                if (_g.type == "bar" && _g.enabledFieldData[me.barField]) {
-                    me.barDatas = _g.enabledFieldData[me.barField];
+                if (_g.type == "bar" && _g.data[me.barField]) {
+                    me.barDatas = _g.data[me.barField];
                     return false;
                 }
             });

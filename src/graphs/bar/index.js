@@ -16,8 +16,7 @@ export default class BarGraphs extends GraphsBase
         this.type = "bar";
 
         this.enabledField = null;
-        this.enabledFieldData = {}; //{uv:[],pv:[]...} 目前该属性主要是在 bartgi组件 中用到，本模块中没有用到
-
+ 
         this.yAxisAlign = "left"; //默认设置为左y轴
         this._xAxis = this.root._coordinate._xAxis;
 
@@ -527,7 +526,7 @@ export default class BarGraphs extends GraphsBase
 
         //用来计算下面的hLen
         this.setEnabledField();
-        this.enabledFieldData = {};
+        this.data = {};
 
         var layoutGraphs = [];
         var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
@@ -571,7 +570,7 @@ export default class BarGraphs extends GraphsBase
             disLeft += (barDis + barW) * preHLen;
         };
 
-        var tmpData = [];
+        //var tmpData = [];
         var _yAxis = this.yAxisAlign == "left" ? _coor._yAxisLeft : _coor._yAxisRight;
 
         //然后计算出对于结构的dataOrg
@@ -671,8 +670,8 @@ export default class BarGraphs extends GraphsBase
                         }
                     };
 
-                    if( !me.enabledFieldData[ node.field ] ){
-                        me.enabledFieldData[ node.field ] = tempBarData[v];
+                    if( !me.data[ node.field ] ){
+                        me.data[ node.field ] = tempBarData[v];
                     };
 
                     tempBarData[v].push(node);
@@ -680,10 +679,10 @@ export default class BarGraphs extends GraphsBase
                 });
             } );
             
-            tempBarData.length && tmpData.push( tempBarData );
+            //tempBarData.length && tmpData.push( tempBarData );
         } );
             
-        return me.enabledFieldData;
+        return me.data;
         //return tmpData;
     }
 

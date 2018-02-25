@@ -14,7 +14,7 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
         this.ctx = root.stage.canvas.getContext("2d");
         this.dataFrame = root.dataFrame; //root.dataFrame的引用
 
-        this.data = null;
+        this.data = null; //{ ur : [] , pv : [] } 平铺hash结构
         this.field = null;
         this.sprite   = null;
 
