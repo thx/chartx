@@ -8208,14 +8208,14 @@ var Coordinate = function (_Chart) {
         key: "_tipsPointerAtAllGraphs",
         value: function _tipsPointerAtAllGraphs(e) {
             _$5.each(this._graphs, function (_g) {
-                _g._tipsPointerHandOf && _g._tipsPointerHandOf(e);
+                _g.tipsPointerOf(e);
             });
         }
     }, {
         key: "_tipsPointerHideAtAllGraphs",
         value: function _tipsPointerHideAtAllGraphs(e) {
             _$5.each(this._graphs, function (_g) {
-                _g._tipsPointerHideOf && _g._tipsPointerHideOf(e);
+                _g.tipsPointerHideOf(e);
             });
         }
     }]);
@@ -12381,6 +12381,12 @@ var GraphsBase = function (_Canvax$Event$EventDi) {
     }
 
     createClass$1(GraphsBase, [{
+        key: "tipsPointerOf",
+        value: function tipsPointerOf(e) {}
+    }, {
+        key: "tipsPointerHideOf",
+        value: function tipsPointerHideOf(e) {}
+    }, {
         key: "focusOf",
         value: function focusOf(field, ind) {}
     }, {
@@ -12632,7 +12638,7 @@ var BarGraphs = function (_GraphsBase) {
             me.bar.count = 0;
 
             var _flattenField = _$15.flatten([this.field]);
-
+            debugger;
             _$15.each(this.data, function (h_group, i) {
                 /*
                 //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
@@ -15916,17 +15922,6 @@ var RadarGraphs = function (_GraphsBase) {
                         _node._strokeStyle = _strokeStyle;
                         _node.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
 
-                            if (e.type == "mouseover") {
-                                this.context.r += 1;
-                                this.context.fillStyle = me.node.strokeStyle;
-                                this.context.strokeStyle = this._strokeStyle;
-                            }
-                            if (e.type == "mouseout") {
-                                this.context.r -= 1;
-                                this.context.fillStyle = this._strokeStyle;
-                                this.context.strokeStyle = me.node.strokeStyle;
-                            }
-
                             me.fire(e.type, e);
                             //图表触发，用来处理Tips
 
@@ -15948,29 +15943,58 @@ var RadarGraphs = function (_GraphsBase) {
             });
         }
     }, {
-        key: "_tipsPointerHandOf",
-        value: function _tipsPointerHandOf(e) {
+        key: "tipsPointerOf",
+        value: function tipsPointerOf(e) {
             var me = this;
+
+            me.tipsPointerHideOf(e);
+
             if (e.eventInfo && e.eventInfo.nodes) {
-                _$22.each(e.eventInfo.nodes, function (node) {
-                    if (me.groups[node.field]) {
-                        var _node = me.groups[node.field].nodes[node.nodeInd];
-                        _node.context.r += 1;
-                        _node.context.fillStyle = me.node.strokeStyle;
-                        _node.context.strokeStyle = _node._strokeStyle;
+                _$22.each(e.eventInfo.nodes, function (eventNode) {
+                    if (me.data[eventNode.field]) {
+                        _$22.each(me.data[eventNode.field], function (n, i) {
+                            if (eventNode.nodeInd == i) {
+                                me.focusOf(n);
+                            } else {
+                                me.unfocusOf(n);
+                            }
+                        });
                     }
                 });
             }
         }
     }, {
-        key: "_tipsPointerHideOf",
-        value: function _tipsPointerHideOf(e) {}
+        key: "tipsPointerHideOf",
+        value: function tipsPointerHideOf(e) {
+            var me = this;
+            _$22.each(me.data, function (g, i) {
+                _$22.each(g, function (node) {
+                    me.unfocusOf(node);
+                });
+            });
+        }
     }, {
-        key: "focusIn",
-        value: function focusIn() {}
+        key: "focusOf",
+        value: function focusOf(node) {
+            if (node.focused) return;
+            var me = this;
+            var _node = me.groups[node.field].nodes[node.nodeInd];
+            _node.context.r += 1;
+            _node.context.fillStyle = me.node.strokeStyle;
+            _node.context.strokeStyle = _node._strokeStyle;
+            node.focused = true;
+        }
     }, {
-        key: "focusOut",
-        value: function focusOut() {}
+        key: "unfocusOf",
+        value: function unfocusOf(node) {
+            if (!node.focused) return;
+            var me = this;
+            var _node = me.groups[node.field].nodes[node.nodeInd];
+            _node.context.r -= 1;
+            _node.context.fillStyle = _node._strokeStyle;
+            _node.context.strokeStyle = me.node.strokeStyle;
+            node.focused = false;
+        }
     }, {
         key: "remove",
         value: function remove(field) {}
@@ -15999,7 +16023,7 @@ var RadarGraphs = function (_GraphsBase) {
                     arr.push({
                         field: field,
                         nodeInd: i,
-                        focesed: false,
+                        focused: false,
                         value: dataOrg[i],
                         point: point,
                         color: fieldMap.color
@@ -16065,7 +16089,7 @@ var Legend = function (_Component) {
         /* data的数据结构为
         [
             //descartes中用到的时候还会带入yAxis
-        {name: "uv", style: "#ff8533", enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
+            {name: "uv", style: "#ff8533", enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
         _this.data = data || [];
@@ -16153,7 +16177,7 @@ var Legend = function (_Component) {
             var rows = 1;
 
             _$23.each(this.data, function (obj, i) {
-                debugger;
+
                 var icon = new Circle$5({
                     id: "legend_field_icon_" + i,
                     context: {

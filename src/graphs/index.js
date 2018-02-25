@@ -28,6 +28,10 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
         this.animation = true;
     }
 
+    tipsPointerOf(e){}
+
+    tipsPointerHideOf(e){}
+
     focusOf(field, ind){}
     
     unfocusOf(field, ind){}

@@ -138,17 +138,6 @@ export default class RadarGraphs extends GraphsBase
                     _node.nodeData = node;
                     _node._strokeStyle = _strokeStyle;
                     _node.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
-                        
-                        if( e.type == "mouseover" ){
-                            this.context.r += 1;
-                            this.context.fillStyle = me.node.strokeStyle;
-                            this.context.strokeStyle = this._strokeStyle;
-                        };
-                        if( e.type == "mouseout" ){
-                            this.context.r -= 1;
-                            this.context.fillStyle = this._strokeStyle;
-                            this.context.strokeStyle = me.node.strokeStyle;
-                        };
 
                         me.fire( e.type, e );
                         //图表触发，用来处理Tips
@@ -171,33 +160,55 @@ export default class RadarGraphs extends GraphsBase
         } );
     }
 
-    _tipsPointerHandOf( e )
+    tipsPointerOf( e )
     {
         var me = this;
+        
+        me.tipsPointerHideOf( e );
+
         if( e.eventInfo && e.eventInfo.nodes ){
-            _.each( e.eventInfo.nodes, function( node ){
-                if( me.groups[ node.field ] ){
-                    var _node = me.groups[ node.field ].nodes[ node.nodeInd ];
-                    _node.context.r += 1;
-                    _node.context.fillStyle = me.node.strokeStyle;
-                    _node.context.strokeStyle = _node._strokeStyle;
+            _.each( e.eventInfo.nodes, function( eventNode ){
+                if( me.data[ eventNode.field ] ){
+                    _.each( me.data[ eventNode.field ] , function( n, i ){
+                        if( eventNode.nodeInd == i ){
+                            me.focusOf(n);
+                        } else {
+                            me.unfocusOf(n);
+                        }
+                    });
                 };
             } );
         }
     }
-
-    _tipsPointerHideOf( e )
+    tipsPointerHideOf( e )
     {
-
+        var me = this;
+        _.each( me.data , function( g, i ){
+            _.each( g , function( node ){
+                me.unfocusOf( node );
+            } );
+        });
     }
 
-    focusIn()
+    focusOf( node )
     {
-
+        if( node.focused ) return;
+        var me = this;
+        var _node = me.groups[ node.field ].nodes[ node.nodeInd ];
+        _node.context.r += 1;
+        _node.context.fillStyle = me.node.strokeStyle;
+        _node.context.strokeStyle = _node._strokeStyle;
+        node.focused = true;
     }
-    focusOut()
+    unfocusOf( node )
     {
-
+        if( !node.focused ) return;
+        var me = this;
+        var _node = me.groups[ node.field ].nodes[ node.nodeInd ];
+        _node.context.r -= 1;
+        _node.context.fillStyle = _node._strokeStyle;
+        _node.context.strokeStyle = me.node.strokeStyle;
+        node.focused = false;
     }
 
     remove( field )
@@ -231,7 +242,7 @@ export default class RadarGraphs extends GraphsBase
                 arr.push( {
                     field : field,
                     nodeInd : i,
-                    focesed : false,
+                    focused : false,
                     value : dataOrg[i],
                     point : point,
                     color : fieldMap.color

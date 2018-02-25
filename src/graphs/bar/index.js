@@ -227,7 +227,7 @@ export default class BarGraphs extends GraphsBase
         me.bar.count = 0;
 
         var _flattenField = _.flatten( [ this.field ] );
-
+debugger
         _.each( this.data, function(h_group, i) {
             /*
             //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，

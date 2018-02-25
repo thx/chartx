@@ -148,14 +148,14 @@ export default class Coordinate extends Chart
     _tipsPointerAtAllGraphs( e )
     {
         _.each( this._graphs, function( _g ){
-            _g._tipsPointerHandOf && _g._tipsPointerHandOf( e );
+            _g.tipsPointerOf( e );
         });
     }
-    
+
     _tipsPointerHideAtAllGraphs( e )
     {
         _.each( this._graphs, function( _g ){
-            _g._tipsPointerHideOf && _g._tipsPointerHideOf( e );
+            _g.tipsPointerHideOf( e );
         });
     }
 
