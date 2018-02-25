@@ -14179,7 +14179,7 @@ var LineGraphs = function (_GraphsBase) {
     function LineGraphs(opts, root) {
         classCallCheck$1(this, LineGraphs);
 
-        var _this = possibleConstructorReturn$1(this, (LineGraphs.__proto__ || Object.getPrototypeOf(LineGraphs)).call(this));
+        var _this = possibleConstructorReturn$1(this, (LineGraphs.__proto__ || Object.getPrototypeOf(LineGraphs)).call(this, opts, root));
 
         _this.type = "line";
 
@@ -14189,6 +14189,8 @@ var LineGraphs = function (_GraphsBase) {
         _this.enabledField = null;
 
         _this.groups = []; //群组集合
+
+        _$17.extend(true, _this, opts);
 
         _this.init(_this._opts);
         return _this;

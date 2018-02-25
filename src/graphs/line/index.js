@@ -10,7 +10,7 @@ export default class LineGraphs extends GraphsBase
 {
     constructor(opts, root)
     {
-        super();
+        super( opts, root );
 
         this.type = "line";
 
@@ -20,6 +20,8 @@ export default class LineGraphs extends GraphsBase
         this.enabledField = null;
         
         this.groups = []; //群组集合
+
+        _.extend(true, this, opts);
 
         this.init(this._opts);
     }
