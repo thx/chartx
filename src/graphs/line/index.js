@@ -21,8 +21,6 @@ export default class LineGraphs extends GraphsBase
         
         this.groups = []; //群组集合
 
-        this.eventEnabled = true;
-
         this.init(this._opts);
     }
 

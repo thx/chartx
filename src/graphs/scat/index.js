@@ -13,8 +13,6 @@ export default class ScatGraphs extends GraphsBase
 
         this.type = "scat";
 
-        this.groupsData = []; //节点分组 { groupName: '', list: [] } 对上面数据的分组
-
         this.node = {
             shapeType   : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
             maxR    : 20,  //圆圈默认最大半径
@@ -33,8 +31,6 @@ export default class ScatGraphs extends GraphsBase
             fontSize: 12,
             fontColor: "#777"
         };
-
-        this.groupField = null; //如果有多个分组的数据，按照这个字段分组，比如男女
 
         _.extend( true, this , opts );
 
@@ -60,7 +56,7 @@ export default class ScatGraphs extends GraphsBase
     draw(opts)
     {
         _.extend( true, this , opts );
-        this.data = this._trimGraphs(); //groupsData也被自动设置完成
+        this.data = this._trimGraphs(); 
         this._widget();
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
@@ -91,14 +87,11 @@ export default class ScatGraphs extends GraphsBase
             var yValue = rowData[ this.field ];
             var xPos = this.root._coordinate._xAxis.getPosX({ val : xValue });
             var yPos = this.root._coordinate._getYaxisOfField( this.field ).getYposFromVal( yValue );
-            var group = this.getGroup( rowData );
-            var groupInd = this.getGroupInd( rowData );
 
             var fieldMap = this.root._coordinate.getFieldMapOf( this.field );
 
             var nodeLayoutData = {
                 rowData : rowData,
-                groupInd : groupInd,
                 x: xPos,
                 y: yPos,
                 value : {
@@ -107,7 +100,7 @@ export default class ScatGraphs extends GraphsBase
                 },
                 field : this.field,
                 color : fieldMap.color,
-                groupName : rowData[ this.groupField ] || "",
+                groupInd : 0,
 
                 //下面的属性都单独设置
                 r : null,   //这里先不设置，在下面的_setR里单独设置
@@ -126,7 +119,6 @@ export default class ScatGraphs extends GraphsBase
             this._setNodeType( nodeLayoutData );
             this._setLabel( nodeLayoutData );
 
-            group.list.push( nodeLayoutData );
             tmplData.push( nodeLayoutData );
         };
 
@@ -220,94 +212,48 @@ export default class ScatGraphs extends GraphsBase
         return this;
     }
 
-    getGroup( rowData )
-    {
-        var group;
-        var me = this;
-        if( this.groupField ){
-            //如果有设置分组字段
-            group = _.find( this.groupsData, function( group ){
-                return group.groupName == rowData[ me.groupField ]
-            });
-            if( !group ){
-                group = {
-                    groupName: rowData[ this.groupField ],
-                    list: []
-                };
-                this.groupsData.push( group );
-            }
-        } else {
-            if( this.groupsData.length==0 ){
-                group = {
-                    groupName: "",
-                    list : []
-                }
-                this.groupsData.push( group );
-            } else {
-                group = this.groupsData[0];
-            }
-        }
-        return group;
-    }
-
-    //必须要先执行了getGroup
-    getGroupInd( rowData )
-    {
-        var i=0;
-        var me = this;
-        _.each( this.groupsData, function( group, gi ){
-            if( group.groupName == rowData[ me.groupField ] ){
-                i = gi
-            }
-        } );
-        return i;
-    }
-
     //根据layoutdata开始绘制
     _widget()
     {
         var me = this;
-        _.each( this.groupsData, function( group, iGroup ){
-            var groupSprite = new Canvax.Display.Sprite({ id : group.groupName });
-            me._shapesp.addChild( groupSprite );
 
-            _.each( group.list , function( nodeData, iNode ){
+        _.each( me.data , function( nodeData, iNode ){
 
-                var _context = me._getNodeContext( nodeData );
-                var Shape = nodeData.shapeType == "circle" ? Circle : Rect;
+            var _context = me._getNodeContext( nodeData );
+            var Shape = nodeData.shapeType == "circle" ? Circle : Rect;
 
-                var _node = new Shape({
-                    id: "shape_"+iGroup+"_"+iNode,
-                    context : _context
+            var _node = new Shape({
+                id: "shape_"+iNode,
+                context : _context
+            });
+            me._shapesp.addChild( _node );
+
+            //数据和canvax原件相互引用
+            _node.nodeData = nodeData;
+            _node.iNode = iNode;
+            nodeData.shape = _node;
+
+            _node.on("mouseover mousemove mouseout tap click", function(e) {
+                me._nodeEventHendle(e, this);
+            });
+
+            //如果有label
+            if( nodeData.label ){
+                var _label = nodeData.label
+                text =  new Canvax.Display.Text( _label , {
+                    id: "text_"+iNode,
+                    context: me._getLabelContext( nodeData )
                 });
-                groupSprite.addChild( _node );
+        
+                me._textsp.addChild(text);
 
-                //数据和canvax原件相互引用
-                _node.nodeData = nodeData;
-                _node.iNode = iNode;
-                nodeData.shape = _node;
-
-                _node.on("mouseover mousemove mouseout tap click", function(e) {
-                    me._nodeEventHendle(e, this);
-                });
-
-                //如果有label
-                if( nodeData.label ){
-                    var _label = nodeData.label
-                    text =  new Canvax.Display.Text( _label , {
-                        id: "text_"+iGroup+"_"+iNode,
-                        context: me._getLabelContext( nodeData )
-                    });
-            
-                    me._textsp.addChild(text);
-
-                    //图形节点和text文本相互引用
-                    _node.label = text;
-                    text.shape = _node;
-                }
-            
-            } );
+                //图形节点和text文本相互引用
+                _node.label = text;
+                text.shape = _node;
+            }
+        
         } );
+     
     }
 
     _getLabelContext( nodeData )
