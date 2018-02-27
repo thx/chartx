@@ -215,7 +215,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
     selectOf ( node , e ) 
     {
         var me = this;
-        if( !this.sectors.length || node.selectEnabled ){
+        if( !this.sectors.length || !node.selectEnabled ){
             return;
         };
 
@@ -238,7 +238,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
     unselectOf ( node , e ) 
     {
         var sec = this.sectors[ node.nodeInd ];
-        if (!node.selected || node.selectEnabled) {
+        if (!node.selected || !node.selectEnabled) {
             return
         };
         var me = this;

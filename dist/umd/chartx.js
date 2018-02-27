@@ -15048,7 +15048,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         key: "selectOf",
         value: function selectOf(node, e) {
             var me = this;
-            if (!this.sectors.length || node.selectEnabled) {
+            if (!this.sectors.length || !node.selectEnabled) {
                 return;
             }
 
@@ -15071,7 +15071,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         key: "unselectOf",
         value: function unselectOf(node, e) {
             var sec = this.sectors[node.nodeInd];
-            if (!node.selected || node.selectEnabled) {
+            if (!node.selected || !node.selectEnabled) {
                 return;
             }
             var me = this;
