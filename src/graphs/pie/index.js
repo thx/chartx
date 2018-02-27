@@ -24,14 +24,7 @@ export default class PieGraphs extends GraphsBase
             format: null
         };
 
-        this.focus = {
-            enabled : true
-        };
 
-        this.checked = {
-            r: 5,
-            globalAlpha : 0.7
-        };
 
         this.innerRadius = 0;
         this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
@@ -40,8 +33,6 @@ export default class PieGraphs extends GraphsBase
         this.startAngle = -90;
         //要预留moveDis位置来hover sector 的时候外扩
         this.moveDis = 15;
-
-        this.groups = [];
 
         this.init( opts );
     }
@@ -86,10 +77,11 @@ export default class PieGraphs extends GraphsBase
         this._computerProps();
 
         //这个时候就是真正的计算布局用得layoutdata了
-        var _pie = new Pie( this._opts, this , this._trimGraphs( this.data ) );
-        this.groups.push( _pie );
-        _pie.draw( opts );
-        this.sprite.addChild( _pie.sprite );
+        this._pie = new Pie( this._opts, this , this._trimGraphs( this.data ) );
+     
+        this._pie.draw( opts );
+        
+        this.sprite.addChild( this._pie.sprite );
     }
 
     add( name )
@@ -112,9 +104,8 @@ export default class PieGraphs extends GraphsBase
                 return false;
             }
         } );
-        _.each( this.groups, function( group ){
-            group.resetData( me._trimGraphs( me.data ) );
-        } );
+     
+        me._pie.resetData( me._trimGraphs( me.data ) );
     }
 
     _dataHandle()
@@ -129,14 +120,14 @@ export default class PieGraphs extends GraphsBase
             var rowData = dataFrame.getRowData(i);
             var layoutData = {
                 rowData : rowData,//把这一行数据给到layoutData引用起来
-                sliced  : false,  //是否获取焦点，外扩
-                checked : false,  //是否选中
+                focused : false,  //是否获取焦点，外扩
+                selected : false,  //是否选中
                 enabled : true,   //是否启用，显示在列表中
                 value   : rowData[ this.valueField ],
                 name    : rowData[ this.nameField ],
                 fillStyle : me.getColorByIndex(me.colors, i, l),
                 label   : null,    //绘制的时候再设置
-                ind     : i
+                nodeInd : i
             }
             data.push( layoutData );
         };
@@ -152,7 +143,7 @@ export default class PieGraphs extends GraphsBase
 
             //重新设定下ind
             _.each( data, function( d, i ){
-                d.ind = i;
+                d.nodeInd = i;
             } )
         };
 
@@ -273,7 +264,7 @@ export default class PieGraphs extends GraphsBase
                     
                         quadrant: quadrant, //象限
                         labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
-                        ind: j
+                        nodeInd: j
                     });
 
                     //这个时候可以计算下label，因为很多时候外部label如果是配置的
@@ -294,17 +285,17 @@ export default class PieGraphs extends GraphsBase
         };
     }
 
-    getColorByIndex(colors, ind, len) 
+    getColorByIndex(colors, nodeInd, len) 
     {
-        if (ind >= colors.length) {
+        if (nodeInd >= colors.length) {
             //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
-            if ((len - 1) % colors.length == 0 && (ind % colors.length == 0)) {
-                ind = ind % colors.length + 1;
+            if ((len - 1) % colors.length == 0 && (nodeInd % colors.length == 0)) {
+                nodeInd = nodeInd % colors.length + 1;
             } else {
-                ind = ind % colors.length;
+                nodeInd = nodeInd % colors.length;
             }
         };
-        return colors[ind];
+        return colors[nodeInd];
     }
 
     _getLabel( itemData )
@@ -330,4 +321,21 @@ export default class PieGraphs extends GraphsBase
     {
         return this.data;
     }
+
+    tipsPointerOf( e )
+    {
+    }
+
+    tipsPointerHideOf( e )
+    {
+    }
+
+    focusAt( ind, field ){}
+    
+    unfocusAt( ind, field ){}
+    
+    selectAt( ind, field ){}
+
+    unselectAt( ind, field ){}
+    
 }

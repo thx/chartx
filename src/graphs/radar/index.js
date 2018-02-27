@@ -84,7 +84,8 @@ export default class RadarGraphs extends GraphsBase
             var _strokeStyle = me._getStyle( me.line.strokeStyle , groupInd, fieldMap.color, fieldMap );
 
             var polyCtx = {
-                pointList : pointList
+                pointList : pointList,
+                cursor    : "pointer"
             };
 
             if( me.line.enabled ){
@@ -172,9 +173,10 @@ export default class RadarGraphs extends GraphsBase
                     _.each( me.data[ eventNode.field ] , function( n, i ){
                         if( eventNode.nodeInd == i ){
                             me.focusOf(n);
-                        } else {
-                            me.unfocusOf(n);
                         }
+                        //else {
+                        //    me.unfocusOf(n);
+                        //}
                     });
                 };
             } );

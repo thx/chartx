@@ -136,21 +136,5 @@ export default class Polar extends CoordinateBase
             } );
             e.eventInfo.nodes = nodes;
         };
-        e.eventInfo.rowData = this.dataFrame.getRowData( iNode );
-    }
-
-    _tipsPointerShow( e, _tips, _coor )
-    {
-        
-    }
-
-    _tipsPointerHide( e, _tips, _coor )
-    {
-
-    }
-
-    _tipsPointerMove( e, _tips, _coor )
-    {
-        
     }
 };

@@ -38,17 +38,21 @@ export default class Descartes_Component extends coorBase
 
         if( opts.horizontal ){
             _.extend( true, this.xAxis, {
-                text : {
-                    rotation: 90
-                },
-                isH : true
+                isH : true,
+                scale : {
+                    text : {
+                        rotation: 90
+                    }
+                }
             } );
             _.each( this.yAxis , function( yAxis ){
                 _.extend( true, yAxis, {
-                    text : {
-                        rotation: 90
-                    },
-                    isH : true
+                    isH : true,
+                    scale : {
+                        text : {
+                            rotation: 90
+                        }
+                    }
                 } );
             });
         };
@@ -250,38 +254,43 @@ export default class Descartes_Component extends coorBase
         var me = this;
         var w = me.root.width;
         var h = me.root.height;
-
+        
         _.each([me.sprite.context], function(ctx) {
             ctx.x += ((w - h) / 2);
             ctx.y += ((h - w) / 2);
+
             ctx.rotation = 90;
             ctx.rotateOrigin.x = h / 2;
             ctx.rotateOrigin.y = w / 2;
+
             ctx.scaleOrigin.x = h / 2;
             ctx.scaleOrigin.y = w / 2;
             ctx.scaleX = -1;
         });
 
+        function horizontalText( text ){
+            var ctx = text.context;
+            var rect = text.getRect();
+
+            ctx.scaleOrigin.x = rect.x + rect.width / 2;
+            ctx.scaleOrigin.y = rect.y + rect.height / 2;
+            ctx.scaleY = -1;
+        }
+
         //把x轴文案做一次镜像反转
         _.each( _.flatten( [ this._xAxis ] ), function( _xAxis ){
             _.each( _xAxis.rulesSprite.children, function( xnode ){
-                var ctx = xnode._txt.context;
-                var rect = xnode._txt.getRect();
-                ctx.scaleOrigin.x = rect.x + rect.width / 2;
-                ctx.scaleOrigin.y = rect.y + rect.height / 2;
-                ctx.scaleY = -1
+                horizontalText( xnode._txt );
             } );
+            _xAxis._label && horizontalText( _xAxis._label );
         } );
 
         //把y轴文案做一次镜像反转
         _.each( _.flatten( [ this._yAxis ] ), function( _yAxis ) {
             _.each( _yAxis.rulesSprite.children, function( ynode ){
-                var ctx = ynode._txt.context;
-                var rect = ynode._txt.getRect();
-                ctx.scaleOrigin.x = rect.x + rect.width / 2;
-                ctx.scaleOrigin.y = rect.y + rect.height / 2;
-                ctx.scaleY = -1
+                horizontalText( ynode._txt );
             } );
+            _yAxis._label && horizontalText( _yAxis._label );
         });
 
     }

@@ -145,6 +145,18 @@ export default class Coordinate extends Chart
         });
     }
 
+    _tipsPointerShow( e, _tips, _coor )
+    {   
+    }
+
+    _tipsPointerHide( e, _tips, _coor )
+    {
+    }
+
+    _tipsPointerMove( e, _tips, _coor )
+    {   
+    }
+
     _tipsPointerAtAllGraphs( e )
     {
         _.each( this._graphs, function( _g ){

@@ -25,19 +25,20 @@ export default class xAxis extends Component
         this.scale = {
             enabled : true,
             line : {
-                enabled: 1, //是否有line
-                lineWidth: 1,
-                height: 4,
-                marginTop : 2,
+                enabled    : 1, //是否有line
+                lineWidth  : 1,
+                height     : 4,
+                marginTop  : 2,
                 strokeStyle: '#cccccc'
             },
             text : {
-                fontColor: '#999',
-                fontSize: 12,
-                rotation: 0,
-                format: null,
-                marginTop : 2,
-                textAlign: "center"
+                fontColor  : '#999',
+                fontSize   : 12,
+                rotation   : 0,
+                format     : null,
+                marginTop  : 2,
+                textAlign  : "center",
+                lineHeight : 1
             }
         };
 
@@ -297,7 +298,7 @@ export default class xAxis extends Component
                 x = width * ( (val - this.minVal) / (this.maxVal - this.minVal) );
             };
             if( layoutType == "peak" ){
-                //柱状图的就是peak 
+                //柱状图的就是peak
                 x = this.ceilWidth * (ind+1) - this.ceilWidth/2;
             };
         };
@@ -390,7 +391,7 @@ export default class xAxis extends Component
             });
 
             this.maxTxtH = txt.getTextHeight();
-
+debugger
             if (!!this.scale.text.rotation) {
                 if (this.scale.text.rotation % 90 == 0) {
                     this.height = parseInt( this._textMaxWidth );
@@ -459,12 +460,13 @@ export default class xAxis extends Component
             var textContext = {
                 x: o.text_x || o.x,
                 y: y + 20,
-                fillStyle: this.scale.text.fontColor,
-                fontSize: this.scale.text.fontSize,
-                rotation: -Math.abs(this.scale.text.rotation),
-                textAlign: this.scale.text.textAlign,
-                textBaseline: !!this.scale.text.rotation ? "middle" : "top",
-                globalAlpha: 0
+                fillStyle    : this.scale.text.fontColor,
+                fontSize     : this.scale.text.fontSize,
+                rotation     : -Math.abs(this.scale.text.rotation),
+                textAlign    : this.scale.text.textAlign,
+                lineHeight   : this.scale.text.lineHeight,
+                textBaseline : !!this.scale.text.rotation ? "middle" : "top",
+                globalAlpha  : 0
             };
 
             if (!!this.scale.text.rotation && this.scale.text.rotation != 90) {

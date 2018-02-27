@@ -25,6 +25,14 @@ export default class Pie extends Canvax.Event.EventDispatcher
             y : 0
         };
 
+        this.focused = {
+            enabled : true
+        };
+        this.selected = {
+            r: 5,
+            globalAlpha : 0.7
+        };
+
         //这个pie所属的graphs对象
         this._graphs = _graphs;
         this.moveDis = _graphs.moveDis;
@@ -37,7 +45,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.sprite = null;
         this.labelSp = null;
         this.sectorsSp = null;
-        this.checkedSp = null;
+        this.selectedSp = null;
 
         this.init(opts);
 
@@ -57,8 +65,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.sectorsSp = new Canvax.Display.Sprite();
         this.sprite.addChild(this.sectorsSp);
 
-        this.checkedSp = new Canvax.Display.Sprite();
-        this.sprite.addChild(this.checkedSp);
+        this.selectedSp = new Canvax.Display.Sprite();
+        this.sprite.addChild(this.selectedSp);
 
         if (this._graphs.label.enabled) {
             this.labelSp = new Canvax.Display.Sprite();
@@ -131,40 +139,38 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     hoverClone: false,
                     xyToInt : false, //扇形不需要自动取整
                     context: {
-                        x: item.sliced ? item.outOffsetx : 0,
-                        y: item.sliced ? item.outOffsety : 0,
+                        x: item.focused ? item.outOffsetx : 0,
+                        y: item.focused ? item.outOffsety : 0,
                         r0: me.innerRadius,
                         r: item.outRadius,
                         startAngle: item.startAngle,
                         endAngle: item.endAngle,
                         fillStyle: item.fillStyle,
-                        //ind: item.ind,
+                        //nodeInd: item.nodeInd,
                         cursor: "pointer"
                     },
                     id: 'sector' + i
                 });
             
-                sector.data = item;
-               
-                //扇形slice
-                me._graphs.focus.enabled && sector.hover(function (e) {
-                    var secData = this.data;
-                    if (!secData.checked) {
-                        me.focusAt( secData.ind );
-                    }
-                }, function (e) {
-                    var secData = this.data;
-                    if (!secData.checked) {
-                        me.unfocusAt( secData.ind );
-                    }
+                sector.nodeData = item;
+
+                sector.hover(function(e){
+                    me.focusOf( this.nodeData );
+                } , function(e){
+                    !this.nodeData.selected && me.unfocusOf( this.nodeData );
                 });
 
                 //触发注册的事件
                 sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
-                    if( me[ "on"+e.type ] && _.isFunction( me[ "on"+e.type ] ) ){
-                        //如果有在pie的配置上面注册对应的事件，则触发
-                        me[ "on"+e.type ]( e );
+                    me._graphs.triggerEvent( me, e );
+
+                    me.fire( e.type, e );
+                    //图表触发，用来处理Tips
+                    e.eventInfo = {
+                        nodes : [ this.nodeData ]
                     };
+                    me._graphs.root.fire( e.type, e );
+
                 });
 
                 me.sectorsSp.addChildAt(sector, 0);
@@ -178,29 +184,30 @@ export default class Pie extends Canvax.Event.EventDispatcher
         }
     }
 
-    focusAt (ind, callback) 
+    focusOf( node , callback)
     {
+        if( node.focused ) return;
         var me = this;
-        var sec = me.sectors[ind];
-        var secData = me.data.list[ind];
-        secData.sliced = true;
+        var sec = me.sectors[ node.nodeInd ];
+
         sec.animate({
-            x: secData.outOffsetx,
-            y: secData.outOffsety
+            x: node.outOffsetx,
+            y: node.outOffsety
         }, {
             duration: 100,
             onComplete: function () {
                 callback && callback();
             }
         });
+        node.focused = true;
     }
 
-    unfocusAt (ind, callback) 
+    unfocusOf( node, callback )
     {
+        if( !node.focused ) return;
         var me = this;
-        var sec = me.sectors[ind];
-        var secData = me.data.list[ind];
-        secData.sliced = false;
+
+        var sec = me.sectors[ node.nodeInd ];
         sec.animate({
             x: 0,
             y: 0
@@ -210,53 +217,44 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 callback && callback();
             }
         });
+
+        node.focused = false;
     }
 
-    checkAt (ind) 
+    selectOf ( node ) 
     {
         var me = this;
         if( !this.sectors.length ){
             return;
         };
 
-        var sec = this.sectors[ind];
-        var secData = this.data.list[ind];
-        if (secData.checked) {
+        var sec = this.sectors[node.nodeInd];
+     
+        if ( node.selected ) {
             return
         };
         
-        if (!secData.sliced) {
-            this.focusAt(ind, function () {
+        if (!node.focused) {
+            this.focusOf( node , function () {
                 me.addCheckedSec(sec);
             });
         } else {
             this.addCheckedSec(sec);
         };
-        secData.checked = true;
+        node.selected = true;
     }
 
-    uncheckAt (ind) 
+    unselectOf ( node ) 
     {
-        var sec = this.sectors[ind];
-        var secData = this.data.list[ind];
-        if (!secData.checked) {
+        var sec = this.sectors[ node.nodeInd ];
+        if (!node.selected) {
             return
         };
         var me = this;
-        me.cancelCheckedSec(sec, function () {
-            me.unfocus(ind);
+        me.cancelCheckedSec(sec, function() {
+            me.unfocus(nodeInd);
         });
-        secData.checked = false;
-    }
-
-    uncheckAll () {
-        var me = this;
-        _.each(this.sectors, function (sec, i) {
-            var secData = me.data.list[i];
-            if (secData.checked) {
-                me.uncheckAt( i );
-            }
-        });
+        node.selected = false;
     }
 
     addCheckedSec(sec, callback)
@@ -270,17 +268,17 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 x: secc.x,
                 y: secc.y,
                 r0: secc.r - 1,
-                r: secc.r + this.checked.r,
+                r: secc.r + this.selected.r,
                 startAngle: secc.startAngle,
                 endAngle: secc.startAngle, //secc.endAngle,
                 fillStyle: secc.fillStyle,
-                globalAlpha: this.checked.globalAlpha
+                globalAlpha: this.selected.globalAlpha
             },
-            id: 'checked_' + sec.id
+            id: 'selected_' + sec.id
         });
-        sec._checkedSec = sector
+        sec._selectedSec = sector
 
-        this.checkedSp.addChild(sector);
+        this.selectedSp.addChild(sector);
 
         if( this.completed ){
             sector.animate({
@@ -298,15 +296,15 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
     cancelCheckedSec (sec, callback) 
     {
-        var checkedSec = sec._checkedSec;
+        var selectedSec = sec._selectedSec;
         
-        checkedSec.animate({
-            startAngle: checkedSec.context.endAngle - 0.5
+        selectedSec.animate({
+            startAngle: selectedSec.context.endAngle - 0.5
         }, {
             duration: this._getAngleTime( sec.context ),
             onComplete: function () {
-                delete sec._checkedSec;
-                checkedSec.destroy();
+                delete sec._selectedSec;
+                selectedSec.destroy();
                 callback && callback();
             }
         });
@@ -323,7 +321,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
     {
         var me = this;
         
-        _.each(me.sectors, function (sec, ind) {
+        _.each(me.sectors, function (sec, nodeInd) {
             if (sec.context) {
                 sec.context.r0 = 0;
                 sec.context.r = 0;
@@ -347,10 +345,10 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     var sec = me.sectors[i];
                     var secc = sec.context;
 
-                    var _startAngle = sec.data.startAngle;
-                    var _endAngle = sec.data.endAngle;
-                    var _r = sec.data.outRadius;
-                    var _r0 = sec.data.innerRadius;
+                    var _startAngle = sec.nodeData.startAngle;
+                    var _endAngle = sec.nodeData.endAngle;
+                    var _r = sec.nodeData.outRadius;
+                    var _r0 = sec.nodeData.innerRadius;
 
                     if (secc) {
                         secc.r = _r * status.process;
@@ -359,8 +357,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
                             secc.startAngle = _startAngle;
                             secc.endAngle = _startAngle + (_endAngle - _startAngle) * status.process;
                         } else {
-                            var lastEndAngle = function (ind) {
-                                var lastIndex = ind - 1;
+                            var lastEndAngle = function (nodeInd) {
+                                var lastIndex = nodeInd - 1;
                                 var lastSecc = me.sectors[lastIndex].context;
                                 if (lastIndex == 0) {
                                     return lastSecc ? lastSecc.endAngle : 0;
@@ -375,11 +373,11 @@ export default class Pie extends Canvax.Event.EventDispatcher
                             secc.endAngle = secc.startAngle + ( _endAngle - _startAngle ) * status.process;
                         }
                         //如果已经被选中，有一个选中态
-                        if( sec._checkedSec ){
-                            sec._checkedSec.context.r0 = secc.r - 1;
-                            sec._checkedSec.context.r  = secc.r + me.checked.r;
-                            sec._checkedSec.context.startAngle = secc.startAngle;
-                            sec._checkedSec.context.endAngle = secc.endAngle;
+                        if( sec._selectedSec ){
+                            sec._selectedSec.context.r0 = secc.r - 1;
+                            sec._selectedSec.context.r  = secc.r + me.selected.r;
+                            sec._selectedSec.context.startAngle = secc.startAngle;
+                            sec._selectedSec.context.endAngle = secc.endAngle;
                         }
                     }
                 }

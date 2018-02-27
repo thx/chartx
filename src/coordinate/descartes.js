@@ -616,7 +616,6 @@ export default class Descartes extends CoordinateBase
         }
 
         e.eventInfo.dataZoom = this.dataZoom;
-        e.eventInfo.rowData = this.dataFrame.getRowData( iNode );
     }
 
     _tipsPointerShow( e, _tips, _coor )

@@ -89,18 +89,19 @@ var options = {
             //colors:['red', 'yellow', 'blue']
 
 
-            //checked的实现不再用配置的方式然后内部实现，而是提供接口，在click 或 dblclick里自己调用
-            //checked : {
+            //selected的实现不再用配置的方式然后内部实现，而是提供接口，在click 或 dblclick里自己调用
+            //selected : {
             //    enabled : true
             //}
-            onclick : function( e ){
-                debugger
+            onclick : function( e , graphs ){
+                graphs._pie.selectOf( this.nodeData );
             }
         }
     ],
     tips : {
         content : function(info){
-            return info.name+"："+info.percentage+"%"
+            var node = info.nodes[0];
+            return node.name+"："+node.percentage+"%"
         }
     },
     legend : {}

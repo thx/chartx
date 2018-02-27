@@ -576,17 +576,20 @@ export default class polarComponent extends coorBase
         }
     }
 
-
-
-
-    getAxisNodeAt( i )
+    getAxisNodeOf( e )
     {
         var me = this;
+        var aAxisInd = me.getAAxisIndOf( e );
+
+        if( aAxisInd === undefined ){
+            return;
+        }
+
         var node = {
-            ind   : i,
-            value : me.aAxis.data[i],
-            text  : me.aAxis.scale.data[i],
-            angle : me.aAxis.angleList[i]
+            ind   : aAxisInd,
+            value : me.aAxis.data[aAxisInd],
+            text  : me.aAxis.scale.data[aAxisInd],
+            angle : me.aAxis.angleList[aAxisInd]
         };
         return node;
     }
@@ -598,6 +601,10 @@ export default class polarComponent extends coorBase
 
         if( e.aAxisInd !== undefined ){
             return e.aAxisInd;
+        };
+
+        if( !me.aAxis.angleList.length ){
+            return;
         };
 
         var point = e.point;
@@ -649,17 +656,21 @@ export default class polarComponent extends coorBase
     {
         //这里只获取xAxis的刻度信息;
         var me = this;
-        var aAxisInd = me.getAAxisIndOf( e );
 
-        var aNode = me.getAxisNodeAt(aAxisInd)
+        var aNode = me.getAxisNodeOf( e );
         
         var obj = {
-            aAxis : aNode,
-            title : aNode.text,
+            //aAxis : aNode,
+            //title : aNode.text,
             nodes : [
                 //遍历_graphs 去拿东西
             ]
         };
+        if( aNode ){
+            obj.aAxis = aNode;
+            obj.title = aNode.text;
+        };
+        
         if( e.eventInfo ){
             obj = _.extend(obj, e.eventInfo);
         };

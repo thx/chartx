@@ -32,16 +32,28 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
 
     tipsPointerHideOf(e){}
 
-    focusOf(field, ind){}
+    focusAt( ind, field ){}
     
-    unfocusOf(field, ind){}
+    unfocusAt( ind, field ){}
     
-    selectOf(field, ind){}
+    selectAt( ind, field ){}
 
-    unselectOf(field, ind){}
+    unselectAt( ind, field ){}
 
     remove( field ){}
 
     add( field ){}
+
+    getLegendData(){}
+
+    //触发事件
+    triggerEvent( eventTarget, e )
+    {
+        var fn = eventTarget[ "on"+e.type ];
+        if( fn && _.isFunction( fn ) ){
+            //如果有在pie的配置上面注册对应的事件，则触发
+            fn.apply( e.target , [ e , this ] );
+        };
+    }
 
 }

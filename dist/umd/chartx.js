@@ -8209,6 +8209,15 @@ var Coordinate = function (_Chart) {
             });
         }
     }, {
+        key: "_tipsPointerShow",
+        value: function _tipsPointerShow(e, _tips, _coor) {}
+    }, {
+        key: "_tipsPointerHide",
+        value: function _tipsPointerHide(e, _tips, _coor) {}
+    }, {
+        key: "_tipsPointerMove",
+        value: function _tipsPointerMove(e, _tips, _coor) {}
+    }, {
         key: "_tipsPointerAtAllGraphs",
         value: function _tipsPointerAtAllGraphs(e) {
             _$5.each(this._graphs, function (_g) {
@@ -8525,7 +8534,8 @@ var xAxis = function (_Component) {
                 rotation: 0,
                 format: null,
                 marginTop: 2,
-                textAlign: "center"
+                textAlign: "center",
+                lineHeight: 1
             }
         };
 
@@ -8794,7 +8804,7 @@ var xAxis = function (_Component) {
                     x = width * ((val - this.minVal) / (this.maxVal - this.minVal));
                 }
                 if (layoutType == "peak") {
-                    //柱状图的就是peak 
+                    //柱状图的就是peak
                     x = this.ceilWidth * (ind + 1) - this.ceilWidth / 2;
                 }
             }
@@ -8886,7 +8896,7 @@ var xAxis = function (_Component) {
                 });
 
                 this.maxTxtH = txt.getTextHeight();
-
+                debugger;
                 if (!!this.scale.text.rotation) {
                     if (this.scale.text.rotation % 90 == 0) {
                         this.height = parseInt(this._textMaxWidth);
@@ -8958,6 +8968,7 @@ var xAxis = function (_Component) {
                     fontSize: this.scale.text.fontSize,
                     rotation: -Math.abs(this.scale.text.rotation),
                     textAlign: this.scale.text.textAlign,
+                    lineHeight: this.scale.text.lineHeight,
                     textBaseline: !!this.scale.text.rotation ? "middle" : "top",
                     globalAlpha: 0
                 };
@@ -10216,17 +10227,21 @@ var Descartes_Component = function (_coorBase) {
 
         if (opts.horizontal) {
             _$6.extend(true, _this.xAxis, {
-                text: {
-                    rotation: 90
-                },
-                isH: true
+                isH: true,
+                scale: {
+                    text: {
+                        rotation: 90
+                    }
+                }
             });
             _$6.each(_this.yAxis, function (yAxis$$1) {
                 _$6.extend(true, yAxis$$1, {
-                    text: {
-                        rotation: 90
-                    },
-                    isH: true
+                    isH: true,
+                    scale: {
+                        text: {
+                            rotation: 90
+                        }
+                    }
                 });
             });
         }
@@ -10436,34 +10451,39 @@ var Descartes_Component = function (_coorBase) {
             _$6.each([me.sprite.context], function (ctx) {
                 ctx.x += (w - h) / 2;
                 ctx.y += (h - w) / 2;
+
                 ctx.rotation = 90;
                 ctx.rotateOrigin.x = h / 2;
                 ctx.rotateOrigin.y = w / 2;
+
                 ctx.scaleOrigin.x = h / 2;
                 ctx.scaleOrigin.y = w / 2;
                 ctx.scaleX = -1;
             });
 
+            function horizontalText(text) {
+                var ctx = text.context;
+                var rect = text.getRect();
+
+                ctx.scaleOrigin.x = rect.x + rect.width / 2;
+                ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                ctx.scaleY = -1;
+            }
+
             //把x轴文案做一次镜像反转
             _$6.each(_$6.flatten([this._xAxis]), function (_xAxis) {
                 _$6.each(_xAxis.rulesSprite.children, function (xnode) {
-                    var ctx = xnode._txt.context;
-                    var rect = xnode._txt.getRect();
-                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
-                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
-                    ctx.scaleY = -1;
+                    horizontalText(xnode._txt);
                 });
+                _xAxis._label && horizontalText(_xAxis._label);
             });
 
             //把y轴文案做一次镜像反转
             _$6.each(_$6.flatten([this._yAxis]), function (_yAxis) {
                 _$6.each(_yAxis.rulesSprite.children, function (ynode) {
-                    var ctx = ynode._txt.context;
-                    var rect = ynode._txt.getRect();
-                    ctx.scaleOrigin.x = rect.x + rect.width / 2;
-                    ctx.scaleOrigin.y = rect.y + rect.height / 2;
-                    ctx.scaleY = -1;
+                    horizontalText(ynode._txt);
                 });
+                _yAxis._label && horizontalText(_yAxis._label);
             });
         }
     }, {
@@ -11284,7 +11304,6 @@ var Descartes = function (_CoordinateBase) {
             }
 
             e.eventInfo.dataZoom = this.dataZoom;
-            e.eventInfo.rowData = this.dataFrame.getRowData(iNode);
         }
     }, {
         key: "_tipsPointerShow",
@@ -12111,14 +12130,20 @@ var polarComponent = function (_coorBase) {
             };
         }
     }, {
-        key: "getAxisNodeAt",
-        value: function getAxisNodeAt(i) {
+        key: "getAxisNodeOf",
+        value: function getAxisNodeOf(e) {
             var me = this;
+            var aAxisInd = me.getAAxisIndOf(e);
+
+            if (aAxisInd === undefined) {
+                return;
+            }
+
             var node = {
-                ind: i,
-                value: me.aAxis.data[i],
-                text: me.aAxis.scale.data[i],
-                angle: me.aAxis.angleList[i]
+                ind: aAxisInd,
+                value: me.aAxis.data[aAxisInd],
+                text: me.aAxis.scale.data[aAxisInd],
+                angle: me.aAxis.angleList[aAxisInd]
             };
             return node;
         }
@@ -12132,6 +12157,10 @@ var polarComponent = function (_coorBase) {
 
             if (e.aAxisInd !== undefined) {
                 return e.aAxisInd;
+            }
+
+            if (!me.aAxis.angleList.length) {
+                return;
             }
 
             var point = e.point;
@@ -12182,17 +12211,21 @@ var polarComponent = function (_coorBase) {
         value: function getTipsInfoHandler(e) {
             //这里只获取xAxis的刻度信息;
             var me = this;
-            var aAxisInd = me.getAAxisIndOf(e);
 
-            var aNode = me.getAxisNodeAt(aAxisInd);
+            var aNode = me.getAxisNodeOf(e);
 
             var obj = {
-                aAxis: aNode,
-                title: aNode.text,
+                //aAxis : aNode,
+                //title : aNode.text,
                 nodes: [
                     //遍历_graphs 去拿东西
                 ]
             };
+            if (aNode) {
+                obj.aAxis = aNode;
+                obj.title = aNode.text;
+            }
+
             if (e.eventInfo) {
                 obj = _$13.extend(obj, e.eventInfo);
             }
@@ -12340,20 +12373,12 @@ var Polar = function (_CoordinateBase) {
                 });
                 e.eventInfo.nodes = nodes;
             }
-            e.eventInfo.rowData = this.dataFrame.getRowData(iNode);
         }
-    }, {
-        key: "_tipsPointerShow",
-        value: function _tipsPointerShow(e, _tips, _coor) {}
-    }, {
-        key: "_tipsPointerHide",
-        value: function _tipsPointerHide(e, _tips, _coor) {}
-    }, {
-        key: "_tipsPointerMove",
-        value: function _tipsPointerMove(e, _tips, _coor) {}
     }]);
     return Polar;
 }(Coordinate);
+
+var _$16 = canvax._;
 
 var GraphsBase = function (_Canvax$Event$EventDi) {
     inherits$1(GraphsBase, _Canvax$Event$EventDi);
@@ -12391,23 +12416,38 @@ var GraphsBase = function (_Canvax$Event$EventDi) {
         key: "tipsPointerHideOf",
         value: function tipsPointerHideOf(e) {}
     }, {
-        key: "focusOf",
-        value: function focusOf(field, ind) {}
+        key: "focusAt",
+        value: function focusAt(ind, field) {}
     }, {
-        key: "unfocusOf",
-        value: function unfocusOf(field, ind) {}
+        key: "unfocusAt",
+        value: function unfocusAt(ind, field) {}
     }, {
-        key: "selectOf",
-        value: function selectOf(field, ind) {}
+        key: "selectAt",
+        value: function selectAt(ind, field) {}
     }, {
-        key: "unselectOf",
-        value: function unselectOf(field, ind) {}
+        key: "unselectAt",
+        value: function unselectAt(ind, field) {}
     }, {
         key: "remove",
         value: function remove(field) {}
     }, {
         key: "add",
         value: function add(field) {}
+    }, {
+        key: "getLegendData",
+        value: function getLegendData() {}
+
+        //触发事件
+
+    }, {
+        key: "triggerEvent",
+        value: function triggerEvent(eventTarget, e) {
+            var fn = eventTarget["on" + e.type];
+            if (fn && _$16.isFunction(fn)) {
+                //如果有在pie的配置上面注册对应的事件，则触发
+                fn.apply(e.target, [e, this]);
+            }
+        }
     }]);
     return GraphsBase;
 }(canvax.Event.EventDispatcher);
@@ -14810,6 +14850,14 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             y: 0
         };
 
+        _this.focused = {
+            enabled: true
+        };
+        _this.selected = {
+            r: 5,
+            globalAlpha: 0.7
+        };
+
         //这个pie所属的graphs对象
         _this._graphs = _graphs;
         _this.moveDis = _graphs.moveDis;
@@ -14822,7 +14870,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         _this.sprite = null;
         _this.labelSp = null;
         _this.sectorsSp = null;
-        _this.checkedSp = null;
+        _this.selectedSp = null;
 
         _this.init(opts);
 
@@ -14844,8 +14892,8 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             this.sectorsSp = new canvax.Display.Sprite();
             this.sprite.addChild(this.sectorsSp);
 
-            this.checkedSp = new canvax.Display.Sprite();
-            this.sprite.addChild(this.checkedSp);
+            this.selectedSp = new canvax.Display.Sprite();
+            this.sprite.addChild(this.selectedSp);
 
             if (this._graphs.label.enabled) {
                 this.labelSp = new canvax.Display.Sprite();
@@ -14917,40 +14965,37 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                         hoverClone: false,
                         xyToInt: false, //扇形不需要自动取整
                         context: {
-                            x: item.sliced ? item.outOffsetx : 0,
-                            y: item.sliced ? item.outOffsety : 0,
+                            x: item.focused ? item.outOffsetx : 0,
+                            y: item.focused ? item.outOffsety : 0,
                             r0: me.innerRadius,
                             r: item.outRadius,
                             startAngle: item.startAngle,
                             endAngle: item.endAngle,
                             fillStyle: item.fillStyle,
-                            //ind: item.ind,
+                            //nodeInd: item.nodeInd,
                             cursor: "pointer"
                         },
                         id: 'sector' + i
                     });
 
-                    sector.data = item;
+                    sector.nodeData = item;
 
-                    //扇形slice
-                    me._graphs.focus.enabled && sector.hover(function (e) {
-                        var secData = this.data;
-                        if (!secData.checked) {
-                            me.focusAt(secData.ind);
-                        }
+                    sector.hover(function (e) {
+                        me.focusOf(this.nodeData);
                     }, function (e) {
-                        var secData = this.data;
-                        if (!secData.checked) {
-                            me.unfocusAt(secData.ind);
-                        }
+                        !this.nodeData.selected && me.unfocusOf(this.nodeData);
                     });
 
                     //触发注册的事件
                     sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
-                        if (me["on" + e.type] && _$21.isFunction(me["on" + e.type])) {
-                            //如果有在pie的配置上面注册对应的事件，则触发
-                            me["on" + e.type](e);
-                        }
+                        me._graphs.triggerEvent(me, e);
+
+                        me.fire(e.type, e);
+                        //图表触发，用来处理Tips
+                        e.eventInfo = {
+                            nodes: [this.nodeData]
+                        };
+                        me._graphs.root.fire(e.type, e);
                     });
 
                     me.sectorsSp.addChildAt(sector, 0);
@@ -14963,29 +15008,30 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             }
         }
     }, {
-        key: "focusAt",
-        value: function focusAt(ind, callback) {
+        key: "focusOf",
+        value: function focusOf(node, callback) {
+            if (node.focused) return;
             var me = this;
-            var sec = me.sectors[ind];
-            var secData = me.data.list[ind];
-            secData.sliced = true;
+            var sec = me.sectors[node.nodeInd];
+
             sec.animate({
-                x: secData.outOffsetx,
-                y: secData.outOffsety
+                x: node.outOffsetx,
+                y: node.outOffsety
             }, {
                 duration: 100,
                 onComplete: function onComplete() {
                     callback && callback();
                 }
             });
+            node.focused = true;
         }
     }, {
-        key: "unfocusAt",
-        value: function unfocusAt(ind, callback) {
+        key: "unfocusOf",
+        value: function unfocusOf(node, callback) {
+            if (!node.focused) return;
             var me = this;
-            var sec = me.sectors[ind];
-            var secData = me.data.list[ind];
-            secData.sliced = false;
+
+            var sec = me.sectors[node.nodeInd];
             sec.animate({
                 x: 0,
                 y: 0
@@ -14995,54 +15041,44 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                     callback && callback();
                 }
             });
+
+            node.focused = false;
         }
     }, {
-        key: "checkAt",
-        value: function checkAt(ind) {
+        key: "selectOf",
+        value: function selectOf(node) {
             var me = this;
             if (!this.sectors.length) {
                 return;
             }
 
-            var sec = this.sectors[ind];
-            var secData = this.data.list[ind];
-            if (secData.checked) {
+            var sec = this.sectors[node.nodeInd];
+
+            if (node.selected) {
                 return;
             }
 
-            if (!secData.sliced) {
-                this.focusAt(ind, function () {
+            if (!node.focused) {
+                this.focusOf(node, function () {
                     me.addCheckedSec(sec);
                 });
             } else {
                 this.addCheckedSec(sec);
             }
-            secData.checked = true;
+            node.selected = true;
         }
     }, {
-        key: "uncheckAt",
-        value: function uncheckAt(ind) {
-            var sec = this.sectors[ind];
-            var secData = this.data.list[ind];
-            if (!secData.checked) {
+        key: "unselectOf",
+        value: function unselectOf(node) {
+            var sec = this.sectors[node.nodeInd];
+            if (!node.selected) {
                 return;
             }
             var me = this;
             me.cancelCheckedSec(sec, function () {
-                me.unfocus(ind);
+                me.unfocus(nodeInd);
             });
-            secData.checked = false;
-        }
-    }, {
-        key: "uncheckAll",
-        value: function uncheckAll() {
-            var me = this;
-            _$21.each(this.sectors, function (sec, i) {
-                var secData = me.data.list[i];
-                if (secData.checked) {
-                    me.uncheckAt(i);
-                }
-            });
+            node.selected = false;
         }
     }, {
         key: "addCheckedSec",
@@ -15056,17 +15092,17 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                     x: secc.x,
                     y: secc.y,
                     r0: secc.r - 1,
-                    r: secc.r + this.checked.r,
+                    r: secc.r + this.selected.r,
                     startAngle: secc.startAngle,
                     endAngle: secc.startAngle, //secc.endAngle,
                     fillStyle: secc.fillStyle,
-                    globalAlpha: this.checked.globalAlpha
+                    globalAlpha: this.selected.globalAlpha
                 },
-                id: 'checked_' + sec.id
+                id: 'selected_' + sec.id
             });
-            sec._checkedSec = sector;
+            sec._selectedSec = sector;
 
-            this.checkedSp.addChild(sector);
+            this.selectedSp.addChild(sector);
 
             if (this.completed) {
                 sector.animate({
@@ -15084,15 +15120,15 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
     }, {
         key: "cancelCheckedSec",
         value: function cancelCheckedSec(sec, callback) {
-            var checkedSec = sec._checkedSec;
+            var selectedSec = sec._selectedSec;
 
-            checkedSec.animate({
-                startAngle: checkedSec.context.endAngle - 0.5
+            selectedSec.animate({
+                startAngle: selectedSec.context.endAngle - 0.5
             }, {
                 duration: this._getAngleTime(sec.context),
                 onComplete: function onComplete() {
-                    delete sec._checkedSec;
-                    checkedSec.destroy();
+                    delete sec._selectedSec;
+                    selectedSec.destroy();
                     callback && callback();
                 }
             });
@@ -15107,7 +15143,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         value: function grow() {
             var me = this;
 
-            _$21.each(me.sectors, function (sec, ind) {
+            _$21.each(me.sectors, function (sec, nodeInd) {
                 if (sec.context) {
                     sec.context.r0 = 0;
                     sec.context.r = 0;
@@ -15131,10 +15167,10 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                         var sec = me.sectors[i];
                         var secc = sec.context;
 
-                        var _startAngle = sec.data.startAngle;
-                        var _endAngle = sec.data.endAngle;
-                        var _r = sec.data.outRadius;
-                        var _r0 = sec.data.innerRadius;
+                        var _startAngle = sec.nodeData.startAngle;
+                        var _endAngle = sec.nodeData.endAngle;
+                        var _r = sec.nodeData.outRadius;
+                        var _r0 = sec.nodeData.innerRadius;
 
                         if (secc) {
                             secc.r = _r * status.process;
@@ -15143,8 +15179,8 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                                 secc.startAngle = _startAngle;
                                 secc.endAngle = _startAngle + (_endAngle - _startAngle) * status.process;
                             } else {
-                                var lastEndAngle = function (ind) {
-                                    var lastIndex = ind - 1;
+                                var lastEndAngle = function (nodeInd) {
+                                    var lastIndex = nodeInd - 1;
                                     var lastSecc = me.sectors[lastIndex].context;
                                     if (lastIndex == 0) {
                                         return lastSecc ? lastSecc.endAngle : 0;
@@ -15159,11 +15195,11 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                                 secc.endAngle = secc.startAngle + (_endAngle - _startAngle) * status.process;
                             }
                             //如果已经被选中，有一个选中态
-                            if (sec._checkedSec) {
-                                sec._checkedSec.context.r0 = secc.r - 1;
-                                sec._checkedSec.context.r = secc.r + me.checked.r;
-                                sec._checkedSec.context.startAngle = secc.startAngle;
-                                sec._checkedSec.context.endAngle = secc.endAngle;
+                            if (sec._selectedSec) {
+                                sec._selectedSec.context.r0 = secc.r - 1;
+                                sec._selectedSec.context.r = secc.r + me.selected.r;
+                                sec._selectedSec.context.startAngle = secc.startAngle;
+                                sec._selectedSec.context.endAngle = secc.endAngle;
                             }
                         }
                     }
@@ -15477,15 +15513,6 @@ var PieGraphs = function (_GraphsBase) {
             format: null
         };
 
-        _this.focus = {
-            enabled: true
-        };
-
-        _this.checked = {
-            r: 5,
-            globalAlpha: 0.7
-        };
-
         _this.innerRadius = 0;
         _this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
         _this.minSectorRadius = 20; //outRadius - innerRadius 的最小值
@@ -15493,8 +15520,6 @@ var PieGraphs = function (_GraphsBase) {
         _this.startAngle = -90;
         //要预留moveDis位置来hover sector 的时候外扩
         _this.moveDis = 15;
-
-        _this.groups = [];
 
         _this.init(opts);
         return _this;
@@ -15542,10 +15567,11 @@ var PieGraphs = function (_GraphsBase) {
             this._computerProps();
 
             //这个时候就是真正的计算布局用得layoutdata了
-            var _pie = new Pie$1(this._opts, this, this._trimGraphs(this.data));
-            this.groups.push(_pie);
-            _pie.draw(opts);
-            this.sprite.addChild(_pie.sprite);
+            this._pie = new Pie$1(this._opts, this, this._trimGraphs(this.data));
+
+            this._pie.draw(opts);
+
+            this.sprite.addChild(this._pie.sprite);
         }
     }, {
         key: "add",
@@ -15568,9 +15594,8 @@ var PieGraphs = function (_GraphsBase) {
                     return false;
                 }
             });
-            _$20.each(this.groups, function (group) {
-                group.resetData(me._trimGraphs(me.data));
-            });
+
+            me._pie.resetData(me._trimGraphs(me.data));
         }
     }, {
         key: "_dataHandle",
@@ -15585,14 +15610,14 @@ var PieGraphs = function (_GraphsBase) {
                 var rowData = dataFrame.getRowData(i);
                 var layoutData = {
                     rowData: rowData, //把这一行数据给到layoutData引用起来
-                    sliced: false, //是否获取焦点，外扩
-                    checked: false, //是否选中
+                    focused: false, //是否获取焦点，外扩
+                    selected: false, //是否选中
                     enabled: true, //是否启用，显示在列表中
                     value: rowData[this.valueField],
                     name: rowData[this.nameField],
                     fillStyle: me.getColorByIndex(me.colors, i, l),
                     label: null, //绘制的时候再设置
-                    ind: i
+                    nodeInd: i
                 };
                 data.push(layoutData);
             }
@@ -15608,7 +15633,7 @@ var PieGraphs = function (_GraphsBase) {
 
                 //重新设定下ind
                 _$20.each(data, function (d, i) {
-                    d.ind = i;
+                    d.nodeInd = i;
                 });
             }
 
@@ -15729,7 +15754,7 @@ var PieGraphs = function (_GraphsBase) {
 
                             quadrant: quadrant, //象限
                             labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
-                            ind: j
+                            nodeInd: j
                         });
 
                         //这个时候可以计算下label，因为很多时候外部label如果是配置的
@@ -15751,16 +15776,16 @@ var PieGraphs = function (_GraphsBase) {
         }
     }, {
         key: "getColorByIndex",
-        value: function getColorByIndex(colors, ind, len) {
-            if (ind >= colors.length) {
+        value: function getColorByIndex(colors, nodeInd, len) {
+            if (nodeInd >= colors.length) {
                 //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
-                if ((len - 1) % colors.length == 0 && ind % colors.length == 0) {
-                    ind = ind % colors.length + 1;
+                if ((len - 1) % colors.length == 0 && nodeInd % colors.length == 0) {
+                    nodeInd = nodeInd % colors.length + 1;
                 } else {
-                    ind = ind % colors.length;
+                    nodeInd = nodeInd % colors.length;
                 }
             }
-            return colors[ind];
+            return colors[nodeInd];
         }
     }, {
         key: "_getLabel",
@@ -15786,6 +15811,24 @@ var PieGraphs = function (_GraphsBase) {
         value: function getLegendData() {
             return this.data;
         }
+    }, {
+        key: "tipsPointerOf",
+        value: function tipsPointerOf(e) {}
+    }, {
+        key: "tipsPointerHideOf",
+        value: function tipsPointerHideOf(e) {}
+    }, {
+        key: "focusAt",
+        value: function focusAt(ind, field) {}
+    }, {
+        key: "unfocusAt",
+        value: function unfocusAt(ind, field) {}
+    }, {
+        key: "selectAt",
+        value: function selectAt(ind, field) {}
+    }, {
+        key: "unselectAt",
+        value: function unselectAt(ind, field) {}
     }]);
     return PieGraphs;
 }(GraphsBase);
@@ -15876,7 +15919,8 @@ var RadarGraphs = function (_GraphsBase) {
                 var _strokeStyle = me._getStyle(me.line.strokeStyle, groupInd, fieldMap.color, fieldMap);
 
                 var polyCtx = {
-                    pointList: pointList
+                    pointList: pointList,
+                    cursor: "pointer"
                 };
 
                 if (me.line.enabled) {
@@ -15964,9 +16008,10 @@ var RadarGraphs = function (_GraphsBase) {
                         _$22.each(me.data[eventNode.field], function (n, i) {
                             if (eventNode.nodeInd == i) {
                                 me.focusOf(n);
-                            } else {
-                                me.unfocusOf(n);
                             }
+                            //else {
+                            //    me.unfocusOf(n);
+                            //}
                         });
                     }
                 });
