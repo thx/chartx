@@ -57,12 +57,21 @@ var options = {
     graphs : [
         {
             type : "pie",
+
             valueField : "value", //决定了这个pie的角度
             nameField : "name",
-
             //rField : "r", //如果是丁格尔玫瑰，就有半径的Field
-            groupField : "group",//如果有两圈或者多圈的pie ， 和scat的思路一样，采用分组的方式来实现比较灵活
-            
+
+            //饼图的起始角度[有效值范围0-360度，默认值0度
+            //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
+            startAngle:-90,
+            //数据排序，默认按用户给定顺序[desc/asc]
+            sort: 'desc',
+           
+            //是否允许动画
+            animation: true,
+
+
             //周边tip
             label : {
                 enabled: true,
@@ -73,15 +82,7 @@ var options = {
                     return "<div><span>"+rowData.name+"</span>：<span>"+rowData.value+"（"+ data.percentage +"%）</span></div>"
                 }
             },
-            //饼图的起始角度[有效值范围0-360度，默认值0度
-            //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
-            startAngle:-90,
-            //数据排序，默认按用户给定顺序[desc/asc]
-            sort: 'desc',
-            //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
-            allowPointSelect: true,
-            //是否允许动画
-            animation: true,
+
             //内圆半径
             //innerRadius: 50,
             //outRadius: 70,
@@ -91,10 +92,10 @@ var options = {
             onclick : function( e , graphs ){
                 var nodeData = e.eventInfo.nodes[0];
                 if( !nodeData.selected ){
-                    graphs.selectAt( nodeData.nodeInd );
+                    graphs.selectAt( nodeData.nodeInd , e );
                 } else {
-                    graphs.unselectAt( nodeData.nodeInd );
-                }
+                    graphs.unselectAt( nodeData.nodeInd , e );
+                };
             }
         }
     ],

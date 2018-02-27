@@ -14,17 +14,21 @@ export default class PieGraphs extends GraphsBase
         this.type = "pie";
 
         this.valueField = null;
-        this.nameField = null;
-        this.rField = null;//如果有配置rField，那么每个pie的outRadius都会不一样
+        this.nameField  = null;
+        this.rField     = null;//如果有配置rField，那么每个pie的outRadius都会不一样
 
         this.colors = Theme.colors;
 
         this.label = {
-            enabled: false,
-            format: null
+            enabled : false,
+            format  : null
         };
 
+        this.focusEnabled = true;
+        this.selectEnabled = false;
 
+        this.selectedR = 5;
+        this.selectedAlpha = 0.7;
 
         this.innerRadius = 0;
         this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
@@ -71,7 +75,7 @@ export default class PieGraphs extends GraphsBase
     /**
      * opts ==> {width,height,origin}
      */
-    draw( opts ) 
+    draw( opts )
     {
         _.extend(true, this, opts);
         this._computerProps();
@@ -111,7 +115,7 @@ export default class PieGraphs extends GraphsBase
     _dataHandle()
     {
         var me = this;
-        var _coor = this.root._coordinate;
+        var _coor = me.root._coordinate;
 
         var data = [];
         var dataFrame = me.root.dataFrame;
@@ -119,20 +123,25 @@ export default class PieGraphs extends GraphsBase
         for( var i=0,l=dataFrame.org.length-1; i<l; i++ ){
             var rowData = dataFrame.getRowData(i);
             var layoutData = {
-                rowData : rowData,//把这一行数据给到layoutData引用起来
-                focused : false,  //是否获取焦点，外扩
-                selected : false,  //是否选中
-                enabled : true,   //是否启用，显示在列表中
-                value   : rowData[ this.valueField ],
-                name    : rowData[ this.nameField ],
+                rowData   : rowData,//把这一行数据给到layoutData引用起来
+                focused   : false,  //是否获取焦点，外扩
+                focusEnabled : me.focusEnabled,
+
+                selected  : false,  //是否选中
+                selectEnabled : me.selectEnabled,
+                selectedR : me.selectedR,
+                selectedAlpha : me.selectedAlpha,
+                enabled   : true,   //是否启用，显示在列表中
+                value     : rowData[ me.valueField ],
+                name      : rowData[ me.nameField ],
                 fillStyle : me.getColorByIndex(me.colors, i, l),
-                label   : null,    //绘制的时候再设置
-                nodeInd : i
-            }
+                label     : null,    //绘制的时候再设置
+                nodeInd   : i
+            };
             data.push( layoutData );
         };
 
-        if( data.length && this.sort ){
+        if( data.length && me.sort ){
             data.sort(function (a, b) {
                 if (me.sort == 'desc') {
                     return a.value - b.value;
@@ -144,7 +153,7 @@ export default class PieGraphs extends GraphsBase
             //重新设定下ind
             _.each( data, function( d, i ){
                 d.nodeInd = i;
-            } )
+            } );
         };
 
         return data;
@@ -249,6 +258,8 @@ export default class PieGraphs extends GraphsBase
                         endAngle: endAngle, //结束角度
                         midAngle: midAngle,  //中间角度
 
+                        moveDis: me.moveDis,
+
                         outOffsetx: me.moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
                         outOffsety: me.moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
 
@@ -330,24 +341,30 @@ export default class PieGraphs extends GraphsBase
 
 
 
-    focusAt( ind ){
+    focusAt( ind , e ){
         var nodeData = this._pie.data.list[ ind ];
+
+        if( !this.focusEnabled ) return;
+
         this._pie.focusOf( nodeData );
     }
     
-    unfocusAt( ind ){
+    unfocusAt( ind , e ){
         var nodeData = this._pie.data.list[ ind ];
+        if( !nodeData.focusEnabled ) return;
         this._pie.unfocusOf( nodeData );
     }
     
-    selectAt( ind ){
+    selectAt( ind , e ){
         var nodeData = this._pie.data.list[ ind ];
-        this._pie.selectOf( nodeData );
+        if( !this.selectEnabled ) return;
+        this._pie.selectOf( nodeData , e );
     }
 
-    unselectAt( ind ){
+    unselectAt( ind , e ){
         var nodeData = this._pie.data.list[ ind ];
-        this._pie.unselectOf( nodeData );
+        if( !this.selectEnabled ) return;
+        this._pie.unselectOf( nodeData , e );
     }
     
 }

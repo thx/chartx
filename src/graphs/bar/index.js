@@ -25,14 +25,15 @@ export default class BarGraphs extends GraphsBase
         this.absolute = false; 
 
         this.bar = {
-            width: 0,
-            _width: 0,
-            radius: 4,
+            width     : 0,
+            _width    : 0,
+            maxWidth  : 50,
+            radius    : 4,
             fillStyle : null,
             fillAlpha : 0.95,
-            filter : function(){}, //用来定制bar的样式
-            count: 0, //总共有多少个bar
-            xDis: null
+            filter    : function(){}, //用来定制bar的样式
+            count     : 0, //总共有多少个bar
+            xDis      : null
         };
 
         this.text = {
@@ -171,6 +172,9 @@ export default class BarGraphs extends GraphsBase
         };
         this.bar._width < 1 && (this.bar._width = 1);
         this.bar._width = parseInt( this.bar._width );
+        if( this.bar._width > this.bar.maxWidth ){
+            this.bar._width = this.bar.maxWidth;
+        };
         return this.bar._width;
     }
 

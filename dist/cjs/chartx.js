@@ -12479,6 +12479,7 @@ var BarGraphs = function (_GraphsBase) {
         _this.bar = {
             width: 0,
             _width: 0,
+            maxWidth: 50,
             radius: 4,
             fillStyle: null,
             fillAlpha: 0.95,
@@ -12626,6 +12627,9 @@ var BarGraphs = function (_GraphsBase) {
             }
             this.bar._width < 1 && (this.bar._width = 1);
             this.bar._width = parseInt(this.bar._width);
+            if (this.bar._width > this.bar.maxWidth) {
+                this.bar._width = this.bar.maxWidth;
+            }
             return this.bar._width;
         }
     }, {
@@ -14851,19 +14855,9 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             y: 0
         };
 
-        _this.focused = {
-            enabled: true
-        };
-        _this.selected = {
-            r: 5,
-            globalAlpha: 0.7
-        };
-
         //这个pie所属的graphs对象
         _this._graphs = _graphs;
-        _this.moveDis = _graphs.moveDis;
-        _this.innerRadius = _graphs.innerRadius;
-        //this.outRadius = _graphs.outRadius;
+
         _this.domContainer = _graphs.root.canvax.domView;
 
         _this.data = data;
@@ -14968,7 +14962,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                         context: {
                             x: item.focused ? item.outOffsetx : 0,
                             y: item.focused ? item.outOffsety : 0,
-                            r0: me.innerRadius,
+                            r0: item.innerRadius,
                             r: item.outRadius,
                             startAngle: item.startAngle,
                             endAngle: item.endAngle,
@@ -14981,7 +14975,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
 
                     sector.nodeData = item;
 
-                    sector.hover(function (e) {
+                    item.focusEnabled && sector.hover(function (e) {
                         me.focusOf(this.nodeData);
                     }, function (e) {
                         !this.nodeData.selected && me.unfocusOf(this.nodeData);
@@ -15048,9 +15042,9 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         }
     }, {
         key: "selectOf",
-        value: function selectOf(node) {
+        value: function selectOf(node, e) {
             var me = this;
-            if (!this.sectors.length) {
+            if (!this.sectors.length || node.selectEnabled) {
                 return;
             }
 
@@ -15071,14 +15065,16 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         }
     }, {
         key: "unselectOf",
-        value: function unselectOf(node) {
+        value: function unselectOf(node, e) {
             var sec = this.sectors[node.nodeInd];
-            if (!node.selected) {
+            if (!node.selected || node.selectEnabled) {
                 return;
             }
             var me = this;
             me.cancelCheckedSec(sec, function () {
-                me.unfocusOf(node);
+                if (!e || !e.target) {
+                    me.unfocusOf(node);
+                }
             });
             node.selected = false;
         }
@@ -15086,6 +15082,8 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         key: "addCheckedSec",
         value: function addCheckedSec(sec, callback) {
             var secc = sec.context;
+            var nodeData = sec.nodeData;
+
             if (!secc) return;
 
             var sector = new Sector$1({
@@ -15094,11 +15092,11 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                     x: secc.x,
                     y: secc.y,
                     r0: secc.r - 1,
-                    r: secc.r + this.selected.r,
+                    r: secc.r + nodeData.selectedR,
                     startAngle: secc.startAngle,
                     endAngle: secc.startAngle, //secc.endAngle,
                     fillStyle: secc.fillStyle,
-                    globalAlpha: this.selected.globalAlpha
+                    globalAlpha: nodeData.selectedAlpha
                 },
                 id: 'selected_' + sec.id
             });
@@ -15167,12 +15165,13 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                 onUpdate: function onUpdate(status) {
                     for (var i = 0; i < me.sectors.length; i++) {
                         var sec = me.sectors[i];
+                        var nodeData = sec.nodeData;
                         var secc = sec.context;
 
-                        var _startAngle = sec.nodeData.startAngle;
-                        var _endAngle = sec.nodeData.endAngle;
-                        var _r = sec.nodeData.outRadius;
-                        var _r0 = sec.nodeData.innerRadius;
+                        var _startAngle = nodeData.startAngle;
+                        var _endAngle = nodeData.endAngle;
+                        var _r = nodeData.outRadius;
+                        var _r0 = nodeData.innerRadius;
 
                         if (secc) {
                             secc.r = _r * status.process;
@@ -15199,7 +15198,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                             //如果已经被选中，有一个选中态
                             if (sec._selectedSec) {
                                 sec._selectedSec.context.r0 = secc.r - 1;
-                                sec._selectedSec.context.r = secc.r + me.selected.r;
+                                sec._selectedSec.context.r = secc.r + nodeData.selectedR;
                                 sec._selectedSec.context.startAngle = secc.startAngle;
                                 sec._selectedSec.context.endAngle = secc.endAngle;
                             }
@@ -15241,7 +15240,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             for (var i = 0; i < indexs.length; i++) {
                 currentIndex = indexs[i];
                 var itemData = data[currentIndex];
-                var outCircleRadius = itemData.outRadius + me.moveDis;
+                var outCircleRadius = itemData.outRadius + itemData.moveDis;
 
                 //若Y值小于最小值，不画label    
                 if (!itemData.enabled || itemData.y < minY || count >= me.labelMaxCount) continue;
@@ -15515,6 +15514,12 @@ var PieGraphs = function (_GraphsBase) {
             format: null
         };
 
+        _this.focusEnabled = true;
+        _this.selectEnabled = false;
+
+        _this.selectedR = 5;
+        _this.selectedAlpha = 0.7;
+
         _this.innerRadius = 0;
         _this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
         _this.minSectorRadius = 20; //outRadius - innerRadius 的最小值
@@ -15603,7 +15608,7 @@ var PieGraphs = function (_GraphsBase) {
         key: "_dataHandle",
         value: function _dataHandle() {
             var me = this;
-            var _coor = this.root._coordinate;
+            var _coor = me.root._coordinate;
 
             var data = [];
             var dataFrame = me.root.dataFrame;
@@ -15613,10 +15618,15 @@ var PieGraphs = function (_GraphsBase) {
                 var layoutData = {
                     rowData: rowData, //把这一行数据给到layoutData引用起来
                     focused: false, //是否获取焦点，外扩
+                    focusEnabled: me.focusEnabled,
+
                     selected: false, //是否选中
+                    selectEnabled: me.selectEnabled,
+                    selectedR: me.selectedR,
+                    selectedAlpha: me.selectedAlpha,
                     enabled: true, //是否启用，显示在列表中
-                    value: rowData[this.valueField],
-                    name: rowData[this.nameField],
+                    value: rowData[me.valueField],
+                    name: rowData[me.nameField],
                     fillStyle: me.getColorByIndex(me.colors, i, l),
                     label: null, //绘制的时候再设置
                     nodeInd: i
@@ -15624,7 +15634,7 @@ var PieGraphs = function (_GraphsBase) {
                 data.push(layoutData);
             }
 
-            if (data.length && this.sort) {
+            if (data.length && me.sort) {
                 data.sort(function (a, b) {
                     if (me.sort == 'desc') {
                         return a.value - b.value;
@@ -15741,6 +15751,8 @@ var PieGraphs = function (_GraphsBase) {
                             endAngle: endAngle, //结束角度
                             midAngle: midAngle, //中间角度
 
+                            moveDis: me.moveDis,
+
                             outOffsetx: me.moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
                             outOffsety: me.moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
 
@@ -15821,27 +15833,33 @@ var PieGraphs = function (_GraphsBase) {
         value: function tipsPointerHideOf(e) {}
     }, {
         key: "focusAt",
-        value: function focusAt(ind) {
+        value: function focusAt(ind, e) {
             var nodeData = this._pie.data.list[ind];
+
+            if (!this.focusEnabled) return;
+
             this._pie.focusOf(nodeData);
         }
     }, {
         key: "unfocusAt",
-        value: function unfocusAt(ind) {
+        value: function unfocusAt(ind, e) {
             var nodeData = this._pie.data.list[ind];
+            if (!nodeData.focusEnabled) return;
             this._pie.unfocusOf(nodeData);
         }
     }, {
         key: "selectAt",
-        value: function selectAt(ind) {
+        value: function selectAt(ind, e) {
             var nodeData = this._pie.data.list[ind];
-            this._pie.selectOf(nodeData);
+            if (!this.selectEnabled) return;
+            this._pie.selectOf(nodeData, e);
         }
     }, {
         key: "unselectAt",
-        value: function unselectAt(ind) {
+        value: function unselectAt(ind, e) {
             var nodeData = this._pie.data.list[ind];
-            this._pie.unselectOf(nodeData);
+            if (!this.selectEnabled) return;
+            this._pie.unselectOf(nodeData, e);
         }
     }]);
     return PieGraphs;

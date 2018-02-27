@@ -25,19 +25,9 @@ export default class Pie extends Canvax.Event.EventDispatcher
             y : 0
         };
 
-        this.focused = {
-            enabled : true
-        };
-        this.selected = {
-            r: 5,
-            globalAlpha : 0.7
-        };
-
         //这个pie所属的graphs对象
         this._graphs = _graphs;
-        this.moveDis = _graphs.moveDis;
-        this.innerRadius = _graphs.innerRadius;
-        //this.outRadius = _graphs.outRadius;
+
         this.domContainer = _graphs.root.canvax.domView;
 
         this.data = data;
@@ -141,7 +131,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     context: {
                         x: item.focused ? item.outOffsetx : 0,
                         y: item.focused ? item.outOffsety : 0,
-                        r0: me.innerRadius,
+                        r0: item.innerRadius,
                         r: item.outRadius,
                         startAngle: item.startAngle,
                         endAngle: item.endAngle,
@@ -154,7 +144,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
             
                 sector.nodeData = item;
 
-                sector.hover(function(e){
+                item.focusEnabled && sector.hover(function(e){
                     me.focusOf( this.nodeData );
                 } , function(e){
                     !this.nodeData.selected && me.unfocusOf( this.nodeData );
@@ -222,10 +212,10 @@ export default class Pie extends Canvax.Event.EventDispatcher
         node.focused = false;
     }
 
-    selectOf ( node ) 
+    selectOf ( node , e ) 
     {
         var me = this;
-        if( !this.sectors.length ){
+        if( !this.sectors.length || node.selectEnabled ){
             return;
         };
 
@@ -245,15 +235,17 @@ export default class Pie extends Canvax.Event.EventDispatcher
         node.selected = true;
     }
 
-    unselectOf ( node ) 
+    unselectOf ( node , e ) 
     {
         var sec = this.sectors[ node.nodeInd ];
-        if (!node.selected) {
+        if (!node.selected || node.selectEnabled) {
             return
         };
         var me = this;
         me.cancelCheckedSec(sec, function() {
-            me.unfocusOf(node);
+            if( !e || !e.target ){
+                me.unfocusOf(node);
+            };
         });
         node.selected = false;
     }
@@ -261,6 +253,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
     addCheckedSec(sec, callback)
     {
         var secc = sec.context;
+        var nodeData = sec.nodeData;
+
         if( !secc ) return;
         
         var sector = new Sector({
@@ -269,11 +263,11 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 x: secc.x,
                 y: secc.y,
                 r0: secc.r - 1,
-                r: secc.r + this.selected.r,
+                r: secc.r + nodeData.selectedR,
                 startAngle: secc.startAngle,
                 endAngle: secc.startAngle, //secc.endAngle,
                 fillStyle: secc.fillStyle,
-                globalAlpha: this.selected.globalAlpha
+                globalAlpha: nodeData.selectedAlpha
             },
             id: 'selected_' + sec.id
         });
@@ -344,12 +338,13 @@ export default class Pie extends Canvax.Event.EventDispatcher
             onUpdate: function ( status ) {
                 for (var i = 0; i < me.sectors.length; i++) {
                     var sec = me.sectors[i];
+                    var nodeData = sec.nodeData;
                     var secc = sec.context;
 
-                    var _startAngle = sec.nodeData.startAngle;
-                    var _endAngle = sec.nodeData.endAngle;
-                    var _r = sec.nodeData.outRadius;
-                    var _r0 = sec.nodeData.innerRadius;
+                    var _startAngle = nodeData.startAngle;
+                    var _endAngle   = nodeData.endAngle;
+                    var _r  = nodeData.outRadius;
+                    var _r0 = nodeData.innerRadius;
 
                     if (secc) {
                         secc.r = _r * status.process;
@@ -376,7 +371,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                         //如果已经被选中，有一个选中态
                         if( sec._selectedSec ){
                             sec._selectedSec.context.r0 = secc.r - 1;
-                            sec._selectedSec.context.r  = secc.r + me.selected.r;
+                            sec._selectedSec.context.r  = secc.r + nodeData.selectedR;
                             sec._selectedSec.context.startAngle = secc.startAngle;
                             sec._selectedSec.context.endAngle = secc.endAngle;
                         }
@@ -419,7 +414,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         for (var i = 0; i < indexs.length; i++) {
             currentIndex = indexs[i];
             var itemData = data[currentIndex];
-            var outCircleRadius = itemData.outRadius + me.moveDis;
+            var outCircleRadius = itemData.outRadius + itemData.moveDis;
 
             //若Y值小于最小值，不画label    
             if (!itemData.enabled || itemData.y < minY || count >= me.labelMaxCount) continue
