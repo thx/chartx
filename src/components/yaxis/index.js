@@ -156,13 +156,18 @@ export default class yAxis extends Component
         var _label = this.label;
         
         if (_label && _label != "") {
+            var textAlign = this.align == "left" ? "right" : "left";
+            if( this.isH ){
+                textAlign = "left"
+            };
+
             this._label = new Canvax.Display.Text(_label, {
                 context: {
-                    fontSize: this.scale.text.fontSize,
-                    textAlign: this.align == "left" ? "right" : "left",//"left",
-                    textBaseline: this.isH ? "top" : "bottom",
-                    fillStyle: this.scale.text.fontColor,
-                    rotation: this.isH ? -90 : 0
+                    fontSize  : this.scale.text.fontSize,
+                    textAlign : textAlign,//"left",
+                    textBaseline : this.isH ? "top" : "bottom",
+                    fillStyle : this.scale.text.fontColor,
+                    rotation  : this.isH ? -90 : 0
                 }
             });
         }

@@ -88,13 +88,13 @@ var options = {
             //颜色序列,若不设置，会有默认的颜色序列
             //colors:['red', 'yellow', 'blue']
 
-
-            //selected的实现不再用配置的方式然后内部实现，而是提供接口，在click 或 dblclick里自己调用
-            //selected : {
-            //    enabled : true
-            //}
             onclick : function( e , graphs ){
-                graphs._pie.selectOf( this.nodeData );
+                var nodeData = e.eventInfo.nodes[0];
+                if( !nodeData.selected ){
+                    graphs.selectAt( nodeData.nodeInd );
+                } else {
+                    graphs.unselectAt( nodeData.nodeInd );
+                }
             }
         }
     ],

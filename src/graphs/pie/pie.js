@@ -162,14 +162,15 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
                 //触发注册的事件
                 sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
-                    me._graphs.triggerEvent( me, e );
-
+                    
                     me.fire( e.type, e );
                     //图表触发，用来处理Tips
                     e.eventInfo = {
                         nodes : [ this.nodeData ]
                     };
                     me._graphs.root.fire( e.type, e );
+
+                    me._graphs.triggerEvent( me, e );
 
                 });
 
@@ -252,7 +253,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         };
         var me = this;
         me.cancelCheckedSec(sec, function() {
-            me.unfocus(nodeInd);
+            me.unfocusOf(node);
         });
         node.selected = false;
     }

@@ -9366,10 +9366,15 @@ var yAxis = function (_Component) {
             var _label = this.label;
 
             if (_label && _label != "") {
+                var textAlign = this.align == "left" ? "right" : "left";
+                if (this.isH) {
+                    textAlign = "left";
+                }
+
                 this._label = new canvax.Display.Text(_label, {
                     context: {
                         fontSize: this.scale.text.fontSize,
-                        textAlign: this.align == "left" ? "right" : "left", //"left",
+                        textAlign: textAlign, //"left",
                         textBaseline: this.isH ? "top" : "bottom",
                         fillStyle: this.scale.text.fontColor,
                         rotation: this.isH ? -90 : 0
@@ -14985,7 +14990,6 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
 
                     //触发注册的事件
                     sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
-                        me._graphs.triggerEvent(me, e);
 
                         me.fire(e.type, e);
                         //图表触发，用来处理Tips
@@ -14993,6 +14997,8 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                             nodes: [this.nodeData]
                         };
                         me._graphs.root.fire(e.type, e);
+
+                        me._graphs.triggerEvent(me, e);
                     });
 
                     me.sectorsSp.addChildAt(sector, 0);
@@ -15073,7 +15079,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             }
             var me = this;
             me.cancelCheckedSec(sec, function () {
-                me.unfocus(nodeInd);
+                me.unfocusOf(node);
             });
             node.selected = false;
         }
@@ -15816,16 +15822,28 @@ var PieGraphs = function (_GraphsBase) {
         value: function tipsPointerHideOf(e) {}
     }, {
         key: "focusAt",
-        value: function focusAt(ind, field) {}
+        value: function focusAt(ind) {
+            var nodeData = this._pie.data.list[ind];
+            this._pie.focusOf(nodeData);
+        }
     }, {
         key: "unfocusAt",
-        value: function unfocusAt(ind, field) {}
+        value: function unfocusAt(ind) {
+            var nodeData = this._pie.data.list[ind];
+            this._pie.unfocusOf(nodeData);
+        }
     }, {
         key: "selectAt",
-        value: function selectAt(ind, field) {}
+        value: function selectAt(ind) {
+            var nodeData = this._pie.data.list[ind];
+            this._pie.selectOf(nodeData);
+        }
     }, {
         key: "unselectAt",
-        value: function unselectAt(ind, field) {}
+        value: function unselectAt(ind) {
+            var nodeData = this._pie.data.list[ind];
+            this._pie.unselectOf(nodeData);
+        }
     }]);
     return PieGraphs;
 }(GraphsBase);

@@ -322,20 +322,32 @@ export default class PieGraphs extends GraphsBase
         return this.data;
     }
 
-    tipsPointerOf( e )
-    {
+    tipsPointerOf( e ){
     }
 
-    tipsPointerHideOf( e )
-    {
+    tipsPointerHideOf( e ){
     }
 
-    focusAt( ind, field ){}
-    
-    unfocusAt( ind, field ){}
-    
-    selectAt( ind, field ){}
 
-    unselectAt( ind, field ){}
+
+    focusAt( ind ){
+        var nodeData = this._pie.data.list[ ind ];
+        this._pie.focusOf( nodeData );
+    }
+    
+    unfocusAt( ind ){
+        var nodeData = this._pie.data.list[ ind ];
+        this._pie.unfocusOf( nodeData );
+    }
+    
+    selectAt( ind ){
+        var nodeData = this._pie.data.list[ ind ];
+        this._pie.selectOf( nodeData );
+    }
+
+    unselectAt( ind ){
+        var nodeData = this._pie.data.list[ ind ];
+        this._pie.unselectOf( nodeData );
+    }
     
 }
