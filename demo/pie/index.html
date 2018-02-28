@@ -71,9 +71,8 @@ var options = {
             //是否允许动画
             animation: true,
 
-
             //周边tip
-            label : {
+            text : {
                 enabled: true,
                 //是否绘制连接线(注意：此配置仅限于扇形块比较分散，若扇形比较紧密时，无连线会导致识别混淆)
                 //allowLine:false,
@@ -82,21 +81,19 @@ var options = {
                     return "<div><span>"+rowData.name+"</span>：<span>"+rowData.value+"（"+ data.percentage +"%）</span></div>"
                 }
             },
+            node : {
+                select : {
+                    enabled : true
+                },
+                onclick : function( e , nodeData ){
 
-            //内圆半径
-            //innerRadius: 50,
-            //outRadius: 70,
-            //颜色序列,若不设置，会有默认的颜色序列
-            //colors:['red', 'yellow', 'blue']
+                    if( !nodeData.selected ){
+                        this.selectAt( nodeData.nodeInd );
+                    } else {
+                        this.unselectAt( nodeData.nodeInd );
+                    };
 
-            selectEnabled : true,
-            onclick : function( e , graphs ){
-                var nodeData = e.eventInfo.nodes[0];
-                if( !nodeData.selected ){
-                    graphs.selectAt( nodeData.nodeInd , e );
-                } else {
-                    graphs.unselectAt( nodeData.nodeInd , e );
-                };
+                }
             }
         }
     ],

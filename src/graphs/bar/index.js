@@ -13,36 +13,36 @@ export default class BarGraphs extends GraphsBase
     {
         super(opts, root);
 
-        this.type = "bar";
+        this.type = "node";
 
         this.enabledField = null;
  
         this.yAxisAlign = "left"; //默认设置为左y轴
         this._xAxis = this.root._coordinate._xAxis;
 
-        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
+        //trimGraphs的时候是否需要和其他的 node graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
         this.absolute = false; 
 
-        this.bar = {
+        this.node = {
+            shapeType : "rect", //图形的类型是个矩形rect
             width     : 0,
             _width    : 0,
             maxWidth  : 50,
             radius    : 4,
             fillStyle : null,
             fillAlpha : 0.95,
-            filter    : function(){}, //用来定制bar的样式
-            count     : 0, //总共有多少个bar
+            _count    : 0, //总共有多少个bar
             xDis      : null
         };
 
         this.text = {
-            enabled: false,
-            fillStyle: '#999',
-            fontSize: 12,
-            format: null,
-            lineWidth:1,
-            strokeStyle: 'white'
+            enabled   : false,
+            fillStyle : '#999',
+            fontSize  : 12,
+            format    : null,
+            lineWidth : 1,
+            strokeStyle : 'white'
         };
 
         this.sort = null;
@@ -118,7 +118,7 @@ export default class BarGraphs extends GraphsBase
         var index = $o.iNode
         var group = me.barsSp.getChildById('barGroup_' + index)
         
-        var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle)
+        var fillStyle = $o.fillStyle || me._getColor(me.node.fillStyle)
         for (var a = 0, al = group.getNumChildren(); a < al; a++) {
             var rectEl = group.getChildAt(a)
             rectEl.context.fillStyle = fillStyle
@@ -156,26 +156,26 @@ export default class BarGraphs extends GraphsBase
 
     _getBarWidth(ceilWidth, ceilWidth2)
     {
-        if (this.bar.width) {
-            if (_.isFunction(this.bar.width)) {
-                this.bar._width = this.bar.width(ceilWidth);
+        if (this.node.width) {
+            if (_.isFunction(this.node.width)) {
+                this.node._width = this.node.width(ceilWidth);
             } else {
-                this.bar._width = this.bar.width;
+                this.node._width = this.node.width;
             }
         } else {
-            this.bar._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
+            this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
 
             //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
-            if (this.bar._width == 1 && ceilWidth > 3) {
-                this.bar._width = ceilWidth - 2;
+            if (this.node._width == 1 && ceilWidth > 3) {
+                this.node._width = ceilWidth - 2;
             };
         };
-        this.bar._width < 1 && (this.bar._width = 1);
-        this.bar._width = parseInt( this.bar._width );
-        if( this.bar._width > this.bar.maxWidth ){
-            this.bar._width = this.bar.maxWidth;
+        this.node._width < 1 && (this.node._width = 1);
+        this.node._width = parseInt( this.node._width );
+        if( this.node._width > this.node.maxWidth ){
+            this.node._width = this.node.maxWidth;
         };
-        return this.bar._width;
+        return this.node._width;
     }
 
     add( field ){
@@ -185,8 +185,8 @@ export default class BarGraphs extends GraphsBase
     remove( field )
     {
         _.each( this.barsSp.children , function( h_groupSp, h ){
-            var bar = h_groupSp.getChildById("bar_"+h+"_"+field);
-            bar && bar.destroy();
+            var node = h_groupSp.getChildById("bar_"+h+"_"+field);
+            node && node.destroy();
         } );
  
         this.draw();
@@ -226,7 +226,7 @@ export default class BarGraphs extends GraphsBase
         var groupsLen = this.enabledField.length;
         var itemW = 0;
 
-        me.bar.count = 0;
+        me.node._count = 0;
 
         var _flattenField = _.flatten( [ this.field ] );
 
@@ -289,14 +289,14 @@ export default class BarGraphs extends GraphsBase
 
                 for (var v = 0; v < vLen; v++) {
                     
-                    me.bar.count ++;
+                    me.node._count ++;
 
                     //单个的bar，从纵向的底部开始堆叠矩形
                     var rectData = me.data[h_group[v]][h];
 
                     rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                    var fillStyle = me._getColor(me.bar.fillStyle, groupsLen, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+                    var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
 
                     rectData.fillStyle = fillStyle;
 
@@ -309,10 +309,10 @@ export default class BarGraphs extends GraphsBase
                     var finalPos = {
                         x: Math.round(rectData.x),
                         y: rectData.fromY, 
-                        width: me.bar._width,
+                        width: me.node._width,
                         height: rectH,
                         fillStyle: fillStyle,
-                        fillAlpha: me.bar.fillAlpha,
+                        fillAlpha: me.node.fillAlpha,
                         scaleY: -1
                     };
                     rectData.width = finalPos.width;
@@ -323,13 +323,13 @@ export default class BarGraphs extends GraphsBase
                         width: finalPos.width,
                         height: finalPos.height,
                         fillStyle: finalPos.fillStyle,
-                        fillAlpha: me.bar.fillAlpha,
+                        fillAlpha: me.node.fillAlpha,
                         scaleY: 0
                     };
                     
-                    if ( !!me.bar.radius && rectData.isLeaf && !me.proportion ) {
-                        var radiusR = Math.min(me.bar._width / 2, Math.abs(rectH));
-                        radiusR = Math.min(radiusR, me.bar.radius);
+                    if ( !!me.node.radius && rectData.isLeaf && !me.proportion ) {
+                        var radiusR = Math.min(me.node._width / 2, Math.abs(rectH));
+                        radiusR = Math.min(radiusR, me.node.radius);
                         rectCxt.radius = [radiusR, radiusR, 0, 0];
                     };
 
@@ -356,8 +356,6 @@ export default class BarGraphs extends GraphsBase
 
                     rectEl.finalPos = finalPos;
                     rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
-
-                    me.bar.filter.apply( rectEl, [ rectData , me] );
 
                     //叶子节点上面放置info
                     if (rectData.isLeaf && me.text.enabled) {
@@ -467,7 +465,7 @@ export default class BarGraphs extends GraphsBase
                             };
                         });
 
-                        infosp._finalX = rectData.x + me.bar._width/2 - infoWidth / 2;
+                        infosp._finalX = rectData.x + me.node._width/2 - infoWidth / 2;
 
                         //如果数据在basepoint下方
                         if( rectData.value < rectData.yBasePoint.content ){
@@ -476,7 +474,7 @@ export default class BarGraphs extends GraphsBase
                             infosp._finalY = rectData.y - infoHeight;
                         }
                        
-                        infosp._centerX = rectData.x+me.bar._width/2;
+                        infosp._centerX = rectData.x+me.node._width/2;
                         infosp.context.width = infoWidth;
                         infosp.context.height = infoHeight;
 
@@ -539,7 +537,7 @@ export default class BarGraphs extends GraphsBase
 
         if( !this.absolute ){
             _.each( this.root._graphs , function( _g ){
-                if( !_g.absolute && _g.type == "bar" ) {
+                if( !_g.absolute && _g.type == "node" ) {
                     if( _g === me ){
                         _preHLenOver = true;
                     };
@@ -565,8 +563,8 @@ export default class BarGraphs extends GraphsBase
         //知道了ceilWidth2 后 检测下 barW是否需要调整
         var barW = this._getBarWidth(ceilWidth, ceilWidth2);
         var barDis = ceilWidth2 - barW;
-        if( this.bar.xDis != null ){
-            barDis = this.bar.xDis;
+        if( this.node.xDis != null ){
+            barDis = this.node.xDis;
         };
         
         var disLeft = (ceilWidth - barW*hLen - barDis*(hLen-1) ) / 2;
@@ -655,7 +653,7 @@ export default class BarGraphs extends GraphsBase
                     };
 
                     var node = {
-                        type   : "bar",
+                        type   : "node",
                         value  : val,
                         vInd   : v, //如果是堆叠图的话，这个node在堆叠中得位置
                         vCount : vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
@@ -754,24 +752,24 @@ export default class BarGraphs extends GraphsBase
 
                     var group = me.barsSp.getChildById("barGroup_" + h);
 
-                    var bar = group.getChildById("bar_" + h + "_" + rectData.field);
+                    var node = group.getChildById("bar_" + h + "_" + rectData.field);
 
                     if (optsions.duration == 0) {
-                        bar.context.scaleY = sy;
-                        bar.context.y = sy * sy * bar.finalPos.y;
-                        bar.context.x = bar.finalPos.x;
-                        bar.context.width = bar.finalPos.width;
-                        bar.context.height = bar.finalPos.height;
+                        node.context.scaleY = sy;
+                        node.context.y = sy * sy * node.finalPos.y;
+                        node.context.x = node.finalPos.x;
+                        node.context.width = node.finalPos.width;
+                        node.context.height = node.finalPos.height;
                     } else {
-                        if (bar._tweenObj) {
-                            AnimationFrame.destroyTween(bar._tweenObj);
+                        if (node._tweenObj) {
+                            AnimationFrame.destroyTween(node._tweenObj);
                         };
-                        bar._tweenObj = bar.animate({
+                        node._tweenObj = node.animate({
                             scaleY: sy,
-                            y: sy * bar.finalPos.y,
-                            x: bar.finalPos.x,
-                            width: bar.finalPos.width,
-                            height: bar.finalPos.height
+                            y: sy * node.finalPos.y,
+                            x: node.finalPos.x,
+                            width: node.finalPos.width,
+                            height: node.finalPos.height
                         }, {
                             duration: optsions.duration,
                             easing: optsions.easing,
@@ -786,11 +784,11 @@ export default class BarGraphs extends GraphsBase
 
                                 barCount ++;
 
-                                if( barCount === me.bar.count ){
+                                if( barCount === me.node._count ){
                                     callback && callback(me);
                                 }
                             },
-                            id: bar.id
+                            id: node.id
                         });
                     };
 

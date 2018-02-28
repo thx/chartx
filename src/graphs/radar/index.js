@@ -28,6 +28,7 @@ export default class RadarGraphs extends GraphsBase
         };
         this.node = {
             enabled : true,
+            shapeType : "circle",
             r : 4,
             strokeStyle : "#ffffff",
             lineWidth : 1

@@ -8892,7 +8892,7 @@ var xAxis = function (_Component) {
                 });
 
                 this.maxTxtH = txt.getTextHeight();
-                debugger;
+
                 if (!!this.scale.text.rotation) {
                     if (this.scale.text.rotation % 90 == 0) {
                         this.height = parseInt(this._textMaxWidth);
@@ -12438,15 +12438,19 @@ var GraphsBase = function (_Canvax$Event$EventDi) {
         key: "getLegendData",
         value: function getLegendData() {}
 
-        //触发事件
+        //触发事件, 事件处理函数中的this都指向对应的graphs对象。
 
     }, {
         key: "triggerEvent",
-        value: function triggerEvent(eventTarget, e) {
-            var fn = eventTarget["on" + e.type];
+        value: function triggerEvent(eventTargetOpt, e) {
+            var fn = eventTargetOpt["on" + e.type];
             if (fn && _$16.isFunction(fn)) {
                 //如果有在pie的配置上面注册对应的事件，则触发
-                fn.apply(e.target, [e, this]);
+                var nodeData = null;
+                if (e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length) {
+                    nodeData = e.eventInfo.nodes[0];
+                }
+                fn.apply(this, [e, nodeData]);
             }
         }
     }]);
@@ -12465,26 +12469,26 @@ var BarGraphs = function (_GraphsBase) {
 
         var _this = possibleConstructorReturn$1(this, (BarGraphs.__proto__ || Object.getPrototypeOf(BarGraphs)).call(this, opts, root));
 
-        _this.type = "bar";
+        _this.type = "node";
 
         _this.enabledField = null;
 
         _this.yAxisAlign = "left"; //默认设置为左y轴
         _this._xAxis = _this.root._coordinate._xAxis;
 
-        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
+        //trimGraphs的时候是否需要和其他的 node graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
         _this.absolute = false;
 
-        _this.bar = {
+        _this.node = {
+            shapeType: "rect", //图形的类型是个矩形rect
             width: 0,
             _width: 0,
             maxWidth: 50,
             radius: 4,
             fillStyle: null,
             fillAlpha: 0.95,
-            filter: function filter() {}, //用来定制bar的样式
-            count: 0, //总共有多少个bar
+            _count: 0, //总共有多少个bar
             xDis: null
         };
 
@@ -12573,7 +12577,7 @@ var BarGraphs = function (_GraphsBase) {
             var index = $o.iNode;
             var group = me.barsSp.getChildById('barGroup_' + index);
 
-            var fillStyle = $o.fillStyle || me._getColor(me.bar.fillStyle);
+            var fillStyle = $o.fillStyle || me._getColor(me.node.fillStyle);
             for (var a = 0, al = group.getNumChildren(); a < al; a++) {
                 var rectEl = group.getChildAt(a);
                 rectEl.context.fillStyle = fillStyle;
@@ -12611,26 +12615,26 @@ var BarGraphs = function (_GraphsBase) {
     }, {
         key: "_getBarWidth",
         value: function _getBarWidth(ceilWidth, ceilWidth2) {
-            if (this.bar.width) {
-                if (_$15.isFunction(this.bar.width)) {
-                    this.bar._width = this.bar.width(ceilWidth);
+            if (this.node.width) {
+                if (_$15.isFunction(this.node.width)) {
+                    this.node._width = this.node.width(ceilWidth);
                 } else {
-                    this.bar._width = this.bar.width;
+                    this.node._width = this.node.width;
                 }
             } else {
-                this.bar._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
+                this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
 
                 //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
-                if (this.bar._width == 1 && ceilWidth > 3) {
-                    this.bar._width = ceilWidth - 2;
+                if (this.node._width == 1 && ceilWidth > 3) {
+                    this.node._width = ceilWidth - 2;
                 }
             }
-            this.bar._width < 1 && (this.bar._width = 1);
-            this.bar._width = parseInt(this.bar._width);
-            if (this.bar._width > this.bar.maxWidth) {
-                this.bar._width = this.bar.maxWidth;
+            this.node._width < 1 && (this.node._width = 1);
+            this.node._width = parseInt(this.node._width);
+            if (this.node._width > this.node.maxWidth) {
+                this.node._width = this.node.maxWidth;
             }
-            return this.bar._width;
+            return this.node._width;
         }
     }, {
         key: "add",
@@ -12641,8 +12645,8 @@ var BarGraphs = function (_GraphsBase) {
         key: "remove",
         value: function remove(field) {
             _$15.each(this.barsSp.children, function (h_groupSp, h) {
-                var bar = h_groupSp.getChildById("bar_" + h + "_" + field);
-                bar && bar.destroy();
+                var node = h_groupSp.getChildById("bar_" + h + "_" + field);
+                node && node.destroy();
             });
 
             this.draw();
@@ -12682,7 +12686,7 @@ var BarGraphs = function (_GraphsBase) {
             var groupsLen = this.enabledField.length;
             var itemW = 0;
 
-            me.bar.count = 0;
+            me.node._count = 0;
 
             var _flattenField = _$15.flatten([this.field]);
 
@@ -12745,14 +12749,14 @@ var BarGraphs = function (_GraphsBase) {
 
                     for (var v = 0; v < vLen; v++) {
 
-                        me.bar.count++;
+                        me.node._count++;
 
                         //单个的bar，从纵向的底部开始堆叠矩形
                         var rectData = me.data[h_group[v]][h];
 
                         rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                        var fillStyle = me._getColor(me.bar.fillStyle, groupsLen, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+                        var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
 
                         rectData.fillStyle = fillStyle;
 
@@ -12765,10 +12769,10 @@ var BarGraphs = function (_GraphsBase) {
                         var finalPos = {
                             x: Math.round(rectData.x),
                             y: rectData.fromY,
-                            width: me.bar._width,
+                            width: me.node._width,
                             height: rectH,
                             fillStyle: fillStyle,
-                            fillAlpha: me.bar.fillAlpha,
+                            fillAlpha: me.node.fillAlpha,
                             scaleY: -1
                         };
                         rectData.width = finalPos.width;
@@ -12779,13 +12783,13 @@ var BarGraphs = function (_GraphsBase) {
                             width: finalPos.width,
                             height: finalPos.height,
                             fillStyle: finalPos.fillStyle,
-                            fillAlpha: me.bar.fillAlpha,
+                            fillAlpha: me.node.fillAlpha,
                             scaleY: 0
                         };
 
-                        if (!!me.bar.radius && rectData.isLeaf && !me.proportion) {
-                            var radiusR = Math.min(me.bar._width / 2, Math.abs(rectH));
-                            radiusR = Math.min(radiusR, me.bar.radius);
+                        if (!!me.node.radius && rectData.isLeaf && !me.proportion) {
+                            var radiusR = Math.min(me.node._width / 2, Math.abs(rectH));
+                            radiusR = Math.min(radiusR, me.node.radius);
                             rectCxt.radius = [radiusR, radiusR, 0, 0];
                         }
 
@@ -12812,8 +12816,6 @@ var BarGraphs = function (_GraphsBase) {
 
                         rectEl.finalPos = finalPos;
                         rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
-
-                        me.bar.filter.apply(rectEl, [rectData, me]);
 
                         //叶子节点上面放置info
                         if (rectData.isLeaf && me.text.enabled) {
@@ -12919,7 +12921,7 @@ var BarGraphs = function (_GraphsBase) {
                                 }
                             });
 
-                            infosp._finalX = rectData.x + me.bar._width / 2 - infoWidth / 2;
+                            infosp._finalX = rectData.x + me.node._width / 2 - infoWidth / 2;
 
                             //如果数据在basepoint下方
                             if (rectData.value < rectData.yBasePoint.content) {
@@ -12928,7 +12930,7 @@ var BarGraphs = function (_GraphsBase) {
                                 infosp._finalY = rectData.y - infoHeight;
                             }
 
-                            infosp._centerX = rectData.x + me.bar._width / 2;
+                            infosp._centerX = rectData.x + me.node._width / 2;
                             infosp.context.width = infoWidth;
                             infosp.context.height = infoHeight;
 
@@ -12991,7 +12993,7 @@ var BarGraphs = function (_GraphsBase) {
 
             if (!this.absolute) {
                 _$15.each(this.root._graphs, function (_g) {
-                    if (!_g.absolute && _g.type == "bar") {
+                    if (!_g.absolute && _g.type == "node") {
                         if (_g === me) {
                             _preHLenOver = true;
                         }
@@ -13017,8 +13019,8 @@ var BarGraphs = function (_GraphsBase) {
             //知道了ceilWidth2 后 检测下 barW是否需要调整
             var barW = this._getBarWidth(ceilWidth, ceilWidth2);
             var barDis = ceilWidth2 - barW;
-            if (this.bar.xDis != null) {
-                barDis = this.bar.xDis;
+            if (this.node.xDis != null) {
+                barDis = this.node.xDis;
             }
 
             var disLeft = (ceilWidth - barW * hLen - barDis * (hLen - 1)) / 2;
@@ -13107,7 +13109,7 @@ var BarGraphs = function (_GraphsBase) {
                         }
 
                         var node = {
-                            type: "bar",
+                            type: "node",
                             value: val,
                             vInd: v, //如果是堆叠图的话，这个node在堆叠中得位置
                             vCount: vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
@@ -13207,24 +13209,24 @@ var BarGraphs = function (_GraphsBase) {
 
                         var group = me.barsSp.getChildById("barGroup_" + h);
 
-                        var bar = group.getChildById("bar_" + h + "_" + rectData.field);
+                        var node = group.getChildById("bar_" + h + "_" + rectData.field);
 
                         if (optsions.duration == 0) {
-                            bar.context.scaleY = sy;
-                            bar.context.y = sy * sy * bar.finalPos.y;
-                            bar.context.x = bar.finalPos.x;
-                            bar.context.width = bar.finalPos.width;
-                            bar.context.height = bar.finalPos.height;
+                            node.context.scaleY = sy;
+                            node.context.y = sy * sy * node.finalPos.y;
+                            node.context.x = node.finalPos.x;
+                            node.context.width = node.finalPos.width;
+                            node.context.height = node.finalPos.height;
                         } else {
-                            if (bar._tweenObj) {
-                                AnimationFrame$1.destroyTween(bar._tweenObj);
+                            if (node._tweenObj) {
+                                AnimationFrame$1.destroyTween(node._tweenObj);
                             }
-                            bar._tweenObj = bar.animate({
+                            node._tweenObj = node.animate({
                                 scaleY: sy,
-                                y: sy * bar.finalPos.y,
-                                x: bar.finalPos.x,
-                                width: bar.finalPos.width,
-                                height: bar.finalPos.height
+                                y: sy * node.finalPos.y,
+                                x: node.finalPos.x,
+                                width: node.finalPos.width,
+                                height: node.finalPos.height
                             }, {
                                 duration: optsions.duration,
                                 easing: optsions.easing,
@@ -13237,11 +13239,11 @@ var BarGraphs = function (_GraphsBase) {
 
                                     barCount++;
 
-                                    if (barCount === me.bar.count) {
+                                    if (barCount === me.node._count) {
                                         callback && callback(me);
                                     }
                                 },
-                                id: bar.id
+                                id: node.id
                             });
                         }
 
@@ -13504,6 +13506,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
         _this.line = { //线
             enabled: 1,
+            shapeType: "brokenLine", //折线
             strokeStyle: fieldMap.color,
             lineWidth: 2,
             lineType: "solid",
@@ -13512,6 +13515,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
         _this.node = { //节点 
             enabled: 1, //是否有
+            shapeType: "circle",
             corner: false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
             r: 3, //半径 node 圆点的半径
             fillStyle: '#ffffff',
@@ -13525,7 +13529,6 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             strokeStyle: null,
             fontSize: 13,
             format: null
-
         };
 
         _this.area = { //填充
@@ -14507,15 +14510,32 @@ var ScatGraphs = function (_GraphsBase) {
             r: null,
             normalR: 10,
             fillStyle: null,
+            fillAlpha: 0.8,
+
             strokeStyle: null,
             lineWidth: 0,
-            alpha: 0.9
-            //onclick ondblclick 注册的事件都是小写
-        };
-        _this.label = {
+            lineAlpha: 0,
+
+            focus: {
+                enabled: true,
+                lineWidth: 6,
+                lineAlpha: 0.2,
+                fillAlpha: 0.8
+            },
+            select: {
+                enabled: true,
+                lineWidth: 8,
+                lineAlpha: 0.4,
+                fillAlpha: 1
+
+                //onclick ondblclick 注册的事件都是小写
+            } };
+
+        _this.text = {
+            enabled: true,
             field: null,
-            format: function format(label) {
-                return label;
+            format: function format(text) {
+                return text;
             },
             fontSize: 12,
             fontColor: "#777"
@@ -14591,7 +14611,10 @@ var ScatGraphs = function (_GraphsBase) {
                     },
                     field: this.field,
                     color: fieldMap.color,
-                    groupInd: 0,
+                    nodeInd: i,
+
+                    focused: false,
+                    selected: false,
 
                     //下面的属性都单独设置
                     r: null, //这里先不设置，在下面的_setR里单独设置
@@ -14600,7 +14623,7 @@ var ScatGraphs = function (_GraphsBase) {
                     lineWidth: 0,
                     shapeType: null,
                     shape: null, //对应的canvax 节点， 在widget之后赋值
-                    label: null
+                    text: null
                 };
 
                 this._setR(nodeLayoutData);
@@ -14608,7 +14631,7 @@ var ScatGraphs = function (_GraphsBase) {
                 this._setStrokeStyle(nodeLayoutData);
                 this._setLineWidth(nodeLayoutData);
                 this._setNodeType(nodeLayoutData);
-                this._setLabel(nodeLayoutData);
+                this._setText(nodeLayoutData);
 
                 tmplData.push(nodeLayoutData);
             }
@@ -14643,11 +14666,11 @@ var ScatGraphs = function (_GraphsBase) {
             return this;
         }
     }, {
-        key: "_setLabel",
-        value: function _setLabel(nodeLayoutData) {
-            if (this.label.field != null) {
-                if (_$19.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
-                    nodeLayoutData.label = nodeLayoutData.rowData[this.label.field];
+        key: "_setText",
+        value: function _setText(nodeLayoutData) {
+            if (this.text.field != null) {
+                if (_$19.isString(this.text.field) && nodeLayoutData.rowData[this.text.field]) {
+                    nodeLayoutData.text = nodeLayoutData.rowData[this.text.field];
                 }
             }
         }
@@ -14660,7 +14683,7 @@ var ScatGraphs = function (_GraphsBase) {
     }, {
         key: "_setStrokeStyle",
         value: function _setStrokeStyle(nodeLayoutData) {
-            nodeLayoutData.strokeStyle = this._getStyle(this.node.strokeStyle, nodeLayoutData);
+            nodeLayoutData.strokeStyle = this._getStyle(this.node.strokeStyle || this.node.fillStyle, nodeLayoutData);
             return this;
         }
     }, {
@@ -14715,6 +14738,7 @@ var ScatGraphs = function (_GraphsBase) {
 
                 var _node = new Shape({
                     id: "shape_" + iNode,
+                    hoverClone: false,
                     context: _context
                 });
                 me._shapesp.addChild(_node);
@@ -14724,34 +14748,53 @@ var ScatGraphs = function (_GraphsBase) {
                 _node.iNode = iNode;
                 nodeData.shape = _node;
 
-                _node.on("mouseover mousemove mouseout tap click", function (e) {
-                    me._nodeEventHendle(e, this);
+                me.node.focus.enabled && _node.hover(function (e) {
+                    me.focusAt(this.nodeData.nodeInd);
+                }, function (e) {
+                    !this.nodeData.selected && me.unfocusAt(this.nodeData.nodeInd);
+                });
+
+                _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+
+                    e.eventInfo = {
+                        title: null,
+                        nodes: [this.nodeData]
+                    };
+                    if (this.nodeData.text) {
+                        e.eventInfo.title = this.nodeData.text;
+                    }
+
+                    //fire到root上面去的是为了让root去处理tips
+                    me.root.fire(e.type, e);
+
+                    me.triggerEvent(me.node, e);
                 });
 
                 //如果有label
-                if (nodeData.label) {
-                    var _label = nodeData.label;
-                    text = new canvax.Display.Text(_label, {
+                if (nodeData.text && me.text.enabled) {
+
+                    var text = nodeData.text;
+                    var _text = new canvax.Display.Text(text, {
                         id: "text_" + iNode,
-                        context: me._getLabelContext(nodeData)
+                        context: me._getTextContext(nodeData)
                     });
 
-                    me._textsp.addChild(text);
+                    me._textsp.addChild(_text);
 
                     //图形节点和text文本相互引用
-                    _node.label = text;
-                    text.shape = _node;
+                    _node.text = _text;
+                    _text.shape = _node;
                 }
             });
         }
     }, {
-        key: "_getLabelContext",
-        value: function _getLabelContext(nodeData) {
+        key: "_getTextContext",
+        value: function _getTextContext(nodeData) {
             var ctx = {
                 x: nodeData.x,
                 y: nodeData.y,
-                fillStyle: this.label.fontColor,
-                fontSize: this.label.fontSize,
+                fillStyle: this.text.fontColor,
+                fontSize: this.text.fontSize,
                 textAlign: 'center',
                 textBaseline: 'middle'
             };
@@ -14778,30 +14821,16 @@ var ScatGraphs = function (_GraphsBase) {
                 fillStyle: nodeData.fillStyle,
                 strokeStyle: nodeData.strokeStyle,
                 lineWidth: nodeData.lineWidth,
-                globalAlpha: this.node.alpha,
+                fillAlpha: this.node.fillAlpha,
                 cursor: "pointer"
             };
+
             if (this.animation) {
                 ctx.x = 0;
                 ctx.y = 0;
                 ctx.r = 1;
             }
             return ctx;
-        }
-    }, {
-        key: "_nodeEventHendle",
-        value: function _nodeEventHendle(e, node) {
-            e.eventInfo = {
-                title: null,
-                nodes: [node.nodeData]
-            };
-            if (this.node["on" + e.type]) {
-                //如果用户有注册了节点上面执行这个事件,那么就要执行
-                this.node["on" + e.type].apply(node, [node.nodeData, this]);
-            }
-
-            //fire到root上面去的是为了让root去处理tips
-            this.root.fire(e.type, e);
         }
 
         /**
@@ -14818,14 +14847,73 @@ var ScatGraphs = function (_GraphsBase) {
                     r: nodeData.r
                 }, {
                     onUpdate: function onUpdate(opts) {
-                        if (this.label) {
-                            this.label.context.x = opts.x;
-                            this.label.context.y = opts.y;
+                        if (this.text) {
+                            this.text.context.x = opts.x;
+                            this.text.context.y = opts.y;
                         }
                     },
                     delay: Math.round(Math.random() * 300)
                 });
             });
+        }
+    }, {
+        key: "focusAt",
+        value: function focusAt(ind) {
+            var nodeData = this.data[ind];
+            if (!this.node.focus.enabled || nodeData.focused) return;
+
+            var nctx = nodeData.shape.context;
+            nctx.lineWidth = this.node.focus.lineWidth;
+            nctx.lineAlpha = this.node.focus.lineAlpha;
+            nctx.fillAlpha = this.node.focus.fillAlpha;
+            nodeData.focused = true;
+        }
+    }, {
+        key: "unfocusAt",
+        value: function unfocusAt(ind) {
+            var nodeData = this.data[ind];
+            if (!this.node.focus.enabled || !nodeData.focused) return;
+            var nctx = nodeData.shape.context;
+            nctx.lineWidth = this.node.lineWidth;
+            nctx.lineAlpha = this.node.lineAlpha;
+            nctx.fillAlpha = this.node.fillAlpha;
+
+            nodeData.focused = false;
+        }
+    }, {
+        key: "selectAt",
+        value: function selectAt(ind) {
+
+            var nodeData = this.data[ind];
+            if (!this.node.select.enabled || nodeData.selected) return;
+
+            var nctx = nodeData.shape.context;
+            nctx.lineWidth = this.node.select.lineWidth;
+            nctx.lineAlpha = this.node.select.lineAlpha;
+            nctx.fillAlpha = this.node.select.fillAlpha;
+
+            nodeData.selected = true;
+        }
+    }, {
+        key: "unselectAt",
+        value: function unselectAt(ind) {
+            var nodeData = this.data[ind];
+            if (!this.node.select.enabled || !nodeData.selected) return;
+
+            var nctx = nodeData.shape.context;
+
+            if (nodeData.focused) {
+                //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
+                nctx.lineWidth = this.node.focus.lineWidth;
+                nctx.lineAlpha = this.node.focus.lineAlpha;
+                nctx.fillAlpha = this.node.focus.fillAlpha;
+            } else {
+                nctx.lineWidth = this.node.lineWidth;
+                nctx.lineAlpha = this.node.lineAlpha;
+                nctx.fillAlpha = this.node.fillAlpha;
+            }
+
+            nodeData.selected = false;
         }
     }]);
     return ScatGraphs;
@@ -14863,15 +14951,15 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         _this.data = data;
 
         _this.sprite = null;
-        _this.labelSp = null;
+        _this.textSp = null;
         _this.sectorsSp = null;
         _this.selectedSp = null;
 
         _this.init(opts);
 
         _this.sectors = [];
-        _this.labelMaxCount = 15;
-        _this.labelList = [];
+        _this.textMaxCount = 15;
+        _this.textList = [];
 
         _this.completed = false; //首次加载动画是否完成
         return _this;
@@ -14890,8 +14978,8 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             this.selectedSp = new canvax.Display.Sprite();
             this.sprite.addChild(this.selectedSp);
 
-            if (this._graphs.label.enabled) {
-                this.labelSp = new canvax.Display.Sprite();
+            if (this._graphs.text.enabled) {
+                this.textSp = new canvax.Display.Sprite();
             }
         }
     }, {
@@ -14934,7 +15022,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                     onComplete: function onComplete() {
                         completedNum++;
                         if (completedNum == me.sectors.length) {
-                            if (me._graphs.label.enabled) {
+                            if (me._graphs.text.enabled) {
                                 me._startWidgetLabel();
                             }
                         }
@@ -14951,7 +15039,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
 
             var moreSecData;
             if (list.length > 0 && total > 0) {
-                me.labelSp && me.sprite.addChild(me.labelSp);
+                me.textSp && me.sprite.addChild(me.textSp);
                 for (var i = 0; i < list.length; i++) {
                     var item = list[i];
 
@@ -14991,14 +15079,14 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                         };
                         me._graphs.root.fire(e.type, e);
 
-                        me._graphs.triggerEvent(me, e);
+                        me._graphs.triggerEvent(me.node, e);
                     });
 
                     me.sectorsSp.addChildAt(sector, 0);
                     me.sectors.push(sector);
                 }
 
-                if (me._graphs.label.enabled) {
+                if (me._graphs.text.enabled) {
                     me._startWidgetLabel();
                 }
             }
@@ -15055,6 +15143,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             }
 
             if (!node.focused) {
+                node._focusTigger = "select";
                 this.focusOf(node, function () {
                     me.addCheckedSec(sec);
                 });
@@ -15072,7 +15161,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             }
             var me = this;
             me.cancelCheckedSec(sec, function () {
-                if (!e || !e.target) {
+                if (node._focusTigger == "select") {
                     me.unfocusOf(node);
                 }
             });
@@ -15219,7 +15308,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             var count = 0;
             var data = me.data.list;
             var minTxtDis = 15;
-            var labelOffsetX = 5;
+            var textOffsetX = 5;
 
             var currentIndex;
             var preY, currentY, adjustX, txtDis, bwidth, bheight, bx, by;
@@ -15230,7 +15319,7 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
             var isup = quadrant == 3 || quadrant == 4;
             var minY = isleft ? lmin : rmin;
 
-            //label的绘制顺序做修正，label的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
+            //text的绘制顺序做修正，text的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
             if (indexs.length > 0) {
                 indexs.sort(function (a, b) {
                     return isup ? data[a].edgey - data[b].edgey : data[b].edgey - data[a].edgey;
@@ -15242,8 +15331,8 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                 var itemData = data[currentIndex];
                 var outCircleRadius = itemData.outRadius + itemData.moveDis;
 
-                //若Y值小于最小值，不画label    
-                if (!itemData.enabled || itemData.y < minY || count >= me.labelMaxCount) continue;
+                //若Y值小于最小值，不画text    
+                if (!itemData.enabled || itemData.y < minY || count >= me.textMaxCount) continue;
                 count++;
                 currentY = itemData.edgey;
                 adjustX = Math.abs(itemData.edgex);
@@ -15278,16 +15367,8 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                     }
                 }
 
-                //指示线
-                /**
-                [
-                    [ itemData.centerx , itemData.centery ], //startAngle
-                    [ itemData.outx , itemData.outy ],  //二次贝塞尔控制点
-                    [ isleft ? -adjustX-labelOffsetX : adjustX+labelOffsetX, currentY] //endAngle
-                ]
-                */
                 var pathStr = "M" + itemData.centerx + "," + itemData.centery;
-                pathStr += "Q" + itemData.outx + "," + itemData.outy + "," + (isleft ? -adjustX - labelOffsetX : adjustX + labelOffsetX) + "," + currentY;
+                pathStr += "Q" + itemData.outx + "," + itemData.outy + "," + (isleft ? -adjustX - textOffsetX : adjustX + textOffsetX) + "," + currentY;
 
                 var path = new Path$2({
                     context: {
@@ -15299,21 +15380,20 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                 });
 
                 //指示文字
-
-                var labelTxt = itemData.label;
+                var textTxt = itemData.text;
                 //如果用户format过，那么就用用户指定的格式
                 //如果没有就默认拼接
-                if (!this._graphs.label.format) {
-                    if (labelTxt) {
-                        labelTxt = labelTxt + "：" + itemData.percentage + "%";
+                if (!this._graphs.text.format) {
+                    if (textTxt) {
+                        textTxt = textTxt + "：" + itemData.percentage + "%";
                     } else {
-                        labelTxt = itemData.percentage + "%";
+                        textTxt = itemData.percentage + "%";
                     }
                 }
 
                 var branchTxt = document.createElement("div");
                 branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + "";
-                branchTxt.innerHTML = labelTxt;
+                branchTxt.innerHTML = textTxt;
                 me.domContainer.appendChild(branchTxt);
                 bwidth = branchTxt.offsetWidth;
                 bheight = branchTxt.offsetHeight;
@@ -15323,19 +15403,19 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
 
                 switch (quadrant) {
                     case 1:
-                        bx += labelOffsetX;
+                        bx += textOffsetX;
                         by -= bheight / 2;
                         break;
                     case 2:
-                        bx -= bwidth + labelOffsetX;
+                        bx -= bwidth + textOffsetX;
                         by -= bheight / 2;
                         break;
                     case 3:
-                        bx -= bwidth + labelOffsetX;
+                        bx -= bwidth + textOffsetX;
                         by -= bheight / 2;
                         break;
                     case 4:
-                        bx += labelOffsetX;
+                        bx += textOffsetX;
                         by -= bheight / 2;
                         break;
                 }
@@ -15343,16 +15423,16 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
                 branchTxt.style.left = bx + me.origin.x + "px";
                 branchTxt.style.top = by + me.origin.y + "px";
 
-                me.labelSp.addChild(path);
+                me.textSp.addChild(path);
 
-                me.labelList.push({
+                me.textList.push({
                     width: bwidth,
                     height: bheight,
                     x: bx + me.origin.x,
                     y: by + me.origin.y,
                     data: itemData,
-                    labelTxt: labelTxt,
-                    labelEle: branchTxt
+                    textTxt: textTxt,
+                    textEle: branchTxt
                 });
             }
         }
@@ -15424,21 +15504,21 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
 
             var overflowIndexs, sortedIndexs;
 
-            if (widgetInfo.right.indexs.length > me.labelMaxCount) {
+            if (widgetInfo.right.indexs.length > me.textMaxCount) {
                 sortedIndexs = widgetInfo.right.indexs.slice(0);
                 sortedIndexs.sort(function (a, b) {
                     return data[b].y - data[a].y;
                 });
-                overflowIndexs = sortedIndexs.slice(me.labelMaxCount);
+                overflowIndexs = sortedIndexs.slice(me.textMaxCount);
                 rMinPercentage = data[overflowIndexs[0]].percentage;
                 rMinY = data[overflowIndexs[0]].y;
             }
-            if (widgetInfo.left.indexs.length > me.labelMaxCount) {
+            if (widgetInfo.left.indexs.length > me.textMaxCount) {
                 sortedIndexs = widgetInfo.left.indexs.slice(0);
                 sortedIndexs.sort(function (a, b) {
                     return data[b].y - data[a].y;
                 });
-                overflowIndexs = sortedIndexs.slice(me.labelMaxCount);
+                overflowIndexs = sortedIndexs.slice(me.textMaxCount);
                 lMinPercentage = data[overflowIndexs[0]].percentage;
                 lMinY = data[overflowIndexs[0]].y;
             }
@@ -15459,31 +15539,31 @@ var Pie$1 = function (_Canvax$Event$EventDi) {
         key: "destroyLabel",
         value: function destroyLabel() {
             var me = this;
-            if (this.labelSp) {
-                this.labelSp.removeAllChildren();
+            if (this.textSp) {
+                this.textSp.removeAllChildren();
             }
-            _$21.each(this.labelList, function (lab) {
-                me.domContainer.removeChild(lab.labelEle);
+            _$21.each(this.textList, function (lab) {
+                me.domContainer.removeChild(lab.textEle);
             });
-            this.labelList = [];
+            this.textList = [];
         }
     }, {
         key: "_showGrowLabel",
         value: function _showGrowLabel() {
-            if (this.labelSp) {
-                this.labelSp.context.globalAlpha = 1;
-                _$21.each(this.labelList, function (lab) {
-                    lab.labelEle.style.visibility = "visible";
+            if (this.textSp) {
+                this.textSp.context.globalAlpha = 1;
+                _$21.each(this.textList, function (lab) {
+                    lab.textEle.style.visibility = "visible";
                 });
             }
         }
     }, {
         key: "_hideGrowLabel",
         value: function _hideGrowLabel() {
-            if (this.labelSp) {
-                this.labelSp.context.globalAlpha = 0;
-                _$21.each(this.labelList, function (lab) {
-                    lab.labelEle.style.visibility = "hidden";
+            if (this.textSp) {
+                this.textSp.context.globalAlpha = 0;
+                _$21.each(this.textList, function (lab) {
+                    lab.textEle.style.visibility = "hidden";
                 });
             }
         }
@@ -15507,26 +15587,31 @@ var PieGraphs = function (_GraphsBase) {
         _this.nameField = null;
         _this.rField = null; //如果有配置rField，那么每个pie的outRadius都会不一样
 
-        _this.colors = Theme.colors;
+        _this.node = {
+            shapeType: "sector",
+            colors: Theme.colors,
 
-        _this.label = {
+            focus: {
+                enabled: true
+            },
+            select: {
+                enabled: false,
+                r: 5,
+                alpha: 0.7
+            },
+
+            innerRadius: 0,
+            outRadius: null, //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
+            minSectorRadius: 20, //outRadius - innerRadius 的最小值
+            moveDis: 15 //要预留moveDis位置来hover sector 的时候外扩
+        };
+
+        _this.text = {
             enabled: false,
             format: null
         };
 
-        _this.focusEnabled = true;
-        _this.selectEnabled = false;
-
-        _this.selectedR = 5;
-        _this.selectedAlpha = 0.7;
-
-        _this.innerRadius = 0;
-        _this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
-        _this.minSectorRadius = 20; //outRadius - innerRadius 的最小值
-
         _this.startAngle = -90;
-        //要预留moveDis位置来hover sector 的时候外扩
-        _this.moveDis = 15;
 
         _this.init(opts);
         return _this;
@@ -15548,18 +15633,18 @@ var PieGraphs = function (_GraphsBase) {
             var h = this.height;
 
             //TODO：如果用户有配置outRadius的话，就按照用户的来，目前不做修正
-            if (!this.outRadius) {
+            if (!this.node.outRadius) {
                 var outRadius = Math.min(w, h) / 2;
-                if (this.label && this.label.enabled) {
+                if (this.text.enabled) {
                     //要预留moveDis位置来hover sector 的时候外扩
-                    outRadius -= this.moveDis;
+                    outRadius -= this.node.moveDis;
                 }
-                this.outRadius = parseInt(outRadius);
+                this.node.outRadius = parseInt(outRadius);
             }
 
             //要保证sec具有一个最小的radius
-            if (this.outRadius - this.innerRadius < this.minSectorRadius) {
-                this.innerRadius = this.outRadius - this.minSectorRadius;
+            if (this.node.outRadius - this.node.innerRadius < this.node.minSectorRadius) {
+                this.node.innerRadius = this.node.outRadius - this.node.minSectorRadius;
             }
         }
 
@@ -15618,17 +15703,17 @@ var PieGraphs = function (_GraphsBase) {
                 var layoutData = {
                     rowData: rowData, //把这一行数据给到layoutData引用起来
                     focused: false, //是否获取焦点，外扩
-                    focusEnabled: me.focusEnabled,
+                    focusEnabled: me.node.focus.enabled,
 
                     selected: false, //是否选中
-                    selectEnabled: me.selectEnabled,
-                    selectedR: me.selectedR,
-                    selectedAlpha: me.selectedAlpha,
+                    selectEnabled: me.node.select.enabled,
+                    selectedR: me.node.select.r,
+                    selectedAlpha: me.node.select.alpha,
                     enabled: true, //是否启用，显示在列表中
                     value: rowData[me.valueField],
                     name: rowData[me.nameField],
-                    fillStyle: me.getColorByIndex(me.colors, i, l),
-                    label: null, //绘制的时候再设置
+                    fillStyle: me.getColorByIndex(me.node.colors, i, l),
+                    text: null, //绘制的时候再设置
                     nodeInd: i
                 };
                 data.push(layoutData);
@@ -15738,30 +15823,32 @@ var PieGraphs = function (_GraphsBase) {
                             }
                         }(midAngle);
 
-                        var outRadius = me.outRadius;
+                        var outRadius = me.node.outRadius;
 
                         if (me.rField) {
-                            outRadius = parseInt((me.outRadius - me.innerRadius) * ((data[j].rowData[me.rField] - minRval) / (maxRval - minRval)) + me.innerRadius);
+                            outRadius = parseInt((me.node.outRadius - me.node.innerRadius) * ((data[j].rowData[me.rField] - minRval) / (maxRval - minRval)) + me.innerRadius);
                         }
+
+                        var moveDis = me.node.moveDis;
 
                         _$20.extend(data[j], {
                             outRadius: outRadius,
-                            innerRadius: me.innerRadius,
+                            innerRadius: me.node.innerRadius,
                             startAngle: me.currentAngle, //起始角度
                             endAngle: endAngle, //结束角度
                             midAngle: midAngle, //中间角度
 
-                            moveDis: me.moveDis,
+                            moveDis: moveDis,
 
-                            outOffsetx: me.moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
-                            outOffsety: me.moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
+                            outOffsetx: moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
+                            outOffsety: moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
 
                             centerx: outRadius * cosV,
                             centery: outRadius * sinV,
-                            outx: (outRadius + me.moveDis) * cosV,
-                            outy: (outRadius + me.moveDis) * sinV,
-                            edgex: (outRadius + me.moveDis) * cosV,
-                            edgey: (outRadius + me.moveDis) * sinV,
+                            outx: (outRadius + moveDis) * cosV,
+                            outy: (outRadius + moveDis) * sinV,
+                            edgex: (outRadius + moveDis) * cosV,
+                            edgey: (outRadius + moveDis) * sinV,
 
                             orginPercentage: percentage,
                             percentage: fixedPercentage,
@@ -15772,7 +15859,7 @@ var PieGraphs = function (_GraphsBase) {
                         });
 
                         //这个时候可以计算下label，因为很多时候外部label如果是配置的
-                        data[j].label = me._getLabel(data[j]);
+                        data[j].text = me._getLabel(data[j]);
 
                         me.currentAngle += angle;
 
@@ -15804,16 +15891,16 @@ var PieGraphs = function (_GraphsBase) {
     }, {
         key: "_getLabel",
         value: function _getLabel(itemData) {
-            var label;
-            if (this.label.enabled) {
+            var text;
+            if (this.text.enabled) {
                 if (this.nameField) {
-                    label = itemData.rowData[this.nameField];
+                    text = itemData.rowData[this.nameField];
                 }
-                if (_$20.isFunction(this.label.format)) {
-                    label = this.label.format(itemData);
+                if (_$20.isFunction(this.text.format)) {
+                    text = this.text.format(itemData);
                 }
             }
-            return label;
+            return text;
         }
     }, {
         key: "getList",
@@ -15833,33 +15920,33 @@ var PieGraphs = function (_GraphsBase) {
         value: function tipsPointerHideOf(e) {}
     }, {
         key: "focusAt",
-        value: function focusAt(ind, e) {
+        value: function focusAt(ind) {
             var nodeData = this._pie.data.list[ind];
 
-            if (!this.focusEnabled) return;
+            if (!this.node.focus.enabled) return;
 
             this._pie.focusOf(nodeData);
         }
     }, {
         key: "unfocusAt",
-        value: function unfocusAt(ind, e) {
+        value: function unfocusAt(ind) {
             var nodeData = this._pie.data.list[ind];
-            if (!nodeData.focusEnabled) return;
+            if (!nodeData.node.focus.enabled) return;
             this._pie.unfocusOf(nodeData);
         }
     }, {
         key: "selectAt",
-        value: function selectAt(ind, e) {
+        value: function selectAt(ind) {
             var nodeData = this._pie.data.list[ind];
-            if (!this.selectEnabled) return;
-            this._pie.selectOf(nodeData, e);
+            if (!this.node.select.enabled) return;
+            this._pie.selectOf(nodeData);
         }
     }, {
         key: "unselectAt",
-        value: function unselectAt(ind, e) {
+        value: function unselectAt(ind) {
             var nodeData = this._pie.data.list[ind];
-            if (!this.selectEnabled) return;
-            this._pie.unselectOf(nodeData, e);
+            if (!this.node.select.enabled) return;
+            this._pie.unselectOf(nodeData);
         }
     }]);
     return PieGraphs;
@@ -15893,6 +15980,7 @@ var RadarGraphs = function (_GraphsBase) {
         };
         _this.node = {
             enabled: true,
+            shapeType: "circle",
             r: 4,
             strokeStyle: "#ffffff",
             lineWidth: 1

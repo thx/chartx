@@ -33,15 +33,15 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.data = data;
 
         this.sprite = null;
-        this.labelSp = null;
+        this.textSp = null;
         this.sectorsSp = null;
         this.selectedSp = null;
 
         this.init(opts);
 
         this.sectors = [];
-        this.labelMaxCount = 15;
-        this.labelList = [];
+        this.textMaxCount = 15;
+        this.textList = [];
 
         this.completed = false;//首次加载动画是否完成
     }
@@ -58,8 +58,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.selectedSp = new Canvax.Display.Sprite();
         this.sprite.addChild(this.selectedSp);
 
-        if (this._graphs.label.enabled) {
-            this.labelSp = new Canvax.Display.Sprite();
+        if (this._graphs.text.enabled) {
+            this.textSp = new Canvax.Display.Sprite();
         };
 
     }
@@ -103,7 +103,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 onComplete : function(){
                     completedNum++;
                     if( completedNum == me.sectors.length ){
-                        if ( me._graphs.label.enabled ) {
+                        if ( me._graphs.text.enabled ) {
                             me._startWidgetLabel();
                         };
                     }
@@ -120,7 +120,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
         var moreSecData;
         if ( list.length > 0 && total > 0 ) {
-            me.labelSp && me.sprite.addChild(me.labelSp);
+            me.textSp && me.sprite.addChild(me.textSp);
             for (var i = 0; i < list.length; i++) {
                 var item = list[i];
             
@@ -160,7 +160,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     };
                     me._graphs.root.fire( e.type, e );
 
-                    me._graphs.triggerEvent( me, e );
+                    me._graphs.triggerEvent( me.node , e );
 
                 });
 
@@ -169,7 +169,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 
             };
 
-            if (me._graphs.label.enabled) {
+            if (me._graphs.text.enabled) {
                 me._startWidgetLabel();
             };
         }
@@ -226,6 +226,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         };
         
         if (!node.focused) {
+            node._focusTigger = "select";
             this.focusOf( node , function () {
                 me.addCheckedSec(sec);
             });
@@ -243,7 +244,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         };
         var me = this;
         me.cancelCheckedSec(sec, function() {
-            if( !e || !e.target ){
+            if( node._focusTigger == "select" ){
                 me.unfocusOf(node);
             };
         });
@@ -393,7 +394,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         var count = 0;
         var data = me.data.list;
         var minTxtDis = 15;
-        var labelOffsetX = 5;
+        var textOffsetX = 5;
         
         var currentIndex;
         var preY, currentY, adjustX, txtDis, bwidth, bheight, bx, by;
@@ -404,7 +405,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         var isup = quadrant == 3 || quadrant == 4;
         var minY = isleft ? lmin : rmin;
 
-        //label的绘制顺序做修正，label的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
+        //text的绘制顺序做修正，text的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
         if (indexs.length > 0) {
             indexs.sort(function (a, b) {
                 return isup ? data[a].edgey - data[b].edgey : data[b].edgey - data[a].edgey;
@@ -416,8 +417,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
             var itemData = data[currentIndex];
             var outCircleRadius = itemData.outRadius + itemData.moveDis;
 
-            //若Y值小于最小值，不画label    
-            if (!itemData.enabled || itemData.y < minY || count >= me.labelMaxCount) continue
+            //若Y值小于最小值，不画text    
+            if (!itemData.enabled || itemData.y < minY || count >= me.textMaxCount) continue
             count++;
             currentY = itemData.edgey;
             adjustX = Math.abs(itemData.edgex);
@@ -451,18 +452,9 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     ySpaceInfo.right = preY;
                 }
             };
-
-
-            //指示线
-            /**
-            [
-                [ itemData.centerx , itemData.centery ], //startAngle
-                [ itemData.outx , itemData.outy ],  //二次贝塞尔控制点
-                [ isleft ? -adjustX-labelOffsetX : adjustX+labelOffsetX, currentY] //endAngle
-            ]
-            */
+            
             var pathStr = "M"+itemData.centerx+","+itemData.centery;
-            pathStr += "Q"+itemData.outx+","+itemData.outy+","+(isleft ? -adjustX-labelOffsetX : adjustX+labelOffsetX)+","+currentY;
+            pathStr += "Q"+itemData.outx+","+itemData.outy+","+(isleft ? -adjustX-textOffsetX : adjustX+textOffsetX)+","+currentY;
             
             var path = new Path({
                 context: {
@@ -476,21 +468,20 @@ export default class Pie extends Canvax.Event.EventDispatcher
             
          
             //指示文字
-
-            var labelTxt = itemData.label;
+            var textTxt = itemData.text;
             //如果用户format过，那么就用用户指定的格式
             //如果没有就默认拼接
-            if( !this._graphs.label.format ){
-                if( labelTxt ){
-                    labelTxt = labelTxt + "：" + itemData.percentage + "%" 
+            if( !this._graphs.text.format ){
+                if( textTxt ){
+                    textTxt = textTxt + "：" + itemData.percentage + "%" 
                 } else {
-                    labelTxt = itemData.percentage + "%" 
+                    textTxt = itemData.percentage + "%" 
                 }
             };
 
             var branchTxt = document.createElement("div");
             branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + ""
-            branchTxt.innerHTML = labelTxt;
+            branchTxt.innerHTML = textTxt;
             me.domContainer.appendChild(branchTxt);
             bwidth = branchTxt.offsetWidth;
             bheight = branchTxt.offsetHeight;
@@ -500,19 +491,19 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
             switch (quadrant) {
                 case 1:
-                    bx += labelOffsetX;
+                    bx += textOffsetX;
                     by -= bheight / 2;
                     break;
                 case 2:
-                    bx -= (bwidth + labelOffsetX);
+                    bx -= (bwidth + textOffsetX);
                     by -= bheight / 2;
                     break;
                 case 3:
-                    bx -= (bwidth + labelOffsetX);
+                    bx -= (bwidth + textOffsetX);
                     by -= bheight / 2;
                     break;
                 case 4:
-                    bx += labelOffsetX;
+                    bx += textOffsetX;
                     by -= bheight / 2;
                     break;
             };
@@ -520,16 +511,16 @@ export default class Pie extends Canvax.Event.EventDispatcher
             branchTxt.style.left = bx + me.origin.x + "px";
             branchTxt.style.top = by + me.origin.y + "px";
 
-            me.labelSp.addChild( path );
+            me.textSp.addChild( path );
             
-            me.labelList.push({
+            me.textList.push({
                 width: bwidth,
                 height: bheight,
                 x: bx + me.origin.x,
                 y: by + me.origin.y,
                 data: itemData,
-                labelTxt: labelTxt,
-                labelEle: branchTxt
+                textTxt: textTxt,
+                textEle: branchTxt
             });
         }
     }
@@ -603,21 +594,21 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
         var overflowIndexs, sortedIndexs;
         
-        if (widgetInfo.right.indexs.length > me.labelMaxCount) {
+        if (widgetInfo.right.indexs.length > me.textMaxCount) {
             sortedIndexs = widgetInfo.right.indexs.slice(0);
             sortedIndexs.sort(function (a, b) {
                 return data[b].y - data[a].y;
             });
-            overflowIndexs = sortedIndexs.slice(me.labelMaxCount);
+            overflowIndexs = sortedIndexs.slice(me.textMaxCount);
             rMinPercentage = data[overflowIndexs[0]].percentage;
             rMinY = data[overflowIndexs[0]].y;
         }
-        if (widgetInfo.left.indexs.length > me.labelMaxCount) {
+        if (widgetInfo.left.indexs.length > me.textMaxCount) {
             sortedIndexs = widgetInfo.left.indexs.slice(0);
             sortedIndexs.sort(function (a, b) {
                 return data[b].y - data[a].y;
             });
-            overflowIndexs = sortedIndexs.slice(me.labelMaxCount);
+            overflowIndexs = sortedIndexs.slice(me.textMaxCount);
             lMinPercentage = data[overflowIndexs[0]].percentage;
             lMinY = data[overflowIndexs[0]].y;
         }
@@ -638,31 +629,31 @@ export default class Pie extends Canvax.Event.EventDispatcher
     destroyLabel()
     {
         var me = this;
-        if (this.labelSp) {
-            this.labelSp.removeAllChildren();
+        if (this.textSp) {
+            this.textSp.removeAllChildren();
         };
-        _.each(this.labelList, function (lab) {
-            me.domContainer.removeChild( lab.labelEle );
+        _.each(this.textList, function (lab) {
+            me.domContainer.removeChild( lab.textEle );
         });
-        this.labelList = [];
+        this.textList = [];
     }
 
     _showGrowLabel()
     {
-        if (this.labelSp) {
-            this.labelSp.context.globalAlpha = 1;
-            _.each(this.labelList, function (lab) {
-                lab.labelEle.style.visibility = "visible"
+        if (this.textSp) {
+            this.textSp.context.globalAlpha = 1;
+            _.each(this.textList, function (lab) {
+                lab.textEle.style.visibility = "visible"
             });
         }
     }
 
     _hideGrowLabel()
     {
-        if (this.labelSp) {
-            this.labelSp.context.globalAlpha = 0;
-            _.each(this.labelList, function (lab) {
-                lab.labelEle.style.visibility = "hidden"
+        if (this.textSp) {
+            this.textSp.context.globalAlpha = 0;
+            _.each(this.textList, function (lab) {
+                lab.textEle.style.visibility = "hidden"
             });
         }
     }

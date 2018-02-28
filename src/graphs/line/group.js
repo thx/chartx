@@ -32,6 +32,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
         this.line = { //线
             enabled: 1,
+            shapeType : "brokenLine",//折线
             strokeStyle: fieldMap.color,
             lineWidth: 2,
             lineType: "solid",
@@ -39,27 +40,27 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
 
         this.node = { //节点 
-            enabled: 1, //是否有
-            corner: false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-            r: 3, //半径 node 圆点的半径
-            fillStyle: '#ffffff',
-            strokeStyle: null,
-            lineWidth: 2
+            enabled   : 1, //是否有
+            shapeType : "circle",
+            corner    : false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
+            r         : 3, //半径 node 圆点的半径
+            fillStyle : '#ffffff',
+            strokeStyle : null,
+            lineWidth   : 2
         };
 
         this.text = {
-            enabled : 0,
-            fillStyle: null,
-            strokeStyle: null,
-            fontSize: 13,
-            format: null,
-
+            enabled     : 0,
+            fillStyle   : null,
+            strokeStyle : null,
+            fontSize    : 13,
+            format      : null
         };
 
         this.area = { //填充
-            enabled:1,
-            fillStyle: null,
-            alpha: 0.3
+            enabled   :1,
+            fillStyle : null,
+            alpha     : 0.3
         };
 
         this.data = []; 

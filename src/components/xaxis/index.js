@@ -391,7 +391,7 @@ export default class xAxis extends Component
             });
 
             this.maxTxtH = txt.getTextHeight();
-debugger
+
             if (!!this.scale.text.rotation) {
                 if (this.scale.text.rotation % 90 == 0) {
                     this.height = parseInt( this._textMaxWidth );

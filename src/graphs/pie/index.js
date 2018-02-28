@@ -17,27 +17,32 @@ export default class PieGraphs extends GraphsBase
         this.nameField  = null;
         this.rField     = null;//如果有配置rField，那么每个pie的outRadius都会不一样
 
-        this.colors = Theme.colors;
+        this.node = {
+            shapeType : "sector",
+            colors : Theme.colors,
+            
+            focus  : {
+                enabled : true,
+            },
+            select : {
+                enabled : false,
+                r : 5,
+                alpha : 0.7
+            },
+            
+            innerRadius : 0,
+            outRadius : null,//如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
+            minSectorRadius : 20,//outRadius - innerRadius 的最小值
+            moveDis : 15    //要预留moveDis位置来hover sector 的时候外扩
+        };
 
-        this.label = {
+        this.text = {
             enabled : false,
             format  : null
         };
 
-        this.focusEnabled = true;
-        this.selectEnabled = false;
-
-        this.selectedR = 5;
-        this.selectedAlpha = 0.7;
-
-        this.innerRadius = 0;
-        this.outRadius = null; //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
-        this.minSectorRadius = 20; //outRadius - innerRadius 的最小值
-
         this.startAngle = -90;
-        //要预留moveDis位置来hover sector 的时候外扩
-        this.moveDis = 15;
-
+        
         this.init( opts );
     }
 
@@ -56,18 +61,18 @@ export default class PieGraphs extends GraphsBase
         var h = this.height;
 
         //TODO：如果用户有配置outRadius的话，就按照用户的来，目前不做修正
-        if( !this.outRadius ){
+        if( !this.node.outRadius ){
             var outRadius = Math.min(w, h) / 2;
-            if (this.label && this.label.enabled) {
+            if ( this.text.enabled ) {
                 //要预留moveDis位置来hover sector 的时候外扩
-                outRadius -= this.moveDis;
+                outRadius -= this.node.moveDis;
             };
-            this.outRadius = parseInt( outRadius );
+            this.node.outRadius = parseInt( outRadius );
         };
 
         //要保证sec具有一个最小的radius
-        if( this.outRadius - this.innerRadius < this.minSectorRadius ){
-            this.innerRadius = this.outRadius - this.minSectorRadius;
+        if( this.node.outRadius - this.node.innerRadius < this.node.minSectorRadius ){
+            this.node.innerRadius = this.node.outRadius - this.node.minSectorRadius;
         };
 
     }
@@ -125,17 +130,17 @@ export default class PieGraphs extends GraphsBase
             var layoutData = {
                 rowData   : rowData,//把这一行数据给到layoutData引用起来
                 focused   : false,  //是否获取焦点，外扩
-                focusEnabled : me.focusEnabled,
+                focusEnabled : me.node.focus.enabled,
 
                 selected  : false,  //是否选中
-                selectEnabled : me.selectEnabled,
-                selectedR : me.selectedR,
-                selectedAlpha : me.selectedAlpha,
+                selectEnabled : me.node.select.enabled,
+                selectedR     : me.node.select.r,
+                selectedAlpha : me.node.select.alpha,
                 enabled   : true,   //是否启用，显示在列表中
                 value     : rowData[ me.valueField ],
                 name      : rowData[ me.nameField ],
-                fillStyle : me.getColorByIndex(me.colors, i, l),
-                label     : null,    //绘制的时候再设置
+                fillStyle : me.getColorByIndex(me.node.colors, i, l),
+                text     : null,    //绘制的时候再设置
                 nodeInd   : i
             };
             data.push( layoutData );
@@ -245,30 +250,32 @@ export default class PieGraphs extends GraphsBase
                         }
                     } (midAngle);
 
-                    var outRadius = me.outRadius;
+                    var outRadius = me.node.outRadius;
 
                     if( me.rField ){
-                        outRadius = parseInt( (me.outRadius - me.innerRadius) * ( (data[j].rowData[me.rField] - minRval)/(maxRval-minRval)  ) + me.innerRadius );
-                    }
+                        outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (data[j].rowData[me.rField] - minRval)/(maxRval-minRval)  ) + me.innerRadius );
+                    };
+
+                    var moveDis = me.node.moveDis;
 
                     _.extend(data[j], {
-                        outRadius : outRadius,
-                        innerRadius : me.innerRadius,
-                        startAngle: me.currentAngle, //起始角度
-                        endAngle: endAngle, //结束角度
-                        midAngle: midAngle,  //中间角度
+                        outRadius   : outRadius,
+                        innerRadius : me.node.innerRadius,
+                        startAngle  : me.currentAngle, //起始角度
+                        endAngle    : endAngle, //结束角度
+                        midAngle    : midAngle,  //中间角度
 
-                        moveDis: me.moveDis,
+                        moveDis     : moveDis,
 
-                        outOffsetx: me.moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
-                        outOffsety: me.moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
+                        outOffsetx  : moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
+                        outOffsety  : moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
 
-                        centerx: outRadius * cosV,
-                        centery: outRadius * sinV,
-                        outx: (outRadius + me.moveDis) * cosV,
-                        outy: (outRadius + me.moveDis) * sinV,
-                        edgex: (outRadius + me.moveDis) * cosV,
-                        edgey: (outRadius + me.moveDis) * sinV,
+                        centerx     : outRadius * cosV,
+                        centery     : outRadius * sinV,
+                        outx        : (outRadius + moveDis) * cosV,
+                        outy        : (outRadius + moveDis) * sinV,
+                        edgex       : (outRadius + moveDis) * cosV,
+                        edgey       : (outRadius + moveDis) * sinV,
 
                         orginPercentage: percentage,
                         percentage: fixedPercentage,
@@ -279,7 +286,7 @@ export default class PieGraphs extends GraphsBase
                     });
 
                     //这个时候可以计算下label，因为很多时候外部label如果是配置的
-                    data[j].label = me._getLabel( data[j] );
+                    data[j].text = me._getLabel( data[j] );
                     
                     me.currentAngle += angle;
                     
@@ -311,16 +318,16 @@ export default class PieGraphs extends GraphsBase
 
     _getLabel( itemData )
     {
-        var label;
-        if( this.label.enabled ){
+        var text;
+        if( this.text.enabled ){
             if( this.nameField ){
-                label = itemData.rowData[ this.nameField ];
+                text = itemData.rowData[ this.nameField ];
             }
-            if( _.isFunction( this.label.format ) ){
-                label = this.label.format( itemData )
+            if( _.isFunction( this.text.format ) ){
+                text = this.text.format( itemData )
             }
         }
-        return label;
+        return text;
     }
 
     getList()
@@ -341,30 +348,30 @@ export default class PieGraphs extends GraphsBase
 
 
 
-    focusAt( ind , e ){
+    focusAt( ind ){
         var nodeData = this._pie.data.list[ ind ];
 
-        if( !this.focusEnabled ) return;
+        if( !this.node.focus.enabled ) return;
 
         this._pie.focusOf( nodeData );
     }
     
-    unfocusAt( ind , e ){
+    unfocusAt( ind ){
         var nodeData = this._pie.data.list[ ind ];
-        if( !nodeData.focusEnabled ) return;
+        if( !nodeData.node.focus.enabled ) return;
         this._pie.unfocusOf( nodeData );
     }
     
-    selectAt( ind , e ){
+    selectAt( ind ){
         var nodeData = this._pie.data.list[ ind ];
-        if( !this.selectEnabled ) return;
-        this._pie.selectOf( nodeData , e );
+        if( !this.node.select.enabled ) return;
+        this._pie.selectOf( nodeData );
     }
 
-    unselectAt( ind , e ){
+    unselectAt( ind ){
         var nodeData = this._pie.data.list[ ind ];
-        if( !this.selectEnabled ) return;
-        this._pie.unselectOf( nodeData , e );
+        if( !this.node.select.enabled ) return;
+        this._pie.unselectOf( nodeData );
     }
     
 }

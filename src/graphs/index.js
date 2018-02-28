@@ -46,13 +46,17 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
 
     getLegendData(){}
 
-    //触发事件
-    triggerEvent( eventTarget, e )
+    //触发事件, 事件处理函数中的this都指向对应的graphs对象。
+    triggerEvent( eventTargetOpt, e )
     {
-        var fn = eventTarget[ "on"+e.type ];
+        var fn = eventTargetOpt[ "on"+e.type ];
         if( fn && _.isFunction( fn ) ){
             //如果有在pie的配置上面注册对应的事件，则触发
-            fn.apply( e.target , [ e , this ] );
+            var nodeData = null;
+            if( e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length ){
+                nodeData = e.eventInfo.nodes[0];
+            };
+            fn.apply( this , [ e , nodeData ] );
         };
     }
 
