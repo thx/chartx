@@ -20,7 +20,7 @@ export default class PieGraphs extends GraphsBase
         this.node = {
             shapeType : "sector",
             colors : Theme.colors,
-            
+
             focus  : {
                 enabled : true,
             },
@@ -128,20 +128,20 @@ export default class PieGraphs extends GraphsBase
         for( var i=0,l=dataFrame.org.length-1; i<l; i++ ){
             var rowData = dataFrame.getRowData(i);
             var layoutData = {
-                rowData   : rowData,//把这一行数据给到layoutData引用起来
-                focused   : false,  //是否获取焦点，外扩
-                focusEnabled : me.node.focus.enabled,
+                rowData       : rowData,//把这一行数据给到layoutData引用起来
+                focused       : false,  //是否获取焦点，外扩
+                focusEnabled  : me.node.focus.enabled,
 
-                selected  : false,  //是否选中
+                selected      : false,  //是否选中
                 selectEnabled : me.node.select.enabled,
                 selectedR     : me.node.select.r,
                 selectedAlpha : me.node.select.alpha,
-                enabled   : true,   //是否启用，显示在列表中
-                value     : rowData[ me.valueField ],
-                name      : rowData[ me.nameField ],
-                fillStyle : me.getColorByIndex(me.node.colors, i, l),
-                text     : null,    //绘制的时候再设置
-                nodeInd   : i
+                enabled       : true,   //是否启用，显示在列表中
+                value         : rowData[ me.valueField ],
+                name          : rowData[ me.nameField ],
+                fillStyle     : me.getColorByIndex(me.node.colors, i, l),
+                text          : null,    //绘制的时候再设置
+                nodeInd       : i
             };
             data.push( layoutData );
         };

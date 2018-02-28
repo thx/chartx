@@ -106,9 +106,11 @@ export default class LineGraphs extends GraphsBase
                 var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                 var node = {
-                    value: _lineData[b],
-                    x: x,
-                    y: y
+                    nodeInd : b,
+                    field   : field,
+                    value   : _lineData[b],
+                    x       : x,
+                    y       : y
                 };
 
                 _data.push( node );

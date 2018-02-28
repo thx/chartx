@@ -13,19 +13,19 @@ export default class BarGraphs extends GraphsBase
     {
         super(opts, root);
 
-        this.type = "node";
+        this.type = "bar";
 
         this.enabledField = null;
  
         this.yAxisAlign = "left"; //默认设置为左y轴
         this._xAxis = this.root._coordinate._xAxis;
 
-        //trimGraphs的时候是否需要和其他的 node graphs一起并排计算，true的话这个就会和别的重叠
+        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
         this.absolute = false; 
 
         this.node = {
-            shapeType : "rect", //图形的类型是个矩形rect
+            type      : "rect",
             width     : 0,
             _width    : 0,
             maxWidth  : 50,
@@ -185,8 +185,8 @@ export default class BarGraphs extends GraphsBase
     remove( field )
     {
         _.each( this.barsSp.children , function( h_groupSp, h ){
-            var node = h_groupSp.getChildById("bar_"+h+"_"+field);
-            node && node.destroy();
+            var bar = h_groupSp.getChildById("bar_"+h+"_"+field);
+            bar && bar.destroy();
         } );
  
         this.draw();
@@ -537,7 +537,7 @@ export default class BarGraphs extends GraphsBase
 
         if( !this.absolute ){
             _.each( this.root._graphs , function( _g ){
-                if( !_g.absolute && _g.type == "node" ) {
+                if( !_g.absolute && _g.type == "bar" ) {
                     if( _g === me ){
                         _preHLenOver = true;
                     };
@@ -590,6 +590,7 @@ export default class BarGraphs extends GraphsBase
 
                 me._dataLen = vSectionData.length;
 
+                //vSectionData为具体的一个field对应的一组数据
                 _.each(vSectionData, function(val, i) {
                     if (!xArr[i]) {
                         return;
@@ -653,7 +654,7 @@ export default class BarGraphs extends GraphsBase
                     };
 
                     var node = {
-                        type   : "node",
+                        type   : "bar",
                         value  : val,
                         vInd   : v, //如果是堆叠图的话，这个node在堆叠中得位置
                         vCount : vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
@@ -669,7 +670,9 @@ export default class BarGraphs extends GraphsBase
                             field: me._xAxis.field,
                             value: xArr[i].value,
                             layoutText: xArr[i].layoutText
-                        }
+                        },
+                        nodeInd: i,
+                        //rowData: this.root.dataFrame.getRowData( i );
                     };
 
                     if( !me.data[ node.field ] ){
@@ -752,24 +755,24 @@ export default class BarGraphs extends GraphsBase
 
                     var group = me.barsSp.getChildById("barGroup_" + h);
 
-                    var node = group.getChildById("bar_" + h + "_" + rectData.field);
+                    var bar = group.getChildById("bar_" + h + "_" + rectData.field);
 
                     if (optsions.duration == 0) {
-                        node.context.scaleY = sy;
-                        node.context.y = sy * sy * node.finalPos.y;
-                        node.context.x = node.finalPos.x;
-                        node.context.width = node.finalPos.width;
-                        node.context.height = node.finalPos.height;
+                        bar.context.scaleY = sy;
+                        bar.context.y = sy * sy * bar.finalPos.y;
+                        bar.context.x = bar.finalPos.x;
+                        bar.context.width = bar.finalPos.width;
+                        bar.context.height = bar.finalPos.height;
                     } else {
-                        if (node._tweenObj) {
-                            AnimationFrame.destroyTween(node._tweenObj);
+                        if (bar._tweenObj) {
+                            AnimationFrame.destroyTween(bar._tweenObj);
                         };
-                        node._tweenObj = node.animate({
+                        bar._tweenObj = bar.animate({
                             scaleY: sy,
-                            y: sy * node.finalPos.y,
-                            x: node.finalPos.x,
-                            width: node.finalPos.width,
-                            height: node.finalPos.height
+                            y: sy * bar.finalPos.y,
+                            x: bar.finalPos.x,
+                            width: bar.finalPos.width,
+                            height: bar.finalPos.height
                         }, {
                             duration: optsions.duration,
                             easing: optsions.easing,
@@ -788,7 +791,7 @@ export default class BarGraphs extends GraphsBase
                                     callback && callback(me);
                                 }
                             },
-                            id: node.id
+                            id: bar.id
                         });
                     };
 

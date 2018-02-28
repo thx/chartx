@@ -12469,19 +12469,19 @@ var BarGraphs = function (_GraphsBase) {
 
         var _this = possibleConstructorReturn$1(this, (BarGraphs.__proto__ || Object.getPrototypeOf(BarGraphs)).call(this, opts, root));
 
-        _this.type = "node";
+        _this.type = "bar";
 
         _this.enabledField = null;
 
         _this.yAxisAlign = "left"; //默认设置为左y轴
         _this._xAxis = _this.root._coordinate._xAxis;
 
-        //trimGraphs的时候是否需要和其他的 node graphs一起并排计算，true的话这个就会和别的重叠
+        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
         _this.absolute = false;
 
         _this.node = {
-            shapeType: "rect", //图形的类型是个矩形rect
+            type: "rect",
             width: 0,
             _width: 0,
             maxWidth: 50,
@@ -12645,8 +12645,8 @@ var BarGraphs = function (_GraphsBase) {
         key: "remove",
         value: function remove(field) {
             _$15.each(this.barsSp.children, function (h_groupSp, h) {
-                var node = h_groupSp.getChildById("bar_" + h + "_" + field);
-                node && node.destroy();
+                var bar = h_groupSp.getChildById("bar_" + h + "_" + field);
+                bar && bar.destroy();
             });
 
             this.draw();
@@ -12993,7 +12993,7 @@ var BarGraphs = function (_GraphsBase) {
 
             if (!this.absolute) {
                 _$15.each(this.root._graphs, function (_g) {
-                    if (!_g.absolute && _g.type == "node") {
+                    if (!_g.absolute && _g.type == "bar") {
                         if (_g === me) {
                             _preHLenOver = true;
                         }
@@ -13046,6 +13046,7 @@ var BarGraphs = function (_GraphsBase) {
 
                     me._dataLen = vSectionData.length;
 
+                    //vSectionData为具体的一个field对应的一组数据
                     _$15.each(vSectionData, function (val, i) {
                         if (!xArr[i]) {
                             return;
@@ -13109,7 +13110,7 @@ var BarGraphs = function (_GraphsBase) {
                         }
 
                         var node = {
-                            type: "node",
+                            type: "bar",
                             value: val,
                             vInd: v, //如果是堆叠图的话，这个node在堆叠中得位置
                             vCount: vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
@@ -13125,7 +13126,9 @@ var BarGraphs = function (_GraphsBase) {
                                 field: me._xAxis.field,
                                 value: xArr[i].value,
                                 layoutText: xArr[i].layoutText
-                            }
+                            },
+                            nodeInd: i
+                            //rowData: this.root.dataFrame.getRowData( i );
                         };
 
                         if (!me.data[node.field]) {
@@ -13209,24 +13212,24 @@ var BarGraphs = function (_GraphsBase) {
 
                         var group = me.barsSp.getChildById("barGroup_" + h);
 
-                        var node = group.getChildById("bar_" + h + "_" + rectData.field);
+                        var bar = group.getChildById("bar_" + h + "_" + rectData.field);
 
                         if (optsions.duration == 0) {
-                            node.context.scaleY = sy;
-                            node.context.y = sy * sy * node.finalPos.y;
-                            node.context.x = node.finalPos.x;
-                            node.context.width = node.finalPos.width;
-                            node.context.height = node.finalPos.height;
+                            bar.context.scaleY = sy;
+                            bar.context.y = sy * sy * bar.finalPos.y;
+                            bar.context.x = bar.finalPos.x;
+                            bar.context.width = bar.finalPos.width;
+                            bar.context.height = bar.finalPos.height;
                         } else {
-                            if (node._tweenObj) {
-                                AnimationFrame$1.destroyTween(node._tweenObj);
+                            if (bar._tweenObj) {
+                                AnimationFrame$1.destroyTween(bar._tweenObj);
                             }
-                            node._tweenObj = node.animate({
+                            bar._tweenObj = bar.animate({
                                 scaleY: sy,
-                                y: sy * node.finalPos.y,
-                                x: node.finalPos.x,
-                                width: node.finalPos.width,
-                                height: node.finalPos.height
+                                y: sy * bar.finalPos.y,
+                                x: bar.finalPos.x,
+                                width: bar.finalPos.width,
+                                height: bar.finalPos.height
                             }, {
                                 duration: optsions.duration,
                                 easing: optsions.easing,
@@ -13243,7 +13246,7 @@ var BarGraphs = function (_GraphsBase) {
                                         callback && callback(me);
                                     }
                                 },
-                                id: node.id
+                                id: bar.id
                             });
                         }
 
@@ -14330,6 +14333,8 @@ var LineGraphs = function (_GraphsBase) {
                     var y = _$17.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                     var node = {
+                        nodeInd: b,
+                        field: field,
                         value: _lineData[b],
                         x: x,
                         y: y
