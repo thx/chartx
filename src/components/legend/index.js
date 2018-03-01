@@ -41,8 +41,6 @@ export default class Legend extends Component
 
         this._labelColor = "#999";
 
-        //this.label = null; // label 格式化函数配置
-
         this.position = "top" ; //图例所在的方向top,right,bottom,left
 
         this.layoutType = "h"; //横向 top,bottom --> h left,right -- >v

@@ -8683,12 +8683,15 @@ var xAxis = function (_Component) {
                     iNode = this.dataOrg.length - 1;
                 }
             }
+
             if (this.layoutType == "rule") {
                 iNode = parseInt((x + this.ceilWidth / 2) / this.ceilWidth);
             }
-            if (iNode >= this.dataOrg.length) {
-                iNode = this.dataOrg.length - 1;
+
+            if (this.layoutType == "proportion") {
+                iNode = parseInt(x / ((this.maxVal - this.minVal) / this.width));
             }
+
             return iNode;
         }
     }, {
@@ -8698,20 +8701,30 @@ var xAxis = function (_Component) {
             //这里和用 data 计算 layoutData的 trimgraphs 中不一样得是
             //这里的val获取必须在dataOrg中获取，统一的dataLen 也必须是用的 this.dataOrg.length
             var ind = this.getIndexOfX(x);
+
             var val = this.dataOrg[ind];
-            var layoutText = this._getFormatText(val);
             var dataLen = this.dataOrg.length;
+            var x = x;
+
+            if (this.layoutType == "proportion") {
+                val = (this.maxVal - this.minVal) * (x / this.width) + this.minVal;
+            } else {
+                x = this.getPosX({
+                    val: val,
+                    ind: ind,
+                    dataLen: dataLen,
+                    width: this.width
+                });
+            }
+
+            var layoutText = this._getFormatText(val);
 
             var o = {
                 ind: ind,
                 value: val,
                 layoutText: layoutText,
-                x: this.getPosX({
-                    val: val,
-                    ind: ind,
-                    dataLen: dataLen,
-                    width: this.width
-                }),
+                x: x,
+
                 field: this.field
             };
 
@@ -8917,6 +8930,7 @@ var xAxis = function (_Component) {
             } else {
                 res = text;
             }
+
             if (_$8.isArray(res)) {
                 res = Tools.numAddSymbol(res);
             }
@@ -10814,7 +10828,7 @@ var Descartes = function (_CoordinateBase) {
         _this.dataFrame = _this.initData(_this._data);
 
         //this.draw();
-        _this.tipsPointer = null;
+        _this._tipsPointer = null;
         return _this;
     }
 
@@ -11290,6 +11304,7 @@ var Descartes = function (_CoordinateBase) {
     }, {
         key: "setTipsInfo",
         value: function setTipsInfo(e) {
+
             e.eventInfo = this._coordinate.getTipsInfoHandler(e);
 
             //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
@@ -11306,16 +11321,29 @@ var Descartes = function (_CoordinateBase) {
 
             e.eventInfo.dataZoom = this.dataZoom;
         }
+
+        //TODO：这个可以抽一个tipsPointer组件出来
+
     }, {
         key: "_tipsPointerShow",
         value: function _tipsPointerShow(e, _tips, _coor) {
+
             if (!_tips.pointer) return;
-            var el = this.tipsPointer;
+
+            //console.log("show");
+
+            var el = this._tipsPointer;
             var y = _coor.origin.y - _coor.height;
+            var x = 0;
+            if (_tips.pointer == "line") {
+                x = _coor.origin.x + e.eventInfo.xAxis.x;
+            }
+            if (_tips.pointer == "shadow") {
+                x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth / 2;
+            }
 
             if (!el) {
                 if (_tips.pointer == "line") {
-                    var x = _coor.origin.x + e.eventInfo.xAxis.x;
                     el = new Line$1({
                         //xyToInt : false,
                         context: {
@@ -11335,7 +11363,6 @@ var Descartes = function (_CoordinateBase) {
                     });
                 }
                 if (_tips.pointer == "shadow") {
-                    var x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth / 2;
                     el = new Rect$1({
                         //xyToInt : false,
                         context: {
@@ -11350,28 +11377,41 @@ var Descartes = function (_CoordinateBase) {
                 }
 
                 this.graphsSprite.addChild(el, 0);
-                this.tipsPointer = el;
+                this._tipsPointer = el;
             } else {
-                el.animate({
-                    x: x,
-                    y: y
-                }, {
-                    duration: 200
-                });
+                if (_tips.pointerAnimate) {
+                    if (el.__animation) {
+                        el.__animation.stop();
+                    }
+                    el.__animation = el.animate({
+                        x: x,
+                        y: y
+                    }, {
+                        duration: 200
+                    });
+                } else {
+                    el.context.x = x;
+                    el.context.y = y;
+                }
             }
         }
     }, {
         key: "_tipsPointerHide",
         value: function _tipsPointerHide(e, _tips, _coor) {
-            if (!_tips.pointer || !this.tipsPointer) return;
-            this.tipsPointer.destroy();
-            this.tipsPointer = null;
+
+            if (!_tips.pointer || !this._tipsPointer) return;
+            //console.log("hide");
+            this._tipsPointer.destroy();
+            this._tipsPointer = null;
         }
     }, {
         key: "_tipsPointerMove",
         value: function _tipsPointerMove(e, _tips, _coor) {
             if (!_tips.pointer) return;
-            var el = this.tipsPointer;
+
+            //console.log("move");
+
+            var el = this._tipsPointer;
             var x = _coor.origin.x + e.eventInfo.xAxis.x;
             if (_tips.pointer == "shadow") {
                 x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth / 2;
@@ -11382,20 +11422,25 @@ var Descartes = function (_CoordinateBase) {
                 return;
             }
 
-            if (el.__animation) {
-                el.__animation.stop();
-            }
-            el.__targetX = x;
-            el.__animation = el.animate({
-                x: x,
-                y: y
-            }, {
-                duration: 200,
-                onComplete: function onComplete() {
-                    delete el.__targetX;
-                    delete el.__animation;
+            if (_tips.pointerAnimate) {
+                if (el.__animation) {
+                    el.__animation.stop();
                 }
-            });
+                el.__targetX = x;
+                el.__animation = el.animate({
+                    x: x,
+                    y: y
+                }, {
+                    duration: 200,
+                    onComplete: function onComplete() {
+                        delete el.__targetX;
+                        delete el.__animation;
+                    }
+                });
+            } else {
+                el.context.x = x;
+                el.context.y = y;
+            }
         }
     }]);
     return Descartes;
@@ -16295,8 +16340,6 @@ var Legend = function (_Component) {
 
         _this._labelColor = "#999";
 
-        //this.label = null; // label 格式化函数配置
-
         _this.position = "top"; //图例所在的方向top,right,bottom,left
 
         _this.layoutType = "h"; //横向 top,bottom --> h left,right -- >v
@@ -17650,6 +17693,7 @@ var Tips = function (_Component) {
         _this.enabled = true; //tips是默认显示的
 
         _this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'shadow'
+        _this.pointerAnimate = true;
 
         _this.init(opt);
         return _this;

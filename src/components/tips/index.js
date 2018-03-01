@@ -43,6 +43,7 @@ export default class Tips extends Component
         this.enabled = true; //tips是默认显示的
 
         this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'shadow'
+        this.pointerAnimate = true;
 
         this.init(opt);
     }

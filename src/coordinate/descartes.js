@@ -129,7 +129,7 @@ export default class Descartes extends CoordinateBase
         this.dataFrame = this.initData( this._data );
 
         //this.draw();
-        this.tipsPointer = null;
+        this._tipsPointer = null;
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
@@ -601,6 +601,7 @@ export default class Descartes extends CoordinateBase
     //方便外部自定义tip是的content
     setTipsInfo(e)
     {
+        
         e.eventInfo = this._coordinate.getTipsInfoHandler(e);
 
         //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
@@ -618,15 +619,28 @@ export default class Descartes extends CoordinateBase
         e.eventInfo.dataZoom = this.dataZoom;
     }
 
+
+    //TODO：这个可以抽一个tipsPointer组件出来
+
     _tipsPointerShow( e, _tips, _coor )
     {
+        
         if( !_tips.pointer ) return;
-        var el = this.tipsPointer;        
+
+        //console.log("show");
+
+        var el = this._tipsPointer;        
         var y = _coor.origin.y - _coor.height;
+        var x = 0;
+        if( _tips.pointer == "line" ){
+            x = _coor.origin.x + e.eventInfo.xAxis.x;
+        }
+        if( _tips.pointer == "shadow" ){
+            x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth/2;
+        }
 
         if( !el ){
             if( _tips.pointer == "line" ){
-                var x = _coor.origin.x + e.eventInfo.xAxis.x;
                 el = new Line({
                     //xyToInt : false,
                     context : {
@@ -646,7 +660,6 @@ export default class Descartes extends CoordinateBase
                 });
             };
             if( _tips.pointer == "shadow" ){
-                var x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth/2;
                 el = new Rect({
                     //xyToInt : false,
                     context : {
@@ -661,28 +674,41 @@ export default class Descartes extends CoordinateBase
             };
             
             this.graphsSprite.addChild( el, 0 );
-            this.tipsPointer = el;
+            this._tipsPointer = el;
         } else {
-            el.animate( {
-                x : x,
-                y : y
-            } , {
-                duration : 200
-            });
+            if( _tips.pointerAnimate ){
+                if( el.__animation ){
+                    el.__animation.stop();
+                };
+                el.__animation = el.animate( {
+                    x : x,
+                    y : y
+                } , {
+                    duration : 200
+                });
+            } else {
+                el.context.x = x;
+                el.context.y = y;
+            }
         }
     }
 
     _tipsPointerHide( e, _tips, _coor )
     {
-        if( !_tips.pointer  || !this.tipsPointer ) return;
-        this.tipsPointer.destroy();
-        this.tipsPointer = null;
+        
+        if( !_tips.pointer  || !this._tipsPointer ) return;
+        //console.log("hide");
+        this._tipsPointer.destroy();
+        this._tipsPointer = null;
     }
 
     _tipsPointerMove( e, _tips, _coor )
     {
         if( !_tips.pointer ) return;
-        var el = this.tipsPointer;
+
+        //console.log("move");
+
+        var el = this._tipsPointer;
         var x = _coor.origin.x + e.eventInfo.xAxis.x;
         if( _tips.pointer == "shadow" ){
             x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth/2;
@@ -693,19 +719,24 @@ export default class Descartes extends CoordinateBase
             return;
         };
 
-        if( el.__animation ){
-            el.__animation.stop();
-        };
-        el.__targetX = x;
-        el.__animation = el.animate( {
-            x : x,
-            y : y
-        } , {
-            duration : 200,
-            onComplete : function(){
-                delete el.__targetX;
-                delete el.__animation;
-            }
-        })
+        if( _tips.pointerAnimate ){
+            if( el.__animation ){
+                el.__animation.stop();
+            };
+            el.__targetX = x;
+            el.__animation = el.animate( {
+                x : x,
+                y : y
+            } , {
+                duration : 200,
+                onComplete : function(){
+                    delete el.__targetX;
+                    delete el.__animation;
+                }
+            })
+        } else {
+            el.context.x = x;
+            el.context.y = y;
+        }
     }
 }

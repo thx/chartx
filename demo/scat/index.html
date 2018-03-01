@@ -116,14 +116,20 @@ var options = {
                     enabled : true
                 },
                 onclick : function( e , nodeData ){
+                    console.log("onclick")
                     if( !nodeData.selected ){
                         this.selectAt( nodeData.nodeInd );
                     } else {
                         this.unselectAt( nodeData.nodeInd );
                     };
+                },
+                ondblclick : function(){
+                    console.log("ondblclick")
                 }
+
             },
             text : {
+                enabled : false,
                 field : "text"
             }
         }
