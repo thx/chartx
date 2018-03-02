@@ -4176,7 +4176,7 @@ var CanvasRenderer = function (_SystemRenderer) {
                 //如果是文本
                 var ctx = stage.ctx;
                 ctx.setTransform.apply(ctx, displayObject.worldTransform.toArray());
-                displayObject.render(ctx);
+                displayObject.render(ctx, globalAlpha);
             }
 
             if (displayObject.children) {
@@ -5779,14 +5779,15 @@ var Text = function (_DisplayObject) {
         }
     }, {
         key: "_setContextStyle",
-        value: function _setContextStyle(ctx, style) {
+        value: function _setContextStyle(ctx, style, globalAlpha) {
             // 简单判断不做严格类型检测
             for (var p in style) {
                 if (p != "textBaseline" && p in ctx) {
                     if (style[p] || _$1.isNumber(style[p])) {
                         if (p == "globalAlpha") {
                             //透明度要从父节点继承
-                            ctx[p] *= style[p];
+                            //ctx[p] = style[p] * globalAlpha; //render里面已经做过相乘了，不需要重新*
+                            ctx.globalAlpha = globalAlpha;
                         } else {
                             ctx[p] = style[p];
                         }
@@ -5797,8 +5798,8 @@ var Text = function (_DisplayObject) {
         }
     }, {
         key: "render",
-        value: function render(ctx) {
-            this._renderText(ctx, this._getTextLines());
+        value: function render(ctx, globalAlpha) {
+            this._renderText(ctx, this._getTextLines(), globalAlpha);
         }
     }, {
         key: "resetText",
@@ -5828,9 +5829,9 @@ var Text = function (_DisplayObject) {
         }
     }, {
         key: "_renderText",
-        value: function _renderText(ctx, textLines) {
+        value: function _renderText(ctx, textLines, globalAlpha) {
             ctx.save();
-            this._setContextStyle(ctx, this.context.$model);
+            this._setContextStyle(ctx, this.context.$model, globalAlpha);
             this._renderTextStroke(ctx, textLines);
             this._renderTextFill(ctx, textLines);
             ctx.restore();
@@ -12908,12 +12909,13 @@ var BarGraphs = function (_GraphsBase) {
                                         content = _formatc;
                                     }
                                 }
-                                if (!me.animation && _$15.isNumber(content)) {
-                                    content = numAddSymbol(content);
+
+                                if (!content) {
+                                    return;
                                 }
 
-                                if (content === "") {
-                                    return;
+                                if (!me.animation && _$15.isNumber(content)) {
+                                    content = numAddSymbol(content);
                                 }
 
                                 if (ci > 0 && infosp.children.length > 0) {
@@ -12927,14 +12929,14 @@ var BarGraphs = function (_GraphsBase) {
                                     infosp.addChild(txt);
                                 }
 
-                                var txt = null;
+                                var _txt = null;
                                 if (h <= preDataLen - 1) {
-                                    txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                    _txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
                                 }
-                                if (txt) {
+                                if (_txt) {
                                     //do something
                                 } else {
-                                    txt = new canvax.Display.Text(content, {
+                                    _txt = new canvax.Display.Text(content, {
                                         id: "info_txt_" + i + "_" + h + "_" + ci,
                                         context: {
                                             x: infoWidth + 2,
@@ -12944,12 +12946,12 @@ var BarGraphs = function (_GraphsBase) {
                                             strokeStyle: me.text.strokeStyle
                                         }
                                     });
-                                    infosp.addChild(txt);
+                                    infosp.addChild(_txt);
                                 }
-                                txt._text = cdata.value;
-                                txt._data = cdata;
-                                infoWidth += txt.getTextWidth() + 2;
-                                infoHeight = Math.max(infoHeight, txt.getTextHeight());
+                                _txt._text = cdata.value;
+                                _txt._data = cdata;
+                                infoWidth += _txt.getTextWidth() + 2;
+                                infoHeight = Math.max(infoHeight, _txt.getTextHeight());
 
                                 if (me.animation) {
                                     var beginNumber = 0;
@@ -12966,7 +12968,7 @@ var BarGraphs = function (_GraphsBase) {
                                         beginNumber = 100900;
                                     }
                                     //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
-                                    txt.resetText(beginNumber);
+                                    _txt.resetText(beginNumber);
                                 }
                             });
 
@@ -14545,6 +14547,7 @@ var LineGraphs = function (_GraphsBase) {
 
 var Circle$3 = canvax.Shapes.Circle;
 var Rect$7 = canvax.Shapes.Rect;
+var Line$7 = canvax.Shapes.Line;
 var _$19 = canvax._;
 
 var ScatGraphs = function (_GraphsBase) {
@@ -14559,10 +14562,10 @@ var ScatGraphs = function (_GraphsBase) {
 
         _this.node = {
             shapeType: "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-            maxR: 20, //圆圈默认最大半径
-            minR: 5,
+            maxR: 30, //圆圈默认最大半径
+            minR: 8,
             r: null,
-            normalR: 10,
+            normalR: 15,
             fillStyle: null,
             fillAlpha: 0.8,
 
@@ -14584,6 +14587,15 @@ var ScatGraphs = function (_GraphsBase) {
 
                 //onclick ondblclick 注册的事件都是小写
             } };
+
+        //从node点到垂直坐标y==0的连线
+        //气球的绳子
+        _this.line = {
+            enabled: false,
+            lineWidth: 1,
+            strokeStyle: "#ccc",
+            lineType: "dashed"
+        };
 
         _this.text = {
             enabled: true,
@@ -14614,6 +14626,11 @@ var ScatGraphs = function (_GraphsBase) {
             this._textsp = new canvax.Display.Sprite({
                 id: "textsp"
             });
+            this._linesp = new canvax.Display.Sprite({
+                id: "textsp"
+            });
+
+            this.sprite.addChild(this._linesp);
             this.sprite.addChild(this._shapesp);
             this.sprite.addChild(this._textsp);
         }
@@ -14676,8 +14693,9 @@ var ScatGraphs = function (_GraphsBase) {
                     strokeStyle: null,
                     lineWidth: 0,
                     shapeType: null,
-                    shape: null, //对应的canvax 节点， 在widget之后赋值
-                    text: null
+                    text: null,
+
+                    _node: null //对应的canvax 节点， 在widget之后赋值
                 };
 
                 this._setR(nodeLayoutData);
@@ -14800,7 +14818,7 @@ var ScatGraphs = function (_GraphsBase) {
                 //数据和canvax原件相互引用
                 _node.nodeData = nodeData;
                 _node.iNode = iNode;
-                nodeData.shape = _node;
+                nodeData._node = _node;
 
                 me.node.focus.enabled && _node.hover(function (e) {
                     me.focusAt(this.nodeData.nodeInd);
@@ -14824,20 +14842,41 @@ var ScatGraphs = function (_GraphsBase) {
                     me.triggerEvent(me.node, e);
                 });
 
+                if (me.line.enabled) {
+                    var _line = new Line$7({
+                        context: {
+                            start: {
+                                x: _context.x,
+                                y: _context.y + _context.r
+                            },
+                            end: {
+                                x: _context.x,
+                                y: 0
+                            },
+                            lineWidth: me.line.lineWidth,
+                            strokeStyle: me.line.strokeStyle,
+                            lineType: me.line.lineType
+                        }
+                    });
+                    me._linesp.addChild(_line);
+
+                    _node._line = _line;
+                }
+
                 //如果有label
                 if (nodeData.text && me.text.enabled) {
 
                     var text = nodeData.text;
                     var _text = new canvax.Display.Text(text, {
-                        id: "text_" + iNode,
+                        id: "scat_text_" + iNode,
                         context: me._getTextContext(nodeData)
                     });
 
                     me._textsp.addChild(_text);
 
                     //图形节点和text文本相互引用
-                    _node.text = _text;
-                    _text.shape = _node;
+                    _node._text = _text;
+                    _text._node = _node;
                 }
             });
         }
@@ -14853,7 +14892,7 @@ var ScatGraphs = function (_GraphsBase) {
                 textBaseline: 'middle'
             };
             if (this.animation) {
-                ctx.x = 0;
+                //ctx.x = 0;
                 ctx.y = 0;
             }
             return ctx;
@@ -14880,7 +14919,7 @@ var ScatGraphs = function (_GraphsBase) {
             };
 
             if (this.animation) {
-                ctx.x = 0;
+                //ctx.x = 0;
                 ctx.y = 0;
                 ctx.r = 1;
             }
@@ -14895,15 +14934,18 @@ var ScatGraphs = function (_GraphsBase) {
         key: "grow",
         value: function grow() {
             _$19.each(this.data, function (nodeData) {
-                nodeData.shape.animate({
-                    x: nodeData.x,
+                nodeData._node.animate({
+                    //x : nodeData.x,
                     y: nodeData.y,
                     r: nodeData.r
                 }, {
                     onUpdate: function onUpdate(opts) {
-                        if (this.text) {
-                            this.text.context.x = opts.x;
-                            this.text.context.y = opts.y;
+                        if (this._text) {
+                            //this._text.context.x = opts.x;
+                            this._text.context.y = opts.y;
+                        }
+                        if (this._line) {
+                            this._line.context.start.y = opts.y + opts.r;
                         }
                     },
                     delay: Math.round(Math.random() * 300)
@@ -14913,10 +14955,11 @@ var ScatGraphs = function (_GraphsBase) {
     }, {
         key: "focusAt",
         value: function focusAt(ind) {
+            debugger;
             var nodeData = this.data[ind];
             if (!this.node.focus.enabled || nodeData.focused) return;
 
-            var nctx = nodeData.shape.context;
+            var nctx = nodeData._node.context;
             nctx.lineWidth = this.node.focus.lineWidth;
             nctx.lineAlpha = this.node.focus.lineAlpha;
             nctx.fillAlpha = this.node.focus.fillAlpha;
@@ -14927,7 +14970,7 @@ var ScatGraphs = function (_GraphsBase) {
         value: function unfocusAt(ind) {
             var nodeData = this.data[ind];
             if (!this.node.focus.enabled || !nodeData.focused) return;
-            var nctx = nodeData.shape.context;
+            var nctx = nodeData._node.context;
             nctx.lineWidth = this.node.lineWidth;
             nctx.lineAlpha = this.node.lineAlpha;
             nctx.fillAlpha = this.node.fillAlpha;
@@ -14941,7 +14984,7 @@ var ScatGraphs = function (_GraphsBase) {
             var nodeData = this.data[ind];
             if (!this.node.select.enabled || nodeData.selected) return;
 
-            var nctx = nodeData.shape.context;
+            var nctx = nodeData._node.context;
             nctx.lineWidth = this.node.select.lineWidth;
             nctx.lineAlpha = this.node.select.lineAlpha;
             nctx.fillAlpha = this.node.select.fillAlpha;
@@ -14954,7 +14997,7 @@ var ScatGraphs = function (_GraphsBase) {
             var nodeData = this.data[ind];
             if (!this.node.select.enabled || !nodeData.selected) return;
 
-            var nctx = nodeData.shape.context;
+            var nctx = nodeData._node.context;
 
             if (nodeData.focused) {
                 //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
@@ -16537,7 +16580,7 @@ var Legend = function (_Component) {
     return Legend;
 }(component);
 
-var Line$7 = canvax.Shapes.Line;
+var Line$8 = canvax.Shapes.Line;
 var Rect$9 = canvax.Shapes.Rect;
 var _$24 = canvax._;
 
@@ -17013,7 +17056,7 @@ var dataZoom = function (_Component) {
         key: "_addLine",
         value: function _addLine($o) {
             var o = $o || {};
-            var line = new Line$7({
+            var line = new Line$8({
                 id: o.id || '',
                 context: {
                     x: o.x || 0,
@@ -17428,7 +17471,7 @@ var MarkPoint = function (_Component) {
     return MarkPoint;
 }(component);
 
-var Line$8 = canvax.Shapes.Line;
+var Line$9 = canvax.Shapes.Line;
 var Circle$7 = canvax.Shapes.Circle;
 var _$27 = canvax._;
 
@@ -17580,7 +17623,7 @@ var Anchor = function (_Component) {
         value: function _widget() {
             var self = this;
 
-            self._xLine = new Line$8({
+            self._xLine = new Line$9({
                 id: 'x',
                 context: {
                     start: {
@@ -17598,7 +17641,7 @@ var Anchor = function (_Component) {
             });
             self.sprite.addChild(self._xLine);
 
-            self._yLine = new Line$8({
+            self._yLine = new Line$9({
                 id: 'y',
                 context: {
                     start: {
@@ -17891,7 +17934,7 @@ var Tips = function (_Component) {
     return Tips;
 }(component);
 
-var Line$9 = canvax.Shapes.Line;
+var Line$10 = canvax.Shapes.Line;
 var _$29 = canvax._;
 
 var barTgi = function (_Component) {
@@ -17979,7 +18022,7 @@ var barTgi = function (_Component) {
                 var y = me._yAxis.getYposFromVal(tgi);
                 var barData = me.barDatas[i];
 
-                var _tgiLine = new Line$9({
+                var _tgiLine = new Line$10({
                     context: {
                         start: {
                             x: barData.x,

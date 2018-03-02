@@ -403,12 +403,13 @@ export default class BarGraphs extends GraphsBase
                                     content = _formatc
                                 }
                             };
+
+                            if( !content ){
+                                return;
+                            };
+                            
                             if (!me.animation && _.isNumber(content)) {
                                 content = numAddSymbol(content);
-                            };
-
-                            if( content === "" ){
-                                return;
                             };
 
                             if (ci > 0 && infosp.children.length>0) {
@@ -422,14 +423,14 @@ export default class BarGraphs extends GraphsBase
                                 infosp.addChild(txt);
                             };
 
-                            var txt = null;
+                            var _txt = null;
                             if (h <= preDataLen - 1) {
-                                txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                _txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
                             }
-                            if( txt ){
+                            if( _txt ){
                                 //do something
                             } else {
-                                txt = new Canvax.Display.Text( content , {
+                                _txt = new Canvax.Display.Text( content , {
                                     id: "info_txt_" + i + "_" + h + "_" + ci,
                                     context: {
                                         x: infoWidth + 2,
@@ -439,12 +440,12 @@ export default class BarGraphs extends GraphsBase
                                         strokeStyle: me.text.strokeStyle
                                     }
                                 });
-                                infosp.addChild(txt);
+                                infosp.addChild( _txt );
                             };
-                            txt._text = cdata.value;
-                            txt._data = cdata;
-                            infoWidth += txt.getTextWidth() + 2;
-                            infoHeight = Math.max(infoHeight, txt.getTextHeight());
+                            _txt._text = cdata.value;
+                            _txt._data = cdata;
+                            infoWidth += _txt.getTextWidth() + 2;
+                            infoHeight = Math.max(infoHeight, _txt.getTextHeight());
 
                             if( me.animation ){
                                 var beginNumber = 0;
@@ -461,7 +462,7 @@ export default class BarGraphs extends GraphsBase
                                     beginNumber = 100900;
                                 }
                                 //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
-                                txt.resetText( beginNumber );
+                                _txt.resetText( beginNumber );
                             };
                         });
 
