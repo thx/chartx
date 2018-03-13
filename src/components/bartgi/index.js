@@ -46,7 +46,7 @@ export default class barTgi extends Component
     init( opt )
     {
         _.extend(true, this , opt );
-        this._yAxis = this.root._coordinate._yAxis[ this.yAxisAlign=="left"?0:1 ];
+        this._yAxis = this.root._coord._yAxis[ this.yAxisAlign=="left"?0:1 ];
         this.sprite  = new Canvax.Display.Sprite({
             id : "barTgiSprite",
             context : {

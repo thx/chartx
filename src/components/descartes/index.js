@@ -87,7 +87,7 @@ export default class Descartes_Component extends coorBase
     init(opts)
     {
         this.sprite = new Canvax.Display.Sprite({
-            id : "coordinate"
+            id : "coord"
         });
         this._initModules();
         //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，

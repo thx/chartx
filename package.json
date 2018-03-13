@@ -33,7 +33,7 @@
   "dependencies": {
     "rollup-watch": "3.2.2",
     "earcut": "^2.0.7",
-    "canvax2d": "^1.0.21"
+    "canvax2d": "^1.0.22"
   },
   "scripts": {
     "rollup": "node rollup.config.js",

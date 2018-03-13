@@ -44,8 +44,8 @@ var data = [
 ];
 
 var options = {
-    coordinate: {
-        type : "descartes",
+    coord: {
+        type : "rect",
         xAxis : {
             field :  "name",
             layoutType : "peak" //注意：scat的layoutType必须是proportion，位置计算才会对
@@ -89,7 +89,9 @@ var options = {
             }
         }
     ],
-    tips : {}
+    tips : {
+        pointer : "shadow"
+    }
 };
 
 window.scat = Chartx.create("canvasTest" , data , options)

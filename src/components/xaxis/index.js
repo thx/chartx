@@ -8,13 +8,13 @@ const _ = Canvax._;
 
 export default class xAxis extends Component
 {
-    constructor(opts, data, _coordinate)
+    constructor(opts, data, _coord)
     {
         super();
 
         this._opts = opts;
 
-        this._coordinate = _coordinate || {};
+        this._coord = _coord || {};
 
         this.width = 0;
         this.height = 0;
@@ -312,7 +312,8 @@ export default class xAxis extends Component
             };
             if( layoutType == "peak" ){
                 //柱状图的就是peak
-                x = this.ceilWidth * (ind+1) - this.ceilWidth/2;
+                var _ceilWidth = width / dataLen;
+                x = _ceilWidth * (ind+1) - _ceilWidth/2;
             };
         };
 
@@ -646,8 +647,8 @@ export default class xAxis extends Component
     {
         //找到paddingRight,在最后一个文本右移的时候需要用到
         var rootPaddingRight = 0;
-        if( this._coordinate._root ){
-            rootPaddingRight = this._coordinate._root.padding.right;
+        if( this._coord._root ){
+            rootPaddingRight = this._coord._root.padding.right;
         }
         return rootPaddingRight;
     }

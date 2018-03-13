@@ -5,6 +5,7 @@ const _ = Canvax._;
 
 /**
  * 所有坐标系的基类，一些坐标系中复用的代码，沉淀在这里
+ * 空坐标系，一些非直角坐标系，极坐标系的图表，就会直接创建一个空坐标系图表，然后添加组件
  */
 export default class Coordinate extends Chart
 {
@@ -38,14 +39,14 @@ export default class Coordinate extends Chart
             me.padding[ _legend.position ] += _legend.width;
         };
 
-        if( me._coordinate && me._coordinate.type == "descartes" ){
+        if( me._coord && me._coord.type == "descartes" ){
             if( _legend.position == "top" || _legend.position == "bottom" ){
                 this.components.push( {
                     type : "once",
                     plug : {
                         draw : function(){
                             _legend.pos( { 
-                                x : me._coordinate.origin.x + 5
+                                x : me._coord.origin.x + 5
                             } );
                         }
                     }
@@ -86,7 +87,7 @@ export default class Coordinate extends Chart
     add( field )
     {
         var me = this;
-        this._coordinate.addField( field );
+        this._coord.addField( field );
         _.each( this._graphs, function( _g ){
             _g.add( field );
         } );
@@ -95,7 +96,7 @@ export default class Coordinate extends Chart
     remove( field )
     {
         var me = this;
-        this._coordinate.removeField( field );
+        this._coord.removeField( field );
         _.each( this._graphs, function( _g ){
             _g.remove( field );
         } );
@@ -110,7 +111,7 @@ export default class Coordinate extends Chart
             if ( _tips ) {
                 me.setTipsInfo.apply(me, [e]);
                 _tips.show(e);
-                me._tipsPointerShow( e, _tips, me._coordinate );
+                me._tipsPointerShow( e, _tips, me._coord );
                 me._tipsPointerAtAllGraphs( e );
             };
         });
@@ -119,7 +120,7 @@ export default class Coordinate extends Chart
             if ( _tips ) {
                 me.setTipsInfo.apply(me, [e]);
                 _tips.move(e);
-                me._tipsPointerMove( e, _tips, me._coordinate );
+                me._tipsPointerMove( e, _tips, me._coord );
                 me._tipsPointerAtAllGraphs( e );
             };
         });
@@ -127,9 +128,9 @@ export default class Coordinate extends Chart
             //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
             //那么就不要执行hide，顶多只显示这个点得tips数据
             var _tips = me.getComponentById("tips");
-            if ( _tips && !( e.toTarget && me._coordinate.induce && me._coordinate.induce.containsPoint( me._coordinate.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
+            if ( _tips && !( e.toTarget && me._coord.induce && me._coord.induce.containsPoint( me._coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
-                me._tipsPointerHide( e, _tips, me._coordinate );
+                me._tipsPointerHide( e, _tips, me._coord );
                 me._tipsPointerHideAtAllGraphs( e );
             };
         });
@@ -139,7 +140,7 @@ export default class Coordinate extends Chart
                 _tips.hide(e);
                 me.setTipsInfo.apply(me, [e]);
                 _tips.show(e);
-                me._tipsPointerShow( e, _tips, me._coordinate );
+                me._tipsPointerShow( e, _tips, me._coord );
                 me._tipsPointerAtAllGraphs( e );
             };
         });
@@ -170,5 +171,4 @@ export default class Coordinate extends Chart
             _g.tipsPointerHideOf( e );
         });
     }
-
 }

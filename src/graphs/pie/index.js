@@ -120,7 +120,7 @@ export default class PieGraphs extends GraphsBase
     _dataHandle()
     {
         var me = this;
-        var _coor = me.root._coordinate;
+        var _coor = me.root._coord;
 
         var data = [];
         var dataFrame = me.root.dataFrame;

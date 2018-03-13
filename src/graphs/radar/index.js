@@ -1,5 +1,4 @@
 import Canvax from "canvax2d"
-import Theme from "../../theme"
 import GraphsBase from "../index"
 
 const Polygon = Canvax.Shapes.Polygon;
@@ -68,7 +67,7 @@ export default class RadarGraphs extends GraphsBase
     _widget()
     {
         var me = this;
-        var _coor = this.root._coordinate;
+        var _coor = this.root._coord;
 
         var groupInd = 0;
         _.each( this.data, function( list , field ){
@@ -227,10 +226,10 @@ export default class RadarGraphs extends GraphsBase
     _trimGraphs()
     {
         var me = this;
-        var _coor = this.root._coordinate;
+        var _coor = this.root._coord;
 
         //用来计算下面的hLen
-        this.enabledField = this.root._coordinate.getEnabledFields( this.field );
+        this.enabledField = this.root._coord.getEnabledFields( this.field );
         
         var data = {}
         _.each( this.enabledField, function( field ){

@@ -20,8 +20,8 @@ export default class Descartes extends CoordinateBase
         var me = this;
 
         //坐标系统
-        this._coordinate = null;
-        this.coordinate = {
+        this._coord = null;
+        this.coord = {
             xAxis : {
                 //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
                 layoutType    : "rule", //"peak",  
@@ -33,26 +33,26 @@ export default class Descartes extends CoordinateBase
 
         
         opts = _.clone( opts );
-        if( opts.coordinate.yAxis ){
+        if( opts.coord.yAxis ){
             var _nyarr = [];
             //TODO: 因为我们的deep extend 对于数组是整个对象引用过去，所以，这里需要
             //把每个子元素单独clone一遍，恩恩恩， 在canvax中优化extend对于array的处理
-            _.each( _.flatten([opts.coordinate.yAxis]) , function( yopt ){
+            _.each( _.flatten([opts.coord.yAxis]) , function( yopt ){
                 _nyarr.push( _.clone( yopt ) );
             } );
-            opts.coordinate.yAxis = _nyarr;
+            opts.coord.yAxis = _nyarr;
         } else {
-            opts.coordinate.yAxis = [];
+            opts.coord.yAxis = [];
         }
 
-        //根据opt中得Graphs配置，来设置 coordinate.yAxis
+        //根据opt中得Graphs配置，来设置 coord.yAxis
         if( opts.graphs ){
             opts.graphs = _.flatten( [ opts.graphs ] );
-            //有graphs的就要用找到这个graphs.field来设置coordinate.yAxis
+            //有graphs的就要用找到这个graphs.field来设置coord.yAxis
             _.each( opts.graphs, function( graphs ){
                 if( graphs.type == "bar" ){
                     //如果graphs里面有柱状图，那么就整个xAxis都强制使用 peak 的layoutType
-                    me.coordinate.xAxis.layoutType = "peak";
+                    me.coord.xAxis.layoutType = "peak";
                 }
                 if( graphs.field ){
                     //没有配置field的话就不绘制这个 graphs了
@@ -62,7 +62,7 @@ export default class Descartes extends CoordinateBase
                     };
 
                     var optsYaxisObj = null;
-                    optsYaxisObj = _.find( opts.coordinate.yAxis, function( obj, i ){
+                    optsYaxisObj = _.find( opts.coord.yAxis, function( obj, i ){
                         return obj.align == align || ( !obj.align && i == ( align == "left" ? 0 : 1 ));
                     } );
     
@@ -71,7 +71,7 @@ export default class Descartes extends CoordinateBase
                             align : align,
                             field : []
                         }
-                        opts.coordinate.yAxis.push( optsYaxisObj );
+                        opts.coord.yAxis.push( optsYaxisObj );
                     } else {
                         if( !optsYaxisObj.align ){
                             optsYaxisObj.align = align;
@@ -98,7 +98,7 @@ export default class Descartes extends CoordinateBase
         //再梳理一遍yAxis，get没有align的手动配置上align
         //要手动把yAxis 按照 left , right的顺序做次排序
         var _lys=[],_rys=[];
-        _.each( opts.coordinate.yAxis , function( yAxis , i ){
+        _.each( opts.coord.yAxis , function( yAxis , i ){
             if( !yAxis.align ){
                 yAxis.align = i ?"right": "left";
             }
@@ -108,7 +108,7 @@ export default class Descartes extends CoordinateBase
                 _rys.push( yAxis );
             }
         } );
-        opts.coordinate.yAxis = _lys.concat( _rys );
+        opts.coord.yAxis = _lys.concat( _rys );
 
         
         //直角坐标系的绘图模块,是个数组，支持多模块
@@ -140,7 +140,7 @@ export default class Descartes extends CoordinateBase
         this.startDraw( opts );      //开始绘图
         this.drawComponents( opts ); //绘图完，开始绘制插件
 
-        if( this._coordinate.horizontal ){
+        if( this._coord.horizontal ){
             this._horizontal();
         };
 
@@ -151,8 +151,8 @@ export default class Descartes extends CoordinateBase
     {
         var me = this
         //首先是创建一个坐标系对象
-        this._coordinate = new CoordinateComponents( this.coordinate, this );
-        this.coordinateSprite.addChild( this._coordinate.sprite );
+        this._coord = new CoordinateComponents( this.coord, this );
+        this.coordSprite.addChild( this._coord.sprite );
 
         _.each( this.graphs , function( graphs ){
             var _g = new me.graphsMap[ graphs.type ]( graphs, me );
@@ -165,7 +165,7 @@ export default class Descartes extends CoordinateBase
     {
         var me = this;
         !opt && (opt ={});
-        var _coor = this._coordinate;
+        var _coor = this._coord;
 
         if( !_coor._yAxis.length ){
             //如果没有y轴数据
@@ -204,7 +204,7 @@ export default class Descartes extends CoordinateBase
     _resetData( dataTrigger )
     {
         var me = this;
-        this._coordinate.resetData( this.dataFrame , dataTrigger);
+        this._coord.resetData( this.dataFrame , dataTrigger);
         _.each( this._graphs, function( _g ){
             _g.resetData( me.dataFrame , dataTrigger);
         } );
@@ -273,7 +273,7 @@ export default class Descartes extends CoordinateBase
         var me   = this;
         var data = [];
         
-        _.each( _.flatten(me._coordinate.fieldsMap) , function( map , i ){
+        _.each( _.flatten(me._coord.fieldsMap) , function( map , i ){
             //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
             var isGraphsField = false;
             _.each( me.graphs, function( gopt ){
@@ -314,7 +314,7 @@ export default class Descartes extends CoordinateBase
         //var opts = _.extend(true, {}, me._opts);
         //_.extend(true, opts, me.getCloneChart() );
 
-        //clone的chart只需要coordinate 和 graphs 配置就可以了
+        //clone的chart只需要coord 和 graphs 配置就可以了
         //因为画出来后也只需要拿graphs得sprite去贴图
         var graphsOpt = [];
         _.each( this._graphs, function( _g ){
@@ -327,7 +327,7 @@ export default class Descartes extends CoordinateBase
                 _opts.field = _field;
                 if( _g.type == "bar" ){
                     _.extend(true, _opts , {
-                        bar: {
+                        node: {
                             fillStyle: me.dataZoom.normalColor || "#ececec"
                         },
                         animation: false,
@@ -346,8 +346,8 @@ export default class Descartes extends CoordinateBase
                         node: {
                             enabled: false
                         },
-                        fill: {
-                            alpha: 0.6,
+                        area: {
+                            alpha: 1,
                             fillStyle: "#ececec"
                         },
                         animation: false,
@@ -369,7 +369,7 @@ export default class Descartes extends CoordinateBase
             }
         } );
         var opts = {
-            coordinate : this._opts.coordinate,
+            coord : this._opts.coord,
             graphs : graphsOpt
         };
 
@@ -408,10 +408,10 @@ export default class Descartes extends CoordinateBase
         var me = this;
         //初始化 datazoom 模块
         var dataZoomOpt = _.extend(true, {
-            w: me._coordinate.width,
+            w: me._coord.width,
             pos: {
-                x: me._coordinate.origin.x,
-                y: me._coordinate.origin.y + me._coordinate._xAxis.height
+                x: me._coord.origin.x,
+                y: me._coord.origin.y + me._coord._xAxis.height
             },
             dragIng: function(range) {
                 var trigger = {
@@ -453,11 +453,11 @@ export default class Descartes extends CoordinateBase
                 return;
             }
 
-            var _yAxis = me._coordinate._yAxis[0]; //默认为左边的y轴
+            var _yAxis = me._coord._yAxis[0]; //默认为左边的y轴
             
             if( field ){
-                //如果有配置markTo就从me._coordinate._yAxis中找到这个markTo所属的yAxis对象
-                _.each( me._coordinate._yAxis, function( $yAxis, yi ){
+                //如果有配置markTo就从me._coord._yAxis中找到这个markTo所属的yAxis对象
+                _.each( me._coord._yAxis, function( $yAxis, yi ){
                     var fs = _.flatten([ $yAxis.field ]);
                     if( _.indexOf( fs, field ) >= 0 ){
                         _yAxis = $yAxis;
@@ -467,7 +467,7 @@ export default class Descartes extends CoordinateBase
 
             if( ML.yAxisAlign ){
                 //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
-                _yAxis = me._coordinate._yAxis[ ML.yAxisAlign=="left"?0:1 ];
+                _yAxis = me._coord._yAxis[ ML.yAxisAlign=="left"?0:1 ];
             }
 
             var y;
@@ -499,7 +499,7 @@ export default class Descartes extends CoordinateBase
                     draw : function(){
 
                         var _fstyle = "#777";
-                        var fieldMap = me._coordinate.getFieldMapOf( field );
+                        var fieldMap = me._coord.getFieldMapOf( field );
                         if( fieldMap ){
                             _fstyle = fieldMap.color;
                         };
@@ -518,17 +518,17 @@ export default class Descartes extends CoordinateBase
     {
         var me = this;
         var o = {
-            w: me._coordinate.width,
-            h: me._coordinate.height,
+            w: me._coord.width,
+            h: me._coord.height,
             yVal: yVal,
             origin: {
-                x: me._coordinate.origin.x,
-                y: me._coordinate.origin.y
+                x: me._coord.origin.x,
+                y: me._coord.origin.y
             },
             line: {
                 list: [
                     [0, 0],
-                    [me._coordinate.width, 0]
+                    [me._coord.width, 0]
                 ]
                 //strokeStyle: lineStrokeStyle
             },
@@ -577,8 +577,8 @@ export default class Descartes extends CoordinateBase
 
                         barTgiOpt = _.extend( true, {
                             origin: {
-                                x: me._coordinate.origin.x,
-                                y: me._coordinate.origin.y
+                                x: me._coord.origin.x,
+                                y: me._coord.origin.y
                             }
                         } , barTgiOpt );
 
@@ -602,7 +602,7 @@ export default class Descartes extends CoordinateBase
     setTipsInfo(e)
     {
         
-        e.eventInfo = this._coordinate.getTipsInfoHandler(e);
+        e.eventInfo = this._coord.getTipsInfoHandler(e);
 
         //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
         //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
@@ -695,7 +695,6 @@ export default class Descartes extends CoordinateBase
 
     _tipsPointerHide( e, _tips, _coor )
     {
-        
         if( !_tips.pointer  || !this._tipsPointer ) return;
         //console.log("hide");
         this._tipsPointer.destroy();

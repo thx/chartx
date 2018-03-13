@@ -1,12 +1,11 @@
-//图表基类
-import Chart from "./chart"
+//图表皮肤
+import theme from "./theme"
 
-//图表皮肤类
-import Theme from "./theme"
+//空坐标系
 
 //坐标系
-import Descartes from "./coordinate/descartes"
-import Polar from "./coordinate/polar"
+import Rect from "./coord/rect"
+import Polar from "./coord/polar"
 
 //graphs
 import Bar from "./graphs/bar/index"
@@ -24,8 +23,8 @@ import Anchor from "./components/anchor/index"
 import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
 
-var coordinate = {
-    descartes : Descartes,
+var coord = {
+    rect : Rect,
     polar : Polar
 }
 
@@ -51,7 +50,7 @@ var components = {
 //如果数据库中有项目皮肤
 var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
 if( projectTheme && projectTheme.length ){
-    Theme.set( projectTheme );
+    theme.set( projectTheme );
 };
 //皮肤设定end -----------------
 
@@ -59,8 +58,8 @@ if( projectTheme && projectTheme.length ){
 var Chartx = {
     create : function( el, data, opts ){
         var chart = null;
-        if( opts.coordinate && opts.coordinate.type ){
-            chart = new coordinate[ opts.coordinate.type ]( el, data, opts, graphs, components );
+        if( opts.coord && opts.coord.type ){
+            chart = new coord[ opts.coord.type ]( el, data, opts, graphs, components );
         };
         chart && chart.draw();
         return chart;

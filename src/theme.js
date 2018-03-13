@@ -2,6 +2,10 @@ const _colors = ["#ff8533","#73ace6","#82d982","#e673ac","#cd6bed","#8282d9","#c
 export default {
     colors : _colors,
     set : function( colors ){
-        this.colors = colors
+        this.colors = colors;
+        return this.colors;
+    },
+    get : function( ){
+        return this.colors
     }
 }

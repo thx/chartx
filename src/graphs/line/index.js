@@ -69,14 +69,14 @@ export default class LineGraphs extends GraphsBase
     setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-        this.enabledField = this.root._coordinate.getEnabledFields( this.field );
+        this.enabledField = this.root._coord.getEnabledFields( this.field );
     }
 
     //_yAxis, dataFrame
     _trimGraphs()
     {
         var me = this;
-        var _coor = this.root._coordinate;
+        var _coor = this.root._coord;
         
         //{"uv":{}.. ,"click": "pv":]}
         //这样按照字段摊平的一维结构
@@ -96,11 +96,11 @@ export default class LineGraphs extends GraphsBase
             var _data = [];
 
             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                var _xAxis = me.root._coordinate ? me.root._coordinate._xAxis : me.root._xAxis;
+                var _xAxis = me.root._coord ? me.root._coord._xAxis : me.root._xAxis;
                 var x = _xAxis.getPosX( {
                     ind : b,
                     dataLen : bl,
-                    layoutType : me.root._coordinate ? me.root._coordinate.xAxis.layoutType : me.root._xAxis.layoutType
+                    layoutType : me.root._coord ? me.root._coord.xAxis.layoutType : me.root._xAxis.layoutType
                 } );
                 
                 var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
@@ -222,7 +222,7 @@ export default class LineGraphs extends GraphsBase
                 return;
             };
 
-            var fieldMap = me.root._coordinate.getFieldMapOf( field );
+            var fieldMap = me.root._coord.getFieldMapOf( field );
             
             //groupInd 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
             var groupInd = _.indexOf( _flattenField, field );

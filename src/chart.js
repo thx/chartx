@@ -1,6 +1,7 @@
 import Canvax from "canvax2d"
 import { getEl,parse2MatrixData } from "./utils/tools"
 import DataFrame from "./utils/dataframe"
+import theme from "./theme"
 
 const _ = Canvax._;
 
@@ -28,10 +29,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
         this.padding = {
-            top: 10,
-            right: 10,
-            bottom: 10,
-            left: 10
+            top: 20,
+            right: 20,
+            bottom: 20,
+            left: 20
         };
 
         //Canvax实例
@@ -52,10 +53,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
 
         //坐标系存放的容器
-        this.coordinateSprite = new Canvax.Display.Sprite({
-            id: 'coordinateSprite'
+        this.coordSprite = new Canvax.Display.Sprite({
+            id: 'coordSprite'
         });
-        this.stage.addChild( this.coordinateSprite );
+        this.stage.addChild( this.coordSprite );
         //graphs管理
         this.graphsSprite = new Canvax.Display.Sprite({
             id: 'graphsSprite'
@@ -68,6 +69,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
       
         this.inited = false;
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
+
+        this.theme = [];
 
         this.init.apply(this, arguments);
         
@@ -214,7 +217,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //插件管理相关代码begin
     initComponents()
     {
-        var notComponents = [ "coordinate", "graphs" ];
+        var notComponents = [ "coord", "graphs" ];
         for( var _p in this._opts ){
             var p = _p.toLocaleLowerCase();
             if( _.indexOf( notComponents, p ) == -1 ){
@@ -291,7 +294,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 		});
         this.canvax.addChild( this.stageTips );
 
-        var _tips = new this.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coordinate);
+        var _tips = new this.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coord);
         this.stageTips.addChild(_tips.sprite);
         this.components.push({
             type : "tips",

@@ -18,8 +18,8 @@ export default class Polar extends CoordinateBase
         var me = this;
 
         //坐标系统
-        this._coordinate = null;
-        this.coordinate = {
+        this._coord = null;
+        this.coord = {
             rAxis : {
                 field : []
             }
@@ -30,12 +30,12 @@ export default class Polar extends CoordinateBase
         //强制把graphs设置为数组
         this.graphs = _.flatten( [ this.graphs ] );
 
-        //根据graphs.field 来 配置 this.coordinate.rAxis.field -------------------
-        if( !_.isArray( this.coordinate.rAxis.field ) ){
-            this.coordinate.rAxis.field = [this.coordinate.rAxis.field ];
+        //根据graphs.field 来 配置 this.coord.rAxis.field -------------------
+        if( !_.isArray( this.coord.rAxis.field ) ){
+            this.coord.rAxis.field = [this.coord.rAxis.field ];
         };
         if( opts.graphs ){
-            //有graphs的就要用找到这个graphs.field来设置coordinate.rAxis
+            //有graphs的就要用找到这个graphs.field来设置coord.rAxis
             var arrs = [];
             _.each( this.graphs, function( graphs ){
                 if( graphs.field ){
@@ -48,9 +48,8 @@ export default class Polar extends CoordinateBase
                 };
             } );
         };
-        this.coordinate.rAxis.field = this.coordinate.rAxis.field.concat( arrs );
+        this.coord.rAxis.field = this.coord.rAxis.field.concat( arrs );
         //----------------------------------------------------------------------
-
         //这里不要直接用data，而要用 this._data
         this.dataFrame = this.initData( this._data );
     }
@@ -59,8 +58,8 @@ export default class Polar extends CoordinateBase
     {
         var me = this
         //首先是创建一个坐标系对象
-        this._coordinate = new CoordinateComponents( this.coordinate, this );
-        this.coordinateSprite.addChild( this._coordinate.sprite );
+        this._coord = new CoordinateComponents( this.coord, this );
+        this.coordSprite.addChild( this._coord.sprite );
 
         _.each( this.graphs , function( graphs ){
             var _g = new me.graphsMap[ graphs.type ]( graphs, me );
@@ -73,7 +72,7 @@ export default class Polar extends CoordinateBase
     {
         var me = this;
         !opt && (opt ={});
-        var _coor = this._coordinate;
+        var _coor = this._coord;
 
         //先绘制好坐标系统
         _coor.draw( opt );
@@ -125,8 +124,7 @@ export default class Polar extends CoordinateBase
     //方便外部自定义tip是的content
     setTipsInfo(e)
     {
-        e.eventInfo = this._coordinate.getTipsInfoHandler(e);
-
+        e.eventInfo = this._coord.getTipsInfoHandler(e);
         //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
             var nodes = [];

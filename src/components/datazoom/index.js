@@ -24,7 +24,7 @@ export default class dataZoom extends Component
         
         this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
         this.dataLen = 1;
-        this.layoutType = cloneChart.thumbChart._coordinate._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        this.layoutType = cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this.pos = {
             x: 0,
@@ -67,7 +67,7 @@ export default class dataZoom extends Component
         this.disPart = {};
         this.barAddH = 8;
         this.barH = this.h - this.barAddH;
-        this.barY = 6 / 2;
+        this.barY = 0//6 / 2;
         this.btnW = 8;
         this.btnFillStyle = this.color;
         this._btnLeft = null;
@@ -203,11 +203,11 @@ export default class dataZoom extends Component
             var underlineCtx = {
                 start : {
                     x : me.range.start / me.count * me.w + me.btnW / 2,
-                    y : me.barY + me.barH + 2
+                    y : me.barY + me.barH
                 },
                 end : {
                     x : me._getRangeEnd() / me.count * me.w  - me.btnW / 2,
-                    y : me.barY + me.barH + 2
+                    y : me.barY + me.barH
                 },
                 lineWidth : me.underline.lineWidth,
                 strokeStyle : me.underline.strokeStyle
@@ -514,14 +514,15 @@ export default class dataZoom extends Component
         };
 
         var graphssp = this._cloneChart.thumbChart.graphsSprite;
-        var _coor = this._cloneChart.thumbChart._coordinate;
+        var _coor = this._cloneChart.thumbChart._coord;
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg"
         graphssp.context.x = -_coor.origin.x; //0;
-        graphssp.context.y = this.barY;//this.barH + this.barY;
+
+        //TODO:这里为什么要 -2 的原因还没查出来。
+        graphssp.context.y = this.barY - 2;//this.barH + this.barY;
         graphssp.context.scaleY = this.barH / _coor.height;
         graphssp.context.scaleX = this.w / _coor.width;
-
 
         this.dataZoomBg.addChild( graphssp , 0);
 

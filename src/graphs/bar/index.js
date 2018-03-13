@@ -18,7 +18,7 @@ export default class BarGraphs extends GraphsBase
         this.enabledField = null;
  
         this.yAxisAlign = "left"; //默认设置为左y轴
-        this._xAxis = this.root._coordinate._xAxis;
+        this._xAxis = this.root._coord._xAxis;
 
         //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
@@ -127,7 +127,7 @@ export default class BarGraphs extends GraphsBase
 
     _getColor(c, groupsLen, vLen, i, h, v, value, field, _flattenField)
     {
-        var fieldMap = this.root._coordinate.getFieldMapOf(field);
+        var fieldMap = this.root._coord.getFieldMapOf(field);
         var color = fieldMap.color;
 
         //field对应的索引，， 取颜色这里不要用i
@@ -407,7 +407,7 @@ export default class BarGraphs extends GraphsBase
                             if( !content ){
                                 return;
                             };
-                            
+
                             if (!me.animation && _.isNumber(content)) {
                                 content = numAddSymbol(content);
                             };
@@ -516,16 +516,14 @@ export default class BarGraphs extends GraphsBase
     setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-        this.enabledField = this.root._coordinate.getEnabledFields( this.field );
+        this.enabledField = this.root._coord.getEnabledFields( this.field );
     }
 
     _trimGraphs()
     {
         var me = this;
         var _xAxis = this._xAxis;
-        var xArr = _xAxis.layoutData;
-
-        var _coor = this.root._coordinate;
+        var _coord = this.root._coord;
 
         //用来计算下面的hLen
         this.setEnabledField();
@@ -574,7 +572,7 @@ export default class BarGraphs extends GraphsBase
         };
 
         //var tmpData = [];
-        var _yAxis = this.yAxisAlign == "left" ? _coor._yAxisLeft : _coor._yAxisRight;
+        var _yAxis = this.yAxisAlign == "left" ? _coord._yAxisLeft : _coord._yAxisRight;
 
         //然后计算出对于结构的dataOrg
         var dataOrg = this.root.dataFrame.getDataOrg( this.enabledField );
@@ -593,9 +591,6 @@ export default class BarGraphs extends GraphsBase
 
                 //vSectionData为具体的一个field对应的一组数据
                 _.each(vSectionData, function(val, i) {
-                    if (!xArr[i]) {
-                        return;
-                    };
 
                     var vCount = val;
                     if (me.proportion) {
@@ -605,8 +600,14 @@ export default class BarGraphs extends GraphsBase
                             vCount += team[i]
                         });
                     };
+
+                    var _x = _xAxis.getPosX( {
+                        ind : i,
+                        dataLen : me._dataLen,
+                        layoutType : _coord ? _coord.xAxis.layoutType : me.root._xAxis.layoutType
+                    } );
                     
-                    var x = xArr[i].x - ceilWidth / 2 + disLeft + (barW + barDis)*b;
+                    var x = _x - ceilWidth / 2 + disLeft + (barW + barDis)*b;
 
                     var y = 0;
                     if (me.proportion) {
@@ -667,11 +668,12 @@ export default class BarGraphs extends GraphsBase
                         width  : barW,
                         yBasePoint : _yAxis.basePoint,
                         isLeaf : true,
-                        xAxis  : {
-                            field: me._xAxis.field,
-                            value: xArr[i].value,
-                            layoutText: xArr[i].layoutText
-                        },
+                        xArr : _xAxis.getNodeInfoOfX( _x ),
+                        //xAxis  : {
+                        //    field: me._xAxis.field,
+                        //    value: xArr[i].value,
+                        //    layoutText: xArr[i].layoutText
+                        //},
                         nodeInd: i,
                         //rowData: this.root.dataFrame.getRowData( i );
                     };

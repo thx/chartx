@@ -16,8 +16,8 @@ export default class ScatGraphs extends GraphsBase
 
         this.node = {
             shapeType : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-            maxR      : 30,  //圆圈默认最大半径
-            minR      : 8,
+            maxR      : 25,  //圆圈默认最大半径
+            minR      : 5,
             r         : null,
             normalR   : 15,
             fillStyle : null,
@@ -111,17 +111,17 @@ export default class ScatGraphs extends GraphsBase
         var tmplData = [];
 
         var dataLen  = this.root.dataFrame.org.length - 1; //减去title fields行
-        var xField = this.root._coordinate._xAxis.field;
+        var xField = this.root._coord._xAxis.field;
 
         for( var i=0; i<dataLen; i++ ){
             
             var rowData = this.root.dataFrame.getRowData(i);
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
-            var xPos = this.root._coordinate._xAxis.getPosX({ val : xValue });
-            var yPos = this.root._coordinate._getYaxisOfField( this.field ).getYposFromVal( yValue );
+            var xPos = this.root._coord._xAxis.getPosX({ val : xValue });
+            var yPos = this.root._coord._getYaxisOfField( this.field ).getYposFromVal( yValue );
 
-            var fieldMap = this.root._coordinate.getFieldMapOf( this.field );
+            var fieldMap = this.root._coord.getFieldMapOf( this.field );
 
             var nodeLayoutData = {
                 rowData  : rowData,
@@ -407,7 +407,6 @@ export default class ScatGraphs extends GraphsBase
 
 
     focusAt( ind ){
-        debugger
         var nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || nodeData.focused ) return;
 
