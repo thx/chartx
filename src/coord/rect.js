@@ -1,14 +1,14 @@
-import CoordinateBase from "./index"
+import CoordBase from "./index"
 import Canvax from "canvax2d"
 import {parse2MatrixData} from "../utils/tools"
 import DataFrame from "../utils/dataframe"
-import CoordinateComponents from "../components/descartes/index"
+import CoordComponents from "../components/descartes/index"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
 
-export default class Descartes extends CoordinateBase
+export default class Descartes extends CoordBase
 {
     constructor( node, data, opts, graphsMap, componentsMap ){
 
@@ -151,7 +151,7 @@ export default class Descartes extends CoordinateBase
     {
         var me = this
         //首先是创建一个坐标系对象
-        this._coord = new CoordinateComponents( this.coord, this );
+        this._coord = new CoordComponents( this.coord, this );
         this.coordSprite.addChild( this._coord.sprite );
 
         _.each( this.graphs , function( graphs ){

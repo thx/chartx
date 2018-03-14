@@ -7,7 +7,7 @@ const _ = Canvax._;
  * 所有坐标系的基类，一些坐标系中复用的代码，沉淀在这里
  * 空坐标系，一些非直角坐标系，极坐标系的图表，就会直接创建一个空坐标系图表，然后添加组件
  */
-export default class Coordinate extends Chart
+export default class Coord extends Chart
 {
     constructor( node, data, opts, graphsMap, componentsMap )
     {

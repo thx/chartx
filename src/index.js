@@ -1,7 +1,7 @@
 //图表皮肤
 import theme from "./theme"
-
-//空坐标系
+//空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
+import emptyCoord from "./coord/index"
 
 //坐标系
 import Rect from "./coord/rect"
@@ -58,9 +58,11 @@ if( projectTheme && projectTheme.length ){
 var Chartx = {
     create : function( el, data, opts ){
         var chart = null;
+        var Coord = emptyCoord;
         if( opts.coord && opts.coord.type ){
-            chart = new coord[ opts.coord.type ]( el, data, opts, graphs, components );
+            Coord = coord[ opts.coord.type ];
         };
+        chart = new Coord( el, data, opts, graphs, components );
         chart && chart.draw();
         return chart;
     }

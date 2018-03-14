@@ -1,12 +1,12 @@
-import CoordinateBase from "./index"
+import CoordBase from "./index"
 import Canvax from "canvax2d"
 import {parse2MatrixData} from "../utils/tools"
 import DataFrame from "../utils/dataframe"
-import CoordinateComponents from "../components/polar/index"
+import CoordComponents from "../components/polar/index"
 
 const _ = Canvax._;
 
-export default class Polar extends CoordinateBase
+export default class Polar extends CoordBase
 {
     constructor( node, data, opts, graphsMap, componentsMap )
     {
@@ -58,7 +58,7 @@ export default class Polar extends CoordinateBase
     {
         var me = this
         //首先是创建一个坐标系对象
-        this._coord = new CoordinateComponents( this.coord, this );
+        this._coord = new CoordComponents( this.coord, this );
         this.coordSprite.addChild( this._coord.sprite );
 
         _.each( this.graphs , function( graphs ){
