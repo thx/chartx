@@ -8829,6 +8829,10 @@ var xAxis = function (_Component) {
                 if (layoutType == "peak") {
                     //柱状图的就是peak
                     var _ceilWidth = width / dataLen;
+                    if (this.posParseToInt) {
+                        _ceilWidth = parseInt(_ceilWidth);
+                    }
+
                     x = _ceilWidth * (ind + 1) - _ceilWidth / 2;
                 }
             }
@@ -12546,7 +12550,8 @@ var BarGraphs = function (_GraphsBase) {
             fillStyle: null,
             fillAlpha: 0.95,
             _count: 0, //总共有多少个bar
-            xDis: null
+            xDis: null,
+            filter: null
         };
 
         _this.text = {
@@ -12660,10 +12665,7 @@ var BarGraphs = function (_GraphsBase) {
                     iLay: v,
                     field: field,
                     value: value,
-                    xAxis: {
-                        field: this._xAxis.field,
-                        value: this._xAxis.layoutData[h].content
-                    }
+                    xAxis: this._xAxis.layoutData[h]
                 }]);
             }
 
@@ -12873,6 +12875,8 @@ var BarGraphs = function (_GraphsBase) {
 
                         rectEl.finalPos = finalPos;
                         rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                        me.node.filter && me.node.filter.apply(rectEl, [rectData, me]);
 
                         //叶子节点上面放置info
                         if (rectData.isLeaf && me.text.enabled) {
@@ -13181,7 +13185,7 @@ var BarGraphs = function (_GraphsBase) {
                             width: barW,
                             yBasePoint: _yAxis.basePoint,
                             isLeaf: true,
-                            xArr: _xAxis.getNodeInfoOfX(_x),
+                            xAxis: _xAxis.getNodeInfoOfX(_x),
                             //xAxis  : {
                             //    field: me._xAxis.field,
                             //    value: xArr[i].value,

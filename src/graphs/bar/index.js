@@ -33,7 +33,8 @@ export default class BarGraphs extends GraphsBase
             fillStyle : null,
             fillAlpha : 0.95,
             _count    : 0, //总共有多少个bar
-            xDis      : null
+            xDis      : null,
+            filter    : null
         };
 
         this.text = {
@@ -144,10 +145,7 @@ export default class BarGraphs extends GraphsBase
                 iLay: v,
                 field: field,
                 value: value,
-                xAxis: {
-                    field: this._xAxis.field,
-                    value: this._xAxis.layoutData[h].content
-                }
+                xAxis: this._xAxis.layoutData[h]
             }]);
         };
 
@@ -356,6 +354,8 @@ export default class BarGraphs extends GraphsBase
 
                     rectEl.finalPos = finalPos;
                     rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                    me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
 
                     //叶子节点上面放置info
                     if (rectData.isLeaf && me.text.enabled) {
@@ -668,7 +668,7 @@ export default class BarGraphs extends GraphsBase
                         width  : barW,
                         yBasePoint : _yAxis.basePoint,
                         isLeaf : true,
-                        xArr : _xAxis.getNodeInfoOfX( _x ),
+                        xAxis  : _xAxis.getNodeInfoOfX( _x ),
                         //xAxis  : {
                         //    field: me._xAxis.field,
                         //    value: xArr[i].value,

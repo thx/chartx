@@ -313,6 +313,10 @@ export default class xAxis extends Component
             if( layoutType == "peak" ){
                 //柱状图的就是peak
                 var _ceilWidth = width / dataLen;
+                if( this.posParseToInt ){
+                    _ceilWidth = parseInt( _ceilWidth );
+                };
+
                 x = _ceilWidth * (ind+1) - _ceilWidth/2;
             };
         };
