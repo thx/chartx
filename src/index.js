@@ -13,6 +13,7 @@ import Line from "./graphs/line/index"
 import Scat from "./graphs/scat/index"
 import Pie from "./graphs/pie/index"
 import Radar from "./graphs/radar/index"
+import Cloud from "./graphs/cloud/index"
 
 //components
 import Legend from "./components/legend/index"
@@ -29,11 +30,12 @@ var coord = {
 }
 
 var graphs = {
-    bar : Bar,
-    line : Line,
-    scat : Scat,
-    pie : Pie,
-    radar : Radar
+    bar   : Bar,
+    line  : Line,
+    scat  : Scat,
+    pie   : Pie,
+    radar : Radar,
+    cloud : Cloud
 }
 
 var components = {

@@ -2,15 +2,13 @@
 // Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
 
 
-
-
-
+import dispatch from "../utils/dispatch"
 
 var cloudRadians = Math.PI / 180,
     cw = 1 << 11 >> 5,
     ch = 1 << 11;
 
-module.exports = function() {
+var cloud = function() {
   var size = [256, 256],
       text = cloudText,
       font = cloudFont,
@@ -400,3 +398,6 @@ var spirals = {
   archimedean: archimedeanSpiral,
   rectangular: rectangularSpiral
 };
+
+
+export default cloud;

@@ -12,21 +12,23 @@ export default class Polar extends CoordBase
     {
         super( node, data, opts, graphsMap, componentsMap );
 
-        var me = this;
-
         //坐标系统
         this.CoordComponents = CoordComponents;
         this._coord = null;
+
+    }
+
+    //设置这个坐标系下面特有的 opts 默认值
+    //以及往this上面写部分默认数据
+    //在CoordBase中被调用
+    setDefaultOpts( opts )
+    {
+        var me = this;
         this.coord = {
             rAxis : {
                 field : []
             }
         };
-
-        _.extend(true, this, opts);
-
-        //强制把graphs设置为数组
-        this.graphs = _.flatten( [ this.graphs ] );
 
         //根据graphs.field 来 配置 this.coord.rAxis.field -------------------
         if( !_.isArray( this.coord.rAxis.field ) ){
@@ -35,7 +37,7 @@ export default class Polar extends CoordBase
         if( opts.graphs ){
             //有graphs的就要用找到这个graphs.field来设置coord.rAxis
             var arrs = [];
-            _.each( this.graphs, function( graphs ){
+            _.each( opts.graphs, function( graphs ){
                 if( graphs.field ){
                     //没有配置field的话就不绘制这个 graphs了
                     var _fs = graphs.field;
@@ -47,11 +49,9 @@ export default class Polar extends CoordBase
             } );
         };
         this.coord.rAxis.field = this.coord.rAxis.field.concat( arrs );
-        //----------------------------------------------------------------------
-        //这里不要直接用data，而要用 this._data
-        this.dataFrame = this.initData( this._data );
-    }
 
+        return opts
+    }
 
     _getLegendData()
     {

@@ -1,9 +1,7 @@
 import Canvax from "canvax2d"
 import GraphsBase from "../index"
+import cloudLayout from "../../layout/cloud"
 
-const Circle = Canvax.Shapes.Circle;
-const Rect = Canvax.Shapes.Rect;
-const Line = Canvax.Shapes.Line;
 const _ = Canvax._;
 
 export default class ScatGraphs extends GraphsBase
@@ -44,8 +42,9 @@ export default class ScatGraphs extends GraphsBase
         });
     }
 
-    draw()
+    draw( opts )
     {
+        cloudLayout
         debugger
     }
 

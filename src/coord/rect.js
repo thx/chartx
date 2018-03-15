@@ -14,11 +14,18 @@ export default class Descartes extends CoordBase
 
         super( node, data, opts, graphsMap, componentsMap );
 
-        var me = this;
-
         //坐标系统
         this.CoordComponents = CoordComponents;
         this._coord = null;
+
+    }
+
+    //设置这个坐标系下面特有的 opts 默认值
+    //以及往this上面写部分默认数据
+    //在CoordBase中被调用
+    setDefaultOpts( opts )
+    {
+        var me = this;
         this.coord = {
             xAxis : {
                 //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
@@ -29,7 +36,6 @@ export default class Descartes extends CoordBase
             }
         };
 
-        
         opts = _.clone( opts );
         if( opts.coord.yAxis ){
             var _nyarr = [];
@@ -45,7 +51,6 @@ export default class Descartes extends CoordBase
 
         //根据opt中得Graphs配置，来设置 coord.yAxis
         if( opts.graphs ){
-            opts.graphs = _.flatten( [ opts.graphs ] );
             //有graphs的就要用找到这个graphs.field来设置coord.yAxis
             _.each( opts.graphs, function( graphs ){
                 if( graphs.type == "bar" ){
@@ -108,10 +113,6 @@ export default class Descartes extends CoordBase
         } );
         opts.coord.yAxis = _lys.concat( _rys );
 
-        
-        //直角坐标系的绘图模块,是个数组，支持多模块
-        this._graphs = [];
-
         //预设dataZoom的区间数据
         this.dataZoom = {
             h: 25,
@@ -120,14 +121,8 @@ export default class Descartes extends CoordBase
                 end: this._data.length - 1 -1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
             }
         };
-
-        _.extend(true, this, opts);
-
-        //这里不要直接用data，而要用 this._data
-        this.dataFrame = this.initData( this._data );
-
-        //this.draw();
-        this._tipsPointer = null;
+        
+        return opts;
     }
 
     //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame

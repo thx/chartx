@@ -8020,13 +8020,31 @@ var Coord = function (_Chart) {
 
         _this.graphsMap = graphsMap;
         _this.componentsMap = componentsMap;
+
+        _this._graphs = [];
+        if (opts.graphs) {
+            opts.graphs = _.flatten([opts.graphs]);
+        }
+
+        _.extend(true, _this, _this.setDefaultOpts(opts));
+
+        //这里不要直接用data，而要用 this._data
+        _this.dataFrame = _this.initData(_this._data);
+
+        //this.draw();
+        _this._tipsPointer = null;
         return _this;
     }
 
-    //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
-
-
     createClass$1(Coord, [{
+        key: "setDefaultOpts",
+        value: function setDefaultOpts(opts) {
+            return opts;
+        }
+
+        //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
+
+    }, {
         key: "draw",
         value: function draw(opts) {
             this.initModule(opts); //初始化模块  
@@ -8065,7 +8083,7 @@ var Coord = function (_Chart) {
 
             var width = this.width - this.padding.left - this.padding.right;
             var height = this.height - this.padding.top - this.padding.bottom;
-            var origin = { x: 0, y: 0 };
+            var origin = { x: this.padding.left, y: this.padding.top };
 
             if (this._coord) {
                 //先绘制好坐标系统
@@ -10815,127 +10833,126 @@ var Descartes = function (_CoordBase) {
     function Descartes(node, data, opts, graphsMap, componentsMap) {
         classCallCheck$1(this, Descartes);
 
+        //坐标系统
         var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts, graphsMap, componentsMap));
 
-        var me = _this;
-
-        //坐标系统
         _this.CoordComponents = Descartes_Component;
         _this._coord = null;
-        _this.coord = {
-            xAxis: {
-                //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
-                layoutType: "rule", //"peak",  
-                //默认为false，x轴的计量是否需要取整， 这样 比如某些情况下得柱状图的柱子间隔才均匀。
-                //比如一像素间隔的柱状图，如果需要精确的绘制出来每个柱子的间距是1px， 就必须要把这里设置为true
-                posParseToInt: false
-            }
-        };
 
-        opts = _$5.clone(opts);
-        if (opts.coord.yAxis) {
-            var _nyarr = [];
-            //TODO: 因为我们的deep extend 对于数组是整个对象引用过去，所以，这里需要
-            //把每个子元素单独clone一遍，恩恩恩， 在canvax中优化extend对于array的处理
-            _$5.each(_$5.flatten([opts.coord.yAxis]), function (yopt) {
-                _nyarr.push(_$5.clone(yopt));
-            });
-            opts.coord.yAxis = _nyarr;
-        } else {
-            opts.coord.yAxis = [];
-        }
-
-        //根据opt中得Graphs配置，来设置 coord.yAxis
-        if (opts.graphs) {
-            opts.graphs = _$5.flatten([opts.graphs]);
-            //有graphs的就要用找到这个graphs.field来设置coord.yAxis
-            _$5.each(opts.graphs, function (graphs) {
-                if (graphs.type == "bar") {
-                    //如果graphs里面有柱状图，那么就整个xAxis都强制使用 peak 的layoutType
-                    me.coord.xAxis.layoutType = "peak";
-                }
-                if (graphs.field) {
-                    //没有配置field的话就不绘制这个 graphs了
-                    var align = "left"; //默认left
-                    if (graphs.yAxisAlign == "right") {
-                        align = "right";
-                    }
-
-                    var optsYaxisObj = null;
-                    optsYaxisObj = _$5.find(opts.coord.yAxis, function (obj, i) {
-                        return obj.align == align || !obj.align && i == (align == "left" ? 0 : 1);
-                    });
-
-                    if (!optsYaxisObj) {
-                        optsYaxisObj = {
-                            align: align,
-                            field: []
-                        };
-                        opts.coord.yAxis.push(optsYaxisObj);
-                    } else {
-                        if (!optsYaxisObj.align) {
-                            optsYaxisObj.align = align;
-                        }
-                    }
-
-                    if (!optsYaxisObj.field) {
-                        optsYaxisObj.field = [];
-                    } else {
-                        if (!_$5.isArray(optsYaxisObj.field)) {
-                            optsYaxisObj.field = [optsYaxisObj.field];
-                        }
-                    }
-
-                    if (_$5.isArray(graphs.field)) {
-                        optsYaxisObj.field = optsYaxisObj.field.concat(graphs.field);
-                    } else {
-                        optsYaxisObj.field.push(graphs.field);
-                    }
-                }
-            });
-        }
-        //再梳理一遍yAxis，get没有align的手动配置上align
-        //要手动把yAxis 按照 left , right的顺序做次排序
-        var _lys = [],
-            _rys = [];
-        _$5.each(opts.coord.yAxis, function (yAxis, i) {
-            if (!yAxis.align) {
-                yAxis.align = i ? "right" : "left";
-            }
-            if (yAxis.align == "left") {
-                _lys.push(yAxis);
-            } else {
-                _rys.push(yAxis);
-            }
-        });
-        opts.coord.yAxis = _lys.concat(_rys);
-
-        //直角坐标系的绘图模块,是个数组，支持多模块
-        _this._graphs = [];
-
-        //预设dataZoom的区间数据
-        _this.dataZoom = {
-            h: 25,
-            range: {
-                start: 0,
-                end: _this._data.length - 1 - 1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
-            }
-        };
-
-        _$5.extend(true, _this, opts);
-
-        //这里不要直接用data，而要用 this._data
-        _this.dataFrame = _this.initData(_this._data);
-
-        //this.draw();
-        _this._tipsPointer = null;
         return _this;
     }
 
-    //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
+    //设置这个坐标系下面特有的 opts 默认值
+    //以及往this上面写部分默认数据
+    //在CoordBase中被调用
 
 
     createClass$1(Descartes, [{
+        key: "setDefaultOpts",
+        value: function setDefaultOpts(opts) {
+            var me = this;
+            this.coord = {
+                xAxis: {
+                    //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
+                    layoutType: "rule", //"peak",  
+                    //默认为false，x轴的计量是否需要取整， 这样 比如某些情况下得柱状图的柱子间隔才均匀。
+                    //比如一像素间隔的柱状图，如果需要精确的绘制出来每个柱子的间距是1px， 就必须要把这里设置为true
+                    posParseToInt: false
+                }
+            };
+
+            opts = _$5.clone(opts);
+            if (opts.coord.yAxis) {
+                var _nyarr = [];
+                //TODO: 因为我们的deep extend 对于数组是整个对象引用过去，所以，这里需要
+                //把每个子元素单独clone一遍，恩恩恩， 在canvax中优化extend对于array的处理
+                _$5.each(_$5.flatten([opts.coord.yAxis]), function (yopt) {
+                    _nyarr.push(_$5.clone(yopt));
+                });
+                opts.coord.yAxis = _nyarr;
+            } else {
+                opts.coord.yAxis = [];
+            }
+
+            //根据opt中得Graphs配置，来设置 coord.yAxis
+            if (opts.graphs) {
+                //有graphs的就要用找到这个graphs.field来设置coord.yAxis
+                _$5.each(opts.graphs, function (graphs) {
+                    if (graphs.type == "bar") {
+                        //如果graphs里面有柱状图，那么就整个xAxis都强制使用 peak 的layoutType
+                        me.coord.xAxis.layoutType = "peak";
+                    }
+                    if (graphs.field) {
+                        //没有配置field的话就不绘制这个 graphs了
+                        var align = "left"; //默认left
+                        if (graphs.yAxisAlign == "right") {
+                            align = "right";
+                        }
+
+                        var optsYaxisObj = null;
+                        optsYaxisObj = _$5.find(opts.coord.yAxis, function (obj, i) {
+                            return obj.align == align || !obj.align && i == (align == "left" ? 0 : 1);
+                        });
+
+                        if (!optsYaxisObj) {
+                            optsYaxisObj = {
+                                align: align,
+                                field: []
+                            };
+                            opts.coord.yAxis.push(optsYaxisObj);
+                        } else {
+                            if (!optsYaxisObj.align) {
+                                optsYaxisObj.align = align;
+                            }
+                        }
+
+                        if (!optsYaxisObj.field) {
+                            optsYaxisObj.field = [];
+                        } else {
+                            if (!_$5.isArray(optsYaxisObj.field)) {
+                                optsYaxisObj.field = [optsYaxisObj.field];
+                            }
+                        }
+
+                        if (_$5.isArray(graphs.field)) {
+                            optsYaxisObj.field = optsYaxisObj.field.concat(graphs.field);
+                        } else {
+                            optsYaxisObj.field.push(graphs.field);
+                        }
+                    }
+                });
+            }
+            //再梳理一遍yAxis，get没有align的手动配置上align
+            //要手动把yAxis 按照 left , right的顺序做次排序
+            var _lys = [],
+                _rys = [];
+            _$5.each(opts.coord.yAxis, function (yAxis, i) {
+                if (!yAxis.align) {
+                    yAxis.align = i ? "right" : "left";
+                }
+                if (yAxis.align == "left") {
+                    _lys.push(yAxis);
+                } else {
+                    _rys.push(yAxis);
+                }
+            });
+            opts.coord.yAxis = _lys.concat(_rys);
+
+            //预设dataZoom的区间数据
+            this.dataZoom = {
+                h: 25,
+                range: {
+                    start: 0,
+                    end: this._data.length - 1 - 1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
+                }
+            };
+
+            return opts;
+        }
+
+        //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
+
+    }, {
         key: "_resetData",
         value: function _resetData(dataTrigger) {
             var me = this;
@@ -12318,50 +12335,53 @@ var Polar = function (_CoordBase) {
     function Polar(node, data, opts, graphsMap, componentsMap) {
         classCallCheck$1(this, Polar);
 
+        //坐标系统
         var _this = possibleConstructorReturn$1(this, (Polar.__proto__ || Object.getPrototypeOf(Polar)).call(this, node, data, opts, graphsMap, componentsMap));
 
-        var me = _this;
-
-        //坐标系统
         _this.CoordComponents = polarComponent;
         _this._coord = null;
-        _this.coord = {
-            rAxis: {
-                field: []
-            }
-        };
 
-        _$12.extend(true, _this, opts);
-
-        //强制把graphs设置为数组
-        _this.graphs = _$12.flatten([_this.graphs]);
-
-        //根据graphs.field 来 配置 this.coord.rAxis.field -------------------
-        if (!_$12.isArray(_this.coord.rAxis.field)) {
-            _this.coord.rAxis.field = [_this.coord.rAxis.field];
-        }
-        if (opts.graphs) {
-            //有graphs的就要用找到这个graphs.field来设置coord.rAxis
-            var arrs = [];
-            _$12.each(_this.graphs, function (graphs) {
-                if (graphs.field) {
-                    //没有配置field的话就不绘制这个 graphs了
-                    var _fs = graphs.field;
-                    if (!_$12.isArray(_fs)) {
-                        _fs = [_fs];
-                    }
-                    arrs = arrs.concat(_fs);
-                }
-            });
-        }
-        _this.coord.rAxis.field = _this.coord.rAxis.field.concat(arrs);
-        //----------------------------------------------------------------------
-        //这里不要直接用data，而要用 this._data
-        _this.dataFrame = _this.initData(_this._data);
         return _this;
     }
 
+    //设置这个坐标系下面特有的 opts 默认值
+    //以及往this上面写部分默认数据
+    //在CoordBase中被调用
+
+
     createClass$1(Polar, [{
+        key: "setDefaultOpts",
+        value: function setDefaultOpts(opts) {
+            var me = this;
+            this.coord = {
+                rAxis: {
+                    field: []
+                }
+            };
+
+            //根据graphs.field 来 配置 this.coord.rAxis.field -------------------
+            if (!_$12.isArray(this.coord.rAxis.field)) {
+                this.coord.rAxis.field = [this.coord.rAxis.field];
+            }
+            if (opts.graphs) {
+                //有graphs的就要用找到这个graphs.field来设置coord.rAxis
+                var arrs = [];
+                _$12.each(opts.graphs, function (graphs) {
+                    if (graphs.field) {
+                        //没有配置field的话就不绘制这个 graphs了
+                        var _fs = graphs.field;
+                        if (!_$12.isArray(_fs)) {
+                            _fs = [_fs];
+                        }
+                        arrs = arrs.concat(_fs);
+                    }
+                });
+            }
+            this.coord.rAxis.field = this.coord.rAxis.field.concat(arrs);
+
+            return opts;
+        }
+    }, {
         key: "_getLegendData",
         value: function _getLegendData() {
             var legendData = [
@@ -16323,8 +16343,569 @@ var RadarGraphs = function (_GraphsBase) {
     return RadarGraphs;
 }(GraphsBase);
 
-var Circle$5 = canvax.Shapes.Circle;
+/*
+* Dispatch
+*/
+function Dispatch(types) {
+    var i = -1,
+        n = types.length,
+        callbacksByType = {},
+        callbackByName = {},
+        type,
+        that = this;
+
+    that.on = function (type, callback) {
+        type = parseType(type);
+
+        // Return the current callback, if any.
+        if (arguments.length < 2) {
+            return (callback = callbackByName[type.name]) && callback.value;
+        }
+
+        // If a type was specified…
+        if (type.type) {
+            var callbacks = callbacksByType[type.type],
+                callback0 = callbackByName[type.name],
+                i;
+
+            // Remove the current callback, if any, using copy-on-remove.
+            if (callback0) {
+                callback0.value = null;
+                i = callbacks.indexOf(callback0);
+                callbacksByType[type.type] = callbacks = callbacks.slice(0, i).concat(callbacks.slice(i + 1));
+                delete callbackByName[type.name];
+            }
+
+            // Add the new callback, if any.
+            if (callback) {
+                callback = {
+                    value: callback
+                };
+                callbackByName[type.name] = callback;
+                callbacks.push(callback);
+            }
+        }
+
+        // Otherwise, if a null callback was specified, remove all callbacks with the given name.
+        else if (callback == null) {
+                for (var otherType in callbacksByType) {
+                    if (callback = callbackByName[otherType + type.name]) {
+                        callback.value = null;
+                        var callbacks = callbacksByType[otherType],
+                            i = callbacks.indexOf(callback);
+                        callbacksByType[otherType] = callbacks.slice(0, i).concat(callbacks.slice(i + 1));
+                        delete callbackByName[callback.name];
+                    }
+                }
+            }
+
+        return that;
+    };
+
+    while (++i < n) {
+        type = types[i] + "";
+        if (!type || type in that) throw new Error("illegal or duplicate type: " + type);
+        callbacksByType[type] = [];
+        that[type] = applier(type);
+    }
+
+    function parseType(type) {
+        var i = (type += "").indexOf("."),
+            name = type;
+        if (i >= 0) type = type.slice(0, i);else name += ".";
+        if (type && !callbacksByType.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+        return {
+            type: type,
+            name: name
+        };
+    }
+
+    function applier(type) {
+        return function () {
+            var callbacks = callbacksByType[type],
+                // Defensive reference; copy-on-remove.
+            callback,
+                callbackValue,
+                i = -1,
+                n = callbacks.length;
+
+            while (++i < n) {
+                if (callbackValue = (callback = callbacks[i]).value) {
+                    callbackValue.apply(this, arguments);
+                }
+            }
+
+            return that;
+        };
+    }
+}
+
+function dispatch() {
+    return new Dispatch(arguments);
+}
+
+dispatch.prototype = Dispatch.prototype; // allow instanceof
+
+// Word cloud layout by Jason Davies, https://www.jasondavies.com/wordcloud/
+// Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
+
+
+var cloudRadians = Math.PI / 180;
+var cw = 1 << 11 >> 5;
+var ch = 1 << 11;
+
+var cloud = function cloud() {
+  var size = [256, 256],
+      text = cloudText,
+      font = cloudFont,
+      fontSize = cloudFontSize,
+      fontStyle = cloudFontNormal,
+      fontWeight = cloudFontNormal,
+      rotate = cloudRotate,
+      padding = cloudPadding,
+      spiral = archimedeanSpiral,
+      words = [],
+      timeInterval = Infinity,
+      event = dispatch("word", "end"),
+      timer = null,
+      random = Math.random,
+      cloud = {},
+      canvas = cloudCanvas;
+
+  cloud.canvas = function (_) {
+    return arguments.length ? (canvas = functor(_), cloud) : canvas;
+  };
+
+  cloud.start = function () {
+    var contextAndRatio = getContext(canvas()),
+        board = zeroArray((size[0] >> 5) * size[1]),
+        bounds = null,
+        n = words.length,
+        i = -1,
+        tags = [],
+        data = words.map(function (d, i) {
+      d.text = text.call(this, d, i);
+      d.font = font.call(this, d, i);
+      d.style = fontStyle.call(this, d, i);
+      d.weight = fontWeight.call(this, d, i);
+      d.rotate = rotate.call(this, d, i);
+      d.size = ~~fontSize.call(this, d, i);
+      d.padding = padding.call(this, d, i);
+      return d;
+    }).sort(function (a, b) {
+      return b.size - a.size;
+    });
+
+    if (timer) clearInterval(timer);
+    timer = setInterval(step, 0);
+    step();
+
+    return cloud;
+
+    function step() {
+      var start = Date.now();
+      while (Date.now() - start < timeInterval && ++i < n && timer) {
+        var d = data[i];
+        d.x = size[0] * (random() + .5) >> 1;
+        d.y = size[1] * (random() + .5) >> 1;
+        cloudSprite(contextAndRatio, d, data, i);
+        if (d.hasText && place(board, d, bounds)) {
+          tags.push(d);
+          event.call("word", cloud, d);
+          if (bounds) cloudBounds(bounds, d);else bounds = [{ x: d.x + d.x0, y: d.y + d.y0 }, { x: d.x + d.x1, y: d.y + d.y1 }];
+          // Temporary hack
+          d.x -= size[0] >> 1;
+          d.y -= size[1] >> 1;
+        }
+      }
+      if (i >= n) {
+        cloud.stop();
+        event.call("end", cloud, tags, bounds);
+      }
+    }
+  };
+
+  cloud.stop = function () {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    return cloud;
+  };
+
+  function getContext(canvas) {
+    canvas.width = canvas.height = 1;
+    var ratio = Math.sqrt(canvas.getContext("2d").getImageData(0, 0, 1, 1).data.length >> 2);
+    canvas.width = (cw << 5) / ratio;
+    canvas.height = ch / ratio;
+
+    var context = canvas.getContext("2d");
+    context.fillStyle = context.strokeStyle = "red";
+    context.textAlign = "center";
+
+    return { context: context, ratio: ratio };
+  }
+
+  function place(board, tag, bounds) {
+    var perimeter = [{ x: 0, y: 0 }, { x: size[0], y: size[1] }],
+        startX = tag.x,
+        startY = tag.y,
+        maxDelta = Math.sqrt(size[0] * size[0] + size[1] * size[1]),
+        s = spiral(size),
+        dt = random() < .5 ? 1 : -1,
+        t = -dt,
+        dxdy,
+        dx,
+        dy;
+
+    while (dxdy = s(t += dt)) {
+      dx = ~~dxdy[0];
+      dy = ~~dxdy[1];
+
+      if (Math.min(Math.abs(dx), Math.abs(dy)) >= maxDelta) break;
+
+      tag.x = startX + dx;
+      tag.y = startY + dy;
+
+      if (tag.x + tag.x0 < 0 || tag.y + tag.y0 < 0 || tag.x + tag.x1 > size[0] || tag.y + tag.y1 > size[1]) continue;
+      // TODO only check for collisions within current bounds.
+      if (!bounds || !cloudCollide(tag, board, size[0])) {
+        if (!bounds || collideRects(tag, bounds)) {
+          var sprite = tag.sprite,
+              w = tag.width >> 5,
+              sw = size[0] >> 5,
+              lx = tag.x - (w << 4),
+              sx = lx & 0x7f,
+              msx = 32 - sx,
+              h = tag.y1 - tag.y0,
+              x = (tag.y + tag.y0) * sw + (lx >> 5),
+              last;
+          for (var j = 0; j < h; j++) {
+            last = 0;
+            for (var i = 0; i <= w; i++) {
+              board[x + i] |= last << msx | (i < w ? (last = sprite[j * w + i]) >>> sx : 0);
+            }
+            x += sw;
+          }
+          delete tag.sprite;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  cloud.timeInterval = function (_) {
+    return arguments.length ? (timeInterval = _ == null ? Infinity : _, cloud) : timeInterval;
+  };
+
+  cloud.words = function (_) {
+    return arguments.length ? (words = _, cloud) : words;
+  };
+
+  cloud.size = function (_) {
+    return arguments.length ? (size = [+_[0], +_[1]], cloud) : size;
+  };
+
+  cloud.font = function (_) {
+    return arguments.length ? (font = functor(_), cloud) : font;
+  };
+
+  cloud.fontStyle = function (_) {
+    return arguments.length ? (fontStyle = functor(_), cloud) : fontStyle;
+  };
+
+  cloud.fontWeight = function (_) {
+    return arguments.length ? (fontWeight = functor(_), cloud) : fontWeight;
+  };
+
+  cloud.rotate = function (_) {
+    return arguments.length ? (rotate = functor(_), cloud) : rotate;
+  };
+
+  cloud.text = function (_) {
+    return arguments.length ? (text = functor(_), cloud) : text;
+  };
+
+  cloud.spiral = function (_) {
+    return arguments.length ? (spiral = spirals[_] || _, cloud) : spiral;
+  };
+
+  cloud.fontSize = function (_) {
+    return arguments.length ? (fontSize = functor(_), cloud) : fontSize;
+  };
+
+  cloud.padding = function (_) {
+    return arguments.length ? (padding = functor(_), cloud) : padding;
+  };
+
+  cloud.random = function (_) {
+    return arguments.length ? (random = _, cloud) : random;
+  };
+
+  cloud.on = function () {
+    var value = event.on.apply(event, arguments);
+    return value === event ? cloud : value;
+  };
+
+  return cloud;
+};
+
+function cloudText(d) {
+  return d.text;
+}
+
+function cloudFont() {
+  return "serif";
+}
+
+function cloudFontNormal() {
+  return "normal";
+}
+
+function cloudFontSize(d) {
+  return Math.sqrt(d.value);
+}
+
+function cloudRotate() {
+  return (~~(Math.random() * 6) - 3) * 30;
+}
+
+function cloudPadding() {
+  return 1;
+}
+
+// Fetches a monochrome sprite bitmap for the specified text.
+// Load in batches for speed.
+function cloudSprite(contextAndRatio, d, data, di) {
+  if (d.sprite) return;
+  var c = contextAndRatio.context,
+      ratio = contextAndRatio.ratio;
+
+  c.clearRect(0, 0, (cw << 5) / ratio, ch / ratio);
+  var x = 0,
+      y = 0,
+      maxh = 0,
+      n = data.length;
+  --di;
+  while (++di < n) {
+    d = data[di];
+    c.save();
+    c.font = d.style + " " + d.weight + " " + ~~((d.size + 1) / ratio) + "px " + d.font;
+    var w = c.measureText(d.text + "m").width * ratio,
+        h = d.size << 1;
+    if (d.rotate) {
+      var sr = Math.sin(d.rotate * cloudRadians),
+          cr = Math.cos(d.rotate * cloudRadians),
+          wcr = w * cr,
+          wsr = w * sr,
+          hcr = h * cr,
+          hsr = h * sr;
+      w = Math.max(Math.abs(wcr + hsr), Math.abs(wcr - hsr)) + 0x1f >> 5 << 5;
+      h = ~~Math.max(Math.abs(wsr + hcr), Math.abs(wsr - hcr));
+    } else {
+      w = w + 0x1f >> 5 << 5;
+    }
+    if (h > maxh) maxh = h;
+    if (x + w >= cw << 5) {
+      x = 0;
+      y += maxh;
+      maxh = 0;
+    }
+    if (y + h >= ch) break;
+    c.translate((x + (w >> 1)) / ratio, (y + (h >> 1)) / ratio);
+    if (d.rotate) c.rotate(d.rotate * cloudRadians);
+    c.fillText(d.text, 0, 0);
+    if (d.padding) c.lineWidth = 2 * d.padding, c.strokeText(d.text, 0, 0);
+    c.restore();
+    d.width = w;
+    d.height = h;
+    d.xoff = x;
+    d.yoff = y;
+    d.x1 = w >> 1;
+    d.y1 = h >> 1;
+    d.x0 = -d.x1;
+    d.y0 = -d.y1;
+    d.hasText = true;
+    x += w;
+  }
+  var pixels = c.getImageData(0, 0, (cw << 5) / ratio, ch / ratio).data,
+      sprite = [];
+  while (--di >= 0) {
+    d = data[di];
+    if (!d.hasText) continue;
+    var w = d.width,
+        w32 = w >> 5,
+        h = d.y1 - d.y0;
+    // Zero the buffer
+    for (var i = 0; i < h * w32; i++) {
+      sprite[i] = 0;
+    }x = d.xoff;
+    if (x == null) return;
+    y = d.yoff;
+    var seen = 0,
+        seenRow = -1;
+    for (var j = 0; j < h; j++) {
+      for (var i = 0; i < w; i++) {
+        var k = w32 * j + (i >> 5),
+            m = pixels[(y + j) * (cw << 5) + (x + i) << 2] ? 1 << 31 - i % 32 : 0;
+        sprite[k] |= m;
+        seen |= m;
+      }
+      if (seen) seenRow = j;else {
+        d.y0++;
+        h--;
+        j--;
+        y++;
+      }
+    }
+    d.y1 = d.y0 + seenRow;
+    d.sprite = sprite.slice(0, (d.y1 - d.y0) * w32);
+  }
+}
+
+// Use mask-based collision detection.
+function cloudCollide(tag, board, sw) {
+  sw >>= 5;
+  var sprite = tag.sprite,
+      w = tag.width >> 5,
+      lx = tag.x - (w << 4),
+      sx = lx & 0x7f,
+      msx = 32 - sx,
+      h = tag.y1 - tag.y0,
+      x = (tag.y + tag.y0) * sw + (lx >> 5),
+      last;
+  for (var j = 0; j < h; j++) {
+    last = 0;
+    for (var i = 0; i <= w; i++) {
+      if ((last << msx | (i < w ? (last = sprite[j * w + i]) >>> sx : 0)) & board[x + i]) return true;
+    }
+    x += sw;
+  }
+  return false;
+}
+
+function cloudBounds(bounds, d) {
+  var b0 = bounds[0],
+      b1 = bounds[1];
+  if (d.x + d.x0 < b0.x) b0.x = d.x + d.x0;
+  if (d.y + d.y0 < b0.y) b0.y = d.y + d.y0;
+  if (d.x + d.x1 > b1.x) b1.x = d.x + d.x1;
+  if (d.y + d.y1 > b1.y) b1.y = d.y + d.y1;
+}
+
+function collideRects(a, b) {
+  return a.x + a.x1 > b[0].x && a.x + a.x0 < b[1].x && a.y + a.y1 > b[0].y && a.y + a.y0 < b[1].y;
+}
+
+function archimedeanSpiral(size) {
+  var e = size[0] / size[1];
+  return function (t) {
+    return [e * (t *= .1) * Math.cos(t), t * Math.sin(t)];
+  };
+}
+
+function rectangularSpiral(size) {
+  var dy = 4,
+      dx = dy * size[0] / size[1],
+      x = 0,
+      y = 0;
+  return function (t) {
+    var sign = t < 0 ? -1 : 1;
+    // See triangular numbers: T_n = n * (n + 1) / 2.
+    switch (Math.sqrt(1 + 4 * sign * t) - sign & 3) {
+      case 0:
+        x += dx;break;
+      case 1:
+        y += dy;break;
+      case 2:
+        x -= dx;break;
+      default:
+        y -= dy;break;
+    }
+    return [x, y];
+  };
+}
+
+// TODO reuse arrays?
+function zeroArray(n) {
+  var a = [],
+      i = -1;
+  while (++i < n) {
+    a[i] = 0;
+  }return a;
+}
+
+function cloudCanvas() {
+  return document.createElement("canvas");
+}
+
+function functor(d) {
+  return typeof d === "function" ? d : function () {
+    return d;
+  };
+}
+
+var spirals = {
+  archimedean: archimedeanSpiral,
+  rectangular: rectangularSpiral
+};
+
 var _$23 = canvax._;
+
+var ScatGraphs$1 = function (_GraphsBase) {
+    inherits$1(ScatGraphs, _GraphsBase);
+
+    function ScatGraphs(opts, root) {
+        classCallCheck$1(this, ScatGraphs);
+
+        var _this = possibleConstructorReturn$1(this, (ScatGraphs.__proto__ || Object.getPrototypeOf(ScatGraphs)).call(this, opts, root));
+
+        _this.type = "cloud";
+
+        _this.node = {
+            shapeType: "text", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
+            fontColor: "#ccc",
+            fontSize: 18,
+            focus: {
+                enabled: true,
+                lineWidth: 6,
+                lineAlpha: 0.2,
+                fillAlpha: 0.8
+            },
+            select: {
+                enabled: true,
+                lineWidth: 8,
+                lineAlpha: 0.4,
+                fillAlpha: 1
+            }
+        };
+
+        _$23.extend(true, _this, opts);
+
+        _this.init();
+        return _this;
+    }
+
+    createClass$1(ScatGraphs, [{
+        key: "init",
+        value: function init() {
+            this.sprite = new canvax.Display.Sprite({
+                id: "graphsEl"
+            });
+        }
+    }, {
+        key: "draw",
+        value: function draw(opts) {
+            cloud;
+            debugger;
+        }
+    }]);
+    return ScatGraphs;
+}(GraphsBase);
+
+var Circle$5 = canvax.Shapes.Circle;
+var _$24 = canvax._;
 
 var Legend = function (_Component) {
     inherits$1(Legend, _Component);
@@ -16379,7 +16960,7 @@ var Legend = function (_Component) {
         key: "init",
         value: function init(tops) {
             if (tops) {
-                _$23.extend(true, this, tops);
+                _$24.extend(true, this, tops);
             }
 
             if (this.position == "left" || this.position == "right") {
@@ -16423,7 +17004,7 @@ var Legend = function (_Component) {
                 y = 0;
             var rows = 1;
 
-            _$23.each(this.data, function (obj, i) {
+            _$24.each(this.data, function (obj, i) {
 
                 var icon = new Circle$5({
                     id: "legend_field_icon_" + i,
@@ -16512,7 +17093,7 @@ var Legend = function (_Component) {
                 sprite.on("click", function (e) {
 
                     //只有一个field的时候，不支持取消
-                    if (_$23.filter(me.data, function (obj) {
+                    if (_$24.filter(me.data, function (obj) {
                         return obj.enabled;
                     }).length == 1) {
                         if (obj.enabled) {
@@ -16560,7 +17141,7 @@ var Legend = function (_Component) {
 
 var Line$8 = canvax.Shapes.Line;
 var Rect$10 = canvax.Shapes.Rect;
-var _$24 = canvax._;
+var _$25 = canvax._;
 
 var dataZoom = function (_Component) {
     inherits$1(dataZoom, _Component);
@@ -16633,7 +17214,7 @@ var dataZoom = function (_Component) {
 
         _this.zoomBg = null;
 
-        opt && _$24.extend(true, _this, opt);
+        opt && _$25.extend(true, _this, opt);
         _this._computeAttrs(opt);
         _this.init(opt);
         return _this;
@@ -16684,7 +17265,7 @@ var dataZoom = function (_Component) {
             var _preStart = this.range.start;
             var _preEnd = this.range.end;
 
-            opt && _$24.extend(true, this, opt);
+            opt && _$25.extend(true, this, opt);
             this._cloneChart = cloneChart;
             this._computeAttrs(opt);
 
@@ -17087,7 +17668,7 @@ var dataZoom = function (_Component) {
 var BrokenLine$3 = canvax.Shapes.BrokenLine;
 var Sprite$1 = canvax.Display.Sprite;
 var Text$1 = canvax.Display.Text;
-var _$25 = canvax._;
+var _$26 = canvax._;
 
 var MarkLine = function (_Component) {
     inherits$1(MarkLine, _Component);
@@ -17129,7 +17710,7 @@ var MarkLine = function (_Component) {
         _this._txt = null;
         _this._line = null;
 
-        opt && _$25.extend(true, _this, opt);
+        opt && _$26.extend(true, _this, opt);
 
         _this.init();
         return _this;
@@ -17157,7 +17738,7 @@ var MarkLine = function (_Component) {
         key: "_getYVal",
         value: function _getYVal() {
             var y = this.yVal;
-            if (_$25.isFunction(this.yVal)) {
+            if (_$26.isFunction(this.yVal)) {
                 y = this.yVal(this);
             }
 
@@ -17171,13 +17752,13 @@ var MarkLine = function (_Component) {
     }, {
         key: "_getLabel",
         value: function _getLabel() {
-            if (_$25.isString(this.text.content)) {
+            if (_$26.isString(this.text.content)) {
                 return this.text.content;
             }
 
             var yVal = this._getYVal();
             var label = "markline：" + yVal;
-            if (_$25.isFunction(this.text.content)) {
+            if (_$26.isFunction(this.text.content)) {
                 label = this.text.content.apply(this, [yVal]);
             }
             return label;
@@ -17217,7 +17798,7 @@ var MarkLine = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            opt && _$25.extend(true, this, opt);
+            opt && _$26.extend(true, this, opt);
 
             var me = this;
             var y = this._getYPos();
@@ -17246,12 +17827,12 @@ var MarkLine = function (_Component) {
         value: function _setTxtPos(y) {
             var me = this;
             var txt = me._txt;
-            if (_$25.isNumber(me.text.x)) {
+            if (_$26.isNumber(me.text.x)) {
                 txt.context.x = me.text.x;
             } else {
                 txt.context.x = this.w - txt.getTextWidth() - 5;
             }
-            if (_$25.isNumber(me.text.y)) {
+            if (_$26.isNumber(me.text.y)) {
                 txt.context.y = me.text.y;
             } else {
                 txt.context.y = y - txt.getTextHeight();
@@ -17263,7 +17844,7 @@ var MarkLine = function (_Component) {
 
 var Circle$6 = canvax.Shapes.Circle;
 var Droplet$1 = canvax.Shapes.Droplet;
-var _$26 = canvax._;
+var _$27 = canvax._;
 
 var MarkPoint = function (_Component) {
     inherits$1(MarkPoint, _Component);
@@ -17306,9 +17887,9 @@ var MarkPoint = function (_Component) {
         _this.filter = function () {}; //过滤函数
 
         if ("markPoint" in userOpts) {
-            _$26.extend(true, _this, userOpts.markPoint);
+            _$27.extend(true, _this, userOpts.markPoint);
         }
-        chartOpts && _$26.extend(true, _this, chartOpts);
+        chartOpts && _$27.extend(true, _this, chartOpts);
 
         _this.init();
         return _this;
@@ -17353,7 +17934,7 @@ var MarkPoint = function (_Component) {
         key: "_getColor",
         value: function _getColor(c, data, normalColor) {
             var color = c;
-            if (_$26.isFunction(c)) {
+            if (_$27.isFunction(c)) {
                 color = c(data);
             }
             //缺省颜色
@@ -17373,7 +17954,7 @@ var MarkPoint = function (_Component) {
             this.shape.context.visible = true;
             this.shapeBg && (this.shapeBg.context.visible = true);
             this.shapeCircle && (this.shapeCircle.context.visible = true);
-            _$26.isFunction(this.filter) && this.filter(this);
+            _$27.isFunction(this.filter) && this.filter(this);
         }
     }, {
         key: "_initCircleMark",
@@ -17453,7 +18034,7 @@ var MarkPoint = function (_Component) {
 
 var Line$9 = canvax.Shapes.Line;
 var Circle$7 = canvax.Shapes.Circle;
-var _$27 = canvax._;
+var _$28 = canvax._;
 
 var Anchor = function (_Component) {
     inherits$1(Anchor, _Component);
@@ -17512,7 +18093,7 @@ var Anchor = function (_Component) {
         key: "init",
         value: function init(opt) {
             if (opt) {
-                _$27.extend(true, this, opt);
+                _$28.extend(true, this, opt);
             }
 
             this.sprite = new canvax.Display.Sprite({
@@ -17554,7 +18135,7 @@ var Anchor = function (_Component) {
         key: "_initConfig",
         value: function _initConfig(opt) {
             if (opt) {
-                _$27.extend(true, this, opt);
+                _$28.extend(true, this, opt);
             }
         }
 
@@ -17668,7 +18249,7 @@ var Anchor = function (_Component) {
     }, {
         key: "_getProp",
         value: function _getProp(s) {
-            if (_$27.isFunction(s)) {
+            if (_$28.isFunction(s)) {
                 return s();
             }
             return s;
@@ -17677,7 +18258,7 @@ var Anchor = function (_Component) {
     return Anchor;
 }(component);
 
-var _$28 = canvax._;
+var _$29 = canvax._;
 
 var Tips = function (_Component) {
     inherits$1(Tips, _Component);
@@ -17729,7 +18310,7 @@ var Tips = function (_Component) {
     createClass$1(Tips, [{
         key: "init",
         value: function init(opt) {
-            _$28.extend(true, this, opt);
+            _$29.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite({
                 id: "TipSprite"
             });
@@ -17836,7 +18417,7 @@ var Tips = function (_Component) {
             var tipsContent;
 
             if (this.content) {
-                tipsContent = _$28.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
+                tipsContent = _$29.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
             } else {
                 tipsContent = this._getDefaultContent(this.eventInfo);
             }
@@ -17857,7 +18438,7 @@ var Tips = function (_Component) {
                 str += "<tr><td colspan='2'>" + info.title + "</td></tr>";
             }
 
-            _$28.each(info.nodes, function (node, i) {
+            _$29.each(info.nodes, function (node, i) {
                 if (node.value === undefined || node.value === null) {
                     return;
                 }
@@ -17915,7 +18496,7 @@ var Tips = function (_Component) {
 }(component);
 
 var Line$10 = canvax.Shapes.Line;
-var _$29 = canvax._;
+var _$30 = canvax._;
 
 var barTgi = function (_Component) {
     inherits$1(barTgi, _Component);
@@ -17962,7 +18543,7 @@ var barTgi = function (_Component) {
     createClass$1(barTgi, [{
         key: "init",
         value: function init(opt) {
-            _$29.extend(true, this, opt);
+            _$30.extend(true, this, opt);
             this._yAxis = this.root._coord._yAxis[this.yAxisAlign == "left" ? 0 : 1];
             this.sprite = new canvax.Display.Sprite({
                 id: "barTgiSprite",
@@ -17975,7 +18556,7 @@ var barTgi = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            _$29.extend(true, this, opt);
+            _$30.extend(true, this, opt);
             this.barDatas = null;
             this.data = null;
             this.sprite.removeAllChildren();
@@ -17986,19 +18567,19 @@ var barTgi = function (_Component) {
         value: function draw() {
             var me = this;
 
-            _$29.each(me.root._graphs, function (_g) {
+            _$30.each(me.root._graphs, function (_g) {
                 if (_g.type == "bar" && _g.data[me.barField]) {
                     me.barDatas = _g.data[me.barField];
                     return false;
                 }
             });
-            this.data = _$29.flatten(me.root.dataFrame.getDataOrg(me.field));
+            this.data = _$30.flatten(me.root.dataFrame.getDataOrg(me.field));
 
             if (!this.barDatas) {
                 return;
             }
 
-            _$29.each(this.data, function (tgi, i) {
+            _$30.each(this.data, function (tgi, i) {
                 var y = me._yAxis.getYposFromVal(tgi);
                 var barData = me.barDatas[i];
 
@@ -18023,7 +18604,7 @@ var barTgi = function (_Component) {
         key: "_getProp",
         value: function _getProp(val, tgi, i) {
             var res = val;
-            if (_$29.isFunction(val)) {
+            if (_$30.isFunction(val)) {
                 res = val.apply(this, [tgi, i]);
             }
             return res;
@@ -18047,7 +18628,8 @@ var graphs = {
     line: LineGraphs,
     scat: ScatGraphs,
     pie: PieGraphs,
-    radar: RadarGraphs
+    radar: RadarGraphs,
+    cloud: ScatGraphs$1
 };
 
 var components = {

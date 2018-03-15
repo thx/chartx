@@ -14,6 +14,23 @@ export default class Coord extends Chart
         super( node, data, opts );
         this.graphsMap = graphsMap;
         this.componentsMap = componentsMap;
+
+        this._graphs = [];
+        if( opts.graphs ){
+            opts.graphs = _.flatten( [ opts.graphs ] );
+        };
+
+        _.extend(true, this, this.setDefaultOpts( opts ));
+        
+        //这里不要直接用data，而要用 this._data
+        this.dataFrame = this.initData( this._data );
+
+        //this.draw();
+        this._tipsPointer = null;
+    }
+
+    setDefaultOpts( opts ){
+        return opts;
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
@@ -55,7 +72,7 @@ export default class Coord extends Chart
 
         var width = this.width - this.padding.left - this.padding.right;
         var height = this.height - this.padding.top - this.padding.bottom;
-        var origin = { x : 0,y : 0 }
+        var origin = { x : this.padding.left,y : this.padding.top }
 
         if( this._coord ){
             //先绘制好坐标系统
