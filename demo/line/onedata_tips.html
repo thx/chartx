@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+var data = [
+["2","6","9","22","23","date","adzoneName","jumpTwoUv","perClkFreq","landPv","taPv","uniImpUv","clkUv","impPv","adzoneId","clkPv","landRate","jumpTwoRate","impUv","taUv","jumpTwoPv","uniImpPv","landUv","clkRate","taConcentration","perImpFreq"],
+["835394534",0,0,0,0,"2018-03-09","名字adzoneName1",1145,132,35304009,192815748,5083,16725,835394534,2,402797780,0.6187,0.3835,7189847,4170,270039356,638959179,2635,0.8412,0.141,751]
+];
+              
+
+//------------------------------
+//数据请在‘数据编辑’Tab种进行编辑。
+//可以在Code模式里直接使用 data 变量 
+//------------------------------
+//结案分析-基础分析-折线图
+//终端,媒体,资源位,推广位,订单,人群
+var options = {
+  "coord": {
+    "type": "rect",
+    "xAxis": {
+      "field": "date"
+     
+      
+    }
+  },
+  "graphs": [
+    {
+      "type": "line",
+      "field": [
+        "2",
+        "6",
+        "9",
+        "22"
+      ],
+      "node": {
+        "enabled": false
+      },
+      "area": {
+        "alpha": 0.01
+      },
+      "line": {
+        "strokeStyle": [
+          "#8080ff",
+          "#b3b2ff",
+          "#d1d0ff",
+          "#8952cc",
+          "#bb80ff",
+          "#e4ccff",
+          "#ffab66",
+          "#ffc799",
+          "#73aee6",
+          "#4949e5"
+        ],
+        "lineWidth": 4
+      }
+    }
+  ],
+  "tips": {
+    "positionInRange": 1
+  }
+}
+
+
+window.line = Chartx.create("canvasTest" , data , options)
+
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

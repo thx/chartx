@@ -8779,6 +8779,10 @@ var xAxis = function (_Component) {
 
             if (this.layoutType == "rule") {
                 iNode = parseInt((x + this.ceilWidth / 2) / this.ceilWidth);
+                if (this.dataOrg.length == 1) {
+                    //如果只有一个数据
+                    iNode = 0;
+                }
             }
 
             if (this.layoutType == "proportion") {
@@ -8923,24 +8927,23 @@ var xAxis = function (_Component) {
         value: function _computerCeilWidth() {
             //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
             var width = this.width;
-            if (this.dataOrg.length == 0) {
-                this.ceilWidth = width;
-            } else {
-                this.ceilWidth = width / this.dataOrg.length;
+            var ceilWidth = width;
+            if (this.dataOrg.length) {
+                ceilWidth = width / this.dataOrg.length;
                 if (this.layoutType == "rule") {
                     if (this.dataOrg.length == 1) {
-                        this.ceilWidth = width / 2;
+                        ceilWidth = width / 2;
                     } else {
-                        this.ceilWidth = width / (this.dataOrg.length - 1);
+                        ceilWidth = width / (this.dataOrg.length - 1);
                     }
                 }
             }
 
             if (this.posParseToInt) {
-                this.ceilWidth = parseInt(this.ceilWidth);
+                ceilWidth = parseInt(ceilWidth);
             }
 
-            return this.ceilWidth;
+            return ceilWidth;
         }
     }, {
         key: "_trimXAxis",
