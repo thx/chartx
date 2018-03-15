@@ -7787,13 +7787,15 @@ var Chart = function (_Canvax$Event$EventDi) {
         value: function init() {}
     }, {
         key: "draw",
-        value: function draw() {
-            this.initModule(); //初始化模块
-            this.initComponents(); //初始化组件
-            this.startDraw(); //开始绘图
-            this.drawComponents(); //绘图完，开始绘制插件
-            this.inited = true;
-        }
+        value: function draw() {}
+        /*
+        this.initModule(); //初始化模块
+        this.initComponents(); //初始化组件
+        this.startDraw(); //开始绘图
+        this.drawComponents();  //绘图完，开始绘制插件
+        this.inited = true;
+        */
+
 
         /*
          * chart的销毁
@@ -7999,6 +8001,106 @@ var Chart = function (_Canvax$Event$EventDi) {
         }
         //插件相关代码end
 
+
+    }]);
+    return Chart;
+}(canvax.Event.EventDispatcher);
+
+var _ = canvax._;
+
+/**
+ * 所有坐标系的基类，一些坐标系中复用的代码，沉淀在这里
+ * 空坐标系，一些非直角坐标系，极坐标系的图表，就会直接创建一个空坐标系图表，然后添加组件
+ */
+
+var Coord = function (_Chart) {
+    inherits$1(Coord, _Chart);
+
+    function Coord(node, data, opts, graphsMap, componentsMap) {
+        classCallCheck$1(this, Coord);
+
+        var _this = possibleConstructorReturn$1(this, (Coord.__proto__ || Object.getPrototypeOf(Coord)).call(this, node, data, opts));
+
+        _this.graphsMap = graphsMap;
+        _this.componentsMap = componentsMap;
+        return _this;
+    }
+
+    //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
+
+
+    createClass$1(Coord, [{
+        key: "draw",
+        value: function draw(opts) {
+            this.initModule(opts); //初始化模块  
+            this.initComponents(opts); //初始化组件, 来自己chart.js模块
+            this.startDraw(opts); //开始绘图
+            this.drawComponents(opts); //绘图完，开始绘制插件，来自己chart.js模块
+
+            if (this._coord && this._coord.horizontal) {
+                this._horizontal();
+            }
+
+            this.inited = true;
+        }
+    }, {
+        key: "initModule",
+        value: function initModule(opt) {
+            var me = this;
+            //首先是创建一个坐标系对象
+            if (this.CoordComponents) {
+                this._coord = new this.CoordComponents(this.coord, this);
+                this.coordSprite.addChild(this._coord.sprite);
+            }
+
+            _.each(this.graphs, function (graphs) {
+                var _g = new me.graphsMap[graphs.type](graphs, me);
+                me._graphs.push(_g);
+                me.graphsSprite.addChild(_g.sprite);
+            });
+        }
+    }, {
+        key: "startDraw",
+        value: function startDraw(opt) {
+            var me = this;
+            !opt && (opt = {});
+            var _coord = this._coord;
+
+            var width = this.width - this.padding.left - this.padding.right;
+            var height = this.height - this.padding.top - this.padding.bottom;
+            var origin = { x: 0, y: 0 };
+
+            if (this._coord) {
+                //先绘制好坐标系统
+                this._coord.draw(opt);
+                width = this._coord.width;
+                height = this._coord.height;
+                origin = this._coord.origin;
+            }
+
+            var graphsCount = this._graphs.length;
+            var completeNum = 0;
+            _.each(this._graphs, function (_g) {
+                _g.on("complete", function (g) {
+                    completeNum++;
+                    if (completeNum == graphsCount) {
+                        me.fire("complete");
+                    }
+                });
+
+                _g.draw({
+                    width: width,
+                    height: height,
+                    origin: origin,
+                    inited: me.inited
+                });
+            });
+
+            this.bindEvent();
+        }
+
+        //tips组件
+
     }, {
         key: "_init_components_tips",
         value: function _init_components_tips() {
@@ -8061,29 +8163,10 @@ var Chart = function (_Canvax$Event$EventDi) {
             }
             this.stage.addChild(sp);
         }
-    }]);
-    return Chart;
-}(canvax.Event.EventDispatcher);
 
-var _ = canvax._;
+        //设置图例 begin
 
-/**
- * 所有坐标系的基类，一些坐标系中复用的代码，沉淀在这里
- * 空坐标系，一些非直角坐标系，极坐标系的图表，就会直接创建一个空坐标系图表，然后添加组件
- */
-
-var Coord = function (_Chart) {
-    inherits$1(Coord, _Chart);
-
-    function Coord(node, data, opts, graphsMap, componentsMap) {
-        classCallCheck$1(this, Coord);
-        return possibleConstructorReturn$1(this, (Coord.__proto__ || Object.getPrototypeOf(Coord)).call(this, node, data, opts));
-    }
-
-    //设置图例 begin
-
-
-    createClass$1(Coord, [{
+    }, {
         key: "_init_components_legend",
         value: function _init_components_legend(e) {
             !e && (e = {});
@@ -8220,13 +8303,13 @@ var Coord = function (_Chart) {
         }
     }, {
         key: "_tipsPointerShow",
-        value: function _tipsPointerShow(e, _tips, _coor) {}
+        value: function _tipsPointerShow(e, _tips, _coord) {}
     }, {
         key: "_tipsPointerHide",
-        value: function _tipsPointerHide(e, _tips, _coor) {}
+        value: function _tipsPointerHide(e, _tips, _coord) {}
     }, {
         key: "_tipsPointerMove",
-        value: function _tipsPointerMove(e, _tips, _coor) {}
+        value: function _tipsPointerMove(e, _tips, _coord) {}
     }, {
         key: "_tipsPointerAtAllGraphs",
         value: function _tipsPointerAtAllGraphs(e) {
@@ -10732,14 +10815,12 @@ var Descartes = function (_CoordBase) {
     function Descartes(node, data, opts, graphsMap, componentsMap) {
         classCallCheck$1(this, Descartes);
 
-        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts));
-
-        _this.graphsMap = graphsMap;
-        _this.componentsMap = componentsMap;
+        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts, graphsMap, componentsMap));
 
         var me = _this;
 
         //坐标系统
+        _this.CoordComponents = Descartes_Component;
         _this._coord = null;
         _this.coord = {
             xAxis: {
@@ -10851,80 +10932,10 @@ var Descartes = function (_CoordBase) {
         return _this;
     }
 
-    //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
+    //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
 
 
     createClass$1(Descartes, [{
-        key: "draw",
-        value: function draw(opts) {
-            this.initModule(opts); //初始化模块  
-            this.initComponents(opts); //初始化组件
-            this.startDraw(opts); //开始绘图
-            this.drawComponents(opts); //绘图完，开始绘制插件
-
-            if (this._coord.horizontal) {
-                this._horizontal();
-            }
-
-            this.inited = true;
-        }
-    }, {
-        key: "initModule",
-        value: function initModule(opt) {
-            var me = this;
-            //首先是创建一个坐标系对象
-            this._coord = new Descartes_Component(this.coord, this);
-            this.coordSprite.addChild(this._coord.sprite);
-
-            _$5.each(this.graphs, function (graphs) {
-                var _g = new me.graphsMap[graphs.type](graphs, me);
-                me._graphs.push(_g);
-                me.graphsSprite.addChild(_g.sprite);
-            });
-        }
-    }, {
-        key: "startDraw",
-        value: function startDraw(opt) {
-            var me = this;
-            !opt && (opt = {});
-            var _coor = this._coord;
-
-            if (!_coor._yAxis.length) {
-                //如果没有y轴数据
-                return;
-            }
-
-            //先绘制好坐标系统
-            _coor.draw(opt);
-
-            var graphsCount = this._graphs.length;
-            var completeNum = 0;
-            _$5.each(this._graphs, function (_g) {
-                _g.on("complete", function (g) {
-                    completeNum++;
-                    if (completeNum == graphsCount) {
-                        me.fire("complete");
-                    }
-                });
-
-                _g.draw({
-                    width: _coor.width,
-                    height: _coor.height,
-                    origin: {
-                        x: _coor.origin.x,
-                        y: _coor.origin.y
-                    },
-                    sort: _coor._yAxis.sort,
-                    inited: me.inited
-                });
-            });
-
-            this.bindEvent();
-        }
-
-        //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
-
-    }, {
         key: "_resetData",
         value: function _resetData(dataTrigger) {
             var me = this;
@@ -12307,14 +12318,12 @@ var Polar = function (_CoordBase) {
     function Polar(node, data, opts, graphsMap, componentsMap) {
         classCallCheck$1(this, Polar);
 
-        var _this = possibleConstructorReturn$1(this, (Polar.__proto__ || Object.getPrototypeOf(Polar)).call(this, node, data, opts));
-
-        _this.graphsMap = graphsMap;
-        _this.componentsMap = componentsMap;
+        var _this = possibleConstructorReturn$1(this, (Polar.__proto__ || Object.getPrototypeOf(Polar)).call(this, node, data, opts, graphsMap, componentsMap));
 
         var me = _this;
 
         //坐标系统
+        _this.CoordComponents = polarComponent;
         _this._coord = null;
         _this.coord = {
             rAxis: {
@@ -12353,49 +12362,6 @@ var Polar = function (_CoordBase) {
     }
 
     createClass$1(Polar, [{
-        key: "initModule",
-        value: function initModule(opt) {
-            var me = this;
-            //首先是创建一个坐标系对象
-            this._coord = new polarComponent(this.coord, this);
-            this.coordSprite.addChild(this._coord.sprite);
-
-            _$12.each(this.graphs, function (graphs) {
-                var _g = new me.graphsMap[graphs.type](graphs, me);
-                me._graphs.push(_g);
-                me.graphsSprite.addChild(_g.sprite);
-            });
-        }
-    }, {
-        key: "startDraw",
-        value: function startDraw(opt) {
-            var me = this;
-            !opt && (opt = {});
-            var _coor = this._coord;
-
-            //先绘制好坐标系统
-            _coor.draw(opt);
-
-            var graphsCount = this._graphs.length;
-            var completeNum = 0;
-            _$12.each(this._graphs, function (_g) {
-                _g.on("complete", function (g) {
-                    completeNum++;
-                    if (completeNum == graphsCount) {
-                        me.fire("complete");
-                    }
-                });
-
-                _g.draw({
-                    width: _coor.width,
-                    height: _coor.height,
-                    origin: _coor.origin //坐标系圆心
-                });
-            });
-
-            this.bindEvent();
-        }
-    }, {
         key: "_getLegendData",
         value: function _getLegendData() {
             var legendData = [

@@ -12,14 +12,12 @@ export default class Descartes extends CoordBase
 {
     constructor( node, data, opts, graphsMap, componentsMap ){
 
-        super( node, data, opts );
-
-        this.graphsMap = graphsMap;
-        this.componentsMap = componentsMap;
+        super( node, data, opts, graphsMap, componentsMap );
 
         var me = this;
 
         //坐标系统
+        this.CoordComponents = CoordComponents;
         this._coord = null;
         this.coord = {
             xAxis : {
@@ -130,74 +128,6 @@ export default class Descartes extends CoordBase
 
         //this.draw();
         this._tipsPointer = null;
-    }
-
-    //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
-    draw( opts )
-    {
-        this.initModule( opts );     //初始化模块  
-        this.initComponents( opts ); //初始化组件
-        this.startDraw( opts );      //开始绘图
-        this.drawComponents( opts ); //绘图完，开始绘制插件
-
-        if( this._coord.horizontal ){
-            this._horizontal();
-        };
-
-        this.inited = true;
-    }
-
-    initModule(opt)
-    {
-        var me = this
-        //首先是创建一个坐标系对象
-        this._coord = new CoordComponents( this.coord, this );
-        this.coordSprite.addChild( this._coord.sprite );
-
-        _.each( this.graphs , function( graphs ){
-            var _g = new me.graphsMap[ graphs.type ]( graphs, me );
-            me._graphs.push( _g );
-            me.graphsSprite.addChild( _g.sprite );
-        } );
-    }
-
-    startDraw(opt)
-    {
-        var me = this;
-        !opt && (opt ={});
-        var _coor = this._coord;
-
-        if( !_coor._yAxis.length ){
-            //如果没有y轴数据
-            return;
-        }
-
-        //先绘制好坐标系统
-        _coor.draw( opt );
-
-        var graphsCount = this._graphs.length;
-        var completeNum = 0;
-        _.each( this._graphs, function( _g ){
-            _g.on( "complete", function(g) {
-                completeNum ++;
-                if( completeNum == graphsCount ){
-                    me.fire("complete");
-                }
-            });
-            
-            _g.draw({
-                width: _coor.width,
-                height: _coor.height,
-                origin: {
-                    x: _coor.origin.x,
-                    y: _coor.origin.y
-                },
-                sort: _coor._yAxis.sort,
-                inited: me.inited
-            });
-        } );
-
-        this.bindEvent();
     }
 
     //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame

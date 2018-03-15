@@ -89,11 +89,13 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     draw()
     {
+        /*
         this.initModule(); //初始化模块
         this.initComponents(); //初始化组件
         this.startDraw(); //开始绘图
         this.drawComponents();  //绘图完，开始绘制插件
         this.inited = true;
+        */
     }
 
     /*
@@ -286,63 +288,5 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
     //插件相关代码end
 
-    _init_components_tips ()
-    {
-        //所有的tips放在一个单独的tips中
-		this.stageTips = new Canvax.Display.Stage({
-		    id: "main-chart-stage-tips"
-		});
-        this.canvax.addChild( this.stageTips );
 
-        var _tips = new this.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coord);
-        this.stageTips.addChild(_tips.sprite);
-        this.components.push({
-            type : "tips",
-            id : "tips",
-            plug : _tips
-        });
-    }
-
-    //添加水印
-    _init_components_matermark( waterMarkOpt )
-    {
-        var text = waterMarkOpt.content || "chartx";
-        var sp = new Canvax.Display.Sprite({
-            id : "watermark"
-        });
-        var textEl = new Canvax.Display.Text( text , {
-            context: {
-                fontSize: waterMarkOpt.fontSize || 20,
-                strokeStyle : waterMarkOpt.strokeStyle || "#ccc",
-                lineWidth : waterMarkOpt.lineWidth || 2
-            }
-        });
-
-        var textW = textEl.getTextWidth();
-        var textH = textEl.getTextHeight();
-
-        var rowCount = parseInt(this.height / (textH*5)) +1;
-        var coluCount = parseInt(this.width / (textW*1.5)) +1;
-
-        for( var r=0; r< rowCount; r++){
-            for( var c=0; c< coluCount; c++){
-                //TODO:text 的 clone有问题
-                //var cloneText = textEl.clone();
-                var _textEl = new Canvax.Display.Text( text , {
-                    context: {
-                        rotation : 45,
-                        fontSize: waterMarkOpt.fontSize || 25,
-                        strokeStyle : waterMarkOpt.strokeStyle || "#ccc",
-                        lineWidth : waterMarkOpt.lineWidth || 0,
-                        fillStyle : waterMarkOpt.fillStyle || "#ccc",
-                        globalAlpha: waterMarkOpt.globalAlpha || 0.1
-                    }
-                });
-                _textEl.context.x = textW*1.5*c + textW*.25;
-                _textEl.context.y = textH*5*r ;
-                sp.addChild( _textEl );
-            }
-        }
-        this.stage.addChild( sp );
-    }
 }
