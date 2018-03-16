@@ -289,7 +289,6 @@ export default class ScatGraphs extends GraphsBase
        
                 //fire到root上面去的是为了让root去处理tips
                 me.root.fire( e.type, e );
-
                 me.triggerEvent( me.node , e );
             });
 

@@ -1,7 +1,7 @@
 'use strict';
 
 var _colors = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
-var Theme = {
+var theme = {
     colors: _colors,
     set: function set(colors) {
         this.colors = colors;
@@ -2965,6 +2965,8 @@ var DisplayObject = function (_EventDispatcher) {
 
         _this.id = opt.id || Utils.createId(_this.type);
 
+        _this._trackList = []; //一个元素可以追踪另外元素的变动
+
         _this.init.apply(_this, arguments);
 
         //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
@@ -3073,6 +3075,24 @@ var DisplayObject = function (_EventDispatcher) {
 
             //执行init之前，应该就根据参数，把context组织好线
             return Observe(_contextATTRS);
+        }
+
+        //TODO:track目前还没测试过,需要的时候再测试
+
+    }, {
+        key: "track",
+        value: function track(el) {
+            if (_$2.indexOf(this._trackList, el) == -1) {
+                this._trackList.push(el);
+            }
+        }
+    }, {
+        key: "untrack",
+        value: function untrack(el) {
+            var ind = _$2.indexOf(this._trackList, el);
+            if (ind > -1) {
+                this._trackList.splice(ind, 1);
+            }
         }
 
         /* @myself 是否生成自己的镜像 
@@ -3394,6 +3414,23 @@ var DisplayObject = function (_EventDispatcher) {
 
             if (this.graphics) {
                 result = this.containsPoint({ x: x, y: y });
+            }
+
+            if (this.type == "text") {
+                //文本框的先单独处理
+                var _rect = this.getRect();
+                if (!_rect.width || !_rect.height) {
+                    return false;
+                }
+                //正式开始第一步的矩形范围判断
+                if (x >= _rect.x && x <= _rect.x + _rect.width && (_rect.height >= 0 && y >= _rect.y && y <= _rect.y + _rect.height || _rect.height < 0 && y <= _rect.y && y >= _rect.y + _rect.height)) {
+                    //那么就在这个元素的矩形范围内
+                    result = true;
+                } else {
+                    //如果连矩形内都不是，那么肯定的，这个不是我们要找的shap
+                    result = false;
+                }
+                return result;
             }
 
             return result;
@@ -4328,6 +4365,8 @@ var Application = function (_DisplayObjectContain) {
                 reSizeCanvas(s.canvas);
             });
 
+            this.stageView.style.width = this.width + "px";
+            this.stageView.style.height = this.height + "px";
             this.domView.style.width = this.width + "px";
             this.domView.style.height = this.height + "px";
 
@@ -7764,7 +7803,7 @@ var Chart = function (_Canvax$Event$EventDi) {
         _this.inited = false;
         _this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
 
-        _this.theme = [];
+        _this._theme = _$1.extend([], theme.colors); //theme.colors;  //皮肤对象，opts里面可能有theme皮肤组件
 
         _this.init.apply(_this, arguments);
 
@@ -7926,7 +7965,8 @@ var Chart = function (_Canvax$Event$EventDi) {
     }, {
         key: "initComponents",
         value: function initComponents() {
-            var notComponents = ["coord", "graphs"];
+            //TODO: theme 组件优先级最高，在initComponents之前已经加载过
+            var notComponents = ["coord", "graphs", "theme"];
             for (var _p in this._opts) {
                 var p = _p.toLocaleLowerCase();
                 if (_$1.indexOf(notComponents, p) == -1) {
@@ -8045,11 +8085,17 @@ var Coord = function (_Chart) {
 
     }, {
         key: "draw",
-        value: function draw(opts) {
-            this.initModule(opts); //初始化模块  
-            this.initComponents(opts); //初始化组件, 来自己chart.js模块
-            this.startDraw(opts); //开始绘图
-            this.drawComponents(opts); //绘图完，开始绘制插件，来自己chart.js模块
+        value: function draw() {
+            if (this._opts.theme) {
+                //如果用户有配置皮肤组件，优先级最高
+                //皮肤就是一组颜色
+                var _theme = new this.componentsMap.theme(this._opts.theme);
+                this._theme = _theme.mergeTo(this._theme);
+            }
+            this.initModule(); //初始化模块  
+            this.initComponents(); //初始化组件, 来自己chart.js模块
+            this.startDraw(); //开始绘图
+            this.drawComponents(); //绘图完，开始绘制插件，来自己chart.js模块
 
             if (this._coord && this._coord.horizontal) {
                 this._horizontal();
@@ -8298,7 +8344,7 @@ var Coord = function (_Chart) {
                 //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
                 //那么就不要执行hide，顶多只显示这个点得tips数据
                 var _tips = me.getComponentById("tips");
-                if (_tips && !(e.toTarget && me._coord.induce && me._coord.induce.containsPoint(me._coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
+                if (_tips && !(e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint(me._coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
                     _tips.hide(e);
                     me._tipsPointerHide(e, _tips, me._coord);
                     me._tipsPointerHideAtAllGraphs(e);
@@ -8314,6 +8360,20 @@ var Coord = function (_Chart) {
                     me._tipsPointerAtAllGraphs(e);
                 }
             });
+        }
+
+        //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
+
+    }, {
+        key: "setTipsInfo",
+        value: function setTipsInfo(e) {
+            if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
+                var nodes = [];
+                _.each(this._graphs, function (_g) {
+                    nodes = nodes.concat(_g.getNodesAt(e));
+                });
+                e.eventInfo.nodes = nodes;
+            }
         }
     }, {
         key: "_tipsPointerShow",
@@ -10749,11 +10809,12 @@ var Descartes_Component = function (_coorBase) {
                 var clone_fields = _$6.clone(fields);
                 for (var i = 0, l = fields.length; i < l; i++) {
                     if (_$6.isString(fields[i])) {
+
                         clone_fields[i] = {
                             field: fields[i],
                             enabled: true,
                             yAxis: me._getYaxisOfField(fields[i]),
-                            color: Theme.colors[fieldInd],
+                            color: me.root._theme[fieldInd],
                             ind: fieldInd++
                         };
                     }
@@ -11848,7 +11909,7 @@ var polarComponent = function (_coorBase) {
                         clone_fields[i] = {
                             field: fields[i],
                             enabled: true,
-                            color: Theme.colors[fieldInd],
+                            color: me.root._theme[fieldInd],
                             ind: fieldInd++,
                             group: null //这个field对应的ui分组
                         };
@@ -12527,7 +12588,7 @@ var BarGraphs = function (_GraphsBase) {
         _this.absolute = false;
 
         _this.node = {
-            type: "rect",
+            shapeType: "rect",
             width: 0,
             _width: 0,
             maxWidth: 50,
@@ -12614,25 +12675,12 @@ var BarGraphs = function (_GraphsBase) {
                 }
             }
         }
-
-        //dataZoom中用
-
-    }, {
-        key: "setBarStyle",
-        value: function setBarStyle($o) {
-            var me = this;
-            var index = $o.iNode;
-            var group = me.barsSp.getChildById('barGroup_' + index);
-
-            var fillStyle = $o.fillStyle || me._getColor(me.node.fillStyle);
-            for (var a = 0, al = group.getNumChildren(); a < al; a++) {
-                var rectEl = group.getChildAt(a);
-                rectEl.context.fillStyle = fillStyle;
-            }
-        }
     }, {
         key: "_getColor",
-        value: function _getColor(c, groupsLen, vLen, i, h, v, value, field, _flattenField) {
+        value: function _getColor(c, groupsLen, vLen, i, h, v, rectData, _flattenField) {
+            var value = rectData.value;
+            var field = rectData.field;
+
             var fieldMap = this.root._coord.getFieldMapOf(field);
             var color = fieldMap.color;
 
@@ -12644,14 +12692,7 @@ var BarGraphs = function (_GraphsBase) {
                 color = _$15.flatten(c)[_$15.indexOf(_flattenField, field)];
             }
             if (_$15.isFunction(c)) {
-                color = c.apply(this, [{
-                    iGroup: i,
-                    iNode: h,
-                    iLay: v,
-                    field: field,
-                    value: value,
-                    xAxis: this._xAxis.layoutData[h]
-                }]);
+                color = c.apply(this, [rectData]);
             }
 
             return color;
@@ -12800,7 +12841,7 @@ var BarGraphs = function (_GraphsBase) {
 
                         rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                        var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+                        var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData, _flattenField);
 
                         rectData.fillStyle = fillStyle;
 
@@ -13171,13 +13212,8 @@ var BarGraphs = function (_GraphsBase) {
                             yBasePoint: _yAxis.basePoint,
                             isLeaf: true,
                             xAxis: _xAxis.getNodeInfoOfX(_x),
-                            //xAxis  : {
-                            //    field: me._xAxis.field,
-                            //    value: xArr[i].value,
-                            //    layoutText: xArr[i].layoutText
-                            //},
-                            nodeInd: i
-                            //rowData: this.root.dataFrame.getRowData( i );
+                            nodeInd: i,
+                            rowData: me.root.dataFrame.getRowData(i)
                         };
 
                         if (!me.data[node.field]) {
@@ -13576,6 +13612,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         };
 
         _this.text = {
+            shapeType: "text",
             enabled: 0,
             fillStyle: null,
             strokeStyle: null,
@@ -13584,6 +13621,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         };
 
         _this.area = { //填充
+            shapeType: "path",
             enabled: 1,
             fillStyle: null,
             alpha: 0.3
@@ -14836,7 +14874,6 @@ var ScatGraphs = function (_GraphsBase) {
 
                     //fire到root上面去的是为了让root去处理tips
                     me.root.fire(e.type, e);
-
                     me.triggerEvent(me.node, e);
                 });
 
@@ -15683,7 +15720,7 @@ var PieGraphs = function (_GraphsBase) {
 
         _this.node = {
             shapeType: "sector",
-            colors: Theme.colors,
+            colors: _this.root._theme,
 
             focus: {
                 enabled: true
@@ -16063,11 +16100,13 @@ var RadarGraphs = function (_GraphsBase) {
         _this.enabledField = null;
 
         _this.line = {
+            shapeType: "brokenLine",
             enabled: true,
             lineWidth: 2,
             strokeStyle: null
         };
         _this.area = {
+            shapeType: "path",
             enabled: true,
             fillStyle: null,
             fillAlpha: 0.1
@@ -16342,108 +16381,98 @@ var RadarGraphs = function (_GraphsBase) {
     return RadarGraphs;
 }(GraphsBase);
 
-/*
-* Dispatch
-*/
-function Dispatch(types) {
-    var i = -1,
-        n = types.length,
-        callbacksByType = {},
-        callbackByName = {},
-        type,
-        that = this;
-
-    that.on = function (type, callback) {
-        type = parseType(type);
-
-        // Return the current callback, if any.
-        if (arguments.length < 2) {
-            return (callback = callbackByName[type.name]) && callback.value;
-        }
-
-        // If a type was specified…
-        if (type.type) {
-            var callbacks = callbacksByType[type.type],
-                callback0 = callbackByName[type.name],
-                i;
-
-            // Remove the current callback, if any, using copy-on-remove.
-            if (callback0) {
-                callback0.value = null;
-                i = callbacks.indexOf(callback0);
-                callbacksByType[type.type] = callbacks = callbacks.slice(0, i).concat(callbacks.slice(i + 1));
-                delete callbackByName[type.name];
-            }
-
-            // Add the new callback, if any.
-            if (callback) {
-                callback = {
-                    value: callback
-                };
-                callbackByName[type.name] = callback;
-                callbacks.push(callback);
-            }
-        }
-
-        // Otherwise, if a null callback was specified, remove all callbacks with the given name.
-        else if (callback == null) {
-                for (var otherType in callbacksByType) {
-                    if (callback = callbackByName[otherType + type.name]) {
-                        callback.value = null;
-                        var callbacks = callbacksByType[otherType],
-                            i = callbacks.indexOf(callback);
-                        callbacksByType[otherType] = callbacks.slice(0, i).concat(callbacks.slice(i + 1));
-                        delete callbackByName[callback.name];
-                    }
-                }
-            }
-
-        return that;
-    };
-
-    while (++i < n) {
-        type = types[i] + "";
-        if (!type || type in that) throw new Error("illegal or duplicate type: " + type);
-        callbacksByType[type] = [];
-        that[type] = applier(type);
-    }
-
-    function parseType(type) {
-        var i = (type += "").indexOf("."),
-            name = type;
-        if (i >= 0) type = type.slice(0, i);else name += ".";
-        if (type && !callbacksByType.hasOwnProperty(type)) throw new Error("unknown type: " + type);
-        return {
-            type: type,
-            name: name
-        };
-    }
-
-    function applier(type) {
-        return function () {
-            var callbacks = callbacksByType[type],
-                // Defensive reference; copy-on-remove.
-            callback,
-                callbackValue,
-                i = -1,
-                n = callbacks.length;
-
-            while (++i < n) {
-                if (callbackValue = (callback = callbacks[i]).value) {
-                    callbackValue.apply(this, arguments);
-                }
-            }
-
-            return that;
-        };
-    }
-}
+var noop = { value: function value() {} };
 
 function dispatch() {
-    return new Dispatch(arguments);
+  for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {
+    if (!(t = arguments[i] + "") || t in _) throw new Error("illegal type: " + t);
+    _[t] = [];
+  }
+  return new Dispatch(_);
 }
 
-dispatch.prototype = Dispatch.prototype; // allow instanceof
+function Dispatch(_) {
+  this._ = _;
+}
+
+function parseTypenames(typenames, types) {
+  return typenames.trim().split(/^|\s+/).map(function (t) {
+    var name = "",
+        i = t.indexOf(".");
+    if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
+    if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
+    return { type: t, name: name };
+  });
+}
+
+Dispatch.prototype = dispatch.prototype = {
+  constructor: Dispatch,
+  on: function on(typename, callback) {
+    var _ = this._,
+        T = parseTypenames(typename + "", _),
+        t,
+        i = -1,
+        n = T.length;
+
+    // If no callback was specified, return the callback of the given type and name.
+    if (arguments.length < 2) {
+      while (++i < n) {
+        if ((t = (typename = T[i]).type) && (t = get$1(_[t], typename.name))) return t;
+      }return;
+    }
+
+    // If a type was specified, set the callback for the given type and name.
+    // Otherwise, if a null callback was specified, remove callbacks of the given name.
+    if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
+    while (++i < n) {
+      if (t = (typename = T[i]).type) _[t] = set$1(_[t], typename.name, callback);else if (callback == null) for (t in _) {
+        _[t] = set$1(_[t], typename.name, null);
+      }
+    }
+
+    return this;
+  },
+  copy: function copy() {
+    var copy = {},
+        _ = this._;
+    for (var t in _) {
+      copy[t] = _[t].slice();
+    }return new Dispatch(copy);
+  },
+  call: function call(type, that) {
+    if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i = 0, n, t; i < n; ++i) {
+      args[i] = arguments[i + 2];
+    }if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+    for (t = this._[type], i = 0, n = t.length; i < n; ++i) {
+      t[i].value.apply(that, args);
+    }
+  },
+  apply: function apply(type, that, args) {
+    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+    for (var t = this._[type], i = 0, n = t.length; i < n; ++i) {
+      t[i].value.apply(that, args);
+    }
+  }
+};
+
+function get$1(type, name) {
+  for (var i = 0, n = type.length, c; i < n; ++i) {
+    if ((c = type[i]).name === name) {
+      return c.value;
+    }
+  }
+}
+
+function set$1(type, name, callback) {
+  for (var i = 0, n = type.length; i < n; ++i) {
+    if (type[i].name === name) {
+      type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
+      break;
+    }
+  }
+  if (callback != null) type.push({ name: name, value: callback });
+  return type;
+}
 
 // Word cloud layout by Jason Davies, https://www.jasondavies.com/wordcloud/
 // Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
@@ -16851,32 +16880,56 @@ var spirals = {
 };
 
 var _$23 = canvax._;
+var Text$1 = canvax.Display.Text;
 
-var ScatGraphs$1 = function (_GraphsBase) {
-    inherits$1(ScatGraphs, _GraphsBase);
+var CloudGraphs = function (_GraphsBase) {
+    inherits$1(CloudGraphs, _GraphsBase);
 
-    function ScatGraphs(opts, root) {
-        classCallCheck$1(this, ScatGraphs);
+    function CloudGraphs(opts, root) {
+        classCallCheck$1(this, CloudGraphs);
 
-        var _this = possibleConstructorReturn$1(this, (ScatGraphs.__proto__ || Object.getPrototypeOf(ScatGraphs)).call(this, opts, root));
+        var _this = possibleConstructorReturn$1(this, (CloudGraphs.__proto__ || Object.getPrototypeOf(CloudGraphs)).call(this, opts, root));
 
         _this.type = "cloud";
 
+        _this.field = null;
+
+        var me = _this;
         _this.node = {
             shapeType: "text", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-            fontColor: "#ccc",
-            fontSize: 18,
+            fontFamily: "Impact",
+            fontColor: function fontColor(nodeData) {
+                return me.root._theme[nodeData.nodeInd % nodeData.dataLen];
+            },
+            fontSize: function fontSize() {
+                //fontSize默认12-50的随机值
+                return this.minFontSize + Math.random() * this.maxFontSize;
+            },
+            maxFontSize: 38,
+            _maxFontSizeVal: 0, //fontSizer如果配置为一个field的话， 找出这个field数据的最大值
+            minFontSize: 12,
+            _minFontSizeVal: null, //fontSizer如果配置为一个field的话， 找出这个field数据的最小值
+
+            fontWeight: "normal",
+
+            format: function format(str) {
+                return str;
+            },
+
+            padding: 10,
+
+            rotate: function rotate() {
+                return (~~(Math.random() * 6) - 3) * 30;
+            },
+
+            strokeStyle: null,
             focus: {
-                enabled: true,
-                lineWidth: 6,
-                lineAlpha: 0.2,
-                fillAlpha: 0.8
+                enabled: true
             },
             select: {
                 enabled: true,
-                lineWidth: 8,
-                lineAlpha: 0.4,
-                fillAlpha: 1
+                lineWidth: 2,
+                strokeStyle: "#666"
             }
         };
 
@@ -16886,7 +16939,7 @@ var ScatGraphs$1 = function (_GraphsBase) {
         return _this;
     }
 
-    createClass$1(ScatGraphs, [{
+    createClass$1(CloudGraphs, [{
         key: "init",
         value: function init() {
             this.sprite = new canvax.Display.Sprite({
@@ -16896,11 +16949,187 @@ var ScatGraphs$1 = function (_GraphsBase) {
     }, {
         key: "draw",
         value: function draw(opts) {
-            cloud;
-            debugger;
+            _$23.extend(true, this, opts);
+            this._drawGraphs();
+            this.sprite.context.x = this.width / 2;
+            this.sprite.context.y = this.height / 2;
+        }
+    }, {
+        key: "_getFontSize",
+        value: function _getFontSize(ind) {
+            var size = this.node.minFontSize;
+            var rowData = this.dataFrame.getRowData(ind);
+            if (_$23.isFunction(this.node.fontSize)) {
+                size = this.node.fontSize(rowData);
+            }
+            if (_$23.isString(this.node.fontSize) && this.node.fontSize in rowData) {
+                var val = Number(rowData[this.node.fontSize]);
+                if (!isNaN(val)) {
+                    size = this.node.minFontSize + (this.node.maxFontSize - this.node.minFontSize) / (this.node._maxFontSizeVal - this.node._minFontSizeVal) * val;
+                }
+            }
+            if (_$23.isNumber(this.node.fontSize)) {
+                size = this.node.fontSize;
+            }
+
+            return size;
+        }
+    }, {
+        key: "_getRotate",
+        value: function _getRotate(item, ind) {
+            var rotate = this.node.rotate;
+            if (_$23.isFunction(this.node.rotate)) {
+                rotate = this.node.rotate() || 0;
+            }
+            return rotate;
+        }
+    }, {
+        key: "_getFillStyle",
+        value: function _getFillStyle(nodeData) {
+            var color;
+            if (_$23.isString(this.node.fontColor)) {
+                color = this.node.fontColor;
+            }
+            if (_$23.isFunction(this.node.fontColor)) {
+                color = this.node.fontColor(nodeData);
+            }
+            if (!color) {
+                color = "#ccc";
+            }
+            return color;
+        }
+    }, {
+        key: "_drawGraphs",
+        value: function _drawGraphs() {
+            var me = this;
+
+            //查找fontSize的max和min
+            var maxFontSizeVal = 0;
+            var minFontSizeVal = null;
+            if (_$23.isString(this.node.fontSize)) {
+                _$23.each(me.dataFrame.getFieldData(this.node.fontSize), function (val) {
+                    me.node._maxFontSizeVal = Math.max(me.node._maxFontSizeVal, val);
+                    if (me.node._minFontSizeVal === null) {
+                        me.node._minFontSizeVal = val;
+                    } else {
+                        me.node._minFontSizeVal = Math.min(me.node._minFontSizeVal, val);
+                    }
+                });
+            }
+
+            var layout = cloud().size([me.width, me.height]).words(me.dataFrame.getFieldData(me.field).map(function (d, ind) {
+                return {
+                    text: me.node.format(d) || d,
+                    size: me._getFontSize(ind)
+                };
+            })).padding(me.node.padding).rotate(function (item, ind) {
+                //return 0;
+                return me._getRotate(item, ind);
+            }).font(me.node.fontFamily).fontSize(function (d) {
+                return d.size;
+            }).on("end", draw);
+
+            layout.start();
+
+            function draw(data, e) {
+
+                me.data = data;
+                me.sprite.removeAllChildren();
+
+                _$23.each(data, function (tag, i) {
+
+                    tag.nodeInd = i;
+                    tag.dataLen = data.length;
+                    tag.rowData = me.root.dataFrame.getRowData(i);
+                    tag.focused = false;
+                    tag.selected = false;
+
+                    var tagTxt = new Text$1(tag.text, {
+                        context: {
+                            x: tag.x,
+                            y: tag.y,
+                            fontSize: tag.size,
+                            fontFamily: tag.font,
+                            rotation: tag.rotate,
+                            textBaseline: "middle",
+                            textAlign: "center",
+                            cursor: 'pointer',
+                            fontWeight: me.node.fontWeight,
+                            fillStyle: me._getFillStyle(tag)
+                        }
+                    });
+                    me.sprite.addChild(tagTxt);
+
+                    me.node.focus.enabled && tagTxt.hover(function (e) {
+                        me.focusAt(this.nodeData.nodeInd);
+                    }, function (e) {
+                        !this.nodeData.selected && me.unfocusAt(this.nodeData.nodeInd);
+                    });
+
+                    tagTxt.nodeData = tag;
+                    tag._node = tagTxt;
+                    tagTxt.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+
+                        e.eventInfo = {
+                            title: null,
+                            nodes: [this.nodeData]
+                        };
+                        if (this.nodeData.text) {
+                            e.eventInfo.title = this.nodeData.text;
+                        }
+
+                        //fire到root上面去的是为了让root去处理tips
+                        me.root.fire(e.type, e);
+                        me.triggerEvent(me.node, e);
+                    });
+                });
+            }
+        }
+    }, {
+        key: "focusAt",
+        value: function focusAt(ind) {
+            var nodeData = this.data[ind];
+            if (!this.node.focus.enabled || nodeData.focused) return;
+
+            var nctx = nodeData._node.context;
+            nctx.fontSize += 3;
+            nodeData.focused = true;
+        }
+    }, {
+        key: "unfocusAt",
+        value: function unfocusAt(ind) {
+            var nodeData = this.data[ind];
+            if (!this.node.focus.enabled || !nodeData.focused) return;
+            var nctx = nodeData._node.context;
+            nctx.fontSize -= 3;
+            nodeData.focused = false;
+        }
+    }, {
+        key: "selectAt",
+        value: function selectAt(ind) {
+
+            var nodeData = this.data[ind];
+            if (!this.node.select.enabled || nodeData.selected) return;
+
+            var nctx = nodeData._node.context;
+            nctx.lineWidth = this.node.select.lineWidth;
+            nctx.lineAlpha = this.node.select.lineAlpha;
+            nctx.strokeStyle = this.node.select.strokeStyle;
+
+            nodeData.selected = true;
+        }
+    }, {
+        key: "unselectAt",
+        value: function unselectAt(ind) {
+            var nodeData = this.data[ind];
+            if (!this.node.select.enabled || !nodeData.selected) return;
+            var nctx = nodeData._node.context;
+            nctx.strokeStyle = this.node.strokeStyle;
+
+            nodeData.selected = false;
         }
     }]);
-    return ScatGraphs;
+    return CloudGraphs;
 }(GraphsBase);
 
 var Circle$5 = canvax.Shapes.Circle;
@@ -17666,7 +17895,7 @@ var dataZoom = function (_Component) {
 
 var BrokenLine$3 = canvax.Shapes.BrokenLine;
 var Sprite$1 = canvax.Display.Sprite;
-var Text$1 = canvax.Display.Text;
+var Text$2 = canvax.Display.Text;
 var _$26 = canvax._;
 
 var MarkLine = function (_Component) {
@@ -17783,7 +18012,7 @@ var MarkLine = function (_Component) {
             me._line = line;
 
             if (me.text.enabled) {
-                var txt = new Text$1(me._getLabel(), { //文字
+                var txt = new Text$2(me._getLabel(), { //文字
                     context: me.text
                 });
                 this._txt = txt;
@@ -18612,6 +18841,49 @@ var barTgi = function (_Component) {
     return barTgi;
 }(component);
 
+/**
+ * 皮肤组件，不是一个具体的ui组件
+ */
+
+var themeComponent = function () {
+    function themeComponent(theme, root) {
+        classCallCheck$1(this, themeComponent);
+
+        this._root = root;
+        this.colors = theme || [];
+    }
+
+    createClass$1(themeComponent, [{
+        key: "set",
+        value: function set$$1(colors) {
+            this.colors = colors;
+            return this.colors;
+        }
+    }, {
+        key: "get",
+        value: function get$$1(ind) {
+            return this.colors;
+        }
+    }, {
+        key: "mergeTo",
+        value: function mergeTo(colors) {
+            if (!colors) {
+                colors = [];
+            }
+            for (var i = 0, l = this.colors.length; i < l; i++) {
+                if (colors[i]) {
+                    colors[i] = this.colors[i];
+                } else {
+                    colors.push(this.colors[i]);
+                }
+            }
+
+            return colors;
+        }
+    }]);
+    return themeComponent;
+}();
+
 //图表皮肤
 //空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
 //坐标系
@@ -18628,10 +18900,11 @@ var graphs = {
     scat: ScatGraphs,
     pie: PieGraphs,
     radar: RadarGraphs,
-    cloud: ScatGraphs$1
+    cloud: CloudGraphs
 };
 
 var components = {
+    theme: themeComponent,
     legend: Legend,
     dataZoom: dataZoom,
     markLine: MarkLine,
@@ -18644,7 +18917,7 @@ var components = {
     //如果数据库中有项目皮肤
 };var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
 if (projectTheme && projectTheme.length) {
-    Theme.set(projectTheme);
+    theme.set(projectTheme);
 }
 //皮肤设定end -----------------
 

@@ -1,6 +1,5 @@
 import Canvax from "canvax2d"
 import Pie from "./pie"
-import Theme from "../../theme"
 import GraphsBase from "../index"
 
 const _ = Canvax._;
@@ -19,7 +18,7 @@ export default class PieGraphs extends GraphsBase
 
         this.node = {
             shapeType : "sector",
-            colors : Theme.colors,
+            colors : this.root._theme,
 
             focus  : {
                 enabled : true,

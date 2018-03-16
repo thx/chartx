@@ -34,12 +34,18 @@ export default class Coord extends Chart
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
-    draw( opts )
+    draw( )
     {
-        this.initModule( opts );     //初始化模块  
-        this.initComponents( opts ); //初始化组件, 来自己chart.js模块
-        this.startDraw( opts );      //开始绘图
-        this.drawComponents( opts ); //绘图完，开始绘制插件，来自己chart.js模块
+        if( this._opts.theme ){
+            //如果用户有配置皮肤组件，优先级最高
+            //皮肤就是一组颜色
+            var _theme = new this.componentsMap.theme( this._opts.theme );
+            this._theme = _theme.mergeTo( this._theme );
+        };
+        this.initModule( );     //初始化模块  
+        this.initComponents( ); //初始化组件, 来自己chart.js模块
+        this.startDraw( );      //开始绘图
+        this.drawComponents( ); //绘图完，开始绘制插件，来自己chart.js模块
 
         if( this._coord && this._coord.horizontal ){
             this._horizontal();
@@ -280,7 +286,7 @@ export default class Coord extends Chart
             //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
             //那么就不要执行hide，顶多只显示这个点得tips数据
             var _tips = me.getComponentById("tips");
-            if ( _tips && !( e.toTarget && me._coord.induce && me._coord.induce.containsPoint( me._coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
+            if ( _tips && !( e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint( me._coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
                 me._tipsPointerHide( e, _tips, me._coord );
                 me._tipsPointerHideAtAllGraphs( e );
@@ -296,6 +302,18 @@ export default class Coord extends Chart
                 me._tipsPointerAtAllGraphs( e );
             };
         });
+    }
+
+    //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
+    setTipsInfo(e)
+    {
+        if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
+            var nodes = [];
+            _.each( this._graphs, function( _g ){
+                nodes = nodes.concat( _g.getNodesAt( e ) );
+            } );
+            e.eventInfo.nodes = nodes;
+        }
     }
 
     _tipsPointerShow( e, _tips, _coord )

@@ -17,7 +17,6 @@ import coorBase from "../coor_base/index"
 import Canvax from "canvax2d"
 import Grid from "../polar_grid/index"
 import DataSection from "../../utils/datasection"
-import Theme from "../../theme"
 
 const _ = Canvax._;
 
@@ -196,7 +195,7 @@ export default class polarComponent extends coorBase
                     clone_fields[i] = {
                         field : fields[i],
                         enabled : true,
-                        color : Theme.colors[ fieldInd ],
+                        color : me.root._theme[ fieldInd ],
                         ind : fieldInd++,
                         group : null //这个field对应的ui分组
                     }

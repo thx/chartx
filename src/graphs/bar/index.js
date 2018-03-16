@@ -25,7 +25,7 @@ export default class BarGraphs extends GraphsBase
         this.absolute = false; 
 
         this.node = {
-            type      : "rect",
+            shapeType : "rect",
             width     : 0,
             _width    : 0,
             maxWidth  : 50,
@@ -111,26 +111,14 @@ export default class BarGraphs extends GraphsBase
         }
     }
 
-
-    //dataZoom中用
-    setBarStyle($o)
+    _getColor(c, groupsLen, vLen, i, h, v, rectData, _flattenField)
     {
-        var me = this
-        var index = $o.iNode
-        var group = me.barsSp.getChildById('barGroup_' + index)
-        
-        var fillStyle = $o.fillStyle || me._getColor(me.node.fillStyle)
-        for (var a = 0, al = group.getNumChildren(); a < al; a++) {
-            var rectEl = group.getChildAt(a)
-            rectEl.context.fillStyle = fillStyle
-        }
-    }
+        var value = rectData.value;
+        var field = rectData.field;
 
-    _getColor(c, groupsLen, vLen, i, h, v, value, field, _flattenField)
-    {
         var fieldMap = this.root._coord.getFieldMapOf(field);
         var color = fieldMap.color;
-
+       
         //field对应的索引，， 取颜色这里不要用i
         if (_.isString(c)) {
             color = c
@@ -139,14 +127,7 @@ export default class BarGraphs extends GraphsBase
             color = _.flatten(c)[ _.indexOf( _flattenField, field ) ];
         };
         if (_.isFunction(c)) {
-            color = c.apply(this, [{
-                iGroup: i,
-                iNode: h,
-                iLay: v,
-                field: field,
-                value: value,
-                xAxis: this._xAxis.layoutData[h]
-            }]);
+            color = c.apply(this, [ rectData ]);
         };
 
         return color;
@@ -294,7 +275,7 @@ export default class BarGraphs extends GraphsBase
 
                     rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                    var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData.value, rectData.field, _flattenField);
+                    var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData, _flattenField);
 
                     rectData.fillStyle = fillStyle;
 
@@ -669,13 +650,8 @@ export default class BarGraphs extends GraphsBase
                         yBasePoint : _yAxis.basePoint,
                         isLeaf : true,
                         xAxis  : _xAxis.getNodeInfoOfX( _x ),
-                        //xAxis  : {
-                        //    field: me._xAxis.field,
-                        //    value: xArr[i].value,
-                        //    layoutText: xArr[i].layoutText
-                        //},
                         nodeInd: i,
-                        //rowData: this.root.dataFrame.getRowData( i );
+                        rowData: me.root.dataFrame.getRowData( i )
                     };
 
                     if( !me.data[ node.field ] ){

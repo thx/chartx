@@ -50,6 +50,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
 
         this.text = {
+            shapeType   : "text",
             enabled     : 0,
             fillStyle   : null,
             strokeStyle : null,
@@ -58,6 +59,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         };
 
         this.area = { //填充
+            shapeType : "path",
             enabled   :1,
             fillStyle : null,
             alpha     : 0.3

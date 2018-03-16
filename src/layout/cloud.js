@@ -8,6 +8,7 @@ var cloudRadians = Math.PI / 180,
     cw = 1 << 11 >> 5,
     ch = 1 << 11;
 
+    
 var cloud = function() {
   var size = [256, 256],
       text = cloudText,

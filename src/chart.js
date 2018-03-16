@@ -70,7 +70,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.inited = false;
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
 
-        this.theme = [];
+        this._theme = _.extend( [], theme.colors ); //theme.colors;  //皮肤对象，opts里面可能有theme皮肤组件
 
         this.init.apply(this, arguments);
         
@@ -219,7 +219,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //插件管理相关代码begin
     initComponents()
     {
-        var notComponents = [ "coord", "graphs" ];
+        //TODO: theme 组件优先级最高，在initComponents之前已经加载过
+        var notComponents = [ "coord", "graphs" , "theme" ];
         for( var _p in this._opts ){
             var p = _p.toLocaleLowerCase();
             if( _.indexOf( notComponents, p ) == -1 ){

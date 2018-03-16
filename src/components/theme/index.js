@@ -1,17 +1,13 @@
-import theme from "../../theme"
-
-const _ = Canvax._;
-
 /**
  * 皮肤组件，不是一个具体的ui组件
  */
 
 export default class themeComponent
 {
-    constructor( opts , root )
+    constructor( theme , root )
     {
-        super( opts , root );
-        this.colors = theme.get();
+        this._root = root;
+        this.colors = theme || [];
     }
 
     set( colors )
@@ -20,9 +16,25 @@ export default class themeComponent
         return this.colors;
     }
 
-    get()
+    get( ind )
     {
         return this.colors
+    }
+
+    mergeTo( colors )
+    {
+        if( !colors ){
+            colors = [];
+        };
+        for( var i=0,l=this.colors.length; i<l; i++ ){
+            if( colors[i] ){
+                colors[i] = this.colors[i]
+            } else {
+                colors.push( this.colors[i] );
+            }
+        };
+    
+        return colors;
     }
 
 }

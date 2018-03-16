@@ -36,7 +36,7 @@ var data= [
     ["name"   , "value", "size" , "city"],
     ["ie"     , 320    , 122 , "杭州"],
     ["firefox", 213    , 132 , "杭州"],
-    ["safari" , 12    , 321 , "杭州"],
+    ["safari" , 12     , 321 , "杭州"],
     ["chrome" , 12    , 192  , "杭州"],
     ["其他"    , 10    , 382 , "杭州"],
     ["uc"     , 10    , 232 , "北京"],
@@ -47,7 +47,20 @@ var data= [
 var options = {
     graphs : [
         {
-            type : "cloud"
+            type : "cloud",
+            field : "name",
+            node : {
+                fontSize : "size",
+                rotate : 0,
+                onclick : function( e , nodeData ){
+                    console.log("onclick")
+                    if( !nodeData.selected ){
+                        this.selectAt( nodeData.nodeInd );
+                    } else {
+                        this.unselectAt( nodeData.nodeInd );
+                    };
+                }
+            }
         }
     ],
     tips : {
@@ -66,13 +79,13 @@ window.chart = Chartx.create("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>饼图（pie chart）- 基础饼图</h4>
+                <h4>cloud chart - cloud</h4>
                 <p>
                     联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:400px;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
             </div>
 
             </div>

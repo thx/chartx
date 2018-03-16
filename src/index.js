@@ -1,5 +1,5 @@
 //图表皮肤
-import theme from "./theme"
+import globalTheme from "./theme"
 //空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
 import emptyCoord from "./coord/index"
 
@@ -23,6 +23,7 @@ import MarkPoint from "./components/markpoint/index"
 import Anchor from "./components/anchor/index"
 import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
+import Theme from "./components/theme/index"
 
 var coord = {
     rect : Rect,
@@ -39,6 +40,7 @@ var graphs = {
 }
 
 var components = {
+    theme : Theme,
     legend : Legend,
     dataZoom : DataZoom,
     markLine : MarkLine,
@@ -52,7 +54,7 @@ var components = {
 //如果数据库中有项目皮肤
 var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
 if( projectTheme && projectTheme.length ){
-    theme.set( projectTheme );
+    globalTheme.set( projectTheme );
 };
 //皮肤设定end -----------------
 

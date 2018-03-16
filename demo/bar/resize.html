@@ -49,7 +49,7 @@
                 
                 ];
                 var options = {
-                    //theme : [],
+                    theme : [],
                     coord : {
                         type : "rect",
                         xAxis : {
@@ -117,7 +117,10 @@
                 
                 window.bar = Chartx.create("canvasTest" , data , options)
                 
-                            
+                setTimeout( function(){
+                    $("#canvasTest").width(600);
+                    bar.resize();
+                } , 3000)
 
             </textarea></form>
         </td>

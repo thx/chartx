@@ -3,7 +3,6 @@ import Canvax from "canvax2d"
 import xAxisConstructor from "../xaxis/index"
 import yAxisConstructor from "../yaxis/index"
 import Grid from "../descartes_grid/index"
-import Theme from "../../theme"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
@@ -416,11 +415,12 @@ export default class Descartes_Component extends coorBase
             var clone_fields = _.clone( fields );
             for(var i = 0 , l=fields.length ; i<l ; i++) {
                 if( _.isString( fields[i] ) ){
+                    
                     clone_fields[i] = {
                         field : fields[i],
                         enabled : true,
                         yAxis : me._getYaxisOfField( fields[i] ),
-                        color : Theme.colors[ fieldInd ],
+                        color : me.root._theme[ fieldInd ],
                         ind : fieldInd++
                     }
                 }

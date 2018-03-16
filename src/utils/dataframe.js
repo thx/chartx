@@ -14,7 +14,7 @@ const _ = Canvax._;
 
 export default function( data ){
     
-    var dataFrame  = {    //数据框架集合
+    var dataFrame  = {        //数据框架集合
         org           : [],   //最原始的数据  
         data          : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
         getRowData    : _getRowData,

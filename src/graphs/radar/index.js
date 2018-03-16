@@ -16,12 +16,14 @@ export default class RadarGraphs extends GraphsBase
         this.enabledField = null;
 
         this.line = {
-            enabled : true,
-            lineWidth : 2,
+            shapeType   : "brokenLine",
+            enabled     : true,
+            lineWidth   : 2,
             strokeStyle :null
         };
         this.area = {
-            enabled : true,
+            shapeType : "path",
+            enabled   : true,
             fillStyle : null,
             fillAlpha : 0.1
         };

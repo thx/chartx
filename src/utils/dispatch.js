@@ -1,109 +1,84 @@
-/*
-* Dispatch
-*/
-function Dispatch(types) {
-    var i = -1,
-        n = types.length,
-        callbacksByType = {},
-        callbackByName = {},
-        type,
-        that = this;
-
-    that.on = function(type, callback) {
-        type = parseType(type);
-
-        // Return the current callback, if any.
-        if (arguments.length < 2) {
-            return (callback = callbackByName[type.name]) && callback.value;
-        }
-
-        // If a type was specified…
-        if (type.type) {
-            var callbacks = callbacksByType[type.type],
-                callback0 = callbackByName[type.name],
-                i;
-
-            // Remove the current callback, if any, using copy-on-remove.
-            if (callback0) {
-                callback0.value = null;
-                i = callbacks.indexOf(callback0);
-                callbacksByType[type.type] = callbacks = callbacks.slice(0, i).concat(callbacks.slice(i + 1));
-                delete callbackByName[type.name];
-            }
-
-            // Add the new callback, if any.
-            if (callback) {
-                callback = {
-                    value: callback
-                };
-                callbackByName[type.name] = callback;
-                callbacks.push(callback);
-            }
-        }
-
-        // Otherwise, if a null callback was specified, remove all callbacks with the given name.
-        else if (callback == null) {
-            for (var otherType in callbacksByType) {
-                if (callback = callbackByName[otherType + type.name]) {
-                    callback.value = null;
-                    var callbacks = callbacksByType[otherType],
-                        i = callbacks.indexOf(callback);
-                    callbacksByType[otherType] = callbacks.slice(0, i).concat(callbacks.slice(i + 1));
-                    delete callbackByName[callback.name];
-                }
-            }
-        }
-
-        return that;
-    };
-
-    while (++i < n) {
-        type = types[i] + "";
-        if (!type || (type in that)) throw new Error("illegal or duplicate type: " + type);
-        callbacksByType[type] = [];
-        that[type] = applier(type);
-    }
-
-    function parseType(type) {
-        var i = (type += "").indexOf("."),
-            name = type;
-        if (i >= 0) type = type.slice(0, i);
-        else name += ".";
-        if (type && !callbacksByType.hasOwnProperty(type)) throw new Error("unknown type: " + type);
-        return {
-            type: type,
-            name: name
-        };
-    }
-
-    function applier(type) {
-        return function() {
-            var callbacks = callbacksByType[type], // Defensive reference; copy-on-remove.
-                callback,
-                callbackValue,
-                i = -1,
-                n = callbacks.length;
-
-            while (++i < n) {
-                if (callbackValue = (callback = callbacks[i]).value) {
-                    callbackValue.apply(this, arguments);
-                }
-            }
-
-            return that;
-        };
-    }
-}
+var noop = {value: function() {}};
 
 function dispatch() {
-    return new Dispatch(arguments);
+  for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {
+    if (!(t = arguments[i] + "") || (t in _)) throw new Error("illegal type: " + t);
+    _[t] = [];
+  }
+  return new Dispatch(_);
 }
 
-dispatch.prototype = Dispatch.prototype; // allow instanceof
-/*
-* Dispatch end
-*/
+function Dispatch(_) {
+  this._ = _;
+}
 
-//TODO:来自d3的dispatch，后面可以替换为canvax的
+function parseTypenames(typenames, types) {
+  return typenames.trim().split(/^|\s+/).map(function(t) {
+    var name = "", i = t.indexOf(".");
+    if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
+    if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
+    return {type: t, name: name};
+  });
+}
+
+Dispatch.prototype = dispatch.prototype = {
+  constructor: Dispatch,
+  on: function(typename, callback) {
+    var _ = this._,
+        T = parseTypenames(typename + "", _),
+        t,
+        i = -1,
+        n = T.length;
+
+    // If no callback was specified, return the callback of the given type and name.
+    if (arguments.length < 2) {
+      while (++i < n) if ((t = (typename = T[i]).type) && (t = get(_[t], typename.name))) return t;
+      return;
+    }
+
+    // If a type was specified, set the callback for the given type and name.
+    // Otherwise, if a null callback was specified, remove callbacks of the given name.
+    if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
+    while (++i < n) {
+      if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);
+      else if (callback == null) for (t in _) _[t] = set(_[t], typename.name, null);
+    }
+
+    return this;
+  },
+  copy: function() {
+    var copy = {}, _ = this._;
+    for (var t in _) copy[t] = _[t].slice();
+    return new Dispatch(copy);
+  },
+  call: function(type, that) {
+    if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i = 0, n, t; i < n; ++i) args[i] = arguments[i + 2];
+    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+    for (t = this._[type], i = 0, n = t.length; i < n; ++i) t[i].value.apply(that, args);
+  },
+  apply: function(type, that, args) {
+    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+    for (var t = this._[type], i = 0, n = t.length; i < n; ++i) t[i].value.apply(that, args);
+  }
+};
+
+function get(type, name) {
+  for (var i = 0, n = type.length, c; i < n; ++i) {
+    if ((c = type[i]).name === name) {
+      return c.value;
+    }
+  }
+}
+
+function set(type, name, callback) {
+  for (var i = 0, n = type.length; i < n; ++i) {
+    if (type[i].name === name) {
+      type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
+      break;
+    }
+  }
+  if (callback != null) type.push({name: name, value: callback});
+  return type;
+}
 
 export default dispatch;
