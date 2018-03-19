@@ -556,7 +556,7 @@ export default class BarGraphs extends GraphsBase
         var _yAxis = this.yAxisAlign == "left" ? _coord._yAxisLeft : _coord._yAxisRight;
 
         //然后计算出对于结构的dataOrg
-        var dataOrg = this.root.dataFrame.getDataOrg( this.enabledField );
+        var dataOrg = this.dataFrame.getDataOrg( this.enabledField );
 
         //dataOrg和field是一一对应的
         _.each( dataOrg, function( hData, b ){
@@ -651,7 +651,7 @@ export default class BarGraphs extends GraphsBase
                         isLeaf : true,
                         xAxis  : _xAxis.getNodeInfoOfX( _x ),
                         nodeInd: i,
-                        rowData: me.root.dataFrame.getRowData( i )
+                        rowData: me.dataFrame.getRowData( i )
                     };
 
                     if( !me.data[ node.field ] ){

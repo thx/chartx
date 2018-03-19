@@ -110,12 +110,12 @@ export default class ScatGraphs extends GraphsBase
     {
         var tmplData = [];
 
-        var dataLen  = this.root.dataFrame.org.length - 1; //减去title fields行
+        var dataLen  = this.dataFrame.length;
         var xField = this.root._coord._xAxis.field;
 
         for( var i=0; i<dataLen; i++ ){
             
-            var rowData = this.root.dataFrame.getRowData(i);
+            var rowData = this.dataFrame.getRowData(i);
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
             var xPos = this.root._coord._xAxis.getPosX({ val : xValue });
@@ -171,7 +171,7 @@ export default class ScatGraphs extends GraphsBase
             if( _.isString( this.node.r ) && rowData[ this.node.r ] ){
                 //如果配置了某个字段作为r，那么就要自动计算比例
                 if( !this._rData && !this._rMaxValue && !this._rMinValue ){
-                    this._rData = this.root.dataFrame.getFieldData( this.node.r );
+                    this._rData = this.dataFrame.getFieldData( this.node.r );
                     this._rMaxValue = _.max( this._rData );
                     this._rMinValue = _.min( this._rData );
                 };

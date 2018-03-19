@@ -69,7 +69,7 @@ export default class RadarGraphs extends GraphsBase
     _widget()
     {
         var me = this;
-        var _coor = this.root._coord;
+        var _coord = this.root._coord;
 
         var groupInd = 0;
         _.each( this.data, function( list , field ){
@@ -81,7 +81,7 @@ export default class RadarGraphs extends GraphsBase
                 pointList.push([ node.point.x, node.point.y ]);
             } );
 
-            var fieldMap = _coor.getFieldMapOf( field );
+            var fieldMap = _coord.getFieldMapOf( field );
 
             var _strokeStyle = me._getStyle( me.line.strokeStyle , groupInd, fieldMap.color, fieldMap );
 
@@ -228,21 +228,21 @@ export default class RadarGraphs extends GraphsBase
     _trimGraphs()
     {
         var me = this;
-        var _coor = this.root._coord;
+        var _coord = this.root._coord;
 
         //用来计算下面的hLen
         this.enabledField = this.root._coord.getEnabledFields( this.field );
         
         var data = {}
         _.each( this.enabledField, function( field ){
-            var dataOrg = me.root.dataFrame.getFieldData(field);
-            var fieldMap = _coor.getFieldMapOf( field );
+            var dataOrg = me.dataFrame.getFieldData(field);
+            var fieldMap = _coord.getFieldMapOf( field );
             var arr = [];
 
-            _.each( _coor.aAxis.angleList , function( _a , i ){
+            _.each( _coord.aAxis.angleList , function( _a , i ){
                 //弧度
                 var _r = Math.PI * _a / 180;
-                var point = _coor.getPointInRadianOfR( _r, _coor.getROfNum(dataOrg[i]) );
+                var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
                 arr.push( {
                     field : field,
                     nodeInd : i,

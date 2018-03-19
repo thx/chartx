@@ -8,7 +8,7 @@
     //getRadianInPoint
 
     //获取某个弧度方向，半径为r的时候的point坐标点位置
-    //getPointInRadian
+    //getPointInRadianOfR
 
 //应用场景中一般需要用到的属性有
 //width, height, origin(默认为width/2,height/2)
@@ -61,7 +61,7 @@ export default class polarComponent extends coorBase
         };
 
         this.maxR = null;
-        this.rectRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
+        this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
 
         _.extend(true, this, opts);
 
@@ -93,6 +93,7 @@ export default class polarComponent extends coorBase
 
     draw()
     {
+        
         //先计算好要绘制的width,height, origin
         this._computeAttr();
 
@@ -247,15 +248,6 @@ export default class polarComponent extends coorBase
         var rootWidth = this.root.width;
         var rootHeight = this.root.height;
 
-        if( !("origin" in this._opts) ){
-            //如果没有传入任何origin数据，则默认为中心点
-            //origin是相对画布左上角的
-            this.origin = {
-                x : rootWidth/2,
-                y : rootHeight/2
-            };
-        };
-
         if( !("width" in this._opts) ){
             this.width = rootWidth - _padding.left-_padding.right;
         };
@@ -269,9 +261,19 @@ export default class polarComponent extends coorBase
         };
 
         //重置width和height ， 不能和上面的计算origin调换位置
-        if( this.rectRange ){
+        if( this.squareRange ){
             var _num = Math.min( this.width, this.height );
             this.width = this.height = _num;
+        };
+
+
+        if( !("origin" in this._opts) ){
+            //如果没有传入任何origin数据，则默认为中心点
+            //origin是相对画布左上角的
+            this.origin = {
+                x : rootWidth/2,
+                y : rootHeight/2
+            };
         };
 
         //计算maxR
@@ -302,8 +304,13 @@ export default class polarComponent extends coorBase
             //下面的坐标点都是已经origin为原点的坐标系统里
 
             //矩形的4边框线段
-            var origin = this.origin;
+            var _padding = this.root.padding;
+            var origin = {
+                x : this.origin.x - _padding.left,
+                y : this.origin.y - _padding.top
+            };
             var x,y;
+            
 
             //于上边界的相交点
             //最多有两个交点
@@ -394,7 +401,11 @@ export default class polarComponent extends coorBase
 
     _checkPointInRect(p)
     {
-        var origin = this.origin;
+        var _padding = this.root.padding;
+        var origin = {
+            x : this.origin.x - _padding.left,
+            y : this.origin.y - _padding.top
+        };
         var _tansRoot = { x : p.x + origin.x , y: p.y + origin.y };
         return !( _tansRoot.x < 0 || _tansRoot.x > this.width || _tansRoot.y < 0 || _tansRoot.y > this.height );
     }
@@ -409,7 +420,7 @@ export default class polarComponent extends coorBase
             differenceR = (Math.PI*2 + to.radian) - start.radian;
         };
         var middleR = (start.radian+differenceR/2)%(Math.PI*2);
-        return this._checkPointInRect( this.getPointInRadian( middleR , r ) );
+        return this._checkPointInRect( this.getPointInRadianOfR( middleR , r ) );
     }
 
     //获取某个点相对圆心的弧度值

@@ -113,12 +113,18 @@ export default class Descartes extends CoordBase
         } );
         opts.coord.yAxis = _lys.concat( _rys );
 
+        var _orgDataLen = this._data.length; //如果原数据是json格式
+        if( _.isArray( this._data[0] )){
+            //如果原数据是行列式
+            _orgDataLen = this._data.length - 1;
+        };
+
         //预设dataZoom的区间数据
         this.dataZoom = {
             h: 25,
             range: {
                 start: 0,
-                end: this._data.length - 1 -1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
+                end: _orgDataLen -1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
             }
         };
         

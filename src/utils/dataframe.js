@@ -15,7 +15,8 @@ const _ = Canvax._;
 export default function( data ){
     
     var dataFrame  = {        //数据框架集合
-        org           : [],   //最原始的数据  
+        length        : 0,
+        org           : [],   //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
         data          : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
         getRowData    : _getRowData,
         getFieldData  : _getFieldData,
@@ -30,6 +31,9 @@ export default function( data ){
     //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
     if( data.length > 0 && !_.isArray( data[0] ) ){
         data = parse2MatrixData(data);
+        dataFrame.length = data.length;
+    } else {
+        dataFrame.length = data.length - 1;
     };
 
     dataFrame.org = data;

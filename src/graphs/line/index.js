@@ -90,7 +90,7 @@ export default class LineGraphs extends GraphsBase
             //var maxValue = 0;
 
             //单条line的全部data数据
-            var _lineData = me.root.dataFrame.getFieldData(field);
+            var _lineData = me.dataFrame.getFieldData(field);
             if( !_lineData ) return;
 
             var _data = [];

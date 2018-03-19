@@ -122,9 +122,9 @@ export default class PieGraphs extends GraphsBase
         var _coor = me.root._coord;
 
         var data = [];
-        var dataFrame = me.root.dataFrame;
+        var dataFrame = me.dataFrame;
         
-        for( var i=0,l=dataFrame.org.length-1; i<l; i++ ){
+        for( var i=0,l=dataFrame.length; i<l; i++ ){
             var rowData = dataFrame.getRowData(i);
             var layoutData = {
                 rowData       : rowData,//把这一行数据给到layoutData引用起来

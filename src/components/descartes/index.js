@@ -423,6 +423,7 @@ export default class Descartes_Component extends coorBase
                         color : me.root._theme[ fieldInd ],
                         ind : fieldInd++
                     }
+                    
                 }
                 if( _.isArray( fields[i] ) ){
                     clone_fields[i] = _set( fields[i], fieldInd );

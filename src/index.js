@@ -14,6 +14,7 @@ import Scat from "./graphs/scat/index"
 import Pie from "./graphs/pie/index"
 import Radar from "./graphs/radar/index"
 import Cloud from "./graphs/cloud/index"
+import Planet from "./graphs/planet/index"
 
 //components
 import Legend from "./components/legend/index"
@@ -36,7 +37,8 @@ var graphs = {
     scat  : Scat,
     pie   : Pie,
     radar : Radar,
-    cloud : Cloud
+    cloud : Cloud,
+    planet: Planet 
 }
 
 var components = {
@@ -49,6 +51,7 @@ var components = {
     tips : Tips,
     barTgi : BarTgi
 }
+
 
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤
