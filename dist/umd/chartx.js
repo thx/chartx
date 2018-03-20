@@ -17873,7 +17873,7 @@ var PlanetGraphs = function (_GraphsBase) {
         key: "drawBack",
         value: function drawBack() {
             var me = this;
-
+            debugger;
             if (me.grid.rings.scale.length == 1) {
 
                 //如果只有一个，那么就强制添加到3个
