@@ -360,9 +360,9 @@ export default class PlanetGroup
                     x : point.x,
                     y : point.y,
                     r : r,
-                    fillStyle: me._getProp( me.node.fillStyle , i , ii , p.data ),
-                    lineWidth : me._getProp( me.node.lineWidth , i , ii , p.data ),
-                    strokeStyle : me._getProp( me.node.strokeStyle , i , ii , p.data ),
+                    fillStyle: me._getProp( me.node.fillStyle , i , ii , p ),
+                    lineWidth : me._getProp( me.node.lineWidth , i , ii , p ),
+                    strokeStyle : me._getProp( me.node.strokeStyle , i , ii , p ),
                     cursor: "pointer"
                 };
 

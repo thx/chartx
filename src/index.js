@@ -72,6 +72,17 @@ var Chartx = {
         chart = new Coord( el, data, opts, graphs, components );
         chart && chart.draw();
         return chart;
+    },
+    options : {},
+    getOptions : function( chartPark_cid ){
+        //chartPark_cid,chartpark中的图表id
+        var opts = {};
+        _.extend( true, opts, this[ chartPark_cid ] || {} );
+        return opts;
+    },
+    instances : {},
+    getChart : function( chartId ){
+
     }
 };
 
