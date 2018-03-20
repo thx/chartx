@@ -138,7 +138,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             return s[ this.groupInd ]
         }
         if (_.isFunction(s)) {
-            return s.apply( this , [ me.getNodeInfoAt( nodeInd ) ] );
+            return s.apply( this , [ this.getNodeInfoAt( nodeInd ) ] );
         }
         return s
     }

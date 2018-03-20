@@ -13766,7 +13766,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                 return s[this.groupInd];
             }
             if (_$19.isFunction(s)) {
-                return s.apply(this, [me.getNodeInfoAt(nodeInd)]);
+                return s.apply(this, [this.getNodeInfoAt(nodeInd)]);
             }
             return s;
         }
@@ -17288,6 +17288,14 @@ var PlanetGroup = function () {
         key: "_trimGraphs",
         value: function _trimGraphs() {
             var me = this;
+
+            if ((this._coord.maxR - this.rRange.to) / (this.pit.r * 2) < this.groupLen - 1 - this.iGroup) {
+                //要保证后面的group至少能有意个ringNum
+                this.rRange.to = this._coord.maxR - (this.groupLen - 1 - this.iGroup) * this.pit.r * 2;
+            }
+            if (this.rRange.to - this.rRange.start < this.pit.r * 2) {
+                this.rRange.to = this.rRange.start + this.pit.r * 2;
+            }
 
             //计算该group中可以最多分布多少ring
             if (!this.maxRingNum) {
