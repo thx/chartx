@@ -17869,7 +17869,7 @@ var PlanetGraphs = function (_GraphsBase) {
         key: "drawBack",
         value: function drawBack() {
             var me = this;
-            debugger;
+
             if (me.grid.rings.scale.length == 1) {
 
                 //如果只有一个，那么就强制添加到3个
@@ -17878,9 +17878,6 @@ var PlanetGraphs = function (_GraphsBase) {
                 for (var i = 0; i < me.grid.rings.count; i++) {
                     me.grid.rings.scale.push({
                         r: me.center.r + _diffR * (i + 1)
-                        //lineWidth   : me._getBackProp( me.grid.rings.lineWidth , i),
-                        //strokeStyle : me._getBackProp( me.grid.rings.strokeStyle , i),
-                        //fillStyle   : me._getBackProp( me.grid.rings.fillStyle , i)
                     });
                 }
             } else {
@@ -17901,7 +17898,6 @@ var PlanetGraphs = function (_GraphsBase) {
                 }));
             }
 
-            debugger;
             //如果back.rays.count非0， 则绘制从圆心出发的射线
             if (me.grid.rays.count > 1) {
                 var cx = this.root._coord.origin.x;
