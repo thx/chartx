@@ -20,7 +20,8 @@ export default class CloudGraphs extends GraphsBase
             shapeType   : "text", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
             fontFamily  : "Impact",
             fontColor   : function( nodeData ){
-                return me.root._theme[ nodeData.nodeInd % nodeData.dataLen ]
+                return me.root._theme[ nodeData.nodeInd % (me.root._theme.length-1) ]
+                //return me.root._theme[ nodeData.nodeInd % nodeData.dataLen ]
             },
             fontSize    : function(){
                 //fontSize默认12-50的随机值
