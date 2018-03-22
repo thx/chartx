@@ -34,6 +34,7 @@ export default class LineGraphs extends GraphsBase
 
     draw(opts)
     {
+        !opts && (opts ={});
         this.width = opts.width;
         this.height = opts.height;
         _.extend( true, this.origin, opts.origin );
@@ -43,9 +44,13 @@ export default class LineGraphs extends GraphsBase
 
         this.data = this._trimGraphs();
 
-        this._setGroupsForYfield( this.data );
+        this._setGroupsForYfield( this.data , null, opts );
 
-        this.grow();
+        if( this.animation && !opts.resize ){
+            this.grow();
+        } else {
+            this.fire("complete");
+        }
 
         return this;
         
@@ -202,9 +207,11 @@ export default class LineGraphs extends GraphsBase
        return this.groups[ this.getGroupIndex(field) ]
     }
 
-    _setGroupsForYfield(data , fields)
+    _setGroupsForYfield(data , fields, opts)
     {
         var me = this;
+
+        !opts && (opts ={});
 
         if( fields ){
             //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
@@ -236,7 +243,9 @@ export default class LineGraphs extends GraphsBase
                 me.width
             );
 
-            group.draw( {}, g.data );
+            group.draw( {
+                animation : me.animation && !opts.resize
+            }, g.data );
 
             var insert = false;
             //在groups数组中插入到比自己_groupInd小的元素前面去

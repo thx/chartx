@@ -34,7 +34,7 @@ export default class Coord extends Chart
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
-    draw( )
+    draw( opts )
     {
         if( this._opts.theme ){
             //如果用户有配置皮肤组件，优先级最高
@@ -42,10 +42,10 @@ export default class Coord extends Chart
             var _theme = new this.componentsMap.theme( this._opts.theme );
             this._theme = _theme.mergeTo( this._theme );
         };
-        this.initModule( );     //初始化模块  
-        this.initComponents( ); //初始化组件, 来自己chart.js模块
-        this.startDraw( );      //开始绘图
-        this.drawComponents( ); //绘图完，开始绘制插件，来自己chart.js模块
+        this.initModule( opts );     //初始化模块  
+        this.initComponents( opts ); //初始化组件, 来自己chart.js模块
+        this.startDraw( opts );      //开始绘图
+        this.drawComponents( opts ); //绘图完，开始绘制插件，来自己chart.js模块
 
         if( this._coord && this._coord.horizontal ){
             this._horizontal();
@@ -54,7 +54,7 @@ export default class Coord extends Chart
         this.inited = true;
     }
 
-    initModule(opt)
+    initModule(opts)
     {
         var me = this
         //首先是创建一个坐标系对象
@@ -70,10 +70,10 @@ export default class Coord extends Chart
         } );
     }
 
-    startDraw(opt)
+    startDraw(opts)
     {
         var me = this;
-        !opt && (opt ={});
+        !opts && (opts ={});
         var _coord = this._coord;
 
         var width = this.width - this.padding.left - this.padding.right;
@@ -82,7 +82,7 @@ export default class Coord extends Chart
 
         if( this._coord ){
             //先绘制好坐标系统
-            this._coord.draw( opt );
+            this._coord.draw( opts );
             width = this._coord.width;
             height = this._coord.height;
             origin = this._coord.origin;
@@ -99,10 +99,11 @@ export default class Coord extends Chart
             });
             
             _g.draw({
-                width : width,
-                height: height,
-                origin: origin,
-                inited: me.inited
+                width  : width,
+                height : height,
+                origin : origin,
+                inited : me.inited,
+                resize : opts.trigger == "resize"
             });
 
         } );
@@ -130,46 +131,10 @@ export default class Coord extends Chart
     }
 
     //添加水印
-    _init_components_matermark( waterMarkOpt )
+    _init_components_watermark( waterMarkOpt )
     {
-        var text = waterMarkOpt.content || "chartx";
-        var sp = new Canvax.Display.Sprite({
-            id : "watermark"
-        });
-        var textEl = new Canvax.Display.Text( text , {
-            context: {
-                fontSize: waterMarkOpt.fontSize || 20,
-                strokeStyle : waterMarkOpt.strokeStyle || "#ccc",
-                lineWidth : waterMarkOpt.lineWidth || 2
-            }
-        });
-
-        var textW = textEl.getTextWidth();
-        var textH = textEl.getTextHeight();
-
-        var rowCount = parseInt(this.height / (textH*5)) +1;
-        var coluCount = parseInt(this.width / (textW*1.5)) +1;
-
-        for( var r=0; r< rowCount; r++){
-            for( var c=0; c< coluCount; c++){
-                //TODO:text 的 clone有问题
-                //var cloneText = textEl.clone();
-                var _textEl = new Canvax.Display.Text( text , {
-                    context: {
-                        rotation : 45,
-                        fontSize: waterMarkOpt.fontSize || 25,
-                        strokeStyle : waterMarkOpt.strokeStyle || "#ccc",
-                        lineWidth : waterMarkOpt.lineWidth || 0,
-                        fillStyle : waterMarkOpt.fillStyle || "#ccc",
-                        globalAlpha: waterMarkOpt.globalAlpha || 0.1
-                    }
-                });
-                _textEl.context.x = textW*1.5*c + textW*.25;
-                _textEl.context.y = textH*5*r ;
-                sp.addChild( _textEl );
-            }
-        }
-        this.stage.addChild( sp );
+        var _water = new this.componentsMap.waterMark( waterMarkOpt, this );
+        this.stage.addChild( _water.spripte );
     }
 
     //设置图例 begin
@@ -235,6 +200,7 @@ export default class Coord extends Chart
             type : "legend",
             plug : _legend
         } );
+
         me.stage.addChild( _legend.sprite );
     }
 

@@ -12,11 +12,11 @@ const _ = Canvax._;
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
-    constructor( fieldMap, groupInd, opt, ctx, h, w )
+    constructor( fieldMap, groupInd, opts, ctx, h, w )
     {
         super();
 
-        this._opt = opt;
+        this._opt = opts;
         this.fieldMap = fieldMap;
         this.field = null; //在extend之后要重新设置
         this.groupInd = groupInd;
@@ -27,8 +27,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this.w = w;
         this.h = h;
         this.y = 0;
-
-        this.animation = true;
 
         this.line = { //线
             enabled: 1,
@@ -72,16 +70,16 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
-        _.extend(true, this, opt );
+        _.extend(true, this, opts );
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
         this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
 
-        this.init(opt)
+        this.init(opts)
     }
 
-    init(opt)
+    init(opts)
     {
         
 
@@ -94,11 +92,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         });
     }
 
-    draw(opt, data)
+    draw(opts, data)
     {
-        _.extend(true, this, opt);
+        _.extend(true, this, opts);
         this.data = data;
-        this._widget();
+        this._widget( opts );
     }
 
 
@@ -240,7 +238,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
     /**
      * 
-     * @param {object} opt 
+     * @param {object} opts 
      * @param {data} data 
      * 
      * 触发这次reset的触发原因比如{name : 'datazoom', left:-1,right:1},  
@@ -290,16 +288,9 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         me._grow();
     }
 
-    _grow(callback)
+    _grow(callback , opts)
     {
         var me = this;
-        if (!me.animation || me._currPointList.length == 0) {
-            //TODO: 在禁止了animation的时候， 如果用户监听了complete事件，必须要加setTimeout，才能触发
-            setTimeout( function(){
-                callback && callback(me);
-            } , 10);
-            return;
-        };
 
         function _update( list ){
             me._bline.context.pointList = _.clone( list );
@@ -335,7 +326,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this._growTween = AnimationFrame.registTween({
             from: me._getPointPosStr(me._currPointList),
             to: me._getPointPosStr(me._pointList),
-            desc: me.field + ' animation',
+            desc: me.field,
             onUpdate: function( arg ) {
                 for (var p in arg) {
                     var ind = parseInt(p.split("_")[2]);
@@ -383,9 +374,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return list;
     }
 
-    _widget()
+    _widget( opts )
     {
         var me = this;
+        !opts && (opts ={});
         
         me._pointList = this._getPointList(me.data);
 
@@ -394,7 +386,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             return;
         };
         var list = [];
-        if (me.animation) {
+        if (opts.animation) {
             var firstNode = this._getFirstNode();
             var firstY = firstNode ? firstNode.y : undefined;
             for (var a = 0, al = me.data.length; a < al; a++) {

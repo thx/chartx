@@ -53,8 +53,6 @@ export default class descartesGrid extends Component
         this.xAxisSp      = null;                       //x轴上的线集合
         this.yAxisSp      = null;                       //y轴上的线集合
 
-        this.animation = true;
-
         this.init(opt);
     }
 

@@ -118,6 +118,8 @@ export default class Descartes_Component extends coorBase
 
     draw( opts )
     {
+        !opts && (opts ={});
+        
         //在绘制的时候，是已经能拿到xAxis的height了得
         var _padding = this.root.padding;
 
@@ -141,7 +143,8 @@ export default class Descartes_Component extends coorBase
                     x: _padding.left,
                     y: y
                 },
-                yMaxHeight: y - _padding.top
+                yMaxHeight: y - _padding.top,
+                resize : opts.trigger == "resize"
             });
             _yAxisW = this._yAxisLeft.width;
         }
@@ -153,7 +156,8 @@ export default class Descartes_Component extends coorBase
                     x: 0,
                     y: y
                 },
-                yMaxHeight: y - _padding.top
+                yMaxHeight: y - _padding.top,
+                resize : opts.trigger == "resize"
             });
             _yAxisRW = this._yAxisRight.width;
         };
@@ -164,7 +168,8 @@ export default class Descartes_Component extends coorBase
                 x : _padding.left + _yAxisW,
                 y : y
             },
-            width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right
+            width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
+            resize : opts.trigger == "resize"
         });
         
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
@@ -187,7 +192,8 @@ export default class Descartes_Component extends coorBase
             pos     : {
                 x   : this.origin.x,
                 y   : this.origin.y
-            }
+            },
+            resize : opts.trigger == "resize"
         } );
 
         if( this.horizontal ){

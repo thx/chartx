@@ -67,10 +67,13 @@ export default class CloudGraphs extends GraphsBase
 
     draw( opts )
     {
+        !opts && (opts ={});
         _.extend( true, this , opts );
         this._drawGraphs();
         this.sprite.context.x = this.width / 2;
         this.sprite.context.y = this.height / 2;
+
+        this.fire("complete");
     }
 
     _getFontSize(ind)

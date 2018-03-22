@@ -80,7 +80,7 @@
                     graphs : [
                     
                         {
-                            type : "bar",
+                            type : "line",
                             field : "click",
                             yAxisAlign : "left",
                             text : {
@@ -112,14 +112,21 @@
                             fontSize : 14
                         },
                         y : 180
-                    }]
+                    }],
+                    waterMark: {
+                        text : "我就是水印哈哈",
+                        globalAlpha : 0.2,  //可选
+                        fontColor : "#ccc"  //可选
+                    }
                 };
                 
                 window.bar = Chartx.create("canvasTest" , data , options)
                 
                 setTimeout( function(){
+                    
                     $("#canvasTest").width(600);
                     bar.resize();
+
                 } , 3000)
 
             </textarea></form>

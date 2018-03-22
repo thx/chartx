@@ -88,11 +88,15 @@ export default class PlanetGraphs extends GraphsBase
 
     draw( opts )
     {
+        !opts && (opts ={});
+
         _.extend( true, this , opts );
 
         this.drawGroups();
 
         this.drawCenter();
+
+        this.fire("complete");
     
     }
 

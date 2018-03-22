@@ -8,11 +8,11 @@ const _ = Canvax._;
 
 export default class yAxis extends Component
 {
-	constructor( opt, data ){
+	constructor( opts, data ){
 
         super();
 
-        this._opt = opt;
+        this._opt = opts;
         
         this.width   = null; //第一次计算后就会有值
 
@@ -82,12 +82,12 @@ export default class yAxis extends Component
 
         this.layoutType = "proportion"; // rule , peak, proportion
 
-        this.init(opt, data );
+        this.init(opts, data );
     }
 
-    init(opt, data )
+    init(opts, data )
     {
-        _.extend(true , this, opt);
+        _.extend(true , this, opts);
 
         //extend会设置好this.field
         //先要矫正子啊field确保一定是个array
@@ -173,9 +173,10 @@ export default class yAxis extends Component
         }
     }
 
-    draw(opt)
+    draw(opts)
     {
-        opt && _.extend(true, this, opt);
+        !opts && (opts ={});
+        opts && _.extend(true, this, opts);
         this._getLabel();
         this.height = this.yMaxHeight - this._getYAxisDisLine();
 
@@ -191,7 +192,7 @@ export default class yAxis extends Component
         this.height = parseInt( this.height );
         
         this._trimYAxis();
-        this._widget();
+        this._widget( opts );
 
         this.setX(this.pos.x);
         this.setY(this.pos.y);
@@ -589,41 +590,42 @@ export default class yAxis extends Component
 
     resetWidth(width)
     {
-        var self = this;
-        self.width = width;
-        if( self.align == "left" ){
-            self.rulesSprite.context.x = self.width;
+        var me = this;
+        me.width = width;
+        if( me.align == "left" ){
+            me.rulesSprite.context.x = me.width;
         }
     }
 
-    _widget()
+    _widget( opts )
     {
-        var self = this;
-        if (!self.scale.enabled) {
-            self.width = 0;
+        var me = this;
+        !opts && (opts ={});
+        if (!me.scale.enabled) {
+            me.width = 0;
             return;
         };
         
         var arr = this.layoutData;
-        self.maxW = 0;
-        self._label && self.sprite.addChild(self._label);
+        me.maxW = 0;
+        me._label && me.sprite.addChild(me._label);
         for (var a = 0, al = arr.length; a < al; a++) {
             var o = arr[a];
             var y = o.y;
             var content = o.content;
             
-            if (_.isFunction(self.scale.text.format)) {
-                content = self.scale.text.format(content, self);
+            if (_.isFunction(me.scale.text.format)) {
+                content = me.scale.text.format(content, me);
             };
             if( content === undefined || content === null ){
                 content = numAddSymbol( o.content );
             };  
 
-            var textAlign = (self.align == "left" ? "right" : "left");
+            var textAlign = (me.align == "left" ? "right" : "left");
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
-            if (self.scale.text.rotation == 90 || self.scale.text.rotation == -90) {
+            if (me.scale.text.rotation == 90 || me.scale.text.rotation == -90) {
                 textAlign = "center";
                 if (a == arr.length - 1) {
                     posy = y - 2;
@@ -638,24 +640,34 @@ export default class yAxis extends Component
 
             if( yNode ){
                 if( yNode._txt ){
-                    yNode._txt.animate({
-                        y: posy
-                    }, {
-                        duration: 500,
-                        delay: a*80,
-                        id: yNode._txt.id
-                    });
+
+                    if (me.animation && !opts.resize) {
+                        yNode._txt.animate({
+                            y: posy
+                        }, {
+                            duration: 500,
+                            delay: a*80,
+                            id: yNode._txt.id
+                        });
+                    } else {
+                        yNode._txt.context.y = posy;
+                    };
+                    
                     yNode._txt.resetText( content );
                 };
 
                 if( yNode._line ){
-                    yNode._line.animate({
-                        y: y
-                    }, {
-                        duration: 500,
-                        delay: a*80,
-                        id: yNode._line.id
-                    });
+                    if (me.animation && !opts.resize) {
+                        yNode._line.animate({
+                            y: y
+                        }, {
+                            duration: 500,
+                            delay: a*80,
+                            id: yNode._line.id
+                        });
+                    } else {
+                        yNode._line.context.y = y;
+                    }
                 };
 
             } else {
@@ -664,28 +676,28 @@ export default class yAxis extends Component
                 });
 
                 var aniFrom = 20;
-                if( content == self.baseNumber ){
+                if( content == me.baseNumber ){
                     aniFrom = 0;
                 };
 
-                if( content < self.baseNumber ){
+                if( content < me.baseNumber ){
                     aniFrom = -20;
                 };
 
                 var lineX = 0
-                if (self.scale.line.enabled) {
+                if (me.scale.line.enabled) {
                     //线条
-                    lineX = self.align == "left" ? - self.scale.line.width - self.scale.line.marginToLine : self.scale.line.marginToLine;
+                    lineX = me.align == "left" ? - me.scale.line.width - me.scale.line.marginToLine : me.scale.line.marginToLine;
                     var line = new Line({
                         context: {
                             x: lineX ,
                             y: y,
                             end : {
-                                x : self.scale.line.width,
+                                x : me.scale.line.width,
                                 y : 0
                             },
-                            lineWidth: self.scale.line.lineWidth,
-                            strokeStyle: self._getProp(self.scale.line.strokeStyle)
+                            lineWidth: me.scale.line.lineWidth,
+                            strokeStyle: me._getProp(me.scale.line.strokeStyle)
                         }
                     });
                     yNode.addChild(line);
@@ -693,17 +705,17 @@ export default class yAxis extends Component
                 };
 
                 //文字
-                var txtX = self.align == "left" ? lineX - self.scale.text.marginToLine : lineX + self.scale.line.width + self.scale.text.marginToLine;
+                var txtX = me.align == "left" ? lineX - me.scale.text.marginToLine : lineX + me.scale.line.width + me.scale.text.marginToLine;
                 if( this.isH ){
-                    txtX = txtX + (self.align == "left"?-1:1)* 4
+                    txtX = txtX + (me.align == "left"?-1:1)* 4
                 };
                 var txt = new Canvax.Display.Text(content, {
-                    id: "yAxis_txt_" + self.align + "_" + a,
+                    id: "yAxis_txt_" + me.align + "_" + a,
                     context: {
                         x: txtX,
                         y: posy + aniFrom,
-                        fillStyle: self._getProp(self.scale.text.fontColor),
-                        fontSize: self.scale.text.fontSize,
+                        fillStyle: me._getProp(me.scale.text.fontColor),
+                        fontSize: me.scale.text.fontSize,
                         rotation: -Math.abs(this.scale.text.rotation),
                         textAlign: textAlign,
                         textBaseline: "middle",
@@ -713,23 +725,23 @@ export default class yAxis extends Component
                 yNode.addChild(txt);
                 yNode._txt = txt;
 
-                self.maxW = Math.max(self.maxW, txt.getTextWidth());
-                if (self.scale.text.rotation == 90 || self.scale.text.rotation == -90) {
-                    self.maxW = Math.max(self.maxW, txt.getTextHeight());
+                me.maxW = Math.max(me.maxW, txt.getTextWidth());
+                if (me.scale.text.rotation == 90 || me.scale.text.rotation == -90) {
+                    me.maxW = Math.max(me.maxW, txt.getTextHeight());
                 };
 
                 //这里可以由用户来自定义过滤 来 决定 该node的样式
-                _.isFunction(self.filter) && self.filter({
-                    layoutData: self.layoutData,
+                _.isFunction(me.filter) && me.filter({
+                    layoutData: me.layoutData,
                     index: a,
                     txt: txt,
                     line: line
                 });
 
-                self.rulesSprite.addChild(yNode);
+                me.rulesSprite.addChild(yNode);
 
            
-                if (self.animation) {
+                if (me.animation && !opts.resize) {
                     txt.animate({
                         globalAlpha: 1,
                         y: txt.context.y - aniFrom
@@ -747,25 +759,25 @@ export default class yAxis extends Component
         };
 
         //把 rulesSprite.children中多余的给remove掉
-        if( self.rulesSprite.children.length > arr.length ){
-            for( var al = arr.length,pl = self.rulesSprite.children.length;al<pl;al++  ){
-                self.rulesSprite.getChildAt( al ).remove();
+        if( me.rulesSprite.children.length > arr.length ){
+            for( var al = arr.length,pl = me.rulesSprite.children.length;al<pl;al++  ){
+                me.rulesSprite.getChildAt( al ).remove();
                 al--,pl--;
             };
         };
 
-        self.maxW += self.scale.text.marginToLine;
-        if( self.width === null ){
-            self.width = parseInt( self.maxW + self.scale.text.marginToLine  );
-            if (self.scale.line.enabled) {
-                self.width += parseInt( self.scale.line.width + self.scale.line.marginToLine );
+        me.maxW += me.scale.text.marginToLine;
+        if( me.width === null ){
+            me.width = parseInt( me.maxW + me.scale.text.marginToLine  );
+            if (me.scale.line.enabled) {
+                me.width += parseInt( me.scale.line.width + me.scale.line.marginToLine );
             }
         }
 
         var _originX = 0;
-        if( self.align == "left" ){
-            self.rulesSprite.context.x = self.width;
-            _originX = self.width;
+        if( me.align == "left" ){
+            me.rulesSprite.context.x = me.width;
+            _originX = me.width;
         }
 
         //轴线
@@ -777,10 +789,10 @@ export default class yAxis extends Component
                 },
                 end         : {
                     x : _originX,
-                    y : -self.height
+                    y : -me.height
                 },
                 lineWidth   : this.scale.line.lineWidth,
-                strokeStyle : self._getProp(self.scale.line.strokeStyle)
+                strokeStyle : me._getProp(me.scale.line.strokeStyle)
             }
         });
         this.sprite.addChild( _axisline );

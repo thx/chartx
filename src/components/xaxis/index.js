@@ -66,7 +66,6 @@ export default class xAxis extends Component
         this.isH = false; //是否为横向转向的x轴
 
         this.animation = true;
-        this.resize = false;
 
         //layoutType == "proportion"的时候才有效
         this.maxVal = null; 
@@ -249,9 +248,8 @@ export default class xAxis extends Component
         this.sprite.context.x = this.pos.x;
         this.sprite.context.y = this.pos.y;
 
-        this._widget();
+        this._widget( opts );
 
-        this.resize = false;
     }
 
     _getLabel()
@@ -447,9 +445,10 @@ export default class xAxis extends Component
         return res;
     }
 
-    _widget()
+    _widget( opts )
     {
         if( !this.scale.enabled ) return;
+        !opts && (opts ={});
 
         var arr = this.layoutData
 
@@ -480,7 +479,7 @@ export default class xAxis extends Component
 
             //文字
             var textContext = {
-                x: o.text_x || o.x,
+                x: o._text_x || o.x,
                 y: y + 20,
                 fillStyle    : this.scale.text.fontColor,
                 fontSize     : this.scale.text.fontSize,
@@ -498,7 +497,6 @@ export default class xAxis extends Component
 
             if( xNode._txt ){
                 //_.extend( xNode._txt.context , textContext );
-                //debugger
                 xNode._txt.resetText( o.layoutText+"" );
                 if( this.animation ){
                     xNode._txt.animate( {
@@ -519,7 +517,7 @@ export default class xAxis extends Component
                 xNode.addChild( xNode._txt );
 
                 //新建的 txt的 动画方式
-                if (this.animation && !this.resize) {
+                if (this.animation && !opts.resize) {
                     xNode._txt.animate({
                         globalAlpha: 1,
                         y: xNode._txt.context.y - 20
@@ -673,7 +671,8 @@ export default class xAxis extends Component
             return;
         }
 
-        var l = arr.length;                
+        var l = arr.length;  
+        var textAlign = me.scale.text.textAlign;              
 
         function checkOver(i){
             var curr = arr[i];
@@ -692,27 +691,34 @@ export default class xAxis extends Component
                 if(!!me.scale.text.rotation){
                     nextWidth = 35
                     currWidth = 35
-                }
-
+                };
                 
-                var next_x = next.x;
-                if( me.scale.text.textAlign == "center" ){
-                    next_x = next.x - nextWidth/2;
+                //默认left
+                var next_left_x = next.x; //下个节点的起始
+                var curr_right_x = curr.x+currWidth; //当前节点的终点
+
+                if( textAlign == "center" ){
+                    next_left_x = next.x - nextWidth/2;
+                    curr_right_x = curr.x+currWidth/2;
+                };
+                if( textAlign  == "right" ){
+                    next_left_x = next.x - nextWidth;
+                    curr_right_x = curr.x;
                 };
 
                 if( ii == l-2 ){
                     //next是最后一个
-                    if( me.scale.text.textAlign == "center" && (next.x+nextWidth/2) > me.width ){
-                        next_x = me.width - nextWidth;
-                        next.text_x = me.width - nextWidth/2 + me._getRootPR();
+                    if( textAlign == "center" && (next.x+nextWidth/2) > me.width ){
+                        next_left_x = me.width - nextWidth;
+                        next._text_x = me.width - nextWidth/2;
                     }
-                    if( me.scale.text.textAlign == "left" && (next.x+nextWidth) > me.width ){
-                        next_x = me.width - nextWidth;
-                        next.text_x = me.width - nextWidth;
+                    if( textAlign == "left" && (next.x+nextWidth) > me.width ){
+                        next_left_x = me.width - nextWidth;
+                        next._text_x = me.width - nextWidth;
                     }
                 }
 
-                if( next_x < curr.x+currWidth/2 ){
+                if( next_left_x < curr_right_x ){
                     if( ii == l-2 ){
                         //最后一个的话，反把前面的给hide
                         next.visible = true;

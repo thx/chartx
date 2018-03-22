@@ -88,15 +88,22 @@ export default class ScatGraphs extends GraphsBase
 
     draw(opts)
     {
+        !opts && (opts ={});
+
         _.extend( true, this , opts );
         this.data = this._trimGraphs(); 
         this._widget();
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
-        if( this.animation ){
-            this.grow();
-        };
+        var me = this;
+        if( this.animation && !opts.resize ){
+            this.grow( function(){
+                me.fire("complete");
+            } );
+        } else {
+            this.fire("complete");
+        }
 
         return this;
     }
@@ -382,8 +389,10 @@ export default class ScatGraphs extends GraphsBase
     /**
      * 生长动画
      */
-    grow()
+    grow( callback )
     {
+        var i = 0;
+        var l = this.data.length-1;
         _.each( this.data , function( nodeData ){
             nodeData._node.animate({
                 //x : nodeData.x,
@@ -399,7 +408,13 @@ export default class ScatGraphs extends GraphsBase
                         this._line.context.start.y = opts.y+opts.r;
                     }
                 },
-                delay : Math.round(Math.random()*300)
+                delay : Math.round(Math.random()*300),
+                onComplete : function(){
+                    i = i+1;
+                    if( i == l ){
+                        callback && callback();
+                    }
+                }
             })
         } );
     }

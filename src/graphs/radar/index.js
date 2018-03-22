@@ -56,6 +56,8 @@ export default class RadarGraphs extends GraphsBase
 
     draw(opts)
     {
+        !opts && (opts ={});
+        
         var me = this;
         _.extend(true, this, opts);
         this.data = this._trimGraphs();
@@ -64,6 +66,8 @@ export default class RadarGraphs extends GraphsBase
 
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
+
+        this.fire("complete");
     }
 
     _widget()

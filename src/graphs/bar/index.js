@@ -187,10 +187,14 @@ export default class BarGraphs extends GraphsBase
 
     draw(opts)
     { 
+        !opts && (opts ={});
+
         //第二个data参数去掉，直接trimgraphs获取最新的data
         _.extend(true, this, opts);
 
         var me = this;
+
+        var animate = me.animation && !opts.resize;
 
         this.data = this._trimGraphs();
 
@@ -312,7 +316,7 @@ export default class BarGraphs extends GraphsBase
                         rectCxt.radius = [radiusR, radiusR, 0, 0];
                     };
 
-                    if (!me.animation) {
+                    if (!animate) {
                         delete rectCxt.scaleY;
                         rectCxt.y = finalPos.y;
                     };
@@ -389,7 +393,7 @@ export default class BarGraphs extends GraphsBase
                                 return;
                             };
 
-                            if (!me.animation && _.isNumber(content)) {
+                            if (!animate && _.isNumber(content)) {
                                 content = numAddSymbol(content);
                             };
 
@@ -428,7 +432,7 @@ export default class BarGraphs extends GraphsBase
                             infoWidth += _txt.getTextWidth() + 2;
                             infoHeight = Math.max(infoHeight, _txt.getTextHeight());
 
-                            if( me.animation ){
+                            if( animate ){
                                 var beginNumber = 0;
                                 if( content >=100 ){
                                     beginNumber = 100;
@@ -460,7 +464,7 @@ export default class BarGraphs extends GraphsBase
                         infosp.context.width = infoWidth;
                         infosp.context.height = infoHeight;
 
-                        if (!me.animation) {
+                        if (!animate) {
                             infosp.context.y = infosp._finalY;
                             infosp.context.x = infosp._finalX;
                             infosp.context.visible = true;
@@ -487,8 +491,9 @@ export default class BarGraphs extends GraphsBase
         this.grow(function() {
             me.fire("complete");
         }, {
-            delay: 0,
-            duration: 300
+            delay : 0,
+            duration : 300,
+            animate : animate
         });
 
         me._preDataLen = me._dataLen;
@@ -706,7 +711,7 @@ export default class BarGraphs extends GraphsBase
             };
         };
 
-        if (!this.animation) {
+        if (!opts.animate) {
             callback && callback(me);
             return;
         };

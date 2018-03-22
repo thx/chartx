@@ -47,24 +47,15 @@ export default class Chart extends Canvax.Event.EventDispatcher
 		    id: "main-chart-stage"
 		});
         this.canvax.addChild( this.stage );
-        
         //设置stage ---------------------------------------------------------end
 
-
-
-        //坐标系存放的容器
-        this.coordSprite = new Canvax.Display.Sprite({
-            id: 'coordSprite'
-        });
-        this.stage.addChild( this.coordSprite );
-        //graphs管理
-        this.graphsSprite = new Canvax.Display.Sprite({
-            id: 'graphsSprite'
-        });
-        this.stage.addChild( this.graphsSprite );
+        //构件好coord 和 graphs 的根容器
+        this.setCoord_Graphs_Sp();
+        
+        //初始化_graphs为空数组
         this._graphs = [];
+
         //组件管理机制,所有的组件都绘制在这个地方
-    
         this.components = [];
       
         this.inited = false;
@@ -73,14 +64,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this._theme = _.extend( [], theme.colors ); //theme.colors;  //皮肤对象，opts里面可能有theme皮肤组件
 
         this.init.apply(this, arguments);
-        
-        var me = this;
-        if( opts.waterMark ){
-            //添加水印的临时解决方案
-            setTimeout( function(){
-                me._init_components_matermark( opts.waterMark );
-            } , 50);
-        }
+
     }
 
     init()
@@ -96,6 +80,21 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.drawComponents();  //绘图完，开始绘制插件
         this.inited = true;
         */
+    }
+
+    setCoord_Graphs_Sp()
+    {
+        //坐标系存放的容器
+        this.coordSprite = new Canvax.Display.Sprite({
+            id: 'coordSprite'
+        });
+        this.stage.addChild( this.coordSprite );
+
+        //graphs管理
+        this.graphsSprite = new Canvax.Display.Sprite({
+            id: 'graphsSprite'
+        });
+        this.stage.addChild( this.graphsSprite );
     }
 
     /*
@@ -117,6 +116,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
      **/
     _clean()
     {
+        //保留所有的stage，stage下面得元素全部 destroy 掉
         for (var i=0,l=this.canvax.children.length;i<l;i++){
             var stage = this.canvax.getChildAt(i);
             for( var s = 0 , sl=stage.children.length ; s<sl ; s++){
@@ -124,6 +124,21 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 s--;
                 sl--;
             }
+        };
+
+        //因为上面的destroy把 this.coordSprite 和 this.graphsSprite 这两个预设的容器给destroy了
+        //所以要重新设置一遍准备好。
+        this.setCoord_Graphs_Sp();
+
+        this.components = []; //组件清空
+        this._graphs = [];    //绘图组件清空
+        this.canvax.domView.innerHTML = "";
+        //padding数据也要重置为起始值
+        this.padding = {
+            top   : 20,
+            right : 20,
+            bottom: 20,
+            left  : 20
         };
     }
 
@@ -135,7 +150,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         var _w = parseInt(this.el.offsetWidth);
         var _h = parseInt(this.el.offsetHeight);
         if( _w == this.width && _h == this.height ) return;
-        this._clean();
+        
         this.width = _w;
         this.height = _h;
         this.canvax.resize();
@@ -166,28 +181,11 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         this.dataFrame = this.initData( this._data );
 
-        this.components = []; //组件清空
-        this._graphs = [];    //绘图组件清空
         this._clean();
-        this.canvax.domView.innerHTML = "";
-
-        //padding数据也要重置为起始值
-        this.padding = {
-            top: 10,
-            right: 10,
-            bottom: 10,
-            left: 10
-        };
 
         this._init && this._init(this._node, this._data, this._opts);
-        this.draw();
+        this.draw( opts );
 
-        if( opts.waterMark ){
-            //添加水印的临时解决方案
-            setTimeout( function(){
-                me._init_components_matermark( opts.waterMark );
-            } , 50);
-        };
     }
 
 

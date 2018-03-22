@@ -75,11 +75,13 @@ export default class Pie extends Canvax.Event.EventDispatcher
  
         me._widget();
             
-        if (this.animation) {
+        /*
+        if ( opts.animation ) {
             me.grow();
         } else {
             me.completed = true;
         }
+        */
     }
 
     resetData( data )
@@ -313,7 +315,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
 
 
-    grow() 
+    grow( callback ) 
     {
         var me = this;
         
@@ -383,6 +385,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
             onComplete: function () {
                 me._showGrowLabel();
                 me.completed = true;
+
+                callback && callback();
             }
         });
     }

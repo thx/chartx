@@ -25,6 +25,7 @@ import Anchor from "./components/anchor/index"
 import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
 import Theme from "./components/theme/index"
+import WaterMark from "./components/watermark/index"
 
 var coord = {
     rect : Rect,
@@ -38,7 +39,7 @@ var graphs = {
     pie   : Pie,
     radar : Radar,
     cloud : Cloud,
-    planet: Planet 
+    planet: Planet
 }
 
 var components = {
@@ -49,7 +50,8 @@ var components = {
     markPoint : MarkPoint,
     anchor : Anchor,
     tips : Tips,
-    barTgi : BarTgi
+    barTgi : BarTgi,
+    waterMark : WaterMark
 }
 
 

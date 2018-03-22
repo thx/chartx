@@ -81,13 +81,23 @@ export default class PieGraphs extends GraphsBase
      */
     draw( opts )
     {
+        !opts && (opts ={});
+
         _.extend(true, this, opts);
         this._computerProps();
 
         //这个时候就是真正的计算布局用得layoutdata了
         this._pie = new Pie( this._opts, this , this._trimGraphs( this.data ) );
-     
         this._pie.draw( opts );
+
+        var me = this;
+        if( this.animation && !opts.resize ){
+            this._pie.grow( function(){
+                me.fire("complete");
+            } );
+        } else {
+            this.fire("complete");
+        }
         
         this.sprite.addChild( this._pie.sprite );
     }

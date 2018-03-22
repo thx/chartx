@@ -91,8 +91,9 @@ export default class polarComponent extends coorBase
 
     }
 
-    draw()
+    draw( opts )
     {
+        !opts && (opts ={});
         
         //先计算好要绘制的width,height, origin
         this._computeAttr();
