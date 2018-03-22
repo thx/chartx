@@ -7809,6 +7809,7 @@ var Chart = function (_Canvax$Event$EventDi) {
         _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
         _this.height = parseInt(_this.el.offsetHeight); //图表区域高
 
+
         //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
         _this.padding = {
@@ -7824,6 +7825,9 @@ var Chart = function (_Canvax$Event$EventDi) {
             webGL: false
         });
         _this.canvax.registEvent();
+
+        _this.id = _this.canvax.id;
+        _this.el.setAttribute("chart_id", _this.id);
 
         //设置stage ---------------------------------------------------------begin
         _this.stage = new canvax.Display.Stage({
@@ -19895,12 +19899,20 @@ if (projectTheme && projectTheme.length) {
 var Chartx = {
     create: function create(el, data, opts) {
         var chart = null;
+        var me = this;
         var Coord$$1 = Coord;
         if (opts.coord && opts.coord.type) {
             Coord$$1 = coord[opts.coord.type];
         }
         chart = new Coord$$1(el, data, opts, graphs, components);
-        chart && chart.draw();
+        if (chart) {
+            chart.draw();
+            me.instances[chart.id] = chart;
+            chart.on("destroy", function () {
+                me.instances[chart.id] = null;
+                delete me.instances[chart.id];
+            });
+        }
         return chart;
     },
     options: {},
@@ -19911,7 +19923,15 @@ var Chartx = {
         return opts;
     },
     instances: {},
-    getChart: function getChart(chartId) {}
+    getChart: function getChart(chartId) {
+        return this.instances[chartId];
+    },
+    resize: function resize() {
+        //调用全局的这个resize方法，会把当前所有的 chart instances 都执行一遍resize
+        for (var c in this.instances) {
+            this.instances[c].resize();
+        }
+    }
 };
 
 return Chartx;

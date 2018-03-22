@@ -67,12 +67,20 @@ if( projectTheme && projectTheme.length ){
 var Chartx = {
     create : function( el, data, opts ){
         var chart = null;
+        var me = this;
         var Coord = emptyCoord;
         if( opts.coord && opts.coord.type ){
             Coord = coord[ opts.coord.type ];
         };
         chart = new Coord( el, data, opts, graphs, components );
-        chart && chart.draw();
+        if( chart ){
+            chart.draw();
+            me.instances[ chart.id ] = chart;
+            chart.on("destroy" , function(){
+                me.instances[ chart.id ] = null;
+                delete me.instances[ chart.id ];
+            });
+        };
         return chart;
     },
     options : {},
@@ -84,7 +92,13 @@ var Chartx = {
     },
     instances : {},
     getChart : function( chartId ){
-
+        return this.instances[ chartId ];
+    },
+    resize : function(){
+        //调用全局的这个resize方法，会把当前所有的 chart instances 都执行一遍resize
+        for( var c in this.instances ){
+            this.instances[ c ].resize();
+        }
     }
 };
 

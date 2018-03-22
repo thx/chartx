@@ -26,6 +26,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.width = parseInt(this.el.offsetWidth) //图表区域宽
         this.height = parseInt(this.el.offsetHeight) //图表区域高
 
+    
+
         //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
         this.padding = {
@@ -41,6 +43,11 @@ export default class Chart extends Canvax.Event.EventDispatcher
 		    webGL : false
 		});
         this.canvax.registEvent();
+
+
+        this.id = this.canvax.id;
+        this.el.setAttribute("chart_id" , this.id);
+
         
         //设置stage ---------------------------------------------------------begin
 		this.stage = new Canvax.Display.Stage({
