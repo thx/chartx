@@ -94,7 +94,7 @@ export default class LineGraphs extends GraphsBase
         _.each( _.flatten( me.enabledField ) , function( field, i ){
             //var maxValue = 0;
 
-            
+            var fieldMap = me.root._coord.getFieldMapOf( field );
 
             //单条line的全部data数据
             var _lineData = me.dataFrame.getFieldData(field);
@@ -113,6 +113,7 @@ export default class LineGraphs extends GraphsBase
                 var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                 var node = {
+                    type     : "line",
                     iGroup   : i,
                     iNode    : b,
                     field    : field,
@@ -120,7 +121,7 @@ export default class LineGraphs extends GraphsBase
                     x        : x,
                     y        : y,
                     rowData  : me.dataFrame.getRowData( b ),
-                    color    : null
+                    color    : fieldMap.style
                 };
 
                 _data.push( node );
