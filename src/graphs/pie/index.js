@@ -150,7 +150,7 @@ export default class PieGraphs extends GraphsBase
                 name          : rowData[ me.nameField ],
                 fillStyle     : me.getColorByIndex(me.node.colors, i, l),
                 text          : null,    //绘制的时候再设置
-                nodeInd       : i
+                iNode       : i
             };
             data.push( layoutData );
         };
@@ -166,7 +166,7 @@ export default class PieGraphs extends GraphsBase
 
             //重新设定下ind
             _.each( data, function( d, i ){
-                d.nodeInd = i;
+                d.iNode = i;
             } );
         };
 
@@ -291,7 +291,7 @@ export default class PieGraphs extends GraphsBase
                     
                         quadrant: quadrant, //象限
                         labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
-                        nodeInd: j
+                        iNode: j
                     });
 
                     //这个时候可以计算下label，因为很多时候外部label如果是配置的
@@ -312,17 +312,17 @@ export default class PieGraphs extends GraphsBase
         };
     }
 
-    getColorByIndex(colors, nodeInd, len) 
+    getColorByIndex(colors, iNode, len) 
     {
-        if (nodeInd >= colors.length) {
+        if (iNode >= colors.length) {
             //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
-            if ((len - 1) % colors.length == 0 && (nodeInd % colors.length == 0)) {
-                nodeInd = nodeInd % colors.length + 1;
+            if ((len - 1) % colors.length == 0 && (iNode % colors.length == 0)) {
+                iNode = iNode % colors.length + 1;
             } else {
-                nodeInd = nodeInd % colors.length;
+                iNode = iNode % colors.length;
             }
         };
-        return colors[nodeInd];
+        return colors[iNode];
     }
 
     _getLabel( itemData )

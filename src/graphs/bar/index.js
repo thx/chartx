@@ -642,21 +642,21 @@ export default class BarGraphs extends GraphsBase
                     };
 
                     var node = {
-                        type   : "bar",
-                        value  : val,
-                        vInd   : v, //如果是堆叠图的话，这个node在堆叠中得位置
-                        vCount : vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
-                        field  : me._getTargetField(b, v, i, me.enabledField),
-                        fromX  : x,
-                        fromY  : fromY,
-                        x      : x,
-                        y      : y,
-                        width  : barW,
+                        type    : "bar",
+                        value   : val,
+                        vInd    : v, //如果是堆叠图的话，这个node在堆叠中得位置
+                        vCount  : vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
+                        field   : me._getTargetField(b, v, i, me.enabledField),
+                        fromX   : x,
+                        fromY   : fromY,
+                        x       : x,
+                        y       : y,
+                        width   : barW,
                         yBasePoint : _yAxis.basePoint,
-                        isLeaf : true,
-                        xAxis  : _xAxis.getNodeInfoOfX( _x ),
-                        nodeInd: i,
-                        rowData: me.dataFrame.getRowData( i )
+                        isLeaf  : true,
+                        xAxis   : _xAxis.getNodeInfoOfX( _x ),
+                        iNode : i,
+                        rowData : me.dataFrame.getRowData( i )
                     };
 
                     if( !me.data[ node.field ] ){

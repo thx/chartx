@@ -75,7 +75,7 @@ export default class RadarGraphs extends GraphsBase
         var me = this;
         var _coord = this.root._coord;
 
-        var groupInd = 0;
+        var iGroup = 0;
         _.each( this.data, function( list , field ){
 
             var group = {};
@@ -87,7 +87,7 @@ export default class RadarGraphs extends GraphsBase
 
             var fieldMap = _coord.getFieldMapOf( field );
 
-            var _strokeStyle = me._getStyle( me.line.strokeStyle , groupInd, fieldMap.color, fieldMap );
+            var _strokeStyle = me._getStyle( me.line.strokeStyle , iGroup, fieldMap.color, fieldMap );
 
             var polyCtx = {
                 pointList : pointList,
@@ -99,8 +99,8 @@ export default class RadarGraphs extends GraphsBase
                 polyCtx.strokeStyle = _strokeStyle;
             };
             if( me.area.enabled ){
-                polyCtx.fillStyle = me._getStyle( me.area.fillStyle , groupInd, fieldMap.color, fieldMap );
-                polyCtx.fillAlpha = me._getStyle( me.area.fillAlpha , groupInd, 1, fieldMap );
+                polyCtx.fillStyle = me._getStyle( me.area.fillStyle , iGroup, fieldMap.color, fieldMap );
+                polyCtx.fillAlpha = me._getStyle( me.area.fillAlpha , iGroup, 1, fieldMap );
             };
 
             var _poly = new Polygon({
@@ -141,7 +141,7 @@ export default class RadarGraphs extends GraphsBase
                         }
                     });
                     me.sprite.addChild( _node );
-                    _node.nodeInd = i;
+                    _node.iNode = i;
                     _node.nodeData = node;
                     _node._strokeStyle = _strokeStyle;
                     _node.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
@@ -150,7 +150,7 @@ export default class RadarGraphs extends GraphsBase
                         //图表触发，用来处理Tips
 
                         //这样就会直接用这个aAxisInd了，不会用e.point去做计算
-                        e.aAxisInd = this.nodeInd;
+                        e.aAxisInd = this.iNode;
                         e.eventInfo = {
                             nodes : [ this.nodeData ]
                         };
@@ -163,7 +163,7 @@ export default class RadarGraphs extends GraphsBase
 
             me.groups[ field ] = group;
 
-            groupInd++;
+            iGroup++;
         } );
     }
 
@@ -177,7 +177,7 @@ export default class RadarGraphs extends GraphsBase
             _.each( e.eventInfo.nodes, function( eventNode ){
                 if( me.data[ eventNode.field ] ){
                     _.each( me.data[ eventNode.field ] , function( n, i ){
-                        if( eventNode.nodeInd == i ){
+                        if( eventNode.iNode == i ){
                             me.focusOf(n);
                         }
                         //else {
@@ -202,7 +202,7 @@ export default class RadarGraphs extends GraphsBase
     {
         if( node.focused ) return;
         var me = this;
-        var _node = me.groups[ node.field ].nodes[ node.nodeInd ];
+        var _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r += 1;
         _node.context.fillStyle = me.node.strokeStyle;
         _node.context.strokeStyle = _node._strokeStyle;
@@ -212,7 +212,7 @@ export default class RadarGraphs extends GraphsBase
     {
         if( !node.focused ) return;
         var me = this;
-        var _node = me.groups[ node.field ].nodes[ node.nodeInd ];
+        var _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r -= 1;
         _node.context.fillStyle = _node._strokeStyle;
         _node.context.strokeStyle = me.node.strokeStyle;
@@ -249,7 +249,7 @@ export default class RadarGraphs extends GraphsBase
                 var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
                 arr.push( {
                     field : field,
-                    nodeInd : i,
+                    iNode : i,
                     focused : false,
                     value : dataOrg[i],
                     point : point,
@@ -261,17 +261,17 @@ export default class RadarGraphs extends GraphsBase
         return data;
     }
 
-    _getStyle( style, groupInd ,def, fieldMap )
+    _getStyle( style, iGroup ,def, fieldMap )
     {
         var _s = def;
         if( _.isString( style ) || _.isNumber( style ) ){
             _s = style;
         }
         if( _.isArray( style ) ){
-            _s = style[ groupInd ];
+            _s = style[ iGroup ];
         }
         if( _.isFunction( style ) ){
-            _s = style( groupInd, fieldMap );
+            _s = style( iGroup, fieldMap );
         }
         return _s;
     }

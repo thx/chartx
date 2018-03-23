@@ -482,7 +482,7 @@ export default class PlanetGroup
         } );
     }
 
-    _getRProp( r, ringInd, nodeInd, nodeData )
+    _getRProp( r, ringInd, iNode, nodeData )
     {
         var me = this;
 
@@ -502,10 +502,10 @@ export default class PlanetGroup
             
             return me.node.minR + (rVal-this.__rValMin)/(this.__rValMax-this.__rValMin) * (me.node.maxR - me.node.minR);
         };
-        return me._getProp(r , ringInd , nodeInd , nodeData);
+        return me._getProp(r , ringInd , iNode , nodeData);
     }
 
-    _getProp( p, ringInd, nodeInd, nodeData )
+    _getProp( p, ringInd, iNode, nodeData )
     {
         var iGroup = this.iGroup;
         if( _.isFunction( p ) ){

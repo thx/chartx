@@ -138,7 +138,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                         startAngle: item.startAngle,
                         endAngle: item.endAngle,
                         fillStyle: item.fillStyle,
-                        //nodeInd: item.nodeInd,
+                        //iNode: item.iNode,
                         cursor: "pointer"
                     },
                     id: 'sector' + i
@@ -181,7 +181,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
     {
         if( node.focused ) return;
         var me = this;
-        var sec = me.sectors[ node.nodeInd ];
+        var sec = me.sectors[ node.iNode ];
 
         sec.animate({
             x: node.outOffsetx,
@@ -200,7 +200,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         if( !node.focused ) return;
         var me = this;
 
-        var sec = me.sectors[ node.nodeInd ];
+        var sec = me.sectors[ node.iNode ];
         sec.animate({
             x: 0,
             y: 0
@@ -221,7 +221,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
             return;
         };
 
-        var sec = this.sectors[node.nodeInd];
+        var sec = this.sectors[node.iNode];
      
         if ( node.selected ) {
             return
@@ -240,7 +240,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
     unselectOf ( node , e ) 
     {
-        var sec = this.sectors[ node.nodeInd ];
+        var sec = this.sectors[ node.iNode ];
         if (!node.selected || !node.selectEnabled) {
             return
         };
@@ -319,7 +319,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
     {
         var me = this;
         
-        _.each(me.sectors, function (sec, nodeInd) {
+        _.each(me.sectors, function (sec, iNode) {
             if (sec.context) {
                 sec.context.r0 = 0;
                 sec.context.r = 0;
@@ -356,8 +356,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
                             secc.startAngle = _startAngle;
                             secc.endAngle = _startAngle + (_endAngle - _startAngle) * status.process;
                         } else {
-                            var lastEndAngle = function (nodeInd) {
-                                var lastIndex = nodeInd - 1;
+                            var lastEndAngle = function (iNode) {
+                                var lastIndex = iNode - 1;
                                 var lastSecc = me.sectors[lastIndex].context;
                                 if (lastIndex == 0) {
                                     return lastSecc ? lastSecc.endAngle : 0;

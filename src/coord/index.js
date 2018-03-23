@@ -87,6 +87,12 @@ export default class Coord extends Chart
             height = this._coord.height;
             origin = this._coord.origin;
         };
+
+        if( this.dataFrame.length == 0 ){
+            //如果没有数据，不需要绘制graphs
+            me.fire("complete");
+            return;
+        };
     
         var graphsCount = this._graphs.length;
         var completeNum = 0;

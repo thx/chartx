@@ -140,7 +140,7 @@ export default class ScatGraphs extends GraphsBase
                 },
                 field    : this.field,
                 color    : fieldMap.color,
-                nodeInd  : i,
+                iNode  : i,
 
                 focused  : false,
                 selected : false,
@@ -223,7 +223,7 @@ export default class ScatGraphs extends GraphsBase
     {
         var _style = style;
         if( _.isArray( style ) ){
-            _style = style[ nodeLayoutData.groupInd ]
+            _style = style[ nodeLayoutData.iGroup ]
         };
         if( _.isFunction( style ) ){
             _style = style( nodeLayoutData );
@@ -244,7 +244,7 @@ export default class ScatGraphs extends GraphsBase
     {
         var shapeType = this.node.shapeType;
         if( _.isArray( shapeType ) ){
-            shapeType = shapeType[ nodeLayoutData.groupInd ]
+            shapeType = shapeType[ nodeLayoutData.iGroup ]
         };
         if( _.isFunction( shapeType ) ){
             shapeType = shapeType( nodeLayoutData );
@@ -279,9 +279,9 @@ export default class ScatGraphs extends GraphsBase
             nodeData._node = _node;
 
             me.node.focus.enabled && _node.hover(function(e){
-                me.focusAt( this.nodeData.nodeInd );
+                me.focusAt( this.nodeData.iNode );
             } , function(e){
-                !this.nodeData.selected && me.unfocusAt( this.nodeData.nodeInd );
+                !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
             });
 
             _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {

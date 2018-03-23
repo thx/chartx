@@ -12,14 +12,14 @@ const _ = Canvax._;
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
-    constructor( fieldMap, groupInd, opts, ctx, h, w )
+    constructor( fieldMap, iGroup, opts, ctx, h, w )
     {
         super();
 
         this._opt = opts;
         this.fieldMap = fieldMap;
         this.field = null; //在extend之后要重新设置
-        this.groupInd = groupInd;
+        this.iGroup = iGroup;
         
         this._yAxis = fieldMap.yAxis;
         
@@ -74,15 +74,13 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
-        this.field = fieldMap.field; //groupInd 在yAxis.field中对应的值
+        this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
 
         this.init(opts)
     }
 
     init(opts)
     {
-        
-
         this.sprite = new Canvax.Display.Sprite();
         var me = this;
         this.sprite.on("destroy" , function(){
@@ -115,10 +113,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         });
     }
 
-    //styleType , normals , groupInd
-    _getColor(s, nodeInd)
+    //styleType , normals , iGroup
+    _getColor(s, iNode)
     {
-        var color = this._getProp(s, nodeInd);
+        var color = this._getProp(s, iNode);
         if (!color || color == "") {
             //这个时候可以先取线的style，和线保持一致
             color = this._getLineStrokeStyle();
@@ -130,31 +128,15 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return color;
     }
 
-    _getProp(s, nodeInd)
+    _getProp(s, iNode)
     {
         if (_.isArray(s)) {
-            return s[ this.groupInd ]
+            return s[ this.iGroup ]
         }
         if (_.isFunction(s)) {
-            return s.apply( this , [ this.getNodeInfoAt( nodeInd ) ] );
+            return s.apply( this , [ this.getNodeInfoAt( iNode ) ] );
         }
         return s
-    }
-
-    _createNodeInfo( ind )
-    {
-        var me = this;
-        var obj = {};
-        obj.type = "line";
-        obj.r = me._getProp(me.node.r, ind);
-        obj.fillStyle = me._getProp(me.node.fillStyle, ind) || "#ffffff";
-        obj.strokeStyle = me._getProp(me.node.strokeStyle, ind) || me._getLineStrokeStyle();
-        obj.color = obj.strokeStyle;
-        obj.lineWidth = me._getProp(me.node.lineWidth, ind) || 2;
-        obj.alpha = me._getProp(me.area.alpha, ind);
-        obj.field = me.field;
-        obj.groupInd = me.groupInd;
-        return obj
     }
 
 
@@ -162,78 +144,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     getNodeInfoAt($index)
     {
         var o = this.data[ $index ];
-
-        if (o && o.value != null && o.value != undefined && o.value !== "") {
-            return _.extend(o , this._createNodeInfo( $index ));
-        } else {
-            return null;
-        }
-    }
-
-    //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
-    getNodeInfoOfX( x )
-    {
-        var me = this;
-        var nodeInfo;
-        for( var i = 0,l = this.data.length; i<l; i++ ){
-            if( Math.abs( this.data[i].x - x) <= 1 ){
-                //左右相差不到1px的，都算
-                nodeInfo = this.getNodeInfoAt(i);
-                return nodeInfo;
-            }
-        };
-
-        var getPointFromXInLine = function( x , line ){
-            var p = {x : x, y: 0};
-            p.y = line[0][1] + ((line[1][1]-line[0][1])/(line[1][0]-line[0][0])) * (x - line[0][0]);
-            return p;
-        };
-
-        var point;
-        var search = function( points ){
-
-            if( x<points[0][0] || x>points.slice(-1)[0][0] ){
-                return;
-            };
-
-            var midInd = parseInt(points.length / 2);
-            if( Math.abs(points[midInd][0] - x ) <= 1 ){
-                point = {
-                    x: points[midInd][0],
-                    y: points[midInd][1]
-                };
-                return;
-            };
-            var _pl = [];
-            if( x > points[midInd][0] ){
-                if( x < points[midInd+1][0]){
-                    point = getPointFromXInLine( x , [ points[midInd] , points[midInd+1] ] );
-                    return;
-                } else {
-                    _pl = points.slice( midInd+1 );
-                }
-            } else {
-                if( x > points[midInd-1][0] ){
-                    point = getPointFromXInLine( x , [ points[midInd-1] , points[midInd] ] );
-                    return;
-                } else {
-                    _pl = points.slice( 0 , midInd );
-                }
-            };
-            search(_pl);
-
-        };
-        
-        search( this._bline.context.pointList );
-        
-        if(!point){
-            return null;
-        }
-
-        point.value = me._yAxis.getValFromYpos( point.y ); //null;
-        
-        //TODO:这里要优化下，这个x值可能刚好对应上了某个具体的index，，，而现在强制为-1是不对的
-        return _.extend( point, me._createNodeInfo( -1 ));
+        return o;
     }
 
     /**
@@ -299,25 +210,25 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             me._area.context.path = me._fillLine(me._bline);
             me._area.context.fillStyle = me._getFillStyle();
 
-            var nodeInd=0;
+            var iNode=0;
             _.each( list, function( point, i ){
                 if( _.isNumber( point[1] ) ){
                     if( me._circles ){
-                        var _circle = me._circles.getChildAt(nodeInd);
+                        var _circle = me._circles.getChildAt(iNode);
                         if( _circle ){
                             _circle.context.x = point[0];
                             _circle.context.y = point[1];
                         }
                     }
                     if( me._texts ){
-                        var _text = me._texts.getChildAt(nodeInd);
+                        var _text = me._texts.getChildAt(iNode);
                         if( _text ){
                             _text.context.x = point[0];
                             _text.context.y = point[1] - 3;
                             me._checkTextPos( _text , i );
                         }
                     }
-                    nodeInd++;
+                    iNode++;
                 }
             } );
         };
@@ -572,7 +483,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 this.sprite.addChild(this._circles);
             }
             
-            var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+            var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
             for (var a = 0, al = list.length; a < al; a++) {
                 var _point = me._currPointList[a];
                 if( !_point || !_.isNumber( _point[1] ) ){
@@ -589,7 +500,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     fillStyle: me.node.fillStyle
                 };
 
-                var circle = me._circles.children[ nodeInd ];
+                var circle = me._circles.children[ iNode ];
                 if( circle ){
                     _.extend( circle.context , context );
                 } else {
@@ -599,7 +510,6 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     me._circles.addChild(circle);
                 };
                  
-
                 if (me.node.corner) { //拐角才有节点
                     var y = me._pointList[a][1];
                     var pre = me._pointList[a - 1];
@@ -611,12 +521,12 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     }
                 };
 
-                nodeInd++;
+                iNode++;
             };
 
             //把过多的circle节点删除了
-            if( me._circles.children.length > nodeInd ){
-                for( var i = nodeInd,l=me._circles.children.length; i<l; i++ ){
+            if( me._circles.children.length > iNode ){
+                for( var i = iNode,l=me._circles.children.length; i<l; i++ ){
                     me._circles.children[i].destroy();
                     i--;
                     l--;
@@ -637,7 +547,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 this.sprite.addChild(this._texts);
             }
             
-            var nodeInd = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+            var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
             for (var a = 0, al = list.length; a < al; a++) {
                 var _point = list[a];
                 if( !_point || !_.isNumber( _point[1] ) ){
@@ -667,7 +577,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     continue;
                 }
 
-                var text = this._texts.children[ nodeInd ];
+                var text = this._texts.children[ iNode ];
                 if( text ){
                     text.resetText( content );
                     _.extend( text.context, context );
@@ -678,12 +588,12 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     me._texts.addChild(text);
                     me._checkTextPos( text , a );
                 }
-                nodeInd++;
+                iNode++;
             };
 
             //把过多的circle节点删除了
-            if( me._texts.children.length > nodeInd ){
-                for( var i = nodeInd,l=me._texts.children.length; i<l; i++ ){
+            if( me._texts.children.length > iNode ){
+                for( var i = iNode,l=me._texts.children.length; i<l; i++ ){
                     me._texts.children[i].destroy();
                     i--;
                     l--;
