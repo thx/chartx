@@ -1,3 +1,4 @@
+
 //图表皮肤
 import globalTheme from "./theme"
 //空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
@@ -86,8 +87,23 @@ var Chartx = {
     options : {},
     getOptions : function( chartPark_cid ){
         //chartPark_cid,chartpark中的图表id
-        var opts = {};
-        _.extend( true, opts, this[ chartPark_cid ] || {} );
+        var JsonSerialize = {
+            prefix: '[[JSON_FUN_PREFIX_',
+            suffix: '_JSON_FUN_SUFFIX]]'
+        };
+        var parse = function(string){
+            return JSON.parse( string ,function(key, value){
+                if((typeof value === 'string') && 
+                   (value.indexOf(JsonSerialize.suffix) > 0) && 
+                   (value.indexOf(JsonSerialize.prefix) == 0)
+                ){
+                    return (new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, '')))();
+                }
+                
+                return value;
+            })||{};
+        };
+        var opts = parse( decodeURIComponent( this.options[ chartPark_cid ] || {} ) );
         return opts;
     },
     instances : {},

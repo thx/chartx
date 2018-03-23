@@ -604,15 +604,22 @@ export default class xAxis extends Component
     _setTextMaxWidth()
     {
         var arr = this._layoutDataSection;
-        var maxLenText = arr[0];
+        var _maxLenText = arr[0]; 
+        //第一个值可能是null, undefined
+        if( _maxLenText === null || _maxLenText === undefined ){
+            _maxLenText = "";
+        };
 
         for (var a = 0, l = arr.length; a < l; a++) {
-            if ((arr[a]+'').length > maxLenText.length) {
-                maxLenText = arr[a];
+            if( arr[a] === null || arr[a] === undefined ){
+                continue;
+            };
+            if ((arr[a]+'').length > _maxLenText.length) {
+                _maxLenText = arr[a];
             }
         };
 
-        var txt = new Canvax.Display.Text(maxLenText || "test", {
+        var txt = new Canvax.Display.Text( _maxLenText || "test", {
             context: {
                 fillStyle: this.scale.text.fontColor,
                 fontSize: this.scale.text.fontSize
