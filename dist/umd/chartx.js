@@ -14418,7 +14418,7 @@ var LineGraphs = function (_GraphsBase) {
                         x: x,
                         y: y,
                         rowData: me.dataFrame.getRowData(b),
-                        color: fieldMap.style
+                        color: fieldMap.color
                     };
 
                     _data.push(node);
