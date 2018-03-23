@@ -203,6 +203,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     {
         var me = this;
 
+        if( !data.length ){
+            callback && callback( me );
+        };
+
         function _update( list ){
             me._bline.context.pointList = _.clone( list );
             me._bline.context.strokeStyle = me._getLineStrokeStyle( list );

@@ -13848,6 +13848,10 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         value: function _grow(callback, opts) {
             var me = this;
 
+            if (!data.length) {
+                callback && callback(me);
+            }
+
             function _update(list) {
                 me._bline.context.pointList = _$18.clone(list);
                 me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
