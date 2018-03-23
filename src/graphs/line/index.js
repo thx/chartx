@@ -119,7 +119,8 @@ export default class LineGraphs extends GraphsBase
                     value    : _lineData[b],
                     x        : x,
                     y        : y,
-                    rowData  : me.dataFrame.getRowData( b )
+                    rowData  : me.dataFrame.getRowData( b ),
+                    color    : null
                 };
 
                 _data.push( node );

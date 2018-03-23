@@ -12917,7 +12917,7 @@ var BarGraphs = function (_GraphsBase) {
 
                         var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData, _flattenField);
 
-                        rectData.fillStyle = fillStyle;
+                        rectData.color = fillStyle;
 
                         var rectH = rectData.y - rectData.fromY;
 
@@ -13288,7 +13288,8 @@ var BarGraphs = function (_GraphsBase) {
                             isLeaf: true,
                             xAxis: _xAxis.getNodeInfoOfX(_x),
                             iNode: i,
-                            rowData: me.dataFrame.getRowData(i)
+                            rowData: me.dataFrame.getRowData(i),
+                            color: null
                         };
 
                         if (!me.data[node.field]) {
@@ -14410,7 +14411,8 @@ var LineGraphs = function (_GraphsBase) {
                         value: _lineData[b],
                         x: x,
                         y: y,
-                        rowData: me.dataFrame.getRowData(b)
+                        rowData: me.dataFrame.getRowData(b),
+                        color: null
                     };
 
                     _data.push(node);

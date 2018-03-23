@@ -281,7 +281,7 @@ export default class BarGraphs extends GraphsBase
 
                     var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData, _flattenField);
 
-                    rectData.fillStyle = fillStyle;
+                    rectData.color = fillStyle;
 
                     var rectH = rectData.y - rectData.fromY;
 
@@ -655,8 +655,9 @@ export default class BarGraphs extends GraphsBase
                         yBasePoint : _yAxis.basePoint,
                         isLeaf  : true,
                         xAxis   : _xAxis.getNodeInfoOfX( _x ),
-                        iNode : i,
-                        rowData : me.dataFrame.getRowData( i )
+                        iNode   : i,
+                        rowData : me.dataFrame.getRowData( i ),
+                        color   : null
                     };
 
                     if( !me.data[ node.field ] ){
