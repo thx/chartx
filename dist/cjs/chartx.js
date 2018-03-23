@@ -13849,6 +13849,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             var me = this;
 
             if (!me.data.length) {
+                //因为在index中有调用
                 callback && callback(me);
                 return;
             }

@@ -204,6 +204,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var me = this;
 
         if( !me.data.length ){
+            //因为在index中有调用
             callback && callback( me );
             return;
         };
