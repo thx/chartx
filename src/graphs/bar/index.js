@@ -85,11 +85,11 @@ export default class BarGraphs extends GraphsBase
             if( _.isArray(fs) ){
                 _.each( fs, function( _fs, ii ){
                     //fs的结构两层到顶了
-                    var node = data[ _fs ][ index ];
+                    var node = data[ _fs ] ? data[ _fs ][ index ] : null;
                     node && _nodesInfoList.push( node );
                 } );
             } else {
-                var node = data[ fs ][ index ];
+                var node = data[ fs ] ? data[ fs ][ index ] : null;
                 node && _nodesInfoList.push( node );
             }
         } );

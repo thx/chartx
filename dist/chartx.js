@@ -11064,9 +11064,18 @@ var Descartes = function (_CoordBase) {
                 h: 25,
                 range: {
                     start: 0,
-                    end: _orgDataLen - 1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
+                    end: _orgDataLen ? _orgDataLen - 1 : 0
                 }
             };
+            if (opts.dataZoom) {
+                if (opts.dataZoom && opts.dataZoom.range && "end" in opts.dataZoom.range && opts.dataZoom.range.end > this.dataZoom.range.end) {
+                    opts.dataZoom.range.end = this.dataZoom.range.end;
+                }
+
+                if (opts.dataZoom.range.end < opts.dataZoom.range.start) {
+                    opts.dataZoom.range.start = opts.dataZoom.range.end;
+                }
+            }
 
             return opts;
         }
@@ -12423,7 +12432,7 @@ var polarComponent = function (_coorBase) {
         value: function _initInduce() {
             var me = this;
             me.induce = this._grid.induce;
-            me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+            me.induce && me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
                 me.fire(e.type, e);
                 //图表触发，用来处理Tips
                 me.root.fire(e.type, e);
@@ -12721,11 +12730,11 @@ var BarGraphs = function (_GraphsBase) {
                 if (_$15.isArray(fs)) {
                     _$15.each(fs, function (_fs, ii) {
                         //fs的结构两层到顶了
-                        var node = data[_fs][index];
+                        var node = data[_fs] ? data[_fs][index] : null;
                         node && _nodesInfoList.push(node);
                     });
                 } else {
-                    var node = data[fs][index];
+                    var node = data[fs] ? data[fs][index] : null;
                     node && _nodesInfoList.push(node);
                 }
             });

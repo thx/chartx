@@ -656,7 +656,7 @@ export default class polarComponent extends coorBase
     {
         var me = this;
         me.induce = this._grid.induce;
-        me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+        me.induce && me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
             me.fire( e.type, e );
             //图表触发，用来处理Tips
             me.root.fire( e.type, e );

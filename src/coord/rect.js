@@ -124,8 +124,17 @@ export default class Descartes extends CoordBase
             h: 25,
             range: {
                 start: 0,
-                end: _orgDataLen -1 //因为第一行是title 要-1，然后end是0开始的索引继续-1
+                end: _orgDataLen ? _orgDataLen - 1 : 0
             }
+        };
+        if( opts.dataZoom ){
+            if( opts.dataZoom && opts.dataZoom.range && "end" in opts.dataZoom.range && opts.dataZoom.range.end > this.dataZoom.range.end ){
+                opts.dataZoom.range.end = this.dataZoom.range.end;
+            };
+
+            if( opts.dataZoom.range.end < opts.dataZoom.range.start ){
+                opts.dataZoom.range.start = opts.dataZoom.range.end
+            };
         };
         
         return opts;
