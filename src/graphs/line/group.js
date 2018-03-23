@@ -205,6 +205,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
         if( !me.data.length ){
             callback && callback( me );
+            return;
         };
 
         function _update( list ){
