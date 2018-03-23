@@ -13851,6 +13851,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
 
             if (!me.data.length) {
                 callback && callback(me);
+                return;
             }
 
             function _update(list) {
