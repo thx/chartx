@@ -203,7 +203,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     {
         var me = this;
 
-        if( !data.length ){
+        if( !me.data.length ){
             callback && callback( me );
         };
 

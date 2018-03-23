@@ -13849,7 +13849,7 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
         value: function _grow(callback, opts) {
             var me = this;
 
-            if (!data.length) {
+            if (!me.data.length) {
                 callback && callback(me);
             }
 
