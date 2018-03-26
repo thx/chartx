@@ -127,8 +127,8 @@ export default class Descartes extends CoordBase
                 end: _orgDataLen ? _orgDataLen - 1 : 0
             }
         };
-        if( opts.dataZoom ){
-            if( opts.dataZoom && opts.dataZoom.range && "end" in opts.dataZoom.range && opts.dataZoom.range.end > this.dataZoom.range.end ){
+        if( opts.dataZoom && opts.dataZoom.range ){
+            if( "end" in opts.dataZoom.range && opts.dataZoom.range.end > this.dataZoom.range.end ){
                 opts.dataZoom.range.end = this.dataZoom.range.end;
             };
 

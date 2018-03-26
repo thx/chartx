@@ -696,8 +696,8 @@ export default class xAxis extends Component
 
                 //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
                 if(!!me.scale.text.rotation){
-                    nextWidth = 35
-                    currWidth = 35
+                    nextWidth = Math.min( nextWidth, 30 );
+                    currWidth = Math.min( currWidth, 30 );
                 };
                 
                 //默认left

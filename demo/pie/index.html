@@ -58,9 +58,7 @@ var options = {
         {
             type : "pie",
 
-            valueField : "value", //决定了这个pie的角度
-            nameField : "name",
-            //rField : "r", //如果是丁格尔玫瑰，就有半径的Field
+            
 
             //饼图的起始角度[有效值范围0-360度，默认值0度
             //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
@@ -82,15 +80,18 @@ var options = {
                 }
             },
             node : {
+                value : "value", //决定了这个pie的角度
+                name  : "name",
+                //r : "r", //如果是丁格尔玫瑰，就有半径的Field
                 select : {
                     enabled : true
                 },
                 onclick : function( e , nodeData ){
 
                     if( !nodeData.selected ){
-                        this.selectAt( nodeData.nodeInd );
+                        this.selectAt( nodeData.iNode );
                     } else {
-                        this.unselectAt( nodeData.nodeInd );
+                        this.unselectAt( nodeData.iNode );
                     };
 
                 }

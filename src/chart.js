@@ -43,7 +43,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.canvax.registEvent();
 
 
-        this.id = this.canvax.id;
+        this.id = "chartx_"+this.canvax.id;
         this.el.setAttribute("chart_id" , this.id);
 
         

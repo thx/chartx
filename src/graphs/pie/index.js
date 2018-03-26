@@ -12,11 +12,10 @@ export default class PieGraphs extends GraphsBase
 
         this.type = "pie";
 
-        this.valueField = null;
-        this.nameField  = null;
-        this.rField     = null;//如果有配置rField，那么每个pie的outRadius都会不一样
-
         this.node = {
+            value : null,
+            name : null,
+            r : null, //自动计算，也可以配置一个字段，就成了丁格尔玫瑰图
             shapeType : "sector",
             colors : this.root._theme,
 
@@ -31,7 +30,7 @@ export default class PieGraphs extends GraphsBase
             
             innerRadius : 0,
             outRadius : null,//如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
-            minSectorRadius : 20,//outRadius - innerRadius 的最小值
+            minSectorRadius : 30,//outRadius - innerRadius 的最小值
             moveDis : 15    //要预留moveDis位置来hover sector 的时候外扩
         };
 
@@ -146,8 +145,8 @@ export default class PieGraphs extends GraphsBase
                 selectedR     : me.node.select.r,
                 selectedAlpha : me.node.select.alpha,
                 enabled       : true,   //是否启用，显示在列表中
-                value         : rowData[ me.valueField ],
-                name          : rowData[ me.nameField ],
+                value         : rowData[ me.node.value ],
+                name          : rowData[ me.node.name ],
                 fillStyle     : me.getColorByIndex(me.node.colors, i, l),
                 text          : null,    //绘制的时候再设置
                 iNode       : i
@@ -193,9 +192,9 @@ export default class PieGraphs extends GraphsBase
                 if( !data[i].enabled ) continue;
 
                 total += data[i].value;
-                if( me.rField ){
-                    maxRval = Math.max( maxRval, data[i].rowData[ me.rField ]);
-                    minRval = Math.min( minRval, data[i].rowData[ me.rField ]);
+                if( me.node.r ){
+                    maxRval = Math.max( maxRval, data[i].rowData[ me.node.r ]);
+                    minRval = Math.min( minRval, data[i].rowData[ me.node.r ]);
                 }
             };
 
@@ -261,8 +260,8 @@ export default class PieGraphs extends GraphsBase
 
                     var outRadius = me.node.outRadius;
 
-                    if( me.rField ){
-                        outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (data[j].rowData[me.rField] - minRval)/(maxRval-minRval)  ) + me.innerRadius );
+                    if( me.node.r ){
+                        outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (data[j].rowData[me.node.r] - minRval)/(maxRval-minRval)  ) + me.node.innerRadius );
                     };
 
                     var moveDis = me.node.moveDis;
@@ -329,8 +328,8 @@ export default class PieGraphs extends GraphsBase
     {
         var text;
         if( this.text.enabled ){
-            if( this.nameField ){
-                text = itemData.rowData[ this.nameField ];
+            if( this.node.name ){
+                text = itemData.rowData[ this.node.name ];
             }
             if( _.isFunction( this.text.format ) ){
                 text = this.text.format( itemData )

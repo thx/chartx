@@ -57,6 +57,7 @@ export default class BarGraphs extends GraphsBase
         _.extend(true, this, opts);
 
         this.init();
+        
     }
 
     init()
@@ -419,7 +420,7 @@ export default class BarGraphs extends GraphsBase
                                     id: "info_txt_" + i + "_" + h + "_" + ci,
                                     context: {
                                         x: infoWidth + 2,
-                                        fillStyle: cdata.fillStyle,
+                                        fillStyle: cdata.color,
                                         fontSize: me.text.fontSize,
                                         lineWidth: me.text.lineWidth,
                                         strokeStyle: me.text.strokeStyle
