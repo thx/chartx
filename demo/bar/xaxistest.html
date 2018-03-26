@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+                //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+                //第一行是表头。
+                var data= [{"amount":null,"id":5463507,"name":"陕西省","percent":"2.69","tagId":132410,"tgi":"96.46","value":"44"},{"amount":null,"id":5463510,"name":"青海省","percent":"0.29","tagId":132410,"tgi":"92.62","value":"47"},{"amount":null,"id":5463511,"name":"香港特别行政区","percent":"0.02","tagId":132410,"tgi":"104.38","value":"48"},{"amount":null,"id":5463489,"name":"黑龙江省","percent":"2.23","tagId":132410,"tgi":"111.74","value":"50"},{"amount":null,"id":5463474,"name":"四川省","percent":"4.63","tagId":132410,"tgi":"96.05","value":"11"},{"amount":null,"id":5463475,"name":"天津市","percent":"1.28","tagId":132410,"tgi":"102.41","value":"12"},{"amount":null,"id":5463476,"name":"宁夏回族自治区","percent":"0.46","tagId":132410,"tgi":"93.69","value":"13"},{"amount":null,"id":5463477,"name":"安徽省","percent":"3.33","tagId":132410,"tgi":"97.47","value":"14"},{"amount":null,"id":5463478,"name":"山东省","percent":"6.94","tagId":132410,"tgi":"106.22","value":"15"},{"amount":null,"id":5463479,"name":"山西省","percent":"2.61","tagId":132410,"tgi":"103.23","value":"16"},{"amount":null,"id":5463480,"name":"广东省","percent":"11.85","tagId":132410,"tgi":"91.48","value":"17"},{"amount":null,"id":5463481,"name":"广西壮族自治区","percent":"2.81","tagId":132410,"tgi":"98.48","value":"18"},{"amount":null,"id":5463513,"name":"上海市","percent":"3.41","tagId":132410,"tgi":"107.39","value":"2"},{"amount":null,"id":5463466,"name":"云南省","percent":"2.07","tagId":132410,"tgi":"85.87","value":"3"},{"amount":null,"id":5463467,"name":"内蒙古自治区","percent":"1.63","tagId":132410,"tgi":"103.93","value":"4"},{"amount":null,"id":5463468,"name":"北京市","percent":"3.23","tagId":132410,"tgi":"102.26","value":"5"},{"amount":null,"id":5463469,"name":"台湾省","percent":"0.02","tagId":132410,"tgi":"114.40","value":"6"},{"amount":null,"id":5463472,"name":"吉林省","percent":"1.66","tagId":132410,"tgi":"106.13","value":"9"},{"amount":null,"id":5463483,"name":"新疆维吾尔自治区","percent":"1.05","tagId":132410,"tgi":"96.60","value":"20"},{"amount":null,"id":5463487,"name":"江苏省","percent":"7.43","tagId":132410,"tgi":"101.88","value":"24"},{"amount":null,"id":5463488,"name":"江西省","percent":"2.45","tagId":132410,"tgi":"98.95","value":"25"},{"amount":null,"id":5463491,"name":"河北省","percent":"4.97","tagId":132410,"tgi":"105.72","value":"28"},{"amount":null,"id":5463492,"name":"河南省","percent":"6.05","tagId":132410,"tgi":"98.57","value":"29"},{"amount":null,"id":5463493,"name":"浙江省","percent":"6.96","tagId":132410,"tgi":"105.18","value":"30"},{"amount":null,"id":5463494,"name":"海南省","percent":"0.41","tagId":132410,"tgi":"89.92","value":"31"},{"amount":null,"id":5463496,"name":"湖北省","percent":"3.93","tagId":132410,"tgi":"104.69","value":"33"},{"amount":null,"id":5463497,"name":"湖南省","percent":"3.62","tagId":132410,"tgi":"103.05","value":"34"},{"amount":null,"id":5463498,"name":"澳门特别行政区","percent":"0.00","tagId":132410,"tgi":"101.86","value":"35"},{"amount":null,"id":5463500,"name":"甘肃省","percent":"1.35","tagId":132410,"tgi":"94.49","value":"37"},{"amount":null,"id":5463501,"name":"福建省","percent":"3.55","tagId":132410,"tgi":"103.01","value":"38"},{"amount":null,"id":5463503,"name":"西藏自治区","percent":"0.09","tagId":132410,"tgi":"77.68","value":"40"},{"amount":null,"id":5463504,"name":"贵州省","percent":"1.74","tagId":132410,"tgi":"85.05","value":"41"},{"amount":null,"id":5463505,"name":"辽宁省","percent":"3.25","tagId":132410,"tgi":"108.82","value":"42"},{"amount":null,"id":5463506,"name":"重庆市","percent":"2.00","tagId":132410,"tgi":"95.38","value":"43"}];
+                var options = {
+                    "theme": [
+                      "#73ace6"
+                    ],
+                    "coord": {
+                      "type": "rect",
+                      "horizontal": true,
+                      "xAxis": {
+                        "field": [
+                          "name"
+                        ]
+                      },
+                      "yAxis": [
+                        {
+                          "align": "right",
+                          "middleweight": 100,
+                          "field": [
+                            "tgi"
+                          ],
+                          "scale": {
+                            "text": {
+                              "fontColor": "#5d95d0"
+                            },
+                            "line": {
+                              "strokeStyle": "#5d95d0"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "graphs": [
+                      {
+                        "type": "bar",
+                        "field": "percent",
+                        "yAxisAlign": "left"
+                      }
+                    ],
+                    "markLine": [
+                      {
+                        "yAxisAlign": "right",
+                        "y": 100,
+                        "line": {
+                          "strokeStyle": "#5d95d0"
+                        }
+                      }
+                    ],
+                    "barTgi": [
+                      {
+                        "field": "tgi",
+                        "barField": "percent",
+                        "yAxisAlign": "right"
+                      }
+                    ],
+                    "tips": {
+                      "pointer": "shadow",
+                      "content": function (){
+                        return "tips"
+                      }
+                    }
+                  }
+                
+                window.bar = Chartx.create("canvasTest" , data , options)
+                
+                            
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:490px;height:590px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
