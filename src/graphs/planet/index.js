@@ -41,8 +41,8 @@ export default class PlanetGraphs extends GraphsBase
                 fillStyle : null,
                 strokeStyle: null,
                 lineWidth : 1,
-                scale: [], //环形刻度线集合
-                count: 3 //在 scale.length>1 的时候会被修改为 scale.length
+                section: [], //环形刻度线集合
+                count: 3 //在 section.length>1 的时候会被修改为 section.length
             },
             rays : {
                 count : 0,
@@ -123,7 +123,7 @@ export default class PlanetGraphs extends GraphsBase
 
             me._groups.push( _g );
 
-            me.grid.rings.scale.push({
+            me.grid.rings.section.push({
                 r : _g.rRange.to
             });
             
@@ -167,23 +167,23 @@ export default class PlanetGraphs extends GraphsBase
     drawBack(){
         var me = this;
         
-        if( me.grid.rings.scale.length == 1 ){
+        if( me.grid.rings.section.length == 1 ){
 
             //如果只有一个，那么就强制添加到3个
-            var _diffR = (me.grid.rings.scale[0].r - me.center.r) / me.grid.rings.count;
-            me.grid.rings.scale = [];
+            var _diffR = (me.grid.rings.section[0].r - me.center.r) / me.grid.rings.count;
+            me.grid.rings.section = [];
             for( var i=0;i<me.grid.rings.count ; i++ ){
-                me.grid.rings.scale.push({
+                me.grid.rings.section.push({
                     r : me.center.r + _diffR*(i+1)
                 });
             }
         } else {
-            me.grid.rings.count = me.grid.rings.scale.length;
+            me.grid.rings.count = me.grid.rings.section.length;
         };
 
         
-        for( var i=me.grid.rings.scale.length-1 ; i>=0 ; i-- ){
-            var _scale = me.grid.rings.scale[i];
+        for( var i=me.grid.rings.section.length-1 ; i>=0 ; i-- ){
+            var _scale = me.grid.rings.section[i];
             me.sprite.addChild( new Circle({
                 context : {
                     x : me.root._coord.origin.x,
@@ -204,8 +204,8 @@ export default class PlanetGraphs extends GraphsBase
             var itemAng = 360 / me.grid.rays.count;
             var _r = me.root._coord.maxR; //Math.max( me.w, me.h );
 
-            if( me.grid.rings.scale.length ){
-                _r = me.grid.rings.scale.slice(-1)[0].r
+            if( me.grid.rings.section.length ){
+                _r = me.grid.rings.section.slice(-1)[0].r
             }
 
             for( var i=0,l=me.grid.rays.count; i<l; i++ ){
@@ -243,7 +243,7 @@ export default class PlanetGraphs extends GraphsBase
             res = p.apply( this , [ {
                 //iGroup : iGroup,
                 scaleInd : i,
-                count : this.grid.rings.scale.length,
+                count : this.grid.rings.section.length,
 
                 groups : this._groups,
                 graphs : this

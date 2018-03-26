@@ -22,7 +22,7 @@ export default class yAxis extends Component
         this.label   = "";
         this._label  = null; //label 的text对象
 
-        this.scale = {
+        this.ruler = {
             enabled : true,
             line : {
                 enabled      : 1,      //是否有line
@@ -163,10 +163,10 @@ export default class yAxis extends Component
 
             this._label = new Canvax.Display.Text(_label, {
                 context: {
-                    fontSize  : this.scale.text.fontSize,
+                    fontSize  : this.ruler.text.fontSize,
                     textAlign : textAlign,//"left",
                     textBaseline : this.isH ? "top" : "bottom",
-                    fillStyle : this.scale.text.fontColor,
+                    fillStyle : this.ruler.text.fontColor,
                     rotation  : this.isH ? -90 : 0
                 }
             });
@@ -601,7 +601,7 @@ export default class yAxis extends Component
     {
         var me = this;
         !opts && (opts ={});
-        if (!me.scale.enabled) {
+        if (!me.ruler.enabled) {
             me.width = 0;
             return;
         };
@@ -614,8 +614,8 @@ export default class yAxis extends Component
             var y = o.y;
             var content = o.content;
             
-            if (_.isFunction(me.scale.text.format)) {
-                content = me.scale.text.format(content, me);
+            if (_.isFunction(me.ruler.text.format)) {
+                content = me.ruler.text.format(content, me);
             };
             if( content === undefined || content === null ){
                 content = numAddSymbol( o.content );
@@ -625,7 +625,7 @@ export default class yAxis extends Component
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
-            if (me.scale.text.rotation == 90 || me.scale.text.rotation == -90) {
+            if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
                 textAlign = "center";
                 if (a == arr.length - 1) {
                     posy = y - 2;
@@ -685,19 +685,19 @@ export default class yAxis extends Component
                 };
 
                 var lineX = 0
-                if (me.scale.line.enabled) {
+                if (me.ruler.line.enabled) {
                     //线条
-                    lineX = me.align == "left" ? - me.scale.line.width - me.scale.line.marginToLine : me.scale.line.marginToLine;
+                    lineX = me.align == "left" ? - me.ruler.line.width - me.ruler.line.marginToLine : me.ruler.line.marginToLine;
                     var line = new Line({
                         context: {
                             x: lineX ,
                             y: y,
                             end : {
-                                x : me.scale.line.width,
+                                x : me.ruler.line.width,
                                 y : 0
                             },
-                            lineWidth: me.scale.line.lineWidth,
-                            strokeStyle: me._getProp(me.scale.line.strokeStyle)
+                            lineWidth: me.ruler.line.lineWidth,
+                            strokeStyle: me._getProp(me.ruler.line.strokeStyle)
                         }
                     });
                     yNode.addChild(line);
@@ -705,7 +705,7 @@ export default class yAxis extends Component
                 };
 
                 //文字
-                var txtX = me.align == "left" ? lineX - me.scale.text.marginToLine : lineX + me.scale.line.width + me.scale.text.marginToLine;
+                var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.line.width + me.ruler.text.marginToLine;
                 if( this.isH ){
                     txtX = txtX + (me.align == "left"?-1:1)* 4
                 };
@@ -714,9 +714,9 @@ export default class yAxis extends Component
                     context: {
                         x: txtX,
                         y: posy + aniFrom,
-                        fillStyle: me._getProp(me.scale.text.fontColor),
-                        fontSize: me.scale.text.fontSize,
-                        rotation: -Math.abs(this.scale.text.rotation),
+                        fillStyle: me._getProp(me.ruler.text.fontColor),
+                        fontSize: me.ruler.text.fontSize,
+                        rotation: -Math.abs(me.ruler.text.rotation),
                         textAlign: textAlign,
                         textBaseline: "middle",
                         globalAlpha: 0
@@ -726,7 +726,7 @@ export default class yAxis extends Component
                 yNode._txt = txt;
 
                 me.maxW = Math.max(me.maxW, txt.getTextWidth());
-                if (me.scale.text.rotation == 90 || me.scale.text.rotation == -90) {
+                if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
                     me.maxW = Math.max(me.maxW, txt.getTextHeight());
                 };
 
@@ -766,11 +766,11 @@ export default class yAxis extends Component
             };
         };
 
-        me.maxW += me.scale.text.marginToLine;
+        me.maxW += me.ruler.text.marginToLine;
         if( me.width === null ){
-            me.width = parseInt( me.maxW + me.scale.text.marginToLine  );
-            if (me.scale.line.enabled) {
-                me.width += parseInt( me.scale.line.width + me.scale.line.marginToLine );
+            me.width = parseInt( me.maxW + me.ruler.text.marginToLine  );
+            if (me.ruler.line.enabled) {
+                me.width += parseInt( me.ruler.line.width + me.ruler.line.marginToLine );
             }
         }
 
@@ -791,8 +791,8 @@ export default class yAxis extends Component
                     x : _originX,
                     y : -me.height
                 },
-                lineWidth   : this.scale.line.lineWidth,
-                strokeStyle : me._getProp(me.scale.line.strokeStyle)
+                lineWidth   : me.ruler.line.lineWidth,
+                strokeStyle : me._getProp(me.ruler.line.strokeStyle)
             }
         });
         this.sprite.addChild( _axisline );

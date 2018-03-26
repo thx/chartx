@@ -36,7 +36,7 @@ export default class polarComponent extends coorBase
             data : [],
             angleList : [], //对应layoutType下的角度list
             beginAngle : -90,
-            scale : {
+            ruler : {
                 //刻度尺,在最外沿的蜘蛛网上面
                 data : [], //aAxis.data的 text.format后版本
                 enabled : true,
@@ -50,7 +50,7 @@ export default class polarComponent extends coorBase
         this.rAxis = {
             field : [],
             dataSection : null,
-            scale : {
+            ruler : {
                 //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
                 enabled : false 
             }
@@ -112,7 +112,7 @@ export default class polarComponent extends coorBase
                 dataSection : this.rAxis.dataSection
             } , this);
 
-            if( this.aAxis.scale.enabled ){
+            if( this.aAxis.ruler.enabled ){
                 this._drawAAxisScale();
             };
     
@@ -235,7 +235,7 @@ export default class polarComponent extends coorBase
             this._grid = new Grid( this.grid, this );
             this.sprite.addChild( this._grid.sprite );
         };
-        if( this.aAxis.scale.enabled && this.grid.enabled ){
+        if( this.aAxis.ruler.enabled && this.grid.enabled ){
             this._aAxisScaleSp = new Canvax.Display.Sprite({
                 id : "aAxisScaleSp"
             });
@@ -256,7 +256,7 @@ export default class polarComponent extends coorBase
             this.height = rootHeight - _padding.top-_padding.bottom;
         };
 
-        if( this.aAxis.scale.enabled ){
+        if( this.aAxis.ruler.enabled ){
             this.width -= 20*2;
             this.height -= 20*2;
         };
@@ -523,16 +523,16 @@ export default class polarComponent extends coorBase
             var c = {
                 x : point.x,
                 y : point.y,
-                fillStyle : me.aAxis.scale.text.fontColor
+                fillStyle : me.aAxis.ruler.text.fontColor
             };
 
-            label = me.aAxis.scale.text.format( label );
+            label = me.aAxis.ruler.text.format( label );
             _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
             me._aAxisScaleSp.addChild(new Canvax.Display.Text( label , {
                 context : c
             }));
 
-            me.aAxis.scale.data.push( label );
+            me.aAxis.ruler.data.push( label );
             
         } );
     }
@@ -599,7 +599,7 @@ export default class polarComponent extends coorBase
         var node = {
             ind   : aAxisInd,
             value : me.aAxis.data[aAxisInd],
-            text  : me.aAxis.scale.data[aAxisInd],
+            text  : me.aAxis.ruler.data[aAxisInd],
             angle : me.aAxis.angleList[aAxisInd]
         };
         return node;

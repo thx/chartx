@@ -38,7 +38,7 @@ export default class Descartes_Component extends coorBase
         if( opts.horizontal ){
             _.extend( true, this.xAxis, {
                 isH : true,
-                scale : {
+                ruler : {
                     text : {
                         rotation: 90
                     }
@@ -47,7 +47,7 @@ export default class Descartes_Component extends coorBase
             _.each( this.yAxis , function( yAxis ){
                 _.extend( true, yAxis, {
                     isH : true,
-                    scale : {
+                    ruler : {
                         text : {
                             rotation: 90
                         }
@@ -59,13 +59,13 @@ export default class Descartes_Component extends coorBase
         if( "enabled" in opts ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _.extend( true, this.xAxis, {
-                scale : {
+                ruler : {
                     enabled : opts.enabled
                 }
             } );
             _.each( this.yAxis , function( yAxis ){
                 _.extend( true, yAxis, {
-                    scale : {
+                    ruler : {
                         enabled : opts.enabled
                     }
                 } );

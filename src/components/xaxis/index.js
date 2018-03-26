@@ -22,7 +22,7 @@ export default class xAxis extends Component
         this.label = "";
         this._label = null; //this.label对应的文本对象
 
-        this.scale = {
+        this.ruler = {
             enabled : true,
             line : {
                 enabled    : 1, //是否有line
@@ -117,9 +117,9 @@ export default class xAxis extends Component
             this.dataSection = this._initDataSection(this.dataOrg);
         };        
 
-        if (this.scale.text.rotation != 0 ) {
+        if (this.ruler.text.rotation != 0 ) {
             //如果是旋转的文本，那么以右边为旋转中心点
-            this.scale.text.textAlign = "right";
+            this.ruler.text.textAlign = "right";
         };
 
 
@@ -258,10 +258,10 @@ export default class xAxis extends Component
             if( !this._label ){
                 this._label = new Canvax.Display.Text(this.label, {
                     context: {
-                        fontSize: this.scale.text.fontSize,
+                        fontSize: this.ruler.text.fontSize,
                         textAlign: this.isH ? "center" : "left",
                         textBaseline: this.isH ? "top" : "middle",
-                        fillStyle: this.scale.text.fontColor,
+                        fillStyle: this.ruler.text.fontColor,
                         rotation: this.isH ? -90 : 0
                     }
                 });
@@ -361,7 +361,7 @@ export default class xAxis extends Component
             var layoutText = this._getFormatText( data[a] )
             var txt = new Canvax.Display.Text( layoutText , {
                 context: {
-                    fontSize: this.scale.text.fontSize
+                    fontSize: this.ruler.text.fontSize
                 }
             });
             
@@ -400,38 +400,38 @@ export default class xAxis extends Component
 
     _setXAxisHeight()
     { //检测下文字的高等
-        if (!this.scale.enabled) {
+        if (!this.ruler.enabled) {
             this.height = 3; 
         } else {
             var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
                 context: {
-                    fontSize: this.scale.text.fontSize
+                    fontSize: this.ruler.text.fontSize
                 }
             });
 
             this.maxTxtH = txt.getTextHeight();
 
-            if (!!this.scale.text.rotation) {
-                if (this.scale.text.rotation % 90 == 0) {
+            if (!!this.ruler.text.rotation) {
+                if (this.ruler.text.rotation % 90 == 0) {
                     this.height = parseInt( this._textMaxWidth );
                 } else {
-                    var sinR = Math.sin(Math.abs(this.scale.text.rotation) * Math.PI / 180);
-                    var cosR = Math.cos(Math.abs(this.scale.text.rotation) * Math.PI / 180);
+                    var sinR = Math.sin(Math.abs(this.ruler.text.rotation) * Math.PI / 180);
+                    var cosR = Math.cos(Math.abs(this.ruler.text.rotation) * Math.PI / 180);
                     this.height = parseInt(sinR * this._textMaxWidth + txt.getTextHeight() + 5);
                 }
             } else {
                 this.height = parseInt( this.maxTxtH );
             }
 
-            this.height += this.scale.line.height + this.scale.line.marginTop + this.scale.text.marginTop;
+            this.height += this.ruler.line.height + this.ruler.line.marginTop + this.ruler.text.marginTop;
         }
     }
 
     _getFormatText(text)
     {
         var res;
-        if (_.isFunction(this.scale.text.format)) {
-            res = this.scale.text.format(text);
+        if (_.isFunction(this.ruler.text.format)) {
+            res = this.ruler.text.format(text);
         } else {
             res = text
         }
@@ -447,7 +447,7 @@ export default class xAxis extends Component
 
     _widget( opts )
     {
-        if( !this.scale.enabled ) return;
+        if( !this.ruler.enabled ) return;
         !opts && (opts ={});
 
         var arr = this.layoutData
@@ -475,22 +475,22 @@ export default class xAxis extends Component
 
             var o = arr[a]
             var x = o.x,
-                y = this.scale.line.height + this.scale.line.marginTop + this.scale.text.marginTop;
+                y = this.ruler.line.height + this.ruler.line.marginTop + this.ruler.text.marginTop;
 
             //文字
             var textContext = {
                 x: o._text_x || o.x,
                 y: y + 20,
-                fillStyle    : this.scale.text.fontColor,
-                fontSize     : this.scale.text.fontSize,
-                rotation     : -Math.abs(this.scale.text.rotation),
-                textAlign    : this.scale.text.textAlign,
-                lineHeight   : this.scale.text.lineHeight,
-                textBaseline : !!this.scale.text.rotation ? "middle" : "top",
+                fillStyle    : this.ruler.text.fontColor,
+                fontSize     : this.ruler.text.fontSize,
+                rotation     : -Math.abs(this.ruler.text.rotation),
+                textAlign    : this.ruler.text.textAlign,
+                lineHeight   : this.ruler.text.lineHeight,
+                textBaseline : !!this.ruler.text.rotation ? "middle" : "top",
                 globalAlpha  : 0
             };
 
-            if (!!this.scale.text.rotation && this.scale.text.rotation != 90) {
+            if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
                 textContext.x += 5;
                 textContext.y += 3;
             };
@@ -534,16 +534,16 @@ export default class xAxis extends Component
             };
             
 
-            if (this.scale.line.enabled) {
+            if (this.ruler.line.enabled) {
                 var lineContext = {
                     x: x,
-                    y: this.scale.line.marginTop,
+                    y: this.ruler.line.marginTop,
                     end : {
                         x : 0,
-                        y : this.scale.line.height
+                        y : this.ruler.line.height
                     },
-                    lineWidth: this.scale.line.lineWidth,
-                    strokeStyle: this.scale.line.strokeStyle
+                    lineWidth: this.ruler.line.lineWidth,
+                    strokeStyle: this.ruler.line.strokeStyle
                 };
                 if( xNode._line ){
                     //_.extend( xNode._txt.context , textContext );
@@ -593,8 +593,8 @@ export default class xAxis extends Component
                     x : this.width,
                     y : 0
                 },
-                lineWidth   : this.scale.line.lineWidth,
-                strokeStyle : this.scale.line.strokeStyle
+                lineWidth   : this.ruler.line.lineWidth,
+                strokeStyle : this.ruler.line.strokeStyle
             }
         });
         this.sprite.addChild( _axisline );
@@ -621,8 +621,8 @@ export default class xAxis extends Component
 
         var txt = new Canvax.Display.Text( _maxLenText || "test", {
             context: {
-                fillStyle: this.scale.text.fontColor,
-                fontSize: this.scale.text.fontSize
+                fillStyle: this.ruler.text.fontColor,
+                fontSize: this.ruler.text.fontSize
             }
         });
 
@@ -638,7 +638,7 @@ export default class xAxis extends Component
         var arr = this.layoutData;
         var l = arr.length;
 
-        if( !this.scale.enabled || !l ) return;
+        if( !this.ruler.enabled || !l ) return;
 
         // rule , peak, proportion
         if( me.layoutType == "proportion" ){
@@ -679,7 +679,7 @@ export default class xAxis extends Component
         }
 
         var l = arr.length;  
-        var textAlign = me.scale.text.textAlign;              
+        var textAlign = me.ruler.text.textAlign;              
 
         function checkOver(i){
             var curr = arr[i];
@@ -695,7 +695,7 @@ export default class xAxis extends Component
                 var currWidth = curr.textWidth;
 
                 //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-                if(!!me.scale.text.rotation){
+                if(!!me.ruler.text.rotation){
                     nextWidth = Math.min( nextWidth, 22 );
                     currWidth = Math.min( currWidth, 22 );
                 };

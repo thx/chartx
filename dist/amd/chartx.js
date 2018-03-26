@@ -8839,7 +8839,7 @@ var xAxis = function (_Component) {
         _this.label = "";
         _this._label = null; //this.label对应的文本对象
 
-        _this.scale = {
+        _this.ruler = {
             enabled: true,
             line: {
                 enabled: 1, //是否有line
@@ -8936,9 +8936,9 @@ var xAxis = function (_Component) {
                 this.dataSection = this._initDataSection(this.dataOrg);
             }
 
-            if (this.scale.text.rotation != 0) {
+            if (this.ruler.text.rotation != 0) {
                 //如果是旋转的文本，那么以右边为旋转中心点
-                this.scale.text.textAlign = "right";
+                this.ruler.text.textAlign = "right";
             }
 
             //先计算出来显示文本
@@ -9079,10 +9079,10 @@ var xAxis = function (_Component) {
                 if (!this._label) {
                     this._label = new canvax.Display.Text(this.label, {
                         context: {
-                            fontSize: this.scale.text.fontSize,
+                            fontSize: this.ruler.text.fontSize,
                             textAlign: this.isH ? "center" : "left",
                             textBaseline: this.isH ? "top" : "middle",
-                            fillStyle: this.scale.text.fontColor,
+                            fillStyle: this.ruler.text.fontColor,
                             rotation: this.isH ? -90 : 0
                         }
                     });
@@ -9185,7 +9185,7 @@ var xAxis = function (_Component) {
                 var layoutText = this._getFormatText(data[a]);
                 var txt = new canvax.Display.Text(layoutText, {
                     context: {
-                        fontSize: this.scale.text.fontSize
+                        fontSize: this.ruler.text.fontSize
                     }
                 });
 
@@ -9224,38 +9224,38 @@ var xAxis = function (_Component) {
         key: "_setXAxisHeight",
         value: function _setXAxisHeight() {
             //检测下文字的高等
-            if (!this.scale.enabled) {
+            if (!this.ruler.enabled) {
                 this.height = 3;
             } else {
                 var txt = new canvax.Display.Text(this._layoutDataSection[0] || "test", {
                     context: {
-                        fontSize: this.scale.text.fontSize
+                        fontSize: this.ruler.text.fontSize
                     }
                 });
 
                 this.maxTxtH = txt.getTextHeight();
 
-                if (!!this.scale.text.rotation) {
-                    if (this.scale.text.rotation % 90 == 0) {
+                if (!!this.ruler.text.rotation) {
+                    if (this.ruler.text.rotation % 90 == 0) {
                         this.height = parseInt(this._textMaxWidth);
                     } else {
-                        var sinR = Math.sin(Math.abs(this.scale.text.rotation) * Math.PI / 180);
-                        var cosR = Math.cos(Math.abs(this.scale.text.rotation) * Math.PI / 180);
+                        var sinR = Math.sin(Math.abs(this.ruler.text.rotation) * Math.PI / 180);
+                        var cosR = Math.cos(Math.abs(this.ruler.text.rotation) * Math.PI / 180);
                         this.height = parseInt(sinR * this._textMaxWidth + txt.getTextHeight() + 5);
                     }
                 } else {
                     this.height = parseInt(this.maxTxtH);
                 }
 
-                this.height += this.scale.line.height + this.scale.line.marginTop + this.scale.text.marginTop;
+                this.height += this.ruler.line.height + this.ruler.line.marginTop + this.ruler.text.marginTop;
             }
         }
     }, {
         key: "_getFormatText",
         value: function _getFormatText(text) {
             var res;
-            if (_$8.isFunction(this.scale.text.format)) {
-                res = this.scale.text.format(text);
+            if (_$8.isFunction(this.ruler.text.format)) {
+                res = this.ruler.text.format(text);
             } else {
                 res = text;
             }
@@ -9271,7 +9271,7 @@ var xAxis = function (_Component) {
     }, {
         key: "_widget",
         value: function _widget(opts) {
-            if (!this.scale.enabled) return;
+            if (!this.ruler.enabled) return;
             !opts && (opts = {});
 
             var arr = this.layoutData;
@@ -9298,22 +9298,22 @@ var xAxis = function (_Component) {
 
                 var o = arr[a];
                 var x = o.x,
-                    y = this.scale.line.height + this.scale.line.marginTop + this.scale.text.marginTop;
+                    y = this.ruler.line.height + this.ruler.line.marginTop + this.ruler.text.marginTop;
 
                 //文字
                 var textContext = {
                     x: o._text_x || o.x,
                     y: y + 20,
-                    fillStyle: this.scale.text.fontColor,
-                    fontSize: this.scale.text.fontSize,
-                    rotation: -Math.abs(this.scale.text.rotation),
-                    textAlign: this.scale.text.textAlign,
-                    lineHeight: this.scale.text.lineHeight,
-                    textBaseline: !!this.scale.text.rotation ? "middle" : "top",
+                    fillStyle: this.ruler.text.fontColor,
+                    fontSize: this.ruler.text.fontSize,
+                    rotation: -Math.abs(this.ruler.text.rotation),
+                    textAlign: this.ruler.text.textAlign,
+                    lineHeight: this.ruler.text.lineHeight,
+                    textBaseline: !!this.ruler.text.rotation ? "middle" : "top",
                     globalAlpha: 0
                 };
 
-                if (!!this.scale.text.rotation && this.scale.text.rotation != 90) {
+                if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
                     textContext.x += 5;
                     textContext.y += 3;
                 }
@@ -9355,16 +9355,16 @@ var xAxis = function (_Component) {
                     }
                 }
 
-                if (this.scale.line.enabled) {
+                if (this.ruler.line.enabled) {
                     var lineContext = {
                         x: x,
-                        y: this.scale.line.marginTop,
+                        y: this.ruler.line.marginTop,
                         end: {
                             x: 0,
-                            y: this.scale.line.height
+                            y: this.ruler.line.height
                         },
-                        lineWidth: this.scale.line.lineWidth,
-                        strokeStyle: this.scale.line.strokeStyle
+                        lineWidth: this.ruler.line.lineWidth,
+                        strokeStyle: this.ruler.line.strokeStyle
                     };
                     if (xNode._line) {
                         //_.extend( xNode._txt.context , textContext );
@@ -9413,8 +9413,8 @@ var xAxis = function (_Component) {
                         x: this.width,
                         y: 0
                     },
-                    lineWidth: this.scale.line.lineWidth,
-                    strokeStyle: this.scale.line.strokeStyle
+                    lineWidth: this.ruler.line.lineWidth,
+                    strokeStyle: this.ruler.line.strokeStyle
                 }
             });
             this.sprite.addChild(_axisline);
@@ -9440,8 +9440,8 @@ var xAxis = function (_Component) {
 
             var txt = new canvax.Display.Text(_maxLenText || "test", {
                 context: {
-                    fillStyle: this.scale.text.fontColor,
-                    fontSize: this.scale.text.fontSize
+                    fillStyle: this.ruler.text.fontColor,
+                    fontSize: this.ruler.text.fontSize
                 }
             });
 
@@ -9457,7 +9457,7 @@ var xAxis = function (_Component) {
             var arr = this.layoutData;
             var l = arr.length;
 
-            if (!this.scale.enabled || !l) return;
+            if (!this.ruler.enabled || !l) return;
 
             // rule , peak, proportion
             if (me.layoutType == "proportion") {
@@ -9497,7 +9497,7 @@ var xAxis = function (_Component) {
             }
 
             var l = arr.length;
-            var textAlign = me.scale.text.textAlign;
+            var textAlign = me.ruler.text.textAlign;
 
             function checkOver(i) {
                 var curr = arr[i];
@@ -9513,7 +9513,7 @@ var xAxis = function (_Component) {
                     var currWidth = curr.textWidth;
 
                     //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-                    if (!!me.scale.text.rotation) {
+                    if (!!me.ruler.text.rotation) {
                         nextWidth = Math.min(nextWidth, 22);
                         currWidth = Math.min(currWidth, 22);
                     }
@@ -9586,7 +9586,7 @@ var yAxis = function (_Component) {
         _this.label = "";
         _this._label = null; //label 的text对象
 
-        _this.scale = {
+        _this.ruler = {
             enabled: true,
             line: {
                 enabled: 1, //是否有line
@@ -9731,10 +9731,10 @@ var yAxis = function (_Component) {
 
                 this._label = new canvax.Display.Text(_label, {
                     context: {
-                        fontSize: this.scale.text.fontSize,
+                        fontSize: this.ruler.text.fontSize,
                         textAlign: textAlign, //"left",
                         textBaseline: this.isH ? "top" : "bottom",
-                        fillStyle: this.scale.text.fontColor,
+                        fillStyle: this.ruler.text.fontColor,
                         rotation: this.isH ? -90 : 0
                     }
                 });
@@ -10163,7 +10163,7 @@ var yAxis = function (_Component) {
         value: function _widget(opts) {
             var me = this;
             !opts && (opts = {});
-            if (!me.scale.enabled) {
+            if (!me.ruler.enabled) {
                 me.width = 0;
                 return;
             }
@@ -10176,8 +10176,8 @@ var yAxis = function (_Component) {
                 var y = o.y;
                 var content = o.content;
 
-                if (_$10.isFunction(me.scale.text.format)) {
-                    content = me.scale.text.format(content, me);
+                if (_$10.isFunction(me.ruler.text.format)) {
+                    content = me.ruler.text.format(content, me);
                 }
                 if (content === undefined || content === null) {
                     content = numAddSymbol(o.content);
@@ -10187,7 +10187,7 @@ var yAxis = function (_Component) {
 
                 var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
                 //为横向图表把y轴反转后的 逻辑
-                if (me.scale.text.rotation == 90 || me.scale.text.rotation == -90) {
+                if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
                     textAlign = "center";
                     if (a == arr.length - 1) {
                         posy = y - 2;
@@ -10246,19 +10246,19 @@ var yAxis = function (_Component) {
                     }
 
                     var lineX = 0;
-                    if (me.scale.line.enabled) {
+                    if (me.ruler.line.enabled) {
                         //线条
-                        lineX = me.align == "left" ? -me.scale.line.width - me.scale.line.marginToLine : me.scale.line.marginToLine;
+                        lineX = me.align == "left" ? -me.ruler.line.width - me.ruler.line.marginToLine : me.ruler.line.marginToLine;
                         var line = new Line$3({
                             context: {
                                 x: lineX,
                                 y: y,
                                 end: {
-                                    x: me.scale.line.width,
+                                    x: me.ruler.line.width,
                                     y: 0
                                 },
-                                lineWidth: me.scale.line.lineWidth,
-                                strokeStyle: me._getProp(me.scale.line.strokeStyle)
+                                lineWidth: me.ruler.line.lineWidth,
+                                strokeStyle: me._getProp(me.ruler.line.strokeStyle)
                             }
                         });
                         yNode.addChild(line);
@@ -10266,7 +10266,7 @@ var yAxis = function (_Component) {
                     }
 
                     //文字
-                    var txtX = me.align == "left" ? lineX - me.scale.text.marginToLine : lineX + me.scale.line.width + me.scale.text.marginToLine;
+                    var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.line.width + me.ruler.text.marginToLine;
                     if (this.isH) {
                         txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
                     }
@@ -10275,9 +10275,9 @@ var yAxis = function (_Component) {
                         context: {
                             x: txtX,
                             y: posy + aniFrom,
-                            fillStyle: me._getProp(me.scale.text.fontColor),
-                            fontSize: me.scale.text.fontSize,
-                            rotation: -Math.abs(this.scale.text.rotation),
+                            fillStyle: me._getProp(me.ruler.text.fontColor),
+                            fontSize: me.ruler.text.fontSize,
+                            rotation: -Math.abs(me.ruler.text.rotation),
                             textAlign: textAlign,
                             textBaseline: "middle",
                             globalAlpha: 0
@@ -10287,7 +10287,7 @@ var yAxis = function (_Component) {
                     yNode._txt = txt;
 
                     me.maxW = Math.max(me.maxW, txt.getTextWidth());
-                    if (me.scale.text.rotation == 90 || me.scale.text.rotation == -90) {
+                    if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
                         me.maxW = Math.max(me.maxW, txt.getTextHeight());
                     }
 
@@ -10326,11 +10326,11 @@ var yAxis = function (_Component) {
                 }
             }
 
-            me.maxW += me.scale.text.marginToLine;
+            me.maxW += me.ruler.text.marginToLine;
             if (me.width === null) {
-                me.width = parseInt(me.maxW + me.scale.text.marginToLine);
-                if (me.scale.line.enabled) {
-                    me.width += parseInt(me.scale.line.width + me.scale.line.marginToLine);
+                me.width = parseInt(me.maxW + me.ruler.text.marginToLine);
+                if (me.ruler.line.enabled) {
+                    me.width += parseInt(me.ruler.line.width + me.ruler.line.marginToLine);
                 }
             }
 
@@ -10351,8 +10351,8 @@ var yAxis = function (_Component) {
                         x: _originX,
                         y: -me.height
                     },
-                    lineWidth: this.scale.line.lineWidth,
-                    strokeStyle: me._getProp(me.scale.line.strokeStyle)
+                    lineWidth: me.ruler.line.lineWidth,
+                    strokeStyle: me._getProp(me.ruler.line.strokeStyle)
                 }
             });
             this.sprite.addChild(_axisline);
@@ -10598,7 +10598,7 @@ var Descartes_Component = function (_coorBase) {
         if (opts.horizontal) {
             _$6.extend(true, _this.xAxis, {
                 isH: true,
-                scale: {
+                ruler: {
                     text: {
                         rotation: 90
                     }
@@ -10607,7 +10607,7 @@ var Descartes_Component = function (_coorBase) {
             _$6.each(_this.yAxis, function (yAxis$$1) {
                 _$6.extend(true, yAxis$$1, {
                     isH: true,
-                    scale: {
+                    ruler: {
                         text: {
                             rotation: 90
                         }
@@ -10619,13 +10619,13 @@ var Descartes_Component = function (_coorBase) {
         if ("enabled" in opts) {
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _$6.extend(true, _this.xAxis, {
-                scale: {
+                ruler: {
                     enabled: opts.enabled
                 }
             });
             _$6.each(_this.yAxis, function (yAxis$$1) {
                 _$6.extend(true, yAxis$$1, {
-                    scale: {
+                    ruler: {
                         enabled: opts.enabled
                     }
                 });
@@ -11944,7 +11944,7 @@ var polarComponent = function (_coorBase) {
             data: [],
             angleList: [], //对应layoutType下的角度list
             beginAngle: -90,
-            scale: {
+            ruler: {
                 //刻度尺,在最外沿的蜘蛛网上面
                 data: [], //aAxis.data的 text.format后版本
                 enabled: true,
@@ -11960,7 +11960,7 @@ var polarComponent = function (_coorBase) {
         _this.rAxis = {
             field: [],
             dataSection: null,
-            scale: {
+            ruler: {
                 //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
                 enabled: false
             }
@@ -12022,7 +12022,7 @@ var polarComponent = function (_coorBase) {
                     dataSection: this.rAxis.dataSection
                 }, this);
 
-                if (this.aAxis.scale.enabled) {
+                if (this.aAxis.ruler.enabled) {
                     this._drawAAxisScale();
                 }
 
@@ -12147,7 +12147,7 @@ var polarComponent = function (_coorBase) {
                 this._grid = new polarGrid(this.grid, this);
                 this.sprite.addChild(this._grid.sprite);
             }
-            if (this.aAxis.scale.enabled && this.grid.enabled) {
+            if (this.aAxis.ruler.enabled && this.grid.enabled) {
                 this._aAxisScaleSp = new canvax.Display.Sprite({
                     id: "aAxisScaleSp"
                 });
@@ -12168,7 +12168,7 @@ var polarComponent = function (_coorBase) {
                 this.height = rootHeight - _padding.top - _padding.bottom;
             }
 
-            if (this.aAxis.scale.enabled) {
+            if (this.aAxis.ruler.enabled) {
                 this.width -= 20 * 2;
                 this.height -= 20 * 2;
             }
@@ -12424,16 +12424,16 @@ var polarComponent = function (_coorBase) {
                 var c = {
                     x: point.x,
                     y: point.y,
-                    fillStyle: me.aAxis.scale.text.fontColor
+                    fillStyle: me.aAxis.ruler.text.fontColor
                 };
 
-                label = me.aAxis.scale.text.format(label);
+                label = me.aAxis.ruler.text.format(label);
                 _$13.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
                 me._aAxisScaleSp.addChild(new canvax.Display.Text(label, {
                     context: c
                 }));
 
-                me.aAxis.scale.data.push(label);
+                me.aAxis.ruler.data.push(label);
             });
         }
 
@@ -12501,7 +12501,7 @@ var polarComponent = function (_coorBase) {
             var node = {
                 ind: aAxisInd,
                 value: me.aAxis.data[aAxisInd],
-                text: me.aAxis.scale.data[aAxisInd],
+                text: me.aAxis.ruler.data[aAxisInd],
                 angle: me.aAxis.angleList[aAxisInd]
             };
             return node;
@@ -17860,8 +17860,8 @@ var PlanetGraphs = function (_GraphsBase) {
                 fillStyle: null,
                 strokeStyle: null,
                 lineWidth: 1,
-                scale: [], //环形刻度线集合
-                count: 3 //在 scale.length>1 的时候会被修改为 scale.length
+                section: [], //环形刻度线集合
+                count: 3 //在 section.length>1 的时候会被修改为 section.length
             },
             rays: {
                 count: 0,
@@ -17941,7 +17941,7 @@ var PlanetGraphs = function (_GraphsBase) {
 
                 me._groups.push(_g);
 
-                me.grid.rings.scale.push({
+                me.grid.rings.section.push({
                     r: _g.rRange.to
                 });
             });
@@ -17985,22 +17985,22 @@ var PlanetGraphs = function (_GraphsBase) {
         value: function drawBack() {
             var me = this;
 
-            if (me.grid.rings.scale.length == 1) {
+            if (me.grid.rings.section.length == 1) {
 
                 //如果只有一个，那么就强制添加到3个
-                var _diffR = (me.grid.rings.scale[0].r - me.center.r) / me.grid.rings.count;
-                me.grid.rings.scale = [];
+                var _diffR = (me.grid.rings.section[0].r - me.center.r) / me.grid.rings.count;
+                me.grid.rings.section = [];
                 for (var i = 0; i < me.grid.rings.count; i++) {
-                    me.grid.rings.scale.push({
+                    me.grid.rings.section.push({
                         r: me.center.r + _diffR * (i + 1)
                     });
                 }
             } else {
-                me.grid.rings.count = me.grid.rings.scale.length;
+                me.grid.rings.count = me.grid.rings.section.length;
             }
 
-            for (var i = me.grid.rings.scale.length - 1; i >= 0; i--) {
-                var _scale = me.grid.rings.scale[i];
+            for (var i = me.grid.rings.section.length - 1; i >= 0; i--) {
+                var _scale = me.grid.rings.section[i];
                 me.sprite.addChild(new Circle$5({
                     context: {
                         x: me.root._coord.origin.x,
@@ -18020,8 +18020,8 @@ var PlanetGraphs = function (_GraphsBase) {
                 var itemAng = 360 / me.grid.rays.count;
                 var _r = me.root._coord.maxR; //Math.max( me.w, me.h );
 
-                if (me.grid.rings.scale.length) {
-                    _r = me.grid.rings.scale.slice(-1)[0].r;
+                if (me.grid.rings.section.length) {
+                    _r = me.grid.rings.section.slice(-1)[0].r;
                 }
 
                 for (var i = 0, l = me.grid.rays.count; i < l; i++) {
@@ -18058,7 +18058,7 @@ var PlanetGraphs = function (_GraphsBase) {
                 res = p.apply(this, [{
                     //iGroup : iGroup,
                     scaleInd: i,
-                    count: this.grid.rings.scale.length,
+                    count: this.grid.rings.section.length,
 
                     groups: this._groups,
                     graphs: this
