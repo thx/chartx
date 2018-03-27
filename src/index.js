@@ -87,6 +87,9 @@ var Chartx = {
     options : {},
     getOptions : function( chartPark_cid ){
         //chartPark_cid,chartpark中的图表id
+        if( !this.options[ chartPark_cid ] ){
+            return;
+        };
         var JsonSerialize = {
             prefix: '[[JSON_FUN_PREFIX_',
             suffix: '_JSON_FUN_SUFFIX]]'

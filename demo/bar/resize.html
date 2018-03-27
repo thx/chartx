@@ -79,14 +79,49 @@
                     },
                     graphs : [
                     
-                        {
-                            type : "line",
-                            field : "click",
-                            yAxisAlign : "left",
-                            text : {
-                                enabled : true
-                            }
+                    {
+                        "type": "line",
+                        "field": "click",
+                        "line": {
+                          "strokeStyle": {
+                            "lineargradient": [
+                              {
+                                "position": 0,
+                                "color": "#b6eb17"
+                              },
+                              {
+                                "position": 0.06,
+                                "color": "#2bcca0"
+                              },
+                              {
+                                "position": 0.13,
+                                "color": "#4c7fff"
+                              },
+                              {
+                                "position": 0.85,
+                                "color": "#4c7fff"
+                              },
+                              {
+                                "position": 0.95,
+                                "color": "#0e34ef"
+                              },
+                              {
+                                "position": 1,
+                                "color": "#170089"
+                              }
+                            ]
+                          },
+                          "lineWidth": 3
                         },
+                        "node": {
+                          "strokeStyle": "#4c7fff",
+                          "enabled": false
+                        },
+                        "fill": {
+                          "fillStyle": "#4f82ff",
+                          "alpha": 0.1
+                        }
+                      },
                         {
                             type : "bar",
                             field : [ [ "uv","pv" ],"ppc" ],
@@ -94,7 +129,7 @@
                         }
                         
                     ],
-                    dataZoom: {},
+                    dataZoom1: {},
                     markLine :  [{
                         markTo: 'uv',
                         text : {

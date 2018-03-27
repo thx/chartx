@@ -46,12 +46,13 @@ export default class LineGraphs extends GraphsBase
 
         this._setGroupsForYfield( this.data , null, opts );
 
+        //this.grow();
         if( this.animation && !opts.resize ){
             this.grow();
         } else {
             this.fire("complete");
         }
-
+        
         return this;
         
     }
