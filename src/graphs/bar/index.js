@@ -57,7 +57,7 @@ export default class BarGraphs extends GraphsBase
         _.extend(true, this, opts);
 
         this.init();
-        
+
     }
 
     init()
@@ -86,12 +86,12 @@ export default class BarGraphs extends GraphsBase
             if( _.isArray(fs) ){
                 _.each( fs, function( _fs, ii ){
                     //fs的结构两层到顶了
-                    var node = data[ _fs ] ? data[ _fs ][ index ] : null;
-                    node && _nodesInfoList.push( node );
+                    var nodeData = data[ _fs ] ? data[ _fs ][ index ] : null;
+                    nodeData && _nodesInfoList.push( nodeData );
                 } );
             } else {
-                var node = data[ fs ] ? data[ fs ][ index ] : null;
-                node && _nodesInfoList.push( node );
+                var nodeData = data[ fs ] ? data[ fs ][ index ] : null;
+                nodeData && _nodesInfoList.push( nodeData );
             }
         } );
         
@@ -340,6 +340,10 @@ export default class BarGraphs extends GraphsBase
 
                     rectEl.finalPos = finalPos;
                     rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                    //nodeData, nodeElement ， data和图形之间互相引用的属性约定
+                    rectEl.nodeData = rectData;
+                    rectData.nodeElement = rectEl;
 
                     me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
 
@@ -642,7 +646,7 @@ export default class BarGraphs extends GraphsBase
                         y = -(_yAxis.height - Math.abs(y));
                     };
 
-                    var node = {
+                    var nodeData = {
                         type    : "bar",
                         value   : val,
                         vInd    : v, //如果是堆叠图的话，这个node在堆叠中得位置
@@ -661,11 +665,11 @@ export default class BarGraphs extends GraphsBase
                         color   : null
                     };
 
-                    if( !me.data[ node.field ] ){
-                        me.data[ node.field ] = tempBarData[v];
+                    if( !me.data[ nodeData.field ] ){
+                        me.data[ nodeData.field ] = tempBarData[v];
                     };
 
-                    tempBarData[v].push(node);
+                    tempBarData[v].push(nodeData);
 
                 });
             } );

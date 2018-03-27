@@ -7623,6 +7623,12 @@ var DataFrame = function (data) {
     //填充好total的data并且把属于yAxis的设置为number
     for (var a = 1, al = data.length; a < al; a++) {
         for (var b = 0, bl = data[a].length; b < bl; b++) {
+
+            var _val = data[a][b];
+            if (!isNaN(_val)) {
+                _val = Number(_val);
+            }
+
             total[b].data.push(data[a][b]);
         }
     }
@@ -12728,12 +12734,12 @@ var BarGraphs = function (_GraphsBase) {
                 if (_$15.isArray(fs)) {
                     _$15.each(fs, function (_fs, ii) {
                         //fs的结构两层到顶了
-                        var node = data[_fs] ? data[_fs][index] : null;
-                        node && _nodesInfoList.push(node);
+                        var nodeData = data[_fs] ? data[_fs][index] : null;
+                        nodeData && _nodesInfoList.push(nodeData);
                     });
                 } else {
-                    var node = data[fs] ? data[fs][index] : null;
-                    node && _nodesInfoList.push(node);
+                    var nodeData = data[fs] ? data[fs][index] : null;
+                    nodeData && _nodesInfoList.push(nodeData);
                 }
             });
 
@@ -12983,6 +12989,10 @@ var BarGraphs = function (_GraphsBase) {
 
                         rectEl.finalPos = finalPos;
                         rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
+
+                        //nodeData, nodeElement ， data和图形之间互相引用的属性约定
+                        rectEl.nodeData = rectData;
+                        rectData.nodeElement = rectEl;
 
                         me.node.filter && me.node.filter.apply(rectEl, [rectData, me]);
 
@@ -13281,7 +13291,7 @@ var BarGraphs = function (_GraphsBase) {
                             y = -(_yAxis.height - Math.abs(y));
                         }
 
-                        var node = {
+                        var nodeData = {
                             type: "bar",
                             value: val,
                             vInd: v, //如果是堆叠图的话，这个node在堆叠中得位置
@@ -13300,11 +13310,11 @@ var BarGraphs = function (_GraphsBase) {
                             color: null
                         };
 
-                        if (!me.data[node.field]) {
-                            me.data[node.field] = tempBarData[v];
+                        if (!me.data[nodeData.field]) {
+                            me.data[nodeData.field] = tempBarData[v];
                         }
 
-                        tempBarData[v].push(node);
+                        tempBarData[v].push(nodeData);
                     });
                 });
 
@@ -17011,9 +17021,10 @@ var CloudGraphs = function (_GraphsBase) {
             if (_$23.isString(this.node.fontSize) && this.node.fontSize in rowData) {
                 var val = Number(rowData[this.node.fontSize]);
                 if (!isNaN(val)) {
-                    size = this.node.minFontSize + (this.node.maxFontSize - this.node.minFontSize) / (this.node._maxFontSizeVal - this.node._minFontSizeVal) * val;
+                    size = this.node.minFontSize + (this.node.maxFontSize - this.node.minFontSize) / (this.node._maxFontSizeVal - this.node._minFontSizeVal) * (val - this.node._minFontSizeVal);
                 }
             }
+
             if (_$23.isNumber(this.node.fontSize)) {
                 size = this.node.fontSize;
             }

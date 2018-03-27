@@ -128,8 +128,8 @@ chartx2.0 代码规范
   
 file:../canvax
 
-直角坐标系的两类轴（xAxis,yAxis）,和极坐标系的两类轴（aAxis,rAxis ）， 都至少有field和scale
-scale用来表示刻度ui，axis上面别的所有的属性都是逻辑属性，scale用来控制是否有ui。
+直角坐标系的两类轴（xAxis,yAxis）,和极坐标系的两类轴（aAxis,rAxis ）， 都至少有field和ruler
+ruler用来表示刻度ui，axis上面别的所有的属性都是逻辑属性，ruler用来控制是否有ui。
 
 graphs 约定
 所有得graphs中把所有的ui设置都归为了4个属性（这么多年的经验来看， 基本能满足目前为止的所有需求）
@@ -137,3 +137,6 @@ node --》 (对应一个数据节点，而不是ui元素)
 line --》（多个数据节点的链接，在雷达图和line折线图中表现为用折线绘制连接）
 area --》（同样地，表示多个数据节点的链接，然后有一个闭环，出现了一个面）
 text --》 文本
+
+
+nodeData, nodeElement ， data和图形之间互相引用的属性约定

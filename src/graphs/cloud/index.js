@@ -86,9 +86,10 @@ export default class CloudGraphs extends GraphsBase
         if( _.isString( this.node.fontSize ) && this.node.fontSize in rowData ){
             var val = Number( rowData[ this.node.fontSize ] );
             if( !isNaN( val ) ){
-                size = this.node.minFontSize + (this.node.maxFontSize-this.node.minFontSize)/(this.node._maxFontSizeVal - this.node._minFontSizeVal) * val;
+                size = this.node.minFontSize + (this.node.maxFontSize-this.node.minFontSize)/(this.node._maxFontSizeVal - this.node._minFontSizeVal) * (val - this.node._minFontSizeVal);
             }
         }
+        
         if( _.isNumber( this.node.fontSize ) ){
             size = this.node.fontSize;
         }
