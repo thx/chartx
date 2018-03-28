@@ -212,7 +212,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.fire("resetData");
     }
 
-    //默认每个chart都要内部实现一个_initData
+   
     initData(data)
     {
         return DataFrame.apply(this, arguments);

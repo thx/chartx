@@ -8013,9 +8013,6 @@ var Chart = function (_Canvax$Event$EventDi) {
             this._resetData && this._resetData(dataTrigger);
             this.fire("resetData");
         }
-
-        //默认每个chart都要内部实现一个_initData
-
     }, {
         key: "initData",
         value: function initData(data) {
@@ -8226,6 +8223,23 @@ var Coord = function (_Chart) {
             });
 
             this.bindEvent();
+        }
+
+        //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
+
+    }, {
+        key: "_resetData",
+        value: function _resetData(dataTrigger) {
+            var me = this;
+            if (this._coord) {
+                this._coord.resetData(this.dataFrame, dataTrigger);
+            }
+
+            _.each(this._graphs, function (_g) {
+                _g.resetData(me.dataFrame, dataTrigger);
+            });
+
+            this.componentsReset(dataTrigger);
         }
 
         //tips组件
@@ -8848,6 +8862,13 @@ var xAxis = function (_Component) {
         value: function _initDataSection(data) {
             var arr = _$8.flatten(data);
             if (this.layoutType == "proportion") {
+                if (arr.length == 1) {
+                    arr.push(0);
+                    arr.push(arr[0] * 2);
+                }
+                arr = arr.sort(function (a, b) {
+                    return a - b;
+                });
                 arr = DataSection.section(arr);
             }
             return arr;
@@ -9489,7 +9510,7 @@ var yAxis = function (_Component) {
         };
         _this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
 
-        _this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
+        _this.layoutData = []; //dataSection 对应的layout数据{y:-100, value:'1000'}
         _this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
         _this.waterLine = null; //水位data，需要混入 计算 dataSection， 如果有设置waterLineData， dataSection的最高水位不会低于这个值
 
@@ -9710,7 +9731,7 @@ var yAxis = function (_Component) {
         value: function getValFromYpos(y) {
             var start = this.layoutData[0];
             var end = this.layoutData.slice(-1)[0];
-            var val = (end.content - start.content) * ((y - start.y) / (end.y - start.y)) + start.content;
+            var val = (end.value - start.value) * ((y - start.y) / (end.y - start.y)) + start.value;
             return val;
         }
     }, {
@@ -9745,7 +9766,7 @@ var yAxis = function (_Component) {
     }, {
         key: "_trimYAxis",
         value: function _trimYAxis() {
-
+            var me = this;
             var tmpData = [];
             //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
             //this._yOriginTrans = this._getYOriginTrans( 0 );
@@ -9759,16 +9780,51 @@ var yAxis = function (_Component) {
 
             //设置 basePoint
             this.basePoint = {
-                content: this.baseNumber,
+                value: this.baseNumber,
                 y: this.getYposFromVal(this.baseNumber)
             };
 
-            for (var a = 0, al = this.dataSection.length; a < al; a++) {
-                tmpData[a] = {
-                    content: this.dataSection[a],
-                    y: this.getYposFromVal(this.dataSection[a])
+            for (var i = 0, l = this.dataSection.length; i < l; i++) {
+                var layoutData = {
+                    value: this.dataSection[i],
+                    y: this.getYposFromVal(this.dataSection[i]),
+                    visible: true,
+                    text: ""
                 };
+
+                //把format提前
+                var text = layoutData.value;
+                if (_$10.isFunction(me.ruler.text.format)) {
+                    text = me.ruler.text.format(text, me);
+                }
+                if (text === undefined || text === null) {
+                    text = numAddSymbol(layoutData.value);
+                }
+                layoutData.text = text;
+
+                tmpData.push(layoutData);
             }
+
+            var _preShowInd = 0;
+            for (var a = 0, al = tmpData.length; a < al; a++) {
+                if (a == 0) continue;
+
+                if (_preShowInd == 0) {
+                    if (tmpData[a].text == tmpData[_preShowInd].text) {
+                        //如果后面的format后的数据和前面的节点的format后数据相同
+                        tmpData[a].visible = false;
+                    } else {
+                        _preShowInd = a;
+                    }
+                } else {
+                    if (tmpData[a].text == tmpData[_preShowInd].text) {
+                        tmpData[_preShowInd].visible = false;
+                    }
+                    _preShowInd = a;
+                }
+            }
+
+            //TODO: 最后的问题就是dataSection中得每个只如果format后都相同的话，就会出现最上面最下面两个一样得刻度
             this.layoutData = tmpData;
         }
     }, {
@@ -10052,15 +10108,12 @@ var yAxis = function (_Component) {
             me._label && me.sprite.addChild(me._label);
             for (var a = 0, al = arr.length; a < al; a++) {
                 var o = arr[a];
+                if (!o.visible) {
+                    continue;
+                }
                 var y = o.y;
-                var content = o.content;
 
-                if (_$10.isFunction(me.ruler.text.format)) {
-                    content = me.ruler.text.format(content, me);
-                }
-                if (content === undefined || content === null) {
-                    content = numAddSymbol(o.content);
-                }
+                var value = o.value;
 
                 var textAlign = me.align == "left" ? "right" : "left";
 
@@ -10094,7 +10147,7 @@ var yAxis = function (_Component) {
                             yNode._txt.context.y = posy;
                         }
 
-                        yNode._txt.resetText(content);
+                        yNode._txt.resetText(o.text);
                     }
 
                     if (yNode._line) {
@@ -10116,11 +10169,11 @@ var yAxis = function (_Component) {
                     });
 
                     var aniFrom = 20;
-                    if (content == me.baseNumber) {
+                    if (o.value == me.baseNumber) {
                         aniFrom = 0;
                     }
 
-                    if (content < me.baseNumber) {
+                    if (o.value < me.baseNumber) {
                         aniFrom = -20;
                     }
 
@@ -10149,7 +10202,7 @@ var yAxis = function (_Component) {
                     if (this.isH) {
                         txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
                     }
-                    var txt = new canvax.Display.Text(content, {
+                    var txt = new canvax.Display.Text(o.text, {
                         id: "yAxis_txt_" + me.align + "_" + a,
                         context: {
                             x: txtX,
@@ -11083,19 +11136,6 @@ var Descartes = function (_CoordBase) {
             }
 
             return opts;
-        }
-
-        //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
-
-    }, {
-        key: "_resetData",
-        value: function _resetData(dataTrigger) {
-            var me = this;
-            this._coord.resetData(this.dataFrame, dataTrigger);
-            _$5.each(this._graphs, function (_g) {
-                _g.resetData(me.dataFrame, dataTrigger);
-            });
-            this.componentsReset(dataTrigger);
         }
     }, {
         key: "initData",
@@ -12823,6 +12863,7 @@ var BarGraphs = function (_GraphsBase) {
     }, {
         key: "resetData",
         value: function resetData(dataFrame, dataTrigger) {
+            this.dataFrame = dataFrame;
             this.draw();
         }
     }, {
@@ -12854,7 +12895,7 @@ var BarGraphs = function (_GraphsBase) {
                 return;
             }
 
-            var preDataLen = me._preDataLen; //纵向的分组，主要用于resetData的时候，对比前后data数量用
+            var preDataLen = me._preDataLen; //纵向的分组，主要用于 resetData 的时候，对比前后data数量用
 
             var groupsLen = this.enabledField.length;
             var itemW = 0;
@@ -13019,32 +13060,32 @@ var BarGraphs = function (_GraphsBase) {
                                 txtGroupH.addChild(infosp);
                             }
 
-                            var contents = [];
+                            var _values = [];
                             for (var c = vLen - 1; c >= 0; c--) {
                                 //在baseNumber同一侧的数据放在一个叶子节点上面显示
-                                if (rectData.value > rectData.yBasePoint.content === me.data[h_group[c]][h].value > me.data[h_group[c]][h].yBasePoint.content) {
-                                    contents.push(me.data[h_group[c]][h]);
+                                if (rectData.value > rectData.yBasePoint.value === me.data[h_group[c]][h].value > me.data[h_group[c]][h].yBasePoint.value) {
+                                    _values.push(me.data[h_group[c]][h]);
                                 }
                             }
 
                             var infoWidth = 0;
                             var infoHeight = 0;
 
-                            _$15.each(contents, function (cdata, ci) {
-                                var content = cdata.value;
+                            _$15.each(_values, function (cdata, ci) {
+                                var value = cdata.value;
                                 if (_$15.isFunction(me.text.format)) {
-                                    var _formatc = me.text.format.apply(me, [content, cdata]);
+                                    var _formatc = me.text.format.apply(me, [value, cdata]);
                                     if (!!_formatc || _formatc === "" || _formatc === 0) {
-                                        content = _formatc;
+                                        value = _formatc;
                                     }
                                 }
 
-                                if (!content) {
+                                if (!value) {
                                     return;
                                 }
 
-                                if (!animate && _$15.isNumber(content)) {
-                                    content = numAddSymbol(content);
+                                if (!animate && _$15.isNumber(value)) {
+                                    value = numAddSymbol(value);
                                 }
 
                                 if (ci > 0 && infosp.children.length > 0) {
@@ -13065,7 +13106,7 @@ var BarGraphs = function (_GraphsBase) {
                                 if (_txt) {
                                     //do something
                                 } else {
-                                    _txt = new canvax.Display.Text(content, {
+                                    _txt = new canvax.Display.Text(value, {
                                         id: "info_txt_" + i + "_" + h + "_" + ci,
                                         context: {
                                             x: infoWidth + 2,
@@ -13084,16 +13125,16 @@ var BarGraphs = function (_GraphsBase) {
 
                                 if (animate) {
                                     var beginNumber = 0;
-                                    if (content >= 100) {
+                                    if (value >= 100) {
                                         beginNumber = 100;
                                     }
-                                    if (content >= 1000) {
+                                    if (value >= 1000) {
                                         beginNumber = 1000;
                                     }
-                                    if (content >= 10000) {
+                                    if (value >= 10000) {
                                         beginNumber = 10000;
                                     }
-                                    if (content >= 100000) {
+                                    if (value >= 100000) {
                                         beginNumber = 100900;
                                     }
                                     //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
@@ -13104,7 +13145,7 @@ var BarGraphs = function (_GraphsBase) {
                             infosp._finalX = rectData.x + me.node._width / 2 - infoWidth / 2;
 
                             //如果数据在basepoint下方
-                            if (rectData.value < rectData.yBasePoint.content) {
+                            if (rectData.value < rectData.yBasePoint.value) {
                                 infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
                             } else {
                                 infosp._finalY = rectData.y - infoHeight;
@@ -13260,7 +13301,7 @@ var BarGraphs = function (_GraphsBase) {
 
                             var preY = preData[i].y;
                             var preVal = preData[i].value;
-                            var yBaseNumber = yBasePoint.content;
+                            var yBaseNumber = yBasePoint.value;
                             if (val >= yBaseNumber) {
                                 //如果大于基线的，那么就寻找之前所有大于基线的
                                 if (preVal >= yBaseNumber) {
@@ -13352,7 +13393,7 @@ var BarGraphs = function (_GraphsBase) {
         value: function grow(callback, opts) {
 
             var me = this;
-
+            console.log(me._preDataLen + "|" + me._dataLen);
             //先把已经不在当前range范围内的元素destroy掉
             if (me._preDataLen > me._dataLen) {
                 for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
@@ -13462,16 +13503,16 @@ var BarGraphs = function (_GraphsBase) {
                                             duration: optsions.duration + 100,
                                             delay: h * optsions.delay,
                                             onUpdate: function onUpdate(arg) {
-                                                var content = arg.v;
+                                                var value = arg.v;
                                                 if (_$15.isFunction(me.text.format)) {
-                                                    var _formatc = me.text.format.apply(me, [content, txt._data]);
+                                                    var _formatc = me.text.format.apply(me, [value, txt._data]);
                                                     if (!!_formatc || _formatc === "" || _formatc === 0) {
-                                                        content = _formatc;
+                                                        value = _formatc;
                                                     }
-                                                } else if (_$15.isNumber(content)) {
-                                                    content = numAddSymbol(parseInt(content));
+                                                } else if (_$15.isNumber(value)) {
+                                                    value = numAddSymbol(parseInt(value));
                                                 }
-                                                txt.resetText(content);
+                                                txt.resetText(value);
                                                 if (txt.parent) {
                                                     me._updateInfoTextPos(txt.parent);
                                                 } else {
@@ -14231,21 +14272,21 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
                         strokeStyle: "#ffffff"
                     };
 
-                    var content = me.data[a].value;
+                    var value = me.data[a].value;
                     if (_$18.isFunction(me.text.format)) {
-                        content = me.text.format.apply(me, [content, a]) || content;
+                        value = me.text.format.apply(me, [value, a]) || value;
                     }
 
-                    if (content == undefined || content == null) {
+                    if (value == undefined || value == null) {
                         continue;
                     }
 
                     var text = this._texts.children[iNode];
                     if (text) {
-                        text.resetText(content);
+                        text.resetText(value);
                         _$18.extend(text.context, context);
                     } else {
-                        text = new canvax.Display.Text(content, {
+                        text = new canvax.Display.Text(value, {
                             context: context
                         });
                         me._texts.addChild(text);
@@ -14789,8 +14830,14 @@ var ScatGraphs = function (_GraphsBase) {
                         this._rMaxValue = _$19.max(this._rData);
                         this._rMinValue = _$19.min(this._rData);
                     }
+
                     var rVal = rowData[this.node.r];
-                    r = this.node.minR + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxR - this.node.minR);
+
+                    if (this._rMaxValue == this._rMinValue) {
+                        r = this.node.minR + (this.node.maxR - this.node.minR) / 2;
+                    } else {
+                        r = this.node.minR + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxR - this.node.minR);
+                    }
                 }
                 if (_$19.isFunction(this.node.r)) {
                     r = this.node.r(rowData);
@@ -18107,8 +18154,7 @@ var Legend = function (_Component) {
 
                 icon.on("click", function () {});
 
-                var content = me.label(obj);
-                var txt = new canvax.Display.Text(content, {
+                var txt = new canvax.Display.Text(me.label(obj), {
                     id: "legend_field_txt_" + i,
                     context: {
                         x: me.icon.r + 3,
@@ -18779,7 +18825,7 @@ var MarkLine = function (_Component) {
             enabled: false,
             fillStyle: '#999999',
             fontSize: 12,
-            content: null,
+            value: null,
             lineType: 'dashed',
             lineWidth: 1,
             strokeStyle: "white"
@@ -18828,14 +18874,14 @@ var MarkLine = function (_Component) {
     }, {
         key: "_getLabel",
         value: function _getLabel() {
-            if (_$28.isString(this.text.content)) {
-                return this.text.content;
+            if (_$28.isString(this.text.value)) {
+                return this.text.value;
             }
 
             var yVal = this._getYVal();
             var label = "markline：" + yVal;
-            if (_$28.isFunction(this.text.content)) {
-                label = this.text.content.apply(this, [yVal]);
+            if (_$28.isFunction(this.text.value)) {
+                label = this.text.value.apply(this, [yVal]);
             }
             return label;
         }
@@ -19866,9 +19912,13 @@ var Chartx = {
         return chart;
     },
     options: {},
-    getOptions: function getOptions(chartPark_cid) {
+    getOptions: function getOptions(chartPark_cid, options) {
         //chartPark_cid,chartpark中的图表id
-        if (!this.options[chartPark_cid]) {
+        if (!options) {
+            options = this.options;
+        }
+
+        if (!options[chartPark_cid]) {
             return;
         }
         var JsonSerialize = {
@@ -19884,7 +19934,7 @@ var Chartx = {
                 return value;
             }) || {};
         };
-        var opts = parse(decodeURIComponent(this.options[chartPark_cid] || {}));
+        var opts = parse(decodeURIComponent(options[chartPark_cid] || {}));
         return opts;
     },
     instances: {},

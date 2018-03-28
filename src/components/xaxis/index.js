@@ -150,6 +150,11 @@ export default class xAxis extends Component
     {
         var arr = _.flatten(data);
         if( this.layoutType == "proportion" ){
+            if( arr.length == 1 ){
+               arr.push( 0 );
+               arr.push( arr[0]*2 );
+            };
+            arr = arr.sort(function(a,b){return a-b});
             arr = DataSection.section(arr)
         };
         return arr;

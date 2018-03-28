@@ -182,9 +182,14 @@ export default class ScatGraphs extends GraphsBase
                     this._rMaxValue = _.max( this._rData );
                     this._rMinValue = _.min( this._rData );
                 };
-                var rVal = rowData[ this.node.r ];
-                r = this.node.minR + (rVal-this._rMinValue)/( this._rMaxValue-this._rMinValue ) * ( this.node.maxR - this.node.minR )
 
+                var rVal = rowData[ this.node.r ];
+
+                if( this._rMaxValue ==  this._rMinValue ){
+                    r = this.node.minR + ( this.node.maxR - this.node.minR )/2;
+                } else {
+                    r = this.node.minR + (rVal-this._rMinValue)/( this._rMaxValue-this._rMinValue ) * ( this.node.maxR - this.node.minR )
+                };
             };
             if( _.isFunction( this.node.r ) ){
                 r = this.node.r( rowData );

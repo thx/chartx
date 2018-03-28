@@ -117,6 +117,21 @@ export default class Coord extends Chart
         this.bindEvent();
     }
 
+    //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
+    _resetData( dataTrigger )
+    {
+        var me = this;
+        if( this._coord ){
+            this._coord.resetData( this.dataFrame , dataTrigger);
+        };
+        
+        _.each( this._graphs, function( _g ){
+            _g.resetData( me.dataFrame , dataTrigger);
+        } );
+
+        this.componentsReset( dataTrigger );
+    }
+
 
     //tips组件
     _init_components_tips ()

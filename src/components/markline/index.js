@@ -35,7 +35,7 @@ export default class MarkLine extends Component
             enabled  : false,
             fillStyle: '#999999',
             fontSize : 12,
-            content  : null,
+            value  : null,
             lineType : 'dashed',
             lineWidth: 1,
             strokeStyle : "white"
@@ -84,14 +84,14 @@ export default class MarkLine extends Component
 
     _getLabel()
     {
-        if( _.isString( this.text.content ) ){
-            return this.text.content;
+        if( _.isString( this.text.value ) ){
+            return this.text.value;
         };
 
         var yVal = this._getYVal();
         var label = "markline："+yVal;
-        if (_.isFunction(this.text.content)) {
-            label = this.text.content.apply( this, [ yVal ] )
+        if (_.isFunction(this.text.value)) {
+            label = this.text.value.apply( this, [ yVal ] )
         }
         return label;
     }

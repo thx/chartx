@@ -46,7 +46,7 @@ export default class yAxis extends Component
         };
         this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
         
-        this.layoutData = []; //dataSection 对应的layout数据{y:-100, content:'1000'}
+        this.layoutData = []; //dataSection 对应的layout数据{y:-100, value:'1000'}
         this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
         this.waterLine = null; //水位data，需要混入 计算 dataSection， 如果有设置waterLineData， dataSection的最高水位不会低于这个值
 
@@ -262,7 +262,7 @@ export default class yAxis extends Component
     {
         var start = this.layoutData[0];
         var end   = this.layoutData.slice(-1)[0];
-        var val = (end.content-start.content) * ((y-start.y)/(end.y-start.y)) + start.content;
+        var val = (end.value-start.value) * ((y-start.y)/(end.y-start.y)) + start.value;
         return val;
     }
 
@@ -297,7 +297,7 @@ export default class yAxis extends Component
 
     _trimYAxis()
     {
-        
+        var me = this;
         var tmpData = [];
         //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
         //this._yOriginTrans = this._getYOriginTrans( 0 );
@@ -311,16 +311,53 @@ export default class yAxis extends Component
 
         //设置 basePoint
         this.basePoint = {
-            content: this.baseNumber,
+            value: this.baseNumber,
             y: this.getYposFromVal( this.baseNumber ),
         };
         
-        for (var a = 0, al = this.dataSection.length; a < al; a++) {
-            tmpData[a] = {
-                content: this.dataSection[a],
-                y: this.getYposFromVal( this.dataSection[a] )
+        for (var i = 0, l = this.dataSection.length; i < l; i++) {
+            var layoutData = {
+                value   : this.dataSection[ i ],
+                y       : this.getYposFromVal( this.dataSection[ i ] ),
+                visible : true,
+                text    : ""
             };
+
+            //把format提前
+            var text = layoutData.value;
+            if (_.isFunction(me.ruler.text.format)) {
+                text = me.ruler.text.format(text, me);
+            };
+            if( text === undefined || text === null ){
+                text = numAddSymbol( layoutData.value );
+            };  
+            layoutData.text = text;
+
+            tmpData.push( layoutData );
+
+        }
+
+        var _preShowInd = 0;
+        for (var a = 0, al = tmpData.length; a < al; a++) {
+            if( a == 0 ) continue;
+
+            if( _preShowInd == 0 ){
+                if( tmpData[a].text == tmpData[ _preShowInd ].text ){
+                    //如果后面的format后的数据和前面的节点的format后数据相同
+                    tmpData[a].visible = false;
+                } else {
+                    _preShowInd = a;
+                }
+            } else {
+                if( tmpData[a].text == tmpData[ _preShowInd ].text ){
+                    tmpData[_preShowInd].visible = false;
+                    
+                }
+                _preShowInd = a;
+            }
         };
+
+        //TODO: 最后的问题就是dataSection中得每个只如果format后都相同的话，就会出现最上面最下面两个一样得刻度
         this.layoutData = tmpData;
     }
 
@@ -611,15 +648,12 @@ export default class yAxis extends Component
         me._label && me.sprite.addChild(me._label);
         for (var a = 0, al = arr.length; a < al; a++) {
             var o = arr[a];
-            var y = o.y;
-            var content = o.content;
-            
-            if (_.isFunction(me.ruler.text.format)) {
-                content = me.ruler.text.format(content, me);
+            if( !o.visible ){
+                continue;
             };
-            if( content === undefined || content === null ){
-                content = numAddSymbol( o.content );
-            };  
+            var y = o.y;
+
+            var value = o.value;
 
             var textAlign = (me.align == "left" ? "right" : "left");
  
@@ -653,7 +687,7 @@ export default class yAxis extends Component
                         yNode._txt.context.y = posy;
                     };
                     
-                    yNode._txt.resetText( content );
+                    yNode._txt.resetText( o.text );
                 };
 
                 if( yNode._line ){
@@ -676,11 +710,11 @@ export default class yAxis extends Component
                 });
 
                 var aniFrom = 20;
-                if( content == me.baseNumber ){
+                if( o.value == me.baseNumber ){
                     aniFrom = 0;
                 };
 
-                if( content < me.baseNumber ){
+                if( o.value < me.baseNumber ){
                     aniFrom = -20;
                 };
 
@@ -709,7 +743,7 @@ export default class yAxis extends Component
                 if( this.isH ){
                     txtX = txtX + (me.align == "left"?-1:1)* 4
                 };
-                var txt = new Canvax.Display.Text(content, {
+                var txt = new Canvax.Display.Text( o.text , {
                     id: "yAxis_txt_" + me.align + "_" + a,
                     context: {
                         x: txtX,

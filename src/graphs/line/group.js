@@ -574,21 +574,21 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     strokeStyle:"#ffffff"
                 };
 
-                var content = me.data[ a ].value;
+                var value = me.data[ a ].value;
                 if (_.isFunction(me.text.format)) {
-                    content = (me.text.format.apply( me , [content , a]) || content );
+                    value = (me.text.format.apply( me , [value , a]) || value );
                 };
 
-                if( content == undefined || content == null ){
+                if( value == undefined || value == null ){
                     continue;
                 }
 
                 var text = this._texts.children[ iNode ];
                 if( text ){
-                    text.resetText( content );
+                    text.resetText( value );
                     _.extend( text.context, context );
                 } else {
-                    text =  new Canvax.Display.Text( content , {
+                    text =  new Canvax.Display.Text( value , {
                         context: context
                     });
                     me._texts.addChild(text);

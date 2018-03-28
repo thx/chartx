@@ -140,16 +140,7 @@ export default class Descartes extends CoordBase
         return opts;
     }
 
-    //reset之前是应该已经 merge过了 opt ，  和准备好了dataFrame
-    _resetData( dataTrigger )
-    {
-        var me = this;
-        this._coord.resetData( this.dataFrame , dataTrigger);
-        _.each( this._graphs, function( _g ){
-            _g.resetData( me.dataFrame , dataTrigger);
-        } );
-        this.componentsReset( dataTrigger );
-    }
+
 
     initData(data, opt)
     {

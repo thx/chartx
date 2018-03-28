@@ -118,8 +118,7 @@ export default class Legend extends Component
             
             icon.on("click" , function(){});
             
-            var content= me.label(obj);
-            var txt    = new Canvax.Display.Text( content , {
+            var txt    = new Canvax.Display.Text( me.label(obj) , {
                 id: "legend_field_txt_"+i,
                 context : {
                     x : me.icon.r + 3 ,

@@ -140,3 +140,5 @@ text --》 文本
 
 
 nodeData, nodeElement ， data和图形之间互相引用的属性约定
+
+text的值统一为value属性（以前很多地方是content，这个全部统一），只有tips的内容的属性用content,因为这个内容是一个内容的片段，text.value属性一般都是返回一单个string

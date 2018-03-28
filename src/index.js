@@ -85,9 +85,13 @@ var Chartx = {
         return chart;
     },
     options : {},
-    getOptions : function( chartPark_cid ){
+    getOptions : function( chartPark_cid , options ){
         //chartPark_cid,chartpark中的图表id
-        if( !this.options[ chartPark_cid ] ){
+        if( !options ){
+            options = this.options;
+        };
+
+        if( !options[ chartPark_cid ] ){
             return;
         };
         var JsonSerialize = {
@@ -106,7 +110,7 @@ var Chartx = {
                 return value;
             })||{};
         };
-        var opts = parse( decodeURIComponent( this.options[ chartPark_cid ] || {} ) );
+        var opts = parse( decodeURIComponent( options[ chartPark_cid ] || {} ) );
         return opts;
     },
     instances : {},

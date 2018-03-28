@@ -174,6 +174,7 @@ export default class BarGraphs extends GraphsBase
 
     resetData( dataFrame , dataTrigger )
     {
+        this.dataFrame = dataFrame;
         this.draw();
     }
 
@@ -205,7 +206,7 @@ export default class BarGraphs extends GraphsBase
             return;
         };
 
-        var preDataLen = me._preDataLen; //纵向的分组，主要用于resetData的时候，对比前后data数量用
+        var preDataLen = me._preDataLen; //纵向的分组，主要用于 resetData 的时候，对比前后data数量用
 
         var groupsLen = this.enabledField.length;
         var itemW = 0;
@@ -370,36 +371,36 @@ export default class BarGraphs extends GraphsBase
                             txtGroupH.addChild(infosp);
                         };
 
-                        var contents = [];
+                        var _values = [];
                         for (var c = vLen - 1; c >= 0; c--) {
                             //在baseNumber同一侧的数据放在一个叶子节点上面显示
                             if( 
-                                rectData.value > rectData.yBasePoint.content 
+                                rectData.value > rectData.yBasePoint.value 
                                 === 
-                                me.data[h_group[c]][h].value > me.data[h_group[c]][h].yBasePoint.content
+                                me.data[h_group[c]][h].value > me.data[h_group[c]][h].yBasePoint.value
                             ) {
-                                contents.push(me.data[h_group[c]][h]);
+                                _values.push(me.data[h_group[c]][h]);
                             }
                         }
 
                         var infoWidth = 0;
                         var infoHeight = 0;
                         
-                        _.each(contents, function(cdata, ci) {
-                            var content = cdata.value;
+                        _.each(_values, function(cdata, ci) {
+                            var value = cdata.value;
                             if (_.isFunction(me.text.format)) {
-                                var _formatc = me.text.format.apply( me , [content , cdata]);
+                                var _formatc = me.text.format.apply( me , [value , cdata]);
                                 if(!!_formatc || _formatc==="" || _formatc===0){
-                                    content = _formatc
+                                    value = _formatc
                                 }
                             };
 
-                            if( !content ){
+                            if( !value ){
                                 return;
                             };
 
-                            if (!animate && _.isNumber(content)) {
-                                content = numAddSymbol(content);
+                            if (!animate && _.isNumber(value)) {
+                                value = numAddSymbol(value);
                             };
 
                             if (ci > 0 && infosp.children.length>0) {
@@ -420,7 +421,7 @@ export default class BarGraphs extends GraphsBase
                             if( _txt ){
                                 //do something
                             } else {
-                                _txt = new Canvax.Display.Text( content , {
+                                _txt = new Canvax.Display.Text( value , {
                                     id: "info_txt_" + i + "_" + h + "_" + ci,
                                     context: {
                                         x: infoWidth + 2,
@@ -439,16 +440,16 @@ export default class BarGraphs extends GraphsBase
 
                             if( animate ){
                                 var beginNumber = 0;
-                                if( content >=100 ){
+                                if( value >=100 ){
                                     beginNumber = 100;
                                 }
-                                if( content >=1000 ){
+                                if( value >=1000 ){
                                     beginNumber = 1000;
                                 }
-                                if( content >=10000 ){
+                                if( value >=10000 ){
                                     beginNumber = 10000;
                                 }
-                                if( content >=100000 ){
+                                if( value >=100000 ){
                                     beginNumber = 100900;
                                 }
                                 //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
@@ -459,7 +460,7 @@ export default class BarGraphs extends GraphsBase
                         infosp._finalX = rectData.x + me.node._width/2 - infoWidth / 2;
 
                         //如果数据在basepoint下方
-                        if( rectData.value < rectData.yBasePoint.content ){
+                        if( rectData.value < rectData.yBasePoint.value ){
                             infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
                         } else {
                             infosp._finalY = rectData.y - infoHeight;
@@ -615,7 +616,7 @@ export default class BarGraphs extends GraphsBase
 
                         var preY = preData[i].y;
                         var preVal = preData[i].value;
-                        var yBaseNumber = yBasePoint.content;
+                        var yBaseNumber = yBasePoint.value;
                         if( val >= yBaseNumber ){
                             //如果大于基线的，那么就寻找之前所有大于基线的
                             if( preVal >= yBaseNumber ){
@@ -706,7 +707,7 @@ export default class BarGraphs extends GraphsBase
     {
 
         var me = this;
-        
+        console.log( me._preDataLen+"|"+ me._dataLen)
         //先把已经不在当前range范围内的元素destroy掉
         if ( me._preDataLen > me._dataLen) {
             for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
@@ -818,16 +819,16 @@ export default class BarGraphs extends GraphsBase
                                         duration: optsions.duration + 100,
                                         delay: h * optsions.delay,
                                         onUpdate: function( arg ) {
-                                            var content = arg.v;
+                                            var value = arg.v;
                                             if (_.isFunction(me.text.format)) {
-                                                var _formatc = me.text.format.apply( me , [content , txt._data]);
+                                                var _formatc = me.text.format.apply( me , [value , txt._data]);
                                                 if(!!_formatc || _formatc==="" || _formatc===0){
-                                                    content = _formatc
+                                                    value = _formatc
                                                 }
-                                            } else if (_.isNumber(content)) {
-                                                content = numAddSymbol(parseInt(content));
+                                            } else if (_.isNumber(value)) {
+                                                value = numAddSymbol(parseInt(value));
                                             };
-                                            txt.resetText(content);
+                                            txt.resetText(value);
                                             if (txt.parent) {
                                                 me._updateInfoTextPos(txt.parent);
                                             } else {
