@@ -80,7 +80,6 @@ export default class MarkLine extends Component
 
     draw()
     {
-        debugger
         var me = this;
         var aimPoint = me.aimPoint;
 

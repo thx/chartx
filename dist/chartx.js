@@ -14868,7 +14868,7 @@ var ScatGraphs = function (_GraphsBase) {
 
         //动画的起始位置， 默认x=data.x y = 0
         _this.aniOrigin = "default"; //center（坐标正中） origin（坐标原点）
-        debugger;
+
         _$19.extend(true, _this, opts);
 
         _this.init();
@@ -17346,7 +17346,7 @@ var CloudGraphs = function (_GraphsBase) {
 
                     tag.iNode = i;
                     tag.dataLen = data.length;
-                    debugger;
+
                     tag.focused = false;
                     tag.selected = false;
 
@@ -20138,7 +20138,6 @@ var MarkLine$2 = function (_Component) {
     }, {
         key: "draw",
         value: function draw() {
-            debugger;
             var me = this;
             var aimPoint = me.aimPoint;
 

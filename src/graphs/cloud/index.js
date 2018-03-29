@@ -186,7 +186,7 @@ export default class CloudGraphs extends GraphsBase
                 
                 tag.iNode  = i;
                 tag.dataLen  = data.length;
-                debugger
+            
                 tag.focused  = false;
                 tag.selected = false;
 
