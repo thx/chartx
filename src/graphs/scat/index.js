@@ -60,6 +60,9 @@ export default class ScatGraphs extends GraphsBase
             fontColor: "#777"
         };
 
+        //动画的起始位置， 默认x=data.x y = 0
+        this.aniOrigin = "default" //center（坐标正中） origin（坐标原点）
+debugger
         _.extend( true, this , opts );
 
         this.init( );
@@ -357,8 +360,20 @@ export default class ScatGraphs extends GraphsBase
             textBaseline : 'middle'
         };
         if( this.animation ){
+            if( this.aniOrigin == "default" ){
+                //ctx.x = 0;
+                ctx.y = 0;
+            }
+            if( this.aniOrigin == "origin" ){
+                ctx.x = 0;
+                ctx.y = 0;
+            }
+            if( this.aniOrigin == "center" ){
+                ctx.x = this.width/2;
+                ctx.y = -(this.height/2);
+            }
             //ctx.x = 0;
-            ctx.y = 0;
+            //ctx.y = 0;  
         };
         return ctx;
     }
@@ -384,8 +399,20 @@ export default class ScatGraphs extends GraphsBase
         };
 
         if( this.animation ){
-            //ctx.x = 0;
-            ctx.y = 0;
+            
+            if( this.aniOrigin == "default" ){
+                //ctx.x = 0;
+                ctx.y = 0;
+            }
+            if( this.aniOrigin == "origin" ){
+                ctx.x = 0;
+                ctx.y = 0;
+            }
+            if( this.aniOrigin == "center" ){
+                ctx.x = this.width/2;
+                ctx.y = -(this.height/2);
+            }
+
             ctx.r = 1;
         };
         return ctx;
@@ -400,13 +427,13 @@ export default class ScatGraphs extends GraphsBase
         var l = this.data.length-1;
         _.each( this.data , function( nodeData ){
             nodeData._node.animate({
-                //x : nodeData.x,
+                x : nodeData.x,
                 y : nodeData.y,
                 r : nodeData.r
             }, {
                 onUpdate: function( opts ){
                     if( this._text ){
-                        //this._text.context.x = opts.x;
+                        this._text.context.x = opts.x;
                         this._text.context.y = opts.y;
                     }
                     if( this._line ){

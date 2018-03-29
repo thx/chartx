@@ -365,6 +365,41 @@ export default class Descartes extends CoordBase
     }
     //datazoom end
 
+    //rect cross begin
+    _init_components_cross()
+    {
+        //原则上一个直角坐标系中最佳只设置一个cross
+        var me = this;
+        if( !_.isArray( me.cross ) ){
+            me.cross = [ me.cross ];
+        };
+        _.each( me.cross, function( cross , i){
+            me.components.push( {
+                type : "once",
+                plug : {
+                    draw: function(){
+
+                        var opts = _.extend( true, {
+                            origin: {
+                                x: me._coord.origin.x,
+                                y: me._coord.origin.y
+                            },
+                            width : me._coord.width,
+                            height : me._coord.height
+                        } , cross );
+
+                        var _cross = new me.componentsMap.cross( opts, me );
+                        me.components.push( {
+                            type : "cross"+i,
+                            plug : _cross
+                        } ); 
+                        me.graphsSprite.addChild( _cross.sprite );
+
+                    }
+                }
+            } );
+        });
+    }
 
     //markLine begin
     _init_components_markline()
@@ -487,11 +522,6 @@ export default class Descartes extends CoordBase
     {
     }
 
-    _init_components_anchor( )
-    {
-
-    }
-
     _init_components_bartgi()
     {
         var me = this;
@@ -552,8 +582,7 @@ export default class Descartes extends CoordBase
 
 
     //TODO：这个可以抽一个tipsPointer组件出来
-
-    _tipsPointerShow( e, _tips, _coor )
+    _tipsPointerShow( e, _tips, _coord )
     {
         
         if( !_tips.pointer ) return;
@@ -561,13 +590,13 @@ export default class Descartes extends CoordBase
         //console.log("show");
 
         var el = this._tipsPointer;        
-        var y = _coor.origin.y - _coor.height;
+        var y = _coord.origin.y - _coord.height;
         var x = 0;
         if( _tips.pointer == "line" ){
-            x = _coor.origin.x + e.eventInfo.xAxis.x;
+            x = _coord.origin.x + e.eventInfo.xAxis.x;
         }
         if( _tips.pointer == "shadow" ){
-            x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth/2;
+            x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
         }
 
         if( !el ){
@@ -583,7 +612,7 @@ export default class Descartes extends CoordBase
                         },
                         end : {
                             x : 0,
-                            y : _coor.height
+                            y : _coord.height
                         },
                         lineWidth : 1,
                         strokeStyle : "#cccccc"
@@ -594,8 +623,8 @@ export default class Descartes extends CoordBase
                 el = new Rect({
                     //xyToInt : false,
                     context : {
-                        width : _coor._xAxis.ceilWidth,
-                        height : _coor.height,
+                        width : _coord._xAxis.ceilWidth,
+                        height : _coord.height,
                         x : x,
                         y : y,
                         fillStyle : "#cccccc",
@@ -607,7 +636,7 @@ export default class Descartes extends CoordBase
             this.graphsSprite.addChild( el, 0 );
             this._tipsPointer = el;
         } else {
-            if( _tips.pointerAnimate ){
+            if( _tips.pointerAnimate && _coord._xAxis.layoutType != "proportion" ){
                 if( el.__animation ){
                     el.__animation.stop();
                 };
@@ -624,7 +653,7 @@ export default class Descartes extends CoordBase
         }
     }
 
-    _tipsPointerHide( e, _tips, _coor )
+    _tipsPointerHide( e, _tips, _coord )
     {
         if( !_tips.pointer  || !this._tipsPointer ) return;
         //console.log("hide");
@@ -632,24 +661,24 @@ export default class Descartes extends CoordBase
         this._tipsPointer = null;
     }
 
-    _tipsPointerMove( e, _tips, _coor )
+    _tipsPointerMove( e, _tips, _coord )
     {
         if( !_tips.pointer ) return;
 
         //console.log("move");
 
         var el = this._tipsPointer;
-        var x = _coor.origin.x + e.eventInfo.xAxis.x;
+        var x = _coord.origin.x + e.eventInfo.xAxis.x;
         if( _tips.pointer == "shadow" ){
-            x = _coor.origin.x + e.eventInfo.xAxis.x - _coor._xAxis.ceilWidth/2;
+            x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
         };
-        var y = _coor.origin.y - _coor.height;
+        var y = _coord.origin.y - _coord.height;
 
         if( x == el.__targetX ){
             return;
         };
 
-        if( _tips.pointerAnimate ){
+        if( _tips.pointerAnimate && _coord._xAxis.layoutType != "proportion"){
             if( el.__animation ){
                 el.__animation.stop();
             };

@@ -76,20 +76,32 @@ export default class CloudGraphs extends GraphsBase
         this.fire("complete");
     }
 
-    _getFontSize(ind)
+    getDaraFrameIndOfVal( val )
+    {
+        var me = this;
+        var df = this.dataFrame;
+        var org = _.find( df.data, function( d ){
+            return d.field == me.field;
+        } );
+        var ind = _.indexOf( org.data, val );
+        return ind;
+    }
+
+    _getFontSize( rowData, val )
     {
         var size = this.node.minFontSize;
-        var rowData = this.dataFrame.getRowData( ind );
+
         if( _.isFunction( this.node.fontSize ) ){
             size = this.node.fontSize( rowData );
-        }
+        };
+
         if( _.isString( this.node.fontSize ) && this.node.fontSize in rowData ){
             var val = Number( rowData[ this.node.fontSize ] );
             if( !isNaN( val ) ){
                 size = this.node.minFontSize + (this.node.maxFontSize-this.node.minFontSize)/(this.node._maxFontSizeVal - this.node._minFontSizeVal) * (val - this.node._minFontSizeVal);
             }
         }
-        
+
         if( _.isNumber( this.node.fontSize ) ){
             size = this.node.fontSize;
         }
@@ -142,9 +154,14 @@ export default class CloudGraphs extends GraphsBase
         var layout = cloudLayout()
             .size([me.width, me.height])
             .words(me.dataFrame.getFieldData( me.field ).map(function(d, ind) {
+                var rowData  = me.root.dataFrame.getRowData( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
                 return {
-                    text: me.node.format(d) || d,
-                    size: me._getFontSize( ind )
+                    rowData : rowData,
+                    field   : me.field,
+                    value   : d,
+                    text    : me.node.format(d) || d,
+                    size    : me._getFontSize( rowData, d ),
+                    iNode   : ind
                 };
             }))
             .padding( me.node.padding )
@@ -169,7 +186,7 @@ export default class CloudGraphs extends GraphsBase
                 
                 tag.iNode  = i;
                 tag.dataLen  = data.length;
-                tag.rowData  = me.root.dataFrame.getRowData( i );
+                debugger
                 tag.focused  = false;
                 tag.selected = false;
 

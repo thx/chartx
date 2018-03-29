@@ -27,6 +27,7 @@ import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
 import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
+import Cross from "./components/cross/index"
 
 var coord = {
     rect : Rect,
@@ -52,7 +53,8 @@ var components = {
     anchor : Anchor,
     tips : Tips,
     barTgi : BarTgi,
-    waterMark : WaterMark
+    waterMark : WaterMark,
+    cross : Cross
 }
 
 
