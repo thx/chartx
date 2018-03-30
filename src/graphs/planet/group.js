@@ -9,11 +9,14 @@ export default class PlanetGroup
 {
     constructor(opts, dataFrame , _graphs)
     {
+    
         this._opts = opts;
         this.dataFrame = dataFrame;
         this._graphs = _graphs;
         this.root = _graphs.root;
         this._coord = this.root._coord;
+
+        this.field = null;
 
         this.iGroup = 0;
         this.groupLen = 1;
@@ -23,6 +26,9 @@ export default class PlanetGroup
             start : 0, 
             to : 0
         };
+
+        this.width  = 0;
+        this.height = 0;
 
         this.node = {
             shapeType : "circle",
@@ -71,6 +77,8 @@ export default class PlanetGroup
         if( this.node.maxR > this.pit.r ){
             this.pit.r = this.node.maxR
         };
+
+        
 
         this.init();
     }
@@ -141,7 +149,7 @@ export default class PlanetGroup
 
             planets.push( planetLayoutData );
         };
-
+debugger
         if( me.sortField ){
             planets = planets.sort( function(a , b){
                 var field = me.sortField;
@@ -176,7 +184,7 @@ export default class PlanetGroup
             };
 
             //该半径上面的弧度集合
-            var arcs = this._coord.getRadiansAtR( _r );
+            var arcs = this._coord.getRadiansAtR( _r , me.width, me.height );
 
             //测试代码begin---------------------------------------------------
             //用来绘制弧度的辅助线
@@ -473,7 +481,10 @@ export default class PlanetGroup
                     context: _labelCtx
                 });
             
-                _node.text = _text;
+                //互相用属性引用起来
+                _node.textNode = _text;
+                _text.nodeData = p;
+                p.textNode = _text;
 
                 _ringSp.addChild( _text );
             } );

@@ -14,30 +14,27 @@ export default class Legend extends Component
         /* data的数据结构为
         [
             //descartes中用到的时候还会带入yAxis
-            {name: "uv", style: "#ff8533", enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
+            {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
         this.data = data || [];
 
         this.width = 0;
         this.height = 0;
-        this.tag = {
-            height : 20,
-            width  : "auto"
-        };
 
-        this.icon = {
+        this.node = {
+            height : 30,
+            width  : "auto",
+            shapeType : "circle",
             r : 5,
             lineWidth : 1,
-            fillStyle : "#999"
+            fillStyle : "#999",
+            onChecked : function(){},
+            onUnChecked : function(){}
         };
 
-        this.tips = {
-            enabled : false
-        };
-
-        this.onChecked=function(){};
-        this.onUnChecked=function(){};
+        //this.onChecked=function(){};
+        //this.onUnChecked=function(){};
 
         this._labelColor = "#999";
 
@@ -71,7 +68,7 @@ export default class Legend extends Component
 
     pos( pos )
     {
-        pos.x && (this.sprite.context.x = pos.x + this.icon.r);
+        pos.x && (this.sprite.context.x = pos.x + this.node.r);
         pos.y && (this.sprite.context.y = pos.y);
     }
 
@@ -95,34 +92,34 @@ export default class Legend extends Component
 
         _.each( this.data , function( obj , i ){
 
-            var icon   = new Circle({
+            var _icon = new Circle({
                 id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
-                    y     : me.tag.height/2 ,
+                    y     : me.node.height/2 ,
                     fillStyle : !obj.enabled ? "#ccc" : (obj.color || me._labelColor),
-                    r : me.icon.r,
+                    r : me.node.r,
                     cursor: "pointer"
                 }
             });
             
-            icon.hover(function( e ){
+            _icon.hover(function( e ){
                 e.eventInfo = me._getInfoHandler(e,obj);
             } , function(e){
                 delete e.eventInfo;
             });
-            icon.on("mousemove" , function( e ){
+            _icon.on("mousemove" , function( e ){
                 e.eventInfo = me._getInfoHandler(e,obj);
             });
             //阻止事件冒泡
             
-            icon.on("click" , function(){});
+            _icon.on("click" , function(){});
             
             var txt    = new Canvax.Display.Text( me.label(obj) , {
                 id: "legend_field_txt_"+i,
                 context : {
-                    x : me.icon.r + 3 ,
-                    y : me.tag.height / 2,
+                    x : me.node.r + 3 ,
+                    y : me.node.height / 2,
                     textAlign : "left",
                     textBaseline : "middle",
                     fillStyle : "#333", //obj.color
@@ -141,22 +138,22 @@ export default class Legend extends Component
             txt.on("click" , function(){});
 
             var txtW = txt.getTextWidth();
-            var itemW = txtW + me.icon.r*2 + 20;
+            var itemW = txtW + me.node.r*2 + 20;
 
             maxItemWidth = Math.max( maxItemWidth, itemW );
 
             var spItemC = {
-                height : me.tag.height
+                height : me.node.height
             };
 
             if( me.layoutType == "v" ){
-                if( y + me.tag.height > viewHeight ){
+                if( y + me.node.height > viewHeight ){
                     x += maxItemWidth;
                     y = 0;
                 }
                 spItemC.x = x;
                 spItemC.y = y;
-                y += me.tag.height;
+                y += me.node.height;
                 height = Math.max( height , y );
             } else {
                 if( x + itemW > viewWidth ){
@@ -165,14 +162,14 @@ export default class Legend extends Component
                     rows++;
                 };
                 spItemC.x = x;
-                spItemC.y = me.tag.height * (rows-1);
+                spItemC.y = me.node.height * (rows-1);
                 x += itemW;
             };
             var sprite = new Canvax.Display.Sprite({
                 id : "legend_field_"+i,
                 context : spItemC
             });
-            sprite.addChild( icon );
+            sprite.addChild( _icon );
             sprite.addChild( txt );
 
             sprite.context.width = itemW;
@@ -189,12 +186,12 @@ export default class Legend extends Component
                 
                 obj.enabled = !obj.enabled;
 
-                icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || me._labelColor);
+                _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || me._labelColor);
 
                 if( obj.enabled ){
-                    me.onChecked( obj.name );
+                    me.node.onChecked( obj );
                 } else {
-                    me.onUnChecked( obj.name );
+                    me.node.onUnChecked( obj );
                 }
             });
 
@@ -202,7 +199,7 @@ export default class Legend extends Component
 
         if( this.layoutType == "h" ){
             me.width = me.sprite.context.width  = width;
-            me.height = me.sprite.context.height = me.tag.height * rows;
+            me.height = me.sprite.context.height = me.node.height * rows;
         } else {
             me.width = me.sprite.context.width  = x + maxItemWidth;
             me.height = me.sprite.context.height = height;

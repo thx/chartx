@@ -16,85 +16,57 @@ var theme = {
 var commonjsGlobal$1 = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
+    return typeof obj;
 } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
 
-
-
-
-
-
-
-
-
-
-
 var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
 };
 
 var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
+        }
     }
-  }
 
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
+    return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);
+        if (staticProps) defineProperties(Constructor, staticProps);
+        return Constructor;
+    };
 }();
 
-
-
-
-
-
-
-
-
 var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
     }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+            value: subClass,
+            enumerable: false,
+            writable: true,
+            configurable: true
+        }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
 
-
-
-
-
-
-
-
-
-
-
 var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
 
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
 var _$2 = {};
@@ -121,323 +93,323 @@ var nativeIsArray = Array.isArray;
 var nativeKeys = Object.keys;
 
 var shallowProperty = function shallowProperty(key) {
-  return function (obj) {
-    return obj == null ? void 0 : obj[key];
-  };
+    return function (obj) {
+        return obj == null ? void 0 : obj[key];
+    };
 };
 var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 var getLength = shallowProperty('length');
 var isArrayLike = function isArrayLike(collection) {
-  var length = getLength(collection);
-  return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+    var length = getLength(collection);
+    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
 };
 
 _$2.values = function (obj) {
-  var keys = _$2.keys(obj);
-  var length = keys.length;
-  var values = new Array(length);
-  for (var i = 0; i < length; i++) {
-    values[i] = obj[keys[i]];
-  }
-  return values;
+    var keys = _$2.keys(obj);
+    var length = keys.length;
+    var values = new Array(length);
+    for (var i = 0; i < length; i++) {
+        values[i] = obj[keys[i]];
+    }
+    return values;
 };
 
 _$2.keys = nativeKeys || function (obj) {
-  if (obj !== Object(obj)) throw new TypeError('Invalid object');
-  var keys = [];
-  for (var key in obj) {
-    if (_$2.has(obj, key)) keys.push(key);
-  }return keys;
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) {
+        if (_$2.has(obj, key)) keys.push(key);
+    }return keys;
 };
 
 _$2.has = function (obj, key) {
-  return hasOwnProperty.call(obj, key);
+    return hasOwnProperty.call(obj, key);
 };
 
 var each = _$2.each = _$2.forEach = function (obj, iterator, context) {
-  if (obj == null) return;
-  if (nativeForEach && obj.forEach === nativeForEach) {
-    obj.forEach(iterator, context);
-  } else if (obj.length === +obj.length) {
-    for (var i = 0, length = obj.length; i < length; i++) {
-      if (iterator.call(context, obj[i], i, obj) === breaker) return;
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+        obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+        for (var i = 0, length = obj.length; i < length; i++) {
+            if (iterator.call(context, obj[i], i, obj) === breaker) return;
+        }
+    } else {
+        var keys = _$2.keys(obj);
+        for (var i = 0, length = keys.length; i < length; i++) {
+            if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+        }
     }
-  } else {
-    var keys = _$2.keys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
-      if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-    }
-  }
 };
 
 _$2.compact = function (array) {
-  return _$2.filter(array, _$2.identity);
+    return _$2.filter(array, _$2.identity);
 };
 
 _$2.filter = _$2.select = function (obj, iterator, context) {
-  var results = [];
-  if (obj == null) return results;
-  if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
-  each(obj, function (value, index, list) {
-    if (iterator.call(context, value, index, list)) results.push(value);
-  });
-  return results;
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function (value, index, list) {
+        if (iterator.call(context, value, index, list)) results.push(value);
+    });
+    return results;
 };
 
 each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function (name) {
-  _$2['is' + name] = function (obj) {
-    return toString.call(obj) == '[object ' + name + ']';
-  };
+    _$2['is' + name] = function (obj) {
+        return toString.call(obj) == '[object ' + name + ']';
+    };
 });
 
 if (!_$2.isArguments(arguments)) {
-  _$2.isArguments = function (obj) {
-    return !!(obj && _$2.has(obj, 'callee'));
-  };
+    _$2.isArguments = function (obj) {
+        return !!(obj && _$2.has(obj, 'callee'));
+    };
 }
 
 {
-  _$2.isFunction = function (obj) {
-    return typeof obj === 'function';
-  };
+    _$2.isFunction = function (obj) {
+        return typeof obj === 'function';
+    };
 }
 
 _$2.isFinite = function (obj) {
-  return isFinite(obj) && !isNaN(parseFloat(obj));
+    return isFinite(obj) && !isNaN(parseFloat(obj));
 };
 
 _$2.isNaN = function (obj) {
-  return _$2.isNumber(obj) && obj != +obj;
+    return _$2.isNumber(obj) && obj != +obj;
 };
 
 _$2.isBoolean = function (obj) {
-  return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
 };
 
 _$2.isNull = function (obj) {
-  return obj === null;
+    return obj === null;
 };
 
 _$2.isEmpty = function (obj) {
-  if (obj == null) return true;
-  if (_$2.isArray(obj) || _$2.isString(obj)) return obj.length === 0;
-  for (var key in obj) {
-    if (_$2.has(obj, key)) return false;
-  }return true;
+    if (obj == null) return true;
+    if (_$2.isArray(obj) || _$2.isString(obj)) return obj.length === 0;
+    for (var key in obj) {
+        if (_$2.has(obj, key)) return false;
+    }return true;
 };
 
 _$2.isElement = function (obj) {
-  return !!(obj && obj.nodeType === 1);
+    return !!(obj && obj.nodeType === 1);
 };
 
 _$2.isArray = nativeIsArray || function (obj) {
-  return toString.call(obj) == '[object Array]';
+    return toString.call(obj) == '[object Array]';
 };
 
 _$2.isObject = function (obj) {
-  return obj === Object(obj);
+    return obj === Object(obj);
 };
 
 _$2.identity = function (value) {
-  return value;
+    return value;
 };
 
 _$2.indexOf = function (array, item, isSorted) {
-  if (array == null) return -1;
-  var i = 0,
-      length = array.length;
-  if (isSorted) {
-    if (typeof isSorted == 'number') {
-      i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
-    } else {
-      i = _$2.sortedIndex(array, item);
-      return array[i] === item ? i : -1;
+    if (array == null) return -1;
+    var i = 0,
+        length = array.length;
+    if (isSorted) {
+        if (typeof isSorted == 'number') {
+            i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
+        } else {
+            i = _$2.sortedIndex(array, item);
+            return array[i] === item ? i : -1;
+        }
     }
-  }
-  if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-  for (; i < length; i++) {
-    if (array[i] === item) return i;
-  }return -1;
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < length; i++) {
+        if (array[i] === item) return i;
+    }return -1;
 };
 
 _$2.isWindow = function (obj) {
-  return obj != null && obj == obj.window;
+    return obj != null && obj == obj.window;
 };
 
 // Internal implementation of a recursive `flatten` function.
 var flatten = function flatten(input, shallow, output) {
-  if (shallow && _$2.every(input, _$2.isArray)) {
-    return concat.apply(output, input);
-  }
-  each(input, function (value) {
-    if (_$2.isArray(value) || _$2.isArguments(value)) {
-      shallow ? push.apply(output, value) : flatten(value, shallow, output);
-    } else {
-      output.push(value);
+    if (shallow && _$2.every(input, _$2.isArray)) {
+        return concat.apply(output, input);
     }
-  });
-  return output;
+    each(input, function (value) {
+        if (_$2.isArray(value) || _$2.isArguments(value)) {
+            shallow ? push.apply(output, value) : flatten(value, shallow, output);
+        } else {
+            output.push(value);
+        }
+    });
+    return output;
 };
 
 // Flatten out an array, either recursively (by default), or just one level.
 _$2.flatten = function (array, shallow) {
-  return flatten(array, shallow, []);
+    return flatten(array, shallow, []);
 };
 
 _$2.every = _$2.all = function (obj, iterator, context) {
-  iterator || (iterator = _$2.identity);
-  var result = true;
-  if (obj == null) return result;
-  if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
-  each(obj, function (value, index, list) {
-    if (!(result = result && iterator.call(context, value, index, list))) return breaker;
-  });
-  return !!result;
+    iterator || (iterator = _$2.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function (value, index, list) {
+        if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
 };
 
 // Return the minimum element (or element-based computation).
 _$2.min = function (obj, iterator, context) {
-  if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-    return Math.min.apply(Math, obj);
-  }
-  if (!iterator && _$2.isEmpty(obj)) return Infinity;
-  var result = { computed: Infinity, value: Infinity };
-  each(obj, function (value, index, list) {
-    var computed = iterator ? iterator.call(context, value, index, list) : value;
-    computed < result.computed && (result = { value: value, computed: computed });
-  });
-  return result.value;
+    if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+        return Math.min.apply(Math, obj);
+    }
+    if (!iterator && _$2.isEmpty(obj)) return Infinity;
+    var result = { computed: Infinity, value: Infinity };
+    each(obj, function (value, index, list) {
+        var computed = iterator ? iterator.call(context, value, index, list) : value;
+        computed < result.computed && (result = { value: value, computed: computed });
+    });
+    return result.value;
 };
 // Return the maximum element or (element-based computation).
 // Can't optimize arrays of integers longer than 65,535 elements.
 // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
 _$2.max = function (obj, iterator, context) {
-  if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-    return Math.max.apply(Math, obj);
-  }
-  if (!iterator && _$2.isEmpty(obj)) return -Infinity;
-  var result = { computed: -Infinity, value: -Infinity };
-  each(obj, function (value, index, list) {
-    var computed = iterator ? iterator.call(context, value, index, list) : value;
-    computed > result.computed && (result = { value: value, computed: computed });
-  });
-  return result.value;
+    if (!iterator && _$2.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+        return Math.max.apply(Math, obj);
+    }
+    if (!iterator && _$2.isEmpty(obj)) return -Infinity;
+    var result = { computed: -Infinity, value: -Infinity };
+    each(obj, function (value, index, list) {
+        var computed = iterator ? iterator.call(context, value, index, list) : value;
+        computed > result.computed && (result = { value: value, computed: computed });
+    });
+    return result.value;
 };
 
 // Return the first value which passes a truth test. Aliased as `detect`.
 _$2.find = _$2.detect = function (obj, iterator, context) {
-  var result;
-  any(obj, function (value, index, list) {
-    if (iterator.call(context, value, index, list)) {
-      result = value;
-      return true;
-    }
-  });
-  return result;
+    var result;
+    any(obj, function (value, index, list) {
+        if (iterator.call(context, value, index, list)) {
+            result = value;
+            return true;
+        }
+    });
+    return result;
 };
 // Determine if at least one element in the object matches a truth test.
 // Delegates to **ECMAScript 5**'s native `some` if available.
 // Aliased as `any`.
 var any = _$2.some = _$2.any = function (obj, iterator, context) {
-  iterator || (iterator = _$2.identity);
-  var result = false;
-  if (obj == null) return result;
-  if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
-  each(obj, function (value, index, list) {
-    if (result || (result = iterator.call(context, value, index, list))) return breaker;
-  });
-  return !!result;
+    iterator || (iterator = _$2.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function (value, index, list) {
+        if (result || (result = iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
 };
 // Return a version of the array that does not contain the specified value(s).
 _$2.without = function (array) {
-  return _$2.difference(array, slice.call(arguments, 1));
+    return _$2.difference(array, slice.call(arguments, 1));
 };
 // Take the difference between one array and a number of other arrays.
 // Only the elements present in just the first array will remain.
 _$2.difference = function (array) {
-  var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-  return _$2.filter(array, function (value) {
-    return !_$2.contains(rest, value);
-  });
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _$2.filter(array, function (value) {
+        return !_$2.contains(rest, value);
+    });
 };
 // Produce a duplicate-free version of the array. If the array has already
 // been sorted, you have the option of using a faster algorithm.
 // Aliased as `unique`.
 _$2.uniq = _$2.unique = function (array, isSorted, iterator, context) {
-  if (_$2.isFunction(isSorted)) {
-    context = iterator;
-    iterator = isSorted;
-    isSorted = false;
-  }
-  var initial = iterator ? _$2.map(array, iterator, context) : array;
-  var results = [];
-  var seen = [];
-  each(initial, function (value, index) {
-    if (isSorted ? !index || seen[seen.length - 1] !== value : !_$2.contains(seen, value)) {
-      seen.push(value);
-      results.push(array[index]);
+    if (_$2.isFunction(isSorted)) {
+        context = iterator;
+        iterator = isSorted;
+        isSorted = false;
     }
-  });
-  return results;
+    var initial = iterator ? _$2.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function (value, index) {
+        if (isSorted ? !index || seen[seen.length - 1] !== value : !_$2.contains(seen, value)) {
+            seen.push(value);
+            results.push(array[index]);
+        }
+    });
+    return results;
 };
 // Return the results of applying the iterator to each element.
 // Delegates to **ECMAScript 5**'s native `map` if available.
 _$2.map = _$2.collect = function (obj, iterator, context) {
-  var results = [];
-  if (obj == null) return results;
-  if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-  each(obj, function (value, index, list) {
-    results.push(iterator.call(context, value, index, list));
-  });
-  return results;
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function (value, index, list) {
+        results.push(iterator.call(context, value, index, list));
+    });
+    return results;
 };
 // Determine if the array or object contains a given value (using `===`).
 // Aliased as `include`.
 _$2.contains = _$2.include = function (obj, target) {
-  if (obj == null) return false;
-  if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-  return any(obj, function (value) {
-    return value === target;
-  });
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function (value) {
+        return value === target;
+    });
 };
 
 // Convenience version of a common use case of `map`: fetching a property.
 _$2.pluck = function (obj, key) {
-  return _$2.map(obj, function (value) {
-    return value[key];
-  });
+    return _$2.map(obj, function (value) {
+        return value[key];
+    });
 };
 
 // Return a random integer between min and max (inclusive).
 _$2.random = function (min, max) {
-  if (max == null) {
-    max = min;
-    min = 0;
-  }
-  return min + Math.floor(Math.random() * (max - min + 1));
+    if (max == null) {
+        max = min;
+        min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
 };
 
 // Shuffle a collection.
 _$2.shuffle = function (obj) {
-  return _$2.sample(obj, Infinity);
+    return _$2.sample(obj, Infinity);
 };
 
 _$2.sample = function (obj, n, guard) {
-  if (n == null || guard) {
-    if (!isArrayLike(obj)) obj = _$2.values(obj);
-    return obj[_$2.random(obj.length - 1)];
-  }
-  var sample = isArrayLike(obj) ? _$2.clone(obj) : _$2.values(obj);
-  var length = getLength(sample);
-  n = Math.max(Math.min(n, length), 0);
-  var last = length - 1;
-  for (var index = 0; index < n; index++) {
-    var rand = _$2.random(index, last);
-    var temp = sample[index];
-    sample[index] = sample[rand];
-    sample[rand] = temp;
-  }
-  return sample.slice(0, n);
+    if (n == null || guard) {
+        if (!isArrayLike(obj)) obj = _$2.values(obj);
+        return obj[_$2.random(obj.length - 1)];
+    }
+    var sample = isArrayLike(obj) ? _$2.clone(obj) : _$2.values(obj);
+    var length = getLength(sample);
+    n = Math.max(Math.min(n, length), 0);
+    var last = length - 1;
+    for (var index = 0; index < n; index++) {
+        var rand = _$2.random(index, last);
+        var temp = sample[index];
+        sample[index] = sample[rand];
+        sample[rand] = temp;
+    }
+    return sample.slice(0, n);
 };
 
 /**
@@ -445,50 +417,50 @@ _$2.sample = function (obj, n, guard) {
 *如果是深度extend，第一个参数就设置为true
 */
 _$2.extend = function () {
-  var options,
-      name,
-      src,
-      copy,
-      target = arguments[0] || {},
-      i = 1,
-      length = arguments.length,
-      deep = false;
-  if (typeof target === "boolean") {
-    deep = target;
-    target = arguments[1] || {};
-    i = 2;
-  }
-  if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$2.isFunction(target)) {
-    target = {};
-  }
-  if (length === i) {
-    target = this;
-    --i;
-  }
-  for (; i < length; i++) {
-    if ((options = arguments[i]) != null) {
-      for (name in options) {
-        src = target[name];
-        copy = options[name];
-        if (target === copy) {
-          continue;
-        }
-
-        //if( deep && copy && _.isObject( copy ) &&  && !_.isArray( copy ) && !_.isFunction( copy ) ){
-        if (deep && copy && _$2.isObject(copy) && copy.constructor === Object) {
-          target[name] = _$2.extend(deep, src, copy);
-        } else {
-          target[name] = copy;
-        }
-      }
+    var options,
+        name,
+        src,
+        copy,
+        target = arguments[0] || {},
+        i = 1,
+        length = arguments.length,
+        deep = false;
+    if (typeof target === "boolean") {
+        deep = target;
+        target = arguments[1] || {};
+        i = 2;
     }
-  }
-  return target;
+    if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$2.isFunction(target)) {
+        target = {};
+    }
+    if (length === i) {
+        target = this;
+        --i;
+    }
+    for (; i < length; i++) {
+        if ((options = arguments[i]) != null) {
+            for (name in options) {
+                src = target[name];
+                copy = options[name];
+                if (target === copy) {
+                    continue;
+                }
+
+                //if( deep && copy && _.isObject( copy ) &&  && !_.isArray( copy ) && !_.isFunction( copy ) ){
+                if (deep && copy && _$2.isObject(copy) && copy.constructor === Object) {
+                    target[name] = _$2.extend(deep, src, copy);
+                } else {
+                    target[name] = copy;
+                }
+            }
+        }
+    }
+    return target;
 };
 
 _$2.clone = function (obj) {
-  if (!_$2.isObject(obj)) return obj;
-  return _$2.isArray(obj) ? obj.slice() : _$2.extend(true, {}, obj);
+    if (!_$2.isObject(obj)) return obj;
+    return _$2.isArray(obj) ? obj.slice() : _$2.extend(true, {}, obj);
 };
 
 /**
@@ -659,65 +631,65 @@ CanvaxEvent.prototype = {
 };
 
 var settings = {
-  //设备分辨率
-  RESOLUTION: window.devicePixelRatio || 1,
+    //设备分辨率
+    RESOLUTION: window.devicePixelRatio || 1,
 
-  /**
-   * Target frames per millisecond.
-   */
-  TARGET_FPMS: 0.06,
+    /**
+     * Target frames per millisecond.
+     */
+    TARGET_FPMS: 0.06,
 
-  /**
-   * If set to true WebGL will attempt make textures mimpaped by default.
-   * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
-   */
-  MIPMAP_TEXTURES: true,
+    /**
+     * If set to true WebGL will attempt make textures mimpaped by default.
+     * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
+     */
+    MIPMAP_TEXTURES: true,
 
-  /**
-   * Default filter resolution.
-   */
-  FILTER_RESOLUTION: 1,
+    /**
+     * Default filter resolution.
+     */
+    FILTER_RESOLUTION: 1,
 
-  // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
-  // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
+    // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
+    // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
 
-  /**
-   * The default sprite batch size.
-   *
-   * The default aims to balance desktop and mobile devices.
-   */
-  SPRITE_BATCH_SIZE: 4096,
+    /**
+     * The default sprite batch size.
+     *
+     * The default aims to balance desktop and mobile devices.
+     */
+    SPRITE_BATCH_SIZE: 4096,
 
-  /**
-   * The prefix that denotes a URL is for a retina asset.
-   */
-  RETINA_PREFIX: /@(.+)x/,
+    /**
+     * The prefix that denotes a URL is for a retina asset.
+     */
+    RETINA_PREFIX: /@(.+)x/,
 
-  RENDER_OPTIONS: {
-    view: null,
-    antialias: true,
-    forceFXAA: false,
-    autoResize: false,
-    transparent: true,
-    backgroundColor: 0x000000,
-    clearBeforeRender: true,
-    preserveDrawingBuffer: false,
-    roundPixels: false
-  },
+    RENDER_OPTIONS: {
+        view: null,
+        antialias: true,
+        forceFXAA: false,
+        autoResize: false,
+        transparent: true,
+        backgroundColor: 0x000000,
+        clearBeforeRender: true,
+        preserveDrawingBuffer: false,
+        roundPixels: false
+    },
 
-  TRANSFORM_MODE: 0,
+    TRANSFORM_MODE: 0,
 
-  GC_MODE: 0,
+    GC_MODE: 0,
 
-  GC_MAX_IDLE: 60 * 60,
+    GC_MAX_IDLE: 60 * 60,
 
-  GC_MAX_CHECK_COUNT: 60 * 10,
+    GC_MAX_CHECK_COUNT: 60 * 10,
 
-  WRAP_MODE: 0,
+    WRAP_MODE: 0,
 
-  SCALE_MODE: 0,
+    SCALE_MODE: 0,
 
-  PRECISION: 'mediump'
+    PRECISION: 'mediump'
 
 };
 
@@ -734,7 +706,6 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
                 }
             };
 
-            
             return {
                 v: eventDomFn
             };
@@ -755,7 +726,6 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
                 }
             };
 
-            
             return {
                 v: eventFn
             };
@@ -1777,920 +1747,834 @@ Matrix.prototype = {
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof commonjsGlobal$1 !== 'undefined' ? commonjsGlobal$1 : typeof self !== 'undefined' ? self : {};
 
-
-
-
-
 function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
+    return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
 
 var Tween = createCommonjsModule(function (module, exports) {
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */
+    /**
+     * Tween.js - Licensed under the MIT license
+     * https://github.com/tweenjs/tween.js
+     * ----------------------------------------------
+     *
+     * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+     * Thank you all, you're awesome!
+     */
+
+    var _Group = function () {
+        this._tweens = {};
+        this._tweensAddedDuringUpdate = {};
+    };
+
+    _Group.prototype = {
+        getAll: function () {
+
+            return Object.keys(this._tweens).map(function (tweenId) {
+                return this._tweens[tweenId];
+            }.bind(this));
+        },
+
+        removeAll: function () {
+
+            this._tweens = {};
+        },
+
+        add: function (tween) {
+
+            this._tweens[tween.getId()] = tween;
+            this._tweensAddedDuringUpdate[tween.getId()] = tween;
+        },
+
+        remove: function (tween) {
+
+            delete this._tweens[tween.getId()];
+            delete this._tweensAddedDuringUpdate[tween.getId()];
+        },
+
+        update: function (time, preserve) {
+
+            var tweenIds = Object.keys(this._tweens);
+
+            if (tweenIds.length === 0) {
+                return false;
+            }
+
+            time = time !== undefined ? time : TWEEN.now();
+
+            // Tweens are updated in "batches". If you add a new tween during an update, then the
+            // new tween will be updated in the next batch.
+            // If you remove a tween during an update, it will normally still be updated. However,
+            // if the removed tween was added during the current batch, then it will not be updated.
+            while (tweenIds.length > 0) {
+                this._tweensAddedDuringUpdate = {};
+
+                for (var i = 0; i < tweenIds.length; i++) {
+
+                    if (this._tweens[tweenIds[i]].update(time) === false) {
+                        this._tweens[tweenIds[i]]._isPlaying = false;
+
+                        if (!preserve) {
+                            delete this._tweens[tweenIds[i]];
+                        }
+                    }
+                }
+
+                tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+            }
+
+            return true;
+        }
+    };
+
+    var TWEEN = new _Group();
+
+    TWEEN.Group = _Group;
+    TWEEN._nextId = 0;
+    TWEEN.nextId = function () {
+        return TWEEN._nextId++;
+    };
+
+    // Include a performance.now polyfill.
+    // In node.js, use process.hrtime.
+    if (typeof window === 'undefined' && typeof process !== 'undefined') {
+        TWEEN.now = function () {
+            var time = process.hrtime();
+
+            // Convert [seconds, nanoseconds] to milliseconds.
+            return time[0] * 1000 + time[1] / 1000000;
+        };
+    }
+    // In a browser, use window.performance.now if it is available.
+    else if (typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined) {
+            // This must be bound, because directly assigning this function
+            // leads to an invocation exception in Chrome.
+            TWEEN.now = window.performance.now.bind(window.performance);
+        }
+        // Use Date.now if it is available.
+        else if (Date.now !== undefined) {
+                TWEEN.now = Date.now;
+            }
+            // Otherwise, use 'new Date().getTime()'.
+            else {
+                    TWEEN.now = function () {
+                        return new Date().getTime();
+                    };
+                }
+
+    TWEEN.Tween = function (object, group) {
+        this._object = object;
+        this._valuesStart = {};
+        this._valuesEnd = {};
+        this._valuesStartRepeat = {};
+        this._duration = 1000;
+        this._repeat = 0;
+        this._repeatDelayTime = undefined;
+        this._yoyo = false;
+        this._isPlaying = false;
+        this._reversed = false;
+        this._delayTime = 0;
+        this._startTime = null;
+        this._easingFunction = TWEEN.Easing.Linear.None;
+        this._interpolationFunction = TWEEN.Interpolation.Linear;
+        this._chainedTweens = [];
+        this._onStartCallback = null;
+        this._onStartCallbackFired = false;
+        this._onUpdateCallback = null;
+        this._onCompleteCallback = null;
+        this._onStopCallback = null;
+        this._group = group || TWEEN;
+        this._id = TWEEN.nextId();
+    };
+
+    TWEEN.Tween.prototype = {
+        getId: function getId() {
+            return this._id;
+        },
+
+        isPlaying: function isPlaying() {
+            return this._isPlaying;
+        },
 
+        to: function to(properties, duration) {
 
-var _Group = function () {
-	this._tweens = {};
-	this._tweensAddedDuringUpdate = {};
-};
+            this._valuesEnd = properties;
 
-_Group.prototype = {
-	getAll: function () {
+            if (duration !== undefined) {
+                this._duration = duration;
+            }
 
-		return Object.keys(this._tweens).map(function (tweenId) {
-			return this._tweens[tweenId];
-		}.bind(this));
+            return this;
+        },
 
-	},
+        start: function start(time) {
 
-	removeAll: function () {
+            this._group.add(this);
 
-		this._tweens = {};
+            this._isPlaying = true;
 
-	},
-
-	add: function (tween) {
-
-		this._tweens[tween.getId()] = tween;
-		this._tweensAddedDuringUpdate[tween.getId()] = tween;
-
-	},
-
-	remove: function (tween) {
-
-		delete this._tweens[tween.getId()];
-		delete this._tweensAddedDuringUpdate[tween.getId()];
-
-	},
-
-	update: function (time, preserve) {
-
-		var tweenIds = Object.keys(this._tweens);
-
-		if (tweenIds.length === 0) {
-			return false;
-		}
-
-		time = time !== undefined ? time : TWEEN.now();
-
-		// Tweens are updated in "batches". If you add a new tween during an update, then the
-		// new tween will be updated in the next batch.
-		// If you remove a tween during an update, it will normally still be updated. However,
-		// if the removed tween was added during the current batch, then it will not be updated.
-		while (tweenIds.length > 0) {
-			this._tweensAddedDuringUpdate = {};
-
-			for (var i = 0; i < tweenIds.length; i++) {
-
-				if (this._tweens[tweenIds[i]].update(time) === false) {
-					this._tweens[tweenIds[i]]._isPlaying = false;
-
-					if (!preserve) {
-						delete this._tweens[tweenIds[i]];
-					}
-				}
-			}
+            this._onStartCallbackFired = false;
 
-			tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-		}
+            this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
+            this._startTime += this._delayTime;
 
-		return true;
+            for (var property in this._valuesEnd) {
 
-	}
-};
+                // Check if an Array was provided as property value
+                if (this._valuesEnd[property] instanceof Array) {
 
-var TWEEN = new _Group();
+                    if (this._valuesEnd[property].length === 0) {
+                        continue;
+                    }
 
-TWEEN.Group = _Group;
-TWEEN._nextId = 0;
-TWEEN.nextId = function () {
-	return TWEEN._nextId++;
-};
+                    // Create a local copy of the Array with the start value at the front
+                    this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+                }
 
+                // If `to()` specifies a property that doesn't exist in the source object,
+                // we should not set that property in the object
+                if (this._object[property] === undefined) {
+                    continue;
+                }
 
-// Include a performance.now polyfill.
-// In node.js, use process.hrtime.
-if (typeof (window) === 'undefined' && typeof (process) !== 'undefined') {
-	TWEEN.now = function () {
-		var time = process.hrtime();
+                // Save the starting value.
+                this._valuesStart[property] = this._object[property];
 
-		// Convert [seconds, nanoseconds] to milliseconds.
-		return time[0] * 1000 + time[1] / 1000000;
-	};
-}
-// In a browser, use window.performance.now if it is available.
-else if (typeof (window) !== 'undefined' &&
-         window.performance !== undefined &&
-		 window.performance.now !== undefined) {
-	// This must be bound, because directly assigning this function
-	// leads to an invocation exception in Chrome.
-	TWEEN.now = window.performance.now.bind(window.performance);
-}
-// Use Date.now if it is available.
-else if (Date.now !== undefined) {
-	TWEEN.now = Date.now;
-}
-// Otherwise, use 'new Date().getTime()'.
-else {
-	TWEEN.now = function () {
-		return new Date().getTime();
-	};
-}
-
+                if (this._valuesStart[property] instanceof Array === false) {
+                    this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+                }
 
-TWEEN.Tween = function (object, group) {
-	this._object = object;
-	this._valuesStart = {};
-	this._valuesEnd = {};
-	this._valuesStartRepeat = {};
-	this._duration = 1000;
-	this._repeat = 0;
-	this._repeatDelayTime = undefined;
-	this._yoyo = false;
-	this._isPlaying = false;
-	this._reversed = false;
-	this._delayTime = 0;
-	this._startTime = null;
-	this._easingFunction = TWEEN.Easing.Linear.None;
-	this._interpolationFunction = TWEEN.Interpolation.Linear;
-	this._chainedTweens = [];
-	this._onStartCallback = null;
-	this._onStartCallbackFired = false;
-	this._onUpdateCallback = null;
-	this._onCompleteCallback = null;
-	this._onStopCallback = null;
-	this._group = group || TWEEN;
-	this._id = TWEEN.nextId();
+                this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+            }
 
-};
+            return this;
+        },
 
-TWEEN.Tween.prototype = {
-	getId: function getId() {
-		return this._id;
-	},
+        stop: function stop() {
 
-	isPlaying: function isPlaying() {
-		return this._isPlaying;
-	},
+            if (!this._isPlaying) {
+                return this;
+            }
 
-	to: function to(properties, duration) {
+            this._group.remove(this);
+            this._isPlaying = false;
 
-		this._valuesEnd = properties;
+            if (this._onStopCallback !== null) {
+                this._onStopCallback(this._object);
+            }
 
-		if (duration !== undefined) {
-			this._duration = duration;
-		}
+            this.stopChainedTweens();
+            return this;
+        },
 
-		return this;
+        end: function end() {
 
-	},
+            this.update(this._startTime + this._duration);
+            return this;
+        },
 
-	start: function start(time) {
+        stopChainedTweens: function stopChainedTweens() {
 
-		this._group.add(this);
+            for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+                this._chainedTweens[i].stop();
+            }
+        },
 
-		this._isPlaying = true;
+        delay: function delay(amount) {
 
-		this._onStartCallbackFired = false;
+            this._delayTime = amount;
+            return this;
+        },
 
-		this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
-		this._startTime += this._delayTime;
+        repeat: function repeat(times) {
 
-		for (var property in this._valuesEnd) {
+            this._repeat = times;
+            return this;
+        },
 
-			// Check if an Array was provided as property value
-			if (this._valuesEnd[property] instanceof Array) {
+        repeatDelay: function repeatDelay(amount) {
 
-				if (this._valuesEnd[property].length === 0) {
-					continue;
-				}
+            this._repeatDelayTime = amount;
+            return this;
+        },
 
-				// Create a local copy of the Array with the start value at the front
-				this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+        yoyo: function yoyo(yoyo) {
 
-			}
+            this._yoyo = yoyo;
+            return this;
+        },
 
-			// If `to()` specifies a property that doesn't exist in the source object,
-			// we should not set that property in the object
-			if (this._object[property] === undefined) {
-				continue;
-			}
+        easing: function easing(easing) {
 
-			// Save the starting value.
-			this._valuesStart[property] = this._object[property];
+            this._easingFunction = easing;
+            return this;
+        },
 
-			if ((this._valuesStart[property] instanceof Array) === false) {
-				this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
-			}
+        interpolation: function interpolation(interpolation) {
 
-			this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+            this._interpolationFunction = interpolation;
+            return this;
+        },
 
-		}
+        chain: function chain() {
 
-		return this;
+            this._chainedTweens = arguments;
+            return this;
+        },
 
-	},
+        onStart: function onStart(callback) {
 
-	stop: function stop() {
+            this._onStartCallback = callback;
+            return this;
+        },
 
-		if (!this._isPlaying) {
-			return this;
-		}
+        onUpdate: function onUpdate(callback) {
 
-		this._group.remove(this);
-		this._isPlaying = false;
+            this._onUpdateCallback = callback;
+            return this;
+        },
 
-		if (this._onStopCallback !== null) {
-			this._onStopCallback(this._object);
-		}
+        onComplete: function onComplete(callback) {
 
-		this.stopChainedTweens();
-		return this;
+            this._onCompleteCallback = callback;
+            return this;
+        },
 
-	},
+        onStop: function onStop(callback) {
 
-	end: function end() {
+            this._onStopCallback = callback;
+            return this;
+        },
 
-		this.update(this._startTime + this._duration);
-		return this;
+        update: function update(time) {
 
-	},
+            var property;
+            var elapsed;
+            var value;
 
-	stopChainedTweens: function stopChainedTweens() {
+            if (time < this._startTime) {
+                return true;
+            }
 
-		for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-			this._chainedTweens[i].stop();
-		}
+            if (this._onStartCallbackFired === false) {
 
-	},
+                if (this._onStartCallback !== null) {
+                    this._onStartCallback(this._object);
+                }
 
-	delay: function delay(amount) {
+                this._onStartCallbackFired = true;
+            }
 
-		this._delayTime = amount;
-		return this;
+            elapsed = (time - this._startTime) / this._duration;
+            elapsed = elapsed > 1 ? 1 : elapsed;
 
-	},
+            value = this._easingFunction(elapsed);
 
-	repeat: function repeat(times) {
+            for (property in this._valuesEnd) {
 
-		this._repeat = times;
-		return this;
+                // Don't update properties that do not exist in the source object
+                if (this._valuesStart[property] === undefined) {
+                    continue;
+                }
 
-	},
+                var start = this._valuesStart[property] || 0;
+                var end = this._valuesEnd[property];
 
-	repeatDelay: function repeatDelay(amount) {
+                if (end instanceof Array) {
 
-		this._repeatDelayTime = amount;
-		return this;
+                    this._object[property] = this._interpolationFunction(end, value);
+                } else {
 
-	},
+                    // Parses relative end values with start as base (e.g.: +10, -3)
+                    if (typeof end === 'string') {
 
-	yoyo: function yoyo(yoyo) {
+                        if (end.charAt(0) === '+' || end.charAt(0) === '-') {
+                            end = start + parseFloat(end);
+                        } else {
+                            end = parseFloat(end);
+                        }
+                    }
 
-		this._yoyo = yoyo;
-		return this;
+                    // Protect against non numeric properties.
+                    if (typeof end === 'number') {
+                        this._object[property] = start + (end - start) * value;
+                    }
+                }
+            }
 
-	},
+            if (this._onUpdateCallback !== null) {
+                this._onUpdateCallback(this._object);
+            }
 
-	easing: function easing(easing) {
+            if (elapsed === 1) {
 
-		this._easingFunction = easing;
-		return this;
+                if (this._repeat > 0) {
 
-	},
+                    if (isFinite(this._repeat)) {
+                        this._repeat--;
+                    }
 
-	interpolation: function interpolation(interpolation) {
+                    // Reassign starting values, restart by making startTime = now
+                    for (property in this._valuesStartRepeat) {
 
-		this._interpolationFunction = interpolation;
-		return this;
+                        if (typeof this._valuesEnd[property] === 'string') {
+                            this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+                        }
 
-	},
+                        if (this._yoyo) {
+                            var tmp = this._valuesStartRepeat[property];
 
-	chain: function chain() {
+                            this._valuesStartRepeat[property] = this._valuesEnd[property];
+                            this._valuesEnd[property] = tmp;
+                        }
 
-		this._chainedTweens = arguments;
-		return this;
+                        this._valuesStart[property] = this._valuesStartRepeat[property];
+                    }
 
-	},
+                    if (this._yoyo) {
+                        this._reversed = !this._reversed;
+                    }
 
-	onStart: function onStart(callback) {
+                    if (this._repeatDelayTime !== undefined) {
+                        this._startTime = time + this._repeatDelayTime;
+                    } else {
+                        this._startTime = time + this._delayTime;
+                    }
 
-		this._onStartCallback = callback;
-		return this;
+                    return true;
+                } else {
 
-	},
+                    if (this._onCompleteCallback !== null) {
 
-	onUpdate: function onUpdate(callback) {
+                        this._onCompleteCallback(this._object);
+                    }
 
-		this._onUpdateCallback = callback;
-		return this;
+                    for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+                        // Make the chained tweens start exactly at the time they should,
+                        // even if the `update()` method was called way past the duration of the tween
+                        this._chainedTweens[i].start(this._startTime + this._duration);
+                    }
 
-	},
+                    return false;
+                }
+            }
 
-	onComplete: function onComplete(callback) {
+            return true;
+        }
+    };
 
-		this._onCompleteCallback = callback;
-		return this;
+    TWEEN.Easing = {
 
-	},
+        Linear: {
 
-	onStop: function onStop(callback) {
+            None: function (k) {
 
-		this._onStopCallback = callback;
-		return this;
+                return k;
+            }
 
-	},
+        },
 
-	update: function update(time) {
+        Quadratic: {
 
-		var property;
-		var elapsed;
-		var value;
+            In: function (k) {
 
-		if (time < this._startTime) {
-			return true;
-		}
+                return k * k;
+            },
 
-		if (this._onStartCallbackFired === false) {
+            Out: function (k) {
 
-			if (this._onStartCallback !== null) {
-				this._onStartCallback(this._object);
-			}
+                return k * (2 - k);
+            },
 
-			this._onStartCallbackFired = true;
-		}
+            InOut: function (k) {
 
-		elapsed = (time - this._startTime) / this._duration;
-		elapsed = elapsed > 1 ? 1 : elapsed;
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k;
+                }
 
-		value = this._easingFunction(elapsed);
+                return -0.5 * (--k * (k - 2) - 1);
+            }
 
-		for (property in this._valuesEnd) {
+        },
 
-			// Don't update properties that do not exist in the source object
-			if (this._valuesStart[property] === undefined) {
-				continue;
-			}
+        Cubic: {
 
-			var start = this._valuesStart[property] || 0;
-			var end = this._valuesEnd[property];
+            In: function (k) {
 
-			if (end instanceof Array) {
+                return k * k * k;
+            },
 
-				this._object[property] = this._interpolationFunction(end, value);
+            Out: function (k) {
 
-			} else {
+                return --k * k * k + 1;
+            },
 
-				// Parses relative end values with start as base (e.g.: +10, -3)
-				if (typeof (end) === 'string') {
+            InOut: function (k) {
 
-					if (end.charAt(0) === '+' || end.charAt(0) === '-') {
-						end = start + parseFloat(end);
-					} else {
-						end = parseFloat(end);
-					}
-				}
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k;
+                }
 
-				// Protect against non numeric properties.
-				if (typeof (end) === 'number') {
-					this._object[property] = start + (end - start) * value;
-				}
+                return 0.5 * ((k -= 2) * k * k + 2);
+            }
 
-			}
+        },
 
-		}
+        Quartic: {
 
-		if (this._onUpdateCallback !== null) {
-			this._onUpdateCallback(this._object);
-		}
+            In: function (k) {
 
-		if (elapsed === 1) {
+                return k * k * k * k;
+            },
 
-			if (this._repeat > 0) {
+            Out: function (k) {
 
-				if (isFinite(this._repeat)) {
-					this._repeat--;
-				}
+                return 1 - --k * k * k * k;
+            },
 
-				// Reassign starting values, restart by making startTime = now
-				for (property in this._valuesStartRepeat) {
+            InOut: function (k) {
 
-					if (typeof (this._valuesEnd[property]) === 'string') {
-						this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-					}
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k * k;
+                }
 
-					if (this._yoyo) {
-						var tmp = this._valuesStartRepeat[property];
+                return -0.5 * ((k -= 2) * k * k * k - 2);
+            }
 
-						this._valuesStartRepeat[property] = this._valuesEnd[property];
-						this._valuesEnd[property] = tmp;
-					}
+        },
 
-					this._valuesStart[property] = this._valuesStartRepeat[property];
+        Quintic: {
 
-				}
+            In: function (k) {
 
-				if (this._yoyo) {
-					this._reversed = !this._reversed;
-				}
+                return k * k * k * k * k;
+            },
 
-				if (this._repeatDelayTime !== undefined) {
-					this._startTime = time + this._repeatDelayTime;
-				} else {
-					this._startTime = time + this._delayTime;
-				}
+            Out: function (k) {
 
-				return true;
+                return --k * k * k * k * k + 1;
+            },
 
-			} else {
+            InOut: function (k) {
 
-				if (this._onCompleteCallback !== null) {
+                if ((k *= 2) < 1) {
+                    return 0.5 * k * k * k * k * k;
+                }
 
-					this._onCompleteCallback(this._object);
-				}
+                return 0.5 * ((k -= 2) * k * k * k * k + 2);
+            }
 
-				for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-					// Make the chained tweens start exactly at the time they should,
-					// even if the `update()` method was called way past the duration of the tween
-					this._chainedTweens[i].start(this._startTime + this._duration);
-				}
+        },
 
-				return false;
+        Sinusoidal: {
 
-			}
+            In: function (k) {
 
-		}
+                return 1 - Math.cos(k * Math.PI / 2);
+            },
 
-		return true;
+            Out: function (k) {
 
-	}
-};
+                return Math.sin(k * Math.PI / 2);
+            },
 
+            InOut: function (k) {
 
-TWEEN.Easing = {
+                return 0.5 * (1 - Math.cos(Math.PI * k));
+            }
 
-	Linear: {
+        },
 
-		None: function (k) {
+        Exponential: {
 
-			return k;
+            In: function (k) {
 
-		}
+                return k === 0 ? 0 : Math.pow(1024, k - 1);
+            },
 
-	},
+            Out: function (k) {
 
-	Quadratic: {
+                return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return k * k;
+                if (k === 0) {
+                    return 0;
+                }
 
-		},
+                if (k === 1) {
+                    return 1;
+                }
 
-		Out: function (k) {
+                if ((k *= 2) < 1) {
+                    return 0.5 * Math.pow(1024, k - 1);
+                }
 
-			return k * (2 - k);
+                return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+            }
 
-		},
+        },
 
-		InOut: function (k) {
+        Circular: {
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k;
-			}
+            In: function (k) {
 
-			return - 0.5 * (--k * (k - 2) - 1);
+                return 1 - Math.sqrt(1 - k * k);
+            },
 
-		}
+            Out: function (k) {
 
-	},
+                return Math.sqrt(1 - --k * k);
+            },
 
-	Cubic: {
+            InOut: function (k) {
 
-		In: function (k) {
+                if ((k *= 2) < 1) {
+                    return -0.5 * (Math.sqrt(1 - k * k) - 1);
+                }
 
-			return k * k * k;
+                return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+            }
 
-		},
+        },
 
-		Out: function (k) {
+        Elastic: {
 
-			return --k * k * k + 1;
+            In: function (k) {
 
-		},
+                if (k === 0) {
+                    return 0;
+                }
 
-		InOut: function (k) {
+                if (k === 1) {
+                    return 1;
+                }
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k;
-			}
+                return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+            },
 
-			return 0.5 * ((k -= 2) * k * k + 2);
+            Out: function (k) {
 
-		}
+                if (k === 0) {
+                    return 0;
+                }
 
-	},
+                if (k === 1) {
+                    return 1;
+                }
 
-	Quartic: {
+                return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return k * k * k * k;
+                if (k === 0) {
+                    return 0;
+                }
 
-		},
+                if (k === 1) {
+                    return 1;
+                }
 
-		Out: function (k) {
+                k *= 2;
 
-			return 1 - (--k * k * k * k);
+                if (k < 1) {
+                    return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+                }
 
-		},
+                return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+            }
 
-		InOut: function (k) {
+        },
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k;
-			}
+        Back: {
 
-			return - 0.5 * ((k -= 2) * k * k * k - 2);
+            In: function (k) {
 
-		}
+                var s = 1.70158;
 
-	},
+                return k * k * ((s + 1) * k - s);
+            },
 
-	Quintic: {
+            Out: function (k) {
 
-		In: function (k) {
+                var s = 1.70158;
 
-			return k * k * k * k * k;
+                return --k * k * ((s + 1) * k + s) + 1;
+            },
 
-		},
+            InOut: function (k) {
 
-		Out: function (k) {
+                var s = 1.70158 * 1.525;
 
-			return --k * k * k * k * k + 1;
+                if ((k *= 2) < 1) {
+                    return 0.5 * (k * k * ((s + 1) * k - s));
+                }
 
-		},
+                return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+            }
 
-		InOut: function (k) {
+        },
 
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k * k;
-			}
+        Bounce: {
 
-			return 0.5 * ((k -= 2) * k * k * k * k + 2);
+            In: function (k) {
 
-		}
+                return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+            },
 
-	},
+            Out: function (k) {
 
-	Sinusoidal: {
+                if (k < 1 / 2.75) {
+                    return 7.5625 * k * k;
+                } else if (k < 2 / 2.75) {
+                    return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+                } else if (k < 2.5 / 2.75) {
+                    return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+                } else {
+                    return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+                }
+            },
 
-		In: function (k) {
+            InOut: function (k) {
 
-			return 1 - Math.cos(k * Math.PI / 2);
+                if (k < 0.5) {
+                    return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
+                }
 
-		},
+                return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+            }
 
-		Out: function (k) {
+        }
 
-			return Math.sin(k * Math.PI / 2);
+    };
 
-		},
+    TWEEN.Interpolation = {
 
-		InOut: function (k) {
+        Linear: function (v, k) {
 
-			return 0.5 * (1 - Math.cos(Math.PI * k));
+            var m = v.length - 1;
+            var f = m * k;
+            var i = Math.floor(f);
+            var fn = TWEEN.Interpolation.Utils.Linear;
 
-		}
+            if (k < 0) {
+                return fn(v[0], v[1], f);
+            }
 
-	},
+            if (k > 1) {
+                return fn(v[m], v[m - 1], m - f);
+            }
 
-	Exponential: {
+            return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+        },
 
-		In: function (k) {
+        Bezier: function (v, k) {
 
-			return k === 0 ? 0 : Math.pow(1024, k - 1);
+            var b = 0;
+            var n = v.length - 1;
+            var pw = Math.pow;
+            var bn = TWEEN.Interpolation.Utils.Bernstein;
 
-		},
+            for (var i = 0; i <= n; i++) {
+                b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+            }
 
-		Out: function (k) {
+            return b;
+        },
 
-			return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+        CatmullRom: function (v, k) {
 
-		},
+            var m = v.length - 1;
+            var f = m * k;
+            var i = Math.floor(f);
+            var fn = TWEEN.Interpolation.Utils.CatmullRom;
 
-		InOut: function (k) {
+            if (v[0] === v[m]) {
 
-			if (k === 0) {
-				return 0;
-			}
+                if (k < 0) {
+                    i = Math.floor(f = m * (1 + k));
+                }
 
-			if (k === 1) {
-				return 1;
-			}
+                return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+            } else {
 
-			if ((k *= 2) < 1) {
-				return 0.5 * Math.pow(1024, k - 1);
-			}
+                if (k < 0) {
+                    return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+                }
 
-			return 0.5 * (- Math.pow(2, - 10 * (k - 1)) + 2);
+                if (k > 1) {
+                    return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+                }
 
-		}
+                return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+            }
+        },
 
-	},
+        Utils: {
 
-	Circular: {
+            Linear: function (p0, p1, t) {
 
-		In: function (k) {
+                return (p1 - p0) * t + p0;
+            },
 
-			return 1 - Math.sqrt(1 - k * k);
+            Bernstein: function (n, i) {
 
-		},
+                var fc = TWEEN.Interpolation.Utils.Factorial;
 
-		Out: function (k) {
+                return fc(n) / fc(i) / fc(n - i);
+            },
 
-			return Math.sqrt(1 - (--k * k));
+            Factorial: function () {
 
-		},
+                var a = [1];
 
-		InOut: function (k) {
+                return function (n) {
 
-			if ((k *= 2) < 1) {
-				return - 0.5 * (Math.sqrt(1 - k * k) - 1);
-			}
+                    var s = 1;
 
-			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+                    if (a[n]) {
+                        return a[n];
+                    }
 
-		}
+                    for (var i = n; i > 1; i--) {
+                        s *= i;
+                    }
 
-	},
+                    a[n] = s;
+                    return s;
+                };
+            }(),
 
-	Elastic: {
+            CatmullRom: function (p0, p1, p2, p3, t) {
 
-		In: function (k) {
+                var v0 = (p2 - p0) * 0.5;
+                var v1 = (p3 - p1) * 0.5;
+                var t2 = t * t;
+                var t3 = t * t2;
 
-			if (k === 0) {
-				return 0;
-			}
+                return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+            }
 
-			if (k === 1) {
-				return 1;
-			}
+        }
 
-			return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+    };
 
-		},
+    // UMD (Universal Module Definition)
+    (function (root) {
 
-		Out: function (k) {
+        if (typeof undefined === 'function' && undefined.amd) {
 
-			if (k === 0) {
-				return 0;
-			}
+            // AMD
+            undefined([], function () {
+                return TWEEN;
+            });
+        } else {
 
-			if (k === 1) {
-				return 1;
-			}
-
-			return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			if (k === 0) {
-				return 0;
-			}
-
-			if (k === 1) {
-				return 1;
-			}
-
-			k *= 2;
-
-			if (k < 1) {
-				return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
-			}
-
-			return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
-
-		}
-
-	},
-
-	Back: {
-
-		In: function (k) {
-
-			var s = 1.70158;
-
-			return k * k * ((s + 1) * k - s);
-
-		},
-
-		Out: function (k) {
-
-			var s = 1.70158;
-
-			return --k * k * ((s + 1) * k + s) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			var s = 1.70158 * 1.525;
-
-			if ((k *= 2) < 1) {
-				return 0.5 * (k * k * ((s + 1) * k - s));
-			}
-
-			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
-
-		}
-
-	},
-
-	Bounce: {
-
-		In: function (k) {
-
-			return 1 - TWEEN.Easing.Bounce.Out(1 - k);
-
-		},
-
-		Out: function (k) {
-
-			if (k < (1 / 2.75)) {
-				return 7.5625 * k * k;
-			} else if (k < (2 / 2.75)) {
-				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
-			} else if (k < (2.5 / 2.75)) {
-				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
-			} else {
-				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
-			}
-
-		},
-
-		InOut: function (k) {
-
-			if (k < 0.5) {
-				return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
-			}
-
-			return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
-
-		}
-
-	}
-
-};
-
-TWEEN.Interpolation = {
-
-	Linear: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.Linear;
-
-		if (k < 0) {
-			return fn(v[0], v[1], f);
-		}
-
-		if (k > 1) {
-			return fn(v[m], v[m - 1], m - f);
-		}
-
-		return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-
-	},
-
-	Bezier: function (v, k) {
-
-		var b = 0;
-		var n = v.length - 1;
-		var pw = Math.pow;
-		var bn = TWEEN.Interpolation.Utils.Bernstein;
-
-		for (var i = 0; i <= n; i++) {
-			b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-		}
-
-		return b;
-
-	},
-
-	CatmullRom: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.CatmullRom;
-
-		if (v[0] === v[m]) {
-
-			if (k < 0) {
-				i = Math.floor(f = m * (1 + k));
-			}
-
-			return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-
-		} else {
-
-			if (k < 0) {
-				return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-			}
-
-			if (k > 1) {
-				return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-			}
-
-			return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-
-		}
-
-	},
-
-	Utils: {
-
-		Linear: function (p0, p1, t) {
-
-			return (p1 - p0) * t + p0;
-
-		},
-
-		Bernstein: function (n, i) {
-
-			var fc = TWEEN.Interpolation.Utils.Factorial;
-
-			return fc(n) / fc(i) / fc(n - i);
-
-		},
-
-		Factorial: (function () {
-
-			var a = [1];
-
-			return function (n) {
-
-				var s = 1;
-
-				if (a[n]) {
-					return a[n];
-				}
-
-				for (var i = n; i > 1; i--) {
-					s *= i;
-				}
-
-				a[n] = s;
-				return s;
-
-			};
-
-		})(),
-
-		CatmullRom: function (p0, p1, p2, p3, t) {
-
-			var v0 = (p2 - p0) * 0.5;
-			var v1 = (p3 - p1) * 0.5;
-			var t2 = t * t;
-			var t3 = t * t2;
-
-			return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (- 3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-
-		}
-
-	}
-
-};
-
-// UMD (Universal Module Definition)
-(function (root) {
-
-	if (typeof undefined === 'function' && undefined.amd) {
-
-		// AMD
-		undefined([], function () {
-			return TWEEN;
-		});
-
-	} else {
-
-		// Node.js
-		module.exports = TWEEN;
-
-	}
-
-})(commonjsGlobal);
+            // Node.js
+            module.exports = TWEEN;
+        }
+    })(commonjsGlobal);
 });
 
 //import Tween from "./Tween"
@@ -2838,7 +2722,6 @@ function registTween(options) {
             tween.id = tid;
             tween.start();
 
-            
             animate();
         })();
     }
@@ -2872,11 +2755,14 @@ function Observe(scope) {
     var stopRepeatAssign = true;
 
     var pmodel = {},
-        //要返回的对象
+
+    //要返回的对象
     accessores = {},
-        //内部用于转换的对象
+
+    //内部用于转换的对象
     _Publics = ["$watch", "$model"],
-        //公共属性，不需要get set 化的
+
+    //公共属性，不需要get set 化的
     model = {}; //这是pmodel上的$model属性
 
     var Publics = _Publics;
@@ -3028,19 +2914,12 @@ var RENDERER_TYPE = {
     CANVAS: 2
 };
 
-
-
 var SHAPES = {
     POLY: 0,
     RECT: 1,
     CIRC: 2,
     ELIP: 3
 };
-
-
-
-
-
 
 //会影响到transform改变的context属性
 var TRANSFORM_PROPS = ["x", "y", "scaleX", "scaleY", "rotation", "scaleOrigin", "rotateOrigin"];
@@ -3125,6 +3004,8 @@ var DisplayObject = function (_EventDispatcher) {
 
         _this.moveing = false; //如果元素在最轨道运动中的时候，最好把这个设置为true，这样能保证轨迹的丝搬顺滑，否则因为xyToInt的原因，会有跳跃
 
+        _this.clip = null; //裁剪的图形对象
+
         //创建好context
         _this.context = _this._createContext(opt);
 
@@ -3144,6 +3025,12 @@ var DisplayObject = function (_EventDispatcher) {
     createClass(DisplayObject, [{
         key: "init",
         value: function init() {}
+    }, {
+        key: "clipTo",
+        value: function clipTo(node) {
+            this.clip = node;
+            node.isClip = true;
+        }
     }, {
         key: "_createContext",
         value: function _createContext(opt) {
@@ -3976,7 +3863,6 @@ var Stage = function (_DisplayObjectContain) {
     function Stage(opt) {
         classCallCheck(this, Stage);
 
-
         opt.type = "stage";
 
         var _this = possibleConstructorReturn(this, (Stage.__proto__ || Object.getPrototypeOf(Stage)).call(this, opt));
@@ -4198,10 +4084,9 @@ var CanvasGraphicsRenderer = function () {
     * @stage 也可以displayObject.getStage()获取。
     */
 
-
     createClass(CanvasGraphicsRenderer, [{
         key: 'render',
-        value: function render(displayObject, stage, globalAlpha) {
+        value: function render(displayObject, stage, globalAlpha, isClip) {
             var renderer = this.renderer;
             var graphicsData = displayObject.graphics.graphicsData;
             var ctx = stage.ctx;
@@ -4213,15 +4098,15 @@ var CanvasGraphicsRenderer = function () {
                 var fillStyle = data.fillStyle;
                 var strokeStyle = data.strokeStyle;
 
-                var fill = data.hasFill() && data.fillAlpha;
-                var line = data.hasLine() && data.lineAlpha;
+                var fill = data.hasFill() && data.fillAlpha && !isClip;
+                var line = data.hasLine() && data.lineAlpha && !isClip;
 
                 ctx.lineWidth = data.lineWidth;
 
                 if (data.type === SHAPES.POLY) {
                     ctx.beginPath();
 
-                    this.renderPolygon(shape.points, shape.closed, ctx);
+                    this.renderPolygon(shape.points, shape.closed, ctx, isClip);
 
                     if (fill) {
                         ctx.globalAlpha = data.fillAlpha * globalAlpha;
@@ -4234,6 +4119,13 @@ var CanvasGraphicsRenderer = function () {
                         ctx.stroke();
                     }
                 } else if (data.type === SHAPES.RECT) {
+                    if (isClip) {
+                        //ctx.beginPath();
+                        //rect本身已经是个close的path
+                        ctx.rect(shape.x, shape.y, shape.width, shape.height);
+                        //ctx.closePath();
+                    }
+
                     if (fill) {
                         ctx.globalAlpha = data.fillAlpha * globalAlpha;
                         ctx.fillStyle = fillStyle;
@@ -4301,14 +4193,14 @@ var CanvasGraphicsRenderer = function () {
         }
     }, {
         key: 'renderPolygon',
-        value: function renderPolygon(points, close, ctx) {
+        value: function renderPolygon(points, close, ctx, isClip) {
             ctx.moveTo(points[0], points[1]);
 
             for (var j = 1; j < points.length / 2; ++j) {
                 ctx.lineTo(points[j * 2], points[j * 2 + 1]);
             }
 
-            if (close) {
+            if (close || isClip) {
                 ctx.closePath();
             }
         }
@@ -4363,35 +4255,51 @@ var CanvasRenderer = function (_SystemRenderer) {
 
             globalAlpha *= $MC.globalAlpha;
 
-            if (!$MC.visible) {
+            if (!$MC.visible || !globalAlpha || displayObject.isClip) {
                 return;
+            }
+
+            var ctx = stage.ctx;
+            ctx.setTransform.apply(ctx, displayObject.worldTransform.toArray());
+
+            var isClipSave = false;
+            if (displayObject.clip && displayObject.clip.graphics) {
+                //如果这个对象有一个裁剪路径对象，那么就绘制这个裁剪路径
+
+                var _clip = displayObject.clip;
+                ctx.save();
+                isClipSave = true;
+
+                if (!_clip.worldTransform || _clip._transformChange || _clip.parent._transformChange) {
+                    _clip.setWorldTransform();
+                    _clip._transformChange = true;
+                }
+                ctx.setTransform.apply(ctx, _clip.worldTransform.toArray());
+
+                //如果 graphicsData.length==0 的情况下才需要执行_draw来组织graphics数据
+                if (!_clip.graphics.graphicsData.length) {
+                    //当渲染器开始渲染app的时候，app下面的所有displayObject都已经准备好了对应的世界矩阵
+                    _clip._draw(_clip.graphics); //_draw会完成绘制准备好 graphicsData
+                }
+                this.CGR.render(_clip, stage, globalAlpha, isClipSave);
+
+                _clip._transformChange = false;
+
+                ctx.clip();
             }
 
             //因为已经采用了setTransform了， 非shape元素已经不需要执行transform 和 render
             if (displayObject.graphics) {
-
-                var ctx = stage.ctx;
-
-                ctx.setTransform.apply(ctx, displayObject.worldTransform.toArray());
-
                 //如果 graphicsData.length==0 的情况下才需要执行_draw来组织graphics数据
                 if (!displayObject.graphics.graphicsData.length) {
                     //当渲染器开始渲染app的时候，app下面的所有displayObject都已经准备好了对应的世界矩阵
                     displayObject._draw(displayObject.graphics); //_draw会完成绘制准备好 graphicsData
                 }
-
-                if (globalAlpha) {
-                    this.CGR.render(displayObject, stage, globalAlpha);
-                }
+                this.CGR.render(displayObject, stage, globalAlpha);
             }
 
             if (displayObject.type == "text") {
-                if (!globalAlpha) {
-                    return;
-                }
                 //如果是文本
-                var ctx = stage.ctx;
-                ctx.setTransform.apply(ctx, displayObject.worldTransform.toArray());
                 displayObject.render(ctx, globalAlpha);
             }
 
@@ -4402,6 +4310,11 @@ var CanvasRenderer = function (_SystemRenderer) {
             }
 
             displayObject._transformChange = false;
+
+            if (isClipSave) {
+                //如果这个对象有裁剪对象， 则要恢复，裁剪之前的环境
+                ctx.restore();
+            }
         }
     }, {
         key: '_clear',
@@ -4668,17 +4581,17 @@ var Application = function (_DisplayObjectContain) {
  * 模拟as3 中 的sprite类，目前还只是个简单的容易。
  */
 var Sprite = function (_DisplayObjectContain) {
-  inherits(Sprite, _DisplayObjectContain);
+    inherits(Sprite, _DisplayObjectContain);
 
-  function Sprite(opt) {
-    classCallCheck(this, Sprite);
+    function Sprite(opt) {
+        classCallCheck(this, Sprite);
 
-    opt = Utils.checkOpt(opt);
-    opt.type = "sprite";
-    return possibleConstructorReturn(this, (Sprite.__proto__ || Object.getPrototypeOf(Sprite)).call(this, opt));
-  }
+        opt = Utils.checkOpt(opt);
+        opt.type = "sprite";
+        return possibleConstructorReturn(this, (Sprite.__proto__ || Object.getPrototypeOf(Sprite)).call(this, opt));
+    }
 
-  return Sprite;
+    return Sprite;
 }(DisplayObjectContainer);
 
 var GraphicsData = function () {
@@ -4765,101 +4678,101 @@ var _join = Array.prototype.join;
  * http://mozilla.org/MPL/2.0/
  */
 function arcToSegments(toX, toY, rx, ry, large, sweep, rotateX) {
-  var argsString = _join.call(arguments);
-  if (arcToSegmentsCache[argsString]) {
-    return arcToSegmentsCache[argsString];
-  }
+    var argsString = _join.call(arguments);
+    if (arcToSegmentsCache[argsString]) {
+        return arcToSegmentsCache[argsString];
+    }
 
-  var PI = Math.PI,
-      th = rotateX * PI / 180,
-      sinTh = Math.sin(th),
-      cosTh = Math.cos(th),
-      fromX = 0,
-      fromY = 0;
+    var PI = Math.PI,
+        th = rotateX * PI / 180,
+        sinTh = Math.sin(th),
+        cosTh = Math.cos(th),
+        fromX = 0,
+        fromY = 0;
 
-  rx = Math.abs(rx);
-  ry = Math.abs(ry);
+    rx = Math.abs(rx);
+    ry = Math.abs(ry);
 
-  var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
-      py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
-      rx2 = rx * rx,
-      ry2 = ry * ry,
-      py2 = py * py,
-      px2 = px * px,
-      pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
-      root = 0;
+    var px = -cosTh * toX * 0.5 - sinTh * toY * 0.5,
+        py = -cosTh * toY * 0.5 + sinTh * toX * 0.5,
+        rx2 = rx * rx,
+        ry2 = ry * ry,
+        py2 = py * py,
+        px2 = px * px,
+        pl = rx2 * ry2 - rx2 * py2 - ry2 * px2,
+        root = 0;
 
-  if (pl < 0) {
-    var s = Math.sqrt(1 - pl / (rx2 * ry2));
-    rx *= s;
-    ry *= s;
-  } else {
-    root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
-  }
+    if (pl < 0) {
+        var s = Math.sqrt(1 - pl / (rx2 * ry2));
+        rx *= s;
+        ry *= s;
+    } else {
+        root = (large === sweep ? -1.0 : 1.0) * Math.sqrt(pl / (rx2 * py2 + ry2 * px2));
+    }
 
-  var cx = root * rx * py / ry,
-      cy = -root * ry * px / rx,
-      cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
-      cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
-      mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
-      dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
+    var cx = root * rx * py / ry,
+        cy = -root * ry * px / rx,
+        cx1 = cosTh * cx - sinTh * cy + toX * 0.5,
+        cy1 = sinTh * cx + cosTh * cy + toY * 0.5,
+        mTheta = calcVectorAngle(1, 0, (px - cx) / rx, (py - cy) / ry),
+        dtheta = calcVectorAngle((px - cx) / rx, (py - cy) / ry, (-px - cx) / rx, (-py - cy) / ry);
 
-  if (sweep === 0 && dtheta > 0) {
-    dtheta -= 2 * PI;
-  } else if (sweep === 1 && dtheta < 0) {
-    dtheta += 2 * PI;
-  }
+    if (sweep === 0 && dtheta > 0) {
+        dtheta -= 2 * PI;
+    } else if (sweep === 1 && dtheta < 0) {
+        dtheta += 2 * PI;
+    }
 
-  // Convert into cubic bezier segments <= 90deg
-  var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
-      result = [],
-      mDelta = dtheta / segments,
-      mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
-      th3 = mTheta + mDelta;
+    // Convert into cubic bezier segments <= 90deg
+    var segments = Math.ceil(Math.abs(dtheta / PI * 2)),
+        result = [],
+        mDelta = dtheta / segments,
+        mT = 8 / 3 * Math.sin(mDelta / 4) * Math.sin(mDelta / 4) / Math.sin(mDelta / 2),
+        th3 = mTheta + mDelta;
 
-  for (var i = 0; i < segments; i++) {
-    result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
-    fromX = result[i][4];
-    fromY = result[i][5];
-    mTheta = th3;
-    th3 += mDelta;
-  }
-  arcToSegmentsCache[argsString] = result;
-  return result;
+    for (var i = 0; i < segments; i++) {
+        result[i] = segmentToBezier(mTheta, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY);
+        fromX = result[i][4];
+        fromY = result[i][5];
+        mTheta = th3;
+        th3 += mDelta;
+    }
+    arcToSegmentsCache[argsString] = result;
+    return result;
 }
 
 function segmentToBezier(th2, th3, cosTh, sinTh, rx, ry, cx1, cy1, mT, fromX, fromY) {
-  var argsString2 = _join.call(arguments);
-  if (segmentToBezierCache[argsString2]) {
+    var argsString2 = _join.call(arguments);
+    if (segmentToBezierCache[argsString2]) {
+        return segmentToBezierCache[argsString2];
+    }
+
+    var costh2 = Math.cos(th2),
+        sinth2 = Math.sin(th2),
+        costh3 = Math.cos(th3),
+        sinth3 = Math.sin(th3),
+        toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
+        toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
+        cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
+        cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
+        cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
+        cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
+
+    segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
     return segmentToBezierCache[argsString2];
-  }
-
-  var costh2 = Math.cos(th2),
-      sinth2 = Math.sin(th2),
-      costh3 = Math.cos(th3),
-      sinth3 = Math.sin(th3),
-      toX = cosTh * rx * costh3 - sinTh * ry * sinth3 + cx1,
-      toY = sinTh * rx * costh3 + cosTh * ry * sinth3 + cy1,
-      cp1X = fromX + mT * (-cosTh * rx * sinth2 - sinTh * ry * costh2),
-      cp1Y = fromY + mT * (-sinTh * rx * sinth2 + cosTh * ry * costh2),
-      cp2X = toX + mT * (cosTh * rx * sinth3 + sinTh * ry * costh3),
-      cp2Y = toY + mT * (sinTh * rx * sinth3 - cosTh * ry * costh3);
-
-  segmentToBezierCache[argsString2] = [cp1X, cp1Y, cp2X, cp2Y, toX, toY];
-  return segmentToBezierCache[argsString2];
 }
 
 /*
  * Private
  */
 function calcVectorAngle(ux, uy, vx, vy) {
-  var ta = Math.atan2(uy, ux),
-      tb = Math.atan2(vy, vx);
-  if (tb >= ta) {
-    return tb - ta;
-  } else {
-    return 2 * Math.PI - (ta - tb);
-  }
+    var ta = Math.atan2(uy, ux),
+        tb = Math.atan2(vy, vx);
+    if (tb >= ta) {
+        return tb - ta;
+    } else {
+        return 2 * Math.PI - (ta - tb);
+    }
 }
 
 /**
@@ -4870,25 +4783,25 @@ function calcVectorAngle(ux, uy, vx, vy) {
  * @param {Array} coords
  */
 var drawArc = function drawArc(graphics, fx, fy, coords) {
-  var rx = coords[0],
-      ry = coords[1],
-      rot = coords[2],
-      large = coords[3],
-      sweep = coords[4],
-      tx = coords[5],
-      ty = coords[6],
-      segs = [[], [], [], []],
-      segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+    var rx = coords[0],
+        ry = coords[1],
+        rot = coords[2],
+        large = coords[3],
+        sweep = coords[4],
+        tx = coords[5],
+        ty = coords[6],
+        segs = [[], [], [], []],
+        segsNorm = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
 
-  for (var i = 0, len = segsNorm.length; i < len; i++) {
-    segs[i][0] = segsNorm[i][0] + fx;
-    segs[i][1] = segsNorm[i][1] + fy;
-    segs[i][2] = segsNorm[i][2] + fx;
-    segs[i][3] = segsNorm[i][3] + fy;
-    segs[i][4] = segsNorm[i][4] + fx;
-    segs[i][5] = segsNorm[i][5] + fy;
-    graphics.bezierCurveTo.apply(graphics, segs[i]);
-  }
+    for (var i = 0, len = segsNorm.length; i < len; i++) {
+        segs[i][0] = segsNorm[i][0] + fx;
+        segs[i][1] = segsNorm[i][1] + fy;
+        segs[i][2] = segsNorm[i][2] + fx;
+        segs[i][3] = segsNorm[i][3] + fy;
+        segs[i][4] = segsNorm[i][4] + fx;
+        segs[i][5] = segsNorm[i][5] + fy;
+        graphics.bezierCurveTo.apply(graphics, segs[i]);
+    }
 };
 
 /**
@@ -4905,20 +4818,20 @@ var drawArc = function drawArc(graphics, fx, fy, coords) {
  */
 var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, tx, ty) {
 
-  var fromX = 0,
-      fromY = 0,
-      bound,
-      bounds = [],
-      segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
+    var fromX = 0,
+        fromY = 0,
+        bound,
+        bounds = [],
+        segs = arcToSegments(tx - fx, ty - fy, rx, ry, large, sweep, rot);
 
-  for (var i = 0, len = segs.length; i < len; i++) {
-    bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
-    bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
-    bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
-    fromX = segs[i][4];
-    fromY = segs[i][5];
-  }
-  return bounds;
+    for (var i = 0, len = segs.length; i < len; i++) {
+        bound = getBoundsOfCurve(fromX, fromY, segs[i][0], segs[i][1], segs[i][2], segs[i][3], segs[i][4], segs[i][5]);
+        bounds.push({ x: bound[0].x + fx, y: bound[0].y + fy });
+        bounds.push({ x: bound[1].x + fx, y: bound[1].y + fy });
+        fromX = segs[i][4];
+        fromY = segs[i][5];
+    }
+    return bounds;
 };
 
 /**
@@ -4934,96 +4847,96 @@ var getBoundsOfArc = function getBoundsOfArc(fx, fy, rx, ry, rot, large, sweep, 
  */
 // taken from http://jsbin.com/ivomiq/56/edit  no credits available for that.
 function getBoundsOfCurve(x0, y0, x1, y1, x2, y2, x3, y3) {
-  var argsString = _join.call(arguments);
-  if (boundsOfCurveCache[argsString]) {
-    return boundsOfCurveCache[argsString];
-  }
-
-  var sqrt = Math.sqrt,
-      min = Math.min,
-      max = Math.max,
-      abs = Math.abs,
-      tvalues = [],
-      bounds = [[], []],
-      a,
-      b,
-      c,
-      t,
-      t1,
-      t2,
-      b2ac,
-      sqrtb2ac;
-
-  b = 6 * x0 - 12 * x1 + 6 * x2;
-  a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
-  c = 3 * x1 - 3 * x0;
-
-  for (var i = 0; i < 2; ++i) {
-    if (i > 0) {
-      b = 6 * y0 - 12 * y1 + 6 * y2;
-      a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
-      c = 3 * y1 - 3 * y0;
+    var argsString = _join.call(arguments);
+    if (boundsOfCurveCache[argsString]) {
+        return boundsOfCurveCache[argsString];
     }
 
-    if (abs(a) < 1e-12) {
-      if (abs(b) < 1e-12) {
-        continue;
-      }
-      t = -c / b;
-      if (0 < t && t < 1) {
-        tvalues.push(t);
-      }
-      continue;
-    }
-    b2ac = b * b - 4 * c * a;
-    if (b2ac < 0) {
-      continue;
-    }
-    sqrtb2ac = sqrt(b2ac);
-    t1 = (-b + sqrtb2ac) / (2 * a);
-    if (0 < t1 && t1 < 1) {
-      tvalues.push(t1);
-    }
-    t2 = (-b - sqrtb2ac) / (2 * a);
-    if (0 < t2 && t2 < 1) {
-      tvalues.push(t2);
-    }
-  }
+    var sqrt = Math.sqrt,
+        min = Math.min,
+        max = Math.max,
+        abs = Math.abs,
+        tvalues = [],
+        bounds = [[], []],
+        a,
+        b,
+        c,
+        t,
+        t1,
+        t2,
+        b2ac,
+        sqrtb2ac;
 
-  var x,
-      y,
-      j = tvalues.length,
-      jlen = j,
-      mt;
-  while (j--) {
-    t = tvalues[j];
-    mt = 1 - t;
-    x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
-    bounds[0][j] = x;
+    b = 6 * x0 - 12 * x1 + 6 * x2;
+    a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
+    c = 3 * x1 - 3 * x0;
 
-    y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
-    bounds[1][j] = y;
-  }
+    for (var i = 0; i < 2; ++i) {
+        if (i > 0) {
+            b = 6 * y0 - 12 * y1 + 6 * y2;
+            a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
+            c = 3 * y1 - 3 * y0;
+        }
 
-  bounds[0][jlen] = x0;
-  bounds[1][jlen] = y0;
-  bounds[0][jlen + 1] = x3;
-  bounds[1][jlen + 1] = y3;
-  var result = [{
-    x: min.apply(null, bounds[0]),
-    y: min.apply(null, bounds[1])
-  }, {
-    x: max.apply(null, bounds[0]),
-    y: max.apply(null, bounds[1])
-  }];
-  boundsOfCurveCache[argsString] = result;
-  return result;
+        if (abs(a) < 1e-12) {
+            if (abs(b) < 1e-12) {
+                continue;
+            }
+            t = -c / b;
+            if (0 < t && t < 1) {
+                tvalues.push(t);
+            }
+            continue;
+        }
+        b2ac = b * b - 4 * c * a;
+        if (b2ac < 0) {
+            continue;
+        }
+        sqrtb2ac = sqrt(b2ac);
+        t1 = (-b + sqrtb2ac) / (2 * a);
+        if (0 < t1 && t1 < 1) {
+            tvalues.push(t1);
+        }
+        t2 = (-b - sqrtb2ac) / (2 * a);
+        if (0 < t2 && t2 < 1) {
+            tvalues.push(t2);
+        }
+    }
+
+    var x,
+        y,
+        j = tvalues.length,
+        jlen = j,
+        mt;
+    while (j--) {
+        t = tvalues[j];
+        mt = 1 - t;
+        x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
+        bounds[0][j] = x;
+
+        y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+        bounds[1][j] = y;
+    }
+
+    bounds[0][jlen] = x0;
+    bounds[1][jlen] = y0;
+    bounds[0][jlen + 1] = x3;
+    bounds[1][jlen + 1] = y3;
+    var result = [{
+        x: min.apply(null, bounds[0]),
+        y: min.apply(null, bounds[1])
+    }, {
+        x: max.apply(null, bounds[0]),
+        y: max.apply(null, bounds[1])
+    }];
+    boundsOfCurveCache[argsString] = result;
+    return result;
 }
 
 var Arc = {
-  drawArc: drawArc,
-  getBoundsOfCurve: getBoundsOfCurve,
-  getBoundsOfArc: getBoundsOfArc
+    drawArc: drawArc,
+    getBoundsOfCurve: getBoundsOfCurve,
+    getBoundsOfArc: getBoundsOfArc
 };
 
 var Rectangle = function () {
@@ -6702,7 +6615,6 @@ var Path = function (_Shape) {
     function Path(opt) {
         classCallCheck(this, Path);
 
-
         var _context = _$2.extend({
             pointList: [], //从下面的path中计算得到的边界点的集合
             path: "" //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
@@ -7925,6 +7837,8 @@ var possibleConstructorReturn$1 = function (self, call) {
 
 var _$1 = canvax._;
 
+var padding = 10;
+
 var Chart = function (_Canvax$Event$EventDi) {
     inherits$1(Chart, _Canvax$Event$EventDi);
 
@@ -7951,10 +7865,10 @@ var Chart = function (_Canvax$Event$EventDi) {
         //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
         _this.padding = {
-            top: 20,
-            right: 20,
-            bottom: 20,
-            left: 20
+            top: padding,
+            right: padding,
+            bottom: padding,
+            left: padding
         };
 
         //Canvax实例
@@ -8065,10 +7979,10 @@ var Chart = function (_Canvax$Event$EventDi) {
             this.canvax.domView.innerHTML = "";
             //padding数据也要重置为起始值
             this.padding = {
-                top: 20,
-                right: 20,
-                bottom: 20,
-                left: 20
+                top: padding,
+                right: padding,
+                bottom: padding,
+                left: padding
             };
         }
 
@@ -8407,17 +8321,30 @@ var Coord = function (_Chart) {
             var me = this;
             //设置legendOpt
             var legendOpt = _.extend(true, {
-                onChecked: function onChecked(name) {
-                    me.add(name);
-                    me.componentsReset({ name: "legend" });
-                },
-                onUnChecked: function onUnChecked(name) {
-                    me.remove(name);
-                    me.componentsReset({ name: "legend" });
+                node: {
+                    onChecked: function onChecked(obj) {
+                        me.show(obj.name, obj);
+                        me.componentsReset({ name: "legend" });
+                    },
+                    onUnChecked: function onUnChecked(obj) {
+                        me.hide(obj.name, obj);
+                        me.componentsReset({ name: "legend" });
+                    }
                 }
             }, me._opts.legend);
 
-            var _legend = new me.componentsMap.legend(me._getLegendData(), legendOpt, this);
+            var legendData = me._opts.legend.data;
+            if (legendData) {
+                _.each(legendData, function (item, i) {
+                    item.enabled = true;
+                    item.ind = i;
+                });
+                delete me._opts.legend.data;
+            } else {
+                legendData = me._getLegendData();
+            }
+
+            var _legend = new me.componentsMap.legend(legendData, legendOpt, this);
 
             if (_legend.layoutType == "h") {
                 me.padding[_legend.position] += _legend.height;
@@ -8450,11 +8377,11 @@ var Coord = function (_Chart) {
             }
             if (_legend.position == "top") {
                 pos.x = me.padding.left;
-                pos.y = me.padding.top - _legend.height * 1.25;
+                pos.y = me.padding.top - _legend.height;
             }
             if (_legend.position == "bottom") {
                 pos.x = me.padding.left;
-                pos.y = me.height - me.padding.bottom * 0.8;
+                pos.y = me.height - me.padding.bottom;
             }
 
             _legend.pos(pos);
@@ -8466,26 +8393,20 @@ var Coord = function (_Chart) {
 
             me.stage.addChild(_legend.sprite);
         }
-
-        /*
-         *添加一个yAxis字段，也就是添加一条brokenline折线
-         *@params field 添加的字段
-         **/
-
     }, {
-        key: "add",
-        value: function add(field) {
-            this._coord.addField(field);
+        key: "show",
+        value: function show(field, legendData) {
+            this._coord.addField(field, legendData);
             _.each(this._graphs, function (_g) {
-                _g.add(field);
+                _g.show(field, legendData);
             });
         }
     }, {
-        key: "remove",
-        value: function remove(field) {
-            this._coord.removeField(field);
+        key: "hide",
+        value: function hide(field, legendData) {
+            this._coord.removeField(field, legendData);
             _.each(this._graphs, function (_g) {
-                _g.remove(field);
+                _g.hide(field, legendData);
             });
         }
 
@@ -12259,8 +12180,8 @@ var polarComponent = function (_coorBase) {
                 //如果没有传入任何origin数据，则默认为中心点
                 //origin是相对画布左上角的
                 this.origin = {
-                    x: rootWidth / 2,
-                    y: rootHeight / 2
+                    x: _padding.left + (rootWidth - _padding.left - _padding.right) / 2, //rootWidth/2,
+                    y: _padding.top + (rootHeight - _padding.top - _padding.bottom) / 2 //rootHeight/2
                 };
             }
 
@@ -12285,8 +12206,16 @@ var polarComponent = function (_coorBase) {
 
     }, {
         key: "getRadiansAtR",
-        value: function getRadiansAtR(r) {
+        value: function getRadiansAtR(r, width, height) {
+
             var me = this;
+            if (width == undefined) {
+                width = this.width;
+            }
+            if (height == undefined) {
+                height = this.height;
+            }
+
             var _rs = [];
             if (r > this.maxR) {
                 return [];
@@ -12295,9 +12224,12 @@ var polarComponent = function (_coorBase) {
 
                 //矩形的4边框线段
                 var _padding = this.root.padding;
+
+                //这个origin 是相对在width，height矩形范围内的圆心，
+                //而this.origin 是在整个画布的位置
                 var origin = {
-                    x: this.origin.x - _padding.left,
-                    y: this.origin.y - _padding.top
+                    x: this.origin.x - _padding.left - (this.width - width) / 2,
+                    y: this.origin.y - _padding.top - (this.height - height) / 2
                 };
                 var x, y;
 
@@ -12306,29 +12238,29 @@ var polarComponent = function (_coorBase) {
                 var distanceT = origin.y;
                 if (distanceT < r) {
                     x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceT, 2));
-                    _rs = _rs.concat(this._filterPointsInRect([{ x: -x, y: -distanceT }, { x: x, y: -distanceT }]));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: -x, y: -distanceT }, { x: x, y: -distanceT }], origin, width, height));
                 }
 
                 //于右边界的相交点
                 //最多有两个交点
-                var distanceR = this.width - origin.x;
+                var distanceR = width - origin.x;
                 if (distanceR < r) {
                     y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceR, 2));
-                    _rs = _rs.concat(this._filterPointsInRect([{ x: distanceR, y: -y }, { x: distanceR, y: y }]));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: distanceR, y: -y }, { x: distanceR, y: y }], origin, width, height));
                 }
                 //于下边界的相交点
                 //最多有两个交点
-                var distanceB = this.height - origin.y;
+                var distanceB = height - origin.y;
                 if (distanceB < r) {
                     x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceB, 2));
-                    _rs = _rs.concat(this._filterPointsInRect([{ x: x, y: distanceB }, { x: -x, y: distanceB }]));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: x, y: distanceB }, { x: -x, y: distanceB }], origin, width, height));
                 }
                 //于左边界的相交点
                 //最多有两个交点
                 var distanceL = origin.x;
                 if (distanceL < r) {
                     y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceL, 2));
-                    _rs = _rs.concat(this._filterPointsInRect([{ x: -distanceL, y: y }, { x: -distanceL, y: -y }]));
+                    _rs = _rs.concat(this._filterPointsInRect([{ x: -distanceL, y: y }, { x: -distanceL, y: -y }], origin, width, height));
                 }
 
                 var arcs = []; //[ [{point , radian} , {point , radian}] ... ]
@@ -12348,7 +12280,7 @@ var polarComponent = function (_coorBase) {
 
                 //过滤掉不在rect内的弧线段
                 for (var i = 0, l = arcs.length; i < l; i++) {
-                    if (!this._checkArcInRect(arcs[i], r)) {
+                    if (!this._checkArcInRect(arcs[i], r, origin, width, height)) {
                         arcs.splice(i, 1);
                         i--, l--;
                     }
@@ -12358,9 +12290,9 @@ var polarComponent = function (_coorBase) {
         }
     }, {
         key: "_filterPointsInRect",
-        value: function _filterPointsInRect(points) {
+        value: function _filterPointsInRect(points, origin, width, height) {
             for (var i = 0, l = points.length; i < l; i++) {
-                if (!this._checkPointInRect(points[i])) {
+                if (!this._checkPointInRect(points[i], origin, width, height)) {
                     //该点不在root rect范围内，去掉
                     points.splice(i, 1);
                     i--, l--;
@@ -12370,21 +12302,16 @@ var polarComponent = function (_coorBase) {
         }
     }, {
         key: "_checkPointInRect",
-        value: function _checkPointInRect(p) {
-            var _padding = this.root.padding;
-            var origin = {
-                x: this.origin.x - _padding.left,
-                y: this.origin.y - _padding.top
-            };
+        value: function _checkPointInRect(p, origin, width, height) {
             var _tansRoot = { x: p.x + origin.x, y: p.y + origin.y };
-            return !(_tansRoot.x < 0 || _tansRoot.x > this.width || _tansRoot.y < 0 || _tansRoot.y > this.height);
+            return !(_tansRoot.x < 0 || _tansRoot.x > width || _tansRoot.y < 0 || _tansRoot.y > height);
         }
 
         //检查由n个相交点分割出来的圆弧是否在rect内
 
     }, {
         key: "_checkArcInRect",
-        value: function _checkArcInRect(arc, r) {
+        value: function _checkArcInRect(arc, r, origin, width, height) {
             var start = arc[0];
             var to = arc[1];
             var differenceR = to.radian - start.radian;
@@ -12392,7 +12319,7 @@ var polarComponent = function (_coorBase) {
                 differenceR = Math.PI * 2 + to.radian - start.radian;
             }
             var middleR = (start.radian + differenceR / 2) % (Math.PI * 2);
-            return this._checkPointInRect(this.getPointInRadianOfR(middleR, r));
+            return this._checkPointInRect(this.getPointInRadianOfR(middleR, r), origin, width, height);
         }
 
         //获取某个点相对圆心的弧度值
@@ -12785,7 +12712,7 @@ var GraphsBase = function (_Canvax$Event$EventDi) {
         _this.dataFrame = root.dataFrame; //root.dataFrame的引用
 
         _this.data = null; //{ ur : [] , pv : [] } 平铺hash结构
-        _this.field = null;
+
         _this.sprite = null;
 
         _this.width = 0;
@@ -12818,11 +12745,11 @@ var GraphsBase = function (_Canvax$Event$EventDi) {
         key: "unselectAt",
         value: function unselectAt(ind, field) {}
     }, {
-        key: "remove",
-        value: function remove(field) {}
+        key: "hide",
+        value: function hide(field) {}
     }, {
-        key: "add",
-        value: function add(field) {}
+        key: "show",
+        value: function show(field) {}
     }, {
         key: "getLegendData",
         value: function getLegendData() {}
@@ -12861,6 +12788,7 @@ var BarGraphs = function (_GraphsBase) {
 
         _this.type = "bar";
 
+        _this.field = null;
         _this.enabledField = null;
 
         _this.yAxisAlign = "left"; //默认设置为左y轴
@@ -13006,13 +12934,13 @@ var BarGraphs = function (_GraphsBase) {
             return this.node._width;
         }
     }, {
-        key: "add",
-        value: function add(field) {
+        key: "show",
+        value: function show(field) {
             this.draw();
         }
     }, {
-        key: "remove",
-        value: function remove(field) {
+        key: "hide",
+        value: function hide(field) {
             _$15.each(this.barsSp.children, function (h_groupSp, h) {
                 var bar = h_groupSp.getChildById("bar_" + h + "_" + field);
                 bar && bar.destroy();
@@ -14535,6 +14463,7 @@ var LineGraphs = function (_GraphsBase) {
         //默认给左轴
         _this.yAxisAlign = "left";
 
+        _this.field = null;
         _this.enabledField = null;
 
         _this.groups = []; //群组集合
@@ -14681,8 +14610,8 @@ var LineGraphs = function (_GraphsBase) {
             return this;
         }
     }, {
-        key: "add",
-        value: function add(field) {
+        key: "show",
+        value: function show(field) {
             var me = this;
 
             //这个field不再这个graphs里面的，不相关
@@ -14697,14 +14626,9 @@ var LineGraphs = function (_GraphsBase) {
                 g.resetData(me.data[g.field].data);
             });
         }
-
-        /*
-         *删除 ind
-         **/
-
     }, {
-        key: "remove",
-        value: function remove(field) {
+        key: "hide",
+        value: function hide(field) {
             var me = this;
             var i = me.getGroupIndex(field);
 
@@ -14818,6 +14742,8 @@ var ScatGraphs = function (_GraphsBase) {
         var _this = possibleConstructorReturn$1(this, (ScatGraphs.__proto__ || Object.getPrototypeOf(ScatGraphs)).call(this, opts, root));
 
         _this.type = "scat";
+
+        _this.field = null;
 
         _this.node = {
             shapeType: "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
@@ -16080,13 +16006,13 @@ var PieGraphs = function (_GraphsBase) {
             this.sprite.addChild(this._pie.sprite);
         }
     }, {
-        key: "add",
-        value: function add(name) {
+        key: "show",
+        value: function show(name) {
             this._setEnabled(name, true);
         }
     }, {
-        key: "remove",
-        value: function remove(name) {
+        key: "hide",
+        value: function hide(name) {
             this._setEnabled(name, false);
         }
     }, {
@@ -16380,6 +16306,7 @@ var RadarGraphs = function (_GraphsBase) {
 
         _this.type = "radar";
 
+        _this.field = null;
         _this.enabledField = null;
 
         _this.line = {
@@ -16589,11 +16516,11 @@ var RadarGraphs = function (_GraphsBase) {
             node.focused = false;
         }
     }, {
-        key: "remove",
-        value: function remove(field) {}
+        key: "hide",
+        value: function hide(field) {}
     }, {
-        key: "add",
-        value: function add(field) {}
+        key: "show",
+        value: function show(field) {}
     }, {
         key: "_trimGraphs",
         value: function _trimGraphs() {
@@ -17446,11 +17373,14 @@ var PlanetGroup = function () {
     function PlanetGroup(opts, dataFrame, _graphs) {
         classCallCheck$1(this, PlanetGroup);
 
+
         this._opts = opts;
         this.dataFrame = dataFrame;
         this._graphs = _graphs;
         this.root = _graphs.root;
         this._coord = this.root._coord;
+
+        this.field = null;
 
         this.iGroup = 0;
         this.groupLen = 1;
@@ -17460,6 +17390,9 @@ var PlanetGroup = function () {
             start: 0,
             to: 0
         };
+
+        this.width = 0;
+        this.height = 0;
 
         this.node = {
             shapeType: "circle",
@@ -17577,7 +17510,7 @@ var PlanetGroup = function () {
 
                 planets.push(planetLayoutData);
             }
-
+            debugger;
             if (me.sortField) {
                 planets = planets.sort(function (a, b) {
                     var field = me.sortField;
@@ -17614,7 +17547,7 @@ var PlanetGroup = function () {
                 }
 
                 //该半径上面的弧度集合
-                var arcs = this._coord.getRadiansAtR(_r);
+                var arcs = this._coord.getRadiansAtR(_r, me.width, me.height);
 
                 //测试代码begin---------------------------------------------------
                 //用来绘制弧度的辅助线
@@ -17908,7 +17841,10 @@ var PlanetGroup = function () {
                         context: _labelCtx
                     });
 
-                    _node.text = _text;
+                    //互相用属性引用起来
+                    _node.textNode = _text;
+                    _text.nodeData = p;
+                    p.textNode = _text;
 
                     _ringSp.addChild(_text);
                 });
@@ -17957,6 +17893,7 @@ var _$24 = canvax._;
 var Text$2 = canvax.Display.Text;
 var Circle$5 = canvax.Shapes.Circle;
 var Line$8 = canvax.Shapes.Line;
+var Rect$10 = canvax.Shapes.Rect;
 
 var PlanetGraphs = function (_GraphsBase) {
     inherits$1(PlanetGraphs, _GraphsBase);
@@ -17969,6 +17906,8 @@ var PlanetGraphs = function (_GraphsBase) {
         _this.type = "planet";
 
         _this.field = null;
+
+        //this.legendField = null;
 
         _this.center = {
             enabled: true,
@@ -18009,19 +17948,6 @@ var PlanetGraphs = function (_GraphsBase) {
             _this.center.enabled = false;
         }
 
-        //矫正padding
-        var _circleMaxR;
-        try {
-            _circleMaxR = _this.graphs.group.circle.maxR;
-        } catch (e) {}
-        if (_circleMaxR == undefined) {
-            _circleMaxR = 30;
-        }
-        root.padding.top = _circleMaxR;
-        root.padding.bottom = _circleMaxR;
-        root.padding.left = _circleMaxR;
-        root.padding.right = _circleMaxR;
-
         _this.init();
         return _this;
     }
@@ -18032,11 +17958,18 @@ var PlanetGraphs = function (_GraphsBase) {
             this.sprite = new canvax.Display.Sprite({
                 id: "graphsEl"
             });
+
+            this.gridSp = new canvax.Display.Sprite({
+                id: "gridSp"
+            });
+
+            this.sprite.addChild(this.gridSp);
             this.dataGroupHandle();
         }
     }, {
         key: "draw",
         value: function draw(opts) {
+
             !opts && (opts = {});
 
             _$24.extend(true, this, opts);
@@ -18048,6 +17981,75 @@ var PlanetGraphs = function (_GraphsBase) {
             this.fire("complete");
         }
     }, {
+        key: "show",
+        value: function show(field, legendData) {
+            this.getAgreeNodeData(legendData, function (data) {
+                data.node.context.visible = true;
+                data.textNode.context.visible = true;
+            });
+        }
+    }, {
+        key: "hide",
+        value: function hide(field, legendData) {
+            this.getAgreeNodeData(legendData, function (data) {
+                data.node.context.visible = false;
+                data.textNode.context.visible = false;
+            });
+        }
+    }, {
+        key: "getAgreeNodeData",
+        value: function getAgreeNodeData(legendData, callback) {
+            _$24.each(this._groups, function (_g) {
+                _$24.each(_g._rings, function (ring, i) {
+                    _$24.each(ring.planets, function (data, ii) {
+                        var rowData = data.rowData;
+                        if (legendData.name == rowData[legendData.field]) {
+                            //这个数据符合
+                            //data.node.context.visible = false;
+                            //data.textNode.context.visible = false;
+                            callback && callback(data);
+                        }
+                    });
+                });
+            });
+        }
+
+        /*
+        getLegendData()
+        {
+            var list = [];
+            var legendDataList = [];
+            if( this.legendField ){
+                
+                _.each( this.dataFrame.getFieldData( this.legendField ), function( val ){
+                    if( _.indexOf( list, val ) == -1 ){
+                        list.push( val );
+                        legendDataList.push({
+                            name: val, 
+                            color: "#ff8533", 
+                            enabled: true, 
+                            ind: 0
+                        });
+                    };
+                } );
+             };
+             return legendDataList;
+        }
+        */
+
+    }, {
+        key: "_getMaxR",
+        value: function _getMaxR() {
+            var _circleMaxR;
+            try {
+                _circleMaxR = this.graphs.group.circle.maxR;
+            } catch (e) {}
+            if (_circleMaxR == undefined) {
+                _circleMaxR = 30;
+            }
+            return _circleMaxR;
+        }
+    }, {
         key: "drawGroups",
         value: function drawGroups() {
             var me = this;
@@ -18055,6 +18057,8 @@ var PlanetGraphs = function (_GraphsBase) {
             var groupRStart = this.center.r + this.center.margin;
 
             var maxR = me.root._coord.maxR - me.center.r - me.center.margin;
+            var _circleMaxR = this._getMaxR();
+
             _$24.each(this.groupDataFrames, function (df, i) {
                 var toR = groupRStart + maxR * (df.length / me.dataFrame.length);
 
@@ -18064,7 +18068,9 @@ var PlanetGraphs = function (_GraphsBase) {
                     rRange: {
                         start: groupRStart,
                         to: toR
-                    }
+                    },
+                    width: me.width - _circleMaxR * 2,
+                    height: me.height - _circleMaxR * 2
                 }, me._opts), df, me);
 
                 groupRStart = _g.rRange.to;
@@ -18131,7 +18137,7 @@ var PlanetGraphs = function (_GraphsBase) {
 
             for (var i = me.grid.rings.section.length - 1; i >= 0; i--) {
                 var _scale = me.grid.rings.section[i];
-                me.sprite.addChild(new Circle$5({
+                me.gridSp.addChild(new Circle$5({
                     context: {
                         x: me.root._coord.origin.x,
                         y: me.root._coord.origin.y,
@@ -18159,7 +18165,7 @@ var PlanetGraphs = function (_GraphsBase) {
                     var tx = cx + _r * Math.cos(radian);
                     var ty = cy + _r * Math.sin(radian);
 
-                    me.sprite.addChild(new Line$8({
+                    me.gridSp.addChild(new Line$8({
                         context: {
                             start: {
                                 x: cx,
@@ -18169,7 +18175,6 @@ var PlanetGraphs = function (_GraphsBase) {
                                 x: tx,
                                 y: ty
                             },
-
                             lineWidth: me._getBackProp(me.grid.rays.lineWidth, i),
                             strokeStyle: me._getBackProp(me.grid.rays.strokeStyle, i),
                             globalAlpha: me.grid.rays.globalAlpha
@@ -18177,6 +18182,18 @@ var PlanetGraphs = function (_GraphsBase) {
                     }));
                 }
             }
+
+            var _clipRect = new Rect$10({
+                name: "clipRect",
+                context: {
+                    x: me.root._coord.origin.x - me.root.width / 2,
+                    y: me.root._coord.origin.y - me.height / 2,
+                    width: me.root.width,
+                    height: me.height
+                }
+            });
+            me.gridSp.clipTo(_clipRect);
+            me.sprite.addChild(_clipRect);
         }
     }, {
         key: "_getBackProp",
@@ -18248,30 +18265,27 @@ var Legend = function (_Component) {
         /* data的数据结构为
         [
             //descartes中用到的时候还会带入yAxis
-            {name: "uv", style: "#ff8533", enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
+            {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
         _this.data = data || [];
 
         _this.width = 0;
         _this.height = 0;
-        _this.tag = {
-            height: 20,
-            width: "auto"
-        };
 
-        _this.icon = {
+        _this.node = {
+            height: 30,
+            width: "auto",
+            shapeType: "circle",
             r: 5,
             lineWidth: 1,
-            fillStyle: "#999"
+            fillStyle: "#999",
+            onChecked: function onChecked() {},
+            onUnChecked: function onUnChecked() {}
         };
 
-        _this.tips = {
-            enabled: false
-        };
-
-        _this.onChecked = function () {};
-        _this.onUnChecked = function () {};
+        //this.onChecked=function(){};
+        //this.onUnChecked=function(){};
 
         _this._labelColor = "#999";
 
@@ -18307,7 +18321,7 @@ var Legend = function (_Component) {
     }, {
         key: "pos",
         value: function pos(_pos) {
-            _pos.x && (this.sprite.context.x = _pos.x + this.icon.r);
+            _pos.x && (this.sprite.context.x = _pos.x + this.node.r);
             _pos.y && (this.sprite.context.y = _pos.y);
         }
 
@@ -18335,34 +18349,34 @@ var Legend = function (_Component) {
 
             _$26.each(this.data, function (obj, i) {
 
-                var icon = new Circle$7({
+                var _icon = new Circle$7({
                     id: "legend_field_icon_" + i,
                     context: {
                         x: 0,
-                        y: me.tag.height / 2,
+                        y: me.node.height / 2,
                         fillStyle: !obj.enabled ? "#ccc" : obj.color || me._labelColor,
-                        r: me.icon.r,
+                        r: me.node.r,
                         cursor: "pointer"
                     }
                 });
 
-                icon.hover(function (e) {
+                _icon.hover(function (e) {
                     e.eventInfo = me._getInfoHandler(e, obj);
                 }, function (e) {
                     delete e.eventInfo;
                 });
-                icon.on("mousemove", function (e) {
+                _icon.on("mousemove", function (e) {
                     e.eventInfo = me._getInfoHandler(e, obj);
                 });
                 //阻止事件冒泡
 
-                icon.on("click", function () {});
+                _icon.on("click", function () {});
 
                 var txt = new canvax.Display.Text(me.label(obj), {
                     id: "legend_field_txt_" + i,
                     context: {
-                        x: me.icon.r + 3,
-                        y: me.tag.height / 2,
+                        x: me.node.r + 3,
+                        y: me.node.height / 2,
                         textAlign: "left",
                         textBaseline: "middle",
                         fillStyle: "#333", //obj.color
@@ -18381,22 +18395,22 @@ var Legend = function (_Component) {
                 txt.on("click", function () {});
 
                 var txtW = txt.getTextWidth();
-                var itemW = txtW + me.icon.r * 2 + 20;
+                var itemW = txtW + me.node.r * 2 + 20;
 
                 maxItemWidth = Math.max(maxItemWidth, itemW);
 
                 var spItemC = {
-                    height: me.tag.height
+                    height: me.node.height
                 };
 
                 if (me.layoutType == "v") {
-                    if (y + me.tag.height > viewHeight) {
+                    if (y + me.node.height > viewHeight) {
                         x += maxItemWidth;
                         y = 0;
                     }
                     spItemC.x = x;
                     spItemC.y = y;
-                    y += me.tag.height;
+                    y += me.node.height;
                     height = Math.max(height, y);
                 } else {
                     if (x + itemW > viewWidth) {
@@ -18405,14 +18419,14 @@ var Legend = function (_Component) {
                         rows++;
                     }
                     spItemC.x = x;
-                    spItemC.y = me.tag.height * (rows - 1);
+                    spItemC.y = me.node.height * (rows - 1);
                     x += itemW;
                 }
                 var sprite = new canvax.Display.Sprite({
                     id: "legend_field_" + i,
                     context: spItemC
                 });
-                sprite.addChild(icon);
+                sprite.addChild(_icon);
                 sprite.addChild(txt);
 
                 sprite.context.width = itemW;
@@ -18431,19 +18445,19 @@ var Legend = function (_Component) {
 
                     obj.enabled = !obj.enabled;
 
-                    icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || me._labelColor;
+                    _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || me._labelColor;
 
                     if (obj.enabled) {
-                        me.onChecked(obj.name);
+                        me.node.onChecked(obj);
                     } else {
-                        me.onUnChecked(obj.name);
+                        me.node.onUnChecked(obj);
                     }
                 });
             });
 
             if (this.layoutType == "h") {
                 me.width = me.sprite.context.width = width;
-                me.height = me.sprite.context.height = me.tag.height * rows;
+                me.height = me.sprite.context.height = me.node.height * rows;
             } else {
                 me.width = me.sprite.context.width = x + maxItemWidth;
                 me.height = me.sprite.context.height = height;
@@ -18468,7 +18482,7 @@ var Legend = function (_Component) {
 }(component);
 
 var Line$9 = canvax.Shapes.Line;
-var Rect$10 = canvax.Shapes.Rect;
+var Rect$11 = canvax.Shapes.Rect;
 var _$27 = canvax._;
 
 var dataZoom = function (_Component) {
@@ -18658,7 +18672,7 @@ var dataZoom = function (_Component) {
                         onUpdate: setLines
                     });
                 } else {
-                    me._bgRect = new Rect$10({
+                    me._bgRect = new Rect$11({
                         context: bgRectCtx
                     });
                     me.dataZoomBg.addChild(me._bgRect);
@@ -18702,7 +18716,7 @@ var dataZoom = function (_Component) {
                     onUpdate: setLines
                 });
             } else {
-                me._btnLeft = new Rect$10({
+                me._btnLeft = new Rect$11({
                     id: 'btnLeft',
                     dragEnabled: me.left.eventEnabled,
                     context: btnLeftCtx
@@ -18747,7 +18761,7 @@ var dataZoom = function (_Component) {
                     onUpdate: setLines
                 });
             } else {
-                me._btnRight = new Rect$10({
+                me._btnRight = new Rect$11({
                     id: 'btnRight',
                     dragEnabled: me.right.eventEnabled,
                     context: btnRightCtx
@@ -18790,7 +18804,7 @@ var dataZoom = function (_Component) {
                 });
             } else {
                 //中间矩形拖拽区域
-                this.rangeRect = new Rect$10({
+                this.rangeRect = new Rect$11({
                     id: 'btnCenter',
                     dragEnabled: true,
                     context: rangeRectCtx
@@ -20228,14 +20242,18 @@ var Chartx = {
         if (opts.coord && opts.coord.type) {
             Coord$$1 = coord[opts.coord.type];
         }
-        chart = new Coord$$1(el, data, opts, graphs, components);
-        if (chart) {
-            chart.draw();
-            me.instances[chart.id] = chart;
-            chart.on("destroy", function () {
-                me.instances[chart.id] = null;
-                delete me.instances[chart.id];
-            });
+        try {
+            chart = new Coord$$1(el, data, opts, graphs, components);
+            if (chart) {
+                chart.draw();
+                me.instances[chart.id] = chart;
+                chart.on("destroy", function () {
+                    me.instances[chart.id] = null;
+                    delete me.instances[chart.id];
+                });
+            }
+        } catch (err) {
+            throw "Chatx Error：" + err;
         }
         return chart;
     },

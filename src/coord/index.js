@@ -165,17 +165,30 @@ export default class Coord extends Chart
         var me = this;
         //设置legendOpt
         var legendOpt = _.extend(true, {
-            onChecked : function( name ){
-                me.add( name );
-                me.componentsReset({ name : "legend" });
-            },
-            onUnChecked : function( name ){
-                me.remove( name );
-                me.componentsReset({ name : "legend" });
+            node : {
+                onChecked : function( obj ){
+                    me.show( obj.name , obj );
+                    me.componentsReset({ name : "legend" });
+                },
+                onUnChecked : function( obj ){
+                    me.hide( obj.name , obj );
+                    me.componentsReset({ name : "legend" });
+                }
             }
         } , me._opts.legend);
+
+        var legendData = me._opts.legend.data;
+        if( legendData ){
+            _.each( legendData, function( item, i ){
+                item.enabled = true;
+                item.ind = i;
+            } );
+            delete me._opts.legend.data;
+        } else {
+            legendData = me._getLegendData();
+        }
         
-        var _legend = new me.componentsMap.legend( me._getLegendData(), legendOpt, this );
+        var _legend = new me.componentsMap.legend( legendData, legendOpt, this );
     
         if( _legend.layoutType == "h" ){
             me.padding[ _legend.position ] += _legend.height;
@@ -208,11 +221,11 @@ export default class Coord extends Chart
         };
         if( _legend.position == "top" ){
             pos.x = me.padding.left;
-            pos.y = me.padding.top - _legend.height*1.25;
+            pos.y = me.padding.top - _legend.height;
         };
         if( _legend.position == "bottom" ){
             pos.x = me.padding.left;
-            pos.y = me.height - me.padding.bottom*0.8;
+            pos.y = me.height - me.padding.bottom;
         };
 
         _legend.pos( pos );
@@ -225,25 +238,22 @@ export default class Coord extends Chart
         me.stage.addChild( _legend.sprite );
     }
 
-    /*
-     *添加一个yAxis字段，也就是添加一条brokenline折线
-     *@params field 添加的字段
-     **/
-    add( field )
+
+    show( field , legendData)
     {
         var me = this;
-        this._coord.addField( field );
+        this._coord.addField( field , legendData);
         _.each( this._graphs, function( _g ){
-            _g.add( field );
+            _g.show( field , legendData);
         } );
     }
 
-    remove( field )
+    hide( field , legendData)
     {
         var me = this;
-        this._coord.removeField( field );
+        this._coord.removeField( field , legendData );
         _.each( this._graphs, function( _g ){
-            _g.remove( field );
+            _g.hide( field , legendData );
         } );
     }
 

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield" , "uv" ,"pv","click"],
+    [ "1月1号" , null , undefined , null    ],
+    [ "1月2号" , 0   , "" , ""    ],
+    [ "1月3号" , -23   , 15 , undefined    ],
+    [ "1月4号" , -32  , 135 , 123    ],
+    [ "1月5号" , 0  , 173 , 71    ],
+    [ "1月6号" , 0  , 154 , 39    ],
+    [ "1月7号" , 0  , 168 , null    ],
+    [ "1月8号" , 66   ,183 , 51    ],
+    [ "1月9号" , 132   , 145 , 243    ],
+    [ "1月10号", 158  , 85 , 231    ],
+    [ "1月11号", 79  , 53 , 71    ],
+    [ "1月12号", 188  , 104 , 39    ],
+    [ "1月13号", 55  , 168 , 65    ],
+    [ "1月14号", undefined   ,183 , 51    ]
+];
+
+var data = [
+    { xfield : 1, uv: null, pv: undefined, click: null },
+    { xfield : 2, uv: 0, pv: "", click: ""},
+    { xfield : 3, uv: 23, pv: 145, click : undefined },
+    { xfield : 4, uv : 232, pv: 32, click : 123 },
+    { xfield : 5, uv : 232, pv: 123, click : 63 },
+    { xfield : 6, uv : 43, pv: 213, click : 42 },
+    { xfield : 7, uv : 23, pv: 152, click : 62 },
+    { xfield : 8, uv : 122, pv: 53, click : 35 },
+    { xfield : 9, uv : 23, pv: 45, click : 103 },
+    { xfield : 10, uv : 64, pv: 75, click : 74 },
+    { xfield : 11, uv : 212, pv: 74, click : 43 },
+    { xfield : 12, uv : undefined, pv: 19, click : 7 }
+]
+
+var options = {
+    coord : {
+        type : "rect",
+        //横向的图表，是坐标系横向了
+        //horizontal : true,
+
+        xAxis : {
+            field : "xfield",
+            text:{
+                rotation  : 30 
+            }
+        },
+        yAxis : [
+            {
+                label : "left",
+                text:{
+                    rotation  : 30 
+                }
+            },
+            {
+                label : "right"
+            }
+        ]
+    },
+    graphs : [
+    
+        { 
+            type : "line",
+            field : "uv" , 
+            //yAxisAlign:"left" ,
+            line : {
+                strokeStyle : "#eeccdd"
+            },
+            fill : {
+                alpha : [ 0.5 , 0 ]
+            },
+            node : {
+                //配置拐点才出现节点
+                corner : true
+            },
+            text : {
+                enabled : true
+            }
+        },
+        
+        {   
+            type : "line",
+            field : undefined , 
+            //yAxisAlign:"right",
+            line : {
+                lineType : "dashed",
+                strokeStyle : {
+                    lineargradient : [
+                        {position : 0    , color:"#ff7033"},
+                        {position : 0.1 , color:"#ff9933"},
+                        {position : 0.3 , color:"#2dafe3"},
+                        {position : 0.85 , color:"#449be3"},
+                        {position : 0.95 , color:"#7177e3"},
+                        {position : 1.0  , color:"#5744e3"}
+                    ]
+                }
+            },
+            text : {
+                enabled : true
+            }
+        }
+    ],
+    legend : {
+        enabled : 1
+    },
+    dataZoom: {
+        range : {
+            start : 0,
+            end : 10
+        }
+    },
+    tips : {
+        pointer : "line"
+    },
+    markLine: [
+        {
+            markTo: "click",
+            text : {
+                enabled : true,
+                content : function( yval ){
+                    return 'click markline ：' + parseInt( yval )
+                },
+                fontSize : 14
+            },
+            y : 210
+        },
+        {
+            markTo: 'uv',
+            text : {
+                enabled : true,
+                fontSize : 14
+            }
+        },
+        {
+            text : {
+                enabled : true,
+                fillStyle : "#777"
+            },
+            line: {
+                strokeStyle : "#777"
+            },
+            y : 70
+        }
+    ]   
+};
+
+window.line = Chartx.create("canvasTest" , data , options)
+
+setTimeout( function(){
+    Chartx.create("canvasTest" , data , options)
+} , 3000)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

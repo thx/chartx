@@ -11,8 +11,9 @@ export default class RadarGraphs extends GraphsBase
     {
         super( opts, root );
 
-        this.type = "radar";
+        this.type  = "radar";
         
+        this.field = null;
         this.enabledField = null;
 
         this.line = {
@@ -219,12 +220,12 @@ export default class RadarGraphs extends GraphsBase
         node.focused = false;
     }
 
-    remove( field )
+    hide( field )
     {
 
     }
 
-    add( field )
+    show( field )
     {
 
     }

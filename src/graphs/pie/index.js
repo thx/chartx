@@ -101,12 +101,12 @@ export default class PieGraphs extends GraphsBase
         this.sprite.addChild( this._pie.sprite );
     }
 
-    add( name )
+    show( name )
     {
         this._setEnabled( name, true );
     }
 
-    remove( name )
+    hide( name )
     {
         this._setEnabled( name, false );
     }

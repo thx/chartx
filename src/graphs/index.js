@@ -14,11 +14,11 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
         this.ctx = root.stage.canvas.getContext("2d");
         this.dataFrame = root.dataFrame; //root.dataFrame的引用
 
-        this.data = null; //{ ur : [] , pv : [] } 平铺hash结构
-        this.field = null;
-        this.sprite   = null;
+        this.data   = null; //{ ur : [] , pv : [] } 平铺hash结构
+        
+        this.sprite = null;
 
-        this.width = 0;
+        this.width  = 0;
         this.height = 0;
         this.origin = {
             x: 0,
@@ -40,9 +40,9 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
 
     unselectAt( ind, field ){}
 
-    remove( field ){}
+    hide( field ){}
 
-    add( field ){}
+    show( field ){}
 
     getLegendData(){}
 

@@ -15,6 +15,7 @@ export default class BarGraphs extends GraphsBase
 
         this.type = "bar";
 
+        this.field  = null;
         this.enabledField = null;
  
         this.yAxisAlign = "left"; //默认设置为左y轴
@@ -158,11 +159,11 @@ export default class BarGraphs extends GraphsBase
         return this.node._width;
     }
 
-    add( field ){
+    show( field ){
         this.draw();
     }
 
-    remove( field )
+    hide( field )
     {
         _.each( this.barsSp.children , function( h_groupSp, h ){
             var bar = h_groupSp.getChildById("bar_"+h+"_"+field);

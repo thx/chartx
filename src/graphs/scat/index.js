@@ -14,6 +14,8 @@ export default class ScatGraphs extends GraphsBase
 
         this.type = "scat";
 
+        this.field  = null;
+
         this.node = {
             shapeType : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
             maxR      : 25,  //圆圈默认最大半径

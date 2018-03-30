@@ -75,14 +75,18 @@ var Chartx = {
         if( opts.coord && opts.coord.type ){
             Coord = coord[ opts.coord.type ];
         };
-        chart = new Coord( el, data, opts, graphs, components );
-        if( chart ){
-            chart.draw();
-            me.instances[ chart.id ] = chart;
-            chart.on("destroy" , function(){
-                me.instances[ chart.id ] = null;
-                delete me.instances[ chart.id ];
-            });
+        try {
+            chart = new Coord( el, data, opts, graphs, components );
+            if( chart ){
+                chart.draw();
+                me.instances[ chart.id ] = chart;
+                chart.on("destroy" , function(){
+                    me.instances[ chart.id ] = null;
+                    delete me.instances[ chart.id ];
+                });
+            };
+        } catch(err){
+            throw "Chatx Error：" + err
         };
         return chart;
     },

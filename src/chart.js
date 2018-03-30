@@ -5,6 +5,8 @@ import theme from "./theme"
 
 const _ = Canvax._;
 
+const padding = 10;
+
 export default class Chart extends Canvax.Event.EventDispatcher
 {
     constructor( node, data, opts )
@@ -29,10 +31,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
         this.padding = {
-            top: 20,
-            right: 20,
-            bottom: 20,
-            left: 20
+            top: padding,
+            right: padding,
+            bottom: padding,
+            left: padding
         };
 
         //Canvax实例
@@ -140,10 +142,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.canvax.domView.innerHTML = "";
         //padding数据也要重置为起始值
         this.padding = {
-            top   : 20,
-            right : 20,
-            bottom: 20,
-            left  : 20
+            top   : padding,
+            right : padding,
+            bottom: padding,
+            left  : padding
         };
     }
 

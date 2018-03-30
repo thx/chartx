@@ -17,6 +17,7 @@ export default class LineGraphs extends GraphsBase
         //默认给左轴
         this.yAxisAlign = "left";
 
+        this.field  = null;
         this.enabledField = null;
         
         this.groups = []; //群组集合
@@ -160,7 +161,7 @@ export default class LineGraphs extends GraphsBase
         return this;
     }
 
-    add( field )
+    show( field )
     {
         var me = this;
         
@@ -177,10 +178,7 @@ export default class LineGraphs extends GraphsBase
         });
     }
 
-    /*
-     *删除 ind
-     **/
-    remove( field )
+    hide( field )
     {
         var me = this;
         var i = me.getGroupIndex( field );

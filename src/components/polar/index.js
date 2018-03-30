@@ -250,10 +250,10 @@ export default class polarComponent extends coorBase
         var rootHeight = this.root.height;
 
         if( !("width" in this._opts) ){
-            this.width = rootWidth - _padding.left-_padding.right;
+            this.width = rootWidth - _padding.left - _padding.right;
         };
         if( !("height" in this._opts) ){
-            this.height = rootHeight - _padding.top-_padding.bottom;
+            this.height = rootHeight - _padding.top - _padding.bottom;
         };
 
         if( this.aAxis.ruler.enabled ){
@@ -272,8 +272,8 @@ export default class polarComponent extends coorBase
             //如果没有传入任何origin数据，则默认为中心点
             //origin是相对画布左上角的
             this.origin = {
-                x : rootWidth/2,
-                y : rootHeight/2
+                x : _padding.left + ( rootWidth - _padding.left - _padding.right )/2, //rootWidth/2,
+                y : _padding.top + ( rootHeight - _padding.top - _padding.bottom )/2  //rootHeight/2
             };
         };
 
@@ -295,9 +295,17 @@ export default class polarComponent extends coorBase
 
     //获取极坐标系内任意半径上的弧度集合
     //[ [{point , radian} , {point , radian}] ... ]
-    getRadiansAtR( r )
+    getRadiansAtR( r , width , height)
     {
+        
         var me = this;
+        if( width == undefined ){
+            width = this.width;
+        };
+        if( height == undefined ){
+            height = this.height;
+        };
+
         var _rs = [];
         if( r > this.maxR ){
             return [];
@@ -306,9 +314,12 @@ export default class polarComponent extends coorBase
 
             //矩形的4边框线段
             var _padding = this.root.padding;
+            
+            //这个origin 是相对在width，height矩形范围内的圆心，
+            //而this.origin 是在整个画布的位置
             var origin = {
-                x : this.origin.x - _padding.left,
-                y : this.origin.y - _padding.top
+                x : this.origin.x - _padding.left - (this.width-width)/2,
+                y : this.origin.y - _padding.top - (this.height-height)/2
             };
             var x,y;
             
@@ -321,28 +332,28 @@ export default class polarComponent extends coorBase
                 _rs = _rs.concat( this._filterPointsInRect([
                     { x : -x ,y : -distanceT},
                     { x : x  ,y : -distanceT}
-                ]) );
+                ], origin,width, height) );
             };
 
             //于右边界的相交点
             //最多有两个交点
-            var distanceR = this.width - origin.x;
+            var distanceR = width - origin.x;
             if( distanceR < r ){
                 y = Math.sqrt( Math.pow(r,2)-Math.pow(distanceR , 2) );
                 _rs = _rs.concat( this._filterPointsInRect([
                     { x : distanceR  ,y : -y},
                     { x : distanceR  ,y : y}
-                ]) );
+                ], origin, width, height) );
             };
             //于下边界的相交点
             //最多有两个交点
-            var distanceB = this.height - origin.y;
+            var distanceB = height - origin.y;
             if( distanceB < r ){
                 x = Math.sqrt( Math.pow(r,2)-Math.pow(distanceB , 2) );
                 _rs = _rs.concat( this._filterPointsInRect([
                     { x : x   ,y : distanceB},
                     { x : -x  ,y : distanceB}
-                ]) );
+                ], origin, width, height) );
             };
             //于左边界的相交点
             //最多有两个交点
@@ -352,7 +363,7 @@ export default class polarComponent extends coorBase
                 _rs = _rs.concat( this._filterPointsInRect([
                     { x : -distanceL  ,y : y},
                     { x : -distanceL  ,y : -y}
-                ]) );
+                ], origin, width, height) );
             };
 
 
@@ -379,7 +390,7 @@ export default class polarComponent extends coorBase
 
             //过滤掉不在rect内的弧线段
             for( var i=0,l=arcs.length ; i<l ; i++ ){
-                if( !this._checkArcInRect( arcs[i] , r ) ){
+                if( !this._checkArcInRect( arcs[i] , r , origin, width, height) ){
                     arcs.splice(i , 1);
                     i--,l--;
                 }
@@ -388,10 +399,10 @@ export default class polarComponent extends coorBase
         }
     }
 
-    _filterPointsInRect( points )
+    _filterPointsInRect( points , origin, width, height)
     {
         for( var i=0,l=points.length; i<l ; i++ ){
-            if( !this._checkPointInRect(points[i]) ){
+            if( !this._checkPointInRect(points[i], origin, width, height) ){
                 //该点不在root rect范围内，去掉
                 points.splice( i , 1 );
                 i--,l--;
@@ -400,19 +411,14 @@ export default class polarComponent extends coorBase
         return points;
     }
 
-    _checkPointInRect(p)
+    _checkPointInRect(p, origin, width, height)
     {
-        var _padding = this.root.padding;
-        var origin = {
-            x : this.origin.x - _padding.left,
-            y : this.origin.y - _padding.top
-        };
         var _tansRoot = { x : p.x + origin.x , y: p.y + origin.y };
-        return !( _tansRoot.x < 0 || _tansRoot.x > this.width || _tansRoot.y < 0 || _tansRoot.y > this.height );
+        return !( _tansRoot.x < 0 || _tansRoot.x > width || _tansRoot.y < 0 || _tansRoot.y > height );
     }
 
     //检查由n个相交点分割出来的圆弧是否在rect内
-    _checkArcInRect( arc , r)
+    _checkArcInRect( arc, r, origin, width, height)
     {
         var start = arc[0];
         var to = arc[1];
@@ -421,7 +427,7 @@ export default class polarComponent extends coorBase
             differenceR = (Math.PI*2 + to.radian) - start.radian;
         };
         var middleR = (start.radian+differenceR/2)%(Math.PI*2);
-        return this._checkPointInRect( this.getPointInRadianOfR( middleR , r ) );
+        return this._checkPointInRect( this.getPointInRadianOfR( middleR , r ) , origin, width, height);
     }
 
     //获取某个点相对圆心的弧度值

@@ -7,6 +7,7 @@ const _ = Canvax._;
 const Text = Canvax.Display.Text;
 const Circle = Canvax.Shapes.Circle;
 const Line = Canvax.Shapes.Line;
+const Rect = Canvax.Shapes.Rect;
 
 export default class PlanetGraphs extends GraphsBase
 {
@@ -17,6 +18,8 @@ export default class PlanetGraphs extends GraphsBase
         this.type = "planet";
 
         this.field = null;
+        
+        //this.legendField = null;
 
         var me = this;
         //圆心原点坐标
@@ -33,7 +36,6 @@ export default class PlanetGraphs extends GraphsBase
         this.groupDataFrames = [];
         this.groupField = null;
         this._groups = [];
-
 
         //planet自己得grid，不用polar的grid
         this.grid = {
@@ -52,7 +54,6 @@ export default class PlanetGraphs extends GraphsBase
             }
         };
 
-
         _.extend( true, this , opts );
 
         if( this.center.r == 0 || !this.center.enabled ){
@@ -61,33 +62,28 @@ export default class PlanetGraphs extends GraphsBase
             this.center.enabled = false;
         };
 
-        //矫正padding
-        var _circleMaxR;
-        try{
-            _circleMaxR = this.graphs.group.circle.maxR;
-        } catch(e){}
-        if( _circleMaxR == undefined ){
-            _circleMaxR = 30
-        };
-        root.padding.top = _circleMaxR;
-        root.padding.bottom = _circleMaxR;
-        root.padding.left = _circleMaxR;
-        root.padding.right = _circleMaxR;
-
-
-        this.init( );
+        this.init();
     }
+
+
 
     init()
     {
         this.sprite = new Canvax.Display.Sprite({ 
             id : "graphsEl"
         });
+
+        this.gridSp = new Canvax.Display.Sprite({ 
+            id : "gridSp"
+        });
+
+        this.sprite.addChild( this.gridSp );
         this.dataGroupHandle();
     }
 
     draw( opts )
     {
+        
         !opts && (opts ={});
 
         _.extend( true, this , opts );
@@ -100,6 +96,77 @@ export default class PlanetGraphs extends GraphsBase
     
     }
 
+    show( field , legendData)
+    {
+        this.getAgreeNodeData( legendData, function( data ){
+            data.node.context.visible = true;
+            data.textNode.context.visible = true;
+        } );
+    }
+
+    hide( field , legendData)
+    {
+        this.getAgreeNodeData( legendData, function( data ){
+            data.node.context.visible = false;
+            data.textNode.context.visible = false;
+        } );
+    }
+
+    getAgreeNodeData( legendData , callback)
+    {
+        var me = this;
+        _.each( this._groups, function( _g ){
+            _.each( _g._rings , function( ring , i ){
+                _.each( ring.planets, function( data , ii){
+                    var rowData = data.rowData;
+                    if( legendData.name == rowData[ legendData.field ] ){
+                        //这个数据符合
+                        //data.node.context.visible = false;
+                        //data.textNode.context.visible = false;
+                        callback && callback( data );
+                    };
+                });
+            });
+        } );
+    }
+
+    /*
+    getLegendData()
+    {
+        var list = [];
+        var legendDataList = [];
+        if( this.legendField ){
+            
+            _.each( this.dataFrame.getFieldData( this.legendField ), function( val ){
+                if( _.indexOf( list, val ) == -1 ){
+                    list.push( val );
+                    legendDataList.push({
+                        name: val, 
+                        color: "#ff8533", 
+                        enabled: true, 
+                        ind: 0
+                    });
+                };
+            } );
+
+        };
+
+        return legendDataList;
+    }
+    */
+
+    _getMaxR()
+    {
+        var _circleMaxR;
+        try{
+            _circleMaxR = this.graphs.group.circle.maxR;
+        } catch(e){}
+        if( _circleMaxR == undefined ){
+            _circleMaxR = 30
+        };
+        return _circleMaxR;
+    }
+
     drawGroups()
     {
         var me = this;
@@ -107,6 +174,8 @@ export default class PlanetGraphs extends GraphsBase
         var groupRStart = this.center.r + this.center.margin;
         
         var maxR = me.root._coord.maxR - me.center.r - me.center.margin;
+        var _circleMaxR = this._getMaxR();
+
         _.each( this.groupDataFrames , function( df , i ){
             var toR = groupRStart + maxR*( (df.length) / (me.dataFrame.length) );
             
@@ -116,7 +185,9 @@ export default class PlanetGraphs extends GraphsBase
                 rRange : {
                     start : groupRStart,
                     to : toR
-                }
+                },
+                width : me.width - _circleMaxR*2,
+                height: me.height - _circleMaxR*2
             }, me._opts) , df , me );
 
             groupRStart = _g.rRange.to;
@@ -184,7 +255,7 @@ export default class PlanetGraphs extends GraphsBase
         
         for( var i=me.grid.rings.section.length-1 ; i>=0 ; i-- ){
             var _scale = me.grid.rings.section[i];
-            me.sprite.addChild( new Circle({
+            me.gridSp.addChild( new Circle({
                 context : {
                     x : me.root._coord.origin.x,
                     y : me.root._coord.origin.y,
@@ -213,7 +284,7 @@ export default class PlanetGraphs extends GraphsBase
                 var tx = cx + _r * Math.cos( radian );
                 var ty = cy + _r * Math.sin( radian );
 
-                me.sprite.addChild( new Line({
+                me.gridSp.addChild( new Line({
                     context : {
                         start : {
                             x : cx,
@@ -223,15 +294,26 @@ export default class PlanetGraphs extends GraphsBase
                             x : tx,
                             y : ty
                         },
-                      
                         lineWidth : me._getBackProp( me.grid.rays.lineWidth , i),
                         strokeStyle : me._getBackProp( me.grid.rays.strokeStyle , i),
                         globalAlpha : me.grid.rays.globalAlpha
                     }
                 }) );
-
             };
         };
+
+        var _clipRect = new Rect({
+            name: "clipRect",
+            context : {
+                x : me.root._coord.origin.x-me.root.width/2,
+                y : me.root._coord.origin.y-me.height/2,
+                width : me.root.width,
+                height : me.height
+            }
+        });
+        me.gridSp.clipTo( _clipRect );
+        me.sprite.addChild( _clipRect );
+
     }
 
     _getBackProp( p, i )
