@@ -4245,6 +4245,12 @@ var CanvasRenderer = function (_SystemRenderer) {
     }, {
         key: '_render',
         value: function _render(stage, displayObject, globalAlpha) {
+            var ctx = stage.ctx;
+
+            if (!ctx) {
+                return;
+            }
+
             var $MC = displayObject.context.$model;
 
             if (!displayObject.worldTransform || displayObject._transformChange || displayObject.parent._transformChange) {
@@ -4258,13 +4264,11 @@ var CanvasRenderer = function (_SystemRenderer) {
                 return;
             }
 
-            var ctx = stage.ctx;
             ctx.setTransform.apply(ctx, displayObject.worldTransform.toArray());
 
             var isClipSave = false;
             if (displayObject.clip && displayObject.clip.graphics) {
                 //如果这个对象有一个裁剪路径对象，那么就绘制这个裁剪路径
-
                 var _clip = displayObject.clip;
                 ctx.save();
                 isClipSave = true;
@@ -5945,10 +5949,12 @@ var Text = function (_DisplayObject) {
         key: "getTextWidth",
         value: function getTextWidth() {
             var width = 0;
-            Utils._pixelCtx.save();
-            Utils._pixelCtx.font = this.context.$model.font;
-            width = this._getTextWidth(Utils._pixelCtx, this._getTextLines());
-            Utils._pixelCtx.restore();
+            if (Utils._pixelCtx) {
+                Utils._pixelCtx.save();
+                Utils._pixelCtx.font = this.context.$model.font;
+                width = this._getTextWidth(Utils._pixelCtx, this._getTextLines());
+                Utils._pixelCtx.restore();
+            }
             return width;
         }
     }, {
@@ -5964,6 +5970,7 @@ var Text = function (_DisplayObject) {
     }, {
         key: "_renderText",
         value: function _renderText(ctx, textLines, globalAlpha) {
+            if (!ctx) return;
             ctx.save();
             this._setContextStyle(ctx, this.context.$model, globalAlpha);
             this._renderTextStroke(ctx, textLines);
@@ -6005,6 +6012,8 @@ var Text = function (_DisplayObject) {
     }, {
         key: "_renderTextStroke",
         value: function _renderTextStroke(ctx, textLines) {
+            if (!ctx) return;
+
             if (!this.context.$model.strokeStyle || !this.context.$model.lineWidth) return;
 
             var lineHeights = 0;
@@ -17509,7 +17518,7 @@ var PlanetGroup = function () {
 
                 planets.push(planetLayoutData);
             }
-            debugger;
+
             if (me.sortField) {
                 planets = planets.sort(function (a, b) {
                     var field = me.sortField;

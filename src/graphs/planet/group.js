@@ -149,7 +149,7 @@ export default class PlanetGroup
 
             planets.push( planetLayoutData );
         };
-debugger
+
         if( me.sortField ){
             planets = planets.sort( function(a , b){
                 var field = me.sortField;
