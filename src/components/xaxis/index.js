@@ -328,6 +328,10 @@ export default class xAxis extends Component
             };
         };
 
+        if( isNaN(x) ){
+            x = 0;
+        };
+
         return parseInt( x , 10 );
         
     }

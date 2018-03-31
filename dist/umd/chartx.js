@@ -7514,6 +7514,9 @@ var _$3 = canvax._;
 
 //如果应用传入的数据是[{name:name, sex:sex ...} , ...] 这样的数据，就自动转换为chartx需要的矩阵格式数据
 function parse2MatrixData(list) {
+    if (list === undefined || list === null) {
+        list = [];
+    }
     //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
     if (list.length > 0 && !_$3.isArray(list[0])) {
         var newArr = [];
@@ -7849,7 +7852,7 @@ var possibleConstructorReturn$1 = function (self, call) {
 
 var _$1 = canvax._;
 
-var padding = 10;
+var padding = 20;
 
 var Chart = function (_Canvax$Event$EventDi) {
     inherits$1(Chart, _Canvax$Event$EventDi);
@@ -9108,6 +9111,10 @@ var xAxis = function (_Component) {
                 }
             }
 
+            if (isNaN(x)) {
+                x = 0;
+            }
+
             return parseInt(x, 10);
         }
     }, {
@@ -9784,6 +9791,11 @@ var yAxis = function (_Component) {
             if (this.sort == "desc") {
                 y = Math.abs(this.height - Math.abs(y));
             }
+
+            if (isNaN(y)) {
+                y = 0;
+            }
+
             return -y;
         }
     }, {
@@ -11655,6 +11667,10 @@ var Descartes = function (_CoordBase) {
             }
             if (_tips.pointer == "shadow") {
                 x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
+                if (e.eventInfo.xAxis.ind < 0) {
+                    //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
+                    x = _coord.origin.x;
+                }
             }
 
             if (!el) {
@@ -11678,6 +11694,7 @@ var Descartes = function (_CoordBase) {
                     });
                 }
                 if (_tips.pointer == "shadow") {
+                    debugger;
                     el = new Rect$1({
                         //xyToInt : false,
                         context: {
@@ -11729,6 +11746,10 @@ var Descartes = function (_CoordBase) {
             var x = _coord.origin.x + e.eventInfo.xAxis.x;
             if (_tips.pointer == "shadow") {
                 x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
+                if (e.eventInfo.xAxis.ind < 0) {
+                    //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
+                    x = _coord.origin.x;
+                }
             }
             var y = _coord.origin.y - _coord.height;
 
@@ -20267,19 +20288,19 @@ var Chartx = {
         if (opts.coord && opts.coord.type) {
             Coord$$1 = coord[opts.coord.type];
         }
-        try {
-            chart = new Coord$$1(el, data, opts, graphs, components);
-            if (chart) {
-                chart.draw();
-                me.instances[chart.id] = chart;
-                chart.on("destroy", function () {
-                    me.instances[chart.id] = null;
-                    delete me.instances[chart.id];
-                });
-            }
-        } catch (err) {
-            throw "Chatx Error：" + err;
+        //try {
+        chart = new Coord$$1(el, data, opts, graphs, components);
+        if (chart) {
+            chart.draw();
+            me.instances[chart.id] = chart;
+            chart.on("destroy", function () {
+                me.instances[chart.id] = null;
+                delete me.instances[chart.id];
+            });
         }
+        //} catch(err){
+        //    throw "Chatx Error：" + err
+        //};
         return chart;
     },
     options: {},

@@ -597,6 +597,10 @@ export default class Descartes extends CoordBase
         }
         if( _tips.pointer == "shadow" ){
             x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
+            if( e.eventInfo.xAxis.ind < 0 ){
+                //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
+                x = _coord.origin.x;
+            }
         }
 
         if( !el ){
@@ -620,6 +624,7 @@ export default class Descartes extends CoordBase
                 });
             };
             if( _tips.pointer == "shadow" ){
+                debugger
                 el = new Rect({
                     //xyToInt : false,
                     context : {
@@ -671,6 +676,10 @@ export default class Descartes extends CoordBase
         var x = _coord.origin.x + e.eventInfo.xAxis.x;
         if( _tips.pointer == "shadow" ){
             x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
+            if( e.eventInfo.xAxis.ind < 0 ){
+                //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
+                x = _coord.origin.x;
+            }
         };
         var y = _coord.origin.y - _coord.height;
 

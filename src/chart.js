@@ -5,7 +5,7 @@ import theme from "./theme"
 
 const _ = Canvax._;
 
-const padding = 10;
+const padding = 20;
 
 export default class Chart extends Canvax.Event.EventDispatcher
 {

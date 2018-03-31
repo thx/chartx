@@ -75,7 +75,7 @@ var Chartx = {
         if( opts.coord && opts.coord.type ){
             Coord = coord[ opts.coord.type ];
         };
-        try {
+        //try {
             chart = new Coord( el, data, opts, graphs, components );
             if( chart ){
                 chart.draw();
@@ -85,9 +85,9 @@ var Chartx = {
                     delete me.instances[ chart.id ];
                 });
             };
-        } catch(err){
-            throw "Chatx Error：" + err
-        };
+        //} catch(err){
+        //    throw "Chatx Error：" + err
+        //};
         return chart;
     },
     options : {},

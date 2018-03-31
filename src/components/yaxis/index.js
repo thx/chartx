@@ -254,7 +254,12 @@ export default class yAxis extends Component
         //返回的y是以最底端为坐标原点的坐标值，所以就是负数
         if( this.sort == "desc" ){
             y = Math.abs(this.height - Math.abs(y));
-        }
+        };
+
+        if( isNaN(y) ){
+            y = 0;
+        };
+        
         return -y;
     }
 
