@@ -624,7 +624,6 @@ export default class Descartes extends CoordBase
                 });
             };
             if( _tips.pointer == "shadow" ){
-                debugger
                 el = new Rect({
                     //xyToInt : false,
                     context : {

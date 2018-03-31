@@ -11691,7 +11691,6 @@ var Descartes = function (_CoordBase) {
                     });
                 }
                 if (_tips.pointer == "shadow") {
-                    debugger;
                     el = new Rect$1({
                         //xyToInt : false,
                         context: {
