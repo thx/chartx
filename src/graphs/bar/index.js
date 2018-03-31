@@ -190,6 +190,7 @@ export default class BarGraphs extends GraphsBase
 
     draw(opts)
     { 
+        
         !opts && (opts ={});
 
         //第二个data参数去掉，直接trimgraphs获取最新的data
@@ -396,11 +397,11 @@ export default class BarGraphs extends GraphsBase
                                 }
                             };
 
-                            if( !value ){
+                            if( value === undefined || value === null || value === "" ){
                                 return;
                             };
 
-                            if (!animate && _.isNumber(value)) {
+                            if (_.isNumber(value)) {
                                 value = numAddSymbol(value);
                             };
 
@@ -422,6 +423,7 @@ export default class BarGraphs extends GraphsBase
                             if( _txt ){
                                 //do something
                             } else {
+                                
                                 _txt = new Canvax.Display.Text( value , {
                                     id: "info_txt_" + i + "_" + h + "_" + ci,
                                     context: {
@@ -434,6 +436,13 @@ export default class BarGraphs extends GraphsBase
                                 });
                                 infosp.addChild( _txt );
                             };
+
+                            _txt.fixedNum = 0;
+                            var __vsp = value.split('.');
+                            if( __vsp.length > 1 ){
+                                _txt.fixedNum = __vsp[1].length;
+                            }
+
                             _txt._text = cdata.value;
                             _txt._data = cdata;
                             infoWidth += _txt.getTextWidth() + 2;
@@ -820,15 +829,19 @@ export default class BarGraphs extends GraphsBase
                                         duration: optsions.duration + 100,
                                         delay: h * optsions.delay,
                                         onUpdate: function( arg ) {
+                                            
                                             var value = arg.v;
                                             if (_.isFunction(me.text.format)) {
                                                 var _formatc = me.text.format.apply( me , [value , txt._data]);
                                                 if(!!_formatc || _formatc==="" || _formatc===0){
                                                     value = _formatc
                                                 }
-                                            } else if (_.isNumber(value)) {
-                                                value = numAddSymbol(parseInt(value));
                                             };
+
+                                            if (_.isNumber(value)) {
+                                                value = numAddSymbol( value.toFixed( txt.fixedNum ) );
+                                            };
+
                                             txt.resetText(value);
                                             if (txt.parent) {
                                                 me._updateInfoTextPos(txt.parent);

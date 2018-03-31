@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+                //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+                //第一行是表头。
+                var data= [{"id":5463468,"name":"北京市","percent":15.64,"tagId":132410,"tgi":495.29,"value":"5"},{"id":5463475,"name":"天津市","percent":6.16,"tagId":132410,"tgi":494.61,"value":"12"},{"id":5463491,"name":"河北省","percent":3.74,"tagId":132410,"tgi":79.56,"value":"28"},{"id":5463479,"name":"山西省","percent":2.1,"tagId":132410,"tgi":82.97,"value":"16"},{"id":5463467,"name":"内蒙古自治区","percent":1.29,"tagId":132410,"tgi":83.02,"value":"4"},{"id":5463505,"name":"辽宁省","percent":2.23,"tagId":132410,"tgi":74.98,"value":"42"},{"id":5463472,"name":"吉林省","percent":1.2,"tagId":132410,"tgi":77.1,"value":"9"},{"id":5463489,"name":"黑龙江省","percent":1.44,"tagId":132410,"tgi":72.44,"value":"50"},{"id":5463513,"name":"上海市","percent":2.75,"tagId":132410,"tgi":86.59,"value":"2"},{"id":5463487,"name":"江苏省","percent":6.26,"tagId":132410,"tgi":85.62,"value":"24"},{"id":5463493,"name":"浙江省","percent":5.35,"tagId":132410,"tgi":80.65,"value":"30"},{"id":5463477,"name":"安徽省","percent":2.87,"tagId":132410,"tgi":83.69,"value":"14"},{"id":5463501,"name":"福建省","percent":2.97,"tagId":132410,"tgi":86.03,"value":"38"},{"id":5463488,"name":"江西省","percent":2.01,"tagId":132410,"tgi":80.81,"value":"25"},{"id":5463478,"name":"山东省","percent":5.16,"tagId":132410,"tgi":78.95,"value":"15"},{"id":5463492,"name":"河南省","percent":5.14,"tagId":132410,"tgi":83.67,"value":"29"},{"id":5463496,"name":"湖北省","percent":3.19,"tagId":132410,"tgi":84.82,"value":"33"},{"id":5463497,"name":"湖南省","percent":2.66,"tagId":132410,"tgi":75.63,"value":"34"},{"id":5463480,"name":"广东省","percent":10.92,"tagId":132410,"tgi":84.52,"value":"17"},{"id":5463481,"name":"广西壮族自治区","percent":2.18,"tagId":132410,"tgi":76.35,"value":"18"},{"id":5463494,"name":"海南省","percent":0.42,"tagId":132410,"tgi":93.35,"value":"31"},{"id":5463506,"name":"重庆市","percent":1.71,"tagId":132410,"tgi":81.25,"value":"43"},{"id":5463474,"name":"四川省","percent":3.7,"tagId":132410,"tgi":76.66,"value":"11"},{"id":5463504,"name":"贵州省","percent":1.68,"tagId":132410,"tgi":82.45,"value":"41"},{"id":5463466,"name":"云南省","percent":1.84,"tagId":132410,"tgi":76.53,"value":"3"},{"id":5463503,"name":"西藏自治区","percent":0.13,"tagId":132410,"tgi":111.72,"value":"40"},{"id":5463507,"name":"陕西省","percent":2.5,"tagId":132410,"tgi":89.65,"value":"44"},{"id":5463500,"name":"甘肃省","percent":1.18,"tagId":132410,"tgi":82.66,"value":"37"},{"id":5463510,"name":"青海省","percent":0.26,"tagId":132410,"tgi":82.36,"value":"47"},{"id":5463476,"name":"宁夏回族自治区","percent":0.38,"tagId":132410,"tgi":79.34,"value":"13"},{"id":5463483,"name":"新疆维吾尔自治区","percent":0.91,"tagId":132410,"tgi":84.16,"value":"20"},{"id":5463511,"name":"香港特别行政区","percent":0.01,"tagId":132410,"tgi":75.31,"value":"48"},{"id":5463498,"name":"澳门特别行政区","percent":0,"tagId":132410,"tgi":97.32,"value":"35"},{"id":5463469,"name":"台湾省","percent":0.01,"tagId":132410,"tgi":72.46,"value":"6"}];
+                var options ={"theme":["#73ace6"],"coord":{"type":"rect","horizontal":true,"xAxis":{"field":["name"]},"yAxis":[{"align":"right","middleweight":100,"field":["tgi"],"scale":{"text":{"fontColor":"#5d95d0"},"line":{"strokeStyle":"#5d95d0"}}}]},"graphs":[{"type":"bar","field":"percent","yAxisAlign":"left","node":{"width":15},"text":{"enabled":1}}],"markLine":[{"yAxisAlign":"right","y":100,"line":{"strokeStyle":"#5d95d0"}}],"barTgi":[{"field":"tgi","barField":"percent","yAxisAlign":"right","line":{}}],"tips":{"positionInRange":1,"pointer":"shadow"}};
+                
+                window.bar = Chartx.create("canvasTest" , data , options)
+                
+                       
+                setTimeout( function(){
+                    return;
+                    $("#canvasTest").width(400);
+                    bar.resize();
+
+                } , 3000)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:410px;height:1000px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

@@ -12978,6 +12978,7 @@ var BarGraphs = function (_GraphsBase) {
     }, {
         key: "draw",
         value: function draw(opts) {
+
             !opts && (opts = {});
 
             //第二个data参数去掉，直接trimgraphs获取最新的data
@@ -13180,11 +13181,11 @@ var BarGraphs = function (_GraphsBase) {
                                     }
                                 }
 
-                                if (!value) {
+                                if (value === undefined || value === null || value === "") {
                                     return;
                                 }
 
-                                if (!animate && _$15.isNumber(value)) {
+                                if (_$15.isNumber(value)) {
                                     value = numAddSymbol(value);
                                 }
 
@@ -13206,6 +13207,7 @@ var BarGraphs = function (_GraphsBase) {
                                 if (_txt) {
                                     //do something
                                 } else {
+
                                     _txt = new canvax.Display.Text(value, {
                                         id: "info_txt_" + i + "_" + h + "_" + ci,
                                         context: {
@@ -13218,6 +13220,13 @@ var BarGraphs = function (_GraphsBase) {
                                     });
                                     infosp.addChild(_txt);
                                 }
+
+                                _txt.fixedNum = 0;
+                                var __vsp = value.split('.');
+                                if (__vsp.length > 1) {
+                                    _txt.fixedNum = __vsp[1].length;
+                                }
+
                                 _txt._text = cdata.value;
                                 _txt._data = cdata;
                                 infoWidth += _txt.getTextWidth() + 2;
@@ -13603,15 +13612,19 @@ var BarGraphs = function (_GraphsBase) {
                                             duration: optsions.duration + 100,
                                             delay: h * optsions.delay,
                                             onUpdate: function onUpdate(arg) {
+
                                                 var value = arg.v;
                                                 if (_$15.isFunction(me.text.format)) {
                                                     var _formatc = me.text.format.apply(me, [value, txt._data]);
                                                     if (!!_formatc || _formatc === "" || _formatc === 0) {
                                                         value = _formatc;
                                                     }
-                                                } else if (_$15.isNumber(value)) {
-                                                    value = numAddSymbol(parseInt(value));
                                                 }
+
+                                                if (_$15.isNumber(value)) {
+                                                    value = numAddSymbol(value.toFixed(txt.fixedNum));
+                                                }
+
                                                 txt.resetText(value);
                                                 if (txt.parent) {
                                                     me._updateInfoTextPos(txt.parent);
