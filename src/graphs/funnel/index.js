@@ -1,22 +1,26 @@
 import Canvax from "canvax2d"
 import GraphsBase from "../index"
-import cloudLayout from "../../layout/cloud"
 
 const _ = Canvax._;
 const Text = Canvax.Display.Text;
+const Polygon = Canvax.Shapes.Polygon;
 
-export default class CloudGraphs extends GraphsBase
+export default class FunnelGraphs extends GraphsBase
 {
     constructor(opts, root)
     {
         super( opts, root );
 
-        this.type = "cloud";
+        this.type = "funnel";
 
         this.field = null;
 
-        this.maxVal = 0;
-        this.minVal = 0;
+        this.data  = []; //layoutData list , default is empty Array
+
+        this.maxVal = null;
+        this.minVal = null;
+        this.maxWidth = null;
+        this.minWidth = 0;
 
         this.node = {
             shapeType   : "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
@@ -39,19 +43,35 @@ export default class CloudGraphs extends GraphsBase
     init()
     {
         this.sprite = new Canvax.Display.Sprite({ 
-            id : "graphsEl"
+            name : "funnelGraphsEl"
         });
     }
 
     draw( opts )
     {
         !opts && (opts ={});
-        _.extend( true, this , opts );
-        this._drawGraphs();
-        this.sprite.context.x = this.width / 2;
-        this.sprite.context.y = this.height / 2;
+        
+        //第二个data参数去掉，直接trimgraphs获取最新的data
+        _.extend(true, this, opts);
 
-        this.fire("complete");
+        var me = this;
+
+        var animate = me.animation && !opts.resize;
+
+        this.data = this._trimGraphs();
+    }
+
+    _trimGraphs()
+    {
+        if( !this.field ) return;
+        debugger
+        var _org = this.dataFrame.getFieldData( this.field );
+
+    }
+
+    _drawGraphs()
+    {
+
     }
 
 

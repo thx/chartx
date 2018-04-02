@@ -18293,18 +18293,21 @@ var PlanetGraphs = function (_GraphsBase) {
 
 var _$26 = canvax._;
 var Text$4 = canvax.Display.Text;
+var Polygon$3 = canvax.Shapes.Polygon;
 
-var CloudGraphs$1 = function (_GraphsBase) {
-    inherits$1(CloudGraphs, _GraphsBase);
+var FunnelGraphs = function (_GraphsBase) {
+    inherits$1(FunnelGraphs, _GraphsBase);
 
-    function CloudGraphs(opts, root) {
-        classCallCheck$1(this, CloudGraphs);
+    function FunnelGraphs(opts, root) {
+        classCallCheck$1(this, FunnelGraphs);
 
-        var _this = possibleConstructorReturn$1(this, (CloudGraphs.__proto__ || Object.getPrototypeOf(CloudGraphs)).call(this, opts, root));
+        var _this = possibleConstructorReturn$1(this, (FunnelGraphs.__proto__ || Object.getPrototypeOf(FunnelGraphs)).call(this, opts, root));
 
-        _this.type = "cloud";
+        _this.type = "funnel";
 
         _this.field = null;
+
+        _this.data = []; //layoutData list , default is empty Array
 
         _this.maxVal = 0;
         _this.minVal = 0;
@@ -18328,26 +18331,37 @@ var CloudGraphs$1 = function (_GraphsBase) {
         return _this;
     }
 
-    createClass$1(CloudGraphs, [{
+    createClass$1(FunnelGraphs, [{
         key: "init",
         value: function init() {
             this.sprite = new canvax.Display.Sprite({
-                id: "graphsEl"
+                name: "funnelGraphsEl"
             });
         }
     }, {
         key: "draw",
         value: function draw(opts) {
             !opts && (opts = {});
-            _$26.extend(true, this, opts);
-            this._drawGraphs();
-            this.sprite.context.x = this.width / 2;
-            this.sprite.context.y = this.height / 2;
 
-            this.fire("complete");
+            //第二个data参数去掉，直接trimgraphs获取最新的data
+            _$26.extend(true, this, opts);
+
+            var me = this;
+
+            var animate = me.animation && !opts.resize;
+
+            this.data = this._trimGraphs();
         }
+    }, {
+        key: "_trimGraphs",
+        value: function _trimGraphs() {
+            debugger;
+        }
+    }, {
+        key: "_drawGraphs",
+        value: function _drawGraphs() {}
     }]);
-    return CloudGraphs;
+    return FunnelGraphs;
 }(GraphsBase);
 
 var Circle$7 = canvax.Shapes.Circle;
@@ -20311,7 +20325,7 @@ var graphs = {
     radar: RadarGraphs,
     cloud: CloudGraphs,
     planet: PlanetGraphs,
-    funnel: CloudGraphs$1
+    funnel: FunnelGraphs
 };
 
 var components = {
