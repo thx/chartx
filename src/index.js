@@ -16,6 +16,7 @@ import Pie from "./graphs/pie/index"
 import Radar from "./graphs/radar/index"
 import Cloud from "./graphs/cloud/index"
 import Planet from "./graphs/planet/index"
+import Funnel from "./graphs/funnel/index"
 
 //components
 import Legend from "./components/legend/index"
@@ -41,7 +42,8 @@ var graphs = {
     pie   : Pie,
     radar : Radar,
     cloud : Cloud,
-    planet: Planet
+    planet: Planet,
+    funnel: Funnel
 }
 
 var components = {

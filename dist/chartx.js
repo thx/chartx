@@ -18292,8 +18292,67 @@ var PlanetGraphs = function (_GraphsBase) {
     return PlanetGraphs;
 }(GraphsBase);
 
-var Circle$7 = canvax.Shapes.Circle;
 var _$26 = canvax._;
+var Text$4 = canvax.Display.Text;
+
+var CloudGraphs$1 = function (_GraphsBase) {
+    inherits$1(CloudGraphs, _GraphsBase);
+
+    function CloudGraphs(opts, root) {
+        classCallCheck$1(this, CloudGraphs);
+
+        var _this = possibleConstructorReturn$1(this, (CloudGraphs.__proto__ || Object.getPrototypeOf(CloudGraphs)).call(this, opts, root));
+
+        _this.type = "cloud";
+
+        _this.field = null;
+
+        _this.maxVal = 0;
+        _this.minVal = 0;
+
+        _this.node = {
+            shapeType: "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
+
+            focus: {
+                enabled: true
+            },
+            select: {
+                enabled: true,
+                lineWidth: 2,
+                strokeStyle: "#666"
+            }
+        };
+
+        _$26.extend(true, _this, opts);
+
+        _this.init();
+        return _this;
+    }
+
+    createClass$1(CloudGraphs, [{
+        key: "init",
+        value: function init() {
+            this.sprite = new canvax.Display.Sprite({
+                id: "graphsEl"
+            });
+        }
+    }, {
+        key: "draw",
+        value: function draw(opts) {
+            !opts && (opts = {});
+            _$26.extend(true, this, opts);
+            this._drawGraphs();
+            this.sprite.context.x = this.width / 2;
+            this.sprite.context.y = this.height / 2;
+
+            this.fire("complete");
+        }
+    }]);
+    return CloudGraphs;
+}(GraphsBase);
+
+var Circle$7 = canvax.Shapes.Circle;
+var _$27 = canvax._;
 
 var Legend = function (_Component) {
     inherits$1(Legend, _Component);
@@ -18345,7 +18404,7 @@ var Legend = function (_Component) {
         key: "init",
         value: function init(tops) {
             if (tops) {
-                _$26.extend(true, this, tops);
+                _$27.extend(true, this, tops);
             }
 
             if (this.position == "left" || this.position == "right") {
@@ -18389,7 +18448,7 @@ var Legend = function (_Component) {
                 y = 0;
             var rows = 1;
 
-            _$26.each(this.data, function (obj, i) {
+            _$27.each(this.data, function (obj, i) {
 
                 var _icon = new Circle$7({
                     id: "legend_field_icon_" + i,
@@ -18477,7 +18536,7 @@ var Legend = function (_Component) {
                 sprite.on("click", function (e) {
 
                     //只有一个field的时候，不支持取消
-                    if (_$26.filter(me.data, function (obj) {
+                    if (_$27.filter(me.data, function (obj) {
                         return obj.enabled;
                     }).length == 1) {
                         if (obj.enabled) {
@@ -18525,7 +18584,7 @@ var Legend = function (_Component) {
 
 var Line$9 = canvax.Shapes.Line;
 var Rect$11 = canvax.Shapes.Rect;
-var _$27 = canvax._;
+var _$28 = canvax._;
 
 var dataZoom = function (_Component) {
     inherits$1(dataZoom, _Component);
@@ -18598,7 +18657,7 @@ var dataZoom = function (_Component) {
 
         _this.zoomBg = null;
 
-        opt && _$27.extend(true, _this, opt);
+        opt && _$28.extend(true, _this, opt);
         _this._computeAttrs(opt);
         _this.init(opt);
         return _this;
@@ -18649,7 +18708,7 @@ var dataZoom = function (_Component) {
             var _preStart = this.range.start;
             var _preEnd = this.range.end;
 
-            opt && _$27.extend(true, this, opt);
+            opt && _$28.extend(true, this, opt);
             this._cloneChart = cloneChart;
             this._computeAttrs(opt);
 
@@ -19051,8 +19110,8 @@ var dataZoom = function (_Component) {
 
 var BrokenLine$3 = canvax.Shapes.BrokenLine;
 var Sprite$1 = canvax.Display.Sprite;
-var Text$4 = canvax.Display.Text;
-var _$28 = canvax._;
+var Text$5 = canvax.Display.Text;
+var _$29 = canvax._;
 
 var MarkLine = function (_Component) {
     inherits$1(MarkLine, _Component);
@@ -19094,7 +19153,7 @@ var MarkLine = function (_Component) {
         _this._txt = null;
         _this._line = null;
 
-        opt && _$28.extend(true, _this, opt);
+        opt && _$29.extend(true, _this, opt);
 
         _this.init();
         return _this;
@@ -19120,7 +19179,7 @@ var MarkLine = function (_Component) {
         key: "_getYVal",
         value: function _getYVal() {
             var y = this.yVal;
-            if (_$28.isFunction(this.yVal)) {
+            if (_$29.isFunction(this.yVal)) {
                 y = this.yVal(this);
             }
 
@@ -19134,13 +19193,13 @@ var MarkLine = function (_Component) {
     }, {
         key: "_getLabel",
         value: function _getLabel() {
-            if (_$28.isString(this.text.value)) {
+            if (_$29.isString(this.text.value)) {
                 return this.text.value;
             }
 
             var yVal = this._getYVal();
             var label = "markline：" + yVal;
-            if (_$28.isFunction(this.text.value)) {
+            if (_$29.isFunction(this.text.value)) {
                 label = this.text.value.apply(this, [yVal]);
             }
             return label;
@@ -19166,7 +19225,7 @@ var MarkLine = function (_Component) {
             me._line = line;
 
             if (me.text.enabled) {
-                var txt = new Text$4(me._getLabel(), { //文字
+                var txt = new Text$5(me._getLabel(), { //文字
                     context: me.text
                 });
                 this._txt = txt;
@@ -19180,7 +19239,7 @@ var MarkLine = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            opt && _$28.extend(true, this, opt);
+            opt && _$29.extend(true, this, opt);
 
             var me = this;
             var y = this._getYPos();
@@ -19209,12 +19268,12 @@ var MarkLine = function (_Component) {
         value: function _setTxtPos(y) {
             var me = this;
             var txt = me._txt;
-            if (_$28.isNumber(me.text.x)) {
+            if (_$29.isNumber(me.text.x)) {
                 txt.context.x = me.text.x;
             } else {
                 txt.context.x = this.w - txt.getTextWidth() - 5;
             }
-            if (_$28.isNumber(me.text.y)) {
+            if (_$29.isNumber(me.text.y)) {
                 txt.context.y = me.text.y;
             } else {
                 txt.context.y = y - txt.getTextHeight();
@@ -19226,7 +19285,7 @@ var MarkLine = function (_Component) {
 
 var Circle$8 = canvax.Shapes.Circle;
 var Droplet$1 = canvax.Shapes.Droplet;
-var _$29 = canvax._;
+var _$30 = canvax._;
 
 var MarkPoint = function (_Component) {
     inherits$1(MarkPoint, _Component);
@@ -19269,9 +19328,9 @@ var MarkPoint = function (_Component) {
         _this.filter = function () {}; //过滤函数
 
         if ("markPoint" in userOpts) {
-            _$29.extend(true, _this, userOpts.markPoint);
+            _$30.extend(true, _this, userOpts.markPoint);
         }
-        chartOpts && _$29.extend(true, _this, chartOpts);
+        chartOpts && _$30.extend(true, _this, chartOpts);
 
         _this.init();
         return _this;
@@ -19316,7 +19375,7 @@ var MarkPoint = function (_Component) {
         key: "_getColor",
         value: function _getColor(c, data, normalColor) {
             var color = c;
-            if (_$29.isFunction(c)) {
+            if (_$30.isFunction(c)) {
                 color = c(data);
             }
             //缺省颜色
@@ -19336,7 +19395,7 @@ var MarkPoint = function (_Component) {
             this.shape.context.visible = true;
             this.shapeBg && (this.shapeBg.context.visible = true);
             this.shapeCircle && (this.shapeCircle.context.visible = true);
-            _$29.isFunction(this.filter) && this.filter(this);
+            _$30.isFunction(this.filter) && this.filter(this);
         }
     }, {
         key: "_initCircleMark",
@@ -19416,7 +19475,7 @@ var MarkPoint = function (_Component) {
 
 var Line$10 = canvax.Shapes.Line;
 var Circle$9 = canvax.Shapes.Circle;
-var _$30 = canvax._;
+var _$31 = canvax._;
 
 var Anchor = function (_Component) {
     inherits$1(Anchor, _Component);
@@ -19475,7 +19534,7 @@ var Anchor = function (_Component) {
         key: "init",
         value: function init(opt) {
             if (opt) {
-                _$30.extend(true, this, opt);
+                _$31.extend(true, this, opt);
             }
 
             this.sprite = new canvax.Display.Sprite({
@@ -19517,7 +19576,7 @@ var Anchor = function (_Component) {
         key: "_initConfig",
         value: function _initConfig(opt) {
             if (opt) {
-                _$30.extend(true, this, opt);
+                _$31.extend(true, this, opt);
             }
         }
 
@@ -19631,7 +19690,7 @@ var Anchor = function (_Component) {
     }, {
         key: "_getProp",
         value: function _getProp(s) {
-            if (_$30.isFunction(s)) {
+            if (_$31.isFunction(s)) {
                 return s();
             }
             return s;
@@ -19640,7 +19699,7 @@ var Anchor = function (_Component) {
     return Anchor;
 }(component);
 
-var _$31 = canvax._;
+var _$32 = canvax._;
 
 var Tips = function (_Component) {
     inherits$1(Tips, _Component);
@@ -19692,7 +19751,7 @@ var Tips = function (_Component) {
     createClass$1(Tips, [{
         key: "init",
         value: function init(opt) {
-            _$31.extend(true, this, opt);
+            _$32.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite({
                 id: "TipSprite"
             });
@@ -19798,7 +19857,7 @@ var Tips = function (_Component) {
             var tipsContent;
 
             if (this.content) {
-                tipsContent = _$31.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
+                tipsContent = _$32.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
             } else {
                 tipsContent = this._getDefaultContent(this.eventInfo);
             }
@@ -19817,7 +19876,7 @@ var Tips = function (_Component) {
                 str += "<tr><td colspan='2'>" + info.title + "</td></tr>";
             }
 
-            _$31.each(info.nodes, function (node, i) {
+            _$32.each(info.nodes, function (node, i) {
                 if (node.value === undefined || node.value === null) {
                     return;
                 }
@@ -19875,7 +19934,7 @@ var Tips = function (_Component) {
 }(component);
 
 var Line$11 = canvax.Shapes.Line;
-var _$32 = canvax._;
+var _$33 = canvax._;
 
 var barTgi = function (_Component) {
     inherits$1(barTgi, _Component);
@@ -19922,7 +19981,7 @@ var barTgi = function (_Component) {
     createClass$1(barTgi, [{
         key: "init",
         value: function init(opt) {
-            _$32.extend(true, this, opt);
+            _$33.extend(true, this, opt);
             this._yAxis = this.root._coord._yAxis[this.yAxisAlign == "left" ? 0 : 1];
             this.sprite = new canvax.Display.Sprite({
                 id: "barTgiSprite",
@@ -19935,7 +19994,7 @@ var barTgi = function (_Component) {
     }, {
         key: "reset",
         value: function reset(opt) {
-            _$32.extend(true, this, opt);
+            _$33.extend(true, this, opt);
             this.barDatas = null;
             this.data = null;
             this.sprite.removeAllChildren();
@@ -19946,19 +20005,19 @@ var barTgi = function (_Component) {
         value: function draw() {
             var me = this;
 
-            _$32.each(me.root._graphs, function (_g) {
+            _$33.each(me.root._graphs, function (_g) {
                 if (_g.type == "bar" && _g.data[me.barField]) {
                     me.barDatas = _g.data[me.barField];
                     return false;
                 }
             });
-            this.data = _$32.flatten(me.root.dataFrame.getDataOrg(me.field));
+            this.data = _$33.flatten(me.root.dataFrame.getDataOrg(me.field));
 
             if (!this.barDatas) {
                 return;
             }
 
-            _$32.each(this.data, function (tgi, i) {
+            _$33.each(this.data, function (tgi, i) {
                 var y = me._yAxis.getYposFromVal(tgi);
                 var barData = me.barDatas[i];
 
@@ -19983,7 +20042,7 @@ var barTgi = function (_Component) {
         key: "_getProp",
         value: function _getProp(val, tgi, i) {
             var res = val;
-            if (_$32.isFunction(val)) {
+            if (_$33.isFunction(val)) {
                 res = val.apply(this, [tgi, i]);
             }
             return res;
@@ -20038,8 +20097,8 @@ var themeComponent = function () {
 /**
  * 水印组件
  */
-var Text$5 = canvax.Display.Text;
-var _$33 = canvax._;
+var Text$6 = canvax.Display.Text;
+var _$34 = canvax._;
 
 var waterMark = function () {
     function waterMark(opts, root) {
@@ -20057,7 +20116,7 @@ var waterMark = function () {
         this.globalAlpha = 0.2;
         this.rotation = 45;
 
-        _$33.extend(true, this, opts);
+        _$34.extend(true, this, opts);
 
         this.init();
     }
@@ -20114,8 +20173,8 @@ var waterMark = function () {
 
 var Line$12 = canvax.Shapes.Line;
 var Sprite$2 = canvax.Display.Sprite;
-var Text$6 = canvax.Display.Text;
-var _$34 = canvax._;
+var Text$7 = canvax.Display.Text;
+var _$35 = canvax._;
 
 var MarkLine$2 = function (_Component) {
     inherits$1(MarkLine, _Component);
@@ -20174,7 +20233,7 @@ var MarkLine$2 = function (_Component) {
         _this._hLine = null; //横向的线
         _this._vLine = null; //竖向的线
 
-        opt && _$34.extend(true, _this, opt);
+        opt && _$35.extend(true, _this, opt);
 
         _this.init();
         return _this;
@@ -20252,7 +20311,8 @@ var graphs = {
     pie: PieGraphs,
     radar: RadarGraphs,
     cloud: CloudGraphs,
-    planet: PlanetGraphs
+    planet: PlanetGraphs,
+    funnel: CloudGraphs$1
 };
 
 var components = {
