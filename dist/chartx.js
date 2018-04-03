@@ -13251,7 +13251,7 @@ var BarGraphs = function (_GraphsBase) {
                                 _txt._data = cdata;
                                 infoWidth += _txt.getTextWidth() + 2;
                                 infoHeight = Math.max(infoHeight, _txt.getTextHeight());
-                                debugger;
+
                                 if (animate && isNewNode) {
                                     var beginNumber = 0;
                                     if (value >= 100) {
