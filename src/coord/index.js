@@ -102,6 +102,7 @@ export default class Coord extends Chart
                 if( completeNum == graphsCount ){
                     me.fire("complete");
                 }
+                _g.inited = true;
             });
             
             _g.draw({

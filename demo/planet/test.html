@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+["group","name","pv","tgi","color"],
+["明星名人","德云社相声","6628973","114.9","#ff8533"],
+["明星名人","恋爱先生","68029673","107.13","#ff8533"],
+["明星名人","欢乐喜剧人 第四季","46806912","104.37","#ff8533"],
+["明星名人","周杰伦","98202133","130.72","#ff8533"],
+["明星名人","火影忍者","33046414","108.42","#ff8533"],
+["明星名人","张学友","69611929","130.07","#ff8533"],
+["明星名人","锋味","19714430","107.95","#ff8533"],
+["明星名人","杨幂","167443147","122.59","#ff8533"],
+["明星名人","海绵宝宝","53738664","101.42","#ff8533"],
+["明星名人","林俊杰","43972682","125.61","#ff8533"],
+["明星名人","微微一笑很倾城","29070698","98.7","#ff8533"],
+["电影","小苹果","17603337","114.13","#73ace6"],
+["电影","迪丽热巴","123285843","126.09","#73ace6"],
+["电影","五月天","15607785","131.86","#73ace6"],
+["电影","赵丽颖","117993494","126.2","#73ace6"],
+["电影","微微一笑很倾城","29070698","98.92","#73ace6"],
+["电影","三生三世十里桃花","31716529","110.68","#73ace6"],
+["电影","战狼2","75014005","115.76","#73ace6"],
+["电影","三生三世十里桃花","31716529","110.44","#73ace6"],
+["动漫","玄幻","15092415","110.43","#cd6bed"],
+["电视剧","海贼王","21165513","109.51","#82d982"],
+["电视剧","鹿晗","86219612","135.04","#82d982"],
+["电视剧","歌手 2018","28638434","105.87","#82d982"],
+["电视剧","终极一班5","29219890","100.59","#82d982"],
+["电视剧","西游记","77739115","115.85","#82d982"],
+["电视剧","辽宁卫视春节联欢晚会 2018","28036622","105.38","#82d982"],
+["动漫","瑞克·林顿","16881101","118.23","#cd6bed"],
+["电视剧","恐龙","30648298","118.28","#82d982"],
+["电视剧","捉妖记2","76058667","112.85","#82d982"],
+["电视剧","江疏影","115321227","123.47","#82d982"],
+["电视剧","欢乐颂","24199963","111.74","#82d982"],
+["综艺","郭德纲","119859242","120.32","#e673ac"],
+["综艺","杨洋","78968637","131.17","#e673ac"],
+["综艺","妖猫传","41919229","109.43","#e673ac"],
+["综艺","谈判官 tv版","35978091","99.2","#e673ac"],
+["综艺","西游记","77739115","115.6","#e673ac"],
+["动漫","泽田镰作","39494030","115.55","#cd6bed"],
+["综艺","易烊千玺","50300742","133.7","#e673ac"],
+["综艺","欢乐颂","24199963","111.5","#e673ac"],
+["综艺","唐人街探案2","92873895","115.25","#e673ac"],
+["综艺","郑爽","84542078","125.21","#e673ac"],
+["动漫","陈思诚","57093114","114.69","#cd6bed"],
+["综艺","芳华","53976557","122.49","#e673ac"],
+["综艺","黄子韬","99583178","124.35","#e673ac"],
+["综艺","战狼","85102155","118.2","#e673ac"],
+["综艺","唐人街探案","91630464","119.02","#e673ac"],
+["综艺","柜中美人","45205788","102.44","#e673ac"],
+["综艺","寻秦记","48211231","114.57","#e673ac"],
+["综艺","周星驰","96160311","122.25","#e673ac"],
+["动漫","靳东","80750163","121.62","#cd6bed"]
+];
+
+
+
+
+var options = {
+    "coord": {
+      "type": "polar",
+      "squareRange": false,
+      "aAxis": {
+        "ruler": {
+          "enabled": false
+        }
+      },
+      "grid": {
+        "enabled": false
+      }
+    },
+    "graphs": [
+      {
+        "type": "planet",
+        "field": "name",
+        "sortField": "tgi",
+        "center": {
+          "text": "娱乐圈",
+          "fillStyle": "#1ad09f"
+        },
+        "node": {
+          "r": "pv",
+          "fillStyle": function (e){
+            return e.rowData.color;
+          }
+        },
+        "getLegendData": function ()
+        {
+          var groupField = "group";
+          var groupOrg = this.dataFrame.getFieldData( groupField );
+          var colorField = "color";
+          var colorOrg = this.dataFrame.getFieldData( colorField );
+          var groupMap = {};
+          var legendDataList = [];
+          
+          for( var i = 0,l = groupOrg.length; i<l; i++ ){
+              var val = groupOrg[i];
+              if( !groupMap[val] ){
+                groupMap[val] = true;
+                legendDataList.push({
+                  name: val, 
+                  fillStyle: colorOrg[i], 
+                  field : groupField,
+                  enabled: true, 
+                  ind: i
+                });
+              };
+          };
+
+          return legendDataList;
+        },
+        "grid": {
+          "rings": {
+            "count": 10,
+            "fillStyle": [
+              "#A1C7FF",
+              "#B6D8FF",
+              "#C1DFFF",
+              "#CBE4FF",
+              "#D5E9FF",
+              "#DDEDFF",
+              "#E4F1FF",
+              "#EBF5FF",
+              "#F3F9FF",
+              "#F8FCFF"
+            ],
+            "strokeStyle": [
+              "#85AAFF",
+              "#607AFF",
+              "#9AC9FF",
+              "#A1CCFF",
+              "#8FB8FF",
+              "#BBDAFF",
+              "#C2DEFF",
+              "#8FB8FF",
+              "#DBECFF",
+              "#E8F3FF"
+            ]
+          },
+          "rays": {
+            "count": 12
+          }
+        }
+      }
+    ],
+    "tips": {
+      "content": function (e){
+        var rowData = e.nodes[0].rowData;
+        var str = "";
+        for( var p in rowData ){
+          str += p + "："+ rowData[p]+"<br />";
+        };
+        return str;
+      }
+    },
+    "legend": {}
+  }
+
+window.scat = Chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>planet星系图</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:1000px;height:540px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    <script>
+
+    </script>
+</body> 
+</html>
+
+

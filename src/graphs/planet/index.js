@@ -98,6 +98,7 @@ export default class PlanetGraphs extends GraphsBase
 
     show( field , legendData)
     {
+        
         this.getAgreeNodeData( legendData, function( data ){
             data.node.context.visible = true;
             data.textNode.context.visible = true;
@@ -130,7 +131,7 @@ export default class PlanetGraphs extends GraphsBase
         } );
     }
 
-    /*
+    
     getLegendData()
     {
         var list = [];
@@ -142,6 +143,7 @@ export default class PlanetGraphs extends GraphsBase
                     list.push( val );
                     legendDataList.push({
                         name: val, 
+                        field : this.legendField,
                         color: "#ff8533", 
                         enabled: true, 
                         ind: 0
@@ -153,7 +155,7 @@ export default class PlanetGraphs extends GraphsBase
 
         return legendDataList;
     }
-    */
+    
 
     _getMaxR()
     {

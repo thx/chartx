@@ -65,12 +65,10 @@ export default class Polar extends CoordBase
                     return d.name == item.name
                 } ) ) return;
 
-                legendData.push({
-                    name    : item.name,
-                    color   : item.fillStyle,
-                    enabled : item.enabled,
-                    ind     : item.ind
-                })
+                var data = _.extend(true, {}, item);
+                data.color = item.fillStyle;
+
+                legendData.push( data )
             } );
         } );
         return legendData;

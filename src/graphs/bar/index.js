@@ -417,8 +417,10 @@ export default class BarGraphs extends GraphsBase
                             };
 
                             var _txt = null;
+                            var isNewNode = true;
                             if (h <= preDataLen - 1) {
                                 _txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                isNewNode = false
                             }
                             if( _txt ){
                                 //do something
@@ -448,7 +450,7 @@ export default class BarGraphs extends GraphsBase
                             infoWidth += _txt.getTextWidth() + 2;
                             infoHeight = Math.max(infoHeight, _txt.getTextHeight());
 
-                            if( animate ){
+                            if( animate && isNewNode ){
                                 var beginNumber = 0;
                                 if( value >=100 ){
                                     beginNumber = 100;
@@ -819,6 +821,7 @@ export default class BarGraphs extends GraphsBase
                                     if (txt._tweenObj) {
                                         AnimationFrame.destroyTween(txt._tweenObj);
                                     };
+                                  console.log(txt.text)
                                     txt._tweenObj = AnimationFrame.registTween({
                                         from: {
                                             v: txt.text
@@ -843,6 +846,7 @@ export default class BarGraphs extends GraphsBase
                                             };
 
                                             txt.resetText(value);
+                                            
                                             if (txt.parent) {
                                                 me._updateInfoTextPos(txt.parent);
                                             } else {

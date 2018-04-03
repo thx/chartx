@@ -26,6 +26,7 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
         };
 
         this.animation = true;
+        this.inited = false;
     }
 
     tipsPointerOf(e){}

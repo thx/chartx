@@ -8264,6 +8264,7 @@ var Coord = function (_Chart) {
                     if (completeNum == graphsCount) {
                         me.fire("complete");
                     }
+                    _g.inited = true;
                 });
 
                 _g.draw({
@@ -11284,6 +11285,7 @@ var Descartes = function (_CoordBase) {
                     data.push({
                         enabled: map.enabled,
                         name: map.field,
+                        field: map.field,
                         ind: map.ind,
                         color: map.color,
                         yAxis: map.yAxis
@@ -12692,12 +12694,10 @@ var Polar = function (_CoordBase) {
                         return d.name == item.name;
                     })) return;
 
-                    legendData.push({
-                        name: item.name,
-                        color: item.fillStyle,
-                        enabled: item.enabled,
-                        ind: item.ind
-                    });
+                    var data = _$12.extend(true, {}, item);
+                    data.color = item.fillStyle;
+
+                    legendData.push(data);
                 });
             });
             return legendData;
@@ -12752,6 +12752,7 @@ var GraphsBase = function (_Canvax$Event$EventDi) {
         };
 
         _this.animation = true;
+        _this.inited = false;
         return _this;
     }
 
@@ -13218,8 +13219,10 @@ var BarGraphs = function (_GraphsBase) {
                                 }
 
                                 var _txt = null;
+                                var isNewNode = true;
                                 if (h <= preDataLen - 1) {
                                     _txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
+                                    isNewNode = false;
                                 }
                                 if (_txt) {
                                     //do something
@@ -13248,8 +13251,8 @@ var BarGraphs = function (_GraphsBase) {
                                 _txt._data = cdata;
                                 infoWidth += _txt.getTextWidth() + 2;
                                 infoHeight = Math.max(infoHeight, _txt.getTextHeight());
-
-                                if (animate) {
+                                debugger;
+                                if (animate && isNewNode) {
                                     var beginNumber = 0;
                                     if (value >= 100) {
                                         beginNumber = 100;
@@ -13619,6 +13622,7 @@ var BarGraphs = function (_GraphsBase) {
                                         if (txt._tweenObj) {
                                             AnimationFrame$1.destroyTween(txt._tweenObj);
                                         }
+                                        console.log(txt.text);
                                         txt._tweenObj = AnimationFrame$1.registTween({
                                             from: {
                                                 v: txt.text
@@ -13643,6 +13647,7 @@ var BarGraphs = function (_GraphsBase) {
                                                 }
 
                                                 txt.resetText(value);
+
                                                 if (txt.parent) {
                                                     me._updateInfoTextPos(txt.parent);
                                                 } else {
@@ -18025,6 +18030,7 @@ var PlanetGraphs = function (_GraphsBase) {
     }, {
         key: "show",
         value: function show(field, legendData) {
+
             this.getAgreeNodeData(legendData, function (data) {
                 data.node.context.visible = true;
                 data.textNode.context.visible = true;
@@ -18055,30 +18061,29 @@ var PlanetGraphs = function (_GraphsBase) {
                 });
             });
         }
-
-        /*
-        getLegendData()
-        {
+    }, {
+        key: "getLegendData",
+        value: function getLegendData() {
             var list = [];
             var legendDataList = [];
-            if( this.legendField ){
-                
-                _.each( this.dataFrame.getFieldData( this.legendField ), function( val ){
-                    if( _.indexOf( list, val ) == -1 ){
-                        list.push( val );
+            if (this.legendField) {
+
+                _$24.each(this.dataFrame.getFieldData(this.legendField), function (val) {
+                    if (_$24.indexOf(list, val) == -1) {
+                        list.push(val);
                         legendDataList.push({
-                            name: val, 
-                            color: "#ff8533", 
-                            enabled: true, 
+                            name: val,
+                            field: this.legendField,
+                            color: "#ff8533",
+                            enabled: true,
                             ind: 0
                         });
-                    };
-                } );
-             };
-             return legendDataList;
-        }
-        */
+                    }
+                });
+            }
 
+            return legendDataList;
+        }
     }, {
         key: "_getMaxR",
         value: function _getMaxR() {
@@ -18307,11 +18312,13 @@ var FunnelGraphs = function (_GraphsBase) {
         _this.type = "funnel";
 
         _this.field = null;
-
+        _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
         _this.data = []; //layoutData list , default is empty Array
 
-        _this.maxVal = 0;
-        _this.minVal = 0;
+        _this.maxVal = null;
+        _this.minVal = null;
+        _this.maxNodeWidth = null;
+        _this.minNodeWidth = 0;
 
         _this.node = {
             shapeType: "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
@@ -18340,6 +18347,20 @@ var FunnelGraphs = function (_GraphsBase) {
             });
         }
     }, {
+        key: "_computerAttr",
+        value: function _computerAttr() {
+            if (this.field) {
+                this.dataOrg = this.dataFrame.getFieldData(this.field);
+            }
+            this.maxVal = _$26.max(this.dataOrg);
+            this.minVal = _$26.min(this.dataOrg);
+
+            //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
+            if (!this.maxNodeWidth) {
+                this.maxNodeWidth = this.width * 0.6;
+            }
+        }
+    }, {
         key: "draw",
         value: function draw(opts) {
             !opts && (opts = {});
@@ -18351,12 +18372,14 @@ var FunnelGraphs = function (_GraphsBase) {
 
             var animate = me.animation && !opts.resize;
 
+            this._computerAttr();
+
             this.data = this._trimGraphs();
         }
     }, {
         key: "_trimGraphs",
         value: function _trimGraphs() {
-            debugger;
+            if (!this.field) return;
         }
     }, {
         key: "_drawGraphs",

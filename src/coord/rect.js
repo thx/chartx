@@ -218,6 +218,7 @@ export default class Descartes extends CoordBase
                 data.push( {
                     enabled : map.enabled,
                     name    : map.field,
+                    field   : map.field,
                     ind     : map.ind,
                     color   : map.color,
                     yAxis   : map.yAxis

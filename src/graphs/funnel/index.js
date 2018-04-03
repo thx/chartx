@@ -14,13 +14,13 @@ export default class FunnelGraphs extends GraphsBase
         this.type = "funnel";
 
         this.field = null;
-
+        this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
         this.data  = []; //layoutData list , default is empty Array
 
         this.maxVal = null;
         this.minVal = null;
-        this.maxWidth = null;
-        this.minWidth = 0;
+        this.maxNodeWidth = null;
+        this.minNodeWidth = 0;
 
         this.node = {
             shapeType   : "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
@@ -45,6 +45,21 @@ export default class FunnelGraphs extends GraphsBase
         this.sprite = new Canvax.Display.Sprite({ 
             name : "funnelGraphsEl"
         });
+        
+    }
+
+    _computerAttr()
+    {
+        if( this.field ){
+            this.dataOrg = this.dataFrame.getFieldData( this.field );
+        };
+        this.maxVal = _.max( this.dataOrg );
+        this.minVal = _.min( this.dataOrg );
+        
+        //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
+        if( !this.maxNodeWidth ){
+            this.maxNodeWidth = this.width * 0.6;
+        };
     }
 
     draw( opts )
@@ -58,14 +73,16 @@ export default class FunnelGraphs extends GraphsBase
 
         var animate = me.animation && !opts.resize;
 
+        this._computerAttr();
+
         this.data = this._trimGraphs();
     }
 
     _trimGraphs()
     {
         if( !this.field ) return;
-        debugger
-        var _org = this.dataFrame.getFieldData( this.field );
+        
+        
 
     }
 
