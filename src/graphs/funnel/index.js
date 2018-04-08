@@ -19,10 +19,13 @@ export default class FunnelGraphs extends GraphsBase
         this.data  = []; //layoutData list , default is empty Array
         this.sort = null;
 
-        this.maxVal = null;
-        this.minVal = null;
+        this.invert = false;//默认为倒立的金字塔结构
+
+        this._maxVal = null;
+        this._minVal = null;
         this.maxNodeWidth = null;
         this.minNodeWidth = 0;
+        this.minVal = 0; //漏斗的塔尖，默认为0
 
         this.node = {
             shapeType   : "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
@@ -45,7 +48,6 @@ export default class FunnelGraphs extends GraphsBase
             },
             fontColor : "#ffffff",
             fontSize : 13,
-            textAlign : "center",
             textBaseline : "middle"
         }
 
@@ -67,16 +69,25 @@ export default class FunnelGraphs extends GraphsBase
         if( this.field ){
             this.dataOrg = this.dataFrame.getFieldData( this.field );
         };
-        this.maxVal = _.max( this.dataOrg );
-        this.minVal = _.min( this.dataOrg );
+        this._maxVal = _.max( this.dataOrg );
+        this._minVal = _.min( this.dataOrg );
         
         //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
         if( !this.maxNodeWidth ){
-            this.maxNodeWidth = this.width * 0.8;
+            this.maxNodeWidth = this.width * 0.7;
         };
 
         if( !this.node.height ){
             this.node.height = this.height / this.dataOrg.length;
+        };
+
+        if( this.sort == "asc" ){
+            //倒序的话
+            this.invert = true;
+        };
+        if( this.sort == "desc" ){
+            //倒序的话
+            this.invert = false;
         };
     }
 
@@ -146,7 +157,7 @@ export default class FunnelGraphs extends GraphsBase
             ld.text = me.text.format( ld.value , ld );
         } );
         _.each( layoutData, function( ld , i){
-            ld.points = me._getPoints(ld , layoutData[i+1]);
+            ld.points = me._getPoints(ld , layoutData[i+1], layoutData[i-1]);
             ld.middlePoint = {
                 x : 0,
                 y : (ld.iNode + 0.5) * me.node.height
@@ -158,24 +169,37 @@ export default class FunnelGraphs extends GraphsBase
 
     _getNodeWidth( num )
     {
-        var width = this.minNodeWidth + ( (this.maxNodeWidth-this.minNodeWidth) / this.maxVal * num );
+        var width = this.minNodeWidth + ( (this.maxNodeWidth-this.minNodeWidth) / (this._maxVal-this.minVal) * (num-this.minVal) );
         return parseInt( width );
     }
 
-    _getPoints( layoutData , nextLayoutData )
+    _getPoints( layoutData , nextLayoutData , preLayoutData )
     {
         var points = [];
         var topY = layoutData.iNode * this.node.height;
         var bottomY = topY + this.node.height;
-        points.push( [ -layoutData.width/2, topY] ); //左上
-        points.push( [ layoutData.width/2, topY] ); //右上
 
-        var bottomWidth = this.minNodeWidth;
-        if( nextLayoutData ){
-            bottomWidth = nextLayoutData.width;
-        };
-        points.push( [ bottomWidth/2, bottomY] ); //右下
-        points.push( [ -bottomWidth/2, bottomY] ); //左下
+        if( !this.invert ){    
+            points.push( [ -layoutData.width/2, topY] ); //左上
+            points.push( [ layoutData.width/2, topY] ); //右上
+
+            var bottomWidth = this.minNodeWidth;
+            if( nextLayoutData ){
+                bottomWidth = nextLayoutData.width;
+            };
+            points.push( [ bottomWidth/2, bottomY] ); //右下
+            points.push( [ -bottomWidth/2, bottomY] ); //左下
+        } else {
+            //正金字塔结构的话，是从最上面一个 data 的 top 取min开始
+            var topWidth = this.minNodeWidth;
+            if( preLayoutData ){
+                topWidth = preLayoutData.width;
+            };
+            points.push( [ -topWidth/2, topY] ); //左上
+            points.push( [ topWidth/2, topY] ); //右上
+            points.push( [ layoutData.width/2, bottomY] ); //右下
+            points.push( [ -layoutData.width/2, bottomY] ); //左下
+        }
 
         return points;
     }
@@ -205,13 +229,29 @@ export default class FunnelGraphs extends GraphsBase
                 me.triggerEvent( me.node , e );
             });
 
+            var textAlign = "center";
+            var textPoint = {
+                x : ld.middlePoint.x,
+                y : ld.middlePoint.y
+            };
+            if( me.text.align == "left" ){
+                textPoint.x = ld.points[0][0] - (ld.points[0][0] - ld.points[3][0])/2;
+                textPoint.x -= 15;
+                textAlign = "right";
+            };
+            if( me.text.align == "right" ){
+                textPoint.x = ld.points[1][0] - (ld.points[1][0] - ld.points[2][0])/2
+                textPoint.x += 15;
+                textAlign = "left";
+            };
+
             var _text = new Text( ld.text , {
                 context : {
-                    x : ld.middlePoint.x,
-                    y : ld.middlePoint.y,
+                    x : textPoint.x,
+                    y : textPoint.y,
                     fontSize : me.text.fontSize,
-                    fillStyle : me.text.fontColor,
-                    textAlign : me.text.textAlign,
+                    fillStyle : me.text.align == "center" ? me.text.fontColor : ld.color,
+                    textAlign : textAlign,
                     textBaseline : me.text.textBaseline
                 }
             } );
