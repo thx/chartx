@@ -9592,9 +9592,9 @@ var yAxis = function (_Component) {
         _this.yMaxHeight = 0; //y轴最大高
         _this.height = 0; //y轴第一条线到原点的高
 
-        _this.baseNumber = null; //为非负number
+        _this.baseNumber = null; //默认为0，如果dataSection最小值小于0，则baseNumber为最小值，如果dataSection最大值大于0，则baseNumber为最大值
         _this.basePoint = null; //value为 baseNumber 的point {x,y}
-        _this.bottomNumber = null; //如果手动设置了 bottomNumber 为负数，则baseNumber＝0，否则baseNumber 就 等于设置的 bottomNumber
+        _this.bottomNumber = null;
 
         _this._yOriginTrans = 0; //当设置的 baseNumber 和datasection的min不同的时候，
 
@@ -9838,14 +9838,17 @@ var yAxis = function (_Component) {
         value: function _trimYAxis() {
             var me = this;
             var tmpData = [];
+
+            /*
             //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
             //this._yOriginTrans = this._getYOriginTrans( 0 );
-            var originVal = _$10.min(this.dataSection);
-            if (originVal < 0) {
+            var originVal = _.min(this.dataSection);
+            if( originVal < 0  ){
                 originVal = 0;
-            }
+            };
+            */
 
-            //originVal = this.baseNumber;
+            var originVal = this.baseNumber;
             this._yOriginTrans = this._getYOriginTrans(originVal);
 
             //设置 basePoint
@@ -10098,15 +10101,22 @@ var yAxis = function (_Component) {
         key: "_setBottomAndBaseNumber",
         value: function _setBottomAndBaseNumber() {
             if (this.bottomNumber == null) {
-                this.bottomNumber = this.dataSection[0];
+                //this.bottomNumber = this.dataSection[0];
+                this.bottomNumber = _$10.min(this.dataSection);
             }
 
             //没人情况下 baseNumber 就是datasection的最小值
             if (this._opt.baseNumber == undefined || this._opt.baseNumber == null) {
-                this.baseNumber = this.dataSection[0]; //_.min( this.dataSection );
-                if (this.baseNumber < 0) {
-                    this.baseNumber = 0;
+                this.baseNumber = 0; //this.dataSection[0];//_.min( this.dataSection );
+                if (_$10.max(this.dataSection) < 0) {
+                    this.baseNumber = _$10.max(this.dataSection);
                 }
+                if (_$10.min(this.dataSection) > 0) {
+                    this.baseNumber = _$10.min(this.dataSection);
+                }
+                //if( this.baseNumber < 0 ){
+                //    this.baseNumber = 0;
+                //}
             }
         }
     }, {
@@ -18314,6 +18324,7 @@ var FunnelGraphs = function (_GraphsBase) {
         _this.field = null;
         _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
         _this.data = []; //layoutData list , default is empty Array
+        _this.sort = null;
 
         _this.maxVal = null;
         _this.minVal = null;
@@ -18322,7 +18333,7 @@ var FunnelGraphs = function (_GraphsBase) {
 
         _this.node = {
             shapeType: "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-
+            height: 0, //漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length
             focus: {
                 enabled: true
             },
@@ -18331,6 +18342,18 @@ var FunnelGraphs = function (_GraphsBase) {
                 lineWidth: 2,
                 strokeStyle: "#666"
             }
+        };
+
+        _this.text = {
+            enabled: true,
+            align: "center", // left , center, right
+            format: function format(num) {
+                return numAddSymbol(num);
+            },
+            fontColor: "#ffffff",
+            fontSize: 13,
+            textAlign: "center",
+            textBaseline: "middle"
         };
 
         _$26.extend(true, _this, opts);
@@ -18357,7 +18380,11 @@ var FunnelGraphs = function (_GraphsBase) {
 
             //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
             if (!this.maxNodeWidth) {
-                this.maxNodeWidth = this.width * 0.6;
+                this.maxNodeWidth = this.width * 0.8;
+            }
+
+            if (!this.node.height) {
+                this.node.height = this.height / this.dataOrg.length;
             }
         }
     }, {
@@ -18375,15 +18402,130 @@ var FunnelGraphs = function (_GraphsBase) {
             this._computerAttr();
 
             this.data = this._trimGraphs();
+
+            this._drawGraphs();
+
+            this.sprite.context.x = this.origin.x + this.width / 2;
+            this.sprite.context.y = this.origin.y;
         }
     }, {
         key: "_trimGraphs",
         value: function _trimGraphs() {
             if (!this.field) return;
+
+            var me = this;
+            //var dataOrg = _.clone( this.dataOrg );
+
+            var layoutData = [];
+
+            _$26.each(this.dataOrg, function (num, i) {
+
+                var ld = {
+                    type: "funnel",
+                    field: me.field,
+                    rowData: me.dataFrame.getRowData(i),
+                    value: num,
+                    width: me._getNodeWidth(num),
+                    color: me.root._theme[i], //默认从皮肤中获取
+                    cursor: "pointer",
+
+                    //下面得都在layoutData的循环中计算
+                    text: '',
+                    middlePoint: null,
+                    iNode: -1,
+                    points: []
+                };
+                layoutData.push(ld);
+            });
+
+            if (this.sort) {
+                layoutData = layoutData.sort(function (a, b) {
+                    if (me.sort == "desc") {
+                        return b.value - a.value;
+                    } else {
+                        return a.value - b.value;
+                    }
+                });
+            }
+
+            _$26.each(layoutData, function (ld, i) {
+                ld.iNode = i;
+                ld.text = me.text.format(ld.value, ld);
+            });
+            _$26.each(layoutData, function (ld, i) {
+                ld.points = me._getPoints(ld, layoutData[i + 1]);
+                ld.middlePoint = {
+                    x: 0,
+                    y: (ld.iNode + 0.5) * me.node.height
+                };
+            });
+
+            return layoutData;
+        }
+    }, {
+        key: "_getNodeWidth",
+        value: function _getNodeWidth(num) {
+            var width = this.minNodeWidth + (this.maxNodeWidth - this.minNodeWidth) / this.maxVal * num;
+            return parseInt(width);
+        }
+    }, {
+        key: "_getPoints",
+        value: function _getPoints(layoutData, nextLayoutData) {
+            var points = [];
+            var topY = layoutData.iNode * this.node.height;
+            var bottomY = topY + this.node.height;
+            points.push([-layoutData.width / 2, topY]); //左上
+            points.push([layoutData.width / 2, topY]); //右上
+
+            var bottomWidth = this.minNodeWidth;
+            if (nextLayoutData) {
+                bottomWidth = nextLayoutData.width;
+            }
+            points.push([bottomWidth / 2, bottomY]); //右下
+            points.push([-bottomWidth / 2, bottomY]); //左下
+
+            return points;
         }
     }, {
         key: "_drawGraphs",
-        value: function _drawGraphs() {}
+        value: function _drawGraphs() {
+            var me = this;
+            _$26.each(this.data, function (ld) {
+                var _polygon = new Polygon$3({
+                    context: {
+                        pointList: ld.points,
+                        fillStyle: ld.color,
+                        cursor: ld.cursor
+                    }
+                });
+                me.sprite.addChild(_polygon);
+                _polygon.nodeData = ld;
+                _polygon.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+
+                    e.eventInfo = {
+                        title: me.field,
+                        nodes: [this.nodeData]
+                    };
+
+                    //fire到root上面去的是为了让root去处理tips
+                    me.root.fire(e.type, e);
+                    me.triggerEvent(me.node, e);
+                });
+
+                var _text = new Text$4(ld.text, {
+                    context: {
+                        x: ld.middlePoint.x,
+                        y: ld.middlePoint.y,
+                        fontSize: me.text.fontSize,
+                        fillStyle: me.text.fontColor,
+                        textAlign: me.text.textAlign,
+                        textBaseline: me.text.textBaseline
+                    }
+                });
+
+                me.sprite.addChild(_text);
+            });
+        }
     }]);
     return FunnelGraphs;
 }(GraphsBase);

@@ -63,9 +63,9 @@ export default class yAxis extends Component
         this.yMaxHeight = 0; //y轴最大高
         this.height = 0; //y轴第一条线到原点的高
 
-        this.baseNumber = null; //为非负number
+        this.baseNumber = null; //默认为0，如果dataSection最小值小于0，则baseNumber为最小值，如果dataSection最大值大于0，则baseNumber为最大值
         this.basePoint = null; //value为 baseNumber 的point {x,y}
-        this.bottomNumber = null; //如果手动设置了 bottomNumber 为负数，则baseNumber＝0，否则baseNumber 就 等于设置的 bottomNumber
+        this.bottomNumber = null; 
 
         this._yOriginTrans = 0;//当设置的 baseNumber 和datasection的min不同的时候，
         
@@ -304,14 +304,17 @@ export default class yAxis extends Component
     {
         var me = this;
         var tmpData = [];
+
+        /*
         //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
         //this._yOriginTrans = this._getYOriginTrans( 0 );
         var originVal = _.min(this.dataSection);
         if( originVal < 0  ){
             originVal = 0;
         };
+        */
 
-        //originVal = this.baseNumber;
+        var originVal = this.baseNumber;
         this._yOriginTrans = this._getYOriginTrans( originVal );
 
         //设置 basePoint
@@ -563,16 +566,24 @@ export default class yAxis extends Component
     _setBottomAndBaseNumber()
     {
         if( this.bottomNumber == null ){
-            this.bottomNumber = this.dataSection[0];
-        }
+            //this.bottomNumber = this.dataSection[0];
+            this.bottomNumber = _.min( this.dataSection );
+        };
         
         //没人情况下 baseNumber 就是datasection的最小值
         if (this._opt.baseNumber == undefined || this._opt.baseNumber == null) {
-            this.baseNumber = this.dataSection[0];//_.min( this.dataSection );
-            if( this.baseNumber < 0 ){
-                this.baseNumber = 0;
-            }
+            this.baseNumber = 0;//this.dataSection[0];//_.min( this.dataSection );
+            if( _.max( this.dataSection ) < 0 ){
+                this.baseNumber = _.max( this.dataSection );
+            };
+            if( _.min( this.dataSection ) > 0 ){
+                this.baseNumber = _.min( this.dataSection );
+            };
+            //if( this.baseNumber < 0 ){
+            //    this.baseNumber = 0;
+            //}
         };
+        
     }
 
     _middleweight()
