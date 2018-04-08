@@ -92,6 +92,9 @@ var Chartx = {
         //};
         return chart;
     },
+    setGlobalTheme: function( colors ){
+        globalTheme.set( colors );
+    },
     options : {},
     getOptions : function( chartPark_cid , options ){
         //chartPark_cid,chartpark中的图表id
