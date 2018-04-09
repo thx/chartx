@@ -40,6 +40,7 @@ export default class PieGraphs extends GraphsBase
         };
 
         this.startAngle = -90;
+        this.allAngles = 360;
         
         this.init( opts );
     }
@@ -176,9 +177,9 @@ export default class PieGraphs extends GraphsBase
     {
         var me = this;
         var total = 0;
-
-        me.currentAngle = 0 + me.startAngle % 360;
-        var limitAngle = 360 + me.startAngle % 360;
+debugger
+        me.currentAngle = 0 + me.startAngle % 360;//me.allAngles;
+        var limitAngle = me.allAngles + me.startAngle % me.allAngles;
 
         var percentFixedNum = 2;     
         
@@ -210,7 +211,7 @@ export default class PieGraphs extends GraphsBase
                     
                     var fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
 
-                    var angle = 360 * percentage;
+                    var angle = me.allAngles * percentage;
                     var endAngle = me.currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
                     var cosV = Math.cos((me.currentAngle + angle / 2) / 180 * Math.PI);
                     var sinV = Math.sin((me.currentAngle + angle / 2) / 180 * Math.PI);
@@ -221,7 +222,7 @@ export default class PieGraphs extends GraphsBase
                         if (ang >= limitAngle) {
                             ang = limitAngle;
                         }
-                        ang = ang % 360;
+                        ang = ang % me.allAngles;
                         var angleRatio = parseInt(ang / 90);
                         if (ang >= 0) {
                             switch (angleRatio) {
