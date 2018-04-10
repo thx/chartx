@@ -14855,7 +14855,8 @@ var ScatGraphs = function (_GraphsBase) {
             },
             fontSize: 12,
             fontColor: "#777",
-            strokeStyle: "#ffffff"
+            strokeStyle: "#ffffff",
+            lineWidth: 1
         };
 
         //动画的起始位置， 默认x=data.x y = 0
