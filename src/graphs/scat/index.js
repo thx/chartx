@@ -212,7 +212,7 @@ export default class ScatGraphs extends GraphsBase
     {
         if( this.text.field != null ){
             if( _.isString( this.text.field ) && nodeLayoutData.rowData[ this.text.field ] ){
-                nodeLayoutData.text = nodeLayoutData.rowData[ this.text.field ]
+                nodeLayoutData.text = this.text.format( nodeLayoutData.rowData[ this.text.field ] );
             }
         }
     }

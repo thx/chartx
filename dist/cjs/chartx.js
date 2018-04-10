@@ -15007,7 +15007,7 @@ var ScatGraphs = function (_GraphsBase) {
         value: function _setText(nodeLayoutData) {
             if (this.text.field != null) {
                 if (_$20.isString(this.text.field) && nodeLayoutData.rowData[this.text.field]) {
-                    nodeLayoutData.text = nodeLayoutData.rowData[this.text.field];
+                    nodeLayoutData.text = this.text.format(nodeLayoutData.rowData[this.text.field]);
                 }
             }
         }
