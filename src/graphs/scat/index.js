@@ -359,6 +359,7 @@ export default class ScatGraphs extends GraphsBase
             y: nodeData.y,
             fillStyle: this.text.fontColor,
             fontSize: this.text.fontSize,
+            strokeStyle : this.text.strokeStyle,
             textAlign : 'center',
             textBaseline : 'middle'
         };
