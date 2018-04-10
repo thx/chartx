@@ -7899,6 +7899,7 @@ var Chart = function (_Canvax$Event$EventDi) {
 
         _this.id = "chartx_" + _this.canvax.id;
         _this.el.setAttribute("chart_id", _this.id);
+        _this.el.setAttribute("chartx_version", "2.0");
 
         //设置stage ---------------------------------------------------------begin
         _this.stage = new canvax.Display.Stage({
@@ -16146,7 +16147,7 @@ var PieGraphs = function (_GraphsBase) {
         value: function _trimGraphs(data) {
             var me = this;
             var total = 0;
-            debugger;
+
             me.currentAngle = 0 + me.startAngle % 360; //me.allAngles;
             var limitAngle = me.allAngles + me.startAngle % me.allAngles;
 
@@ -20575,6 +20576,7 @@ var Chartx = {
         chart = new Coord$$1(el, data, opts, graphs, components);
         if (chart) {
             chart.draw();
+
             me.instances[chart.id] = chart;
             chart.on("destroy", function () {
                 me.instances[chart.id] = null;
@@ -20586,6 +20588,7 @@ var Chartx = {
         //};
         return chart;
     },
+
     setGlobalTheme: function setGlobalTheme(colors) {
         theme.set(colors);
     },

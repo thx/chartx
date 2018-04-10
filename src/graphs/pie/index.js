@@ -177,7 +177,7 @@ export default class PieGraphs extends GraphsBase
     {
         var me = this;
         var total = 0;
-debugger
+
         me.currentAngle = 0 + me.startAngle % 360;//me.allAngles;
         var limitAngle = me.allAngles + me.startAngle % me.allAngles;
 

@@ -81,6 +81,7 @@ var Chartx = {
             chart = new Coord( el, data, opts, graphs, components );
             if( chart ){
                 chart.draw();
+                
                 me.instances[ chart.id ] = chart;
                 chart.on("destroy" , function(){
                     me.instances[ chart.id ] = null;
@@ -92,6 +93,8 @@ var Chartx = {
         //};
         return chart;
     },
+
+    
     setGlobalTheme: function( colors ){
         globalTheme.set( colors );
     },
