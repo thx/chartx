@@ -59,7 +59,8 @@ export default class ScatGraphs extends GraphsBase
             field : null,
             format : function(text){ return text },
             fontSize: 12,
-            fontColor: "#777"
+            fontColor: "#777",
+            strokeStyle : "#ffffff"
         };
 
         //动画的起始位置， 默认x=data.x y = 0
