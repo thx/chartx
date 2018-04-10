@@ -15154,6 +15154,8 @@ var ScatGraphs = function (_GraphsBase) {
                 y: nodeData.y,
                 fillStyle: this.text.fontColor,
                 fontSize: this.text.fontSize,
+                strokeStyle: this.text.strokeStyle,
+                lineWidth: this.text.lineWidth,
                 textAlign: 'center',
                 textBaseline: 'middle'
             };

@@ -60,7 +60,8 @@ export default class ScatGraphs extends GraphsBase
             format : function(text){ return text },
             fontSize: 12,
             fontColor: "#777",
-            strokeStyle : "#ffffff"
+            strokeStyle : "#ffffff",
+            lineWidth : 1
         };
 
         //动画的起始位置， 默认x=data.x y = 0
@@ -360,6 +361,7 @@ export default class ScatGraphs extends GraphsBase
             fillStyle: this.text.fontColor,
             fontSize: this.text.fontSize,
             strokeStyle : this.text.strokeStyle,
+            lineWidth : this.text.lineWidth,
             textAlign : 'center',
             textBaseline : 'middle'
         };
