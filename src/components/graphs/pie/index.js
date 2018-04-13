@@ -70,7 +70,7 @@ export default class PieGraphs extends GraphsBase
             };
             this.node.outRadius = parseInt( outRadius );
         };
-        if( opts.node && opts.node.radius ){
+        if( this.node.radius !== null ){
             //如果用户有直接配置 radius，那么radius优先，用来计算
             this.node.radius = Math( this.node.radius, this.node.minSectorRadius );
             this.node.innerRadius = this.node.outRadius - this.node.radius;
