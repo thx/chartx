@@ -72,7 +72,7 @@ export default class PieGraphs extends GraphsBase
         };
         if( this.node.radius !== null ){
             //如果用户有直接配置 radius，那么radius优先，用来计算
-            this.node.radius = Math( this.node.radius, this.node.minSectorRadius );
+            this.node.radius = Math.max( this.node.radius, this.node.minSectorRadius );
             this.node.innerRadius = this.node.outRadius - this.node.radius;
         };
         //要保证sec具有一个最小的radius
