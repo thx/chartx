@@ -147,7 +147,7 @@ export default class ScatGraphs extends GraphsBase
                 },
                 field    : this.field,
                 color    : fieldMap.color,
-                iNode  : i,
+                iNode    : i,
 
                 focused  : false,
                 selected : false,

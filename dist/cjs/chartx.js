@@ -15946,7 +15946,7 @@ var PieGraphs = function (_GraphsBase) {
             name: null,
             r: null, //自动计算，也可以配置一个字段，就成了丁格尔玫瑰图
             shapeType: "sector",
-            colors: _this.root._theme,
+            fillStyle: _this.root._theme,
 
             focus: {
                 enabled: true
@@ -16090,7 +16090,7 @@ var PieGraphs = function (_GraphsBase) {
                     enabled: true, //是否启用，显示在列表中
                     value: rowData[me.node.value],
                     name: rowData[me.node.name],
-                    fillStyle: me.getColorByIndex(me.node.colors, i, l),
+                    fillStyle: me.getColorByIndex(me.node.fillStyle, i, l),
                     text: null, //绘制的时候再设置
                     iNode: i
                 };
@@ -18318,6 +18318,11 @@ var FunnelGraphs = function (_GraphsBase) {
         _this.node = {
             shapeType: "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
             height: 0, //漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length
+
+            fillStyle: null, //目前主要用皮肤来实现配色，暂时node.fillStyle没用到，但是先定义起来
+            lineWidth: 0,
+            strokeStyle: null,
+
             focus: {
                 enabled: true
             },

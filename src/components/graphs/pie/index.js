@@ -17,7 +17,7 @@ export default class PieGraphs extends GraphsBase
             name : null,
             r : null, //自动计算，也可以配置一个字段，就成了丁格尔玫瑰图
             shapeType : "sector",
-            colors : this.root._theme,
+            fillStyle : this.root._theme,
 
             focus  : {
                 enabled : true,
@@ -158,7 +158,7 @@ export default class PieGraphs extends GraphsBase
                 enabled       : true,   //是否启用，显示在列表中
                 value         : rowData[ me.node.value ],
                 name          : rowData[ me.node.name ],
-                fillStyle     : me.getColorByIndex(me.node.colors, i, l),
+                fillStyle     : me.getColorByIndex(me.node.fillStyle, i, l),
                 text          : null,    //绘制的时候再设置
                 iNode       : i
             };
