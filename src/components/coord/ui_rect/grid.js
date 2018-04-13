@@ -1,11 +1,10 @@
-import Component from "../../component"
 import Canvax from "canvax2d"
 
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
-export default class descartesGrid extends Component
+export default class descartesGrid extends Canvax.Event.EventDispatcher
 {
     constructor( opt, root )
     {

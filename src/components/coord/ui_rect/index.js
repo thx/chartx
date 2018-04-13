@@ -1,8 +1,8 @@
-import coorBase from "../_coor_base/index"
+import coorBase from "../ui_coord_base"
 import Canvax from "canvax2d"
-import xAxisConstructor from "../xaxis/index"
-import yAxisConstructor from "../yaxis/index"
-import Grid from "./grid/index"
+import xAxisConstructor from "./xaxis"
+import yAxisConstructor from "./yaxis"
+import Grid from "./grid"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;

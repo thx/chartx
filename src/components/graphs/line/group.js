@@ -1,6 +1,6 @@
 import Canvax from "canvax2d"
-import {getPath} from "../../utils/tools"
-import ColorFormat from "../../utils/colorformat"
+import {getPath} from "../../../utils/tools"
+import ColorFormat from "../../../utils/colorformat"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;

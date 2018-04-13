@@ -1,9 +1,8 @@
-import Component from "../component"
 import Canvax from "canvax2d"
 
 const _ = Canvax._;
 
-export default class coorBase extends Component
+export default class coorBase extends Canvax.Event.EventDispatcher
 {
 	constructor(opts, root){
         super(opts, root);
@@ -32,7 +31,6 @@ export default class coorBase extends Component
         this.fieldsMap = null;
         this.induce = null;
     }
-
 
     //设置 fieldsMap 中对应field 的 enabled状态
     setFieldEnabled( field )

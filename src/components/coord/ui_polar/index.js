@@ -13,10 +13,10 @@
 //应用场景中一般需要用到的属性有
 //width, height, origin(默认为width/2,height/2)
 
-import coorBase from "../coor_base/index"
+import coorBase from "../ui_coord_base"
 import Canvax from "canvax2d"
-import Grid from "../grid/index"
-import DataSection from "../../utils/datasection"
+import Grid from "./grid"
+import DataSection from "../../../utils/datasection"
 
 const _ = Canvax._;
 
@@ -39,7 +39,7 @@ export default class polarComponent extends coorBase
             ruler : {
                 //刻度尺,在最外沿的蜘蛛网上面
                 data : [], //aAxis.data的 text.format后版本
-                enabled : true,
+                enabled : opts.aAxis && opts.aAxis.field, //只有配置了aAxis才会有需要ruler，必须pie的话是目前不会用到ruler的
                 text : {
                     format : function( v ){ return v },
                     fontColor : "#666"

@@ -1,22 +1,23 @@
 
 //图表皮肤
-import globalTheme from "./theme"
+import globalTheme from "./theme";
+
 //空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
-import emptyCoord from "./coord/index"
+import emptyCoord from "./components/coord/index"
 
 //坐标系
-import Rect from "./coord/rect"
-import Polar from "./coord/polar"
+import Rect from "./components/coord/rect"
+import Polar from "./components/coord/polar"
 
 //graphs
-import Bar from "./graphs/bar/index"
-import Line from "./graphs/line/index"
-import Scat from "./graphs/scat/index"
-import Pie from "./graphs/pie/index"
-import Radar from "./graphs/radar/index"
-import Cloud from "./graphs/cloud/index"
-import Planet from "./graphs/planet/index"
-import Funnel from "./graphs/funnel/index"
+import Bar from "./components/graphs/bar/index"
+import Line from "./components/graphs/line/index"
+import Scat from "./components/graphs/scat/index"
+import Pie from "./components/graphs/pie/index"
+import Radar from "./components/graphs/radar/index"
+import Cloud from "./components/graphs/cloud/index"
+import Planet from "./components/graphs/planet/index"
+import Funnel from "./components/graphs/funnel/index"
 
 //components
 import Legend from "./components/legend/index"

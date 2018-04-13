@@ -1,6 +1,6 @@
 import Canvax from "canvax2d"
 import Group from "./group"
-import {getDisMinATArr} from "../../utils/tools"
+import {getDisMinATArr} from "../../../utils/tools"
 import GraphsBase from "../index"
 
 const _ = Canvax._;

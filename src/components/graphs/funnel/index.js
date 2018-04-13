@@ -1,6 +1,6 @@
 import Canvax from "canvax2d"
 import GraphsBase from "../index"
-import {numAddSymbol} from "../../utils/tools"
+import {numAddSymbol} from "../../../utils/tools"
 
 const _ = Canvax._;
 const Text = Canvax.Display.Text;

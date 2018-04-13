@@ -1,4 +1,3 @@
-import Component from "../../component"
 import Canvax from "canvax2d"
 
 const Line = Canvax.Shapes.Line;
@@ -7,7 +6,7 @@ const Polygon = Canvax.Shapes.Polygon;
 
 const _ = Canvax._;
 
-export default class polarGrid extends Component
+export default class polarGrid extends Canvax.Event.EventDispatcher
 {
     constructor( opt, root )
     {

@@ -1,5 +1,5 @@
 import Canvax from "canvax2d"
-import {numAddSymbol} from "../../utils/tools"
+import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
 
 const AnimationFrame = Canvax.AnimationFrame;
@@ -557,7 +557,7 @@ export default class BarGraphs extends GraphsBase
         } else {
             layoutGraphs = [ this ];
             hLen = this.enabledField.length;
-        }
+        };
 
         var ceilWidth = _xAxis.ceilWidth;
         //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分

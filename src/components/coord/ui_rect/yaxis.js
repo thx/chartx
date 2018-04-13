@@ -1,4 +1,3 @@
-import Component from "../../component"
 import Canvax from "canvax2d"
 import {numAddSymbol} from "../../../utils/tools"
 import DataSection from "../../../utils/datasection"
@@ -6,7 +5,7 @@ import DataSection from "../../../utils/datasection"
 const Line = Canvax.Shapes.Line;
 const _ = Canvax._;
 
-export default class yAxis extends Component
+export default class yAxis extends Canvax.Event.EventDispatcher
 {
 	constructor( opts, data ){
 

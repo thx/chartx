@@ -1,8 +1,8 @@
-import CoordBase from "../index"
+import CoordBase from "./index"
 import Canvax from "canvax2d"
 import {parse2MatrixData} from "../../utils/tools"
 import DataFrame from "../../utils/dataframe"
-import CoordComponents from "..//polar/index"
+import CoordComponents from "./ui_polar/index"
 
 const _ = Canvax._;
 

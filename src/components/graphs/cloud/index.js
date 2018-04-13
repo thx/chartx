@@ -1,6 +1,6 @@
 import Canvax from "canvax2d"
 import GraphsBase from "../index"
-import cloudLayout from "../../layout/cloud"
+import cloudLayout from "../../../layout/cloud"
 
 const _ = Canvax._;
 const Text = Canvax.Display.Text;
@@ -216,18 +216,18 @@ export default class CloudGraphs extends GraphsBase
                 tag._node = tagTxt;
                 tagTxt.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
                     
-                     e.eventInfo = {
-                         title : null,
-                         nodes : [ this.nodeData ]
-                     };
-                     if( this.nodeData.text ){
-                         e.eventInfo.title = this.nodeData.text;
-                     };
-        
-                     //fire到root上面去的是为了让root去处理tips
-                     me.root.fire( e.type, e );
-                     me.triggerEvent( me.node , e );
-                 });
+                    e.eventInfo = {
+                        title : null,
+                        nodes : [ this.nodeData ]
+                    };
+                    if( this.nodeData.text ){
+                        e.eventInfo.title = this.nodeData.text;
+                    };
+    
+                    //fire到root上面去的是为了让root去处理tips
+                    me.root.fire( e.type, e );
+                    me.triggerEvent( me.node , e );
+                });
             });
 
         }

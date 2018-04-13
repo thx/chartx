@@ -4478,7 +4478,8 @@ var Application = function (_DisplayObjectContain) {
             if (!_pixelCanvas) {
                 _pixelCanvas = $.createCanvas(0, 0, "_pixelCanvas");
             } else {
-                //如果又的话 就不需要在创建了
+                //如果有的话 就不需要在创建了，但是最好获取一下context,因为可能同时存在chartx1.0的图表
+                Utils._pixelCtx = _pixelCanvas.getContext('2d');
                 return;
             }
             document.body.appendChild(_pixelCanvas);
@@ -8516,41 +8517,10 @@ var Coord = function (_Chart) {
     return Coord;
 }(Chart);
 
-var component = function (_Canvax$Event$EventDi) {
-    inherits$1(component, _Canvax$Event$EventDi);
-
-    function component(opt, data) {
-        classCallCheck$1(this, component);
-
-        var _this = possibleConstructorReturn$1(this, (component.__proto__ || Object.getPrototypeOf(component)).call(this, opt, data));
-
-        _this.enabled = false; //是否加载该组件
-        return _this;
-    }
-
-    createClass$1(component, [{
-        key: "init",
-        value: function init(opt, data) {}
-    }, {
-        key: "draw",
-        value: function draw() {}
-
-        //组件的销毁
-
-    }, {
-        key: "destroy",
-        value: function destroy() {}
-    }, {
-        key: "reset",
-        value: function reset() {}
-    }]);
-    return component;
-}(canvax.Event.EventDispatcher);
-
 var _$8 = canvax._;
 
-var coorBase = function (_Component) {
-    inherits$1(coorBase, _Component);
+var coorBase = function (_Canvax$Event$EventDi) {
+    inherits$1(coorBase, _Canvax$Event$EventDi);
 
     function coorBase(opts, root) {
         classCallCheck$1(this, coorBase);
@@ -8661,7 +8631,38 @@ var coorBase = function (_Component) {
         }
     }]);
     return coorBase;
-}(component);
+}(canvax.Event.EventDispatcher);
+
+var component = function (_Canvax$Event$EventDi) {
+    inherits$1(component, _Canvax$Event$EventDi);
+
+    function component(opt, data) {
+        classCallCheck$1(this, component);
+
+        var _this = possibleConstructorReturn$1(this, (component.__proto__ || Object.getPrototypeOf(component)).call(this, opt, data));
+
+        _this.enabled = false; //是否加载该组件
+        return _this;
+    }
+
+    createClass$1(component, [{
+        key: "init",
+        value: function init(opt, data) {}
+    }, {
+        key: "draw",
+        value: function draw() {}
+
+        //组件的销毁
+
+    }, {
+        key: "destroy",
+        value: function destroy() {}
+    }, {
+        key: "reset",
+        value: function reset() {}
+    }]);
+    return component;
+}(canvax.Event.EventDispatcher);
 
 var _$10 = canvax._;
 
@@ -9540,8 +9541,8 @@ var xAxis = function (_Component) {
 var Line$3 = canvax.Shapes.Line;
 var _$11 = canvax._;
 
-var yAxis = function (_Component) {
-    inherits$1(yAxis, _Component);
+var yAxis = function (_Canvax$Event$EventDi) {
+    inherits$1(yAxis, _Canvax$Event$EventDi);
 
     function yAxis(opts, data) {
         classCallCheck$1(this, yAxis);
@@ -10390,14 +10391,14 @@ var yAxis = function (_Component) {
         }
     }]);
     return yAxis;
-}(component);
+}(canvax.Event.EventDispatcher);
 
 var Line$4 = canvax.Shapes.Line;
 var Rect$4 = canvax.Shapes.Rect;
 var _$12 = canvax._;
 
-var descartesGrid = function (_Component) {
-    inherits$1(descartesGrid, _Component);
+var descartesGrid = function (_Canvax$Event$EventDi) {
+    inherits$1(descartesGrid, _Canvax$Event$EventDi);
 
     function descartesGrid(opt, root) {
         classCallCheck$1(this, descartesGrid);
@@ -10451,23 +10452,23 @@ var descartesGrid = function (_Component) {
     }
 
     createClass$1(descartesGrid, [{
-        key: "init",
+        key: 'init',
         value: function init(opt) {
             _$12.extend(true, this, opt);
             this.sprite = new canvax.Display.Sprite();
         }
     }, {
-        key: "setX",
+        key: 'setX',
         value: function setX($n) {
             this.sprite.context.x = $n;
         }
     }, {
-        key: "setY",
+        key: 'setY',
         value: function setY($n) {
             this.sprite.context.y = $n;
         }
     }, {
-        key: "draw",
+        key: 'draw',
         value: function draw(opt) {
             _$12.extend(true, this, opt);
             //this._configData(opt);
@@ -10476,18 +10477,18 @@ var descartesGrid = function (_Component) {
             this.setY(this.pos.y);
         }
     }, {
-        key: "clean",
+        key: 'clean',
         value: function clean() {
             this.sprite.removeAllChildren();
         }
     }, {
-        key: "reset",
+        key: 'reset',
         value: function reset(opt) {
             this.sprite.removeAllChildren();
             this.draw(opt);
         }
     }, {
-        key: "_widget",
+        key: '_widget',
         value: function _widget() {
 
             var self = this;
@@ -10580,7 +10581,7 @@ var descartesGrid = function (_Component) {
         }
     }]);
     return descartesGrid;
-}(component);
+}(canvax.Event.EventDispatcher);
 
 var _$7 = canvax._;
 var Rect$3 = canvax.Shapes.Rect;
@@ -11802,8 +11803,8 @@ var Polygon$1 = canvax.Shapes.Polygon;
 
 var _$15 = canvax._;
 
-var polarGrid = function (_Component) {
-    inherits$1(polarGrid, _Component);
+var polarGrid = function (_Canvax$Event$EventDi) {
+    inherits$1(polarGrid, _Canvax$Event$EventDi);
 
     function polarGrid(opt, root) {
         classCallCheck$1(this, polarGrid);
@@ -11952,7 +11953,7 @@ var polarGrid = function (_Component) {
         }
     }]);
     return polarGrid;
-}(component);
+}(canvax.Event.EventDispatcher);
 
 //极坐标 坐标轴
 //极坐标系目前对外抛出三个方法
@@ -11992,7 +11993,7 @@ var polarComponent = function (_coorBase) {
             ruler: {
                 //刻度尺,在最外沿的蜘蛛网上面
                 data: [], //aAxis.data的 text.format后版本
-                enabled: true,
+                enabled: opts.aAxis && opts.aAxis.field, //只有配置了aAxis才会有需要ruler，必须pie的话是目前不会用到ruler的
                 text: {
                     format: function format(v) {
                         return v;
