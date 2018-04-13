@@ -30,7 +30,8 @@ export default class PieGraphs extends GraphsBase
             
             innerRadius : 0,
             outRadius : null,//如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
-            minSectorRadius : 30,//outRadius - innerRadius 的最小值
+            radius : null,
+            minSectorRadius : 10,//outRadius - innerRadius ， 也就是radius的最小值
             moveDis : 15    //要预留moveDis位置来hover sector 的时候外扩
         };
 
@@ -48,6 +49,7 @@ export default class PieGraphs extends GraphsBase
     init( opts )
     {
         _.extend(true, this, opts);
+
         this.sprite = new Canvax.Display.Sprite();
 
         //初步设置下data，主要legend等需要用到
@@ -59,7 +61,7 @@ export default class PieGraphs extends GraphsBase
         var w = this.width;
         var h = this.height;
 
-        //TODO：如果用户有配置outRadius的话，就按照用户的来，目前不做修正
+        //根据配置情况重新修正 outRadius ，innerRadius ------------
         if( !this.node.outRadius ){
             var outRadius = Math.min(w, h) / 2;
             if ( this.text.enabled ) {
@@ -68,11 +70,19 @@ export default class PieGraphs extends GraphsBase
             };
             this.node.outRadius = parseInt( outRadius );
         };
-
+        if( opts.node && opts.node.radius ){
+            //如果用户有直接配置 radius，那么radius优先，用来计算
+            this.node.radius = Math( this.node.radius, this.node.minSectorRadius );
+            this.node.innerRadius = this.node.outRadius - this.node.radius;
+        };
         //要保证sec具有一个最小的radius
         if( this.node.outRadius - this.node.innerRadius < this.node.minSectorRadius ){
             this.node.innerRadius = this.node.outRadius - this.node.minSectorRadius;
         };
+        if( this.node.innerRadius < 0 ){
+            this.node.innerRadius = 0;
+        };
+        // end --------------------------------------------------
 
     }
 
