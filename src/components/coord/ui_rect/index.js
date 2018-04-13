@@ -36,23 +36,9 @@ export default class Descartes_Component extends coorBase
         _.extend(true, this, opts);
 
         if( opts.horizontal ){
-            _.extend( true, this.xAxis, {
-                isH : true,
-                ruler : {
-                    text : {
-                        rotation: 90
-                    }
-                }
-            } );
+            this.xAxis.isH = true;
             _.each( this.yAxis , function( yAxis ){
-                _.extend( true, yAxis, {
-                    isH : true,
-                    ruler : {
-                        text : {
-                            rotation: 90
-                        }
-                    }
-                } );
+                yAxis.isH = true;
             });
         };
 
@@ -118,9 +104,10 @@ export default class Descartes_Component extends coorBase
 
     draw( opts )
     {
+        //在绘制的时候，要先拿到xAxis的高
+
         !opts && (opts ={});
         
-        //在绘制的时候，是已经能拿到xAxis的height了得
         var _padding = this.root.padding;
 
         var h = opts.height || this.root.height;
@@ -153,8 +140,8 @@ export default class Descartes_Component extends coorBase
         if (this._yAxisRight) {
             this._yAxisRight.draw({
                 pos: {
-                    x: 0,
-                    y: y
+                    x : 0,
+                    y : y
                 },
                 yMaxHeight: y - _padding.top,
                 resize : opts.trigger == "resize"
@@ -259,18 +246,26 @@ export default class Descartes_Component extends coorBase
         var me = this;
         var w = me.root.width;
         var h = me.root.height;
+        var padding = me.root.padding;
         
+    
         _.each([me.sprite.context], function(ctx) {
             ctx.x += ((w - h) / 2);
-            ctx.y += ((h - w) / 2);
+
+            //TODO：还没弄明白为啥这里需要= +20 才正常
+            ctx.y += ((h - w) / 2 + 20);
+
+            var origin = {
+                x : h/2,
+                y : w/2
+            }
 
             ctx.rotation = 90;
-            ctx.rotateOrigin.x = h / 2;
-            ctx.rotateOrigin.y = w / 2;
+            ctx.rotateOrigin = origin;
 
-            ctx.scaleOrigin.x = h / 2;
-            ctx.scaleOrigin.y = w / 2;
+            ctx.scaleOrigin = origin;
             ctx.scaleX = -1;
+
         });
 
         function horizontalText( text ){
@@ -482,7 +477,7 @@ export default class Descartes_Component extends coorBase
         
         var obj = {
             xAxis : xNode,
-            title : xNode.layoutText,
+            title : xNode.text,
             nodes : [
                 //遍历_graphs 去拿东西
             ]

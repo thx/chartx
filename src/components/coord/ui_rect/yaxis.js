@@ -38,6 +38,10 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 marginToLine : 3 //和刻度线的距离
             }
         };
+        if( opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined) ){
+            //如果是横向直角坐标系图
+            this.ruler.text.rotation = 90;
+        };
 
         this.pos = {
             x: 0,

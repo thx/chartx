@@ -40,6 +40,7 @@ export default class BarGraphs extends GraphsBase
 
         this.text = {
             enabled   : false,
+            animation : true,
             fillStyle : '#999',
             fontSize  : 12,
             format    : null,
@@ -450,7 +451,7 @@ export default class BarGraphs extends GraphsBase
                             infoWidth += _txt.getTextWidth() + 2;
                             infoHeight = Math.max(infoHeight, _txt.getTextHeight());
 
-                            if( animate && isNewNode ){
+                            if( animate && isNewNode && me.text.animation ){
                                 var beginNumber = 0;
                                 if( value >=100 ){
                                     beginNumber = 100;
@@ -719,7 +720,7 @@ export default class BarGraphs extends GraphsBase
     {
 
         var me = this;
-        console.log( me._preDataLen+"|"+ me._dataLen)
+        //console.log( me._preDataLen+"|"+ me._dataLen)
         //先把已经不在当前range范围内的元素destroy掉
         if ( me._preDataLen > me._dataLen) {
             for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
@@ -821,7 +822,6 @@ export default class BarGraphs extends GraphsBase
                                     if (txt._tweenObj) {
                                         AnimationFrame.destroyTween(txt._tweenObj);
                                     };
-                                  console.log(txt.text)
                                     txt._tweenObj = AnimationFrame.registTween({
                                         from: {
                                             v: txt.text
@@ -845,7 +845,7 @@ export default class BarGraphs extends GraphsBase
                                                 value = numAddSymbol( value.toFixed( txt.fixedNum ) );
                                             };
 
-                                            txt.resetText(value);
+                                            me.text.animation && txt.resetText(value);
                                             
                                             if (txt.parent) {
                                                 me._updateInfoTextPos(txt.parent);

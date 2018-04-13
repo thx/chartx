@@ -163,15 +163,16 @@ export default class Descartes extends CoordBase
 
         var ctx = me.graphsSprite.context;
         ctx.x += ((me.width - me.height) / 2);
-        ctx.y += ((me.height - me.width) / 2);
+
+        //TODO：还没弄明白为啥这里需要= +20 才正常
+        ctx.y += ((me.height - me.width) / 2 + 20);
         ctx.rotation = 90;
-        ctx.rotateOrigin.x = me.height / 2;
-        ctx.rotateOrigin.y = me.width / 2;
-        ctx.scaleOrigin.x = me.height / 2;
-        ctx.scaleOrigin.y = me.width / 2;
+
+        var origin = { x : me.height/2, y : me.width/2 };
+        ctx.rotateOrigin = origin;
+        ctx.scaleOrigin = origin;
         ctx.scaleX = -1;
      
-
         function _horizontalText( el ){
             if( el.children ){
                 _.each( el.children, function( _el ){
