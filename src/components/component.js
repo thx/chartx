@@ -8,7 +8,7 @@ export default class component extends Canvax.Event.EventDispatcher
         this.enabled = false; //是否加载该组件
     }
 
-    init( opt, data ) 
+    init( opt, data )
     {
               
     }

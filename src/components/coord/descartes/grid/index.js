@@ -1,4 +1,4 @@
-import Component from "../component"
+import Component from "../../component"
 import Canvax from "canvax2d"
 
 const Line = Canvax.Shapes.Line;

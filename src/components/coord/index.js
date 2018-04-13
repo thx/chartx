@@ -1,4 +1,4 @@
-import Chart from "../chart"
+import Chart from "../../chart"
 import Canvax from "canvax2d"
 
 const _ = Canvax._;

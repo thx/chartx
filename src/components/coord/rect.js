@@ -1,8 +1,8 @@
-import CoordBase from "./index"
+import CoordBase from "../index"
 import Canvax from "canvax2d"
-import {parse2MatrixData} from "../utils/tools"
-import DataFrame from "../utils/dataframe"
-import CoordComponents from "../components/descartes/index"
+import {parse2MatrixData} from "../../utils/tools"
+import DataFrame from "../../utils/dataframe"
+import CoordComponents from "../descartes/index"
 
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;

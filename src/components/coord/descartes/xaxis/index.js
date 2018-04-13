@@ -1,7 +1,7 @@
-import Component from "../component"
+import Component from "../../component"
 import Canvax from "canvax2d"
-import {numAddSymbol} from "../../utils/tools"
-import DataSection from "../../utils/datasection"
+import {numAddSymbol} from "../../../utils/tools"
+import DataSection from "../../../utils/datasection"
 
 const Line = Canvax.Shapes.Line;
 const _ = Canvax._;
