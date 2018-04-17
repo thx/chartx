@@ -241,19 +241,16 @@ export default class Descartes_Component extends coorBase
      * 
      * @param {x,y} size 
      */
-    _horizontal( ) 
+    _horizontal( opt ) 
     {
         var me = this;
-        var w = me.root.width;
-        var h = me.root.height;
-        var padding = me.root.padding;
-        
+        var w = opt.h;
+        var h = opt.w;
     
         _.each([me.sprite.context], function(ctx) {
+            
             ctx.x += ((w - h) / 2);
-
-            //TODO：还没弄明白为啥这里需要= +20 才正常
-            ctx.y += ((h - w) / 2 + 20);
+            ctx.y += ((h - w) / 2);
 
             var origin = {
                 x : h/2,
@@ -267,6 +264,7 @@ export default class Descartes_Component extends coorBase
             ctx.scaleX = -1;
 
         });
+
 
         function horizontalText( text ){
             var ctx = text.context;

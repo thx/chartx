@@ -10,7 +10,6 @@ export default {
         _.each( colors, function( color , i ){
             me.colors[i] = color;
         } );
-
         return this.colors;
     },
     get : function( ){

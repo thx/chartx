@@ -41,6 +41,7 @@ export default class polarComponent extends coorBase
                 data : [], //aAxis.data的 text.format后版本
                 enabled : opts.aAxis && opts.aAxis.field, //只有配置了aAxis才会有需要ruler，必须pie的话是目前不会用到ruler的
                 text : {
+                    enabled : true,
                     format : function( v ){ return v },
                     fontColor : "#666"
                 }
@@ -524,7 +525,9 @@ export default class polarComponent extends coorBase
         me._aAxisScaleSp.context.y = this.origin.y;
 
         _.each( this.aAxis.data , function( label, i ){
-            
+
+            if( !me.aAxis.ruler.text.enabled ) return;
+
             var point = points[i];
             var c = {
                 x : point.x,

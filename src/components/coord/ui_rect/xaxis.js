@@ -23,11 +23,16 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         this.ruler = {
             enabled : true,
-            line : {
-                enabled    : 1, //是否有line
+            tickline : {
+                enabled    : 1, //是否有刻度线
                 lineWidth  : 1,
                 height     : 4,
                 marginTop  : 2,
+                strokeStyle: '#cccccc'
+            },
+            axisline : {
+                enabled    : 1, //是否有轴线
+                lineWidth  : 1,
                 strokeStyle: '#cccccc'
             },
             text : {
@@ -433,7 +438,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
             var o = arr[a]
             var x = o.x,
-                y = this.ruler.line.height + this.ruler.line.marginTop + this.ruler.text.marginTop;
+                y = this.ruler.tickline.height + this.ruler.tickline.marginTop + this.ruler.text.marginTop;
 
             //文字
             var textContext = {
@@ -494,16 +499,16 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             xNode._txt.context.visible = !!arr[a].visible;
             
 
-            if (this.ruler.line.enabled) {
+            if (this.ruler.tickline.enabled) {
                 var lineContext = {
                     x: x,
-                    y: this.ruler.line.marginTop,
+                    y: this.ruler.tickline.marginTop,
                     end : {
                         x : 0,
-                        y : this.ruler.line.height
+                        y : this.ruler.tickline.height
                     },
-                    lineWidth: this.ruler.line.lineWidth,
-                    strokeStyle: this.ruler.line.strokeStyle
+                    lineWidth: this.ruler.tickline.lineWidth,
+                    strokeStyle: this.ruler.tickline.strokeStyle
                 };
                 if( xNode._line ){
                     //_.extend( xNode._txt.context , textContext );
@@ -543,21 +548,23 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         };
 
         //轴线
-        var _axisline = new Line({
-            context : {
-                start       : {
-                    x : 0,
-                    y : 0
-                },
-                end         : {
-                    x : this.width,
-                    y : 0
-                },
-                lineWidth   : this.ruler.line.lineWidth,
-                strokeStyle : this.ruler.line.strokeStyle
-            }
-        });
-        this.sprite.addChild( _axisline );
+        if( this.ruler.axisline.enabled ){
+            var _axisline = new Line({
+                context : {
+                    start : {
+                        x : 0,
+                        y : 0
+                    },
+                    end   : {
+                        x : this.width,
+                        y : 0
+                    },
+                    lineWidth   : this.ruler.axisline.lineWidth,
+                    strokeStyle : this.ruler.axisline.strokeStyle
+                }
+            });
+            this.sprite.addChild( _axisline );
+        }
 
     }
 
@@ -604,31 +611,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 
             } );
 
-            this.height = _maxHeight + this.ruler.line.height + this.ruler.line.marginTop + this.ruler.text.marginTop;
-
-            /*
-            var txt = new Canvax.Display.Text(this._layoutDataSection[0] || "test", {
-                context: {
-                    fontSize: this.ruler.text.fontSize
-                }
-            });
-
-            this.maxTxtH = txt.getTextHeight();
-
-            if (!!this.ruler.text.rotation) {
-                if (this.ruler.text.rotation % 90 == 0) {
-                    this.height = parseInt( this._textMaxWidth );
-                } else {
-                    var sinR = Math.sin(Math.abs(this.ruler.text.rotation) * Math.PI / 180);
-                    var cosR = Math.cos(Math.abs(this.ruler.text.rotation) * Math.PI / 180);
-                    this.height = parseInt(sinR * this._textMaxWidth + txt.getTextHeight() + 5);
-                }
-            } else {
-                this.height = parseInt( this.maxTxtH );
-            }
-
-            this.height += this.ruler.line.height + this.ruler.line.marginTop + this.ruler.text.marginTop;
-            */
+            this.height = _maxHeight + this.ruler.tickline.height + this.ruler.tickline.marginTop + this.ruler.text.marginTop;
         }
     }
 

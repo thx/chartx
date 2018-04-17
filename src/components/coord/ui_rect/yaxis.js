@@ -23,12 +23,17 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
         this.ruler = {
             enabled : true,
-            line : {
-                enabled      : 1,      //是否有line
-                width        : 4,      //刻度线的宽度，和轴线无关
+            tickline : {//刻度线
+                enabled      : 1,
+                width        : 4,
                 lineWidth    : 1,
                 strokeStyle  : '#cccccc',
                 marginToLine : 2
+            },
+            axisline : {//轴线
+                enabled      : 1,     
+                lineWidth    : 1,
+                strokeStyle  : '#cccccc'
             },
             text : {
                 fontColor    : '#999',
@@ -738,19 +743,19 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 };
 
                 var lineX = 0
-                if (me.ruler.line.enabled) {
+                if (me.ruler.tickline.enabled) {
                     //线条
-                    lineX = me.align == "left" ? - me.ruler.line.width - me.ruler.line.marginToLine : me.ruler.line.marginToLine;
+                    lineX = me.align == "left" ? - me.ruler.tickline.width - me.ruler.tickline.marginToLine : me.ruler.tickline.marginToLine;
                     var line = new Line({
                         context: {
                             x: lineX ,
                             y: y,
                             end : {
-                                x : me.ruler.line.width,
+                                x : me.ruler.tickline.width,
                                 y : 0
                             },
-                            lineWidth: me.ruler.line.lineWidth,
-                            strokeStyle: me._getProp(me.ruler.line.strokeStyle)
+                            lineWidth: me.ruler.tickline.lineWidth,
+                            strokeStyle: me._getProp(me.ruler.tickline.strokeStyle)
                         }
                     });
                     yNode.addChild(line);
@@ -758,7 +763,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 };
 
                 //文字
-                var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.line.width + me.ruler.text.marginToLine;
+                var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.tickline.width + me.ruler.text.marginToLine;
                 if( this.isH ){
                     txtX = txtX + (me.align == "left"?-1:1)* 4
                 };
@@ -778,9 +783,11 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 yNode.addChild(txt);
                 yNode._txt = txt;
 
-                me.maxW = Math.max(me.maxW, txt.getTextWidth());
+                
                 if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
                     me.maxW = Math.max(me.maxW, txt.getTextHeight());
+                } else {
+                    me.maxW = Math.max(me.maxW, txt.getTextWidth());
                 };
 
                 //这里可以由用户来自定义过滤 来 决定 该node的样式
@@ -819,11 +826,10 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             };
         };
 
-        me.maxW += me.ruler.text.marginToLine;
         if( me.width === null ){
             me.width = parseInt( me.maxW + me.ruler.text.marginToLine  );
-            if (me.ruler.line.enabled) {
-                me.width += parseInt( me.ruler.line.width + me.ruler.line.marginToLine );
+            if (me.ruler.tickline.enabled) {
+                me.width += parseInt( me.ruler.tickline.width + me.ruler.tickline.marginToLine );
             }
         }
 
@@ -834,22 +840,26 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         }
 
         //轴线
-        var _axisline = new Line({
-            context : {
-                start       : {
-                    x : _originX,
-                    y : 0
-                },
-                end         : {
-                    x : _originX,
-                    y : -me.height
-                },
-                lineWidth   : me.ruler.line.lineWidth,
-                strokeStyle : me._getProp(me.ruler.line.strokeStyle)
-            }
-        });
-        this.sprite.addChild( _axisline );
+        if( me.ruler.axisline.enabled ){
+            var _axisline = new Line({
+                context : {
+                    start : {
+                        x : _originX,
+                        y : 0
+                    },
+                    end   : {
+                        x : _originX,
+                        y : -me.height
+                    },
+                    lineWidth   : me.ruler.axisline.lineWidth,
+                    strokeStyle : me._getProp(me.ruler.axisline.strokeStyle)
+                }
+            });
+            this.sprite.addChild( _axisline );
+        }
+
     }
+
 
     _getProp(s)
     {

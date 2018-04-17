@@ -99,7 +99,21 @@ var Chartx = {
     setGlobalTheme: function( colors ){
         globalTheme.set( colors );
     },
-    options : {},
+    getGlobalTheme: function(){
+        return globalTheme.get();
+    },
+    
+    instances : {},
+    getChart : function( chartId ){
+        return this.instances[ chartId ];
+    },
+    resize : function(){
+        //调用全局的这个resize方法，会把当前所有的 chart instances 都执行一遍resize
+        for( var c in this.instances ){
+            this.instances[ c ].resize();
+        }
+    },
+    
     getOptions : function( chartPark_cid , options ){
         //chartPark_cid,chartpark中的图表id
         if( !options ){
@@ -128,16 +142,7 @@ var Chartx = {
         var opts = parse( decodeURIComponent( options[ chartPark_cid ] || {} ) );
         return opts;
     },
-    instances : {},
-    getChart : function( chartId ){
-        return this.instances[ chartId ];
-    },
-    resize : function(){
-        //调用全局的这个resize方法，会把当前所有的 chart instances 都执行一遍resize
-        for( var c in this.instances ){
-            this.instances[ c ].resize();
-        }
-    }
+    options : {}
 };
 
 export default Chartx;

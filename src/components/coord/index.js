@@ -39,7 +39,7 @@ export default class Coord extends Chart
         if( this._opts.theme ){
             //如果用户有配置皮肤组件，优先级最高
             //皮肤就是一组颜色
-            var _theme = new this.componentsMap.theme( this._opts.theme );
+            var _theme = new this.componentsMap.theme( this._opts.theme, this );
             this._theme = _theme.mergeTo( this._theme );
         };
         this.initModule( opts );     //初始化模块  
