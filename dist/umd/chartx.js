@@ -9259,7 +9259,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
 
                 xNode._txt.context.visible = !!arr[a].visible;
 
-                if (this.ruler.tickline.enabled) {
+                if (this.ruler.tickline.enabled && !!arr[a].visible) {
                     var lineContext = {
                         x: x,
                         y: this.ruler.tickline.marginTop,

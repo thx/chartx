@@ -499,7 +499,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             xNode._txt.context.visible = !!arr[a].visible;
             
 
-            if (this.ruler.tickline.enabled) {
+            if ( this.ruler.tickline.enabled && !!arr[a].visible ) {
                 var lineContext = {
                     x: x,
                     y: this.ruler.tickline.marginTop,
