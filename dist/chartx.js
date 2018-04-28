@@ -797,7 +797,7 @@ var $ = {
     createView: function createView(_width, _height, id) {
         var view = document.createElement("div");
         view.className = "canvax-view";
-        view.style.cssText += "position:relative;width:" + _width + "px;height:" + _height + "px;";
+        view.style.cssText += "position:relative;width:100%;height:100%;";
 
         var stageView = document.createElement("div");
         stageView.style.cssText += "position:absolute;width:" + _width + "px;height:" + _height + "px;";
@@ -4419,8 +4419,9 @@ var Application = function (_DisplayObjectContain) {
             this.width = parseInt(opt && "width" in opt || this.el.offsetWidth, 10);
             this.height = parseInt(opt && "height" in opt || this.el.offsetHeight, 10);
 
-            this.view.style.width = this.width + "px";
-            this.view.style.height = this.height + "px";
+            //this.view  width height都一直设置为100%
+            //this.view.style.width  = this.width +"px";
+            //this.view.style.height = this.height+"px";
 
             this.viewOffset = $.offset(this.view);
             this.context.$model.width = this.width;
@@ -8201,7 +8202,7 @@ var Coord = function (_Chart) {
             return opts;
         }
 
-        //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
+        //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 drawEndHorizontal 的操作
 
     }, {
         key: "draw",
@@ -8214,11 +8215,16 @@ var Coord = function (_Chart) {
             }
             this.initModule(opts); //初始化模块  
             this.initComponents(opts); //初始化组件, 来自己chart.js模块
+
+            if (this._coord && this._coord.horizontal) {
+                this.drawBeginHorizontal && this.drawBeginHorizontal();
+            }
+
             this.startDraw(opts); //开始绘图
             this.drawComponents(opts); //绘图完，开始绘制插件，来自己chart.js模块
 
             if (this._coord && this._coord.horizontal) {
-                this._horizontal();
+                this.drawEndHorizontal && this.drawEndHorizontal();
             }
 
             this.inited = true;
@@ -8772,7 +8778,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
 
         _this.ruler = {
             enabled: true,
-            tickline: {
+            tickLine: {
                 enabled: 1, //是否有刻度线
                 lineWidth: 1,
                 height: 4,
@@ -8785,6 +8791,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
                 strokeStyle: '#cccccc'
             },
             text: {
+                enabled: 1,
                 fontColor: '#999',
                 fontSize: 12,
                 rotation: 0,
@@ -9197,75 +9204,77 @@ var xAxis = function (_Canvax$Event$EventDi) {
 
                 var o = arr[a];
                 var x = o.x,
-                    y = this.ruler.tickline.height + this.ruler.tickline.marginTop + this.ruler.text.marginTop;
+                    y = this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
 
-                //文字
-                var textContext = {
-                    x: o._text_x || o.x,
-                    y: y + 20,
-                    fillStyle: this.ruler.text.fontColor,
-                    fontSize: this.ruler.text.fontSize,
-                    rotation: -Math.abs(this.ruler.text.rotation),
-                    textAlign: this.ruler.text.textAlign,
-                    lineHeight: this.ruler.text.lineHeight,
-                    textBaseline: !!this.ruler.text.rotation ? "middle" : "top",
-                    globalAlpha: 0
-                };
+                if (this.ruler.text.enabled && !!arr[a].visible) {
+                    //文字
+                    var textContext = {
+                        x: o._text_x || o.x,
+                        y: y + 20,
+                        fillStyle: this.ruler.text.fontColor,
+                        fontSize: this.ruler.text.fontSize,
+                        rotation: -Math.abs(this.ruler.text.rotation),
+                        textAlign: this.ruler.text.textAlign,
+                        lineHeight: this.ruler.text.lineHeight,
+                        textBaseline: !!this.ruler.text.rotation ? "middle" : "top",
+                        globalAlpha: 0
+                    };
 
-                if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
-                    textContext.x += 5;
-                    textContext.y += 3;
+                    if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
+                        textContext.x += 5;
+                        textContext.y += 3;
+                    }
+
+                    if (xNode._txt) {
+                        //_.extend( xNode._txt.context , textContext );
+                        xNode._txt.resetText(o.text + "");
+                        if (this.animation) {
+                            xNode._txt.animate({
+                                x: textContext.x
+                            }, {
+                                duration: 300
+                            });
+                        } else {
+                            xNode._txt.context.x = textContext.x;
+                        }
+                    } else {
+
+                        xNode._txt = new canvax.Display.Text(o.text, {
+                            id: "xAxis_txt_" + a,
+                            context: textContext
+                        });
+                        xNode.addChild(xNode._txt);
+
+                        //新建的 txt的 动画方式
+                        if (this.animation && !opts.resize) {
+                            xNode._txt.animate({
+                                globalAlpha: 1,
+                                y: xNode._txt.context.y - 20
+                            }, {
+                                duration: 500,
+                                easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                                delay: a * delay,
+                                id: xNode._txt.id
+                            });
+                        } else {
+                            xNode._txt.context.y = xNode._txt.context.y - 20;
+                            xNode._txt.context.globalAlpha = 1;
+                        }
+                    }
+
+                    //xNode._txt.context.visible = !!arr[a].visible;
                 }
 
-                if (xNode._txt) {
-                    //_.extend( xNode._txt.context , textContext );
-                    xNode._txt.resetText(o.text + "");
-                    if (this.animation) {
-                        xNode._txt.animate({
-                            x: textContext.x
-                        }, {
-                            duration: 300
-                        });
-                    } else {
-                        xNode._txt.context.x = textContext.x;
-                    }
-                } else {
-
-                    xNode._txt = new canvax.Display.Text(o.text, {
-                        id: "xAxis_txt_" + a,
-                        context: textContext
-                    });
-                    xNode.addChild(xNode._txt);
-
-                    //新建的 txt的 动画方式
-                    if (this.animation && !opts.resize) {
-                        xNode._txt.animate({
-                            globalAlpha: 1,
-                            y: xNode._txt.context.y - 20
-                        }, {
-                            duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * delay,
-                            id: xNode._txt.id
-                        });
-                    } else {
-                        xNode._txt.context.y = xNode._txt.context.y - 20;
-                        xNode._txt.context.globalAlpha = 1;
-                    }
-                }
-
-                xNode._txt.context.visible = !!arr[a].visible;
-
-                if (this.ruler.tickline.enabled && !!arr[a].visible) {
+                if (this.ruler.tickLine.enabled && !!arr[a].visible) {
                     var lineContext = {
                         x: x,
-                        y: this.ruler.tickline.marginTop,
+                        y: this.ruler.tickLine.marginTop,
                         end: {
                             x: 0,
-                            y: this.ruler.tickline.height
+                            y: this.ruler.tickLine.height
                         },
-                        lineWidth: this.ruler.tickline.lineWidth,
-                        strokeStyle: this.ruler.tickline.strokeStyle
+                        lineWidth: this.ruler.tickLine.lineWidth,
+                        strokeStyle: this.ruler.tickLine.strokeStyle
                     };
                     if (xNode._line) {
                         //_.extend( xNode._txt.context , textContext );
@@ -9328,43 +9337,46 @@ var xAxis = function (_Canvax$Event$EventDi) {
             //检测下文字的高等
             var me = this;
             if (!me.ruler.enabled) {
-                me.height = 3;
+                me.height = 0;
             } else {
-                var _maxHeight = 0;
-                _$9.each(me.dataSection, function (val) {
+                var _maxTextHeight = 0;
 
-                    var txt = new canvax.Display.Text(me._getFormatText(val), {
-                        context: {
-                            fontSize: me.ruler.text.fontSize
+                if (this.ruler.text.enabled) {
+                    _$9.each(me.dataSection, function (val) {
+
+                        var txt = new canvax.Display.Text(me._getFormatText(val), {
+                            context: {
+                                fontSize: me.ruler.text.fontSize
+                            }
+                        });
+
+                        var textWidth = txt.getTextWidth();
+                        var textHeight = txt.getTextHeight();
+                        var height = textHeight; //文本在外接矩形height
+
+                        if (!!me.ruler.text.rotation) {
+                            //有设置旋转
+                            if (me.ruler.text.rotation == 90) {
+                                height = textWidth;
+                            } else {
+                                var sinR = Math.sin(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
+                                var cosR = Math.cos(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
+                                height = parseInt(sinR * textWidth);
+                                
+                            }
                         }
+
+                        //没有设置旋转
+                        if (me.isH) {
+                            //横向柱状图
+
+                        }
+
+                        _maxTextHeight = Math.max(_maxTextHeight, height);
                     });
+                }
 
-                    var textWidth = txt.getTextWidth();
-                    var textHeight = txt.getTextHeight();
-                    var height = textHeight; //文本在外接矩形height
-
-                    if (!!me.ruler.text.rotation) {
-                        //有设置旋转
-                        if (me.ruler.text.rotation == 90) {
-                            height = textWidth;
-                        } else {
-                            var sinR = Math.sin(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-                            var cosR = Math.cos(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-                            height = parseInt(sinR * textWidth);
-                            
-                        }
-                    }
-
-                    //没有设置旋转
-                    if (me.isH) {
-                        //横向柱状图
-
-                    }
-
-                    _maxHeight = Math.max(_maxHeight, height);
-                });
-
-                this.height = _maxHeight + this.ruler.tickline.height + this.ruler.tickline.marginTop + this.ruler.text.marginTop;
+                this.height = _maxTextHeight + this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
             }
         }
     }, {
@@ -9506,19 +9518,20 @@ var yAxis = function (_Canvax$Event$EventDi) {
 
         _this.ruler = {
             enabled: true,
-            tickline: { //刻度线
+            tickLine: { //刻度线
                 enabled: 1,
                 width: 4,
                 lineWidth: 1,
                 strokeStyle: '#cccccc',
                 marginToLine: 2
             },
-            axisline: { //轴线
+            axisLine: { //轴线
                 enabled: 1,
                 lineWidth: 1,
                 strokeStyle: '#cccccc'
             },
             text: {
+                enabled: 1,
                 fontColor: '#999',
                 fontSize: 12,
                 format: null,
@@ -10076,9 +10089,6 @@ var yAxis = function (_Canvax$Event$EventDi) {
                 if (_$11.min(this.dataSection) > 0) {
                     this.baseNumber = _$11.min(this.dataSection);
                 }
-                //if( this.baseNumber < 0 ){
-                //    this.baseNumber = 0;
-                //}
             }
         }
     }, {
@@ -10175,7 +10185,7 @@ var yAxis = function (_Canvax$Event$EventDi) {
                 var yNode = this.rulesSprite.getChildAt(a);
 
                 if (yNode) {
-                    if (yNode._txt) {
+                    if (yNode._txt && this.ruler.text.enabled) {
 
                         if (me.animation && !opts.resize) {
                             yNode._txt.animate({
@@ -10192,17 +10202,17 @@ var yAxis = function (_Canvax$Event$EventDi) {
                         yNode._txt.resetText(o.text);
                     }
 
-                    if (yNode._line) {
+                    if (yNode._tickLine && this.ruler.tickLine.enabled) {
                         if (me.animation && !opts.resize) {
-                            yNode._line.animate({
+                            yNode._tickLine.animate({
                                 y: y
                             }, {
                                 duration: 500,
                                 delay: a * 80,
-                                id: yNode._line.id
+                                id: yNode._tickLine.id
                             });
                         } else {
-                            yNode._line.context.y = y;
+                            yNode._tickLine.context.y = y;
                         }
                     }
                 } else {
@@ -10220,75 +10230,77 @@ var yAxis = function (_Canvax$Event$EventDi) {
                     }
 
                     var lineX = 0;
-                    if (me.ruler.tickline.enabled) {
+                    if (me.ruler.tickLine.enabled) {
                         //线条
-                        lineX = me.align == "left" ? -me.ruler.tickline.width - me.ruler.tickline.marginToLine : me.ruler.tickline.marginToLine;
+                        lineX = me.align == "left" ? -me.ruler.tickLine.width - me.ruler.tickLine.marginToLine : me.ruler.tickLine.marginToLine;
                         var line = new Line$3({
                             context: {
                                 x: lineX,
                                 y: y,
                                 end: {
-                                    x: me.ruler.tickline.width,
+                                    x: me.ruler.tickLine.width,
                                     y: 0
                                 },
-                                lineWidth: me.ruler.tickline.lineWidth,
-                                strokeStyle: me._getProp(me.ruler.tickline.strokeStyle)
+                                lineWidth: me.ruler.tickLine.lineWidth,
+                                strokeStyle: me._getProp(me.ruler.tickLine.strokeStyle)
                             }
                         });
                         yNode.addChild(line);
-                        yNode._line = line;
+                        yNode._tickLine = line;
                     }
 
                     //文字
-                    var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.tickline.width + me.ruler.text.marginToLine;
-                    if (this.isH) {
-                        txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
-                    }
-                    var txt = new canvax.Display.Text(o.text, {
-                        id: "yAxis_txt_" + me.align + "_" + a,
-                        context: {
-                            x: txtX,
-                            y: posy + aniFrom,
-                            fillStyle: me._getProp(me.ruler.text.fontColor),
-                            fontSize: me.ruler.text.fontSize,
-                            rotation: -Math.abs(me.ruler.text.rotation),
-                            textAlign: textAlign,
-                            textBaseline: "middle",
-                            globalAlpha: 0
+                    if (me.ruler.text.enabled) {
+                        var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.tickLine.width + me.ruler.text.marginToLine;
+                        if (this.isH) {
+                            txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
                         }
-                    });
-                    yNode.addChild(txt);
-                    yNode._txt = txt;
-
-                    if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
-                        me.maxW = Math.max(me.maxW, txt.getTextHeight());
-                    } else {
-                        me.maxW = Math.max(me.maxW, txt.getTextWidth());
-                    }
-
-                    //这里可以由用户来自定义过滤 来 决定 该node的样式
-                    _$11.isFunction(me.filter) && me.filter({
-                        layoutData: me.layoutData,
-                        index: a,
-                        txt: txt,
-                        line: line
-                    });
-
-                    me.rulesSprite.addChild(yNode);
-
-                    if (me.animation && !opts.resize) {
-                        txt.animate({
-                            globalAlpha: 1,
-                            y: txt.context.y - aniFrom
-                        }, {
-                            duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: (a + 1) * 80,
-                            id: txt.id
+                        var txt = new canvax.Display.Text(o.text, {
+                            id: "yAxis_txt_" + me.align + "_" + a,
+                            context: {
+                                x: txtX,
+                                y: posy + aniFrom,
+                                fillStyle: me._getProp(me.ruler.text.fontColor),
+                                fontSize: me.ruler.text.fontSize,
+                                rotation: -Math.abs(me.ruler.text.rotation),
+                                textAlign: textAlign,
+                                textBaseline: "middle",
+                                globalAlpha: 0
+                            }
                         });
-                    } else {
-                        txt.context.y = txt.context.y - aniFrom;
-                        txt.context.globalAlpha = 1;
+                        yNode.addChild(txt);
+                        yNode._txt = txt;
+
+                        if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
+                            me.maxW = Math.max(me.maxW, txt.getTextHeight());
+                        } else {
+                            me.maxW = Math.max(me.maxW, txt.getTextWidth());
+                        }
+
+                        //这里可以由用户来自定义过滤 来 决定 该node的样式
+                        _$11.isFunction(me.filter) && me.filter({
+                            layoutData: me.layoutData,
+                            index: a,
+                            txt: txt,
+                            line: line
+                        });
+
+                        me.rulesSprite.addChild(yNode);
+
+                        if (me.animation && !opts.resize) {
+                            txt.animate({
+                                globalAlpha: 1,
+                                y: txt.context.y - aniFrom
+                            }, {
+                                duration: 500,
+                                easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                                delay: (a + 1) * 80,
+                                id: txt.id
+                            });
+                        } else {
+                            txt.context.y = txt.context.y - aniFrom;
+                            txt.context.globalAlpha = 1;
+                        }
                     }
                 }
             }
@@ -10303,8 +10315,8 @@ var yAxis = function (_Canvax$Event$EventDi) {
 
             if (me.width === null) {
                 me.width = parseInt(me.maxW + me.ruler.text.marginToLine);
-                if (me.ruler.tickline.enabled) {
-                    me.width += parseInt(me.ruler.tickline.width + me.ruler.tickline.marginToLine);
+                if (me.ruler.tickLine.enabled) {
+                    me.width += parseInt(me.ruler.tickLine.width + me.ruler.tickLine.marginToLine);
                 }
             }
 
@@ -10315,8 +10327,8 @@ var yAxis = function (_Canvax$Event$EventDi) {
             }
 
             //轴线
-            if (me.ruler.axisline.enabled) {
-                var _axisline = new Line$3({
+            if (me.ruler.axisLine.enabled) {
+                var _axisLine = new Line$3({
                     context: {
                         start: {
                             x: _originX,
@@ -10326,11 +10338,11 @@ var yAxis = function (_Canvax$Event$EventDi) {
                             x: _originX,
                             y: -me.height
                         },
-                        lineWidth: me.ruler.axisline.lineWidth,
-                        strokeStyle: me._getProp(me.ruler.axisline.strokeStyle)
+                        lineWidth: me.ruler.axisLine.lineWidth,
+                        strokeStyle: me._getProp(me.ruler.axisLine.strokeStyle)
                     }
                 });
-                this.sprite.addChild(_axisline);
+                this.sprite.addChild(_axisLine);
             }
         }
     }, {
@@ -10799,35 +10811,36 @@ var Descartes_Component = function (_coorBase) {
 
                 ctx.rotation = 90;
                 ctx.rotateOrigin = origin;
-
-                ctx.scaleOrigin = origin;
-                ctx.scaleX = -1;
+                //ctx.scaleOrigin = origin;
+                //ctx.scaleX = -1;
             });
 
-            function horizontalText(text) {
+            /*
+            function horizontalText( text ){
                 var ctx = text.context;
                 var rect = text.getRect();
-
-                ctx.scaleOrigin.x = rect.x + rect.width / 2;
-                ctx.scaleOrigin.y = rect.y + rect.height / 2;
+                 var origin = {
+                    x : rect.x + rect.width / 2,
+                    y : rect.y + rect.height / 2
+                }
+                 ctx.scaleOrigin = origin;
                 ctx.scaleY = -1;
             }
-
-            //把x轴文案做一次镜像反转
-            _$7.each(_$7.flatten([this._xAxis]), function (_xAxis) {
-                _$7.each(_xAxis.rulesSprite.children, function (xnode) {
-                    horizontalText(xnode._txt);
-                });
-                _xAxis._label && horizontalText(_xAxis._label);
+             //把x轴文案做一次镜像反转
+            _.each( _.flatten( [ this._xAxis ] ), function( _xAxis ){
+                _.each( _xAxis.rulesSprite.children, function( xnode ){
+                    horizontalText( xnode._txt );
+                } );
+                _xAxis._label && horizontalText( _xAxis._label );
+            } );
+             //把y轴文案做一次镜像反转
+            _.each( _.flatten( [ this._yAxis ] ), function( _yAxis ) {
+                _.each( _yAxis.rulesSprite.children, function( ynode ){
+                    horizontalText( ynode._txt );
+                } );
+                _yAxis._label && horizontalText( _yAxis._label );
             });
-
-            //把y轴文案做一次镜像反转
-            _$7.each(_$7.flatten([this._yAxis]), function (_yAxis) {
-                _$7.each(_yAxis.rulesSprite.children, function (ynode) {
-                    horizontalText(ynode._txt);
-                });
-                _yAxis._label && horizontalText(_yAxis._label);
-            });
+            */
         }
     }, {
         key: "getPosX",
@@ -11188,8 +11201,32 @@ var Descartes = function (_CoordBase) {
             return d;
         }
     }, {
-        key: "_horizontal",
-        value: function _horizontal() {
+        key: "drawBeginHorizontal",
+        value: function drawBeginHorizontal() {
+            //横向了之后， 要把4个padding值轮换一下
+            //top,right 对调 ， bottom,left 对调
+            var padding = this.padding;
+
+            var num = padding.top;
+            padding.top = padding.right;
+            padding.right = padding.bottom;
+            padding.bottom = padding.left;
+            padding.left = num;
+
+            /*
+            padding.top = padding.right;
+            padding.right = num;
+            num = padding.bottom;
+            padding.bottom = padding.left;
+            padding.left = num;
+            */
+        }
+
+        //绘制完毕后的横向处理
+
+    }, {
+        key: "drawEndHorizontal",
+        value: function drawEndHorizontal() {
             var me = this;
 
             var ctx = me.graphsSprite.context;
@@ -11199,27 +11236,27 @@ var Descartes = function (_CoordBase) {
 
             var origin = { x: me.height / 2, y: me.width / 2 };
             ctx.rotateOrigin = origin;
-            ctx.scaleOrigin = origin;
-            ctx.scaleX = -1;
+            //ctx.scaleOrigin = origin;
+            //ctx.scaleX = -1;
 
             function _horizontalText(el) {
+
                 if (el.children) {
                     _$6.each(el.children, function (_el) {
                         _horizontalText(_el);
                     });
                 }
                 if (el.type == "text") {
+
                     var ctx = el.context;
                     var w = ctx.width;
                     var h = ctx.height;
 
-                    ctx.scaleOrigin.x = w / 2;
-                    ctx.scaleOrigin.y = h / 2;
-                    ctx.scaleX = -1;
-
-                    ctx.rotation = 90;
-                    ctx.rotateOrigin.x = w / 2;
-                    ctx.rotateOrigin.y = h / 2;
+                    ctx.rotation = -90;
+                    var origin = { x: w / 2, y: h / 2 };
+                    ctx.rotateOrigin = origin;
+                    //ctx.scaleOrigin = origin;
+                    //ctx.scaleX = -1;
                 }
             }
 
@@ -18645,7 +18682,7 @@ var Legend = function (_Component) {
                 id: "LegendSprite"
             });
 
-            this.draw();
+            this._draw();
         }
     }, {
         key: "pos",
@@ -18664,6 +18701,12 @@ var Legend = function (_Component) {
     }, {
         key: "draw",
         value: function draw() {
+            //图例组件运行开始运行的时候就需要计算好自己的高宽 所以早就在_draw中渲染好了， 
+            //组件统一调用draw的时候就不需要做任何处理了
+        }
+    }, {
+        key: "_draw",
+        value: function _draw() {
             var me = this;
 
             var viewWidth = this.root.width - this.root.padding.left - this.root.padding.right;
@@ -18682,7 +18725,7 @@ var Legend = function (_Component) {
                     id: "legend_field_icon_" + i,
                     context: {
                         x: 0,
-                        y: me.node.height / 2,
+                        y: me.node.height / 3,
                         fillStyle: !obj.enabled ? "#ccc" : obj.color || me._labelColor,
                         r: me.node.r,
                         cursor: "pointer"
@@ -18705,7 +18748,7 @@ var Legend = function (_Component) {
                     id: "legend_field_txt_" + i,
                     context: {
                         x: me.node.r + 3,
-                        y: me.node.height / 2,
+                        y: me.node.height / 3,
                         textAlign: "left",
                         textBaseline: "middle",
                         fillStyle: "#333", //obj.color

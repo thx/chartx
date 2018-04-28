@@ -33,7 +33,7 @@ export default class Coord extends Chart
         return opts;
     }
 
-    //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 _horizontal 的操作
+    //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 drawEndHorizontal 的操作
     draw( opts )
     {
         if( this._opts.theme ){
@@ -44,11 +44,16 @@ export default class Coord extends Chart
         };
         this.initModule( opts );     //初始化模块  
         this.initComponents( opts ); //初始化组件, 来自己chart.js模块
+
+        if( this._coord && this._coord.horizontal ){
+            this.drawBeginHorizontal && this.drawBeginHorizontal();
+        };
+
         this.startDraw( opts );      //开始绘图
         this.drawComponents( opts ); //绘图完，开始绘制插件，来自己chart.js模块
 
         if( this._coord && this._coord.horizontal ){
-            this._horizontal();
+            this.drawEndHorizontal && this.drawEndHorizontal();
         };
 
         this.inited = true;

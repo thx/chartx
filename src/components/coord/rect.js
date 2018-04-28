@@ -157,7 +157,30 @@ export default class Descartes extends CoordBase
         return d;
     }
 
-    _horizontal() 
+    drawBeginHorizontal()
+    {
+        //横向了之后， 要把4个padding值轮换一下
+        //top,right 对调 ， bottom,left 对调
+        var padding = this.padding;
+        
+        var num = padding.top;
+        padding.top = padding.right;
+        padding.right = padding.bottom;
+        padding.bottom = padding.left;
+        padding.left = num;
+
+        /*
+        padding.top = padding.right;
+        padding.right = num;
+        num = padding.bottom;
+        padding.bottom = padding.left;
+        padding.left = num;
+        */
+
+    }
+
+    //绘制完毕后的横向处理
+    drawEndHorizontal() 
     {
         var me = this;
 
@@ -166,30 +189,32 @@ export default class Descartes extends CoordBase
         ctx.y += ((me.height - me.width) / 2);
         ctx.rotation = 90;
 
+        
         var origin = { x : me.height/2, y : me.width/2 };
         ctx.rotateOrigin = origin;
-        ctx.scaleOrigin = origin;
-        ctx.scaleX = -1;
-     
+        //ctx.scaleOrigin = origin;
+        //ctx.scaleX = -1;
+        
         function _horizontalText( el ){
+            
             if( el.children ){
                 _.each( el.children, function( _el ){
                     _horizontalText( _el );
                 } )
-            }
+            };
             if( el.type == "text" ){
+                
                 var ctx = el.context;
                 var w = ctx.width;
                 var h = ctx.height;
 
-                ctx.scaleOrigin.x = w / 2;
-                ctx.scaleOrigin.y = h / 2;
-                ctx.scaleX = -1;
-
-                ctx.rotation = 90;
-                ctx.rotateOrigin.x = w / 2;
-                ctx.rotateOrigin.y = h / 2;
-            }
+                ctx.rotation = -90;
+                var origin = { x: w/2, y: h/2 };
+                ctx.rotateOrigin = origin;
+                //ctx.scaleOrigin = origin;
+                //ctx.scaleX = -1;
+                
+            };
         }
 
         _.each(me._graphs, function( _graphs ) {

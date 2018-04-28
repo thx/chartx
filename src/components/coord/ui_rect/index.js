@@ -255,23 +255,27 @@ export default class Descartes_Component extends coorBase
             var origin = {
                 x : h/2,
                 y : w/2
-            }
+            };
 
             ctx.rotation = 90;
             ctx.rotateOrigin = origin;
-
-            ctx.scaleOrigin = origin;
-            ctx.scaleX = -1;
+            //ctx.scaleOrigin = origin;
+            //ctx.scaleX = -1;
 
         });
 
 
+        /*
         function horizontalText( text ){
             var ctx = text.context;
             var rect = text.getRect();
 
-            ctx.scaleOrigin.x = rect.x + rect.width / 2;
-            ctx.scaleOrigin.y = rect.y + rect.height / 2;
+            var origin = {
+                x : rect.x + rect.width / 2,
+                y : rect.y + rect.height / 2
+            }
+
+            ctx.scaleOrigin = origin;
             ctx.scaleY = -1;
         }
 
@@ -290,6 +294,7 @@ export default class Descartes_Component extends coorBase
             } );
             _yAxis._label && horizontalText( _yAxis._label );
         });
+        */
 
     }
 

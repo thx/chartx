@@ -56,10 +56,7 @@
                             field : "xfield",
                             ruler : {
                                 text : {
-                                    textAlign : "right",
-                                    format: function(){
-                                        return "x\nodfdfdfdfsdfo"
-                                    }
+                                    textAlign : "right"
                                 }
                             }
                             //dataSection : [1,3,5,7,9]
@@ -67,10 +64,8 @@
                         yAxis : [
                             {
                                 label : "left"
-                            },
-                            {
-                                label : "right"
                             }
+                            
                         ]
                     },
                     legend : {},
@@ -78,7 +73,6 @@
                         pointer : "shadow"
                     },
                     graphs : [
-                    
                         {
                             type : "bar",
                             field : "click",
@@ -90,7 +84,7 @@
                         {
                             type : "bar",
                             field : [ [ "uv","pv" ],"ppc" ],
-                            yAxisAlign : "right"
+                            yAxisAlign : "left"
                         }
                         
                     ],

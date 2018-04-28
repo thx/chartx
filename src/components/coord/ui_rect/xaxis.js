@@ -23,7 +23,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         this.ruler = {
             enabled : true,
-            tickline : {
+            tickLine : {
                 enabled    : 1, //是否有刻度线
                 lineWidth  : 1,
                 height     : 4,
@@ -36,6 +36,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 strokeStyle: '#cccccc'
             },
             text : {
+                enabled    : 1,
                 fontColor  : '#999',
                 fontSize   : 12,
                 rotation   : 0,
@@ -49,7 +50,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         if( opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined) ){
             //如果是横向直角坐标系图
             this.ruler.text.rotation = 90;
-        }
+        };
 
         this.maxTxtH = 0;
 
@@ -438,77 +439,80 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
             var o = arr[a]
             var x = o.x,
-                y = this.ruler.tickline.height + this.ruler.tickline.marginTop + this.ruler.text.marginTop;
+                y = this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
 
-            //文字
-            var textContext = {
-                x: o._text_x || o.x,
-                y: y + 20,
-                fillStyle    : this.ruler.text.fontColor,
-                fontSize     : this.ruler.text.fontSize,
-                rotation     : -Math.abs(this.ruler.text.rotation),
-                textAlign    : this.ruler.text.textAlign,
-                lineHeight   : this.ruler.text.lineHeight,
-                textBaseline : !!this.ruler.text.rotation ? "middle" : "top",
-                globalAlpha  : 0
-            };
-
-            if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
-                textContext.x += 5;
-                textContext.y += 3;
-            };
-
-            if( xNode._txt ){
-                //_.extend( xNode._txt.context , textContext );
-                xNode._txt.resetText( o.text+"" );
-                if( this.animation ){
-                    xNode._txt.animate( {
-                        x : textContext.x
-                    } , {
-                        duration : 300
-                    });
-                } else {
-                    xNode._txt.context.x = textContext.x
-                }
-
-            } else {
-
-                xNode._txt = new Canvax.Display.Text(o.text, {
-                    id: "xAxis_txt_" + a,
-                    context: textContext
-                });
-                xNode.addChild( xNode._txt );
-
-                //新建的 txt的 动画方式
-                if (this.animation && !opts.resize) {
-                    xNode._txt.animate({
-                        globalAlpha: 1,
-                        y: xNode._txt.context.y - 20
-                    }, {
-                        duration: 500,
-                        easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                        delay: a * delay,
-                        id: xNode._txt.id
-                    });
-                } else {
-                    xNode._txt.context.y = xNode._txt.context.y - 20;
-                    xNode._txt.context.globalAlpha = 1;
+        
+            if ( this.ruler.text.enabled && !!arr[a].visible ){
+                //文字
+                var textContext = {
+                    x: o._text_x || o.x,
+                    y: y + 20,
+                    fillStyle    : this.ruler.text.fontColor,
+                    fontSize     : this.ruler.text.fontSize,
+                    rotation     : -Math.abs(this.ruler.text.rotation),
+                    textAlign    : this.ruler.text.textAlign,
+                    lineHeight   : this.ruler.text.lineHeight,
+                    textBaseline : !!this.ruler.text.rotation ? "middle" : "top",
+                    globalAlpha  : 0
                 };
-            };
 
-            xNode._txt.context.visible = !!arr[a].visible;
+                if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
+                    textContext.x += 5;
+                    textContext.y += 3;
+                };
+
+                if( xNode._txt ){
+                    //_.extend( xNode._txt.context , textContext );
+                    xNode._txt.resetText( o.text+"" );
+                    if( this.animation ){
+                        xNode._txt.animate( {
+                            x : textContext.x
+                        } , {
+                            duration : 300
+                        });
+                    } else {
+                        xNode._txt.context.x = textContext.x
+                    }
+
+                } else {
+
+                    xNode._txt = new Canvax.Display.Text(o.text, {
+                        id: "xAxis_txt_" + a,
+                        context: textContext
+                    });
+                    xNode.addChild( xNode._txt );
+
+                    //新建的 txt的 动画方式
+                    if (this.animation && !opts.resize) {
+                        xNode._txt.animate({
+                            globalAlpha: 1,
+                            y: xNode._txt.context.y - 20
+                        }, {
+                            duration: 500,
+                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                            delay: a * delay,
+                            id: xNode._txt.id
+                        });
+                    } else {
+                        xNode._txt.context.y = xNode._txt.context.y - 20;
+                        xNode._txt.context.globalAlpha = 1;
+                    };
+                };
+
+                //xNode._txt.context.visible = !!arr[a].visible;
+            };
             
 
-            if ( this.ruler.tickline.enabled && !!arr[a].visible ) {
+            if ( this.ruler.tickLine.enabled && !!arr[a].visible ) {
                 var lineContext = {
                     x: x,
-                    y: this.ruler.tickline.marginTop,
+                    y: this.ruler.tickLine.marginTop,
                     end : {
                         x : 0,
-                        y : this.ruler.tickline.height
+                        y : this.ruler.tickLine.height
                     },
-                    lineWidth: this.ruler.tickline.lineWidth,
-                    strokeStyle: this.ruler.tickline.strokeStyle
+                    lineWidth: this.ruler.tickLine.lineWidth,
+                    strokeStyle: this.ruler.tickLine.strokeStyle
                 };
                 if( xNode._line ){
                     //_.extend( xNode._txt.context , textContext );
@@ -572,46 +576,49 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     { //检测下文字的高等
         var me = this;
         if (!me.ruler.enabled) {
-            me.height = 3; 
+            me.height = 0; 
         } else {
-            var _maxHeight = 0;
-            _.each( me.dataSection, function( val ){
+            var _maxTextHeight = 0;
 
-                    var txt = new Canvax.Display.Text( me._getFormatText(val) , {
-                        context: {
-                            fontSize: me.ruler.text.fontSize
-                        }
-                    });
-        
-                    var textWidth = txt.getTextWidth();
-                    var textHeight = txt.getTextHeight();
-                    var width = textWidth; //文本在外接矩形width
-                    var height = textHeight;//文本在外接矩形height
+            if( this.ruler.text.enabled ){
+                _.each( me.dataSection, function( val ){
 
-                    if (!!me.ruler.text.rotation) {
-                        //有设置旋转
-                        if ( me.ruler.text.rotation == 90 ) {
-                            width  = textHeight;
-                            height = textWidth;
-                        } else {
-                            var sinR = Math.sin(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-                            var cosR = Math.cos(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-                            height = parseInt( sinR * textWidth );
-                            width = parseInt( cosR * textWidth );
+                        var txt = new Canvax.Display.Text( me._getFormatText(val) , {
+                            context: {
+                                fontSize: me.ruler.text.fontSize
+                            }
+                        });
+            
+                        var textWidth = txt.getTextWidth();
+                        var textHeight = txt.getTextHeight();
+                        var width = textWidth; //文本在外接矩形width
+                        var height = textHeight;//文本在外接矩形height
+
+                        if (!!me.ruler.text.rotation) {
+                            //有设置旋转
+                            if ( me.ruler.text.rotation == 90 ) {
+                                width  = textHeight;
+                                height = textWidth;
+                            } else {
+                                var sinR = Math.sin(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
+                                var cosR = Math.cos(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
+                                height = parseInt( sinR * textWidth );
+                                width = parseInt( cosR * textWidth );
+                            };
                         };
-                    };
 
-                    //没有设置旋转
-                    if( me.isH ){
-                        //横向柱状图
-                        
-                    };
+                        //没有设置旋转
+                        if( me.isH ){
+                            //横向柱状图
+                            
+                        };
 
-                    _maxHeight = Math.max( _maxHeight, height);
-                
-            } );
+                        _maxTextHeight = Math.max( _maxTextHeight, height);
+                    
+                } );
+            };
 
-            this.height = _maxHeight + this.ruler.tickline.height + this.ruler.tickline.marginTop + this.ruler.text.marginTop;
+            this.height = _maxTextHeight + this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
         }
     }
 

@@ -63,7 +63,7 @@ export default class Legend extends Component
             id : "LegendSprite"
         });
 
-        this.draw();
+        this._draw();
     }
 
     pos( pos )
@@ -79,6 +79,12 @@ export default class Legend extends Component
     }
 
     draw()
+    {
+        //图例组件运行开始运行的时候就需要计算好自己的高宽 所以早就在_draw中渲染好了， 
+        //组件统一调用draw的时候就不需要做任何处理了
+    }
+
+    _draw()
     {
         var me = this;
 
@@ -96,7 +102,7 @@ export default class Legend extends Component
                 id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
-                    y     : me.node.height/2 ,
+                    y     : me.node.height/3 ,
                     fillStyle : !obj.enabled ? "#ccc" : (obj.color || me._labelColor),
                     r : me.node.r,
                     cursor: "pointer"
@@ -119,7 +125,7 @@ export default class Legend extends Component
                 id: "legend_field_txt_"+i,
                 context : {
                     x : me.node.r + 3 ,
-                    y : me.node.height / 2,
+                    y : me.node.height / 3,
                     textAlign : "left",
                     textBaseline : "middle",
                     fillStyle : "#333", //obj.color
