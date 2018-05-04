@@ -8,7 +8,7 @@
 * 这样的结构化数据格式。
 */
 import {parse2MatrixData} from "./tools"
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 
 const _ = Canvax._;
 

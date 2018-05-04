@@ -1,4 +1,4 @@
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import { getEl,parse2MatrixData } from "./utils/tools"
 import DataFrame from "./utils/dataframe"
 import theme from "./theme"

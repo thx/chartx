@@ -1,5 +1,5 @@
 import Component from "../component"
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 
 const Circle = Canvax.Shapes.Circle;
 const Droplet = Canvax.Shapes.Droplet;

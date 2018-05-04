@@ -1,4 +1,4 @@
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import {getPath} from "../../../utils/tools"
 import ColorFormat from "../../../utils/colorformat"
 

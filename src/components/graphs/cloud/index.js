@@ -1,4 +1,4 @@
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import GraphsBase from "../index"
 import cloudLayout from "../../../layout/cloud"
 

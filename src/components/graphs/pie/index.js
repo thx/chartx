@@ -1,4 +1,4 @@
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import Pie from "./pie"
 import GraphsBase from "../index"
 

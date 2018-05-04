@@ -1,5 +1,5 @@
 import coorBase from "../ui_coord_base"
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"

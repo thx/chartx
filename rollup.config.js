@@ -5,7 +5,7 @@ var resolve = require('rollup-plugin-node-resolve');
 var uglify = require('rollup-plugin-uglify');
 
 rollup.rollup({
-    entry: 'src/index.js',
+    input: 'src/index.js',
     plugins: [
       babel({
         exclude: 'node_modules/**'
@@ -25,31 +25,31 @@ rollup.rollup({
 
     bundle.write({
         format: 'iife',
-        moduleName: 'Chartx',
-        dest: 'dist/chartx.js',
+        name: 'Chartx',
+        file: 'dist/chartx.js',
         //sourceMap: 'inline'
     });
 
 
     bundle.write({
         format: 'amd',
-        moduleName: 'Chartx',
-        dest: 'dist/amd/chartx.js',
+        name: 'Chartx',
+        file: 'dist/amd/chartx.js',
         //sourceMap: 'inline'
     });
 
     bundle.write({
         format: 'umd',
-        moduleName: 'Chartx',
-        dest: 'dist/umd/chartx.js',
+        name: 'Chartx',
+        file: 'dist/umd/chartx.js',
         //sourceMap: 'inline'
     });
 
 
     bundle.write({
         format: 'cjs',
-        moduleName: 'Chartx',
-        dest: 'dist/cjs/chartx.js',
+        name: 'Chartx',
+        file: 'dist/cjs/chartx.js',
         //sourceMap: 'inline'
     });
 

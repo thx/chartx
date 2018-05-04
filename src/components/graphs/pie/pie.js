@@ -1,6 +1,6 @@
 //单环pie
 
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 
 
 const Sector = Canvax.Shapes.Sector

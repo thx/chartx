@@ -1,5 +1,5 @@
 import CoordBase from "./index"
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import {parse2MatrixData} from "../../utils/tools"
 import DataFrame from "../../utils/dataframe"
 import CoordComponents from "./ui_rect/index"

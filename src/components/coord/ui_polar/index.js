@@ -14,7 +14,7 @@
 //width, height, origin(默认为width/2,height/2)
 
 import coorBase from "../ui_coord_base"
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import Grid from "./grid"
 import DataSection from "../../../utils/datasection"
 

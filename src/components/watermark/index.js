@@ -1,7 +1,7 @@
 /**
  * 水印组件
  */
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 
 const Text = Canvax.Display.Text;
 const _ = Canvax._;

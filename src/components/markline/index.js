@@ -1,5 +1,5 @@
 import Component from "../component"
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 
 const BrokenLine = Canvax.Shapes.BrokenLine;
 const Sprite = Canvax.Display.Sprite;

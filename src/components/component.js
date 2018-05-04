@@ -1,4 +1,4 @@
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 
 export default class component extends Canvax.Event.EventDispatcher
 {

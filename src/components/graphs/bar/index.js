@@ -1,4 +1,4 @@
-import Canvax from "canvax2d"
+import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
 
@@ -30,6 +30,9 @@ export default class BarGraphs extends GraphsBase
             width     : 0,
             _width    : 0,
             maxWidth  : 50,
+            minWidth  : 1,
+            minHeight : 0,
+
             radius    : 4,
             fillStyle : null,
             fillAlpha : 0.95,
@@ -290,9 +293,13 @@ export default class BarGraphs extends GraphsBase
 
                     var rectH = rectData.y - rectData.fromY;
 
-                    if( isNaN(rectH) || Math.abs(rectH) < 1 ){
+                    if( isNaN(rectH) ){
                         rectH = 0;
-                    };
+                    } else {
+                        if( Math.abs(rectH) < me.node.minHeight ){
+                            rectH = me.node.minHeight;
+                        }
+                    }
 
                     var finalPos = {
                         x: Math.round(rectData.x),
