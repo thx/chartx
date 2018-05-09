@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+
+
+var data = [
+["cost","impression","transactionTotal","searchImpression","searchTransaction","saveCost","contentImpression","contentTransaction","contentCost","theDate"],
+[56477,29851247,3576.347442840845,5285,11653,135.23543952350644,432730,18788.237921287142,287.23344421113336,"2018-12-12"],
+[68647,27741531,1290.3485061101924,37429,13204,2121.239042391477,482814,25653.23372594129,204.2328844421385,"2018-12-18"],
+[81481,29033466,1120.342442231393,5266,20874,1183.2355825337274,111254,28381.232555552826,319.23134106976835,"2018-12-12"],
+[24162,18836451,2014.3442666011663,17262,18070,1993.2322158254633,460997,5235.230792274845,81.23657482689275,"2018-12-18"],
+[49420,16701444,1090.3465043770357,14483,28382,896.2346259798355,158624,12413.235396902151,174.23286537699866,"2018-12-12"],
+[23422,16641967,2254.3437275466376,25518,14688,1729.230321684743,481133,13820.238755646224,37.23557671814852,"2018-12-18"],
+[53827,19388210,3616.347744092548,1992,33850,1937.2303358132547,155824,7515.237335844322,219.2354753108877,"2018-12-12"],
+[63734,27174767,2358.3451796163386,1448,19538,2614.2365419514304,471509,14532.238537568091,238.2359764387046,"2018-12-18"],
+[75626,12845926,3467.344624611276,2134,38931,120.23938582780984,160448,6096.239444621741,290.23396766167616,"2018-12-12"],
+[98312,14655481,3352.346544517449,19558,34926,1900.2343794382073,371083,9668.236336110402,373.23755477613616,"2018-12-18"],
+[24150,11722028,3242.3435275879456,3353,14081,672.2348620774844,111098,4410.23228666353,251.2378272187515,"2018-12-12"],
+[52461,29348303,1440.3475527362307,23118,38489,1703.2370497246454,161174,16629.231183175823,58.23957525637574,"2018-12-18"],
+[88692,13328561,1872.3420464031735,20163,8577,2842.2333644132573,416626,20186.232352600833,306.2325858777912,"2018-12-12"],
+[86203,32282397,3401.3468340529284,36649,20253,1185.2373878779877,256450,10188.235115811309,160.2308817173584,"2018-12-18"],
+[77173,33169956,2706.345594286761,31548,11681,1697.2335114126709,101405,19053.23423456795,146.23163785728994,"2018-12-12"],
+[88264,27640252,3032.3458764439624,25464,30047,2605.2352837563976,269081,20277.23285345535,38.23432617338415,"2018-12-18"],
+[53676,18063719,1117.3498418608547,22751,29215,2144.2358894129165,468515,29067.238387447287,116.23724573616784,"2018-12-12"],
+[22406,28477893,3245.345653242374,21553,1381,1880.2364111178267,167267,20217.23931148364,366.2328461314353,"2018-12-18"],
+[14813,18171630,3436.3473218583404,20188,26231,2173.238773112893,332286,14521.230516727152,347.2345499109607,"2018-12-12"],
+[54574,12679658,2198.341212869962,24671,9750,1858.2357630786914,347981,19904.238481574557,304.2344451063792,"2018-12-18"],
+[92919,19237692,1651.343736362062,15770,31067,1552.2374911652362,488149,13461.234176812404,90.23699037280275,"2018-12-12"],
+[56343,10541494,2153.3483392230587,3449,20150,1699.2302534684375,304690,22552.233434561054,388.2320434216062,"2018-12-18"],
+[50912,24325530,2300.3436473554225,3596,24338,745.2329276181056,258986,12868.231964446704,39.23515068565568,"2018-12-12"],
+[30050,30042114,1583.3406712778276,21802,8934,1432.2365164638609,462189,32829.233519513895,52.2314386103159,"2018-12-18"]
+]
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            animation: 1,
+            field: "theDate"
+        },
+        yAxis: [
+            {
+                animation: false,
+                scale: {
+                    text: {}
+                }
+            }
+        ]
+    },
+    graphs: {
+        type: "line",
+        animation:0,
+        field: [
+            "cost"
+        ],
+        node: {
+            enabled: false
+        },
+        line: {
+            enabled: 1,
+            strokeStyle : "red",
+            lineWidth: 1
+        },
+        area : {
+            enabled:1,
+            fillStyle : "blue",
+            alpha:0.2
+        }
+    },
+    tips: {
+        positionInRange: 1 
+    }
+};
+
+window.line = Chartx.create("canvasTest" , data , options)
+
+
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:1356px;height:280px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+
