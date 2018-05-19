@@ -10472,6 +10472,7 @@
 	                yAxis.enabled = opts.enabled;
 	            });
 	            */
+
 	            _this.grid.enabled = opts.enabled;
 	        }
 	        _this.init(opts);
@@ -11092,8 +11093,9 @@
 	                    var h = ctx.height;
 
 	                    ctx.rotation = -90;
-	                    var origin = { x: w / 2, y: h / 2 };
-	                    ctx.rotateOrigin = origin;
+
+	                    //var origin = { x: parseInt(w/2), y: parseInt(h/2) };
+	                    //ctx.rotateOrigin = origin;
 	                    //ctx.scaleOrigin = origin;
 	                    //ctx.scaleX = -1;
 	                }            }
@@ -12616,11 +12618,18 @@
 	        _this.text = {
 	            enabled: false,
 	            animation: true,
-	            fillStyle: '#999',
+	            fontColor: null, //如果有设置text.fontColor那么优先使用fontColor
 	            fontSize: 12,
 	            format: null,
-	            lineWidth: 1,
-	            strokeStyle: 'white'
+	            lineWidth: 0,
+	            strokeStyle: null,
+
+	            rotate: 0,
+	            align: "center", //left center right
+	            verticalAlign: "bottom", //top middle bottom
+	            position: "top", //top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center
+	            offsetX: 0,
+	            offsetY: 0
 	        };
 
 	        _this.sort = null;
@@ -12718,7 +12727,7 @@
 	                    this.node._width = this.node.width;
 	                }
 	            } else {
-	                this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
+	                this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.2);
 
 	                //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
 	                if (this.node._width == 1 && ceilWidth > 3) {
@@ -12788,6 +12797,7 @@
 	            var _flattenField = _$17.flatten([this.field]);
 
 	            _$17.each(this.enabledField, function (h_group, i) {
+
 	                h_group = _$17.flatten([h_group]);
 	                /*
 	                //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
@@ -12812,6 +12822,8 @@
 	                me._barsLen = me._dataLen * groupsLen;
 
 	                for (var h = 0; h < me._dataLen; h++) {
+
+	                    //bar的group
 	                    var groupH = null;
 	                    if (i == 0) {
 	                        //横向的分组
@@ -12826,7 +12838,7 @@
 	                        }                    } else {
 	                        groupH = me.barsSp.getChildById("barGroup_" + h);
 	                    }
-	                    //同上面，给txt做好分组
+	                    //txt的group begin
 	                    var txtGroupH = null;
 	                    if (i == 0) {
 	                        if (h <= preDataLen - 1) {
@@ -12839,7 +12851,8 @@
 	                            txtGroupH.iGroup = i;
 	                        }                    } else {
 	                        txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
-	                    }
+	                    }                    //txt的group begin
+
 	                    for (var v = 0; v < vLen; v++) {
 
 	                        me.node._count++;
@@ -12874,7 +12887,7 @@
 	                        };
 	                        rectData.width = finalPos.width;
 
-	                        var rectCxt = {
+	                        var rectCtx = {
 	                            x: finalPos.x,
 	                            y: rectData.yBasePoint.y, //0,
 	                            width: finalPos.width,
@@ -12887,11 +12900,11 @@
 	                        if (!!me.node.radius && rectData.isLeaf && !me.proportion) {
 	                            var radiusR = Math.min(me.node._width / 2, Math.abs(rectH));
 	                            radiusR = Math.min(radiusR, me.node.radius);
-	                            rectCxt.radius = [radiusR, radiusR, 0, 0];
+	                            rectCtx.radius = [radiusR, radiusR, 0, 0];
 	                        }
 	                        if (!animate) {
-	                            delete rectCxt.scaleY;
-	                            rectCxt.y = finalPos.y;
+	                            delete rectCtx.scaleY;
+	                            rectCtx.y = finalPos.y;
 	                        }
 	                        var rectEl = null;
 	                        var barId = "bar_" + h + "_" + rectData.field;
@@ -12902,7 +12915,7 @@
 	                        } else {
 	                            rectEl = new Rect$4({
 	                                id: barId,
-	                                context: rectCxt
+	                                context: rectCtx
 	                            });
 	                            rectEl.field = rectData.field;
 	                            groupH.addChild(rectEl);
@@ -12916,133 +12929,59 @@
 
 	                        me.node.filter && me.node.filter.apply(rectEl, [rectData, me]);
 
-	                        //叶子节点上面放置info
-	                        if (rectData.isLeaf && me.text.enabled) {
+	                        //text begin ------------------------------
+	                        if (me.text.enabled) {
+
+	                            var value = rectData.value;
+	                            if (_$17.isFunction(me.text.format)) {
+	                                var _formatc = me.text.format.apply(me, [value, rectData]);
+	                                if (_formatc !== undefined || _formatc !== null) {
+	                                    value = _formatc;
+	                                }
+	                            }
+	                            if (value === undefined || value === null || value === "") {
+	                                continue;
+	                            }
+	                            if (_$17.isNumber(value)) {
+	                                value = numAddSymbol(value);
+	                            }
+	                            var textCtx = {
+	                                fillStyle: me.text.fontColor || finalPos.fillStyle,
+	                                fontSize: me.text.fontSize,
+	                                lineWidth: me.text.lineWidth,
+	                                strokeStyle: me.text.strokeStyle || finalPos.fillStyle,
+	                                //textAlign   : me.text.align,
+	                                textBaseline: me.text.verticalAlign,
+	                                rotate: me.text.rotate
+	                            };
+	                            //然后根据position, offset确定x,y
+	                            var _textPos = me._getTextPos(finalPos, rectData);
+	                            textCtx.x = _textPos.x;
+	                            textCtx.y = _textPos.y;
+
+	                            textCtx.textAlign = me._getTextAlign(finalPos, rectData);
 
 	                            //文字
-	                            var infosp = null;
-	                            var infospId = "infosp_" + h + "_" + rectData.field;
+	                            var textEl = null;
+	                            var textId = "text_" + h + "_" + rectData.field;
 	                            if (h <= preDataLen - 1) {
-	                                infosp = txtGroupH.getChildById(infospId);
-	                            }
-	                            if (infosp) ; else {
-	                                infosp = new canvax.Display.Sprite({
-	                                    id: infospId,
-	                                    context: {
-	                                        y: rectData.yBasePoint.y,
-	                                        visible: false
-	                                    }
-	                                });
-	                                infosp._hGroup = h;
-	                                txtGroupH.addChild(infosp);
-	                            }
-	                            var _values = [];
-	                            for (var c = vLen - 1; c >= 0; c--) {
-	                                //在baseNumber同一侧的数据放在一个叶子节点上面显示
-	                                if (rectData.value > rectData.yBasePoint.value === me.data[h_group[c]][h].value > me.data[h_group[c]][h].yBasePoint.value) {
-	                                    _values.push(me.data[h_group[c]][h]);
-	                                }
-	                            }
-
-	                            var infoWidth = 0;
-	                            var infoHeight = 0;
-
-	                            _$17.each(_values, function (cdata, ci) {
-	                                var value = cdata.value;
-	                                if (_$17.isFunction(me.text.format)) {
-	                                    var _formatc = me.text.format.apply(me, [value, cdata]);
-	                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
-	                                        value = _formatc;
-	                                    }
-	                                }
-	                                if (value === undefined || value === null || value === "") {
-	                                    return;
-	                                }
-	                                if (_$17.isNumber(value)) {
-	                                    value = numAddSymbol(value);
-	                                }
-	                                if (ci > 0 && infosp.children.length > 0) {
-	                                    txt = new canvax.Display.Text("/", {
-	                                        context: {
-	                                            x: infoWidth + 2,
-	                                            fillStyle: "#999"
-	                                        }
-	                                    });
-	                                    infoWidth += txt.getTextWidth() + 2;
-	                                    infosp.addChild(txt);
-	                                }
-	                                var _txt = null;
-	                                var isNewNode = true;
-	                                if (h <= preDataLen - 1) {
-	                                    _txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
-	                                    isNewNode = false;
-	                                }
-	                                if (_txt) ; else {
-
-	                                    _txt = new canvax.Display.Text(value, {
-	                                        id: "info_txt_" + i + "_" + h + "_" + ci,
-	                                        context: {
-	                                            x: infoWidth + 2,
-	                                            fillStyle: cdata.color,
-	                                            fontSize: me.text.fontSize,
-	                                            lineWidth: me.text.lineWidth,
-	                                            strokeStyle: me.text.strokeStyle
-	                                        }
-	                                    });
-	                                    infosp.addChild(_txt);
-	                                }
-	                                _txt.fixedNum = 0;
-	                                var __vsp = value.split('.');
-	                                if (__vsp.length > 1) {
-	                                    _txt.fixedNum = __vsp[1].length;
-	                                }
-
-	                                _txt._text = cdata.value;
-	                                _txt._data = cdata;
-	                                infoWidth += _txt.getTextWidth() + 2;
-	                                infoHeight = Math.max(infoHeight, _txt.getTextHeight());
-
-	                                if (animate && isNewNode && me.text.animation) {
-	                                    var beginNumber = 0;
-	                                    if (value >= 100) {
-	                                        beginNumber = 100;
-	                                    }
-	                                    if (value >= 1000) {
-	                                        beginNumber = 1000;
-	                                    }
-	                                    if (value >= 10000) {
-	                                        beginNumber = 10000;
-	                                    }
-	                                    if (value >= 100000) {
-	                                        beginNumber = 100900;
-	                                    }
-	                                    //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
-	                                    _txt.resetText(beginNumber);
-	                                }                            });
-
-	                            infosp._finalX = rectData.x + me.node._width / 2 - infoWidth / 2;
-
-	                            //如果数据在basepoint下方
-	                            if (rectData.value < rectData.yBasePoint.value) {
-	                                infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
+	                                textEl = txtGroupH.getChildById(textId);
+	                            }                            if (textEl) {
+	                                //do something
+	                                textEl.resetText(value);
 	                            } else {
-	                                infosp._finalY = rectData.y - infoHeight;
-	                            }
-
-	                            infosp._centerX = rectData.x + me.node._width / 2;
-	                            infosp.context.width = infoWidth;
-	                            infosp.context.height = infoHeight;
-
-	                            if (!animate) {
-	                                infosp.context.y = infosp._finalY;
-	                                infosp.context.x = infosp._finalX;
-	                                infosp.context.visible = true;
+	                                textEl = new canvax.Display.Text(value, {
+	                                    id: textId,
+	                                    context: textCtx
+	                                });
+	                                textEl.field = rectData.field;
+	                                txtGroupH.addChild(textEl);
 	                            }                        }
+	                        //text end ------------------------------
 	                    }                }
 	            });
 
 	            this.sprite.addChild(this.barsSp);
-
 	            //如果有text设置， 就要吧text的txtsSp也添加到sprite
 	            if (this.text.enabled) {
 	                this.sprite.addChild(this.txtsSp);
@@ -13231,21 +13170,73 @@
 	            //return tmpData;
 	        }
 	    }, {
-	        key: "_updateInfoTextPos",
-	        value: function _updateInfoTextPos(el) {
+	        key: "_getTextAlign",
+	        value: function _getTextAlign(bar, rectData) {
+	            var align = this.text.align;
+	            if (rectData.value < rectData.yBasePoint.value) {
+	                if (align == "left") {
+	                    align = "right";
+	                } else if (align == "right") {
+	                    align = "left";
+	                }
+	            }            return align;
+	        }
+	    }, {
+	        key: "_getTextPos",
+	        value: function _getTextPos(bar, rectData) {
 
-	            var infoWidth = 0;
-	            var infoHeight = 0;
-	            var cl = el.children.length;
-	            _$17.each(el.children, function (c, i) {
-	                if (c.getTextWidth) {
-	                    c.context.x = infoWidth;
-	                    infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
-	                    infoHeight = Math.max(infoHeight, c.getTextHeight());
-	                }            });
-	            el.context.x = el._centerX - infoWidth / 2;
-	            el.context.width = infoWidth;
-	            el.context.height = infoHeight;
+	            var me = this;
+	            var point = {
+	                x: 0, y: 0
+	            };
+	            var x = bar.x,
+	                y = bar.y;
+	            switch (me.text.position) {
+	                case "top":
+	                    x = bar.x + bar.width / 2;
+	                    y = bar.y + bar.height;
+	                    break;
+	                case "topRight":
+	                    x = bar.x + bar.width;
+	                    y = bar.y + bar.height;
+	                    break;
+	                case "right":
+	                    x = bar.x + bar.width;
+	                    y = bar.y + bar.height / 2;
+	                    break;
+	                case "rightBottom":
+	                    x = bar.x + bar.width;
+	                    y = bar.y;
+	                    break;
+	                case "bottom":
+	                    x = bar.x + bar.width / 2;
+	                    y = bar.y;
+	                    break;
+	                case "bottomLeft":
+	                    x = bar.x;
+	                    y = bar.y;
+	                    break;
+	                case "left":
+	                    x = bar.x;
+	                    y = bar.y + bar.height / 2;
+	                    break;
+	                case "leftTop":
+	                    x = bar.x;
+	                    y = bar.y + bar.height;
+	                    break;
+	                case "center":
+	                    x = bar.x + bar.width / 2;
+	                    y = bar.y + bar.height / 2;
+	                    break;
+	            }            x -= me.text.offsetX;
+
+	            var i = 1;
+	            if (rectData.value < rectData.yBasePoint.value) {
+	                i = -1;
+	            }            y -= i * me.text.offsetY;
+	            point.x = x;
+	            point.y = y;
+	            return point;
 	        }
 
 	        /**
@@ -13327,63 +13318,7 @@
 	                                },
 	                                id: bar.id
 	                            });
-	                        }
-	                        //txt grow
-	                        if (me.text.enabled) {
-	                            var txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
-	                            var infosp = txtGroupH.getChildById("infosp_" + h + "_" + rectData.field);
-	                            if (infosp) {
-	                                infosp.animate({
-	                                    y: infosp._finalY,
-	                                    x: infosp._finalX
-	                                }, {
-	                                    duration: optsions.duration,
-	                                    easing: optsions.easing,
-	                                    delay: h * optsions.delay,
-	                                    onUpdate: function onUpdate() {
-	                                        this.context && (this.context.visible = true);
-	                                    },
-	                                    onComplete: function onComplete() {}
-	                                });
-
-	                                _$17.each(infosp.children, function (txt) {
-	                                    if (txt._text || txt._text === 0) {
-	                                        if (txt._tweenObj) {
-	                                            AnimationFrame$1.destroyTween(txt._tweenObj);
-	                                        }                                        txt._tweenObj = AnimationFrame$1.registTween({
-	                                            from: {
-	                                                v: txt.text
-	                                            },
-	                                            to: {
-	                                                v: txt._text
-	                                            },
-	                                            duration: optsions.duration + 100,
-	                                            delay: h * optsions.delay,
-	                                            onUpdate: function onUpdate(arg) {
-
-	                                                var value = arg.v;
-	                                                if (_$17.isFunction(me.text.format)) {
-	                                                    var _formatc = me.text.format.apply(me, [value, txt._data]);
-	                                                    if (!!_formatc || _formatc === "" || _formatc === 0) {
-	                                                        value = _formatc;
-	                                                    }
-	                                                }
-	                                                if (_$17.isNumber(value)) {
-	                                                    value = numAddSymbol(value.toFixed(txt.fixedNum));
-	                                                }
-	                                                me.text.animation && txt.resetText(value);
-
-	                                                if (txt.parent) {
-	                                                    me._updateInfoTextPos(txt.parent);
-	                                                } else {
-	                                                    txt.destroy();
-	                                                }
-	                                            }
-	                                        });
-	                                    }                                });
-	                            }
-	                        }
-	                    }                }            });
+	                        }                    }                }            });
 	        }
 	    }]);
 	    return BarGraphs;
@@ -14519,9 +14454,16 @@
 	                return text;
 	            },
 	            fontSize: 12,
-	            fontColor: "#777",
+	            fontColor: null, //"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
 	            strokeStyle: "#ffffff",
-	            lineWidth: 0
+	            lineWidth: 2,
+
+	            rotate: 0,
+	            align: "center", //left center right
+	            verticalAlign: "top", //top middle bottom
+	            position: "bottom", //auto(目前等于center，还未实现),center,top,right,bottom,left
+	            offsetX: 0,
+	            offsetY: 0
 	        };
 
 	        //动画的起始位置， 默认x=data.x y = 0
@@ -14798,34 +14740,70 @@
 	            });
 	        }
 	    }, {
+	        key: "_getTextPosition",
+	        value: function _getTextPosition(nodeData) {
+	            var x = 0,
+	                y = 0;
+	            switch (this.text.position) {
+	                case "center":
+	                    x = nodeData.x;
+	                    y = nodeData.y;
+	                    break;
+	                case "top":
+	                    x = nodeData.x;
+	                    y = nodeData.y - nodeData.r;
+	                    break;
+	                case "right":
+	                    x = nodeData.x + nodeData.r;
+	                    y = nodeData.y;
+	                    break;
+	                case "bottom":
+	                    x = nodeData.x;
+	                    y = nodeData.y + nodeData.r;
+	                    break;
+	                case "left":
+	                    x = nodeData.x - nodeData.r;
+	                    y = nodeData.y;
+	                    break;
+	                case "auto":
+	                    x = nodeData.x;
+	                    y = nodeData.y;
+	                    break;
+	            }
+	            var point = {
+	                x: x + this.text.offsetX,
+	                y: y + this.text.offsetY
+	            };
+
+	            return point;
+	        }
+	    }, {
 	        key: "_getTextContext",
 	        value: function _getTextContext(nodeData) {
+
+	            var textPoint = this._getTextPosition(nodeData);
+
 	            var ctx = {
-	                x: nodeData.x,
-	                y: nodeData.y,
-	                fillStyle: this.text.fontColor,
+	                x: textPoint.x,
+	                y: textPoint.y,
+	                fillStyle: this.text.fontColor || nodeData.fillStyle,
 	                fontSize: this.text.fontSize,
-	                strokeStyle: this.text.strokeStyle,
+	                strokeStyle: this.text.strokeStyle || nodeData.fillStyle,
 	                lineWidth: this.text.lineWidth,
-	                textAlign: 'center',
-	                textBaseline: 'middle'
+	                textAlign: this.text.align,
+	                textBaseline: this.text.verticalAlign
 	            };
+
 	            if (this.animation) {
 	                if (this.aniOrigin == "default") {
-	                    //ctx.x = 0;
 	                    ctx.y = 0;
-	                }
-	                if (this.aniOrigin == "origin") {
+	                }                if (this.aniOrigin == "origin") {
 	                    ctx.x = 0;
 	                    ctx.y = 0;
-	                }
-	                if (this.aniOrigin == "center") {
+	                }                if (this.aniOrigin == "center") {
 	                    ctx.x = this.width / 2;
 	                    ctx.y = -(this.height / 2);
-	                }
-	                //ctx.x = 0;
-	                //ctx.y = 0;  
-	            }            return ctx;
+	                }            }            return ctx;
 	        }
 	    }, {
 	        key: "_getNodeContext",
@@ -14876,6 +14854,7 @@
 	        value: function grow(callback) {
 	            var i = 0;
 	            var l = this.data.length - 1;
+	            var me = this;
 	            _$20.each(this.data, function (nodeData) {
 	                nodeData._node.animate({
 	                    x: nodeData.x,
@@ -14884,10 +14863,10 @@
 	                }, {
 	                    onUpdate: function onUpdate(opts) {
 	                        if (this._text) {
-	                            this._text.context.x = opts.x;
-	                            this._text.context.y = opts.y;
-	                        }
-	                        if (this._line) {
+	                            var _textPoint = me._getTextPosition(opts);
+	                            this._text.context.x = _textPoint.x;
+	                            this._text.context.y = _textPoint.y;
+	                        }                        if (this._line) {
 	                            this._line.context.start.y = opts.y + opts.r;
 	                        }
 	                    },
