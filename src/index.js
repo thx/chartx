@@ -1,5 +1,6 @@
 
 import global from "./global";
+import canvax from "canvax";
 
 //图表皮肤
 import globalTheme from "./theme";
@@ -76,6 +77,17 @@ var Chartx = {
     create : function( el, data, opts ){
         var chart = null;
         var me = this;
+
+        //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
+        var chart_id = canvax.$.query(el).getAttribute("chart_id");
+        if( chart_id != undefined ){
+            var _chart = me.instances[ chart_id ];
+            if( _chart ){
+                _chart.destroy();
+            };
+            delete me.instances[ chart_id ];
+        };
+
         var Coord = emptyCoord;
         if( opts.coord && opts.coord.type ){
             Coord = coord[ opts.coord.type ];

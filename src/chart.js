@@ -112,7 +112,9 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         this._clean();
         if( this.el ){
-            this.el.innerHTML = "";
+            this.el.removeAttribute("chart_id");
+            this.el.removeAttribute("chartx_version");
+            this.canvax.destroy();
             this.el = null;
         };
         this._destroy && this._destroy();

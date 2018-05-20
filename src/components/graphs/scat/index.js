@@ -73,7 +73,7 @@ export default class ScatGraphs extends GraphsBase
 
         //动画的起始位置， 默认x=data.x y = 0
         this.aniOrigin = "default" //center（坐标正中） origin（坐标原点）
-
+        
         _.extend( true, this , opts );
 
         this.init( );
