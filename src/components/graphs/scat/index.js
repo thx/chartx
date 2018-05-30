@@ -59,14 +59,21 @@ export default class ScatGraphs extends GraphsBase
             field : null,
             format : function(text){ return text },
             fontSize: 12,
-            fontColor: "#777",
+            fontColor: null,//"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
             strokeStyle : "#ffffff",
-            lineWidth : 0
+            lineWidth : 2,
+
+            rotate : 0,
+            align : "center",  //left center right
+            verticalAlign : "top", //top middle bottom
+            position : "bottom", //auto(目前等于center，还未实现),center,top,right,bottom,left
+            offsetX : 0,
+            offsetY : 0
         };
 
         //动画的起始位置， 默认x=data.x y = 0
         this.aniOrigin = "default" //center（坐标正中） origin（坐标原点）
-
+        
         _.extend( true, this , opts );
 
         this.init( );
@@ -353,33 +360,72 @@ export default class ScatGraphs extends GraphsBase
      
     }
 
+    _getTextPosition( nodeData )
+    {
+        var x=0,y=0;
+        switch( this.text.position ){
+            case "center" :
+                x = nodeData.x;
+                y = nodeData.y;
+                break;
+            case "top" :
+                x = nodeData.x;
+                y = nodeData.y - nodeData.r;
+                break;
+            case "right" :
+                x = nodeData.x + nodeData.r;
+                y = nodeData.y;
+                break;
+            case "bottom" :
+                x = nodeData.x;
+                y = nodeData.y + nodeData.r;
+                break;
+            case "left" :
+                x = nodeData.x - nodeData.r;
+                y = nodeData.y;
+                break;
+            case "auto" :
+                x = nodeData.x;
+                y = nodeData.y;
+                break;
+        };
+
+        var point = {
+            x: x + this.text.offsetX,
+            y: y + this.text.offsetY
+        };
+
+        return point;
+    }
+
     _getTextContext( nodeData )
     {
+        
+        var textPoint = this._getTextPosition( nodeData );
+        
         var ctx = {
-            x: nodeData.x,
-            y: nodeData.y,
-            fillStyle: this.text.fontColor,
+            x: textPoint.x,
+            y: textPoint.y,
+            fillStyle: this.text.fontColor || nodeData.fillStyle,
             fontSize: this.text.fontSize,
-            strokeStyle : this.text.strokeStyle,
+            strokeStyle : this.text.strokeStyle || nodeData.fillStyle,
             lineWidth : this.text.lineWidth,
-            textAlign : 'center',
-            textBaseline : 'middle'
+            textAlign : this.text.align,
+            textBaseline : this.text.verticalAlign
         };
+
         if( this.animation ){
             if( this.aniOrigin == "default" ){
-                //ctx.x = 0;
                 ctx.y = 0;
-            }
+            };
             if( this.aniOrigin == "origin" ){
                 ctx.x = 0;
                 ctx.y = 0;
-            }
+            };
             if( this.aniOrigin == "center" ){
                 ctx.x = this.width/2;
                 ctx.y = -(this.height/2);
-            }
-            //ctx.x = 0;
-            //ctx.y = 0;  
+            }; 
         };
         return ctx;
     }
@@ -431,6 +477,7 @@ export default class ScatGraphs extends GraphsBase
     {
         var i = 0;
         var l = this.data.length-1;
+        var me = this;
         _.each( this.data , function( nodeData ){
             nodeData._node.animate({
                 x : nodeData.x,
@@ -439,9 +486,10 @@ export default class ScatGraphs extends GraphsBase
             }, {
                 onUpdate: function( opts ){
                     if( this._text ){
-                        this._text.context.x = opts.x;
-                        this._text.context.y = opts.y;
-                    }
+                        var _textPoint = me._getTextPosition( opts );
+                        this._text.context.x = _textPoint.x;
+                        this._text.context.y = _textPoint.y;
+                    };
                     if( this._line ){
                         this._line.context.start.y = opts.y+opts.r;
                     }

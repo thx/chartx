@@ -209,8 +209,9 @@ export default class Descartes extends CoordBase
                 var h = ctx.height;
 
                 ctx.rotation = -90;
-                var origin = { x: w/2, y: h/2 };
-                ctx.rotateOrigin = origin;
+                
+                //var origin = { x: parseInt(w/2), y: parseInt(h/2) };
+                //ctx.rotateOrigin = origin;
                 //ctx.scaleOrigin = origin;
                 //ctx.scaleX = -1;
                 

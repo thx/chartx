@@ -44,11 +44,18 @@ export default class BarGraphs extends GraphsBase
         this.text = {
             enabled   : false,
             animation : true,
-            fillStyle : '#999',
+            fontColor : null, //如果有设置text.fontColor那么优先使用fontColor
             fontSize  : 12,
             format    : null,
-            lineWidth : 1,
-            strokeStyle : 'white'
+            lineWidth : 0,
+            strokeStyle : null,
+
+            rotate : 0,
+            align : "center",  //left center right
+            verticalAlign : "bottom", //top middle bottom
+            position : "top", //top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center
+            offsetX : 0,
+            offsetY : 0
         };
 
         this.sort = null;
@@ -148,8 +155,8 @@ export default class BarGraphs extends GraphsBase
                 this.node._width = this.node.width;
             }
         } else {
-            this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.3);
-
+            this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.2);
+            
             //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
             if (this.node._width == 1 && ceilWidth > 3) {
                 this.node._width = ceilWidth - 2;
@@ -222,6 +229,7 @@ export default class BarGraphs extends GraphsBase
         var _flattenField = _.flatten( [ this.field ] );
 
         _.each( this.enabledField , function(h_group, i) {
+            
             h_group = _.flatten([ h_group ]);
             /*
             //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
@@ -246,6 +254,8 @@ export default class BarGraphs extends GraphsBase
             me._barsLen = me._dataLen * groupsLen;
 
             for (var h = 0; h < me._dataLen; h++) {
+
+                //bar的group
                 var groupH = null;
                 if (i == 0) {
                     //横向的分组
@@ -262,7 +272,7 @@ export default class BarGraphs extends GraphsBase
                     groupH = me.barsSp.getChildById("barGroup_" + h);
                 };
 
-                //同上面，给txt做好分组
+                //txt的group begin
                 var txtGroupH = null;
                 if (i == 0) {
                     if (h <= preDataLen - 1) {
@@ -277,6 +287,7 @@ export default class BarGraphs extends GraphsBase
                 } else {
                     txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
                 };
+                //txt的group begin
 
                 for (var v = 0; v < vLen; v++) {
                     
@@ -302,17 +313,17 @@ export default class BarGraphs extends GraphsBase
                     }
 
                     var finalPos = {
-                        x: Math.round(rectData.x),
-                        y: rectData.fromY, 
-                        width: me.node._width,
-                        height: rectH,
-                        fillStyle: fillStyle,
-                        fillAlpha: me.node.fillAlpha,
-                        scaleY: -1
+                        x         : Math.round(rectData.x),
+                        y         : rectData.fromY, 
+                        width     : me.node._width,
+                        height    : rectH,
+                        fillStyle : fillStyle,
+                        fillAlpha : me.node.fillAlpha,
+                        scaleY    : -1
                     };
                     rectData.width = finalPos.width;
                     
-                    var rectCxt = {
+                    var rectCtx = {
                         x: finalPos.x,
                         y: rectData.yBasePoint.y,//0,
                         width: finalPos.width,
@@ -325,12 +336,12 @@ export default class BarGraphs extends GraphsBase
                     if ( !!me.node.radius && rectData.isLeaf && !me.proportion ) {
                         var radiusR = Math.min(me.node._width / 2, Math.abs(rectH));
                         radiusR = Math.min(radiusR, me.node.radius);
-                        rectCxt.radius = [radiusR, radiusR, 0, 0];
+                        rectCtx.radius = [radiusR, radiusR, 0, 0];
                     };
 
                     if (!animate) {
-                        delete rectCxt.scaleY;
-                        rectCxt.y = finalPos.y;
+                        delete rectCtx.scaleY;
+                        rectCtx.y = finalPos.y;
                     };
 
                     var rectEl = null;
@@ -343,7 +354,7 @@ export default class BarGraphs extends GraphsBase
                     } else {
                         rectEl = new Rect({
                             id: barId,
-                            context: rectCxt
+                            context: rectCtx
                         });
                         rectEl.field = rectData.field;
                         groupH.addChild(rectEl);
@@ -358,150 +369,72 @@ export default class BarGraphs extends GraphsBase
 
                     me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
 
-                    //叶子节点上面放置info
-                    if (rectData.isLeaf && me.text.enabled) {
+                    //text begin ------------------------------
+                    if ( me.text.enabled ) {
+
+                        var value = rectData.value;
+                        if ( _.isFunction(me.text.format) ) {
+                            var _formatc = me.text.format.apply( me , [value , rectData]);
+                            if( _formatc !== undefined || _formatc !== null ){
+                                value = _formatc
+                            }
+                        };
+
+                        if( value === undefined || value === null || value === "" ){
+                            continue;
+                        };
+
+                        if ( _.isNumber(value) ) {
+                            value = numAddSymbol(value);
+                        };
+                        
+                        var textCtx = {
+                            fillStyle   : me.text.fontColor || finalPos.fillStyle,
+                            fontSize    : me.text.fontSize,
+                            lineWidth   : me.text.lineWidth,
+                            strokeStyle : me.text.strokeStyle || finalPos.fillStyle,
+                            //textAlign   : me.text.align,
+                            textBaseline: me.text.verticalAlign,
+                            rotate      : me.text.rotate
+                        };
+                        //然后根据position, offset确定x,y
+                        var _textPos = me._getTextPos( finalPos , rectData );
+                        textCtx.x = _textPos.x;
+                        textCtx.y = _textPos.y;
+
+                        textCtx.textAlign = me._getTextAlign(  finalPos , rectData  );
+
                         
                         //文字
-                        var infosp = null;
-                        var infospId = "infosp_" + h + "_" + rectData.field;
+                        var textEl = null;
+                        var textId = "text_" + h + "_" + rectData.field;
                         if (h <= preDataLen - 1) {
-                            infosp = txtGroupH.getChildById( infospId );
-                        } 
-                        if( infosp ){
+                            textEl = txtGroupH.getChildById( textId );
+                        }; 
+                        if( textEl ){
                             //do something
+                            textEl.resetText( value );
                         } else {
-                            infosp = new Canvax.Display.Sprite({
-                                id: infospId,
-                                context: {
-                                    y : rectData.yBasePoint.y,
-                                    visible: false
-                                }
+                            textEl = new Canvax.Display.Text( value , {
+                                id: textId,
+                                context: textCtx
                             });
-                            infosp._hGroup = h;
-                            txtGroupH.addChild(infosp);
+                            textEl.field = rectData.field;
+                            txtGroupH.addChild( textEl );
                         };
-
-                        var _values = [];
-                        for (var c = vLen - 1; c >= 0; c--) {
-                            //在baseNumber同一侧的数据放在一个叶子节点上面显示
-                            if( 
-                                rectData.value > rectData.yBasePoint.value 
-                                === 
-                                me.data[h_group[c]][h].value > me.data[h_group[c]][h].yBasePoint.value
-                            ) {
-                                _values.push(me.data[h_group[c]][h]);
-                            }
-                        }
-
-                        var infoWidth = 0;
-                        var infoHeight = 0;
-                        
-                        _.each(_values, function(cdata, ci) {
-                            var value = cdata.value;
-                            if (_.isFunction(me.text.format)) {
-                                var _formatc = me.text.format.apply( me , [value , cdata]);
-                                if(!!_formatc || _formatc==="" || _formatc===0){
-                                    value = _formatc
-                                }
-                            };
-
-                            if( value === undefined || value === null || value === "" ){
-                                return;
-                            };
-
-                            if (_.isNumber(value)) {
-                                value = numAddSymbol(value);
-                            };
-
-                            if (ci > 0 && infosp.children.length>0) {
-                                txt = new Canvax.Display.Text("/", {
-                                    context: {
-                                        x: infoWidth + 2,
-                                        fillStyle: "#999"
-                                    }
-                                });
-                                infoWidth += txt.getTextWidth() + 2;
-                                infosp.addChild(txt);
-                            };
-
-                            var _txt = null;
-                            var isNewNode = true;
-                            if (h <= preDataLen - 1) {
-                                _txt = infosp.getChildById("info_txt_" + i + "_" + h + "_" + ci);
-                                isNewNode = false
-                            }
-                            if( _txt ){
-                                //do something
-                            } else {
-                                
-                                _txt = new Canvax.Display.Text( value , {
-                                    id: "info_txt_" + i + "_" + h + "_" + ci,
-                                    context: {
-                                        x: infoWidth + 2,
-                                        fillStyle: cdata.color,
-                                        fontSize: me.text.fontSize,
-                                        lineWidth: me.text.lineWidth,
-                                        strokeStyle: me.text.strokeStyle
-                                    }
-                                });
-                                infosp.addChild( _txt );
-                            };
-
-                            _txt.fixedNum = 0;
-                            var __vsp = value.split('.');
-                            if( __vsp.length > 1 ){
-                                _txt.fixedNum = __vsp[1].length;
-                            }
-
-                            _txt._text = cdata.value;
-                            _txt._data = cdata;
-                            infoWidth += _txt.getTextWidth() + 2;
-                            infoHeight = Math.max(infoHeight, _txt.getTextHeight());
-
-                            if( animate && isNewNode && me.text.animation ){
-                                var beginNumber = 0;
-                                if( value >=100 ){
-                                    beginNumber = 100;
-                                }
-                                if( value >=1000 ){
-                                    beginNumber = 1000;
-                                }
-                                if( value >=10000 ){
-                                    beginNumber = 10000;
-                                }
-                                if( value >=100000 ){
-                                    beginNumber = 100900;
-                                }
-                                //beginNumber 和 content保持同样位数，这样动画的时候不会跳动
-                                _txt.resetText( beginNumber );
-                            };
-                        });
-
-                        infosp._finalX = rectData.x + me.node._width/2 - infoWidth / 2;
-
-                        //如果数据在basepoint下方
-                        if( rectData.value < rectData.yBasePoint.value ){
-                            infosp._finalY = rectData.y + 3; //3 只是个偏移量，没有什么特别的意思
-                        } else {
-                            infosp._finalY = rectData.y - infoHeight;
-                        }
-                       
-                        infosp._centerX = rectData.x+me.node._width/2;
-                        infosp.context.width = infoWidth;
-                        infosp.context.height = infoHeight;
 
                         if (!animate) {
-                            infosp.context.y = infosp._finalY;
-                            infosp.context.x = infosp._finalX;
-                            infosp.context.visible = true;
-                        };
+                        
+                        }
+
                     }
+                    //text end ------------------------------
+
                 };
             }
         });
 
         this.sprite.addChild(this.barsSp);
-
         //如果有text设置， 就要吧text的txtsSp也添加到sprite
         if (this.text.enabled) {
             this.sprite.addChild(this.txtsSp);
@@ -702,22 +635,73 @@ export default class BarGraphs extends GraphsBase
         //return tmpData;
     }
 
-    _updateInfoTextPos(el) 
-    {
+    _getTextAlign( bar , rectData ){
+        var align = this.text.align;
+        if( rectData.value < rectData.yBasePoint.value ){
+            if( align == "left" ){
+                align = "right"
+            } else if( align == "right" ){
+                align = "left"
+            }
+        };
+        return align;
+    }
+    
+    _getTextPos( bar , rectData ){
 
-        var infoWidth = 0;
-        var infoHeight = 0;
-        var cl = el.children.length;
-        _.each(el.children, function(c, i) {
-            if (c.getTextWidth) {
-                c.context.x = infoWidth;
-                infoWidth += c.getTextWidth() + (i < cl ? 2 : 0);
-                infoHeight = Math.max(infoHeight, c.getTextHeight());
-            };
-        });
-        el.context.x = el._centerX - infoWidth / 2;
-        el.context.width = infoWidth;
-        el.context.height = infoHeight;
+        var me = this;
+        var point = {
+            x : 0, y : 0
+        };
+        var x=bar.x ,y=bar.y;
+        switch( me.text.position ){
+            case "top" :
+                x = bar.x + bar.width/2;
+                y = bar.y + bar.height;
+                break;
+            case "topRight" :
+                x = bar.x + bar.width;
+                y = bar.y + bar.height;
+                break;
+            case "right" :
+                x = bar.x + bar.width;
+                y = bar.y + bar.height/2;
+                break;
+            case "rightBottom" :
+                x = bar.x + bar.width;
+                y = bar.y;
+                break;
+            case "bottom" :
+                x = bar.x + bar.width/2;
+                y = bar.y;
+                break;
+            case "bottomLeft" :
+                x = bar.x;
+                y = bar.y;
+                break;
+            case "left" :
+                x = bar.x;
+                y = bar.y + bar.height/2;
+                break;
+            case "leftTop" :
+                x = bar.x;
+                y = bar.y + bar.height;
+                break;
+            case "center" :
+                x = bar.x + bar.width/2;
+                y = bar.y + bar.height/2;
+                break;
+        };
+        x -= me.text.offsetX;
+
+        var i = 1;
+        if( rectData.value < rectData.yBasePoint.value ){
+            i = -1;
+        };
+        y -= i * me.text.offsetY;
+        point.x = x;
+        point.y = y;
+        return point;
     }
 
     /**
@@ -768,14 +752,14 @@ export default class BarGraphs extends GraphsBase
 
                     var bar = group.getChildById("bar_" + h + "_" + rectData.field);
 
-                    if (optsions.duration == 0) {
+                    if ( optsions.duration == 0 ) {
                         bar.context.scaleY = sy;
                         bar.context.y = sy * sy * bar.finalPos.y;
                         bar.context.x = bar.finalPos.x;
                         bar.context.width = bar.finalPos.width;
                         bar.context.height = bar.finalPos.height;
                     } else {
-                        if (bar._tweenObj) {
+                        if ( bar._tweenObj ) {
                             AnimationFrame.destroyTween(bar._tweenObj);
                         };
                         bar._tweenObj = bar.animate({
@@ -805,66 +789,6 @@ export default class BarGraphs extends GraphsBase
                             id: bar.id
                         });
                     };
-
-                    //txt grow
-                    if (me.text.enabled) {
-                        var txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
-                        var infosp = txtGroupH.getChildById( "infosp_" + h + "_" + rectData.field );
-                        if(infosp){
-                            infosp.animate({
-                                y: infosp._finalY,
-                                x: infosp._finalX
-                            }, {
-                                duration: optsions.duration,
-                                easing: optsions.easing,
-                                delay: h * optsions.delay,
-                                onUpdate: function() {
-                                    this.context && (this.context.visible = true);
-                                },
-                                onComplete: function() {}
-                            });
-
-                            _.each(infosp.children, function(txt) {
-                                if (txt._text || txt._text===0) {
-                                    if (txt._tweenObj) {
-                                        AnimationFrame.destroyTween(txt._tweenObj);
-                                    };
-                                    txt._tweenObj = AnimationFrame.registTween({
-                                        from: {
-                                            v: txt.text
-                                        },
-                                        to: {
-                                            v: txt._text
-                                        },
-                                        duration: optsions.duration + 100,
-                                        delay: h * optsions.delay,
-                                        onUpdate: function( arg ) {
-                                            
-                                            var value = arg.v;
-                                            if (_.isFunction(me.text.format)) {
-                                                var _formatc = me.text.format.apply( me , [value , txt._data]);
-                                                if(!!_formatc || _formatc==="" || _formatc===0){
-                                                    value = _formatc
-                                                }
-                                            };
-
-                                            if (_.isNumber(value)) {
-                                                value = numAddSymbol( value.toFixed( txt.fixedNum ) );
-                                            };
-
-                                            me.text.animation && txt.resetText(value);
-                                            
-                                            if (txt.parent) {
-                                                me._updateInfoTextPos(txt.parent);
-                                            } else {
-                                                txt.destroy();
-                                            }
-                                        }
-                                    })
-                                };
-                            });
-                        }
-                    }
 
                 };
             };

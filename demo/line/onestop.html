@@ -105,7 +105,10 @@ var options = {
     }
 };
 
-window.line = Chartx.create("canvasTest" , data , options)
+setInterval(function(){
+    window.line = Chartx.create("canvasTest" , data , options)
+} , 2000);
+
 
 
 

@@ -37,14 +37,12 @@
                 //第一行是表头。
                 var data= [
                     ["xfield","uv" ,"pv" ,"click", "ppc"],
-                    [ 1      , 101 , 20  , 33    , 53],
+                    [ 1      , -101 , 33  , 212    , 53],
                     [ 2      , 67  , 51  , 26    , 62],
                     [ 3      , 130 , 50  , 50    , 23],
                     [ 4      , 101 , 60  , 33    , 64],
                     [ 5      , 67  , 91  , 126   , 34 ],
                     [ 6      , 30  , 50 , 90     , 21],
-                    [ 7      , 51  , 120 , 33    , 112],
-                    [ 8      , 67  , 51  , 86    , 231],
                     [ 923123123      , 120 , 90  , 150   , 23 ]
                 
                 ];
@@ -63,7 +61,8 @@
                         },
                         yAxis : [
                             {
-                                label : "left"
+                                label : "yaxis",
+                                align : "right"
                             }
                             
                         ]
@@ -76,37 +75,33 @@
                         {
                             type : "bar",
                             field : "click",
-                            yAxisAlign : "left",
+                            yAxisAlign : "right",
                             text : {
-                                enabled : true
+                                enabled : true,
+                                align:"left",
+                                verticalAlign : "middle",
+                                position:"bottom",
+                                fontColor : "#fff",
+                                lineWidth : 2,
+                                offsetY : 10
                             }
                         },
                         {
                             type : "bar",
-                            field : [ [ "uv","pv" ],"ppc" ],
-                            yAxisAlign : "left"
+                            field : [ [ "uv","pv" ] ],
+                            yAxisAlign : "right",
+                            text : {
+                                enabled : true,
+                                align:"left",
+                                position : "bottom",
+                                verticalAlign : "middle",
+                                fontColor : "#fff",
+                                lineWidth : 2,
+                                offsetY : 10
+                            }
                         }
                         
-                    ],
-                
-                    markLine :  [{
-                        markTo: 'uv',
-                        text : {
-                            enabled : true,
-                            content : function( yVal ){
-                                return 'UV 均值 ：' + parseInt( yVal )
-                            },
-                            fontSize : 14
-                        }
-                        //y : 30 //不设置y，就会自动设置为均线
-                    },{
-                        markTo: 'pv',
-                        text : {
-                            enabled : true,
-                            fontSize : 14
-                        },
-                        y : 180
-                    }]
+                    ]
                 };
                 
                 window.bar = Chartx.create("canvasTest" , data , options)
@@ -126,7 +121,7 @@
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:100%;height:600px;position:relative;'></div>
             </div>
 
             </div>

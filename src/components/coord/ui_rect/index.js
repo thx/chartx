@@ -63,6 +63,7 @@ export default class Descartes_Component extends coorBase
                 yAxis.enabled = opts.enabled;
             });
             */
+            
             this.grid.enabled = opts.enabled;
         };
 
