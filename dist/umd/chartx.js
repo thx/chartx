@@ -454,173 +454,6 @@
 	    return _.isArray(obj) ? obj.slice() : _.extend(true, {}, obj);
 	};
 
-	/**
-	 * Canvax
-	 *
-	 * @author 释剑 (李涛, litao.lt@alibaba-inc.com 
-	*/
-	var Utils = {
-	    mainFrameRate: 60, //默认主帧率
-	    now: 0,
-	    /*像素检测专用*/
-	    _pixelCtx: null,
-	    __emptyFunc: function __emptyFunc() {},
-	    //retina 屏幕优化
-	    _devicePixelRatio: window.devicePixelRatio || 1,
-	    _UID: 0, //该值为向上的自增长整数值
-	    getUID: function getUID() {
-	        return this._UID++;
-	    },
-	    createId: function createId(name) {
-	        //if end with a digit, then append an undersBase before appending
-	        var charCode = name.charCodeAt(name.length - 1);
-	        if (charCode >= 48 && charCode <= 57) name += "_";
-	        return name + Utils.getUID();
-	    },
-	    canvasSupport: function canvasSupport() {
-	        return !!document.createElement('canvas').getContext;
-	    },
-
-	    initElement: function initElement(canvas) {
-	        if (window.FlashCanvas && FlashCanvas.initElement) {
-	            FlashCanvas.initElement(canvas);
-	        }
-	    },
-
-	    /**
-	     * 按照css的顺序，返回一个[上,右,下,左]
-	     */
-	    getCssOrderArr: function getCssOrderArr(r) {
-	        var r1;
-	        var r2;
-	        var r3;
-	        var r4;
-
-	        if (typeof r === 'number') {
-	            r1 = r2 = r3 = r4 = r;
-	        } else if (r instanceof Array) {
-	            if (r.length === 1) {
-	                r1 = r2 = r3 = r4 = r[0];
-	            } else if (r.length === 2) {
-	                r1 = r3 = r[0];
-	                r2 = r4 = r[1];
-	            } else if (r.length === 3) {
-	                r1 = r[0];
-	                r2 = r4 = r[1];
-	                r3 = r[2];
-	            } else {
-	                r1 = r[0];
-	                r2 = r[1];
-	                r3 = r[2];
-	                r4 = r[3];
-	            }
-	        } else {
-	            r1 = r2 = r3 = r4 = 0;
-	        }
-	        return [r1, r2, r3, r4];
-	    },
-
-	    isWebGLSupported: function isWebGLSupported() {
-	        var contextOptions = { stencil: true };
-	        try {
-	            if (!window.WebGLRenderingContext) //不存在直接return
-	                {
-	                    return false;
-	                }
-	            var canvas = document.createElement('canvas'),
-	                gl = canvas.getContext('webgl', contextOptions) || canvas.getContext('experimental-webgl', contextOptions);
-	            return !!(gl && gl.getContextAttributes().stencil); //还要确实检测是否支持webGL模式
-	        } catch (e) {
-	            return false;
-	        }
-	    },
-	    checkOpt: function checkOpt(opt) {
-	        if (!opt) {
-	            opt = {
-	                context: {}
-	            };
-	        } else {
-	            if (!opt.context) {
-	                opt.context = {};
-	            }
-	        }
-	        return opt;
-	    }
-	};
-
-	/**
-	 * Point
-	 *
-	 * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-	 */
-	var Point = function () {
-	    function Point() {
-	        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-	        classCallCheck(this, Point);
-
-	        if (arguments.length == 1 && _typeof(arguments[0]) == 'object') {
-	            var arg = arguments[0];
-	            if ("x" in arg && "y" in arg) {
-	                this.x = arg.x * 1;
-	                this.y = arg.y * 1;
-	            } else {
-	                var i = 0;
-	                for (var p in arg) {
-	                    if (i == 0) {
-	                        this.x = arg[p] * 1;
-	                    } else {
-	                        this.y = arg[p] * 1;
-	                        break;
-	                    }
-	                    i++;
-	                }
-	            }
-	        } else {
-	            this.x = x * 1;
-	            this.y = y * 1;
-	        }
-	    }
-
-	    createClass(Point, [{
-	        key: "toArray",
-	        value: function toArray$$1() {
-	            return [this.x, this.y];
-	        }
-	    }]);
-	    return Point;
-	}();
-
-	/**
-	 * Canvax
-	 *
-	 * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-	 *
-	 * canvas 上委托的事件管理
-	 */
-	var CanvaxEvent = function CanvaxEvent(evt, params) {
-
-	    var eventType = "CanvaxEvent";
-	    if (_.isString(evt)) {
-	        eventType = evt;
-	    }
-	    if (_.isObject(evt) && evt.type) {
-	        eventType = evt.type;
-	    }
-
-	    this.target = null;
-	    this.currentTarget = null;
-	    this.type = eventType;
-	    this.point = null;
-
-	    this._stopPropagation = false; //默认不阻止事件冒泡
-	};
-	CanvaxEvent.prototype = {
-	    stopPropagation: function stopPropagation() {
-	        this._stopPropagation = true;
-	    }
-	};
-
 	var settings = {
 	    //设备分辨率
 	    RESOLUTION: window.devicePixelRatio || 1,
@@ -819,6 +652,176 @@
 	        };
 	    }
 	    //dom相关代码结束
+	};
+
+	/**
+	 * Canvax
+	 *
+	 * @author 释剑 (李涛, litao.lt@alibaba-inc.com 
+	*/
+	var Utils = {
+	    mainFrameRate: 60, //默认主帧率
+	    now: 0,
+	    /*给文本检测高宽专用*/
+	    _pixelCtx: null,
+	    __emptyFunc: function __emptyFunc() {},
+	    //retina 屏幕优化
+	    _devicePixelRatio: window.devicePixelRatio || 1,
+	    _UID: 0, //该值为向上的自增长整数值
+	    getUID: function getUID() {
+	        return this._UID++;
+	    },
+	    createId: function createId(name) {
+	        //if end with a digit, then append an undersBase before appending
+	        var charCode = name.charCodeAt(name.length - 1);
+	        if (charCode >= 48 && charCode <= 57) name += "_";
+	        return name + Utils.getUID();
+	    },
+	    canvasSupport: function canvasSupport() {
+	        return !!document.createElement('canvas').getContext;
+	    },
+
+	    initElement: function initElement(canvas) {
+	        if (window.FlashCanvas && FlashCanvas.initElement) {
+	            FlashCanvas.initElement(canvas);
+	        }
+	        return canvas;
+	    },
+
+	    /**
+	     * 按照css的顺序，返回一个[上,右,下,左]
+	     */
+	    getCssOrderArr: function getCssOrderArr(r) {
+	        var r1;
+	        var r2;
+	        var r3;
+	        var r4;
+
+	        if (typeof r === 'number') {
+	            r1 = r2 = r3 = r4 = r;
+	        } else if (r instanceof Array) {
+	            if (r.length === 1) {
+	                r1 = r2 = r3 = r4 = r[0];
+	            } else if (r.length === 2) {
+	                r1 = r3 = r[0];
+	                r2 = r4 = r[1];
+	            } else if (r.length === 3) {
+	                r1 = r[0];
+	                r2 = r4 = r[1];
+	                r3 = r[2];
+	            } else {
+	                r1 = r[0];
+	                r2 = r[1];
+	                r3 = r[2];
+	                r4 = r[3];
+	            }
+	        } else {
+	            r1 = r2 = r3 = r4 = 0;
+	        }
+	        return [r1, r2, r3, r4];
+	    },
+
+	    isWebGLSupported: function isWebGLSupported() {
+	        var contextOptions = { stencil: true };
+	        try {
+	            if (!window.WebGLRenderingContext) //不存在直接return
+	                {
+	                    return false;
+	                }
+	            var canvas = document.createElement('canvas'),
+	                gl = canvas.getContext('webgl', contextOptions) || canvas.getContext('experimental-webgl', contextOptions);
+	            return !!(gl && gl.getContextAttributes().stencil); //还要确实检测是否支持webGL模式
+	        } catch (e) {
+	            return false;
+	        }
+	    },
+	    checkOpt: function checkOpt(opt) {
+	        if (!opt) {
+	            opt = {
+	                context: {}
+	            };
+	        } else {
+	            if (!opt.context) {
+	                opt.context = {};
+	            }
+	        }
+	        return opt;
+	    }
+	};
+
+	Utils._pixelCtx = Utils.initElement($.createCanvas(1, 1, "_pixelCanvas")).getContext('2d');
+
+	/**
+	 * Point
+	 *
+	 * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+	 */
+	var Point = function () {
+	    function Point() {
+	        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	        classCallCheck(this, Point);
+
+	        if (arguments.length == 1 && _typeof(arguments[0]) == 'object') {
+	            var arg = arguments[0];
+	            if ("x" in arg && "y" in arg) {
+	                this.x = arg.x * 1;
+	                this.y = arg.y * 1;
+	            } else {
+	                var i = 0;
+	                for (var p in arg) {
+	                    if (i == 0) {
+	                        this.x = arg[p] * 1;
+	                    } else {
+	                        this.y = arg[p] * 1;
+	                        break;
+	                    }
+	                    i++;
+	                }
+	            }
+	        } else {
+	            this.x = x * 1;
+	            this.y = y * 1;
+	        }
+	    }
+
+	    createClass(Point, [{
+	        key: "toArray",
+	        value: function toArray$$1() {
+	            return [this.x, this.y];
+	        }
+	    }]);
+	    return Point;
+	}();
+
+	/**
+	 * Canvax
+	 *
+	 * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+	 *
+	 * canvas 上委托的事件管理
+	 */
+	var CanvaxEvent = function CanvaxEvent(evt, params) {
+
+	    var eventType = "CanvaxEvent";
+	    if (_.isString(evt)) {
+	        eventType = evt;
+	    }
+	    if (_.isObject(evt) && evt.type) {
+	        eventType = evt.type;
+	    }
+
+	    this.target = null;
+	    this.currentTarget = null;
+	    this.type = eventType;
+	    this.point = null;
+
+	    this._stopPropagation = false; //默认不阻止事件冒泡
+	};
+	CanvaxEvent.prototype = {
+	    stopPropagation: function stopPropagation() {
+	        this._stopPropagation = true;
+	    }
 	};
 
 	/**
@@ -2654,6 +2657,7 @@
 	 * @result tween
 	 */
 	function registTween(options) {
+
 	    var opt = _.extend({
 	        from: null,
 	        to: null,
@@ -2675,7 +2679,6 @@
 	    if (opt.from && opt.to) {
 	        (function () {
 	            var animate = function animate() {
-
 	                if (tween._isCompleteed || tween._isStoped) {
 	                    tween = null;
 	                    return;
@@ -2730,7 +2733,9 @@
 	    registFrame: registFrame,
 	    destroyFrame: destroyFrame,
 	    registTween: registTween,
-	    destroyTween: destroyTween
+	    destroyTween: destroyTween,
+	    Tween: Tween,
+	    taskList: _taskList
 	};
 
 	/**
@@ -3421,7 +3426,7 @@
 	            //if( !this.worldTransform ){
 	            var cm = new Matrix();
 	            cm.concat(this._transform);
-	            cm.concat(this.parent.worldTransform);
+	            this.parent && cm.concat(this.parent.worldTransform);
 	            this.worldTransform = cm;
 	            //};
 	            return this.worldTransform;
@@ -3522,6 +3527,10 @@
 	            if (!context) {
 	                context = this.context;
 	            }
+	            if (!context) {
+	                //这个时候如果还是找不到context说明这个 el 已经被destroy了
+	                return;
+	            }
 
 	            var to = toContent;
 	            var from = null;
@@ -3582,6 +3591,7 @@
 	            options.onComplete = function (status) {
 	                compFun.apply(self, arguments);
 	            };
+	            options.desc = "tweenType:DisplayObject.animate__id:" + this.id + "__objectType:" + this.type;
 	            tween = AnimationFrame.registTween(options);
 	            return tween;
 	        }
@@ -3744,13 +3754,14 @@
 	            };
 	            this.fire("destroy");
 	            */
-	            this._destroy();
+
 	            //依次销毁所有子元素
 	            for (var i = 0, l = this.children.length; i < l; i++) {
 	                this.getChildAt(i).destroy();
 	                i--;
 	                l--;
 	            }
+	            this._destroy();
 	        }
 
 	        /*
@@ -3960,7 +3971,7 @@
 	            if (self._heartBeat) {
 
 	                //var _begin = new Date().getTime();
-	                self.render(this.app);
+	                this.app.children.length && self.render(this.app);
 	                //var _end = new Date().getTime();
 	                //$(document.body).append( "<br />render："+ (_end - _begin) );
 
@@ -4245,7 +4256,7 @@
 
 	            var $MC = displayObject.context.$model;
 
-	            if (!displayObject.worldTransform || displayObject._transformChange || displayObject.parent._transformChange) {
+	            if (!displayObject.worldTransform || displayObject._transformChange || displayObject.parent && displayObject.parent._transformChange) {
 	                displayObject.setWorldTransform();
 	                displayObject._transformChange = true;
 	            }
@@ -4399,9 +4410,6 @@
 	        _this._bufferStage = null;
 	        _this._creatHoverStage();
 
-	        //创建一个如果要用像素检测的时候的容器
-	        _this._createPixelContext();
-
 	        //设置一个默认的matrix做为app的世界根节点坐标
 	        _this.worldTransform = new Matrix().identity();
 	        return _this;
@@ -4414,6 +4422,24 @@
 	            this.event = new EventHandler(this, opt);
 	            this.event.init();
 	            return this.event;
+	        }
+	    }, {
+	        key: "destroy",
+	        value: function destroy() {
+	            for (var i = 0, l = this.children.length; i < l; i++) {
+	                var stage = this.children[i];
+	                stage.destroy();
+	                stage.canvas = null;
+	                stage.ctx = null;
+	                stage = null;
+	                i--, l--;
+	            }
+	            this.view.removeChild(this.stageView);
+	            this.view.removeChild(this.domView);
+	            this.el.removeChild(this.view);
+	            this.el.innerHTML = "";
+	            this.event = null;
+	            this._bufferStage = null;
 	        }
 	    }, {
 	        key: "resize",
@@ -4470,38 +4496,6 @@
 	            this._bufferStage._eventEnabled = false;
 	            this.addChild(this._bufferStage);
 	        }
-
-	        /**
-	         * 用来检测文本width height 
-	         * @return {Object} 上下文
-	        */
-
-	    }, {
-	        key: "_createPixelContext",
-	        value: function _createPixelContext() {
-	            var _pixelCanvas = $.query("_pixelCanvas");
-	            if (!_pixelCanvas) {
-	                _pixelCanvas = $.createCanvas(0, 0, "_pixelCanvas");
-	            } else {
-	                //如果有的话 就不需要在创建了，但是最好获取一下context,因为可能同时存在chartx1.0的图表
-	                Utils._pixelCtx = _pixelCanvas.getContext('2d');
-	                return;
-	            }
-	            document.body.appendChild(_pixelCanvas);
-	            Utils.initElement(_pixelCanvas);
-	            if (Utils.canvasSupport()) {
-	                //canvas的话，哪怕是display:none的页可以用来左像素检测和measureText文本width检测
-	                _pixelCanvas.style.display = "none";
-	            } else {
-	                //flashCanvas 的话，swf如果display:none了。就做不了measureText 文本宽度 检测了
-	                _pixelCanvas.style.zIndex = -1;
-	                _pixelCanvas.style.position = "absolute";
-	                _pixelCanvas.style.left = -this.context.$model.width + "px";
-	                _pixelCanvas.style.top = -this.context.$model.height + "px";
-	                _pixelCanvas.style.visibility = "hidden";
-	            }
-	            Utils._pixelCtx = _pixelCanvas.getContext('2d');
-	        }
 	    }, {
 	        key: "updateViewOffset",
 	        value: function updateViewOffset() {
@@ -4556,14 +4550,11 @@
 	    }, {
 	        key: "toDataURL",
 	        value: function toDataURL() {
-	            //var canvas = Base._createCanvas( "curr_base64_canvas" , this.width , this.height );
 	            var canvas = $.createCanvas(this.width, this.height, "curr_base64_canvas");
 	            var ctx = canvas.getContext("2d");
-
 	            _.each(this.children, function (stage) {
 	                ctx.drawImage(stage.canvas, 0, 0);
 	            });
-
 	            return canvas.toDataURL();
 	        }
 	    }]);
@@ -5873,6 +5864,9 @@
 	            fontSize: 13, //字体大小默认13
 	            fontWeight: "normal",
 	            fontFamily: "微软雅黑,sans-serif",
+	            textBaseline: "top",
+	            textAlign: "left",
+
 	            textDecoration: null,
 	            fillStyle: 'blank',
 	            strokeStyle: null,
@@ -7495,7 +7489,7 @@
 	Canvax.AnimationFrame = AnimationFrame;
 
 	Canvax._ = _;
-
+	Canvax.$ = $;
 	Canvax.utils = Utils;
 
 	var canvax = Canvax;
