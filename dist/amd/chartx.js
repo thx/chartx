@@ -8747,9 +8747,9 @@ define(function () { 'use strict';
 	            enabled: true,
 	            tickLine: {
 	                enabled: 1, //是否有刻度线
-	                lineWidth: 1,
-	                height: 4,
-	                marginTop: 2,
+	                lineWidth: 1, //线宽
+	                lineLength: 4, //线长
+	                distance: 2,
 	                strokeStyle: '#cccccc'
 	            },
 	            axisline: {
@@ -8763,7 +8763,7 @@ define(function () { 'use strict';
 	                fontSize: 12,
 	                rotation: 0,
 	                format: null,
-	                marginTop: 2,
+	                distance: 2,
 	                textAlign: "center",
 	                lineHeight: 1
 	            }
@@ -9146,7 +9146,7 @@ define(function () { 'use strict';
 	                }
 	                var o = arr[a];
 	                var x = o.x,
-	                    y = this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
+	                    y = this.ruler.tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
 
 	                if (this.ruler.text.enabled && !!arr[a].visible) {
 	                    //文字
@@ -9206,10 +9206,10 @@ define(function () { 'use strict';
 	                if (this.ruler.tickLine.enabled && !!arr[a].visible) {
 	                    var lineContext = {
 	                        x: x,
-	                        y: this.ruler.tickLine.marginTop,
+	                        y: this.ruler.tickLine.distance,
 	                        end: {
 	                            x: 0,
-	                            y: this.ruler.tickLine.height
+	                            y: this.ruler.tickLine.lineLength
 	                        },
 	                        lineWidth: this.ruler.tickLine.lineWidth,
 	                        strokeStyle: this.ruler.tickLine.strokeStyle
@@ -9301,7 +9301,7 @@ define(function () { 'use strict';
 	                        _maxTextHeight = Math.max(_maxTextHeight, height);
 	                    });
 	                }
-	                this.height = _maxTextHeight + this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
+	                this.height = _maxTextHeight + this.ruler.tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
 	            }
 	        }
 	    }, {
@@ -9427,7 +9427,7 @@ define(function () { 'use strict';
 	        _this.width = null; //第一次计算后就会有值
 
 	        _this.maxW = 0; //最大文本的 width
-	        _this.field = []; //这个 轴 上面的 field
+	        _this.field = []; //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
 	        _this.label = "";
 	        _this._label = null; //label 的text对象
@@ -9436,10 +9436,10 @@ define(function () { 'use strict';
 	            enabled: true,
 	            tickLine: { //刻度线
 	                enabled: 1,
-	                width: 4,
-	                lineWidth: 1,
+	                lineWidth: 1, //线宽
+	                lineLength: 4, //线长
 	                strokeStyle: '#cccccc',
-	                marginToLine: 2
+	                distance: 2
 	            },
 	            axisLine: { //轴线
 	                enabled: 1,
@@ -9452,7 +9452,9 @@ define(function () { 'use strict';
 	                fontSize: 12,
 	                format: null,
 	                rotation: 0,
-	                marginToLine: 3 //和刻度线的距离
+	                distance: 3, //和刻度线的距离,
+	                textAlign: null, //"right",
+	                lineHeight: 1
 	            }
 	        };
 	        if (opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined)) {
@@ -10040,7 +10042,7 @@ define(function () { 'use strict';
 
 	                var value = o.value;
 
-	                var textAlign = me.align == "left" ? "right" : "left";
+	                var textAlign = me.ruler.text.textAlign || (me.align == "left" ? "right" : "left");
 
 	                var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
 	                //为横向图表把y轴反转后的 逻辑
@@ -10099,13 +10101,13 @@ define(function () { 'use strict';
 	                    var lineX = 0;
 	                    if (me.ruler.tickLine.enabled) {
 	                        //线条
-	                        lineX = me.align == "left" ? -me.ruler.tickLine.width - me.ruler.tickLine.marginToLine : me.ruler.tickLine.marginToLine;
+	                        lineX = me.align == "left" ? -me.ruler.tickLine.lineLength - me.ruler.tickLine.distance : me.ruler.tickLine.distance;
 	                        var line = new Line$2({
 	                            context: {
 	                                x: lineX,
 	                                y: y,
 	                                end: {
-	                                    x: me.ruler.tickLine.width,
+	                                    x: me.ruler.tickLine.lineLength,
 	                                    y: 0
 	                                },
 	                                lineWidth: me.ruler.tickLine.lineWidth,
@@ -10117,7 +10119,7 @@ define(function () { 'use strict';
 	                    }
 	                    //文字
 	                    if (me.ruler.text.enabled) {
-	                        var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.tickLine.width + me.ruler.text.marginToLine;
+	                        var txtX = me.align == "left" ? lineX - me.ruler.text.distance : lineX + me.ruler.tickLine.lineLength + me.ruler.text.distance;
 	                        if (this.isH) {
 	                            txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
 	                        }                        var txt = new canvax.Display.Text(o.text, {
@@ -10130,6 +10132,7 @@ define(function () { 'use strict';
 	                                rotation: -Math.abs(me.ruler.text.rotation),
 	                                textAlign: textAlign,
 	                                textBaseline: "middle",
+	                                lineHeight: me.ruler.text.lineHeight,
 	                                globalAlpha: 0
 	                            }
 	                        });
@@ -10174,9 +10177,9 @@ define(function () { 'use strict';
 	                    al--, pl--;
 	                }            }
 	            if (me.width === null) {
-	                me.width = parseInt(me.maxW + me.ruler.text.marginToLine);
+	                me.width = parseInt(me.maxW + me.ruler.text.distance);
 	                if (me.ruler.tickLine.enabled) {
-	                    me.width += parseInt(me.ruler.tickLine.width + me.ruler.tickLine.marginToLine);
+	                    me.width += parseInt(me.ruler.tickLine.lineLength + me.ruler.tickLine.distance);
 	                }
 	            }
 
@@ -10660,36 +10663,7 @@ define(function () { 'use strict';
 
 	                ctx.rotation = 90;
 	                ctx.rotateOrigin = origin;
-	                //ctx.scaleOrigin = origin;
-	                //ctx.scaleX = -1;
 	            });
-
-	            /*
-	            function horizontalText( text ){
-	                var ctx = text.context;
-	                var rect = text.getRect();
-	                 var origin = {
-	                    x : rect.x + rect.width / 2,
-	                    y : rect.y + rect.height / 2
-	                }
-	                 ctx.scaleOrigin = origin;
-	                ctx.scaleY = -1;
-	            }
-	             //把x轴文案做一次镜像反转
-	            _.each( _.flatten( [ this._xAxis ] ), function( _xAxis ){
-	                _.each( _xAxis.rulesSprite.children, function( xnode ){
-	                    horizontalText( xnode._txt );
-	                } );
-	                _xAxis._label && horizontalText( _xAxis._label );
-	            } );
-	             //把y轴文案做一次镜像反转
-	            _.each( _.flatten( [ this._yAxis ] ), function( _yAxis ) {
-	                _.each( _yAxis.rulesSprite.children, function( ynode ){
-	                    horizontalText( ynode._txt );
-	                } );
-	                _yAxis._label && horizontalText( _yAxis._label );
-	            });
-	            */
 	        }
 	    }, {
 	        key: "getPosX",

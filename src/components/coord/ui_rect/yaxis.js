@@ -16,7 +16,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.width   = null; //第一次计算后就会有值
 
         this.maxW    = 0;    //最大文本的 width
-        this.field   = [];   //这个 轴 上面的 field
+        this.field   = [];   //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
         this.label   = "";
         this._label  = null; //label 的text对象
@@ -25,10 +25,10 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             enabled : true,
             tickLine : {//刻度线
                 enabled      : 1,
-                width        : 4,
-                lineWidth    : 1,
+                lineWidth    : 1, //线宽
+                lineLength   : 4, //线长
                 strokeStyle  : '#cccccc',
-                marginToLine : 2
+                distance     : 2
             },
             axisLine : {//轴线
                 enabled      : 1,     
@@ -41,7 +41,9 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 fontSize     : 12,
                 format       : null,
                 rotation     : 0,
-                marginToLine : 3 //和刻度线的距离
+                distance     : 3, //和刻度线的距离,
+                textAlign    : null,//"right",
+                lineHeight   : 1
             }
         };
         if( opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined) ){
@@ -677,7 +679,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
             var value = o.value;
 
-            var textAlign = (me.align == "left" ? "right" : "left");
+            var textAlign = me.ruler.text.textAlign || (me.align == "left" ? "right" : "left");
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
@@ -743,13 +745,13 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 var lineX = 0
                 if (me.ruler.tickLine.enabled) {
                     //线条
-                    lineX = me.align == "left" ? - me.ruler.tickLine.width - me.ruler.tickLine.marginToLine : me.ruler.tickLine.marginToLine;
+                    lineX = me.align == "left" ? - me.ruler.  tickLine.lineLength - me.ruler.tickLine.distance : me.ruler.tickLine.distance;
                     var line = new Line({
                         context: {
                             x: lineX ,
                             y: y,
                             end : {
-                                x : me.ruler.tickLine.width,
+                                x : me.ruler.  tickLine.lineLength,
                                 y : 0
                             },
                             lineWidth: me.ruler.tickLine.lineWidth,
@@ -762,7 +764,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
                 //文字
                 if( me.ruler.text.enabled ){
-                    var txtX = me.align == "left" ? lineX - me.ruler.text.marginToLine : lineX + me.ruler.tickLine.width + me.ruler.text.marginToLine;
+                    var txtX = me.align == "left" ? lineX - me.ruler.text.distance : lineX + me.ruler.  tickLine.lineLength + me.ruler.text.distance;
                     if( this.isH ){
                         txtX = txtX + (me.align == "left"?-1:1)* 4
                     };
@@ -776,6 +778,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                             rotation: -Math.abs(me.ruler.text.rotation),
                             textAlign: textAlign,
                             textBaseline: "middle",
+                            lineHeight  : me.ruler.text.lineHeight,
                             globalAlpha: 0
                         }
                     });
@@ -827,9 +830,9 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         };
 
         if( me.width === null ){
-            me.width = parseInt( me.maxW + me.ruler.text.marginToLine  );
+            me.width = parseInt( me.maxW + me.ruler.text.distance  );
             if (me.ruler.tickLine.enabled) {
-                me.width += parseInt( me.ruler.tickLine.width + me.ruler.tickLine.marginToLine );
+                me.width += parseInt( me.ruler.  tickLine.lineLength + me.ruler.tickLine.distance );
             }
         }
 

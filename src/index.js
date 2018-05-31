@@ -115,5 +115,4 @@ for( var p in global ){
     Chartx[ p ] = global[ p ];
 };
 
-
 export default Chartx;

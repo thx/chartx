@@ -260,42 +260,8 @@ export default class Descartes_Component extends coorBase
 
             ctx.rotation = 90;
             ctx.rotateOrigin = origin;
-            //ctx.scaleOrigin = origin;
-            //ctx.scaleX = -1;
 
         });
-
-
-        /*
-        function horizontalText( text ){
-            var ctx = text.context;
-            var rect = text.getRect();
-
-            var origin = {
-                x : rect.x + rect.width / 2,
-                y : rect.y + rect.height / 2
-            }
-
-            ctx.scaleOrigin = origin;
-            ctx.scaleY = -1;
-        }
-
-        //把x轴文案做一次镜像反转
-        _.each( _.flatten( [ this._xAxis ] ), function( _xAxis ){
-            _.each( _xAxis.rulesSprite.children, function( xnode ){
-                horizontalText( xnode._txt );
-            } );
-            _xAxis._label && horizontalText( _xAxis._label );
-        } );
-
-        //把y轴文案做一次镜像反转
-        _.each( _.flatten( [ this._yAxis ] ), function( _yAxis ) {
-            _.each( _yAxis.rulesSprite.children, function( ynode ){
-                horizontalText( ynode._txt );
-            } );
-            _yAxis._label && horizontalText( _yAxis._label );
-        });
-        */
 
     }
 

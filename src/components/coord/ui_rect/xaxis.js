@@ -25,9 +25,9 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             enabled : true,
             tickLine : {
                 enabled    : 1, //是否有刻度线
-                lineWidth  : 1,
-                height     : 4,
-                marginTop  : 2,
+                lineWidth  : 1, //线宽
+                lineLength : 4, //线长
+                distance   : 2,
                 strokeStyle: '#cccccc'
             },
             axisline : {
@@ -41,7 +41,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 fontSize   : 12,
                 rotation   : 0,
                 format     : null,
-                marginTop  : 2,
+                distance  : 2,
                 textAlign  : "center",
                 lineHeight : 1
             }
@@ -439,7 +439,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
             var o = arr[a]
             var x = o.x,
-                y = this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
+                y = this.ruler.  tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
 
         
             if ( this.ruler.text.enabled && !!arr[a].visible ){
@@ -506,10 +506,10 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             if ( this.ruler.tickLine.enabled && !!arr[a].visible ) {
                 var lineContext = {
                     x: x,
-                    y: this.ruler.tickLine.marginTop,
+                    y: this.ruler.tickLine.distance,
                     end : {
                         x : 0,
-                        y : this.ruler.tickLine.height
+                        y : this.ruler.  tickLine.lineLength
                     },
                     lineWidth: this.ruler.tickLine.lineWidth,
                     strokeStyle: this.ruler.tickLine.strokeStyle
@@ -618,7 +618,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 } );
             };
 
-            this.height = _maxTextHeight + this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
+            this.height = _maxTextHeight + this.ruler.  tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
         }
     }
 
