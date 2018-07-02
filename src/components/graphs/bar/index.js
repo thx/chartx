@@ -180,7 +180,11 @@ export default class BarGraphs extends GraphsBase
             var bar = h_groupSp.getChildById("bar_"+h+"_"+field);
             bar && bar.destroy();
         } );
- 
+        _.each( this.txtsSp.children , function( sp, h ){
+            var text = sp.getChildById("text_"+h+"_"+field);
+            text && text.destroy();
+        } );
+        
         this.draw();
     }
 
@@ -401,7 +405,6 @@ export default class BarGraphs extends GraphsBase
                         var _textPos = me._getTextPos( finalPos , rectData );
                         textCtx.x = _textPos.x;
                         textCtx.y = _textPos.y;
-
                         textCtx.textAlign = me._getTextAlign(  finalPos , rectData  );
 
                         
@@ -414,6 +417,9 @@ export default class BarGraphs extends GraphsBase
                         if( textEl ){
                             //do something
                             textEl.resetText( value );
+                            textEl.context.x = textCtx.x;
+                            textEl.context.y = textCtx.y;
+
                         } else {
                             textEl = new Canvax.Display.Text( value , {
                                 id: textId,
@@ -424,7 +430,7 @@ export default class BarGraphs extends GraphsBase
                         };
 
                         if (!animate) {
-                        
+                            //TODO：现在暂时没有做text的animate
                         }
 
                     }

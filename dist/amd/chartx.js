@@ -8327,7 +8327,7 @@ define(function () { 'use strict';
 	            var me = this;
 	            //设置legendOpt
 	            var legendOpt = _$5.extend(true, {
-	                node: {
+	                icon: {
 	                    onChecked: function onChecked(obj) {
 	                        me.show(obj.name, obj);
 	                        me.componentsReset({ name: "legend" });
@@ -12719,6 +12719,10 @@ define(function () { 'use strict';
 	                var bar = h_groupSp.getChildById("bar_" + h + "_" + field);
 	                bar && bar.destroy();
 	            });
+	            _$17.each(this.txtsSp.children, function (sp, h) {
+	                var text = sp.getChildById("text_" + h + "_" + field);
+	                text && text.destroy();
+	            });
 
 	            this.draw();
 	        }
@@ -12927,7 +12931,6 @@ define(function () { 'use strict';
 	                            var _textPos = me._getTextPos(finalPos, rectData);
 	                            textCtx.x = _textPos.x;
 	                            textCtx.y = _textPos.y;
-
 	                            textCtx.textAlign = me._getTextAlign(finalPos, rectData);
 
 	                            //文字
@@ -12938,6 +12941,8 @@ define(function () { 'use strict';
 	                            }                            if (textEl) {
 	                                //do something
 	                                textEl.resetText(value);
+	                                textEl.context.x = textCtx.x;
+	                                textEl.context.y = textCtx.y;
 	                            } else {
 	                                textEl = new canvax.Display.Text(value, {
 	                                    id: textId,
@@ -13496,11 +13501,11 @@ define(function () { 'use strict';
 	            smooth: true
 	        };
 
-	        _this.node = { //节点 
+	        _this.icon = { //节点 
 	            enabled: 1, //是否有
 	            shapeType: "circle",
 	            corner: false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-	            r: 3, //半径 node 圆点的半径
+	            r: 3, //半径 icon 圆点的半径
 	            fillStyle: '#ffffff',
 	            strokeStyle: null,
 	            lineWidth: 2
@@ -13919,7 +13924,7 @@ define(function () { 'use strict';
 	            var me = this;
 	            var list = me._currPointList;
 
-	            if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) {
+	            if ((me.icon.enabled || list.length == 1) && !!me.line.lineWidth) {
 	                //拐角的圆点
 	                if (!this._circles) {
 	                    this._circles = new canvax.Display.Sprite({});
@@ -13936,10 +13941,10 @@ define(function () { 'use strict';
 	                    var context = {
 	                        x: _point[0],
 	                        y: _point[1],
-	                        r: me._getProp(me.node.r, a),
-	                        lineWidth: me._getProp(me.node.lineWidth, a) || 2,
-	                        strokeStyle: me._getColor(me.node.strokeStyle, a),
-	                        fillStyle: me.node.fillStyle
+	                        r: me._getProp(me.icon.r, a),
+	                        lineWidth: me._getProp(me.icon.lineWidth, a) || 2,
+	                        strokeStyle: me._getColor(me.icon.strokeStyle, a),
+	                        fillStyle: me.icon.fillStyle
 	                    };
 
 	                    var circle = me._circles.children[iNode];
@@ -13951,7 +13956,7 @@ define(function () { 'use strict';
 	                        });
 	                        me._circles.addChild(circle);
 	                    }
-	                    if (me.node.corner) {
+	                    if (me.icon.corner) {
 	                        //拐角才有节点
 	                        var y = me._pointList[a][1];
 	                        var pre = me._pointList[a - 1];

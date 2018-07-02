@@ -171,7 +171,7 @@ export default class Coord extends Chart
         var me = this;
         //设置legendOpt
         var legendOpt = _.extend(true, {
-            node : {
+            icon : {
                 onChecked : function( obj ){
                     me.show( obj.name , obj );
                     me.componentsReset({ name : "legend" });
