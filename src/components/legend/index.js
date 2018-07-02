@@ -17,12 +17,13 @@ export default class Legend extends Component
             {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
+        
         this.data = data || [];
 
         this.width = 0;
         this.height = 0;
 
-        this.node = {
+        this.icon = {
             height : 30,
             width  : "auto",
             shapeType : "circle",
@@ -32,6 +33,16 @@ export default class Legend extends Component
             onChecked : function(){},
             onUnChecked : function(){}
         };
+
+        this.text = {
+            textAlign : "left",
+            textBaseline : "middle",
+            fillStyle : "#333", //obj.color
+            cursor: "pointer",
+            format : function( info ){
+                return info.name
+            }
+        }
 
         //this.onChecked=function(){};
         //this.onUnChecked=function(){};
@@ -68,15 +79,10 @@ export default class Legend extends Component
 
     pos( pos )
     {
-        pos.x && (this.sprite.context.x = pos.x + this.node.r);
+        pos.x && (this.sprite.context.x = pos.x + this.icon.r);
         pos.y && (this.sprite.context.y = pos.y);
     }
 
-    // label 格式化函数配置
-    label( info )
-    {
-        return info.name;
-    }
 
     draw()
     {
@@ -102,9 +108,9 @@ export default class Legend extends Component
                 id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
-                    y     : me.node.height/3 ,
+                    y     : me.icon.height/3 ,
                     fillStyle : !obj.enabled ? "#ccc" : (obj.color || me._labelColor),
-                    r : me.node.r,
+                    r : me.icon.r,
                     cursor: "pointer"
                 }
             });
@@ -121,15 +127,15 @@ export default class Legend extends Component
             
             _icon.on("click" , function(){});
             
-            var txt    = new Canvax.Display.Text( me.label(obj) , {
+            var txt = new Canvax.Display.Text( me.text.format(obj) , {
                 id: "legend_field_txt_"+i,
                 context : {
-                    x : me.node.r + 3 ,
-                    y : me.node.height / 3,
-                    textAlign : "left",
-                    textBaseline : "middle",
-                    fillStyle : "#333", //obj.color
-                    cursor: "pointer"
+                    x : me.icon.r + 3 ,
+                    y : me.icon.height / 3,
+                    textAlign : me.text.textAlign, //"left",
+                    textBaseline : me.text.textBaseline,//"middle",
+                    fillStyle : me.text.fillStyle,//"#333", //obj.color
+                    cursor: me.text.cursor //"pointer"
                 }
             } );
         
@@ -144,22 +150,22 @@ export default class Legend extends Component
             txt.on("click" , function(){});
 
             var txtW = txt.getTextWidth();
-            var itemW = txtW + me.node.r*2 + 20;
+            var itemW = txtW + me.icon.r*2 + 20;
 
             maxItemWidth = Math.max( maxItemWidth, itemW );
 
             var spItemC = {
-                height : me.node.height
+                height : me.icon.height
             };
 
             if( me.layoutType == "v" ){
-                if( y + me.node.height > viewHeight ){
+                if( y + me.icon.height > viewHeight ){
                     x += maxItemWidth;
                     y = 0;
                 }
                 spItemC.x = x;
                 spItemC.y = y;
-                y += me.node.height;
+                y += me.icon.height;
                 height = Math.max( height , y );
             } else {
                 if( x + itemW > viewWidth ){
@@ -168,7 +174,7 @@ export default class Legend extends Component
                     rows++;
                 };
                 spItemC.x = x;
-                spItemC.y = me.node.height * (rows-1);
+                spItemC.y = me.icon.height * (rows-1);
                 x += itemW;
             };
             var sprite = new Canvax.Display.Sprite({
@@ -195,9 +201,9 @@ export default class Legend extends Component
                 _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || me._labelColor);
 
                 if( obj.enabled ){
-                    me.node.onChecked( obj );
+                    me.icon.onChecked( obj );
                 } else {
-                    me.node.onUnChecked( obj );
+                    me.icon.onUnChecked( obj );
                 }
             });
 
@@ -205,7 +211,7 @@ export default class Legend extends Component
 
         if( this.layoutType == "h" ){
             me.width = me.sprite.context.width  = width;
-            me.height = me.sprite.context.height = me.node.height * rows;
+            me.height = me.sprite.context.height = me.icon.height * rows;
         } else {
             me.width = me.sprite.context.width  = x + maxItemWidth;
             me.height = me.sprite.context.height = height;

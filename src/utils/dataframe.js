@@ -53,10 +53,12 @@ export default function( data ){
     for(var a = 1, al = data.length; a < al; a++){
         for(var b = 0, bl = data[a].length; b < bl; b++){
             
+            /*
             var _val = data[a][b];
             if( !isNaN( _val ) ){
                 _val = Number( _val );
             };
+            */
             
             total[b].data.push( data[a][b] );
         }

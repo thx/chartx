@@ -7715,10 +7715,13 @@
 	    for (var a = 1, al = data.length; a < al; a++) {
 	        for (var b = 0, bl = data[a].length; b < bl; b++) {
 
+	            /*
 	            var _val = data[a][b];
-	            if (!isNaN(_val)) {
-	                _val = Number(_val);
-	            }
+	            if( !isNaN( _val ) ){
+	                _val = Number( _val );
+	            };
+	            */
+
 	            total[b].data.push(data[a][b]);
 	        }
 	    }
@@ -18152,12 +18155,13 @@
 	            {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
 	        ]
 	        */
+
 	        _this.data = data || [];
 
 	        _this.width = 0;
 	        _this.height = 0;
 
-	        _this.node = {
+	        _this.icon = {
 	            height: 30,
 	            width: "auto",
 	            shapeType: "circle",
@@ -18168,10 +18172,19 @@
 	            onUnChecked: function onUnChecked() {}
 	        };
 
-	        //this.onChecked=function(){};
-	        //this.onUnChecked=function(){};
+	        _this.text = {
+	            textAlign: "left",
+	            textBaseline: "middle",
+	            fillStyle: "#333", //obj.color
+	            cursor: "pointer",
+	            format: function format(info) {
+	                return info.name;
+	            }
 
-	        _this._labelColor = "#999";
+	            //this.onChecked=function(){};
+	            //this.onUnChecked=function(){};
+
+	        };_this._labelColor = "#999";
 
 	        _this.position = "top"; //图例所在的方向top,right,bottom,left
 
@@ -18203,16 +18216,8 @@
 	    }, {
 	        key: "pos",
 	        value: function pos(_pos) {
-	            _pos.x && (this.sprite.context.x = _pos.x + this.node.r);
+	            _pos.x && (this.sprite.context.x = _pos.x + this.icon.r);
 	            _pos.y && (this.sprite.context.y = _pos.y);
-	        }
-
-	        // label 格式化函数配置
-
-	    }, {
-	        key: "label",
-	        value: function label(info) {
-	            return info.name;
 	        }
 	    }, {
 	        key: "draw",
@@ -18241,9 +18246,9 @@
 	                    id: "legend_field_icon_" + i,
 	                    context: {
 	                        x: 0,
-	                        y: me.node.height / 3,
+	                        y: me.icon.height / 3,
 	                        fillStyle: !obj.enabled ? "#ccc" : obj.color || me._labelColor,
-	                        r: me.node.r,
+	                        r: me.icon.r,
 	                        cursor: "pointer"
 	                    }
 	                });
@@ -18260,15 +18265,15 @@
 
 	                _icon.on("click", function () {});
 
-	                var txt = new canvax.Display.Text(me.label(obj), {
+	                var txt = new canvax.Display.Text(me.text.format(obj), {
 	                    id: "legend_field_txt_" + i,
 	                    context: {
-	                        x: me.node.r + 3,
-	                        y: me.node.height / 3,
-	                        textAlign: "left",
-	                        textBaseline: "middle",
-	                        fillStyle: "#333", //obj.color
-	                        cursor: "pointer"
+	                        x: me.icon.r + 3,
+	                        y: me.icon.height / 3,
+	                        textAlign: me.text.textAlign, //"left",
+	                        textBaseline: me.text.textBaseline, //"middle",
+	                        fillStyle: me.text.fillStyle, //"#333", //obj.color
+	                        cursor: me.text.cursor //"pointer"
 	                    }
 	                });
 
@@ -18283,22 +18288,22 @@
 	                txt.on("click", function () {});
 
 	                var txtW = txt.getTextWidth();
-	                var itemW = txtW + me.node.r * 2 + 20;
+	                var itemW = txtW + me.icon.r * 2 + 20;
 
 	                maxItemWidth = Math.max(maxItemWidth, itemW);
 
 	                var spItemC = {
-	                    height: me.node.height
+	                    height: me.icon.height
 	                };
 
 	                if (me.layoutType == "v") {
-	                    if (y + me.node.height > viewHeight) {
+	                    if (y + me.icon.height > viewHeight) {
 	                        x += maxItemWidth;
 	                        y = 0;
 	                    }
 	                    spItemC.x = x;
 	                    spItemC.y = y;
-	                    y += me.node.height;
+	                    y += me.icon.height;
 	                    height = Math.max(height, y);
 	                } else {
 	                    if (x + itemW > viewWidth) {
@@ -18306,7 +18311,7 @@
 	                        x = 0;
 	                        rows++;
 	                    }                    spItemC.x = x;
-	                    spItemC.y = me.node.height * (rows - 1);
+	                    spItemC.y = me.icon.height * (rows - 1);
 	                    x += itemW;
 	                }                var sprite = new canvax.Display.Sprite({
 	                    id: "legend_field_" + i,
@@ -18333,16 +18338,16 @@
 	                    _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || me._labelColor;
 
 	                    if (obj.enabled) {
-	                        me.node.onChecked(obj);
+	                        me.icon.onChecked(obj);
 	                    } else {
-	                        me.node.onUnChecked(obj);
+	                        me.icon.onUnChecked(obj);
 	                    }
 	                });
 	            });
 
 	            if (this.layoutType == "h") {
 	                me.width = me.sprite.context.width = width;
-	                me.height = me.sprite.context.height = me.node.height * rows;
+	                me.height = me.sprite.context.height = me.icon.height * rows;
 	            } else {
 	                me.width = me.sprite.context.width = x + maxItemWidth;
 	                me.height = me.sprite.context.height = height;
