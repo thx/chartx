@@ -9493,7 +9493,8 @@
 
 	        _this.baseNumber = null; //默认为0，如果dataSection最小值小于0，则baseNumber为最小值，如果dataSection最大值大于0，则baseNumber为最大值
 	        _this.basePoint = null; //value为 baseNumber 的point {x,y}
-	        _this.bottomNumber = null;
+	        _this.min = null;
+	        _this.max = null; //后面加的，目前还没用
 
 	        _this._yOriginTrans = 0; //当设置的 baseNumber 和datasection的min不同的时候，
 
@@ -9676,14 +9677,11 @@
 	                    y += this._yOriginTrans;
 	                    break;
 	                }
-	            }            //返回的y是以最底端为坐标原点的坐标值，所以就是负数
-	            if (this.sort == "desc") {
-	                y = Math.abs(this.height - Math.abs(y));
 	            }
 	            if (isNaN(y)) {
 	                y = 0;
 	            }
-	            return -y;
+	            return -Math.abs(y);
 	        }
 	    }, {
 	        key: "getValFromYpos",
@@ -9878,6 +9876,7 @@
 	    }, {
 	        key: "_initData",
 	        value: function _initData() {
+	            var me = this;
 
 	            var arr = this._setDataSection();
 
@@ -9885,8 +9884,8 @@
 	                arr.push(this.waterLine);
 	            }
 
-	            if (this._opt.bottomNumber != null) {
-	                arr.push(this.bottomNumber);
+	            if (this._opt.min != null) {
+	                arr.push(this.min);
 	            }            if (arr.length == 1) {
 	                arr.push(arr[0] * 2);
 	            }
@@ -9915,7 +9914,15 @@
 	            //如果还是0
 	            if (this.dataSection.length == 0) {
 	                this.dataSection = [0];
-	            }            this.dataSectionGroup = [_$9.clone(this.dataSection)];
+	            }            if (_$9.min(this.dataSection) < this._opt.min) {
+	                var minDiss = me._opt.min - _$9.min(me.dataSection);
+	                //如果用户有硬性要求min，而且计算出来的dataSection还是比min小的话
+	                _$9.each(this.dataSection, function (num, i) {
+	                    me.dataSection[i] += minDiss;
+	                });
+	            }
+	            //如果有 middleweight 设置，就会重新设置dataSectionGroup
+	            this.dataSectionGroup = [_$9.clone(this.dataSection)];
 
 	            this._sort();
 	            this._setBottomAndBaseNumber();
@@ -9967,9 +9974,9 @@
 	    }, {
 	        key: "_setBottomAndBaseNumber",
 	        value: function _setBottomAndBaseNumber() {
-	            if (this.bottomNumber == null) {
-	                //this.bottomNumber = this.dataSection[0];
-	                this.bottomNumber = _$9.min(this.dataSection);
+	            if (this.min == null) {
+	                //this.min = this.dataSection[0];
+	                this.min = _$9.min(this.dataSection);
 	            }
 	            //没人情况下 baseNumber 就是datasection的最小值
 	            if (this._opt.baseNumber == undefined || this._opt.baseNumber == null) {
