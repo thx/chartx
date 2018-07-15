@@ -8746,35 +8746,34 @@ define(function () { 'use strict';
 	        _this.label = "";
 	        _this._label = null; //this.label对应的文本对象
 
-	        _this.ruler = {
-	            enabled: true,
-	            tickLine: {
-	                enabled: 1, //是否有刻度线
-	                lineWidth: 1, //线宽
-	                lineLength: 4, //线长
-	                distance: 2,
-	                strokeStyle: '#cccccc'
-	            },
-	            axisline: {
-	                enabled: 1, //是否有轴线
-	                lineWidth: 1,
-	                strokeStyle: '#cccccc'
-	            },
-	            text: {
-	                enabled: 1,
-	                fontColor: '#999',
-	                fontSize: 12,
-	                rotation: 0,
-	                format: null,
-	                distance: 2,
-	                textAlign: "center",
-	                lineHeight: 1
-	            }
+
+	        _this.enabled = true;
+	        _this.tickLine = {
+	            enabled: 1, //是否有刻度线
+	            lineWidth: 1, //线宽
+	            lineLength: 4, //线长
+	            distance: 2,
+	            strokeStyle: '#cccccc'
+	        };
+	        _this.axisLine = {
+	            enabled: 1, //是否有轴线
+	            lineWidth: 1,
+	            strokeStyle: '#cccccc'
+	        };
+	        _this.text = {
+	            enabled: 1,
+	            fontColor: '#999',
+	            fontSize: 12,
+	            rotation: 0,
+	            format: null,
+	            distance: 2,
+	            textAlign: "center",
+	            lineHeight: 1
 	        };
 
-	        if (opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined)) {
+	        if (opts.isH && (!opts.text || opts.text.rotaion === undefined)) {
 	            //如果是横向直角坐标系图
-	            _this.ruler.text.rotation = 90;
+	            _this.text.rotation = 90;
 	        }
 	        _this.maxTxtH = 0;
 
@@ -8848,9 +8847,9 @@ define(function () { 'use strict';
 	                //如果没有传入指定的dataSection，才需要计算dataSection
 	                this.dataSection = this._initDataSection(this.dataOrg);
 	            }
-	            if (this.ruler.text.rotation != 0) {
+	            if (this.text.rotation != 0) {
 	                //如果是旋转的文本，那么以右边为旋转中心点
-	                this.ruler.text.textAlign = "right";
+	                this.text.textAlign = "right";
 	            }
 	            //取第一个数据来判断xaxis的刻度值类型是否为 number
 	            this.minVal == null && (this.minVal = _$8.min(this.dataSection));
@@ -8986,10 +8985,10 @@ define(function () { 'use strict';
 	                if (!this._label) {
 	                    this._label = new canvax.Display.Text(this.label, {
 	                        context: {
-	                            fontSize: this.ruler.text.fontSize,
+	                            fontSize: this.text.fontSize,
 	                            textAlign: this.isH ? "center" : "left",
 	                            textBaseline: this.isH ? "top" : "middle",
-	                            fillStyle: this.ruler.text.fontColor,
+	                            fillStyle: this.text.fontColor,
 	                            rotation: this.isH ? -90 : 0
 	                        }
 	                    });
@@ -9085,7 +9084,7 @@ define(function () { 'use strict';
 	                var text = this._getFormatText(data[a]);
 	                var txt = new canvax.Display.Text(text, {
 	                    context: {
-	                        fontSize: this.ruler.text.fontSize
+	                        fontSize: this.text.fontSize
 	                    }
 	                });
 
@@ -9110,8 +9109,8 @@ define(function () { 'use strict';
 	        key: "_getFormatText",
 	        value: function _getFormatText(text) {
 	            var res;
-	            if (_$8.isFunction(this.ruler.text.format)) {
-	                res = this.ruler.text.format(text);
+	            if (_$8.isFunction(this.text.format)) {
+	                res = this.text.format(text);
 	            } else {
 	                res = text;
 	            }
@@ -9126,7 +9125,7 @@ define(function () { 'use strict';
 	    }, {
 	        key: "_widget",
 	        value: function _widget(opts) {
-	            if (!this.ruler.enabled) return;
+	            if (!this.enabled) return;
 	            !opts && (opts = {});
 
 	            var arr = this.layoutData;
@@ -9149,23 +9148,23 @@ define(function () { 'use strict';
 	                }
 	                var o = arr[a];
 	                var x = o.x,
-	                    y = this.ruler.tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
+	                    y = this.tickLine.lineLength + this.tickLine.distance + this.text.distance;
 
-	                if (this.ruler.text.enabled && !!arr[a].visible) {
+	                if (this.text.enabled && !!arr[a].visible) {
 	                    //文字
 	                    var textContext = {
 	                        x: o._text_x || o.x,
 	                        y: y + 20,
-	                        fillStyle: this.ruler.text.fontColor,
-	                        fontSize: this.ruler.text.fontSize,
-	                        rotation: -Math.abs(this.ruler.text.rotation),
-	                        textAlign: this.ruler.text.textAlign,
-	                        lineHeight: this.ruler.text.lineHeight,
-	                        textBaseline: !!this.ruler.text.rotation ? "middle" : "top",
+	                        fillStyle: this.text.fontColor,
+	                        fontSize: this.text.fontSize,
+	                        rotation: -Math.abs(this.text.rotation),
+	                        textAlign: this.text.textAlign,
+	                        lineHeight: this.text.lineHeight,
+	                        textBaseline: !!this.text.rotation ? "middle" : "top",
 	                        globalAlpha: 0
 	                    };
 
-	                    if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
+	                    if (!!this.text.rotation && this.text.rotation != 90) {
 	                        textContext.x += 5;
 	                        textContext.y += 3;
 	                    }
@@ -9206,16 +9205,16 @@ define(function () { 'use strict';
 	                        }                    }
 	                    //xNode._txt.context.visible = !!arr[a].visible;
 	                }
-	                if (this.ruler.tickLine.enabled && !!arr[a].visible) {
+	                if (this.tickLine.enabled && !!arr[a].visible) {
 	                    var lineContext = {
 	                        x: x,
-	                        y: this.ruler.tickLine.distance,
+	                        y: this.tickLine.distance,
 	                        end: {
 	                            x: 0,
-	                            y: this.ruler.tickLine.lineLength
+	                            y: this.tickLine.lineLength
 	                        },
-	                        lineWidth: this.ruler.tickLine.lineWidth,
-	                        strokeStyle: this.ruler.tickLine.strokeStyle
+	                        lineWidth: this.tickLine.lineWidth,
+	                        strokeStyle: this.tickLine.strokeStyle
 	                    };
 	                    if (xNode._line) {
 	                        //_.extend( xNode._txt.context , textContext );
@@ -9249,7 +9248,7 @@ define(function () { 'use strict';
 	                    al--, pl--;
 	                }            }
 	            //轴线
-	            if (this.ruler.axisline.enabled) {
+	            if (this.axisLine.enabled) {
 	                var _axisline = new Line$1({
 	                    context: {
 	                        start: {
@@ -9260,8 +9259,8 @@ define(function () { 'use strict';
 	                            x: this.width,
 	                            y: 0
 	                        },
-	                        lineWidth: this.ruler.axisline.lineWidth,
-	                        strokeStyle: this.ruler.axisline.strokeStyle
+	                        lineWidth: this.axisLine.lineWidth,
+	                        strokeStyle: this.axisLine.strokeStyle
 	                    }
 	                });
 	                this.sprite.addChild(_axisline);
@@ -9272,17 +9271,17 @@ define(function () { 'use strict';
 	        value: function _setXAxisHeight() {
 	            //检测下文字的高等
 	            var me = this;
-	            if (!me.ruler.enabled) {
+	            if (!me.enabled) {
 	                me.height = 0;
 	            } else {
 	                var _maxTextHeight = 0;
 
-	                if (this.ruler.text.enabled) {
+	                if (this.text.enabled) {
 	                    _$8.each(me.dataSection, function (val) {
 
 	                        var txt = new canvax.Display.Text(me._getFormatText(val), {
 	                            context: {
-	                                fontSize: me.ruler.text.fontSize
+	                                fontSize: me.text.fontSize
 	                            }
 	                        });
 
@@ -9290,13 +9289,13 @@ define(function () { 'use strict';
 	                        var textHeight = txt.getTextHeight();
 	                        var height = textHeight; //文本在外接矩形height
 
-	                        if (!!me.ruler.text.rotation) {
+	                        if (!!me.text.rotation) {
 	                            //有设置旋转
-	                            if (me.ruler.text.rotation == 90) {
+	                            if (me.text.rotation == 90) {
 	                                height = textWidth;
 	                            } else {
-	                                var sinR = Math.sin(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-	                                var cosR = Math.cos(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
+	                                var sinR = Math.sin(Math.abs(me.text.rotation) * Math.PI / 180);
+	                                var cosR = Math.cos(Math.abs(me.text.rotation) * Math.PI / 180);
 	                                height = parseInt(sinR * textWidth);
 	                            }                        }
 	                        //没有设置旋转
@@ -9304,7 +9303,7 @@ define(function () { 'use strict';
 	                        _maxTextHeight = Math.max(_maxTextHeight, height);
 	                    });
 	                }
-	                this.height = _maxTextHeight + this.ruler.tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
+	                this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.distance + this.text.distance;
 	            }
 	        }
 	    }, {
@@ -9314,7 +9313,7 @@ define(function () { 'use strict';
 	            var arr = this.layoutData;
 	            var l = arr.length;
 
-	            if (!this.ruler.enabled || !l) return;
+	            if (!this.enabled || !l) return;
 
 	            // rule , peak, proportion
 	            if (me.layoutType == "proportion") {
@@ -9351,7 +9350,7 @@ define(function () { 'use strict';
 	            }
 
 	            var l = arr.length;
-	            var textAlign = me.ruler.text.textAlign;
+	            var textAlign = me.text.textAlign;
 
 	            function checkOver(i) {
 	                var curr = arr[i];
@@ -9366,7 +9365,7 @@ define(function () { 'use strict';
 	                    var currWidth = curr.textWidth;
 
 	                    //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-	                    if (!!me.ruler.text.rotation) {
+	                    if (!!me.text.rotation) {
 	                        nextWidth = Math.min(nextWidth, 22);
 	                        currWidth = Math.min(currWidth, 22);
 	                    }
@@ -9435,34 +9434,34 @@ define(function () { 'use strict';
 	        _this.label = "";
 	        _this._label = null; //label 的text对象
 
-	        _this.ruler = {
-	            enabled: true,
-	            tickLine: { //刻度线
-	                enabled: 1,
-	                lineWidth: 1, //线宽
-	                lineLength: 4, //线长
-	                strokeStyle: '#cccccc',
-	                distance: 2
-	            },
-	            axisLine: { //轴线
-	                enabled: 1,
-	                lineWidth: 1,
-	                strokeStyle: '#cccccc'
-	            },
-	            text: {
-	                enabled: 1,
-	                fontColor: '#999',
-	                fontSize: 12,
-	                format: null,
-	                rotation: 0,
-	                distance: 3, //和刻度线的距离,
-	                textAlign: null, //"right",
-	                lineHeight: 1
-	            }
+
+	        _this.enabled = true;
+	        _this.tickLine = { //刻度线
+	            enabled: 1,
+	            lineWidth: 1, //线宽
+	            lineLength: 4, //线长
+	            strokeStyle: '#cccccc',
+	            distance: 2
 	        };
-	        if (opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined)) {
+	        _this.axisLine = { //轴线
+	            enabled: 1,
+	            lineWidth: 1,
+	            strokeStyle: '#cccccc'
+	        };
+	        _this.text = {
+	            enabled: 1,
+	            fontColor: '#999',
+	            fontSize: 12,
+	            format: null,
+	            rotation: 0,
+	            distance: 3, //和刻度线的距离,
+	            textAlign: null, //"right",
+	            lineHeight: 1
+	        };
+
+	        if (opts.isH && (!opts.text || opts.text.rotaion === undefined)) {
 	            //如果是横向直角坐标系图
-	            _this.ruler.text.rotation = 90;
+	            _this.text.rotation = 90;
 	        }
 	        _this.pos = {
 	            x: 0,
@@ -9589,10 +9588,10 @@ define(function () { 'use strict';
 	                }
 	                this._label = new canvax.Display.Text(_label, {
 	                    context: {
-	                        fontSize: this.ruler.text.fontSize,
+	                        fontSize: this.text.fontSize,
 	                        textAlign: textAlign, //"left",
 	                        textBaseline: this.isH ? "top" : "bottom",
-	                        fillStyle: this.ruler.text.fontColor,
+	                        fillStyle: this.text.fontColor,
 	                        rotation: this.isH ? -90 : 0
 	                    }
 	                });
@@ -9748,8 +9747,8 @@ define(function () { 'use strict';
 
 	                //把format提前
 	                var text = layoutData.value;
-	                if (_$9.isFunction(me.ruler.text.format)) {
-	                    text = me.ruler.text.format(text, me);
+	                if (_$9.isFunction(me.text.format)) {
+	                    text = me.text.format(text, me);
 	                }                if (text === undefined || text === null) {
 	                    text = numAddSymbol(layoutData.value);
 	                }                layoutData.text = text;
@@ -10037,7 +10036,7 @@ define(function () { 'use strict';
 	        value: function _widget(opts) {
 	            var me = this;
 	            !opts && (opts = {});
-	            if (!me.ruler.enabled) {
+	            if (!me.enabled) {
 	                me.width = 0;
 	                return;
 	            }
@@ -10052,11 +10051,11 @@ define(function () { 'use strict';
 
 	                var value = o.value;
 
-	                var textAlign = me.ruler.text.textAlign || (me.align == "left" ? "right" : "left");
+	                var textAlign = me.text.textAlign || (me.align == "left" ? "right" : "left");
 
 	                var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
 	                //为横向图表把y轴反转后的 逻辑
-	                if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
+	                if (me.text.rotation == 90 || me.text.rotation == -90) {
 	                    textAlign = "center";
 	                    if (a == arr.length - 1) {
 	                        posy = y - 2;
@@ -10069,7 +10068,7 @@ define(function () { 'use strict';
 	                var yNode = this.rulesSprite.getChildAt(a);
 
 	                if (yNode) {
-	                    if (yNode._txt && this.ruler.text.enabled) {
+	                    if (yNode._txt && this.text.enabled) {
 
 	                        if (me.animation && !opts.resize) {
 	                            yNode._txt.animate({
@@ -10084,7 +10083,7 @@ define(function () { 'use strict';
 	                        }
 	                        yNode._txt.resetText(o.text);
 	                    }
-	                    if (yNode._tickLine && this.ruler.tickLine.enabled) {
+	                    if (yNode._tickLine && this.tickLine.enabled) {
 	                        if (me.animation && !opts.resize) {
 	                            yNode._tickLine.animate({
 	                                y: y
@@ -10109,27 +10108,27 @@ define(function () { 'use strict';
 	                        aniFrom = -20;
 	                    }
 	                    var lineX = 0;
-	                    if (me.ruler.tickLine.enabled) {
+	                    if (me.tickLine.enabled) {
 	                        //线条
-	                        lineX = me.align == "left" ? -me.ruler.tickLine.lineLength - me.ruler.tickLine.distance : me.ruler.tickLine.distance;
+	                        lineX = me.align == "left" ? -me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
 	                        var line = new Line$2({
 	                            context: {
 	                                x: lineX,
 	                                y: y,
 	                                end: {
-	                                    x: me.ruler.tickLine.lineLength,
+	                                    x: me.tickLine.lineLength,
 	                                    y: 0
 	                                },
-	                                lineWidth: me.ruler.tickLine.lineWidth,
-	                                strokeStyle: me._getProp(me.ruler.tickLine.strokeStyle)
+	                                lineWidth: me.tickLine.lineWidth,
+	                                strokeStyle: me._getProp(me.tickLine.strokeStyle)
 	                            }
 	                        });
 	                        yNode.addChild(line);
 	                        yNode._tickLine = line;
 	                    }
 	                    //文字
-	                    if (me.ruler.text.enabled) {
-	                        var txtX = me.align == "left" ? lineX - me.ruler.text.distance : lineX + me.ruler.tickLine.lineLength + me.ruler.text.distance;
+	                    if (me.text.enabled) {
+	                        var txtX = me.align == "left" ? lineX - me.text.distance : lineX + me.tickLine.lineLength + me.text.distance;
 	                        if (this.isH) {
 	                            txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
 	                        }                        var txt = new canvax.Display.Text(o.text, {
@@ -10137,19 +10136,19 @@ define(function () { 'use strict';
 	                            context: {
 	                                x: txtX,
 	                                y: posy + aniFrom,
-	                                fillStyle: me._getProp(me.ruler.text.fontColor),
-	                                fontSize: me.ruler.text.fontSize,
-	                                rotation: -Math.abs(me.ruler.text.rotation),
+	                                fillStyle: me._getProp(me.text.fontColor),
+	                                fontSize: me.text.fontSize,
+	                                rotation: -Math.abs(me.text.rotation),
 	                                textAlign: textAlign,
 	                                textBaseline: "middle",
-	                                lineHeight: me.ruler.text.lineHeight,
+	                                lineHeight: me.text.lineHeight,
 	                                globalAlpha: 0
 	                            }
 	                        });
 	                        yNode.addChild(txt);
 	                        yNode._txt = txt;
 
-	                        if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
+	                        if (me.text.rotation == 90 || me.text.rotation == -90) {
 	                            me.maxW = Math.max(me.maxW, txt.getTextHeight());
 	                        } else {
 	                            me.maxW = Math.max(me.maxW, txt.getTextWidth());
@@ -10187,9 +10186,9 @@ define(function () { 'use strict';
 	                    al--, pl--;
 	                }            }
 	            if (me.width === null) {
-	                me.width = parseInt(me.maxW + me.ruler.text.distance);
-	                if (me.ruler.tickLine.enabled) {
-	                    me.width += parseInt(me.ruler.tickLine.lineLength + me.ruler.tickLine.distance);
+	                me.width = parseInt(me.maxW + me.text.distance);
+	                if (me.tickLine.enabled) {
+	                    me.width += parseInt(me.tickLine.lineLength + me.tickLine.distance);
 	                }
 	            }
 
@@ -10200,7 +10199,7 @@ define(function () { 'use strict';
 	            }
 
 	            //轴线
-	            if (me.ruler.axisLine.enabled) {
+	            if (me.axisLine.enabled) {
 	                var _axisLine = new Line$2({
 	                    context: {
 	                        start: {
@@ -10211,8 +10210,8 @@ define(function () { 'use strict';
 	                            x: _originX,
 	                            y: -me.height
 	                        },
-	                        lineWidth: me.ruler.axisLine.lineWidth,
-	                        strokeStyle: me._getProp(me.ruler.axisLine.strokeStyle)
+	                        lineWidth: me.axisLine.lineWidth,
+	                        strokeStyle: me._getProp(me.axisLine.strokeStyle)
 	                    }
 	                });
 	                this.sprite.addChild(_axisLine);
@@ -10459,15 +10458,11 @@ define(function () { 'use strict';
 	        if ("enabled" in opts) {
 	            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
 	            _$11.extend(true, _this.xAxis, {
-	                ruler: {
-	                    enabled: opts.enabled
-	                }
+	                enabled: opts.enabled
 	            });
 	            _$11.each(_this.yAxis, function (yAxis$$1) {
 	                _$11.extend(true, yAxis$$1, {
-	                    ruler: {
-	                        enabled: opts.enabled
-	                    }
+	                    enabled: opts.enabled
 	                });
 	            });
 
@@ -10922,7 +10917,8 @@ define(function () { 'use strict';
 	            //根据opt中得Graphs配置，来设置 coord.yAxis
 	            if (opts.graphs) {
 	                //有graphs的就要用找到这个graphs.field来设置coord.yAxis
-	                _$12.each(opts.graphs, function (graphs) {
+	                for (var i = 0; i < opts.graphs.length; i++) {
+	                    var graphs = opts.graphs[i];
 	                    if (graphs.type == "bar") {
 	                        //如果graphs里面有柱状图，那么就整个xAxis都强制使用 peak 的layoutType
 	                        me.coord.xAxis.layoutType = "peak";
@@ -10963,8 +10959,11 @@ define(function () { 'use strict';
 	                        } else {
 	                            optsYaxisObj.field.push(graphs.field);
 	                        }
+	                    } else {
+	                        //在，直角坐标系中，每个graphs一定要有一个field设置，如果没有，就去掉这个graphs
+	                        opts.graphs.splice(i--, 1);
 	                    }
-	                });
+	                }
 	            }            //再梳理一遍yAxis，get没有align的手动配置上align
 	            //要手动把yAxis 按照 left , right的顺序做次排序
 	            var _lys = [],
@@ -11762,27 +11761,24 @@ define(function () { 'use strict';
 	            data: [],
 	            angleList: [], //对应layoutType下的角度list
 	            beginAngle: -90,
-	            ruler: {
-	                //刻度尺,在最外沿的蜘蛛网上面
-	                data: [], //aAxis.data的 text.format后版本
-	                enabled: opts.aAxis && opts.aAxis.field, //只有配置了aAxis才会有需要ruler，必须pie的话是目前不会用到ruler的
-	                text: {
-	                    enabled: true,
-	                    format: function format(v) {
-	                        return v;
-	                    },
-	                    fontColor: "#666"
-	                }
+
+	            //刻度尺,在最外沿的蜘蛛网上面
+	            layoutData: [], //aAxis.data的 text.format后版本
+	            enabled: opts.aAxis && opts.aAxis.field,
+	            text: {
+	                enabled: true,
+	                format: function format(v) {
+	                    return v;
+	                },
+	                fontColor: "#666"
 	            }
 	        };
 
 	        _this.rAxis = {
 	            field: [],
 	            dataSection: null,
-	            ruler: {
-	                //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
-	                enabled: false
-	            }
+	            //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
+	            enabled: false
 	        };
 
 	        _this.grid = {
@@ -11840,7 +11836,7 @@ define(function () { 'use strict';
 	                    dataSection: this.rAxis.dataSection
 	                }, this);
 
-	                if (this.aAxis.ruler.enabled) {
+	                if (this.aAxis.enabled) {
 	                    this._drawAAxisScale();
 	                }
 	                this._initInduce();
@@ -11955,7 +11951,7 @@ define(function () { 'use strict';
 	            if (this.grid.enabled) {
 	                this._grid = new polarGrid(this.grid, this);
 	                this.sprite.addChild(this._grid.sprite);
-	            }            if (this.aAxis.ruler.enabled && this.grid.enabled) {
+	            }            if (this.aAxis.enabled && this.grid.enabled) {
 	                this._aAxisScaleSp = new canvax.Display.Sprite({
 	                    id: "aAxisScaleSp"
 	                });
@@ -11973,7 +11969,7 @@ define(function () { 'use strict';
 	            }            if (!("height" in this._opts)) {
 	                this.height = rootHeight - _padding.top - _padding.bottom;
 	            }
-	            if (this.aAxis.ruler.enabled) {
+	            if (this.aAxis.enabled) {
 	                this.width -= 20 * 2;
 	                this.height -= 20 * 2;
 	            }
@@ -12212,22 +12208,22 @@ define(function () { 'use strict';
 
 	            _$14.each(this.aAxis.data, function (label, i) {
 
-	                if (!me.aAxis.ruler.text.enabled) return;
+	                if (!me.aAxis.text.enabled) return;
 
 	                var point = points[i];
 	                var c = {
 	                    x: point.x,
 	                    y: point.y,
-	                    fillStyle: me.aAxis.ruler.text.fontColor
+	                    fillStyle: me.aAxis.text.fontColor
 	                };
 
-	                label = me.aAxis.ruler.text.format(label);
+	                label = me.aAxis.text.format(label);
 	                _$14.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
 	                me._aAxisScaleSp.addChild(new canvax.Display.Text(label, {
 	                    context: c
 	                }));
 
-	                me.aAxis.ruler.data.push(label);
+	                me.aAxis.layoutData.push(label);
 	            });
 	        }
 
@@ -12295,7 +12291,7 @@ define(function () { 'use strict';
 	            var node = {
 	                ind: aAxisInd,
 	                value: me.aAxis.data[aAxisInd],
-	                text: me.aAxis.ruler.data[aAxisInd],
+	                text: me.aAxis.layoutData[aAxisInd],
 	                angle: me.aAxis.angleList[aAxisInd]
 	            };
 	            return node;
@@ -15982,7 +15978,7 @@ define(function () { 'use strict';
 	            fillStyle: null,
 	            fillAlpha: 0.1
 	        };
-	        _this.node = {
+	        _this.icon = {
 	            enabled: true,
 	            shapeType: "circle",
 	            r: 4,
@@ -16075,7 +16071,7 @@ define(function () { 'use strict';
 	                    me.root.fire(e.type, e);
 	                });
 
-	                if (me.node.enabled) {
+	                if (me.icon.enabled) {
 	                    //绘制圆点
 	                    var _nodes = [];
 	                    _$23.each(list, function (node, i) {
@@ -16085,9 +16081,9 @@ define(function () { 'use strict';
 	                                cursor: "pointer",
 	                                x: node.point.x,
 	                                y: node.point.y,
-	                                r: me.node.r,
-	                                lineWidth: me.node.lineWidth,
-	                                strokeStyle: me.node.strokeStyle,
+	                                r: me.icon.r,
+	                                lineWidth: me.icon.lineWidth,
+	                                strokeStyle: me.icon.strokeStyle,
 	                                fillStyle: _strokeStyle
 	                            }
 	                        });
@@ -16154,7 +16150,7 @@ define(function () { 'use strict';
 	            var me = this;
 	            var _node = me.groups[node.field].nodes[node.iNode];
 	            _node.context.r += 1;
-	            _node.context.fillStyle = me.node.strokeStyle;
+	            _node.context.fillStyle = me.icon.strokeStyle;
 	            _node.context.strokeStyle = _node._strokeStyle;
 	            node.focused = true;
 	        }
@@ -16166,7 +16162,7 @@ define(function () { 'use strict';
 	            var _node = me.groups[node.field].nodes[node.iNode];
 	            _node.context.r -= 1;
 	            _node.context.fillStyle = _node._strokeStyle;
-	            _node.context.strokeStyle = me.node.strokeStyle;
+	            _node.context.strokeStyle = me.icon.strokeStyle;
 	            node.focused = false;
 	        }
 	    }, {

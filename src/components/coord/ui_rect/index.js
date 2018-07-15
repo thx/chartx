@@ -45,15 +45,11 @@ export default class Descartes_Component extends coorBase
         if( "enabled" in opts ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _.extend( true, this.xAxis, {
-                ruler : {
-                    enabled : opts.enabled
-                }
+                enabled : opts.enabled
             } );
             _.each( this.yAxis , function( yAxis ){
                 _.extend( true, yAxis, {
-                    ruler : {
-                        enabled : opts.enabled
-                    }
+                    enabled : opts.enabled
                 } );
             });
 
@@ -291,7 +287,8 @@ export default class Descartes_Component extends coorBase
             //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
             //只留下enabled的field 结构
             return this.filterEnabledFields( fields );
-        }
+        };
+        
         var fmap = {
             left: [], right:[]
         };

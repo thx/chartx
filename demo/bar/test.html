@@ -1,126 +1,147 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1"
+    />
+    <title>xChart demo -- bar</title>
 
-<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="../../dist/chartx.js"></script>
-<!-- codemirror -->
-<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
-<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
-<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
-<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
-<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
-<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
-<link rel="stylesheet" href="../../lib/codemirror/docs.css">
-<!-- codemirror end -->
-<!--bootstrap-->
-<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
-<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
-<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
-<!--bootstrap end-->
-<script type="text/javascript" src="../../lib/demo.js"></script>
-<link rel="stylesheet" href="../../lib/demo.css">
+    <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../dist/chartx.js"></script>
+    <!-- codemirror -->
+    <script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+    <link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+    <link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+    <link rel="stylesheet" href="../../lib/codemirror/docs.css">
+    <!-- codemirror end -->
+    <!--bootstrap-->
+    <script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+    <!--bootstrap end-->
+    <script type="text/javascript" src="../../lib/demo.js"></script>
+    <link rel="stylesheet" href="../../lib/demo.css">
 </head>
-<body >
 
-<table>
-    <tr>
-        <td id="td-vl">
-            <form><textarea id="code" name="code">
-                var data = [
-                    ["time","pv","uv","click","ppc"],
-                    ["2017-03-21",10,11,12,45],
-                    ["2017-03-22",20,32,14,34],
-                    ["2017-03-23",30,15,12,65]
-                ];
-                var options = {
-                    coord: {
-                        type: "rect",
-                        horizontal: true,
-                        xAxis: {
-                            field: "time",
-                            ruler: {
-                                enabled: false
-                            }
-                        },
-                        yAxis: {
-                            ruler: {
-                                text: {
-                                    format: function (val){
-                            return val + '%'
-                          }
-                                }
-                            }
-                        }
-                    },
-                    graphs: [
-                        {
-                            type: "bar",
-                            field: "uv",
-                            text: {
-                                enabled: true,
-                                format: function (val){
-                          val = val.toFixed(2)
-                          return val + '%'
-                        }
-                            },
-                            node: {
-                                fillStyle: "#ccc",
-                                xDis: 2
-                            }
-                        },
-                        {
-                            type: "bar",
-                            field: "pv",
-                            text: {
-                                enabled: true,
-                                format: function (val){
-                          val = val.toFixed(2)
-                          return val + '%'
-                        }
-                            },
-                            node: {
-                                fillStyle: function (e){
-                          var colors = ['#0994f4', '#ff9801', '#8d36da']
-                          return colors[e.iNode]
-                        },
-                                xDis: 2
-                            }
-                        }
-                    ]
+<body>
+
+    <table>
+        <tr>
+            <td id="td-vl">
+                <form>
+                    <textarea id="code" name="code">
+                        var data = [
+                        ["percent","self","compete"],
+                        ["2017-03-21",10,11],
+                        ["2017-03-22",20,32],
+                        ["2017-03-23",30,15]
+                    ];
+                
+var options = {
+    coord: {
+        type: "rect",
+        horizontal: true,
+        xAxis: {
+            field: "percent",
+            ruler: {
+                enabled: false
+            }
+        },
+        yAxis: {
+            align: "right",
+            ruler: {
+                text: {
+                    format: function (val) {
+                        return val + '%'
+                    }
                 }
+            }
+        }
+    },
+    graphs: [
+        {
+            type: "bar",
+            field: "self",
+            yAxisAlign: "right",
+            text: {
+                enabled: true,
+                format: function (val) {
+                    val = val == null ? '--' : val.toFixed(2)
+                    return val + '%'
+                },
+                align: "left",
+                verticalAlign: "middle",
+                position: "bottom",
+                fontColor: "#fff",
+                lineWidth: 2,
+                offsetY: 10
+            },
+            node: {
+                fillStyle: function (e) {
+                    var colors = ['#8d36da', '#ff9801', '#0994f4']
+                    return colors[e.iNode]
+                },
+                xDis: 2
+            }
+        },
+        {
+            type: "bar",
+            field: "compete",
+            yAxisAlign: "right",
+            text: {
+                enabled: true,
+                format: function (val) {
+                    val = val == null ? '--' : val.toFixed(2)
+                    return val + '%'
+                },
+                align: "left",
+                verticalAlign: "middle",
+                position: "bottom",
+                fontColor: "#666",
+                lineWidth: 2,
+                offsetY: 10
+            },
+            node: {
+                fillStyle: "#ccc",
+                xDis: 2
+            }
+        }
+    ]
+}
+
                 window.bar = Chartx.create("canvasTest" , data , options)
                 
                        
             
 
-            </textarea></form>
-        </td>
-        <td style="padding:0 10px;" id="td-vr">
-            <div id="chartdemo-r">
-            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
-                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+            </textarea>
+                </form>
+            </td>
+            <td style="padding:0 10px;" id="td-vr">
+                <div id="chartdemo-r">
+                    <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                        <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>柱状图（bar chart）</h4>
-                <p>
-                    联系人：@释剑
-                </p>
-            </div>
-            <div  class="test-c">
-                <div id="canvasTest" style='background:#fafafa;width:600px;height:400px;position:relative;'></div>
-            </div>
+                        <h4>柱状图（bar chart）</h4>
+                        <p>
+                            联系人：@释剑
+                        </p>
+                    </div>
+                    <div class="test-c">
+                        <div id="canvasTest" style='background:#fafafa;width:600px;height:400px;position:relative;'></div>
+                    </div>
 
-            </div>
-        </td>
-    </tr>
-</table>
+                </div>
+            </td>
+        </tr>
+    </table>
 
-    
-</body> 
+
+</body>
+
 </html>
-
-

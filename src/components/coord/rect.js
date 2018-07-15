@@ -52,7 +52,8 @@ export default class Descartes extends CoordBase
         //根据opt中得Graphs配置，来设置 coord.yAxis
         if( opts.graphs ){
             //有graphs的就要用找到这个graphs.field来设置coord.yAxis
-            _.each( opts.graphs, function( graphs ){
+            for( var i=0; i<opts.graphs.length; i++ ){
+                var graphs = opts.graphs[i];
                 if( graphs.type == "bar" ){
                     //如果graphs里面有柱状图，那么就整个xAxis都强制使用 peak 的layoutType
                     me.coord.xAxis.layoutType = "peak";
@@ -95,8 +96,12 @@ export default class Descartes extends CoordBase
                         optsYaxisObj.field.push( graphs.field )
                     }
                         
+                } else {
+                    //在，直角坐标系中，每个graphs一定要有一个field设置，如果没有，就去掉这个graphs
+                    opts.graphs.splice(i--,1);
                 }
-            } );
+            }
+
         };
         //再梳理一遍yAxis，get没有align的手动配置上align
         //要手动把yAxis 按照 left , right的顺序做次排序
@@ -139,8 +144,6 @@ export default class Descartes extends CoordBase
         
         return opts;
     }
-
-
 
     initData(data, opt)
     {

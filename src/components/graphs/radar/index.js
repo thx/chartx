@@ -28,7 +28,7 @@ export default class RadarGraphs extends GraphsBase
             fillStyle : null,
             fillAlpha : 0.1
         };
-        this.node = {
+        this.icon = {
             enabled : true,
             shapeType : "circle",
             r : 4,
@@ -125,7 +125,7 @@ export default class RadarGraphs extends GraphsBase
                 me.root.fire( e.type, e );
             });
             
-            if( me.node.enabled ){
+            if( me.icon.enabled ){
                 //绘制圆点
                 var _nodes = [];
                 _.each( list , function( node, i ){
@@ -135,9 +135,9 @@ export default class RadarGraphs extends GraphsBase
                             cursor : "pointer",
                             x : node.point.x,
                             y : node.point.y,
-                            r : me.node.r,
-                            lineWidth : me.node.lineWidth,
-                            strokeStyle : me.node.strokeStyle,
+                            r : me.icon.r,
+                            lineWidth : me.icon.lineWidth,
+                            strokeStyle : me.icon.strokeStyle,
                             fillStyle : _strokeStyle
                         }
                     });
@@ -205,7 +205,7 @@ export default class RadarGraphs extends GraphsBase
         var me = this;
         var _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r += 1;
-        _node.context.fillStyle = me.node.strokeStyle;
+        _node.context.fillStyle = me.icon.strokeStyle;
         _node.context.strokeStyle = _node._strokeStyle;
         node.focused = true;
     }
@@ -216,7 +216,7 @@ export default class RadarGraphs extends GraphsBase
         var _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r -= 1;
         _node.context.fillStyle = _node._strokeStyle;
-        _node.context.strokeStyle = me.node.strokeStyle;
+        _node.context.strokeStyle = me.icon.strokeStyle;
         node.focused = false;
     }
 

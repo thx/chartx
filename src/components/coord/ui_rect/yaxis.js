@@ -21,21 +21,21 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.label   = "";
         this._label  = null; //label 的text对象
 
-        this.ruler = {
-            enabled : true,
-            tickLine : {//刻度线
+        
+            this.enabled = true;
+            this.tickLine= {//刻度线
                 enabled      : 1,
                 lineWidth    : 1, //线宽
                 lineLength   : 4, //线长
                 strokeStyle  : '#cccccc',
                 distance     : 2
-            },
-            axisLine : {//轴线
+            };
+            this.axisLine = {//轴线
                 enabled      : 1,     
                 lineWidth    : 1,
                 strokeStyle  : '#cccccc'
-            },
-            text : {
+            };
+            this.text = {
                 enabled      : 1,
                 fontColor    : '#999',
                 fontSize     : 12,
@@ -44,11 +44,11 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 distance     : 3, //和刻度线的距离,
                 textAlign    : null,//"right",
                 lineHeight   : 1
-            }
-        };
-        if( opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined) ){
+            };
+        
+        if( opts.isH && (!opts.text || opts.text.rotaion === undefined) ){
             //如果是横向直角坐标系图
-            this.ruler.text.rotation = 90;
+            this.text.rotation = 90;
         };
 
         this.pos = {
@@ -175,10 +175,10 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
             this._label = new Canvax.Display.Text(_label, {
                 context: {
-                    fontSize  : this.ruler.text.fontSize,
+                    fontSize  : this.text.fontSize,
                     textAlign : textAlign,//"left",
                     textBaseline : this.isH ? "top" : "bottom",
-                    fillStyle : this.ruler.text.fontColor,
+                    fillStyle : this.text.fontColor,
                     rotation  : this.isH ? -90 : 0
                 }
             });
@@ -341,8 +341,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
             //把format提前
             var text = layoutData.value;
-            if (_.isFunction(me.ruler.text.format)) {
-                text = me.ruler.text.format(text, me);
+            if (_.isFunction(me.text.format)) {
+                text = me.text.format(text, me);
             };
             if( text === undefined || text === null ){
                 text = numAddSymbol( layoutData.value );
@@ -669,7 +669,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
     {
         var me = this;
         !opts && (opts ={});
-        if (!me.ruler.enabled) {
+        if (!me.enabled) {
             me.width = 0;
             return;
         };
@@ -686,11 +686,11 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
             var value = o.value;
 
-            var textAlign = me.ruler.text.textAlign || (me.align == "left" ? "right" : "left");
+            var textAlign = me.text.textAlign || (me.align == "left" ? "right" : "left");
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
-            if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
+            if (me.text.rotation == 90 || me.text.rotation == -90) {
                 textAlign = "center";
                 if (a == arr.length - 1) {
                     posy = y - 2;
@@ -704,7 +704,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             var yNode = this.rulesSprite.getChildAt(a);
 
             if( yNode ){
-                if( yNode._txt && this.ruler.text.enabled ){
+                if( yNode._txt && this.text.enabled ){
 
                     if (me.animation && !opts.resize) {
                         yNode._txt.animate({
@@ -721,7 +721,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                     yNode._txt.resetText( o.text );
                 };
 
-                if( yNode._tickLine && this.ruler.tickLine.enabled ){
+                if( yNode._tickLine && this.tickLine.enabled ){
                     if (me.animation && !opts.resize) {
                         yNode._tickLine.animate({
                             y: y
@@ -750,19 +750,19 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 };
 
                 var lineX = 0
-                if (me.ruler.tickLine.enabled) {
+                if (me.tickLine.enabled) {
                     //线条
-                    lineX = me.align == "left" ? - me.ruler.  tickLine.lineLength - me.ruler.tickLine.distance : me.ruler.tickLine.distance;
+                    lineX = me.align == "left" ? - me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
                     var line = new Line({
                         context: {
                             x: lineX ,
                             y: y,
                             end : {
-                                x : me.ruler.  tickLine.lineLength,
+                                x : me.tickLine.lineLength,
                                 y : 0
                             },
-                            lineWidth: me.ruler.tickLine.lineWidth,
-                            strokeStyle: me._getProp(me.ruler.tickLine.strokeStyle)
+                            lineWidth: me.tickLine.lineWidth,
+                            strokeStyle: me._getProp(me.tickLine.strokeStyle)
                         }
                     });
                     yNode.addChild(line);
@@ -770,8 +770,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 };
 
                 //文字
-                if( me.ruler.text.enabled ){
-                    var txtX = me.align == "left" ? lineX - me.ruler.text.distance : lineX + me.ruler.  tickLine.lineLength + me.ruler.text.distance;
+                if( me.text.enabled ){
+                    var txtX = me.align == "left" ? lineX - me.text.distance : lineX + me.tickLine.lineLength + me.text.distance;
                     if( this.isH ){
                         txtX = txtX + (me.align == "left"?-1:1)* 4
                     };
@@ -780,12 +780,12 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                         context: {
                             x: txtX,
                             y: posy + aniFrom,
-                            fillStyle: me._getProp(me.ruler.text.fontColor),
-                            fontSize: me.ruler.text.fontSize,
-                            rotation: -Math.abs(me.ruler.text.rotation),
+                            fillStyle: me._getProp(me.text.fontColor),
+                            fontSize: me.text.fontSize,
+                            rotation: -Math.abs(me.text.rotation),
                             textAlign: textAlign,
                             textBaseline: "middle",
-                            lineHeight  : me.ruler.text.lineHeight,
+                            lineHeight  : me.text.lineHeight,
                             globalAlpha: 0
                         }
                     });
@@ -793,7 +793,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                     yNode._txt = txt;
 
                     
-                    if (me.ruler.text.rotation == 90 || me.ruler.text.rotation == -90) {
+                    if (me.text.rotation == 90 || me.text.rotation == -90) {
                         me.maxW = Math.max(me.maxW, txt.getTextHeight());
                     } else {
                         me.maxW = Math.max(me.maxW, txt.getTextWidth());
@@ -837,9 +837,9 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         };
 
         if( me.width === null ){
-            me.width = parseInt( me.maxW + me.ruler.text.distance  );
-            if (me.ruler.tickLine.enabled) {
-                me.width += parseInt( me.ruler.  tickLine.lineLength + me.ruler.tickLine.distance );
+            me.width = parseInt( me.maxW + me.text.distance  );
+            if (me.tickLine.enabled) {
+                me.width += parseInt( me.tickLine.lineLength + me.tickLine.distance );
             }
         }
 
@@ -850,7 +850,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         }
 
         //轴线
-        if( me.ruler.axisLine.enabled ){
+        if( me.axisLine.enabled ){
             var _axisLine = new Line({
                 context : {
                     start : {
@@ -861,8 +861,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                         x : _originX,
                         y : -me.height
                     },
-                    lineWidth   : me.ruler.axisLine.lineWidth,
-                    strokeStyle : me._getProp(me.ruler.axisLine.strokeStyle)
+                    lineWidth   : me.axisLine.lineWidth,
+                    strokeStyle : me._getProp(me.axisLine.strokeStyle)
                 }
             });
             this.sprite.addChild( _axisLine );

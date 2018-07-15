@@ -21,35 +21,35 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         this.label = "";
         this._label = null; //this.label对应的文本对象
 
-        this.ruler = {
-            enabled : true,
-            tickLine : {
-                enabled    : 1, //是否有刻度线
-                lineWidth  : 1, //线宽
-                lineLength : 4, //线长
-                distance   : 2,
-                strokeStyle: '#cccccc'
-            },
-            axisline : {
-                enabled    : 1, //是否有轴线
-                lineWidth  : 1,
-                strokeStyle: '#cccccc'
-            },
-            text : {
-                enabled    : 1,
-                fontColor  : '#999',
-                fontSize   : 12,
-                rotation   : 0,
-                format     : null,
-                distance  : 2,
-                textAlign  : "center",
-                lineHeight : 1
-            }
+    
+        this.enabled = true;
+        this.tickLine = {
+            enabled    : 1, //是否有刻度线
+            lineWidth  : 1, //线宽
+            lineLength : 4, //线长
+            distance   : 2,
+            strokeStyle: '#cccccc'
         };
+        this.axisLine = {
+            enabled    : 1, //是否有轴线
+            lineWidth  : 1,
+            strokeStyle: '#cccccc'
+        };
+        this.text = {
+            enabled    : 1,
+            fontColor  : '#999',
+            fontSize   : 12,
+            rotation   : 0,
+            format     : null,
+            distance  : 2,
+            textAlign  : "center",
+            lineHeight : 1
+        };
+        
 
-        if( opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined) ){
+        if( opts.isH && (!opts.text || opts.text.rotaion === undefined) ){
             //如果是横向直角坐标系图
-            this.ruler.text.rotation = 90;
+            this.text.rotation = 90;
         };
 
         this.maxTxtH = 0;
@@ -125,9 +125,9 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             this.dataSection = this._initDataSection(this.dataOrg);
         };        
 
-        if (this.ruler.text.rotation != 0 ) {
+        if (this.text.rotation != 0 ) {
             //如果是旋转的文本，那么以右边为旋转中心点
-            this.ruler.text.textAlign = "right";
+            this.text.textAlign = "right";
         };
 
         //取第一个数据来判断xaxis的刻度值类型是否为 number
@@ -265,10 +265,10 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             if( !this._label ){
                 this._label = new Canvax.Display.Text(this.label, {
                     context: {
-                        fontSize: this.ruler.text.fontSize,
+                        fontSize: this.text.fontSize,
                         textAlign: this.isH ? "center" : "left",
                         textBaseline: this.isH ? "top" : "middle",
-                        fillStyle: this.ruler.text.fontColor,
+                        fillStyle: this.text.fontColor,
                         rotation: this.isH ? -90 : 0
                     }
                 });
@@ -371,7 +371,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             var text = this._getFormatText( data[a] );
             var txt = new Canvax.Display.Text( text , {
                 context: {
-                    fontSize: this.ruler.text.fontSize
+                    fontSize: this.text.fontSize
                 }
             });
             
@@ -397,8 +397,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     _getFormatText(text)
     {
         var res;
-        if (_.isFunction(this.ruler.text.format)) {
-            res = this.ruler.text.format(text);
+        if (_.isFunction(this.text.format)) {
+            res = this.text.format(text);
         } else {
             res = text
         }
@@ -414,7 +414,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
     _widget( opts )
     {
-        if( !this.ruler.enabled ) return;
+        if( !this.enabled ) return;
         !opts && (opts ={});
 
         var arr = this.layoutData
@@ -439,24 +439,24 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
             var o = arr[a]
             var x = o.x,
-                y = this.ruler.  tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
+                y = this.tickLine.lineLength + this.tickLine.distance + this.text.distance;
 
         
-            if ( this.ruler.text.enabled && !!arr[a].visible ){
+            if ( this.text.enabled && !!arr[a].visible ){
                 //文字
                 var textContext = {
                     x: o._text_x || o.x,
                     y: y + 20,
-                    fillStyle    : this.ruler.text.fontColor,
-                    fontSize     : this.ruler.text.fontSize,
-                    rotation     : -Math.abs(this.ruler.text.rotation),
-                    textAlign    : this.ruler.text.textAlign,
-                    lineHeight   : this.ruler.text.lineHeight,
-                    textBaseline : !!this.ruler.text.rotation ? "middle" : "top",
+                    fillStyle    : this.text.fontColor,
+                    fontSize     : this.text.fontSize,
+                    rotation     : -Math.abs(this.text.rotation),
+                    textAlign    : this.text.textAlign,
+                    lineHeight   : this.text.lineHeight,
+                    textBaseline : !!this.text.rotation ? "middle" : "top",
                     globalAlpha  : 0
                 };
 
-                if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
+                if (!!this.text.rotation && this.text.rotation != 90) {
                     textContext.x += 5;
                     textContext.y += 3;
                 };
@@ -503,16 +503,16 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             };
             
 
-            if ( this.ruler.tickLine.enabled && !!arr[a].visible ) {
+            if ( this.tickLine.enabled && !!arr[a].visible ) {
                 var lineContext = {
                     x: x,
-                    y: this.ruler.tickLine.distance,
+                    y: this.tickLine.distance,
                     end : {
                         x : 0,
-                        y : this.ruler.  tickLine.lineLength
+                        y : this.tickLine.lineLength
                     },
-                    lineWidth: this.ruler.tickLine.lineWidth,
-                    strokeStyle: this.ruler.tickLine.strokeStyle
+                    lineWidth: this.tickLine.lineWidth,
+                    strokeStyle: this.tickLine.strokeStyle
                 };
                 if( xNode._line ){
                     //_.extend( xNode._txt.context , textContext );
@@ -552,7 +552,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         };
 
         //轴线
-        if( this.ruler.axisline.enabled ){
+        if( this.axisLine.enabled ){
             var _axisline = new Line({
                 context : {
                     start : {
@@ -563,8 +563,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                         x : this.width,
                         y : 0
                     },
-                    lineWidth   : this.ruler.axisline.lineWidth,
-                    strokeStyle : this.ruler.axisline.strokeStyle
+                    lineWidth   : this.axisLine.lineWidth,
+                    strokeStyle : this.axisLine.strokeStyle
                 }
             });
             this.sprite.addChild( _axisline );
@@ -575,17 +575,17 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     _setXAxisHeight()
     { //检测下文字的高等
         var me = this;
-        if (!me.ruler.enabled) {
+        if (!me.enabled) {
             me.height = 0; 
         } else {
             var _maxTextHeight = 0;
 
-            if( this.ruler.text.enabled ){
+            if( this.text.enabled ){
                 _.each( me.dataSection, function( val ){
 
                         var txt = new Canvax.Display.Text( me._getFormatText(val) , {
                             context: {
-                                fontSize: me.ruler.text.fontSize
+                                fontSize: me.text.fontSize
                             }
                         });
             
@@ -594,14 +594,14 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                         var width = textWidth; //文本在外接矩形width
                         var height = textHeight;//文本在外接矩形height
 
-                        if (!!me.ruler.text.rotation) {
+                        if (!!me.text.rotation) {
                             //有设置旋转
-                            if ( me.ruler.text.rotation == 90 ) {
+                            if ( me.text.rotation == 90 ) {
                                 width  = textHeight;
                                 height = textWidth;
                             } else {
-                                var sinR = Math.sin(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-                                var cosR = Math.cos(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
+                                var sinR = Math.sin(Math.abs(me.text.rotation) * Math.PI / 180);
+                                var cosR = Math.cos(Math.abs(me.text.rotation) * Math.PI / 180);
                                 height = parseInt( sinR * textWidth );
                                 width = parseInt( cosR * textWidth );
                             };
@@ -618,7 +618,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 } );
             };
 
-            this.height = _maxTextHeight + this.ruler.  tickLine.lineLength + this.ruler.tickLine.distance + this.ruler.text.distance;
+            this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.distance + this.text.distance;
         }
     }
 
@@ -628,7 +628,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         var arr = this.layoutData;
         var l = arr.length;
 
-        if( !this.ruler.enabled || !l ) return;
+        if( !this.enabled || !l ) return;
 
         // rule , peak, proportion
         if( me.layoutType == "proportion" ){
@@ -669,7 +669,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         }
 
         var l = arr.length;  
-        var textAlign = me.ruler.text.textAlign;              
+        var textAlign = me.text.textAlign;              
 
         function checkOver(i){
             var curr = arr[i];
@@ -685,7 +685,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 var currWidth = curr.textWidth;
 
                 //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-                if(!!me.ruler.text.rotation){
+                if(!!me.text.rotation){
                     nextWidth = Math.min( nextWidth, 22 );
                     currWidth = Math.min( currWidth, 22 );
                 };
