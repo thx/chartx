@@ -50,7 +50,7 @@ export default class BarGraphs extends GraphsBase
             lineWidth : 0,
             strokeStyle : null,
 
-            rotate : 0,
+            rotation : 0,
             align : "center",  //left center right
             verticalAlign : "bottom", //top middle bottom
             position : "top", //top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center
@@ -399,7 +399,7 @@ export default class BarGraphs extends GraphsBase
                             strokeStyle : me.text.strokeStyle || finalPos.fillStyle,
                             //textAlign   : me.text.align,
                             textBaseline: me.text.verticalAlign,
-                            rotate      : me.text.rotate
+                            rotation      : me.text.rotation
                         };
                         //然后根据position, offset确定x,y
                         var _textPos = me._getTextPos( finalPos , rectData );
