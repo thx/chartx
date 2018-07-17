@@ -93,7 +93,7 @@ export default class Descartes_Component extends coorBase
 
         this._grid.reset({
             animation:false,
-            xAxis: {
+            xDirection: {
                 data: this._yAxisLeft.layoutData
             }
         });
@@ -167,10 +167,10 @@ export default class Descartes_Component extends coorBase
         this._grid.draw({
             width   : this.width,
             height  : this.height,
-            xAxis   : {
+            xDirection   : {
                 data: this._yAxis[0].layoutData
             },
-            yAxis   : {
+            yDirection   : {
                 data: this._xAxis.layoutData
             },
             pos     : {
@@ -288,7 +288,7 @@ export default class Descartes_Component extends coorBase
             //只留下enabled的field 结构
             return this.filterEnabledFields( fields );
         };
-        
+
         var fmap = {
             left: [], right:[]
         };
@@ -332,7 +332,7 @@ export default class Descartes_Component extends coorBase
         //然后yAxis更新后，对应的背景也要更新
         this._grid.reset({
             animation:false,
-            xAxis: {
+            xDirection: {
                 data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
             }
         });

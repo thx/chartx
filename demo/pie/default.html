@@ -33,7 +33,7 @@
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组
 var data= [
-    ["name"   , "value", "r" , "city"],
+    ["browser"   , "value", "r" , "city"],
     ["ie"     , 320    , 122 , "杭州"],
     ["firefox", 213    , 132 , "杭州"],
     ["safari" , 12    , 321 , "杭州"],
@@ -46,27 +46,21 @@ var data= [
 
 var options = {
     coord : {
-        type : "polar",
-        aAxis : {
-
-        },
-        grid : {
-
-        }
+        type : "polar"
     },
     graphs : [
         {
             type : "pie",
-            node : {
-                value : "value", //决定了这个pie的角度
-                name  : "name"
+            field : "value",
+            label : {
+                field : "browser"
             }
         }
     ],
     tips : {
         content : function(info){
             var node = info.nodes[0];
-            return node.name+"："+node.percentage+"%"
+            return node.label+"："+node.percentage+"%"
         }
     }
 };

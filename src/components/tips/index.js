@@ -42,7 +42,7 @@ export default class Tips extends Component
         this.positionInRange = false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
 
-        this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'shadow'
+        this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'
         this.pointerAnimate = true;
 
         this.init(opt);

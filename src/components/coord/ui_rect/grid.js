@@ -10,43 +10,41 @@ export default class descartesGrid extends Canvax.Event.EventDispatcher
     {
         super( opt, root);
 
-        this.width       = 0;   
-        this.height      = 0;
-        this.root    = root; //该组件被添加到的目标图表项目，
+        this.width  = 0;   
+        this.height = 0;
+        this.root   = root; //该组件被添加到的目标图表项目，
 
-        this.pos     = {
+        this.pos    = {
             x : 0,
             y : 0
-        }
+        };
 
         this.enabled = 1;
 
-        this.xAxis   = {                                //x轴上的线
+        this.xDirection = {                                //x方向上的线
+            shapeType   : "line",
             enabled     : 1,
             data        : [],                      //[{y:100},{}]
-            org         : null,                    //x轴坐标原点，默认为上面的data[0]
-            // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
             lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
             lineWidth   : 1,
             strokeStyle : '#f0f0f0', //'#e5e5e5',
             filter      : null 
-        }
-        this.yAxis = {                                //y轴上的线
+        };
+        this.yDirection = {                                //y方向上的线
+            shapeType   : "line",
             enabled     : 0,
             data        : [],                      //[{x:100},{}]
-            xDis        : 0,
-            org         : null,                    //y轴坐标原点，默认为上面的data[0]
-            // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
             lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
             lineWidth   : 1,
             strokeStyle : '#f0f0f0',//'#e5e5e5',
             filter      : null
-        } 
+        };
         
         this.fill = {
+            enabled : true,
             fillStyle : null,
             alpha : null
-        }
+        };
 
         this.sprite       = null;                       //总的sprite
         this.xAxisSp      = null;                       //x轴上的线集合
@@ -101,7 +99,7 @@ export default class descartesGrid extends Canvax.Event.EventDispatcher
 
         var _yAxis = self.root._yAxis[ 0 ];
         
-        if( self.root && _yAxis && _yAxis.dataSectionGroup ){
+        if( self.fill.enabled && self.root && _yAxis && _yAxis.dataSectionGroup && _yAxis.dataSectionGroup.length>1 ){
             self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
             for( var g = 0 , gl=_yAxis.dataSectionGroup.length ; g < gl ; g++ ){
                 var yGroupHeight = _yAxis.height / gl ;
@@ -124,7 +122,7 @@ export default class descartesGrid extends Canvax.Event.EventDispatcher
         self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
         
         //x轴方向的线集合
-        var arr = self.xAxis.data;
+        var arr = self.xDirection.data;
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a];
           
@@ -132,14 +130,14 @@ export default class descartesGrid extends Canvax.Event.EventDispatcher
                 id : "back_line_"+a,
                 context : {
                     y : o.y,
-                    lineType    : self.xAxis.lineType,
-                    lineWidth   : self.xAxis.lineWidth,
-                    strokeStyle : self.xAxis.strokeStyle  
+                    lineType    : self.xDirection.lineType,
+                    lineWidth   : self.xDirection.lineWidth,
+                    strokeStyle : self.xDirection.strokeStyle  
                 }
             });
-            if(self.xAxis.enabled){
-                _.isFunction( self.xAxis.filter ) && self.xAxis.filter.apply( line , [{
-                    layoutData : self.yAxis.data,
+            if(self.xDirection.enabled){
+                _.isFunction( self.xDirection.filter ) && self.xDirection.filter.apply( line , [{
+                    layoutData : self.yDirection.data,
                     index      : a,
                     line       : line
                 } , self]);
@@ -153,7 +151,7 @@ export default class descartesGrid extends Canvax.Event.EventDispatcher
         };
 
         //y轴方向的线集合
-        var arr = self.yAxis.data
+        var arr = self.yDirection.data
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a]
             var line = new Line({
@@ -167,15 +165,15 @@ export default class descartesGrid extends Canvax.Event.EventDispatcher
                         x : 0,
                         y : -self.height
                     },
-                    lineType    : self.yAxis.lineType,
-                    lineWidth   : self.yAxis.lineWidth,
-                    strokeStyle : self.yAxis.strokeStyle,
+                    lineType    : self.yDirection.lineType,
+                    lineWidth   : self.yDirection.lineWidth,
+                    strokeStyle : self.yDirection.strokeStyle,
                     visible     : o.x ? true : false
                 }
             });
-            if(self.yAxis.enabled){
-                _.isFunction( self.yAxis.filter ) && self.yAxis.filter.apply(line , [{
-                    layoutData : self.xAxis.data,
+            if(self.yDirection.enabled){
+                _.isFunction( self.yDirection.filter ) && self.yDirection.filter.apply(line , [{
+                    layoutData : self.xDirection.data,
                     index      : a,
                     line       : line
                 } , self ]);

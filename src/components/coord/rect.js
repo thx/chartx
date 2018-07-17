@@ -624,7 +624,7 @@ export default class Descartes extends CoordBase
         if( _tips.pointer == "line" ){
             x = _coord.origin.x + e.eventInfo.xAxis.x;
         }
-        if( _tips.pointer == "shadow" ){
+        if( _tips.pointer == "region" ){
             x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
             if( e.eventInfo.xAxis.ind < 0 ){
                 //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
@@ -652,7 +652,7 @@ export default class Descartes extends CoordBase
                     }
                 });
             };
-            if( _tips.pointer == "shadow" ){
+            if( _tips.pointer == "region" ){
                 el = new Rect({
                     //xyToInt : false,
                     context : {
@@ -702,7 +702,7 @@ export default class Descartes extends CoordBase
 
         var el = this._tipsPointer;
         var x = _coord.origin.x + e.eventInfo.xAxis.x;
-        if( _tips.pointer == "shadow" ){
+        if( _tips.pointer == "region" ){
             x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
             if( e.eventInfo.xAxis.ind < 0 ){
                 //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1

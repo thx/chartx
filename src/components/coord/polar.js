@@ -66,7 +66,7 @@ export default class Polar extends CoordBase
                 } ) ) return;
 
                 var data = _.extend(true, {}, item);
-                data.color = item.fillStyle;
+                data.color = item.fillStyle || item.color || item.style;
 
                 legendData.push( data )
             } );

@@ -10256,22 +10256,19 @@ define(function () { 'use strict';
 
 	        _this.enabled = 1;
 
-	        _this.xAxis = { //x轴上的线
+	        _this.xDirection = { //x方向上的线
+	            shapeType: "line",
 	            enabled: 1,
 	            data: [], //[{y:100},{}]
-	            org: null, //x轴坐标原点，默认为上面的data[0]
-	            // data     : [{y:0},{y:-100},{y:-200},{y:-300},{y:-400},{y:-500},{y:-600},{y:-700}],
 	            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
 	            lineWidth: 1,
 	            strokeStyle: '#f0f0f0', //'#e5e5e5',
 	            filter: null
 	        };
-	        _this.yAxis = { //y轴上的线
+	        _this.yDirection = { //y方向上的线
+	            shapeType: "line",
 	            enabled: 0,
 	            data: [], //[{x:100},{}]
-	            xDis: 0,
-	            org: null, //y轴坐标原点，默认为上面的data[0]
-	            // data     : [{x:100},{x:200},{x:300},{x:400},{x:500},{x:600},{x:700}],
 	            lineType: 'solid', //线条类型(dashed = 虚线 | '' = 实线)
 	            lineWidth: 1,
 	            strokeStyle: '#f0f0f0', //'#e5e5e5',
@@ -10279,6 +10276,7 @@ define(function () { 'use strict';
 	        };
 
 	        _this.fill = {
+	            enabled: true,
 	            fillStyle: null,
 	            alpha: null
 	        };
@@ -10292,23 +10290,23 @@ define(function () { 'use strict';
 	    }
 
 	    createClass$1(descartesGrid, [{
-	        key: 'init',
+	        key: "init",
 	        value: function init(opt) {
 	            _$10.extend(true, this, opt);
 	            this.sprite = new canvax.Display.Sprite();
 	        }
 	    }, {
-	        key: 'setX',
+	        key: "setX",
 	        value: function setX($n) {
 	            this.sprite.context.x = $n;
 	        }
 	    }, {
-	        key: 'setY',
+	        key: "setY",
 	        value: function setY($n) {
 	            this.sprite.context.y = $n;
 	        }
 	    }, {
-	        key: 'draw',
+	        key: "draw",
 	        value: function draw(opt) {
 	            _$10.extend(true, this, opt);
 	            //this._configData(opt);
@@ -10317,18 +10315,18 @@ define(function () { 'use strict';
 	            this.setY(this.pos.y);
 	        }
 	    }, {
-	        key: 'clean',
+	        key: "clean",
 	        value: function clean() {
 	            this.sprite.removeAllChildren();
 	        }
 	    }, {
-	        key: 'reset',
+	        key: "reset",
 	        value: function reset(opt) {
 	            this.sprite.removeAllChildren();
 	            this.draw(opt);
 	        }
 	    }, {
-	        key: '_widget',
+	        key: "_widget",
 	        value: function _widget() {
 
 	            var self = this;
@@ -10337,7 +10335,7 @@ define(function () { 'use strict';
 	            }
 	            var _yAxis = self.root._yAxis[0];
 
-	            if (self.root && _yAxis && _yAxis.dataSectionGroup) {
+	            if (self.fill.enabled && self.root && _yAxis && _yAxis.dataSectionGroup && _yAxis.dataSectionGroup.length > 1) {
 	                self.yGroupSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yGroupSp);
 	                for (var g = 0, gl = _yAxis.dataSectionGroup.length; g < gl; g++) {
 	                    var yGroupHeight = _yAxis.height / gl;
@@ -10358,7 +10356,7 @@ define(function () { 'use strict';
 	            self.yAxisSp = new canvax.Display.Sprite(), self.sprite.addChild(self.yAxisSp);
 
 	            //x轴方向的线集合
-	            var arr = self.xAxis.data;
+	            var arr = self.xDirection.data;
 	            for (var a = 0, al = arr.length; a < al; a++) {
 	                var o = arr[a];
 
@@ -10366,14 +10364,14 @@ define(function () { 'use strict';
 	                    id: "back_line_" + a,
 	                    context: {
 	                        y: o.y,
-	                        lineType: self.xAxis.lineType,
-	                        lineWidth: self.xAxis.lineWidth,
-	                        strokeStyle: self.xAxis.strokeStyle
+	                        lineType: self.xDirection.lineType,
+	                        lineWidth: self.xDirection.lineWidth,
+	                        strokeStyle: self.xDirection.strokeStyle
 	                    }
 	                });
-	                if (self.xAxis.enabled) {
-	                    _$10.isFunction(self.xAxis.filter) && self.xAxis.filter.apply(line, [{
-	                        layoutData: self.yAxis.data,
+	                if (self.xDirection.enabled) {
+	                    _$10.isFunction(self.xDirection.filter) && self.xDirection.filter.apply(line, [{
+	                        layoutData: self.yDirection.data,
 	                        index: a,
 	                        line: line
 	                    }, self]);
@@ -10384,7 +10382,7 @@ define(function () { 'use strict';
 	                    line.context.end.x = self.width;
 	                }            }
 	            //y轴方向的线集合
-	            var arr = self.yAxis.data;
+	            var arr = self.yDirection.data;
 	            for (var a = 0, al = arr.length; a < al; a++) {
 	                var o = arr[a];
 	                var line = new Line$3({
@@ -10398,15 +10396,15 @@ define(function () { 'use strict';
 	                            x: 0,
 	                            y: -self.height
 	                        },
-	                        lineType: self.yAxis.lineType,
-	                        lineWidth: self.yAxis.lineWidth,
-	                        strokeStyle: self.yAxis.strokeStyle,
+	                        lineType: self.yDirection.lineType,
+	                        lineWidth: self.yDirection.lineWidth,
+	                        strokeStyle: self.yDirection.strokeStyle,
 	                        visible: o.x ? true : false
 	                    }
 	                });
-	                if (self.yAxis.enabled) {
-	                    _$10.isFunction(self.yAxis.filter) && self.yAxis.filter.apply(line, [{
-	                        layoutData: self.xAxis.data,
+	                if (self.yDirection.enabled) {
+	                    _$10.isFunction(self.yDirection.filter) && self.yDirection.filter.apply(line, [{
+	                        layoutData: self.xDirection.data,
 	                        index: a,
 	                        line: line
 	                    }, self]);
@@ -10507,7 +10505,7 @@ define(function () { 'use strict';
 
 	            this._grid.reset({
 	                animation: false,
-	                xAxis: {
+	                xDirection: {
 	                    data: this._yAxisLeft.layoutData
 	                }
 	            });
@@ -10579,10 +10577,10 @@ define(function () { 'use strict';
 	            this._grid.draw({
 	                width: this.width,
 	                height: this.height,
-	                xAxis: {
+	                xDirection: {
 	                    data: this._yAxis[0].layoutData
 	                },
-	                yAxis: {
+	                yDirection: {
 	                    data: this._xAxis.layoutData
 	                },
 	                pos: {
@@ -10743,7 +10741,7 @@ define(function () { 'use strict';
 	            //然后yAxis更新后，对应的背景也要更新
 	            this._grid.reset({
 	                animation: false,
-	                xAxis: {
+	                xDirection: {
 	                    data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
 	                }
 	            });
@@ -11475,7 +11473,7 @@ define(function () { 'use strict';
 	            if (_tips.pointer == "line") {
 	                x = _coord.origin.x + e.eventInfo.xAxis.x;
 	            }
-	            if (_tips.pointer == "shadow") {
+	            if (_tips.pointer == "region") {
 	                x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
 	                if (e.eventInfo.xAxis.ind < 0) {
 	                    //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
@@ -11502,7 +11500,7 @@ define(function () { 'use strict';
 	                            strokeStyle: "#cccccc"
 	                        }
 	                    });
-	                }                if (_tips.pointer == "shadow") {
+	                }                if (_tips.pointer == "region") {
 	                    el = new Rect$3({
 	                        //xyToInt : false,
 	                        context: {
@@ -11550,7 +11548,7 @@ define(function () { 'use strict';
 
 	            var el = this._tipsPointer;
 	            var x = _coord.origin.x + e.eventInfo.xAxis.x;
-	            if (_tips.pointer == "shadow") {
+	            if (_tips.pointer == "region") {
 	                x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
 	                if (e.eventInfo.xAxis.ind < 0) {
 	                    //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
@@ -11608,17 +11606,24 @@ define(function () { 'use strict';
 	        };
 
 	        _this.enabled = false;
-	        _this.type = "poly";
 
-	        _this.line = {
+	        //环
+	        _this.ring = {
+	            shapeType: "poly",
 	            lineType: "sold",
+	            lineWidth: 1,
+	            strokeStyle: "#e5e5e5", //["#f9f9f9", "#f7f7f7"],
+	            fillStyle: null, //["#f9f9f9", "#f7f7f7"],
+	            fillAlpha: 0.5
+	        };
+
+	        //射线
+	        _this.ray = {
+	            enabled: true,
 	            lineWidth: 1,
 	            strokeStyle: "#e5e5e5"
 	        };
-	        _this.fill = {
-	            fillStyle: null, //["#f9f9f9", "#f7f7f7"],
-	            alpha: 0.5
-	        };
+
 	        _this.dataSection = [];
 
 	        _this.sprite = null; //总的sprite
@@ -11679,16 +11684,16 @@ define(function () { 'use strict';
 	                    var points = me.root.getPointsOfR(r);
 
 	                    var ctx = {
-	                        //lineType : me.line.lineType,
-	                        lineWidth: me.line.lineWidth,
-	                        strokeStyle: me.line.strokeStyle,
-	                        fillStyle: me._getFillStyle(me.fill.fillStyle, i - 1),
-	                        fillAlpha: me.fill.alpha
+	                        //lineType : me.ring.lineType,
+	                        lineWidth: me.ring.lineWidth,
+	                        strokeStyle: me._getStyle(me.ring.strokeStyle, i - 1), //me.ring.strokeStyle,
+	                        fillStyle: me._getStyle(me.ring.fillStyle, i - 1),
+	                        fillAlpha: me.ring.fillAlpha
 	                    };
 
 	                    var _ring;
 	                    var ringType = Circle$1;
-	                    if (me.type == "circle") {
+	                    if (me.ring.shapeType == "circle") {
 	                        ctx.r = r;
 	                        _ring = new ringType({
 	                            context: ctx
@@ -11718,8 +11723,8 @@ define(function () { 'use strict';
 	                        var _line = new Line$5({
 	                            context: {
 	                                end: point,
-	                                lineWidth: me.line.lineWidth,
-	                                strokeStyle: me.line.strokeStyle
+	                                lineWidth: me.ring.lineWidth,
+	                                strokeStyle: me.ring.strokeStyle
 	                            }
 	                        });
 	                        me.sprite.addChild(_line);
@@ -11728,8 +11733,8 @@ define(function () { 'use strict';
 	            });
 	        }
 	    }, {
-	        key: "_getFillStyle",
-	        value: function _getFillStyle(color, i) {
+	        key: "_getStyle",
+	        value: function _getStyle(color, i) {
 	            if (_$13.isArray(color)) {
 	                return color[i % color.length];
 	            }
@@ -12441,7 +12446,7 @@ define(function () { 'use strict';
 	                    })) return;
 
 	                    var data = _$15.extend(true, {}, item);
-	                    data.color = item.fillStyle;
+	                    data.color = item.fillStyle || item.color || item.style;
 
 	                    legendData.push(data);
 	                });
@@ -12604,7 +12609,7 @@ define(function () { 'use strict';
 	            offsetY: 0
 	        };
 
-	        _this.sort = null;
+	        //this.sort = null; //TODO:这个设置有问题，暂时所有sort相关的逻辑都注释掉
 
 	        _this._barsLen = 0;
 
@@ -12966,9 +12971,12 @@ define(function () { 'use strict';
 	            this.sprite.context.x = this.origin.x;
 	            this.sprite.context.y = this.origin.y;
 
+	            /*
 	            if (this.sort && this.sort == "desc") {
 	                this.sprite.context.y -= this.height;
-	            }
+	            };
+	            */
+
 	            this.grow(function () {
 	                me.fire("complete");
 	            }, {
@@ -13111,9 +13119,12 @@ define(function () { 'use strict';
 
 	                        //如果有排序的话
 	                        //TODO:这个逻辑好像有问题
+	                        /*
 	                        if (_yAxis.sort && _yAxis.sort == "desc") {
 	                            y = -(_yAxis.height - Math.abs(y));
-	                        }
+	                        };
+	                        */
+
 	                        var nodeData = {
 	                            type: "bar",
 	                            value: val,
@@ -13238,9 +13249,12 @@ define(function () { 'use strict';
 	                callback && callback(me);
 	                return;
 	            }            var sy = 1;
+	            /*
 	            if (this.sort && this.sort == "desc") {
 	                sy = -1;
-	            }
+	            };
+	            */
+
 	            var optsions = _$17.extend({
 	                delay: Math.min(1000 / this._barsLen, 80),
 	                easing: "Linear.None", //"Back.Out",
@@ -14931,12 +14945,10 @@ define(function () { 'use strict';
 	var Pie = function (_Canvax$Event$EventDi) {
 	    inherits$1(Pie, _Canvax$Event$EventDi);
 
-	    function Pie(opts, _graphs, data) {
+	    function Pie(_graphs, data) {
 	        classCallCheck$1(this, Pie);
 
 	        var _this = possibleConstructorReturn$1(this, (Pie.__proto__ || Object.getPrototypeOf(Pie)).call(this));
-
-	        _this._opts = opts;
 
 	        _this.width = 0;
 	        _this.height = 0;
@@ -14957,7 +14969,7 @@ define(function () { 'use strict';
 	        _this.sectorsSp = null;
 	        _this.selectedSp = null;
 
-	        _this.init(opts);
+	        _this.init();
 
 	        _this.sectors = [];
 	        _this.textMaxCount = 15;
@@ -14969,8 +14981,7 @@ define(function () { 'use strict';
 
 	    createClass$1(Pie, [{
 	        key: "init",
-	        value: function init(opts) {
-	            _$21.extend(true, this, opts);
+	        value: function init() {
 
 	            this.sprite = new canvax.Display.Sprite();
 
@@ -14980,7 +14991,7 @@ define(function () { 'use strict';
 	            this.selectedSp = new canvax.Display.Sprite();
 	            this.sprite.addChild(this.selectedSp);
 
-	            if (this._graphs.text.enabled) {
+	            if (this._graphs.label.enabled) {
 	                this.textSp = new canvax.Display.Sprite();
 	            }        }
 	    }, {
@@ -15025,7 +15036,7 @@ define(function () { 'use strict';
 	                    onComplete: function onComplete() {
 	                        completedNum++;
 	                        if (completedNum == me.sectors.length) {
-	                            if (me._graphs.text.enabled) {
+	                            if (me._graphs.label.enabled) {
 	                                me._startWidgetLabel();
 	                            }                        }
 	                    }
@@ -15079,13 +15090,13 @@ define(function () { 'use strict';
 	                        };
 	                        me._graphs.root.fire(e.type, e);
 
-	                        me._graphs.triggerEvent(me.node, e);
+	                        me._graphs.triggerEvent(me._graphs.node, e);
 	                    });
 
 	                    me.sectorsSp.addChildAt(sector, 0);
 	                    me.sectors.push(sector);
 	                }
-	                if (me._graphs.text.enabled) {
+	                if (me._graphs.label.enabled) {
 	                    me._startWidgetLabel();
 	                }            }
 	        }
@@ -15372,10 +15383,10 @@ define(function () { 'use strict';
 	                });
 
 	                //指示文字
-	                var textTxt = itemData.text;
+	                var textTxt = itemData.labelText;
 	                //如果用户format过，那么就用用户指定的格式
 	                //如果没有就默认拼接
-	                if (!this._graphs.text.format) {
+	                if (!this._graphs.label.format) {
 	                    if (textTxt) {
 	                        textTxt = textTxt + "：" + itemData.percentage + "%";
 	                    } else {
@@ -15572,30 +15583,31 @@ define(function () { 'use strict';
 
 	        _this.type = "pie";
 
-	        _this.node = {
-	            value: null,
-	            name: null,
-	            r: null, //自动计算，也可以配置一个字段，就成了丁格尔玫瑰图
-	            shapeType: "sector",
-	            fillStyle: _this.root._theme,
+	        _this.field = null;
+	        _this.sort = null; //默认不排序，可以配置为asc,desc
 
+	        _this.node = {
+	            shapeType: "sector",
+
+	            radius: null, //每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图
+	            innerRadius: 0, //扇形的内圆半径
+	            outRadius: null, //最大外围半径
+	            minRadius: 10, //outRadius - innerRadius ， 也就是radius的最小值
+	            moveDis: 15, //要预留moveDis位置来hover sector 的时候外扩
+
+	            fillStyle: _this.root._theme,
 	            focus: {
 	                enabled: true
 	            },
 	            select: {
 	                enabled: false,
-	                r: 5,
+	                radius: 5,
 	                alpha: 0.7
-	            },
-
-	            innerRadius: 0,
-	            outRadius: null, //如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
-	            radius: null,
-	            minSectorRadius: 10, //outRadius - innerRadius ， 也就是radius的最小值
-	            moveDis: 15 //要预留moveDis位置来hover sector 的时候外扩
+	            }
 	        };
 
-	        _this.text = {
+	        _this.label = {
+	            field: null, //默认获取field的值，但是可以单独设置
 	            enabled: false,
 	            format: null
 	        };
@@ -15626,17 +15638,18 @@ define(function () { 'use strict';
 	            //根据配置情况重新修正 outRadius ，innerRadius ------------
 	            if (!this.node.outRadius) {
 	                var outRadius = Math.min(w, h) / 2;
-	                if (this.text.enabled) {
+	                if (this.label.enabled) {
 	                    //要预留moveDis位置来hover sector 的时候外扩
 	                    outRadius -= this.node.moveDis;
 	                }                this.node.outRadius = parseInt(outRadius);
-	            }            if (this.node.radius !== null) {
+	            }            if (this.node.radius !== null && _$22.isNumber(this.node.radius)) {
 	                //如果用户有直接配置 radius，那么radius优先，用来计算
-	                this.node.radius = Math.max(this.node.radius, this.node.minSectorRadius);
-	                this.node.innerRadius = this.node.outRadius - this.node.radius;
-	            }            //要保证sec具有一个最小的radius
-	            if (this.node.outRadius - this.node.innerRadius < this.node.minSectorRadius) {
-	                this.node.innerRadius = this.node.outRadius - this.node.minSectorRadius;
+	                this.node.radius = Math.max(this.node.radius, this.node.minRadius);
+	                this.node.outRadius = this.node.innerRadius + this.node.radius;
+	            }
+	            //要保证sec具有一个最小的radius
+	            if (this.node.outRadius - this.node.innerRadius < this.node.minRadius) {
+	                this.node.innerRadius = this.node.outRadius - this.node.minRadius;
 	            }            if (this.node.innerRadius < 0) {
 	                this.node.innerRadius = 0;
 	            }            // end --------------------------------------------------
@@ -15655,7 +15668,7 @@ define(function () { 'use strict';
 	            this._computerProps();
 
 	            //这个时候就是真正的计算布局用得layoutdata了
-	            this._pie = new Pie(this._opts, this, this._trimGraphs(this.data));
+	            this._pie = new Pie(this, this._trimGraphs(this.data));
 	            this._pie.draw(opts);
 
 	            var me = this;
@@ -15671,21 +15684,21 @@ define(function () { 'use strict';
 	        }
 	    }, {
 	        key: "show",
-	        value: function show(name) {
-	            this._setEnabled(name, true);
+	        value: function show(label) {
+	            this._setEnabled(label, true);
 	        }
 	    }, {
 	        key: "hide",
-	        value: function hide(name) {
-	            this._setEnabled(name, false);
+	        value: function hide(label) {
+	            this._setEnabled(label, false);
 	        }
 	    }, {
 	        key: "_setEnabled",
-	        value: function _setEnabled(name, status) {
+	        value: function _setEnabled(label, status) {
 	            var me = this;
 
 	            _$22.each(this.data, function (item) {
-	                if (item.name === name) {
+	                if (item.label === label) {
 	                    item.enabled = status;
 	                    return false;
 	                }
@@ -15711,20 +15724,21 @@ define(function () { 'use strict';
 
 	                    selected: false, //是否选中
 	                    selectEnabled: me.node.select.enabled,
-	                    selectedR: me.node.select.r,
+	                    selectedR: me.node.select.radius,
 	                    selectedAlpha: me.node.select.alpha,
 	                    enabled: true, //是否启用，显示在列表中
-	                    value: rowData[me.node.value],
-	                    name: rowData[me.node.name],
 	                    fillStyle: me.getColorByIndex(me.node.fillStyle, i, l),
-	                    text: null, //绘制的时候再设置
+
+	                    value: rowData[me.field],
+	                    label: rowData[me.label.field || me.field],
+	                    labelText: null, //绘制的时候再设置,label format后的数据
 	                    iNode: i
 	                };
 	                data.push(layoutData);
 	            }
 	            if (data.length && me.sort) {
 	                data.sort(function (a, b) {
-	                    if (me.sort == 'desc') {
+	                    if (me.sort == 'asc') {
 	                        return a.value - b.value;
 	                    } else {
 	                        return b.value - a.value;
@@ -15749,6 +15763,7 @@ define(function () { 'use strict';
 
 	            var percentFixedNum = 2;
 
+	            //下面连个变量当node.r设置为数据字段的时候用
 	            var maxRval = 0;
 	            var minRval = 0;
 
@@ -15759,10 +15774,13 @@ define(function () { 'use strict';
 	                    if (!data[i].enabled) continue;
 
 	                    total += data[i].value;
-	                    if (me.node.r) {
-	                        maxRval = Math.max(maxRval, data[i].rowData[me.node.r]);
-	                        minRval = Math.min(minRval, data[i].rowData[me.node.r]);
-	                    }
+	                    if (me.node.radius) {
+	                        var _r = me.node.radius;
+	                        if (_$22.isString(me.node.radius) && me.node.radius in data[i].rowData) {
+	                            _r = Number(data[i].rowData[me.node.radius]);
+	                            maxRval = Math.max(maxRval, _r);
+	                            minRval = Math.min(minRval, _r);
+	                        }                    }
 	                }
 	                if (total > 0) {
 
@@ -15825,9 +15843,14 @@ define(function () { 'use strict';
 
 	                        var outRadius = me.node.outRadius;
 
-	                        if (me.node.r) {
-	                            outRadius = parseInt((me.node.outRadius - me.node.innerRadius) * ((data[j].rowData[me.node.r] - minRval) / (maxRval - minRval)) + me.node.innerRadius);
-	                        }
+	                        if (me.node.radius) {
+	                            var _rr = me.node.radius;
+	                            if (_$22.isString(me.node.radius) && me.node.radius in data[j].rowData) {
+	                                _rr = Number(data[j].rowData[me.node.radius]);
+	                                outRadius = parseInt((me.node.outRadius - me.node.innerRadius) * ((_rr - minRval) / (maxRval - minRval)) + me.node.innerRadius);
+	                            } else {
+	                                outRadius = _rr;
+	                            }                        }
 	                        var moveDis = me.node.moveDis;
 
 	                        _$22.extend(data[j], {
@@ -15858,7 +15881,7 @@ define(function () { 'use strict';
 	                        });
 
 	                        //这个时候可以计算下label，因为很多时候外部label如果是配置的
-	                        data[j].text = me._getLabel(data[j]);
+	                        data[j].labelText = me._getLabelText(data[j]);
 
 	                        me.currentAngle += angle;
 
@@ -15886,18 +15909,18 @@ define(function () { 'use strict';
 	            }            return colors[iNode];
 	        }
 	    }, {
-	        key: "_getLabel",
-	        value: function _getLabel(itemData) {
-	            var text;
-	            if (this.text.enabled) {
-	                if (this.node.name) {
-	                    text = itemData.rowData[this.node.name];
+	        key: "_getLabelText",
+	        value: function _getLabelText(itemData) {
+	            var str;
+	            if (this.label.enabled) {
+	                if (this.label.field) {
+	                    str = itemData.rowData[this.label.field];
 	                }
-	                if (_$22.isFunction(this.text.format)) {
-	                    text = this.text.format(itemData);
+	                if (_$22.isFunction(this.label.format)) {
+	                    str = this.label.format(itemData);
 	                }
 	            }
-	            return text;
+	            return str;
 	        }
 	    }, {
 	        key: "getList",
@@ -15907,7 +15930,16 @@ define(function () { 'use strict';
 	    }, {
 	        key: "getLegendData",
 	        value: function getLegendData() {
-	            return this.data;
+	            //return this.data;
+	            var legendData = [];
+	            _$22.each(this.data, function (item) {
+	                legendData.push({
+	                    name: item.label,
+	                    color: item.fillStyle,
+	                    enabled: item.enabled
+	                });
+	            });
+	            return legendData;
 	        }
 	    }, {
 	        key: "tipsPointerOf",
@@ -19505,7 +19537,7 @@ define(function () { 'use strict';
 	        _this.positionInRange = false; //tip的浮层是否限定在画布区域
 	        _this.enabled = true; //tips是默认显示的
 
-	        _this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'shadow'
+	        _this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'
 	        _this.pointerAnimate = true;
 
 	        _this.init(opt);

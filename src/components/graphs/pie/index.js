@@ -12,30 +12,31 @@ export default class PieGraphs extends GraphsBase
 
         this.type = "pie";
 
-        this.node = {
-            value : null,
-            name : null,
-            r : null, //自动计算，也可以配置一个字段，就成了丁格尔玫瑰图
-            shapeType : "sector",
-            fillStyle : this.root._theme,
+        this.field = null; 
+        this.sort = null; //默认不排序，可以配置为asc,desc
 
-            focus  : {
+        this.node = {
+            shapeType : "sector",
+
+            radius : null, //每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图
+            innerRadius : 0, //扇形的内圆半径
+            outRadius : null,//最大外围半径
+            minRadius : 10,//outRadius - innerRadius ， 也就是radius的最小值
+            moveDis : 15, //要预留moveDis位置来hover sector 的时候外扩
+
+            fillStyle : this.root._theme,
+            focus : {
                 enabled : true,
             },
             select : {
                 enabled : false,
-                r : 5,
+                radius : 5,
                 alpha : 0.7
-            },
-            
-            innerRadius : 0,
-            outRadius : null,//如果有配置rField（丁格尔玫瑰图）,则outRadius代表最大radius
-            radius : null,
-            minSectorRadius : 10,//outRadius - innerRadius ， 也就是radius的最小值
-            moveDis : 15    //要预留moveDis位置来hover sector 的时候外扩
+            }
         };
 
-        this.text = {
+        this.label = {
+            field : null, //默认获取field的值，但是可以单独设置
             enabled : false,
             format  : null
         };
@@ -64,20 +65,21 @@ export default class PieGraphs extends GraphsBase
         //根据配置情况重新修正 outRadius ，innerRadius ------------
         if( !this.node.outRadius ){
             var outRadius = Math.min(w, h) / 2;
-            if ( this.text.enabled ) {
+            if ( this.label.enabled ) {
                 //要预留moveDis位置来hover sector 的时候外扩
                 outRadius -= this.node.moveDis;
             };
             this.node.outRadius = parseInt( outRadius );
         };
-        if( this.node.radius !== null ){
+        if( this.node.radius !== null && _.isNumber( this.node.radius ) ){
             //如果用户有直接配置 radius，那么radius优先，用来计算
-            this.node.radius = Math.max( this.node.radius, this.node.minSectorRadius );
-            this.node.innerRadius = this.node.outRadius - this.node.radius;
+            this.node.radius = Math.max( this.node.radius, this.node.minRadius );
+            this.node.outRadius = this.node.innerRadius + this.node.radius;
         };
+        
         //要保证sec具有一个最小的radius
-        if( this.node.outRadius - this.node.innerRadius < this.node.minSectorRadius ){
-            this.node.innerRadius = this.node.outRadius - this.node.minSectorRadius;
+        if( this.node.outRadius - this.node.innerRadius < this.node.minRadius ){
+            this.node.innerRadius = this.node.outRadius - this.node.minRadius;
         };
         if( this.node.innerRadius < 0 ){
             this.node.innerRadius = 0;
@@ -97,7 +99,7 @@ export default class PieGraphs extends GraphsBase
         this._computerProps();
 
         //这个时候就是真正的计算布局用得layoutdata了
-        this._pie = new Pie( this._opts, this , this._trimGraphs( this.data ) );
+        this._pie = new Pie( this , this._trimGraphs( this.data ) );
         this._pie.draw( opts );
 
         var me = this;
@@ -112,22 +114,22 @@ export default class PieGraphs extends GraphsBase
         this.sprite.addChild( this._pie.sprite );
     }
 
-    show( name )
+    show( label )
     {
-        this._setEnabled( name, true );
+        this._setEnabled( label, true );
     }
 
-    hide( name )
+    hide( label )
     {
-        this._setEnabled( name, false );
+        this._setEnabled( label, false );
     }
 
-    _setEnabled( name, status )
+    _setEnabled( label, status )
     {
         var me = this;
 
         _.each( this.data, function( item ){
-            if( item.name === name ){
+            if( item.label === label ){
                 item.enabled = status;
                 return false;
             }
@@ -153,21 +155,22 @@ export default class PieGraphs extends GraphsBase
 
                 selected      : false,  //是否选中
                 selectEnabled : me.node.select.enabled,
-                selectedR     : me.node.select.r,
+                selectedR     : me.node.select.radius,
                 selectedAlpha : me.node.select.alpha,
                 enabled       : true,   //是否启用，显示在列表中
-                value         : rowData[ me.node.value ],
-                name          : rowData[ me.node.name ],
                 fillStyle     : me.getColorByIndex(me.node.fillStyle, i, l),
-                text          : null,    //绘制的时候再设置
-                iNode       : i
+
+                value         : rowData[ me.field ],
+                label         : rowData[ me.label.field || me.field ],
+                labelText     : null, //绘制的时候再设置,label format后的数据
+                iNode         : i
             };
             data.push( layoutData );
         };
 
         if( data.length && me.sort ){
             data.sort(function (a, b) {
-                if (me.sort == 'desc') {
+                if (me.sort == 'asc') {
                     return a.value - b.value;
                 } else {
                     return b.value - a.value;
@@ -193,6 +196,7 @@ export default class PieGraphs extends GraphsBase
 
         var percentFixedNum = 2;     
         
+        //下面连个变量当node.r设置为数据字段的时候用
         var maxRval = 0;
         var minRval = 0;
 
@@ -203,9 +207,14 @@ export default class PieGraphs extends GraphsBase
                 if( !data[i].enabled ) continue;
 
                 total += data[i].value;
-                if( me.node.r ){
-                    maxRval = Math.max( maxRval, data[i].rowData[ me.node.r ]);
-                    minRval = Math.min( minRval, data[i].rowData[ me.node.r ]);
+                if( me.node.radius ){
+                    var _r = me.node.radius;
+                    if( _.isString(me.node.radius) &&  me.node.radius in data[i].rowData){
+                        _r = Number(data[i].rowData[ me.node.radius ]);
+                        maxRval = Math.max( maxRval, _r );
+                        minRval = Math.min( minRval, _r );
+                    };
+                    
                 }
             };
 
@@ -271,8 +280,15 @@ export default class PieGraphs extends GraphsBase
 
                     var outRadius = me.node.outRadius;
 
-                    if( me.node.r ){
-                        outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (data[j].rowData[me.node.r] - minRval)/(maxRval-minRval)  ) + me.node.innerRadius );
+                    if( me.node.radius ){
+                        var _rr = me.node.radius;
+                        if( _.isString(me.node.radius) &&  me.node.radius in data[j].rowData){
+                            _rr = Number( data[j].rowData[me.node.radius] );                  
+                            outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (_rr - minRval)/(maxRval-minRval)  ) + me.node.innerRadius );
+                        } else {
+                            outRadius = _rr;
+                        };
+
                     };
 
                     var moveDis = me.node.moveDis;
@@ -305,7 +321,7 @@ export default class PieGraphs extends GraphsBase
                     });
 
                     //这个时候可以计算下label，因为很多时候外部label如果是配置的
-                    data[j].text = me._getLabel( data[j] );
+                    data[j].labelText = me._getLabelText( data[j] );
                     
                     me.currentAngle += angle;
                     
@@ -335,18 +351,18 @@ export default class PieGraphs extends GraphsBase
         return colors[iNode];
     }
 
-    _getLabel( itemData )
+    _getLabelText( itemData )
     {
-        var text;
-        if( this.text.enabled ){
-            if( this.node.name ){
-                text = itemData.rowData[ this.node.name ];
+        var str;
+        if( this.label.enabled ){
+            if( this.label.field ){
+                str = itemData.rowData[ this.label.field ];
             }
-            if( _.isFunction( this.text.format ) ){
-                text = this.text.format( itemData )
+            if( _.isFunction( this.label.format ) ){
+                str = this.label.format( itemData )
             }
         }
-        return text;
+        return str;
     }
 
     getList()
@@ -356,7 +372,16 @@ export default class PieGraphs extends GraphsBase
 
     getLegendData()
     {
-        return this.data;
+        //return this.data;
+        var legendData = [];
+        _.each( this.data, function(item){
+            legendData.push( {
+                name : item.label,
+                color : item.fillStyle,
+                enabled : item.enabled
+            } )
+        } );
+        return legendData;
     }
 
     tipsPointerOf( e ){

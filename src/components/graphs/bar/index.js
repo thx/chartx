@@ -58,7 +58,7 @@ export default class BarGraphs extends GraphsBase
             offsetY : 0
         };
 
-        this.sort = null;
+        //this.sort = null; //TODO:这个设置有问题，暂时所有sort相关的逻辑都注释掉
 
         this._barsLen = 0;
 
@@ -449,9 +449,11 @@ export default class BarGraphs extends GraphsBase
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
+        /*
         if (this.sort && this.sort == "desc") {
             this.sprite.context.y -= this.height;
         };
+        */
 
         this.grow(function() {
             me.fire("complete");
@@ -602,9 +604,11 @@ export default class BarGraphs extends GraphsBase
 
                     //如果有排序的话
                     //TODO:这个逻辑好像有问题
+                    /*
                     if (_yAxis.sort && _yAxis.sort == "desc") {
                         y = -(_yAxis.height - Math.abs(y));
                     };
+                    */
 
                     var nodeData = {
                         type    : "bar",
@@ -733,9 +737,11 @@ export default class BarGraphs extends GraphsBase
             return;
         };
         var sy = 1;
+        /*
         if (this.sort && this.sort == "desc") {
             sy = -1;
         };
+        */
 
         var optsions = _.extend({
             delay: Math.min(1000 / this._barsLen, 80),
