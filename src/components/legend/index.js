@@ -23,6 +23,13 @@ export default class Legend extends Component
         this.width = 0;
         this.height = 0;
 
+        //一般来讲，比如柱状图折线图等，是按照传入的field来分组来设置图例的，那么legend.field都是null
+        //但是还有一种情况就是，是按照同一个field中的数据去重后来分组的，比如散点图中sex属性的男女两个分组作为图例，
+        //以及pie饼图中的每个数据的name字段都是作为一个图例
+        //那么就想要给legend主动设置一个field字段，然后legend自己从dataFrame中拿到这个field的数据来去重，然后分组做为图例
+        //这是一个很屌的设计
+        this.field = null;
+
         this.icon = {
             height : 30,
             width  : "auto",
@@ -42,7 +49,7 @@ export default class Legend extends Component
             format : function( name, info ){
                 return name
             }
-        }
+        };
 
         //this.onChecked=function(){};
         //this.onUnChecked=function(){};

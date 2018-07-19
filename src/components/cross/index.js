@@ -40,13 +40,15 @@ export default class MarkLine extends Component
             lineType    : 'solid'
         };
 
+        //待开发
         this.node = {
             enabled : false,
             shapeType : "circle",
-            r : 1,
+            radius : 1,
             fillStyle : "#999"
         };
 
+        //待开发
         this.label = {
             enabled  : false,
             fillStyle: '#999999',

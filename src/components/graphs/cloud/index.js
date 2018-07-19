@@ -27,9 +27,9 @@ export default class CloudGraphs extends GraphsBase
                 //fontSize默认12-50的随机值
                 return this.minFontSize + Math.random() * this.maxFontSize;
             },
-            maxFontSize : 38,
+            maxFontSize : 30,
             _maxFontSizeVal : 0, //fontSizer如果配置为一个field的话， 找出这个field数据的最大值
-            minFontSize : 18,
+            minFontSize : 16,
             _minFontSizeVal : null,//fontSizer如果配置为一个field的话， 找出这个field数据的最小值
 
             fontWeight : "normal",
@@ -38,7 +38,7 @@ export default class CloudGraphs extends GraphsBase
 
             padding : 10,
 
-            rotate : function(){
+            rotation : function(){
                 return (~~(Math.random() * 6) - 3) * 30;
             },
 
@@ -111,11 +111,11 @@ export default class CloudGraphs extends GraphsBase
 
     _getRotate( item, ind )
     {
-        var rotate = this.node.rotate;
-        if( _.isFunction( this.node.rotate ) ){
-            rotate = this.node.rotate() || 0;
-        }
-        return rotate;
+        var rotation = this.node.rotation;
+        if( _.isFunction( this.node.rotation ) ){
+            rotation = this.node.rotation( item, ind ) || 0;
+        };
+        return rotation;
     }
 
     _getFontColor( nodeData )

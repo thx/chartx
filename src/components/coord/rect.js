@@ -669,7 +669,7 @@ export default class Descartes extends CoordBase
             this.graphsSprite.addChild( el, 0 );
             this._tipsPointer = el;
         } else {
-            if( _tips.pointerAnimate && _coord._xAxis.layoutType != "proportion" ){
+            if( _tips.pointerAnim && _coord._xAxis.layoutType != "proportion" ){
                 if( el.__animation ){
                     el.__animation.stop();
                 };
@@ -715,7 +715,7 @@ export default class Descartes extends CoordBase
             return;
         };
 
-        if( _tips.pointerAnimate && _coord._xAxis.layoutType != "proportion"){
+        if( _tips.pointerAnim && _coord._xAxis.layoutType != "proportion"){
             if( el.__animation ){
                 el.__animation.stop();
             };

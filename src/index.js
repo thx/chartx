@@ -27,7 +27,6 @@ import Legend from "./components/legend/index"
 import DataZoom from "./components/datazoom/index"
 import MarkLine from "./components/markline/index"
 import MarkPoint from "./components/markpoint/index"
-import Anchor from "./components/anchor/index"
 import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
 import Theme from "./components/theme/index"
@@ -56,7 +55,6 @@ var components = {
     dataZoom : DataZoom,
     markLine : MarkLine,
     markPoint : MarkPoint,
-    anchor : Anchor,
     tips : Tips,
     barTgi : BarTgi,
     waterMark : WaterMark,

@@ -65,9 +65,9 @@ var options = {
                 onclick : function( e , nodeData ){
                     console.log("onclick")
                     if( !nodeData.selected ){
-                        this.selectAt( nodeData.nodeInd );
+                        this.selectAt( nodeData.iNode );
                     } else {
-                        this.unselectAt( nodeData.nodeInd );
+                        this.unselectAt( nodeData.iNode );
                     };
                 },
                 ondblclick : function(){

@@ -17,7 +17,7 @@ export default class Tips extends Component
         this.dW      = 0;  //html的tips内容width
         this.dH      = 0;  //html的tips内容Height
 
-        this.borderRadius   = "5px";  //背景框的 圆角 
+        this.borderRadius  = "5px";  //背景框的 圆角 
 
         this.sprite  = null;
         this.content = null; //tips的详细内容
@@ -26,12 +26,12 @@ export default class Tips extends Component
         this.fontColor = "#999";
         this.strokeStyle = "#ccc";
         
-        this.place = "right"; //在鼠标的左（右）边
+        this.position = "right"; //在鼠标的左（右）边
         
         this._tipDom = null;
-        //this._back   = null;
 
-        this.offset = 10; //tips内容到鼠标位置的偏移量
+        this.offsetX = 10; //tips内容到鼠标位置的偏移量x
+        this.offsetY = 10; //tips内容到鼠标位置的偏移量y
     
         //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
         //会deepExtend到this.indo上面来
@@ -41,7 +41,7 @@ export default class Tips extends Component
         this.enabled = true; //tips是默认显示的
 
         this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
-        this.pointerAnimate = true;
+        this.pointerAnim = true;
 
         this.init(opt);
     }
@@ -97,13 +97,13 @@ export default class Tips extends Component
         if( !this.enabled ) return;
         if(!this._tipDom) return;
         var pos = e.pos || e.target.localToGlobal( e.point );
-        var x   = this._checkX( pos.x + this.offset );
-        var y   = this._checkY( pos.y + this.offset );
+        var x   = this._checkX( pos.x + this.offsetX );
+        var y   = this._checkY( pos.y + this.offsetY );
 
         this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
         
-        if( this.place == "left" ){
-            this._tipDom.style.left = this._checkX( pos.x - this.offset - this._tipDom.offsetWidth )+"px";
+        if( this.position == "left" ){
+            this._tipDom.style.left = this._checkX( pos.x - this.offsetX - this._tipDom.offsetWidth )+"px";
         };
     }
 
@@ -176,7 +176,7 @@ export default class Tips extends Component
             if( node.value === undefined || node.value === null ){
                 return;
             };
-debugger
+
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
             var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
             str+="<td "+tsStyle+">"+ (node.label || node.field || "") +"：</td>";

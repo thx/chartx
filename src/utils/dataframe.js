@@ -21,7 +21,11 @@ export default function( data ){
         getRowData    : _getRowData,
         getFieldData  : _getFieldData,
         getDataOrg    : getDataOrg,
-        fields        : []
+        fields        : [],
+        range         : {
+            start     : 0,
+            end       : 0
+        }
     };
 
     if( !data || data.length == 0 ){
@@ -35,6 +39,9 @@ export default function( data ){
     } else {
         dataFrame.length = data.length - 1;
     };
+
+    //设置好数据区间end值
+    dataFrame.range.end = dataFrame.length - 1;
 
     dataFrame.org = data;
     dataFrame.fields = data[0] ? data[0] : []; //所有的字段集合;
@@ -103,7 +110,7 @@ export default function( data ){
                 for( var ii=0,iil=arr.length ; ii<iil ; ii++ ){
                      if( $field[i] == arr[ii].field ){
                          fieldInTotal = true;
-                         _fieldData.push( _format(arr[ii].data) );
+                         _fieldData.push( _format( arr[ii].data.slice( dataFrame.range.start, dataFrame.range.end ) ) );
                          break;
                      }
                 };
@@ -121,11 +128,11 @@ export default function( data ){
     function _getRowData(index){
         var o = {}
         var data = dataFrame.data
-        for(var a = 0, al = data.length; a < al; a++){
+        for(var a = dataFrame.range.start; a <= dataFrame.range.end; a++){
             if(data[a]){
-                o[data[a].field] = data[a].data[index]
+                o[data[a].field] = data[a].data[dataFrame.range.start+index]
             }
-        }
+        };
         return o
     }
 
@@ -137,7 +144,7 @@ export default function( data ){
             }
         } ); 
         if( data ){
-            return data.data;
+            return data.data.slice( dataFrame.range.start, dataFrame.range.end );
         } else {
             return []
         }

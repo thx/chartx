@@ -44,10 +44,10 @@ export default class Coord extends Chart
             if( !_.isArray( this._opts.theme ) ){
                 this._opts.theme = [this._opts.theme];
             };
-            
+
             var _theme = new this.componentsMap.theme( this._opts.theme, this );
             this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用下面的merge
-            //this._theme = _theme.mergeTo( this._theme );
+            
         };
         this.initModule( opts );     //初始化模块  
         this.initComponents( opts ); //初始化组件, 来自己chart.js模块

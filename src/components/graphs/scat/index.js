@@ -65,7 +65,7 @@ export default class ScatGraphs extends GraphsBase
             strokeStyle : "#ffffff",
             lineWidth : 2,
 
-            rotate : 0,
+            rotation : 0,
             align : "center",  //left center right
             verticalAlign : "top", //top middle bottom
             position : "bottom", //auto(目前等于center，还未实现),center,top,right,bottom,left
