@@ -42,6 +42,7 @@ export default function( data ){
 
     //设置好数据区间end值
     dataFrame.range.end = dataFrame.length - 1;
+    
 
     dataFrame.org = data;
     dataFrame.fields = data[0] ? data[0] : []; //所有的字段集合;
@@ -110,7 +111,7 @@ export default function( data ){
                 for( var ii=0,iil=arr.length ; ii<iil ; ii++ ){
                      if( $field[i] == arr[ii].field ){
                          fieldInTotal = true;
-                         _fieldData.push( _format( arr[ii].data.slice( dataFrame.range.start, dataFrame.range.end ) ) );
+                         _fieldData.push( _format( arr[ii].data.slice( dataFrame.range.start, dataFrame.range.end+1 ) ) );
                          break;
                      }
                 };
@@ -144,7 +145,7 @@ export default function( data ){
             }
         } ); 
         if( data ){
-            return data.data.slice( dataFrame.range.start, dataFrame.range.end );
+            return data.data.slice( dataFrame.range.start, dataFrame.range.end+1 );
         } else {
             return []
         }

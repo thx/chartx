@@ -7762,7 +7762,7 @@ function DataFrame (data) {
                     _fieldData = [];
                 }                for (var ii = 0, iil = arr.length; ii < iil; ii++) {
                     if ($field[i] == arr[ii].field) {
-                        _fieldData.push(_format(arr[ii].data.slice(dataFrame.range.start, dataFrame.range.end)));
+                        _fieldData.push(_format(arr[ii].data.slice(dataFrame.range.start, dataFrame.range.end + 1)));
                         break;
                     }
                 }                if (!lev) {
@@ -7791,7 +7791,7 @@ function DataFrame (data) {
             }
         });
         if (data) {
-            return data.data.slice(dataFrame.range.start, dataFrame.range.end);
+            return data.data.slice(dataFrame.range.start, dataFrame.range.end + 1);
         } else {
             return [];
         }
