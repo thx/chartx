@@ -75,19 +75,19 @@ var options = {
 
         xAxis : {
             field : "xfield",
-            text:{
+            label:{
                 rotation  : 30 
             }
         },
         yAxis : [
             {
-                label : "left",
-                text:{
+                name : "left",
+                label:{
                     rotation  : 30 
                 }
             },
             {
-                label : "right"
+                name : "right"
             }
         ]
     },
@@ -107,7 +107,7 @@ var options = {
                 //配置拐点才出现节点
                 corner : true
             },
-            text : {
+            label : {
                 enabled : true
             }
         },
@@ -129,7 +129,7 @@ var options = {
                     ]
                 }
             },
-            text : {
+            label : {
                 enabled : true
             }
         }
@@ -149,7 +149,7 @@ var options = {
     markLine: [
         {
             markTo: "click",
-            text : {
+            label : {
                 enabled : true,
                 content : function( yval ){
                     return 'click markline ：' + parseInt( yval )
@@ -160,13 +160,13 @@ var options = {
         },
         {
             markTo: 'uv',
-            text : {
+            label : {
                 enabled : true,
                 fontSize : 14
             }
         },
         {
-            text : {
+            label : {
                 enabled : true,
                 fillStyle : "#777"
             },

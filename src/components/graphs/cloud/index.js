@@ -16,12 +16,12 @@ export default class CloudGraphs extends GraphsBase
         this.field = null;
 
         var me = this;
+
+        //坚持一个数据节点的设置都在一个node下面
         this.node = {
-            shapeType   : "text", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
             fontFamily  : "Impact",
             fontColor   : function( nodeData ){
-                return me.root._theme[ nodeData.iNode % (me.root._theme.length-1) ]
-                //return me.root._theme[ nodeData.iNode % nodeData.dataLen ]
+                return me.root._theme[ nodeData.iNode % me.root._theme.length ]
             },
             fontSize    : function(){
                 //fontSize默认12-50的随机值
@@ -29,12 +29,12 @@ export default class CloudGraphs extends GraphsBase
             },
             maxFontSize : 38,
             _maxFontSizeVal : 0, //fontSizer如果配置为一个field的话， 找出这个field数据的最大值
-            minFontSize : 12,
+            minFontSize : 18,
             _minFontSizeVal : null,//fontSizer如果配置为一个field的话， 找出这个field数据的最小值
 
             fontWeight : "normal",
 
-            format : function( str ){ return str},
+            format : function( str, tag ){ return str},
 
             padding : 10,
 
@@ -118,7 +118,7 @@ export default class CloudGraphs extends GraphsBase
         return rotate;
     }
 
-    _getFillStyle( nodeData )
+    _getFontColor( nodeData )
     {
         var color;
         if( _.isString( this.node.fontColor ) ){
@@ -155,14 +155,20 @@ export default class CloudGraphs extends GraphsBase
             .size([me.width, me.height])
             .words(me.dataFrame.getFieldData( me.field ).map(function(d, ind) {
                 var rowData  = me.root.dataFrame.getRowData( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
-                return {
+                var tag = {
                     rowData : rowData,
                     field   : me.field,
                     value   : d,
-                    text    : me.node.format(d) || d,
+                    text    : null,
                     size    : me._getFontSize( rowData, d ),
-                    iNode   : ind
+                    iNode   : ind,
+                    color   : null //在绘制的时候统一设置
                 };
+
+                tag.fontColor = me._getFontColor( tag );
+                tag.text = me.node.format(d, tag) || d;
+
+                return tag
             }))
             .padding( me.node.padding )
             .rotate(function(item , ind) {
@@ -201,7 +207,7 @@ export default class CloudGraphs extends GraphsBase
                         textAlign: "center",
                         cursor: 'pointer',
                         fontWeight: me.node.fontWeight,
-                        fillStyle: me._getFillStyle( tag )
+                        fillStyle: tag.fontColor
                     }
                 });
                 me.sprite.addChild(tagTxt);

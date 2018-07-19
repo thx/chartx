@@ -45,7 +45,6 @@ rollup.rollup({
         //sourceMap: 'inline'
     });
 
-
     bundle.write({
         format: 'cjs',
         name: 'Chartx',

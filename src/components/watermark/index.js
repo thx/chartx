@@ -16,10 +16,10 @@ export default class waterMark
 
         this.text = "chartx";
         this.fontSize = 20;
+        this.fontColor = "#ccc";
         this.strokeStyle = "#ccc";
         this.lineWidth = 0;
-        this.fontColor = "#ccc";
-        this.globalAlpha = 0.2;
+        this.alpha = 0.2;
         this.rotation = 45;
 
         _.extend( true, this, opts );
@@ -63,7 +63,7 @@ export default class waterMark
                         strokeStyle : this.strokeStyle,
                         lineWidth   : this.lineWidth,
                         fillStyle   : this.fontColor,
-                        globalAlpha : this.globalAlpha
+                        globalAlpha : this.alpha
                     }
                 });
                 _textEl.context.x = textW*1.5*c + textW*.25;

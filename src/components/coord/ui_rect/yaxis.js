@@ -18,37 +18,36 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.maxW    = 0;    //最大文本的 width
         this.field   = [];   //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
-        this.label   = "";
-        this._label  = null; //label 的text对象
+        this.name    = "";
+        this._name   = null;
 
+        this.enabled = true;
+        this.tickLine= {//刻度线
+            enabled      : 1,
+            lineWidth    : 1, //线宽
+            lineLength   : 4, //线长
+            strokeStyle  : '#cccccc',
+            distance     : 2
+        };
+        this.axisLine = {//轴线
+            enabled      : 1,     
+            lineWidth    : 1,
+            strokeStyle  : '#cccccc'
+        };
+        this.label = {
+            enabled      : 1,
+            fontColor    : '#999',
+            fontSize     : 12,
+            format       : null,
+            rotation     : 0,
+            distance     : 3, //和刻度线的距离,
+            textAlign    : null,//"right",
+            lineHeight   : 1
+        };
         
-            this.enabled = true;
-            this.tickLine= {//刻度线
-                enabled      : 1,
-                lineWidth    : 1, //线宽
-                lineLength   : 4, //线长
-                strokeStyle  : '#cccccc',
-                distance     : 2
-            };
-            this.axisLine = {//轴线
-                enabled      : 1,     
-                lineWidth    : 1,
-                strokeStyle  : '#cccccc'
-            };
-            this.text = {
-                enabled      : 1,
-                fontColor    : '#999',
-                fontSize     : 12,
-                format       : null,
-                rotation     : 0,
-                distance     : 3, //和刻度线的距离,
-                textAlign    : null,//"right",
-                lineHeight   : 1
-            };
-        
-        if( opts.isH && (!opts.text || opts.text.rotaion === undefined) ){
+        if( opts.isH && (!opts.label || opts.label.rotaion === undefined) ){
             //如果是横向直角坐标系图
-            this.text.rotation = 90;
+            this.label.rotation = 90;
         };
 
         this.pos = {
@@ -150,35 +149,22 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.pos.y = $n;
     }
 
-    setAllStyle(sty)
+    _getName()
     {
-        _.each(this.rulesSprite.children, function(s) {
-            _.each(s.children, function(cel) {
-                if (cel.type == "text") {
-                    cel.context.fontColor = sty;
-                } else if (cel.type == "line") {
-                    cel.context.strokeStyle = sty;
-                }
-            });
-        });
-    }
-
-    _getLabel()
-    {
-        var _label = this.label;
+        var _name = this.name;
         
-        if (_label && _label != "") {
+        if (_name && _name != "") {
             var textAlign = this.align == "left" ? "right" : "left";
             if( this.isH ){
                 textAlign = "left"
             };
 
-            this._label = new Canvax.Display.Text(_label, {
+            this._name = new Canvax.Display.Text(_name, {
                 context: {
-                    fontSize  : this.text.fontSize,
+                    fontSize  : this.label.fontSize,
                     textAlign : textAlign,//"left",
                     textBaseline : this.isH ? "top" : "bottom",
-                    fillStyle : this.text.fontColor,
+                    fillStyle : this.label.fontColor,
                     rotation  : this.isH ? -90 : 0
                 }
             });
@@ -189,16 +175,16 @@ export default class yAxis extends Canvax.Event.EventDispatcher
     {
         !opts && (opts ={});
         opts && _.extend(true, this, opts);
-        this._getLabel();
+        this._getName();
         this.height = this.yMaxHeight - this._getYAxisDisLine();
 
-        if (this._label) {
+        if (this._name) {
             if (this.isH) {
-                this.height -= this._label.getTextWidth();
+                this.height -= this._name.getTextWidth();
             } else {
-                this.height -= this._label.getTextHeight();
+                this.height -= this._name.getTextHeight();
             }
-            this._label.context.y = -this.height - 5;
+            this._name.context.y = -this.height - 5;
         };
 
         this.height = parseInt( this.height );
@@ -209,9 +195,9 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.setX(this.pos.x);
         this.setY(this.pos.y);
 
-        if (this._label) {
+        if (this._name) {
             if(this.align == "left"){
-                this._label.context.x += this.width; 
+                this._name.context.x += this.width; 
             }
         }
 
@@ -341,8 +327,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
             //把format提前
             var text = layoutData.value;
-            if (_.isFunction(me.text.format)) {
-                text = me.text.format(text, me);
+            if (_.isFunction(me.label.format)) {
+                text = me.label.format(text);
             };
             if( text === undefined || text === null ){
                 text = numAddSymbol( layoutData.value );
@@ -676,7 +662,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         
         var arr = this.layoutData;
         me.maxW = 0;
-        me._label && me.sprite.addChild(me._label);
+        me._name && me.sprite.addChild(me._name);
         for (var a = 0, al = arr.length; a < al; a++) {
             var o = arr[a];
             if( !o.visible ){
@@ -686,11 +672,11 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
             var value = o.value;
 
-            var textAlign = me.text.textAlign || (me.align == "left" ? "right" : "left");
+            var textAlign = me.label.textAlign || (me.align == "left" ? "right" : "left");
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
-            if (me.text.rotation == 90 || me.text.rotation == -90) {
+            if (me.label.rotation == 90 || me.label.rotation == -90) {
                 textAlign = "center";
                 if (a == arr.length - 1) {
                     posy = y - 2;
@@ -704,7 +690,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             var yNode = this.rulesSprite.getChildAt(a);
 
             if( yNode ){
-                if( yNode._txt && this.text.enabled ){
+                if( yNode._txt && this.label.enabled ){
 
                     if (me.animation && !opts.resize) {
                         yNode._txt.animate({
@@ -770,8 +756,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 };
 
                 //文字
-                if( me.text.enabled ){
-                    var txtX = me.align == "left" ? lineX - me.text.distance : lineX + me.tickLine.lineLength + me.text.distance;
+                if( me.label.enabled ){
+                    var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
                     if( this.isH ){
                         txtX = txtX + (me.align == "left"?-1:1)* 4
                     };
@@ -780,12 +766,12 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                         context: {
                             x: txtX,
                             y: posy + aniFrom,
-                            fillStyle: me._getProp(me.text.fontColor),
-                            fontSize: me.text.fontSize,
-                            rotation: -Math.abs(me.text.rotation),
+                            fillStyle: me._getProp(me.label.fontColor),
+                            fontSize: me.label.fontSize,
+                            rotation: -Math.abs(me.label.rotation),
                             textAlign: textAlign,
                             textBaseline: "middle",
-                            lineHeight  : me.text.lineHeight,
+                            lineHeight  : me.label.lineHeight,
                             globalAlpha: 0
                         }
                     });
@@ -793,7 +779,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                     yNode._txt = txt;
 
                     
-                    if (me.text.rotation == 90 || me.text.rotation == -90) {
+                    if (me.label.rotation == 90 || me.label.rotation == -90) {
                         me.maxW = Math.max(me.maxW, txt.getTextHeight());
                     } else {
                         me.maxW = Math.max(me.maxW, txt.getTextWidth());
@@ -837,7 +823,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         };
 
         if( me.width === null ){
-            me.width = parseInt( me.maxW + me.text.distance  );
+            me.width = parseInt( me.maxW + me.label.distance  );
             if (me.tickLine.enabled) {
                 me.width += parseInt( me.tickLine.lineLength + me.tickLine.distance );
             }

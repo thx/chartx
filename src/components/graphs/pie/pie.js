@@ -467,6 +467,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
             });
 
             //指示文字
+            /*
             var textTxt = itemData.labelText;
             //如果用户format过，那么就用用户指定的格式
             //如果没有就默认拼接
@@ -477,7 +478,9 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     textTxt = itemData.percentage + "%" 
                 }
             };
+            */
 
+            var textTxt = itemData.labelText;
             var branchTxt = document.createElement("div");
             branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + ""
             branchTxt.innerHTML = textTxt;

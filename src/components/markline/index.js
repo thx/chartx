@@ -21,7 +21,8 @@ export default class MarkLine extends Component
         };
 
         this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
-        this.yVal = 0;     //y 的值，可能是个function
+        this.yVal = 0;     //y 的值，可能是个function，均值计算就是个function
+        
         this.line       = {
             y           : 0,
             list        : [],
@@ -31,14 +32,15 @@ export default class MarkLine extends Component
             lineType    : 'dashed'
         };
 
-        this.text = {
-            enabled  : false,
-            fillStyle: '#999999',
-            fontSize : 12,
-            value  : null,
-            lineType : 'dashed',
-            lineWidth: 1,
-            strokeStyle : "white"
+        this.label = {
+            enabled     : false,
+            fillStyle   : '#999999',
+            fontSize    : 12,
+            text        : null, //"markline",
+            lineType    : 'dashed',
+            lineWidth   : 1,
+            strokeStyle : "white",
+            format      : null
         };
 
         this._txt = null;
@@ -84,16 +86,18 @@ export default class MarkLine extends Component
 
     _getLabel()
     {
-        if( _.isString( this.text.value ) ){
-            return this.text.value;
-        };
-
+        var str;
         var yVal = this._getYVal();
-        var label = "markline："+yVal;
-        if (_.isFunction(this.text.value)) {
-            label = this.text.value.apply( this, [ yVal ] )
-        }
-        return label;
+        if( _.isFunction( this.label.format ) ){
+            str = this.label.format( yVal , this );
+        } else {
+            if( _.isString( this.label.text ) ){
+                str = this.label.text;
+            } else {
+                str = yVal;
+            };
+        };
+        return str;
     }
 
     draw()
@@ -116,15 +120,14 @@ export default class MarkLine extends Component
         me._line = line;
 
 
-        if(me.text.enabled){
+        if(me.label.enabled){
             var txt = new Text( me._getLabel() , {           //文字
-                context : me.text
+                context : me.label
             })
             this._txt = txt
             me.core.addChild(txt)
 
             me._setTxtPos( y );
-
         }
     
         this.line.y = y;
@@ -143,7 +146,7 @@ export default class MarkLine extends Component
             }, {
                 duration: 300,
                 onUpdate: function( obj ){
-                    if( me.text.enabled ){
+                    if( me.label.enabled ){
                         me._txt.resetText( me._getLabel() );
                         me._setTxtPos( obj.y )
                         //me._txt.context.y = obj.y - me._txt.getTextHeight();
@@ -161,13 +164,13 @@ export default class MarkLine extends Component
     {
         var me = this;
         var txt = me._txt;
-        if(_.isNumber(me.text.x)){
-            txt.context.x = me.text.x
+        if(_.isNumber(me.label.x)){
+            txt.context.x = me.label.x
         } else {
             txt.context.x = this.w - txt.getTextWidth() - 5; 
         }
-        if(_.isNumber(me.text.y)){
-            txt.context.y = me.text.y
+        if(_.isNumber(me.label.y)){
+            txt.context.y = me.label.y
         } else {
             txt.context.y = y - txt.getTextHeight() 
         }

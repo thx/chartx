@@ -18,9 +18,9 @@ export default class ScatGraphs extends GraphsBase
 
         this.node = {
             shapeType : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-            maxR      : 25,  //圆圈默认最大半径
-            minR      : 5,
-            r         : null,
+            maxRadius : 25,  //圆圈默认最大半径
+            minRadius : 5,
+            radius    : null,
             normalR   : 15,
             fillStyle : null,
             fillAlpha : 0.8,
@@ -54,10 +54,12 @@ export default class ScatGraphs extends GraphsBase
             lineType : "dashed"
         };
         
-        this.text = {
+        this.label = {
             enabled : true,
             field : null,
-            format : function(text){ return text },
+            format : function(txt, nodeData){ 
+                return txt 
+            },
             fontSize: 12,
             fontColor: null,//"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
             strokeStyle : "#ffffff",
@@ -153,19 +155,20 @@ export default class ScatGraphs extends GraphsBase
                     y    : yValue
                 },
                 field    : this.field,
-                color    : fieldMap.color,
+                fieldColor : fieldMap.color,
                 iNode    : i,
 
                 focused  : false,
                 selected : false,
 
                 //下面的属性都单独设置
-                r        : null,   //这里先不设置，在下面的_setR里单独设置
+                radius      : null,   //这里先不设置，在下面的_setR里单独设置
                 fillStyle   : null,
+                color       : null,
                 strokeStyle : null,
                 lineWidth : 0,
                 shapeType : null,
-                text : null,
+                label : null,
 
                 _node : null //对应的canvax 节点， 在widget之后赋值
             };
@@ -188,47 +191,47 @@ export default class ScatGraphs extends GraphsBase
 
         var r = this.node.normalR;
         var rowData = nodeLayoutData.rowData;
-        if( this.node.r != null ){
-            if( _.isString( this.node.r ) && rowData[ this.node.r ] ){
+        if( this.node.radius != null ){
+            if( _.isString( this.node.radius ) && rowData[ this.node.radius ] ){
                 //如果配置了某个字段作为r，那么就要自动计算比例
                 if( !this._rData && !this._rMaxValue && !this._rMinValue ){
-                    this._rData = this.dataFrame.getFieldData( this.node.r );
+                    this._rData = this.dataFrame.getFieldData( this.node.radius );
                     this._rMaxValue = _.max( this._rData );
                     this._rMinValue = _.min( this._rData );
                 };
 
-                var rVal = rowData[ this.node.r ];
+                var rVal = rowData[ this.node.radius ];
 
                 if( this._rMaxValue ==  this._rMinValue ){
-                    r = this.node.minR + ( this.node.maxR - this.node.minR )/2;
+                    r = this.node.minRadius + ( this.node.maxRadius - this.node.minRadius )/2;
                 } else {
-                    r = this.node.minR + (rVal-this._rMinValue)/( this._rMaxValue-this._rMinValue ) * ( this.node.maxR - this.node.minR )
+                    r = this.node.minRadius + (rVal-this._rMinValue)/( this._rMaxValue-this._rMinValue ) * ( this.node.maxRadius - this.node.minRadius )
                 };
             };
-            if( _.isFunction( this.node.r ) ){
-                r = this.node.r( rowData );
+            if( _.isFunction( this.node.radius ) ){
+                r = this.node.radius( rowData );
             };
-            if( !isNaN( parseInt( this.node.r ) ) ){
-                r = parseInt( this.node.r )
+            if( !isNaN( parseInt( this.node.radius ) ) ){
+                r = parseInt( this.node.radius )
             };
         };
-        nodeLayoutData.r = r;
+        nodeLayoutData.radius = r;
         return this;
 
     }
 
     _setText( nodeLayoutData )
     {
-        if( this.text.field != null ){
-            if( _.isString( this.text.field ) && nodeLayoutData.rowData[ this.text.field ] ){
-                nodeLayoutData.text = this.text.format( nodeLayoutData.rowData[ this.text.field ] );
+        if( this.label.field != null ){
+            if( _.isString( this.label.field ) && nodeLayoutData.rowData[ this.label.field ] ){
+                nodeLayoutData.label = this.label.format( nodeLayoutData.rowData[ this.label.field ], nodeLayoutData );
             }
         }
     }
 
     _setFillStyle( nodeLayoutData )
     {
-        nodeLayoutData.fillStyle = this._getStyle( this.node.fillStyle, nodeLayoutData );
+        nodeLayoutData.color = nodeLayoutData.fillStyle = this._getStyle( this.node.fillStyle, nodeLayoutData );
         return this;
     }
 
@@ -248,7 +251,7 @@ export default class ScatGraphs extends GraphsBase
             _style = style( nodeLayoutData );
         };
         if( !_style ){
-            _style = nodeLayoutData.color;
+            _style = nodeLayoutData.fillStyle;
         };
         return _style;
     }
@@ -309,8 +312,8 @@ export default class ScatGraphs extends GraphsBase
                     title : null,
                     nodes : [ this.nodeData ]
                 };
-                if( this.nodeData.text ){
-                    e.eventInfo.title = this.nodeData.text;
+                if( this.nodeData.label ){
+                    e.eventInfo.title = this.nodeData.label;
                 };
        
                 //fire到root上面去的是为了让root去处理tips
@@ -341,58 +344,57 @@ export default class ScatGraphs extends GraphsBase
             };
 
             //如果有label
-            if( nodeData.text && me.text.enabled ){
-                
-                var text = nodeData.text
-                var _text =  new Canvax.Display.Text( text , {
+            if( nodeData.label && me.label.enabled ){
+            
+                var _label =  new Canvax.Display.Text( nodeData.label , {
                     id: "scat_text_"+iNode,
                     context: me._getTextContext( nodeData )
                 });
         
-                me._textsp.addChild( _text );
+                me._textsp.addChild( _label );
 
                 //图形节点和text文本相互引用
-                _node._text = _text;
-                _text._node = _node;
+                _node._label = _label;
+                _label._node = _node;
             }
         
         } );
      
     }
 
-    _getTextPosition( nodeData )
+    _getTextPosition( opt )
     {
         var x=0,y=0;
-        switch( this.text.position ){
+        switch( this.label.position ){
             case "center" :
-                x = nodeData.x;
-                y = nodeData.y;
+                x = opt.x;
+                y = opt.y;
                 break;
             case "top" :
-                x = nodeData.x;
-                y = nodeData.y - nodeData.r;
+                x = opt.x;
+                y = opt.y - opt.r;
                 break;
             case "right" :
-                x = nodeData.x + nodeData.r;
-                y = nodeData.y;
+                x = opt.x + opt.r;
+                y = opt.y;
                 break;
             case "bottom" :
-                x = nodeData.x;
-                y = nodeData.y + nodeData.r;
+                x = opt.x;
+                y = opt.y + opt.r;
                 break;
             case "left" :
-                x = nodeData.x - nodeData.r;
-                y = nodeData.y;
+                x = opt.x - opt.r;
+                y = opt.y;
                 break;
             case "auto" :
-                x = nodeData.x;
-                y = nodeData.y;
+                x = opt.x;
+                y = opt.y;
                 break;
         };
 
         var point = {
-            x: x + this.text.offsetX,
-            y: y + this.text.offsetY
+            x: x + this.label.offsetX,
+            y: y + this.label.offsetY
         };
 
         return point;
@@ -401,17 +403,21 @@ export default class ScatGraphs extends GraphsBase
     _getTextContext( nodeData )
     {
         
-        var textPoint = this._getTextPosition( nodeData );
+        var textPoint = this._getTextPosition( {
+            x : nodeData.x,
+            y : nodeData.y,
+            r : nodeData.radius
+        } );
         
         var ctx = {
             x: textPoint.x,
             y: textPoint.y,
-            fillStyle: this.text.fontColor || nodeData.fillStyle,
-            fontSize: this.text.fontSize,
-            strokeStyle : this.text.strokeStyle || nodeData.fillStyle,
-            lineWidth : this.text.lineWidth,
-            textAlign : this.text.align,
-            textBaseline : this.text.verticalAlign
+            fillStyle: this.label.fontColor || nodeData.fillStyle,
+            fontSize: this.label.fontSize,
+            strokeStyle : this.label.strokeStyle || nodeData.fillStyle,
+            lineWidth : this.label.lineWidth,
+            textAlign : this.label.align,
+            textBaseline : this.label.verticalAlign
         };
 
         if( this.animation ){
@@ -442,7 +448,7 @@ export default class ScatGraphs extends GraphsBase
         var ctx = {
             x : nodeData.x,
             y : nodeData.y,
-            r : nodeData.r,
+            r : nodeData.radius,
             fillStyle : nodeData.fillStyle,
             strokeStyle : nodeData.strokeStyle,
             lineWidth : nodeData.lineWidth,
@@ -482,17 +488,17 @@ export default class ScatGraphs extends GraphsBase
             nodeData._node.animate({
                 x : nodeData.x,
                 y : nodeData.y,
-                r : nodeData.r
+                r : nodeData.radius
             }, {
                 onUpdate: function( opts ){
-                    if( this._text ){
+                    if( this._label ){
                         var _textPoint = me._getTextPosition( opts );
-                        this._text.context.x = _textPoint.x;
-                        this._text.context.y = _textPoint.y;
+                        this._label.context.x = _textPoint.x;
+                        this._label.context.y = _textPoint.y;
                     };
                     if( this._line ){
                         this._line.context.start.y = opts.y+opts.r;
-                    }
+                    };
                 },
                 delay : Math.round(Math.random()*300),
                 onComplete : function(){

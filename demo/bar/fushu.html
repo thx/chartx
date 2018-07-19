@@ -53,7 +53,7 @@
                         type : "rect",
                         xAxis : {
                             field : "xfield",
-                            text : {
+                            label : {
                                 textAlign : "right",
                                 format: function(){
                                     return "x\nodfdfdfdfsdfo"
@@ -63,9 +63,9 @@
                         },
                         yAxis : [
                             {
-                                label : "left",
+                                name : "left",
                                 dataSection : [-100, -600, -1200],
-                                text : {
+                                label : {
     
                                     format : function(val){
                                         
@@ -77,7 +77,7 @@
                     },
                     legend : {},
                     tips : {
-                        pointer : "shadow"
+                        pointer : "region"
                     },
                     graphs : [
                     
@@ -85,7 +85,7 @@
                             type : "bar",
                             field : "click",
                             yAxisAlign : "left",
-                            text : {
+                            label : {
                                 enabled : true
                             }
                         }

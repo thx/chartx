@@ -56,10 +56,10 @@ var options = {
         },
         yAxis : [
             {
-                label : "left"
+                name : "left"
             },
             {
-                label : "right"
+                name : "right"
             }
         ]
     },
@@ -85,7 +85,7 @@ var options = {
     },
     markLine :  [{
         markTo: 'uv',
-        text : {
+        label : {
             enabled : true,
             format : function( yVal ){
                 return 'UV 均值 ：' + parseInt( yVal )
@@ -95,7 +95,7 @@ var options = {
         //y : 30 //不设置y，就会自动设置为均线
     },{
         markTo: 'pv',
-        text : {
+        label : {
             enabled : true,
             fontSize : 14
         },

@@ -41,7 +41,7 @@ export default class BarGraphs extends GraphsBase
             filter    : null
         };
 
-        this.text = {
+        this.label = {
             enabled   : false,
             animation : true,
             fontColor : null, //如果有设置text.fontColor那么优先使用fontColor
@@ -93,6 +93,7 @@ export default class BarGraphs extends GraphsBase
     {
         //该index指当前
         var data = this.data;
+        
         var _nodesInfoList = []; //节点信息集合
         _.each( this.enabledField, function( fs, i ){
             if( _.isArray(fs) ){
@@ -177,12 +178,12 @@ export default class BarGraphs extends GraphsBase
     hide( field )
     {
         _.each( this.barsSp.children , function( h_groupSp, h ){
-            var bar = h_groupSp.getChildById("bar_"+h+"_"+field);
-            bar && bar.destroy();
+            var _bar = h_groupSp.getChildById("bar_"+h+"_"+field);
+            _bar && _bar.destroy();
         } );
         _.each( this.txtsSp.children , function( sp, h ){
-            var text = sp.getChildById("text_"+h+"_"+field);
-            text && text.destroy();
+            var _label = sp.getChildById("text_"+h+"_"+field);
+            _label && _label.destroy();
         } );
         
         this.draw();
@@ -198,7 +199,7 @@ export default class BarGraphs extends GraphsBase
     {
         this.data = {};
         this.barsSp.removeAllChildren();
-        if (this.text.enabled) {
+        if (this.label.enabled) {
             this.txtsSp.removeAllChildren();
         };
     }
@@ -373,12 +374,12 @@ export default class BarGraphs extends GraphsBase
 
                     me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
 
-                    //text begin ------------------------------
-                    if ( me.text.enabled ) {
+                    //label begin ------------------------------
+                    if ( me.label.enabled ) {
 
                         var value = rectData.value;
-                        if ( _.isFunction(me.text.format) ) {
-                            var _formatc = me.text.format.apply( me , [value , rectData]);
+                        if ( _.isFunction(me.label.format) ) {
+                            var _formatc = me.label.format(value, rectData);
                             if( _formatc !== undefined || _formatc !== null ){
                                 value = _formatc
                             }
@@ -393,13 +394,13 @@ export default class BarGraphs extends GraphsBase
                         };
                         
                         var textCtx = {
-                            fillStyle   : me.text.fontColor || finalPos.fillStyle,
-                            fontSize    : me.text.fontSize,
-                            lineWidth   : me.text.lineWidth,
-                            strokeStyle : me.text.strokeStyle || finalPos.fillStyle,
-                            //textAlign   : me.text.align,
-                            textBaseline: me.text.verticalAlign,
-                            rotation      : me.text.rotation
+                            fillStyle   : me.label.fontColor || finalPos.fillStyle,
+                            fontSize    : me.label.fontSize,
+                            lineWidth   : me.label.lineWidth,
+                            strokeStyle : me.label.strokeStyle || finalPos.fillStyle,
+                            //textAlign   : me.label.align,
+                            textBaseline: me.label.verticalAlign,
+                            rotation      : me.label.rotation
                         };
                         //然后根据position, offset确定x,y
                         var _textPos = me._getTextPos( finalPos , rectData );
@@ -434,7 +435,7 @@ export default class BarGraphs extends GraphsBase
                         }
 
                     }
-                    //text end ------------------------------
+                    //label end ------------------------------
 
                 };
             }
@@ -442,7 +443,7 @@ export default class BarGraphs extends GraphsBase
 
         this.sprite.addChild(this.barsSp);
         //如果有text设置， 就要吧text的txtsSp也添加到sprite
-        if (this.text.enabled) {
+        if (this.label.enabled) {
             this.sprite.addChild(this.txtsSp);
         };
 
@@ -646,7 +647,7 @@ export default class BarGraphs extends GraphsBase
     }
 
     _getTextAlign( bar , rectData ){
-        var align = this.text.align;
+        var align = this.label.align;
         if( rectData.value < rectData.yBasePoint.value ){
             if( align == "left" ){
                 align = "right"
@@ -664,7 +665,7 @@ export default class BarGraphs extends GraphsBase
             x : 0, y : 0
         };
         var x=bar.x ,y=bar.y;
-        switch( me.text.position ){
+        switch( me.label.position ){
             case "top" :
                 x = bar.x + bar.width/2;
                 y = bar.y + bar.height;
@@ -702,13 +703,13 @@ export default class BarGraphs extends GraphsBase
                 y = bar.y + bar.height/2;
                 break;
         };
-        x -= me.text.offsetX;
+        x -= me.label.offsetX;
 
         var i = 1;
         if( rectData.value < rectData.yBasePoint.value ){
             i = -1;
         };
-        y -= i * me.text.offsetY;
+        y -= i * me.label.offsetY;
         point.x = x;
         point.y = y;
         return point;
@@ -726,7 +727,7 @@ export default class BarGraphs extends GraphsBase
         if ( me._preDataLen > me._dataLen) {
             for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
                 me.barsSp.getChildAt(i).destroy();
-                me.text.enabled && me.txtsSp.getChildAt(i).destroy();
+                me.label.enabled && me.txtsSp.getChildAt(i).destroy();
                 i--;
                 l--;
             };

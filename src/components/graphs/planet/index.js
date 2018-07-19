@@ -23,10 +23,11 @@ export default class PlanetGraphs extends GraphsBase
 
         var me = this;
         //圆心原点坐标
-        this.center ={
+        this.center = {
             enabled : true,
-            text : "center",
-            r : 30,
+            shapeType : "text", //后续可以添加path啊，img啊之类的
+            content : "center",
+            radius : 30,
             fillStyle : "#70629e",
             fontSize : 15,
             fontColor: "#ffffff",
@@ -56,17 +57,15 @@ export default class PlanetGraphs extends GraphsBase
 
         _.extend( true, this , opts );
 
-        if( this.center.r == 0 || !this.center.enabled ){
-            this.center.r = 0;
+        if( this.center.radius == 0 || !this.center.enabled ){
+            this.center.radius = 0;
             this.center.margin = 0;
             this.center.enabled = false;
         };
 
         this.init();
     }
-
-
-
+    
     init()
     {
         this.sprite = new Canvax.Display.Sprite({ 
@@ -173,9 +172,9 @@ export default class PlanetGraphs extends GraphsBase
     {
         var me = this;
 
-        var groupRStart = this.center.r + this.center.margin;
+        var groupRStart = this.center.radius + this.center.margin;
         
-        var maxR = me.root._coord.maxR - me.center.r - me.center.margin;
+        var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
         var _circleMaxR = this._getMaxR();
 
         _.each( this.groupDataFrames , function( df , i ){
@@ -197,7 +196,7 @@ export default class PlanetGraphs extends GraphsBase
             me._groups.push( _g );
 
             me.grid.rings.section.push({
-                r : _g.rRange.to
+                radius : _g.rRange.to
             });
             
         } );
@@ -218,11 +217,11 @@ export default class PlanetGraphs extends GraphsBase
                     x : this.origin.x,
                     y : this.origin.y,
                     fillStyle : this.center.fillStyle,
-                    r : this.center.r
+                    r : this.center.radius
                 }
             });
             //绘制实心圆上面的文案
-            this._centerTxt = new Text(this.center.text, {
+            this._centerTxt = new Text(this.center.content, {
                 context: {
                     x: this.origin.x,
                     y: this.origin.y,
@@ -243,11 +242,11 @@ export default class PlanetGraphs extends GraphsBase
         if( me.grid.rings.section.length == 1 ){
 
             //如果只有一个，那么就强制添加到3个
-            var _diffR = (me.grid.rings.section[0].r - me.center.r) / me.grid.rings.count;
+            var _diffR = (me.grid.rings.section[0].radius - me.center.radius) / me.grid.rings.count;
             me.grid.rings.section = [];
             for( var i=0;i<me.grid.rings.count ; i++ ){
                 me.grid.rings.section.push({
-                    r : me.center.r + _diffR*(i+1)
+                    radius : me.center.radius + _diffR*(i+1)
                 });
             }
         } else {
@@ -261,7 +260,7 @@ export default class PlanetGraphs extends GraphsBase
                 context : {
                     x : me.root._coord.origin.x,
                     y : me.root._coord.origin.y,
-                    r : _scale.r,
+                    r : _scale.radius,
                     lineWidth : me._getBackProp( me.grid.rings.lineWidth , i),
                     strokeStyle : me._getBackProp( me.grid.rings.strokeStyle , i),
                     fillStyle: me._getBackProp( me.grid.rings.fillStyle , i)
@@ -278,7 +277,7 @@ export default class PlanetGraphs extends GraphsBase
             var _r = me.root._coord.maxR; //Math.max( me.w, me.h );
 
             if( me.grid.rings.section.length ){
-                _r = me.grid.rings.section.slice(-1)[0].r
+                _r = me.grid.rings.section.slice(-1)[0].radius
             }
 
             for( var i=0,l=me.grid.rays.count; i<l; i++ ){

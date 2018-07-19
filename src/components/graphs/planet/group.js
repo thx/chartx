@@ -37,8 +37,7 @@ export default class PlanetGroup
             lineWidth : 2,
             strokeStyle : "#fff",
             fillStyle : '#f2fbfb',
-            text : '',
-            r : 15, //也可以是个function,也可以配置{field:'pv'}来设置字段， 自动计算r
+            radius : 15, //也可以是个function,也可以配置{field:'pv'}来设置字段， 自动计算r
 
             focus : {
                 enabled : true
@@ -50,20 +49,21 @@ export default class PlanetGroup
             }
         };
 
-        this.text = {
+        this.label = {
+            enabled   : true,
             fontColor : "#666",
             fontSize  : 13,
             position  : null
         };
 
-        this.sort = "desc"
+        this.sort = "desc";
         this.sortField = null;
 
         this.layoutType = "radian";
         
         //坑位，用来做占位
         this.pit = {
-            r : 30
+            radius : 30
         };
 
         this.planets = [];
@@ -73,9 +73,9 @@ export default class PlanetGroup
 
         _.extend( true, this, opts );
 
-        //circle.maxR 绝对不能大于最大 占位 pit.r
-        if( this.node.maxR > this.pit.r ){
-            this.pit.r = this.node.maxR
+        //circle.maxR 绝对不能大于最大 占位 pit.radius
+        if( this.node.maxR > this.pit.radius ){
+            this.pit.radius = this.node.maxR
         };
 
         
@@ -104,24 +104,24 @@ export default class PlanetGroup
         var me = this;
 
 
-        if( (this._coord.maxR - this.rRange.to)/(this.pit.r*2) < this.groupLen-1-this.iGroup ){
+        if( (this._coord.maxR - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
             //要保证后面的group至少能有意个ringNum
-            this.rRange.to = this._coord.maxR - (this.groupLen-1-this.iGroup)*this.pit.r*2;
+            this.rRange.to = this._coord.maxR - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
         };
-        if( this.rRange.to - this.rRange.start < this.pit.r*2 ){
-            this.rRange.to = this.rRange.start + this.pit.r*2;
+        if( this.rRange.to - this.rRange.start < this.pit.radius*2 ){
+            this.rRange.to = this.rRange.start + this.pit.radius*2;
         };
 
         //计算该group中可以最多分布多少ring
         if( !this.maxRingNum ){
-            this.maxRingNum = parseInt((this.rRange.to - this.rRange.start) / (this.pit.r*2) , 10 );
+            this.maxRingNum = parseInt((this.rRange.to - this.rRange.start) / (this.pit.radius*2) , 10 );
             
             //如果可以划10个环，但是其实数据只有8条， 那么就 当然是只需要划分8ring
             this.ringNum = Math.min( this.maxRingNum , this.dataFrame.length );
         };
 
         //重新计算修改 rRange.to的值
-        this.rRange.to = this.rRange.start + this.ringNum * this.pit.r * 2;
+        this.rRange.to = this.rRange.start + this.ringNum * this.pit.radius * 2;
 
         //根据数据创建n个星球
         var planets = [];
@@ -130,21 +130,28 @@ export default class PlanetGroup
         for( var i=0; i<dataLen; i++ ){  
             var rowData = this.dataFrame.getRowData(i);
             var planetLayoutData = {
-                groupLen  : this.groupLen,
-                iGroup    : me.iGroup,
-                iNode     : i,
-                node      : null, //canvax元素
-                rowData   : rowData,
-                fillStyle : null,
-                pit       : null, //假设这个planet是个萝卜，那么 pit 就是这个萝卜的坑
+                groupLen    : this.groupLen,
+                iGroup      : me.iGroup,
+                iNode       : i,
+                node        : null, //canvax元素
+                rowData     : rowData,
 
-                ringInd   : -1,
+                //下面这些都只能在绘制的时候确定然后赋值
+                iRing       : null,
+                iPlanet     : null,
+                fillStyle   : null,
+                color       : null, //给tips用
+                strokeStyle : null,
+                
+                pit         : null, //假设这个planet是个萝卜，那么 pit 就是这个萝卜的坑
 
-                field     : me.field,
-                text      : rowData[me.field],
+                ringInd     : -1,
 
-                focused   : false,
-                selected  : false
+                field       : me.field,
+                label       : rowData[me.field],
+
+                focused     : false,
+                selected    : false
             };
 
             planets.push( planetLayoutData );
@@ -177,10 +184,10 @@ export default class PlanetGroup
         var _rings = [];
 
         for( var i=0,l=this.ringNum ; i<l ; i++ ){
-            var _r = i*this.pit.r*2 + this.pit.r + this.rRange.start;
+            var _r = i*this.pit.radius*2 + this.pit.radius + this.rRange.start;
 
             if( !me._graphs.center.enabled ){
-                _r = i*this.pit.r*2 + this.rRange.start;
+                _r = i*this.pit.radius*2 + this.rRange.start;
             };
 
             //该半径上面的弧度集合
@@ -205,14 +212,14 @@ export default class PlanetGroup
             //测试代码end------------------------------------------------------
 
             //该半径圆弧上，可以绘制一个星球的最小弧度值
-            var minRadianItem = Math.atan( this.pit.r / _r );
+            var minRadianItem = Math.atan( this.pit.radius / _r );
 
             _rings.push( {
-                arcs : arcs,
-                pits : [], //萝卜坑
+                arcs    : arcs,
+                pits    : [], //萝卜坑
                 planets : [], //将要入坑的萝卜
-                r: _r, //这个ring所在的半径轨道
-                max: 0 //这个环上面最多能布局下的 planet 数量
+                radius  : _r, //这个ring所在的半径轨道
+                max     : 0 //这个环上面最多能布局下的 planet 数量
             } );
 
         };
@@ -225,8 +232,8 @@ export default class PlanetGroup
         _.each( _rings , function( ring , i ){
             //先计算上这个轨道上排排站一共可以放的下多少个星球
             //一个星球需要多少弧度
-            var minRadian = Math.asin( me.pit.r / ring.r ) * 2;
-            if( ring.r == 0 ){
+            var minRadian = Math.asin( me.pit.radius / ring.radius ) * 2;
+            if( ring.radius == 0 ){
                 //说明就在圆心
                 minRadian = Math.PI*2;
             };
@@ -251,12 +258,12 @@ export default class PlanetGroup
 
                         //测试占位情况代码begin---------------------------------------------
                         /*
-                        var point = me._coord.getPointInRadianOfR( pit.middle , ring.r )
+                        var point = me._coord.getPointInRadianOfR( pit.middle , ring.radius )
                         me.sprite.addChild(new Circle({
                             context:{
                                 x : point.x,
                                 y : point.y,
-                                r : me.pit.r,
+                                r : me.pit.radius,
                                 fillStyle: "#ccc",
                                 strokeStyle: "red",
                                 lineWidth: 1,
@@ -357,9 +364,9 @@ export default class PlanetGroup
                     return;
                 };
 
-                var point = me._coord.getPointInRadianOfR( p.pit.middle , ring.r );
+                var point = me._coord.getPointInRadianOfR( p.pit.middle , ring.radius );
 
-                var r = me._getRProp( me.node.r , i, ii , p);
+                var r = me._getRProp( me.node.radius , i, ii , p);
 
                 //计算该萝卜在坑位（pit）中围绕pit的圆心可以随机移动的范围（r）
                 var _transR = me.node.maxR - r;
@@ -373,15 +380,25 @@ export default class PlanetGroup
                     point.y += Math.cos(_randomRadian) * _randomTransR;
                 };
 
+                var _fillStyle = me._getProp( me.node.fillStyle , i , ii , p );
+                var _strokeStyle = me._getProp( me.node.strokeStyle , i , ii , p );
+
                 var circleCtx = {
                     x : point.x,
                     y : point.y,
                     r : r,
-                    fillStyle: me._getProp( me.node.fillStyle , i , ii , p ),
+                    fillStyle: _fillStyle,
                     lineWidth : me._getProp( me.node.lineWidth , i , ii , p ),
-                    strokeStyle : me._getProp( me.node.strokeStyle , i , ii , p ),
+                    strokeStyle : _strokeStyle,
                     cursor: "pointer"
                 };
+
+                //设置好p上面的fillStyle 和 strokeStyle
+                p.color = p.fillStyle = _fillStyle;
+                p.strokeStyle = _strokeStyle;
+                p.iRing = i;
+                p.iPlanet = ii;
+                
 
                 var _node = new Circle({
                     hoverClone: false,
@@ -394,8 +411,8 @@ export default class PlanetGroup
                          title : null,
                          nodes : [ this.nodeData ]
                      };
-                     if( this.nodeData.text ){
-                         e.eventInfo.title = this.nodeData.text;
+                     if( this.nodeData.label ){
+                         e.eventInfo.title = this.nodeData.label;
                      };
             
                      //fire到root上面去的是为了让root去处理tips
@@ -417,26 +434,26 @@ export default class PlanetGroup
                 var _labelCtx = {
                     x: point.x,
                     y: point.y, //point.y + r +3
-                    fontSize: me.text.fontSize,
+                    fontSize: me.label.fontSize,
                     textAlign: "center",
                     textBaseline: "middle",
-                    fillStyle: me.text.fontColor,
+                    fillStyle: me.label.fontColor,
                     rotation : -_ringCtx.rotation,
                     rotateOrigin : {
                         x : 0,
                         y : 0 //-(r + 3)
                     }
                 };
-                var _text = new Canvax.Display.Text( p.text , {
+                var _text = new Canvax.Display.Text( p.label , {
                     context: _labelCtx
                 });
 
                 var _labelWidth = _text.getTextWidth();
                 var _labelHeight = _text.getTextHeight();
 
-                if( me.text.position ){
-                    if( _.isFunction( me.text.position ) ){
-                        var _pos = me.text.position( {
+                if( me.label.position ){
+                    if( _.isFunction( me.label.position ) ){
+                        var _pos = me.label.position( {
                             node : _node,
                             circleR : r,
                             circleCenter : {
@@ -457,7 +474,7 @@ export default class PlanetGroup
                         _labelCtx.y = _pos.y;
 
                         if( _labelWidth > r*2 ){
-                            _labelCtx.fontSize = me.text.fontSize - 3;
+                            _labelCtx.fontSize = me.label.fontSize - 3;
                         }
                     }
 
@@ -477,7 +494,7 @@ export default class PlanetGroup
 
                 //TODO:这里其实应该是直接可以修改 _text.context. 属性的
                 //但是这里版本的canvax有问题。先重新创建文本对象吧
-                _text = new Canvax.Display.Text( p.text , {
+                _text = new Canvax.Display.Text( p.label , {
                     context: _labelCtx
                 });
             

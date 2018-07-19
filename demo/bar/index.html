@@ -53,7 +53,8 @@
                         type : "rect",
                         xAxis : {
                             field : "xfield",
-                            text : {
+                            name : "xAxis",
+                            label : {
                                 textAlign : "right",
                                 format: function(){
                                     return "x\nodfdfdfdfsdfo"
@@ -64,9 +65,9 @@
                         },
                         yAxis : [
                             {
-                                label : "left",
+                                name : "left",
                                 //dataSection : [1,2,3,4,5,6,7,8],
-                                text : {
+                                label : {
                                     format : function(val){
                                         
                                         val
@@ -74,13 +75,13 @@
                                 }
                             },
                             {
-                                label : "right"
+                                name : "right"
                             }
                         ]
                     },
                     legend : {},
                     tips : {
-                        pointer : "shadow"
+                        pointer : "region"
                     },
                     graphs : [
                     
@@ -88,7 +89,7 @@
                             type : "bar",
                             field : "click",
                             yAxisAlign : "left",
-                            text : {
+                            label : {
                                 enabled : true
                             }
                         },
@@ -96,7 +97,7 @@
                             type : "bar",
                             field : [ [ "uv","pv" ],"ppc" ],
                             yAxisAlign : "right",
-                            text : {
+                            label : {
                                 enabled : true,
                                 verticalAlign: "middle",
                                 position : "center",
@@ -110,9 +111,9 @@
                     dataZoom: {},
                     markLine :  [{
                         markTo: 'uv',
-                        text : {
+                        label : {
                             enabled : true,
-                            value : function( yVal ){
+                            text : function( yVal ){
                                 return 'UV 均值 ：' + parseInt( yVal )
                             },
                             fontSize : 14
@@ -120,7 +121,7 @@
                         //y : 30 //不设置y，就会自动设置为均线
                     },{
                         markTo: 'pv',
-                        text : {
+                        label : {
                             enabled : true,
                             fontSize : 14
                         },

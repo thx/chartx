@@ -292,7 +292,7 @@ export default class Descartes extends CoordBase
                         },
                         animation: false,
                         eventEnabled: false,
-                        text: {
+                        label: {
                             enabled: false
                         }
                     } )
@@ -312,7 +312,7 @@ export default class Descartes extends CoordBase
                         },
                         animation: false,
                         eventEnabled: false,
-                        text: {
+                        label: {
                             enabled: false
                         }
                     } )
@@ -499,7 +499,7 @@ export default class Descartes extends CoordBase
                             _fstyle = fieldMap.color;
                         };
                         var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
-                        var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
+                        var textFillStyle = ML.label && ML.label.fillStyle || _fstyle;
         
                         me.creatOneMarkLine( ML, y, _yAxis, lineStrokeStyle, textFillStyle, field );
                     }
@@ -527,7 +527,7 @@ export default class Descartes extends CoordBase
                 ]
                 //strokeStyle: lineStrokeStyle
             },
-            text: {
+            label: {
                 fillStyle: textFillStyle
             },
             field: field

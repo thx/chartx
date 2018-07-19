@@ -52,14 +52,14 @@
                         horizontal : true,
                         xAxis : {
                             field : "xfield",
-                            text : {
+                            label : {
                                 textAlign : "right"
                             }
                             //dataSection : [1,3,5,7,9]
                         },
                         yAxis : [
                             {
-                                label : "yaxis",
+                                name : "yaxis",
                                 align : "right"
                             }
                             
@@ -67,14 +67,14 @@
                     },
                     legend : {},
                     tips : {
-                        pointer : "shadow"
+                        pointer : "region"
                     },
                     graphs : [
                         {
                             type : "bar",
                             field : "click",
                             yAxisAlign : "right",
-                            text : {
+                            label : {
                                 enabled : true,
                                 align:"left",
                                 verticalAlign : "middle",
@@ -88,7 +88,7 @@
                             type : "bar",
                             field : [ [ "uv","pv" ] ],
                             yAxisAlign : "right",
-                            text : {
+                            label : {
                                 enabled : true,
                                 align:"left",
                                 position : "bottom",

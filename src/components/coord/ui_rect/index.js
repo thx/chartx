@@ -422,7 +422,7 @@ export default class Descartes_Component extends coorBase
 
         if( !me.sprite.getChildById("induce") ){
             me.sprite.addChild(me.induce);
-        }
+        };
         
         me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
             //e.eventInfo = me._getInfoHandler(e);

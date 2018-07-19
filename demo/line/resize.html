@@ -49,12 +49,11 @@
                 
                 ];
                 var options = {
-                    theme : [],
                     coord : {
                         type : "rect",
                         xAxis : {
                             field : "xfield",
-                            text : {
+                            label : {
                                 textAlign : "right",
                                 format: function(){
                                     return "x\nodfdfdfdfsdfo"
@@ -65,16 +64,16 @@
                         },
                         yAxis : [
                             {
-                                label : "left"
+                                name : "left"
                             },
                             {
-                                label : "right"
+                                name : "right"
                             }
                         ]
                     },
                     legend : {},
                     tips : {
-                        pointer : "shadow"
+                        pointer : "region"
                     },
                     graphs : [
                     
@@ -131,7 +130,7 @@
                     dataZoom1: {},
                     markLine :  [{
                         markTo: 'uv',
-                        text : {
+                        label : {
                             enabled : true,
                             content : function( yVal ){
                                 return 'UV 均值 ：' + parseInt( yVal )
@@ -141,7 +140,7 @@
                         //y : 30 //不设置y，就会自动设置为均线
                     },{
                         markTo: 'pv',
-                        text : {
+                        label : {
                             enabled : true,
                             fontSize : 14
                         },

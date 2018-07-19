@@ -45,7 +45,7 @@ export default class FunnelGraphs extends GraphsBase
             }
         };
 
-        this.text = {
+        this.label = {
             enabled : true,
             align : "center", // left , center, right
             format : function( num ){ 
@@ -139,7 +139,7 @@ export default class FunnelGraphs extends GraphsBase
                 cursor  : "pointer",
                
                 //下面得都在layoutData的循环中计算
-                text    : '',
+                label    : '',
                 middlePoint : null,
                 iNode   : -1,
                 points  : []
@@ -159,7 +159,7 @@ export default class FunnelGraphs extends GraphsBase
 
         _.each( layoutData, function( ld , i){
             ld.iNode = i;
-            ld.text = me.text.format( ld.value , ld );
+            ld.label = me.label.format( ld.value , ld );
         } );
         _.each( layoutData, function( ld , i){
             ld.points = me._getPoints(ld , layoutData[i+1], layoutData[i-1]);
@@ -239,25 +239,25 @@ export default class FunnelGraphs extends GraphsBase
                 x : ld.middlePoint.x,
                 y : ld.middlePoint.y
             };
-            if( me.text.align == "left" ){
+            if( me.label.align == "left" ){
                 textPoint.x = ld.points[0][0] - (ld.points[0][0] - ld.points[3][0])/2;
                 textPoint.x -= 15;
                 textAlign = "right";
             };
-            if( me.text.align == "right" ){
+            if( me.label.align == "right" ){
                 textPoint.x = ld.points[1][0] - (ld.points[1][0] - ld.points[2][0])/2
                 textPoint.x += 15;
                 textAlign = "left";
             };
 
-            var _text = new Text( ld.text , {
+            var _text = new Text( ld.label , {
                 context : {
                     x : textPoint.x,
                     y : textPoint.y,
-                    fontSize : me.text.fontSize,
-                    fillStyle : me.text.align == "center" ? me.text.fontColor : ld.color,
+                    fontSize : me.label.fontSize,
+                    fillStyle : me.label.align == "center" ? me.label.fontColor : ld.color,
                     textAlign : textAlign,
-                    textBaseline : me.text.textBaseline
+                    textBaseline : me.label.textBaseline
                 }
             } );
 

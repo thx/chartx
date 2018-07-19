@@ -47,7 +47,7 @@ export default class MarkLine extends Component
             fillStyle : "#999"
         };
 
-        this.text = {
+        this.label = {
             enabled  : false,
             fillStyle: '#999999',
             fontSize : 12,

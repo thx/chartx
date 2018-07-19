@@ -17,15 +17,13 @@ export default class Tips extends Component
         this.dW      = 0;  //html的tips内容width
         this.dH      = 0;  //html的tips内容Height
 
-        this.backR   = "5px";  //背景框的 圆角 
+        this.borderRadius   = "5px";  //背景框的 圆角 
 
         this.sprite  = null;
         this.content = null; //tips的详细内容
 
         this.fillStyle   = "rgba(255,255,255,0.95)";//"#000000";
-        this.text        = {
-            fillStyle    : "#999"
-        };
+        this.fontColor = "#999";
         this.strokeStyle = "#ccc";
         
         this.place = "right"; //在鼠标的左（右）边
@@ -42,7 +40,7 @@ export default class Tips extends Component
         this.positionInRange = false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
 
-        this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'
+        this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
         this.pointerAnimate = true;
 
         this.init(opt);
@@ -117,7 +115,7 @@ export default class Tips extends Component
         var me = this;
         this._tipDom = document.createElement("div");
         this._tipDom.className = "chart-tips";
-        this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";border:1px solid "+this.strokeStyle+";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:"+this.text.fillStyle+";line-height:1.5"
+        this._tipDom.style.cssText += "；-moz-border-radius:"+this.borderRadius+"; -webkit-border-radius:"+this.borderRadius+"; border-radius:"+this.borderRadius+";background:"+this.fillStyle+";border:1px solid "+this.strokeStyle+";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:"+this.fontColor+";line-height:1.5"
         this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px "+this.strokeStyle+"; -webkit-box-shadow:1px 1px 3px "+this.strokeStyle+"; box-shadow:1px 1px 3px "+this.strokeStyle+";"
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
         this.tipDomContainer.appendChild( this._tipDom );        
@@ -178,10 +176,10 @@ export default class Tips extends Component
             if( node.value === undefined || node.value === null ){
                 return;
             };
-
+debugger
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
             var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-            str+="<td "+tsStyle+">"+ (node.name || node.field || "") +"：</td>";
+            str+="<td "+tsStyle+">"+ (node.label || node.field || "") +"：</td>";
             str += "<td "+tsStyle+">"+ (typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) +"</td></tr>";
         });
         str+="</table>";

@@ -148,6 +148,7 @@ export default class PieGraphs extends GraphsBase
         
         for( var i=0,l=dataFrame.length; i<l; i++ ){
             var rowData = dataFrame.getRowData(i);
+            var color = me.getColorByIndex(me.node.fillStyle, i, l);
             var layoutData = {
                 rowData       : rowData,//把这一行数据给到layoutData引用起来
                 focused       : false,  //是否获取焦点，外扩
@@ -158,13 +159,15 @@ export default class PieGraphs extends GraphsBase
                 selectedR     : me.node.select.radius,
                 selectedAlpha : me.node.select.alpha,
                 enabled       : true,   //是否启用，显示在列表中
-                fillStyle     : me.getColorByIndex(me.node.fillStyle, i, l),
+                fillStyle     : color,
+                color         : color, //加个color属性是为了给tips用
 
                 value         : rowData[ me.field ],
                 label         : rowData[ me.label.field || me.field ],
                 labelText     : null, //绘制的时候再设置,label format后的数据
                 iNode         : i
             };
+            debugger
             data.push( layoutData );
         };
 
@@ -355,11 +358,16 @@ export default class PieGraphs extends GraphsBase
     {
         var str;
         if( this.label.enabled ){
-            if( this.label.field ){
-                str = itemData.rowData[ this.label.field ];
-            }
-            if( _.isFunction( this.label.format ) ){
-                str = this.label.format( itemData )
+            if( this.label.format ){
+                if( _.isFunction( this.label.format ) ){
+                    str = this.label.format( itemData.label, itemData );
+                }
+            } else {
+                if( this.label.field ){
+                    str = itemData.rowData[ this.label.field ] + "：" + itemData.percentage + "%" 
+                } else {
+                    str = itemData.percentage + "%" 
+                }
             }
         }
         return str;

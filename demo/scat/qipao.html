@@ -56,7 +56,7 @@ var options = {
             type : "scat",
             field : "money",
             node : {
-                r : "house", //r可以配置为某个字段名字，就会自动计算比例
+                radius : "house", //r可以配置为某个字段名字，就会自动计算比例
                 fillStyle : function( d ){
                     if( d.rowData.sex == "男" ){
                         return "#ff8533"
@@ -80,7 +80,7 @@ var options = {
                 }
 
             },
-            text : {
+            label : {
                 enabled : true,
                 field : "text"
             },
@@ -90,7 +90,7 @@ var options = {
         }
     ],
     tips : {
-        pointer : "shadow"
+        pointer : "region"
     }
 };
 

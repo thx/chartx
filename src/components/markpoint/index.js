@@ -31,7 +31,7 @@ export default class MarkPoint extends Component
         this.vr = 12;
 
         //circle opts
-        this.r  = 5;
+        this.radius  = 5;
         
         this.sprite = null;
         this.shape  = null;
@@ -119,7 +119,7 @@ export default class MarkPoint extends Component
     {
         var me = this;
         var ctx = {
-            r : me.r,
+            r : me.radius,
             fillStyle   : me._fillStyle,
             lineWidth   : me.lineWidth,
             strokeStyle : me._strokeStyle,

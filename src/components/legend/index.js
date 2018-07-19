@@ -27,20 +27,20 @@ export default class Legend extends Component
             height : 30,
             width  : "auto",
             shapeType : "circle",
-            r : 5,
+            radius : 5,
             lineWidth : 1,
             fillStyle : "#999",
             onChecked : function(){},
             onUnChecked : function(){}
         };
 
-        this.text = {
+        this.label = {
             textAlign : "left",
             textBaseline : "middle",
             fillStyle : "#333", //obj.color
             cursor: "pointer",
-            format : function( info ){
-                return info.name
+            format : function( name, info ){
+                return name
             }
         }
 
@@ -79,7 +79,7 @@ export default class Legend extends Component
 
     pos( pos )
     {
-        pos.x && (this.sprite.context.x = pos.x + this.icon.r);
+        pos.x && (this.sprite.context.x = pos.x + this.icon.radius);
         pos.y && (this.sprite.context.y = pos.y);
     }
 
@@ -110,7 +110,7 @@ export default class Legend extends Component
                     x     : 0,
                     y     : me.icon.height/3 ,
                     fillStyle : !obj.enabled ? "#ccc" : (obj.color || me._labelColor),
-                    r : me.icon.r,
+                    r : me.icon.radius,
                     cursor: "pointer"
                 }
             });
@@ -127,15 +127,15 @@ export default class Legend extends Component
             
             _icon.on("click" , function(){});
             
-            var txt = new Canvax.Display.Text( me.text.format(obj) , {
+            var txt = new Canvax.Display.Text( me.label.format(obj.name, obj) , {
                 id: "legend_field_txt_"+i,
                 context : {
-                    x : me.icon.r + 3 ,
+                    x : me.icon.radius + 3 ,
                     y : me.icon.height / 3,
-                    textAlign : me.text.textAlign, //"left",
-                    textBaseline : me.text.textBaseline,//"middle",
-                    fillStyle : me.text.fillStyle,//"#333", //obj.color
-                    cursor: me.text.cursor //"pointer"
+                    textAlign : me.label.textAlign, //"left",
+                    textBaseline : me.label.textBaseline,//"middle",
+                    fillStyle : me.label.fillStyle,//"#333", //obj.color
+                    cursor: me.label.cursor //"pointer"
                 }
             } );
         
@@ -150,7 +150,7 @@ export default class Legend extends Component
             txt.on("click" , function(){});
 
             var txtW = txt.getTextWidth();
-            var itemW = txtW + me.icon.r*2 + 20;
+            var itemW = txtW + me.icon.radius*2 + 20;
 
             maxItemWidth = Math.max( maxItemWidth, itemW );
 

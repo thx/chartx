@@ -29,11 +29,11 @@ export default class RadarGraphs extends GraphsBase
             fillAlpha : 0.1
         };
         this.icon = {
-            enabled : true,
-            shapeType : "circle",
-            r : 4,
+            enabled     : true,
+            shapeType   : "circle",
+            radius      : 4,
             strokeStyle : "#ffffff",
-            lineWidth : 1
+            lineWidth   : 1
         };
 
         this.groups = {
@@ -135,7 +135,7 @@ export default class RadarGraphs extends GraphsBase
                             cursor : "pointer",
                             x : node.point.x,
                             y : node.point.y,
-                            r : me.icon.r,
+                            r : me.icon.radius,
                             lineWidth : me.icon.lineWidth,
                             strokeStyle : me.icon.strokeStyle,
                             fillStyle : _strokeStyle
@@ -249,12 +249,13 @@ export default class RadarGraphs extends GraphsBase
                 var _r = Math.PI * _a / 180;
                 var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
                 arr.push( {
-                    field : field,
-                    iNode : i,
+                    field   : field,
+                    iNode   : i,
+                    rowData : me.dataFrame.getRowData(i),
                     focused : false,
-                    value : dataOrg[i],
-                    point : point,
-                    color : fieldMap.color
+                    value   : dataOrg[i],
+                    point   : point,
+                    color   : fieldMap.color
                 } );
             } );
             data[ field ] = arr;

@@ -38,9 +38,9 @@ export default class polarComponent extends coorBase
             beginAngle : -90,
             
             //刻度尺,在最外沿的蜘蛛网上面
-            layoutData : [], //aAxis.data的 text.format后版本
+            layoutData : [], //aAxis.data的 label.format后版本
             enabled : opts.aAxis && opts.aAxis.field,
-            text : {
+            label : {
                 enabled : true,
                 format : function( v ){ return v },
                 fontColor : "#666"
@@ -521,24 +521,24 @@ export default class polarComponent extends coorBase
         me._aAxisScaleSp.context.x = this.origin.x;
         me._aAxisScaleSp.context.y = this.origin.y;
 
-        _.each( this.aAxis.data , function( label, i ){
+        _.each( this.aAxis.data , function( value , i ){
 
-            if( !me.aAxis.text.enabled ) return;
+            if( !me.aAxis.label.enabled ) return;
 
             var point = points[i];
             var c = {
                 x : point.x,
                 y : point.y,
-                fillStyle : me.aAxis.text.fontColor
+                fillStyle : me.aAxis.label.fontColor
             };
 
-            label = me.aAxis.text.format( label );
+            var text = me.aAxis.label.format( value );
             _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
-            me._aAxisScaleSp.addChild(new Canvax.Display.Text( label , {
+            me._aAxisScaleSp.addChild(new Canvax.Display.Text( text , {
                 context : c
             }));
 
-            me.aAxis.layoutData.push( label );
+            me.aAxis.layoutData.push( text );
             
         } );
     }
@@ -678,7 +678,7 @@ export default class polarComponent extends coorBase
         
         var obj = {
             //aAxis : aNode,
-            //title : aNode.text,
+            //title : aNode.label,
             nodes : [
                 //遍历_graphs 去拿东西
             ]

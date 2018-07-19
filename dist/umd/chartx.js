@@ -8200,8 +8200,14 @@
 	            if (this._opts.theme) {
 	                //如果用户有配置皮肤组件，优先级最高
 	                //皮肤就是一组颜色
+
+	                //假如用户就只传了一个颜色值
+	                if (!_$5.isArray(this._opts.theme)) {
+	                    this._opts.theme = [this._opts.theme];
+	                }
 	                var _theme = new this.componentsMap.theme(this._opts.theme, this);
-	                this._theme = _theme.mergeTo(this._theme);
+	                this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用下面的merge
+	                //this._theme = _theme.mergeTo( this._theme );
 	            }            this.initModule(opts); //初始化模块  
 	            this.initComponents(opts); //初始化组件, 来自己chart.js模块
 
@@ -8747,9 +8753,8 @@
 	        _this.width = 0;
 	        _this.height = 0;
 
-	        _this.label = "";
-	        _this._label = null; //this.label对应的文本对象
-
+	        _this.name = "";
+	        _this._name = null; //this.label对应的文本对象
 
 	        _this.enabled = true;
 	        _this.tickLine = {
@@ -8764,7 +8769,7 @@
 	            lineWidth: 1,
 	            strokeStyle: '#cccccc'
 	        };
-	        _this.text = {
+	        _this.label = {
 	            enabled: 1,
 	            fontColor: '#999',
 	            fontSize: 12,
@@ -8775,9 +8780,9 @@
 	            lineHeight: 1
 	        };
 
-	        if (opts.isH && (!opts.text || opts.text.rotaion === undefined)) {
+	        if (opts.isH && (!opts.label || opts.label.rotaion === undefined)) {
 	            //如果是横向直角坐标系图
-	            _this.text.rotation = 90;
+	            _this.label.rotation = 90;
 	        }
 	        _this.maxTxtH = 0;
 
@@ -8851,9 +8856,9 @@
 	                //如果没有传入指定的dataSection，才需要计算dataSection
 	                this.dataSection = this._initDataSection(this.dataOrg);
 	            }
-	            if (this.text.rotation != 0) {
+	            if (this.label.rotation != 0) {
 	                //如果是旋转的文本，那么以右边为旋转中心点
-	                this.text.textAlign = "right";
+	                this.label.textAlign = "right";
 	            }
 	            //取第一个数据来判断xaxis的刻度值类型是否为 number
 	            this.minVal == null && (this.minVal = _$8.min(this.dataSection));
@@ -8892,7 +8897,9 @@
 	        key: "resetData",
 	        value: function resetData(dataFrame) {
 	            this._initHandle(dataFrame);
-	            this.draw();
+	            this.draw({
+	                resetData: true
+	            });
 	        }
 	    }, {
 	        key: "getIndexOfVal",
@@ -8954,12 +8961,10 @@
 	                    width: this.width
 	                });
 	            }
-	            var text = this._getFormatText(val);
-
 	            var o = {
 	                ind: ind,
 	                value: val,
-	                text: text,
+	                text: this._getFormatText(val), //text是format后的数据
 	                x: x,
 	                field: this.field
 	            };
@@ -8970,11 +8975,11 @@
 	        key: "draw",
 	        value: function draw(opts) {
 	            //首次渲染从 直角坐标系组件中会传入 opts
-	            this._getLabel();
-	            this._computerConfig(opts);
-
+	            if (!opts.resetData) {
+	                this._getName();
+	                this._computerConfig(opts);
+	            }
 	            this.layoutData = this._trimXAxis(this.dataSection);
-
 	            this._trimLayoutData();
 
 	            this.sprite.context.x = this.pos.x;
@@ -8983,21 +8988,21 @@
 	            this._widget(opts);
 	        }
 	    }, {
-	        key: "_getLabel",
-	        value: function _getLabel() {
-	            if (this.label && this.label != "") {
-	                if (!this._label) {
-	                    this._label = new canvax.Display.Text(this.label, {
+	        key: "_getName",
+	        value: function _getName() {
+	            if (this.name && this.name != "") {
+	                if (!this._name) {
+	                    this._name = new canvax.Display.Text(this.name, {
 	                        context: {
-	                            fontSize: this.text.fontSize,
+	                            fontSize: this.label.fontSize,
 	                            textAlign: this.isH ? "center" : "left",
 	                            textBaseline: this.isH ? "top" : "middle",
-	                            fillStyle: this.text.fontColor,
+	                            fillStyle: this.label.fontColor,
 	                            rotation: this.isH ? -90 : 0
 	                        }
 	                    });
 	                } else {
-	                    this._label.resetText(this.label);
+	                    this._name.resetText(this.name);
 	                }
 	            }
 	        }
@@ -9010,11 +9015,11 @@
 	            if (opts) {
 	                _$8.extend(true, this, opts);
 	            }
-	            if (this._label) {
+	            if (this._name) {
 	                if (this.isH) {
-	                    this.width -= this._label.getTextHeight() + 5;
+	                    this.width -= this._name.getTextHeight() + 5;
 	                } else {
-	                    this.width -= this._label.getTextWidth() + 5;
+	                    this.width -= this._name.getTextWidth() + 5;
 	                }
 	            }        }
 
@@ -9088,7 +9093,7 @@
 	                var text = this._getFormatText(data[a]);
 	                var txt = new canvax.Display.Text(text, {
 	                    context: {
-	                        fontSize: this.text.fontSize
+	                        fontSize: this.label.fontSize
 	                    }
 	                });
 
@@ -9111,19 +9116,19 @@
 	        }
 	    }, {
 	        key: "_getFormatText",
-	        value: function _getFormatText(text) {
+	        value: function _getFormatText(val) {
 	            var res;
-	            if (_$8.isFunction(this.text.format)) {
-	                res = this.text.format(text);
+	            if (_$8.isFunction(this.label.format)) {
+	                res = this.label.format(val);
 	            } else {
-	                res = text;
+	                res = val;
 	            }
 
 	            if (_$8.isArray(res)) {
 	                res = Tools.numAddSymbol(res);
 	            }
 	            if (!res) {
-	                res = text;
+	                res = val;
 	            }            return res;
 	        }
 	    }, {
@@ -9134,9 +9139,9 @@
 
 	            var arr = this.layoutData;
 
-	            if (this._label) {
-	                this._label.context.x = this.width + 5;
-	                this.sprite.addChild(this._label);
+	            if (this._name) {
+	                this._name.context.x = this.width + 5;
+	                this.sprite.addChild(this._name);
 	            }
 	            var delay = Math.min(1000 / arr.length, 25);
 
@@ -9152,23 +9157,23 @@
 	                }
 	                var o = arr[a];
 	                var x = o.x,
-	                    y = this.tickLine.lineLength + this.tickLine.distance + this.text.distance;
+	                    y = this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
 
-	                if (this.text.enabled && !!arr[a].visible) {
+	                if (this.label.enabled && !!arr[a].visible) {
 	                    //文字
 	                    var textContext = {
 	                        x: o._text_x || o.x,
 	                        y: y + 20,
-	                        fillStyle: this.text.fontColor,
-	                        fontSize: this.text.fontSize,
-	                        rotation: -Math.abs(this.text.rotation),
-	                        textAlign: this.text.textAlign,
-	                        lineHeight: this.text.lineHeight,
-	                        textBaseline: !!this.text.rotation ? "middle" : "top",
+	                        fillStyle: this.label.fontColor,
+	                        fontSize: this.label.fontSize,
+	                        rotation: -Math.abs(this.label.rotation),
+	                        textAlign: this.label.textAlign,
+	                        lineHeight: this.label.lineHeight,
+	                        textBaseline: !!this.label.rotation ? "middle" : "top",
 	                        globalAlpha: 0
 	                    };
 
-	                    if (!!this.text.rotation && this.text.rotation != 90) {
+	                    if (!!this.label.rotation && this.label.rotation != 90) {
 	                        textContext.x += 5;
 	                        textContext.y += 3;
 	                    }
@@ -9280,12 +9285,12 @@
 	            } else {
 	                var _maxTextHeight = 0;
 
-	                if (this.text.enabled) {
-	                    _$8.each(me.dataSection, function (val) {
+	                if (this.label.enabled) {
+	                    _$8.each(me.dataSection, function (val, i) {
 
 	                        var txt = new canvax.Display.Text(me._getFormatText(val), {
 	                            context: {
-	                                fontSize: me.text.fontSize
+	                                fontSize: me.label.fontSize
 	                            }
 	                        });
 
@@ -9293,13 +9298,13 @@
 	                        var textHeight = txt.getTextHeight();
 	                        var height = textHeight; //文本在外接矩形height
 
-	                        if (!!me.text.rotation) {
+	                        if (!!me.label.rotation) {
 	                            //有设置旋转
-	                            if (me.text.rotation == 90) {
+	                            if (me.label.rotation == 90) {
 	                                height = textWidth;
 	                            } else {
-	                                var sinR = Math.sin(Math.abs(me.text.rotation) * Math.PI / 180);
-	                                var cosR = Math.cos(Math.abs(me.text.rotation) * Math.PI / 180);
+	                                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
+	                                var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
 	                                height = parseInt(sinR * textWidth);
 	                            }                        }
 	                        //没有设置旋转
@@ -9307,7 +9312,7 @@
 	                        _maxTextHeight = Math.max(_maxTextHeight, height);
 	                    });
 	                }
-	                this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.distance + this.text.distance;
+	                this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
 	            }
 	        }
 	    }, {
@@ -9354,7 +9359,7 @@
 	            }
 
 	            var l = arr.length;
-	            var textAlign = me.text.textAlign;
+	            var textAlign = me.label.textAlign;
 
 	            function checkOver(i) {
 	                var curr = arr[i];
@@ -9369,7 +9374,7 @@
 	                    var currWidth = curr.textWidth;
 
 	                    //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-	                    if (!!me.text.rotation) {
+	                    if (!!me.label.rotation) {
 	                        nextWidth = Math.min(nextWidth, 22);
 	                        currWidth = Math.min(currWidth, 22);
 	                    }
@@ -9435,9 +9440,8 @@
 	        _this.maxW = 0; //最大文本的 width
 	        _this.field = []; //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
-	        _this.label = "";
-	        _this._label = null; //label 的text对象
-
+	        _this.name = "";
+	        _this._name = null;
 
 	        _this.enabled = true;
 	        _this.tickLine = { //刻度线
@@ -9452,7 +9456,7 @@
 	            lineWidth: 1,
 	            strokeStyle: '#cccccc'
 	        };
-	        _this.text = {
+	        _this.label = {
 	            enabled: 1,
 	            fontColor: '#999',
 	            fontSize: 12,
@@ -9463,9 +9467,9 @@
 	            lineHeight: 1
 	        };
 
-	        if (opts.isH && (!opts.text || opts.text.rotaion === undefined)) {
+	        if (opts.isH && (!opts.label || opts.label.rotaion === undefined)) {
 	            //如果是横向直角坐标系图
-	            _this.text.rotation = 90;
+	            _this.label.rotation = 90;
 	        }
 	        _this.pos = {
 	            x: 0,
@@ -9568,34 +9572,21 @@
 	            this.pos.y = $n;
 	        }
 	    }, {
-	        key: "setAllStyle",
-	        value: function setAllStyle(sty) {
-	            _$9.each(this.rulesSprite.children, function (s) {
-	                _$9.each(s.children, function (cel) {
-	                    if (cel.type == "text") {
-	                        cel.context.fontColor = sty;
-	                    } else if (cel.type == "line") {
-	                        cel.context.strokeStyle = sty;
-	                    }
-	                });
-	            });
-	        }
-	    }, {
-	        key: "_getLabel",
-	        value: function _getLabel() {
-	            var _label = this.label;
+	        key: "_getName",
+	        value: function _getName() {
+	            var _name = this.name;
 
-	            if (_label && _label != "") {
+	            if (_name && _name != "") {
 	                var textAlign = this.align == "left" ? "right" : "left";
 	                if (this.isH) {
 	                    textAlign = "left";
 	                }
-	                this._label = new canvax.Display.Text(_label, {
+	                this._name = new canvax.Display.Text(_name, {
 	                    context: {
-	                        fontSize: this.text.fontSize,
+	                        fontSize: this.label.fontSize,
 	                        textAlign: textAlign, //"left",
 	                        textBaseline: this.isH ? "top" : "bottom",
-	                        fillStyle: this.text.fontColor,
+	                        fillStyle: this.label.fontColor,
 	                        rotation: this.isH ? -90 : 0
 	                    }
 	                });
@@ -9606,16 +9597,16 @@
 	        value: function draw(opts) {
 	            !opts && (opts = {});
 	            opts && _$9.extend(true, this, opts);
-	            this._getLabel();
+	            this._getName();
 	            this.height = this.yMaxHeight - this._getYAxisDisLine();
 
-	            if (this._label) {
+	            if (this._name) {
 	                if (this.isH) {
-	                    this.height -= this._label.getTextWidth();
+	                    this.height -= this._name.getTextWidth();
 	                } else {
-	                    this.height -= this._label.getTextHeight();
+	                    this.height -= this._name.getTextHeight();
 	                }
-	                this._label.context.y = -this.height - 5;
+	                this._name.context.y = -this.height - 5;
 	            }
 	            this.height = parseInt(this.height);
 
@@ -9625,9 +9616,9 @@
 	            this.setX(this.pos.x);
 	            this.setY(this.pos.y);
 
-	            if (this._label) {
+	            if (this._name) {
 	                if (this.align == "left") {
-	                    this._label.context.x += this.width;
+	                    this._name.context.x += this.width;
 	                }
 	            }
 	        }
@@ -9751,8 +9742,8 @@
 
 	                //把format提前
 	                var text = layoutData.value;
-	                if (_$9.isFunction(me.text.format)) {
-	                    text = me.text.format(text, me);
+	                if (_$9.isFunction(me.label.format)) {
+	                    text = me.label.format(text);
 	                }                if (text === undefined || text === null) {
 	                    text = numAddSymbol(layoutData.value);
 	                }                layoutData.text = text;
@@ -10046,7 +10037,7 @@
 	            }
 	            var arr = this.layoutData;
 	            me.maxW = 0;
-	            me._label && me.sprite.addChild(me._label);
+	            me._name && me.sprite.addChild(me._name);
 	            for (var a = 0, al = arr.length; a < al; a++) {
 	                var o = arr[a];
 	                if (!o.visible) {
@@ -10055,11 +10046,11 @@
 
 	                var value = o.value;
 
-	                var textAlign = me.text.textAlign || (me.align == "left" ? "right" : "left");
+	                var textAlign = me.label.textAlign || (me.align == "left" ? "right" : "left");
 
 	                var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
 	                //为横向图表把y轴反转后的 逻辑
-	                if (me.text.rotation == 90 || me.text.rotation == -90) {
+	                if (me.label.rotation == 90 || me.label.rotation == -90) {
 	                    textAlign = "center";
 	                    if (a == arr.length - 1) {
 	                        posy = y - 2;
@@ -10072,7 +10063,7 @@
 	                var yNode = this.rulesSprite.getChildAt(a);
 
 	                if (yNode) {
-	                    if (yNode._txt && this.text.enabled) {
+	                    if (yNode._txt && this.label.enabled) {
 
 	                        if (me.animation && !opts.resize) {
 	                            yNode._txt.animate({
@@ -10131,8 +10122,8 @@
 	                        yNode._tickLine = line;
 	                    }
 	                    //文字
-	                    if (me.text.enabled) {
-	                        var txtX = me.align == "left" ? lineX - me.text.distance : lineX + me.tickLine.lineLength + me.text.distance;
+	                    if (me.label.enabled) {
+	                        var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
 	                        if (this.isH) {
 	                            txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
 	                        }                        var txt = new canvax.Display.Text(o.text, {
@@ -10140,19 +10131,19 @@
 	                            context: {
 	                                x: txtX,
 	                                y: posy + aniFrom,
-	                                fillStyle: me._getProp(me.text.fontColor),
-	                                fontSize: me.text.fontSize,
-	                                rotation: -Math.abs(me.text.rotation),
+	                                fillStyle: me._getProp(me.label.fontColor),
+	                                fontSize: me.label.fontSize,
+	                                rotation: -Math.abs(me.label.rotation),
 	                                textAlign: textAlign,
 	                                textBaseline: "middle",
-	                                lineHeight: me.text.lineHeight,
+	                                lineHeight: me.label.lineHeight,
 	                                globalAlpha: 0
 	                            }
 	                        });
 	                        yNode.addChild(txt);
 	                        yNode._txt = txt;
 
-	                        if (me.text.rotation == 90 || me.text.rotation == -90) {
+	                        if (me.label.rotation == 90 || me.label.rotation == -90) {
 	                            me.maxW = Math.max(me.maxW, txt.getTextHeight());
 	                        } else {
 	                            me.maxW = Math.max(me.maxW, txt.getTextWidth());
@@ -10190,7 +10181,7 @@
 	                    al--, pl--;
 	                }            }
 	            if (me.width === null) {
-	                me.width = parseInt(me.maxW + me.text.distance);
+	                me.width = parseInt(me.maxW + me.label.distance);
 	                if (me.tickLine.enabled) {
 	                    me.width += parseInt(me.tickLine.lineLength + me.tickLine.distance);
 	                }
@@ -10832,7 +10823,6 @@
 	            if (!me.sprite.getChildById("induce")) {
 	                me.sprite.addChild(me.induce);
 	            }
-
 	            me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
 	                //e.eventInfo = me._getInfoHandler(e);
 	                me.fire(e.type, e);
@@ -11152,7 +11142,7 @@
 	                            },
 	                            animation: false,
 	                            eventEnabled: false,
-	                            text: {
+	                            label: {
 	                                enabled: false
 	                            }
 	                        });
@@ -11172,7 +11162,7 @@
 	                            },
 	                            animation: false,
 	                            eventEnabled: false,
-	                            text: {
+	                            label: {
 	                                enabled: false
 	                            }
 	                        });
@@ -11357,7 +11347,7 @@
 	                            if (fieldMap) {
 	                                _fstyle = fieldMap.color;
 	                            }                            var lineStrokeStyle = ML.line && ML.line.strokeStyle || _fstyle;
-	                            var textFillStyle = ML.text && ML.text.fillStyle || _fstyle;
+	                            var textFillStyle = ML.label && ML.label.fillStyle || _fstyle;
 
 	                            me.creatOneMarkLine(ML, y, _yAxis, lineStrokeStyle, textFillStyle, field);
 	                        }
@@ -11381,7 +11371,7 @@
 	                    list: [[0, 0], [me._coord.width, 0]]
 	                    //strokeStyle: lineStrokeStyle
 	                },
-	                text: {
+	                label: {
 	                    fillStyle: textFillStyle
 	                },
 	                field: field
@@ -11772,9 +11762,9 @@
 	            beginAngle: -90,
 
 	            //刻度尺,在最外沿的蜘蛛网上面
-	            layoutData: [], //aAxis.data的 text.format后版本
+	            layoutData: [], //aAxis.data的 label.format后版本
 	            enabled: opts.aAxis && opts.aAxis.field,
-	            text: {
+	            label: {
 	                enabled: true,
 	                format: function format(v) {
 	                    return v;
@@ -12215,24 +12205,24 @@
 	            me._aAxisScaleSp.context.x = this.origin.x;
 	            me._aAxisScaleSp.context.y = this.origin.y;
 
-	            _$14.each(this.aAxis.data, function (label, i) {
+	            _$14.each(this.aAxis.data, function (value, i) {
 
-	                if (!me.aAxis.text.enabled) return;
+	                if (!me.aAxis.label.enabled) return;
 
 	                var point = points[i];
 	                var c = {
 	                    x: point.x,
 	                    y: point.y,
-	                    fillStyle: me.aAxis.text.fontColor
+	                    fillStyle: me.aAxis.label.fontColor
 	                };
 
-	                label = me.aAxis.text.format(label);
+	                var text = me.aAxis.label.format(value);
 	                _$14.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
-	                me._aAxisScaleSp.addChild(new canvax.Display.Text(label, {
+	                me._aAxisScaleSp.addChild(new canvax.Display.Text(text, {
 	                    context: c
 	                }));
 
-	                me.aAxis.layoutData.push(label);
+	                me.aAxis.layoutData.push(text);
 	            });
 	        }
 
@@ -12370,7 +12360,7 @@
 
 	            var obj = {
 	                //aAxis : aNode,
-	                //title : aNode.text,
+	                //title : aNode.label,
 	                nodes: [
 	                    //遍历_graphs 去拿东西
 	                ]
@@ -12596,7 +12586,7 @@
 	            filter: null
 	        };
 
-	        _this.text = {
+	        _this.label = {
 	            enabled: false,
 	            animation: true,
 	            fontColor: null, //如果有设置text.fontColor那么优先使用fontColor
@@ -12650,6 +12640,7 @@
 	        value: function getNodesAt(index) {
 	            //该index指当前
 	            var data = this.data;
+
 	            var _nodesInfoList = []; //节点信息集合
 	            _$17.each(this.enabledField, function (fs, i) {
 	                if (_$17.isArray(fs)) {
@@ -12728,12 +12719,12 @@
 	        key: "hide",
 	        value: function hide(field) {
 	            _$17.each(this.barsSp.children, function (h_groupSp, h) {
-	                var bar = h_groupSp.getChildById("bar_" + h + "_" + field);
-	                bar && bar.destroy();
+	                var _bar = h_groupSp.getChildById("bar_" + h + "_" + field);
+	                _bar && _bar.destroy();
 	            });
 	            _$17.each(this.txtsSp.children, function (sp, h) {
-	                var text = sp.getChildById("text_" + h + "_" + field);
-	                text && text.destroy();
+	                var _label = sp.getChildById("text_" + h + "_" + field);
+	                _label && _label.destroy();
 	            });
 
 	            this.draw();
@@ -12749,7 +12740,7 @@
 	        value: function clean() {
 	            this.data = {};
 	            this.barsSp.removeAllChildren();
-	            if (this.text.enabled) {
+	            if (this.label.enabled) {
 	                this.txtsSp.removeAllChildren();
 	            }        }
 	    }, {
@@ -12914,12 +12905,12 @@
 
 	                        me.node.filter && me.node.filter.apply(rectEl, [rectData, me]);
 
-	                        //text begin ------------------------------
-	                        if (me.text.enabled) {
+	                        //label begin ------------------------------
+	                        if (me.label.enabled) {
 
 	                            var value = rectData.value;
-	                            if (_$17.isFunction(me.text.format)) {
-	                                var _formatc = me.text.format.apply(me, [value, rectData]);
+	                            if (_$17.isFunction(me.label.format)) {
+	                                var _formatc = me.label.format(value, rectData);
 	                                if (_formatc !== undefined || _formatc !== null) {
 	                                    value = _formatc;
 	                                }
@@ -12931,13 +12922,13 @@
 	                                value = numAddSymbol(value);
 	                            }
 	                            var textCtx = {
-	                                fillStyle: me.text.fontColor || finalPos.fillStyle,
-	                                fontSize: me.text.fontSize,
-	                                lineWidth: me.text.lineWidth,
-	                                strokeStyle: me.text.strokeStyle || finalPos.fillStyle,
-	                                //textAlign   : me.text.align,
-	                                textBaseline: me.text.verticalAlign,
-	                                rotation: me.text.rotation
+	                                fillStyle: me.label.fontColor || finalPos.fillStyle,
+	                                fontSize: me.label.fontSize,
+	                                lineWidth: me.label.lineWidth,
+	                                strokeStyle: me.label.strokeStyle || finalPos.fillStyle,
+	                                //textAlign   : me.label.align,
+	                                textBaseline: me.label.verticalAlign,
+	                                rotation: me.label.rotation
 	                            };
 	                            //然后根据position, offset确定x,y
 	                            var _textPos = me._getTextPos(finalPos, rectData);
@@ -12963,13 +12954,13 @@
 	                                textEl.field = rectData.field;
 	                                txtGroupH.addChild(textEl);
 	                            }                        }
-	                        //text end ------------------------------
+	                        //label end ------------------------------
 	                    }                }
 	            });
 
 	            this.sprite.addChild(this.barsSp);
 	            //如果有text设置， 就要吧text的txtsSp也添加到sprite
-	            if (this.text.enabled) {
+	            if (this.label.enabled) {
 	                this.sprite.addChild(this.txtsSp);
 	            }
 	            this.sprite.context.x = this.origin.x;
@@ -13164,7 +13155,7 @@
 	    }, {
 	        key: "_getTextAlign",
 	        value: function _getTextAlign(bar, rectData) {
-	            var align = this.text.align;
+	            var align = this.label.align;
 	            if (rectData.value < rectData.yBasePoint.value) {
 	                if (align == "left") {
 	                    align = "right";
@@ -13183,7 +13174,7 @@
 	            };
 	            var x = bar.x,
 	                y = bar.y;
-	            switch (me.text.position) {
+	            switch (me.label.position) {
 	                case "top":
 	                    x = bar.x + bar.width / 2;
 	                    y = bar.y + bar.height;
@@ -13220,12 +13211,12 @@
 	                    x = bar.x + bar.width / 2;
 	                    y = bar.y + bar.height / 2;
 	                    break;
-	            }            x -= me.text.offsetX;
+	            }            x -= me.label.offsetX;
 
 	            var i = 1;
 	            if (rectData.value < rectData.yBasePoint.value) {
 	                i = -1;
-	            }            y -= i * me.text.offsetY;
+	            }            y -= i * me.label.offsetY;
 	            point.x = x;
 	            point.y = y;
 	            return point;
@@ -13245,7 +13236,7 @@
 	            if (me._preDataLen > me._dataLen) {
 	                for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
 	                    me.barsSp.getChildAt(i).destroy();
-	                    me.text.enabled && me.txtsSp.getChildAt(i).destroy();
+	                    me.label.enabled && me.txtsSp.getChildAt(i).destroy();
 	                    i--;
 	                    l--;
 	                }            }
@@ -13526,18 +13517,17 @@
 	            enabled: 1, //是否有
 	            shapeType: "circle",
 	            corner: false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-	            r: 3, //半径 icon 圆点的半径
+	            radius: 3, //半径 icon 圆点的半径
 	            fillStyle: '#ffffff',
 	            strokeStyle: null,
 	            lineWidth: 2
 	        };
 
-	        _this.text = {
-	            shapeType: "text",
+	        _this.label = {
 	            enabled: 0,
-	            fillStyle: null,
+	            fontColor: null,
 	            strokeStyle: null,
-	            fontSize: 13,
+	            fontSize: 12,
 	            format: null
 	        };
 
@@ -13712,8 +13702,8 @@
 	                                _circle.context.y = point[1];
 	                            }
 	                        }
-	                        if (me._texts) {
-	                            var _text = me._texts.getChildAt(iNode);
+	                        if (me._labels) {
+	                            var _text = me._labels.getChildAt(iNode);
 	                            if (_text) {
 	                                _text.context.x = point[0];
 	                                _text.context.y = point[1] - 3;
@@ -13962,7 +13952,7 @@
 	                    var context = {
 	                        x: _point[0],
 	                        y: _point[1],
-	                        r: me._getProp(me.icon.r, a),
+	                        r: me._getProp(me.icon.radius, a),
 	                        lineWidth: me._getProp(me.icon.lineWidth, a) || 2,
 	                        strokeStyle: me._getColor(me.icon.strokeStyle, a),
 	                        fillStyle: me.icon.fillStyle
@@ -14005,11 +13995,11 @@
 	            var me = this;
 	            var list = me._currPointList;
 
-	            if (me.text.enabled) {
+	            if (me.label.enabled) {
 	                //节点上面的文本info
-	                if (!this._texts) {
-	                    this._texts = new canvax.Display.Sprite({});
-	                    this.sprite.addChild(this._texts);
+	                if (!this._labels) {
+	                    this._labels = new canvax.Display.Sprite({});
+	                    this.sprite.addChild(this._labels);
 	                }
 
 	                var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -14019,59 +14009,56 @@
 	                        //折线图中有可能这个point为undefined
 	                        continue;
 	                    }
-	                    var fontFillStyle = me._getColor(me.text.fillStyle, a);
-
 	                    var context = {
 	                        x: _point[0],
 	                        y: _point[1] - 3,
-	                        fontSize: this.text.fontSize,
+	                        fontSize: this.label.fontSize,
 	                        textAlign: "center",
 	                        textBaseline: "bottom",
-	                        fillStyle: fontFillStyle,
+	                        fillStyle: me._getColor(me.label.fontColor, a),
 	                        lineWidth: 1,
 	                        strokeStyle: "#ffffff"
 	                    };
 
 	                    var value = me.data[a].value;
-	                    if (_$18.isFunction(me.text.format)) {
-	                        value = me.text.format.apply(me, [value, a]) || value;
+	                    if (_$18.isFunction(me.label.format)) {
+	                        value = me.label.format(value, me.data[a]) || value;
 	                    }
 	                    if (value == undefined || value == null) {
 	                        continue;
 	                    }
-
-	                    var text = this._texts.children[iNode];
-	                    if (text) {
-	                        text.resetText(value);
-	                        _$18.extend(text.context, context);
+	                    var _label = this._labels.children[iNode];
+	                    if (_label) {
+	                        _label.resetText(value);
+	                        _$18.extend(_label.context, context);
 	                    } else {
-	                        text = new canvax.Display.Text(value, {
+	                        _label = new canvax.Display.Text(value, {
 	                            context: context
 	                        });
-	                        me._texts.addChild(text);
-	                        me._checkTextPos(text, a);
+	                        me._labels.addChild(_label);
+	                        me._checkTextPos(_label, a);
 	                    }
 	                    iNode++;
 	                }
 	                //把过多的circle节点删除了
-	                if (me._texts.children.length > iNode) {
-	                    for (var i = iNode, l = me._texts.children.length; i < l; i++) {
-	                        me._texts.children[i].destroy();
+	                if (me._labels.children.length > iNode) {
+	                    for (var i = iNode, l = me._labels.children.length; i < l; i++) {
+	                        me._labels.children[i].destroy();
 	                        i--;
 	                        l--;
 	                    }
 	                }            }        }
 	    }, {
 	        key: "_checkTextPos",
-	        value: function _checkTextPos(text, ind) {
+	        value: function _checkTextPos(_label, ind) {
 	            var me = this;
 	            var list = me._currPointList;
 	            var pre = list[ind - 1];
 	            var next = list[ind + 1];
 
-	            if (pre && next && pre[1] < text.context.y && next[1] < text.context.y) {
-	                text.context.y += 7;
-	                text.context.textBaseline = "top";
+	            if (pre && next && pre[1] < _label.context.y && next[1] < _label.context.y) {
+	                _label.context.y += 7;
+	                _label.context.textBaseline = "top";
 	            }
 	        }
 	    }, {
@@ -14407,9 +14394,9 @@
 
 	        _this.node = {
 	            shapeType: "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-	            maxR: 25, //圆圈默认最大半径
-	            minR: 5,
-	            r: null,
+	            maxRadius: 25, //圆圈默认最大半径
+	            minRadius: 5,
+	            radius: null,
 	            normalR: 15,
 	            fillStyle: null,
 	            fillAlpha: 0.8,
@@ -14442,11 +14429,11 @@
 	            lineType: "dashed"
 	        };
 
-	        _this.text = {
+	        _this.label = {
 	            enabled: true,
 	            field: null,
-	            format: function format(text) {
-	                return text;
+	            format: function format(txt, nodeData) {
+	                return txt;
 	            },
 	            fontSize: 12,
 	            fontColor: null, //"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
@@ -14545,19 +14532,20 @@
 	                        y: yValue
 	                    },
 	                    field: this.field,
-	                    color: fieldMap.color,
+	                    fieldColor: fieldMap.color,
 	                    iNode: i,
 
 	                    focused: false,
 	                    selected: false,
 
 	                    //下面的属性都单独设置
-	                    r: null, //这里先不设置，在下面的_setR里单独设置
+	                    radius: null, //这里先不设置，在下面的_setR里单独设置
 	                    fillStyle: null,
+	                    color: null,
 	                    strokeStyle: null,
 	                    lineWidth: 0,
 	                    shapeType: null,
-	                    text: null,
+	                    label: null,
 
 	                    _node: null //对应的canvax 节点， 在widget之后赋值
 	                };
@@ -14579,40 +14567,40 @@
 
 	            var r = this.node.normalR;
 	            var rowData = nodeLayoutData.rowData;
-	            if (this.node.r != null) {
-	                if (_$20.isString(this.node.r) && rowData[this.node.r]) {
+	            if (this.node.radius != null) {
+	                if (_$20.isString(this.node.radius) && rowData[this.node.radius]) {
 	                    //如果配置了某个字段作为r，那么就要自动计算比例
 	                    if (!this._rData && !this._rMaxValue && !this._rMinValue) {
-	                        this._rData = this.dataFrame.getFieldData(this.node.r);
+	                        this._rData = this.dataFrame.getFieldData(this.node.radius);
 	                        this._rMaxValue = _$20.max(this._rData);
 	                        this._rMinValue = _$20.min(this._rData);
 	                    }
-	                    var rVal = rowData[this.node.r];
+	                    var rVal = rowData[this.node.radius];
 
 	                    if (this._rMaxValue == this._rMinValue) {
-	                        r = this.node.minR + (this.node.maxR - this.node.minR) / 2;
+	                        r = this.node.minRadius + (this.node.maxRadius - this.node.minRadius) / 2;
 	                    } else {
-	                        r = this.node.minR + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxR - this.node.minR);
-	                    }                }                if (_$20.isFunction(this.node.r)) {
-	                    r = this.node.r(rowData);
-	                }                if (!isNaN(parseInt(this.node.r))) {
-	                    r = parseInt(this.node.r);
-	                }            }            nodeLayoutData.r = r;
+	                        r = this.node.minRadius + (rVal - this._rMinValue) / (this._rMaxValue - this._rMinValue) * (this.node.maxRadius - this.node.minRadius);
+	                    }                }                if (_$20.isFunction(this.node.radius)) {
+	                    r = this.node.radius(rowData);
+	                }                if (!isNaN(parseInt(this.node.radius))) {
+	                    r = parseInt(this.node.radius);
+	                }            }            nodeLayoutData.radius = r;
 	            return this;
 	        }
 	    }, {
 	        key: "_setText",
 	        value: function _setText(nodeLayoutData) {
-	            if (this.text.field != null) {
-	                if (_$20.isString(this.text.field) && nodeLayoutData.rowData[this.text.field]) {
-	                    nodeLayoutData.text = this.text.format(nodeLayoutData.rowData[this.text.field]);
+	            if (this.label.field != null) {
+	                if (_$20.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
+	                    nodeLayoutData.label = this.label.format(nodeLayoutData.rowData[this.label.field], nodeLayoutData);
 	                }
 	            }
 	        }
 	    }, {
 	        key: "_setFillStyle",
 	        value: function _setFillStyle(nodeLayoutData) {
-	            nodeLayoutData.fillStyle = this._getStyle(this.node.fillStyle, nodeLayoutData);
+	            nodeLayoutData.color = nodeLayoutData.fillStyle = this._getStyle(this.node.fillStyle, nodeLayoutData);
 	            return this;
 	        }
 	    }, {
@@ -14630,7 +14618,7 @@
 	            }            if (_$20.isFunction(style)) {
 	                _style = style(nodeLayoutData);
 	            }            if (!_style) {
-	                _style = nodeLayoutData.color;
+	                _style = nodeLayoutData.fillStyle;
 	            }            return _style;
 	        }
 	    }, {
@@ -14689,8 +14677,8 @@
 	                        title: null,
 	                        nodes: [this.nodeData]
 	                    };
-	                    if (this.nodeData.text) {
-	                        e.eventInfo.title = this.nodeData.text;
+	                    if (this.nodeData.label) {
+	                        e.eventInfo.title = this.nodeData.label;
 	                    }
 	                    //fire到root上面去的是为了让root去处理tips
 	                    me.root.fire(e.type, e);
@@ -14718,56 +14706,55 @@
 	                    _node._line = _line;
 	                }
 	                //如果有label
-	                if (nodeData.text && me.text.enabled) {
+	                if (nodeData.label && me.label.enabled) {
 
-	                    var text = nodeData.text;
-	                    var _text = new canvax.Display.Text(text, {
+	                    var _label = new canvax.Display.Text(nodeData.label, {
 	                        id: "scat_text_" + iNode,
 	                        context: me._getTextContext(nodeData)
 	                    });
 
-	                    me._textsp.addChild(_text);
+	                    me._textsp.addChild(_label);
 
 	                    //图形节点和text文本相互引用
-	                    _node._text = _text;
-	                    _text._node = _node;
+	                    _node._label = _label;
+	                    _label._node = _node;
 	                }
 	            });
 	        }
 	    }, {
 	        key: "_getTextPosition",
-	        value: function _getTextPosition(nodeData) {
+	        value: function _getTextPosition(opt) {
 	            var x = 0,
 	                y = 0;
-	            switch (this.text.position) {
+	            switch (this.label.position) {
 	                case "center":
-	                    x = nodeData.x;
-	                    y = nodeData.y;
+	                    x = opt.x;
+	                    y = opt.y;
 	                    break;
 	                case "top":
-	                    x = nodeData.x;
-	                    y = nodeData.y - nodeData.r;
+	                    x = opt.x;
+	                    y = opt.y - opt.r;
 	                    break;
 	                case "right":
-	                    x = nodeData.x + nodeData.r;
-	                    y = nodeData.y;
+	                    x = opt.x + opt.r;
+	                    y = opt.y;
 	                    break;
 	                case "bottom":
-	                    x = nodeData.x;
-	                    y = nodeData.y + nodeData.r;
+	                    x = opt.x;
+	                    y = opt.y + opt.r;
 	                    break;
 	                case "left":
-	                    x = nodeData.x - nodeData.r;
-	                    y = nodeData.y;
+	                    x = opt.x - opt.r;
+	                    y = opt.y;
 	                    break;
 	                case "auto":
-	                    x = nodeData.x;
-	                    y = nodeData.y;
+	                    x = opt.x;
+	                    y = opt.y;
 	                    break;
 	            }
 	            var point = {
-	                x: x + this.text.offsetX,
-	                y: y + this.text.offsetY
+	                x: x + this.label.offsetX,
+	                y: y + this.label.offsetY
 	            };
 
 	            return point;
@@ -14776,17 +14763,21 @@
 	        key: "_getTextContext",
 	        value: function _getTextContext(nodeData) {
 
-	            var textPoint = this._getTextPosition(nodeData);
+	            var textPoint = this._getTextPosition({
+	                x: nodeData.x,
+	                y: nodeData.y,
+	                r: nodeData.radius
+	            });
 
 	            var ctx = {
 	                x: textPoint.x,
 	                y: textPoint.y,
-	                fillStyle: this.text.fontColor || nodeData.fillStyle,
-	                fontSize: this.text.fontSize,
-	                strokeStyle: this.text.strokeStyle || nodeData.fillStyle,
-	                lineWidth: this.text.lineWidth,
-	                textAlign: this.text.align,
-	                textBaseline: this.text.verticalAlign
+	                fillStyle: this.label.fontColor || nodeData.fillStyle,
+	                fontSize: this.label.fontSize,
+	                strokeStyle: this.label.strokeStyle || nodeData.fillStyle,
+	                lineWidth: this.label.lineWidth,
+	                textAlign: this.label.align,
+	                textBaseline: this.label.verticalAlign
 	            };
 
 	            if (this.animation) {
@@ -14813,7 +14804,7 @@
 	            var ctx = {
 	                x: nodeData.x,
 	                y: nodeData.y,
-	                r: nodeData.r,
+	                r: nodeData.radius,
 	                fillStyle: nodeData.fillStyle,
 	                strokeStyle: nodeData.strokeStyle,
 	                lineWidth: nodeData.lineWidth,
@@ -14854,17 +14845,16 @@
 	                nodeData._node.animate({
 	                    x: nodeData.x,
 	                    y: nodeData.y,
-	                    r: nodeData.r
+	                    r: nodeData.radius
 	                }, {
 	                    onUpdate: function onUpdate(opts) {
-	                        if (this._text) {
+	                        if (this._label) {
 	                            var _textPoint = me._getTextPosition(opts);
-	                            this._text.context.x = _textPoint.x;
-	                            this._text.context.y = _textPoint.y;
+	                            this._label.context.x = _textPoint.x;
+	                            this._label.context.y = _textPoint.y;
 	                        }                        if (this._line) {
 	                            this._line.context.start.y = opts.y + opts.r;
-	                        }
-	                    },
+	                        }                    },
 	                    delay: Math.round(Math.random() * 300),
 	                    onComplete: function onComplete() {
 	                        i = i + 1;
@@ -15387,16 +15377,20 @@
 	                });
 
 	                //指示文字
+	                /*
 	                var textTxt = itemData.labelText;
 	                //如果用户format过，那么就用用户指定的格式
 	                //如果没有就默认拼接
-	                if (!this._graphs.label.format) {
-	                    if (textTxt) {
-	                        textTxt = textTxt + "：" + itemData.percentage + "%";
+	                if( !this._graphs.label.format ){
+	                    if( textTxt ){
+	                        textTxt = textTxt + "：" + itemData.percentage + "%" 
 	                    } else {
-	                        textTxt = itemData.percentage + "%";
+	                        textTxt = itemData.percentage + "%" 
 	                    }
-	                }
+	                };
+	                */
+
+	                var textTxt = itemData.labelText;
 	                var branchTxt = document.createElement("div");
 	                branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + "";
 	                branchTxt.innerHTML = textTxt;
@@ -15721,6 +15715,7 @@
 
 	            for (var i = 0, l = dataFrame.length; i < l; i++) {
 	                var rowData = dataFrame.getRowData(i);
+	                var color = me.getColorByIndex(me.node.fillStyle, i, l);
 	                var layoutData = {
 	                    rowData: rowData, //把这一行数据给到layoutData引用起来
 	                    focused: false, //是否获取焦点，外扩
@@ -15731,13 +15726,15 @@
 	                    selectedR: me.node.select.radius,
 	                    selectedAlpha: me.node.select.alpha,
 	                    enabled: true, //是否启用，显示在列表中
-	                    fillStyle: me.getColorByIndex(me.node.fillStyle, i, l),
+	                    fillStyle: color,
+	                    color: color, //加个color属性是为了给tips用
 
 	                    value: rowData[me.field],
 	                    label: rowData[me.label.field || me.field],
 	                    labelText: null, //绘制的时候再设置,label format后的数据
 	                    iNode: i
 	                };
+	                debugger;
 	                data.push(layoutData);
 	            }
 	            if (data.length && me.sort) {
@@ -15917,11 +15914,16 @@
 	        value: function _getLabelText(itemData) {
 	            var str;
 	            if (this.label.enabled) {
-	                if (this.label.field) {
-	                    str = itemData.rowData[this.label.field];
-	                }
-	                if (_$22.isFunction(this.label.format)) {
-	                    str = this.label.format(itemData);
+	                if (this.label.format) {
+	                    if (_$22.isFunction(this.label.format)) {
+	                        str = this.label.format(itemData.label, itemData);
+	                    }
+	                } else {
+	                    if (this.label.field) {
+	                        str = itemData.rowData[this.label.field] + "：" + itemData.percentage + "%";
+	                    } else {
+	                        str = itemData.percentage + "%";
+	                    }
 	                }
 	            }
 	            return str;
@@ -16017,7 +16019,7 @@
 	        _this.icon = {
 	            enabled: true,
 	            shapeType: "circle",
-	            r: 4,
+	            radius: 4,
 	            strokeStyle: "#ffffff",
 	            lineWidth: 1
 	        };
@@ -16117,7 +16119,7 @@
 	                                cursor: "pointer",
 	                                x: node.point.x,
 	                                y: node.point.y,
-	                                r: me.icon.r,
+	                                r: me.icon.radius,
 	                                lineWidth: me.icon.lineWidth,
 	                                strokeStyle: me.icon.strokeStyle,
 	                                fillStyle: _strokeStyle
@@ -16229,6 +16231,7 @@
 	                    arr.push({
 	                        field: field,
 	                        iNode: i,
+	                        rowData: me.dataFrame.getRowData(i),
 	                        focused: false,
 	                        value: dataOrg[i],
 	                        point: point,
@@ -16792,12 +16795,12 @@
 	        _this.field = null;
 
 	        var me = _this;
+
+	        //坚持一个数据节点的设置都在一个node下面
 	        _this.node = {
-	            shapeType: "text", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
 	            fontFamily: "Impact",
 	            fontColor: function fontColor(nodeData) {
-	                return me.root._theme[nodeData.iNode % (me.root._theme.length - 1)];
-	                //return me.root._theme[ nodeData.iNode % nodeData.dataLen ]
+	                return me.root._theme[nodeData.iNode % me.root._theme.length];
 	            },
 	            fontSize: function fontSize() {
 	                //fontSize默认12-50的随机值
@@ -16805,12 +16808,12 @@
 	            },
 	            maxFontSize: 38,
 	            _maxFontSizeVal: 0, //fontSizer如果配置为一个field的话， 找出这个field数据的最大值
-	            minFontSize: 12,
+	            minFontSize: 18,
 	            _minFontSizeVal: null, //fontSizer如果配置为一个field的话， 找出这个field数据的最小值
 
 	            fontWeight: "normal",
 
-	            format: function format(str) {
+	            format: function format(str, tag) {
 	                return str;
 	            },
 
@@ -16897,8 +16900,8 @@
 	            return rotate;
 	        }
 	    }, {
-	        key: "_getFillStyle",
-	        value: function _getFillStyle(nodeData) {
+	        key: "_getFontColor",
+	        value: function _getFontColor(nodeData) {
 	            var color;
 	            if (_$24.isString(this.node.fontColor)) {
 	                color = this.node.fontColor;
@@ -16928,14 +16931,20 @@
 
 	            var layout = cloud().size([me.width, me.height]).words(me.dataFrame.getFieldData(me.field).map(function (d, ind) {
 	                var rowData = me.root.dataFrame.getRowData(me.getDaraFrameIndOfVal(d)); //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
-	                return {
+	                var tag = {
 	                    rowData: rowData,
 	                    field: me.field,
 	                    value: d,
-	                    text: me.node.format(d) || d,
+	                    text: null,
 	                    size: me._getFontSize(rowData, d),
-	                    iNode: ind
+	                    iNode: ind,
+	                    color: null //在绘制的时候统一设置
 	                };
+
+	                tag.fontColor = me._getFontColor(tag);
+	                tag.text = me.node.format(d, tag) || d;
+
+	                return tag;
 	            })).padding(me.node.padding).rotate(function (item, ind) {
 	                //return 0;
 	                return me._getRotate(item, ind);
@@ -16969,7 +16978,7 @@
 	                            textAlign: "center",
 	                            cursor: 'pointer',
 	                            fontWeight: me.node.fontWeight,
-	                            fillStyle: me._getFillStyle(tag)
+	                            fillStyle: tag.fontColor
 	                        }
 	                    });
 	                    me.sprite.addChild(tagTxt);
@@ -17081,8 +17090,7 @@
 	            lineWidth: 2,
 	            strokeStyle: "#fff",
 	            fillStyle: '#f2fbfb',
-	            text: '',
-	            r: 15, //也可以是个function,也可以配置{field:'pv'}来设置字段， 自动计算r
+	            radius: 15, //也可以是个function,也可以配置{field:'pv'}来设置字段， 自动计算r
 
 	            focus: {
 	                enabled: true
@@ -17094,7 +17102,8 @@
 	            }
 	        };
 
-	        this.text = {
+	        this.label = {
+	            enabled: true,
 	            fontColor: "#666",
 	            fontSize: 13,
 	            position: null
@@ -17107,7 +17116,7 @@
 
 	        //坑位，用来做占位
 	        this.pit = {
-	            r: 30
+	            radius: 30
 	        };
 
 	        this.planets = [];
@@ -17117,9 +17126,9 @@
 
 	        _$25.extend(true, this, opts);
 
-	        //circle.maxR 绝对不能大于最大 占位 pit.r
-	        if (this.node.maxR > this.pit.r) {
-	            this.pit.r = this.node.maxR;
+	        //circle.maxR 绝对不能大于最大 占位 pit.radius
+	        if (this.node.maxR > this.pit.radius) {
+	            this.pit.radius = this.node.maxR;
 	        }
 	        this.init();
 	    }
@@ -17144,21 +17153,21 @@
 	        value: function _trimGraphs() {
 	            var me = this;
 
-	            if ((this._coord.maxR - this.rRange.to) / (this.pit.r * 2) < this.groupLen - 1 - this.iGroup) {
+	            if ((this._coord.maxR - this.rRange.to) / (this.pit.radius * 2) < this.groupLen - 1 - this.iGroup) {
 	                //要保证后面的group至少能有意个ringNum
-	                this.rRange.to = this._coord.maxR - (this.groupLen - 1 - this.iGroup) * this.pit.r * 2;
-	            }            if (this.rRange.to - this.rRange.start < this.pit.r * 2) {
-	                this.rRange.to = this.rRange.start + this.pit.r * 2;
+	                this.rRange.to = this._coord.maxR - (this.groupLen - 1 - this.iGroup) * this.pit.radius * 2;
+	            }            if (this.rRange.to - this.rRange.start < this.pit.radius * 2) {
+	                this.rRange.to = this.rRange.start + this.pit.radius * 2;
 	            }
 	            //计算该group中可以最多分布多少ring
 	            if (!this.maxRingNum) {
-	                this.maxRingNum = parseInt((this.rRange.to - this.rRange.start) / (this.pit.r * 2), 10);
+	                this.maxRingNum = parseInt((this.rRange.to - this.rRange.start) / (this.pit.radius * 2), 10);
 
 	                //如果可以划10个环，但是其实数据只有8条， 那么就 当然是只需要划分8ring
 	                this.ringNum = Math.min(this.maxRingNum, this.dataFrame.length);
 	            }
 	            //重新计算修改 rRange.to的值
-	            this.rRange.to = this.rRange.start + this.ringNum * this.pit.r * 2;
+	            this.rRange.to = this.rRange.start + this.ringNum * this.pit.radius * 2;
 
 	            //根据数据创建n个星球
 	            var planets = [];
@@ -17172,13 +17181,20 @@
 	                    iNode: i,
 	                    node: null, //canvax元素
 	                    rowData: rowData,
+
+	                    //下面这些都只能在绘制的时候确定然后赋值
+	                    iRing: null,
+	                    iPlanet: null,
 	                    fillStyle: null,
+	                    color: null, //给tips用
+	                    strokeStyle: null,
+
 	                    pit: null, //假设这个planet是个萝卜，那么 pit 就是这个萝卜的坑
 
 	                    ringInd: -1,
 
 	                    field: me.field,
-	                    text: rowData[me.field],
+	                    label: rowData[me.field],
 
 	                    focused: false,
 	                    selected: false
@@ -17214,10 +17230,10 @@
 	            var _rings = [];
 
 	            for (var i = 0, l = this.ringNum; i < l; i++) {
-	                var _r = i * this.pit.r * 2 + this.pit.r + this.rRange.start;
+	                var _r = i * this.pit.radius * 2 + this.pit.radius + this.rRange.start;
 
 	                if (!me._graphs.center.enabled) {
-	                    _r = i * this.pit.r * 2 + this.rRange.start;
+	                    _r = i * this.pit.radius * 2 + this.rRange.start;
 	                }
 	                //该半径上面的弧度集合
 	                var arcs = this._coord.getRadiansAtR(_r, me.width, me.height);
@@ -17241,13 +17257,13 @@
 	                //测试代码end------------------------------------------------------
 
 	                //该半径圆弧上，可以绘制一个星球的最小弧度值
-	                var minRadianItem = Math.atan(this.pit.r / _r);
+	                var minRadianItem = Math.atan(this.pit.radius / _r);
 
 	                _rings.push({
 	                    arcs: arcs,
 	                    pits: [], //萝卜坑
 	                    planets: [], //将要入坑的萝卜
-	                    r: _r, //这个ring所在的半径轨道
+	                    radius: _r, //这个ring所在的半径轨道
 	                    max: 0 //这个环上面最多能布局下的 planet 数量
 	                });
 	            }
@@ -17259,8 +17275,8 @@
 	            _$25.each(_rings, function (ring, i) {
 	                //先计算上这个轨道上排排站一共可以放的下多少个星球
 	                //一个星球需要多少弧度
-	                var minRadian = Math.asin(me.pit.r / ring.r) * 2;
-	                if (ring.r == 0) {
+	                var minRadian = Math.asin(me.pit.radius / ring.radius) * 2;
+	                if (ring.radius == 0) {
 	                    //说明就在圆心
 	                    minRadian = Math.PI * 2;
 	                }
@@ -17284,12 +17300,12 @@
 
 	                            //测试占位情况代码begin---------------------------------------------
 	                            /*
-	                            var point = me._coord.getPointInRadianOfR( pit.middle , ring.r )
+	                            var point = me._coord.getPointInRadianOfR( pit.middle , ring.radius )
 	                            me.sprite.addChild(new Circle({
 	                                context:{
 	                                    x : point.x,
 	                                    y : point.y,
-	                                    r : me.pit.r,
+	                                    r : me.pit.radius,
 	                                    fillStyle: "#ccc",
 	                                    strokeStyle: "red",
 	                                    lineWidth: 1,
@@ -17382,9 +17398,9 @@
 	                        //如果这个萝卜没有足够的坑位可以放，很遗憾，只能扔掉了
 	                        return;
 	                    }
-	                    var point = me._coord.getPointInRadianOfR(p.pit.middle, ring.r);
+	                    var point = me._coord.getPointInRadianOfR(p.pit.middle, ring.radius);
 
-	                    var r = me._getRProp(me.node.r, i, ii, p);
+	                    var r = me._getRProp(me.node.radius, i, ii, p);
 
 	                    //计算该萝卜在坑位（pit）中围绕pit的圆心可以随机移动的范围（r）
 	                    var _transR = me.node.maxR - r;
@@ -17397,15 +17413,24 @@
 	                        point.x += Math.sin(_randomRadian) * _randomTransR;
 	                        point.y += Math.cos(_randomRadian) * _randomTransR;
 	                    }
+	                    var _fillStyle = me._getProp(me.node.fillStyle, i, ii, p);
+	                    var _strokeStyle = me._getProp(me.node.strokeStyle, i, ii, p);
+
 	                    var circleCtx = {
 	                        x: point.x,
 	                        y: point.y,
 	                        r: r,
-	                        fillStyle: me._getProp(me.node.fillStyle, i, ii, p),
+	                        fillStyle: _fillStyle,
 	                        lineWidth: me._getProp(me.node.lineWidth, i, ii, p),
-	                        strokeStyle: me._getProp(me.node.strokeStyle, i, ii, p),
+	                        strokeStyle: _strokeStyle,
 	                        cursor: "pointer"
 	                    };
+
+	                    //设置好p上面的fillStyle 和 strokeStyle
+	                    p.color = p.fillStyle = _fillStyle;
+	                    p.strokeStyle = _strokeStyle;
+	                    p.iRing = i;
+	                    p.iPlanet = ii;
 
 	                    var _node = new Circle$6({
 	                        hoverClone: false,
@@ -17418,8 +17443,8 @@
 	                            title: null,
 	                            nodes: [this.nodeData]
 	                        };
-	                        if (this.nodeData.text) {
-	                            e.eventInfo.title = this.nodeData.text;
+	                        if (this.nodeData.label) {
+	                            e.eventInfo.title = this.nodeData.label;
 	                        }
 	                        //fire到root上面去的是为了让root去处理tips
 	                        me.root.fire(e.type, e);
@@ -17440,26 +17465,26 @@
 	                    var _labelCtx = {
 	                        x: point.x,
 	                        y: point.y, //point.y + r +3
-	                        fontSize: me.text.fontSize,
+	                        fontSize: me.label.fontSize,
 	                        textAlign: "center",
 	                        textBaseline: "middle",
-	                        fillStyle: me.text.fontColor,
+	                        fillStyle: me.label.fontColor,
 	                        rotation: -_ringCtx.rotation,
 	                        rotateOrigin: {
 	                            x: 0,
 	                            y: 0 //-(r + 3)
 	                        }
 	                    };
-	                    var _text = new canvax.Display.Text(p.text, {
+	                    var _text = new canvax.Display.Text(p.label, {
 	                        context: _labelCtx
 	                    });
 
 	                    var _labelWidth = _text.getTextWidth();
 	                    var _labelHeight = _text.getTextHeight();
 
-	                    if (me.text.position) {
-	                        if (_$25.isFunction(me.text.position)) {
-	                            var _pos = me.text.position({
+	                    if (me.label.position) {
+	                        if (_$25.isFunction(me.label.position)) {
+	                            var _pos = me.label.position({
 	                                node: _node,
 	                                circleR: r,
 	                                circleCenter: {
@@ -17479,7 +17504,7 @@
 	                            _labelCtx.y = _pos.y;
 
 	                            if (_labelWidth > r * 2) {
-	                                _labelCtx.fontSize = me.text.fontSize - 3;
+	                                _labelCtx.fontSize = me.label.fontSize - 3;
 	                            }
 	                        }
 	                    } else {
@@ -17496,7 +17521,7 @@
 
 	                    //TODO:这里其实应该是直接可以修改 _text.context. 属性的
 	                    //但是这里版本的canvax有问题。先重新创建文本对象吧
-	                    _text = new canvax.Display.Text(p.text, {
+	                    _text = new canvax.Display.Text(p.label, {
 	                        context: _labelCtx
 	                    });
 
@@ -17565,8 +17590,9 @@
 	        //圆心原点坐标
 	        _this.center = {
 	            enabled: true,
-	            text: "center",
-	            r: 30,
+	            shapeType: "text", //后续可以添加path啊，img啊之类的
+	            content: "center",
+	            radius: 30,
 	            fillStyle: "#70629e",
 	            fontSize: 15,
 	            fontColor: "#ffffff",
@@ -17596,8 +17622,8 @@
 
 	        _$26.extend(true, _this, opts);
 
-	        if (_this.center.r == 0 || !_this.center.enabled) {
-	            _this.center.r = 0;
+	        if (_this.center.radius == 0 || !_this.center.enabled) {
+	            _this.center.radius = 0;
 	            _this.center.margin = 0;
 	            _this.center.enabled = false;
 	        }
@@ -17703,9 +17729,9 @@
 	        value: function drawGroups() {
 	            var me = this;
 
-	            var groupRStart = this.center.r + this.center.margin;
+	            var groupRStart = this.center.radius + this.center.margin;
 
-	            var maxR = me.root._coord.maxR - me.center.r - me.center.margin;
+	            var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
 	            var _circleMaxR = this._getMaxR();
 
 	            _$26.each(this.groupDataFrames, function (df, i) {
@@ -17727,7 +17753,7 @@
 	                me._groups.push(_g);
 
 	                me.grid.rings.section.push({
-	                    r: _g.rRange.to
+	                    radius: _g.rRange.to
 	                });
 	            });
 
@@ -17747,11 +17773,11 @@
 	                        x: this.origin.x,
 	                        y: this.origin.y,
 	                        fillStyle: this.center.fillStyle,
-	                        r: this.center.r
+	                        r: this.center.radius
 	                    }
 	                });
 	                //绘制实心圆上面的文案
-	                this._centerTxt = new Text$3(this.center.text, {
+	                this._centerTxt = new Text$3(this.center.content, {
 	                    context: {
 	                        x: this.origin.x,
 	                        y: this.origin.y,
@@ -17773,11 +17799,11 @@
 	            if (me.grid.rings.section.length == 1) {
 
 	                //如果只有一个，那么就强制添加到3个
-	                var _diffR = (me.grid.rings.section[0].r - me.center.r) / me.grid.rings.count;
+	                var _diffR = (me.grid.rings.section[0].radius - me.center.radius) / me.grid.rings.count;
 	                me.grid.rings.section = [];
 	                for (var i = 0; i < me.grid.rings.count; i++) {
 	                    me.grid.rings.section.push({
-	                        r: me.center.r + _diffR * (i + 1)
+	                        radius: me.center.radius + _diffR * (i + 1)
 	                    });
 	                }
 	            } else {
@@ -17789,7 +17815,7 @@
 	                    context: {
 	                        x: me.root._coord.origin.x,
 	                        y: me.root._coord.origin.y,
-	                        r: _scale.r,
+	                        r: _scale.radius,
 	                        lineWidth: me._getBackProp(me.grid.rings.lineWidth, i),
 	                        strokeStyle: me._getBackProp(me.grid.rings.strokeStyle, i),
 	                        fillStyle: me._getBackProp(me.grid.rings.fillStyle, i)
@@ -17804,7 +17830,7 @@
 	                var _r = me.root._coord.maxR; //Math.max( me.w, me.h );
 
 	                if (me.grid.rings.section.length) {
-	                    _r = me.grid.rings.section.slice(-1)[0].r;
+	                    _r = me.grid.rings.section.slice(-1)[0].radius;
 	                }
 
 	                for (var i = 0, l = me.grid.rays.count; i < l; i++) {
@@ -17933,7 +17959,7 @@
 	            }
 	        };
 
-	        _this.text = {
+	        _this.label = {
 	            enabled: true,
 	            align: "center", // left , center, right
 	            format: function format(num) {
@@ -18022,7 +18048,7 @@
 	                    cursor: "pointer",
 
 	                    //下面得都在layoutData的循环中计算
-	                    text: '',
+	                    label: '',
 	                    middlePoint: null,
 	                    iNode: -1,
 	                    points: []
@@ -18041,7 +18067,7 @@
 	            }
 	            _$27.each(layoutData, function (ld, i) {
 	                ld.iNode = i;
-	                ld.text = me.text.format(ld.value, ld);
+	                ld.label = me.label.format(ld.value, ld);
 	            });
 	            _$27.each(layoutData, function (ld, i) {
 	                ld.points = me._getPoints(ld, layoutData[i + 1], layoutData[i - 1]);
@@ -18119,23 +18145,23 @@
 	                    x: ld.middlePoint.x,
 	                    y: ld.middlePoint.y
 	                };
-	                if (me.text.align == "left") {
+	                if (me.label.align == "left") {
 	                    textPoint.x = ld.points[0][0] - (ld.points[0][0] - ld.points[3][0]) / 2;
 	                    textPoint.x -= 15;
 	                    textAlign = "right";
-	                }                if (me.text.align == "right") {
+	                }                if (me.label.align == "right") {
 	                    textPoint.x = ld.points[1][0] - (ld.points[1][0] - ld.points[2][0]) / 2;
 	                    textPoint.x += 15;
 	                    textAlign = "left";
 	                }
-	                var _text = new Text$4(ld.text, {
+	                var _text = new Text$4(ld.label, {
 	                    context: {
 	                        x: textPoint.x,
 	                        y: textPoint.y,
-	                        fontSize: me.text.fontSize,
-	                        fillStyle: me.text.align == "center" ? me.text.fontColor : ld.color,
+	                        fontSize: me.label.fontSize,
+	                        fillStyle: me.label.align == "center" ? me.label.fontColor : ld.color,
 	                        textAlign: textAlign,
-	                        textBaseline: me.text.textBaseline
+	                        textBaseline: me.label.textBaseline
 	                    }
 	                });
 
@@ -18205,20 +18231,20 @@
 	            height: 30,
 	            width: "auto",
 	            shapeType: "circle",
-	            r: 5,
+	            radius: 5,
 	            lineWidth: 1,
 	            fillStyle: "#999",
 	            onChecked: function onChecked() {},
 	            onUnChecked: function onUnChecked() {}
 	        };
 
-	        _this.text = {
+	        _this.label = {
 	            textAlign: "left",
 	            textBaseline: "middle",
 	            fillStyle: "#333", //obj.color
 	            cursor: "pointer",
-	            format: function format(info) {
-	                return info.name;
+	            format: function format(name, info) {
+	                return name;
 	            }
 
 	            //this.onChecked=function(){};
@@ -18256,7 +18282,7 @@
 	    }, {
 	        key: "pos",
 	        value: function pos(_pos) {
-	            _pos.x && (this.sprite.context.x = _pos.x + this.icon.r);
+	            _pos.x && (this.sprite.context.x = _pos.x + this.icon.radius);
 	            _pos.y && (this.sprite.context.y = _pos.y);
 	        }
 	    }, {
@@ -18288,7 +18314,7 @@
 	                        x: 0,
 	                        y: me.icon.height / 3,
 	                        fillStyle: !obj.enabled ? "#ccc" : obj.color || me._labelColor,
-	                        r: me.icon.r,
+	                        r: me.icon.radius,
 	                        cursor: "pointer"
 	                    }
 	                });
@@ -18305,15 +18331,15 @@
 
 	                _icon.on("click", function () {});
 
-	                var txt = new canvax.Display.Text(me.text.format(obj), {
+	                var txt = new canvax.Display.Text(me.label.format(obj.name, obj), {
 	                    id: "legend_field_txt_" + i,
 	                    context: {
-	                        x: me.icon.r + 3,
+	                        x: me.icon.radius + 3,
 	                        y: me.icon.height / 3,
-	                        textAlign: me.text.textAlign, //"left",
-	                        textBaseline: me.text.textBaseline, //"middle",
-	                        fillStyle: me.text.fillStyle, //"#333", //obj.color
-	                        cursor: me.text.cursor //"pointer"
+	                        textAlign: me.label.textAlign, //"left",
+	                        textBaseline: me.label.textBaseline, //"middle",
+	                        fillStyle: me.label.fillStyle, //"#333", //obj.color
+	                        cursor: me.label.cursor //"pointer"
 	                    }
 	                });
 
@@ -18328,7 +18354,7 @@
 	                txt.on("click", function () {});
 
 	                var txtW = txt.getTextWidth();
-	                var itemW = txtW + me.icon.r * 2 + 20;
+	                var itemW = txtW + me.icon.radius * 2 + 20;
 
 	                maxItemWidth = Math.max(maxItemWidth, itemW);
 
@@ -18936,7 +18962,8 @@
 	        };
 
 	        _this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
-	        _this.yVal = 0; //y 的值，可能是个function
+	        _this.yVal = 0; //y 的值，可能是个function，均值计算就是个function
+
 	        _this.line = {
 	            y: 0,
 	            list: [],
@@ -18946,14 +18973,15 @@
 	            lineType: 'dashed'
 	        };
 
-	        _this.text = {
+	        _this.label = {
 	            enabled: false,
 	            fillStyle: '#999999',
 	            fontSize: 12,
-	            value: null,
+	            text: null, //"markline",
 	            lineType: 'dashed',
 	            lineWidth: 1,
-	            strokeStyle: "white"
+	            strokeStyle: "white",
+	            format: null
 	        };
 
 	        _this._txt = null;
@@ -18998,15 +19026,16 @@
 	    }, {
 	        key: "_getLabel",
 	        value: function _getLabel() {
-	            if (_$30.isString(this.text.value)) {
-	                return this.text.value;
-	            }
+	            var str;
 	            var yVal = this._getYVal();
-	            var label = "markline：" + yVal;
-	            if (_$30.isFunction(this.text.value)) {
-	                label = this.text.value.apply(this, [yVal]);
-	            }
-	            return label;
+	            if (_$30.isFunction(this.label.format)) {
+	                str = this.label.format(yVal, this);
+	            } else {
+	                if (_$30.isString(this.label.text)) {
+	                    str = this.label.text;
+	                } else {
+	                    str = yVal;
+	                }            }            return str;
 	        }
 	    }, {
 	        key: "draw",
@@ -19028,9 +19057,9 @@
 	            me.core.addChild(line);
 	            me._line = line;
 
-	            if (me.text.enabled) {
+	            if (me.label.enabled) {
 	                var txt = new Text$5(me._getLabel(), { //文字
-	                    context: me.text
+	                    context: me.label
 	                });
 	                this._txt = txt;
 	                me.core.addChild(txt);
@@ -19054,7 +19083,7 @@
 	                }, {
 	                    duration: 300,
 	                    onUpdate: function onUpdate(obj) {
-	                        if (me.text.enabled) {
+	                        if (me.label.enabled) {
 	                            me._txt.resetText(me._getLabel());
 	                            me._setTxtPos(obj.y);
 	                            //me._txt.context.y = obj.y - me._txt.getTextHeight();
@@ -19071,13 +19100,13 @@
 	        value: function _setTxtPos(y) {
 	            var me = this;
 	            var txt = me._txt;
-	            if (_$30.isNumber(me.text.x)) {
-	                txt.context.x = me.text.x;
+	            if (_$30.isNumber(me.label.x)) {
+	                txt.context.x = me.label.x;
 	            } else {
 	                txt.context.x = this.w - txt.getTextWidth() - 5;
 	            }
-	            if (_$30.isNumber(me.text.y)) {
-	                txt.context.y = me.text.y;
+	            if (_$30.isNumber(me.label.y)) {
+	                txt.context.y = me.label.y;
 	            } else {
 	                txt.context.y = y - txt.getTextHeight();
 	            }
@@ -19118,7 +19147,7 @@
 	        _this.vr = 12;
 
 	        //circle opts
-	        _this.r = 5;
+	        _this.radius = 5;
 
 	        _this.sprite = null;
 	        _this.shape = null;
@@ -19203,7 +19232,7 @@
 	        value: function _initCircleMark() {
 	            var me = this;
 	            var ctx = {
-	                r: me.r,
+	                r: me.radius,
 	                fillStyle: me._fillStyle,
 	                lineWidth: me.lineWidth,
 	                strokeStyle: me._strokeStyle,
@@ -19272,6 +19301,8 @@
 	    }]);
 	    return MarkPoint;
 	}(component);
+
+	//目前没有用到过这个组件
 
 	var Line$9 = canvax.Shapes.Line;
 	var Circle$10 = canvax.Shapes.Circle;
@@ -19516,15 +19547,13 @@
 	        _this.dW = 0; //html的tips内容width
 	        _this.dH = 0; //html的tips内容Height
 
-	        _this.backR = "5px"; //背景框的 圆角 
+	        _this.borderRadius = "5px"; //背景框的 圆角 
 
 	        _this.sprite = null;
 	        _this.content = null; //tips的详细内容
 
 	        _this.fillStyle = "rgba(255,255,255,0.95)"; //"#000000";
-	        _this.text = {
-	            fillStyle: "#999"
-	        };
+	        _this.fontColor = "#999";
 	        _this.strokeStyle = "#ccc";
 
 	        _this.place = "right"; //在鼠标的左（右）边
@@ -19541,7 +19570,7 @@
 	        _this.positionInRange = false; //tip的浮层是否限定在画布区域
 	        _this.enabled = true; //tips是默认显示的
 
-	        _this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'
+	        _this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
 	        _this.pointerAnimate = true;
 
 	        _this.init(opt);
@@ -19620,7 +19649,7 @@
 	        value: function _creatTipDom(e) {
 	            this._tipDom = document.createElement("div");
 	            this._tipDom.className = "chart-tips";
-	            this._tipDom.style.cssText += "；-moz-border-radius:" + this.backR + "; -webkit-border-radius:" + this.backR + "; border-radius:" + this.backR + ";background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.text.fillStyle + ";line-height:1.5";
+	            this._tipDom.style.cssText += "；-moz-border-radius:" + this.borderRadius + "; -webkit-border-radius:" + this.borderRadius + "; border-radius:" + this.borderRadius + ";background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
 	            this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px " + this.strokeStyle + "; -webkit-box-shadow:1px 1px 3px " + this.strokeStyle + "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
 	            this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
 	            this.tipDomContainer.appendChild(this._tipDom);
@@ -19675,10 +19704,10 @@
 	            _$33.each(info.nodes, function (node, i) {
 	                if (node.value === undefined || node.value === null) {
 	                    return;
-	                }
+	                }                debugger;
 	                str += "<tr style='color:" + (node.color || node.fillStyle || node.strokeStyle) + "'>";
 	                var tsStyle = "style='border:none;white-space:nowrap;word-wrap:normal;'";
-	                str += "<td " + tsStyle + ">" + (node.name || node.field || "") + "：</td>";
+	                str += "<td " + tsStyle + ">" + (node.label || node.field || "") + "：</td>";
 	                str += "<td " + tsStyle + ">" + (_typeof$1(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) + "</td></tr>";
 	            });
 	            str += "</table>";
@@ -19904,10 +19933,10 @@
 
 	        this.text = "chartx";
 	        this.fontSize = 20;
+	        this.fontColor = "#ccc";
 	        this.strokeStyle = "#ccc";
 	        this.lineWidth = 0;
-	        this.fontColor = "#ccc";
-	        this.globalAlpha = 0.2;
+	        this.alpha = 0.2;
 	        this.rotation = 45;
 
 	        _$35.extend(true, this, opts);
@@ -19952,7 +19981,7 @@
 	                            strokeStyle: this.strokeStyle,
 	                            lineWidth: this.lineWidth,
 	                            fillStyle: this.fontColor,
-	                            globalAlpha: this.globalAlpha
+	                            globalAlpha: this.alpha
 	                        }
 	                    });
 	                    _textEl.context.x = textW * 1.5 * c + textW * .25;
@@ -20012,7 +20041,7 @@
 	            fillStyle: "#999"
 	        };
 
-	        _this.text = {
+	        _this.label = {
 	            enabled: false,
 	            fillStyle: '#999999',
 	            fontSize: 12,

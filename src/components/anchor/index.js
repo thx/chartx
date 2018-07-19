@@ -1,3 +1,5 @@
+//目前没有用到过这个组件
+
 import Component from "../component"
 import Canvax from "canvax"
 
