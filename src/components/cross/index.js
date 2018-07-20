@@ -8,11 +8,47 @@ const _ = Canvax._;
 
 export default class MarkLine extends Component
 {
-    constructor(opt , _yAxis)
+    //rect cross begin
+    static register(app)
     {
-        super(opt , _yAxis);
+        //原则上一个直角坐标系中最佳只设置一个cross
+        var me = this;
+        if( !_.isArray( app.cross ) ){
+            app.cross = [ app.cross ];
+        };
+        _.each( app.cross, function( cross , i){
+            app.components.push( {
+                type : "once",
+                plug : {
+                    draw: function(){
 
-        this._yAxis = _yAxis;
+                        var opts = _.extend( true, {
+                            origin: {
+                                x: app._coord.origin.x,
+                                y: app._coord.origin.y
+                            },
+                            width : app._coord.width,
+                            height : app._coord.height
+                        } , cross );
+
+                        var _cross = new me( opts, app );
+                        app.components.push( {
+                            type : "cross"+i,
+                            plug : _cross
+                        } );
+                        app.graphsSprite.addChild( _cross.sprite );
+
+                    }
+                }
+            } );
+        });
+    }
+
+    constructor(opt , root)
+    {
+        super(opt);
+
+        this.root = root;
 
         this.width  = opt.width || 0;
         this.height = opt.height || 0;

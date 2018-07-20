@@ -7,7 +7,7 @@ import Grid from "./grid"
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 
-export default class Descartes_Component extends coorBase
+export default class Rect_Component extends coorBase
 {
     constructor( opts, root )
     {

@@ -7701,7 +7701,10 @@ define(function () { 'use strict';
 	    }
 	    //设置好数据区间end值
 	    dataFrame.range.end = dataFrame.length - 1;
-
+	    //然后检查opts中是否有dataZoom.range
+	    if (this._opts.dataZoom && this._opts.dataZoom.range) {
+	        _$3.extend(dataFrame.range, this._opts.dataZoom.range);
+	    }
 	    dataFrame.org = data;
 	    dataFrame.fields = data[0] ? data[0] : []; //所有的字段集合;
 
@@ -7934,7 +7937,7 @@ define(function () { 'use strict';
 	        value: function draw() {
 	            /*
 	            this.initModule(); //初始化模块
-	            this.initComponents(); //初始化组件
+	            this.registerComponents(); //初始化组件
 	            this.startDraw(); //开始绘图
 	            this.drawComponents();  //绘图完，开始绘制插件
 	            this.inited = true;
@@ -8065,10 +8068,8 @@ define(function () { 'use strict';
 	        value: function resetData(data, dataTrigger) {
 	            if (data) {
 	                this._data = parse2MatrixData(data);
-	            }
-	            this.dataFrame = this.initData(this._data);
-
-	            this._resetData && this._resetData(dataTrigger);
+	                this.dataFrame = this.initData(this._data);
+	            }            this._resetData && this._resetData(dataTrigger);
 	            this.fire("resetData");
 	        }
 	    }, {
@@ -8080,15 +8081,15 @@ define(function () { 'use strict';
 	        //插件管理相关代码begin
 
 	    }, {
-	        key: "initComponents",
-	        value: function initComponents() {
-	            //TODO: theme 组件优先级最高，在initComponents之前已经加载过
+	        key: "registerComponents",
+	        value: function registerComponents() {
+	            //TODO: theme 组件优先级最高，在registerComponents之前已经加载过
 	            var notComponents = ["coord", "graphs", "theme"];
 	            for (var _p in this._opts) {
-	                var p = _p.toLocaleLowerCase();
-	                if (_$4.indexOf(notComponents, p) == -1) {
-	                    if (this["_init_components_" + p]) {
-	                        this["_init_components_" + p](this._opts[_p]);
+	                if (_$4.indexOf(notComponents, _p) == -1) {
+	                    var compConstructor = this.componentsMap[_p];
+	                    if (compConstructor.register) {
+	                        compConstructor.register(this);
 	                    }                }
 	            }
 	        }
@@ -8174,14 +8175,14 @@ define(function () { 'use strict';
 	        _this.graphsMap = graphsMap;
 	        _this.componentsMap = componentsMap;
 
+	        //这里不要直接用data，而要用 this._data
+	        _this.dataFrame = _this.initData(_this._data);
+
 	        _this._graphs = [];
 	        if (opts.graphs) {
 	            opts.graphs = _$5.flatten([opts.graphs]);
 	        }
 	        _$5.extend(true, _this, _this.setDefaultOpts(opts));
-
-	        //这里不要直接用data，而要用 this._data
-	        _this.dataFrame = _this.initData(_this._data);
 
 	        //this.draw();
 	        _this._tipsPointer = null;
@@ -8210,7 +8211,7 @@ define(function () { 'use strict';
 	                var _theme = new this.componentsMap.theme(this._opts.theme, this);
 	                this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用下面的merge
 	            }            this.initModule(opts); //初始化模块  
-	            this.initComponents(opts); //初始化组件, 来自己chart.js模块
+	            this.registerComponents(opts); //初始化组件, 来自己chart.js模块
 
 	            if (this._coord && this._coord.horizontal) {
 	                this.drawBeginHorizontal && this.drawBeginHorizontal();
@@ -8298,113 +8299,6 @@ define(function () { 'use strict';
 	            });
 
 	            this.componentsReset(dataTrigger);
-	        }
-
-	        //tips组件
-
-	    }, {
-	        key: "_init_components_tips",
-	        value: function _init_components_tips() {
-	            //所有的tips放在一个单独的tips中
-	            this.stageTips = new canvax.Display.Stage({
-	                id: "main-chart-stage-tips"
-	            });
-	            this.canvax.addChild(this.stageTips);
-
-	            var _tips = new this.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coord);
-	            this.stageTips.addChild(_tips.sprite);
-	            this.components.push({
-	                type: "tips",
-	                id: "tips",
-	                plug: _tips
-	            });
-	        }
-
-	        //添加水印
-
-	    }, {
-	        key: "_init_components_watermark",
-	        value: function _init_components_watermark(waterMarkOpt) {
-	            var _water = new this.componentsMap.waterMark(waterMarkOpt, this);
-	            this.stage.addChild(_water.spripte);
-	        }
-
-	        //设置图例 begin
-
-	    }, {
-	        key: "_init_components_legend",
-	        value: function _init_components_legend(e) {
-	            !e && (e = {});
-	            var me = this;
-	            //设置legendOpt
-	            var legendOpt = _$5.extend(true, {
-	                icon: {
-	                    onChecked: function onChecked(obj) {
-	                        me.show(obj.name, obj);
-	                        me.componentsReset({ name: "legend" });
-	                    },
-	                    onUnChecked: function onUnChecked(obj) {
-	                        me.hide(obj.name, obj);
-	                        me.componentsReset({ name: "legend" });
-	                    }
-	                }
-	            }, me._opts.legend);
-
-	            var legendData = me._opts.legend.data;
-	            if (legendData) {
-	                _$5.each(legendData, function (item, i) {
-	                    item.enabled = true;
-	                    item.ind = i;
-	                });
-	                delete me._opts.legend.data;
-	            } else {
-	                legendData = me._getLegendData();
-	            }
-
-	            var _legend = new me.componentsMap.legend(legendData, legendOpt, this);
-
-	            if (_legend.layoutType == "h") {
-	                me.padding[_legend.position] += _legend.height;
-	            } else {
-	                me.padding[_legend.position] += _legend.width;
-	            }
-	            if (me._coord && me._coord.type == "descartes") {
-	                if (_legend.position == "top" || _legend.position == "bottom") {
-	                    this.components.push({
-	                        type: "once",
-	                        plug: {
-	                            draw: function draw() {
-	                                _legend.pos({
-	                                    x: me._coord.origin.x + 5
-	                                });
-	                            }
-	                        }
-	                    });
-	                }
-	            }
-
-	            //default right
-	            var pos = {
-	                x: me.width - me.padding.right,
-	                y: me.padding.top
-	            };
-	            if (_legend.position == "left") {
-	                pos.x = me.padding.left - _legend.width;
-	            }            if (_legend.position == "top") {
-	                pos.x = me.padding.left;
-	                pos.y = me.padding.top - _legend.height;
-	            }            if (_legend.position == "bottom") {
-	                pos.x = me.padding.left;
-	                pos.y = me.height - me.padding.bottom;
-	            }
-	            _legend.pos(pos);
-
-	            this.components.push({
-	                type: "legend",
-	                plug: _legend
-	            });
-
-	            me.stage.addChild(_legend.sprite);
 	        }
 	    }, {
 	        key: "show",
@@ -10414,13 +10308,13 @@ define(function () { 'use strict';
 	var _$11 = canvax._;
 	var Rect$2 = canvax.Shapes.Rect;
 
-	var Descartes_Component = function (_coorBase) {
-	    inherits$1(Descartes_Component, _coorBase);
+	var Rect_Component = function (_coorBase) {
+	    inherits$1(Rect_Component, _coorBase);
 
-	    function Descartes_Component(opts, root) {
-	        classCallCheck$1(this, Descartes_Component);
+	    function Rect_Component(opts, root) {
+	        classCallCheck$1(this, Rect_Component);
 
-	        var _this = possibleConstructorReturn$1(this, (Descartes_Component.__proto__ || Object.getPrototypeOf(Descartes_Component)).call(this, opts, root));
+	        var _this = possibleConstructorReturn$1(this, (Rect_Component.__proto__ || Object.getPrototypeOf(Rect_Component)).call(this, opts, root));
 
 	        _this.type = "descartes";
 
@@ -10473,7 +10367,7 @@ define(function () { 'use strict';
 	        return _this;
 	    }
 
-	    createClass$1(Descartes_Component, [{
+	    createClass$1(Rect_Component, [{
 	        key: "init",
 	        value: function init(opts) {
 	            this.sprite = new canvax.Display.Sprite({
@@ -10853,7 +10747,7 @@ define(function () { 'use strict';
 	            }            return obj;
 	        }
 	    }]);
-	    return Descartes_Component;
+	    return Rect_Component;
 	}(coorBase);
 
 	var _$12 = canvax._;
@@ -10869,7 +10763,7 @@ define(function () { 'use strict';
 	        //坐标系统
 	        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts, graphsMap, componentsMap));
 
-	        _this.CoordComponents = Descartes_Component;
+	        _this.CoordComponents = Rect_Component;
 	        _this._coord = null;
 
 	        return _this;
@@ -10884,7 +10778,7 @@ define(function () { 'use strict';
 	        key: "setDefaultOpts",
 	        value: function setDefaultOpts(opts) {
 	            var me = this;
-	            this.coord = {
+	            me.coord = {
 	                xAxis: {
 	                    //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
 	                    layoutType: "rule", //"peak",  
@@ -10973,41 +10867,13 @@ define(function () { 'use strict';
 	            });
 	            opts.coord.yAxis = _lys.concat(_rys);
 
-	            var _orgDataLen = this._data.length; //如果原数据是json格式
-	            if (_$12.isArray(this._data[0])) {
-	                //如果原数据是行列式
-	                _orgDataLen = this._data.length - 1;
+	            if (opts.dataZoom) {
+	                me.dataZoom = {
+	                    h: 26
+	                };
 	            }
-	            //预设dataZoom的区间数据
-	            this.dataZoom = {
-	                h: 25,
-	                range: {
-	                    start: 0,
-	                    end: _orgDataLen ? _orgDataLen - 1 : 0
-	                }
-	            };
-	            if (opts.dataZoom && opts.dataZoom.range) {
-	                if ("end" in opts.dataZoom.range && opts.dataZoom.range.end > this.dataZoom.range.end) {
-	                    opts.dataZoom.range.end = this.dataZoom.range.end;
-	                }
-	                if (opts.dataZoom.range.end < opts.dataZoom.range.start) {
-	                    opts.dataZoom.range.start = opts.dataZoom.range.end;
-	                }            }
-	            return opts;
-	        }
-	    }, {
-	        key: "initData",
-	        value: function initData(data, opt) {
-	            var d;
-	            var dataZoom = this.dataZoom || opt && opt.dataZoom;
 
-	            if (this._opts.dataZoom) {
-	                var datas = [data[0]];
-	                datas = datas.concat(data.slice(parseInt(dataZoom.range.start) + 1, parseInt(dataZoom.range.end) + 1 + 1));
-	                d = DataFrame.apply(this, [datas, opt]);
-	            } else {
-	                d = DataFrame.apply(this, arguments);
-	            }            return d;
+	            return opts;
 	        }
 	    }, {
 	        key: "drawBeginHorizontal",
@@ -11021,14 +10887,6 @@ define(function () { 'use strict';
 	            padding.right = padding.bottom;
 	            padding.bottom = padding.left;
 	            padding.left = num;
-
-	            /*
-	            padding.top = padding.right;
-	            padding.right = num;
-	            num = padding.bottom;
-	            padding.bottom = padding.left;
-	            padding.left = num;
-	            */
 	        }
 
 	        //绘制完毕后的横向处理
@@ -11061,11 +10919,6 @@ define(function () { 'use strict';
 	                    var h = ctx.height;
 
 	                    ctx.rotation = -90;
-
-	                    //var origin = { x: parseInt(w/2), y: parseInt(h/2) };
-	                    //ctx.rotateOrigin = origin;
-	                    //ctx.scaleOrigin = origin;
-	                    //ctx.scaleX = -1;
 	                }            }
 
 	            _$12.each(me._graphs, function (_graphs) {
@@ -11073,11 +10926,11 @@ define(function () { 'use strict';
 	            });
 	        }
 
-	        //只有field为多组数据的时候才需要legend
+	        //只有field为多组数据的时候才需要legend，给到legend组件来调用
 
 	    }, {
-	        key: "_getLegendData",
-	        value: function _getLegendData() {
+	        key: "getLegendData",
+	        value: function getLegendData() {
 	            var me = this;
 	            var data = [];
 
@@ -11106,328 +10959,6 @@ define(function () { 'use strict';
 	        }
 	        ////设置图例end
 
-	        //datazoom begin
-
-	    }, {
-	        key: "_getCloneChart",
-	        value: function _getCloneChart() {
-	            var me = this;
-	            var chartConstructor = this.constructor; //(barConstructor || Bar);
-	            var cloneEl = me.el.cloneNode();
-	            cloneEl.innerHTML = "";
-	            cloneEl.id = me.el.id + "_currclone";
-	            cloneEl.style.position = "absolute";
-	            cloneEl.style.width = me.el.offsetWidth + "px";
-	            cloneEl.style.height = me.el.offsetHeight + "px";
-	            cloneEl.style.top = "10000px";
-	            document.body.appendChild(cloneEl);
-
-	            //var opts = _.extend(true, {}, me._opts);
-	            //_.extend(true, opts, me.getCloneChart() );
-
-	            //clone的chart只需要coord 和 graphs 配置就可以了
-	            //因为画出来后也只需要拿graphs得sprite去贴图
-	            var graphsOpt = [];
-	            _$12.each(this._graphs, function (_g) {
-	                var _field = _g.enabledField || _g.field;
-
-	                if (_$12.flatten([_field]).length) {
-
-	                    var _opts = _$12.extend(true, {}, _g._opts);
-
-	                    _opts.field = _field;
-	                    if (_g.type == "bar") {
-	                        _$12.extend(true, _opts, {
-	                            node: {
-	                                fillStyle: me.dataZoom.normalColor || "#ececec"
-	                            },
-	                            animation: false,
-	                            eventEnabled: false,
-	                            label: {
-	                                enabled: false
-	                            }
-	                        });
-	                    }
-	                    if (_g.type == "line") {
-	                        _$12.extend(true, _opts, {
-	                            line: {
-	                                //lineWidth: 1,
-	                                strokeStyle: "#ececec"
-	                            },
-	                            node: {
-	                                enabled: false
-	                            },
-	                            area: {
-	                                alpha: 1,
-	                                fillStyle: "#ececec"
-	                            },
-	                            animation: false,
-	                            eventEnabled: false,
-	                            label: {
-	                                enabled: false
-	                            }
-	                        });
-	                    }
-	                    if (_g.type == "scat") {
-	                        _$12.extend(true, _opts, {
-	                            node: {
-	                                fillStyle: "#ececec"
-	                            }
-	                        });
-	                    }
-
-	                    graphsOpt.push(_opts);
-	                }
-	            });
-	            var opts = {
-	                coord: this._opts.coord,
-	                graphs: graphsOpt
-	            };
-
-	            var thumbChart = new chartConstructor(cloneEl, me._data, opts, me.graphsMap, me.componentsMap);
-	            thumbChart.draw();
-
-	            return {
-	                thumbChart: thumbChart,
-	                cloneEl: cloneEl
-	            };
-	        }
-	    }, {
-	        key: "_init_components_datazoom",
-	        value: function _init_components_datazoom() {
-	            var me = this;
-
-	            me.padding.bottom += me.dataZoom.h;
-
-	            this.components.push({
-	                type: "once",
-	                plug: {
-	                    draw: function draw() {
-	                        var _dataZoom = new me.componentsMap.dataZoom(me._getDataZoomOpt(), me._getCloneChart());
-	                        me.components.push({
-	                            type: "dataZoom",
-	                            plug: _dataZoom
-	                        });
-	                        me.graphsSprite.addChild(_dataZoom.sprite);
-	                    }
-	                }
-	            });
-	        }
-	    }, {
-	        key: "_getDataZoomOpt",
-	        value: function _getDataZoomOpt() {
-	            var me = this;
-	            //初始化 datazoom 模块
-	            var dataZoomOpt = _$12.extend(true, {
-	                w: me._coord.width,
-	                pos: {
-	                    x: me._coord.origin.x,
-	                    y: me._coord.origin.y + me._coord._xAxis.height
-	                },
-	                dragIng: function dragIng(range) {
-	                    var trigger = {
-	                        name: "dataZoom",
-	                        left: me.dataZoom.range.start - range.start,
-	                        right: range.end - me.dataZoom.range.end
-	                    };
-
-	                    _$12.extend(me.dataZoom.range, range);
-	                    me.resetData(me._data, trigger);
-	                    me.fire("dataZoomDragIng");
-	                },
-	                dragEnd: function dragEnd(range) {
-	                    me.updateChecked && me.updateChecked();
-	                    me.fire("dataZoomDragEnd");
-	                }
-	            }, me.dataZoom);
-
-	            return dataZoomOpt;
-	        }
-	        //datazoom end
-
-	        //rect cross begin
-
-	    }, {
-	        key: "_init_components_cross",
-	        value: function _init_components_cross() {
-	            //原则上一个直角坐标系中最佳只设置一个cross
-	            var me = this;
-	            if (!_$12.isArray(me.cross)) {
-	                me.cross = [me.cross];
-	            }            _$12.each(me.cross, function (cross, i) {
-	                me.components.push({
-	                    type: "once",
-	                    plug: {
-	                        draw: function draw() {
-
-	                            var opts = _$12.extend(true, {
-	                                origin: {
-	                                    x: me._coord.origin.x,
-	                                    y: me._coord.origin.y
-	                                },
-	                                width: me._coord.width,
-	                                height: me._coord.height
-	                            }, cross);
-
-	                            var _cross = new me.componentsMap.cross(opts, me);
-	                            me.components.push({
-	                                type: "cross" + i,
-	                                plug: _cross
-	                            });
-	                            me.graphsSprite.addChild(_cross.sprite);
-	                        }
-	                    }
-	                });
-	            });
-	        }
-
-	        //markLine begin
-
-	    }, {
-	        key: "_init_components_markline",
-	        value: function _init_components_markline() {
-	            var me = this;
-
-	            if (!_$12.isArray(me.markLine)) {
-	                me.markLine = [me.markLine];
-	            }
-	            _$12.each(me.markLine, function (ML) {
-	                //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
-	                var field = ML.markTo;
-
-	                if (field && _$12.indexOf(me.dataFrame.fields, field) == -1) {
-	                    //如果配置的字段不存在，则不绘制
-	                    return;
-	                }
-
-	                var _yAxis = me._coord._yAxis[0]; //默认为左边的y轴
-
-	                if (field) {
-	                    //如果有配置markTo就从me._coord._yAxis中找到这个markTo所属的yAxis对象
-	                    _$12.each(me._coord._yAxis, function ($yAxis, yi) {
-	                        var fs = _$12.flatten([$yAxis.field]);
-	                        if (_$12.indexOf(fs, field) >= 0) {
-	                            _yAxis = $yAxis;
-	                        }
-	                    });
-	                }
-
-	                if (ML.yAxisAlign) {
-	                    //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
-	                    _yAxis = me._coord._yAxis[ML.yAxisAlign == "left" ? 0 : 1];
-	                }
-
-	                var y;
-	                if (ML.y !== undefined && ML.y !== null) {
-	                    y = Number(ML.y);
-	                } else {
-	                    //如果没有配置这个y的属性，就 自动计算出来均值
-	                    //但是均值是自动计算的，比如datazoom在draging的时候
-	                    y = function y() {
-	                        var _fdata = me.dataFrame.getFieldData(field);
-	                        var _count = 0;
-	                        _$12.each(_fdata, function (val) {
-	                            if (Number(val)) {
-	                                _count += val;
-	                            }
-	                        });
-	                        return _count / _fdata.length;
-	                    };
-	                }
-	                if (!isNaN(y)) {
-	                    //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
-	                    _yAxis.setWaterLine(y);
-	                }
-	                me.components.push({
-	                    type: "once",
-	                    plug: {
-	                        draw: function draw() {
-
-	                            var _fstyle = "#777";
-	                            var fieldMap = me._coord.getFieldMapOf(field);
-	                            if (fieldMap) {
-	                                _fstyle = fieldMap.color;
-	                            }                            var lineStrokeStyle = ML.line && ML.line.strokeStyle || _fstyle;
-	                            var textFillStyle = ML.label && ML.label.fillStyle || _fstyle;
-
-	                            me.creatOneMarkLine(ML, y, _yAxis, lineStrokeStyle, textFillStyle, field);
-	                        }
-	                    }
-	                });
-	            });
-	        }
-	    }, {
-	        key: "creatOneMarkLine",
-	        value: function creatOneMarkLine(ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field) {
-	            var me = this;
-	            var o = {
-	                w: me._coord.width,
-	                h: me._coord.height,
-	                yVal: yVal,
-	                origin: {
-	                    x: me._coord.origin.x,
-	                    y: me._coord.origin.y
-	                },
-	                line: {
-	                    list: [[0, 0], [me._coord.width, 0]]
-	                    //strokeStyle: lineStrokeStyle
-	                },
-	                label: {
-	                    fillStyle: textFillStyle
-	                },
-	                field: field
-	            };
-
-	            if (lineStrokeStyle) {
-	                o.line.strokeStyle = lineStrokeStyle;
-	            }
-
-	            var _markLine = new me.componentsMap.markLine(_$12.extend(true, ML, o), _yAxis);
-	            me.components.push({
-	                type: "markLine",
-	                plug: _markLine
-	            });
-	            me.graphsSprite.addChild(_markLine.sprite);
-	        }
-	        //markLine end
-
-
-	    }, {
-	        key: "_init_components_markpoint",
-	        value: function _init_components_markpoint() {}
-	    }, {
-	        key: "_init_components_bartgi",
-	        value: function _init_components_bartgi() {
-	            var me = this;
-
-	            if (!_$12.isArray(me.barTgi)) {
-	                me.barTgi = [me.barTgi];
-	            }
-	            _$12.each(me.barTgi, function (barTgiOpt, i) {
-	                me.components.push({
-	                    type: "once",
-	                    plug: {
-	                        draw: function draw() {
-
-	                            barTgiOpt = _$12.extend(true, {
-	                                origin: {
-	                                    x: me._coord.origin.x,
-	                                    y: me._coord.origin.y
-	                                }
-	                            }, barTgiOpt);
-
-	                            var _barTgi = new me.componentsMap.barTgi(barTgiOpt, me);
-	                            me.components.push({
-	                                type: "barTgi",
-	                                plug: _barTgi
-	                            });
-	                            me.graphsSprite.addChild(_barTgi.sprite);
-	                        }
-	                    }
-	                });
-	            });
-	        }
-
 	        //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
 	        //方便外部自定义tip是的content
 
@@ -11448,8 +10979,6 @@ define(function () { 'use strict';
 	                });
 	                e.eventInfo.nodes = nodes;
 	            }
-
-	            e.eventInfo.dataZoom = this.dataZoom;
 	        }
 
 	        //TODO：这个可以抽一个tipsPointer组件出来
@@ -12428,8 +11957,8 @@ define(function () { 'use strict';
 	            return opts;
 	        }
 	    }, {
-	        key: "_getLegendData",
-	        value: function _getLegendData() {
+	        key: "getLegendData",
+	        value: function getLegendData() {
 	            var legendData = [
 	                //{name: "uv", style: "#ff8533", enabled: true, ind: 0}
 	            ];
@@ -15735,7 +15264,7 @@ define(function () { 'use strict';
 	                    labelText: null, //绘制的时候再设置,label format后的数据
 	                    iNode: i
 	                };
-	                debugger;
+
 	                data.push(layoutData);
 	            }
 	            if (data.length && me.sort) {
@@ -18208,6 +17737,81 @@ define(function () { 'use strict';
 
 	var Legend = function (_Component) {
 	    inherits$1(Legend, _Component);
+	    createClass$1(Legend, null, [{
+	        key: "register",
+	        value: function register(app) {
+	            //设置legendOpt
+	            var legendOpt = _$28.extend(true, {
+	                icon: {
+	                    onChecked: function onChecked(obj) {
+	                        app.show(obj.name, obj);
+	                        app.componentsReset({ name: "legend" });
+	                    },
+	                    onUnChecked: function onUnChecked(obj) {
+	                        app.hide(obj.name, obj);
+	                        app.componentsReset({ name: "legend" });
+	                    }
+	                }
+	            }, app._opts.legend);
+
+	            var legendData = app._opts.legend.data;
+	            if (legendData) {
+	                _$28.each(legendData, function (item, i) {
+	                    item.enabled = true;
+	                    item.ind = i;
+	                });
+	                delete app._opts.legend.data;
+	            } else {
+	                legendData = app.getLegendData();
+	            }
+
+	            //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
+	            var _legend = new this(legendData, legendOpt, app);
+
+	            if (_legend.layoutType == "h") {
+	                app.padding[_legend.position] += _legend.height;
+	            } else {
+	                app.padding[_legend.position] += _legend.width;
+	            }
+	            if (app._coord && app._coord.type == "descartes") {
+	                if (_legend.position == "top" || _legend.position == "bottom") {
+	                    app.components.push({
+	                        type: "once",
+	                        plug: {
+	                            draw: function draw() {
+	                                _legend.pos({
+	                                    x: app._coord.origin.x + 5
+	                                });
+	                            }
+	                        }
+	                    });
+	                }
+	            }
+
+	            //default right
+	            var pos = {
+	                x: app.width - app.padding.right,
+	                y: app.padding.top
+	            };
+	            if (_legend.position == "left") {
+	                pos.x = app.padding.left - _legend.width;
+	            }            if (_legend.position == "top") {
+	                pos.x = app.padding.left;
+	                pos.y = app.padding.top - _legend.height;
+	            }            if (_legend.position == "bottom") {
+	                pos.x = app.padding.left;
+	                pos.y = app.height - app.padding.bottom;
+	            }
+	            _legend.pos(pos);
+
+	            app.components.push({
+	                type: "legend",
+	                plug: _legend
+	            });
+
+	            app.stage.addChild(_legend.sprite);
+	        }
+	    }]);
 
 	    function Legend(data, tops, root) {
 	        classCallCheck$1(this, Legend);
@@ -18451,6 +18055,149 @@ define(function () { 'use strict';
 
 	var dataZoom = function (_Component) {
 	    inherits$1(dataZoom, _Component);
+	    createClass$1(dataZoom, null, [{
+	        key: "register",
+
+
+	        //datazoom begin
+	        value: function register(app) {
+
+	            var me = this;
+
+	            app.padding.bottom += app.dataZoom.h;
+
+	            app.components.push({
+	                type: "once",
+	                plug: {
+	                    draw: function draw() {
+	                        var _dataZoom = new me(me._getDataZoomOpt(app), me._getCloneChart(app));
+	                        app.components.push({
+	                            type: "dataZoom",
+	                            plug: _dataZoom
+	                        });
+	                        app.graphsSprite.addChild(_dataZoom.sprite);
+	                    }
+	                }
+	            });
+	        }
+	    }, {
+	        key: "_getCloneChart",
+	        value: function _getCloneChart(app) {
+	            var chartConstructor = app.constructor; //(barConstructor || Bar);
+	            var cloneEl = app.el.cloneNode();
+	            cloneEl.innerHTML = "";
+	            cloneEl.id = app.el.id + "_currclone";
+	            cloneEl.style.position = "absolute";
+	            cloneEl.style.width = app.el.offsetWidth + "px";
+	            cloneEl.style.height = app.el.offsetHeight + "px";
+	            cloneEl.style.top = "10000px";
+	            document.body.appendChild(cloneEl);
+
+	            //var opts = _.extend(true, {}, me._opts);
+	            //_.extend(true, opts, me.getCloneChart() );
+
+	            //clone的chart只需要coord 和 graphs 配置就可以了
+	            //因为画出来后也只需要拿graphs得sprite去贴图
+	            var graphsOpt = [];
+	            _$29.each(app._graphs, function (_g) {
+	                var _field = _g.enabledField || _g.field;
+
+	                if (_$29.flatten([_field]).length) {
+
+	                    var _opts = _$29.extend(true, {}, _g._opts);
+
+	                    _opts.field = _field;
+	                    if (_g.type == "bar") {
+	                        _$29.extend(true, _opts, {
+	                            node: {
+	                                fillStyle: "#ececec"
+	                            },
+	                            animation: false,
+	                            eventEnabled: false,
+	                            label: {
+	                                enabled: false
+	                            }
+	                        });
+	                    }
+	                    if (_g.type == "line") {
+	                        _$29.extend(true, _opts, {
+	                            line: {
+	                                //lineWidth: 1,
+	                                strokeStyle: "#ececec"
+	                            },
+	                            icon: {
+	                                enabled: false
+	                            },
+	                            area: {
+	                                alpha: 1,
+	                                fillStyle: "#ececec"
+	                            },
+	                            animation: false,
+	                            eventEnabled: false,
+	                            label: {
+	                                enabled: false
+	                            }
+	                        });
+	                    }
+	                    if (_g.type == "scat") {
+	                        _$29.extend(true, _opts, {
+	                            node: {
+	                                fillStyle: "#ececec"
+	                            }
+	                        });
+	                    }
+
+	                    graphsOpt.push(_opts);
+	                }
+	            });
+	            var opts = {
+	                coord: app._opts.coord,
+	                graphs: graphsOpt
+	            };
+
+	            var thumbChart = new chartConstructor(cloneEl, app._data, opts, app.graphsMap, app.componentsMap);
+	            thumbChart.draw();
+
+	            return {
+	                thumbChart: thumbChart,
+	                cloneEl: cloneEl
+	            };
+	        }
+	    }, {
+	        key: "_getDataZoomOpt",
+	        value: function _getDataZoomOpt(app) {
+	            //初始化 datazoom 模块
+	            var dataZoomOpt = _$29.extend(true, {
+	                w: app._coord.width,
+	                pos: {
+	                    x: app._coord.origin.x,
+	                    y: app._coord.origin.y + app._coord._xAxis.height
+	                },
+	                dragIng: function dragIng(range) {
+	                    var trigger = {
+	                        name: "dataZoom",
+	                        left: app.dataFrame.range.start - range.start,
+	                        right: range.end - app.dataFrame.range.end
+	                    };
+
+	                    _$29.extend(app.dataFrame.range, range);
+
+	                    //不想要重新构造dataFrame，所以第一个参数为null
+	                    app.resetData(null, trigger);
+	                    app.fire("dataZoomDragIng");
+	                },
+	                dragEnd: function dragEnd(range) {
+	                    app.updateChecked && app.updateChecked();
+	                    app.fire("dataZoomDragEnd");
+	                }
+	            }, app.dataZoom);
+
+	            return dataZoomOpt;
+	        }
+	        //datazoom end
+
+
+	    }]);
 
 	    function dataZoom(opt, cloneChart) {
 	        classCallCheck$1(this, dataZoom);
@@ -18488,7 +18235,7 @@ define(function () { 'use strict';
 	        };
 
 	        _this.w = 0;
-	        _this.h = 40;
+	        _this.h = 26;
 
 	        _this.color = opt.color || "#008ae6";
 
@@ -18955,6 +18702,119 @@ define(function () { 'use strict';
 
 	var MarkLine = function (_Component) {
 	    inherits$1(MarkLine, _Component);
+	    createClass$1(MarkLine, null, [{
+	        key: "register",
+
+
+	        //markLine begin
+	        value: function register(app) {
+	            var app = app;
+	            var me = this;
+
+	            if (!_$30.isArray(app.markLine)) {
+	                app.markLine = [app.markLine];
+	            }
+	            _$30.each(app.markLine, function (ML) {
+	                //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
+	                var field = ML.markTo;
+
+	                if (field && _$30.indexOf(app.dataFrame.fields, field) == -1) {
+	                    //如果配置的字段不存在，则不绘制
+	                    return;
+	                }
+
+	                var _yAxis = app._coord._yAxis[0]; //默认为左边的y轴
+
+	                if (field) {
+	                    //如果有配置markTo就从me._coord._yAxis中找到这个markTo所属的yAxis对象
+	                    _$30.each(app._coord._yAxis, function ($yAxis, yi) {
+	                        var fs = _$30.flatten([$yAxis.field]);
+	                        if (_$30.indexOf(fs, field) >= 0) {
+	                            _yAxis = $yAxis;
+	                        }
+	                    });
+	                }
+
+	                if (ML.yAxisAlign) {
+	                    //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
+	                    _yAxis = app._coord._yAxis[ML.yAxisAlign == "left" ? 0 : 1];
+	                }
+
+	                var y;
+	                if (ML.y !== undefined && ML.y !== null) {
+	                    y = Number(ML.y);
+	                } else {
+	                    //如果没有配置这个y的属性，就 自动计算出来均值
+	                    //但是均值是自动计算的，比如datazoom在draging的时候
+	                    y = function y() {
+	                        var _fdata = app.dataFrame.getFieldData(field);
+	                        var _count = 0;
+	                        _$30.each(_fdata, function (val) {
+	                            if (Number(val)) {
+	                                _count += val;
+	                            }
+	                        });
+	                        return _count / _fdata.length;
+	                    };
+	                }
+	                if (!isNaN(y)) {
+	                    //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
+	                    _yAxis.setWaterLine(y);
+	                }
+	                app.components.push({
+	                    type: "once",
+	                    plug: {
+	                        draw: function draw() {
+
+	                            var _fstyle = "#777";
+	                            var fieldMap = app._coord.getFieldMapOf(field);
+	                            if (fieldMap) {
+	                                _fstyle = fieldMap.color;
+	                            }                            var lineStrokeStyle = ML.line && ML.line.strokeStyle || _fstyle;
+	                            var textFillStyle = ML.label && ML.label.fillStyle || _fstyle;
+
+	                            me.creatOneMarkLine(app, ML, y, _yAxis, lineStrokeStyle, textFillStyle, field);
+	                        }
+	                    }
+	                });
+	            });
+	        }
+	    }, {
+	        key: "creatOneMarkLine",
+	        value: function creatOneMarkLine(app, ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field) {
+
+	            var o = {
+	                w: app._coord.width,
+	                h: app._coord.height,
+	                yVal: yVal,
+	                origin: {
+	                    x: app._coord.origin.x,
+	                    y: app._coord.origin.y
+	                },
+	                line: {
+	                    list: [[0, 0], [app._coord.width, 0]]
+	                    //strokeStyle: lineStrokeStyle
+	                },
+	                label: {
+	                    fillStyle: textFillStyle
+	                },
+	                field: field
+	            };
+
+	            if (lineStrokeStyle) {
+	                o.line.strokeStyle = lineStrokeStyle;
+	            }
+	            var _markLine = new this(_$30.extend(true, ML, o), _yAxis);
+	            app.components.push({
+	                type: "markLine",
+	                plug: _markLine
+	            });
+	            app.graphsSprite.addChild(_markLine.sprite);
+	        }
+	        //markLine end
+
+
+	    }]);
 
 	    function MarkLine(opt, _yAxis) {
 	        classCallCheck$1(this, MarkLine);
@@ -19314,6 +19174,24 @@ define(function () { 'use strict';
 
 	var Tips = function (_Component) {
 	    inherits$1(Tips, _Component);
+	    createClass$1(Tips, null, [{
+	        key: "register",
+	        value: function register(app) {
+	            //所有的tips放在一个单独的tips中
+	            app.stageTips = new canvax.Display.Stage({
+	                id: "main-chart-stage-tips"
+	            });
+	            app.canvax.addChild(app.stageTips);
+
+	            var _tips = new this(app.tips, app.canvax.domView, app.dataFrame, app._coord);
+	            app.stageTips.addChild(_tips.sprite);
+	            app.components.push({
+	                type: "tips",
+	                id: "tips",
+	                plug: _tips
+	            });
+	        }
+	    }]);
 
 	    function Tips(opt, tipDomContainer) {
 	        classCallCheck$1(this, Tips);
@@ -19542,6 +19420,40 @@ define(function () { 'use strict';
 
 	var barTgi = function (_Component) {
 	    inherits$1(barTgi, _Component);
+	    createClass$1(barTgi, null, [{
+	        key: "register",
+	        value: function register(app) {
+
+	            if (!_$33.isArray(app.barTgi)) {
+	                app.barTgi = [app.barTgi];
+	            }
+	            var barTgiConstructor = this;
+
+	            _$33.each(app.barTgi, function (barTgiOpt, i) {
+	                app.components.push({
+	                    type: "once",
+	                    plug: {
+	                        draw: function draw() {
+
+	                            barTgiOpt = _$33.extend(true, {
+	                                origin: {
+	                                    x: app._coord.origin.x,
+	                                    y: app._coord.origin.y
+	                                }
+	                            }, barTgiOpt);
+
+	                            var _barTgi = new barTgiConstructor(barTgiOpt, app);
+	                            app.components.push({
+	                                type: "barTgi",
+	                                plug: _barTgi
+	                            });
+	                            app.graphsSprite.addChild(_barTgi.sprite);
+	                        }
+	                    }
+	                });
+	            });
+	        }
+	    }]);
 
 	    function barTgi(opt, root) {
 	        classCallCheck$1(this, barTgi);
@@ -19704,6 +19616,15 @@ define(function () { 'use strict';
 	var _$34 = canvax._;
 
 	var waterMark = function () {
+	    createClass$1(waterMark, null, [{
+	        key: "register",
+	        value: function register(app) {
+	            var waterMarkOpt = app.waterMark;
+	            var _water = new this(waterMarkOpt, app);
+	            app.stage.addChild(_water.spripte);
+	        }
+	    }]);
+
 	    function waterMark(opts, root) {
 	        classCallCheck$1(this, waterMark);
 
@@ -19781,13 +19702,49 @@ define(function () { 'use strict';
 
 	var MarkLine$1 = function (_Component) {
 	    inherits$1(MarkLine, _Component);
+	    createClass$1(MarkLine, null, [{
+	        key: "register",
 
-	    function MarkLine(opt, _yAxis) {
+	        //rect cross begin
+	        value: function register(app) {
+	            //原则上一个直角坐标系中最佳只设置一个cross
+	            var me = this;
+	            if (!_$35.isArray(app.cross)) {
+	                app.cross = [app.cross];
+	            }            _$35.each(app.cross, function (cross, i) {
+	                app.components.push({
+	                    type: "once",
+	                    plug: {
+	                        draw: function draw() {
+
+	                            var opts = _$35.extend(true, {
+	                                origin: {
+	                                    x: app._coord.origin.x,
+	                                    y: app._coord.origin.y
+	                                },
+	                                width: app._coord.width,
+	                                height: app._coord.height
+	                            }, cross);
+
+	                            var _cross = new me(opts, app);
+	                            app.components.push({
+	                                type: "cross" + i,
+	                                plug: _cross
+	                            });
+	                            app.graphsSprite.addChild(_cross.sprite);
+	                        }
+	                    }
+	                });
+	            });
+	        }
+	    }]);
+
+	    function MarkLine(opt, root) {
 	        classCallCheck$1(this, MarkLine);
 
-	        var _this = possibleConstructorReturn$1(this, (MarkLine.__proto__ || Object.getPrototypeOf(MarkLine)).call(this, opt, _yAxis));
+	        var _this = possibleConstructorReturn$1(this, (MarkLine.__proto__ || Object.getPrototypeOf(MarkLine)).call(this, opt));
 
-	        _this._yAxis = _yAxis;
+	        _this.root = root;
 
 	        _this.width = opt.width || 0;
 	        _this.height = opt.height || 0;

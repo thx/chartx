@@ -6,6 +6,41 @@ const _ = Canvax._;
 
 export default class barTgi extends Component
 {
+    static register( app )
+    {
+        
+        if( !_.isArray( app.barTgi ) ){
+            app.barTgi = [ app.barTgi ];
+        };
+
+        var barTgiConstructor = this;
+
+        _.each( app.barTgi , function( barTgiOpt, i ){
+            app.components.push( {
+                type : "once",
+                plug : {
+                    draw: function(){
+
+                        barTgiOpt = _.extend( true, {
+                            origin: {
+                                x: app._coord.origin.x,
+                                y: app._coord.origin.y
+                            }
+                        } , barTgiOpt );
+
+                        var _barTgi = new barTgiConstructor( barTgiOpt, app );
+                        app.components.push( {
+                            type : "barTgi",
+                            plug : _barTgi
+                        } ); 
+                        app.graphsSprite.addChild( _barTgi.sprite );
+
+                    }
+                }
+            } );
+        } );
+    }
+
     constructor( opt, root )
     {
         super();

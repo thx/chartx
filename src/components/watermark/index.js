@@ -8,6 +8,14 @@ const _ = Canvax._;
 
 export default class waterMark
 {
+
+    static register( app )
+    {
+        var waterMarkOpt = app.waterMark;
+        var _water = new this( waterMarkOpt, app );
+        app.stage.addChild( _water.spripte );
+    }
+
     constructor( opts , root )
     {
         this.root = root;

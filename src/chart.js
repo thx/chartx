@@ -83,7 +83,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         /*
         this.initModule(); //初始化模块
-        this.initComponents(); //初始化组件
+        this.registerComponents(); //初始化组件
         this.startDraw(); //开始绘图
         this.drawComponents();  //绘图完，开始绘制插件
         this.inited = true;
@@ -209,10 +209,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         if( data ){
             this._data = parse2MatrixData( data );
+            this.dataFrame = this.initData( this._data );
         };
-
-        this.dataFrame = this.initData( this._data );
-
         this._resetData && this._resetData( dataTrigger );
         this.fire("resetData");
     }
@@ -225,15 +223,15 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
 
     //插件管理相关代码begin
-    initComponents()
+    registerComponents()
     {
-        //TODO: theme 组件优先级最高，在initComponents之前已经加载过
+        //TODO: theme 组件优先级最高，在registerComponents之前已经加载过
         var notComponents = [ "coord", "graphs" , "theme" ];
         for( var _p in this._opts ){
-            var p = _p.toLocaleLowerCase();
-            if( _.indexOf( notComponents, p ) == -1 ){
-                if( this[ "_init_components_"+p ] ){
-                    this[ "_init_components_"+p ]( this._opts[ _p ] );
+            if( _.indexOf( notComponents, _p ) == -1 ){
+                var compConstructor = this.componentsMap[ _p ];
+                if( compConstructor.register ){
+                    compConstructor.register( this );
                 };
             }
         }

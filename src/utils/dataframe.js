@@ -42,6 +42,10 @@ export default function( data ){
 
     //设置好数据区间end值
     dataFrame.range.end = dataFrame.length - 1;
+    //然后检查opts中是否有dataZoom.range
+    if( this._opts.dataZoom && this._opts.dataZoom.range ){
+        _.extend( dataFrame.range, this._opts.dataZoom.range );
+    };
     
 
     dataFrame.org = data;

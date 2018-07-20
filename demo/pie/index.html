@@ -101,13 +101,18 @@ var options = {
             }
         }
     ],
+    
     tips : {
         content : function(info){
             var node = info.nodes[0];
             return node.label+"："+node.percentage+"%"
         }
     },
-    legend : {}
+    
+    legend : {},
+    waterMark : {
+        text : "watermark"
+    }
 };
 
 window.chart = Chartx.create("canvasTest" , data , options);

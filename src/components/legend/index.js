@@ -6,6 +6,84 @@ const _ = Canvax._;
 
 export default class Legend extends Component
 {
+    static register( app )
+    {
+        //设置legendOpt
+        var legendOpt = _.extend(true, {
+            icon : {
+                onChecked : function( obj ){
+                    app.show( obj.name , obj );
+                    app.componentsReset({ name : "legend" });
+                },
+                onUnChecked : function( obj ){
+                    app.hide( obj.name , obj );
+                    app.componentsReset({ name : "legend" });
+                }
+            }
+        } , app._opts.legend);
+
+        var legendData = app._opts.legend.data;
+        if( legendData ){
+            _.each( legendData, function( item, i ){
+                item.enabled = true;
+                item.ind = i;
+            } );
+            delete app._opts.legend.data;
+        } else {
+            legendData = app.getLegendData();
+        }
+        
+        //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
+        var _legend = new this( legendData, legendOpt, app );
+    
+        if( _legend.layoutType == "h" ){
+            app.padding[ _legend.position ] += _legend.height;
+        } else {
+            app.padding[ _legend.position ] += _legend.width;
+        };
+
+        if( app._coord && app._coord.type == "descartes" ){
+            if( _legend.position == "top" || _legend.position == "bottom" ){
+                app.components.push( {
+                    type : "once",
+                    plug : {
+                        draw : function(){
+                            _legend.pos( { 
+                                x : app._coord.origin.x + 5
+                            } );
+                        }
+                    }
+                } );
+            }
+        }
+        
+        //default right
+        var pos = {
+            x : app.width - app.padding.right,
+            y : app.padding.top
+        };
+        if( _legend.position == "left" ){
+            pos.x = app.padding.left - _legend.width;
+        };
+        if( _legend.position == "top" ){
+            pos.x = app.padding.left;
+            pos.y = app.padding.top - _legend.height;
+        };
+        if( _legend.position == "bottom" ){
+            pos.x = app.padding.left;
+            pos.y = app.height - app.padding.bottom;
+        };
+
+        _legend.pos( pos );
+
+        app.components.push( {
+            type : "legend",
+            plug : _legend
+        } );
+
+        app.stage.addChild( _legend.sprite );
+    }
+
     constructor(data, tops, root)
     {
         super();

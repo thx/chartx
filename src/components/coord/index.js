@@ -15,6 +15,9 @@ export default class Coord extends Chart
         this.graphsMap = graphsMap;
         this.componentsMap = componentsMap;
 
+        //这里不要直接用data，而要用 this._data
+        this.dataFrame = this.initData( this._data );
+
         this._graphs = [];
         if( opts.graphs ){
             opts.graphs = _.flatten( [ opts.graphs ] );
@@ -22,9 +25,6 @@ export default class Coord extends Chart
 
         _.extend(true, this, this.setDefaultOpts( opts ));
         
-        //这里不要直接用data，而要用 this._data
-        this.dataFrame = this.initData( this._data );
-
         //this.draw();
         this._tipsPointer = null;
     }
@@ -50,7 +50,7 @@ export default class Coord extends Chart
             
         };
         this.initModule( opts );     //初始化模块  
-        this.initComponents( opts ); //初始化组件, 来自己chart.js模块
+        this.registerComponents( opts ); //初始化组件, 来自己chart.js模块
 
         if( this._coord && this._coord.horizontal ){
             this.drawBeginHorizontal && this.drawBeginHorizontal();
@@ -144,113 +144,6 @@ export default class Coord extends Chart
 
         this.componentsReset( dataTrigger );
     }
-
-
-    //tips组件
-    _init_components_tips ()
-    {
-        //所有的tips放在一个单独的tips中
-		this.stageTips = new Canvax.Display.Stage({
-		    id: "main-chart-stage-tips"
-		});
-        this.canvax.addChild( this.stageTips );
-
-        var _tips = new this.componentsMap.tips(this.tips, this.canvax.domView, this.dataFrame, this._coord);
-        this.stageTips.addChild(_tips.sprite);
-        this.components.push({
-            type : "tips",
-            id : "tips",
-            plug : _tips
-        });
-    }
-
-    //添加水印
-    _init_components_watermark( waterMarkOpt )
-    {
-        var _water = new this.componentsMap.waterMark( waterMarkOpt, this );
-        this.stage.addChild( _water.spripte );
-    }
-
-    //设置图例 begin
-    _init_components_legend( e )
-    {
-        !e && (e={});
-        var me = this;
-        //设置legendOpt
-        var legendOpt = _.extend(true, {
-            icon : {
-                onChecked : function( obj ){
-                    me.show( obj.name , obj );
-                    me.componentsReset({ name : "legend" });
-                },
-                onUnChecked : function( obj ){
-                    me.hide( obj.name , obj );
-                    me.componentsReset({ name : "legend" });
-                }
-            }
-        } , me._opts.legend);
-
-        var legendData = me._opts.legend.data;
-        if( legendData ){
-            _.each( legendData, function( item, i ){
-                item.enabled = true;
-                item.ind = i;
-            } );
-            delete me._opts.legend.data;
-        } else {
-            legendData = me._getLegendData();
-        }
-        
-        var _legend = new me.componentsMap.legend( legendData, legendOpt, this );
-    
-        if( _legend.layoutType == "h" ){
-            me.padding[ _legend.position ] += _legend.height;
-        } else {
-            me.padding[ _legend.position ] += _legend.width;
-        };
-
-        if( me._coord && me._coord.type == "descartes" ){
-            if( _legend.position == "top" || _legend.position == "bottom" ){
-                this.components.push( {
-                    type : "once",
-                    plug : {
-                        draw : function(){
-                            _legend.pos( { 
-                                x : me._coord.origin.x + 5
-                            } );
-                        }
-                    }
-                } );
-            }
-        }
-        
-        //default right
-        var pos = {
-            x : me.width - me.padding.right,
-            y : me.padding.top
-        };
-        if( _legend.position == "left" ){
-            pos.x = me.padding.left - _legend.width;
-        };
-        if( _legend.position == "top" ){
-            pos.x = me.padding.left;
-            pos.y = me.padding.top - _legend.height;
-        };
-        if( _legend.position == "bottom" ){
-            pos.x = me.padding.left;
-            pos.y = me.height - me.padding.bottom;
-        };
-
-        _legend.pos( pos );
-
-        this.components.push( {
-            type : "legend",
-            plug : _legend
-        } );
-
-        me.stage.addChild( _legend.sprite );
-    }
-
 
     show( field , legendData)
     {

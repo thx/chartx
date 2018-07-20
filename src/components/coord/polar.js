@@ -53,7 +53,7 @@ export default class Polar extends CoordBase
         return opts
     }
 
-    _getLegendData()
+    getLegendData()
     {
         var legendData = [
             //{name: "uv", style: "#ff8533", enabled: true, ind: 0}

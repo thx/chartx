@@ -6,6 +6,23 @@ const _ = Canvax._;
 
 export default class Tips extends Component
 {
+    static register( app )
+    {
+        //所有的tips放在一个单独的tips中
+		app.stageTips = new Canvax.Display.Stage({
+		    id: "main-chart-stage-tips"
+		});
+        app.canvax.addChild( app.stageTips );
+
+        var _tips = new this(app.tips, app.canvax.domView, app.dataFrame, app._coord);
+        app.stageTips.addChild( _tips.sprite );
+        app.components.push({
+            type : "tips",
+            id : "tips",
+            plug : _tips
+        });
+    }
+
     constructor( opt, tipDomContainer )
     {
         super();
@@ -221,4 +238,5 @@ export default class Tips extends Component
         }
         return y
     }
+    
 }

@@ -26,7 +26,7 @@ export default class Descartes extends CoordBase
     setDefaultOpts( opts )
     {
         var me = this;
-        this.coord = {
+        me.coord = {
             xAxis : {
                 //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
                 layoutType    : "rule", //"peak",  
@@ -118,46 +118,13 @@ export default class Descartes extends CoordBase
         } );
         opts.coord.yAxis = _lys.concat( _rys );
 
-        var _orgDataLen = this._data.length; //如果原数据是json格式
-        if( _.isArray( this._data[0] )){
-            //如果原数据是行列式
-            _orgDataLen = this._data.length - 1;
-        };
-
-        //预设dataZoom的区间数据
-        this.dataZoom = {
-            h: 25,
-            range: {
-                start: 0,
-                end: _orgDataLen ? _orgDataLen - 1 : 0
-            }
-        };
-        if( opts.dataZoom && opts.dataZoom.range ){
-            if( "end" in opts.dataZoom.range && opts.dataZoom.range.end > this.dataZoom.range.end ){
-                opts.dataZoom.range.end = this.dataZoom.range.end;
+        if( opts.dataZoom ){
+            me.dataZoom = {
+                h : 26
             };
-
-            if( opts.dataZoom.range.end < opts.dataZoom.range.start ){
-                opts.dataZoom.range.start = opts.dataZoom.range.end
-            };
-        };
+        }
         
         return opts;
-    }
-
-    initData(data, opt)
-    {
-        var d;
-        var dataZoom = (this.dataZoom || (opt && opt.dataZoom));
-
-        if ( this._opts.dataZoom ) {
-            var datas = [data[0]];
-            datas = datas.concat(data.slice( parseInt(dataZoom.range.start) + 1, parseInt(dataZoom.range.end) + 1 + 1));
-            d = DataFrame.apply(this, [datas, opt]);
-        } else {
-            d = DataFrame.apply(this, arguments);
-        };
-        return d;
     }
 
     drawBeginHorizontal()
@@ -171,14 +138,6 @@ export default class Descartes extends CoordBase
         padding.right = padding.bottom;
         padding.bottom = padding.left;
         padding.left = num;
-
-        /*
-        padding.top = padding.right;
-        padding.right = num;
-        num = padding.bottom;
-        padding.bottom = padding.left;
-        padding.left = num;
-        */
 
     }
 
@@ -213,11 +172,6 @@ export default class Descartes extends CoordBase
 
                 ctx.rotation = -90;
                 
-                //var origin = { x: parseInt(w/2), y: parseInt(h/2) };
-                //ctx.rotateOrigin = origin;
-                //ctx.scaleOrigin = origin;
-                //ctx.scaleX = -1;
-                
             };
         }
 
@@ -226,8 +180,8 @@ export default class Descartes extends CoordBase
         });
     }
 
-    //只有field为多组数据的时候才需要legend
-    _getLegendData()
+    //只有field为多组数据的时候才需要legend，给到legend组件来调用
+    getLegendData()
     {
         var me   = this;
         var data = [];
@@ -257,336 +211,6 @@ export default class Descartes extends CoordBase
     }
     ////设置图例end
 
-    //datazoom begin
-    _getCloneChart()
-    {
-        var me = this;
-        var chartConstructor = this.constructor;//(barConstructor || Bar);
-        var cloneEl = me.el.cloneNode();
-        cloneEl.innerHTML = "";
-        cloneEl.id = me.el.id + "_currclone";
-        cloneEl.style.position = "absolute";
-        cloneEl.style.width = me.el.offsetWidth + "px";
-        cloneEl.style.height = me.el.offsetHeight + "px";
-        cloneEl.style.top = "10000px";
-        document.body.appendChild(cloneEl);
-
-        //var opts = _.extend(true, {}, me._opts);
-        //_.extend(true, opts, me.getCloneChart() );
-
-        //clone的chart只需要coord 和 graphs 配置就可以了
-        //因为画出来后也只需要拿graphs得sprite去贴图
-        var graphsOpt = [];
-        _.each( this._graphs, function( _g ){
-            var _field = _g.enabledField || _g.field;
-            
-            if( _.flatten([_field]).length ) {
-
-                var _opts = _.extend( true, {} , _g._opts );
-                
-                _opts.field = _field;
-                if( _g.type == "bar" ){
-                    _.extend(true, _opts , {
-                        node: {
-                            fillStyle: me.dataZoom.normalColor || "#ececec"
-                        },
-                        animation: false,
-                        eventEnabled: false,
-                        label: {
-                            enabled: false
-                        }
-                    } )
-                }
-                if( _g.type == "line" ){
-                    _.extend( true,  _opts , {
-                        line: {
-                            //lineWidth: 1,
-                            strokeStyle: "#ececec"
-                        },
-                        node: {
-                            enabled: false
-                        },
-                        area: {
-                            alpha: 1,
-                            fillStyle: "#ececec"
-                        },
-                        animation: false,
-                        eventEnabled: false,
-                        label: {
-                            enabled: false
-                        }
-                    } )
-                }
-                if( _g.type == "scat" ){
-                    _.extend( true, _opts, {
-                        node : {
-                            fillStyle : "#ececec"
-                        }
-                    } )
-                }
-
-                graphsOpt.push( _opts );
-            }
-        } );
-        var opts = {
-            coord : this._opts.coord,
-            graphs : graphsOpt
-        };
-
-        var thumbChart = new chartConstructor(cloneEl, me._data, opts, me.graphsMap, me.componentsMap);
-        thumbChart.draw();
-
-        return {
-            thumbChart: thumbChart,
-            cloneEl: cloneEl
-        }
-    }
-
-    _init_components_datazoom()
-    {
-        var me = this;
-
-        me.padding.bottom += me.dataZoom.h;
-
-        this.components.push( {
-            type : "once",
-            plug : {
-                draw: function(){
-                    var _dataZoom = new me.componentsMap.dataZoom( me._getDataZoomOpt() , me._getCloneChart() );
-                    me.components.push( {
-                        type : "dataZoom",
-                        plug : _dataZoom
-                    } ); 
-                    me.graphsSprite.addChild( _dataZoom.sprite );
-                }
-            }
-        } );
-    }
-
-    _getDataZoomOpt()
-    {
-        var me = this;
-        //初始化 datazoom 模块
-        var dataZoomOpt = _.extend(true, {
-            w: me._coord.width,
-            pos: {
-                x: me._coord.origin.x,
-                y: me._coord.origin.y + me._coord._xAxis.height
-            },
-            dragIng: function(range) {
-                var trigger = {
-                    name : "dataZoom",
-                    left :  me.dataZoom.range.start - range.start,
-                    right : range.end - me.dataZoom.range.end
-                };
-
-                _.extend( me.dataZoom.range , range );
-                me.resetData( me._data , trigger );
-                me.fire("dataZoomDragIng");
-            },
-            dragEnd: function(range) {
-                me.updateChecked && me.updateChecked();
-                me.fire("dataZoomDragEnd");
-            }
-        }, me.dataZoom);
-
-        return dataZoomOpt
-    }
-    //datazoom end
-
-    //rect cross begin
-    _init_components_cross()
-    {
-        //原则上一个直角坐标系中最佳只设置一个cross
-        var me = this;
-        if( !_.isArray( me.cross ) ){
-            me.cross = [ me.cross ];
-        };
-        _.each( me.cross, function( cross , i){
-            me.components.push( {
-                type : "once",
-                plug : {
-                    draw: function(){
-
-                        var opts = _.extend( true, {
-                            origin: {
-                                x: me._coord.origin.x,
-                                y: me._coord.origin.y
-                            },
-                            width : me._coord.width,
-                            height : me._coord.height
-                        } , cross );
-
-                        var _cross = new me.componentsMap.cross( opts, me );
-                        me.components.push( {
-                            type : "cross"+i,
-                            plug : _cross
-                        } ); 
-                        me.graphsSprite.addChild( _cross.sprite );
-
-                    }
-                }
-            } );
-        });
-    }
-
-    //markLine begin
-    _init_components_markline()
-    {
-        var me = this;
-
-        if( !_.isArray( me.markLine ) ){
-            me.markLine = [ me.markLine ];
-        };
-
-        _.each( me.markLine, function( ML ){
-            //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
-            var field = ML.markTo;
-
-            if( field && _.indexOf( me.dataFrame.fields , field ) == -1 ){
-                //如果配置的字段不存在，则不绘制
-                return;
-            }
-
-            var _yAxis = me._coord._yAxis[0]; //默认为左边的y轴
-            
-            if( field ){
-                //如果有配置markTo就从me._coord._yAxis中找到这个markTo所属的yAxis对象
-                _.each( me._coord._yAxis, function( $yAxis, yi ){
-                    var fs = _.flatten([ $yAxis.field ]);
-                    if( _.indexOf( fs, field ) >= 0 ){
-                        _yAxis = $yAxis;
-                    }
-                } );
-            }
-
-            if( ML.yAxisAlign ){
-                //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
-                _yAxis = me._coord._yAxis[ ML.yAxisAlign=="left"?0:1 ];
-            }
-
-            var y;
-            if( ML.y !== undefined && ML.y !== null ){
-                y = Number( ML.y );
-            } else {
-                //如果没有配置这个y的属性，就 自动计算出来均值
-                //但是均值是自动计算的，比如datazoom在draging的时候
-                y = function(){
-                    var _fdata = me.dataFrame.getFieldData( field );
-                    var _count = 0;
-                    _.each( _fdata, function( val ){
-                        if( Number( val ) ){
-                            _count += val;
-                        }
-                    } );
-                    return _count / _fdata.length;
-                }
-            };
-
-            if( !isNaN(y) ) {
-                //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
-                _yAxis.setWaterLine( y );
-            };
-
-            me.components.push( {
-                type : "once",
-                plug : {
-                    draw : function(){
-
-                        var _fstyle = "#777";
-                        var fieldMap = me._coord.getFieldMapOf( field );
-                        if( fieldMap ){
-                            _fstyle = fieldMap.color;
-                        };
-                        var lineStrokeStyle =  ML.line && ML.line.strokeStyle || _fstyle;
-                        var textFillStyle = ML.label && ML.label.fillStyle || _fstyle;
-        
-                        me.creatOneMarkLine( ML, y, _yAxis, lineStrokeStyle, textFillStyle, field );
-                    }
-                }
-            } );
-
-        } );
-    }
-
-    creatOneMarkLine( ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field )
-    {
-        var me = this;
-        var o = {
-            w: me._coord.width,
-            h: me._coord.height,
-            yVal: yVal,
-            origin: {
-                x: me._coord.origin.x,
-                y: me._coord.origin.y
-            },
-            line: {
-                list: [
-                    [0, 0],
-                    [me._coord.width, 0]
-                ]
-                //strokeStyle: lineStrokeStyle
-            },
-            label: {
-                fillStyle: textFillStyle
-            },
-            field: field
-        };
-
-        if( lineStrokeStyle ){
-            o.line.strokeStyle = lineStrokeStyle;
-        }
-
-        var _markLine = new me.componentsMap.markLine( _.extend( true, ML, o) , _yAxis );
-        me.components.push( {
-            type : "markLine",
-            plug : _markLine
-        } );
-        me.graphsSprite.addChild( _markLine.sprite );
-    }
-    //markLine end
-
-
-    _init_components_markpoint() 
-    {
-    }
-
-    _init_components_bartgi()
-    {
-        var me = this;
-        
-        if( !_.isArray( me.barTgi ) ){
-            me.barTgi = [ me.barTgi ];
-        };
-
-        _.each( me.barTgi , function( barTgiOpt, i ){
-            me.components.push( {
-                type : "once",
-                plug : {
-                    draw: function(){
-
-                        barTgiOpt = _.extend( true, {
-                            origin: {
-                                x: me._coord.origin.x,
-                                y: me._coord.origin.y
-                            }
-                        } , barTgiOpt );
-
-                        var _barTgi = new me.componentsMap.barTgi( barTgiOpt, me );
-                        me.components.push( {
-                            type : "barTgi",
-                            plug : _barTgi
-                        } ); 
-                        me.graphsSprite.addChild( _barTgi.sprite );
-
-                    }
-                }
-            } );
-        } );
-    }
-
-
-
     //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
     //方便外部自定义tip是的content
     setTipsInfo(e)
@@ -606,7 +230,6 @@ export default class Descartes extends CoordBase
             e.eventInfo.nodes = nodes;
         }
 
-        e.eventInfo.dataZoom = this.dataZoom;
     }
 
 

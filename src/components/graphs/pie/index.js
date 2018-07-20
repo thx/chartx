@@ -167,7 +167,7 @@ export default class PieGraphs extends GraphsBase
                 labelText     : null, //绘制的时候再设置,label format后的数据
                 iNode         : i
             };
-            debugger
+            
             data.push( layoutData );
         };
 
