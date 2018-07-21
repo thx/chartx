@@ -17947,8 +17947,8 @@
 	        };
 	        _this.center = {
 	            eventEnabled: true,
-	            fillStyle: '#ffffff',
-	            globalAlpha: 0
+	            fillStyle: '#000000',
+	            alpha: 0
 	        };
 
 	        _this.w = 0;
@@ -18215,7 +18215,7 @@
 	                width: btnRightCtx.x - btnLeftCtx.x - me.btnW,
 	                height: this.barH - 1,
 	                fillStyle: me.center.fillStyle,
-	                globalAlpha: me.center.globalAlpha,
+	                fillAlpha: me.center.alpha,
 	                cursor: "move"
 	            };
 	            if (this.rangeRect) {
