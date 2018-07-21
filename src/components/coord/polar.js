@@ -8,9 +8,9 @@ const _ = Canvax._;
 
 export default class Polar extends CoordBase
 {
-    constructor( node, data, opts, graphsMap, componentsMap )
+    constructor( node, data, opt, graphsMap, componentsMap )
     {
-        super( node, data, opts, graphsMap, componentsMap );
+        super( node, data, opt, graphsMap, componentsMap );
 
         //坐标系统
         this.CoordComponents = CoordComponents;
@@ -18,10 +18,10 @@ export default class Polar extends CoordBase
 
     }
 
-    //设置这个坐标系下面特有的 opts 默认值
+    //设置这个坐标系下面特有的 opt 默认值
     //以及往this上面写部分默认数据
     //在CoordBase中被调用
-    setDefaultOpts( opts )
+    setDefaultOpts( opt )
     {
         var me = this;
         this.coord = {
@@ -34,10 +34,10 @@ export default class Polar extends CoordBase
         if( !_.isArray( this.coord.rAxis.field ) ){
             this.coord.rAxis.field = [this.coord.rAxis.field ];
         };
-        if( opts.graphs ){
+        if( opt.graphs ){
             //有graphs的就要用找到这个graphs.field来设置coord.rAxis
             var arrs = [];
-            _.each( opts.graphs, function( graphs ){
+            _.each( opt.graphs, function( graphs ){
                 if( graphs.field ){
                     //没有配置field的话就不绘制这个 graphs了
                     var _fs = graphs.field;
@@ -50,7 +50,7 @@ export default class Polar extends CoordBase
         };
         this.coord.rAxis.field = this.coord.rAxis.field.concat( arrs );
 
-        return opts
+        return opt
     }
 
     getLegendData()

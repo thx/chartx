@@ -7,11 +7,11 @@ const _ = Canvax._;
 
 export default class yAxis extends Canvax.Event.EventDispatcher
 {
-	constructor( opts, data ){
+	constructor( opt, data ){
 
         super();
 
-        this._opt = opts;
+        this._opt = opt;
         
         this.width   = null; //第一次计算后就会有值
 
@@ -45,7 +45,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             lineHeight   : 1
         };
         
-        if( opts.isH && (!opts.label || opts.label.rotaion === undefined) ){
+        if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
             //如果是横向直角坐标系图
             this.label.rotation = 90;
         };
@@ -93,12 +93,12 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
         this.layoutType = "proportion"; // rule , peak, proportion
 
-        this.init(opts, data );
+        this.init(opt, data );
     }
 
-    init(opts, data )
+    init(opt, data )
     {
-        _.extend(true , this, opts);
+        _.extend(true , this, opt);
 
         //extend会设置好this.field
         //先要矫正子啊field确保一定是个array
@@ -171,10 +171,10 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         }
     }
 
-    draw(opts)
+    draw(opt)
     {
-        !opts && (opts ={});
-        opts && _.extend(true, this, opts);
+        !opt && (opt ={});
+        opt && _.extend(true, this, opt);
         this._getName();
         this.height = this.yMaxHeight - this._getYAxisDisLine();
 
@@ -190,7 +190,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.height = parseInt( this.height );
         
         this._trimYAxis();
-        this._widget( opts );
+        this._widget( opt );
 
         this.setX(this.pos.x);
         this.setY(this.pos.y);
@@ -651,10 +651,10 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         }
     }
 
-    _widget( opts )
+    _widget( opt )
     {
         var me = this;
-        !opts && (opts ={});
+        !opt && (opt ={});
         if (!me.enabled) {
             me.width = 0;
             return;
@@ -692,7 +692,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             if( yNode ){
                 if( yNode._txt && this.label.enabled ){
 
-                    if (me.animation && !opts.resize) {
+                    if (me.animation && !opt.resize) {
                         yNode._txt.animate({
                             y: posy
                         }, {
@@ -708,7 +708,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 };
 
                 if( yNode._tickLine && this.tickLine.enabled ){
-                    if (me.animation && !opts.resize) {
+                    if (me.animation && !opt.resize) {
                         yNode._tickLine.animate({
                             y: y
                         }, {
@@ -796,7 +796,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                     me.rulesSprite.addChild(yNode);
 
             
-                    if (me.animation && !opts.resize) {
+                    if (me.animation && !opt.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - aniFrom

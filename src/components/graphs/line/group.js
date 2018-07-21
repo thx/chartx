@@ -12,11 +12,11 @@ const _ = Canvax._;
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
-    constructor( fieldMap, iGroup, opts, ctx, h, w )
+    constructor( fieldMap, iGroup, opt, ctx, h, w )
     {
         super();
 
-        this._opt = opts;
+        this._opt = opt;
         this.fieldMap = fieldMap;
         this.field = null; //在extend之后要重新设置
         this.iGroup = iGroup;
@@ -69,16 +69,16 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
-        _.extend(true, this, opts );
+        _.extend(true, this, opt );
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
         this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
 
-        this.init(opts)
+        this.init(opt)
     }
 
-    init(opts)
+    init(opt)
     {
         this.sprite = new Canvax.Display.Sprite();
         var me = this;
@@ -89,11 +89,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         });
     }
 
-    draw(opts, data)
+    draw(opt, data)
     {
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
         this.data = data;
-        this._widget( opts );
+        this._widget( opt );
     }
 
 
@@ -148,7 +148,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
     /**
      * 
-     * @param {object} opts 
+     * @param {object} opt 
      * @param {data} data 
      * 
      * 触发这次reset的触发原因比如{name : 'datazoom', left:-1,right:1},  
@@ -198,7 +198,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         me._grow();
     }
 
-    _grow(callback , opts)
+    _grow(callback , opt)
     {
         var me = this;
 
@@ -290,10 +290,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return list;
     }
 
-    _widget( opts )
+    _widget( opt )
     {
         var me = this;
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         me._pointList = this._getPointList(me.data);
 
@@ -302,7 +302,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             return;
         };
         var list = [];
-        if (opts.animation) {
+        if (opt.animation) {
             var firstNode = this._getFirstNode();
             var firstY = firstNode ? firstNode.y : undefined;
             for (var a = 0, al = me.data.length; a < al; a++) {

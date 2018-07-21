@@ -9,9 +9,9 @@ const _ = Canvax._;
 
 export default class BarGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super(opts, root);
+        super(opt, root);
 
         this.type = "bar";
 
@@ -66,7 +66,7 @@ export default class BarGraphs extends GraphsBase
 
         this.proportion = false;//比例柱状图，比例图首先肯定是个堆叠图
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         this.init();
 
@@ -204,17 +204,17 @@ export default class BarGraphs extends GraphsBase
         };
     }
 
-    draw(opts)
+    draw(opt)
     { 
         
-        !opts && (opts ={});
+        !opt && (opt ={});
 
         //第二个data参数去掉，直接trimgraphs获取最新的data
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         var me = this;
 
-        var animate = me.animation && !opts.resize;
+        var animate = me.animation && !opt.resize;
 
         this.data = this._trimGraphs();
 
@@ -718,7 +718,7 @@ export default class BarGraphs extends GraphsBase
     /**
      * 生长动画
      */
-    grow(callback, opts) 
+    grow(callback, opt) 
     {
 
         var me = this;
@@ -733,7 +733,7 @@ export default class BarGraphs extends GraphsBase
             };
         };
 
-        if (!opts.animate) {
+        if (!opt.animate) {
             callback && callback(me);
             return;
         };
@@ -748,7 +748,7 @@ export default class BarGraphs extends GraphsBase
             delay: Math.min(1000 / this._barsLen, 80),
             easing: "Linear.None",//"Back.Out",
             duration: 500
-        }, opts);
+        }, opt);
 
         var barCount = 0;
         _.each(me.enabledField, function(h_group, g) {

@@ -45,7 +45,7 @@ export default {
                 return value;
             })||{};
         };
-        var opts = parse( decodeURIComponent( options[ chartPark_cid ] || {} ) );
-        return opts;
+        var opt = parse( decodeURIComponent( options[ chartPark_cid ] || {} ) );
+        return opt;
     }
 };

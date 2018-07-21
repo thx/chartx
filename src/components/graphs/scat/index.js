@@ -8,9 +8,9 @@ const _ = Canvax._;
 
 export default class ScatGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "scat";
 
@@ -76,7 +76,7 @@ export default class ScatGraphs extends GraphsBase
         //动画的起始位置， 默认x=data.x y = 0
         this.aniOrigin = "default" //center（坐标正中） origin（坐标原点）
         
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.init( );
     }
@@ -102,18 +102,18 @@ export default class ScatGraphs extends GraphsBase
         this.sprite.addChild( this._textsp );
     }
 
-    draw(opts)
+    draw(opt)
     {
-        !opts && (opts ={});
+        !opt && (opt ={});
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
         this.data = this._trimGraphs(); 
         this._widget();
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
         var me = this;
-        if( this.animation && !opts.resize ){
+        if( this.animation && !opt.resize ){
             this.grow( function(){
                 me.fire("complete");
             } );
@@ -490,14 +490,14 @@ export default class ScatGraphs extends GraphsBase
                 y : nodeData.y,
                 r : nodeData.radius
             }, {
-                onUpdate: function( opts ){
+                onUpdate: function( opt ){
                     if( this._label ){
-                        var _textPoint = me._getTextPosition( opts );
+                        var _textPoint = me._getTextPosition( opt );
                         this._label.context.x = _textPoint.x;
                         this._label.context.y = _textPoint.y;
                     };
                     if( this._line ){
-                        this._line.context.start.y = opts.y+opts.r;
+                        this._line.context.start.y = opt.y+opt.r;
                     };
                 },
                 delay : Math.round(Math.random()*300),

@@ -6,7 +6,82 @@ const _ = Canvax._;
 
 export default class Legend extends Component
 {
-    static register( app )
+    constructor(data, opt, root)
+    {
+        super();
+
+        this.root = root;
+        /* data的数据结构为
+        [
+            //descartes中用到的时候还会带入yAxis
+            {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
+        ]
+        */
+        
+        this.data = data || [];
+
+        this.width = 0;
+        this.height = 0;
+
+        //一般来讲，比如柱状图折线图等，是按照传入的field来分组来设置图例的，那么legend.field都是null
+        //但是还有一种情况就是，是按照同一个field中的数据去重后来分组的，比如散点图中sex属性的男女两个分组作为图例，
+        //以及pie饼图中的每个数据的name字段都是作为一个图例
+        //那么就想要给legend主动设置一个field字段，然后legend自己从dataFrame中拿到这个field的数据来去重，然后分组做为图例
+        //这是一个很屌的设计
+        this.field = null;
+
+        this.icon = {
+            height : 30,
+            width  : "auto",
+            shapeType : "circle",
+            radius : 5,
+            lineWidth : 1,
+            fillStyle : "#999",
+            onChecked : function(){},
+            onUnChecked : function(){}
+        };
+
+        this.label = {
+            textAlign : "left",
+            textBaseline : "middle",
+            fillStyle : "#333", //obj.color
+            cursor: "pointer",
+            format : function( name, info ){
+                return name
+            }
+        };
+
+        //this.onChecked=function(){};
+        //this.onUnChecked=function(){};
+
+        this._labelColor = "#999";
+
+        this.position = "top" ; //图例所在的方向top,right,bottom,left
+
+        this.layoutType = "h"; //横向 top,bottom --> h left,right -- >v
+
+        this.sprite  = null;
+
+
+
+        if( opt ){
+            _.extend(true, this , opt );
+        };
+
+        if( this.position == "left" || this.position == "right" ){
+            this.layoutType = 'v';
+        } else {
+            this.layoutType = 'h';
+        };
+
+        this.sprite = new Canvax.Display.Sprite({
+            id : "LegendSprite"
+        });
+
+        this._draw();
+    }
+
+    static init( opt,app )
     {
         //设置legendOpt
         var legendOpt = _.extend(true, {
@@ -82,84 +157,6 @@ export default class Legend extends Component
         } );
 
         app.stage.addChild( _legend.sprite );
-    }
-
-    constructor(data, tops, root)
-    {
-        super();
-
-        this.root = root;
-        /* data的数据结构为
-        [
-            //descartes中用到的时候还会带入yAxis
-            {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
-        ]
-        */
-        
-        this.data = data || [];
-
-        this.width = 0;
-        this.height = 0;
-
-        //一般来讲，比如柱状图折线图等，是按照传入的field来分组来设置图例的，那么legend.field都是null
-        //但是还有一种情况就是，是按照同一个field中的数据去重后来分组的，比如散点图中sex属性的男女两个分组作为图例，
-        //以及pie饼图中的每个数据的name字段都是作为一个图例
-        //那么就想要给legend主动设置一个field字段，然后legend自己从dataFrame中拿到这个field的数据来去重，然后分组做为图例
-        //这是一个很屌的设计
-        this.field = null;
-
-        this.icon = {
-            height : 30,
-            width  : "auto",
-            shapeType : "circle",
-            radius : 5,
-            lineWidth : 1,
-            fillStyle : "#999",
-            onChecked : function(){},
-            onUnChecked : function(){}
-        };
-
-        this.label = {
-            textAlign : "left",
-            textBaseline : "middle",
-            fillStyle : "#333", //obj.color
-            cursor: "pointer",
-            format : function( name, info ){
-                return name
-            }
-        };
-
-        //this.onChecked=function(){};
-        //this.onUnChecked=function(){};
-
-        this._labelColor = "#999";
-
-        this.position = "top" ; //图例所在的方向top,right,bottom,left
-
-        this.layoutType = "h"; //横向 top,bottom --> h left,right -- >v
-
-        this.sprite  = null;
-
-        this.init( tops );
-    }
-
-    init( tops )
-    {
-        if( tops ){
-            _.extend(true, this , tops );
-        };
-
-        if( this.position == "left" || this.position == "right" ){
-            this.layoutType = 'v';
-        } else {
-            this.layoutType = 'h';
-        };
-
-        this.sprite = new Canvax.Display.Sprite({
-            id : "LegendSprite"
-        });
-
-        this._draw();
     }
 
     pos( pos )

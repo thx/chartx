@@ -9,9 +9,9 @@ const _ = Canvax._;
  */
 export default class Coord extends Chart
 {
-    constructor( node, data, opts, graphsMap, componentsMap )
+    constructor( node, data, opt, graphsMap, componentsMap )
     {
-        super( node, data, opts );
+        super( node, data, opt );
         this.graphsMap = graphsMap;
         this.componentsMap = componentsMap;
 
@@ -19,22 +19,22 @@ export default class Coord extends Chart
         this.dataFrame = this.initData( this._data );
 
         this._graphs = [];
-        if( opts.graphs ){
-            opts.graphs = _.flatten( [ opts.graphs ] );
+        if( opt.graphs ){
+            opt.graphs = _.flatten( [ opt.graphs ] );
         };
 
-        _.extend(true, this, this.setDefaultOpts( opts ));
+        _.extend(true, this, this.setDefaultOpts( opt ));
         
         //this.draw();
-        this._tipsPointer = null;
+        
     }
 
-    setDefaultOpts( opts ){
-        return opts;
+    setDefaultOpts( opt ){
+        return opt;
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 drawEndHorizontal 的操作
-    draw( opts )
+    draw( opt )
     {
         if( this._opts.theme ){
             //如果用户有配置皮肤组件，优先级最高
@@ -49,15 +49,15 @@ export default class Coord extends Chart
             this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用下面的merge
             
         };
-        this.initModule( opts );     //初始化模块  
-        this.registerComponents( opts ); //初始化组件, 来自己chart.js模块
+        this.initModule( opt );     //初始化模块  
+        this.initComponents( opt ); //初始化组件, 来自己chart.js模块
 
         if( this._coord && this._coord.horizontal ){
             this.drawBeginHorizontal && this.drawBeginHorizontal();
         };
 
-        this.startDraw( opts );      //开始绘图
-        this.drawComponents( opts ); //绘图完，开始绘制插件，来自己chart.js模块
+        this.startDraw( opt );      //开始绘图
+        this.drawComponents( opt ); //绘图完，开始绘制插件，来自己chart.js模块
 
         if( this._coord && this._coord.horizontal ){
             this.drawEndHorizontal && this.drawEndHorizontal();
@@ -66,7 +66,7 @@ export default class Coord extends Chart
         this.inited = true;
     }
 
-    initModule(opts)
+    initModule(opt)
     {
         var me = this
         //首先是创建一个坐标系对象
@@ -82,10 +82,10 @@ export default class Coord extends Chart
         } );
     }
 
-    startDraw(opts)
+    startDraw(opt)
     {
         var me = this;
-        !opts && (opts ={});
+        !opt && (opt ={});
         var _coord = this._coord;
 
         var width = this.width - this.padding.left - this.padding.right;
@@ -94,7 +94,7 @@ export default class Coord extends Chart
 
         if( this._coord ){
             //先绘制好坐标系统
-            this._coord.draw( opts );
+            this._coord.draw( opt );
             width = this._coord.width;
             height = this._coord.height;
             origin = this._coord.origin;
@@ -122,7 +122,7 @@ export default class Coord extends Chart
                 height : height,
                 origin : origin,
                 inited : me.inited,
-                resize : opts.trigger == "resize"
+                resize : opt.trigger == "resize"
             });
 
         } );
@@ -172,7 +172,6 @@ export default class Coord extends Chart
             if ( _tips ) {
                 me.setTipsInfo.apply(me, [e]);
                 _tips.show(e);
-                me._tipsPointerShow( e, _tips, me._coord );
                 me._tipsPointerAtAllGraphs( e );
             };
         });
@@ -181,7 +180,6 @@ export default class Coord extends Chart
             if ( _tips ) {
                 me.setTipsInfo.apply(me, [e]);
                 _tips.move(e);
-                me._tipsPointerMove( e, _tips, me._coord );
                 me._tipsPointerAtAllGraphs( e );
             };
         });
@@ -191,7 +189,6 @@ export default class Coord extends Chart
             var _tips = me.getComponentById("tips");
             if ( _tips && !( e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint( me._coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
-                me._tipsPointerHide( e, _tips, me._coord );
                 me._tipsPointerHideAtAllGraphs( e );
             };
         });
@@ -201,7 +198,6 @@ export default class Coord extends Chart
                 _tips.hide(e);
                 me.setTipsInfo.apply(me, [e]);
                 _tips.show(e);
-                me._tipsPointerShow( e, _tips, me._coord );
                 me._tipsPointerAtAllGraphs( e );
             };
         });
@@ -217,18 +213,6 @@ export default class Coord extends Chart
             } );
             e.eventInfo.nodes = nodes;
         }
-    }
-
-    _tipsPointerShow( e, _tips, _coord )
-    {   
-    }
-
-    _tipsPointerHide( e, _tips, _coord )
-    {
-    }
-
-    _tipsPointerMove( e, _tips, _coord )
-    {   
     }
 
     _tipsPointerAtAllGraphs( e )

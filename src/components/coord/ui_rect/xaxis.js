@@ -7,11 +7,11 @@ const _ = Canvax._;
 
 export default class xAxis extends Canvax.Event.EventDispatcher
 {
-    constructor(opts, data, _coord)
+    constructor(opt, data, _coord)
     {
         super();
 
-        this._opts = opts;
+        this._opts = opt;
 
         this._coord = _coord || {};
 
@@ -45,7 +45,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             lineHeight : 1
         };
         
-        if( opts.isH && (!opts.label || opts.label.rotaion === undefined) ){
+        if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
             //如果是横向直角坐标系图
             this.label.rotation = 90;
         };
@@ -87,15 +87,15 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
 
-        _.extend(true , this, opts);
+        _.extend(true , this, opt);
 
-        this.init(opts, data);
+        this.init(opt, data);
 
         //xAxis的field只有一个值,
         this.field = _.flatten( [ this.field ] )[0];
     }
 
-    init(opts, data) 
+    init(opt, data) 
     {
         this.sprite = new Canvax.Display.Sprite({
             id: "xAxisSprite"
@@ -240,12 +240,12 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         return o;
     }
     
-    draw(opts)
+    draw(opt)
     {
-        //首次渲染从 直角坐标系组件中会传入 opts
-        if( !opts.resetData ){
+        //首次渲染从 直角坐标系组件中会传入 opt
+        if( !opt.resetData ){
             this._getName();
-            this._computerConfig(opts);
+            this._computerConfig(opt);
         };
         
         this.layoutData = this._trimXAxis(this.dataSection);
@@ -254,7 +254,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         this.sprite.context.x = this.pos.x;
         this.sprite.context.y = this.pos.y;
 
-        this._widget( opts );
+        this._widget( opt );
 
     }
 
@@ -278,10 +278,10 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     }
 
     //初始化配置
-    _computerConfig(opts)
+    _computerConfig(opt)
     {
-        if (opts) {
-            _.extend(true, this, opts);
+        if (opt) {
+            _.extend(true, this, opt);
         };
 
         if (this._name) {
@@ -295,14 +295,14 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
     //获取x对应的位置
     //val ind 至少要有一个
-    getPosX( opts )
+    getPosX( opt )
     {
         var x = 0;
-        var val = opts.val; 
-        var ind = "ind" in opts ? opts.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
-        var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
-        var width = "width" in opts ? opts.width : this.width;
-        var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
+        var val = opt.val; 
+        var ind = "ind" in opt ? opt.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
+        var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
+        var width = "width" in opt ? opt.width : this.width;
+        var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
 
         if( dataLen == 1 ){
             x =  width / 2;
@@ -411,10 +411,10 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         return res;
     }
 
-    _widget( opts )
+    _widget( opt )
     {
         if( !this.enabled ) return;
-        !opts && (opts ={});
+        !opt && (opt ={});
 
         var arr = this.layoutData
 
@@ -482,7 +482,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                     xNode.addChild( xNode._txt );
 
                     //新建的 txt的 动画方式
-                    if (this.animation && !opts.resize) {
+                    if (this.animation && !opt.resize) {
                         xNode._txt.animate({
                             globalAlpha: 1,
                             y: xNode._txt.context.y - 20

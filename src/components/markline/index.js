@@ -8,9 +8,61 @@ const _ = Canvax._;
 
 export default class MarkLine extends Component
 {
+    constructor(opt , _yAxis)
+    {
+        super(opt , _yAxis);
+
+        this._yAxis = _yAxis;
+        this.w      = 0;
+        this.h      = 0
+        this.field  = null;
+        this.origin = {
+            x : 0 , y : 0
+        };
+
+        this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
+        this.yVal = 0;     //y 的值，可能是个function，均值计算就是个function
+        
+        this.line       = {
+            y           : 0,
+            list        : [],
+            strokeStyle : '#999',
+            lineWidth   : 1,
+            smooth      : false,
+            lineType    : 'dashed'
+        };
+
+        this.label = {
+            enabled     : false,
+            fillStyle   : '#999999',
+            fontSize    : 12,
+            text        : null, //"markline",
+            lineType    : 'dashed',
+            lineWidth   : 1,
+            strokeStyle : "white",
+            format      : null
+        };
+
+        this._txt = null;
+        this._line = null;
+       
+        opt && _.extend(true, this, opt);
+
+        this.sprite  = new Sprite();
+        
+        this.core  = new Sprite({ 
+            context : {
+                x : this.origin.x,
+                y : this.origin.y
+            }
+        });
+
+        this.sprite.addChild( this.core );
+    }
+
 
     //markLine begin
-    static register(app)
+    static init(opt,app)
     {
         var app = app;
         var me = this;
@@ -125,68 +177,6 @@ export default class MarkLine extends Component
         app.graphsSprite.addChild( _markLine.sprite );
     }
     //markLine end
-
-
-    constructor(opt , _yAxis)
-    {
-        super(opt , _yAxis);
-
-        this._yAxis = _yAxis;
-        this.w      = 0;
-        this.h      = 0
-        this.field  = null;
-        this.origin = {
-            x : 0 , y : 0
-        };
-
-        this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
-        this.yVal = 0;     //y 的值，可能是个function，均值计算就是个function
-        
-        this.line       = {
-            y           : 0,
-            list        : [],
-            strokeStyle : '#999',
-            lineWidth   : 1,
-            smooth      : false,
-            lineType    : 'dashed'
-        };
-
-        this.label = {
-            enabled     : false,
-            fillStyle   : '#999999',
-            fontSize    : 12,
-            text        : null, //"markline",
-            lineType    : 'dashed',
-            lineWidth   : 1,
-            strokeStyle : "white",
-            format      : null
-        };
-
-        this._txt = null;
-        this._line = null;
-       
-        opt && _.extend(true, this, opt);
-
-        this.init();
-    }
-
-    init()
-    {
-        var me = this;
-
-        this.sprite  = new Sprite();
-
-        this.core  = new Sprite({ 
-            context : {
-                x : this.origin.x,
-                y : this.origin.y
-            }
-        });
-
-        this.sprite.addChild( this.core );
-
-        //me.draw();    
-    }
 
     _getYVal()
     {

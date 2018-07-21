@@ -7,9 +7,9 @@ const Text = Canvax.Display.Text;
 
 export default class CloudGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "cloud";
 
@@ -53,7 +53,7 @@ export default class CloudGraphs extends GraphsBase
             }
         };
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.init( );
     }
@@ -65,10 +65,10 @@ export default class CloudGraphs extends GraphsBase
         });
     }
 
-    draw( opts )
+    draw( opt )
     {
-        !opts && (opts ={});
-        _.extend( true, this , opts );
+        !opt && (opt ={});
+        _.extend( true, this , opt );
         this._drawGraphs();
         this.sprite.context.x = this.width / 2;
         this.sprite.context.y = this.height / 2;

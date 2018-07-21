@@ -8,41 +8,6 @@ const _ = Canvax._;
 
 export default class MarkLine extends Component
 {
-    //rect cross begin
-    static register(app)
-    {
-        //原则上一个直角坐标系中最佳只设置一个cross
-        var me = this;
-        if( !_.isArray( app.cross ) ){
-            app.cross = [ app.cross ];
-        };
-        _.each( app.cross, function( cross , i){
-            app.components.push( {
-                type : "once",
-                plug : {
-                    draw: function(){
-
-                        var opts = _.extend( true, {
-                            origin: {
-                                x: app._coord.origin.x,
-                                y: app._coord.origin.y
-                            },
-                            width : app._coord.width,
-                            height : app._coord.height
-                        } , cross );
-
-                        var _cross = new me( opts, app );
-                        app.components.push( {
-                            type : "cross"+i,
-                            plug : _cross
-                        } );
-                        app.graphsSprite.addChild( _cross.sprite );
-
-                    }
-                }
-            } );
-        });
-    }
 
     constructor(opt , root)
     {
@@ -102,17 +67,48 @@ export default class MarkLine extends Component
        
         opt && _.extend(true, this, opt);
 
-        this.init();
-    }
-
-    init()
-    {
         this.sprite  = new Sprite({
             id : "cross_"+Canvax.utils.getUID(),
             context : {
                 x : this.origin.x,
                 y : this.origin.y
             }
+        });
+    }
+
+    //rect cross begin
+    static init(opt,app)
+    {
+        //原则上一个直角坐标系中最佳只设置一个cross
+        var me = this;
+        if( !_.isArray( app.cross ) ){
+            app.cross = [ app.cross ];
+        };
+        _.each( app.cross, function( cross , i){
+            app.components.push( {
+                type : "once",
+                plug : {
+                    draw: function(){
+
+                        var opt = _.extend( true, {
+                            origin: {
+                                x: app._coord.origin.x,
+                                y: app._coord.origin.y
+                            },
+                            width : app._coord.width,
+                            height : app._coord.height
+                        } , cross );
+
+                        var _cross = new me( opt, app );
+                        app.components.push( {
+                            type : "cross"+i,
+                            plug : _cross
+                        } );
+                        app.graphsSprite.addChild( _cross.sprite );
+
+                    }
+                }
+            } );
         });
     }
 

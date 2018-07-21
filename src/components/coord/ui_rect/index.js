@@ -9,9 +9,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class Rect_Component extends coorBase
 {
-    constructor( opts, root )
+    constructor( opt, root )
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "descartes";
         
@@ -33,40 +33,40 @@ export default class Rect_Component extends coorBase
         this.grid = {
         };
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
-        if( opts.horizontal ){
+        if( opt.horizontal ){
             this.xAxis.isH = true;
             _.each( this.yAxis , function( yAxis ){
                 yAxis.isH = true;
             });
         };
 
-        if( "enabled" in opts ){
+        if( "enabled" in opt ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _.extend( true, this.xAxis, {
-                enabled : opts.enabled
+                enabled : opt.enabled
             } );
             _.each( this.yAxis , function( yAxis ){
                 _.extend( true, yAxis, {
-                    enabled : opts.enabled
+                    enabled : opt.enabled
                 } );
             });
 
             /*
-            this.xAxis.enabled = opts.enabled;
+            this.xAxis.enabled = opt.enabled;
             _.each( this.yAxis , function( yAxis ){
-                yAxis.enabled = opts.enabled;
+                yAxis.enabled = opt.enabled;
             });
             */
             
-            this.grid.enabled = opts.enabled;
+            this.grid.enabled = opt.enabled;
         };
 
-        this.init(opts);
+        this.init(opt);
     }
 
-    init(opts)
+    init(opt)
     {
         this.sprite = new Canvax.Display.Sprite({
             id : "coord"
@@ -99,16 +99,16 @@ export default class Rect_Component extends coorBase
         });
     }
 
-    draw( opts )
+    draw( opt )
     {
         //在绘制的时候，要先拿到xAxis的高
 
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         var _padding = this.root.padding;
 
-        var h = opts.height || this.root.height;
-        var w = opts.width || this.root.width;
+        var h = opt.height || this.root.height;
+        var w = opt.width || this.root.width;
         if( this.horizontal ){
             //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
             var _num = w;
@@ -128,7 +128,7 @@ export default class Rect_Component extends coorBase
                     y: y
                 },
                 yMaxHeight: y - _padding.top,
-                resize : opts.trigger == "resize"
+                resize : opt.trigger == "resize"
             });
             _yAxisW = this._yAxisLeft.width;
         }
@@ -141,7 +141,7 @@ export default class Rect_Component extends coorBase
                     y : y
                 },
                 yMaxHeight: y - _padding.top,
-                resize : opts.trigger == "resize"
+                resize : opt.trigger == "resize"
             });
             _yAxisRW = this._yAxisRight.width;
         };
@@ -153,7 +153,7 @@ export default class Rect_Component extends coorBase
                 y : y
             },
             width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
-            resize : opts.trigger == "resize"
+            resize : opt.trigger == "resize"
         });
         
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
@@ -177,7 +177,7 @@ export default class Rect_Component extends coorBase
                 x   : this.origin.x,
                 y   : this.origin.y
             },
-            resize : opts.trigger == "resize"
+            resize : opt.trigger == "resize"
         } );
 
         if( this.horizontal ){
@@ -261,9 +261,9 @@ export default class Rect_Component extends coorBase
 
     }
 
-    getPosX( opts )
+    getPosX( opt )
     {
-        return this._xAxis.getPosX( opts );
+        return this._xAxis.getPosX( opt );
     }
 
     _getAxisDataFrame( fields )

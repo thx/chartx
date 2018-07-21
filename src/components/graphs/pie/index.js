@@ -6,9 +6,9 @@ const _ = Canvax._;
 
 export default class PieGraphs extends GraphsBase
 {
-    constructor( opts, root )
+    constructor( opt, root )
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "pie";
 
@@ -44,12 +44,12 @@ export default class PieGraphs extends GraphsBase
         this.startAngle = -90;
         this.allAngles = 360;
         
-        this.init( opts );
+        this.init( opt );
     }
 
-    init( opts )
+    init( opt )
     {
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         this.sprite = new Canvax.Display.Sprite();
 
@@ -89,21 +89,21 @@ export default class PieGraphs extends GraphsBase
     }
 
     /**
-     * opts ==> {width,height,origin}
+     * opt ==> {width,height,origin}
      */
-    draw( opts )
+    draw( opt )
     {
-        !opts && (opts ={});
+        !opt && (opt ={});
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
         this._computerProps();
 
         //这个时候就是真正的计算布局用得layoutdata了
         this._pie = new Pie( this , this._trimGraphs( this.data ) );
-        this._pie.draw( opts );
+        this._pie.draw( opt );
 
         var me = this;
-        if( this.animation && !opts.resize ){
+        if( this.animation && !opt.resize ){
             this._pie.grow( function(){
                 me.fire("complete");
             } );

@@ -8,9 +8,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class LineGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "line";
 
@@ -22,33 +22,33 @@ export default class LineGraphs extends GraphsBase
         
         this.groups = []; //群组集合
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         this.init(this._opts);
     }
 
-    init(opts)
+    init(opt)
     {
-        opts.yAxisAlign && (this.yAxisAlign = opts.yAxisAlign);
+        opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
         this.sprite = new Canvax.Display.Sprite();
     }
 
-    draw(opts)
+    draw(opt)
     {
-        !opts && (opts ={});
-        this.width = opts.width;
-        this.height = opts.height;
-        _.extend( true, this.origin, opts.origin );
+        !opt && (opt ={});
+        this.width = opt.width;
+        this.height = opt.height;
+        _.extend( true, this.origin, opt.origin );
 
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
         this.data = this._trimGraphs();
 
-        this._setGroupsForYfield( this.data , null, opts );
+        this._setGroupsForYfield( this.data , null, opt );
 
         //this.grow();
-        if( this.animation && !opts.resize ){
+        if( this.animation && !opt.resize ){
             this.grow();
         } else {
             this.fire("complete");
@@ -212,11 +212,11 @@ export default class LineGraphs extends GraphsBase
        return this.groups[ this.getGroupIndex(field) ]
     }
 
-    _setGroupsForYfield(data , fields, opts)
+    _setGroupsForYfield(data , fields, opt)
     {
         var me = this;
 
-        !opts && (opts ={});
+        !opt && (opt ={});
 
         if( fields ){
             //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
@@ -249,7 +249,7 @@ export default class LineGraphs extends GraphsBase
             );
 
             group.draw( {
-                animation : me.animation && !opts.resize
+                animation : me.animation && !opt.resize
             }, g.data );
 
             var insert = false;

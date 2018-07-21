@@ -26,11 +26,11 @@ export default class MarkPoint extends Component
         this.duration    = 800;//如果有动画，则代表动画时长
         this.easing      = null;//动画类型
 
-        //droplet opts
+        //droplet opt
         this.hr = 8;
         this.vr = 12;
 
-        //circle opts
+        //circle opt
         this.radius  = 5;
         
         this.sprite = null;

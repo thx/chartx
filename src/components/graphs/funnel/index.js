@@ -8,9 +8,9 @@ const Polygon = Canvax.Shapes.Polygon;
 
 export default class FunnelGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "funnel";
 
@@ -56,7 +56,7 @@ export default class FunnelGraphs extends GraphsBase
             textBaseline : "middle"
         }
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.init( );
     }
@@ -96,16 +96,16 @@ export default class FunnelGraphs extends GraphsBase
         };
     }
 
-    draw( opts )
+    draw( opt )
     {
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         //第二个data参数去掉，直接trimgraphs获取最新的data
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         var me = this;
 
-        var animate = me.animation && !opts.resize;
+        var animate = me.animation && !opt.resize;
 
         this._computerAttr();
 

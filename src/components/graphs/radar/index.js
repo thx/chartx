@@ -7,9 +7,9 @@ const _ = Canvax._;
 
 export default class RadarGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type  = "radar";
         
@@ -43,7 +43,7 @@ export default class RadarGraphs extends GraphsBase
             //}
         };
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.init();
     }
@@ -55,12 +55,12 @@ export default class RadarGraphs extends GraphsBase
         });
     }
 
-    draw(opts)
+    draw(opt)
     {
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         var me = this;
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
         this.data = this._trimGraphs();
         
         this._widget();

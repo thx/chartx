@@ -7,10 +7,10 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class PlanetGroup
 {
-    constructor(opts, dataFrame , _graphs)
+    constructor(opt, dataFrame , _graphs)
     {
     
-        this._opts = opts;
+        this._opts = opt;
         this.dataFrame = dataFrame;
         this._graphs = _graphs;
         this.root = _graphs.root;
@@ -71,7 +71,7 @@ export default class PlanetGroup
         this.maxRingNum = 0;
         this.ringNum = 0;
 
-        _.extend( true, this, opts );
+        _.extend( true, this, opt );
 
         //circle.maxR 绝对不能大于最大 占位 pit.radius
         if( this.node.maxR > this.pit.radius ){

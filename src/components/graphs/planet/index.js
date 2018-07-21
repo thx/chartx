@@ -11,9 +11,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class PlanetGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "planet";
 
@@ -55,7 +55,7 @@ export default class PlanetGraphs extends GraphsBase
             }
         };
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         if( this.center.radius == 0 || !this.center.enabled ){
             this.center.radius = 0;
@@ -80,12 +80,12 @@ export default class PlanetGraphs extends GraphsBase
         this.dataGroupHandle();
     }
 
-    draw( opts )
+    draw( opt )
     {
         
-        !opts && (opts ={});
+        !opt && (opt ={});
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.drawGroups();
 

@@ -8,15 +8,7 @@ const _ = Canvax._;
 
 export default class waterMark
 {
-
-    static register( app )
-    {
-        var waterMarkOpt = app.waterMark;
-        var _water = new this( waterMarkOpt, app );
-        app.stage.addChild( _water.spripte );
-    }
-
-    constructor( opts , root )
+    constructor( opt , root )
     {
         this.root = root;
         this.width = root.width;
@@ -30,19 +22,20 @@ export default class waterMark
         this.alpha = 0.2;
         this.rotation = 45;
 
-        _.extend( true, this, opts );
+        _.extend( true, this, opt );
 
-        this.init();
-    }
-
-    init()
-    {
         this.spripte = new Canvax.Display.Sprite({
             id : "watermark"
         });
-
         this.draw();
     }
+
+    static init( opt , app )
+    {
+        var _water = new this( opt, app );
+        app.stage.addChild( _water.spripte );
+    }
+
 
     draw()
     {

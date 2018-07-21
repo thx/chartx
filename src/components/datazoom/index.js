@@ -9,146 +9,7 @@ const _ = Canvax._;
 export default class dataZoom extends Component
 {
 
-    //datazoom begin
-    static register(app)
-    {
-
-        let me = this;
-
-        app.padding.bottom += app.dataZoom.h;
-
-        app.components.push( {
-            type : "once",
-            plug : {
-                draw: function(){
-                    var _dataZoom = new me( me._getDataZoomOpt( app ) , me._getCloneChart( app ) );
-                    app.components.push( {
-                        type : "dataZoom",
-                        plug : _dataZoom
-                    } ); 
-                    app.graphsSprite.addChild( _dataZoom.sprite );
-                }
-            }
-        } );
-    }
-
-    static _getCloneChart( app ) 
-    {
-        var chartConstructor = app.constructor;//(barConstructor || Bar);
-        var cloneEl = app.el.cloneNode();
-        cloneEl.innerHTML = "";
-        cloneEl.id = app.el.id + "_currclone";
-        cloneEl.style.position = "absolute";
-        cloneEl.style.width = app.el.offsetWidth + "px";
-        cloneEl.style.height = app.el.offsetHeight + "px";
-        cloneEl.style.top = "10000px";
-        document.body.appendChild(cloneEl);
-
-        //var opts = _.extend(true, {}, me._opts);
-        //_.extend(true, opts, me.getCloneChart() );
-
-        //clone的chart只需要coord 和 graphs 配置就可以了
-        //因为画出来后也只需要拿graphs得sprite去贴图
-        var graphsOpt = [];
-        _.each( app._graphs, function( _g ){
-            var _field = _g.enabledField || _g.field;
-            
-            if( _.flatten([_field]).length ) {
-
-                var _opts = _.extend( true, {} , _g._opts );
-                
-                _opts.field = _field;
-                if( _g.type == "bar" ){
-                    _.extend(true, _opts , {
-                        node: {
-                            fillStyle: "#ececec"
-                        },
-                        animation: false,
-                        eventEnabled: false,
-                        label: {
-                            enabled: false
-                        }
-                    } )
-                }
-                if( _g.type == "line" ){
-                    _.extend( true,  _opts , {
-                        line: {
-                            //lineWidth: 1,
-                            strokeStyle: "#ececec"
-                        },
-                        icon: {
-                            enabled: false
-                        },
-                        area: {
-                            alpha: 1,
-                            fillStyle: "#ececec"
-                        },
-                        animation: false,
-                        eventEnabled: false,
-                        label: {
-                            enabled: false
-                        }
-                    } )
-                }
-                if( _g.type == "scat" ){
-                    _.extend( true, _opts, {
-                        node : {
-                            fillStyle : "#ececec"
-                        }
-                    } )
-                }
-
-                graphsOpt.push( _opts );
-            }
-        } );
-        var opts = {
-            coord : app._opts.coord,
-            graphs : graphsOpt
-        };
-
-        var thumbChart = new chartConstructor(cloneEl, app._data, opts, app.graphsMap, app.componentsMap);
-        thumbChart.draw();
-
-        return {
-            thumbChart: thumbChart,
-            cloneEl: cloneEl
-        }
-    }
-
-    static _getDataZoomOpt(app)
-    {
-        //初始化 datazoom 模块
-        var dataZoomOpt = _.extend(true, {
-            w: app._coord.width,
-            pos: {
-                x: app._coord.origin.x,
-                y: app._coord.origin.y + app._coord._xAxis.height
-            },
-            dragIng: function(range) {
-                var trigger = {
-                    name : "dataZoom",
-                    left :  app.dataFrame.range.start - range.start,
-                    right : range.end - app.dataFrame.range.end
-                };
-
-                _.extend( app.dataFrame.range , range );
-                
-                //不想要重新构造dataFrame，所以第一个参数为null
-                app.resetData( null , trigger );
-                app.fire("dataZoomDragIng");
-            },
-            dragEnd: function(range) {
-                app.updateChecked && app.updateChecked();
-                app.fire("dataZoomDragEnd");
-            }
-        }, app.dataZoom);
-
-        return dataZoomOpt
-    }
-    //datazoom end
-
-
-	constructor(opt, cloneChart)
+    constructor(opt, cloneChart)
 	{
         super(opt, cloneChart);
         
@@ -218,33 +79,168 @@ export default class dataZoom extends Component
 
         opt && _.extend( true, this, opt);
         this._computeAttrs( opt );
-        this.init(opt);
-	}
+        
 
-	init(opt) 
-	{
-        var me = this;
-        me.sprite = new Canvax.Display.Sprite({
+        this.sprite = new Canvax.Display.Sprite({
             id : "dataZoom",
             context: {
-                x: me.pos.x,
-                y: me.pos.y
+                x: this.pos.x,
+                y: this.pos.y
             }
         });
-        me.sprite.noSkip=true;
-        me.dataZoomBg = new Canvax.Display.Sprite({
+        this.sprite.noSkip=true;
+        this.dataZoomBg = new Canvax.Display.Sprite({
             id : "dataZoomBg"
         });
-        me.dataZoomBtns = new Canvax.Display.Sprite({
+        this.dataZoomBtns = new Canvax.Display.Sprite({
             id : "dataZoomBtns"
         });
-        me.sprite.addChild( me.dataZoomBg );
-        me.sprite.addChild( me.dataZoomBtns );
+        this.sprite.addChild( this.dataZoomBg );
+        this.sprite.addChild( this.dataZoomBtns );
 
-        me.widget();
-        me._setLines();
+        this.widget();
+        this._setLines();
         this.setZoomBg();
+	}
+
+    //datazoom begin
+    static init(opt,app)
+    {
+
+        let me = this;
+
+        app.padding.bottom += app.dataZoom.h;
+
+        app.components.push( {
+            type : "once",
+            plug : {
+                draw: function(){
+                    var _dataZoom = new me( me._getDataZoomOpt( app ) , me._getCloneChart( app ) );
+                    app.components.push( {
+                        type : "dataZoom",
+                        plug : _dataZoom
+                    } ); 
+                    app.graphsSprite.addChild( _dataZoom.sprite );
+                }
+            }
+        } );
     }
+
+    static _getCloneChart( app ) 
+    {
+        var chartConstructor = app.constructor;//(barConstructor || Bar);
+        var cloneEl = app.el.cloneNode();
+        cloneEl.innerHTML = "";
+        cloneEl.id = app.el.id + "_currclone";
+        cloneEl.style.position = "absolute";
+        cloneEl.style.width = app.el.offsetWidth + "px";
+        cloneEl.style.height = app.el.offsetHeight + "px";
+        cloneEl.style.top = "10000px";
+        document.body.appendChild(cloneEl);
+
+        //var opt = _.extend(true, {}, me._opts);
+        //_.extend(true, opt, me.getCloneChart() );
+
+        //clone的chart只需要coord 和 graphs 配置就可以了
+        //因为画出来后也只需要拿graphs得sprite去贴图
+        var graphsOpt = [];
+        _.each( app._graphs, function( _g ){
+            var _field = _g.enabledField || _g.field;
+            
+            if( _.flatten([_field]).length ) {
+
+                var _opts = _.extend( true, {} , _g._opts );
+                
+                _opts.field = _field;
+                if( _g.type == "bar" ){
+                    _.extend(true, _opts , {
+                        node: {
+                            fillStyle: "#ececec"
+                        },
+                        animation: false,
+                        eventEnabled: false,
+                        label: {
+                            enabled: false
+                        }
+                    } )
+                }
+                if( _g.type == "line" ){
+                    _.extend( true,  _opts , {
+                        line: {
+                            //lineWidth: 1,
+                            strokeStyle: "#ececec"
+                        },
+                        icon: {
+                            enabled: false
+                        },
+                        area: {
+                            alpha: 1,
+                            fillStyle: "#ececec"
+                        },
+                        animation: false,
+                        eventEnabled: false,
+                        label: {
+                            enabled: false
+                        }
+                    } )
+                }
+                if( _g.type == "scat" ){
+                    _.extend( true, _opts, {
+                        node : {
+                            fillStyle : "#ececec"
+                        }
+                    } )
+                }
+
+                graphsOpt.push( _opts );
+            }
+        } );
+        var opt = {
+            coord : app._opts.coord,
+            graphs : graphsOpt
+        };
+
+        var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.graphsMap, app.componentsMap);
+        thumbChart.draw();
+
+        return {
+            thumbChart: thumbChart,
+            cloneEl: cloneEl
+        }
+    }
+
+    static _getDataZoomOpt(app)
+    {
+        //初始化 datazoom 模块
+        var dataZoomOpt = _.extend(true, {
+            w: app._coord.width,
+            pos: {
+                x: app._coord.origin.x,
+                y: app._coord.origin.y + app._coord._xAxis.height
+            },
+            dragIng: function(range) {
+                var trigger = {
+                    name : "dataZoom",
+                    left :  app.dataFrame.range.start - range.start,
+                    right : range.end - app.dataFrame.range.end
+                };
+
+                _.extend( app.dataFrame.range , range );
+                
+                //不想要重新构造dataFrame，所以第一个参数为null
+                app.resetData( null , trigger );
+                app.fire("dataZoomDragIng");
+            },
+            dragEnd: function(range) {
+                app.updateChecked && app.updateChecked();
+                app.fire("dataZoomDragEnd");
+            }
+        }, app.dataZoom);
+
+        return dataZoomOpt
+    }
+    //datazoom end
+
 
     draw()
     {

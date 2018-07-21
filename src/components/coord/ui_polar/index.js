@@ -22,9 +22,9 @@ const _ = Canvax._;
 
 export default class polarComponent extends coorBase
 {
-    constructor( opts , root )
+    constructor( opt , root )
     {
-        super( opts , root );
+        super( opt , root );
 
         this.type  = "polar";
         
@@ -39,7 +39,7 @@ export default class polarComponent extends coorBase
             
             //刻度尺,在最外沿的蜘蛛网上面
             layoutData : [], //aAxis.data的 label.format后版本
-            enabled : opts.aAxis && opts.aAxis.field,
+            enabled : opt.aAxis && opt.aAxis.field,
             label : {
                 enabled : true,
                 format : function( v ){ return v },
@@ -61,17 +61,17 @@ export default class polarComponent extends coorBase
         this.maxR = null;
         this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         if( !this.aAxis.field ){
             //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
             this.grid.enabled = false;
         };
 
-        this.init(opts);
+        this.init(opt);
     }
 
-    init(opts)
+    init(opt)
     {
         this.sprite = new Canvax.Display.Sprite({
             id : "coord_polar"
@@ -89,9 +89,9 @@ export default class polarComponent extends coorBase
 
     }
 
-    draw( opts )
+    draw( opt )
     {
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         //先计算好要绘制的width,height, origin
         this._computeAttr();

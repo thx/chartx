@@ -72,7 +72,7 @@ if( projectTheme && projectTheme.length ){
 
 
 var Chartx = {
-    create : function( el, data, opts ){
+    create : function( el, data, opt ){
         var chart = null;
         var me = this;
 
@@ -87,11 +87,11 @@ var Chartx = {
         };
 
         var Coord = emptyCoord;
-        if( opts.coord && opts.coord.type ){
-            Coord = coord[ opts.coord.type ];
+        if( opt.coord && opt.coord.type ){
+            Coord = coord[ opt.coord.type ];
         };
         //try {
-            chart = new Coord( el, data, opts, graphs, components );
+            chart = new Coord( el, data, opt, graphs, components );
             if( chart ){
                 chart.draw();
                 

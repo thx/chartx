@@ -61,11 +61,11 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
     }
 
-    draw(opts)
+    draw(opt)
     {
         var me = this;
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         this.sprite.context.x = me.origin.x;
         this.sprite.context.y = me.origin.y;
@@ -73,7 +73,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         me._widget();
             
         /*
-        if ( opts.animation ) {
+        if ( opt.animation ) {
             me.grow();
         } else {
             me.completed = true;
