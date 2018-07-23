@@ -56,7 +56,7 @@ export default class Coord extends Chart
             this.drawBeginHorizontal && this.drawBeginHorizontal();
         };
 
-        this.startDraw( opt );      //开始绘图
+        this.startDraw( opt ); //开始绘图
         this.drawComponents( opt ); //绘图完，开始绘制插件，来自己chart.js模块
 
         if( this._coord && this._coord.horizontal ){
@@ -215,6 +215,7 @@ export default class Coord extends Chart
         }
     }
 
+    //把这个point拿来给每一个graphs执行一次测试，给graphs上面的shape触发激活样式
     _tipsPointerAtAllGraphs( e )
     {
         _.each( this._graphs, function( _g ){
@@ -228,4 +229,5 @@ export default class Coord extends Chart
             _g.tipsPointerHideOf( e );
         });
     }
+
 }

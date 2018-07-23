@@ -81,7 +81,7 @@ export default class Legend extends Component
         this._draw();
     }
 
-    static init( opt,app )
+    static register( opt,app )
     {
         //设置legendOpt
         var legendOpt = _.extend(true, {
@@ -95,18 +95,18 @@ export default class Legend extends Component
                     app.componentsReset({ name : "legend" });
                 }
             }
-        } , app._opts.legend);
+        } , opt);
 
-        var legendData = app._opts.legend.data;
+        var legendData = opt.data;
         if( legendData ){
             _.each( legendData, function( item, i ){
                 item.enabled = true;
                 item.ind = i;
             } );
-            delete app._opts.legend.data;
+            delete opt.data;
         } else {
             legendData = app.getLegendData();
-        }
+        };
         
         //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
         var _legend = new this( legendData, legendOpt, app );
@@ -117,14 +117,14 @@ export default class Legend extends Component
             app.padding[ _legend.position ] += _legend.width;
         };
 
-        if( app._coord && app._coord.type == "descartes" ){
+        if( app._coord && app._coord.type == 'rect' ){
             if( _legend.position == "top" || _legend.position == "bottom" ){
                 app.components.push( {
                     type : "once",
                     plug : {
                         draw : function(){
                             _legend.pos( { 
-                                x : app._coord.origin.x + 5
+                                x : app._coord.origin.x
                             } );
                         }
                     }

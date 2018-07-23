@@ -6,16 +6,14 @@ import CoordComponents from "./ui_rect/index"
 
 const _ = Canvax._;
 
-export default class Descartes extends CoordBase
+export default class Rect extends CoordBase
 {
     constructor( node, data, opts, graphsMap, componentsMap ){
 
         super( node, data, opts, graphsMap, componentsMap );
-
         //坐标系统
         this.CoordComponents = CoordComponents;
         this._coord = null;
-
     }
 
     //设置这个坐标系下面特有的 opts 默认值
@@ -115,12 +113,6 @@ export default class Descartes extends CoordBase
             }
         } );
         opts.coord.yAxis = _lys.concat( _rys );
-
-        if( opts.dataZoom ){
-            me.dataZoom = {
-                h : 26
-            };
-        }
         
         return opts;
     }
@@ -209,14 +201,14 @@ export default class Descartes extends CoordBase
     }
     ////设置图例end
 
-    //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
-    //方便外部自定义tip是的content
+    //把这个点位置对应的x轴数据和y轴数据存到 tips 的 info 里面
+    //方便外部自定义 tip 是的 content
     setTipsInfo(e)
     {
         
         e.eventInfo = this._coord.getTipsInfoHandler(e);
 
-        //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
+        //如果具体的e事件对象中有设置好了得 e.eventInfo.nodes，那么就不再遍历_graphs去取值
         //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
         //那么tips就只显示这个bardata的数据
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){

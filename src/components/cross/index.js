@@ -77,14 +77,14 @@ export default class MarkLine extends Component
     }
 
     //rect cross begin
-    static init(opt,app)
+    static register(opt,app)
     {
         //原则上一个直角坐标系中最佳只设置一个cross
         var me = this;
-        if( !_.isArray( app.cross ) ){
-            app.cross = [ app.cross ];
+        if( !_.isArray( opt ) ){
+            opt = [ opt ];
         };
-        _.each( app.cross, function( cross , i){
+        _.each( opt, function( cross , i){
             app.components.push( {
                 type : "once",
                 plug : {

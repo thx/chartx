@@ -13,7 +13,7 @@ export default class Rect_Component extends coorBase
     {
         super( opt, root );
 
-        this.type = "descartes";
+        this.type = "rect";
         
         this._xAxis = null;
         this._yAxis = [];
@@ -204,7 +204,7 @@ export default class Rect_Component extends coorBase
         var yAxisLeft, yAxisRight;
         var yAxisLeftDataFrame, yAxisRightDataFrame;
 
-        //从chart/descartes.js中重新设定了后的yAxis 肯定是个数组
+        // yAxis 肯定是个数组
         if( !_.isArray( yAxis ) ){
             yAxis = [ yAxis ];
         };

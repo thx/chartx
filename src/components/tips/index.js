@@ -58,7 +58,7 @@ export default class Tips extends Component
         });
     }
 
-    static init( opt,app )
+    static register( opt,app )
     {
         //所有的tips放在一个单独的tips中
 		app.stageTips = new Canvax.Display.Stage({
@@ -66,7 +66,7 @@ export default class Tips extends Component
 		});
         app.canvax.addChild( app.stageTips );
 
-        var _tips = new this(app.tips, app);
+        var _tips = new this(opt, app);
         app.stageTips.addChild( _tips.sprite );
         app.components.push({
             type : "tips",

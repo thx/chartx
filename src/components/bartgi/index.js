@@ -54,16 +54,16 @@ export default class barTgi extends Component
     }
 
 
-    static init( opt,app )
+    static register( opt,app )
     {
         
-        if( !_.isArray( app.barTgi ) ){
-            app.barTgi = [ app.barTgi ];
+        if( !_.isArray( opt ) ){
+            opt = [ opt ];
         };
 
         var barTgiConstructor = this;
 
-        _.each( app.barTgi , function( barTgiOpt, i ){
+        _.each( opt , function( barTgiOpt, i ){
             app.components.push( {
                 type : "once",
                 plug : {

@@ -40,7 +40,7 @@ export default class dataZoom extends Component
         this.center = {
             eventEnabled: true,
             fillStyle : '#000000',
-            alpha : 0
+            alpha : 0.05
         };
 
         this.w = 0;
@@ -104,18 +104,24 @@ export default class dataZoom extends Component
 	}
 
     //datazoom begin
-    static init(opt,app)
+    static register(opt,app)
     {
 
         let me = this;
 
-        app.padding.bottom += app.dataZoom.h;
+        //预设默认的opt.dataZoom
+        opt = _.extend( {
+            h : 26
+        } , opt)
+
+        app.padding.bottom += opt.h;
 
         app.components.push( {
             type : "once",
             plug : {
                 draw: function(){
-                    var _dataZoom = new me( me._getDataZoomOpt( app ) , me._getCloneChart( app ) );
+                    //这个时候才能拿到_coord.width _coord.height等尺寸信息， 这个时候_coord也才绘制完成了
+                    var _dataZoom = new me( me._getDataZoomOpt( opt, app ) , me._getCloneChart( opt, app ) );
                     app.components.push( {
                         type : "dataZoom",
                         plug : _dataZoom
@@ -126,7 +132,7 @@ export default class dataZoom extends Component
         } );
     }
 
-    static _getCloneChart( app ) 
+    static _getCloneChart( opt, app ) 
     {
         var chartConstructor = app.constructor;//(barConstructor || Bar);
         var cloneEl = app.el.cloneNode();
@@ -209,7 +215,7 @@ export default class dataZoom extends Component
         }
     }
 
-    static _getDataZoomOpt(app)
+    static _getDataZoomOpt( opt, app)
     {
         //初始化 datazoom 模块
         var dataZoomOpt = _.extend(true, {
@@ -235,7 +241,7 @@ export default class dataZoom extends Component
                 app.updateChecked && app.updateChecked();
                 app.fire("dataZoomDragEnd");
             }
-        }, app.dataZoom);
+        }, opt);
 
         return dataZoomOpt
     }

@@ -26,7 +26,7 @@ export default class BarGraphs extends GraphsBase
         this.absolute = false; 
 
         this.node = {
-            shapeType : "rect",
+            shapeType : 'rect',
             width     : 0,
             _width    : 0,
             maxWidth  : 50,
@@ -432,7 +432,7 @@ export default class BarGraphs extends GraphsBase
 
                         if (!animate) {
                             //TODO：现在暂时没有做text的animate
-                        }
+                        };
 
                     }
                     //label end ------------------------------

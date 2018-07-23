@@ -8086,8 +8086,8 @@ define(function () { 'use strict';
 	                        _comp = [_comp];
 	                    }                    _$4.each(_comp, function (compOpt) {
 	                        var compConstructor = me.componentsMap[_p];
-	                        if (compConstructor && compConstructor.init) {
-	                            compConstructor.init(compOpt, me);
+	                        if (compConstructor && compConstructor.register) {
+	                            compConstructor.register(compOpt, me);
 	                        }                    });
 	                }
 	            }
@@ -8367,6 +8367,9 @@ define(function () { 'use strict';
 	                e.eventInfo.nodes = nodes;
 	            }
 	        }
+
+	        //把这个point拿来给每一个graphs执行一次测试，给graphs上面的shape触发激活样式
+
 	    }, {
 	        key: "_tipsPointerAtAllGraphs",
 	        value: function _tipsPointerAtAllGraphs(e) {
@@ -10302,7 +10305,7 @@ define(function () { 'use strict';
 
 	        var _this = possibleConstructorReturn$1(this, (Rect_Component.__proto__ || Object.getPrototypeOf(Rect_Component)).call(this, opt, root));
 
-	        _this.type = "descartes";
+	        _this.type = "rect";
 
 	        _this._xAxis = null;
 	        _this._yAxis = [];
@@ -10490,7 +10493,7 @@ define(function () { 'use strict';
 	            var yAxisLeft, yAxisRight;
 	            var yAxisLeftDataFrame, yAxisRightDataFrame;
 
-	            //从chart/descartes.js中重新设定了后的yAxis 肯定是个数组
+	            // yAxis 肯定是个数组
 	            if (!_$11.isArray(yAxis$$1)) {
 	                yAxis$$1 = [yAxis$$1];
 	            }
@@ -10738,18 +10741,17 @@ define(function () { 'use strict';
 
 	var _$12 = canvax._;
 
-	var Descartes = function (_CoordBase) {
-	    inherits$1(Descartes, _CoordBase);
+	var Rect$3 = function (_CoordBase) {
+	    inherits$1(Rect, _CoordBase);
 
-	    function Descartes(node, data, opts, graphsMap, componentsMap) {
-	        classCallCheck$1(this, Descartes);
+	    function Rect(node, data, opts, graphsMap, componentsMap) {
+	        classCallCheck$1(this, Rect);
 
 	        //坐标系统
-	        var _this = possibleConstructorReturn$1(this, (Descartes.__proto__ || Object.getPrototypeOf(Descartes)).call(this, node, data, opts, graphsMap, componentsMap));
+	        var _this = possibleConstructorReturn$1(this, (Rect.__proto__ || Object.getPrototypeOf(Rect)).call(this, node, data, opts, graphsMap, componentsMap));
 
 	        _this.CoordComponents = Rect_Component;
 	        _this._coord = null;
-
 	        return _this;
 	    }
 
@@ -10758,7 +10760,7 @@ define(function () { 'use strict';
 	    //在CoordBase中被调用
 
 
-	    createClass$1(Descartes, [{
+	    createClass$1(Rect, [{
 	        key: "setDefaultOpts",
 	        value: function setDefaultOpts(opts) {
 	            var me = this;
@@ -10851,12 +10853,6 @@ define(function () { 'use strict';
 	            });
 	            opts.coord.yAxis = _lys.concat(_rys);
 
-	            if (opts.dataZoom) {
-	                me.dataZoom = {
-	                    h: 26
-	                };
-	            }
-
 	            return opts;
 	        }
 	    }, {
@@ -10943,8 +10939,8 @@ define(function () { 'use strict';
 	        }
 	        ////设置图例end
 
-	        //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
-	        //方便外部自定义tip是的content
+	        //把这个点位置对应的x轴数据和y轴数据存到 tips 的 info 里面
+	        //方便外部自定义 tip 是的 content
 
 	    }, {
 	        key: "setTipsInfo",
@@ -10952,7 +10948,7 @@ define(function () { 'use strict';
 
 	            e.eventInfo = this._coord.getTipsInfoHandler(e);
 
-	            //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
+	            //如果具体的e事件对象中有设置好了得 e.eventInfo.nodes，那么就不再遍历_graphs去取值
 	            //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
 	            //那么tips就只显示这个bardata的数据
 	            if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
@@ -10965,7 +10961,7 @@ define(function () { 'use strict';
 	            }
 	        }
 	    }]);
-	    return Descartes;
+	    return Rect;
 	}(Coord);
 
 	var Line$4 = canvax.Shapes.Line;
@@ -11939,7 +11935,7 @@ define(function () { 'use strict';
 
 	var AnimationFrame$1 = canvax.AnimationFrame;
 	var BrokenLine$1 = canvax.Shapes.BrokenLine;
-	var Rect$3 = canvax.Shapes.Rect;
+	var Rect$4 = canvax.Shapes.Rect;
 	var _$17 = canvax._;
 
 	var BarGraphs = function (_GraphsBase) {
@@ -11963,7 +11959,7 @@ define(function () { 'use strict';
 	        _this.absolute = false;
 
 	        _this.node = {
-	            shapeType: "rect",
+	            shapeType: 'rect',
 	            width: 0,
 	            _width: 0,
 	            maxWidth: 50,
@@ -12281,7 +12277,7 @@ define(function () { 'use strict';
 	                        }                        if (rectEl) {
 	                            rectEl.context.fillStyle = fillStyle;
 	                        } else {
-	                            rectEl = new Rect$3({
+	                            rectEl = new Rect$4({
 	                                id: barId,
 	                                context: rectCtx
 	                            });
@@ -12870,7 +12866,7 @@ define(function () { 'use strict';
 
 	var AnimationFrame$2 = canvax.AnimationFrame;
 	var BrokenLine$2 = canvax.Shapes.BrokenLine;
-	var Rect$4 = canvax.Shapes.Rect;
+	var Rect$5 = canvax.Shapes.Rect;
 	var Circle$3 = canvax.Shapes.Circle;
 	var Path$1 = canvax.Shapes.Path;
 
@@ -13494,7 +13490,7 @@ define(function () { 'use strict';
 	}(canvax.Event.EventDispatcher);
 
 	var _$19 = canvax._;
-	var Rect$5 = canvax.Shapes.Rect;
+	var Rect$6 = canvax.Shapes.Rect;
 
 	var LineGraphs = function (_GraphsBase) {
 	    inherits$1(LineGraphs, _GraphsBase);
@@ -13768,7 +13764,7 @@ define(function () { 'use strict';
 	}(GraphsBase);
 
 	var Circle$4 = canvax.Shapes.Circle;
-	var Rect$6 = canvax.Shapes.Rect;
+	var Rect$7 = canvax.Shapes.Rect;
 	var Line$5 = canvax.Shapes.Line;
 	var _$20 = canvax._;
 
@@ -14043,7 +14039,7 @@ define(function () { 'use strict';
 	            _$20.each(me.data, function (nodeData, iNode) {
 
 	                var _context = me._getNodeContext(nodeData);
-	                var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$6;
+	                var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$7;
 
 	                var _node = new Shape({
 	                    id: "shape_" + iNode,
@@ -14324,7 +14320,7 @@ define(function () { 'use strict';
 
 	var Sector$1 = canvax.Shapes.Sector;
 	var Path$2 = canvax.Shapes.Path;
-	var Rect$7 = canvax.Shapes.Rect;
+	var Rect$8 = canvax.Shapes.Rect;
 	var AnimationFrame$3 = canvax.AnimationFrame;
 	var _$21 = canvax._;
 
@@ -16965,7 +16961,7 @@ define(function () { 'use strict';
 	var Text$3 = canvax.Display.Text;
 	var Circle$7 = canvax.Shapes.Circle;
 	var Line$6 = canvax.Shapes.Line;
-	var Rect$8 = canvax.Shapes.Rect;
+	var Rect$9 = canvax.Shapes.Rect;
 
 	var PlanetGraphs = function (_GraphsBase) {
 	    inherits$1(PlanetGraphs, _GraphsBase);
@@ -17245,7 +17241,7 @@ define(function () { 'use strict';
 	                        }
 	                    }));
 	                }            }
-	            var _clipRect = new Rect$8({
+	            var _clipRect = new Rect$9({
 	                name: "clipRect",
 	                context: {
 	                    x: me.root._coord.origin.x - me.root.width / 2,
@@ -17828,8 +17824,8 @@ define(function () { 'use strict';
 	            };
 	        }
 	    }], [{
-	        key: "init",
-	        value: function init(opt, app) {
+	        key: "register",
+	        value: function register(opt, app) {
 	            //设置legendOpt
 	            var legendOpt = _$28.extend(true, {
 	                icon: {
@@ -17842,19 +17838,18 @@ define(function () { 'use strict';
 	                        app.componentsReset({ name: "legend" });
 	                    }
 	                }
-	            }, app._opts.legend);
+	            }, opt);
 
-	            var legendData = app._opts.legend.data;
+	            var legendData = opt.data;
 	            if (legendData) {
 	                _$28.each(legendData, function (item, i) {
 	                    item.enabled = true;
 	                    item.ind = i;
 	                });
-	                delete app._opts.legend.data;
+	                delete opt.data;
 	            } else {
 	                legendData = app.getLegendData();
 	            }
-
 	            //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
 	            var _legend = new this(legendData, legendOpt, app);
 
@@ -17863,14 +17858,14 @@ define(function () { 'use strict';
 	            } else {
 	                app.padding[_legend.position] += _legend.width;
 	            }
-	            if (app._coord && app._coord.type == "descartes") {
+	            if (app._coord && app._coord.type == 'rect') {
 	                if (_legend.position == "top" || _legend.position == "bottom") {
 	                    app.components.push({
 	                        type: "once",
 	                        plug: {
 	                            draw: function draw() {
 	                                _legend.pos({
-	                                    x: app._coord.origin.x + 5
+	                                    x: app._coord.origin.x
 	                                });
 	                            }
 	                        }
@@ -17906,7 +17901,7 @@ define(function () { 'use strict';
 	}(component);
 
 	var Line$7 = canvax.Shapes.Line;
-	var Rect$9 = canvax.Shapes.Rect;
+	var Rect$10 = canvax.Shapes.Rect;
 	var _$29 = canvax._;
 
 	var dataZoom = function (_Component) {
@@ -17944,7 +17939,7 @@ define(function () { 'use strict';
 	        _this.center = {
 	            eventEnabled: true,
 	            fillStyle: '#000000',
-	            alpha: 0
+	            alpha: 0.05
 	        };
 
 	        _this.w = 0;
@@ -18096,7 +18091,7 @@ define(function () { 'use strict';
 	                        onUpdate: setLines
 	                    });
 	                } else {
-	                    me._bgRect = new Rect$9({
+	                    me._bgRect = new Rect$10({
 	                        context: bgRectCtx
 	                    });
 	                    me.dataZoomBg.addChild(me._bgRect);
@@ -18139,7 +18134,7 @@ define(function () { 'use strict';
 	                    onUpdate: setLines
 	                });
 	            } else {
-	                me._btnLeft = new Rect$9({
+	                me._btnLeft = new Rect$10({
 	                    id: 'btnLeft',
 	                    dragEnabled: me.left.eventEnabled,
 	                    context: btnLeftCtx
@@ -18181,7 +18176,7 @@ define(function () { 'use strict';
 	                    onUpdate: setLines
 	                });
 	            } else {
-	                me._btnRight = new Rect$9({
+	                me._btnRight = new Rect$10({
 	                    id: 'btnRight',
 	                    dragEnabled: me.right.eventEnabled,
 	                    context: btnRightCtx
@@ -18220,7 +18215,7 @@ define(function () { 'use strict';
 	                });
 	            } else {
 	                //中间矩形拖拽区域
-	                this.rangeRect = new Rect$9({
+	                this.rangeRect = new Rect$10({
 	                    id: 'btnCenter',
 	                    dragEnabled: true,
 	                    context: rangeRectCtx
@@ -18407,18 +18402,24 @@ define(function () { 'use strict';
 	            this._cloneChart.cloneEl.parentNode.removeChild(this._cloneChart.cloneEl);
 	        }
 	    }], [{
-	        key: "init",
-	        value: function init(opt, app) {
+	        key: "register",
+	        value: function register(opt, app) {
 
 	            var me = this;
 
-	            app.padding.bottom += app.dataZoom.h;
+	            //预设默认的opt.dataZoom
+	            opt = _$29.extend({
+	                h: 26
+	            }, opt);
+
+	            app.padding.bottom += opt.h;
 
 	            app.components.push({
 	                type: "once",
 	                plug: {
 	                    draw: function draw() {
-	                        var _dataZoom = new me(me._getDataZoomOpt(app), me._getCloneChart(app));
+	                        //这个时候才能拿到_coord.width _coord.height等尺寸信息， 这个时候_coord也才绘制完成了
+	                        var _dataZoom = new me(me._getDataZoomOpt(opt, app), me._getCloneChart(opt, app));
 	                        app.components.push({
 	                            type: "dataZoom",
 	                            plug: _dataZoom
@@ -18430,7 +18431,7 @@ define(function () { 'use strict';
 	        }
 	    }, {
 	        key: "_getCloneChart",
-	        value: function _getCloneChart(app) {
+	        value: function _getCloneChart(opt, app) {
 	            var chartConstructor = app.constructor; //(barConstructor || Bar);
 	            var cloneEl = app.el.cloneNode();
 	            cloneEl.innerHTML = "";
@@ -18513,7 +18514,7 @@ define(function () { 'use strict';
 	        }
 	    }, {
 	        key: "_getDataZoomOpt",
-	        value: function _getDataZoomOpt(app) {
+	        value: function _getDataZoomOpt(opt, app) {
 	            //初始化 datazoom 模块
 	            var dataZoomOpt = _$29.extend(true, {
 	                w: app._coord.width,
@@ -18538,7 +18539,7 @@ define(function () { 'use strict';
 	                    app.updateChecked && app.updateChecked();
 	                    app.fire("dataZoomDragEnd");
 	                }
-	            }, app.dataZoom);
+	            }, opt);
 
 	            return dataZoomOpt;
 	        }
@@ -18716,15 +18717,15 @@ define(function () { 'use strict';
 	            }
 	        }
 	    }], [{
-	        key: "init",
-	        value: function init(opt, app) {
+	        key: "register",
+	        value: function register(opt, app) {
 	            var app = app;
 	            var me = this;
 
-	            if (!_$30.isArray(app.markLine)) {
-	                app.markLine = [app.markLine];
+	            if (!_$30.isArray(opt)) {
+	                opt = [opt];
 	            }
-	            _$30.each(app.markLine, function (ML) {
+	            _$30.each(opt, function (ML) {
 	                //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
 	                var field = ML.markTo;
 
@@ -18825,195 +18826,8 @@ define(function () { 'use strict';
 	    return MarkLine;
 	}(component);
 
-	var Circle$9 = canvax.Shapes.Circle;
-	var Droplet$1 = canvax.Shapes.Droplet;
 	var _$31 = canvax._;
-
-	var MarkPoint = function (_Component) {
-	    inherits$1(MarkPoint, _Component);
-
-	    function MarkPoint(userOpts, chartOpts, data) {
-	        classCallCheck$1(this, MarkPoint);
-
-	        var _this = possibleConstructorReturn$1(this, (MarkPoint.__proto__ || Object.getPrototypeOf(MarkPoint)).call(this, userOpts, chartOpts, data));
-
-	        _this.markTo = null;
-	        _this.data = data; //这里的data来自加载markpoint的各个chart，结构都会有不一样，但是没关系。data在markpoint本身里面不用作业务逻辑，只会在fillStyle 等是function的时候座位参数透传给用户
-	        _this.point = {
-	            x: 0, y: 0
-	        };
-	        _this.normalColor = "#6B95CF";
-	        _this.shapeType = "droplet"; //"circle";
-	        _this.fillStyle = null;
-	        _this.strokeStyle = null;
-	        _this.lineWidth = 1;
-	        _this.globalAlpha = 0.9;
-
-	        _this.duration = 800; //如果有动画，则代表动画时长
-	        _this.easing = null; //动画类型
-
-	        //droplet opt
-	        _this.hr = 8;
-	        _this.vr = 12;
-
-	        //circle opt
-	        _this.radius = 5;
-
-	        _this.sprite = null;
-	        _this.shape = null;
-
-	        _this.iGroup = null;
-	        _this.iNode = null;
-	        _this.iLay = null;
-
-	        _this.realTime = false; //是否是实时的一个点，如果是的话会有动画
-	        _this.filter = function () {}; //过滤函数
-
-	        if ("markPoint" in userOpts) {
-	            _$31.extend(true, _this, userOpts.markPoint);
-	        }        chartOpts && _$31.extend(true, _this, chartOpts);
-
-	        _this.init();
-	        return _this;
-	    }
-
-	    createClass$1(MarkPoint, [{
-	        key: "init",
-	        value: function init() {
-	            var me = this;
-	            this.sprite = new canvax.Display.Sprite({
-	                context: {
-	                    x: this.point.x,
-	                    y: this.point.y,
-	                    globalAlpha: this.globalAlpha
-	                }
-	            });
-	            this.sprite.on("destroy", function (e) {});
-	            me.widget();
-	        }
-	    }, {
-	        key: "widget",
-	        value: function widget() {
-	            this._fillStyle = this._getColor(this.fillStyle, this.data);
-	            this._strokeStyle = this._getColor(this.strokeStyle, this.data);
-	            switch (this.shapeType.toLocaleLowerCase()) {
-	                case "circle":
-	                    this._initCircleMark();
-	                    break;
-	                case "droplet":
-	                    this._initDropletMark();
-	                    break;
-	            }        }
-	    }, {
-	        key: "rePosition",
-	        value: function rePosition(point) {
-	            this.point = point;
-	            this.sprite.context.x = this.point.x;
-	            this.sprite.context.y = this.point.y;
-	        }
-	    }, {
-	        key: "_getColor",
-	        value: function _getColor(c, data, normalColor) {
-	            var color = c;
-	            if (_$31.isFunction(c)) {
-	                color = c(data);
-	            }
-	            //缺省颜色
-	            if (!color || color == "") {
-	                //如果有传normal进来，就不管normalColor参数是什么，都直接用
-	                if (arguments.length >= 3) {
-	                    color = normalColor;
-	                } else {
-	                    color = this.normalColor;
-	                }
-	            }
-	            return color;
-	        }
-	    }, {
-	        key: "_done",
-	        value: function _done() {
-	            this.shape.context.visible = true;
-	            this.shapeBg && (this.shapeBg.context.visible = true);
-	            this.shapeCircle && (this.shapeCircle.context.visible = true);
-	            _$31.isFunction(this.filter) && this.filter(this);
-	        }
-	    }, {
-	        key: "_initCircleMark",
-	        value: function _initCircleMark() {
-	            var me = this;
-	            var ctx = {
-	                r: me.radius,
-	                fillStyle: me._fillStyle,
-	                lineWidth: me.lineWidth,
-	                strokeStyle: me._strokeStyle,
-	                //globalAlpha : me.globalAlpha,
-	                cursor: "point",
-	                visible: false
-	            };
-	            me.shape = new Circle$9({
-	                context: ctx
-	            });
-	            me.sprite.addChild(me.shape);
-	            me._realTimeAnimate();
-	            me._done();
-	        }
-	    }, {
-	        key: "destroy",
-	        value: function destroy() {
-	            this.sprite.destroy();
-	        }
-	    }, {
-	        key: "_realTimeAnimate",
-	        value: function _realTimeAnimate() {
-	            var me = this;
-	            if (me.realTime) {
-	                if (!me.shapeBg) {
-	                    me.shapeBg = me.shape.clone();
-	                    me.sprite.addChildAt(me.shapeBg, 0);
-	                }            }
-	        }
-	    }, {
-	        key: "_initDropletMark",
-	        value: function _initDropletMark() {
-	            var me = this;
-	            var ctx = {
-	                y: -me.vr,
-	                scaleY: -1,
-	                hr: me.hr,
-	                vr: me.vr,
-	                fillStyle: me._fillStyle,
-	                lineWidth: me.lineWidth,
-	                strokeStyle: me._strokeStyle,
-	                //globalAlpha : me.globalAlpha,
-	                cursor: "point",
-	                visible: false
-	            };
-	            me.shape = new Droplet$1({
-	                hoverClone: false,
-	                context: ctx
-	            });
-	            me.sprite.addChild(me.shape);
-
-	            var circleCtx = {
-	                y: -me.vr,
-	                x: 1,
-	                r: Math.max(me.hr - 6, 2),
-	                fillStyle: "#fff",
-	                visible: false
-	            };
-	            me.shapeCircle = new Circle$9({
-	                context: circleCtx
-	            });
-	            me.sprite.addChild(me.shapeCircle);
-
-	            me._done();
-	        }
-	    }]);
-	    return MarkPoint;
-	}(component);
-
-	var _$32 = canvax._;
-	var Rect$10 = canvax.Shapes.Rect;
+	var Rect$11 = canvax.Shapes.Rect;
 	var Line$8 = canvax.Shapes.Line;
 
 	var Tips = function (_Component) {
@@ -19060,7 +18874,7 @@ define(function () { 'use strict';
 	        _this.pointerAnim = true;
 	        _this._tipsPointer = null;
 
-	        _$32.extend(true, _this, opt);
+	        _$31.extend(true, _this, opt);
 	        _this.sprite = new canvax.Display.Sprite({
 	            id: "TipSprite"
 	        });
@@ -19178,7 +18992,7 @@ define(function () { 'use strict';
 	            var tipsContent;
 
 	            if (this.content) {
-	                tipsContent = _$32.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
+	                tipsContent = _$31.isFunction(this.content) ? this.content(this.eventInfo) : this.content;
 	            } else {
 	                tipsContent = this._getDefaultContent(this.eventInfo);
 	            }
@@ -19196,7 +19010,7 @@ define(function () { 'use strict';
 	            if (info.title !== undefined && info.title !== null && info.title !== "") {
 	                str += "<tr><td colspan='2'>" + info.title + "</td></tr>";
 	            }
-	            _$32.each(info.nodes, function (node, i) {
+	            _$31.each(info.nodes, function (node, i) {
 	                if (node.value === undefined || node.value === null) {
 	                    return;
 	                }
@@ -19292,7 +19106,7 @@ define(function () { 'use strict';
 	                        }
 	                    });
 	                }                if (this.pointer == "region") {
-	                    el = new Rect$10({
+	                    el = new Rect$11({
 	                        //xyToInt : false,
 	                        context: {
 	                            width: _coord._xAxis.ceilWidth,
@@ -19380,15 +19194,15 @@ define(function () { 'use strict';
 	            }
 	        }
 	    }], [{
-	        key: "init",
-	        value: function init(opt, app) {
+	        key: "register",
+	        value: function register(opt, app) {
 	            //所有的tips放在一个单独的tips中
 	            app.stageTips = new canvax.Display.Stage({
 	                id: "main-chart-stage-tips"
 	            });
 	            app.canvax.addChild(app.stageTips);
 
-	            var _tips = new this(app.tips, app);
+	            var _tips = new this(opt, app);
 	            app.stageTips.addChild(_tips.sprite);
 	            app.components.push({
 	                type: "tips",
@@ -19401,7 +19215,7 @@ define(function () { 'use strict';
 	}(component);
 
 	var Line$9 = canvax.Shapes.Line;
-	var _$33 = canvax._;
+	var _$32 = canvax._;
 
 	var barTgi = function (_Component) {
 	    inherits$1(barTgi, _Component);
@@ -19441,7 +19255,7 @@ define(function () { 'use strict';
 	            }
 	        };
 
-	        _$33.extend(true, _this, opt);
+	        _$32.extend(true, _this, opt);
 
 	        _this._yAxis = _this.root._coord._yAxis[_this.yAxisAlign == "left" ? 0 : 1];
 	        _this.sprite = new canvax.Display.Sprite({
@@ -19457,7 +19271,7 @@ define(function () { 'use strict';
 	    createClass$1(barTgi, [{
 	        key: "reset",
 	        value: function reset(opt) {
-	            _$33.extend(true, this, opt);
+	            _$32.extend(true, this, opt);
 	            this.barDatas = null;
 	            this.data = null;
 	            this.sprite.removeAllChildren();
@@ -19468,19 +19282,19 @@ define(function () { 'use strict';
 	        value: function draw() {
 	            var me = this;
 
-	            _$33.each(me.root._graphs, function (_g) {
+	            _$32.each(me.root._graphs, function (_g) {
 	                if (_g.type == "bar" && _g.data[me.barField]) {
 	                    me.barDatas = _g.data[me.barField];
 	                    return false;
 	                }
 	            });
-	            this.data = _$33.flatten(me.root.dataFrame.getDataOrg(me.field));
+	            this.data = _$32.flatten(me.root.dataFrame.getDataOrg(me.field));
 
 	            if (!this.barDatas) {
 	                return;
 	            }
 
-	            _$33.each(this.data, function (tgi, i) {
+	            _$32.each(this.data, function (tgi, i) {
 	                var y = me._yAxis.getYposFromVal(tgi);
 	                var barData = me.barDatas[i];
 
@@ -19505,27 +19319,27 @@ define(function () { 'use strict';
 	        key: "_getProp",
 	        value: function _getProp(val, tgi, i) {
 	            var res = val;
-	            if (_$33.isFunction(val)) {
+	            if (_$32.isFunction(val)) {
 	                res = val.apply(this, [tgi, i]);
 	            }
 	            return res;
 	        }
 	    }], [{
-	        key: "init",
-	        value: function init(opt, app) {
+	        key: "register",
+	        value: function register(opt, app) {
 
-	            if (!_$33.isArray(app.barTgi)) {
-	                app.barTgi = [app.barTgi];
+	            if (!_$32.isArray(opt)) {
+	                opt = [opt];
 	            }
 	            var barTgiConstructor = this;
 
-	            _$33.each(app.barTgi, function (barTgiOpt, i) {
+	            _$32.each(opt, function (barTgiOpt, i) {
 	                app.components.push({
 	                    type: "once",
 	                    plug: {
 	                        draw: function draw() {
 
-	                            barTgiOpt = _$33.extend(true, {
+	                            barTgiOpt = _$32.extend(true, {
 	                                origin: {
 	                                    x: app._coord.origin.x,
 	                                    y: app._coord.origin.y
@@ -19593,7 +19407,7 @@ define(function () { 'use strict';
 	 */
 
 	var Text$6 = canvax.Display.Text;
-	var _$34 = canvax._;
+	var _$33 = canvax._;
 
 	var waterMark = function () {
 	    function waterMark(opt, root) {
@@ -19611,7 +19425,7 @@ define(function () { 'use strict';
 	        this.alpha = 0.2;
 	        this.rotation = 45;
 
-	        _$34.extend(true, this, opt);
+	        _$33.extend(true, this, opt);
 
 	        this.spripte = new canvax.Display.Sprite({
 	            id: "watermark"
@@ -19657,8 +19471,8 @@ define(function () { 'use strict';
 	            }
 	        }
 	    }], [{
-	        key: "init",
-	        value: function init(opt, app) {
+	        key: "register",
+	        value: function register(opt, app) {
 	            var _water = new this(opt, app);
 	            app.stage.addChild(_water.spripte);
 	        }
@@ -19669,7 +19483,7 @@ define(function () { 'use strict';
 	var Line$10 = canvax.Shapes.Line;
 	var Sprite$2 = canvax.Display.Sprite;
 	var Text$7 = canvax.Display.Text;
-	var _$35 = canvax._;
+	var _$34 = canvax._;
 
 	var MarkLine$1 = function (_Component) {
 	    inherits$1(MarkLine, _Component);
@@ -19730,7 +19544,7 @@ define(function () { 'use strict';
 	        _this._hLine = null; //横向的线
 	        _this._vLine = null; //竖向的线
 
-	        opt && _$35.extend(true, _this, opt);
+	        opt && _$34.extend(true, _this, opt);
 
 	        _this.sprite = new Sprite$2({
 	            id: "cross_" + canvax.utils.getUID(),
@@ -19786,19 +19600,19 @@ define(function () { 'use strict';
 	            me.sprite.addChild(me._vLine);
 	        }
 	    }], [{
-	        key: "init",
-	        value: function init(opt, app) {
+	        key: "register",
+	        value: function register(opt, app) {
 	            //原则上一个直角坐标系中最佳只设置一个cross
 	            var me = this;
-	            if (!_$35.isArray(app.cross)) {
-	                app.cross = [app.cross];
-	            }            _$35.each(app.cross, function (cross, i) {
+	            if (!_$34.isArray(opt)) {
+	                opt = [opt];
+	            }            _$34.each(opt, function (cross, i) {
 	                app.components.push({
 	                    type: "once",
 	                    plug: {
 	                        draw: function draw() {
 
-	                            var opt = _$35.extend(true, {
+	                            var opt = _$34.extend(true, {
 	                                origin: {
 	                                    x: app._coord.origin.x,
 	                                    y: app._coord.origin.y
@@ -19823,7 +19637,7 @@ define(function () { 'use strict';
 	}(component);
 
 	var coord = {
-	    rect: Descartes,
+	    rect: Rect$3,
 	    polar: Polar
 	};
 
@@ -19843,7 +19657,6 @@ define(function () { 'use strict';
 	    legend: Legend,
 	    dataZoom: dataZoom,
 	    markLine: MarkLine,
-	    markPoint: MarkPoint,
 	    tips: Tips,
 	    barTgi: barTgi,
 	    waterMark: waterMark,

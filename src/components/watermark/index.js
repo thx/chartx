@@ -30,7 +30,7 @@ export default class waterMark
         this.draw();
     }
 
-    static init( opt , app )
+    static register( opt , app )
     {
         var _water = new this( opt, app );
         app.stage.addChild( _water.spripte );

@@ -230,8 +230,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 };
                 _.each( _comp, function( compOpt ){
                     var compConstructor = me.componentsMap[ _p ];
-                    if( compConstructor && compConstructor.init ){
-                        compConstructor.init( compOpt, me );
+                    if( compConstructor && compConstructor.register ){
+                        compConstructor.register( compOpt, me );
                     };
                 } );
                 

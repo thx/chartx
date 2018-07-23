@@ -62,16 +62,16 @@ export default class MarkLine extends Component
 
 
     //markLine begin
-    static init(opt,app)
+    static register(opt,app)
     {
         var app = app;
         var me = this;
 
-        if( !_.isArray( app.markLine ) ){
-            app.markLine = [ app.markLine ];
+        if( !_.isArray( opt ) ){
+            opt = [ opt ];
         };
 
-        _.each( app.markLine, function( ML ){
+        _.each( opt, function( ML ){
             //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
             var field = ML.markTo;
 
