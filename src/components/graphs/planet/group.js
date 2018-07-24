@@ -116,8 +116,11 @@ export default class PlanetGroup
         if( !this.maxRingNum ){
             this.maxRingNum = parseInt((this.rRange.to - this.rRange.start) / (this.pit.radius*2) , 10 );
             
+            /* TODO: 这个目前有问题
             //如果可以划10个环，但是其实数据只有8条， 那么就 当然是只需要划分8ring
-            this.ringNum = Math.min( this.maxRingNum , this.dataFrame.length );
+            //this.ringNum = Math.min( this.maxRingNum , this.dataFrame.length );
+            */
+            this.ringNum = this.maxRingNum
         };
 
         //重新计算修改 rRange.to的值
@@ -128,6 +131,7 @@ export default class PlanetGroup
 
         var dataLen  = this.dataFrame.length;
         for( var i=0; i<dataLen; i++ ){  
+            
             var rowData = this.dataFrame.getRowData(i);
             var planetLayoutData = {
                 groupLen    : this.groupLen,
@@ -305,6 +309,7 @@ export default class PlanetGroup
 
             //给每个萝卜分配一个坑位
             _.each( ring.planets , function( planet , ii ){
+                
                 if( ii >= ring.pits.length ){
                     //如果萝卜已经比这个ring上面的坑要多，就要扔掉， 没办法的
                     return;
@@ -517,13 +522,10 @@ export default class PlanetGroup
         if( _.isString(r) && _.indexOf( me.dataFrame.fields, r ) > -1 ){
             if( this.__rValMax == undefined && this.__rValMax == undefined ){
                 this.__rValMax = 0;
+                this.__rValMin = 0;
                 _.each( me.planets , function( planet ){
                     me.__rValMax = Math.max( me.__rValMax , planet.rowData[ r ] );
-                    if( me.__rValMin == undefined ){
-                        me.__rValMin = planet.rowData[ r ];
-                    } else {
-                        me.__rValMin = Math.min( me.__rValMin , planet.rowData[ r ] );
-                    }
+                    me.__rValMin = Math.min( me.__rValMin , planet.rowData[ r ] );
                 } );
             };
             var rVal = nodeData.rowData[ r ];

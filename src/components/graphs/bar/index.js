@@ -33,7 +33,7 @@ export default class BarGraphs extends GraphsBase
             minWidth  : 1,
             minHeight : 0,
 
-            radius    : 4,
+            radius    : 3,
             fillStyle : null,
             fillAlpha : 0.95,
             _count    : 0, //总共有多少个bar
@@ -789,7 +789,7 @@ export default class BarGraphs extends GraphsBase
 
                             },
                             onComplete: function(arg) {
-                                if (arg.width < 3) {
+                                if (arg.width < 3 && this.context) {
                                     this.context.radius = 0;
                                 }
 

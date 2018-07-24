@@ -16,6 +16,9 @@ export default class ScatGraphs extends GraphsBase
 
         this.field  = null;
 
+        //TODO:待开发，用groupField来做分组，比如分组出男女两组，然后方便做图例（目前没给scat实现合适的图例）
+        this.groupField = null; 
+
         this.node = {
             shapeType : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
             maxRadius : 25,  //圆圈默认最大半径
@@ -251,7 +254,7 @@ export default class ScatGraphs extends GraphsBase
             _style = style( nodeLayoutData );
         };
         if( !_style ){
-            _style = nodeLayoutData.fillStyle;
+            _style = nodeLayoutData.fieldColor;
         };
         return _style;
     }

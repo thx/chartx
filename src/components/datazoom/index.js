@@ -80,7 +80,6 @@ export default class dataZoom extends Component
         opt && _.extend( true, this, opt);
         this._computeAttrs( opt );
         
-
         this.sprite = new Canvax.Display.Sprite({
             id : "dataZoom",
             context: {
@@ -161,7 +160,8 @@ export default class dataZoom extends Component
                 if( _g.type == "bar" ){
                     _.extend(true, _opts , {
                         node: {
-                            fillStyle: "#ececec"
+                            fillStyle: "#ececec",
+                            radius: 0
                         },
                         animation: false,
                         eventEnabled: false,

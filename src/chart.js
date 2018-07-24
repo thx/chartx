@@ -182,7 +182,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             this._data = parse2MatrixData(data);
         };
 
-        this.dataFrame = this.initData( this._data );
+        this.dataFrame = this.initData( this._data, opt );
 
         this._clean();
 
@@ -209,7 +209,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
    
-    initData(data)
+    initData()
     {
         return DataFrame.apply(this, arguments);
     }
@@ -297,5 +297,30 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
     //插件相关代码end
 
+
+    //获取graphs列表根据type
+    getGraphsByType( type )
+    {
+        var arr = [];
+        _.each( this._graphs, function( g ){
+            if( g.type == type ){
+                arr.push( g )
+            }
+        } );
+        return arr;
+    }
+
+    //获取graphs根据id
+    getGraphsById( id )
+    {
+        var _g;
+        _.each( this._graphs, function( g ){
+            if( g.id == id ){
+                _g = g;
+                return false;
+            }
+        } );
+        return _g;
+    }
 
 }

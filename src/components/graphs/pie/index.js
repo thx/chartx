@@ -15,6 +15,8 @@ export default class PieGraphs extends GraphsBase
         this.field = null; 
         this.sort = null; //默认不排序，可以配置为asc,desc
 
+        this.groupField = null;
+
         this.node = {
             shapeType : "sector",
 
@@ -163,7 +165,7 @@ export default class PieGraphs extends GraphsBase
                 color         : color, //加个color属性是为了给tips用
 
                 value         : rowData[ me.field ],
-                label         : rowData[ me.label.field || me.field ],
+                label         : rowData[  me.groupField || me.label.field || me.field ],
                 labelText     : null, //绘制的时候再设置,label format后的数据
                 iNode         : i
             };
@@ -363,8 +365,9 @@ export default class PieGraphs extends GraphsBase
                     str = this.label.format( itemData.label, itemData );
                 }
             } else {
-                if( this.label.field ){
-                    str = itemData.rowData[ this.label.field ] + "：" + itemData.percentage + "%" 
+                var _field = this.label.field || this.groupField
+                if( _field ){
+                    str = itemData.rowData[ _field ] + "：" + itemData.percentage + "%" 
                 } else {
                     str = itemData.percentage + "%" 
                 }

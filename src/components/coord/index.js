@@ -16,7 +16,7 @@ export default class Coord extends Chart
         this.componentsMap = componentsMap;
 
         //这里不要直接用data，而要用 this._data
-        this.dataFrame = this.initData( this._data );
+        this.dataFrame = this.initData( this._data , opt );
 
         this._graphs = [];
         if( opt.graphs ){

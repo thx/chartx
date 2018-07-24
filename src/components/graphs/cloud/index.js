@@ -139,15 +139,11 @@ export default class CloudGraphs extends GraphsBase
 
         //查找fontSize的max和min
         var maxFontSizeVal = 0;
-        var minFontSizeVal = null;
+        var minFontSizeVal = 0;
         if( _.isString( this.node.fontSize ) ){
             _.each( me.dataFrame.getFieldData( this.node.fontSize ), function( val ){
                 me.node._maxFontSizeVal = Math.max( me.node._maxFontSizeVal, val );
-                if( me.node._minFontSizeVal === null ){
-                    me.node._minFontSizeVal = val
-                } else {
-                    me.node._minFontSizeVal = Math.min( me.node._minFontSizeVal, val );
-                }
+                me.node._minFontSizeVal = Math.min( me.node._minFontSizeVal, val );
             } );
         }
 

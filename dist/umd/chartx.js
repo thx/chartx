@@ -7677,7 +7677,7 @@
 
 	var _$3 = canvax._;
 
-	function DataFrame (data) {
+	function DataFrame (data, opt) {
 
 	    var dataFrame = { //数据框架集合
 	        length: 0,
@@ -7706,8 +7706,8 @@
 	    //设置好数据区间end值
 	    dataFrame.range.end = dataFrame.length - 1;
 	    //然后检查opts中是否有dataZoom.range
-	    if (this._opts.dataZoom && this._opts.dataZoom.range) {
-	        _$3.extend(dataFrame.range, this._opts.dataZoom.range);
+	    if (opt && opt.dataZoom && opt.dataZoom.range) {
+	        _$3.extend(dataFrame.range, opt.dataZoom.range);
 	    }
 	    dataFrame.org = data;
 	    dataFrame.fields = data[0] ? data[0] : []; //所有的字段集合;
@@ -7783,10 +7783,8 @@
 	    function _getRowData(index) {
 	        var o = {};
 	        var data = dataFrame.data;
-	        for (var a = dataFrame.range.start; a <= dataFrame.range.end; a++) {
-	            if (data[a]) {
-	                o[data[a].field] = data[a].data[dataFrame.range.start + index];
-	            }
+	        for (var a = 0; a < data.length; a++) {
+	            o[data[a].field] = data[a].data[dataFrame.range.start + index];
 	        }        return o;
 	    }
 
@@ -8044,7 +8042,7 @@
 	            if (data) {
 	                this._data = parse2MatrixData(data);
 	            }
-	            this.dataFrame = this.initData(this._data);
+	            this.dataFrame = this.initData(this._data, opt);
 
 	            this._clean();
 
@@ -8070,7 +8068,7 @@
 	        }
 	    }, {
 	        key: "initData",
-	        value: function initData(data) {
+	        value: function initData() {
 	            return DataFrame.apply(this, arguments);
 	        }
 
@@ -8156,6 +8154,34 @@
 	        //插件相关代码end
 
 
+	        //获取graphs列表根据type
+
+	    }, {
+	        key: "getGraphsByType",
+	        value: function getGraphsByType(type) {
+	            var arr = [];
+	            _$4.each(this._graphs, function (g) {
+	                if (g.type == type) {
+	                    arr.push(g);
+	                }
+	            });
+	            return arr;
+	        }
+
+	        //获取graphs根据id
+
+	    }, {
+	        key: "getGraphsById",
+	        value: function getGraphsById(id) {
+	            var _g;
+	            _$4.each(this._graphs, function (g) {
+	                if (g.id == id) {
+	                    _g = g;
+	                    return false;
+	                }
+	            });
+	            return _g;
+	        }
 	    }]);
 	    return Chart;
 	}(canvax.Event.EventDispatcher);
@@ -8179,7 +8205,7 @@
 	        _this.componentsMap = componentsMap;
 
 	        //这里不要直接用data，而要用 this._data
-	        _this.dataFrame = _this.initData(_this._data);
+	        _this.dataFrame = _this.initData(_this._data, opt);
 
 	        _this._graphs = [];
 	        if (opt.graphs) {
@@ -8665,7 +8691,8 @@
 	            format: null,
 	            distance: 2,
 	            textAlign: "center",
-	            lineHeight: 1
+	            lineHeight: 1,
+	            evade: true //是否开启逃避检测，目前的逃避只是隐藏
 	        };
 
 	        if (opt.isH && (!opt.label || opt.label.rotaion === undefined)) {
@@ -9210,7 +9237,7 @@
 	            var arr = this.layoutData;
 	            var l = arr.length;
 
-	            if (!this.enabled || !l) return;
+	            if (!this.enabled || !l || !this.label.evade) return;
 
 	            // rule , peak, proportion
 	            if (me.layoutType == "proportion") {
@@ -9218,8 +9245,7 @@
 	            }            if (me.layoutType == "peak") {
 	                //TODO: peak暂时沿用 _checkOver ，这是保险的万无一失的。
 	                this._checkOver();
-	            }
-	            if (me.layoutType == "rule") {
+	            }            if (me.layoutType == "rule") {
 	                this._checkOver();
 	            }        }
 	    }, {
@@ -11970,7 +11996,7 @@
 	            minWidth: 1,
 	            minHeight: 0,
 
-	            radius: 4,
+	            radius: 3,
 	            fillStyle: null,
 	            fillAlpha: 0.95,
 	            _count: 0, //总共有多少个bar
@@ -12684,7 +12710,7 @@
 	                                delay: h * optsions.delay,
 	                                onUpdate: function onUpdate(arg) {},
 	                                onComplete: function onComplete(arg) {
-	                                    if (arg.width < 3) {
+	                                    if (arg.width < 3 && this.context) {
 	                                        this.context.radius = 0;
 	                                    }
 
@@ -13784,6 +13810,9 @@
 
 	        _this.field = null;
 
+	        //TODO:待开发，用groupField来做分组，比如分组出男女两组，然后方便做图例（目前没给scat实现合适的图例）
+	        _this.groupField = null;
+
 	        _this.node = {
 	            shapeType: "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
 	            maxRadius: 25, //圆圈默认最大半径
@@ -14010,7 +14039,7 @@
 	            }            if (_$20.isFunction(style)) {
 	                _style = style(nodeLayoutData);
 	            }            if (!_style) {
-	                _style = nodeLayoutData.fillStyle;
+	                _style = nodeLayoutData.fieldColor;
 	            }            return _style;
 	        }
 	    }, {
@@ -14976,6 +15005,8 @@
 	        _this.field = null;
 	        _this.sort = null; //默认不排序，可以配置为asc,desc
 
+	        _this.groupField = null;
+
 	        _this.node = {
 	            shapeType: "sector",
 
@@ -15122,7 +15153,7 @@
 	                    color: color, //加个color属性是为了给tips用
 
 	                    value: rowData[me.field],
-	                    label: rowData[me.label.field || me.field],
+	                    label: rowData[me.groupField || me.label.field || me.field],
 	                    labelText: null, //绘制的时候再设置,label format后的数据
 	                    iNode: i
 	                };
@@ -15311,8 +15342,9 @@
 	                        str = this.label.format(itemData.label, itemData);
 	                    }
 	                } else {
-	                    if (this.label.field) {
-	                        str = itemData.rowData[this.label.field] + "：" + itemData.percentage + "%";
+	                    var _field = this.label.field || this.groupField;
+	                    if (_field) {
+	                        str = itemData.rowData[_field] + "：" + itemData.percentage + "%";
 	                    } else {
 	                        str = itemData.percentage + "%";
 	                    }
@@ -16312,11 +16344,7 @@
 	            if (_$24.isString(this.node.fontSize)) {
 	                _$24.each(me.dataFrame.getFieldData(this.node.fontSize), function (val) {
 	                    me.node._maxFontSizeVal = Math.max(me.node._maxFontSizeVal, val);
-	                    if (me.node._minFontSizeVal === null) {
-	                        me.node._minFontSizeVal = val;
-	                    } else {
-	                        me.node._minFontSizeVal = Math.min(me.node._minFontSizeVal, val);
-	                    }
+	                    me.node._minFontSizeVal = Math.min(me.node._minFontSizeVal, val);
 	                });
 	            }
 
@@ -16554,8 +16582,11 @@
 	            if (!this.maxRingNum) {
 	                this.maxRingNum = parseInt((this.rRange.to - this.rRange.start) / (this.pit.radius * 2), 10);
 
+	                /* TODO: 这个目前有问题
 	                //如果可以划10个环，但是其实数据只有8条， 那么就 当然是只需要划分8ring
-	                this.ringNum = Math.min(this.maxRingNum, this.dataFrame.length);
+	                //this.ringNum = Math.min( this.maxRingNum , this.dataFrame.length );
+	                */
+	                this.ringNum = this.maxRingNum;
 	            }
 	            //重新计算修改 rRange.to的值
 	            this.rRange.to = this.rRange.start + this.ringNum * this.pit.radius * 2;
@@ -16565,6 +16596,7 @@
 
 	            var dataLen = this.dataFrame.length;
 	            for (var i = 0; i < dataLen; i++) {
+
 	                var rowData = this.dataFrame.getRowData(i);
 	                var planetLayoutData = {
 	                    groupLen: this.groupLen,
@@ -16731,6 +16763,7 @@
 
 	                //给每个萝卜分配一个坑位
 	                _$25.each(ring.planets, function (planet, ii) {
+
 	                    if (ii >= ring.pits.length) {
 	                        //如果萝卜已经比这个ring上面的坑要多，就要扔掉， 没办法的
 	                        return;
@@ -16935,13 +16968,10 @@
 	            if (_$25.isString(r) && _$25.indexOf(me.dataFrame.fields, r) > -1) {
 	                if (this.__rValMax == undefined && this.__rValMax == undefined) {
 	                    this.__rValMax = 0;
+	                    this.__rValMin = 0;
 	                    _$25.each(me.planets, function (planet) {
 	                        me.__rValMax = Math.max(me.__rValMax, planet.rowData[r]);
-	                        if (me.__rValMin == undefined) {
-	                            me.__rValMin = planet.rowData[r];
-	                        } else {
-	                            me.__rValMin = Math.min(me.__rValMin, planet.rowData[r]);
-	                        }
+	                        me.__rValMin = Math.min(me.__rValMin, planet.rowData[r]);
 	                    });
 	                }                var rVal = nodeData.rowData[r];
 
@@ -16990,9 +17020,9 @@
 	            margin: 20 //最近ring到太阳的距离
 	        };
 
-	        _this.groupDataFrames = [];
-	        _this.groupField = null;
-	        _this._groups = [];
+	        _this.ringGroupDataFrames = [];
+	        _this.ringGroupField = null;
+	        _this._ringGroups = [];
 
 	        //planet自己得grid，不用polar的grid
 	        _this.grid = {
@@ -17070,7 +17100,7 @@
 	    }, {
 	        key: "getAgreeNodeData",
 	        value: function getAgreeNodeData(legendData, callback) {
-	            _$26.each(this._groups, function (_g) {
+	            _$26.each(this._ringGroups, function (_g) {
 	                _$26.each(_g._rings, function (ring, i) {
 	                    _$26.each(ring.planets, function (data, ii) {
 	                        var rowData = data.rowData;
@@ -17125,12 +17155,13 @@
 	            var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
 	            var _circleMaxR = this._getMaxR();
 
-	            _$26.each(this.groupDataFrames, function (df, i) {
+	            _$26.each(this.ringGroupDataFrames, function (df, i) {
+
 	                var toR = groupRStart + maxR * (df.length / me.dataFrame.length);
 
 	                var _g = new PlanetGroup(_$26.extend(true, {
 	                    iGroup: i,
-	                    groupLen: me.groupDataFrames.length,
+	                    groupLen: me.ringGroupDataFrames.length,
 	                    rRange: {
 	                        start: groupRStart,
 	                        to: toR
@@ -17141,7 +17172,7 @@
 
 	                groupRStart = _g.rRange.to;
 
-	                me._groups.push(_g);
+	                me._ringGroups.push(_g);
 
 	                me.grid.rings.section.push({
 	                    radius: _g.rRange.to
@@ -17150,7 +17181,7 @@
 
 	            me.drawBack();
 
-	            _$26.each(me._groups, function (_g) {
+	            _$26.each(me._ringGroups, function (_g) {
 	                me.sprite.addChild(_g.sprite);
 	            });
 	        }
@@ -17267,7 +17298,7 @@
 	                    scaleInd: i,
 	                    count: this.grid.rings.section.length,
 
-	                    groups: this._groups,
+	                    groups: this._ringGroups,
 	                    graphs: this
 	                }]);
 	            }            if (_$26.isString(p) || _$26.isNumber(p)) {
@@ -17279,9 +17310,9 @@
 	    }, {
 	        key: "dataGroupHandle",
 	        value: function dataGroupHandle() {
-	            var groupFieldInd = _$26.indexOf(this.dataFrame.fields, this.groupField);
+	            var groupFieldInd = _$26.indexOf(this.dataFrame.fields, this.ringGroupField);
 	            if (groupFieldInd >= 0) {
-	                //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
+	                //有分组字段，就还要对dataFrame中的数据分下组，然后给到 ringGroupDataFrames
 	                var titles = this.dataFrame.org[0];
 	                var _dmap = {}; //以分组的字段值做为key
 
@@ -17296,11 +17327,41 @@
 	                });
 
 	                for (var r in _dmap) {
-	                    this.groupDataFrames.push(DataFrame(_dmap[r]));
+	                    this.ringGroupDataFrames.push(DataFrame(_dmap[r]));
 	                }            } else {
 	                //如果分组字段不存在，则认为数据不需要分组，直接全部作为 group 的一个子集合
-	                this.groupDataFrames.push(this.dataFrame);
+	                this.ringGroupDataFrames.push(this.dataFrame);
 	            }        }
+
+	        //获取所有有效的在布局中的nodeData
+
+	    }, {
+	        key: "getLayoutNodes",
+	        value: function getLayoutNodes() {
+	            var nodes = [];
+	            _$26.each(this._ringGroups, function (rg) {
+	                _$26.each(rg.planets, function (node) {
+	                    if (node.pit) {
+	                        nodes.push(node);
+	                    }                });
+	            });
+	            return nodes;
+	        }
+
+	        //获取所有无效的在不在布局的nodeData
+
+	    }, {
+	        key: "getInvalidNodes",
+	        value: function getInvalidNodes() {
+	            var nodes = [];
+	            _$26.each(this._ringGroups, function (rg) {
+	                _$26.each(rg.planets, function (node) {
+	                    if (!node.pit) {
+	                        nodes.push(node);
+	                    }                });
+	            });
+	            return nodes;
+	        }
 	    }]);
 	    return PlanetGraphs;
 	}(GraphsBase);
@@ -18463,7 +18524,8 @@
 	                    if (_g.type == "bar") {
 	                        _$29.extend(true, _opts, {
 	                            node: {
-	                                fillStyle: "#ececec"
+	                                fillStyle: "#ececec",
+	                                radius: 0
 	                            },
 	                            animation: false,
 	                            eventEnabled: false,
@@ -19072,7 +19134,7 @@
 	            var _coord = this.root._coord;
 
 	            //目前只实现了直角坐标系的tipsPointer
-	            if (_coord.type != 'rect') return;
+	            if (!_coord || _coord.type != 'rect') return;
 
 	            if (!this.pointer) return;
 
@@ -19145,7 +19207,7 @@
 	        value: function _tipsPointerHide() {
 	            var _coord = this.root._coord;
 	            //目前只实现了直角坐标系的tipsPointer
-	            if (_coord.type != 'rect') return;
+	            if (!_coord || _coord.type != 'rect') return;
 
 	            if (!this.pointer || !this._tipsPointer) return;
 	            //console.log("hide");
@@ -19159,7 +19221,7 @@
 	            var _coord = this.root._coord;
 
 	            //目前只实现了直角坐标系的tipsPointer
-	            if (_coord.type != 'rect') return;
+	            if (!_coord || _coord.type != 'rect') return;
 
 	            if (!this.pointer) return;
 

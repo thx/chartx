@@ -42,7 +42,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             format     : null,
             distance   : 2,
             textAlign  : "center",
-            lineHeight : 1
+            lineHeight : 1,
+            evade      : true  //是否开启逃避检测，目前的逃避只是隐藏
         };
         
         if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
@@ -248,7 +249,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             this._computerConfig(opt);
         };
         
-        this.layoutData = this._trimXAxis(this.dataSection);
+        this.layoutData = this._trimXAxis( this.dataSection );
         this._trimLayoutData();
 
         this.sprite.context.x = this.pos.x;
@@ -627,17 +628,16 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         var arr = this.layoutData;
         var l = arr.length;
 
-        if( !this.enabled || !l ) return;
+        if( !this.enabled || !l || !this.label.evade ) return;
 
         // rule , peak, proportion
         if( me.layoutType == "proportion" ){
             this._checkOver();
-        }; 
+        };
         if( me.layoutType == "peak" ){
             //TODO: peak暂时沿用 _checkOver ，这是保险的万无一失的。
             this._checkOver();
         };
-
         if( me.layoutType == "rule" ){
             this._checkOver();
         };

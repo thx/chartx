@@ -261,7 +261,7 @@ export default class Tips extends Component
         var _coord = this.root._coord;
         
         //目前只实现了直角坐标系的tipsPointer
-        if( _coord.type != 'rect' ) return;
+        if( !_coord || _coord.type != 'rect' ) return;
 
         if( !this.pointer ) return;
 
@@ -337,7 +337,7 @@ export default class Tips extends Component
     {
         var _coord = this.root._coord;
         //目前只实现了直角坐标系的tipsPointer
-        if( _coord.type != 'rect' ) return;
+        if( !_coord || _coord.type != 'rect' ) return;
 
         if( !this.pointer  || !this._tipsPointer ) return;
         //console.log("hide");
@@ -351,7 +351,7 @@ export default class Tips extends Component
         var _coord = this.root._coord;
         
         //目前只实现了直角坐标系的tipsPointer
-        if( _coord.type != 'rect' ) return;
+        if( !_coord || _coord.type != 'rect' ) return;
 
         if( !this.pointer ) return;
 

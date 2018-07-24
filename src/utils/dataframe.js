@@ -12,7 +12,7 @@ import Canvax from "canvax"
 
 const _ = Canvax._;
 
-export default function( data ){
+export default function( data, opt ){
     
     var dataFrame  = {        //数据框架集合
         length        : 0,
@@ -43,8 +43,8 @@ export default function( data ){
     //设置好数据区间end值
     dataFrame.range.end = dataFrame.length - 1;
     //然后检查opts中是否有dataZoom.range
-    if( this._opts.dataZoom && this._opts.dataZoom.range ){
-        _.extend( dataFrame.range, this._opts.dataZoom.range );
+    if( opt && opt.dataZoom && opt.dataZoom.range ){
+        _.extend( dataFrame.range, opt.dataZoom.range );
     };
     
 
@@ -133,10 +133,8 @@ export default function( data ){
     function _getRowData(index){
         var o = {}
         var data = dataFrame.data
-        for(var a = dataFrame.range.start; a <= dataFrame.range.end; a++){
-            if(data[a]){
-                o[data[a].field] = data[a].data[dataFrame.range.start+index]
-            }
+        for(var a = 0; a < data.length; a++){
+            o[data[a].field] = data[a].data[ dataFrame.range.start + index ]
         };
         return o
     }

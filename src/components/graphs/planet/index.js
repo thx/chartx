@@ -24,19 +24,19 @@ export default class PlanetGraphs extends GraphsBase
         var me = this;
         //圆心原点坐标
         this.center = {
-            enabled : true,
+            enabled   : true,
             shapeType : "text", //后续可以添加path啊，img啊之类的
-            content : "center",
-            radius : 30,
+            content   : "center",
+            radius    : 30,
             fillStyle : "#70629e",
-            fontSize : 15,
-            fontColor: "#ffffff",
-            margin : 20 //最近ring到太阳的距离
+            fontSize  : 15,
+            fontColor : "#ffffff",
+            margin    : 20 //最近ring到太阳的距离
         };
 
-        this.groupDataFrames = [];
-        this.groupField = null;
-        this._groups = [];
+        this.ringGroupDataFrames = [];
+        this.ringGroupField = null;
+        this._ringGroups = [];
 
         //planet自己得grid，不用polar的grid
         this.grid = {
@@ -115,7 +115,7 @@ export default class PlanetGraphs extends GraphsBase
     getAgreeNodeData( legendData , callback)
     {
         var me = this;
-        _.each( this._groups, function( _g ){
+        _.each( this._ringGroups, function( _g ){
             _.each( _g._rings , function( ring , i ){
                 _.each( ring.planets, function( data , ii){
                     var rowData = data.rowData;
@@ -177,12 +177,13 @@ export default class PlanetGraphs extends GraphsBase
         var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
         var _circleMaxR = this._getMaxR();
 
-        _.each( this.groupDataFrames , function( df , i ){
+        _.each( this.ringGroupDataFrames , function( df , i ){
+            
             var toR = groupRStart + maxR*( (df.length) / (me.dataFrame.length) );
             
             var _g = new Group( _.extend(true, {
                 iGroup : i,
-                groupLen : me.groupDataFrames.length,
+                groupLen : me.ringGroupDataFrames.length,
                 rRange : {
                     start : groupRStart,
                     to : toR
@@ -193,7 +194,7 @@ export default class PlanetGraphs extends GraphsBase
 
             groupRStart = _g.rRange.to;
 
-            me._groups.push( _g );
+            me._ringGroups.push( _g );
 
             me.grid.rings.section.push({
                 radius : _g.rRange.to
@@ -203,7 +204,7 @@ export default class PlanetGraphs extends GraphsBase
 
         me.drawBack();
         
-        _.each( me._groups , function(_g){
+        _.each( me._ringGroups , function(_g){
             me.sprite.addChild( _g.sprite );
         } );
     }
@@ -249,6 +250,7 @@ export default class PlanetGraphs extends GraphsBase
                     radius : me.center.radius + _diffR*(i+1)
                 });
             }
+
         } else {
             me.grid.rings.count = me.grid.rings.section.length;
         };
@@ -319,7 +321,6 @@ export default class PlanetGraphs extends GraphsBase
 
     _getBackProp( p, i )
     {
-        
         var iGroup = i;
         var res = null;
         if( _.isFunction( p ) ){
@@ -328,7 +329,7 @@ export default class PlanetGraphs extends GraphsBase
                 scaleInd : i,
                 count : this.grid.rings.section.length,
 
-                groups : this._groups,
+                groups : this._ringGroups,
                 graphs : this
             } ] );
         };
@@ -343,9 +344,9 @@ export default class PlanetGraphs extends GraphsBase
 
     dataGroupHandle()
     {
-        var groupFieldInd = _.indexOf(this.dataFrame.fields , this.groupField);
+        var groupFieldInd = _.indexOf(this.dataFrame.fields , this.ringGroupField);
         if( groupFieldInd >= 0 ){
-            //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
+            //有分组字段，就还要对dataFrame中的数据分下组，然后给到 ringGroupDataFrames
             var titles = this.dataFrame.org[0];
             var _dmap = {}; //以分组的字段值做为key
 
@@ -363,12 +364,38 @@ export default class PlanetGraphs extends GraphsBase
             } );
 
             for( var r in _dmap ){
-                this.groupDataFrames.push( DataFrame( _dmap[r] ) );
+                this.ringGroupDataFrames.push( DataFrame( _dmap[r] ) );
             };
         } else {
             //如果分组字段不存在，则认为数据不需要分组，直接全部作为 group 的一个子集合
-            this.groupDataFrames.push( this.dataFrame );
+            this.ringGroupDataFrames.push( this.dataFrame );
         };
+    }
+
+    //获取所有有效的在布局中的nodeData
+    getLayoutNodes(){
+        var nodes = [];
+        _.each( this._ringGroups, function( rg ){
+            _.each(rg.planets, function( node ){
+                if( node.pit ){
+                    nodes.push( node );
+                };
+            })
+        } );
+        return nodes;
+    }
+
+    //获取所有无效的在不在布局的nodeData
+    getInvalidNodes(){
+        var nodes = [];
+        _.each( this._ringGroups, function( rg ){
+            _.each(rg.planets, function( node ){
+                if( !node.pit ){
+                    nodes.push( node );
+                };
+            })
+        } );
+        return nodes;
     }
 
 }
