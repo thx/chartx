@@ -76,7 +76,8 @@ export default class PieGraphs extends GraphsBase
         if( this.node.radius !== null && _.isNumber( this.node.radius ) ){
             //如果用户有直接配置 radius，那么radius优先，用来计算
             this.node.radius = Math.max( this.node.radius, this.node.minRadius );
-            this.node.outRadius = this.node.innerRadius + this.node.radius;
+            //this.node.outRadius = this.node.innerRadius + this.node.radius;
+            this.node.innerRadius = this.node.outRadius - this.node.radius;
         };
         
         //要保证sec具有一个最小的radius
@@ -212,14 +213,10 @@ export default class PieGraphs extends GraphsBase
                 if( !data[i].enabled ) continue;
 
                 total += data[i].value;
-                if( me.node.radius ){
-                    var _r = me.node.radius;
-                    if( _.isString(me.node.radius) &&  me.node.radius in data[i].rowData){
-                        _r = Number(data[i].rowData[ me.node.radius ]);
-                        maxRval = Math.max( maxRval, _r );
-                        minRval = Math.min( minRval, _r );
-                    };
-                    
+                if( me.node.radius && (_.isString(me.node.radius) &&  me.node.radius in data[i].rowData) ){
+                    var _r = Number(data[i].rowData[ me.node.radius ]);
+                    maxRval = Math.max( maxRval, _r );
+                    minRval = Math.min( minRval, _r );
                 }
             };
 
@@ -284,16 +281,9 @@ export default class PieGraphs extends GraphsBase
                     } (midAngle);
 
                     var outRadius = me.node.outRadius;
-
-                    if( me.node.radius ){
-                        var _rr = me.node.radius;
-                        if( _.isString(me.node.radius) &&  me.node.radius in data[j].rowData){
-                            _rr = Number( data[j].rowData[me.node.radius] );                  
-                            outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (_rr - minRval)/(maxRval-minRval)  ) + me.node.innerRadius );
-                        } else {
-                            outRadius = _rr;
-                        };
-
+                    if( me.node.radius && (_.isString(me.node.radius) &&  me.node.radius in data[j].rowData) ){
+                        var _rr = Number( data[j].rowData[me.node.radius] );                  
+                        outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (_rr - minRval)/(maxRval-minRval)  ) + me.node.innerRadius );
                     };
 
                     var moveDis = me.node.moveDis;
