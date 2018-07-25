@@ -9237,7 +9237,7 @@
 	            var arr = this.layoutData;
 	            var l = arr.length;
 
-	            if (!this.enabled || !l || !this.label.evade) return;
+	            if (!this.enabled || !l) return;
 
 	            // rule , peak, proportion
 	            if (me.layoutType == "proportion") {
@@ -9271,7 +9271,13 @@
 	                me.trimLayout(arr);
 	                return;
 	            }
-
+	            //如果用户设置不想要做重叠检测
+	            if (!this.label.evade) {
+	                _$8.each(arr, function (layoutItem) {
+	                    layoutItem.visible = true;
+	                });
+	                return;
+	            }
 	            var l = arr.length;
 	            var textAlign = me.label.textAlign;
 
@@ -9281,6 +9287,7 @@
 	                if (curr === undefined) {
 	                    return;
 	                }                curr.visible = true;
+
 	                for (var ii = i; ii < l - 1; ii++) {
 	                    var next = arr[ii + 1];
 

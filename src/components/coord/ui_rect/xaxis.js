@@ -628,7 +628,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         var arr = this.layoutData;
         var l = arr.length;
 
-        if( !this.enabled || !l || !this.label.evade ) return;
+        if( !this.enabled || !l ) return;
 
         // rule , peak, proportion
         if( me.layoutType == "proportion" ){
@@ -665,7 +665,15 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
             me.trimLayout( arr );
             return;
-        }
+        };
+
+        //如果用户设置不想要做重叠检测
+        if( !this.label.evade ){
+            _.each( arr , function( layoutItem ){
+                layoutItem.visible = true;
+            } );
+            return;
+        };
 
         var l = arr.length;  
         var textAlign = me.label.textAlign;              
@@ -677,6 +685,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 return;
             };
             curr.visible = true;
+
             for( var ii=i; ii<l-1; ii++ ){
                 var next = arr[ii+1];
 
