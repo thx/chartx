@@ -53,7 +53,9 @@
                         type : "rect",
                         xAxis : {
                             field : "xfield",
-                            name : "xAxis",
+                            title : {
+                                content : "xAxis"
+                            },
                             label : {
                                 textAlign : "right",
                                 format: function(){
@@ -65,7 +67,9 @@
                         },
                         yAxis : [
                             {
-                                name : "left",
+                                title : {
+                                    content : "left"
+                                },
                                 //dataSection : [1,2,3,4,5,6,7,8],
                                 label : {
                                     format : function(val){
@@ -75,11 +79,13 @@
                                 }
                             },
                             {
-                                name : "right"
+                                title : {
+                                    content : "right"
+                                }
                             }
                         ]
                     },
-                    legend : {},
+                    
                     tips : {
                         pointer : "region"
                     },
@@ -109,6 +115,10 @@
                         
                     ],
                     dataZoom: {},
+                    legend : {
+                        position:"bottom"
+                    },
+
                     markLine :  [{
                         markTo: 'uv',
                         label : {

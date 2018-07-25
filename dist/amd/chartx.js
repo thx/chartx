@@ -8663,15 +8663,25 @@ define(function () { 'use strict';
 	        _this.width = 0;
 	        _this.height = 0;
 
-	        _this.name = "";
-	        _this._name = null; //this.label对应的文本对象
+	        _this.title = {
+	            content: "",
+	            shapeType: "text",
+	            fontColor: '#999',
+	            fontSize: 12,
+	            offset: 2,
+	            textAlign: "center",
+	            textBaseline: "middle",
+	            strokeStyle: null,
+	            lineHeight: 0
+	        };
+	        _this._title = null; //this.title对应的文本对象
 
 	        _this.enabled = true;
 	        _this.tickLine = {
 	            enabled: 1, //是否有刻度线
 	            lineWidth: 1, //线宽
 	            lineLength: 4, //线长
-	            distance: 2,
+	            offset: 2,
 	            strokeStyle: '#cccccc'
 	        };
 	        _this.axisLine = {
@@ -8685,12 +8695,11 @@ define(function () { 'use strict';
 	            fontSize: 12,
 	            rotation: 0,
 	            format: null,
-	            distance: 2,
+	            offset: 2,
 	            textAlign: "center",
 	            lineHeight: 1,
 	            evade: true //是否开启逃避检测，目前的逃避只是隐藏
 	        };
-
 	        if (opt.isH && (!opt.label || opt.label.rotaion === undefined)) {
 	            //如果是横向直角坐标系图
 	            _this.label.rotation = 90;
@@ -8779,6 +8788,8 @@ define(function () { 'use strict';
 	            if (isNaN(this.maxVal) || this.maxVal == Infinity) {
 	                this.maxVal = 1;
 	            }
+	            this._getName();
+
 	            this._setXAxisHeight();
 	        }
 
@@ -8808,9 +8819,7 @@ define(function () { 'use strict';
 	        key: "resetData",
 	        value: function resetData(dataFrame) {
 	            this._initHandle(dataFrame);
-	            this.draw({
-	                resetData: true
-	            });
+	            this.draw();
 	        }
 	    }, {
 	        key: "getIndexOfVal",
@@ -8883,13 +8892,74 @@ define(function () { 'use strict';
 	            return o;
 	        }
 	    }, {
+	        key: "_setXAxisHeight",
+	        value: function _setXAxisHeight() {
+	            //检测下文字的高等
+	            var me = this;
+	            if (!me.enabled) {
+	                me.height = 0;
+	            } else {
+	                var _maxTextHeight = 0;
+
+	                if (this.label.enabled) {
+	                    _$8.each(me.dataSection, function (val, i) {
+
+	                        var txt = new canvax.Display.Text(me._getFormatText(val), {
+	                            context: {
+	                                fontSize: me.label.fontSize
+	                            }
+	                        });
+
+	                        var textWidth = txt.getTextWidth();
+	                        var textHeight = txt.getTextHeight();
+	                        var height = textHeight; //文本在外接矩形height
+
+	                        if (!!me.label.rotation) {
+	                            //有设置旋转
+	                            if (me.label.rotation == 90) {
+	                                height = textWidth;
+	                            } else {
+	                                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
+	                                var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
+	                                height = parseInt(sinR * textWidth);
+	                            }                        }
+	                        _maxTextHeight = Math.max(_maxTextHeight, height);
+	                    });
+	                }
+	                this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
+
+	                if (this._title) {
+	                    this.height += this._title.getTextHeight();
+	                }            }
+	        }
+	    }, {
+	        key: "_getName",
+	        value: function _getName() {
+	            if (this.title.content) {
+	                if (!this._title) {
+	                    this._title = new canvax.Display.Text(this.title.content, {
+	                        context: {
+	                            fontSize: this.title.fontSize,
+	                            textAlign: this.title.textAlign, //"center",//this.isH ? "center" : "left",
+	                            textBaseline: this.title.textBaseline, //"middle", //this.isH ? "top" : "middle",
+	                            fillStyle: this.title.fontColor,
+	                            strokeStyle: this.title.strokeStyle,
+	                            lineWidth: this.title.lineWidth,
+	                            rotation: this.isH ? -180 : 0
+	                        }
+	                    });
+	                } else {
+	                    this._title.resetText(this.title.content);
+	                }
+	            }
+	        }
+	    }, {
 	        key: "draw",
 	        value: function draw(opt) {
 	            //首次渲染从 直角坐标系组件中会传入 opt
-	            if (!opt.resetData) {
-	                this._getName();
-	                this._computerConfig(opt);
-	            }
+
+	            opt && _$8.extend(true, this, opt);
+
 	            this.layoutData = this._trimXAxis(this.dataSection);
 	            this._trimLayoutData();
 
@@ -8898,41 +8968,6 @@ define(function () { 'use strict';
 
 	            this._widget(opt);
 	        }
-	    }, {
-	        key: "_getName",
-	        value: function _getName() {
-	            if (this.name && this.name != "") {
-	                if (!this._name) {
-	                    this._name = new canvax.Display.Text(this.name, {
-	                        context: {
-	                            fontSize: this.label.fontSize,
-	                            textAlign: this.isH ? "center" : "left",
-	                            textBaseline: this.isH ? "top" : "middle",
-	                            fillStyle: this.label.fontColor,
-	                            rotation: this.isH ? -90 : 0
-	                        }
-	                    });
-	                } else {
-	                    this._name.resetText(this.name);
-	                }
-	            }
-	        }
-
-	        //初始化配置
-
-	    }, {
-	        key: "_computerConfig",
-	        value: function _computerConfig(opt) {
-	            if (opt) {
-	                _$8.extend(true, this, opt);
-	            }
-	            if (this._name) {
-	                if (this.isH) {
-	                    this.width -= this._name.getTextHeight() + 5;
-	                } else {
-	                    this.width -= this._name.getTextWidth() + 5;
-	                }
-	            }        }
 
 	        //获取x对应的位置
 	        //val ind 至少要有一个
@@ -9050,9 +9085,10 @@ define(function () { 'use strict';
 
 	            var arr = this.layoutData;
 
-	            if (this._name) {
-	                this._name.context.x = this.width + 5;
-	                this.sprite.addChild(this._name);
+	            if (this._title) {
+	                this._title.context.y = this.height - this._title.getTextHeight() / 2;
+	                this._title.context.x = this.width / 2;
+	                this.sprite.addChild(this._title);
 	            }
 	            var delay = Math.min(1000 / arr.length, 25);
 
@@ -9068,7 +9104,7 @@ define(function () { 'use strict';
 	                }
 	                var o = arr[a];
 	                var x = o.x,
-	                    y = this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
+	                    y = this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
 
 	                if (this.label.enabled && !!arr[a].visible) {
 	                    //文字
@@ -9128,7 +9164,7 @@ define(function () { 'use strict';
 	                if (this.tickLine.enabled && !!arr[a].visible) {
 	                    var lineContext = {
 	                        x: x,
-	                        y: this.tickLine.distance,
+	                        y: this.tickLine.offset,
 	                        end: {
 	                            x: 0,
 	                            y: this.tickLine.lineLength
@@ -9184,46 +9220,6 @@ define(function () { 'use strict';
 	                    }
 	                });
 	                this.sprite.addChild(_axisline);
-	            }
-	        }
-	    }, {
-	        key: "_setXAxisHeight",
-	        value: function _setXAxisHeight() {
-	            //检测下文字的高等
-	            var me = this;
-	            if (!me.enabled) {
-	                me.height = 0;
-	            } else {
-	                var _maxTextHeight = 0;
-
-	                if (this.label.enabled) {
-	                    _$8.each(me.dataSection, function (val, i) {
-
-	                        var txt = new canvax.Display.Text(me._getFormatText(val), {
-	                            context: {
-	                                fontSize: me.label.fontSize
-	                            }
-	                        });
-
-	                        var textWidth = txt.getTextWidth();
-	                        var textHeight = txt.getTextHeight();
-	                        var height = textHeight; //文本在外接矩形height
-
-	                        if (!!me.label.rotation) {
-	                            //有设置旋转
-	                            if (me.label.rotation == 90) {
-	                                height = textWidth;
-	                            } else {
-	                                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
-	                                var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
-	                                height = parseInt(sinR * textWidth);
-	                            }                        }
-	                        //没有设置旋转
-	                        if (me.isH) ;
-	                        _maxTextHeight = Math.max(_maxTextHeight, height);
-	                    });
-	                }
-	                this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
 	            }
 	        }
 	    }, {
@@ -9353,12 +9349,24 @@ define(function () { 'use strict';
 	        _this._opt = opt;
 
 	        _this.width = null; //第一次计算后就会有值
+	        _this.yMaxHeight = 0; //y轴最大高
+	        _this.height = 0; //y轴第一条线到原点的高
 
 	        _this.maxW = 0; //最大文本的 width
 	        _this.field = []; //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
-	        _this.name = "";
-	        _this._name = null;
+	        _this.title = {
+	            content: "",
+	            shapeType: "text",
+	            fontColor: '#999',
+	            fontSize: 12,
+	            offset: 2,
+	            textAlign: "center",
+	            textBaseline: "middle",
+	            strokeStyle: null,
+	            lineHeight: 0
+	        };
+	        _this._title = null; //this.label对应的文本对象
 
 	        _this.enabled = true;
 	        _this.tickLine = { //刻度线
@@ -9408,9 +9416,6 @@ define(function () { 'use strict';
 
 	        _this.sprite = null;
 
-	        _this.yMaxHeight = 0; //y轴最大高
-	        _this.height = 0; //y轴第一条线到原点的高
-
 	        _this.baseNumber = null; //默认为0，如果dataSection最小值小于0，则baseNumber为最小值，如果dataSection最大值大于0，则baseNumber为最大值
 	        _this.basePoint = null; //value为 baseNumber 的point {x,y}
 	        _this.min = null;
@@ -9432,6 +9437,8 @@ define(function () { 'use strict';
 	        _this.layoutType = "proportion"; // rule , peak, proportion
 
 	        _this.init(opt, data);
+
+	        _this._getName();
 	        return _this;
 	    }
 
@@ -9488,25 +9495,36 @@ define(function () { 'use strict';
 	            this.sprite.context.y = $n;
 	            this.pos.y = $n;
 	        }
+
+	        //目前和xAxis一样
+
 	    }, {
 	        key: "_getName",
 	        value: function _getName() {
-	            var _name = this.name;
-
-	            if (_name && _name != "") {
-	                var textAlign = this.align == "left" ? "right" : "left";
-	                if (this.isH) {
-	                    textAlign = "left";
+	            if (this.title.content) {
+	                if (!this._title) {
+	                    var rotation = 0;
+	                    if (this.align == "left") {
+	                        rotation = -90;
+	                    } else {
+	                        rotation = 90;
+	                        if (this.isH) {
+	                            rotation = 270;
+	                        }
+	                    }                    this._title = new canvax.Display.Text(this.title.content, {
+	                        context: {
+	                            fontSize: this.title.fontSize,
+	                            textAlign: this.title.textAlign, //"center",//this.isH ? "center" : "left",
+	                            textBaseline: this.title.textBaseline, //"middle", //this.isH ? "top" : "middle",
+	                            fillStyle: this.title.fontColor,
+	                            strokeStyle: this.title.strokeStyle,
+	                            lineWidth: this.title.lineWidth,
+	                            rotation: rotation
+	                        }
+	                    });
+	                } else {
+	                    this._title.resetText(this.title.content);
 	                }
-	                this._name = new canvax.Display.Text(_name, {
-	                    context: {
-	                        fontSize: this.label.fontSize,
-	                        textAlign: textAlign, //"left",
-	                        textBaseline: this.isH ? "top" : "bottom",
-	                        fillStyle: this.label.fontColor,
-	                        rotation: this.isH ? -90 : 0
-	                    }
-	                });
 	            }
 	        }
 	    }, {
@@ -9514,30 +9532,14 @@ define(function () { 'use strict';
 	        value: function draw(opt) {
 	            !opt && (opt = {});
 	            opt && _$9.extend(true, this, opt);
-	            this._getName();
-	            this.height = this.yMaxHeight - this._getYAxisDisLine();
 
-	            if (this._name) {
-	                if (this.isH) {
-	                    this.height -= this._name.getTextWidth();
-	                } else {
-	                    this.height -= this._name.getTextHeight();
-	                }
-	                this._name.context.y = -this.height - 5;
-	            }
-	            this.height = parseInt(this.height);
+	            this.height = parseInt(this.yMaxHeight - this._getYAxisDisLine());
 
 	            this._trimYAxis();
 	            this._widget(opt);
 
 	            this.setX(this.pos.x);
 	            this.setY(this.pos.y);
-
-	            if (this._name) {
-	                if (this.align == "left") {
-	                    this._name.context.x += this.width;
-	                }
-	            }
 	        }
 
 	        //更具y轴的值来输出对应的在y轴上面的位置
@@ -9954,7 +9956,7 @@ define(function () { 'use strict';
 	            }
 	            var arr = this.layoutData;
 	            me.maxW = 0;
-	            me._name && me.sprite.addChild(me._name);
+
 	            for (var a = 0, al = arr.length; a < al; a++) {
 	                var o = arr[a];
 	                if (!o.visible) {
@@ -10102,6 +10104,9 @@ define(function () { 'use strict';
 	                if (me.tickLine.enabled) {
 	                    me.width += parseInt(me.tickLine.lineLength + me.tickLine.distance);
 	                }
+	                if (me._title) {
+	                    me.width += me._title.getTextHeight();
+	                }
 	            }
 
 	            var _originX = 0;
@@ -10128,7 +10133,14 @@ define(function () { 'use strict';
 	                });
 	                this.sprite.addChild(_axisLine);
 	            }
-	        }
+
+	            if (this._title) {
+	                this._title.context.y = -this.height / 2;
+	                this._title.context.x = this._title.getTextHeight() / 2;
+	                if (this.align == "right") {
+	                    this._title.context.x = this.width - this._title.getTextHeight() / 2;
+	                }                this.sprite.addChild(this._title);
+	            }        }
 	    }, {
 	        key: "_getProp",
 	        value: function _getProp(s) {
@@ -10931,7 +10943,7 @@ define(function () { 'use strict';
 	                    var w = ctx.width;
 	                    var h = ctx.height;
 
-	                    ctx.rotation = -90;
+	                    ctx.rotation = ctx.rotation - 90;
 	                }            }
 
 	            _$12.each(me._graphs, function (_graphs) {
@@ -18476,6 +18488,13 @@ define(function () { 'use strict';
 
 	            app.padding.bottom += opt.h;
 
+	            //目前dataZoom是固定在bottom位置的
+	            //_getDataZoomOpt中会矫正x
+	            opt.pos = {
+	                //x : 0, //x在_getDataZoomOpt中计算
+	                y: app.height - app.padding.bottom
+	            };
+
 	            app.components.push({
 	                type: "once",
 	                plug: {
@@ -18486,7 +18505,8 @@ define(function () { 'use strict';
 	                            type: "dataZoom",
 	                            plug: _dataZoom
 	                        });
-	                        app.graphsSprite.addChild(_dataZoom.sprite);
+	                        //app.graphsSprite.addChild( _dataZoom.sprite );
+	                        app.stage.addChild(_dataZoom.sprite);
 	                    }
 	                }
 	            });
@@ -18567,6 +18587,9 @@ define(function () { 'use strict';
 	                graphs: graphsOpt
 	            };
 
+	            if (opt.coord.horizontal) {
+	                delete opt.coord.horizontal;
+	            }
 	            var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.graphsMap, app.componentsMap);
 	            thumbChart.draw();
 
@@ -18583,7 +18606,7 @@ define(function () { 'use strict';
 	                w: app._coord.width,
 	                pos: {
 	                    x: app._coord.origin.x,
-	                    y: app._coord.origin.y + app._coord._xAxis.height
+	                    y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
 	                },
 	                dragIng: function dragIng(range) {
 	                    var trigger = {

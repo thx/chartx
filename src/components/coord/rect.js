@@ -160,7 +160,7 @@ export default class Rect extends CoordBase
                 var w = ctx.width;
                 var h = ctx.height;
 
-                ctx.rotation = -90;
+                ctx.rotation = ctx.rotation - 90;
                 
             };
         }

@@ -14,12 +14,24 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this._opt = opt;
         
         this.width   = null; //第一次计算后就会有值
+        this.yMaxHeight = 0; //y轴最大高
+        this.height = 0; //y轴第一条线到原点的高
 
         this.maxW    = 0;    //最大文本的 width
         this.field   = [];   //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
-        this.name    = "";
-        this._name   = null;
+        this.title  = {
+            content    : "",
+            shapeType  : "text",
+            fontColor  : '#999',
+            fontSize   : 12,
+            offset   : 2,
+            textAlign  : "center",
+            textBaseline : "middle",
+            strokeStyle : null,
+            lineHeight : 0
+        };
+        this._title = null; //this.label对应的文本对象
 
         this.enabled = true;
         this.tickLine= {//刻度线
@@ -70,9 +82,6 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
         this.sprite = null;
         
-        this.yMaxHeight = 0; //y轴最大高
-        this.height = 0; //y轴第一条线到原点的高
-
         this.baseNumber = null; //默认为0，如果dataSection最小值小于0，则baseNumber为最小值，如果dataSection最大值大于0，则baseNumber为最大值
         this.basePoint = null; //value为 baseNumber 的point {x,y}
         this.min = null; 
@@ -94,6 +103,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.layoutType = "proportion"; // rule , peak, proportion
 
         this.init(opt, data );
+
+        this._getName();
     }
 
     init(opt, data )
@@ -149,25 +160,34 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.pos.y = $n;
     }
 
-    _getName()
+    //目前和xAxis一样
+    _getName() 
     {
-        var _name = this.name;
-        
-        if (_name && _name != "") {
-            var textAlign = this.align == "left" ? "right" : "left";
-            if( this.isH ){
-                textAlign = "left"
-            };
-
-            this._name = new Canvax.Display.Text(_name, {
-                context: {
-                    fontSize  : this.label.fontSize,
-                    textAlign : textAlign,//"left",
-                    textBaseline : this.isH ? "top" : "bottom",
-                    fillStyle : this.label.fontColor,
-                    rotation  : this.isH ? -90 : 0
-                }
-            });
+        if ( this.title.content ) {
+            if( !this._title ){
+                var rotation = 0;
+                if( this.align == "left" ){
+                    rotation = -90;
+                } else {
+                    rotation = 90;
+                    if( this.isH ){
+                        rotation = 270;
+                    }
+                };
+                this._title = new Canvax.Display.Text(this.title.content, {
+                    context: {
+                        fontSize: this.title.fontSize,
+                        textAlign: this.title.textAlign,  //"center",//this.isH ? "center" : "left",
+                        textBaseline: this.title.textBaseline,//"middle", //this.isH ? "top" : "middle",
+                        fillStyle: this.title.fontColor,
+                        strokeStyle: this.title.strokeStyle,
+                        lineWidth : this.title.lineWidth,
+                        rotation: rotation
+                    }
+                });
+            } else {
+                this._title.resetText( this.title.content );
+            }
         }
     }
 
@@ -175,19 +195,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
     {
         !opt && (opt ={});
         opt && _.extend(true, this, opt);
-        this._getName();
-        this.height = this.yMaxHeight - this._getYAxisDisLine();
-
-        if (this._name) {
-            if (this.isH) {
-                this.height -= this._name.getTextWidth();
-            } else {
-                this.height -= this._name.getTextHeight();
-            }
-            this._name.context.y = -this.height - 5;
-        };
-
-        this.height = parseInt( this.height );
+        
+        this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
         
         this._trimYAxis();
         this._widget( opt );
@@ -195,11 +204,6 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.setX(this.pos.x);
         this.setY(this.pos.y);
 
-        if (this._name) {
-            if(this.align == "left"){
-                this._name.context.x += this.width; 
-            }
-        }
 
     }
 
@@ -662,7 +666,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         
         var arr = this.layoutData;
         me.maxW = 0;
-        me._name && me.sprite.addChild(me._name);
+
         for (var a = 0, al = arr.length; a < al; a++) {
             var o = arr[a];
             if( !o.visible ){
@@ -827,6 +831,9 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             if (me.tickLine.enabled) {
                 me.width += parseInt( me.tickLine.lineLength + me.tickLine.distance );
             }
+            if ( me._title ){
+                me.width += me._title.getTextHeight();
+            }
         }
 
         var _originX = 0;
@@ -853,6 +860,15 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             });
             this.sprite.addChild( _axisLine );
         }
+
+        if (this._title) {
+            this._title.context.y = -this.height/2;
+            this._title.context.x = this._title.getTextHeight() / 2;
+            if( this.align == "right" ){
+                this._title.context.x = this.width - this._title.getTextHeight() / 2;
+            };
+            this.sprite.addChild(this._title);
+        };
 
     }
 

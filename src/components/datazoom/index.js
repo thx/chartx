@@ -115,6 +115,13 @@ export default class dataZoom extends Component
 
         app.padding.bottom += opt.h;
 
+        //目前dataZoom是固定在bottom位置的
+        //_getDataZoomOpt中会矫正x
+        opt.pos = {
+            //x : 0, //x在_getDataZoomOpt中计算
+            y : app.height - app.padding.bottom
+        };
+        
         app.components.push( {
             type : "once",
             plug : {
@@ -125,7 +132,8 @@ export default class dataZoom extends Component
                         type : "dataZoom",
                         plug : _dataZoom
                     } ); 
-                    app.graphsSprite.addChild( _dataZoom.sprite );
+                    //app.graphsSprite.addChild( _dataZoom.sprite );
+                    app.stage.addChild( _dataZoom.sprite );
                 }
             }
         } );
@@ -206,6 +214,10 @@ export default class dataZoom extends Component
             graphs : graphsOpt
         };
 
+        if( opt.coord.horizontal ){
+            delete opt.coord.horizontal;
+        };
+
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.graphsMap, app.componentsMap);
         thumbChart.draw();
 
@@ -222,7 +234,7 @@ export default class dataZoom extends Component
             w: app._coord.width,
             pos: {
                 x: app._coord.origin.x,
-                y: app._coord.origin.y + app._coord._xAxis.height
+                y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
             },
             dragIng: function(range) {
                 var trigger = {

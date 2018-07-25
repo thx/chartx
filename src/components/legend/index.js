@@ -110,7 +110,7 @@ export default class Legend extends Component
         
         //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
         var _legend = new this( legendData, legendOpt, app );
-    
+        
         if( _legend.layoutType == "h" ){
             app.padding[ _legend.position ] += _legend.height;
         } else {
