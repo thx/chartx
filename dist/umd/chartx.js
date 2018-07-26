@@ -8018,8 +8018,9 @@
 	            this.canvax.resize();
 	            this.inited = false;
 
-	            this.reset({
-	                trigger: "resize"
+	            this._clean();
+	            this.draw({
+	                resize: true
 	            });
 
 	            this.inited = true;
@@ -8035,6 +8036,7 @@
 	            !opt && (opt = {});
 
 	            _$4.extend(true, this._opts, opt);
+
 	            //和上面的不同this._opts存储的都是用户设置的配置
 	            //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
 	            _$4.extend(true, this, opt);
@@ -8045,8 +8047,6 @@
 	            this.dataFrame = this.initData(this._data, opt);
 
 	            this._clean();
-
-	            this._init && this._init(this._node, this._data, this._opts);
 	            this.draw(opt);
 	        }
 
@@ -8225,6 +8225,8 @@
 	        }
 
 	        //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 drawEndHorizontal 的操作
+	        //create的时候调用没有opt参数
+	        //resize（opt=={resize : true}） 和 reset的时候会有 opt参数传过来
 
 	    }, {
 	        key: "draw",
@@ -8245,8 +8247,7 @@
 	            if (this._coord && this._coord.horizontal) {
 	                this.drawBeginHorizontal && this.drawBeginHorizontal();
 	            }
-	            this.startDraw(opt); //开始绘图
-	            this.drawComponents(opt); //绘图完，开始绘制插件，来自己chart.js模块
+	            this.startDraw(opt); //开始绘图，包括坐标系和graphs 和 components
 
 	            if (this._coord && this._coord.horizontal) {
 	                this.drawEndHorizontal && this.drawEndHorizontal();
@@ -8271,6 +8272,7 @@
 	    }, {
 	        key: "startDraw",
 	        value: function startDraw(opt) {
+
 	            var me = this;
 	            !opt && (opt = {});
 	            var _coord = this._coord;
@@ -8293,6 +8295,14 @@
 	            }
 	            var graphsCount = this._graphs.length;
 	            var completeNum = 0;
+
+	            opt = _$5.extend(opt, {
+	                width: width,
+	                height: height,
+	                origin: origin,
+	                inited: me.inited
+	            });
+
 	            _$5.each(this._graphs, function (_g) {
 	                _g.on("complete", function (g) {
 	                    completeNum++;
@@ -8301,15 +8311,10 @@
 	                    }
 	                    _g.inited = true;
 	                });
-
-	                _g.draw({
-	                    width: width,
-	                    height: height,
-	                    origin: origin,
-	                    inited: me.inited,
-	                    resize: opt.trigger == "resize"
-	                });
+	                _g.draw(opt);
 	            });
+
+	            this.drawComponents(opt); //绘图完，开始绘制插件，来自己chart.js模块
 
 	            this.bindEvent();
 	        }
@@ -10467,7 +10472,7 @@
 	                        y: y
 	                    },
 	                    yMaxHeight: y - _padding.top,
-	                    resize: opt.trigger == "resize"
+	                    resize: opt.resize
 	                });
 	                _yAxisW = this._yAxisLeft.width;
 	            }
@@ -10480,7 +10485,7 @@
 	                        y: y
 	                    },
 	                    yMaxHeight: y - _padding.top,
-	                    resize: opt.trigger == "resize"
+	                    resize: opt.resize
 	                });
 	                _yAxisRW = this._yAxisRight.width;
 	            }
@@ -10491,20 +10496,15 @@
 	                    y: y
 	                },
 	                width: w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
-	                resize: opt.trigger == "resize"
+	                resize: opt.resize
 	            });
 
 	            this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width);
 
-	            this.width = this._xAxis.width;
-	            this.height = this._yAxis[0].height;
-	            this.origin.x = _yAxisW + _padding.left;
-	            this.origin.y = y;
-
 	            //绘制背景网格
 	            this._grid.draw({
-	                width: this.width,
-	                height: this.height,
+	                width: this._xAxis.width,
+	                height: this._yAxis[0].height,
 	                xDirection: {
 	                    data: this._yAxis[0].layoutData
 	                },
@@ -10512,20 +10512,32 @@
 	                    data: this._xAxis.layoutData
 	                },
 	                pos: {
-	                    x: this.origin.x,
-	                    y: this.origin.y
+	                    x: _yAxisW + _padding.left,
+	                    y: y
 	                },
-	                resize: opt.trigger == "resize"
+	                resize: opt.resize
 	            });
+
+	            this.width = this._xAxis.width;
+	            this.height = this._yAxis[0].height;
+	            this.origin.x = _yAxisW + _padding.left;
+	            this.origin.y = y;
+
+	            this._initInduce();
 
 	            if (this.horizontal) {
 	                this._horizontal({
 	                    w: w,
 	                    h: h
 	                });
-	            }
 
-	            this._initInduce();
+	                /*
+	                this.width = this._yAxis[0].height;
+	                this.height = this._xAxis.width;
+	                this.origin.x = this._xAxis.height + _padding.left;
+	                this.origin.y = this._yAxis[0].height + _padding.top;
+	                */
+	            }
 	        }
 	    }, {
 	        key: "_initModules",
@@ -10929,11 +10941,7 @@
 	            ctx.x += (me.width - me.height) / 2;
 	            ctx.y += (me.height - me.width) / 2;
 	            ctx.rotation = 90;
-
-	            var origin = { x: me.height / 2, y: me.width / 2 };
-	            ctx.rotateOrigin = origin;
-	            //ctx.scaleOrigin = origin;
-	            //ctx.scaleX = -1;
+	            ctx.rotateOrigin = { x: me.height / 2, y: me.width / 2 };
 
 	            function _horizontalText(el) {
 

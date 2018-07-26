@@ -34,6 +34,8 @@ export default class Coord extends Chart
     }
 
     //覆盖基类中得draw，和基类的draw唯一不同的是，descartes 会有 drawEndHorizontal 的操作
+    //create的时候调用没有opt参数
+    //resize（opt=={resize : true}） 和 reset的时候会有 opt参数传过来
     draw( opt )
     {
         if( this._opts.theme ){
@@ -56,8 +58,7 @@ export default class Coord extends Chart
             this.drawBeginHorizontal && this.drawBeginHorizontal();
         };
 
-        this.startDraw( opt ); //开始绘图
-        this.drawComponents( opt ); //绘图完，开始绘制插件，来自己chart.js模块
+        this.startDraw( opt ); //开始绘图，包括坐标系和graphs 和 components
 
         if( this._coord && this._coord.horizontal ){
             this.drawEndHorizontal && this.drawEndHorizontal();
@@ -84,6 +85,7 @@ export default class Coord extends Chart
 
     startDraw(opt)
     {
+        
         var me = this;
         !opt && (opt ={});
         var _coord = this._coord;
@@ -95,7 +97,7 @@ export default class Coord extends Chart
         if( this._coord ){
             //先绘制好坐标系统
             this._coord.draw( opt );
-            width = this._coord.width;
+            width  = this._coord.width;
             height = this._coord.height;
             origin = this._coord.origin;
         };
@@ -108,6 +110,14 @@ export default class Coord extends Chart
     
         var graphsCount = this._graphs.length;
         var completeNum = 0;
+
+        opt = _.extend( opt, {
+            width  : width,
+            height : height,
+            origin : origin,
+            inited : me.inited
+        } );
+
         _.each( this._graphs, function( _g ){
             _g.on( "complete", function(g) {
                 completeNum ++;
@@ -116,16 +126,10 @@ export default class Coord extends Chart
                 }
                 _g.inited = true;
             });
-            
-            _g.draw({
-                width  : width,
-                height : height,
-                origin : origin,
-                inited : me.inited,
-                resize : opt.trigger == "resize"
-            });
-
+            _g.draw( opt );
         } );
+
+        this.drawComponents( opt ); //绘图完，开始绘制插件，来自己chart.js模块
 
         this.bindEvent();
     }

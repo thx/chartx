@@ -140,12 +140,7 @@ export default class Rect extends CoordBase
         ctx.x += ((me.width - me.height) / 2);
         ctx.y += ((me.height - me.width) / 2);
         ctx.rotation = 90;
-
-        
-        var origin = { x : me.height/2, y : me.width/2 };
-        ctx.rotateOrigin = origin;
-        //ctx.scaleOrigin = origin;
-        //ctx.scaleX = -1;
+        ctx.rotateOrigin = { x : me.height/2, y : me.width/2 };
         
         function _horizontalText( el ){
             

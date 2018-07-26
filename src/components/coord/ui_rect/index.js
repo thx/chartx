@@ -128,7 +128,7 @@ export default class Rect_Component extends coorBase
                     y: y
                 },
                 yMaxHeight: y - _padding.top,
-                resize : opt.trigger == "resize"
+                resize : opt.resize
             });
             _yAxisW = this._yAxisLeft.width;
         }
@@ -141,7 +141,7 @@ export default class Rect_Component extends coorBase
                     y : y
                 },
                 yMaxHeight: y - _padding.top,
-                resize : opt.trigger == "resize"
+                resize : opt.resize
             });
             _yAxisRW = this._yAxisRight.width;
         };
@@ -153,20 +153,15 @@ export default class Rect_Component extends coorBase
                 y : y
             },
             width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
-            resize : opt.trigger == "resize"
+            resize : opt.resize
         });
         
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
 
-        this.width = this._xAxis.width;
-        this.height = this._yAxis[0].height;
-        this.origin.x = _yAxisW + _padding.left;
-        this.origin.y = y;
-
         //绘制背景网格
         this._grid.draw({
-            width   : this.width,
-            height  : this.height,
+            width   : this._xAxis.width,
+            height  : this._yAxis[0].height,
             xDirection   : {
                 data: this._yAxis[0].layoutData
             },
@@ -174,20 +169,35 @@ export default class Rect_Component extends coorBase
                 data: this._xAxis.layoutData
             },
             pos     : {
-                x   : this.origin.x,
-                y   : this.origin.y
+                x   : _yAxisW + _padding.left,
+                y   : y
             },
-            resize : opt.trigger == "resize"
+            resize : opt.resize
         } );
+
+
+        this.width = this._xAxis.width;
+        this.height = this._yAxis[0].height;
+        this.origin.x = _yAxisW + _padding.left;
+        this.origin.y = y;
+
+        this._initInduce();
 
         if( this.horizontal ){
             this._horizontal({
                 w : w,
                 h : h
             });
+            
+            /*
+            this.width = this._yAxis[0].height;
+            this.height = this._xAxis.width;
+            this.origin.x = this._xAxis.height + _padding.left;
+            this.origin.y = this._yAxis[0].height + _padding.top;
+            */
         }
 
-        this._initInduce();
+        
     }
    
     _initModules()

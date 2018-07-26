@@ -159,9 +159,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.canvax.resize();
         this.inited = false;
 
-        this.reset({
-            trigger : "resize"
-        });
+        this._clean();
+        this.draw( {
+            resize : true
+        } );
 
         this.inited = true;
     }
@@ -174,6 +175,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         !opt && (opt={});
 
         _.extend(true, this._opts, opt);
+
         //和上面的不同this._opts存储的都是用户设置的配置
         //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
         _.extend(true, this , opt);
@@ -185,8 +187,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.dataFrame = this.initData( this._data, opt );
 
         this._clean();
-
-        this._init && this._init(this._node, this._data, this._opts);
         this.draw( opt );
 
     }
@@ -259,11 +259,11 @@ export default class Chart extends Canvax.Event.EventDispatcher
         }); 
     }
 
-    drawComponents()
+    drawComponents(  )
     {
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
-            p.plug && p.plug.draw && p.plug.draw();
+            p.plug && p.plug.draw && p.plug.draw(  );
             if( p.type == "once" ){
                 this.components.splice( i, 1 );
                 i--;
