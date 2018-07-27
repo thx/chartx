@@ -14992,7 +14992,7 @@ var Pie = function (_Canvax$Event$EventDi) {
     }, {
         key: "_showGrowLabel",
         value: function _showGrowLabel() {
-            if (this.textSp) {
+            if (this.textSp && this.textSp.context) {
                 this.textSp.context.globalAlpha = 1;
                 _$21.each(this.textList, function (lab) {
                     lab.textEle.style.visibility = "visible";
@@ -15002,7 +15002,7 @@ var Pie = function (_Canvax$Event$EventDi) {
     }, {
         key: "_hideGrowLabel",
         value: function _hideGrowLabel() {
-            if (this.textSp) {
+            if (this.textSp && this.textSp.context) {
                 this.textSp.context.globalAlpha = 0;
                 _$21.each(this.textList, function (lab) {
                     lab.textEle.style.visibility = "hidden";
