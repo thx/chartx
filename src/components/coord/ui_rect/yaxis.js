@@ -21,7 +21,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.field   = [];   //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
         this.title  = {
-            text       : "",
+            content    : "",
             shapeType  : "text",
             fontColor  : '#999',
             fontSize   : 12,
@@ -163,7 +163,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
     //目前和xAxis一样
     _getName() 
     {
-        if ( this.title.text ) {
+        if ( this.title.content ) {
             if( !this._title ){
                 var rotation = 0;
                 if( this.align == "left" ){
@@ -174,7 +174,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                         rotation = 270;
                     }
                 };
-                this._title = new Canvax.Display.Text(this.title.text, {
+                this._title = new Canvax.Display.Text(this.title.content, {
                     context: {
                         fontSize: this.title.fontSize,
                         textAlign: this.title.textAlign,  //"center",//this.isH ? "center" : "left",
@@ -186,7 +186,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                     }
                 });
             } else {
-                this._title.resetText( this.title.text );
+                this._title.resetText( this.title.content );
             }
         }
     }

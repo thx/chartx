@@ -8670,7 +8670,7 @@ var Chartx = (function () {
 	        _this.height = 0;
 
 	        _this.title = {
-	            text: "",
+	            content: "",
 	            shapeType: "text",
 	            fontColor: '#999',
 	            fontSize: 12,
@@ -8941,9 +8941,9 @@ var Chartx = (function () {
 	    }, {
 	        key: "_getName",
 	        value: function _getName() {
-	            if (this.title.text) {
+	            if (this.title.content) {
 	                if (!this._title) {
-	                    this._title = new canvax.Display.Text(this.title.text, {
+	                    this._title = new canvax.Display.Text(this.title.content, {
 	                        context: {
 	                            fontSize: this.title.fontSize,
 	                            textAlign: this.title.textAlign, //"center",//this.isH ? "center" : "left",
@@ -8955,7 +8955,7 @@ var Chartx = (function () {
 	                        }
 	                    });
 	                } else {
-	                    this._title.resetText(this.title.text);
+	                    this._title.resetText(this.title.content);
 	                }
 	            }
 	        }
@@ -9362,7 +9362,7 @@ var Chartx = (function () {
 	        _this.field = []; //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
 	        _this.title = {
-	            text: "",
+	            content: "",
 	            shapeType: "text",
 	            fontColor: '#999',
 	            fontSize: 12,
@@ -9507,7 +9507,7 @@ var Chartx = (function () {
 	    }, {
 	        key: "_getName",
 	        value: function _getName() {
-	            if (this.title.text) {
+	            if (this.title.content) {
 	                if (!this._title) {
 	                    var rotation = 0;
 	                    if (this.align == "left") {
@@ -9517,7 +9517,7 @@ var Chartx = (function () {
 	                        if (this.isH) {
 	                            rotation = 270;
 	                        }
-	                    }                    this._title = new canvax.Display.Text(this.title.text, {
+	                    }                    this._title = new canvax.Display.Text(this.title.content, {
 	                        context: {
 	                            fontSize: this.title.fontSize,
 	                            textAlign: this.title.textAlign, //"center",//this.isH ? "center" : "left",
@@ -9529,7 +9529,7 @@ var Chartx = (function () {
 	                        }
 	                    });
 	                } else {
-	                    this._title.resetText(this.title.text);
+	                    this._title.resetText(this.title.content);
 	                }
 	            }
 	        }

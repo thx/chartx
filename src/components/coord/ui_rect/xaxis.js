@@ -19,7 +19,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         this.height = 0;
 
         this.title  = {
-            text : "",
+            content    : "",
             shapeType  : "text",
             fontColor  : '#999',
             fontSize   : 12,
@@ -301,9 +301,9 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
     _getName()
     {
-        if ( this.title.text ) {
+        if ( this.title.content ) {
             if( !this._title ){
-                this._title = new Canvax.Display.Text(this.title.text, {
+                this._title = new Canvax.Display.Text(this.title.content, {
                     context: {
                         fontSize: this.title.fontSize,
                         textAlign: this.title.textAlign,  //"center",//this.isH ? "center" : "left",
@@ -315,7 +315,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                     }
                 });
             } else {
-                this._title.resetText( this.title.text );
+                this._title.resetText( this.title.content );
             }
         }
     }
