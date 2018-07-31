@@ -72,9 +72,12 @@ if( projectTheme && projectTheme.length ){
 
 
 var Chartx = {
-    create : function( el, data, opt ){
+    create : function( el, _data, _opt ){
         var chart = null;
         var me = this;
+
+        var data = canvax._.clone( _data );
+        var opt = canvax._.extend( true, {}, _opt );
 
         //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
         var chart_id = canvax.$.query(el).getAttribute("chart_id");

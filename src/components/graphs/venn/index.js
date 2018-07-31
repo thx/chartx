@@ -143,15 +143,16 @@ export default class VennGraphs extends GraphsBase
     }
 
     _vennData() {
-        let arr = this.dataFrame.org;
         let data = [];
         let me = this;
-        let titles = arr.shift(0);
-        _.each(arr, function(row, iNode) {
+
+        for( var i=0,l=this.dataFrame.length; i< l; i++ ){
+            var rowData = me.dataFrame.getRowData( i );
+
             let obj = {
-                iNode: iNode,
+                iNode: i,
                 nodeId : null,
-                rowData : me.dataFrame.getRowData( iNode ),
+                rowData : rowData,
                 sets : null,
 
                 //size和value是同一个值，size是 vennLayout 需要用到的属性
@@ -161,25 +162,29 @@ export default class VennGraphs extends GraphsBase
                 
                 label: null,
                 labelPosition : null,
-                
             };
-            _.each(titles, function(title, i) {
-                if (title == me.node.field) {
-                    let val = row[i];
+
+            for( var p in rowData ){
+
+                var val = rowData[p];
+
+                if (p == me.node.field) {
                     if (!_.isArray(val)) {
                         val = val.split(/[,|]/);
                     };
                     obj.sets = val;
                     obj.nodeId = val.join();
-                } else if (title == me.field) {
-                    obj.size = row[i];
-                    obj.value = row[i]; 
-                } else if (title == me.label.field) {
-                    obj.label = row[i];
+                } else if (p == me.field) {
+                    obj.size = val;
+                    obj.value = val; 
+                } else if (p == me.label.field) {
+                    obj.label = val;
                 };
-            });
+            }
+
             data.push(obj);
-        });
+
+        };
 
         return data;
     }

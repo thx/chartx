@@ -19067,15 +19067,16 @@ var Chartx = (function () {
 	    }, {
 	        key: "_vennData",
 	        value: function _vennData() {
-	            var arr = this.dataFrame.org;
 	            var data = [];
 	            var me = this;
-	            var titles = arr.shift(0);
-	            _$28.each(arr, function (row, iNode) {
+
+	            for (var i = 0, l = this.dataFrame.length; i < l; i++) {
+	                var rowData = me.dataFrame.getRowData(i);
+
 	                var obj = {
-	                    iNode: iNode,
+	                    iNode: i,
 	                    nodeId: null,
-	                    rowData: me.dataFrame.getRowData(iNode),
+	                    rowData: rowData,
 	                    sets: null,
 
 	                    //size和value是同一个值，size是 vennLayout 需要用到的属性
@@ -19085,24 +19086,26 @@ var Chartx = (function () {
 
 	                    label: null,
 	                    labelPosition: null
-
 	                };
-	                _$28.each(titles, function (title, i) {
-	                    if (title == me.node.field) {
-	                        var val = row[i];
+
+	                for (var p in rowData) {
+
+	                    var val = rowData[p];
+
+	                    if (p == me.node.field) {
 	                        if (!_$28.isArray(val)) {
 	                            val = val.split(/[,|]/);
 	                        }                        obj.sets = val;
 	                        obj.nodeId = val.join();
-	                    } else if (title == me.field) {
-	                        obj.size = row[i];
-	                        obj.value = row[i];
-	                    } else if (title == me.label.field) {
-	                        obj.label = row[i];
-	                    }                });
-	                data.push(obj);
-	            });
+	                    } else if (p == me.field) {
+	                        obj.size = val;
+	                        obj.value = val;
+	                    } else if (p == me.label.field) {
+	                        obj.label = val;
+	                    }                }
 
+	                data.push(obj);
+	            }
 	            return data;
 	        }
 	    }, {
@@ -21586,9 +21589,12 @@ var Chartx = (function () {
 
 
 	var Chartx = {
-	    create: function create(el, data, opt) {
+	    create: function create(el, _data, _opt) {
 	        var chart = null;
 	        var me = this;
+
+	        var data = canvax._.clone(_data);
+	        var opt = canvax._.extend(true, {}, _opt);
 
 	        //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
 	        var chart_id = canvax.$.query(el).getAttribute("chart_id");
