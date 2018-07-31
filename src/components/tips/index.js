@@ -81,17 +81,24 @@ export default class Tips extends Component
         if( !this.enabled ) return;
 
         if( e.eventInfo ){
-            this.hide();
+            this.eventInfo = e.eventInfo;
 
             var stage = e.target.getStage();
             this.cW   = stage.context.width;
             this.cH   = stage.context.height;
 
-            //this._creatTipDom(e);
-            this._setContent(e);
-            this.setPosition(e);
+            var content = this._setContent(e);
+            if( content ){
+                this._setPosition(e);
+                this.sprite.toFront();
 
-            this.sprite.toFront();
+                //比如散点图，没有hover到点的时候，也要显示，所有放到最下面
+                //反之，如果只有hover到点的时候才显示point，那么就放这里
+                //this._tipsPointerShow(e);
+            } else {
+                this.hide();
+            }
+            
         };
 
         this._tipsPointerShow(e)
@@ -102,30 +109,43 @@ export default class Tips extends Component
         if( !this.enabled ) return;
 
         if( e.eventInfo ){
-            this._setContent(e);
-            this.setPosition(e);
+            this.eventInfo = e.eventInfo;
+            var content = this._setContent(e);
+            if( content ){
+                this._setPosition(e);
+
+                //比如散点图，没有hover到点的时候，也要显示，所有放到最下面
+                //反之，如果只有hover到点的时候才显示point，那么就放这里
+                //this._tipsPointerMove(e)
+            } else {
+                //move的时候hide的只有dialogTips, pointer不想要隐藏
+                //this.hide();
+                this._hideDialogTips();
+            }
         };
-    
         this._tipsPointerMove(e)
     }
 
     hide()
     {
         if( !this.enabled ) return;
+        this._hideDialogTips();
+        this._tipsPointerHide()
+    }
 
+    _hideDialogTips()
+    {
         if( this.eventInfo ){
             this.eventInfo = null;
             this.sprite.removeAllChildren();
             this._removeContent();
         };
-        
-        this._tipsPointerHide()
     }
 
     /**
      *@pos {x:0,y:0}
      */
-    setPosition( e )
+    _setPosition( e )
     {
         if( !this.enabled ) return;
         if(!this._tipDom) return;
@@ -165,7 +185,6 @@ export default class Tips extends Component
     {
         var tipxContent = this._getContent(e);
         if( !tipxContent && tipxContent!==0 ){
-            this.hide();
             return;
         };
 
@@ -176,17 +195,19 @@ export default class Tips extends Component
         this._tipDom.innerHTML = tipxContent;
         this.dW = this._tipDom.offsetWidth;
         this.dH = this._tipDom.offsetHeight;
+
+        return tipxContent
     }
 
     _getContent(e)
     {
-        this.eventInfo = e.eventInfo;
+       
         var tipsContent;
 
         if( this.content ){
-            tipsContent = _.isFunction(this.content) ? this.content( this.eventInfo ) : this.content;
+            tipsContent = _.isFunction(this.content) ? this.content( e.eventInfo ) : this.content;
         } else {
-            tipsContent = this._getDefaultContent( this.eventInfo );
+            tipsContent = this._getDefaultContent( e.eventInfo );
         };
 
         return tipsContent;
@@ -362,7 +383,7 @@ export default class Tips extends Component
         //目前只实现了直角坐标系的tipsPointer
         if( !_coord || _coord.type != 'rect' ) return;
 
-        if( !this.pointer ) return;
+        if( !this.pointer || !this._tipsPointer ) return;
 
         //console.log("move");
 

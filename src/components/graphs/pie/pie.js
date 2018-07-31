@@ -72,13 +72,6 @@ export default class Pie extends Canvax.Event.EventDispatcher
  
         me._widget();
             
-        /*
-        if ( opt.animation ) {
-            me.grow();
-        } else {
-            me.completed = true;
-        }
-        */
     }
 
     resetData( data )
