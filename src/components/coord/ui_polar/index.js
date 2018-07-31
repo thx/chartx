@@ -195,7 +195,7 @@ export default class polarComponent extends coorBase
                     clone_fields[i] = {
                         field : fields[i],
                         enabled : true,
-                        color : me.root._theme[ fieldInd ],
+                        color : me.root.getTheme( fieldInd ),
                         ind : fieldInd++,
                         group : null //这个field对应的ui分组
                     }

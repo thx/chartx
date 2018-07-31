@@ -48,7 +48,7 @@ export default class Coord extends Chart
             };
 
             var _theme = new this.componentsMap.theme( this._opts.theme, this );
-            this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用下面的merge
+            this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用merge
             
         };
         this.initModule( opt );     //初始化模块  

@@ -83,6 +83,16 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
     }
 
+    //ind 如果有就获取对应索引的具体颜色值
+    getTheme( ind )
+    {
+        var colors = this._theme;
+        if( ind != undefined ){
+            return colors[ ind % colors.length ]
+        };
+        return colors;
+    }
+
     setCoord_Graphs_Sp()
     {
         //坐标系存放的容器

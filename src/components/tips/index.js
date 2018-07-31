@@ -210,9 +210,18 @@ export default class Tips extends Component
                 return;
             };
 
+            
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
-            var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-            str+="<td "+tsStyle+">"+ (node.label || node.field || "") +"：</td>";
+            
+            let tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
+            let label = node.label || node.field;
+            if( label ){
+                label += "：";
+            } else {
+                label = "";
+            };
+        
+            str+="<td "+tsStyle+">"+ label +"</td>";
             str += "<td "+tsStyle+">"+ (typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) +"</td></tr>";
         });
         str+="</table>";

@@ -21,6 +21,7 @@ import Radar from "./components/graphs/radar/index"
 import Cloud from "./components/graphs/cloud/index"
 import Planet from "./components/graphs/planet/index"
 import Funnel from "./components/graphs/funnel/index"
+import Venn from "./components/graphs/venn/index"
 
 //components
 import Legend from "./components/legend/index"
@@ -45,7 +46,8 @@ var graphs = {
     radar : Radar,
     cloud : Cloud,
     planet: Planet,
-    funnel: Funnel
+    funnel: Funnel,
+    venn  : Venn
 }
 
 var components = {

@@ -15,6 +15,8 @@ export default class PieGraphs extends GraphsBase
         this.field = null; 
         this.sort = null; //默认不排序，可以配置为asc,desc
 
+        //groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField
+        //其他图也都统一， 不要改
         this.groupField = null;
 
         this.node = {
@@ -26,7 +28,7 @@ export default class PieGraphs extends GraphsBase
             minRadius : 10,//outRadius - innerRadius ， 也就是radius的最小值
             moveDis : 15, //要预留moveDis位置来hover sector 的时候外扩
 
-            fillStyle : this.root._theme,
+            fillStyle : this.root.getTheme(),
             focus : {
                 enabled : true,
             },

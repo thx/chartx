@@ -21,7 +21,7 @@ export default class CloudGraphs extends GraphsBase
         this.node = {
             fontFamily  : "Impact",
             fontColor   : function( nodeData ){
-                return me.root._theme[ nodeData.iNode % me.root._theme.length ]
+                return me.root.getTheme( nodeData.iNode )
             },
             fontSize    : function(){
                 //fontSize默认12-50的随机值

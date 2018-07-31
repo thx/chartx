@@ -135,7 +135,7 @@ export default class FunnelGraphs extends GraphsBase
                 rowData : me.dataFrame.getRowData(i),
                 value   : num,
                 width   : me._getNodeWidth( num ),
-                color   : me.root._theme[i],//默认从皮肤中获取
+                color   : me.root.getTheme(i),//默认从皮肤中获取
                 cursor  : "pointer",
                
                 //下面得都在layoutData的循环中计算

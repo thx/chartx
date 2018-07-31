@@ -2,7 +2,7 @@
   "name": "chartx",
   "title": "chartx.js",
   "description": "Data Visualization Chart Library",
-  "version": "1.0.39",
+  "version": "1.0.40",
   "homepage": "https://thx.github.io/chartx/",
   "license": "MIT",
   "keywords": [
@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "rollup-watch": "4.3.1",
-    "canvax": "^2.0.1"
+    "canvax": "^2.0.1",
+    "fmin": "0.0.2"
   },
   "scripts": {
     "rollup": "node rollup.config.js",

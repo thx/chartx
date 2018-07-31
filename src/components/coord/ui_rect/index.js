@@ -398,7 +398,7 @@ export default class Rect_Component extends coorBase
                         field : fields[i],
                         enabled : true,
                         yAxis : me._getYaxisOfField( fields[i] ),
-                        color : me.root._theme[ fieldInd ],
+                        color : me.root.getTheme(fieldInd),
                         ind : fieldInd++
                     }
                     
