@@ -6,7 +6,7 @@ const _ = Canvax._;
 
 export default class Legend extends Component
 {
-    constructor(data, tops, root)
+    constructor(data, opt, root)
     {
         super();
 
@@ -17,20 +17,38 @@ export default class Legend extends Component
             {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
+        
         this.data = data || [];
 
         this.width = 0;
         this.height = 0;
 
-        this.node = {
+        //一般来讲，比如柱状图折线图等，是按照传入的field来分组来设置图例的，那么legend.field都是null
+        //但是还有一种情况就是，是按照同一个field中的数据去重后来分组的，比如散点图中sex属性的男女两个分组作为图例，
+        //以及pie饼图中的每个数据的name字段都是作为一个图例
+        //那么就想要给legend主动设置一个field字段，然后legend自己从dataFrame中拿到这个field的数据来去重，然后分组做为图例
+        //这是一个很屌的设计
+        this.field = null;
+
+        this.icon = {
             height : 30,
             width  : "auto",
             shapeType : "circle",
-            r : 5,
+            radius : 5,
             lineWidth : 1,
             fillStyle : "#999",
             onChecked : function(){},
             onUnChecked : function(){}
+        };
+
+        this.label = {
+            textAlign : "left",
+            textBaseline : "middle",
+            fillStyle : "#333", //obj.color
+            cursor: "pointer",
+            format : function( name, info ){
+                return name
+            }
         };
 
         //this.onChecked=function(){};
@@ -44,13 +62,10 @@ export default class Legend extends Component
 
         this.sprite  = null;
 
-        this.init( tops );
-    }
 
-    init( tops )
-    {
-        if( tops ){
-            _.extend(true, this , tops );
+
+        if( opt ){
+            _.extend(true, this , opt );
         };
 
         if( this.position == "left" || this.position == "right" ){
@@ -66,17 +81,90 @@ export default class Legend extends Component
         this._draw();
     }
 
+    static register( opt,app )
+    {
+        //设置legendOpt
+        var legendOpt = _.extend(true, {
+            icon : {
+                onChecked : function( obj ){
+                    app.show( obj.name , obj );
+                    app.componentsReset({ name : "legend" });
+                },
+                onUnChecked : function( obj ){
+                    app.hide( obj.name , obj );
+                    app.componentsReset({ name : "legend" });
+                }
+            }
+        } , opt);
+
+        var legendData = opt.data;
+        if( legendData ){
+            _.each( legendData, function( item, i ){
+                item.enabled = true;
+                item.ind = i;
+            } );
+            delete opt.data;
+        } else {
+            legendData = app.getLegendData();
+        };
+        
+        //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
+        var _legend = new this( legendData, legendOpt, app );
+        
+        if( _legend.layoutType == "h" ){
+            app.padding[ _legend.position ] += _legend.height;
+        } else {
+            app.padding[ _legend.position ] += _legend.width;
+        };
+
+        if( app._coord && app._coord.type == 'rect' ){
+            if( _legend.position == "top" || _legend.position == "bottom" ){
+                app.components.push( {
+                    type : "once",
+                    plug : {
+                        draw : function(){
+                            _legend.pos( { 
+                                x : app._coord.origin.x
+                            } );
+                        }
+                    }
+                } );
+            }
+        }
+        
+        //default right
+        var pos = {
+            x : app.width - app.padding.right,
+            y : app.padding.top
+        };
+        if( _legend.position == "left" ){
+            pos.x = app.padding.left - _legend.width;
+        };
+        if( _legend.position == "top" ){
+            pos.x = app.padding.left;
+            pos.y = app.padding.top - _legend.height;
+        };
+        if( _legend.position == "bottom" ){
+            pos.x = app.padding.left;
+            pos.y = app.height - app.padding.bottom;
+        };
+
+        _legend.pos( pos );
+
+        app.components.push( {
+            type : "legend",
+            plug : _legend
+        } );
+
+        app.stage.addChild( _legend.sprite );
+    }
+
     pos( pos )
     {
-        pos.x && (this.sprite.context.x = pos.x + this.node.r);
+        pos.x && (this.sprite.context.x = pos.x + this.icon.radius);
         pos.y && (this.sprite.context.y = pos.y);
     }
 
-    // label 格式化函数配置
-    label( info )
-    {
-        return info.name;
-    }
 
     draw()
     {
@@ -102,9 +190,9 @@ export default class Legend extends Component
                 id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
-                    y     : me.node.height/3 ,
+                    y     : me.icon.height/3 ,
                     fillStyle : !obj.enabled ? "#ccc" : (obj.color || me._labelColor),
-                    r : me.node.r,
+                    r : me.icon.radius,
                     cursor: "pointer"
                 }
             });
@@ -121,15 +209,15 @@ export default class Legend extends Component
             
             _icon.on("click" , function(){});
             
-            var txt    = new Canvax.Display.Text( me.label(obj) , {
+            var txt = new Canvax.Display.Text( me.label.format(obj.name, obj) , {
                 id: "legend_field_txt_"+i,
                 context : {
-                    x : me.node.r + 3 ,
-                    y : me.node.height / 3,
-                    textAlign : "left",
-                    textBaseline : "middle",
-                    fillStyle : "#333", //obj.color
-                    cursor: "pointer"
+                    x : me.icon.radius + 3 ,
+                    y : me.icon.height / 3,
+                    textAlign : me.label.textAlign, //"left",
+                    textBaseline : me.label.textBaseline,//"middle",
+                    fillStyle : me.label.fillStyle,//"#333", //obj.color
+                    cursor: me.label.cursor //"pointer"
                 }
             } );
         
@@ -144,22 +232,22 @@ export default class Legend extends Component
             txt.on("click" , function(){});
 
             var txtW = txt.getTextWidth();
-            var itemW = txtW + me.node.r*2 + 20;
+            var itemW = txtW + me.icon.radius*2 + 20;
 
             maxItemWidth = Math.max( maxItemWidth, itemW );
 
             var spItemC = {
-                height : me.node.height
+                height : me.icon.height
             };
 
             if( me.layoutType == "v" ){
-                if( y + me.node.height > viewHeight ){
+                if( y + me.icon.height > viewHeight ){
                     x += maxItemWidth;
                     y = 0;
                 }
                 spItemC.x = x;
                 spItemC.y = y;
-                y += me.node.height;
+                y += me.icon.height;
                 height = Math.max( height , y );
             } else {
                 if( x + itemW > viewWidth ){
@@ -168,7 +256,7 @@ export default class Legend extends Component
                     rows++;
                 };
                 spItemC.x = x;
-                spItemC.y = me.node.height * (rows-1);
+                spItemC.y = me.icon.height * (rows-1);
                 x += itemW;
             };
             var sprite = new Canvax.Display.Sprite({
@@ -195,9 +283,9 @@ export default class Legend extends Component
                 _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || me._labelColor);
 
                 if( obj.enabled ){
-                    me.node.onChecked( obj );
+                    me.icon.onChecked( obj );
                 } else {
-                    me.node.onUnChecked( obj );
+                    me.icon.onUnChecked( obj );
                 }
             });
 
@@ -205,7 +293,7 @@ export default class Legend extends Component
 
         if( this.layoutType == "h" ){
             me.width = me.sprite.context.width  = width;
-            me.height = me.sprite.context.height = me.node.height * rows;
+            me.height = me.sprite.context.height = me.icon.height * rows;
         } else {
             me.width = me.sprite.context.width  = x + maxItemWidth;
             me.height = me.sprite.context.height = height;

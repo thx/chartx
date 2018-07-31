@@ -32,60 +32,52 @@
         <td id="td-vl">
             <form><textarea id="code" name="code">
 
-                //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-                //第一行是表头。
-                var data= [
-                    ["xfield","uv" ,"pv" ,"click", "ppc"],
-                    [ "天猫淘宝、天猫淘宝直通车"      , 101 , 20  , 33    , 53],
-                    [ 2      , 67  , 51  , 26    , 62],
-                    [ 3      , 130 , 50  , 50    , 23],
-                    [ 4      , 101 , 60  , 33    , 64],
-                    [ 5      , 67  , 91  , 126   , 34 ],
-                    [ 6      , 30  , 50 , 90     , 21],
-                    [ 7      , 51  , 120 , 33    , 112],
-                    [ 8      , 67  , 51  , 86    , 231],
-                    [ 9      , 120 , 90  , 150   , 23 ]
-                
-                ];
-                var options = {
-                    //theme : [],
-                    coord : {
-                        type : "rect",
-                        xAxis : {
-                            field : "xfield",
-                            
-                            label : {
-                                rotation: 30
-                            }
-                            
-                        }
-                    },
-                    legend : {},
-                    tips : {
-                        pointer : "region"
-                    },
-                    graphs : [
-                    
-                        {
-                            type : "bar",
-                            field : "click",
-                            yAxisAlign : "left",
-                            label : {
-                                enabled : true
-                            }
-                        },
-                        {
-                            type : "bar",
-                            field : [ [ "uv","pv" ],"ppc" ],
-                            yAxisAlign : "right"
-                        }
-                        
-                    ]
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["userId","month","dealRankMonth","categoryIdStairOne","categoryNameStairOne"],
+    [1,"2018-01",1,"一级类目ID1","一级类目名称"],
+    [1,"2018-01",12,"一级类目ID2","一级类目名称"],
+    [1,"2018-01",8,"一级类目ID3","一级类目名称"],
+    [1,"2018-01",11,"一级类目ID4","一级类目名称"]
+];
+
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "month"
+        },
+        yAxis: {
+            min : 1,
+            sort : "desc"
+        }
+    },
+    graphs: [
+        {
+            type: "line",
+            field: "dealRankMonth"
+        }
+    ],
+    tips: {},
+    legend: {
+        label: {
+            format: function(info){
+                var str = "";
+                switch( info.name ){
+                    case "dealRankMonth" :
+                        str = "成交金额排名";
+                        break;
                 };
-                
-                window.bar = Chartx.create("canvasTest" , data , options)
-                
-                            
+                return str;
+            }
+        }
+    }
+}
+
+window.line = Chartx.create("canvasTest" , data , options)
+
 
             </textarea></form>
         </td>
@@ -94,7 +86,7 @@
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>柱状图（bar chart）</h4>
+                <h4>折线图（bar chart）</h4>
                 <p>
                     联系人：@释剑
                 </p>
@@ -108,7 +100,7 @@
     </tr>
 </table>
 
-    
+
 </body> 
 </html>
 

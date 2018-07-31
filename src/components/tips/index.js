@@ -3,37 +3,39 @@ import Canvax from "canvax"
 import {numAddSymbol} from "../../utils/tools"
 
 const _ = Canvax._;
+const Rect = Canvax.Shapes.Rect;
+const Line = Canvax.Shapes.Line;
 
 export default class Tips extends Component
 {
-    constructor( opt, tipDomContainer )
+    constructor( opt, app )
     {
         super();
 
-        this.tipDomContainer = tipDomContainer;
+        this.root    = app;
+
+        this.tipDomContainer = app.canvax.domView;
         this.cW      = 0;  //容器的width
         this.cH      = 0;  //容器的height
 
         this.dW      = 0;  //html的tips内容width
         this.dH      = 0;  //html的tips内容Height
 
-        this.backR   = "5px";  //背景框的 圆角 
+        this.borderRadius  = "5px";  //背景框的 圆角 
 
         this.sprite  = null;
         this.content = null; //tips的详细内容
 
         this.fillStyle   = "rgba(255,255,255,0.95)";//"#000000";
-        this.text        = {
-            fillStyle    : "#999"
-        };
+        this.fontColor = "#999";
         this.strokeStyle = "#ccc";
         
-        this.place = "right"; //在鼠标的左（右）边
+        this.position = "right"; //在鼠标的左（右）边
         
         this._tipDom = null;
-        //this._back   = null;
 
-        this.offset = 10; //tips内容到鼠标位置的偏移量
+        this.offsetX = 10; //tips内容到鼠标位置的偏移量x
+        this.offsetY = 10; //tips内容到鼠标位置的偏移量y
     
         //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
         //会deepExtend到this.indo上面来
@@ -42,14 +44,10 @@ export default class Tips extends Component
         this.positionInRange = false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
 
-        this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'shadow'
-        this.pointerAnimate = true;
+        this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
+        this.pointerAnim = true;
+        this._tipsPointer = null;
 
-        this.init(opt);
-    }
-
-    init(opt)
-    {
         _.extend(true, this , opt );
         this.sprite = new Canvax.Display.Sprite({
             id : "TipSprite"
@@ -60,35 +58,68 @@ export default class Tips extends Component
         });
     }
 
+    static register( opt,app )
+    {
+        //所有的tips放在一个单独的tips中
+		app.stageTips = new Canvax.Display.Stage({
+		    id: "main-chart-stage-tips"
+		});
+        app.canvax.addChild( app.stageTips );
+
+        var _tips = new this(opt, app);
+        app.stageTips.addChild( _tips.sprite );
+        app.components.push({
+            type : "tips",
+            id : "tips",
+            plug : _tips
+        });
+    }
+
     show(e)
     {
-        if( !this.enabled || !e.eventInfo ) return;
-        this.hide();
+        
+        if( !this.enabled ) return;
 
-        var stage = e.target.getStage();
-        this.cW   = stage.context.width;
-        this.cH   = stage.context.height;
+        if( e.eventInfo ){
+            this.hide();
 
-        //this._creatTipDom(e);
-        this._setContent(e);
-        this.setPosition(e);
+            var stage = e.target.getStage();
+            this.cW   = stage.context.width;
+            this.cH   = stage.context.height;
 
-        this.sprite.toFront();
+            //this._creatTipDom(e);
+            this._setContent(e);
+            this.setPosition(e);
+
+            this.sprite.toFront();
+        };
+
+        this._tipsPointerShow(e)
     }
 
     move(e)
     {
-        if( !this.enabled || !e.eventInfo ) return;
-        this._setContent(e);
-        this.setPosition(e);
+        if( !this.enabled ) return;
+
+        if( e.eventInfo ){
+            this._setContent(e);
+            this.setPosition(e);
+        };
+    
+        this._tipsPointerMove(e)
     }
 
     hide()
     {
-        if( !this.enabled || !this.eventInfo ) return;
-        this.eventInfo = null;
-        this.sprite.removeAllChildren();
-        this._removeContent();
+        if( !this.enabled ) return;
+
+        if( this.eventInfo ){
+            this.eventInfo = null;
+            this.sprite.removeAllChildren();
+            this._removeContent();
+        };
+        
+        this._tipsPointerHide()
     }
 
     /**
@@ -99,13 +130,13 @@ export default class Tips extends Component
         if( !this.enabled ) return;
         if(!this._tipDom) return;
         var pos = e.pos || e.target.localToGlobal( e.point );
-        var x   = this._checkX( pos.x + this.offset );
-        var y   = this._checkY( pos.y + this.offset );
+        var x   = this._checkX( pos.x + this.offsetX );
+        var y   = this._checkY( pos.y + this.offsetY );
 
         this._tipDom.style.cssText += ";visibility:visible;left:"+x+"px;top:"+y+"px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
         
-        if( this.place == "left" ){
-            this._tipDom.style.left = this._checkX( pos.x - this.offset - this._tipDom.offsetWidth )+"px";
+        if( this.position == "left" ){
+            this._tipDom.style.left = this._checkX( pos.x - this.offsetX - this._tipDom.offsetWidth )+"px";
         };
     }
 
@@ -117,7 +148,7 @@ export default class Tips extends Component
         var me = this;
         this._tipDom = document.createElement("div");
         this._tipDom.className = "chart-tips";
-        this._tipDom.style.cssText += "；-moz-border-radius:"+this.backR+"; -webkit-border-radius:"+this.backR+"; border-radius:"+this.backR+";background:"+this.fillStyle+";border:1px solid "+this.strokeStyle+";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:"+this.text.fillStyle+";line-height:1.5"
+        this._tipDom.style.cssText += "；-moz-border-radius:"+this.borderRadius+"; -webkit-border-radius:"+this.borderRadius+"; border-radius:"+this.borderRadius+";background:"+this.fillStyle+";border:1px solid "+this.strokeStyle+";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:"+this.fontColor+";line-height:1.5"
         this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px "+this.strokeStyle+"; -webkit-box-shadow:1px 1px 3px "+this.strokeStyle+"; box-shadow:1px 1px 3px "+this.strokeStyle+";"
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
         this.tipDomContainer.appendChild( this._tipDom );        
@@ -179,9 +210,18 @@ export default class Tips extends Component
                 return;
             };
 
+            
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
-            var tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-            str+="<td "+tsStyle+">"+ (node.name || node.field || "") +"：</td>";
+            
+            let tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
+            let label = node.label || node.field;
+            if( label ){
+                label += "：";
+            } else {
+                label = "";
+            };
+        
+            str+="<td "+tsStyle+">"+ label +"</td>";
             str += "<td "+tsStyle+">"+ (typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) +"</td></tr>";
         });
         str+="</table>";
@@ -223,4 +263,143 @@ export default class Tips extends Component
         }
         return y
     }
+
+
+    _tipsPointerShow( e )
+    {
+        var _coord = this.root._coord;
+        
+        //目前只实现了直角坐标系的tipsPointer
+        if( !_coord || _coord.type != 'rect' ) return;
+
+        if( !this.pointer ) return;
+
+        var el = this._tipsPointer;        
+        var y = _coord.origin.y - _coord.height;
+        var x = 0;
+        if( this.pointer == "line" ){
+            x = _coord.origin.x + e.eventInfo.xAxis.x;
+        }
+        if( this.pointer == "region" ){
+            x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
+            if( e.eventInfo.xAxis.ind < 0 ){
+                //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
+                x = _coord.origin.x;
+            }
+        }
+
+        if( !el ){
+            if( this.pointer == "line" ){
+                el = new Line({
+                    //xyToInt : false,
+                    context : {
+                        x : x,
+                        y : y,
+                        start : {
+                            x : 0,
+                            y : 0
+                        },
+                        end : {
+                            x : 0,
+                            y : _coord.height
+                        },
+                        lineWidth : 1,
+                        strokeStyle : "#cccccc"
+                    }
+                });
+            };
+            if( this.pointer == "region" ){
+                el = new Rect({
+                    //xyToInt : false,
+                    context : {
+                        width : _coord._xAxis.ceilWidth,
+                        height : _coord.height,
+                        x : x,
+                        y : y,
+                        fillStyle : "#cccccc",
+                        globalAlpha : 0.3
+                    }
+                });
+            };
+            
+            this.root.graphsSprite.addChild( el, 0 );
+            this._tipsPointer = el;
+        } else {
+            if( this.pointerAnim && _coord._xAxis.layoutType != "proportion" ){
+                if( el.__animation ){
+                    el.__animation.stop();
+                };
+                el.__animation = el.animate( {
+                    x : x,
+                    y : y
+                } , {
+                    duration : 200
+                });
+            } else {
+                el.context.x = x;
+                el.context.y = y;
+            }
+        }
+    }
+
+    _tipsPointerHide( )
+    {
+        var _coord = this.root._coord;
+        //目前只实现了直角坐标系的tipsPointer
+        if( !_coord || _coord.type != 'rect' ) return;
+
+        if( !this.pointer  || !this._tipsPointer ) return;
+        //console.log("hide");
+        this._tipsPointer.destroy();
+        this._tipsPointer = null;
+    }
+
+    _tipsPointerMove( e )
+    {
+
+        var _coord = this.root._coord;
+        
+        //目前只实现了直角坐标系的tipsPointer
+        if( !_coord || _coord.type != 'rect' ) return;
+
+        if( !this.pointer ) return;
+
+        //console.log("move");
+
+        var el = this._tipsPointer;
+        var x = _coord.origin.x + e.eventInfo.xAxis.x;
+        if( this.pointer == "region" ){
+            x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth/2;
+            if( e.eventInfo.xAxis.ind < 0 ){
+                //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
+                x = _coord.origin.x;
+            }
+        };
+        var y = _coord.origin.y - _coord.height;
+
+        if( x == el.__targetX ){
+            return;
+        };
+
+        if( this.pointerAnim && _coord._xAxis.layoutType != "proportion"){
+            if( el.__animation ){
+                el.__animation.stop();
+            };
+            el.__targetX = x;
+            el.__animation = el.animate( {
+                x : x,
+                y : y
+            } , {
+                duration : 200,
+                onComplete : function(){
+                    delete el.__targetX;
+                    delete el.__animation;
+                }
+            })
+        } else {
+            el.context.x = x;
+            el.context.y = y;
+        }
+    }
+    
 }

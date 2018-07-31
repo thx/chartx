@@ -7,9 +7,9 @@ const _ = Canvax._;
 
 export default class RadarGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type  = "radar";
         
@@ -28,12 +28,12 @@ export default class RadarGraphs extends GraphsBase
             fillStyle : null,
             fillAlpha : 0.1
         };
-        this.node = {
-            enabled : true,
-            shapeType : "circle",
-            r : 4,
+        this.icon = {
+            enabled     : true,
+            shapeType   : "circle",
+            radius      : 4,
             strokeStyle : "#ffffff",
-            lineWidth : 1
+            lineWidth   : 1
         };
 
         this.groups = {
@@ -43,7 +43,7 @@ export default class RadarGraphs extends GraphsBase
             //}
         };
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.init();
     }
@@ -55,12 +55,12 @@ export default class RadarGraphs extends GraphsBase
         });
     }
 
-    draw(opts)
+    draw(opt)
     {
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         var me = this;
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
         this.data = this._trimGraphs();
         
         this._widget();
@@ -125,7 +125,7 @@ export default class RadarGraphs extends GraphsBase
                 me.root.fire( e.type, e );
             });
             
-            if( me.node.enabled ){
+            if( me.icon.enabled ){
                 //绘制圆点
                 var _nodes = [];
                 _.each( list , function( node, i ){
@@ -135,9 +135,9 @@ export default class RadarGraphs extends GraphsBase
                             cursor : "pointer",
                             x : node.point.x,
                             y : node.point.y,
-                            r : me.node.r,
-                            lineWidth : me.node.lineWidth,
-                            strokeStyle : me.node.strokeStyle,
+                            r : me.icon.radius,
+                            lineWidth : me.icon.lineWidth,
+                            strokeStyle : me.icon.strokeStyle,
                             fillStyle : _strokeStyle
                         }
                     });
@@ -205,7 +205,7 @@ export default class RadarGraphs extends GraphsBase
         var me = this;
         var _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r += 1;
-        _node.context.fillStyle = me.node.strokeStyle;
+        _node.context.fillStyle = me.icon.strokeStyle;
         _node.context.strokeStyle = _node._strokeStyle;
         node.focused = true;
     }
@@ -216,7 +216,7 @@ export default class RadarGraphs extends GraphsBase
         var _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r -= 1;
         _node.context.fillStyle = _node._strokeStyle;
-        _node.context.strokeStyle = me.node.strokeStyle;
+        _node.context.strokeStyle = me.icon.strokeStyle;
         node.focused = false;
     }
 
@@ -249,12 +249,13 @@ export default class RadarGraphs extends GraphsBase
                 var _r = Math.PI * _a / 180;
                 var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
                 arr.push( {
-                    field : field,
-                    iNode : i,
+                    field   : field,
+                    iNode   : i,
+                    rowData : me.dataFrame.getRowData(i),
                     focused : false,
-                    value : dataOrg[i],
-                    point : point,
-                    color : fieldMap.color
+                    value   : dataOrg[i],
+                    point   : point,
+                    color   : fieldMap.color
                 } );
             } );
             data[ field ] = arr;

@@ -8,7 +8,7 @@ const _ = Canvax._;
 
 export default class waterMark
 {
-    constructor( opts , root )
+    constructor( opt , root )
     {
         this.root = root;
         this.width = root.width;
@@ -16,25 +16,26 @@ export default class waterMark
 
         this.text = "chartx";
         this.fontSize = 20;
+        this.fontColor = "#ccc";
         this.strokeStyle = "#ccc";
         this.lineWidth = 0;
-        this.fontColor = "#ccc";
-        this.globalAlpha = 0.2;
+        this.alpha = 0.2;
         this.rotation = 45;
 
-        _.extend( true, this, opts );
+        _.extend( true, this, opt );
 
-        this.init();
-    }
-
-    init()
-    {
         this.spripte = new Canvax.Display.Sprite({
             id : "watermark"
         });
-
         this.draw();
     }
+
+    static register( opt , app )
+    {
+        var _water = new this( opt, app );
+        app.stage.addChild( _water.spripte );
+    }
+
 
     draw()
     {
@@ -63,7 +64,7 @@ export default class waterMark
                         strokeStyle : this.strokeStyle,
                         lineWidth   : this.lineWidth,
                         fillStyle   : this.fontColor,
-                        globalAlpha : this.globalAlpha
+                        globalAlpha : this.alpha
                     }
                 });
                 _textEl.context.x = textW*1.5*c + textW*.25;

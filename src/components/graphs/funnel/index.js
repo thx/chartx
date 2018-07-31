@@ -8,9 +8,9 @@ const Polygon = Canvax.Shapes.Polygon;
 
 export default class FunnelGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "funnel";
 
@@ -45,7 +45,7 @@ export default class FunnelGraphs extends GraphsBase
             }
         };
 
-        this.text = {
+        this.label = {
             enabled : true,
             align : "center", // left , center, right
             format : function( num ){ 
@@ -56,7 +56,7 @@ export default class FunnelGraphs extends GraphsBase
             textBaseline : "middle"
         }
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.init( );
     }
@@ -96,16 +96,16 @@ export default class FunnelGraphs extends GraphsBase
         };
     }
 
-    draw( opts )
+    draw( opt )
     {
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         //第二个data参数去掉，直接trimgraphs获取最新的data
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         var me = this;
 
-        var animate = me.animation && !opts.resize;
+        var animate = me.animation && !opt.resize;
 
         this._computerAttr();
 
@@ -135,11 +135,11 @@ export default class FunnelGraphs extends GraphsBase
                 rowData : me.dataFrame.getRowData(i),
                 value   : num,
                 width   : me._getNodeWidth( num ),
-                color   : me.root._theme[i],//默认从皮肤中获取
+                color   : me.root.getTheme(i),//默认从皮肤中获取
                 cursor  : "pointer",
                
                 //下面得都在layoutData的循环中计算
-                text    : '',
+                label    : '',
                 middlePoint : null,
                 iNode   : -1,
                 points  : []
@@ -159,7 +159,7 @@ export default class FunnelGraphs extends GraphsBase
 
         _.each( layoutData, function( ld , i){
             ld.iNode = i;
-            ld.text = me.text.format( ld.value , ld );
+            ld.label = me.label.format( ld.value , ld );
         } );
         _.each( layoutData, function( ld , i){
             ld.points = me._getPoints(ld , layoutData[i+1], layoutData[i-1]);
@@ -239,25 +239,25 @@ export default class FunnelGraphs extends GraphsBase
                 x : ld.middlePoint.x,
                 y : ld.middlePoint.y
             };
-            if( me.text.align == "left" ){
+            if( me.label.align == "left" ){
                 textPoint.x = ld.points[0][0] - (ld.points[0][0] - ld.points[3][0])/2;
                 textPoint.x -= 15;
                 textAlign = "right";
             };
-            if( me.text.align == "right" ){
+            if( me.label.align == "right" ){
                 textPoint.x = ld.points[1][0] - (ld.points[1][0] - ld.points[2][0])/2
                 textPoint.x += 15;
                 textAlign = "left";
             };
 
-            var _text = new Text( ld.text , {
+            var _text = new Text( ld.label , {
                 context : {
                     x : textPoint.x,
                     y : textPoint.y,
-                    fontSize : me.text.fontSize,
-                    fillStyle : me.text.align == "center" ? me.text.fontColor : ld.color,
+                    fontSize : me.label.fontSize,
+                    fillStyle : me.label.align == "center" ? me.label.fontColor : ld.color,
                     textAlign : textAlign,
-                    textBaseline : me.text.textBaseline
+                    textBaseline : me.label.textBaseline
                 }
             } );
 

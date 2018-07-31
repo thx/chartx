@@ -95,9 +95,7 @@ var options = {
       "type": "polar",
       "squareRange": false,
       "aAxis": {
-        "ruler": {
           "enabled": false
-        }
       },
       "grid": {
         "enabled": false
@@ -113,7 +111,7 @@ var options = {
           "fillStyle": "#1ad09f"
         },
         "node": {
-          "r": "pv",
+          "radius": "pv",
           "fillStyle": function (e){
             return e.rowData.color;
           }

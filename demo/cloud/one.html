@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- 雷达图</title>
+<title>xChart demo -- 饼图</title>
 
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../dist/chartx.js"></script>
@@ -33,49 +33,32 @@
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组
 var data= [
-    ["name","uv" ,"pv" ,"click"],
-    ["周一" , 101 , 20  , 33    ],
-    ["周二" , 67  , 51  , 26    ],
-    ["周三" , 130 , 50  , 50    ],
-    ["周四" , 101 , 60  , 33    ],
-    ["周五" , 67  , 91  , 126   ],
-    ["周六" , 30  , 50  , 90    ],
-    ["周天" , 51  , 120 , 33    ]
+    ["name"   , "value", "size" , "city"],
+    ["ie"     , 320    , 122 , "杭州"]   
 ];
 
 var options = {
-    coord : {
-        type : "polar",
-
-        //类似直角的xAxis
-        aAxis : {
-            field : "name"
-        },
-        rAxis : {
-            enabled : true
-        },
-        grid : {
-            enabled : true
-        }
-    },
     graphs : [
         {
-            type  : "radar",
-            //会映射到rAxis
-            field : ["uv","pv"]
-        },
-        {
-            type : "radar",
-            field : "click"
+            type : "cloud",
+            field : "name",
+            node : {
+                fontSize : "size",
+                rotation : 0,
+                onclick : function( e , nodeData ){
+                    console.log("onclick")
+                    if( !nodeData.selected ){
+                        this.selectAt( nodeData.iNode );
+                    } else {
+                        this.unselectAt( nodeData.iNode );
+                    };
+                }
+            }
         }
     ],
     tips : {
-    },
- 
-    legend : {
-
+  
     }
-   
 };
 
 window.chart = Chartx.create("canvasTest" , data , options);
@@ -89,13 +72,13 @@ window.chart = Chartx.create("canvasTest" , data , options);
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>雷达图</h4>
+                <h4>cloud chart - cloud</h4>
                 <p>
                     联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:400px;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
             </div>
 
             </div>

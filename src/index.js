@@ -21,13 +21,12 @@ import Radar from "./components/graphs/radar/index"
 import Cloud from "./components/graphs/cloud/index"
 import Planet from "./components/graphs/planet/index"
 import Funnel from "./components/graphs/funnel/index"
+import Venn from "./components/graphs/venn/index"
 
 //components
 import Legend from "./components/legend/index"
 import DataZoom from "./components/datazoom/index"
 import MarkLine from "./components/markline/index"
-import MarkPoint from "./components/markpoint/index"
-import Anchor from "./components/anchor/index"
 import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
 import Theme from "./components/theme/index"
@@ -47,7 +46,8 @@ var graphs = {
     radar : Radar,
     cloud : Cloud,
     planet: Planet,
-    funnel: Funnel
+    funnel: Funnel,
+    venn  : Venn
 }
 
 var components = {
@@ -55,8 +55,6 @@ var components = {
     legend : Legend,
     dataZoom : DataZoom,
     markLine : MarkLine,
-    markPoint : MarkPoint,
-    anchor : Anchor,
     tips : Tips,
     barTgi : BarTgi,
     waterMark : WaterMark,
@@ -74,7 +72,7 @@ if( projectTheme && projectTheme.length ){
 
 
 var Chartx = {
-    create : function( el, data, opts ){
+    create : function( el, data, opt ){
         var chart = null;
         var me = this;
 
@@ -89,11 +87,11 @@ var Chartx = {
         };
 
         var Coord = emptyCoord;
-        if( opts.coord && opts.coord.type ){
-            Coord = coord[ opts.coord.type ];
+        if( opt.coord && opt.coord.type ){
+            Coord = coord[ opt.coord.type ];
         };
         //try {
-            chart = new Coord( el, data, opts, graphs, components );
+            chart = new Coord( el, data, opt, graphs, components );
             if( chart ){
                 chart.draw();
                 
@@ -114,6 +112,5 @@ var Chartx = {
 for( var p in global ){
     Chartx[ p ] = global[ p ];
 };
-
 
 export default Chartx;

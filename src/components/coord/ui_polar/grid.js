@@ -22,17 +22,24 @@ export default class polarGrid extends Canvax.Event.EventDispatcher
         };
 
         this.enabled = false;
-        this.type = "poly";
-
-        this.line = {
+     
+        //环
+        this.ring = {
+            shapeType : "poly",
             lineType : "sold",
             lineWidth : 1,
-            strokeStyle : "#e5e5e5"
-        };
-        this.fill = {
+            strokeStyle : "#e5e5e5",//["#f9f9f9", "#f7f7f7"],
             fillStyle : null, //["#f9f9f9", "#f7f7f7"],
-            alpha : 0.5
+            fillAlpha : 0.5
         };
+
+        //射线
+        this.ray = {
+            enabled : true,
+            lineWidth : 1,
+            strokeStyle : "#e5e5e5",
+        };
+
         this.dataSection = [];
 
         this.sprite = null;//总的sprite
@@ -91,16 +98,16 @@ export default class polarGrid extends Canvax.Event.EventDispatcher
                 var points = me.root.getPointsOfR( r );
 
                 var ctx = {
-                    //lineType : me.line.lineType,
-                    lineWidth : me.line.lineWidth,
-                    strokeStyle : me.line.strokeStyle,
-                    fillStyle : me._getFillStyle( me.fill.fillStyle , i-1 ),
-                    fillAlpha : me.fill.alpha
+                    //lineType : me.ring.lineType,
+                    lineWidth : me.ring.lineWidth,
+                    strokeStyle : me._getStyle( me.ring.strokeStyle , i-1 ),//me.ring.strokeStyle,
+                    fillStyle : me._getStyle( me.ring.fillStyle , i-1 ),
+                    fillAlpha : me.ring.fillAlpha
                 };
 
                 var _ring;
                 var ringType = Circle;
-                if( me.type == "circle" ){
+                if( me.ring.shapeType == "circle" ){
                     ctx.r = r;
                     _ring = new ringType({
                         context : ctx
@@ -135,8 +142,8 @@ export default class polarGrid extends Canvax.Event.EventDispatcher
                     var _line = new Line({
                         context : {
                             end : point,
-                            lineWidth : me.line.lineWidth,
-                            strokeStyle : me.line.strokeStyle
+                            lineWidth : me.ring.lineWidth,
+                            strokeStyle : me.ring.strokeStyle
                         }
                     });
                     me.sprite.addChild( _line );
@@ -145,7 +152,7 @@ export default class polarGrid extends Canvax.Event.EventDispatcher
         } );
     }
 
-    _getFillStyle( color , i )
+    _getStyle( color , i )
     {
         if( _.isArray(color) ){
             return color[ i%color.length ]

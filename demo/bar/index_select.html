@@ -56,16 +56,16 @@
                         },
                         yAxis : [
                             {
-                                label : "left"
+                                name : "left"
                             },
                             {
-                                label : "right"
+                                name : "right"
                             }
                         ]
                     },
                     legend : {},
                     tips : {
-                        pointer : "shadow"
+                        pointer : "region"
                     },
                     graphs : [
                     
@@ -73,7 +73,7 @@
                             type : "bar",
                             field : "click",
                             yAxisAlign : "left",
-                            text : {
+                            label : {
                                 enabled : true
                             },
                             node : {
@@ -88,9 +88,9 @@
                 
                     markLine :  [{
                         markTo: 'uv',
-                        text : {
+                        label : {
                             enabled : true,
-                            content : function( yVal ){
+                            format : function( yVal ){
                                 return 'UV 均值 ：' + parseInt( yVal )
                             },
                             fontSize : 14
@@ -98,7 +98,7 @@
                         //y : 30 //不设置y，就会自动设置为均线
                     },{
                         markTo: 'pv',
-                        text : {
+                        label : {
                             enabled : true,
                             fontSize : 14
                         },

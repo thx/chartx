@@ -7,49 +7,57 @@ const _ = Canvax._;
 
 export default class xAxis extends Canvax.Event.EventDispatcher
 {
-    constructor(opts, data, _coord)
+    constructor(opt, data, _coord)
     {
         super();
 
-        this._opts = opts;
+        this._opts = opt;
 
         this._coord = _coord || {};
 
         this.width = 0;
         this.height = 0;
 
-        this.label = "";
-        this._label = null; //this.label对应的文本对象
-
-        this.ruler = {
-            enabled : true,
-            tickLine : {
-                enabled    : 1, //是否有刻度线
-                lineWidth  : 1,
-                height     : 4,
-                marginTop  : 2,
-                strokeStyle: '#cccccc'
-            },
-            axisline : {
-                enabled    : 1, //是否有轴线
-                lineWidth  : 1,
-                strokeStyle: '#cccccc'
-            },
-            text : {
-                enabled    : 1,
-                fontColor  : '#999',
-                fontSize   : 12,
-                rotation   : 0,
-                format     : null,
-                marginTop  : 2,
-                textAlign  : "center",
-                lineHeight : 1
-            }
+        this.title  = {
+            content    : "",
+            shapeType  : "text",
+            fontColor  : '#999',
+            fontSize   : 12,
+            offset   : 2,
+            textAlign  : "center",
+            textBaseline : "middle",
+            strokeStyle : null,
+            lineHeight : 0
         };
-
-        if( opts.isH && (!opts.ruler || !opts.ruler.text || opts.ruler.text.rotaion === undefined) ){
+        this._title = null; //this.title对应的文本对象
+    
+        this.enabled = true;
+        this.tickLine = {
+            enabled    : 1, //是否有刻度线
+            lineWidth  : 1, //线宽
+            lineLength : 4, //线长
+            offset   : 2,
+            strokeStyle: '#cccccc'
+        };
+        this.axisLine = {
+            enabled    : 1, //是否有轴线
+            lineWidth  : 1,
+            strokeStyle: '#cccccc'
+        };
+        this.label = {
+            enabled    : 1,
+            fontColor  : '#999',
+            fontSize   : 12,
+            rotation   : 0,
+            format     : null,
+            offset   : 2,
+            textAlign  : "center",
+            lineHeight : 1,
+            evade      : true  //是否开启逃避检测，目前的逃避只是隐藏
+        };
+        if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
             //如果是横向直角坐标系图
-            this.ruler.text.rotation = 90;
+            this.label.rotation = 90;
         };
 
         this.maxTxtH = 0;
@@ -89,15 +97,15 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
 
-        _.extend(true , this, opts);
+        _.extend(true , this, opt);
 
-        this.init(opts, data);
+        this.init(opt, data);
 
         //xAxis的field只有一个值,
         this.field = _.flatten( [ this.field ] )[0];
     }
 
-    init(opts, data) 
+    init(opt, data) 
     {
         this.sprite = new Canvax.Display.Sprite({
             id: "xAxisSprite"
@@ -125,9 +133,9 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             this.dataSection = this._initDataSection(this.dataOrg);
         };        
 
-        if (this.ruler.text.rotation != 0 ) {
+        if (this.label.rotation != 0 ) {
             //如果是旋转的文本，那么以右边为旋转中心点
-            this.ruler.text.textAlign = "right";
+            this.label.textAlign = "right";
         };
 
         //取第一个数据来判断xaxis的刻度值类型是否为 number
@@ -139,6 +147,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         if( isNaN(this.maxVal) || this.maxVal==Infinity ){
             this.maxVal = 1;
         };
+
+        this._getName();
 
         this._setXAxisHeight();
 
@@ -229,81 +239,116 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             });
         };
 
-        var text = this._getFormatText( val );
-
         var o = {
             ind    : ind,
             value  : val,
-            text   : text,
+            text   : this._getFormatText( val ), //text是format后的数据
             x      : x,
             field  : this.field
         };
 
         return o;
     }
-    
-    draw(opts)
-    {
-        //首次渲染从 直角坐标系组件中会传入 opts
-        this._getLabel();
-        this._computerConfig(opts);
-        
-        this.layoutData = this._trimXAxis(this.dataSection);
 
+    _setXAxisHeight()
+    { //检测下文字的高等
+        var me = this;
+        if (!me.enabled) {
+            me.height = 0; 
+        } else {
+            var _maxTextHeight = 0;
+
+            if( this.label.enabled ){
+                _.each( me.dataSection, function( val, i ){
+
+                        var txt = new Canvax.Display.Text( me._getFormatText(val) , {
+                            context: {
+                                fontSize: me.label.fontSize
+                            }
+                        });
+            
+                        var textWidth = txt.getTextWidth();
+                        var textHeight = txt.getTextHeight();
+                        var width = textWidth; //文本在外接矩形width
+                        var height = textHeight;//文本在外接矩形height
+
+                        if (!!me.label.rotation) {
+                            //有设置旋转
+                            if ( me.label.rotation == 90 ) {
+                                width  = textHeight;
+                                height = textWidth;
+                            } else {
+                                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
+                                var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
+                                height = parseInt( sinR * textWidth );
+                                width = parseInt( cosR * textWidth );
+                            };
+                        };
+
+                        _maxTextHeight = Math.max( _maxTextHeight, height);
+                    
+                } );
+            };
+
+            this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
+
+            if (this._title) {
+                this.height += this._title.getTextHeight()
+            };
+
+        }
+    }
+
+    _getName()
+    {
+        if ( this.title.content ) {
+            if( !this._title ){
+                this._title = new Canvax.Display.Text(this.title.content, {
+                    context: {
+                        fontSize: this.title.fontSize,
+                        textAlign: this.title.textAlign,  //"center",//this.isH ? "center" : "left",
+                        textBaseline: this.title.textBaseline,//"middle", //this.isH ? "top" : "middle",
+                        fillStyle: this.title.fontColor,
+                        strokeStyle: this.title.strokeStyle,
+                        lineWidth : this.title.lineWidth,
+                        rotation: this.isH ? -180 : 0
+                    }
+                });
+            } else {
+                this._title.resetText( this.title.content );
+            }
+        }
+    }
+    
+    draw(opt)
+    {
+        //首次渲染从 直角坐标系组件中会传入 opt
+        
+        opt && _.extend(true, this, opt);
+        
+        
+        this.layoutData = this._trimXAxis( this.dataSection );
         this._trimLayoutData();
 
         this.sprite.context.x = this.pos.x;
         this.sprite.context.y = this.pos.y;
 
-        this._widget( opts );
+        this._widget( opt );
 
     }
 
-    _getLabel()
-    {
-        if (this.label && this.label != "") {
-            if( !this._label ){
-                this._label = new Canvax.Display.Text(this.label, {
-                    context: {
-                        fontSize: this.ruler.text.fontSize,
-                        textAlign: this.isH ? "center" : "left",
-                        textBaseline: this.isH ? "top" : "middle",
-                        fillStyle: this.ruler.text.fontColor,
-                        rotation: this.isH ? -90 : 0
-                    }
-                });
-            } else {
-                this._label.resetText( this.label );
-            }
-        }
-    }
 
-    //初始化配置
-    _computerConfig(opts)
-    {
-        if (opts) {
-            _.extend(true, this, opts);
-        };
-
-        if (this._label) {
-            if (this.isH) {
-                this.width -= this._label.getTextHeight() + 5
-            } else {
-                this.width -= this._label.getTextWidth() + 5
-            }
-        };
-    }
 
     //获取x对应的位置
     //val ind 至少要有一个
-    getPosX( opts )
+    getPosX( opt )
     {
         var x = 0;
-        var val = opts.val; 
-        var ind = "ind" in opts ? opts.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
-        var dataLen = "dataLen" in opts ? opts.dataLen : this.dataSection.length;
-        var width = "width" in opts ? opts.width : this.width;
-        var layoutType = "layoutType" in opts ? opts.layoutType : this.layoutType;
+        var val = opt.val; 
+        var ind = "ind" in opt ? opt.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
+        var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
+        var width = "width" in opt ? opt.width : this.width;
+        var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
 
         if( dataLen == 1 ){
             x =  width / 2;
@@ -371,14 +416,14 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             var text = this._getFormatText( data[a] );
             var txt = new Canvax.Display.Text( text , {
                 context: {
-                    fontSize: this.ruler.text.fontSize
+                    fontSize: this.label.fontSize
                 }
             });
             
             var o = {
                 ind : a,
                 value   : data[a],
-                text : text,
+                text    : text,
                 x       : this.getPosX({
                     val : data[a],
                     ind : a,
@@ -394,34 +439,35 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         return tmpData;
     }
 
-    _getFormatText(text)
+    _getFormatText( val )
     {
         var res;
-        if (_.isFunction(this.ruler.text.format)) {
-            res = this.ruler.text.format(text);
+        if (_.isFunction(this.label.format)) {
+            res = this.label.format( val );
         } else {
-            res = text
+            res = val
         }
         
         if (_.isArray(res)) {
             res = Tools.numAddSymbol(res);
         }
         if (!res) {
-            res = text;
+            res = val;
         };
         return res;
     }
 
-    _widget( opts )
+    _widget( opt )
     {
-        if( !this.ruler.enabled ) return;
-        !opts && (opts ={});
+        if( !this.enabled ) return;
+        !opt && (opt ={});
 
         var arr = this.layoutData
 
-        if (this._label) {
-            this._label.context.x = this.width + 5;
-            this.sprite.addChild(this._label);
+        if (this._title) {
+            this._title.context.y = this.height - this._title.getTextHeight() / 2;
+            this._title.context.x = this.width / 2;
+            this.sprite.addChild(this._title);
         };
 
         var delay = Math.min(1000 / arr.length, 25);
@@ -439,24 +485,24 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
             var o = arr[a]
             var x = o.x,
-                y = this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
+                y = this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
 
         
-            if ( this.ruler.text.enabled && !!arr[a].visible ){
+            if ( this.label.enabled && !!arr[a].visible ){
                 //文字
                 var textContext = {
                     x: o._text_x || o.x,
                     y: y + 20,
-                    fillStyle    : this.ruler.text.fontColor,
-                    fontSize     : this.ruler.text.fontSize,
-                    rotation     : -Math.abs(this.ruler.text.rotation),
-                    textAlign    : this.ruler.text.textAlign,
-                    lineHeight   : this.ruler.text.lineHeight,
-                    textBaseline : !!this.ruler.text.rotation ? "middle" : "top",
+                    fillStyle    : this.label.fontColor,
+                    fontSize     : this.label.fontSize,
+                    rotation     : -Math.abs(this.label.rotation),
+                    textAlign    : this.label.textAlign,
+                    lineHeight   : this.label.lineHeight,
+                    textBaseline : !!this.label.rotation ? "middle" : "top",
                     globalAlpha  : 0
                 };
 
-                if (!!this.ruler.text.rotation && this.ruler.text.rotation != 90) {
+                if (!!this.label.rotation && this.label.rotation != 90) {
                     textContext.x += 5;
                     textContext.y += 3;
                 };
@@ -483,7 +529,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                     xNode.addChild( xNode._txt );
 
                     //新建的 txt的 动画方式
-                    if (this.animation && !opts.resize) {
+                    if (this.animation && !opt.resize) {
                         xNode._txt.animate({
                             globalAlpha: 1,
                             y: xNode._txt.context.y - 20
@@ -503,16 +549,16 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             };
             
 
-            if ( this.ruler.tickLine.enabled && !!arr[a].visible ) {
+            if ( this.tickLine.enabled && !!arr[a].visible ) {
                 var lineContext = {
                     x: x,
-                    y: this.ruler.tickLine.marginTop,
+                    y: this.tickLine.offset,
                     end : {
                         x : 0,
-                        y : this.ruler.tickLine.height
+                        y : this.tickLine.lineLength
                     },
-                    lineWidth: this.ruler.tickLine.lineWidth,
-                    strokeStyle: this.ruler.tickLine.strokeStyle
+                    lineWidth: this.tickLine.lineWidth,
+                    strokeStyle: this.tickLine.strokeStyle
                 };
                 if( xNode._line ){
                     //_.extend( xNode._txt.context , textContext );
@@ -552,7 +598,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         };
 
         //轴线
-        if( this.ruler.axisline.enabled ){
+        if( this.axisLine.enabled ){
             var _axisline = new Line({
                 context : {
                     start : {
@@ -563,8 +609,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                         x : this.width,
                         y : 0
                     },
-                    lineWidth   : this.ruler.axisline.lineWidth,
-                    strokeStyle : this.ruler.axisline.strokeStyle
+                    lineWidth   : this.axisLine.lineWidth,
+                    strokeStyle : this.axisLine.strokeStyle
                 }
             });
             this.sprite.addChild( _axisline );
@@ -572,55 +618,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
     }
 
-    _setXAxisHeight()
-    { //检测下文字的高等
-        var me = this;
-        if (!me.ruler.enabled) {
-            me.height = 0; 
-        } else {
-            var _maxTextHeight = 0;
-
-            if( this.ruler.text.enabled ){
-                _.each( me.dataSection, function( val ){
-
-                        var txt = new Canvax.Display.Text( me._getFormatText(val) , {
-                            context: {
-                                fontSize: me.ruler.text.fontSize
-                            }
-                        });
-            
-                        var textWidth = txt.getTextWidth();
-                        var textHeight = txt.getTextHeight();
-                        var width = textWidth; //文本在外接矩形width
-                        var height = textHeight;//文本在外接矩形height
-
-                        if (!!me.ruler.text.rotation) {
-                            //有设置旋转
-                            if ( me.ruler.text.rotation == 90 ) {
-                                width  = textHeight;
-                                height = textWidth;
-                            } else {
-                                var sinR = Math.sin(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-                                var cosR = Math.cos(Math.abs(me.ruler.text.rotation) * Math.PI / 180);
-                                height = parseInt( sinR * textWidth );
-                                width = parseInt( cosR * textWidth );
-                            };
-                        };
-
-                        //没有设置旋转
-                        if( me.isH ){
-                            //横向柱状图
-                            
-                        };
-
-                        _maxTextHeight = Math.max( _maxTextHeight, height);
-                    
-                } );
-            };
-
-            this.height = _maxTextHeight + this.ruler.tickLine.height + this.ruler.tickLine.marginTop + this.ruler.text.marginTop;
-        }
-    }
+ 
 
     _trimLayoutData()
     {
@@ -628,17 +626,16 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         var arr = this.layoutData;
         var l = arr.length;
 
-        if( !this.ruler.enabled || !l ) return;
+        if( !this.enabled || !l ) return;
 
         // rule , peak, proportion
         if( me.layoutType == "proportion" ){
             this._checkOver();
-        }; 
+        };
         if( me.layoutType == "peak" ){
             //TODO: peak暂时沿用 _checkOver ，这是保险的万无一失的。
             this._checkOver();
         };
-
         if( me.layoutType == "rule" ){
             this._checkOver();
         };
@@ -666,10 +663,18 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
             me.trimLayout( arr );
             return;
-        }
+        };
+
+        //如果用户设置不想要做重叠检测
+        if( !this.label.evade ){
+            _.each( arr , function( layoutItem ){
+                layoutItem.visible = true;
+            } );
+            return;
+        };
 
         var l = arr.length;  
-        var textAlign = me.ruler.text.textAlign;              
+        var textAlign = me.label.textAlign;              
 
         function checkOver(i){
             var curr = arr[i];
@@ -678,6 +683,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 return;
             };
             curr.visible = true;
+
             for( var ii=i; ii<l-1; ii++ ){
                 var next = arr[ii+1];
 
@@ -685,7 +691,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 var currWidth = curr.textWidth;
 
                 //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
-                if(!!me.ruler.text.rotation){
+                if(!!me.label.rotation){
                     nextWidth = Math.min( nextWidth, 22 );
                     currWidth = Math.min( currWidth, 22 );
                 };

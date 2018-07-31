@@ -105,7 +105,7 @@ var options = {
             field : "money",
             aniOrigin : "center",
             node : {
-                r : "house", //r可以配置为某个字段名字，就会自动计算比例
+                radius : "house", //r可以配置为某个字段名字，就会自动计算比例
                 fillStyle : function( d ){
                     if( d.rowData.sex == "男" ){
                         return "#ff8533"
@@ -119,9 +119,9 @@ var options = {
                 onclick : function( e , nodeData ){
                     console.log("onclick")
                     if( !nodeData.selected ){
-                        this.selectAt( nodeData.nodeInd );
+                        this.selectAt( nodeData.iNode );
                     } else {
-                        this.unselectAt( nodeData.nodeInd );
+                        this.unselectAt( nodeData.iNode );
                     };
                 },
                 ondblclick : function(){
@@ -129,7 +129,7 @@ var options = {
                 }
 
             },
-            text : {
+            label : {
                 enabled : true,
                 field : "text"
             }

@@ -153,9 +153,7 @@ var options = {
         type : "polar",
         squareRange : false, //非 
         aAxis: {
-            ruler : {
-                enabled : false
-            }
+            enabled : false
         },
         grid : {
             enabled : false
@@ -163,15 +161,16 @@ var options = {
     },
     graphs : [
         {
+            id   : "planet",
             type : "planet",
             field : "name",
-            groupField : "group",
+            ringGroupField : "group",
             center : {
                 fillStyle : "#1ad09f"
             },
             node : {
                 //shapeType : "circle", //默认circle
-                r : function(){
+                radius : function(){
                     var rs = [8, 12, 15];
                     return rs[ parseInt( Math.random()*rs.length , 10 ) ]
                 },  

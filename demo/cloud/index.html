@@ -51,13 +51,13 @@ var options = {
             field : "name",
             node : {
                 fontSize : "size",
-                rotate : 0,
+                rotation : 0,
                 onclick : function( e , nodeData ){
                     console.log("onclick")
                     if( !nodeData.selected ){
-                        this.selectAt( nodeData.nodeInd );
+                        this.selectAt( nodeData.iNode );
                     } else {
-                        this.unselectAt( nodeData.nodeInd );
+                        this.unselectAt( nodeData.iNode );
                     };
                 }
             }

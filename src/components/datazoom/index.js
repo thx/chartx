@@ -8,7 +8,8 @@ const _ = Canvax._;
 
 export default class dataZoom extends Component
 {
-	constructor(opt, cloneChart)
+
+    constructor(opt, cloneChart)
 	{
         super(opt, cloneChart);
         
@@ -38,12 +39,12 @@ export default class dataZoom extends Component
         };
         this.center = {
             eventEnabled: true,
-            fillStyle : '#ffffff',
-            globalAlpha : 0
+            fillStyle : '#000000',
+            alpha : 0.05
         };
 
         this.w = 0;
-        this.h = 40;
+        this.h = 26;
 
         this.color = opt.color || "#008ae6";
 
@@ -78,33 +79,186 @@ export default class dataZoom extends Component
 
         opt && _.extend( true, this, opt);
         this._computeAttrs( opt );
-        this.init(opt);
-	}
-
-	init(opt) 
-	{
-        var me = this;
-        me.sprite = new Canvax.Display.Sprite({
+        
+        this.sprite = new Canvax.Display.Sprite({
             id : "dataZoom",
             context: {
-                x: me.pos.x,
-                y: me.pos.y
+                x: this.pos.x,
+                y: this.pos.y
             }
         });
-        me.sprite.noSkip=true;
-        me.dataZoomBg = new Canvax.Display.Sprite({
+        this.sprite.noSkip=true;
+        this.dataZoomBg = new Canvax.Display.Sprite({
             id : "dataZoomBg"
         });
-        me.dataZoomBtns = new Canvax.Display.Sprite({
+        this.dataZoomBtns = new Canvax.Display.Sprite({
             id : "dataZoomBtns"
         });
-        me.sprite.addChild( me.dataZoomBg );
-        me.sprite.addChild( me.dataZoomBtns );
+        this.sprite.addChild( this.dataZoomBg );
+        this.sprite.addChild( this.dataZoomBtns );
 
-        me.widget();
-        me._setLines();
+        this.widget();
+        this._setLines();
         this.setZoomBg();
+	}
+
+    //datazoom begin
+    static register(opt,app)
+    {
+
+        let me = this;
+
+        //预设默认的opt.dataZoom
+        opt = _.extend( {
+            h : 26
+        } , opt)
+
+        app.padding.bottom += opt.h;
+
+        //目前dataZoom是固定在bottom位置的
+        //_getDataZoomOpt中会矫正x
+        opt.pos = {
+            //x : 0, //x在_getDataZoomOpt中计算
+            y : app.height - app.padding.bottom
+        };
+        
+        app.components.push( {
+            type : "once",
+            plug : {
+                draw: function(){
+                    //这个时候才能拿到_coord.width _coord.height等尺寸信息， 这个时候_coord也才绘制完成了
+                    var _dataZoom = new me( me._getDataZoomOpt( opt, app ) , me._getCloneChart( opt, app ) );
+                    app.components.push( {
+                        type : "dataZoom",
+                        plug : _dataZoom
+                    } ); 
+                    //app.graphsSprite.addChild( _dataZoom.sprite );
+                    app.stage.addChild( _dataZoom.sprite );
+                }
+            }
+        } );
     }
+
+    static _getCloneChart( opt, app ) 
+    {
+        var chartConstructor = app.constructor;//(barConstructor || Bar);
+        var cloneEl = app.el.cloneNode();
+        cloneEl.innerHTML = "";
+        cloneEl.id = app.el.id + "_currclone";
+        cloneEl.style.position = "absolute";
+        cloneEl.style.width = app.el.offsetWidth + "px";
+        cloneEl.style.height = app.el.offsetHeight + "px";
+        cloneEl.style.top = "10000px";
+        document.body.appendChild(cloneEl);
+
+        //var opt = _.extend(true, {}, me._opts);
+        //_.extend(true, opt, me.getCloneChart() );
+
+        //clone的chart只需要coord 和 graphs 配置就可以了
+        //因为画出来后也只需要拿graphs得sprite去贴图
+        var graphsOpt = [];
+        _.each( app._graphs, function( _g ){
+            var _field = _g.enabledField || _g.field;
+            
+            if( _.flatten([_field]).length ) {
+
+                var _opts = _.extend( true, {} , _g._opts );
+                
+                _opts.field = _field;
+                if( _g.type == "bar" ){
+                    _.extend(true, _opts , {
+                        node: {
+                            fillStyle: "#ececec",
+                            radius: 0
+                        },
+                        animation: false,
+                        eventEnabled: false,
+                        label: {
+                            enabled: false
+                        }
+                    } )
+                }
+                if( _g.type == "line" ){
+                    _.extend( true,  _opts , {
+                        line: {
+                            //lineWidth: 1,
+                            strokeStyle: "#ececec"
+                        },
+                        icon: {
+                            enabled: false
+                        },
+                        area: {
+                            alpha: 1,
+                            fillStyle: "#ececec"
+                        },
+                        animation: false,
+                        eventEnabled: false,
+                        label: {
+                            enabled: false
+                        }
+                    } )
+                }
+                if( _g.type == "scat" ){
+                    _.extend( true, _opts, {
+                        node : {
+                            fillStyle : "#ececec"
+                        }
+                    } )
+                }
+
+                graphsOpt.push( _opts );
+            }
+        } );
+        var opt = {
+            coord : app._opts.coord,
+            graphs : graphsOpt
+        };
+
+        if( opt.coord.horizontal ){
+            delete opt.coord.horizontal;
+        };
+
+        var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.graphsMap, app.componentsMap);
+        thumbChart.draw();
+
+        return {
+            thumbChart: thumbChart,
+            cloneEl: cloneEl
+        }
+    }
+
+    static _getDataZoomOpt( opt, app)
+    {
+        //初始化 datazoom 模块
+        var dataZoomOpt = _.extend(true, {
+            w: app._coord.width,
+            pos: {
+                x: app._coord.origin.x,
+                y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
+            },
+            dragIng: function(range) {
+                var trigger = {
+                    name : "dataZoom",
+                    left :  app.dataFrame.range.start - range.start,
+                    right : range.end - app.dataFrame.range.end
+                };
+
+                _.extend( app.dataFrame.range , range );
+                
+                //不想要重新构造dataFrame，所以第一个参数为null
+                app.resetData( null , trigger );
+                app.fire("dataZoomDragIng");
+            },
+            dragEnd: function(range) {
+                app.updateChecked && app.updateChecked();
+                app.fire("dataZoomDragEnd");
+            }
+        }, opt);
+
+        return dataZoomOpt
+    }
+    //datazoom end
+
 
     draw()
     {
@@ -319,7 +473,7 @@ export default class dataZoom extends Component
             width : btnRightCtx.x - btnLeftCtx.x - me.btnW,
             height : this.barH - 1,
             fillStyle : me.center.fillStyle,
-            globalAlpha : me.center.globalAlpha,
+            fillAlpha : me.center.alpha,
             cursor : "move"
         };
         if( this.rangeRect ){

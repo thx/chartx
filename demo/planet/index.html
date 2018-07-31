@@ -148,6 +148,11 @@ var data = [
 ["动漫","靳东","80750163","121.62"]
 ];
 
+var data = [
+["group","name","pv","tgi"],
+["明星名人","德云社相声","6628973","114.9"]
+];
+
 
 
 var options = {
@@ -155,9 +160,7 @@ var options = {
         type : "polar",
         squareRange : false,
         aAxis: {
-            ruler : {
-                enabled : false
-            }
+            enabled : false
         },
         grid : {
             enabled : false
@@ -172,7 +175,7 @@ var options = {
                 fillStyle : "#1ad09f"
             },
             node : {
-                r : "pv",     
+                radius : "pv",     
                 fillStyle : function(e){
                     
                     var color;

@@ -4,10 +4,10 @@ const _ = Canvax._;
 
 export default class coorBase extends Canvax.Event.EventDispatcher
 {
-	constructor(opts, root){
-        super(opts, root);
+	constructor(opt, root){
+        super(opt, root);
 
-        this._opts = opts;
+        this._opts = opt;
         this.root  = root;
         this.dataFrame = this.root.dataFrame;
 

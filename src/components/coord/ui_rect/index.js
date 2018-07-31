@@ -7,13 +7,13 @@ import Grid from "./grid"
 const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 
-export default class Descartes_Component extends coorBase
+export default class Rect_Component extends coorBase
 {
-    constructor( opts, root )
+    constructor( opt, root )
     {
-        super( opts, root );
+        super( opt, root );
 
-        this.type = "descartes";
+        this.type = "rect";
         
         this._xAxis = null;
         this._yAxis = [];
@@ -33,44 +33,40 @@ export default class Descartes_Component extends coorBase
         this.grid = {
         };
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
-        if( opts.horizontal ){
+        if( opt.horizontal ){
             this.xAxis.isH = true;
             _.each( this.yAxis , function( yAxis ){
                 yAxis.isH = true;
             });
         };
 
-        if( "enabled" in opts ){
+        if( "enabled" in opt ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _.extend( true, this.xAxis, {
-                ruler : {
-                    enabled : opts.enabled
-                }
+                enabled : opt.enabled
             } );
             _.each( this.yAxis , function( yAxis ){
                 _.extend( true, yAxis, {
-                    ruler : {
-                        enabled : opts.enabled
-                    }
+                    enabled : opt.enabled
                 } );
             });
 
             /*
-            this.xAxis.enabled = opts.enabled;
+            this.xAxis.enabled = opt.enabled;
             _.each( this.yAxis , function( yAxis ){
-                yAxis.enabled = opts.enabled;
+                yAxis.enabled = opt.enabled;
             });
             */
             
-            this.grid.enabled = opts.enabled;
+            this.grid.enabled = opt.enabled;
         };
 
-        this.init(opts);
+        this.init(opt);
     }
 
-    init(opts)
+    init(opt)
     {
         this.sprite = new Canvax.Display.Sprite({
             id : "coord"
@@ -97,22 +93,22 @@ export default class Descartes_Component extends coorBase
 
         this._grid.reset({
             animation:false,
-            xAxis: {
+            xDirection: {
                 data: this._yAxisLeft.layoutData
             }
         });
     }
 
-    draw( opts )
+    draw( opt )
     {
         //在绘制的时候，要先拿到xAxis的高
 
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         var _padding = this.root.padding;
 
-        var h = opts.height || this.root.height;
-        var w = opts.width || this.root.width;
+        var h = opt.height || this.root.height;
+        var w = opt.width || this.root.width;
         if( this.horizontal ){
             //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
             var _num = w;
@@ -132,7 +128,7 @@ export default class Descartes_Component extends coorBase
                     y: y
                 },
                 yMaxHeight: y - _padding.top,
-                resize : opts.trigger == "resize"
+                resize : opt.resize
             });
             _yAxisW = this._yAxisLeft.width;
         }
@@ -145,7 +141,7 @@ export default class Descartes_Component extends coorBase
                     y : y
                 },
                 yMaxHeight: y - _padding.top,
-                resize : opts.trigger == "resize"
+                resize : opt.resize
             });
             _yAxisRW = this._yAxisRight.width;
         };
@@ -157,41 +153,51 @@ export default class Descartes_Component extends coorBase
                 y : y
             },
             width : w - _yAxisW - _padding.left - _yAxisRW - _padding.right,
-            resize : opts.trigger == "resize"
+            resize : opt.resize
         });
         
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
+
+        //绘制背景网格
+        this._grid.draw({
+            width   : this._xAxis.width,
+            height  : this._yAxis[0].height,
+            xDirection   : {
+                data: this._yAxis[0].layoutData
+            },
+            yDirection   : {
+                data: this._xAxis.layoutData
+            },
+            pos     : {
+                x   : _yAxisW + _padding.left,
+                y   : y
+            },
+            resize : opt.resize
+        } );
+
 
         this.width = this._xAxis.width;
         this.height = this._yAxis[0].height;
         this.origin.x = _yAxisW + _padding.left;
         this.origin.y = y;
 
-        //绘制背景网格
-        this._grid.draw({
-            width   : this.width,
-            height  : this.height,
-            xAxis   : {
-                data: this._yAxis[0].layoutData
-            },
-            yAxis   : {
-                data: this._xAxis.layoutData
-            },
-            pos     : {
-                x   : this.origin.x,
-                y   : this.origin.y
-            },
-            resize : opts.trigger == "resize"
-        } );
+        this._initInduce();
 
         if( this.horizontal ){
             this._horizontal({
                 w : w,
                 h : h
             });
+            
+            /*
+            this.width = this._yAxis[0].height;
+            this.height = this._xAxis.width;
+            this.origin.x = this._xAxis.height + _padding.left;
+            this.origin.y = this._yAxis[0].height + _padding.top;
+            */
         }
 
-        this._initInduce();
+        
     }
    
     _initModules()
@@ -208,7 +214,7 @@ export default class Descartes_Component extends coorBase
         var yAxisLeft, yAxisRight;
         var yAxisLeftDataFrame, yAxisRightDataFrame;
 
-        //从chart/descartes.js中重新设定了后的yAxis 肯定是个数组
+        // yAxis 肯定是个数组
         if( !_.isArray( yAxis ) ){
             yAxis = [ yAxis ];
         };
@@ -260,48 +266,14 @@ export default class Descartes_Component extends coorBase
 
             ctx.rotation = 90;
             ctx.rotateOrigin = origin;
-            //ctx.scaleOrigin = origin;
-            //ctx.scaleX = -1;
 
         });
-
-
-        /*
-        function horizontalText( text ){
-            var ctx = text.context;
-            var rect = text.getRect();
-
-            var origin = {
-                x : rect.x + rect.width / 2,
-                y : rect.y + rect.height / 2
-            }
-
-            ctx.scaleOrigin = origin;
-            ctx.scaleY = -1;
-        }
-
-        //把x轴文案做一次镜像反转
-        _.each( _.flatten( [ this._xAxis ] ), function( _xAxis ){
-            _.each( _xAxis.rulesSprite.children, function( xnode ){
-                horizontalText( xnode._txt );
-            } );
-            _xAxis._label && horizontalText( _xAxis._label );
-        } );
-
-        //把y轴文案做一次镜像反转
-        _.each( _.flatten( [ this._yAxis ] ), function( _yAxis ) {
-            _.each( _yAxis.rulesSprite.children, function( ynode ){
-                horizontalText( ynode._txt );
-            } );
-            _yAxis._label && horizontalText( _yAxis._label );
-        });
-        */
 
     }
 
-    getPosX( opts )
+    getPosX( opt )
     {
-        return this._xAxis.getPosX( opts );
+        return this._xAxis.getPosX( opt );
     }
 
     _getAxisDataFrame( fields )
@@ -325,7 +297,8 @@ export default class Descartes_Component extends coorBase
             //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
             //只留下enabled的field 结构
             return this.filterEnabledFields( fields );
-        }
+        };
+
         var fmap = {
             left: [], right:[]
         };
@@ -369,7 +342,7 @@ export default class Descartes_Component extends coorBase
         //然后yAxis更新后，对应的背景也要更新
         this._grid.reset({
             animation:false,
-            xAxis: {
+            xDirection: {
                 data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
             }
         });
@@ -425,7 +398,7 @@ export default class Descartes_Component extends coorBase
                         field : fields[i],
                         enabled : true,
                         yAxis : me._getYaxisOfField( fields[i] ),
-                        color : me.root._theme[ fieldInd ],
+                        color : me.root.getTheme(fieldInd),
                         ind : fieldInd++
                     }
                     
@@ -459,7 +432,7 @@ export default class Descartes_Component extends coorBase
 
         if( !me.sprite.getChildById("induce") ){
             me.sprite.addChild(me.induce);
-        }
+        };
         
         me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
             //e.eventInfo = me._getInfoHandler(e);

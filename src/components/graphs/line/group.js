@@ -12,11 +12,11 @@ const _ = Canvax._;
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
-    constructor( fieldMap, iGroup, opts, ctx, h, w )
+    constructor( fieldMap, iGroup, opt, ctx, h, w )
     {
         super();
 
-        this._opt = opts;
+        this._opt = opt;
         this.fieldMap = fieldMap;
         this.field = null; //在extend之后要重新设置
         this.iGroup = iGroup;
@@ -37,22 +37,21 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             smooth: true
         };
 
-        this.node = { //节点 
-            enabled   : 1, //是否有
-            shapeType : "circle",
-            corner    : false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-            r         : 3, //半径 node 圆点的半径
-            fillStyle : '#ffffff',
+        this.icon = { //节点 
+            enabled     : 1, //是否有
+            shapeType   : "circle",
+            corner      : false, //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
+            radius      : 3, //半径 icon 圆点的半径
+            fillStyle   : '#ffffff',
             strokeStyle : null,
             lineWidth   : 2
         };
 
-        this.text = {
-            shapeType   : "text",
+        this.label = {
             enabled     : 0,
-            fillStyle   : null,
+            fontColor   : null,
             strokeStyle : null,
-            fontSize    : 13,
+            fontSize    : 12,
             format      : null
         };
 
@@ -70,16 +69,16 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
-        _.extend(true, this, opts );
+        _.extend(true, this, opt );
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
         this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
 
-        this.init(opts)
+        this.init(opt)
     }
 
-    init(opts)
+    init(opt)
     {
         this.sprite = new Canvax.Display.Sprite();
         var me = this;
@@ -90,11 +89,11 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         });
     }
 
-    draw(opts, data)
+    draw(opt, data)
     {
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
         this.data = data;
-        this._widget( opts );
+        this._widget( opt );
     }
 
 
@@ -149,7 +148,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
     /**
      * 
-     * @param {object} opts 
+     * @param {object} opt 
      * @param {data} data 
      * 
      * 触发这次reset的触发原因比如{name : 'datazoom', left:-1,right:1},  
@@ -199,7 +198,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         me._grow();
     }
 
-    _grow(callback , opts)
+    _grow(callback , opt)
     {
         var me = this;
 
@@ -226,8 +225,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                             _circle.context.y = point[1];
                         }
                     }
-                    if( me._texts ){
-                        var _text = me._texts.getChildAt(iNode);
+                    if( me._labels ){
+                        var _text = me._labels.getChildAt(iNode);
                         if( _text ){
                             _text.context.x = point[0];
                             _text.context.y = point[1] - 3;
@@ -291,10 +290,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         return list;
     }
 
-    _widget( opts )
+    _widget( opt )
     {
         var me = this;
-        !opts && (opts ={});
+        !opt && (opt ={});
         
         me._pointList = this._getPointList(me.data);
 
@@ -303,7 +302,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             return;
         };
         var list = [];
-        if (opts.animation) {
+        if (opt.animation) {
             var firstNode = this._getFirstNode();
             var firstY = firstNode ? firstNode.y : undefined;
             for (var a = 0, al = me.data.length; a < al; a++) {
@@ -483,7 +482,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var me = this;
         var list = me._currPointList;
 
-        if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
+        if ((me.icon.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
             if( !this._circles ){
                 this._circles = new Canvax.Display.Sprite({});
                 this.sprite.addChild(this._circles);
@@ -500,10 +499,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                 var context = {
                     x: _point[0],
                     y: _point[1],
-                    r: me._getProp(me.node.r, a),
-                    lineWidth: me._getProp(me.node.lineWidth, a) || 2,
-                    strokeStyle: me._getColor( me.node.strokeStyle, a ),
-                    fillStyle: me.node.fillStyle
+                    r: me._getProp(me.icon.radius, a),
+                    lineWidth: me._getProp(me.icon.lineWidth, a) || 2,
+                    strokeStyle: me._getColor( me.icon.strokeStyle, a ),
+                    fillStyle: me.icon.fillStyle
                 };
 
                 var circle = me._circles.children[ iNode ];
@@ -516,7 +515,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     me._circles.addChild(circle);
                 };
                  
-                if (me.node.corner) { //拐角才有节点
+                if (me.icon.corner) { //拐角才有节点
                     var y = me._pointList[a][1];
                     var pre = me._pointList[a - 1];
                     var next = me._pointList[a + 1];
@@ -547,10 +546,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var me = this;
         var list = me._currPointList;
 
-        if ( me.text.enabled ) { //节点上面的文本info
-            if(!this._texts){
-                this._texts = new Canvax.Display.Sprite({});
-                this.sprite.addChild(this._texts);
+        if ( me.label.enabled ) { //节点上面的文本info
+            if(!this._labels){
+                this._labels = new Canvax.Display.Sprite({});
+                this.sprite.addChild(this._labels);
             }
             
             var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -560,47 +559,45 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
                     //折线图中有可能这个point为undefined
                     continue;
                 };
-            
-                var fontFillStyle = me._getColor( me.text.fillStyle, a );
 
                 var context = {
                     x: _point[0],
                     y: _point[1] - 3,
-                    fontSize: this.text.fontSize,
+                    fontSize: this.label.fontSize,
                     textAlign: "center",
                     textBaseline: "bottom",
-                    fillStyle: fontFillStyle,
+                    fillStyle: me._getColor( me.label.fontColor, a ),
                     lineWidth:1,
                     strokeStyle:"#ffffff"
                 };
 
                 var value = me.data[ a ].value;
-                if (_.isFunction(me.text.format)) {
-                    value = (me.text.format.apply( me , [value , a]) || value );
+                if (_.isFunction(me.label.format)) {
+                    value = (me.label.format(value, me.data[ a ]) || value );
                 };
 
                 if( value == undefined || value == null ){
                     continue;
-                }
+                };
 
-                var text = this._texts.children[ iNode ];
-                if( text ){
-                    text.resetText( value );
-                    _.extend( text.context, context );
+                var _label = this._labels.children[ iNode ];
+                if( _label ){
+                    _label.resetText( value );
+                    _.extend( _label.context, context );
                 } else {
-                    text =  new Canvax.Display.Text( value , {
+                    _label =  new Canvax.Display.Text( value , {
                         context: context
                     });
-                    me._texts.addChild(text);
-                    me._checkTextPos( text , a );
+                    me._labels.addChild(_label);
+                    me._checkTextPos( _label , a );
                 }
                 iNode++;
             };
 
             //把过多的circle节点删除了
-            if( me._texts.children.length > iNode ){
-                for( var i = iNode,l=me._texts.children.length; i<l; i++ ){
-                    me._texts.children[i].destroy();
+            if( me._labels.children.length > iNode ){
+                for( var i = iNode,l=me._labels.children.length; i<l; i++ ){
+                    me._labels.children[i].destroy();
                     i--;
                     l--;
                 }
@@ -609,7 +606,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         
     }
 
-    _checkTextPos( text , ind )
+    _checkTextPos( _label , ind )
     {
         var me = this;
         var list = me._currPointList;
@@ -618,10 +615,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
         if( 
             pre && next &&
-            ( pre[1] < text.context.y && next[1] < text.context.y )
+            ( pre[1] < _label.context.y && next[1] < _label.context.y )
          ){
-            text.context.y += 7;
-            text.context.textBaseline = "top"
+            _label.context.y += 7;
+            _label.context.textBaseline = "top"
         }
       
     }

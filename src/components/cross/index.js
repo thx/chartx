@@ -8,11 +8,12 @@ const _ = Canvax._;
 
 export default class MarkLine extends Component
 {
-    constructor(opt , _yAxis)
-    {
-        super(opt , _yAxis);
 
-        this._yAxis = _yAxis;
+    constructor(opt , root)
+    {
+        super(opt);
+
+        this.root = root;
 
         this.width  = opt.width || 0;
         this.height = opt.height || 0;
@@ -40,14 +41,16 @@ export default class MarkLine extends Component
             lineType    : 'solid'
         };
 
+        //待开发
         this.node = {
             enabled : false,
             shapeType : "circle",
-            r : 1,
+            radius : 1,
             fillStyle : "#999"
         };
 
-        this.text = {
+        //待开发
+        this.label = {
             enabled  : false,
             fillStyle: '#999999',
             fontSize : 12,
@@ -64,17 +67,48 @@ export default class MarkLine extends Component
        
         opt && _.extend(true, this, opt);
 
-        this.init();
-    }
-
-    init()
-    {
         this.sprite  = new Sprite({
             id : "cross_"+Canvax.utils.getUID(),
             context : {
                 x : this.origin.x,
                 y : this.origin.y
             }
+        });
+    }
+
+    //rect cross begin
+    static register(opt,app)
+    {
+        //原则上一个直角坐标系中最佳只设置一个cross
+        var me = this;
+        if( !_.isArray( opt ) ){
+            opt = [ opt ];
+        };
+        _.each( opt, function( cross , i){
+            app.components.push( {
+                type : "once",
+                plug : {
+                    draw: function(){
+
+                        var opt = _.extend( true, {
+                            origin: {
+                                x: app._coord.origin.x,
+                                y: app._coord.origin.y
+                            },
+                            width : app._coord.width,
+                            height : app._coord.height
+                        } , cross );
+
+                        var _cross = new me( opt, app );
+                        app.components.push( {
+                            type : "cross"+i,
+                            plug : _cross
+                        } );
+                        app.graphsSprite.addChild( _cross.sprite );
+
+                    }
+                }
+            } );
         });
     }
 

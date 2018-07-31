@@ -9,9 +9,9 @@ const padding = 20;
 
 export default class Chart extends Canvax.Event.EventDispatcher
 {
-    constructor( node, data, opts )
+    constructor( node, data, opt )
     {
-        super( node, data, opts );
+        super( node, data, opt );
 
         this.Canvax = Canvax;
      
@@ -22,7 +22,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //后面有些地方比如 一些graphs中会使用dataFrame.org，， 那么这个dataFrame.org和_data的区别是，
         //_data是全量数据， dataFrame.org是_data经过dataZoom运算过后的子集
         this._data = parse2MatrixData(data);
-        this._opts = opts;
+        this._opts = opt;
 
         this.el = getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width = parseInt(this.el.offsetWidth) //图表区域宽
@@ -81,13 +81,16 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     draw()
     {
-        /*
-        this.initModule(); //初始化模块
-        this.initComponents(); //初始化组件
-        this.startDraw(); //开始绘图
-        this.drawComponents();  //绘图完，开始绘制插件
-        this.inited = true;
-        */
+    }
+
+    //ind 如果有就获取对应索引的具体颜色值
+    getTheme( ind )
+    {
+        var colors = this._theme;
+        if( ind != undefined ){
+            return colors[ ind % colors.length ]
+        };
+        return colors;
     }
 
     setCoord_Graphs_Sp()
@@ -166,9 +169,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.canvax.resize();
         this.inited = false;
 
-        this.reset({
-            trigger : "resize"
-        });
+        this._clean();
+        this.draw( {
+            resize : true
+        } );
 
         this.inited = true;
     }
@@ -176,25 +180,24 @@ export default class Chart extends Canvax.Event.EventDispatcher
     /**
      * reset 其实就是重新绘制整个图表，不再做详细的拆分opts中有哪些变化，来做对应的细致的变化，简单粗暴的全部重新创立
      */
-    reset(opts, data)
+    reset(opt, data)
     {
-        !opts && (opts={});
+        !opt && (opt={});
 
-        _.extend(true, this._opts, opts);
+        _.extend(true, this._opts, opt);
+
         //和上面的不同this._opts存储的都是用户设置的配置
         //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
-        _.extend(true, this , opts);
+        _.extend(true, this , opt);
 
         if( data ) {
             this._data = parse2MatrixData(data);
         };
 
-        this.dataFrame = this.initData( this._data );
+        this.dataFrame = this.initData( this._data, opt );
 
         this._clean();
-
-        this._init && this._init(this._node, this._data, this._opts);
-        this.draw( opts );
+        this.draw( opt );
 
     }
 
@@ -209,16 +212,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         if( data ){
             this._data = parse2MatrixData( data );
+            this.dataFrame = this.initData( this._data );
         };
-
-        this.dataFrame = this.initData( this._data );
-
         this._resetData && this._resetData( dataTrigger );
         this.fire("resetData");
     }
 
    
-    initData(data)
+    initData()
     {
         return DataFrame.apply(this, arguments);
     }
@@ -227,14 +228,23 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //插件管理相关代码begin
     initComponents()
     {
-        //TODO: theme 组件优先级最高，在initComponents之前已经加载过
+        var me = this;
+        //TODO: theme 组件优先级最高，在registerComponents之前已经加载过
         var notComponents = [ "coord", "graphs" , "theme" ];
         for( var _p in this._opts ){
-            var p = _p.toLocaleLowerCase();
-            if( _.indexOf( notComponents, p ) == -1 ){
-                if( this[ "_init_components_"+p ] ){
-                    this[ "_init_components_"+p ]( this._opts[ _p ] );
+            
+            if( _.indexOf( notComponents, _p ) == -1 ){
+                var _comp = this._opts[ _p ];
+                if( ! _.isArray( _comp ) ){
+                    _comp = [ _comp ];
                 };
+                _.each( _comp, function( compOpt ){
+                    var compConstructor = me.componentsMap[ _p ];
+                    if( compConstructor && compConstructor.register ){
+                        compConstructor.register( compOpt, me );
+                    };
+                } );
+                
             }
         }
     }
@@ -259,11 +269,11 @@ export default class Chart extends Canvax.Event.EventDispatcher
         }); 
     }
 
-    drawComponents()
+    drawComponents(  )
     {
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
-            p.plug && p.plug.draw && p.plug.draw();
+            p.plug && p.plug.draw && p.plug.draw(  );
             if( p.type == "once" ){
                 this.components.splice( i, 1 );
                 i--;
@@ -297,5 +307,30 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
     //插件相关代码end
 
+
+    //获取graphs列表根据type
+    getGraphsByType( type )
+    {
+        var arr = [];
+        _.each( this._graphs, function( g ){
+            if( g.type == type ){
+                arr.push( g )
+            }
+        } );
+        return arr;
+    }
+
+    //获取graphs根据id
+    getGraphsById( id )
+    {
+        var _g;
+        _.each( this._graphs, function( g ){
+            if( g.id == id ){
+                _g = g;
+                return false;
+            }
+        } );
+        return _g;
+    }
 
 }

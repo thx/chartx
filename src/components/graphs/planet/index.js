@@ -11,9 +11,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class PlanetGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super( opts, root );
+        super( opt, root );
 
         this.type = "planet";
 
@@ -23,19 +23,20 @@ export default class PlanetGraphs extends GraphsBase
 
         var me = this;
         //圆心原点坐标
-        this.center ={
-            enabled : true,
-            text : "center",
-            r : 30,
+        this.center = {
+            enabled   : true,
+            shapeType : "text", //后续可以添加path啊，img啊之类的
+            content   : "center",
+            radius    : 30,
             fillStyle : "#70629e",
-            fontSize : 15,
-            fontColor: "#ffffff",
-            margin : 20 //最近ring到太阳的距离
+            fontSize  : 15,
+            fontColor : "#ffffff",
+            margin    : 20 //最近ring到太阳的距离
         };
 
-        this.groupDataFrames = [];
-        this.groupField = null;
-        this._groups = [];
+        this.ringGroupDataFrames = [];
+        this.ringGroupField = null;
+        this._ringGroups = [];
 
         //planet自己得grid，不用polar的grid
         this.grid = {
@@ -54,19 +55,17 @@ export default class PlanetGraphs extends GraphsBase
             }
         };
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
-        if( this.center.r == 0 || !this.center.enabled ){
-            this.center.r = 0;
+        if( this.center.radius == 0 || !this.center.enabled ){
+            this.center.radius = 0;
             this.center.margin = 0;
             this.center.enabled = false;
         };
 
         this.init();
     }
-
-
-
+    
     init()
     {
         this.sprite = new Canvax.Display.Sprite({ 
@@ -81,12 +80,12 @@ export default class PlanetGraphs extends GraphsBase
         this.dataGroupHandle();
     }
 
-    draw( opts )
+    draw( opt )
     {
         
-        !opts && (opts ={});
+        !opt && (opt ={});
 
-        _.extend( true, this , opts );
+        _.extend( true, this , opt );
 
         this.drawGroups();
 
@@ -116,7 +115,7 @@ export default class PlanetGraphs extends GraphsBase
     getAgreeNodeData( legendData , callback)
     {
         var me = this;
-        _.each( this._groups, function( _g ){
+        _.each( this._ringGroups, function( _g ){
             _.each( _g._rings , function( ring , i ){
                 _.each( ring.planets, function( data , ii){
                     var rowData = data.rowData;
@@ -173,17 +172,18 @@ export default class PlanetGraphs extends GraphsBase
     {
         var me = this;
 
-        var groupRStart = this.center.r + this.center.margin;
+        var groupRStart = this.center.radius + this.center.margin;
         
-        var maxR = me.root._coord.maxR - me.center.r - me.center.margin;
+        var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
         var _circleMaxR = this._getMaxR();
 
-        _.each( this.groupDataFrames , function( df , i ){
+        _.each( this.ringGroupDataFrames , function( df , i ){
+            
             var toR = groupRStart + maxR*( (df.length) / (me.dataFrame.length) );
             
             var _g = new Group( _.extend(true, {
                 iGroup : i,
-                groupLen : me.groupDataFrames.length,
+                groupLen : me.ringGroupDataFrames.length,
                 rRange : {
                     start : groupRStart,
                     to : toR
@@ -194,17 +194,17 @@ export default class PlanetGraphs extends GraphsBase
 
             groupRStart = _g.rRange.to;
 
-            me._groups.push( _g );
+            me._ringGroups.push( _g );
 
             me.grid.rings.section.push({
-                r : _g.rRange.to
+                radius : _g.rRange.to
             });
             
         } );
 
         me.drawBack();
         
-        _.each( me._groups , function(_g){
+        _.each( me._ringGroups , function(_g){
             me.sprite.addChild( _g.sprite );
         } );
     }
@@ -218,11 +218,11 @@ export default class PlanetGraphs extends GraphsBase
                     x : this.origin.x,
                     y : this.origin.y,
                     fillStyle : this.center.fillStyle,
-                    r : this.center.r
+                    r : this.center.radius
                 }
             });
             //绘制实心圆上面的文案
-            this._centerTxt = new Text(this.center.text, {
+            this._centerTxt = new Text(this.center.content, {
                 context: {
                     x: this.origin.x,
                     y: this.origin.y,
@@ -243,13 +243,14 @@ export default class PlanetGraphs extends GraphsBase
         if( me.grid.rings.section.length == 1 ){
 
             //如果只有一个，那么就强制添加到3个
-            var _diffR = (me.grid.rings.section[0].r - me.center.r) / me.grid.rings.count;
+            var _diffR = (me.grid.rings.section[0].radius - me.center.radius) / me.grid.rings.count;
             me.grid.rings.section = [];
             for( var i=0;i<me.grid.rings.count ; i++ ){
                 me.grid.rings.section.push({
-                    r : me.center.r + _diffR*(i+1)
+                    radius : me.center.radius + _diffR*(i+1)
                 });
             }
+
         } else {
             me.grid.rings.count = me.grid.rings.section.length;
         };
@@ -261,7 +262,7 @@ export default class PlanetGraphs extends GraphsBase
                 context : {
                     x : me.root._coord.origin.x,
                     y : me.root._coord.origin.y,
-                    r : _scale.r,
+                    r : _scale.radius,
                     lineWidth : me._getBackProp( me.grid.rings.lineWidth , i),
                     strokeStyle : me._getBackProp( me.grid.rings.strokeStyle , i),
                     fillStyle: me._getBackProp( me.grid.rings.fillStyle , i)
@@ -278,7 +279,7 @@ export default class PlanetGraphs extends GraphsBase
             var _r = me.root._coord.maxR; //Math.max( me.w, me.h );
 
             if( me.grid.rings.section.length ){
-                _r = me.grid.rings.section.slice(-1)[0].r
+                _r = me.grid.rings.section.slice(-1)[0].radius
             }
 
             for( var i=0,l=me.grid.rays.count; i<l; i++ ){
@@ -320,7 +321,6 @@ export default class PlanetGraphs extends GraphsBase
 
     _getBackProp( p, i )
     {
-        
         var iGroup = i;
         var res = null;
         if( _.isFunction( p ) ){
@@ -329,7 +329,7 @@ export default class PlanetGraphs extends GraphsBase
                 scaleInd : i,
                 count : this.grid.rings.section.length,
 
-                groups : this._groups,
+                groups : this._ringGroups,
                 graphs : this
             } ] );
         };
@@ -344,9 +344,9 @@ export default class PlanetGraphs extends GraphsBase
 
     dataGroupHandle()
     {
-        var groupFieldInd = _.indexOf(this.dataFrame.fields , this.groupField);
+        var groupFieldInd = _.indexOf(this.dataFrame.fields , this.ringGroupField);
         if( groupFieldInd >= 0 ){
-            //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
+            //有分组字段，就还要对dataFrame中的数据分下组，然后给到 ringGroupDataFrames
             var titles = this.dataFrame.org[0];
             var _dmap = {}; //以分组的字段值做为key
 
@@ -364,12 +364,38 @@ export default class PlanetGraphs extends GraphsBase
             } );
 
             for( var r in _dmap ){
-                this.groupDataFrames.push( DataFrame( _dmap[r] ) );
+                this.ringGroupDataFrames.push( DataFrame( _dmap[r] ) );
             };
         } else {
             //如果分组字段不存在，则认为数据不需要分组，直接全部作为 group 的一个子集合
-            this.groupDataFrames.push( this.dataFrame );
+            this.ringGroupDataFrames.push( this.dataFrame );
         };
+    }
+
+    //获取所有有效的在布局中的nodeData
+    getLayoutNodes(){
+        var nodes = [];
+        _.each( this._ringGroups, function( rg ){
+            _.each(rg.planets, function( node ){
+                if( node.pit ){
+                    nodes.push( node );
+                };
+            })
+        } );
+        return nodes;
+    }
+
+    //获取所有无效的在不在布局的nodeData
+    getInvalidNodes(){
+        var nodes = [];
+        _.each( this._ringGroups, function( rg ){
+            _.each(rg.planets, function( node ){
+                if( !node.pit ){
+                    nodes.push( node );
+                };
+            })
+        } );
+        return nodes;
     }
 
 }

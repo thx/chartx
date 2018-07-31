@@ -12,11 +12,9 @@ const _ = Canvax._;
 
 export default class Pie extends Canvax.Event.EventDispatcher
 {
-    constructor( opts, _graphs, data )
+    constructor( _graphs, data )
     {
         super();
-
-        this._opts = opts;
 
         this.width = 0;
         this.height = 0;
@@ -37,7 +35,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.sectorsSp = null;
         this.selectedSp = null;
 
-        this.init(opts);
+        this.init();
 
         this.sectors = [];
         this.textMaxCount = 15;
@@ -46,9 +44,8 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.completed = false;//首次加载动画是否完成
     }
 
-    init(opts)
+    init()
     {
-        _.extend(true, this, opts);
 
         this.sprite = new Canvax.Display.Sprite();
 
@@ -58,17 +55,17 @@ export default class Pie extends Canvax.Event.EventDispatcher
         this.selectedSp = new Canvax.Display.Sprite();
         this.sprite.addChild(this.selectedSp);
 
-        if (this._graphs.text.enabled) {
+        if (this._graphs.label.enabled) {
             this.textSp = new Canvax.Display.Sprite();
         };
 
     }
 
-    draw(opts)
+    draw(opt)
     {
         var me = this;
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         this.sprite.context.x = me.origin.x;
         this.sprite.context.y = me.origin.y;
@@ -76,7 +73,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         me._widget();
             
         /*
-        if ( opts.animation ) {
+        if ( opt.animation ) {
             me.grow();
         } else {
             me.completed = true;
@@ -105,7 +102,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 onComplete : function(){
                     completedNum++;
                     if( completedNum == me.sectors.length ){
-                        if ( me._graphs.text.enabled ) {
+                        if ( me._graphs.label.enabled ) {
                             me._startWidgetLabel();
                         };
                     }
@@ -162,7 +159,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     };
                     me._graphs.root.fire( e.type, e );
 
-                    me._graphs.triggerEvent( me.node , e );
+                    me._graphs.triggerEvent( me._graphs.node , e );
 
                 });
 
@@ -171,7 +168,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 
             };
 
-            if (me._graphs.text.enabled) {
+            if (me._graphs.label.enabled) {
                 me._startWidgetLabel();
             };
         }
@@ -469,20 +466,21 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 }
             });
 
-            
-         
             //指示文字
-            var textTxt = itemData.text;
+            /*
+            var textTxt = itemData.labelText;
             //如果用户format过，那么就用用户指定的格式
             //如果没有就默认拼接
-            if( !this._graphs.text.format ){
+            if( !this._graphs.label.format ){
                 if( textTxt ){
                     textTxt = textTxt + "：" + itemData.percentage + "%" 
                 } else {
                     textTxt = itemData.percentage + "%" 
                 }
             };
+            */
 
+            var textTxt = itemData.labelText;
             var branchTxt = document.createElement("div");
             branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + ""
             branchTxt.innerHTML = textTxt;
@@ -644,7 +642,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
     _showGrowLabel()
     {
-        if (this.textSp) {
+        if (this.textSp && this.textSp.context) {
             this.textSp.context.globalAlpha = 1;
             _.each(this.textList, function (lab) {
                 lab.textEle.style.visibility = "visible"
@@ -654,7 +652,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
 
     _hideGrowLabel()
     {
-        if (this.textSp) {
+        if (this.textSp && this.textSp.context) {
             this.textSp.context.globalAlpha = 0;
             _.each(this.textList, function (lab) {
                 lab.textEle.style.visibility = "hidden"

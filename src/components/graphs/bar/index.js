@@ -9,9 +9,9 @@ const _ = Canvax._;
 
 export default class BarGraphs extends GraphsBase
 {
-    constructor(opts, root)
+    constructor(opt, root)
     {
-        super(opts, root);
+        super(opt, root);
 
         this.type = "bar";
 
@@ -26,14 +26,14 @@ export default class BarGraphs extends GraphsBase
         this.absolute = false; 
 
         this.node = {
-            shapeType : "rect",
+            shapeType : 'rect',
             width     : 0,
             _width    : 0,
             maxWidth  : 50,
             minWidth  : 1,
             minHeight : 0,
 
-            radius    : 4,
+            radius    : 3,
             fillStyle : null,
             fillAlpha : 0.95,
             _count    : 0, //总共有多少个bar
@@ -41,7 +41,7 @@ export default class BarGraphs extends GraphsBase
             filter    : null
         };
 
-        this.text = {
+        this.label = {
             enabled   : false,
             animation : true,
             fontColor : null, //如果有设置text.fontColor那么优先使用fontColor
@@ -50,7 +50,7 @@ export default class BarGraphs extends GraphsBase
             lineWidth : 0,
             strokeStyle : null,
 
-            rotate : 0,
+            rotation : 0,
             align : "center",  //left center right
             verticalAlign : "bottom", //top middle bottom
             position : "top", //top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center
@@ -58,7 +58,7 @@ export default class BarGraphs extends GraphsBase
             offsetY : 0
         };
 
-        this.sort = null;
+        //this.sort = null; //TODO:这个设置有问题，暂时所有sort相关的逻辑都注释掉
 
         this._barsLen = 0;
 
@@ -66,7 +66,7 @@ export default class BarGraphs extends GraphsBase
 
         this.proportion = false;//比例柱状图，比例图首先肯定是个堆叠图
 
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         this.init();
 
@@ -93,6 +93,7 @@ export default class BarGraphs extends GraphsBase
     {
         //该index指当前
         var data = this.data;
+        
         var _nodesInfoList = []; //节点信息集合
         _.each( this.enabledField, function( fs, i ){
             if( _.isArray(fs) ){
@@ -177,10 +178,14 @@ export default class BarGraphs extends GraphsBase
     hide( field )
     {
         _.each( this.barsSp.children , function( h_groupSp, h ){
-            var bar = h_groupSp.getChildById("bar_"+h+"_"+field);
-            bar && bar.destroy();
+            var _bar = h_groupSp.getChildById("bar_"+h+"_"+field);
+            _bar && _bar.destroy();
         } );
- 
+        _.each( this.txtsSp.children , function( sp, h ){
+            var _label = sp.getChildById("text_"+h+"_"+field);
+            _label && _label.destroy();
+        } );
+        
         this.draw();
     }
 
@@ -194,22 +199,22 @@ export default class BarGraphs extends GraphsBase
     {
         this.data = {};
         this.barsSp.removeAllChildren();
-        if (this.text.enabled) {
+        if (this.label.enabled) {
             this.txtsSp.removeAllChildren();
         };
     }
 
-    draw(opts)
+    draw(opt)
     { 
         
-        !opts && (opts ={});
+        !opt && (opt ={});
 
         //第二个data参数去掉，直接trimgraphs获取最新的data
-        _.extend(true, this, opts);
+        _.extend(true, this, opt);
 
         var me = this;
 
-        var animate = me.animation && !opts.resize;
+        var animate = me.animation && !opt.resize;
 
         this.data = this._trimGraphs();
 
@@ -369,12 +374,12 @@ export default class BarGraphs extends GraphsBase
 
                     me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
 
-                    //text begin ------------------------------
-                    if ( me.text.enabled ) {
+                    //label begin ------------------------------
+                    if ( me.label.enabled ) {
 
                         var value = rectData.value;
-                        if ( _.isFunction(me.text.format) ) {
-                            var _formatc = me.text.format.apply( me , [value , rectData]);
+                        if ( _.isFunction(me.label.format) ) {
+                            var _formatc = me.label.format(value, rectData);
                             if( _formatc !== undefined || _formatc !== null ){
                                 value = _formatc
                             }
@@ -389,19 +394,18 @@ export default class BarGraphs extends GraphsBase
                         };
                         
                         var textCtx = {
-                            fillStyle   : me.text.fontColor || finalPos.fillStyle,
-                            fontSize    : me.text.fontSize,
-                            lineWidth   : me.text.lineWidth,
-                            strokeStyle : me.text.strokeStyle || finalPos.fillStyle,
-                            //textAlign   : me.text.align,
-                            textBaseline: me.text.verticalAlign,
-                            rotate      : me.text.rotate
+                            fillStyle   : me.label.fontColor || finalPos.fillStyle,
+                            fontSize    : me.label.fontSize,
+                            lineWidth   : me.label.lineWidth,
+                            strokeStyle : me.label.strokeStyle || finalPos.fillStyle,
+                            //textAlign   : me.label.align,
+                            textBaseline: me.label.verticalAlign,
+                            rotation      : me.label.rotation
                         };
                         //然后根据position, offset确定x,y
                         var _textPos = me._getTextPos( finalPos , rectData );
                         textCtx.x = _textPos.x;
                         textCtx.y = _textPos.y;
-
                         textCtx.textAlign = me._getTextAlign(  finalPos , rectData  );
 
                         
@@ -414,6 +418,9 @@ export default class BarGraphs extends GraphsBase
                         if( textEl ){
                             //do something
                             textEl.resetText( value );
+                            textEl.context.x = textCtx.x;
+                            textEl.context.y = textCtx.y;
+
                         } else {
                             textEl = new Canvax.Display.Text( value , {
                                 id: textId,
@@ -424,11 +431,11 @@ export default class BarGraphs extends GraphsBase
                         };
 
                         if (!animate) {
-                        
-                        }
+                            //TODO：现在暂时没有做text的animate
+                        };
 
                     }
-                    //text end ------------------------------
+                    //label end ------------------------------
 
                 };
             }
@@ -436,16 +443,18 @@ export default class BarGraphs extends GraphsBase
 
         this.sprite.addChild(this.barsSp);
         //如果有text设置， 就要吧text的txtsSp也添加到sprite
-        if (this.text.enabled) {
+        if (this.label.enabled) {
             this.sprite.addChild(this.txtsSp);
         };
 
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
+        /*
         if (this.sort && this.sort == "desc") {
             this.sprite.context.y -= this.height;
         };
+        */
 
         this.grow(function() {
             me.fire("complete");
@@ -596,9 +605,11 @@ export default class BarGraphs extends GraphsBase
 
                     //如果有排序的话
                     //TODO:这个逻辑好像有问题
+                    /*
                     if (_yAxis.sort && _yAxis.sort == "desc") {
                         y = -(_yAxis.height - Math.abs(y));
                     };
+                    */
 
                     var nodeData = {
                         type    : "bar",
@@ -636,7 +647,7 @@ export default class BarGraphs extends GraphsBase
     }
 
     _getTextAlign( bar , rectData ){
-        var align = this.text.align;
+        var align = this.label.align;
         if( rectData.value < rectData.yBasePoint.value ){
             if( align == "left" ){
                 align = "right"
@@ -654,7 +665,7 @@ export default class BarGraphs extends GraphsBase
             x : 0, y : 0
         };
         var x=bar.x ,y=bar.y;
-        switch( me.text.position ){
+        switch( me.label.position ){
             case "top" :
                 x = bar.x + bar.width/2;
                 y = bar.y + bar.height;
@@ -692,13 +703,13 @@ export default class BarGraphs extends GraphsBase
                 y = bar.y + bar.height/2;
                 break;
         };
-        x -= me.text.offsetX;
+        x -= me.label.offsetX;
 
         var i = 1;
         if( rectData.value < rectData.yBasePoint.value ){
             i = -1;
         };
-        y -= i * me.text.offsetY;
+        y -= i * me.label.offsetY;
         point.x = x;
         point.y = y;
         return point;
@@ -707,7 +718,7 @@ export default class BarGraphs extends GraphsBase
     /**
      * 生长动画
      */
-    grow(callback, opts) 
+    grow(callback, opt) 
     {
 
         var me = this;
@@ -716,26 +727,28 @@ export default class BarGraphs extends GraphsBase
         if ( me._preDataLen > me._dataLen) {
             for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
                 me.barsSp.getChildAt(i).destroy();
-                me.text.enabled && me.txtsSp.getChildAt(i).destroy();
+                me.label.enabled && me.txtsSp.getChildAt(i).destroy();
                 i--;
                 l--;
             };
         };
 
-        if (!opts.animate) {
+        if (!opt.animate) {
             callback && callback(me);
             return;
         };
         var sy = 1;
+        /*
         if (this.sort && this.sort == "desc") {
             sy = -1;
         };
+        */
 
         var optsions = _.extend({
             delay: Math.min(1000 / this._barsLen, 80),
             easing: "Linear.None",//"Back.Out",
             duration: 500
-        }, opts);
+        }, opt);
 
         var barCount = 0;
         _.each(me.enabledField, function(h_group, g) {
@@ -776,7 +789,7 @@ export default class BarGraphs extends GraphsBase
 
                             },
                             onComplete: function(arg) {
-                                if (arg.width < 3) {
+                                if (arg.width < 3 && this.context) {
                                     this.context.radius = 0;
                                 }
 
