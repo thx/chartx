@@ -71,7 +71,8 @@ if( projectTheme && projectTheme.length ){
 //皮肤设定end -----------------
 
 
-var Chartx = {
+var chartx = {
+    canvax : canvax,
     create : function( el, _data, _opt ){
         var chart = null;
         var me = this;
@@ -113,7 +114,7 @@ var Chartx = {
 };
 
 for( var p in global ){
-    Chartx[ p ] = global[ p ];
+    chartx[ p ] = global[ p ];
 };
 
-export default Chartx;
+export default chartx;

@@ -8259,9 +8259,7 @@ var Chartx = (function () {
 
 	            if (this._coord && this._coord.horizontal) {
 	                this.drawEndHorizontal && this.drawEndHorizontal();
-	            }
-	            this.inited = true;
-	        }
+	            }        }
 	    }, {
 	        key: "initModule",
 	        value: function initModule(opt) {
@@ -8307,8 +8305,7 @@ var Chartx = (function () {
 	            opt = _$5.extend(opt, {
 	                width: width,
 	                height: height,
-	                origin: origin,
-	                inited: me.inited
+	                origin: origin
 	            });
 
 	            _$5.each(this._graphs, function (_g) {
@@ -13909,6 +13906,11 @@ var Chartx = (function () {
 
 	        _$20.extend(true, _this, opt);
 
+	        //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
+	        _this._rData = null;
+	        _this._rMaxValue = null;
+	        _this._rMinValue = null;
+
 	        _this.init();
 	        return _this;
 	    }
@@ -13946,7 +13948,7 @@ var Chartx = (function () {
 	            this.sprite.context.y = this.origin.y;
 
 	            var me = this;
-	            if (this.animation && !opt.resize) {
+	            if (this.animation && !opt.resize && !me.inited) {
 	                this.grow(function () {
 	                    me.fire("complete");
 	                });
@@ -13955,6 +13957,13 @@ var Chartx = (function () {
 	            }
 
 	            return this;
+	        }
+	    }, {
+	        key: "resetData",
+	        value: function resetData(dataFrame, dataTrigger) {
+	            this.dataFrame = dataFrame;
+	            this.data = this._trimGraphs();
+	            this._widget();
 	        }
 	    }, {
 	        key: "getNodesAt",
@@ -13968,6 +13977,11 @@ var Chartx = (function () {
 
 	            var dataLen = this.dataFrame.length;
 	            var xField = this.root._coord._xAxis.field;
+
+	            ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
+	            this._rData = null;
+	            this._rMaxValue = null;
+	            this._rMinValue = null;
 
 	            for (var i = 0; i < dataLen; i++) {
 
@@ -14104,18 +14118,39 @@ var Chartx = (function () {
 	        value: function _widget() {
 	            var me = this;
 
+	            //那么有多余的元素要去除掉 begin
+	            if (me._shapesp.children.length > me.data.length) {
+	                for (var i = me.data.length; i < me._shapesp.children.length; i++) {
+	                    me._shapesp.getChildAt(i--).destroy();
+	                }
+	            }            if (me._textsp.children.length > me.data.length) {
+	                for (var i = me.data.length; i < me._textsp.children.length; i++) {
+	                    me._textsp.getChildAt(i--).destroy();
+	                }
+	            }            if (me._linesp.children.length > me.data.length) {
+	                for (var i = me.data.length; i < me._linesp.children.length; i++) {
+	                    me._linesp.getChildAt(i--).destroy();
+	                }
+	            }            //那么有多余的元素要去除掉 end
+
 	            _$20.each(me.data, function (nodeData, iNode) {
 
 	                var _context = me._getNodeContext(nodeData);
 	                var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$7;
 
-	                var _node = new Shape({
-	                    id: "shape_" + iNode,
-	                    hoverClone: false,
-	                    context: _context
-	                });
-	                me._shapesp.addChild(_node);
-
+	                var _node = me._shapesp.getChildAt(iNode);
+	                if (!_node) {
+	                    _node = new Shape({
+	                        id: "shape_" + iNode,
+	                        hoverClone: false,
+	                        context: _context
+	                    });
+	                    me._shapesp.addChild(_node);
+	                } else {
+	                    //_node.context = _context;
+	                    //_.extend( _node.context, _context );
+	                    _node.animate(_context);
+	                }
 	                //数据和canvax原件相互引用
 	                _node.nodeData = nodeData;
 	                _node.iNode = iNode;
@@ -14142,40 +14177,53 @@ var Chartx = (function () {
 	                });
 
 	                if (me.line.enabled) {
-	                    var _line = new Line$5({
-	                        context: {
-	                            start: {
-	                                x: _context.x,
-	                                y: _context.y + _context.r
-	                            },
-	                            end: {
-	                                x: _context.x,
-	                                y: 0
-	                            },
-	                            lineWidth: me.line.lineWidth,
-	                            strokeStyle: me.line.strokeStyle,
-	                            lineType: me.line.lineType
-	                        }
-	                    });
-	                    me._linesp.addChild(_line);
+
+	                    var _line = me._linesp.getChildAt(iNode);
+	                    var _lineContext = {
+	                        start: {
+	                            x: _context.x,
+	                            y: _context.y + _context.r
+	                        },
+	                        end: {
+	                            x: _context.x,
+	                            y: 0
+	                        },
+	                        lineWidth: me.line.lineWidth,
+	                        strokeStyle: me.line.strokeStyle,
+	                        lineType: me.line.lineType
+	                    };
+
+	                    if (!_line) {
+	                        _line = new Line$5({
+	                            context: _lineContext
+	                        });
+	                        me._linesp.addChild(_line);
+	                    } else {
+	                        _line.animate(_lineContext);
+	                    }
 
 	                    _node._line = _line;
 	                }
 	                //如果有label
 	                if (nodeData.label && me.label.enabled) {
 
-	                    var _label = new canvax.Display.Text(nodeData.label, {
-	                        id: "scat_text_" + iNode,
-	                        context: me._getTextContext(nodeData)
-	                    });
-
-	                    me._textsp.addChild(_label);
+	                    var _labelContext = me._getTextContext(nodeData);
+	                    var _label = me._textsp.getChildAt(iNode);
+	                    if (!_label) {
+	                        _label = new canvax.Display.Text(nodeData.label, {
+	                            id: "scat_text_" + iNode,
+	                            context: _labelContext
+	                        });
+	                        me._textsp.addChild(_label);
+	                    } else {
+	                        _label.resetText(nodeData.label);
+	                        _label.animate(_labelContext);
+	                    }
 
 	                    //图形节点和text文本相互引用
 	                    _node._label = _label;
 	                    _label._node = _node;
-	                }
-	            });
+	                }            });
 	        }
 	    }, {
 	        key: "_getTextPosition",
@@ -14236,7 +14284,7 @@ var Chartx = (function () {
 	                textBaseline: this.label.verticalAlign
 	            };
 
-	            if (this.animation) {
+	            if (this.animation && !this.inited) {
 	                if (this.aniOrigin == "default") {
 	                    ctx.y = 0;
 	                }                if (this.aniOrigin == "origin") {
@@ -14268,7 +14316,7 @@ var Chartx = (function () {
 	                cursor: "pointer"
 	            };
 
-	            if (this.animation) {
+	            if (this.animation && !this.inited) {
 
 	                if (this.aniOrigin == "default") {
 	                    //ctx.x = 0;
@@ -18967,6 +19015,11 @@ var Chartx = (function () {
 
 	        _$28.extend(true, _this, opt);
 
+	        //_trimGraphs后，计算出来本次data的一些属性
+	        _this._dataCircleLen = 0;
+	        _this._dataLabelLen = 0;
+	        _this._dataPathLen = 0;
+
 	        _this.init();
 	        return _this;
 	    }
@@ -18997,7 +19050,6 @@ var Chartx = (function () {
 	        value: function draw(opt) {
 	            !opt && (opt = {});
 	            _$28.extend(true, this, opt);
-
 	            this.data = this._trimGraphs();
 
 	            this._widget();
@@ -19006,6 +19058,13 @@ var Chartx = (function () {
 	            this.sprite.context.y = this.root.padding.top;
 
 	            this.fire("complete");
+	        }
+	    }, {
+	        key: "resetData",
+	        value: function resetData(dataFrame, dataTrigger) {
+	            this.dataFrame = dataFrame;
+	            this.data = this._trimGraphs();
+	            this._widget();
 	        }
 	    }, {
 	        key: "_trimGraphs",
@@ -19020,6 +19079,10 @@ var Chartx = (function () {
 
 	            var circles = {};
 	            var textCentres = {};
+
+	            this._dataCircleLen = 0;
+	            this._dataLabelLen = 0;
+	            this._dataPathLen = 0;
 
 	            if (data.length > 0) {
 	                var solution = layoutFunction(data, { lossFunction: loss });
@@ -19036,7 +19099,10 @@ var Chartx = (function () {
 	            var pathInd = 0;
 	            _$28.each(data, function (d, ind) {
 	                if (d.label) {
-	                    d.labelPosition = textCentres[d.nodeId];
+	                    if (d.sets.length > 1 && !me.label.showInter) ; else {
+	                        d.labelPosition = textCentres[d.nodeId];
+	                        me._dataLabelLen++;
+	                    }
 	                }                if (d.sets.length > 1) {
 	                    var _path = intersectionAreaPath(d.sets.map(function (set$$1) {
 	                        return circles[set$$1];
@@ -19046,11 +19112,13 @@ var Chartx = (function () {
 	                        path: _path,
 	                        pathInd: pathInd++
 	                    };
+	                    me._dataPathLen++;
 	                } else if (d.sets.length == 1) {
 	                    d.shape = _$28.extend({
 	                        type: 'circle',
 	                        circleInd: circleInd++
 	                    }, circles[d.nodeId]);
+	                    me._dataCircleLen++;
 	                }
 	            });
 
@@ -19075,6 +19143,10 @@ var Chartx = (function () {
 	                    //value是 chartx中和其他图表的值属性保持统一，比如tips中就会读取value
 	                    size: null,
 	                    value: null,
+
+	                    //这两个在绘制的时候赋值
+	                    fillStyle: null,
+	                    strokeStyle: null,
 
 	                    label: null,
 	                    labelPosition: null
@@ -19122,6 +19194,25 @@ var Chartx = (function () {
 	        key: "_widget",
 	        value: function _widget() {
 	            var me = this;
+
+	            //那么有多余的元素要去除掉 begin
+	            if (me.venn_circles.children.length > me._dataCircleLen) {
+	                for (var i = me._dataCircleLen; i < me.venn_circles.children.length; i++) {
+	                    me.venn_circles.getChildAt(i--).destroy();
+	                }
+	            }            if (me.venn_paths.children.length > me._dataPathLen) {
+	                for (var i = me._dataPathLen; i < me.venn_paths.children.length; i++) {
+	                    me.venn_paths.getChildAt(i--).destroy();
+	                }
+	            }            if (me.venn_labels.children.length > me._dataLabelLen) {
+	                for (var i = me._dataLabelLen; i < me.venn_labels.children.length; i++) {
+	                    me.venn_labels.getChildAt(i--).destroy();
+	                }
+	            }            //那么有多余的元素要去除掉 end
+
+	            var circleInd = 0;
+	            var pathInd = 0;
+	            var labelInd = 0;
 	            _$28.each(this.data, function (nodeData, i) {
 	                var shape = nodeData.shape;
 	                var _shape;
@@ -19130,6 +19221,10 @@ var Chartx = (function () {
 	                    if (shape.type == 'circle') {
 	                        var fillStyle = me._getStyle(me.node.fillStyle, shape.circleInd, nodeData);
 	                        var strokeStyle = me._getStyle(me.node.strokeStyle, shape.circleInd, nodeData);
+
+	                        nodeData.fillStyle = fillStyle;
+	                        nodeData.strokeStyle = strokeStyle;
+
 	                        context = {
 	                            x: shape.x,
 	                            y: shape.y,
@@ -19140,11 +19235,16 @@ var Chartx = (function () {
 	                            strokeStyle: strokeStyle,
 	                            lineAlpha: me.node.lineAlpha
 	                        };
-	                        _shape = new Circle$8({
-	                            pointChkPriority: false,
-	                            context: context
-	                        });
-	                        me.venn_circles.addChild(_shape);
+	                        _shape = me.venn_circles.getChildAt(circleInd++);
+	                        if (!_shape) {
+	                            _shape = new Circle$8({
+	                                pointChkPriority: false,
+	                                context: context
+	                            });
+	                            me.venn_circles.addChild(_shape);
+	                        } else {
+	                            _shape.animate(context);
+	                        }
 	                    }                    if (nodeData.shape.type == 'path') {
 	                        context = {
 	                            path: shape.path,
@@ -19155,11 +19255,16 @@ var Chartx = (function () {
 	                            lineAlpha: 0 //me.node.lineAlpha
 	                        };
 
-	                        _shape = new Path$3({
-	                            pointChkPriority: false,
-	                            context: context
-	                        });
-	                        me.venn_paths.addChild(_shape);
+	                        _shape = me.venn_paths.getChildAt(pathInd++);
+	                        if (!_shape) {
+	                            _shape = new Path$3({
+	                                pointChkPriority: false,
+	                                context: context
+	                            });
+	                            me.venn_paths.addChild(_shape);
+	                        } else {
+	                            _shape.animate(context);
+	                        }
 	                    }
 	                    _shape.nodeData = nodeData;
 	                    nodeData._node = _shape;
@@ -19195,19 +19300,27 @@ var Chartx = (function () {
 	                        }
 	                    }
 	                    if (fontSize) {
-	                        var _txt = new Text$5(nodeData.label, {
-	                            context: {
-	                                x: nodeData.labelPosition.x,
-	                                y: nodeData.labelPosition.y,
-	                                fontSize: fontSize,
-	                                //fontFamily: me.label.fontFamily,
-	                                textBaseline: "middle",
-	                                textAlign: "center",
-	                                fontWeight: me.label.fontWeight,
-	                                fillStyle: fontColor
-	                            }
-	                        });
-	                        me.venn_labels.addChild(_txt);
+	                        var _textContext = {
+	                            x: nodeData.labelPosition.x,
+	                            y: nodeData.labelPosition.y,
+	                            fontSize: fontSize,
+	                            //fontFamily: me.label.fontFamily,
+	                            textBaseline: "middle",
+	                            textAlign: "center",
+	                            fontWeight: me.label.fontWeight,
+	                            fillStyle: fontColor
+	                        };
+
+	                        var _txt = me.venn_labels.getChildAt(labelInd++);
+	                        if (!_txt) {
+	                            _txt = new Text$5(nodeData.label, {
+	                                context: _textContext
+	                            });
+	                            me.venn_labels.addChild(_txt);
+	                        } else {
+	                            _txt.resetText(nodeData.label);
+	                            _txt.animate(_textContext);
+	                        }
 	                    }
 	                }
 	            });
@@ -21600,7 +21713,8 @@ var Chartx = (function () {
 	}//皮肤设定end -----------------
 
 
-	var Chartx = {
+	var chartx = {
+	    canvax: canvax,
 	    create: function create(el, _data, _opt) {
 	        var chart = null;
 	        var me = this;
@@ -21638,9 +21752,9 @@ var Chartx = (function () {
 	};
 
 	for (var p in global$1) {
-	    Chartx[p] = global$1[p];
+	    chartx[p] = global$1[p];
 	}
 
-	return Chartx;
+	return chartx;
 
 }());

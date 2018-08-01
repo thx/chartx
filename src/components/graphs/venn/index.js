@@ -54,6 +54,11 @@ export default class VennGraphs extends GraphsBase
 
         _.extend( true, this , opt );
 
+        //_trimGraphs后，计算出来本次data的一些属性
+        this._dataCircleLen = 0;
+        this._dataLabelLen = 0;
+        this._dataPathLen = 0;
+
         this.init( );
     }
 
@@ -82,7 +87,6 @@ export default class VennGraphs extends GraphsBase
     {
         !opt && (opt ={});
         _.extend( true, this , opt );
-
         this.data = this._trimGraphs();
 
         this._widget();
@@ -91,6 +95,13 @@ export default class VennGraphs extends GraphsBase
         this.sprite.context.y = this.root.padding.top;
 
         this.fire("complete");
+    }
+
+    resetData( dataFrame , dataTrigger )
+    {
+        this.dataFrame = dataFrame;
+        this.data = this._trimGraphs(); 
+        this._widget();
     }
 
     _trimGraphs(){
@@ -104,6 +115,10 @@ export default class VennGraphs extends GraphsBase
 
         var circles = {};
         var textCentres = {};
+
+        this._dataCircleLen = 0;
+        this._dataLabelLen = 0;
+        this._dataPathLen = 0;
 
         if (data.length > 0) {
             var solution = layoutFunction(data, {lossFunction: loss});
@@ -122,7 +137,13 @@ export default class VennGraphs extends GraphsBase
         var pathInd = 0;
         _.each( data , function(d , ind) {
             if( d.label ){
-                d.labelPosition = textCentres[ d.nodeId ];
+                if( d.sets.length > 1 && !me.label.showInter ){
+                    //不显示path的文本
+                    // ...
+                } else {
+                    d.labelPosition = textCentres[ d.nodeId ];
+                    me._dataLabelLen++;
+                }
             };
             if (d.sets.length > 1) {
                 var _path = intersectionAreaPath( d.sets.map(function (set) { return circles[set]; }) );
@@ -131,11 +152,13 @@ export default class VennGraphs extends GraphsBase
                     path : _path,
                     pathInd : pathInd++
                 };
+                me._dataPathLen++;
             } else if( d.sets.length == 1 ) {
                 d.shape = _.extend( {
                     type : 'circle',
                     circleInd : circleInd++
                 } , circles[ d.nodeId ] );
+                me._dataCircleLen++;
             }
         });
 
@@ -159,6 +182,10 @@ export default class VennGraphs extends GraphsBase
                 //value是 chartx中和其他图表的值属性保持统一，比如tips中就会读取value
                 size : null,
                 value: null,
+
+                //这两个在绘制的时候赋值
+                fillStyle: null,
+                strokeStyle: null,
                 
                 label: null,
                 labelPosition : null,
@@ -208,6 +235,28 @@ export default class VennGraphs extends GraphsBase
 
     _widget(){
         var me = this;
+
+        //那么有多余的元素要去除掉 begin
+        if( me.venn_circles.children.length > me._dataCircleLen ){
+            for( var i=me._dataCircleLen; i<me.venn_circles.children.length; i++ ){
+                me.venn_circles.getChildAt( i-- ).destroy();
+            }
+        };
+        if( me.venn_paths.children.length > me._dataPathLen ){
+            for( var i=me._dataPathLen; i<me.venn_paths.children.length; i++ ){
+                me.venn_paths.getChildAt( i-- ).destroy();
+            }
+        };
+        if( me.venn_labels.children.length > me._dataLabelLen ){
+            for( var i=me._dataLabelLen; i<me.venn_labels.children.length; i++ ){
+                me.venn_labels.getChildAt( i-- ).destroy();
+            }
+        };
+        //那么有多余的元素要去除掉 end
+
+        let circleInd = 0;
+        let pathInd = 0;
+        let labelInd = 0;
         _.each( this.data , function( nodeData, i ){
             var shape = nodeData.shape;
             var _shape;
@@ -216,6 +265,10 @@ export default class VennGraphs extends GraphsBase
                 if( shape.type == 'circle' ){
                     var fillStyle = me._getStyle( me.node.fillStyle , shape.circleInd, nodeData );
                     var strokeStyle = me._getStyle( me.node.strokeStyle, shape.circleInd, nodeData );
+                    
+                    nodeData.fillStyle = fillStyle;
+                    nodeData.strokeStyle = strokeStyle;
+
                     context = {
                         x : shape.x,
                         y : shape.y,
@@ -226,11 +279,17 @@ export default class VennGraphs extends GraphsBase
                         strokeStyle : strokeStyle,
                         lineAlpha : me.node.lineAlpha
                     };
-                    _shape = new Circle({
-                        pointChkPriority:false,
-                        context : context
-                    });
-                    me.venn_circles.addChild(_shape);
+                    _shape = me.venn_circles.getChildAt( circleInd++ );
+                    if( !_shape ){
+                        _shape = new Circle({
+                            pointChkPriority : false,
+                            context : context
+                        });
+                        me.venn_circles.addChild(_shape);
+                    } else {
+                        _shape.animate( context )
+                    }
+
                 };
                 if( nodeData.shape.type == 'path' ){
                     context = {
@@ -242,11 +301,17 @@ export default class VennGraphs extends GraphsBase
                         lineAlpha : 0//me.node.lineAlpha
                     };
                     
-                    _shape = new Path({
-                        pointChkPriority:false,
-                        context : context
-                    });
-                    me.venn_paths.addChild(_shape);
+                    _shape = me.venn_paths.getChildAt( pathInd++ );
+                    if( !_shape ){
+                        _shape = new Path({
+                            pointChkPriority:false,
+                            context : context
+                        });
+                        me.venn_paths.addChild(_shape);
+                    } else {
+                        _shape.animate( context )
+                    }
+                    
                 };
 
 
@@ -286,19 +351,28 @@ export default class VennGraphs extends GraphsBase
                 };
                 
                 if( fontSize ){
-                    var _txt = new Text( nodeData.label, {
-                        context : {
-                            x : nodeData.labelPosition.x,
-                            y : nodeData.labelPosition.y,
-                            fontSize: fontSize,
-                            //fontFamily: me.label.fontFamily,
-                            textBaseline: "middle",
-                            textAlign: "center",
-                            fontWeight: me.label.fontWeight,
-                            fillStyle: fontColor
-                        }
-                    } );
-                    me.venn_labels.addChild( _txt );
+                    var _textContext = {
+                        x : nodeData.labelPosition.x,
+                        y : nodeData.labelPosition.y,
+                        fontSize: fontSize,
+                        //fontFamily: me.label.fontFamily,
+                        textBaseline: "middle",
+                        textAlign: "center",
+                        fontWeight: me.label.fontWeight,
+                        fillStyle: fontColor
+                    };
+
+                    var _txt = me.venn_labels.getChildAt( labelInd++ );
+                    if( !_txt ){
+                        _txt = new Text( nodeData.label, {
+                            context : _textContext
+                        } );
+                        me.venn_labels.addChild( _txt );
+                    } else {
+                        _txt.resetText( nodeData.label );
+                        _txt.animate( _textContext );
+                    }
+                    
                 }
             }
         });

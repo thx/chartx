@@ -81,6 +81,12 @@ export default class ScatGraphs extends GraphsBase
         
         _.extend( true, this , opt );
 
+        //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
+        this._rData = null;
+        this._rMaxValue = null;
+        this._rMinValue = null;
+
+
         this.init( );
     }
 
@@ -116,7 +122,7 @@ export default class ScatGraphs extends GraphsBase
         this.sprite.context.y = this.origin.y;
 
         var me = this;
-        if( this.animation && !opt.resize ){
+        if( this.animation && !opt.resize && !me.inited ){
             this.grow( function(){
                 me.fire("complete");
             } );
@@ -125,6 +131,13 @@ export default class ScatGraphs extends GraphsBase
         }
 
         return this;
+    }
+
+    resetData( dataFrame , dataTrigger )
+    {
+        this.dataFrame = dataFrame;
+        this.data = this._trimGraphs(); 
+        this._widget();
     }
 
     getNodesAt()
@@ -138,6 +151,11 @@ export default class ScatGraphs extends GraphsBase
 
         var dataLen  = this.dataFrame.length;
         var xField = this.root._coord._xAxis.field;
+
+        ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
+        this._rData = null;
+        this._rMaxValue = null;
+        this._rMinValue = null;
 
         for( var i=0; i<dataLen; i++ ){
             
@@ -286,17 +304,43 @@ export default class ScatGraphs extends GraphsBase
     {
         var me = this;
 
+        //那么有多余的元素要去除掉 begin
+        if( me._shapesp.children.length > me.data.length ){
+            for( var i=me.data.length; i<me._shapesp.children.length; i++ ){
+                me._shapesp.getChildAt( i-- ).destroy();
+            }
+        };
+        if( me._textsp.children.length > me.data.length ){
+            for( var i=me.data.length; i<me._textsp.children.length; i++ ){
+                me._textsp.getChildAt( i-- ).destroy();
+            }
+        };
+        if( me._linesp.children.length > me.data.length ){
+            for( var i=me.data.length; i<me._linesp.children.length; i++ ){
+                me._linesp.getChildAt( i-- ).destroy();
+            }
+        };
+        //那么有多余的元素要去除掉 end
+
         _.each( me.data , function( nodeData, iNode ){
 
             var _context = me._getNodeContext( nodeData );
             var Shape = nodeData.shapeType == "circle" ? Circle : Rect;
 
-            var _node = new Shape({
-                id: "shape_"+iNode,
-                hoverClone : false,
-                context : _context
-            });
-            me._shapesp.addChild( _node );
+            var _node = me._shapesp.getChildAt( iNode );
+            if( !_node ){
+                _node = new Shape({
+                    id: "shape_"+iNode,
+                    hoverClone : false,
+                    context : _context
+                });
+                me._shapesp.addChild( _node );
+            } else {
+                //_node.context = _context;
+                //_.extend( _node.context, _context );
+                _node.animate( _context );
+            };
+        
 
             //数据和canvax原件相互引用
             _node.nodeData = nodeData;
@@ -325,22 +369,30 @@ export default class ScatGraphs extends GraphsBase
             });
 
             if( me.line.enabled ){
-                var _line = new Line({
-                    context : {
-                        start : {
-                            x : _context.x,
-                            y : _context.y+_context.r
-                        },
-                        end : {
-                            x : _context.x,
-                            y : 0
-                        },
-                        lineWidth : me.line.lineWidth,
-                        strokeStyle : me.line.strokeStyle,
-                        lineType: me.line.lineType
-                    }
-                });
-                me._linesp.addChild( _line );
+
+                var _line = me._linesp.getChildAt( iNode );
+                var _lineContext = {
+                    start : {
+                        x : _context.x,
+                        y : _context.y+_context.r
+                    },
+                    end : {
+                        x : _context.x,
+                        y : 0
+                    },
+                    lineWidth : me.line.lineWidth,
+                    strokeStyle : me.line.strokeStyle,
+                    lineType: me.line.lineType
+                };
+
+                if(!_line){
+                    _line = new Line({
+                        context : _lineContext
+                    });
+                    me._linesp.addChild( _line );
+                } else {
+                    _line.animate( _lineContext )
+                }
 
                 _node._line = _line;
                 
@@ -349,17 +401,23 @@ export default class ScatGraphs extends GraphsBase
             //如果有label
             if( nodeData.label && me.label.enabled ){
             
-                var _label =  new Canvax.Display.Text( nodeData.label , {
-                    id: "scat_text_"+iNode,
-                    context: me._getTextContext( nodeData )
-                });
-        
-                me._textsp.addChild( _label );
+                var _labelContext = me._getTextContext( nodeData );
+                var _label = me._textsp.getChildAt( iNode );
+                if( !_label ){
+                    _label = new Canvax.Display.Text( nodeData.label , {
+                        id: "scat_text_"+iNode,
+                        context: _labelContext
+                    });
+                    me._textsp.addChild( _label );
+                } else {
+                    _label.resetText(  nodeData.label );
+                    _label.animate( _labelContext );
+                }
 
                 //图形节点和text文本相互引用
                 _node._label = _label;
                 _label._node = _node;
-            }
+            };
         
         } );
      
@@ -423,7 +481,7 @@ export default class ScatGraphs extends GraphsBase
             textBaseline : this.label.verticalAlign
         };
 
-        if( this.animation ){
+        if( this.animation && !this.inited ){
             if( this.aniOrigin == "default" ){
                 ctx.y = 0;
             };
@@ -459,7 +517,7 @@ export default class ScatGraphs extends GraphsBase
             cursor : "pointer"
         };
 
-        if( this.animation ){
+        if( this.animation && !this.inited ){
             
             if( this.aniOrigin == "default" ){
                 //ctx.x = 0;

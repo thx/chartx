@@ -64,7 +64,7 @@ export default class Coord extends Chart
             this.drawEndHorizontal && this.drawEndHorizontal();
         };
 
-        this.inited = true;
+      
     }
 
     initModule(opt)
@@ -114,8 +114,7 @@ export default class Coord extends Chart
         opt = _.extend( opt, {
             width  : width,
             height : height,
-            origin : origin,
-            inited : me.inited
+            origin : origin
         } );
 
         _.each( this._graphs, function( _g ){
