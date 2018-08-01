@@ -1,3 +1,5 @@
+//算法来源 https://www.benfrederickson.com/venn-diagrams-with-d3.js/
+
 import {nelderMead, bisect, conjugateGradient, zeros, zerosM, norm2, scale} from 'fmin';
 import {intersectionArea, circleOverlap, circleCircleIntersection, distance} from './circleintersection';
 

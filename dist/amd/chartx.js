@@ -18255,6 +18255,8 @@ define(function () { 'use strict';
 	    return center;
 	}
 
+	//算法来源 https://www.benfrederickson.com/venn-diagrams-with-d3.js/
+
 	/** given a list of set objects, and their corresponding overlaps.
 	updates the (x, y, radius) attribute on each set such that their positions
 	roughly correspond to the desired overlaps */
