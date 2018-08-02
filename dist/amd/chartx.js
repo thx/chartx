@@ -8726,6 +8726,8 @@ define(function () { 'use strict';
 
 	        _this.dataOrg = []; //源数据
 	        _this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
+	        _this._formatTextSection = []; //dataSection的值format后一一对应的值
+	        _this._textElements = []; //_formatTextSection中每个文本对应的canvax.shape.Text对象
 
 	        _this.layoutData = []; //{x:100, value:'1000',visible:true}
 
@@ -8773,11 +8775,14 @@ define(function () { 'use strict';
 	                id: "rulesSprite"
 	            });
 	            this.sprite.addChild(this.rulesSprite);
+
 	            this._initHandle(data);
 	        }
 	    }, {
 	        key: "_initHandle",
 	        value: function _initHandle(data) {
+	            var me = this;
+
 	            if (data && data.field) {
 	                this.field = data.field;
 	            }
@@ -8789,6 +8794,19 @@ define(function () { 'use strict';
 	                //如果没有传入指定的dataSection，才需要计算dataSection
 	                this.dataSection = this._initDataSection(this.dataOrg);
 	            }
+	            me._formatTextSection = [];
+	            me._textElements = [];
+	            _$8.each(me.dataSection, function (val, i) {
+	                me._formatTextSection[i] = me._getFormatText(val, i);
+	                //从_formatTextSection中取出对应的格式化后的文本
+	                var txt = new canvax.Display.Text(me._formatTextSection[i], {
+	                    context: {
+	                        fontSize: me.label.fontSize
+	                    }
+	                });
+	                me._textElements[i] = txt;
+	            });
+
 	            if (this.label.rotation != 0) {
 	                //如果是旋转的文本，那么以右边为旋转中心点
 	                this.label.textAlign = "right";
@@ -8897,10 +8915,12 @@ define(function () { 'use strict';
 	            var o = {
 	                ind: ind,
 	                value: val,
-	                text: this._getFormatText(val), //text是format后的数据
+	                text: val, //text是format后的数据
 	                x: x,
 	                field: this.field
 	            };
+
+	            o.text = this._getFormatText(val, ind, o);
 
 	            return o;
 	        }
@@ -8917,11 +8937,8 @@ define(function () { 'use strict';
 	                if (this.label.enabled) {
 	                    _$8.each(me.dataSection, function (val, i) {
 
-	                        var txt = new canvax.Display.Text(me._getFormatText(val), {
-	                            context: {
-	                                fontSize: me.label.fontSize
-	                            }
-	                        });
+	                        //从_formatTextSection中取出对应的格式化后的文本
+	                        var txt = me._textElements[i];
 
 	                        var textWidth = txt.getTextWidth();
 	                        var textHeight = txt.getTextHeight();
@@ -8969,8 +8986,7 @@ define(function () { 'use strict';
 	    }, {
 	        key: "draw",
 	        value: function draw(opt) {
-	            //首次渲染从 直角坐标系组件中会传入 opt
-
+	            //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
 	            opt && _$8.extend(true, this, opt);
 
 	            this.layoutData = this._trimXAxis(this.dataSection);
@@ -9049,12 +9065,8 @@ define(function () { 'use strict';
 	            this.ceilWidth = this._computerCeilWidth();
 
 	            for (var a = 0, al = data.length; a < al; a++) {
-	                var text = this._getFormatText(data[a]);
-	                var txt = new canvax.Display.Text(text, {
-	                    context: {
-	                        fontSize: this.label.fontSize
-	                    }
-	                });
+	                var text = this._formatTextSection[a];
+	                var txt = this._textElements[a];
 
 	                var o = {
 	                    ind: a,
@@ -9075,10 +9087,10 @@ define(function () { 'use strict';
 	        }
 	    }, {
 	        key: "_getFormatText",
-	        value: function _getFormatText(val) {
+	        value: function _getFormatText(val, i) {
 	            var res;
 	            if (_$8.isFunction(this.label.format)) {
-	                res = this.label.format(val);
+	                res = this.label.format.apply(this, arguments);
 	            } else {
 	                res = val;
 	            }
@@ -9675,7 +9687,7 @@ define(function () { 'use strict';
 	                //把format提前
 	                var text = layoutData.value;
 	                if (_$9.isFunction(me.label.format)) {
-	                    text = me.label.format(text);
+	                    text = me.label.format.apply(this, [text, i]);
 	                }                if (text === undefined || text === null) {
 	                    text = numAddSymbol(layoutData.value);
 	                }                layoutData.text = text;

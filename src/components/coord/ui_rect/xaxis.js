@@ -69,6 +69,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         this.dataOrg = []; //源数据
         this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
+        this._formatTextSection = []; //dataSection的值format后一一对应的值
+        this._textElements = []; //_formatTextSection中每个文本对应的canvax.shape.Text对象
 
         this.layoutData = []; //{x:100, value:'1000',visible:true}
 
@@ -114,12 +116,15 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             id: "rulesSprite"
         });
         this.sprite.addChild( this.rulesSprite );
+
         this._initHandle( data );
         
     }
 
     _initHandle( data )
     {
+        var me = this;
+
         if( data && data.field ){
             this.field = data.field;
         }
@@ -132,6 +137,19 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             //如果没有传入指定的dataSection，才需要计算dataSection
             this.dataSection = this._initDataSection(this.dataOrg);
         };        
+
+        me._formatTextSection = [];
+        me._textElements = [];
+        _.each( me.dataSection, function( val, i ){
+            me._formatTextSection[ i ] = me._getFormatText(val, i);
+            //从_formatTextSection中取出对应的格式化后的文本
+            var txt = new Canvax.Display.Text( me._formatTextSection[i] , {
+                context: {
+                    fontSize: me.label.fontSize
+                }
+            });
+            me._textElements[ i ] = txt;
+        });
 
         if (this.label.rotation != 0 ) {
             //如果是旋转的文本，那么以右边为旋转中心点
@@ -242,10 +260,12 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         var o = {
             ind    : ind,
             value  : val,
-            text   : this._getFormatText( val ), //text是format后的数据
+            text   : val, //text是format后的数据
             x      : x,
             field  : this.field
         };
+
+        o.text = this._getFormatText( val, ind, o );
 
         return o;
     }
@@ -261,11 +281,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             if( this.label.enabled ){
                 _.each( me.dataSection, function( val, i ){
 
-                        var txt = new Canvax.Display.Text( me._getFormatText(val) , {
-                            context: {
-                                fontSize: me.label.fontSize
-                            }
-                        });
+                        //从_formatTextSection中取出对应的格式化后的文本
+                        var txt = me._textElements[i];
             
                         var textWidth = txt.getTextWidth();
                         var textHeight = txt.getTextHeight();
@@ -322,10 +339,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     
     draw(opt)
     {
-        //首次渲染从 直角坐标系组件中会传入 opt
-        
+        //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
         opt && _.extend(true, this, opt);
-        
         
         this.layoutData = this._trimXAxis( this.dataSection );
         this._trimLayoutData();
@@ -413,12 +428,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         this.ceilWidth = this._computerCeilWidth();
 
         for (var a = 0, al  = data.length; a < al; a++ ) {
-            var text = this._getFormatText( data[a] );
-            var txt = new Canvax.Display.Text( text , {
-                context: {
-                    fontSize: this.label.fontSize
-                }
-            });
+            var text = this._formatTextSection[a];
+            var txt = this._textElements[a];
             
             var o = {
                 ind : a,
@@ -439,11 +450,11 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         return tmpData;
     }
 
-    _getFormatText( val )
+    _getFormatText( val, i )
     {
         var res;
         if (_.isFunction(this.label.format)) {
-            res = this.label.format( val );
+            res = this.label.format.apply( this, arguments );
         } else {
             res = val
         }

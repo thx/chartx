@@ -332,7 +332,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             //把format提前
             var text = layoutData.value;
             if (_.isFunction(me.label.format)) {
-                text = me.label.format(text);
+                text = me.label.format.apply(this, [text, i ]);
             };
             if( text === undefined || text === null ){
                 text = numAddSymbol( layoutData.value );
