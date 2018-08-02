@@ -8669,7 +8669,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
 
         var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this));
 
-        _this._opts = opt;
+        _this._opt = opt;
 
         _this._coord = _coord || {};
 
@@ -8785,7 +8785,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
             if (data && data.org) {
                 this.dataOrg = _$8.flatten(data.org);
             }
-            if (!this._opts.dataSection && this.dataOrg) {
+            if (!this._opt.dataSection && this.dataOrg) {
                 //如果没有传入指定的dataSection，才需要计算dataSection
                 this.dataSection = this._initDataSection(this.dataOrg);
             }
@@ -8794,10 +8794,10 @@ var xAxis = function (_Canvax$Event$EventDi) {
                 this.label.textAlign = "right";
             }
             //取第一个数据来判断xaxis的刻度值类型是否为 number
-            this.minVal == null && (this.minVal = _$8.min(this.dataSection));
+            !("minVal" in this._opt) && (this.minVal = _$8.min(this.dataSection));
             if (isNaN(this.minVal) || this.minVal == Infinity) {
                 this.minVal = 0;
-            }            this.maxVal == null && (this.maxVal = _$8.max(this.dataSection));
+            }            !("maxVal" in this._opt) && (this.maxVal = _$8.max(this.dataSection));
             if (isNaN(this.maxVal) || this.maxVal == Infinity) {
                 this.maxVal = 1;
             }

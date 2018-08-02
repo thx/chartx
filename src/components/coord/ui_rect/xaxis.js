@@ -11,7 +11,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     {
         super();
 
-        this._opts = opt;
+        this._opt = opt;
 
         this._coord = _coord || {};
 
@@ -128,7 +128,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             this.dataOrg = _.flatten( data.org );
         };
 
-        if( !this._opts.dataSection && this.dataOrg ){
+        if( !this._opt.dataSection && this.dataOrg ){
             //如果没有传入指定的dataSection，才需要计算dataSection
             this.dataSection = this._initDataSection(this.dataOrg);
         };        
@@ -139,11 +139,11 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         };
 
         //取第一个数据来判断xaxis的刻度值类型是否为 number
-        this.minVal == null && (this.minVal = _.min( this.dataSection ));
+        !("minVal" in this._opt) && (this.minVal = _.min( this.dataSection ));
         if( isNaN(this.minVal) || this.minVal==Infinity ){
             this.minVal = 0;
         };
-        this.maxVal == null && (this.maxVal = _.max( this.dataSection ));
+        !("maxVal" in this._opt) && (this.maxVal = _.max( this.dataSection ));
         if( isNaN(this.maxVal) || this.maxVal==Infinity ){
             this.maxVal = 1;
         };
