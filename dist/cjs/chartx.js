@@ -19276,7 +19276,8 @@ var VennGraphs = function (_GraphsBase) {
                             });
                             me.venn_paths.addChild(_shape);
                         } else {
-                            _shape.animate(context);
+                            _shape.context.path = shape.path;
+                            //_shape.animate( context )
                         }
                     }
                     _shape.nodeData = nodeData;

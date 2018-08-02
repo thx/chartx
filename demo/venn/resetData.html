@@ -73,12 +73,13 @@ var options = {
     tips : {}
 };
 
-window.chart = Chartx.create("canvasTest" , data0 , options);
+window.chart = Chartx.create("canvasTest" , data , options);
 
 function reset(){
 setTimeout(function(){ 
     
     chart.resetData( data1 );
+    return;
     setTimeout(function(){ 
         chart.resetData( data );
         setTimeout(function(){ 
