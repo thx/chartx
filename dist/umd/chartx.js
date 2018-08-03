@@ -19255,7 +19255,6 @@
 	                        };
 	                        _shape = me.venn_circles.getChildAt(circleInd++);
 	                        if (!_shape) {
-	                            isNewShape = true;
 	                            _shape = new Circle$8({
 	                                pointChkPriority: false,
 	                                hoverClone: false,
@@ -19263,6 +19262,7 @@
 	                            });
 	                            me.venn_circles.addChild(_shape);
 	                        } else {
+	                            isNewShape = false;
 	                            _shape.animate(context);
 	                        }
 	                    }                    if (nodeData.shape.type == 'path') {
@@ -19277,13 +19277,13 @@
 
 	                        _shape = me.venn_paths.getChildAt(pathInd++);
 	                        if (!_shape) {
-	                            isNewShape = true;
 	                            _shape = new Path$3({
 	                                pointChkPriority: false,
 	                                context: context
 	                            });
 	                            me.venn_paths.addChild(_shape);
 	                        } else {
+	                            isNewShape = false;
 	                            _shape.context.path = shape.path;
 	                            //_shape.animate( context )
 	                        }
