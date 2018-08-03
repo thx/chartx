@@ -41,7 +41,7 @@ export default class Tips extends Component
         //会deepExtend到this.indo上面来
         this.eventInfo    = null; 
         
-        this.positionInRange = false; //tip的浮层是否限定在画布区域
+        this.positionInRange = true; //false; //tip的浮层是否限定在画布区域
         this.enabled = true; //tips是默认显示的
 
         this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
@@ -61,13 +61,8 @@ export default class Tips extends Component
     static register( opt,app )
     {
         //所有的tips放在一个单独的tips中
-		app.stageTips = new Canvax.Display.Stage({
-		    id: "main-chart-stage-tips"
-		});
-        app.canvax.addChild( app.stageTips );
-
         var _tips = new this(opt, app);
-        app.stageTips.addChild( _tips.sprite );
+        app.stage.addChild( _tips.sprite );
         app.components.push({
             type : "tips",
             id : "tips",

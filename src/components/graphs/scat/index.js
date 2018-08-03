@@ -335,13 +335,28 @@ export default class ScatGraphs extends GraphsBase
                     context : _context
                 });
                 me._shapesp.addChild( _node );
+
+                _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                    
+                     e.eventInfo = {
+                         title : null,
+                         nodes : [ this.nodeData ]
+                     };
+                     if( this.nodeData.label ){
+                         e.eventInfo.title = this.nodeData.label;
+                     };
+            
+                     //fire到root上面去的是为了让root去处理tips
+                     me.root.fire( e.type, e );
+                     me.triggerEvent( me.node , e );
+                 });
+
             } else {
                 //_node.context = _context;
                 //_.extend( _node.context, _context );
                 _node.animate( _context );
             };
         
-
             //数据和canvax原件相互引用
             _node.nodeData = nodeData;
             _node.iNode = iNode;
@@ -353,20 +368,7 @@ export default class ScatGraphs extends GraphsBase
                 !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
             });
 
-            _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
-               
-                e.eventInfo = {
-                    title : null,
-                    nodes : [ this.nodeData ]
-                };
-                if( this.nodeData.label ){
-                    e.eventInfo.title = this.nodeData.label;
-                };
-       
-                //fire到root上面去的是为了让root去处理tips
-                me.root.fire( e.type, e );
-                me.triggerEvent( me.node , e );
-            });
+            
 
             if( me.line.enabled ){
 

@@ -260,6 +260,7 @@ export default class VennGraphs extends GraphsBase
         _.each( this.data , function( nodeData, i ){
             var shape = nodeData.shape;
             var _shape;
+            var isNewShape = true;
             if( shape ){
                 var context;
                 if( shape.type == 'circle' ){
@@ -281,8 +282,10 @@ export default class VennGraphs extends GraphsBase
                     };
                     _shape = me.venn_circles.getChildAt( circleInd++ );
                     if( !_shape ){
+                        isNewShape = true;
                         _shape = new Circle({
                             pointChkPriority : false,
+                            hoverClone: false,
                             context : context
                         });
                         me.venn_circles.addChild(_shape);
@@ -303,6 +306,7 @@ export default class VennGraphs extends GraphsBase
                     
                     _shape = me.venn_paths.getChildAt( pathInd++ );
                     if( !_shape ){
+                        isNewShape = true;
                         _shape = new Path({
                             pointChkPriority:false,
                             context : context
@@ -325,17 +329,20 @@ export default class VennGraphs extends GraphsBase
                     !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
                 });
 
-                _shape.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
-                    
-                    e.eventInfo = {
-                        title : null,
-                        nodes : [ this.nodeData ]
-                    };
-    
-                    //fire到root上面去的是为了让root去处理tips
-                    me.root.fire( e.type, e );
-                    me.triggerEvent( me.node , e );
-                });
+                //新创建的元素才需要绑定事件，因为复用的原件已经绑定过事件了
+                if( isNewShape ){
+                    _shape.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                        
+                        e.eventInfo = {
+                            title : null,
+                            nodes : [ this.nodeData ]
+                        };
+        
+                        //fire到root上面去的是为了让root去处理tips
+                        me.root.fire( e.type, e );
+                        me.triggerEvent( me.node , e );
+                    });
+                };
 
             }
 

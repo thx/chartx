@@ -14157,6 +14157,20 @@ define(function () { 'use strict';
 	                        context: _context
 	                    });
 	                    me._shapesp.addChild(_node);
+
+	                    _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+
+	                        e.eventInfo = {
+	                            title: null,
+	                            nodes: [this.nodeData]
+	                        };
+	                        if (this.nodeData.label) {
+	                            e.eventInfo.title = this.nodeData.label;
+	                        }
+	                        //fire到root上面去的是为了让root去处理tips
+	                        me.root.fire(e.type, e);
+	                        me.triggerEvent(me.node, e);
+	                    });
 	                } else {
 	                    //_node.context = _context;
 	                    //_.extend( _node.context, _context );
@@ -14171,20 +14185,6 @@ define(function () { 'use strict';
 	                    me.focusAt(this.nodeData.iNode);
 	                }, function (e) {
 	                    !this.nodeData.selected && me.unfocusAt(this.nodeData.iNode);
-	                });
-
-	                _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
-
-	                    e.eventInfo = {
-	                        title: null,
-	                        nodes: [this.nodeData]
-	                    };
-	                    if (this.nodeData.label) {
-	                        e.eventInfo.title = this.nodeData.label;
-	                    }
-	                    //fire到root上面去的是为了让root去处理tips
-	                    me.root.fire(e.type, e);
-	                    me.triggerEvent(me.node, e);
 	                });
 
 	                if (me.line.enabled) {
@@ -19229,6 +19229,7 @@ define(function () { 'use strict';
 	            _$28.each(this.data, function (nodeData, i) {
 	                var shape = nodeData.shape;
 	                var _shape;
+	                var isNewShape = true;
 	                if (shape) {
 	                    var context;
 	                    if (shape.type == 'circle') {
@@ -19250,8 +19251,10 @@ define(function () { 'use strict';
 	                        };
 	                        _shape = me.venn_circles.getChildAt(circleInd++);
 	                        if (!_shape) {
+	                            isNewShape = true;
 	                            _shape = new Circle$8({
 	                                pointChkPriority: false,
+	                                hoverClone: false,
 	                                context: context
 	                            });
 	                            me.venn_circles.addChild(_shape);
@@ -19270,6 +19273,7 @@ define(function () { 'use strict';
 
 	                        _shape = me.venn_paths.getChildAt(pathInd++);
 	                        if (!_shape) {
+	                            isNewShape = true;
 	                            _shape = new Path$3({
 	                                pointChkPriority: false,
 	                                context: context
@@ -19289,18 +19293,20 @@ define(function () { 'use strict';
 	                        !this.nodeData.selected && me.unfocusAt(this.nodeData.iNode);
 	                    });
 
-	                    _shape.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+	                    //新创建的元素才需要绑定事件，因为复用的原件已经绑定过事件了
+	                    if (isNewShape) {
+	                        _shape.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
 
-	                        e.eventInfo = {
-	                            title: null,
-	                            nodes: [this.nodeData]
-	                        };
+	                            e.eventInfo = {
+	                                title: null,
+	                                nodes: [this.nodeData]
+	                            };
 
-	                        //fire到root上面去的是为了让root去处理tips
-	                        me.root.fire(e.type, e);
-	                        me.triggerEvent(me.node, e);
-	                    });
-	                }
+	                            //fire到root上面去的是为了让root去处理tips
+	                            me.root.fire(e.type, e);
+	                            me.triggerEvent(me.node, e);
+	                        });
+	                    }                }
 
 	                if (nodeData.label && me.label.enabled) {
 
@@ -20896,7 +20902,7 @@ define(function () { 'use strict';
 	        //会deepExtend到this.indo上面来
 	        _this.eventInfo = null;
 
-	        _this.positionInRange = false; //tip的浮层是否限定在画布区域
+	        _this.positionInRange = true; //false; //tip的浮层是否限定在画布区域
 	        _this.enabled = true; //tips是默认显示的
 
 	        _this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
@@ -21253,13 +21259,8 @@ define(function () { 'use strict';
 	        key: "register",
 	        value: function register(opt, app) {
 	            //所有的tips放在一个单独的tips中
-	            app.stageTips = new canvax.Display.Stage({
-	                id: "main-chart-stage-tips"
-	            });
-	            app.canvax.addChild(app.stageTips);
-
 	            var _tips = new this(opt, app);
-	            app.stageTips.addChild(_tips.sprite);
+	            app.stage.addChild(_tips.sprite);
 	            app.components.push({
 	                type: "tips",
 	                id: "tips",
