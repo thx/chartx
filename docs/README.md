@@ -102,6 +102,6 @@ var options = {
 
 [是时候看下快速入手把Chartx接入到你的项目了](./start.html)
 
-## License
+#### License
 
 Chartx is available under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>.

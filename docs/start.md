@@ -1,7 +1,7 @@
 快速上手
 =================
 
-## 1，把Chartx安装到项目中来
+### 1，安装Chartx
 
 我们的项目已经发布到`npm`上面，[https://www.npmjs.com/package/chartx](https://www.npmjs.com/package/chartx)，你可以从`npm`安装
 
@@ -46,7 +46,7 @@ import Chartx from 'chartx';
 
 好，假设你已经能拿到Chartx模块了，我们继续走
 
-## 2，要绘制的位置准备好一个接收图表绘制的容器
+### 2，准备图表绘制的容器
 
 ps：这个容器比如要有高宽值，否则会绘制不出来
 
@@ -54,7 +54,7 @@ ps：这个容器比如要有高宽值，否则会绘制不出来
 <div id='mychart' style='width:600px;height:300px;'></div>
 ```
 
-## 3，准备一份数据
+### 3，准备一份数据
 
 ```javascript
 var data = [
@@ -63,7 +63,7 @@ var data = [
 ];
 ```
 
-## 4，编写要绘制的图表的配置
+### 4，编写图表的配置
 
 ```javascript
 var options = {
@@ -80,7 +80,7 @@ var options = {
 }
 ```
 
-## 5，调用Chartx绘制图表接口，完成绘图
+### 5，调用Chartx.create绘制图表
 
 ```javascript
 Chartx.create( "mychart" , data, options );
