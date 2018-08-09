@@ -1,0 +1,1 @@
+define("canvax/geom/Vector",[],function(){function a(a,b){var c=0,d=0;if(1==arguments.length&&_.isObject(a)){var e=arguments[0];_.isArray(e)?(c=e[0],d=e[1]):e.hasOwnProperty("x")&&e.hasOwnProperty("y")&&(c=e.x,d=e.y)}this._axes=[c,d]}return a.prototype={distance:function(a){var b=this._axes[0]-a._axes[0],c=this._axes[1]-a._axes[1];return Math.sqrt(b*b+c*c)}},a});

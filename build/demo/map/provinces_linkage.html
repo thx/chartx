@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- provinces_linkage</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+<form><textarea id="code" name="code">
+
+var data = [
+    [ "area"   , "click" ],
+    [ "广东省" , 111     ],
+    [ "浙江省" , 100     ],
+    [ "湖南省" , 80      ],
+    [ "湖北省" , 9       ],
+    [ "山西省" , 1       ],
+    [ "山东省" , 33      ],
+    [ "上海"   , 100    ],
+    [ "江苏省" , 200     ],
+    [ "福建省" , 300     ],
+    [ "江西省" , 500     ]
+];
+
+
+//测试 可以 试试 点击广东，就reset这个数据
+var data_guandong = [
+    [ "area" , "click" ],
+    [ "东莞" , 101     ],
+    [ "深圳" , 58      ],
+    [ "广州" , 38      ]
+]
+
+
+var options = {
+    mapName : "china", //默认便是中国地图
+    areaField : "area", //可选，默认为第一个字段
+    valueField : "click",
+    area : {
+        linkage : true //开启地图联动功能，目前只支持省市联动
+    },
+    tips : {
+        prefix : ["点击量"]
+    } 
+};
+
+Chartx.map("canvasTest" , data , options).then(function(map){
+
+    map.on("areadblclick" , function( e ){
+        //TODO: 要实现联动，需要开发者，在这里手动重置map
+        var obj = {};
+        if( map.mapName == "广东" ){
+            obj.data = data_guandong
+        };
+        
+        if( map.mapName == "china" ){
+            obj.data = data
+        };
+
+        map.reset( obj );
+    });
+});
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>中国地图- 省市地图联动</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

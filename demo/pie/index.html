@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- 饼图</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data= [
+    ["node"   , "value"],
+    ["ie"     , 500   ],
+    ["firefox", 300   ],
+    ["safari" , 100   ],
+    ["其他"   , 200   ]    
+];
+
+var options = {
+    xAxis : {
+        field : "node"
+    },
+    yAxis : {
+        field : "value"
+    },
+    tips : {
+        //enabled  : false,
+        content : function(info){
+            return info.name+"："+info.percentage+"%"
+        }
+    },
+    //周边tip
+    dataLabel: {
+        //enabled: false,
+        //是否绘制连接线(注意：此配置仅限于扇形块比较分散，若扇形比较紧密时，无连线会导致识别混淆)
+        //allowLine:false,
+        //format: '{point.name} : {point.y}' //和下面等价
+        format : function( data ){
+            return "<div><span>"+data.name+"</span>：<span>"+data.y+"（"+ data.percentage +"%）</span></div>"
+        }
+
+    },
+    //饼图的起始角度[有效值范围0-360度，默认值0度
+    //饼图的绘制是从起始角度开始，顺时针绘制，参考饼图的绘制动画.
+    startAngle:-90,
+    //数据排序，默认按用户给定顺序[desc/asc]
+    sort: 'desc',
+    //是否允许扇形hover时slice,若设置为false,则单击扇形触发slice
+    allowPointSelect: true,
+    //是否允许动画
+    animation: true,
+    //内圆半径
+    innerRadius: 50,
+    //颜色序列,若不设置，会有默认的颜色序列
+    //colors:['red', 'yellow', 'blue']
+
+    checked : {
+        enabled : true
+    }
+};
+Chartx.pie("canvasTest" , data , options).then(function( pie ){
+
+//先把所有的label给隐藏了
+pie.hideLabelAll();
+
+pie.checkAt(0)
+
+//把对应的第一个label显示
+pie.showLabelAt(0);
+
+    window.pie = pie;
+
+
+
+    //pie.slice(3);
+    pie.on('focus' , function (e) {
+        console.log(e.type);
+        pie.showLabelAt( e.eventInfo.iNode );
+    });
+    pie.on('unfocus' , function (e) {
+        console.log(e.type);
+        pie.hideLabelAt( e.eventInfo.iNode );
+    });
+    pie.on('click',function(e){
+        console.log(e.type);
+    });
+    pie.on('mousedown',function(e){
+        console.log(e.type);
+    });
+    pie.on('mouseup',function(e){
+        console.log(e.type);
+    });
+    pie.on('mousemove',function(e){
+        console.log(e.type);
+    });
+    pie.on('dblclick',function(e){
+        console.log(e.type);
+    });
+
+    window.onresize=function(){
+        debugger
+        pie.resize();
+    }
+
+    /*
+    _.each( pie.getLabelList() , function( pos ){
+    $("#canvasTest").append("<div style='position:absolute;width:"+pos.width+"px;height:"+pos.height+"px;left:"+pos.x+"px;top:"+pos.y+"px;border:1px solid red;'></div>");
+    } );
+    */
+});
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>饼图（pie chart）- 基础饼图</h4>
+                <p>
+                    联系人：@自勉
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>

@@ -1,0 +1,16 @@
+baseurl: /chartx
+permalink: /:categories/:title
+excerpt_separator: "\n\n"
+exclude:
+  - Gruntfile.js
+  - "*.sublime-project"
+  - package.json
+  - readme.md
+  - node_modules
+
+title: Chartx
+url: http://thx.github.io/chatx
+
+gems:
+  - jekyll-feed
+  - jekyll-sitemap

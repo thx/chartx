@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- line</title>
+<script type="text/javascript" src="../../lib/sea.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv","click"],
+    [ 1      , 33 , 120 , 33    ],
+    [ 2      , 10   , 251 , 26    ],
+    [ 3      , 32   , 45 , 43    ],
+    [ 4      , 58  , 135 , 31    ],
+    [ 5      , 79  , 173 , 71    ],
+    [ 6      , 188  , 84 , 39    ],
+    [ 7      , 115  , 68 , 65    ],
+    [ 8      , 66   , 83 , 51    ]
+];
+
+//chart的配置信息，所有的图表都可以极简到只需要配置xAxis，yAxis的字段
+var options = {
+    yAxis : {
+        //这里说明会显示 uv 和pv 两个维度的 折线
+        field : ["pv" ],
+        label : "yaxis"
+    },
+    xAxis : {
+        field : "xfield",
+        label : "xaxis"
+    },
+    graphs : {
+        line : {
+            strokeStyle : {
+                lineargradient : [
+                    {position : 0   , color:"#c6623b"},
+                    {position : 0.2 , color:"#2898cb"},
+                    {position : 0.8 , color:"#2898cb"},
+                    {position : 1.0 , color:"#5345cd"}
+                ]
+            }
+        },
+        node: {
+            enabled : false
+        }
+    }
+};
+//Chartx.line开始初始化chart实例
+var chartx = Chartx.line("canvasTest" , data , options).then(function( chart ){
+
+});
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（line chart）- 基础折线图</h4>
+                <p>
+                    联系人：@逢春 @释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>

@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+<script type="text/javascript" src="../../lib/requirejs.js"></script>
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../chartx/index.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield","uv" ,"pv","click","show"],
+    [ 1      , 101 , 20 , 33    ,100],
+    [ 2      , 67  , 51 , 26    ,35],
+    [ 3      , 76  , 45 , 43    ,43],
+    [ 4      , 58  , 35 , 31    ,345],
+    [ 5      , 79  , 73 , 71    ,234],
+    [ 6      , 88  , 54 , 39    ,423],
+    [ 7      , 56  , 68 , 65    ,89],
+    [ 8      , 99  , 83 , 51    ,88]
+
+];
+var options = {
+    type : '3d',
+    yAxis : {
+        field : [
+             [ "uv" , "pv" ],
+             ["click"]
+             //[ "click" , "show" ]
+        ],
+    },
+    xAxis : {
+        field : ["xfield"],
+    },
+    graphs : {
+        bar : {
+            //fillStyle : [
+            //    [ "#458ae6" , "#94cc5c" ],
+            //    [ "#999999" , "#cccccc" ]
+            //]
+        }
+    }
+}   
+var chartx = Chartx.bar("canvasTest" , data , options);
+chartx.then(function( line ){
+    line.on( "tap" , function( e ){
+        eventHandler(e);
+    } );
+    //mobile 触屏事件对应的为
+    //tap(点击)， panstart(手势准备开始移动) ，panmove(手势移动中)， panend(手势移动结束)
+});
+var eventHandler = function( e ){
+     console.log(e.params.iGroup, e.params.iNode, e.params.iLay)
+     var log = "<div>type："+ e.type + " iGroup：" + e.params.iGroup + " iNode：" + e.params.iNode + " iLay: " + e.params.iLay + "</div>";
+     $("#chart-event-log").prepend( $(log) );
+}
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图 - 基础柱状图</h4>
+                <p>
+                    联系人：@不决 @释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
