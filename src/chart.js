@@ -88,7 +88,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var colors = this._theme;
         if( ind != undefined ){
-            return colors[ ind % colors.length ]
+            return colors[ ind % colors.length ] || "#ccc";
         };
         return colors;
     }
@@ -321,7 +321,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
     //获取graphs根据id
-    getGraphsById( id )
+    getGraphById( id )
     {
         var _g;
         _.each( this._graphs, function( g ){

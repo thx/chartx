@@ -127,9 +127,12 @@ export default class CloudGraphs extends GraphsBase
         if( _.isFunction( this.node.fontColor ) ){
             color = this.node.fontColor( nodeData );
         }
-        if( !color ){
+
+        if( color === undefined ){
+            //只有undefined才会认为需要一个抄底色
+            //“” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
             color = "#ccc"
-        }
+        };
         return color;
     }
 

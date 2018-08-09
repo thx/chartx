@@ -57,8 +57,14 @@ export default class BarGraphs extends GraphsBase
             offsetX : 0,
             offsetY : 0
         };
-
-        //this.sort = null; //TODO:这个设置有问题，暂时所有sort相关的逻辑都注释掉
+        
+        //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+        this.select = {
+            enabled : false,
+            alpha : 0.05,
+            fillStyle : "#ccc",
+            inds : [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
+        };
 
         this._barsLen = 0;
 
@@ -131,7 +137,7 @@ export default class BarGraphs extends GraphsBase
         var field = rectData.field;
 
         var fieldMap = this.root._coord.getFieldMapOf(field);
-        var color = fieldMap.color;
+        var color;
        
         //field对应的索引，， 取颜色这里不要用i
         if (_.isString(c)) {
@@ -142,6 +148,12 @@ export default class BarGraphs extends GraphsBase
         };
         if (_.isFunction(c)) {
             color = c.apply(this, [ rectData ]);
+        };
+
+        if( color === undefined ){
+            //只有undefined才会认为需要还原皮肤色
+            //“” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
+            color = fieldMap.color
         };
 
         return color;
@@ -272,7 +284,58 @@ export default class BarGraphs extends GraphsBase
                         });
                         me.barsSp.addChild(groupH);
                         groupH.iNode = h;
+
                     };
+
+                    //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
+                    //以及显示selected状态
+                    var groupRegion;
+                    if (h <= preDataLen - 1) {
+                        groupRegion = groupH.getChildById("bhr_" + h);
+                        groupRegion.context.width = itemW;
+                        groupRegion.context.x = itemW * h;
+                    } else {
+                        groupRegion = new Rect({
+                            id: "bhr_" + h,
+                            pointChkPriority: false,
+                            hoverClone: false,
+                            context: {
+                                x: itemW * h,
+                                y: -me.height,
+                                width: itemW,
+                                height: me.height,
+                                fillStyle: me.select.fillStyle,
+                                globalAlpha: 0
+                            }
+                        });
+                        groupH.addChild(groupRegion);
+                        groupRegion.iNode = h;
+                        //触发注册的事件
+                        groupRegion.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
+                            
+                            e.eventInfo = {
+                                iNode : this.iNode,
+                                nodes : me.getNodesAt( this.iNode )
+                            };
+
+                            me.root.fire( e.type, e );
+                            me.triggerEvent( me , e );
+
+                            if( me.select.enabled ){
+                                //如果开启了图表的选中交互
+                                
+                                var ind = me.dataFrame.range.start + this.iNode;
+                                if( _.indexOf( me.select.inds, ind ) > -1 ){
+                                    //说明已经选中了
+                                    me.unselectAt( ind );
+                                } else {
+                                    me.selectAt( ind );
+                                }
+                            }
+
+                        });
+                    }
+
                 } else {
                     groupH = me.barsSp.getChildById("barGroup_" + h);
                 };
@@ -450,12 +513,6 @@ export default class BarGraphs extends GraphsBase
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
-        /*
-        if (this.sort && this.sort == "desc") {
-            this.sprite.context.y -= this.height;
-        };
-        */
-
         this.grow(function() {
             me.fire("complete");
         }, {
@@ -603,14 +660,6 @@ export default class BarGraphs extends GraphsBase
                     var fromY = _getFromY(tempBarData, v, i, val, y, _yAxis.basePoint);
                     y += fromY - _yAxis.basePoint.y;
 
-                    //如果有排序的话
-                    //TODO:这个逻辑好像有问题
-                    /*
-                    if (_yAxis.sort && _yAxis.sort == "desc") {
-                        y = -(_yAxis.height - Math.abs(y));
-                    };
-                    */
-
                     var nodeData = {
                         type    : "bar",
                         value   : val,
@@ -738,11 +787,6 @@ export default class BarGraphs extends GraphsBase
             return;
         };
         var sy = 1;
-        /*
-        if (this.sort && this.sort == "desc") {
-            sy = -1;
-        };
-        */
 
         var optsions = _.extend({
             delay: Math.min(1000 / this._barsLen, 80),
@@ -806,5 +850,14 @@ export default class BarGraphs extends GraphsBase
                 };
             };
         });
+    }
+
+    selectAt( ind ){
+        me.select.inds.push( ind )
+    }
+
+    unselectAt( ind ){
+        var _index = _.indexOf( me.select.inds, ind );
+        me.select.inds.splice( _index, 1 );
     }
 }

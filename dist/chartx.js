@@ -7491,17 +7491,19 @@ var Chartx = (function () {
 
 	var canvax = Canvax;
 
-	var _$1 = canvax._;
-
 	var _colors = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
 	var theme = {
 	    colors: _colors,
 	    set: function set(colors) {
-	        //this.colors = colors;
+	        this.colors = colors;
+
+	        /*
 	        var me = this;
-	        _$1.each(colors, function (color, i) {
+	        _.each( colors, function( color , i ){
 	            me.colors[i] = color;
-	        });
+	        } );
+	        */
+
 	        return this.colors;
 	    },
 	    get: function get() {
@@ -7942,7 +7944,7 @@ var Chartx = (function () {
 	        value: function getTheme(ind) {
 	            var colors = this._theme;
 	            if (ind != undefined) {
-	                return colors[ind % colors.length];
+	                return colors[ind % colors.length] || "#ccc";
 	            }            return colors;
 	        }
 	    }, {
@@ -8179,8 +8181,8 @@ var Chartx = (function () {
 	        //获取graphs根据id
 
 	    }, {
-	        key: "getGraphsById",
-	        value: function getGraphsById(id) {
+	        key: "getGraphById",
+	        value: function getGraphById(id) {
 	            var _g;
 	            _$4.each(this._graphs, function (g) {
 	                if (g.id == id) {
@@ -11997,11 +11999,21 @@ var Chartx = (function () {
 	        value: function triggerEvent(eventTargetOpt, e) {
 	            var fn = eventTargetOpt["on" + e.type];
 	            if (fn && _$16.isFunction(fn)) {
-	                //如果有在pie的配置上面注册对应的事件，则触发
-	                var nodeData = null;
 	                if (e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length) {
-	                    nodeData = e.eventInfo.nodes[0];
-	                }                fn.apply(this, [e, nodeData]);
+	                    if (e.eventInfo.nodes.length == 1) {
+	                        fn.apply(this, [e, e.eventInfo.nodes[0]]);
+	                    } else {
+	                        fn.apply(this, [e, e.eventInfo.nodes]);
+	                    }
+	                } else {
+	                    var _arr = [];
+	                    _$16.each(arguments, function (item, i) {
+	                        if (!!i) {
+	                            _arr.push(item);
+	                        }
+	                    });
+	                    fn.apply(this, _arr);
+	                }
 	            }        }
 	    }]);
 	    return GraphsBase;
@@ -12065,7 +12077,13 @@ var Chartx = (function () {
 	            offsetY: 0
 	        };
 
-	        //this.sort = null; //TODO:这个设置有问题，暂时所有sort相关的逻辑都注释掉
+	        //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+	        _this.select = {
+	            enabled: false,
+	            alpha: 0.05,
+	            fillStyle: "#ccc",
+	            inds: [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
+	        };
 
 	        _this._barsLen = 0;
 
@@ -12139,7 +12157,7 @@ var Chartx = (function () {
 	            var field = rectData.field;
 
 	            var fieldMap = this.root._coord.getFieldMapOf(field);
-	            var color = fieldMap.color;
+	            var color;
 
 	            //field对应的索引，， 取颜色这里不要用i
 	            if (_$17.isString(c)) {
@@ -12148,6 +12166,11 @@ var Chartx = (function () {
 	                color = _$17.flatten(c)[_$17.indexOf(_flattenField, field)];
 	            }            if (_$17.isFunction(c)) {
 	                color = c.apply(this, [rectData]);
+	            }
+	            if (color === undefined) {
+	                //只有undefined才会认为需要还原皮肤色
+	                //“” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
+	                color = fieldMap.color;
 	            }
 	            return color;
 	        }
@@ -12273,7 +12296,55 @@ var Chartx = (function () {
 	                            });
 	                            me.barsSp.addChild(groupH);
 	                            groupH.iNode = h;
-	                        }                    } else {
+	                        }
+	                        //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
+	                        //以及显示selected状态
+	                        var groupRegion;
+	                        if (h <= preDataLen - 1) {
+	                            groupRegion = groupH.getChildById("bhr_" + h);
+	                            groupRegion.context.width = itemW;
+	                            groupRegion.context.x = itemW * h;
+	                        } else {
+	                            groupRegion = new Rect$4({
+	                                id: "bhr_" + h,
+	                                pointChkPriority: false,
+	                                hoverClone: false,
+	                                context: {
+	                                    x: itemW * h,
+	                                    y: -me.height,
+	                                    width: itemW,
+	                                    height: me.height,
+	                                    fillStyle: me.select.fillStyle,
+	                                    globalAlpha: 0
+	                                }
+	                            });
+	                            groupH.addChild(groupRegion);
+	                            groupRegion.iNode = h;
+	                            //触发注册的事件
+	                            groupRegion.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
+
+	                                e.eventInfo = {
+	                                    iNode: this.iNode,
+	                                    nodes: me.getNodesAt(this.iNode)
+	                                };
+
+	                                me.root.fire(e.type, e);
+	                                me.triggerEvent(me, e);
+
+	                                if (me.select.enabled) {
+	                                    //如果开启了图表的选中交互
+
+	                                    var ind = me.dataFrame.range.start + this.iNode;
+	                                    if (_$17.indexOf(me.select.inds, ind) > -1) {
+	                                        //说明已经选中了
+	                                        me.unselectAt(ind);
+	                                    } else {
+	                                        me.selectAt(ind);
+	                                    }
+	                                }
+	                            });
+	                        }
+	                    } else {
 	                        groupH = me.barsSp.getChildById("barGroup_" + h);
 	                    }
 	                    //txt的group begin
@@ -12428,12 +12499,6 @@ var Chartx = (function () {
 	            this.sprite.context.x = this.origin.x;
 	            this.sprite.context.y = this.origin.y;
 
-	            /*
-	            if (this.sort && this.sort == "desc") {
-	                this.sprite.context.y -= this.height;
-	            };
-	            */
-
 	            this.grow(function () {
 	                me.fire("complete");
 	            }, {
@@ -12574,14 +12639,6 @@ var Chartx = (function () {
 	                        var fromY = _getFromY(tempBarData, v, i, val, y, _yAxis.basePoint);
 	                        y += fromY - _yAxis.basePoint.y;
 
-	                        //如果有排序的话
-	                        //TODO:这个逻辑好像有问题
-	                        /*
-	                        if (_yAxis.sort && _yAxis.sort == "desc") {
-	                            y = -(_yAxis.height - Math.abs(y));
-	                        };
-	                        */
-
 	                        var nodeData = {
 	                            type: "bar",
 	                            value: val,
@@ -12706,11 +12763,6 @@ var Chartx = (function () {
 	                callback && callback(me);
 	                return;
 	            }            var sy = 1;
-	            /*
-	            if (this.sort && this.sort == "desc") {
-	                sy = -1;
-	            };
-	            */
 
 	            var optsions = _$17.extend({
 	                delay: Math.min(1000 / this._barsLen, 80),
@@ -12767,6 +12819,17 @@ var Chartx = (function () {
 	                                id: bar.id
 	                            });
 	                        }                    }                }            });
+	        }
+	    }, {
+	        key: "selectAt",
+	        value: function selectAt(ind) {
+	            me.select.inds.push(ind);
+	        }
+	    }, {
+	        key: "unselectAt",
+	        value: function unselectAt(ind) {
+	            var _index = _$17.indexOf(me.select.inds, ind);
+	            me.select.inds.splice(_index, 1);
 	        }
 	    }]);
 	    return BarGraphs;
@@ -13058,10 +13121,12 @@ var Chartx = (function () {
 	        key: "_getColor",
 	        value: function _getColor(s, iNode) {
 	            var color = this._getProp(s, iNode);
-	            if (!color || color == "") {
+	            if (color === undefined) {
 	                //这个时候可以先取线的style，和线保持一致
 	                color = this._getLineStrokeStyle();
-	                if (!color || color == "" || !_$18.isString(color)) {
+
+	                //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
+	                if (!color || !_$18.isString(color)) {
 	                    //那么最后，取this.fieldMap.color
 	                    color = this.fieldMap.color;
 	                }
@@ -13072,11 +13137,9 @@ var Chartx = (function () {
 	        value: function _getProp(s, iNode) {
 	            if (_$18.isArray(s)) {
 	                return s[this.iGroup];
-	            }
-	            if (_$18.isFunction(s)) {
+	            }            if (_$18.isFunction(s)) {
 	                return s.apply(this, [this.getNodeInfoAt(iNode)]);
-	            }
-	            return s;
+	            }            return s;
 	        }
 
 	        //这个是tips需要用到的 
@@ -13353,7 +13416,6 @@ var Chartx = (function () {
 	                //如果用户没有配置line.strokeStyle，那么就用默认的
 	                return this.line.strokeStyle;
 	            }
-
 	            if (this._opt.line.strokeStyle.lineargradient) {
 	                //如果用户配置 填充是一个线性渐变
 	                //从bline中找到最高的点
@@ -14585,13 +14647,14 @@ var Chartx = (function () {
 	                    //触发注册的事件
 	                    sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
 
-	                        me.fire(e.type, e);
-	                        //图表触发，用来处理Tips
+	                        //me.fire( e.type, e );
+
 	                        e.eventInfo = {
 	                            nodes: [this.nodeData]
 	                        };
-	                        me._graphs.root.fire(e.type, e);
 
+	                        //图表触发，用来处理Tips
+	                        me._graphs.root.fire(e.type, e);
 	                        me._graphs.triggerEvent(me._graphs.node, e);
 	                    });
 
@@ -16415,10 +16478,12 @@ var Chartx = (function () {
 	            if (_$24.isFunction(this.node.fontColor)) {
 	                color = this.node.fontColor(nodeData);
 	            }
-	            if (!color) {
+
+	            if (color === undefined) {
+	                //只有undefined才会认为需要一个抄底色
+	                //“” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
 	                color = "#ccc";
-	            }
-	            return color;
+	            }            return color;
 	        }
 	    }, {
 	        key: "_drawGraphs",

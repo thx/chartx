@@ -116,10 +116,12 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     _getColor(s, iNode)
     {
         var color = this._getProp(s, iNode);
-        if (!color || color == "") {
+        if ( color === undefined ) {
             //这个时候可以先取线的style，和线保持一致
             color = this._getLineStrokeStyle();
-            if( !color || color == "" || !_.isString( color ) ){
+
+            //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
+            if( !color || !_.isString( color ) ){
                 //那么最后，取this.fieldMap.color
                 color = this.fieldMap.color;
             }
@@ -131,10 +133,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     {
         if (_.isArray(s)) {
             return s[ this.iGroup ]
-        }
+        };
         if (_.isFunction(s)) {
             return s.apply( this , [ this.getNodeInfoAt( iNode ) ] );
-        }
+        };
         return s
     }
 
@@ -433,7 +435,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         if( !this._opt.line || !this._opt.line.strokeStyle ){
             //如果用户没有配置line.strokeStyle，那么就用默认的
             return this.line.strokeStyle;
-        }
+        };
 
         if( this._opt.line.strokeStyle.lineargradient ){
             //如果用户配置 填充是一个线性渐变

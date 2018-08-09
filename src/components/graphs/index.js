@@ -55,9 +55,21 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
             //如果有在pie的配置上面注册对应的事件，则触发
             var nodeData = null;
             if( e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length ){
-                nodeData = e.eventInfo.nodes[0];
-            };
-            fn.apply( this , [ e , nodeData ] );
+                if( e.eventInfo.nodes.length == 1 ){
+                    fn.apply( this , [ e , e.eventInfo.nodes[0] ] );
+                } else {
+                    fn.apply( this , [ e , e.eventInfo.nodes ] );
+                }
+            } else {
+                var _arr = [];
+                _.each( arguments, function(item, i){
+                    if( !!i ){
+                        _arr.push( item );
+                    }
+                } );
+                fn.apply( this, _arr );
+            }
+            
         };
     }
 

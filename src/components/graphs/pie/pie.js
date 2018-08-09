@@ -145,13 +145,14 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 //触发注册的事件
                 sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
                     
-                    me.fire( e.type, e );
-                    //图表触发，用来处理Tips
+                    //me.fire( e.type, e );
+                
                     e.eventInfo = {
                         nodes : [ this.nodeData ]
                     };
-                    me._graphs.root.fire( e.type, e );
 
+                    //图表触发，用来处理Tips
+                    me._graphs.root.fire( e.type, e );
                     me._graphs.triggerEvent( me._graphs.node , e );
 
                 });
