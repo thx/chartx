@@ -1,0 +1,38 @@
+.gitbook-link {
+    display: none !important;
+}
+.book-summary {
+    max-width:260px!important;
+}
+.markdown-section {
+    color:#2C3E50;
+}
+blockquote {
+    border-color: #D6DBDF;
+    background: none repeat scroll 0 0 rgba(102,128,153,.05);
+    padding-top: 0.85em!important;
+    padding-bottom: 1px !important;
+    color:#616b75!important;
+}
+
+body .markdown-section code {
+    border: 0;
+    background-color: #f4f7f9;
+    border-radius: 4px;
+    color: #2C3E50;
+    font-size: 90%;
+    padding: 4px 4px 1px;
+}
+
+body .markdown-section pre code {
+    background-color: transparent;
+    border-radius: 0;
+}
+
+body .markdown-section hr {
+    height: 1px;
+    border: 0;
+    padding: 0;
+    margin: 30px;
+    background: -webkit-gradient(linear,left top,right top,from(rgba(165,69,243,0)),color-stop(.5,hsla(272,6%,49%,.33)),to(rgba(165,69,243,0)));
+}

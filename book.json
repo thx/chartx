@@ -1,0 +1,39 @@
+{
+    "title": "Chartx",
+    "description": "Chartx API 文档",
+    "author": "litao",
+    "output.name": "site",
+    "language": "zh-hans",
+    "gitbook": "3.2.3",
+    "root": ".",
+    "structure": {
+        "readme": "README.md"
+    },
+
+    "plugins": [
+        "github",
+        "anchor-navigation-ex"
+    ],
+    "pluginsConfig": {
+        "github": {
+            "url": "https://github.com/thx/chartx"
+        },
+        "anchor-navigation-ex": {
+            "showLevel": false,
+            "associatedWithSummary": false,
+            "printLog": false,
+            "multipleH1": false,
+            "mode": "pageTop",
+            "float": {
+                "showLevelIcon": false
+            },
+            "pageTop": {
+                "showLevelIcon": false
+            }
+        }
+    },
+
+    "styles": {
+        "website" : "styles/website.css"
+    } 
+}

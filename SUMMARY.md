@@ -1,0 +1,17 @@
+# Summary
+
+* [简介](README.md)
+* [快速上手](start.md)
+* [全局属性\方法](chartx_global.md)
+* [组件配置](components/index.md)
+    * [coord](components/coord/index.md)
+        * [rect](components/coord/rect/index.md)
+        * [polar](components/coord/polar/index.md)
+    * [graphs](components/graphs/index.md)
+        * [bar](components/graphs/bar.md)
+        * [line](components/graphs/line.md)
+        * [pie](components/graphs/pie.md)
+    * [legend](components/legend/index.md)
+    * [tips](components/tips/index.md)
+* [changelog](changelog.md)
+

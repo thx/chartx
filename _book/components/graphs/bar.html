@@ -1,0 +1,518 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>bar · Chartx</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="litao">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-anchor-navigation-ex/style/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+        <link rel="stylesheet" href="../../styles/website.css">
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="line.html" />
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                    简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../../start.html">
+            
+                <a href="../../start.html">
+            
+                    
+                    快速上手
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../../chartx_global.html">
+            
+                <a href="../../chartx_global.html">
+            
+                    
+                    全局属性\方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    组件配置
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="../coord/">
+            
+                <a href="../coord/">
+            
+                    
+                    coord
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1.1" data-path="../coord/rect/">
+            
+                <a href="../coord/rect/">
+            
+                    
+                    rect
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.1.2" data-path="../coord/polar/">
+            
+                <a href="../coord/polar/">
+            
+                    
+                    polar
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    graphs
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="1.4.2.1" data-path="bar.html">
+            
+                <a href="bar.html">
+            
+                    
+                    bar
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.2" data-path="line.html">
+            
+                <a href="line.html">
+            
+                    
+                    line
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.3" data-path="pie.html">
+            
+                <a href="pie.html">
+            
+                    
+                    pie
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="../legend/">
+            
+                <a href="../legend/">
+            
+                    
+                    legend
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="../tips/">
+            
+                <a href="../tips/">
+            
+                    
+                    tips
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../../changelog.html">
+            
+                <a href="../../changelog.html">
+            
+                    
+                    changelog
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../.." >bar</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h2 id="bar"><a name="bar" class="anchor-navigation-ex-anchor" href="#bar"><i class="fa fa-link" aria-hidden="true"></i></a>bar</h2>
+<ul>
+<li><p><strong>field</strong> &#x6570;&#x636E;&#x5B57;&#x6BB5;</p>
+<p>  &#x5728;&#x53C2;&#x8003;&#x4E86;&#x4F17;&#x591A;&#x7684;charts&#x91CC;&#x9762;&#xFF0C;&#x5927;&#x5BB6;&#x5BF9;&#x5B9E;&#x73B0;&#x67F1;&#x72B6;&#x56FE;&#x7684;&#x5404;&#x79CD;&#x7EC4;&#x5408;&#x5F62;&#x6001;&#xFF0C;&#x6BD4;&#x5982;&#x591A;&#x7EC4;&#x67F1;&#x72B6;&#x56FE;&#xFF0C;&#x591A;&#x7EC4;&#x67F1;&#x72B6;&#x56FE;+&#x5806;&#x53E0;&#x7B49;&#x7B49;&#xFF0C;&#x5927;&#x90E8;&#x5206;&#x662F;&#x91C7;&#x7528;&#x589E;&#x52A0;stack&#x914D;&#x7F6E;&#x7684;&#x5F62;&#x5F0F;&#x6765;&#x5B9E;&#x73B0;&#xFF0C;&#x800C;&#x6211;&#x4EEC;&#xFF0C;&#x5DE7;&#x5999;&#x7684;&#x72EC;&#x6811;&#x4E00;&#x5E1C;&#x7684;&#x5229;&#x7528;&#x4E86;&#x628A;field&#x5C5E;&#x6027;&#x8BBE;&#x8BA1;&#x6210;&#x652F;&#x6301;&#x591A;&#x7EF4;&#x6570;&#x7EC4;&#x7684;&#x5F62;&#x5F0F;&#x6765;&#x5DE7;&#x5999;&#x800C;&#x4E14;&#x5F3A;&#x5927;&#x7684;&#x89E3;&#x51B3;&#x4E86;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x8FD8;&#x662F;&#x770B;&#x56FE;&#x8BF4;&#x8BDD;&#x5427;&#xFF1A;</p>
+</li>
+</ul>
+<pre><code class="lang-js">    graphs: {
+        type: <span class="hljs-string">&quot;bar&quot;</span>,
+        field: <span class="hljs-string">&quot;pv&quot;</span> <span class="hljs-comment">//field&#x76F4;&#x63A5;&#x914D;&#x7F6E;&#x4E3A;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x5B57;&#x6BB5;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x5C31;&#x662F;&#x4E2A;&#x5355;&#x67F1;&#x67F1;&#x72B6;&#x56FE;</span>
+    }
+</code></pre>
+<p><img src="../../assets/graphs_bar.jpg" style="width:200px;"></p>
+<pre><code class="lang-js">    graphs: {
+        type: <span class="hljs-string">&quot;bar&quot;</span>,
+        field: [ <span class="hljs-string">&quot;pv&quot;</span>,<span class="hljs-string">&quot;uv&quot;</span> ] <span class="hljs-comment">//field&#x4E3A;&#x4E00;&#x7EF4;&#x6570;&#x7EC4;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x591A;&#x5206;&#x7EC4;&#x67F1;&#x72B6;&#x56FE;</span>
+    }
+</code></pre>
+<p><img src="../../assets/graphs_bar_1.jpg" style="width:200px;"></p>
+<pre><code class="lang-js">    graphs: {
+        type: <span class="hljs-string">&quot;bar&quot;</span>,
+        field: [ 
+            [<span class="hljs-string">&quot;pv&quot;</span>,<span class="hljs-string">&quot;uv&quot;</span>] 
+        ] <span class="hljs-comment">//field&#x4E3A;&#x4E8C;&#x7EF4;&#x6570;&#x7EC4;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x5806;&#x53E0;</span>
+    }
+</code></pre>
+<p><img src="../../assets/graphs_bar_2.jpg" style="width:200px;"></p>
+<pre><code class="lang-js">    graphs: {
+        type: <span class="hljs-string">&quot;bar&quot;</span>,
+        field: [ 
+            [ <span class="hljs-string">&quot;pv&quot;</span>,<span class="hljs-string">&quot;uv&quot;</span> ],
+            <span class="hljs-string">&apos;uv&apos;</span>
+        ] <span class="hljs-comment">//&#x5982;&#x679C;&#x8981;&#x5B9E;&#x73B0;&#x591A;&#x5206;&#x7EC4;&#xFF0C;&#x5176;&#x4E2D;&#x67D0;&#x4E2A;&#x5206;&#x7EC4;&#x53C8;&#x662F;&#x5806;&#x53E0;&#x7684;&#xFF0C;&#x5C31;&#x8FD9;&#x6837;&#x5B9E;&#x73B0;</span>
+    }
+</code></pre>
+<p><img src="../../assets/graphs_bar_3.jpg" style="width:200px;"></p>
+<p>&#x662F;&#x4E0D;&#x662F;&#x5F88;&#x5F62;&#x8C61;&#x7684;&#x914D;&#x7F6E;&#x65B9;&#x5F0F;&#xFF0C;&#x7528;&#x8FC7;&#x5176;&#x4ED6;&#x56FE;&#x8868;&#x5E93;&#x7684;&#x7528;&#x6211;&#x4EEC;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x5B9E;&#x73B0;&#x591A;&#x5206;&#x7EC4;&#x6216;&#x8005;&#x5806;&#x53E0;&#x56FE;&#x8868;&#xFF0C;&#x4F60;&#x4F1A;&#x53D1;&#x73B0;&#x8FD9;&#x7B80;&#x76F4;&#x8212;&#x670D;&#x800C;&#x4E14;&#x5F3A;&#x5927;&#x5230;&#x6B8B;&#x66B4;&#x7684;&#x5730;&#x6B65;&#x3002;</p>
+<ul>
+<li><p><strong>proportion</strong> &#x8BE5;graphs&#x662F;&#x4E0D;&#x662F;&#x6BD4;&#x4F8B;&#x67F1;&#x72B6;&#x56FE;</p>
+</li>
+<li><p><strong>yAxisAlign</strong> &#x9ED8;&#x8BA4;&quot;left&quot;&#xFF0C;&#x8BBE;&#x7F6E;&#x8BE5;graphs&#x5BF9;&#x5E94;&#x7684;&#x90A3;&#x4E00;y&#x8F74;</p>
+</li>
+<li><p><strong>absolute</strong> &#x9ED8;&#x8BA4;false&#xFF0C;trimGraphs&#x7684;&#x65F6;&#x5019;&#x662F;&#x5426;&#x9700;&#x8981;&#x548C;&#x5176;&#x4ED6;&#x7684; bar graphs&#x4E00;&#x8D77;&#x5E76;&#x6392;&#x8BA1;&#x7B97;&#xFF0C;true&#x7684;&#x8BDD;&#x8FD9;&#x4E2A;&#x5C31;&#x4F1A;&#x548C;&#x522B;&#x7684;&#x91CD;&#x53E0;&#xFF0C;&#x548C;css&#x4E2D;&#x5F97;absolute&#x6982;&#x5FF5;&#x4E00;&#x81F4;&#xFF0C;&#x8131;&#x79BB;&#x6587;&#x6863;&#x6D41;&#x7684;&#x7EDD;&#x5BF9;&#x5B9A;&#x4F4D;</p>
+</li>
+<li><p><strong>node</strong> &#x4E00;&#x4E2A;&#x6570;&#x636E;&#x8282;&#x70B9;&#x7684;&#x914D;&#x7F6E;</p>
+<ul>
+<li><p><strong>shapeType</strong> &apos;rect&apos; node&#x7684;&#x56FE;&#x5F62;&#x7C7B;&#x578B;&#xFF0C;&#x9ED8;&#x8BA4;&#x53EA;&#x5B9E;&#x73B0;&#x4E86;rect</p>
+</li>
+<li><p><strong>width</strong> node&#x56FE;&#x5F62;&#x5BF9;&#x5E94;&#x7684;width</p>
+</li>
+<li><p><strong>maxWidth</strong> node&#x56FE;&#x5F62;&#x6700;&#x5927;width&#x9650;&#x5236;</p>
+</li>
+<li><p><strong>minWidth</strong> node&#x56FE;&#x5F62;&#x6700;&#x5C0F;width&#x9650;&#x5236;</p>
+</li>
+<li><p><strong>minHeight</strong> node&#x56FE;&#x5F62;&#x6700;&#x5C0F;&#x9AD8;&#x5EA6;&#x9650;&#x5236;</p>
+</li>
+<li><p><strong>radius</strong> node&#x56FE;&#x5F62;&#x4E3A;rect&#x7684;&#x65F6;&#x5019;&#x7684;&#x5706;&#x89D2;&#x8BBE;&#x7F6E;</p>
+</li>
+<li><p><strong>fillStyle</strong> node&#x56FE;&#x5F62;&#x7684;&#x586B;&#x5145;&#x8272;&#xFF0C;&#x53EF;&#x4EE5;&#x662F;&#x5355;&#x989C;&#x8272;&#x503C;&#xFF0C;&#x53EF;&#x4EE5;&#x662F;&#x6570;&#x7EC4;&#xFF0C;&#x6570;&#x7EC4;&#x7684;&#x8BDD;&#x5B89;&#x88C5;group&#x7D22;&#x5F15;&#x81EA;&#x52A8;&#x83B7;&#x53D6;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x662F;&#x81EA;&#x5B9A;&#x4E49;&#x51FD;&#x6570;&#xFF08;node&#x5BF9;&#x5E94;&#x7684;data&#x505A;&#x4E3A;&#x5165;&#x53C2;&#x6570;&#xFF09;</p>
+</li>
+<li><p><strong>fillAlpha</strong> node&#x56FE;&#x5F62;&#x7684;&#x586B;&#x5145;&#x900F;&#x660E;&#x8272;</p>
+</li>
+<li><p><strong>filter</strong> node&#x56FE;&#x5F62;&#x7684;&#x8FC7;&#x6EE4;&#x51FD;&#x6570;&#xFF0C;&#x5165;&#x53C2;&#x6570;&#x6709;node&#x56FE;&#x5F62;&#x7684;&#x56FE;&#x5F62;&#x5BF9;&#x8C61;&#x4EE5;&#x53CA;node&#x7684;data</p>
+</li>
+</ul>
+</li>
+<li><p><strong>label</strong> </p>
+<ul>
+<li><p><strong>enabled</strong> </p>
+</li>
+<li><p><strong>fontColor</strong> &#x5982;&#x679C;&#x6709;&#x8BBE;&#x7F6E;text.fontColor&#x90A3;&#x4E48;&#x4F18;&#x5148;&#x4F7F;&#x7528;fontColor</p>
+</li>
+<li><p><strong>fontSize</strong> 12</p>
+</li>
+<li><p><strong>format</strong> &#x628A;&#x539F;&#x59CB;&#x6587;&#x672C;&#x683C;&#x5F0F;&#x5316;&#x5230;&#x663E;&#x793A;&#x6587;&#x672C;&#x7684;&#x683C;&#x5F0F;&#x51FD;&#x6570;</p>
+<pre><code class="lang-js">  format( val, nodeData ){
+      <span class="hljs-comment">//&#x7B2C;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#x5C31;label&#x7684;&#x6587;&#x672C;&#x503C;&#xFF0C;&#x7B2C;&#x4E8C;&#x53C2;&#x6570;&#x662F;&#x5177;&#x4F53;&#x7684;node&#x6570;&#x636E;</span>
+  }
+</code></pre>
+</li>
+<li><p><strong>lineWidth</strong> &#x9ED8;&#x8BA4;0&#xFF0C; &#x6587;&#x672C;&#x63CF;&#x8FB9;&#x5927;&#x5C0F;</p>
+</li>
+<li><p><strong>strokeStyle</strong> &#x6587;&#x672C;&#x63CF;&#x8FB9;&#x989C;&#x8272;</p>
+</li>
+<li><p><strong>rotation</strong> &#x6587;&#x672C;&#x9009;&#x62E9;&#x89D2;&#x5EA6;</p>
+</li>
+<li><p><strong>align</strong> &#x6587;&#x672C;&#x6C34;&#x5E73;&#x5E03;&#x5C40;&#x7C7B;&#x578B;&#xFF0C;&#x9ED8;&#x8BA4;center, &#x53EF;&#x9009;&#x6709;left,center,right</p>
+</li>
+<li><p><strong>verticalAlign</strong> &#x6587;&#x672C;&#x5782;&#x76F4;&#x5E03;&#x5C40;&#x7C7B;&#x578B;&#xFF0C;&#x9ED8;&#x8BA4;bottom,&#x53EF;&#x9009;&#x6709;top middle </p>
+</li>
+<li><p><strong>position</strong> &#x6587;&#x672C;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x9ED8;&#x8BA4;top,&#x53EF;&#x9009;&#x6709;top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center</p>
+</li>
+<li><p><strong>offsetX</strong> &#x6587;&#x672C;&#x7684;x&#x65B9;&#x5411;&#x504F;&#x79FB;</p>
+</li>
+<li><p><strong>offsetY</strong> &#x6587;&#x672C;&#x7684;y&#x65B9;&#x5411;&#x504F;&#x79FB;</p>
+</li>
+</ul>
+</li>
+</ul>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: graphs">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="line.html" class="navigation navigation-next " aria-label="Next page: line">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"bar","level":"1.4.2.1","depth":3,"next":{"title":"line","level":"1.4.2.2","depth":3,"path":"components/graphs/line.md","ref":"components/graphs/line.md","articles":[]},"previous":{"title":"graphs","level":"1.4.2","depth":2,"path":"components/graphs/index.md","ref":"components/graphs/index.md","articles":[{"title":"bar","level":"1.4.2.1","depth":3,"path":"components/graphs/bar.md","ref":"components/graphs/bar.md","articles":[]},{"title":"line","level":"1.4.2.2","depth":3,"path":"components/graphs/line.md","ref":"components/graphs/line.md","articles":[]},{"title":"pie","level":"1.4.2.3","depth":3,"path":"components/graphs/pie.md","ref":"components/graphs/pie.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["github","anchor-navigation-ex","livereload"],"root":".","styles":{"website":"styles/website.css"},"pluginsConfig":{"github":{"url":"https://github.com/thx/chartx"},"livereload":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"anchor-navigation-ex":{"associatedWithSummary":false,"float":{"level1Icon":"","level2Icon":"","level3Icon":"","showLevelIcon":false},"mode":"pageTop","multipleH1":false,"pageTop":{"level1Icon":"","level2Icon":"","level3Icon":"","showLevelIcon":false},"printLog":false,"showLevel":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","author":"litao","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Chartx","language":"zh-hans","output.name":"site","gitbook":"3.2.3","description":"Chartx API 文档"},"file":{"path":"components/graphs/bar.md","mtime":"2018-07-19T12:10:36.000Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-09T09:24:03.693Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
