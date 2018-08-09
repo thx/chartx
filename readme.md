@@ -1,98 +1,107 @@
+#Chartx 
 
-![](https://img.alicdn.com/tps/TB14JPTJpXXXXbHXXXXXXXXXXXX-697-303.png)
+## Chartx对图表的理解
 
-Chartx Gitlab：[http://gitlab.alibaba-inc.com/thx/charts](http://gitlab.alibaba-inc.com/thx/charts)
+近几年前端领域风起云涌，数据可视化界也还算热闹，除了上古时期的googleChart,D3,hightChart等，还有不少的新的图表库异军突起，每个图表库的出现都不纯粹的是重复造轮子，都代表着自己对图表的理解，都有着自己的脾性。
 
-Chartx 官网：[http://thx.github.io/chartx](http://thx.github.io/chartx)
+我们来通过解读Chartx如何建立一个简单的图表，来向你描述我们对图表的理解。
 
-### 关于Chartx
-        
-经过两年多,多少个版本的积累，我们阿里妈妈UED的图表库Chartx不断在完善和成长，今天，Chartx已经覆盖了阿里妈妈所有产品，以及易传媒，数据平台等兄弟部门的产品。我们开发了多达12种类的常规图表，和7个从产品的实际需求中诞生的自有原创图表。
+Chartx是一个基于**组件化**开发的图表库，我们把图表从ui层面拆分为一个个组件，然后统一管理，对应的，我们的配置也是和组件一一对应的。
 
+**数据可视化**，那么首先是要有**数据**，我们用来描述一个图表，必须要有数据，和配置两部分，但是数据是纯粹的数据，没有任何的逻辑意义，来看下Chartx中的数据，我们所有图表的数据都是统一的数据格式，加入我们已经准备好了如下的数据：
 
-### 基础底层渲染引擎Canvax
+**Chartx中的标准数据格式**
 
-说到chartx，不得不也搭车说下Canvax，又按照国际惯例先放出地址：[canvax.org](http://canvax.org)。
-
-Canvax是chartx的基础,底层渲染引擎,在这个之上可以快速开发chart,在研发chartx之前，我们针对图表场景精心设计了Canvax，在图表这样对帧率要求不高的场景中，如果使用Main Loop主循环来不停渲染的话，会带来巨大的cpu资源浪费，不利于移动端的覆盖，而如果每次有属性变化都让开发者手动调用一次draw的话又实在太不友好，为此，我们精心设计了Virtual Context来主动驱动canvax引擎渲染的技术（已经向知识产权局提交了专利申请），既解决了Main Loop带来的浪费，又解决了需要开发者手动申请渲染的尴尬。
-
-
-
-### Chartx的能力
-
-#### 跨平台跨终端
-
-Chartx在ie9- 不支持canvas的浏览器中会自动输出flash文件来实现兼容，在移动端Chartx也同样有不俗的表现
-
-#### 丰富的图表类型
-
-Chartx目前有12类常规图表类型：bar(柱状图)，line（折线图），map（地图），pie（饼图），progress（进度图），radar（雷达图），scat（散点图），topo（拓扑图，树状图），chord（和铉图），hybrid（混搭图表），venn（韦恩图），force（力布局图），和7个自定义自有的图表。
-
-
-![](https://img.alicdn.com/tps/TB165YGJpXXXXagXVXXXXXXXXXX-818-1374.jpg)
-
-#### 图表扩展能力
-
-我们每一种图表，都可通过自由的配置来实现其强大的扩展能力。
-比如折线图：
-
-![](https://img.alicdn.com/tps/TB1EMfOJpXXXXbOXpXXXXXXXXXX-1074-974.jpg)
-
-
-#### 自有创新图表开发能力
-
-我们拥有从底层建筑到上层树木的构建能力，这样可以拥有应对天马行空的需求场景的能力。
-
-![](https://img.alicdn.com/tps/TB19TDBJpXXXXc_XVXXXXXXXXXX-1066-580.jpg)
-
-
-### chartx的使用
-
-先上一张图表玉照：
-
-![](https://img.alicdn.com/tps/TB1GHLrJpXXXXb4aXXXXXXXXXXX-602-310.png)
-
-#### 友好的数据格式，真正的数据驱动
-
-我们的数据定义，采用下面的格式：
-
+```javascript
+var data = [
+    { "time": "2017-03-21", "pv": 10, "uv": 12, "click": 112, "ppc": 45 },
+    { "time": "2017-03-22", "pv": 20, "uv": 32, "click": 122, "ppc": 35 }
+];
 ```
-var data= [
-    ["xfield","uv" ,"pv","click"],
-    [ 1      , 3   , 20 , 33    ],
-    [ 2      , 0   , 51 , 26    ],
-    [ 3      , 32  , 45 , 43    ]
-];     
-```
-这样，数据和具体的图表逻辑脱钩，对前后台的数据格式约定非常友好，后台输出数据的时候只需要把表格直接输出。
 
+**有了数据，我们来看Chartx如何绘制一个简单的图表吧**
 
-#### 堆积木一样的搭建图表
+>  比如，我们要创建一个柱状图，我们可以这么分解一下，一个柱状图是基于直角坐标系的，然后在坐标系上面绘制了一个柱形图。那么，我们就需要至少两个组件，一个坐标系组件（type==rect），一个图形组件（type==bar）。
 
-任何一个图表。都会有很多不一样的需求，所以我们把每个图表分拆为很多组件，然后以堆积木的方式来应对不同的需求场景。
+`直角坐标系`
 
-```
+<img src="./assets/coord.jpg" style='width:380px;'>
+
+`柱状图元素`
+
+<img src="./assets/graphs_bar.jpg" style="width:380px;">
+
+**转换到对应的配置就是这样的：**
+
+```javascript
 var options = {
-    xAxis : {}, //xAxis组件，配置直角坐标系的x轴
-    yAxis : {}, //yAxis组件，配置直角坐标系的y轴
-    back  : {}, //背景组件，配置背景
-    tips  : {}  //tips组件，toolTip配置 
+    coord: { //配置一个coord坐标系组件
+        type: "rect", //这个组件的type是rect(直角坐标系)，另外还有polar（极坐标）可选
+        xAxis: { //直角坐标系的x轴是必选
+            field: "time" //设置哪个数据字段来作为x轴
+        }
+    },
+    graphs: { //配置一个绘图组件
+        type: "bar", //告诉系统这个绘图的类型是bar（即柱状图）
+        field: "uv" //然后拿哪个数据字段来绘制这个柱状图形
+    }
 }
 ```
-每一个组件的配置里面还又很丰富的细节配置，可以满足视觉设计师和产品经理的各种需求。
 
+整个图表全部由这个options来描述，而这个options的全部一级的key配置，则对应着一个组件，于是整张图表就像一列火车，由一节一节的车厢组成，而每一个车厢，则表示一个组件，对于基于坐标系绘制的图表，那么坐标系组件就是第一组件必须要配置的，就是这列火车的车头。
 
+然后如果你要添加其他组件进来比如上面这个最基础的折线图，你还要添加一份Legend(图例),和tips组件，那么就是这样了：
 
-### 欢迎大家一起使用交流
+```javascript
+var options = {
+    coord: { 
+        type: "rect", 
+        xAxis: { 
+            field: "time" 
+        }
+    },
+    graphs: { 
+        type: "bar", 
+        field: "uv" 
+    },
+    legend : { ... }, //组装上legend组件
+    tips : { ... } //组装上tips组件
+}
+```
 
-欢迎大家一起使用，共建chartx。对chartx，canvax敢兴趣或者对数据可视化开发感兴趣的同学欢迎加入旺旺群：1238542386，一起探讨。
+另外，如果你要绘制的是一个柱状+折线的混合图表，那么怎么办呢
 
-我们的数据可视化开发小组成员：@逢春，@释剑，@自勉
+**要做混合图表怎么办，比如柱折混合图**
 
-特别的鸣谢：感谢@李牧，@左莫在chartx的成长中的各种支持
+<img src="./assets/graphs_bar_line.jpg" style="width:380px;">
 
+这里我们的理解是，一个叫graphs的车辆里，坐着两个人，一个叫bar，一个叫line
 
-自动测试
+```javascript
+var options = {
+    coord: { 
+        type: "rect", 
+        xAxis: { 
+            field: "time" 
+        }
+    },
+    graphs: [ //在Chartx里，绘图组件这个车箱里，如果坐了多个人，那么请把它配置为一个数组[]
+        { 
+            type: "bar", //一个身份是bar的图形
+            field: "uv"  //它的名字是uv
+        },
+        { 
+            type: "line", //一个身份line的图形
+            field: "pv"  //它的名字是pv
+        }
+    ]
+}
+```
 
-https://aone.alibaba-inc.com/project/473479/task/9785062?akProjectId=473479&
+到这里，你基本已经了解了Chartx了。
 
+[是时候看下快速入手把Chartx接入到你的项目了](./start.html)
+
+## License
+
+Chartx is available under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>.
