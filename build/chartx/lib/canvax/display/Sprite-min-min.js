@@ -1,1 +1,0 @@
-define("canvax/display/Sprite",["canvax/display/DisplayObjectContainer","canvax/core/Base"],function(a,b){var c=function(){var a=this;a.type="sprite",arguments.callee.superclass.constructor.apply(this,arguments)};return b.creatClass(c,a,{init:function(){}}),c});
