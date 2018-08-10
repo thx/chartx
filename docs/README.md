@@ -100,7 +100,7 @@ var options = {
 
 到这里，你基本已经了解了Chartx了。
 
-[是时候看下快速入手把Chartx接入到你的项目了](./start.html)
+[是时候看下快速入手把Chartx接入到你的项目了](/start.html)
 
 #### License
 

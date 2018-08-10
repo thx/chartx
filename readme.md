@@ -146,3 +146,6 @@ nodeData, nodeElement ， data和图形之间互相引用的属性约定
 “” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
 
 
+### 启动文档服务
+
+docsify serve docs
