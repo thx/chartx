@@ -37,9 +37,13 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
     
     unfocusAt( ind, field ){}
     
-    selectAt( ind, field ){}
 
+    selectAt( ind, field ){}
     unselectAt( ind, field ){}
+    //获取选中的 数据点
+    getSelectedList(){ return [] }
+    //获取选中的 列数据, 比如柱状图中的多分组，选中一列数据，则包函了这分组内的所有柱子
+    getSelectedRowList(){ return [] }
 
     hide( field ){}
 

@@ -40,7 +40,7 @@ export default class dataZoom extends Component
         this.center = {
             eventEnabled: true,
             fillStyle : '#000000',
-            alpha : 0.05
+            alpha : 0.03
         };
 
         this.w = 0;

@@ -59,12 +59,17 @@
                         type : "bar",
                         field : ["uv","click"],
                         select : {
-                            enabled : true
+                            enabled : true,
+                            inds : [2,5],
+                            fillStyle : function( info ){
+                                
+                            }
                         }
                     },
                     tips : {
                         pointer : "region"
-                    }
+                    },
+                    dataZoom: {}
                         
                     
                 };

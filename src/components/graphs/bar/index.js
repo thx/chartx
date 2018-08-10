@@ -23,7 +23,9 @@ export default class BarGraphs extends GraphsBase
 
         //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
-        this.absolute = false; 
+        this.absolute = false;
+        
+        this.proportion = false;//比例柱状图，比例图首先肯定是个堆叠图
 
         this.node = {
             shapeType : 'rect',
@@ -61,16 +63,16 @@ export default class BarGraphs extends GraphsBase
         //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
         this.select = {
             enabled : false,
-            alpha : 0.05,
-            fillStyle : "#ccc",
+            alpha : 0.2,
+            fillStyle : null,
+            _fillStyle : "#092848", //和bar.fillStyle一样可以支持array function
+            triggerEventType : "click",
             inds : [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
         };
 
         this._barsLen = 0;
 
         this.txtsSp = null;
-
-        this.proportion = false;//比例柱状图，比例图首先肯定是个堆叠图
 
         _.extend(true, this, opt);
 
@@ -131,7 +133,7 @@ export default class BarGraphs extends GraphsBase
         }
     }
 
-    _getColor(c, groupsLen, vLen, i, h, v, rectData, _flattenField)
+    _getColor(c, rectData, _flattenField)
     {
         var value = rectData.value;
         var field = rectData.field;
@@ -291,24 +293,28 @@ export default class BarGraphs extends GraphsBase
                     //以及显示selected状态
                     var groupRegion;
                     if (h <= preDataLen - 1) {
-                        groupRegion = groupH.getChildById("bhr_" + h);
+                        groupRegion = groupH.getChildById("group_region_" + h);
                         groupRegion.context.width = itemW;
                         groupRegion.context.x = itemW * h;
+                        
                     } else {
+                        
                         groupRegion = new Rect({
-                            id: "bhr_" + h,
+                            id: "group_region_" + h,
                             pointChkPriority: false,
                             hoverClone: false,
+                            xyToInt: false,
                             context: {
                                 x: itemW * h,
                                 y: -me.height,
                                 width: itemW,
                                 height: me.height,
-                                fillStyle: me.select.fillStyle,
-                                globalAlpha: 0
+                                fillStyle: me._getGroupRegionStyle( h ),
+                                globalAlpha: _.indexOf( me.select.inds, me.dataFrame.range.start + h ) > -1 ? me.select.alpha : 0
                             }
                         });
                         groupH.addChild(groupRegion);
+                        
                         groupRegion.iNode = h;
                         //触发注册的事件
                         groupRegion.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
@@ -321,7 +327,7 @@ export default class BarGraphs extends GraphsBase
                             me.root.fire( e.type, e );
                             me.triggerEvent( me , e );
 
-                            if( me.select.enabled ){
+                            if( me.select.enabled && e.type == me.select.triggerEventType ){
                                 //如果开启了图表的选中交互
                                 
                                 var ind = me.dataFrame.range.start + this.iNode;
@@ -366,7 +372,7 @@ export default class BarGraphs extends GraphsBase
 
                     rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
 
-                    var fillStyle = me._getColor(me.node.fillStyle, groupsLen, vLen, i, h, v, rectData, _flattenField);
+                    var fillStyle = me._getColor(me.node.fillStyle, rectData, _flattenField);
 
                     rectData.color = fillStyle;
 
@@ -378,7 +384,7 @@ export default class BarGraphs extends GraphsBase
                         if( Math.abs(rectH) < me.node.minHeight ){
                             rectH = me.node.minHeight;
                         }
-                    }
+                    };
 
                     var finalPos = {
                         x         : Math.round(rectData.x),
@@ -471,7 +477,6 @@ export default class BarGraphs extends GraphsBase
                         textCtx.y = _textPos.y;
                         textCtx.textAlign = me._getTextAlign(  finalPos , rectData  );
 
-                        
                         //文字
                         var textEl = null;
                         var textId = "text_" + h + "_" + rectData.field;
@@ -528,6 +533,28 @@ export default class BarGraphs extends GraphsBase
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
         this.enabledField = this.root._coord.getEnabledFields( this.field );
+    }
+
+    _getGroupRegionStyle( iNode )
+    {
+        var me = this;
+        var _groupRegionStyle = me.select.fillStyle;
+        if (_.isArray( me.select.fillStyle )) {
+            _groupRegionStyle = me.select.fillStyle[ h ];
+        };
+
+        if (_.isFunction( me.select.fillStyle )) {
+            _groupRegionStyle = me.select.fillStyle.apply(this, [ {
+                iNode : iNode,
+                rowData : me.dataFrame.getRowData( iNode )
+            } ]);
+        };
+
+        if( _groupRegionStyle === undefined ){
+            return me.select._fillStyle;
+        };
+
+        return _groupRegionStyle
     }
 
     _trimGraphs()
@@ -852,12 +879,49 @@ export default class BarGraphs extends GraphsBase
         });
     }
 
+    //这里的ind是包含了start的全局index
     selectAt( ind ){
-        me.select.inds.push( ind )
+        if( _.indexOf( this.select.inds, ind ) > -1 ) return;
+
+        this.select.inds.push( ind );
+
+        var index = ind - this.dataFrame.range.start;
+        var group = this.barsSp.getChildById("barGroup_" + index);
+        if( group ){
+            var groupRegion = group.getChildById("group_region_"+index);
+            if( groupRegion ){
+                groupRegion.context.globalAlpha = this.select.alpha;
+            }
+        }
     }
 
+    //这里的ind是包含了start的全局index
     unselectAt( ind ){
-        var _index = _.indexOf( me.select.inds, ind );
-        me.select.inds.splice( _index, 1 );
+        if( _.indexOf( this.select.inds, ind ) == -1 ) return;
+
+        var _index = _.indexOf( this.select.inds, ind );
+        this.select.inds.splice( _index, 1 );
+
+        var index = ind - this.dataFrame.range.start;
+        var group = this.barsSp.getChildById("barGroup_" + index);
+        if( group ){
+            var groupRegion = group.getChildById("group_region_"+index);
+            if( groupRegion ){
+                groupRegion.context.globalAlpha = 0;
+            }
+        }
+        
+    }
+
+    getSelectedRowList(){
+        var rowDatas = [];
+        var me = this;
+
+        _.each( me.select.inds, function( ind ){
+            var index = ind - me.dataFrame.range.start;
+            rowDatas.push( me.dataFrame.getRowData( index ) )
+        } );
+
+        return rowDatas;
     }
 }
