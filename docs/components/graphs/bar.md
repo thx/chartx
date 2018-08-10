@@ -11,7 +11,7 @@ bar
         field: "pv" //field直接配置为一个数据字段字符串，那么这个就是个单柱柱状图
     }
 ```
-<img src="../../assets/graphs_bar.jpg" style="width:200px;">
+<img src="./assets/graphs_bar.jpg" style="width:200px;">
 
 ```js
     graphs: {
@@ -19,7 +19,7 @@ bar
         field: [ "pv","uv" ] //field为一维数组，那么就是一个多分组柱状图
     }
 ```
-<img src="../../assets/graphs_bar_1.jpg" style="width:200px;">
+<img src="./assets/graphs_bar_1.jpg" style="width:200px;">
 
 ```js
     graphs: {
@@ -29,7 +29,7 @@ bar
         ] //field为二维数组，那么就是一个堆叠
     }
 ```
-<img src="../../assets/graphs_bar_2.jpg" style="width:200px;">
+<img src="./assets/graphs_bar_2.jpg" style="width:200px;">
 
 ```js
     graphs: {
@@ -40,7 +40,7 @@ bar
         ] //如果要实现多分组，其中某个分组又是堆叠的，就这样实现
     }
 ```
-<img src="../../assets/graphs_bar_3.jpg" style="width:200px;">
+<img src="./assets/graphs_bar_3.jpg" style="width:200px;">
 
 是不是很形象的配置方式，用过其他图表库的用我们的方式来实现多分组或者堆叠图表，你会发现这简直舒服而且强大到残暴的地步。
 
