@@ -103,3 +103,17 @@ bar
     - `offsetY` 文本的y方向偏移
 
 
+- `select` 分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+
+    - `enabled` 是否开启分组选中功能，默认false
+        
+    - `alpha`  分组选中状态的透明度，默认0.2
+        
+    - `fillStyle` 分组选中状态的的颜色，可以设置单颜色值，或者数组，或者函数（参数为 `{iNode:,rowData:}`）
+        
+    - `triggerEventType` 触发selected的事件类型，默认"click"
+
+    - `inds` 选中的列的索引集合
+    
+
+
