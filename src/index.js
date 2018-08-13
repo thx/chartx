@@ -22,6 +22,8 @@ import Cloud from "./components/graphs/cloud/index"
 import Planet from "./components/graphs/planet/index"
 import Funnel from "./components/graphs/funnel/index"
 import Venn from "./components/graphs/venn/index"
+import Sunburst from "./components/graphs/sunburst/index"
+import Sankey from "./components/graphs/sankey/index"
 
 //components
 import Legend from "./components/legend/index"
@@ -39,26 +41,28 @@ var coord = {
 }
 
 var graphs = {
-    bar   : Bar,
-    line  : Line,
-    scat  : Scat,
-    pie   : Pie,
-    radar : Radar,
-    cloud : Cloud,
-    planet: Planet,
-    funnel: Funnel,
-    venn  : Venn
-}
+    bar      : Bar,
+    line     : Line,
+    scat     : Scat,
+    pie      : Pie,
+    radar    : Radar,
+    cloud    : Cloud,
+    planet   : Planet,
+    funnel   : Funnel,
+    venn     : Venn,
+    sunburst : Sunburst,
+    sankey   : Sankey
+};
 
 var components = {
-    theme : Theme,
-    legend : Legend,
-    dataZoom : DataZoom,
-    markLine : MarkLine,
-    tips : Tips,
-    barTgi : BarTgi,
+    theme     : Theme,
+    legend    : Legend,
+    dataZoom  : DataZoom,
+    markLine  : MarkLine,
+    tips      : Tips,
+    barTgi    : BarTgi,
     waterMark : WaterMark,
-    cross : Cross
+    cross     : Cross
 }
 
 

@@ -14,7 +14,7 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
         this.ctx = root.stage.canvas.getContext("2d");
         this.dataFrame = root.dataFrame; //root.dataFrame的引用
 
-        this.data   = null; //{ ur : [] , pv : [] } 平铺hash结构
+        this.data   = null; //没个graphs中自己_trimGraphs的数据
         
         this.sprite = null;
 

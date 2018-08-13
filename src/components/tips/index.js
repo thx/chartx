@@ -230,7 +230,7 @@ export default class Tips extends Component
             str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
             
             let tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-            let label = node.label || node.field;
+            let label = node.label || node.field || node.name;
             if( label ){
                 label += "：";
             } else {

@@ -18,11 +18,13 @@ export default class VennGraphs extends GraphsBase
 
         this.type = "venn";
 
-        this.field = null;
+        //this.field = null;
+        this.keyField = null;
+        this.valueField = null;
 
         //坚持一个数据节点的设置都在一个node下面
         this.node = {
-            field : null, //node的id标识,而不是label
+            //field : null, //node的id标识,而不是label
 
             strokeStyle: null,
             lineWidth : 2,
@@ -195,13 +197,13 @@ export default class VennGraphs extends GraphsBase
 
                 var val = rowData[p];
 
-                if (p == me.node.field) {
+                if (p == me.keyField) {
                     if (!_.isArray(val)) {
                         val = val.split(/[,|]/);
                     };
                     obj.sets = val;
                     obj.nodeId = val.join();
-                } else if (p == me.field) {
+                } else if (p == me.valueField) {
                     obj.size = val;
                     obj.value = val; 
                 } else if (p == me.label.field) {

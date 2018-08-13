@@ -209,6 +209,9 @@ export default class Coord extends Chart
     //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
     setTipsInfo(e)
     {
+        if( !e.eventInfo ){
+            e.eventInfo = {};
+        };
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
             var nodes = [];
             _.each( this._graphs, function( _g ){

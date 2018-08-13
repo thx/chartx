@@ -61,8 +61,10 @@ var options = {
     graphs : {
         type  : "venn",
 
-        keyField : "nodeId",
-        valueField : "value",
+        field : "value",
+        node  : {
+            field : "nodeId"
+        },
         label : {
             enabled : true,
             field : "label"

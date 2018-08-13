@@ -1,6 +1,12 @@
 import rebind from "./utils/rebind";
 import arrays from "./utils/arrays";
 
+/**
+ * 修改优化了下面 node._value的代码部分
+ * 可以手动给中间节点添加value大于children的value总和的值
+ * 这样，就会有流失的效果
+ */
+
 
 var Hierarchy = function () {
     var sort = layout_hierarchySort,
@@ -22,7 +28,14 @@ var Hierarchy = function () {
                     stack.push(child = childs[n]);
                     child.parent = node;
                     child.depth = node.depth + 1;
-                }
+                };
+
+                //如果这个节点上面有用户主动设置value，那么以用户设置为准
+                var _value = +value.call(hierarchy, node, node.depth);
+                if( _value && !isNaN(_value) ){
+                    node._value = _value;
+                };
+
                 if (value) node.value = 0;
                 node.children = childs;
             } else {
@@ -35,6 +48,12 @@ var Hierarchy = function () {
             var childs, parent;
             if (sort && (childs = node.children)) childs.sort(sort);
             if (value && (parent = node.parent)) parent.value += node.value;
+
+            if( node._value && node._value > node.value ){
+                node.value = node._value;
+            };
+            delete node._value;
+
         });
 
         return nodes;
@@ -68,6 +87,12 @@ var Hierarchy = function () {
                 var parent;
                 if (!node.children) node.value = +value.call(hierarchy, node, node.depth) || 0;
                 if (parent = node.parent) parent.value += node.value;
+
+                if( node._value && node._value > node.value ){
+                    node.value = node._value;
+                };
+                delete node._value;
+
             });
         }
         return root;

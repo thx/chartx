@@ -31,67 +31,31 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-var data0 = [
-    [ "nodeId" , "value" , "label" ],
-    [ 'a'        , 16      , "Armageddon"  ]
-];
+
 var data = [
-    [ "nodeId" , "value" , "label" ],
-    [ 'a'        , 16      , "Armageddon"  ],
-    [ 'b'        , 16      , "Rashomon"  ],
-    [ 'c'        , 16     , "Amelie"  ],
-    [ 'a|b'      , 4      ,    'CoyoteUgly'     ],
-    [ 'a|c'      , 4      ,         ],
-    [ 'b|c'      , 3       ,         ],
-    [ 'a|b|c'    , 2       ,         ]
-];
-var data1 = [
-[ "nodeId" , "value" , "label" ],
-[ 'a'        , 16      , "希特勒"  ],
-[ 'b'        , 16      , "斯大林"  ],
-[ 'a|b'      , 4      ,    ''     ]
-];
-var data2 = [
-[ "nodeId" , "value" , "label" ],
-[ 'a'        , 16      , "希特勒"  ],
-[ 'b'        , 16      , "斯大林"  ]
-];
+    [ "node"      , "value" ],
+    [ "亚索|盖伦"  , 100     ],
+    [ "盖伦|不祥"  , 80      ],
+    [ "盖伦|武器"  , 88      ],
+    [ "皇子|盖伦"  , 288     ],
+    [ "蛮王|武器"  , 66      ],
+    [ "瞎子|狼人"  , 66      ],
+    [ "武器|寒冰"  , 36      ],
+    [ "寒冰|狼人"  , 36      ],
+    [ "狼人|剑圣"  , 67      ]
+
+]
 
 var options = {
     graphs : {
-        type  : "venn",
-
-        keyField : "nodeId",
-        valueField : "value",
-        label : {
-            enabled : true,
-            field : "label"
-        }
+        type  : "sankey",
+        keyField : "node",
+        valueField : "value"
     },
     tips : {}
 };
 
 window.chart = Chartx.create("canvasTest" , data , options);
-
-function reset(){
-setTimeout(function(){ 
-    
-    chart.resetData( data1 );
-    return;
-    setTimeout(function(){ 
-        chart.resetData( data );
-        setTimeout(function(){ 
-            chart.resetData( data2 );
-            setTimeout(function(){ 
-                chart.resetData( data0 );
-                setTimeout(reset ,1000)
-            } , 1000)
-        } , 1000)
-    } , 1000)
-} , 1000)
-}
-
-reset();
 
 
 </textarea></form>

@@ -31,67 +31,67 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-var data0 = [
-    [ "nodeId" , "value" , "label" ],
-    [ 'a'        , 16      , "Armageddon"  ]
-];
+
 var data = [
-    [ "nodeId" , "value" , "label" ],
-    [ 'a'        , 16      , "Armageddon"  ],
-    [ 'b'        , 16      , "Rashomon"  ],
-    [ 'c'        , 16     , "Amelie"  ],
-    [ 'a|b'      , 4      ,    'CoyoteUgly'     ],
-    [ 'a|c'      , 4      ,         ],
-    [ 'b|c'      , 3       ,         ],
-    [ 'a|b|c'    , 2       ,         ]
-];
-var data1 = [
-[ "nodeId" , "value" , "label" ],
-[ 'a'        , 16      , "希特勒"  ],
-[ 'b'        , 16      , "斯大林"  ],
-[ 'a|b'      , 4      ,    ''     ]
-];
-var data2 = [
-[ "nodeId" , "value" , "label" ],
-[ 'a'        , 16      , "希特勒"  ],
-[ 'b'        , 16      , "斯大林"  ]
+    [ 'name'      , 'value' , 'parent'   ],
+
+    [ 'flare'     , null   , null       ],
+
+    [ 'analytics' , null   , 'flare'    ],
+
+    [ 'cluster'   , 20000   , 'analytics'],
+    [ 'AgglomerativeCluster', 3938, 'cluster' ],
+    [ 'CommunityStructure', 3812, 'cluster' ],
+    [ 'HierarchicalCluster', 6714, 'cluster' ],
+    [ 'MergeEdge', 743, 'cluster' ],
+
+    [ 'graph'     , null   , 'analytics'],
+    [ 'BetweennessCentrality' , 3534 , 'graph' ],
+    [ 'LinkDistance' , 5731 , 'graph' ],
+    [ 'MaxFlowMinCut' , 8740 , 'graph'],
+    [ 'ShortestPaths' , 5914 , 'graph'],
+    [ 'SpanningTree' , 3416 , 'graph'],
+
+    [ 'optimization' , null, 'analytics' ],
+    [ 'AspectRatioBanker' , 7074 , 'optimization' ],
+
+    [ 'animate' , null, 'flare' ],
+
+    [ 'Easing' , 17010 , 'animate' ],
+    [ 'FunctionSequence' , 5842 , 'animate'],
+
+    [ 'interpolate' , null, 'animate' ],
+    [ 'ArrayInterpolator' , 1983 , 'interpolate'],
+    [ 'ColorInterpolator' , 2047 , 'interpolate'],
+    [ 'DateInterpolator'  , 1375 , 'interpolate'],
+    [ 'Interpolator' , 8746 , 'interpolate' ],
+    [ 'MatrixInterpolator' , 2202, 'interpolate' ],
+    [ 'NumberInterpolator' , 1382, 'interpolate' ],
+    [ 'ObjectInterpolator' , 1629, 'interpolate' ],
+    [ 'PointInterpolator'  , 1675, 'interpolate' ],
+    [ 'RectangleInterpolator' , 2042 , 'interpolate' ],
+
+    [ 'ISchedulable' , 1041 , 'animate' ],
+    [ 'Parallel' , 5176 , 'animate' ],
+    [ 'Pause' , 449, 'animate'],
+    [ 'Scheduler' , 5593 , 'animate' ],
+    [ 'Sequence' , 5534 , 'animate' ],
+    [ 'Transition' , 9201, 'animate' ],
+    [ 'Transitioner' , 19975 , 'animate' ],
+    [ 'TransitionEvent' , 1116, 'animate' ],
+    [ 'Tween' , 1006 , 'animate' ]
+
 ];
 
 var options = {
     graphs : {
-        type  : "venn",
-
-        keyField : "nodeId",
-        valueField : "value",
-        label : {
-            enabled : true,
-            field : "label"
-        }
+        type  : "sunburst",
+        keyField : "name"
     },
     tips : {}
 };
 
 window.chart = Chartx.create("canvasTest" , data , options);
-
-function reset(){
-setTimeout(function(){ 
-    
-    chart.resetData( data1 );
-    return;
-    setTimeout(function(){ 
-        chart.resetData( data );
-        setTimeout(function(){ 
-            chart.resetData( data2 );
-            setTimeout(function(){ 
-                chart.resetData( data0 );
-                setTimeout(reset ,1000)
-            } , 1000)
-        } , 1000)
-    } , 1000)
-} , 1000)
-}
-
-reset();
 
 
 </textarea></form>
