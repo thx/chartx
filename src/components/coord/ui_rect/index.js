@@ -459,9 +459,16 @@ export default class Rect_Component extends coorBase
                 //遍历_graphs 去拿东西
             ]
         };
+
         if( e.eventInfo ){
             obj = _.extend(obj, e.eventInfo);
+
+            //把xNode信息写到eventInfo上面
+            if( obj.xAxis ){
+                e.eventInfo.xAxis = xNode
+            };
         };
+
         return obj;
     }
 }

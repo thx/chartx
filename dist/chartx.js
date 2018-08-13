@@ -10943,9 +10943,15 @@ var Chartx = (function () {
 	                    //遍历_graphs 去拿东西
 	                ]
 	            };
+
 	            if (e.eventInfo) {
 	                obj = _$12.extend(obj, e.eventInfo);
-	            }            return obj;
+
+	                //把xNode信息写到eventInfo上面
+	                if (obj.xAxis) {
+	                    e.eventInfo.xAxis = xNode;
+	                }            }
+	            return obj;
 	        }
 	    }]);
 	    return Rect_Component;
@@ -12484,13 +12490,10 @@ var Chartx = (function () {
 	                                    iNode: this.iNode,
 	                                    nodes: me.getNodesAt(this.iNode)
 	                                };
-
 	                                me.root.fire(e.type, e);
-	                                me.triggerEvent(me, e);
 
 	                                if (me.select.enabled && e.type == me.select.triggerEventType) {
 	                                    //如果开启了图表的选中交互
-
 	                                    var ind = me.dataFrame.range.start + this.iNode;
 	                                    if (_$18.indexOf(me.select.inds, ind) > -1) {
 	                                        //说明已经选中了
@@ -12499,6 +12502,7 @@ var Chartx = (function () {
 	                                        me.selectAt(ind);
 	                                    }
 	                                }
+	                                me.triggerEvent(me, e);
 	                            });
 	                        }
 	                    } else {
