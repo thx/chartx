@@ -12232,6 +12232,7 @@ var Chartx = (function () {
 	            fillStyle: null,
 	            _fillStyle: "#092848", //和bar.fillStyle一样可以支持array function
 	            triggerEventType: "click",
+	            width: 1,
 	            inds: [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
 	        };
 
@@ -12448,10 +12449,15 @@ var Chartx = (function () {
 	                        //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
 	                        //以及显示selected状态
 	                        var groupRegion;
+	                        var groupRegionWidth = itemW * me.select.width;
+	                        if (me.select.width > 1) {
+	                            //说明是具体指
+	                            groupRegionWidth = me.select.width;
+	                        }
 	                        if (h <= preDataLen - 1) {
 	                            groupRegion = groupH.getChildById("group_region_" + h);
-	                            groupRegion.context.width = itemW;
-	                            groupRegion.context.x = itemW * h;
+	                            groupRegion.context.width = groupRegionWidth;
+	                            groupRegion.context.x = itemW * h + (itemW - groupRegionWidth) / 2;
 	                        } else {
 
 	                            groupRegion = new Rect$4({
@@ -12460,9 +12466,9 @@ var Chartx = (function () {
 	                                hoverClone: false,
 	                                xyToInt: false,
 	                                context: {
-	                                    x: itemW * h,
+	                                    x: itemW * h + (itemW - groupRegionWidth) / 2,
 	                                    y: -me.height,
-	                                    width: itemW,
+	                                    width: groupRegionWidth,
 	                                    height: me.height,
 	                                    fillStyle: me._getGroupRegionStyle(h),
 	                                    globalAlpha: _$18.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
@@ -12672,14 +12678,12 @@ var Chartx = (function () {
 	            var _groupRegionStyle = me.select.fillStyle;
 	            if (_$18.isArray(me.select.fillStyle)) {
 	                _groupRegionStyle = me.select.fillStyle[h];
-	            }
-	            if (_$18.isFunction(me.select.fillStyle)) {
+	            }            if (_$18.isFunction(me.select.fillStyle)) {
 	                _groupRegionStyle = me.select.fillStyle.apply(this, [{
 	                    iNode: iNode,
 	                    rowData: me.dataFrame.getRowData(iNode)
 	                }]);
-	            }
-	            if (_groupRegionStyle === undefined) {
+	            }            if (_groupRegionStyle === undefined || _groupRegionStyle === null) {
 	                return me.select._fillStyle;
 	            }
 	            return _groupRegionStyle;
@@ -21144,7 +21148,10 @@ var Chartx = (function () {
 	                    context: {
 	                        x: node.x + me.data.nodeWidth(),
 	                        y: node.y + Math.max(node.dy / 2, 1),
-	                        fillStyle: "black"
+	                        fillStyle: me.label.fontColor,
+	                        fontSize: me.label.fontSize,
+	                        textAlign: me.label.align,
+	                        textBaseline: me.label.verticalAlign
 	                    }
 	                });
 	                me._labels.addChild(label);

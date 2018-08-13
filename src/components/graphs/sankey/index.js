@@ -216,7 +216,10 @@ export default class sankeyGraphs extends GraphsBase
                 context: {
                     x : node.x+me.data.nodeWidth(),
                     y : node.y+Math.max(node.dy / 2 , 1),
-                    fillStyle : "black"
+                    fillStyle : me.label.fontColor,
+                    fontSize  : me.label.fontSize,
+                    textAlign   : me.label.align,
+                    textBaseline: me.label.verticalAlign
                 }
             });
             me._labels.addChild( label );
