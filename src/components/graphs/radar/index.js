@@ -268,13 +268,18 @@ export default class RadarGraphs extends GraphsBase
         var _s = def;
         if( _.isString( style ) || _.isNumber( style ) ){
             _s = style;
-        }
+        };
         if( _.isArray( style ) ){
             _s = style[ iGroup ];
-        }
+        };
         if( _.isFunction( style ) ){
             _s = style( iGroup, fieldMap );
-        }
+        };
+        if( color === undefined || color === null ){
+            //只有undefined(用户配置了function),null才会认为需要还原皮肤色
+            //“”都会认为是用户主动想要设置的，就为是用户不想他显示
+            color = def;
+        };
         return _s;
     }
 

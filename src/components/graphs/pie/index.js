@@ -28,7 +28,7 @@ export default class PieGraphs extends GraphsBase
             minRadius : 10,//outRadius - innerRadius ， 也就是radius的最小值
             moveDis : 15, //要预留moveDis位置来hover sector 的时候外扩
 
-            fillStyle : this.root.getTheme(),
+            fillStyle : null, //this.root.getTheme(),
             focus : {
                 enabled : true,
             },
@@ -153,7 +153,7 @@ export default class PieGraphs extends GraphsBase
         
         for( var i=0,l=dataFrame.length; i<l; i++ ){
             var rowData = dataFrame.getRowData(i);
-            var color = me.getColorByIndex(me.node.fillStyle, i, l);
+            var color = me.root.getTheme( i );
             var layoutData = {
                 rowData       : rowData,//把这一行数据给到layoutData引用起来
                 focused       : false,  //是否获取焦点，外扩
@@ -164,6 +164,7 @@ export default class PieGraphs extends GraphsBase
                 selectedR     : me.node.select.radius,
                 selectedAlpha : me.node.select.alpha,
                 enabled       : true,   //是否启用，显示在列表中
+                
                 fillStyle     : color,
                 color         : color, //加个color属性是为了给tips用
 
@@ -171,6 +172,13 @@ export default class PieGraphs extends GraphsBase
                 label         : rowData[  me.groupField || me.label.field || me.field ],
                 labelText     : null, //绘制的时候再设置,label format后的数据
                 iNode         : i
+            };
+
+            if( _.isFunction( this.node.fillStyle ) ){
+                var _color = this.node.fontColor( layoutData );
+                if( !_color ){
+                    layoutData.fillStyle = layoutData.color = _color;
+                };
             };
             
             data.push( layoutData );
@@ -333,19 +341,6 @@ export default class PieGraphs extends GraphsBase
             list  : data,
             total : total
         };
-    }
-
-    getColorByIndex(colors, iNode, len) 
-    {
-        if (iNode >= colors.length) {
-            //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
-            if ((len - 1) % colors.length == 0 && (iNode % colors.length == 0)) {
-                iNode = iNode % colors.length + 1;
-            } else {
-                iNode = iNode % colors.length;
-            }
-        };
-        return colors[iNode];
     }
 
     _getLabelText( itemData )

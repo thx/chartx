@@ -116,7 +116,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
     _getColor(s, iNode)
     {
         var color = this._getProp(s, iNode);
-        if ( color === undefined ) {
+        if ( color === undefined || color === null ) {
             //这个时候可以先取线的style，和线保持一致
             color = this._getLineStrokeStyle();
 

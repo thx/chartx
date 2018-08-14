@@ -12321,9 +12321,9 @@ define(function () { 'use strict';
 	            }            if (_$18.isFunction(c)) {
 	                color = c.apply(this, [rectData]);
 	            }
-	            if (color === undefined) {
-	                //只有undefined才会认为需要还原皮肤色
-	                //“” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
+	            if (color === undefined || color === null) {
+	                //只有undefined(用户配置了function),null才会认为需要还原皮肤色
+	                //“”都会认为是用户主动想要设置的，就为是用户不想他显示
 	                color = fieldMap.color;
 	            }
 	            return color;
@@ -13338,7 +13338,7 @@ define(function () { 'use strict';
 	        key: "_getColor",
 	        value: function _getColor(s, iNode) {
 	            var color = this._getProp(s, iNode);
-	            if (color === undefined) {
+	            if (color === undefined || color === null) {
 	                //这个时候可以先取线的style，和线保持一致
 	                color = this._getLineStrokeStyle();
 
@@ -15385,7 +15385,7 @@ define(function () { 'use strict';
 	            minRadius: 10, //outRadius - innerRadius ， 也就是radius的最小值
 	            moveDis: 15, //要预留moveDis位置来hover sector 的时候外扩
 
-	            fillStyle: _this.root.getTheme(),
+	            fillStyle: null, //this.root.getTheme(),
 	            focus: {
 	                enabled: true
 	            },
@@ -15508,7 +15508,7 @@ define(function () { 'use strict';
 
 	            for (var i = 0, l = dataFrame.length; i < l; i++) {
 	                var rowData = dataFrame.getRowData(i);
-	                var color = me.getColorByIndex(me.node.fillStyle, i, l);
+	                var color = me.root.getTheme(i);
 	                var layoutData = {
 	                    rowData: rowData, //把这一行数据给到layoutData引用起来
 	                    focused: false, //是否获取焦点，外扩
@@ -15519,6 +15519,7 @@ define(function () { 'use strict';
 	                    selectedR: me.node.select.radius,
 	                    selectedAlpha: me.node.select.alpha,
 	                    enabled: true, //是否启用，显示在列表中
+
 	                    fillStyle: color,
 	                    color: color, //加个color属性是为了给tips用
 
@@ -15528,6 +15529,11 @@ define(function () { 'use strict';
 	                    iNode: i
 	                };
 
+	                if (_$23.isFunction(this.node.fillStyle)) {
+	                    var _color = this.node.fontColor(layoutData);
+	                    if (!_color) {
+	                        layoutData.fillStyle = layoutData.color = _color;
+	                    }                }
 	                data.push(layoutData);
 	            }
 	            if (data.length && me.sort) {
@@ -15682,18 +15688,6 @@ define(function () { 'use strict';
 	                list: data,
 	                total: total
 	            };
-	        }
-	    }, {
-	        key: "getColorByIndex",
-	        value: function getColorByIndex(colors, iNode, len) {
-	            if (iNode >= colors.length) {
-	                //若数据条数刚好比颜色数组长度大1,会导致最后一个扇形颜色与第一个颜色重复
-	                if ((len - 1) % colors.length == 0 && iNode % colors.length == 0) {
-	                    iNode = iNode % colors.length + 1;
-	                } else {
-	                    iNode = iNode % colors.length;
-	                }
-	            }            return colors[iNode];
 	        }
 	    }, {
 	        key: "_getLabelText",
@@ -16035,14 +16029,15 @@ define(function () { 'use strict';
 	            var _s = def;
 	            if (_$24.isString(style) || _$24.isNumber(style)) {
 	                _s = style;
-	            }
-	            if (_$24.isArray(style)) {
+	            }            if (_$24.isArray(style)) {
 	                _s = style[iGroup];
-	            }
-	            if (_$24.isFunction(style)) {
+	            }            if (_$24.isFunction(style)) {
 	                _s = style(iGroup, fieldMap);
-	            }
-	            return _s;
+	            }            if (color === undefined || color === null) {
+	                //只有undefined(用户配置了function),null才会认为需要还原皮肤色
+	                //“”都会认为是用户主动想要设置的，就为是用户不想他显示
+	                color = def;
+	            }            return _s;
 	        }
 	    }, {
 	        key: "getNodesAt",
@@ -16696,9 +16691,9 @@ define(function () { 'use strict';
 	                color = this.node.fontColor(nodeData);
 	            }
 
-	            if (color === undefined) {
+	            if (color === undefined || color === null) {
 	                //只有undefined才会认为需要一个抄底色
-	                //“” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
+	                //“”都会认为是用户主动想要设置的，就为是用户不想他显示
 	                color = "#ccc";
 	            }            return color;
 	        }

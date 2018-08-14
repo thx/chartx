@@ -153,9 +153,9 @@ export default class BarGraphs extends GraphsBase
             color = c.apply(this, [ rectData ]);
         };
 
-        if( color === undefined ){
-            //只有undefined才会认为需要还原皮肤色
-            //“” 或者 null 都会认为是用户主动想要设置的，就为是用户不想他显示
+        if( color === undefined || color === null ){
+            //只有undefined(用户配置了function),null才会认为需要还原皮肤色
+            //“”都会认为是用户主动想要设置的，就为是用户不想他显示
             color = fieldMap.color
         };
 
