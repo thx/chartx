@@ -20954,6 +20954,10 @@ define(function () { 'use strict';
 	        _this.keyField = null; //key, parent指向的值
 	        _this.valueField = 'value';
 
+	        //默认的情况下sankey图是在keyField中使用 a|b 来表示流向
+	        //但是也可以keyField表示b 用parentField来表示a，和其他表示流向的图的数据格式保持一致
+	        _this.parentField = null;
+
 	        //坚持一个数据节点的设置都在一个node下面
 	        _this.node = {
 	            width: 18,
@@ -21031,10 +21035,15 @@ define(function () { 'use strict';
 	            var links = [];
 	            var keyDatas = me.dataFrame.getFieldData(me.keyField);
 	            var valueDatas = me.dataFrame.getFieldData(me.valueField);
+	            var parentFields = me.dataFrame.getFieldData(me.parentField);
 
 	            var nodeMap = {}; //name:ind
-	            _$31.each(keyDatas, function (key) {
-	                var nodeNames = key.split(/[,|]/);
+	            _$31.each(keyDatas, function (key, i) {
+	                var nodeNames = [];
+	                if (me.parentField) {
+	                    nodeNames.push(parentFields[i]);
+	                }                nodeNames = nodeNames.concat(key.split(/[,|]/));
+
 	                _$31.each(nodeNames, function (name) {
 	                    if (nodeMap[name] === undefined) {
 	                        nodeMap[name] = nodes.length;
@@ -21046,7 +21055,12 @@ define(function () { 'use strict';
 	            });
 
 	            _$31.each(keyDatas, function (key, i) {
-	                var nodeNames = key.split(/[,|]/);
+	                //var nodeNames = key.split(/[,|]/);
+	                var nodeNames = [];
+	                if (me.parentField) {
+	                    nodeNames.push(parentFields[i]);
+	                }                nodeNames = nodeNames.concat(key.split(/[,|]/));
+
 	                if (nodeNames.length == 2) {
 	                    links.push({
 	                        source: nodeMap[nodeNames[0]],

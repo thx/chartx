@@ -20,6 +20,10 @@ export default class sankeyGraphs extends GraphsBase
         this.keyField = null; //key, parent指向的值
         this.valueField = 'value';
 
+        //默认的情况下sankey图是在keyField中使用 a|b 来表示流向
+        //但是也可以keyField表示b 用parentField来表示a，和其他表示流向的图的数据格式保持一致
+        this.parentField = null; 
+
         
         //坚持一个数据节点的设置都在一个node下面
         this.node = {
@@ -98,10 +102,16 @@ export default class sankeyGraphs extends GraphsBase
         var links = [];
         var keyDatas = me.dataFrame.getFieldData( me.keyField );
         var valueDatas = me.dataFrame.getFieldData( me.valueField );
+        var parentFields = me.dataFrame.getFieldData( me.parentField );
 
         var nodeMap = {}; //name:ind
-        _.each( keyDatas, function( key ){
-            var nodeNames = key.split(/[,|]/);
+        _.each( keyDatas, function( key, i ){
+            var nodeNames = [];
+            if( me.parentField ){
+                nodeNames.push( parentFields[i] );
+            };
+            nodeNames = nodeNames.concat( key.split(/[,|]/) );
+
             _.each( nodeNames, function( name ){
                 if( nodeMap[ name ] === undefined ){
                     nodeMap[ name ] = nodes.length;
@@ -114,7 +124,13 @@ export default class sankeyGraphs extends GraphsBase
 
 
         _.each( keyDatas, function( key , i ){
-            var nodeNames = key.split(/[,|]/);
+            //var nodeNames = key.split(/[,|]/);
+            var nodeNames = [];
+            if( me.parentField ){
+                nodeNames.push( parentFields[i] );
+            };
+            nodeNames = nodeNames.concat( key.split(/[,|]/) );
+
             if( nodeNames.length == 2 ){
                 links.push({
                     source : nodeMap[ nodeNames[0] ],
