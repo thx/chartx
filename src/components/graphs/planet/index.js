@@ -25,8 +25,7 @@ export default class PlanetGraphs extends GraphsBase
         //圆心原点坐标
         this.center = {
             enabled   : true,
-            shapeType : "text", //后续可以添加path啊，img啊之类的
-            content   : "center",
+            text      : "center",
             radius    : 30,
             fillStyle : "#70629e",
             fontSize  : 15,
@@ -34,9 +33,9 @@ export default class PlanetGraphs extends GraphsBase
             margin    : 20 //最近ring到太阳的距离
         };
 
-        this.ringGroupDataFrames = [];
-        this.ringGroupField = null;
-        this._ringGroups = [];
+        this.groupDataFrames = [];
+        this.groupField = null;
+        this._ringGroups = []; //groupField对应的 group 对象
 
         //planet自己得grid，不用polar的grid
         this.grid = {
@@ -177,13 +176,13 @@ export default class PlanetGraphs extends GraphsBase
         var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
         var _circleMaxR = this._getMaxR();
 
-        _.each( this.ringGroupDataFrames , function( df , i ){
+        _.each( this.groupDataFrames , function( df , i ){
             
             var toR = groupRStart + maxR*( (df.length) / (me.dataFrame.length) );
             
             var _g = new Group( _.extend(true, {
                 iGroup : i,
-                groupLen : me.ringGroupDataFrames.length,
+                groupLen : me.groupDataFrames.length,
                 rRange : {
                     start : groupRStart,
                     to : toR
@@ -222,7 +221,7 @@ export default class PlanetGraphs extends GraphsBase
                 }
             });
             //绘制实心圆上面的文案
-            this._centerTxt = new Text(this.center.content, {
+            this._centerTxt = new Text(this.center.text, {
                 context: {
                     x: this.origin.x,
                     y: this.origin.y,
@@ -344,9 +343,9 @@ export default class PlanetGraphs extends GraphsBase
 
     dataGroupHandle()
     {
-        var groupFieldInd = _.indexOf(this.dataFrame.fields , this.ringGroupField);
+        var groupFieldInd = _.indexOf(this.dataFrame.fields , this.groupField);
         if( groupFieldInd >= 0 ){
-            //有分组字段，就还要对dataFrame中的数据分下组，然后给到 ringGroupDataFrames
+            //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
             var titles = this.dataFrame.org[0];
             var _dmap = {}; //以分组的字段值做为key
 
@@ -364,11 +363,11 @@ export default class PlanetGraphs extends GraphsBase
             } );
 
             for( var r in _dmap ){
-                this.ringGroupDataFrames.push( DataFrame( _dmap[r] ) );
+                this.groupDataFrames.push( DataFrame( _dmap[r] ) );
             };
         } else {
             //如果分组字段不存在，则认为数据不需要分组，直接全部作为 group 的一个子集合
-            this.ringGroupDataFrames.push( this.dataFrame );
+            this.groupDataFrames.push( this.dataFrame );
         };
     }
 

@@ -83,6 +83,54 @@ var data = [
 
 ];
 
+//------------------------------
+// 在线录入符合chartx数据格式的数据
+// var data =[ ["xfield","uv","pv"], [1,2,3] ]
+// 如果录入的是下面的json格式得list数据，则会在保存的时候自动转换为上面的chartx格式数据
+// var data = [ {"xfield":1,"uv":2,"pv":3} ]
+//------------------------------
+var data = [
+    ["value","name","parent"],
+    ["","flare",""],
+    ["","analytics","flare"],
+    [20000,"cluster","analytics"],
+    [3938,"AgglomerativeCluster","cluster"],
+    [3812,"CommunityStructure","cluster"],
+    [6714,"HierarchicalCluster","cluster"],
+    [743,"MergeEdge","cluster"],
+    ["","graph","analytics"],
+    [3534,"BetweennessCentrality","graph"],
+    [5731,"LinkDistance","graph"],
+    [8740,"MaxFlowMinCut","graph"],
+    [5914,"ShortestPaths","graph"],
+    [3416,"SpanningTree","graph"],
+    ["","optimization","analytics"],
+    [7074,"AspectRatioBanker","optimization"],
+    ["","animate","flare"],
+    [17010,"Easing","animate"],
+    [5842,"FunctionSequence","animate"],
+    ["","interpolate","animate"],
+    [1983,"ArrayInterpolator","interpolate"],
+    [2047,"ColorInterpolator","interpolate"],
+    [1375,"DateInterpolator","interpolate"],
+    [8746,"Interpolator","interpolate"],
+    [2202,"MatrixInterpolator","interpolate"],
+    [1382,"NumberInterpolator","interpolate"],
+    [1629,"ObjectInterpolator","interpolate"],
+    [1675,"PointInterpolator","interpolate"],
+    [2042,"RectangleInterpolator","interpolate"],
+    [1041,"ISchedulable","animate"],
+    [5176,"Parallel","animate"],
+    [449,"Pause","animate"],
+    [5593,"Scheduler","animate"],
+    [5534,"Sequence","animate"],
+    [9201,"Transition","animate"],
+    [19975,"Transitioner","animate"],
+    [1116,"TransitionEvent","animate"],
+    [1006,"Tween","animate"]
+];
+
+
 var options = {
     graphs : {
         type  : "sunburst",

@@ -8812,7 +8812,7 @@ var Chartx = (function () {
 	        _this.height = 0;
 
 	        _this.title = {
-	            content: "",
+	            text: "",
 	            shapeType: "text",
 	            fontColor: '#999',
 	            fontSize: 12,
@@ -9100,9 +9100,9 @@ var Chartx = (function () {
 	    }, {
 	        key: "_getName",
 	        value: function _getName() {
-	            if (this.title.content) {
+	            if (this.title.text) {
 	                if (!this._title) {
-	                    this._title = new canvax.Display.Text(this.title.content, {
+	                    this._title = new canvax.Display.Text(this.title.text, {
 	                        context: {
 	                            fontSize: this.title.fontSize,
 	                            textAlign: this.title.textAlign, //"center",//this.isH ? "center" : "left",
@@ -9114,7 +9114,7 @@ var Chartx = (function () {
 	                        }
 	                    });
 	                } else {
-	                    this._title.resetText(this.title.content);
+	                    this._title.resetText(this.title.text);
 	                }
 	            }
 	        }
@@ -9516,7 +9516,7 @@ var Chartx = (function () {
 	        _this.field = []; //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
 	        _this.title = {
-	            content: "",
+	            text: "",
 	            shapeType: "text",
 	            fontColor: '#999',
 	            fontSize: 12,
@@ -9661,7 +9661,7 @@ var Chartx = (function () {
 	    }, {
 	        key: "_getName",
 	        value: function _getName() {
-	            if (this.title.content) {
+	            if (this.title.text) {
 	                if (!this._title) {
 	                    var rotation = 0;
 	                    if (this.align == "left") {
@@ -9671,7 +9671,7 @@ var Chartx = (function () {
 	                        if (this.isH) {
 	                            rotation = 270;
 	                        }
-	                    }                    this._title = new canvax.Display.Text(this.title.content, {
+	                    }                    this._title = new canvax.Display.Text(this.title.text, {
 	                        context: {
 	                            fontSize: this.title.fontSize,
 	                            textAlign: this.title.textAlign, //"center",//this.isH ? "center" : "left",
@@ -9683,7 +9683,7 @@ var Chartx = (function () {
 	                        }
 	                    });
 	                } else {
-	                    this._title.resetText(this.title.content);
+	                    this._title.resetText(this.title.text);
 	                }
 	            }
 	        }
@@ -17372,8 +17372,7 @@ var Chartx = (function () {
 	        //圆心原点坐标
 	        _this.center = {
 	            enabled: true,
-	            shapeType: "text", //后续可以添加path啊，img啊之类的
-	            content: "center",
+	            text: "center",
 	            radius: 30,
 	            fillStyle: "#70629e",
 	            fontSize: 15,
@@ -17381,9 +17380,9 @@ var Chartx = (function () {
 	            margin: 20 //最近ring到太阳的距离
 	        };
 
-	        _this.ringGroupDataFrames = [];
-	        _this.ringGroupField = null;
-	        _this._ringGroups = [];
+	        _this.groupDataFrames = [];
+	        _this.groupField = null;
+	        _this._ringGroups = []; //groupField对应的 group 对象
 
 	        //planet自己得grid，不用polar的grid
 	        _this.grid = {
@@ -17516,13 +17515,13 @@ var Chartx = (function () {
 	            var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
 	            var _circleMaxR = this._getMaxR();
 
-	            _$27.each(this.ringGroupDataFrames, function (df, i) {
+	            _$27.each(this.groupDataFrames, function (df, i) {
 
 	                var toR = groupRStart + maxR * (df.length / me.dataFrame.length);
 
 	                var _g = new PlanetGroup(_$27.extend(true, {
 	                    iGroup: i,
-	                    groupLen: me.ringGroupDataFrames.length,
+	                    groupLen: me.groupDataFrames.length,
 	                    rRange: {
 	                        start: groupRStart,
 	                        to: toR
@@ -17560,7 +17559,7 @@ var Chartx = (function () {
 	                    }
 	                });
 	                //绘制实心圆上面的文案
-	                this._centerTxt = new Text$3(this.center.content, {
+	                this._centerTxt = new Text$3(this.center.text, {
 	                    context: {
 	                        x: this.origin.x,
 	                        y: this.origin.y,
@@ -17671,9 +17670,9 @@ var Chartx = (function () {
 	    }, {
 	        key: "dataGroupHandle",
 	        value: function dataGroupHandle() {
-	            var groupFieldInd = _$27.indexOf(this.dataFrame.fields, this.ringGroupField);
+	            var groupFieldInd = _$27.indexOf(this.dataFrame.fields, this.groupField);
 	            if (groupFieldInd >= 0) {
-	                //有分组字段，就还要对dataFrame中的数据分下组，然后给到 ringGroupDataFrames
+	                //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
 	                var titles = this.dataFrame.org[0];
 	                var _dmap = {}; //以分组的字段值做为key
 
@@ -17688,10 +17687,10 @@ var Chartx = (function () {
 	                });
 
 	                for (var r in _dmap) {
-	                    this.ringGroupDataFrames.push(DataFrame(_dmap[r]));
+	                    this.groupDataFrames.push(DataFrame(_dmap[r]));
 	                }            } else {
 	                //如果分组字段不存在，则认为数据不需要分组，直接全部作为 group 的一个子集合
-	                this.ringGroupDataFrames.push(this.dataFrame);
+	                this.groupDataFrames.push(this.dataFrame);
 	            }        }
 
 	        //获取所有有效的在布局中的nodeData
