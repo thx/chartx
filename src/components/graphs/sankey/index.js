@@ -231,14 +231,15 @@ export default class sankeyGraphs extends GraphsBase
         _.each(nodes, function(node){
             var align = me.label.align;
 
-            var x = node.x+me.data.nodeWidth();
+            var x = node.x+me.data.nodeWidth()+4;
+            /*
             if( x > me.width/2 ){
                 x  = node.x - 4;
                 align = 'right';
             } else {
                 x += 4;
             };
-
+            */
             var y = node.y+Math.max(node.dy / 2 , 1);
 
             var label = new Canvax.Display.Text(node.name , {
@@ -252,6 +253,12 @@ export default class sankeyGraphs extends GraphsBase
                 }
             });
             me._labels.addChild( label );
+
+            if( label.getTextWidth()+x > me.width ){
+                label.context.x = node.x - 4;
+                label.context.textAlign = 'right';
+            };
+
         });
     }
 
