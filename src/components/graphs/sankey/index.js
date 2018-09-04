@@ -88,9 +88,10 @@ export default class sankeyGraphs extends GraphsBase
 
         this.data = this._trimGraphs();
 
-
         this._widget();
         
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
 
         this.fire("complete");
     }
@@ -228,14 +229,26 @@ export default class sankeyGraphs extends GraphsBase
         var nodes = this.data.nodes();
         var me = this;
         _.each(nodes, function(node){
+            var align = me.label.align;
+
+            var x = node.x+me.data.nodeWidth();
+            if( x > me.width/2 ){
+                x  = node.x - 4;
+                align = 'right';
+            } else {
+                x += 4;
+            };
+
+            var y = node.y+Math.max(node.dy / 2 , 1);
+
             var label = new Canvax.Display.Text(node.name , {
                 context: {
-                    x : node.x+me.data.nodeWidth(),
-                    y : node.y+Math.max(node.dy / 2 , 1),
-                    fillStyle : me.label.fontColor,
-                    fontSize  : me.label.fontSize,
-                    textAlign   : me.label.align,
-                    textBaseline: me.label.verticalAlign
+                    x : x,
+                    y : y,
+                    fillStyle    : me.label.fontColor,
+                    fontSize     : me.label.fontSize,
+                    textAlign    : align,
+                    textBaseline : me.label.verticalAlign
                 }
             });
             me._labels.addChild( label );

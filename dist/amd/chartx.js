@@ -20173,8 +20173,8 @@ define(function () { 'use strict';
 
 	            this._widget();
 
-	            this.sprite.context.x = this.width / 2;
-	            this.sprite.context.y = this.height / 2;
+	            this.sprite.context.x = this.width / 2 + this.origin.x;
+	            this.sprite.context.y = this.height / 2 + this.origin.y;
 
 	            this.fire("complete");
 	        }
@@ -20328,9 +20328,12 @@ define(function () { 'use strict';
 	        key: "getNodesAt",
 	        value: function getNodesAt(e) {
 	            var nodes = [];
-	            var ind = e.eventInfo.iNode;
-	            if (ind !== undefined) {
-	                nodes.push(this.data[ind]);
+	            var iNode = e.eventInfo.iNode;
+	            if (iNode !== undefined) {
+	                var node = _$30.find(this.data, function (item) {
+	                    return item.iNode == iNode;
+	                });
+	                node && nodes.push(node);
 	            }            return nodes;
 	        }
 	    }, {
@@ -20459,11 +20462,15 @@ define(function () { 'use strict';
 	            y0 = d.source.y + d.sy,
 	                y1 = d.target.y + d.ty;
 
+	            var dy = d.dy;
+	            if (dy < 1) {
+	                dy = 1;
+	            }
 	            var path = "M" + x0 + "," + y0 + "C" + x2 + "," + y0 + " " + x3 + "," + y1 + " " + x1 + "," + y1;
 
-	            path += "v" + d.dy;
-	            path += "C" + x3 + "," + (y1 + d.dy) + " " + x2 + "," + (y0 + d.dy) + " " + x0 + "," + (y0 + d.dy);
-	            path += "v" + -d.dy + "z";
+	            path += "v" + dy;
+	            path += "C" + x3 + "," + (y1 + dy) + " " + x2 + "," + (y0 + dy) + " " + x0 + "," + (y0 + dy);
+	            path += "v" + -dy + "z";
 	            return path;
 	        }
 
@@ -21023,6 +21030,9 @@ define(function () { 'use strict';
 
 	            this._widget();
 
+	            this.sprite.context.x = this.origin.x;
+	            this.sprite.context.y = this.origin.y;
+
 	            this.fire("complete");
 	        }
 	    }, {
@@ -21155,13 +21165,24 @@ define(function () { 'use strict';
 	            var nodes = this.data.nodes();
 	            var me = this;
 	            _$31.each(nodes, function (node) {
+	                var align = me.label.align;
+
+	                var x = node.x + me.data.nodeWidth();
+	                if (x > me.width / 2) {
+	                    x = node.x - 4;
+	                    align = 'right';
+	                } else {
+	                    x += 4;
+	                }
+	                var y = node.y + Math.max(node.dy / 2, 1);
+
 	                var label = new canvax.Display.Text(node.name, {
 	                    context: {
-	                        x: node.x + me.data.nodeWidth(),
-	                        y: node.y + Math.max(node.dy / 2, 1),
+	                        x: x,
+	                        y: y,
 	                        fillStyle: me.label.fontColor,
 	                        fontSize: me.label.fontSize,
-	                        textAlign: me.label.align,
+	                        textAlign: align,
 	                        textBaseline: me.label.verticalAlign
 	                    }
 	                });

@@ -64,8 +64,8 @@ export default class sunburstGraphs extends GraphsBase
 
         this._widget();
         
-        this.sprite.context.x = this.width / 2;
-        this.sprite.context.y = this.height / 2;
+        this.sprite.context.x = this.width / 2 + this.origin.x;
+        this.sprite.context.y = this.height / 2  + this.origin.y;
 
         this.fire("complete");
     }
@@ -228,9 +228,12 @@ export default class sunburstGraphs extends GraphsBase
 
     getNodesAt( e ){
         var nodes = [];
-        var ind = e.eventInfo.iNode
-        if( ind !== undefined ){
-            nodes.push( this.data[ ind ] );
+        var iNode = e.eventInfo.iNode
+        if( iNode !== undefined ){
+            var node = _.find( this.data, function( item ){
+                return item.iNode == iNode
+            } );
+            node && nodes.push( node );
         };
         return  nodes
     }
