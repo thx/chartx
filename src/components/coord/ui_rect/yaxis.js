@@ -443,14 +443,20 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 var down_i = 0;
 
                 for (var ii = 0; ii < vLen; ii++) {
-                    !min && (min = d[ii][i])
-                    min = Math.min(min, d[ii][i]);
+                    
+                    var _val = d[ii][i];
+                    if( !_val && _val !== 0 ){
+                        continue;
+                    };
 
-                    if (d[ii][i] >= 0) {
-                        up_count += d[ii][i];
+                    min == undefined && (min = _val)
+                    min = Math.min(min, _val);
+
+                    if (_val >= 0) {
+                        up_count += _val;
                         up_i++
                     } else {
-                        down_count += d[ii][i];
+                        down_count += _val;
                         down_i++
                     }
                 }

@@ -210,9 +210,30 @@ export default class Tips extends Component
 
     _getDefaultContent( info )
     {
+        var str = "";
+        if( info.title !== undefined && info.title !== null &&info.title !== "" ){
+            str += "<div>"+ info.title +"</div>";
+        };
+        _.each( info.nodes , function( node , i ){
+            if( !node.value && node.value !== 0 ){
+                return;
+            };
+            var style = node.color || node.fillStyle || node.strokeStyle;
+            var value = typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
+            
+            str += "<div style='line-height:1.5'><span style='color:"+ style +";padding-right:8px;'>●</span>"+ value +"</div>";
+        });
+        return str;
+    }
+
+    /*
+    _getDefaultContent_bak( info )
+    {
+
+
         if( !info.nodes.length ){
             return null;
-        }
+        };
 
         var str  = "<table style='border:none'>";
         var self = this;
@@ -243,6 +264,7 @@ export default class Tips extends Component
         str+="</table>";
         return str;
     }
+    */
 
     /**
      *获取back要显示的x

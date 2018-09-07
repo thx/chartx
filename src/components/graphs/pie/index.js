@@ -389,7 +389,6 @@ export default class PieGraphs extends GraphsBase
     }
 
 
-
     focusAt( ind ){
         var nodeData = this._pie.data.list[ ind ];
 

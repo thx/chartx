@@ -7500,6 +7500,7 @@
 	        value: function watch(name, value, preValue) {
 	            if (name == "r0" || name == "r" || name == "startAngle" || name == "endAngle" || name == "clockwise") {
 	                //因为这里的graphs不一样。
+	                this.isRing = false; //是否为一个圆环，这里也要开始初始化一下
 	                this.graphics.clear();
 	            }
 	        }
@@ -9927,14 +9928,19 @@
 	                    var down_i = 0;
 
 	                    for (var ii = 0; ii < vLen; ii++) {
-	                        !min && (min = d[ii][i]);
-	                        min = Math.min(min, d[ii][i]);
 
-	                        if (d[ii][i] >= 0) {
-	                            up_count += d[ii][i];
+	                        var _val = d[ii][i];
+	                        if (!_val && _val !== 0) {
+	                            continue;
+	                        }
+	                        min == undefined && (min = _val);
+	                        min = Math.min(min, _val);
+
+	                        if (_val >= 0) {
+	                            up_count += _val;
 	                            up_i++;
 	                        } else {
-	                            down_count += d[ii][i];
+	                            down_count += _val;
 	                            down_i++;
 	                        }
 	                    }
@@ -22677,34 +22683,53 @@
 	    }, {
 	        key: "_getDefaultContent",
 	        value: function _getDefaultContent(info) {
-	            if (!info.nodes.length) {
-	                return null;
-	            }
-
-	            var str = "<table style='border:none'>";
-
+	            var str = "";
 	            if (info.title !== undefined && info.title !== null && info.title !== "") {
-	                str += "<tr><td colspan='2'>" + info.title + "</td></tr>";
-	            }
-	            _$35.each(info.nodes, function (node, i) {
-	                if (node.value === undefined || node.value === null) {
+	                str += "<div>" + info.title + "</div>";
+	            }            _$35.each(info.nodes, function (node, i) {
+	                if (!node.value && node.value !== 0) {
 	                    return;
-	                }
-	                str += "<tr style='color:" + (node.color || node.fillStyle || node.strokeStyle) + "'>";
+	                }                var style = node.color || node.fillStyle || node.strokeStyle;
+	                var value = _typeof$1(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
 
-	                var tsStyle = "style='border:none;white-space:nowrap;word-wrap:normal;'";
-	                var label = node.label || node.field || node.name;
-	                if (label) {
+	                str += "<div style='line-height:1.5'><span style='color:" + style + ";padding-right:8px;'>●</span>" + value + "</div>";
+	            });
+	            return str;
+	        }
+
+	        /*
+	        _getDefaultContent_bak( info )
+	        {
+	              if( !info.nodes.length ){
+	                return null;
+	            };
+	             var str  = "<table style='border:none'>";
+	            var self = this;
+	             if( info.title !== undefined && info.title !== null &&info.title !== "" ){
+	                str += "<tr><td colspan='2'>"+ info.title +"</td></tr>"
+	            };
+	             _.each( info.nodes , function( node , i ){
+	                if( node.value === undefined || node.value === null ){
+	                    return;
+	                };
+	                 
+	                str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
+	                
+	                let tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
+	                let label = node.label || node.field || node.name;
+	                if( label ){
 	                    label += "：";
 	                } else {
 	                    label = "";
-	                }
-	                str += "<td " + tsStyle + ">" + label + "</td>";
-	                str += "<td " + tsStyle + ">" + (_typeof$1(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) + "</td></tr>";
+	                };
+	            
+	                str+="<td "+tsStyle+">"+ label +"</td>";
+	                str += "<td "+tsStyle+">"+ (typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) +"</td></tr>";
 	            });
-	            str += "</table>";
+	            str+="</table>";
 	            return str;
 	        }
+	        */
 
 	        /**
 	         *获取back要显示的x
