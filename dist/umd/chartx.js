@@ -12496,9 +12496,12 @@
 	                            groupRegion.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
 
 	                                e.eventInfo = {
-	                                    iNode: this.iNode,
-	                                    nodes: me.getNodesAt(this.iNode)
+	                                    iNode: this.iNode
+	                                    //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
+	                                    //nodes : me.getNodesAt( this.iNode ) 
 	                                };
+
+	                                //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
 	                                me.root.fire(e.type, e);
 
 	                                if (me.select.enabled && e.type == me.select.triggerEventType) {
