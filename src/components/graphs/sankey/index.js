@@ -202,7 +202,7 @@ export default class sankeyGraphs extends GraphsBase
             var linkColor = me._getColor( me.line.strokeStyle, link , i);
             var d = me.data.link()(link);
         
-            var path = new Path({
+            var _path = new Path({
                 xyToInt : false,
                 context: {
                     path: d,
@@ -213,14 +213,32 @@ export default class sankeyGraphs extends GraphsBase
                 }
             });
 
-            path.link = link;
-            path.hover(function(e){
-                this.context.globalAlpha += 0.2;
-            } , function(e){
-                this.context.globalAlpha -= 0.2;
-            });
 
-            me._links.addChild( path );
+            _path.link = link;
+
+            _path.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                
+                if( e.type == 'mouseover' ){
+                    this.context.globalAlpha += 0.2;
+                };
+                if( e.type == 'mouseout' ){
+                    this.context.globalAlpha -= 0.2;
+                };
+
+                var linkData = this.link;
+
+                e.eventInfo = {
+                    title : linkData.source.name+" --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> "+linkData.target.name,
+                    nodes : [ linkData ]
+                };
+    
+                //fire到root上面去的是为了让root去处理tips
+                me.root.fire( e.type, e );
+                me.triggerEvent( me.node , e );
+             });
+
+
+            me._links.addChild( _path );
         });
     }
 

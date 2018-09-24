@@ -8247,10 +8247,13 @@ var Chart = function (_Canvax$Event$EventDi) {
                     //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
                     return;
                 }
-                if (p.type == "dataZoom") {
-                    p.plug.reset({}, me._getCloneChart());
+                /*
+                if( p.type == "dataZoom" ){
+                    p.plug.reset( {} , p.plug._getCloneChart({}, me) );
                     return;
-                }
+                };
+                */
+
                 p.plug.reset && p.plug.reset(me[p.type] || {}, me.dataFrame);
             });
         }
@@ -8260,6 +8263,7 @@ var Chart = function (_Canvax$Event$EventDi) {
             for (var i = 0, l = this.components.length; i < l; i++) {
                 var p = this.components[i];
                 p.plug && p.plug.draw && p.plug.draw();
+                p.plug.app = this;
                 if (p.type == "once") {
                     this.components.splice(i, 1);
                     i--;
@@ -8674,6 +8678,15 @@ var coorBase = function (_Canvax$Event$EventDi) {
         value: function addField(field) {
             this.changeFieldEnabled(field);
         }
+    }, {
+        key: "getSizeAndOrigin",
+        value: function getSizeAndOrigin() {
+            return {
+                width: this.width,
+                height: this.height,
+                origin: this.origin
+            };
+        }
     }]);
     return coorBase;
 }(canvax.Event.EventDispatcher);
@@ -8897,6 +8910,9 @@ var xAxis = function (_Canvax$Event$EventDi) {
 
         //xAxis的field只有一个值,
         _this.field = _$9.flatten([_this.field])[0];
+
+        _this._txts = [];
+        //this._lines = []; //line目前直接绑定在xNode上面
         return _this;
     }
 
@@ -8984,6 +9000,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
     }, {
         key: "resetData",
         value: function resetData(dataFrame) {
+
             this._initHandle(dataFrame);
             this.draw();
         }
@@ -9214,7 +9231,8 @@ var xAxis = function (_Canvax$Event$EventDi) {
                         width: this.width
                     }),
                     textWidth: txt.getTextWidth(),
-                    field: this.field
+                    field: this.field,
+                    visible: null //trimgrapsh的时候才设置
                 };
 
                 tmpData.push(o);
@@ -9243,6 +9261,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
             if (!this.enabled) return;
             !opt && (opt = {});
 
+            var me = this;
             var arr = this.layoutData;
 
             if (this._title) {
@@ -9251,6 +9270,9 @@ var xAxis = function (_Canvax$Event$EventDi) {
                 this.sprite.addChild(this._title);
             }
             var delay = Math.min(1000 / arr.length, 25);
+
+            var labelVisibleInd = 0;
+            //var lineVisibleInd = 0;
 
             for (var a = 0, al = arr.length; a < al; a++) {
                 var xNodeId = "xNode" + a;
@@ -9266,87 +9288,100 @@ var xAxis = function (_Canvax$Event$EventDi) {
                 var x = o.x,
                     y = this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
 
-                if (this.label.enabled && !!arr[a].visible) {
-                    //文字
-                    var textContext = {
-                        x: o._text_x || o.x,
-                        y: y + 20,
-                        fillStyle: this.label.fontColor,
-                        fontSize: this.label.fontSize,
-                        rotation: -Math.abs(this.label.rotation),
-                        textAlign: this.label.textAlign,
-                        lineHeight: this.label.lineHeight,
-                        textBaseline: !!this.label.rotation ? "middle" : "top",
-                        globalAlpha: 0
-                    };
+                if (this.label.enabled) {
+                    if (!!arr[a].visible) {
 
-                    if (!!this.label.rotation && this.label.rotation != 90) {
-                        textContext.x += 5;
-                        textContext.y += 3;
-                    }
-                    if (xNode._txt) {
-                        //_.extend( xNode._txt.context , textContext );
-                        xNode._txt.resetText(o.text + "");
-                        if (this.animation) {
-                            xNode._txt.animate({
-                                x: textContext.x
-                            }, {
-                                duration: 300
-                            });
-                        } else {
-                            xNode._txt.context.x = textContext.x;
+                        //文字
+                        var textContext = {
+                            x: o._text_x || o.x,
+                            y: y + 20,
+                            fillStyle: this.label.fontColor,
+                            fontSize: this.label.fontSize,
+                            rotation: -Math.abs(this.label.rotation),
+                            textAlign: this.label.textAlign,
+                            lineHeight: this.label.lineHeight,
+                            textBaseline: !!this.label.rotation ? "middle" : "top",
+                            globalAlpha: 0
+                        };
+
+                        if (!!this.label.rotation && this.label.rotation != 90) {
+                            textContext.x += 5;
+                            textContext.y += 3;
                         }
-                    } else {
-
-                        xNode._txt = new canvax.Display.Text(o.text, {
-                            id: "xAxis_txt_" + a,
-                            context: textContext
-                        });
-                        xNode.addChild(xNode._txt);
-
-                        //新建的 txt的 动画方式
-                        if (this.animation && !opt.resize) {
-                            xNode._txt.animate({
-                                globalAlpha: 1,
-                                y: xNode._txt.context.y - 20
-                            }, {
-                                duration: 500,
-                                easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                                delay: a * delay,
-                                id: xNode._txt.id
-                            });
+                        if (labelVisibleInd < me._txts.length) {
+                            //_.extend( xNode._txt.context , textContext );
+                            xNode._txt = me._txts[labelVisibleInd];
+                            xNode._txt.resetText(o.text + "");
+                            if (this.animation) {
+                                xNode._txt.animate({
+                                    x: textContext.x
+                                }, {
+                                    duration: 300
+                                });
+                            } else {
+                                xNode._txt.context.x = textContext.x;
+                            }
                         } else {
-                            xNode._txt.context.y = xNode._txt.context.y - 20;
-                            xNode._txt.context.globalAlpha = 1;
-                        }                    }
+
+                            xNode._txt = new canvax.Display.Text(o.text, {
+                                id: "xAxis_txt_" + a,
+                                context: textContext
+                            });
+                            xNode.addChild(xNode._txt);
+                            me._txts.push(xNode._txt);
+
+                            //新建的 txt的 动画方式
+                            if (this.animation && !opt.resize) {
+                                xNode._txt.animate({
+                                    globalAlpha: 1,
+                                    y: xNode._txt.context.y - 20
+                                }, {
+                                    duration: 500,
+                                    easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                                    delay: a * delay,
+                                    id: xNode._txt.id
+                                });
+                            } else {
+                                xNode._txt.context.y = xNode._txt.context.y - 20;
+                                xNode._txt.context.globalAlpha = 1;
+                            }                        }
+                        labelVisibleInd++;
+                    }
                     //xNode._txt.context.visible = !!arr[a].visible;
                 }
-                if (this.tickLine.enabled && !!arr[a].visible) {
-                    var lineContext = {
-                        x: x,
-                        y: this.tickLine.offset,
-                        end: {
-                            x: 0,
-                            y: this.tickLine.lineLength
-                        },
-                        lineWidth: this.tickLine.lineWidth,
-                        strokeStyle: this.tickLine.strokeStyle
-                    };
-                    if (xNode._line) {
-                        //_.extend( xNode._txt.context , textContext );
-                        if (this.animation) {
-                            xNode._line.animate({
-                                x: lineContext.x
-                            }, {
-                                duration: 300
+                if (this.tickLine.enabled) {
+                    if (!!arr[a].visible) {
+                        var lineContext = {
+                            x: x,
+                            y: this.tickLine.offset,
+                            end: {
+                                x: 0,
+                                y: this.tickLine.lineLength
+                            },
+                            lineWidth: this.tickLine.lineWidth,
+                            strokeStyle: this.tickLine.strokeStyle
+                        };
+                        if (xNode._line) {
+                            //_.extend( xNode._txt.context , textContext );
+                            if (this.animation) {
+                                xNode._line.animate({
+                                    x: lineContext.x
+                                }, {
+                                    duration: 300
+                                });
+                            } else {
+                                xNode._line.context.x = lineContext.x;
+                            }                        } else {
+                            xNode._line = new Line$1({
+                                context: lineContext
                             });
-                        } else {
-                            xNode._line.context.x = lineContext.x;
-                        }                    } else {
-                        xNode._line = new Line$1({
-                            context: lineContext
-                        });
-                        xNode.addChild(xNode._line);
+                            xNode.addChild(xNode._line);
+                        }
+                    } else {
+                        if (xNode._line) {
+                            xNode._line.destroy();
+                            xNode._line = null;
+                        }
                     }
                 }
                 //这里可以由用户来自定义过滤 来 决定 该node的样式
@@ -9356,6 +9391,12 @@ var xAxis = function (_Canvax$Event$EventDi) {
                     txt: xNode._txt,
                     line: xNode._line || null
                 });
+            }
+            //_txts还有多的，就要干掉
+            if (me._txts.length > labelVisibleInd) {
+                for (var i = labelVisibleInd; i < me._txts.length; i++) {
+                    me._txts.splice(i--, 1)[0].destroy();
+                }
             }
             //把sprite.children中多余的给remove掉
             if (this.rulesSprite.children.length > arr.length) {
@@ -10682,18 +10723,40 @@ var Rect_Component = function (_coorBase) {
             this._initInduce();
 
             if (this.horizontal) {
+
                 this._horizontal({
                     w: w,
                     h: h
                 });
 
                 /*
+                var _padding = this.root.padding;
                 this.width = this._yAxis[0].height;
                 this.height = this._xAxis.width;
                 this.origin.x = this._xAxis.height + _padding.left;
                 this.origin.y = this._yAxis[0].height + _padding.top;
                 */
             }
+        }
+    }, {
+        key: "getSizeAndOrigin",
+        value: function getSizeAndOrigin() {
+            var _padding = this.root.padding;
+            var obj = {
+                width: this.width,
+                height: this.height,
+                origin: this.origin
+            };
+            if (this.horizontal) {
+                obj = {
+                    width: this._yAxis[0].height,
+                    height: this._xAxis.width,
+                    origin: {
+                        x: this._xAxis.height + _padding.left,
+                        y: this._yAxis[0].height + _padding.top
+                    }
+                };
+            }            return obj;
         }
     }, {
         key: "_initModules",
@@ -11090,6 +11153,11 @@ var Rect$3 = function (_CoordBase) {
             padding.right = padding.bottom;
             padding.bottom = padding.left;
             padding.left = num;
+        }
+    }, {
+        key: "drawGraphsEnd",
+        value: function drawGraphsEnd() {
+            this._coord.drawGraphsEnd();
         }
 
         //绘制完毕后的横向处理
@@ -15161,8 +15229,15 @@ var Pie = function (_Canvax$Event$EventDi) {
                         ySpaceInfo.right = preY;
                     }
                 }
+                var currentX = isleft ? -adjustX - textOffsetX : adjustX + textOffsetX;
+                var globalX = currentX + me.origin.x;
+                var globalY = currentY + me.origin.y;
+
+                if (globalX > me._graphs.root.width || globalY < 0 || globalY > me._graphs.root.height) {
+                    return;
+                }
                 var pathStr = "M" + itemData.centerx + "," + itemData.centery;
-                pathStr += "Q" + itemData.outx + "," + itemData.outy + "," + (isleft ? -adjustX - textOffsetX : adjustX + textOffsetX) + "," + currentY;
+                pathStr += "Q" + itemData.outx + "," + itemData.outy + "," + currentX + "," + currentY;
 
                 var path = new Path$2({
                     context: {
@@ -21146,7 +21221,7 @@ var sankeyGraphs = function (_GraphsBase) {
                 var linkColor = me._getColor(me.line.strokeStyle, link, i);
                 var d = me.data.link()(link);
 
-                var path = new Path$4({
+                var _path = new Path$4({
                     xyToInt: false,
                     context: {
                         path: d,
@@ -21157,14 +21232,28 @@ var sankeyGraphs = function (_GraphsBase) {
                     }
                 });
 
-                path.link = link;
-                path.hover(function (e) {
-                    this.context.globalAlpha += 0.2;
-                }, function (e) {
-                    this.context.globalAlpha -= 0.2;
+                _path.link = link;
+
+                _path.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+
+                    if (e.type == 'mouseover') {
+                        this.context.globalAlpha += 0.2;
+                    }                    if (e.type == 'mouseout') {
+                        this.context.globalAlpha -= 0.2;
+                    }
+                    var linkData = this.link;
+
+                    e.eventInfo = {
+                        title: linkData.source.name + " --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
+                        nodes: [linkData]
+                    };
+
+                    //fire到root上面去的是为了让root去处理tips
+                    me.root.fire(e.type, e);
+                    me.triggerEvent(me.node, e);
                 });
 
-                me._links.addChild(path);
+                me._links.addChild(_path);
             });
         }
     }, {
@@ -21217,6 +21306,7 @@ var component = function (_Canvax$Event$EventDi) {
         var _this = possibleConstructorReturn$1(this, (component.__proto__ || Object.getPrototypeOf(component)).call(this, opt, data));
 
         _this.enabled = false; //是否加载该组件
+        _this.app = null; //这个组件挂在哪个app上面（图表）
         return _this;
     }
 
@@ -21271,7 +21361,7 @@ var Legend = function (_Component) {
         _this.field = null;
 
         _this.icon = {
-            height: 30,
+            height: 26,
             width: "auto",
             shapeType: "circle",
             radius: 5,
@@ -21345,7 +21435,11 @@ var Legend = function (_Component) {
                 y = 0;
             var rows = 1;
 
+            var isOver = false; //如果legend过多
+
             _$32.each(this.data, function (obj, i) {
+
+                if (isOver) return;
 
                 var _icon = new Circle$10({
                     id: "legend_field_icon_" + i,
@@ -21403,19 +21497,26 @@ var Legend = function (_Component) {
 
                 if (me.layoutType == "v") {
                     if (y + me.icon.height > viewHeight) {
-                        x += maxItemWidth;
+                        if (x > viewWidth * 0.3) {
+                            isOver = true;
+                            return;
+                        }                        x += maxItemWidth;
                         y = 0;
-                    }
-                    spItemC.x = x;
+                    }                    spItemC.x = x;
                     spItemC.y = y;
                     y += me.icon.height;
                     height = Math.max(height, y);
                 } else {
+                    //横向排布
                     if (x + itemW > viewWidth) {
-                        width = Math.max(width, x);
+                        if (me.icon.height * (rows + 1) > viewHeight * 0.3) {
+                            isOver = true;
+                            return;
+                        }                        width = Math.max(width, x);
                         x = 0;
                         rows++;
-                    }                    spItemC.x = x;
+                    }
+                    spItemC.x = x;
                     spItemC.y = me.icon.height * (rows - 1);
                     x += itemW;
                 }                var sprite = new canvax.Display.Sprite({
@@ -21514,7 +21615,7 @@ var Legend = function (_Component) {
                         plug: {
                             draw: function draw() {
                                 _legend.pos({
-                                    x: app._coord.origin.x
+                                    x: app._coord.getSizeAndOrigin().origin.x
                                 });
                             }
                         }
@@ -21534,7 +21635,8 @@ var Legend = function (_Component) {
                 pos.y = app.padding.top - _legend.height;
             }            if (_legend.position == "bottom") {
                 pos.x = app.padding.left;
-                pos.y = app.height - app.padding.bottom;
+                //TODO: this.icon.height 这里要后续拿到单个图例的高，现在默认26
+                pos.y = app.height - app.padding.bottom + 26 / 2;
             }
             _legend.pos(pos);
 
@@ -21669,16 +21771,16 @@ var dataZoom = function (_Component) {
         }
     }, {
         key: "reset",
-        value: function reset(opt, cloneChart) {
+        value: function reset(opt, dataFrame) {
 
             !opt && (opt = {});
 
             var _preCount = this.count;
             var _preStart = this.range.start;
             var _preEnd = this.range.end;
-
+            debugger;
             opt && _$33.extend(true, this, opt);
-            this._cloneChart = cloneChart;
+            this._cloneChart = dataZoom._getCloneChart(opt, this.app); //cloneChart;
             this._computeAttrs(opt);
 
             if (_preCount != this.count || opt.range && (opt.range.start != _preStart || opt.range.end != _preEnd)) {
@@ -22066,8 +22168,8 @@ var dataZoom = function (_Component) {
             //目前dataZoom是固定在bottom位置的
             //_getDataZoomOpt中会矫正x
             opt.pos = {
-                //x : 0, //x在_getDataZoomOpt中计算
-                y: app.height - app.padding.bottom
+                //x : 0, //x在 _getDataZoomOpt 中计算
+                y: app.height - app.padding.bottom + 6
             };
 
             app.components.push({
@@ -22176,11 +22278,18 @@ var dataZoom = function (_Component) {
     }, {
         key: "_getDataZoomOpt",
         value: function _getDataZoomOpt(opt, app) {
+
+            var w = app._coord.width;
+            if (app._coord._opts.horizontal) {
+                w = app._coord.height;
+            }
+            var coordInfo = app._coord.getSizeAndOrigin();
+
             //初始化 datazoom 模块
             var dataZoomOpt = _$33.extend(true, {
-                w: app._coord.width,
+                w: coordInfo.width, //app._coord.width,
                 pos: {
-                    x: app._coord.origin.x,
+                    x: coordInfo.origin.x, //app._coord.origin.x,
                     y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
                 },
                 dragIng: function dragIng(range) {
@@ -22641,6 +22750,7 @@ var Tips = function (_Component) {
             this._tipDom.style.cssText += "；-moz-border-radius:" + this.borderRadius + "; -webkit-border-radius:" + this.borderRadius + "; border-radius:" + this.borderRadius + ";background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
             this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px " + this.strokeStyle + "; -webkit-box-shadow:1px 1px 3px " + this.strokeStyle + "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
             this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
+            this._tipDom.style.cssText += "; text-align:left;";
             this.tipDomContainer.appendChild(this._tipDom);
         }
     }, {
@@ -22684,14 +22794,16 @@ var Tips = function (_Component) {
         value: function _getDefaultContent(info) {
             var str = "";
             if (info.title !== undefined && info.title !== null && info.title !== "") {
-                str += "<div>" + info.title + "</div>";
+                str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
             }            _$35.each(info.nodes, function (node, i) {
                 if (!node.value && node.value !== 0) {
                     return;
                 }                var style = node.color || node.fillStyle || node.strokeStyle;
                 var value = _typeof$1(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
-
-                str += "<div style='line-height:1.5'><span style='color:" + style + ";padding-right:8px;'>●</span>" + value + "</div>";
+                str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
+                if (style) {
+                    str += "<span style='background:" + style + ";margin-right:8px;margin-top:5px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+                }                str += value + "</div>";
             });
             return str;
         }

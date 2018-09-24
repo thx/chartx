@@ -448,8 +448,16 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 }
             };
             
+            var currentX = (isleft ? -adjustX-textOffsetX : adjustX+textOffsetX);
+            var globalX = currentX + me.origin.x;
+            var globalY = currentY + me.origin.y;
+
+            if( globalX > me._graphs.root.width || globalY < 0 || globalY > me._graphs.root.height ){
+                return;
+            };
+
             var pathStr = "M"+itemData.centerx+","+itemData.centery;
-            pathStr += "Q"+itemData.outx+","+itemData.outy+","+(isleft ? -adjustX-textOffsetX : adjustX+textOffsetX)+","+currentY;
+            pathStr += "Q"+itemData.outx+","+itemData.outy+","+currentX+","+currentY;
             
             var path = new Path({
                 context: {

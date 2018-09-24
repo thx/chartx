@@ -31,7 +31,7 @@ export default class Legend extends Component
         this.field = null;
 
         this.icon = {
-            height : 30,
+            height : 26,
             width  : "auto",
             shapeType : "circle",
             radius : 5,
@@ -61,8 +61,6 @@ export default class Legend extends Component
         this.layoutType = "h"; //横向 top,bottom --> h left,right -- >v
 
         this.sprite  = null;
-
-
 
         if( opt ){
             _.extend(true, this , opt );
@@ -124,7 +122,7 @@ export default class Legend extends Component
                     plug : {
                         draw : function(){
                             _legend.pos( { 
-                                x : app._coord.origin.x
+                                x : app._coord.getSizeAndOrigin().origin.x
                             } );
                         }
                     }
@@ -146,7 +144,8 @@ export default class Legend extends Component
         };
         if( _legend.position == "bottom" ){
             pos.x = app.padding.left;
-            pos.y = app.height - app.padding.bottom;
+            //TODO: this.icon.height 这里要后续拿到单个图例的高，现在默认26
+            pos.y = app.height - app.padding.bottom + 26/2;
         };
 
         _legend.pos( pos );
@@ -184,8 +183,12 @@ export default class Legend extends Component
         var x=0,y=0;
         var rows = 1;
 
+        var isOver = false; //如果legend过多
+
         _.each( this.data , function( obj , i ){
 
+            if( isOver ) return;
+            
             var _icon = new Circle({
                 id : "legend_field_icon_"+i,
                 context : {
@@ -215,8 +218,8 @@ export default class Legend extends Component
                     x : me.icon.radius + 3 ,
                     y : me.icon.height / 3,
                     textAlign : me.label.textAlign, //"left",
-                    textBaseline : me.label.textBaseline,//"middle",
-                    fillStyle : me.label.fillStyle,//"#333", //obj.color
+                    textBaseline : me.label.textBaseline, //"middle",
+                    fillStyle : me.label.fillStyle, //"#333", //obj.color
                     cursor: me.label.cursor //"pointer"
                 }
             } );
@@ -242,19 +245,29 @@ export default class Legend extends Component
 
             if( me.layoutType == "v" ){
                 if( y + me.icon.height > viewHeight ){
+                    if( x > viewWidth*0.3 ){
+                        isOver = true;
+                        return;
+                    };
                     x += maxItemWidth;
                     y = 0;
-                }
+                };
                 spItemC.x = x;
                 spItemC.y = y;
                 y += me.icon.height;
                 height = Math.max( height , y );
             } else {
+                //横向排布
                 if( x + itemW > viewWidth ){
+                    if( me.icon.height * (rows+1) > viewHeight*0.3 ){
+                        isOver = true;
+                        return;
+                    };
                     width = Math.max( width, x );
                     x = 0;
-                    rows++;
+                    rows++;    
                 };
+                
                 spItemC.x = x;
                 spItemC.y = me.icon.height * (rows-1);
                 x += itemW;

@@ -260,10 +260,12 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 return;
             };
 
+            /*
             if( p.type == "dataZoom" ){
-                p.plug.reset( {} , me._getCloneChart() );
+                p.plug.reset( {} , p.plug._getCloneChart({}, me) );
                 return;
             };
+            */
 
             p.plug.reset && p.plug.reset( me[ p.type ] || {} , me.dataFrame);
         }); 
@@ -274,6 +276,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
             p.plug && p.plug.draw && p.plug.draw(  );
+            p.plug.app = this;
             if( p.type == "once" ){
                 this.components.splice( i, 1 );
                 i--;

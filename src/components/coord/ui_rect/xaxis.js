@@ -105,6 +105,9 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         //xAxis的field只有一个值,
         this.field = _.flatten( [ this.field ] )[0];
+
+        this._txts = [];
+        //this._lines = []; //line目前直接绑定在xNode上面
     }
 
     init(opt, data) 
@@ -193,6 +196,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     //配置和数据变化
     resetData( dataFrame )
     {
+
         this._initHandle( dataFrame );
         this.draw();
     }
@@ -442,7 +446,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                     width : this.width
                 }),
                 textWidth: txt.getTextWidth(),
-                field : this.field
+                field : this.field,
+                visible: null //trimgrapsh的时候才设置
             };
 
             tmpData.push( o );
@@ -473,7 +478,9 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         if( !this.enabled ) return;
         !opt && (opt ={});
 
-        var arr = this.layoutData
+        var me = this;
+        var arr = this.layoutData;
+        
 
         if (this._title) {
             this._title.context.y = this.height - this._title.getTextHeight() / 2;
@@ -482,6 +489,9 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         };
 
         var delay = Math.min(1000 / arr.length, 25);
+
+        var labelVisibleInd = 0;
+        //var lineVisibleInd = 0;
 
         for (var a = 0, al = arr.length; a < al; a++) {
             var xNodeId = "xNode" + a;
@@ -499,94 +509,107 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 y = this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
 
         
-            if ( this.label.enabled && !!arr[a].visible ){
-                //文字
-                var textContext = {
-                    x: o._text_x || o.x,
-                    y: y + 20,
-                    fillStyle    : this.label.fontColor,
-                    fontSize     : this.label.fontSize,
-                    rotation     : -Math.abs(this.label.rotation),
-                    textAlign    : this.label.textAlign,
-                    lineHeight   : this.label.lineHeight,
-                    textBaseline : !!this.label.rotation ? "middle" : "top",
-                    globalAlpha  : 0
-                };
-
-                if (!!this.label.rotation && this.label.rotation != 90) {
-                    textContext.x += 5;
-                    textContext.y += 3;
-                };
-
-                if( xNode._txt ){
-                    //_.extend( xNode._txt.context , textContext );
-                    xNode._txt.resetText( o.text+"" );
-                    if( this.animation ){
-                        xNode._txt.animate( {
-                            x : textContext.x
-                        } , {
-                            duration : 300
-                        });
-                    } else {
-                        xNode._txt.context.x = textContext.x
-                    }
-
-                } else {
-
-                    xNode._txt = new Canvax.Display.Text(o.text, {
-                        id: "xAxis_txt_" + a,
-                        context: textContext
-                    });
-                    xNode.addChild( xNode._txt );
-
-                    //新建的 txt的 动画方式
-                    if (this.animation && !opt.resize) {
-                        xNode._txt.animate({
-                            globalAlpha: 1,
-                            y: xNode._txt.context.y - 20
-                        }, {
-                            duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: a * delay,
-                            id: xNode._txt.id
-                        });
-                    } else {
-                        xNode._txt.context.y = xNode._txt.context.y - 20;
-                        xNode._txt.context.globalAlpha = 1;
+            if ( this.label.enabled ){
+                if( !!arr[a].visible ){
+                    
+                    //文字
+                    var textContext = {
+                        x: o._text_x || o.x,
+                        y: y + 20,
+                        fillStyle    : this.label.fontColor,
+                        fontSize     : this.label.fontSize,
+                        rotation     : -Math.abs(this.label.rotation),
+                        textAlign    : this.label.textAlign,
+                        lineHeight   : this.label.lineHeight,
+                        textBaseline : !!this.label.rotation ? "middle" : "top",
+                        globalAlpha  : 0
                     };
-                };
 
+                    if (!!this.label.rotation && this.label.rotation != 90) {
+                        textContext.x += 5;
+                        textContext.y += 3;
+                    };
+
+                    if( labelVisibleInd < me._txts.length ){
+                        //_.extend( xNode._txt.context , textContext );
+                        xNode._txt = me._txts[ labelVisibleInd ]
+                        xNode._txt.resetText( o.text+"" );
+                        if( this.animation ){
+                            xNode._txt.animate( {
+                                x : textContext.x
+                            } , {
+                                duration : 300
+                            });
+                        } else {
+                            xNode._txt.context.x = textContext.x
+                        }
+
+                    } else {
+
+                        xNode._txt = new Canvax.Display.Text(o.text, {
+                            id: "xAxis_txt_" + a,
+                            context: textContext
+                        });
+                        xNode.addChild( xNode._txt );
+                        me._txts.push( xNode._txt );
+
+                        //新建的 txt的 动画方式
+                        if (this.animation && !opt.resize) {
+                            xNode._txt.animate({
+                                globalAlpha: 1,
+                                y: xNode._txt.context.y - 20
+                            }, {
+                                duration: 500,
+                                easing: 'Back.Out', //Tween.Easing.Elastic.InOut
+                                delay: a * delay,
+                                id: xNode._txt.id
+                            });
+                        } else {
+                            xNode._txt.context.y = xNode._txt.context.y - 20;
+                            xNode._txt.context.globalAlpha = 1;
+                        };
+                    };
+
+                    labelVisibleInd++;
+                } 
                 //xNode._txt.context.visible = !!arr[a].visible;
             };
             
 
-            if ( this.tickLine.enabled && !!arr[a].visible ) {
-                var lineContext = {
-                    x: x,
-                    y: this.tickLine.offset,
-                    end : {
-                        x : 0,
-                        y : this.tickLine.lineLength
-                    },
-                    lineWidth: this.tickLine.lineWidth,
-                    strokeStyle: this.tickLine.strokeStyle
-                };
-                if( xNode._line ){
-                    //_.extend( xNode._txt.context , textContext );
-                    if( this.animation ){
-                        xNode._line.animate({
-                            x : lineContext.x
-                        } , {
-                            duration : 300
-                        })
-                    } else {
-                        xNode._line.context.x = lineContext.x;
+            if ( this.tickLine.enabled ) {
+                if( !!arr[a].visible ){
+                    var lineContext = {
+                        x: x,
+                        y: this.tickLine.offset,
+                        end : {
+                            x : 0,
+                            y : this.tickLine.lineLength
+                        },
+                        lineWidth: this.tickLine.lineWidth,
+                        strokeStyle: this.tickLine.strokeStyle
                     };
+                    if( xNode._line ){
+                        //_.extend( xNode._txt.context , textContext );
+                        if( this.animation ){
+                            xNode._line.animate({
+                                x : lineContext.x
+                            } , {
+                                duration : 300
+                            })
+                        } else {
+                            xNode._line.context.x = lineContext.x;
+                        };
+                    } else {
+                        xNode._line = new Line({
+                            context: lineContext
+                        });
+                        xNode.addChild(xNode._line);
+                    }
                 } else {
-                    xNode._line = new Line({
-                        context: lineContext
-                    });
-                    xNode.addChild(xNode._line);
+                    if( xNode._line ){
+                        xNode._line.destroy();
+                        xNode._line = null;
+                    }
                 }
             };
 
@@ -598,6 +621,13 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 line: xNode._line || null
             });
             
+        };
+
+        //_txts还有多的，就要干掉
+        if( me._txts.length > labelVisibleInd ){
+            for( var i= labelVisibleInd; i<me._txts.length; i++){
+                me._txts.splice( i-- , 1 )[0].destroy();
+            }
         };
 
         //把sprite.children中多余的给remove掉

@@ -102,4 +102,13 @@ export default class coorBase extends Canvax.Event.EventDispatcher
     {
         this.changeFieldEnabled( field );
     }
+
+    getSizeAndOrigin()
+    {
+        return {
+            width : this.width,
+            height : this.height,
+            origin : this.origin
+        };
+    }
 }

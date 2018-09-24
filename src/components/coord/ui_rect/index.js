@@ -184,22 +184,42 @@ export default class Rect_Component extends coorBase
         this._initInduce();
 
         if( this.horizontal ){
+
             this._horizontal({
                 w : w,
                 h : h
             });
-            
+
             /*
+            var _padding = this.root.padding;
             this.width = this._yAxis[0].height;
             this.height = this._xAxis.width;
             this.origin.x = this._xAxis.height + _padding.left;
             this.origin.y = this._yAxis[0].height + _padding.top;
-            */
+            */   
         }
-
-        
     }
-   
+
+    getSizeAndOrigin(){
+        var _padding = this.root.padding;
+        var obj = {
+            width : this.width,
+            height : this.height,
+            origin : this.origin
+        };
+        if( this.horizontal ){
+            obj = {
+                width : this._yAxis[0].height,
+                height : this._xAxis.width,
+                origin : {
+                    x : this._xAxis.height + _padding.left,
+                    y : this._yAxis[0].height + _padding.top
+                }
+            }
+        };
+        return obj;
+    }
+
     _initModules()
     {
         this._grid = new Grid( this.grid, this );

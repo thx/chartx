@@ -118,8 +118,8 @@ export default class dataZoom extends Component
         //目前dataZoom是固定在bottom位置的
         //_getDataZoomOpt中会矫正x
         opt.pos = {
-            //x : 0, //x在_getDataZoomOpt中计算
-            y : app.height - app.padding.bottom
+            //x : 0, //x在 _getDataZoomOpt 中计算
+            y : app.height - app.padding.bottom + 6
         };
         
         app.components.push( {
@@ -229,11 +229,19 @@ export default class dataZoom extends Component
 
     static _getDataZoomOpt( opt, app)
     {
+        
+        var w = app._coord.width;
+        if( app._coord._opts.horizontal ){
+            w = app._coord.height;
+        };
+
+        var coordInfo = app._coord.getSizeAndOrigin();
+        
         //初始化 datazoom 模块
         var dataZoomOpt = _.extend(true, {
-            w: app._coord.width,
+            w: coordInfo.width,//app._coord.width,
             pos: {
-                x: app._coord.origin.x,
+                x: coordInfo.origin.x,//app._coord.origin.x,
                 y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
             },
             dragIng: function(range) {
@@ -270,7 +278,7 @@ export default class dataZoom extends Component
         this.sprite.destroy();
     }
 
-    reset( opt , cloneChart )
+    reset( opt , dataFrame )
     {
         
         !opt && ( opt = {} );
@@ -278,9 +286,9 @@ export default class dataZoom extends Component
         var _preCount = this.count;
         var _preStart = this.range.start;
         var _preEnd = this.range.end;
-
+debugger
         opt && _.extend(true, this, opt);
-        this._cloneChart = cloneChart;
+        this._cloneChart = dataZoom._getCloneChart( opt, this.app )//cloneChart;
         this._computeAttrs(opt);
 
         if( 

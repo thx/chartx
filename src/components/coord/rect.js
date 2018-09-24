@@ -130,6 +130,10 @@ export default class Rect extends CoordBase
         padding.left = num;
 
     }
+    drawGraphsEnd()
+    {
+        this._coord.drawGraphsEnd();
+    }
 
     //绘制完毕后的横向处理
     drawEndHorizontal() 
