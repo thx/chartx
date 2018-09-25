@@ -215,7 +215,7 @@ export default class polarComponent extends coorBase
         var me = this;
         //如果用户有主动配置了dataSection,是不需要计算dataSection的
         //目前没有做堆叠的dataSection，后面有需要直接从yAxis的模块中拿
-        if( !this._opts.rAxis.dataSection ){
+        if( !this._opt.rAxis.dataSection ){
             var arr = [];
             _.each( _.flatten( [me.rAxis.field] ), function( field ){
                 arr = arr.concat( me.root.dataFrame.getFieldData( field ) );
@@ -247,10 +247,10 @@ export default class polarComponent extends coorBase
         var rootWidth = this.root.width;
         var rootHeight = this.root.height;
 
-        if( !("width" in this._opts) ){
+        if( !("width" in this._opt) ){
             this.width = rootWidth - _padding.left - _padding.right;
         };
-        if( !("height" in this._opts) ){
+        if( !("height" in this._opt) ){
             this.height = rootHeight - _padding.top - _padding.bottom;
         };
 
@@ -266,7 +266,7 @@ export default class polarComponent extends coorBase
         };
 
 
-        if( !("origin" in this._opts) ){
+        if( !("origin" in this._opt) ){
             //如果没有传入任何origin数据，则默认为中心点
             //origin是相对画布左上角的
             this.origin = {

@@ -22,7 +22,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //后面有些地方比如 一些graphs中会使用dataFrame.org，， 那么这个dataFrame.org和_data的区别是，
         //_data是全量数据， dataFrame.org是_data经过dataZoom运算过后的子集
         this._data = parse2MatrixData(data);
-        this._opts = opt;
+        this._opt = opt;
 
         this.el = getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width = parseInt(this.el.offsetWidth) //图表区域宽
@@ -144,6 +144,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.setCoord_Graphs_Sp();
 
         this.components = []; //组件清空
+        this._coord = null;   //坐标系清空
         this._graphs = [];    //绘图组件清空
         this.canvax.domView.innerHTML = "";
         //padding数据也要重置为起始值
@@ -184,7 +185,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         !opt && (opt={});
 
-        _.extend(true, this._opts, opt);
+        _.extend(true, this._opt, opt);
 
         //和上面的不同this._opts存储的都是用户设置的配置
         //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
@@ -231,10 +232,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         var me = this;
         //TODO: theme 组件优先级最高，在registerComponents之前已经加载过
         var notComponents = [ "coord", "graphs" , "theme" ];
-        for( var _p in this._opts ){
+        for( var _p in this._opt ){
             
             if( _.indexOf( notComponents, _p ) == -1 ){
-                var _comp = this._opts[ _p ];
+                var _comp = this._opt[ _p ];
                 if( ! _.isArray( _comp ) ){
                     _comp = [ _comp ];
                 };

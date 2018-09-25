@@ -9,7 +9,7 @@ export default class GraphsBase extends Canvax.Event.EventDispatcher
         super( opt, root );
 
         //这里所有的opts都要透传给 group
-        this._opts = opt || {};
+        this._opt = opt || {};
         this.root = root;
         this.ctx = root.stage.canvas.getContext("2d");
         this.dataFrame = root.dataFrame; //root.dataFrame的引用

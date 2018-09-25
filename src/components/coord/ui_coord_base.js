@@ -7,7 +7,7 @@ export default class coorBase extends Canvax.Event.EventDispatcher
 	constructor(opt, root){
         super(opt, root);
 
-        this._opts = opt;
+        this._opt = opt;
         this.root  = root;
         this.dataFrame = this.root.dataFrame;
 

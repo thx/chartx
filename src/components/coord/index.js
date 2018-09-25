@@ -19,12 +19,13 @@ export default class Coord extends Chart
         this.dataFrame = this.initData( this._data , opt );
 
         this._graphs = [];
+
+        /*
         if( opt.graphs ){
             opt.graphs = _.flatten( [ opt.graphs ] );
         };
-
         _.extend(true, this, this.setDefaultOpts( opt ));
-        
+        */
         //this.draw();
         
     }
@@ -38,16 +39,22 @@ export default class Coord extends Chart
     //resize（opt=={resize : true}） 和 reset的时候会有 opt参数传过来
     draw( opt )
     {
-        if( this._opts.theme ){
+        !opt && (opt = this._opt);
+        if( opt.graphs ){
+            opt.graphs = _.flatten( [ opt.graphs ] );
+        };
+        _.extend(true, this, this.setDefaultOpts( opt ));
+
+        if( this._opt.theme ){
             //如果用户有配置皮肤组件，优先级最高
             //皮肤就是一组颜色
 
             //假如用户就只传了一个颜色值
-            if( !_.isArray( this._opts.theme ) ){
-                this._opts.theme = [this._opts.theme];
+            if( !_.isArray( this._opt.theme ) ){
+                this._opt.theme = [this._opt.theme];
             };
 
-            var _theme = new this.componentsMap.theme( this._opts.theme, this );
+            var _theme = new this.componentsMap.theme( this._opt.theme, this );
             this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用merge
             
         };

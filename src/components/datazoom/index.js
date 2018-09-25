@@ -40,7 +40,7 @@ export default class dataZoom extends Component
         this.center = {
             eventEnabled: true,
             fillStyle : '#000000',
-            alpha : 0.03
+            alpha : 0.02
         };
 
         this.w = 0;
@@ -151,7 +151,7 @@ export default class dataZoom extends Component
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl);
 
-        //var opt = _.extend(true, {}, me._opts);
+        //var opt = _.extend(true, {}, me._opt);
         //_.extend(true, opt, me.getCloneChart() );
 
         //clone的chart只需要coord 和 graphs 配置就可以了
@@ -162,11 +162,11 @@ export default class dataZoom extends Component
             
             if( _.flatten([_field]).length ) {
 
-                var _opts = _.extend( true, {} , _g._opts );
+                var _opt = _.extend( true, {} , _g._opt );
                 
-                _opts.field = _field;
+                _opt.field = _field;
                 if( _g.type == "bar" ){
-                    _.extend(true, _opts , {
+                    _.extend(true, _opt , {
                         node: {
                             fillStyle: "#ececec",
                             radius: 0
@@ -179,7 +179,7 @@ export default class dataZoom extends Component
                     } )
                 }
                 if( _g.type == "line" ){
-                    _.extend( true,  _opts , {
+                    _.extend( true,  _opt , {
                         line: {
                             //lineWidth: 1,
                             strokeStyle: "#ececec"
@@ -199,18 +199,18 @@ export default class dataZoom extends Component
                     } )
                 }
                 if( _g.type == "scat" ){
-                    _.extend( true, _opts, {
+                    _.extend( true, _opt, {
                         node : {
                             fillStyle : "#ececec"
                         }
                     } )
                 }
 
-                graphsOpt.push( _opts );
+                graphsOpt.push( _opt );
             }
         } );
         var opt = {
-            coord : app._opts.coord,
+            coord : app._opt.coord,
             graphs : graphsOpt
         };
 
@@ -231,7 +231,7 @@ export default class dataZoom extends Component
     {
         
         var w = app._coord.width;
-        if( app._coord._opts.horizontal ){
+        if( app._coord._opt.horizontal ){
             w = app._coord.height;
         };
 

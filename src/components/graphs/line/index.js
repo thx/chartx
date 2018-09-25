@@ -24,7 +24,7 @@ export default class LineGraphs extends GraphsBase
 
         _.extend(true, this, opt);
 
-        this.init(this._opts);
+        this.init(this._opt);
     }
 
     init(opt)
@@ -242,7 +242,7 @@ export default class LineGraphs extends GraphsBase
             var group = new Group(
                 fieldMap,
                 iGroup, //不同于fieldMap.ind
-                me._opts,
+                me._opt,
                 me.ctx,
                 me.height,
                 me.width

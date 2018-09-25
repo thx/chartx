@@ -8012,7 +8012,7 @@
 	        //后面有些地方比如 一些graphs中会使用dataFrame.org，， 那么这个dataFrame.org和_data的区别是，
 	        //_data是全量数据， dataFrame.org是_data经过dataZoom运算过后的子集
 	        _this._data = parse2MatrixData(data);
-	        _this._opts = opt;
+	        _this._opt = opt;
 
 	        _this.el = getEl(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
 	        _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
@@ -8135,6 +8135,7 @@
 	            this.setCoord_Graphs_Sp();
 
 	            this.components = []; //组件清空
+	            this._coord = null; //坐标系清空
 	            this._graphs = []; //绘图组件清空
 	            this.canvax.domView.innerHTML = "";
 	            //padding数据也要重置为起始值
@@ -8179,7 +8180,7 @@
 	        value: function reset(opt, data) {
 	            !opt && (opt = {});
 
-	            _$5.extend(true, this._opts, opt);
+	            _$5.extend(true, this._opt, opt);
 
 	            //和上面的不同this._opts存储的都是用户设置的配置
 	            //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
@@ -8224,10 +8225,10 @@
 	            var me = this;
 	            //TODO: theme 组件优先级最高，在registerComponents之前已经加载过
 	            var notComponents = ["coord", "graphs", "theme"];
-	            for (var _p in this._opts) {
+	            for (var _p in this._opt) {
 
 	                if (_$5.indexOf(notComponents, _p) == -1) {
-	                    var _comp = this._opts[_p];
+	                    var _comp = this._opt[_p];
 	                    if (!_$5.isArray(_comp)) {
 	                        _comp = [_comp];
 	                    }                    _$5.each(_comp, function (compOpt) {
@@ -8356,11 +8357,13 @@
 	        _this.dataFrame = _this.initData(_this._data, opt);
 
 	        _this._graphs = [];
-	        if (opt.graphs) {
-	            opt.graphs = _$6.flatten([opt.graphs]);
-	        }
-	        _$6.extend(true, _this, _this.setDefaultOpts(opt));
 
+	        /*
+	        if( opt.graphs ){
+	            opt.graphs = _.flatten( [ opt.graphs ] );
+	        };
+	        _.extend(true, this, this.setDefaultOpts( opt ));
+	        */
 	        //this.draw();
 
 	        return _this;
@@ -8379,15 +8382,20 @@
 	    }, {
 	        key: "draw",
 	        value: function draw(opt) {
-	            if (this._opts.theme) {
+	            !opt && (opt = this._opt);
+	            if (opt.graphs) {
+	                opt.graphs = _$6.flatten([opt.graphs]);
+	            }            _$6.extend(true, this, this.setDefaultOpts(opt));
+
+	            if (this._opt.theme) {
 	                //如果用户有配置皮肤组件，优先级最高
 	                //皮肤就是一组颜色
 
 	                //假如用户就只传了一个颜色值
-	                if (!_$6.isArray(this._opts.theme)) {
-	                    this._opts.theme = [this._opts.theme];
+	                if (!_$6.isArray(this._opt.theme)) {
+	                    this._opt.theme = [this._opt.theme];
 	                }
-	                var _theme = new this.componentsMap.theme(this._opts.theme, this);
+	                var _theme = new this.componentsMap.theme(this._opt.theme, this);
 	                this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用merge
 	            }            this.initModule(opt); //初始化模块  
 	            this.initComponents(opt); //初始化组件, 来自己chart.js模块
@@ -8580,7 +8588,7 @@
 
 	        var _this = possibleConstructorReturn$1(this, (coorBase.__proto__ || Object.getPrototypeOf(coorBase)).call(this, opt, root));
 
-	        _this._opts = opt;
+	        _this._opt = opt;
 	        _this.root = root;
 	        _this.dataFrame = _this.root.dataFrame;
 
@@ -11612,7 +11620,7 @@
 	            var me = this;
 	            //如果用户有主动配置了dataSection,是不需要计算dataSection的
 	            //目前没有做堆叠的dataSection，后面有需要直接从yAxis的模块中拿
-	            if (!this._opts.rAxis.dataSection) {
+	            if (!this._opt.rAxis.dataSection) {
 	                var arr = [];
 	                _$15.each(_$15.flatten([me.rAxis.field]), function (field) {
 	                    arr = arr.concat(me.root.dataFrame.getFieldData(field));
@@ -11642,9 +11650,9 @@
 	            var rootWidth = this.root.width;
 	            var rootHeight = this.root.height;
 
-	            if (!("width" in this._opts)) {
+	            if (!("width" in this._opt)) {
 	                this.width = rootWidth - _padding.left - _padding.right;
-	            }            if (!("height" in this._opts)) {
+	            }            if (!("height" in this._opt)) {
 	                this.height = rootHeight - _padding.top - _padding.bottom;
 	            }
 	            if (this.aAxis.enabled) {
@@ -11656,7 +11664,7 @@
 	                var _num = Math.min(this.width, this.height);
 	                this.width = this.height = _num;
 	            }
-	            if (!("origin" in this._opts)) {
+	            if (!("origin" in this._opt)) {
 	                //如果没有传入任何origin数据，则默认为中心点
 	                //origin是相对画布左上角的
 	                this.origin = {
@@ -12158,7 +12166,7 @@
 	        //这里所有的opts都要透传给 group
 	        var _this = possibleConstructorReturn$1(this, (GraphsBase.__proto__ || Object.getPrototypeOf(GraphsBase)).call(this, opt, root));
 
-	        _this._opts = opt || {};
+	        _this._opt = opt || {};
 	        _this.root = root;
 	        _this.ctx = root.stage.canvas.getContext("2d");
 	        _this.dataFrame = root.dataFrame; //root.dataFrame的引用
@@ -13946,7 +13954,7 @@
 
 	        _$20.extend(true, _this, opt);
 
-	        _this.init(_this._opts);
+	        _this.init(_this._opt);
 	        return _this;
 	    }
 
@@ -14160,7 +14168,7 @@
 	                var iGroup = _$20.indexOf(_flattenField, field);
 
 	                var group = new LineGraphsGroup(fieldMap, iGroup, //不同于fieldMap.ind
-	                me._opts, me.ctx, me.height, me.width);
+	                me._opt, me.ctx, me.height, me.width);
 
 	                group.draw({
 	                    animation: me.animation && !opt.resize
@@ -16930,7 +16938,7 @@
 	        classCallCheck$1(this, PlanetGroup);
 
 
-	        this._opts = opt;
+	        this._opt = opt;
 	        this.dataFrame = dataFrame;
 	        this._graphs = _graphs;
 	        this.root = _graphs.root;
@@ -17615,7 +17623,7 @@
 	                    },
 	                    width: me.width - _circleMaxR * 2,
 	                    height: me.height - _circleMaxR * 2
-	                }, me._opts), df, me);
+	                }, me._opt), df, me);
 
 	                groupRStart = _g.rRange.to;
 
@@ -21694,7 +21702,7 @@
 	        _this.center = {
 	            eventEnabled: true,
 	            fillStyle: '#000000',
-	            alpha: 0.03
+	            alpha: 0.02
 	        };
 
 	        _this.w = 0;
@@ -22205,7 +22213,7 @@
 	            cloneEl.style.top = "10000px";
 	            document.body.appendChild(cloneEl);
 
-	            //var opt = _.extend(true, {}, me._opts);
+	            //var opt = _.extend(true, {}, me._opt);
 	            //_.extend(true, opt, me.getCloneChart() );
 
 	            //clone的chart只需要coord 和 graphs 配置就可以了
@@ -22216,11 +22224,11 @@
 
 	                if (_$33.flatten([_field]).length) {
 
-	                    var _opts = _$33.extend(true, {}, _g._opts);
+	                    var _opt = _$33.extend(true, {}, _g._opt);
 
-	                    _opts.field = _field;
+	                    _opt.field = _field;
 	                    if (_g.type == "bar") {
-	                        _$33.extend(true, _opts, {
+	                        _$33.extend(true, _opt, {
 	                            node: {
 	                                fillStyle: "#ececec",
 	                                radius: 0
@@ -22233,7 +22241,7 @@
 	                        });
 	                    }
 	                    if (_g.type == "line") {
-	                        _$33.extend(true, _opts, {
+	                        _$33.extend(true, _opt, {
 	                            line: {
 	                                //lineWidth: 1,
 	                                strokeStyle: "#ececec"
@@ -22253,18 +22261,18 @@
 	                        });
 	                    }
 	                    if (_g.type == "scat") {
-	                        _$33.extend(true, _opts, {
+	                        _$33.extend(true, _opt, {
 	                            node: {
 	                                fillStyle: "#ececec"
 	                            }
 	                        });
 	                    }
 
-	                    graphsOpt.push(_opts);
+	                    graphsOpt.push(_opt);
 	                }
 	            });
 	            var opt = {
-	                coord: app._opts.coord,
+	                coord: app._opt.coord,
 	                graphs: graphsOpt
 	            };
 
@@ -22284,7 +22292,7 @@
 	        value: function _getDataZoomOpt(opt, app) {
 
 	            var w = app._coord.width;
-	            if (app._coord._opts.horizontal) {
+	            if (app._coord._opt.horizontal) {
 	                w = app._coord.height;
 	            }
 	            var coordInfo = app._coord.getSizeAndOrigin();

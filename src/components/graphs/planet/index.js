@@ -189,7 +189,7 @@ export default class PlanetGraphs extends GraphsBase
                 },
                 width : me.width - _circleMaxR*2,
                 height: me.height - _circleMaxR*2
-            }, me._opts) , df , me );
+            }, me._opt) , df , me );
 
             groupRStart = _g.rRange.to;
 

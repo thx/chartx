@@ -10,7 +10,7 @@ export default class PlanetGroup
     constructor(opt, dataFrame , _graphs)
     {
     
-        this._opts = opt;
+        this._opt = opt;
         this.dataFrame = dataFrame;
         this._graphs = _graphs;
         this.root = _graphs.root;
