@@ -1,3 +1,5 @@
+//https://babeljs.io/repl/#?babili=false&evaluate=true&lineWrap=false&presets=es2015%2Creact%2Cstage-0&code=function%20hello()%20%7B%0A%20%20return%20%3Cdiv%3EHello%20world!%3C%2Fdiv%3E%3B%0A%7D
+//用上面的地址转换成es的react模块，不用jsx
 import React from "react"
 import Chartx from "./index"
 
@@ -18,9 +20,8 @@ class chartxReact extends React.Component {
     this.myRef = React.createRef();
 
     this.chart = null;
-    this.state = {
-        options : this.getChartOptions() //最终用来渲染的options，如果有props.chartId和props.options，两者会做一次extend
-    };
+
+    this.chartOptions = this.getChartOptions(); //最终用来渲染的options，如果有props.chartId和props.options，两者会做一次extend
 
   }
 
@@ -29,9 +30,9 @@ class chartxReact extends React.Component {
    * 如果是width，height的改变，而且原来的width 和 height是绝对值的情况下，则需要重新渲染dom
    */
   shouldComponentUpdate(nextProps, nextState){
+    this.updateChart(nextProps, nextState);
     if( nextProps.width == this.props.width && nextProps.height == this.props.height && nextProps.className == this.props.className ){
-      this.updateChart(nextProps, nextState);
-      return false
+      return false;
     };
     return true;
   }
@@ -41,8 +42,6 @@ class chartxReact extends React.Component {
    * 组件update完毕，reset对应的图表实例
    */
   componentDidUpdate(nextProps, nextState){
-    //目前不建议也不支持reset、resetData 和 resize 同步执行
-    //this.updateChart(nextProps, nextState);
     Chartx.resize();
   }
 
@@ -76,7 +75,7 @@ class chartxReact extends React.Component {
     const dom   = this.myRef.current;
     let data    = this.props.data;
 
-    this.chart = Chartx.create( dom, data, this.state.options );
+    this.chart = Chartx.create( dom, data, this.chartOptions );
 
     if( !Chartx._registWindowOnResize ){
       //整个Chartx只需要注册一次window.onresize就够了
@@ -95,8 +94,8 @@ class chartxReact extends React.Component {
     this.chart.destroy();
   }
 
-  getChartOptions(){
-    let options = this.props.options;
+  getChartOptions( props ){
+    let options = props ? props.options : this.props.options;
     if( this.props.chartId ){
       //options = Object.assign( Chartx.getOptions( this.props.chartId ), options );
       options = Chartx.canvax._.extend( true, Chartx.getOptions( this.props.chartId ), options );
@@ -130,15 +129,13 @@ class chartxReact extends React.Component {
 
   updateChart(nextProps, nextState){
     //如果dom容器不需要重新渲染，但是还是要检测下options 和 data， 单独来reset图表对象
-    let newChartOptions = this.getChartOptions();
-    if( JSON.stringify( this.state.options ) != JSON.stringify( newChartOptions ) ){
-
-      this.setState({
-        options : newChartOptions
-      });
+    let newChartOptions = this.getChartOptions( nextProps );
+    let optionsChange = JSON.stringify( this.chartOptions ) != JSON.stringify( newChartOptions );
+    let dataChange = JSON.stringify( this.props.data ) != JSON.stringify( nextProps.data );
+    if( optionsChange ){
+      this.chartOptions = newChartOptions;
       this.chart.reset( newChartOptions, nextProps.data );
-
-    } else if( JSON.stringify( this.props.data ) != JSON.stringify( nextProps.data ) ){
+    } else if( dataChange ){
       this.chart.resetData( nextProps.data );
     };
 

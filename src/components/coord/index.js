@@ -40,10 +40,14 @@ export default class Coord extends Chart
     draw( opt )
     {
         !opt && (opt = this._opt);
-        if( opt.graphs ){
-            opt.graphs = _.flatten( [ opt.graphs ] );
+        
+        if( !opt.resize ){
+            //如果是resize的话，是不需要处理默认值的
+            if( opt.graphs ){
+                opt.graphs = _.flatten( [ opt.graphs ] );
+            };
+            _.extend(true, this, this.setDefaultOpts( opt ));
         };
-        _.extend(true, this, this.setDefaultOpts( opt ));
 
         if( this._opt.theme ){
             //如果用户有配置皮肤组件，优先级最高
