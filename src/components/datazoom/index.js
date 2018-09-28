@@ -6,6 +6,60 @@ const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 const _ = Canvax._;
 
+const defaultProps = {
+    height : 26,
+    width  : 100,
+    pos : {
+        x: 0,
+        y: 0
+    },
+    offset : { //还没实现
+        x: 0,
+        y: 0
+    },
+    margin: {
+        top: 5, right: 0, bottom: 5, left: 0
+    }, //以上部分是所有组件后续都要实现的
+
+    range : {//0-1
+        start: 0,
+        end : null,
+        max : null, //可以外围控制智能在哪个区间拖动
+        min : 1  //最少至少选中了一个数据
+    },
+    color : "#008ae6",
+    left : { 
+        eventEnabled : true,
+        fillStyle : null,
+    },
+    right : { 
+        eventEnabled : true,
+        fillStyle: null
+    },
+    btnOut : 6, //left,right按钮突出的大小
+    btnHeight : 20,//left,right按钮的高，不在left，right下面，统一在这个属性里， 以为要强制保持一致
+    btnWidth : 8,//left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致
+
+    center : {
+        eventEnabled: true,
+        fillStyle : '#000000',
+        alpha : 0.015
+    },
+    bg : {
+        enabled : true,
+        fillStyle : "",
+        strokeStyle: "#e6e6e6",
+        lineWidth : 1
+    },
+    underline : {
+        enabled : true,
+        strokeStyle : null,
+        lineWidth : 2
+    },
+    position : "bottom", //图例所在的方向top,right,bottom,left
+    hv : "h" //横向 top,bottom --> h left,right -- >v
+};
+
 export default class dataZoom extends Component
 {
 
@@ -14,72 +68,23 @@ export default class dataZoom extends Component
         super(opt, cloneChart);
         
         this._cloneChart = cloneChart;
-
-		//0-1
-        this.range = {
-            start: 0,
-            end : null,
-            max : null, //可以外围控制智能在哪个区间拖动
-            min : 1  //最少至少选中了一个数据
-        };
         
         this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
         this.dataLen = 1;
-        this.layoutType = cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
-
-        this.pos = {
-            x: 0,
-            y: 0
-        };
-        this.left = {
-            eventEnabled : true
-        };
-        this.right = {
-            eventEnabled : true
-        };
-        this.center = {
-            eventEnabled: true,
-            fillStyle : '#000000',
-            alpha : 0.02
-        };
-
-        this.w = 0;
-        this.h = 26;
-
-        this.color = opt.color || "#008ae6";
-
-        this.bg = {
-            enabled : true,
-            fillStyle : "",
-            strokeStyle: "#e6e6e6",
-            lineWidth : 1
-        }
-
-        this.underline = {
-            enabled : true,
-            strokeStyle : this.color,
-            lineWidth : 2
-        }
+        this.axisLayoutType = cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this.dragIng = function(){};
         this.dragEnd = function(){};
-
         
         this.disPart = {};
-        this.barAddH = 8;
-        this.barH = this.h - this.barAddH;
-        this.barY = 0//6 / 2;
-        this.btnW = 8;
-        this.btnFillStyle = this.color;
+
         this._btnLeft = null;
         this._btnRight = null;
         this._underline = null;
 
-        this.zoomBg = null;
-
         opt && _.extend( true, this, opt);
         this._computeAttrs( opt );
-        
+
         this.sprite = new Canvax.Display.Sprite({
             id : "dataZoom",
             context: {
@@ -109,18 +114,26 @@ export default class dataZoom extends Component
         let me = this;
 
         //预设默认的opt.dataZoom
-        opt = _.extend( {
-            h : 26
-        } , opt)
+        opt = _.extend( true, defaultProps , opt);
 
-        app.padding.bottom += opt.h;
-
-        //目前dataZoom是固定在bottom位置的
-        //_getDataZoomOpt中会矫正x
-        opt.pos = {
-            //x : 0, //x在 _getDataZoomOpt 中计算
-            y : app.height - app.padding.bottom + 6
+        if( opt.position == "bottom" ){
+            debugger
+            //目前dataZoom是固定在bottom位置的
+            //_getDataZoomOpt中会矫正x
+            opt.pos = {
+                x : 0, //x在 _getDataZoomOpt 中计算
+                y : app.height - (opt.height + app.padding.bottom + opt.margin.bottom)
+            };
+            app.padding.bottom += (opt.height + opt.margin.top + opt.margin.bottom);
+        }
+        if( opt.position == "top" ){
+            opt.pos = {
+                x : 0, //x在 _getDataZoomOpt 中计算
+                y : app.padding.top + opt.margin.top
+            };
+            app.padding.top += (opt.height + opt.margin.top + opt.margin.bottom);
         };
+        
         
         app.components.push( {
             type : "once",
@@ -230,19 +243,19 @@ export default class dataZoom extends Component
     static _getDataZoomOpt( opt, app)
     {
         
-        var w = app._coord.width;
+        var width = app._coord.width;
         if( app._coord._opt.horizontal ){
-            w = app._coord.height;
+            width = app._coord.height;
         };
 
         var coordInfo = app._coord.getSizeAndOrigin();
         
         //初始化 datazoom 模块
-        var dataZoomOpt = _.extend(true, {
-            w: coordInfo.width,//app._coord.width,
+        var dataZoomOpt = _.extend(true, opt, {
+            width: coordInfo.width,//app._coord.width,
             pos: {
-                x: coordInfo.origin.x,//app._coord.origin.x,
-                y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
+                x: coordInfo.origin.x//app._coord.origin.x,
+                //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
             },
             dragIng: function(range) {
                 var trigger = {
@@ -261,7 +274,7 @@ export default class dataZoom extends Component
                 app.updateChecked && app.updateChecked();
                 app.fire("dataZoomDragEnd");
             }
-        }, opt);
+        });
 
         return dataZoomOpt
     }
@@ -286,7 +299,7 @@ export default class dataZoom extends Component
         var _preCount = this.count;
         var _preStart = this.range.start;
         var _preEnd = this.range.end;
-debugger
+
         opt && _.extend(true, this, opt);
         this._cloneChart = dataZoom._getCloneChart( opt, this.app )//cloneChart;
         this._computeAttrs(opt);
@@ -307,17 +320,26 @@ debugger
         var _cloneChart = this._cloneChart.thumbChart
 
         this.dataLen = _cloneChart._data.length - 1;
-        this.count = this.layoutType == "rule" ? this.dataLen-1 : this.dataLen;
+        this.count = this.axisLayoutType == "rule" ? this.dataLen-1 : this.dataLen;
         
         if(!this.range.max || this.range.max > this.count){
             this.range.max = this.count;
-        }
+        };
         if( !this.range.end || this.range.end > this.dataLen - 1 ){
             this.range.end = this.dataLen - 1;
-        }
+        };
+
+        //如果用户没有配置layoutType但是配置了position
+        if( !opt.hv && opt.position ){
+            if( this.position == "left" || this.position == "right" ){
+                this.hv = 'v';
+            } else {
+                this.hv = 'h';
+            };
+        };
         
         this.disPart = this._getDisPart();
-        this.barH = this.h - this.barAddH;
+        this.btnHeight = this.height - this.btnOut;
     }
 
     _getRangeEnd( end )
@@ -325,7 +347,7 @@ debugger
         if( end === undefined ){
             end = this.range.end;
         }
-        if( this.layoutType == "peak" ){
+        if( this.axisLayoutType == "peak" ){
             end += 1;
         };
         return end
@@ -341,9 +363,9 @@ debugger
         if(me.bg.enabled){
             var bgRectCtx = {
                 x: 0,
-                y: me.barY,
-                width: me.w,
-                height: me.barH,
+                y: 0,
+                width: me.width,
+                height: me.btnHeight,
                 lineWidth: me.bg.lineWidth,
                 strokeStyle: me.bg.strokeStyle,
                 fillStyle: me.bg.fillStyle
@@ -364,15 +386,15 @@ debugger
         if(me.underline.enabled){
             var underlineCtx = {
                 start : {
-                    x : me.range.start / me.count * me.w + me.btnW / 2,
-                    y : me.barY + me.barH
+                    x : me.range.start / me.count * me.width + me.btnWidth / 2,
+                    y : me.btnHeight
                 },
                 end : {
-                    x : me._getRangeEnd() / me.count * me.w  - me.btnW / 2,
-                    y : me.barY + me.barH
+                    x : me._getRangeEnd() / me.count * me.width  - me.btnWidth / 2,
+                    y : me.btnHeight
                 },
                 lineWidth : me.underline.lineWidth,
-                strokeStyle : me.underline.strokeStyle
+                strokeStyle : me.underline.strokeStyle || me.color
             };
 
             if( me._underline ){
@@ -388,11 +410,11 @@ debugger
 
 
         var btnLeftCtx = {
-            x: me.range.start / me.count * me.w,
-            y: me.barY - me.barAddH / 2 + 1,
-            width: me.btnW,
-            height: me.barH + me.barAddH,
-            fillStyle : me.btnFillStyle,
+            x: me.range.start / me.count * me.width,
+            y: - me.btnOut / 2 + 1,
+            width: me.btnWidth,
+            height: me.btnHeight + me.btnOut,
+            fillStyle : me.left.fillStyle || me.color,
             cursor: me.left.eventEnabled && "move"
         }
         if(me._btnLeft){
@@ -407,21 +429,21 @@ debugger
             });
             me._btnLeft.on("draging" , function(e){
                 
-                this.context.y = me.barY - me.barAddH / 2 + 1
+                this.context.y = - me.btnOut / 2 + 1
                 if(this.context.x < 0){
                     this.context.x = 0;
                 };
-                if(this.context.x > (me._btnRight.context.x - me.btnW - 2)){
-                    this.context.x = me._btnRight.context.x - me.btnW - 2
+                if(this.context.x > (me._btnRight.context.x - me.btnWidth - 2)){
+                    this.context.x = me._btnRight.context.x - me.btnWidth - 2
                 };
-                if(me._btnRight.context.x + me.btnW - this.context.x > me.disPart.max){
-                    this.context.x = me._btnRight.context.x + me.btnW - me.disPart.max
+                if(me._btnRight.context.x + me.btnWidth - this.context.x > me.disPart.max){
+                    this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.max
                 }
-                if(me._btnRight.context.x + me.btnW - this.context.x < me.disPart.min){
-                    this.context.x = me._btnRight.context.x + me.btnW - me.disPart.min
+                if(me._btnRight.context.x + me.btnWidth - this.context.x < me.disPart.min){
+                    this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.min
                 }
-                me.rangeRect.context.width = me._btnRight.context.x - this.context.x - me.btnW;
-                me.rangeRect.context.x = this.context.x + me.btnW;
+                me.rangeRect.context.width = me._btnRight.context.x - this.context.x - me.btnWidth;
+                me.rangeRect.context.x = this.context.x + me.btnWidth;
 
                 me._setRange();
 
@@ -433,11 +455,11 @@ debugger
         };
 
         var btnRightCtx = {
-            x: me._getRangeEnd() / me.count * me.w - me.btnW,
-            y: me.barY - me.barAddH / 2 + 1,
-            width: me.btnW,
-            height: me.barH + me.barAddH ,
-            fillStyle : me.btnFillStyle,
+            x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
+            y: - me.btnOut / 2 + 1,
+            width: me.btnWidth,
+            height: me.btnHeight + me.btnOut ,
+            fillStyle : me.right.fillStyle || me.color,
             cursor : me.right.eventEnabled && "move"
         };
 
@@ -454,21 +476,20 @@ debugger
 
             me._btnRight.on("draging" , function(e){
                 
-                this.context.y = me.barY - me.barAddH / 2 + 1
-                if( this.context.x > me.w - me.btnW ){
-                    this.context.x = me.w - me.btnW;
+                this.context.y = - me.btnOut / 2 + 1
+                if( this.context.x > me.width - me.btnWidth ){
+                    this.context.x = me.width - me.btnWidth;
                 };
-                if( this.context.x + me.btnW - me._btnLeft.context.x > me.disPart.max){
-                    this.context.x = me.disPart.max - (me.btnW - me._btnLeft.context.x)
+                if( this.context.x + me.btnWidth - me._btnLeft.context.x > me.disPart.max){
+                    this.context.x = me.disPart.max - (me.btnWidth - me._btnLeft.context.x)
                 };
-                if( this.context.x + me.btnW - me._btnLeft.context.x < me.disPart.min){
-                    this.context.x = me.disPart.min - me.btnW + me._btnLeft.context.x;
+                if( this.context.x + me.btnWidth - me._btnLeft.context.x < me.disPart.min){
+                    this.context.x = me.disPart.min - me.btnWidth + me._btnLeft.context.x;
                 };
-                me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnW;
+                me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnWidth;
                 me._setRange();
             });
             me._btnRight.on("dragend" , function(e){
-                
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnRight );
@@ -476,10 +497,10 @@ debugger
 
 
         var rangeRectCtx = {
-            x : btnLeftCtx.x + me.btnW,
-            y : this.barY + 1,
-            width : btnRightCtx.x - btnLeftCtx.x - me.btnW,
-            height : this.barH - 1,
+            x : btnLeftCtx.x + me.btnWidth,
+            y : 1,
+            width : btnRightCtx.x - btnLeftCtx.x - me.btnWidth,
+            height : this.btnHeight - 1,
             fillStyle : me.center.fillStyle,
             fillAlpha : me.center.alpha,
             cursor : "move"
@@ -497,14 +518,14 @@ debugger
             });
             this.rangeRect.on("draging" , function(e){
                 
-                this.context.y = me.barY + 1;
-                if( this.context.x < me.btnW ){
-                    this.context.x = me.btnW; 
+                this.context.y = 1;
+                if( this.context.x < me.btnWidth ){
+                    this.context.x = me.btnWidth; 
                 };
-                if( this.context.x > me.w - this.context.width - me.btnW ){
-                    this.context.x = me.w - this.context.width - me.btnW;
+                if( this.context.x > me.width - this.context.width - me.btnWidth ){
+                    this.context.x = me.width - this.context.width - me.btnWidth;
                 };
-                me._btnLeft.context.x  = this.context.x - me.btnW;
+                me._btnLeft.context.x  = this.context.x - me.btnWidth;
                 me._btnRight.context.x = this.context.x + this.context.width;
                 me._setRange( "btnCenter" );
 
@@ -541,7 +562,7 @@ debugger
                 count  : 3,
                 // dis    : 1,
                 sprite : this.linesCenter,
-                strokeStyle : this.btnFillStyle
+                strokeStyle : this.color
             });
             this.dataZoomBtns.addChild( this.linesCenter );
         };
@@ -551,15 +572,15 @@ debugger
     _getDisPart()
     {
         var me = this;
-        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.w), 23 );
+        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
         //柱状图用得这种x轴布局，不需要 /2
-        if( this.layoutType == "peak" ){
-            min = Math.max( parseInt(me.range.min / me.count * me.w), 23 );
+        if( this.axisLayoutType == "peak" ){
+            min = Math.max( parseInt(me.range.min / me.count * me.width), 23 );
         };
 
         return {
             min : min,
-            max : parseInt(me.range.max / me.count * me.w)
+            max : parseInt(me.range.max / me.count * me.width)
         }
     }
 
@@ -569,10 +590,10 @@ debugger
         var _end = me._getRangeEnd();
         var _preDis = _end - me.range.start;
 
-        var start = (me._btnLeft.context.x / me.w) * me.count;
-        var end =  ((me._btnRight.context.x + me.btnW) / me.w) * me.count;
+        var start = (me._btnLeft.context.x / me.width) * me.count;
+        var end =  ((me._btnRight.context.x + me.btnWidth) / me.width) * me.count;
 
-        if( this.layoutType == "peak" ){
+        if( this.axisLayoutType == "peak" ){
             start = Math.round( start );
             end = Math.round( end );
         } else {
@@ -591,7 +612,7 @@ debugger
 
         if( start != me.range.start || end != _end ){
             me.range.start = start;
-            if( me.layoutType == "peak" ){
+            if( me.axisLayoutType == "peak" ){
                 end -= 1;
             };
             me.range.end = end;
@@ -624,8 +645,8 @@ debugger
         linesCenter.context.y = btnCenter.context.y + (btnCenter.context.height - linesCenter.context.height ) / 2
 
         if( me.underline.enabled ){
-            me._underline.context.start.x = linesLeft.context.x + me.btnW / 2;
-            me._underline.context.end.x =linesRight.context.x + me.btnW / 2;
+            me._underline.context.start.x = linesLeft.context.x + me.btnWidth / 2;
+            me._underline.context.end.x =linesRight.context.x + me.btnWidth / 2;
         }
     }
 
@@ -682,9 +703,9 @@ debugger
         graphssp.context.x = -_coor.origin.x; //0;
 
         //TODO:这里为什么要 -2 的原因还没查出来。
-        graphssp.context.y = this.barY - 2;//this.barH + this.barY;
-        graphssp.context.scaleY = this.barH / _coor.height;
-        graphssp.context.scaleX = this.w / _coor.width;
+        graphssp.context.y = - 2;
+        graphssp.context.scaleY = this.btnHeight / _coor.height;
+        graphssp.context.scaleX = this.width / _coor.width;
 
         this.dataZoomBg.addChild( graphssp , 0);
 

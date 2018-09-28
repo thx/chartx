@@ -62,6 +62,7 @@ export default class Coord extends Chart
             this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用merge
             
         };
+        
         this.initModule( opt );     //初始化模块  
         this.initComponents( opt ); //初始化组件, 来自己chart.js模块
 

@@ -42,10 +42,22 @@ export default class PlanetGroup
             focus : {
                 enabled : true
             },
+            /*
             select : {
                 enabled : true,
                 lineWidth : 2,
                 strokeStyle : "#666"
+            },
+            */
+            //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+            select : {
+                enabled : false,
+                alpha : 0.2,
+                strokeStyle : null,
+                _strokeStyle : "#092848", //和bar.fillStyle一样可以支持array function
+                triggerEventType : "click",
+                lineWidth : 2,
+                inds : [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
             }
         };
 
@@ -422,6 +434,16 @@ export default class PlanetGroup
             
                      //fire到root上面去的是为了让root去处理tips
                      me.root.fire( e.type, e );
+                     if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
+                        //如果开启了图表的选中交互
+                        var ind = me.dataFrame.range.start + this.iNode;
+                        if( _.indexOf( me.node.select.inds, ind ) > -1 ){
+                            //说明已经选中了
+                            me.unselectAt( ind );
+                        } else {
+                            me.selectAt( ind );
+                        }
+                    };
                      me._graphs.triggerEvent( me.node , e );
                  });
 

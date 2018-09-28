@@ -91,10 +91,11 @@ export default class Rect_Component extends coorBase
             _yAxis.resetData( yAxisDataFrame );
         } );
 
+        var _yAxis = this._yAxisLeft || this._yAxisRight;
         this._grid.reset({
             animation:false,
             xDirection: {
-                data: this._yAxisLeft.layoutData
+                data: _yAxis.layoutData
             }
         });
     }
@@ -201,19 +202,26 @@ export default class Rect_Component extends coorBase
     }
 
     getSizeAndOrigin(){
-        var _padding = this.root.padding;
+        
         var obj = {
             width : this.width,
             height : this.height,
             origin : this.origin
         };
         if( this.horizontal ){
+            var _padding = this.root.padding;
+            //因为在drawBeginHorizontal中
+            //横向了之后， 要把4个padding值轮换换过了
+            //top,right 对调 ， bottom,left 对调
+            //所以，这里要对调换回来给到origin
+            var left = _padding.bottom;
+            var top = _padding.right;
             obj = {
                 width : this._yAxis[0].height,
                 height : this._xAxis.width,
                 origin : {
-                    x : this._xAxis.height + _padding.left,
-                    y : this._yAxis[0].height + _padding.top
+                    x : this._xAxis.height + left,
+                    y : this._yAxis[0].height + top
                 }
             }
         };

@@ -58,19 +58,24 @@ export default class Legend extends Component
 
         this.position = "top" ; //图例所在的方向top,right,bottom,left
 
-        this.layoutType = "h"; //横向 top,bottom --> h left,right -- >v
+        this.hv = "h"; //横向 top,bottom --> h left,right -- >v
 
         this.sprite  = null;
 
         if( opt ){
             _.extend(true, this , opt );
+
+            if( !opt.hv && opt.position ){
+                if( this.position == "left" || this.position == "right" ){
+                    this.hv = 'v';
+                } else {
+                    this.hv = 'h';
+                };
+            };
+            
         };
 
-        if( this.position == "left" || this.position == "right" ){
-            this.layoutType = 'v';
-        } else {
-            this.layoutType = 'h';
-        };
+        
 
         this.sprite = new Canvax.Display.Sprite({
             id : "LegendSprite"
@@ -109,7 +114,7 @@ export default class Legend extends Component
         //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
         var _legend = new this( legendData, legendOpt, app );
         
-        if( _legend.layoutType == "h" ){
+        if( _legend.hv == "h" ){
             app.padding[ _legend.position ] += _legend.height;
         } else {
             app.padding[ _legend.position ] += _legend.width;
@@ -243,7 +248,7 @@ export default class Legend extends Component
                 height : me.icon.height
             };
 
-            if( me.layoutType == "v" ){
+            if( me.hv == "v" ){
                 if( y + me.icon.height > viewHeight ){
                     if( x > viewWidth*0.3 ){
                         isOver = true;
@@ -304,7 +309,7 @@ export default class Legend extends Component
 
         } );
 
-        if( this.layoutType == "h" ){
+        if( this.hv == "h" ){
             me.width = me.sprite.context.width  = width;
             me.height = me.sprite.context.height = me.icon.height * rows;
         } else {

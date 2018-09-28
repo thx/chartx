@@ -25,24 +25,25 @@ class chartxReact extends React.Component {
 
   }
 
-  /**
-   * 如果是options，data的props改变，则不需要重新渲染dom，只执行图表的渲染
-   * 如果是width，height的改变，而且原来的width 和 height是绝对值的情况下，则需要重新渲染dom
-   */
-  shouldComponentUpdate(nextProps, nextState){
-    this.updateChart(nextProps, nextState);
-    if( nextProps.width == this.props.width && nextProps.height == this.props.height && nextProps.className == this.props.className ){
-      return false;
-    };
-    return true;
-  }
-
 
   /**
    * 组件update完毕，reset对应的图表实例
    */
-  componentDidUpdate(nextProps, nextState){
-    Chartx.resize();
+  componentDidUpdate(prevProps, prevState){
+    if (prevProps.width != this.props.width || prevProps.height != this.props.height || prevProps.className != this.props.className) {
+      this.chart.resize();
+    };
+
+    var newChartOptions = this.getChartOptions(this.props);
+    var optionsChange = (JSON.stringify( this.getChartOptions(prevProps) ) != JSON.stringify(newChartOptions));
+    var dataChange = (JSON.stringify(this.props.data) != JSON.stringify(prevProps.data));
+    if (optionsChange) {
+      this.chartOptions = newChartOptions;
+      this.chart.reset(newChartOptions, this.props.data);
+    } else if (dataChange) {
+      this.chart.resetData(this.props.data);
+    };
+
   }
 
   /**
@@ -125,20 +126,6 @@ class chartxReact extends React.Component {
         }
       }
     };
-  }
-
-  updateChart(nextProps, nextState){
-    //如果dom容器不需要重新渲染，但是还是要检测下options 和 data， 单独来reset图表对象
-    let newChartOptions = this.getChartOptions( nextProps );
-    let optionsChange = JSON.stringify( this.chartOptions ) != JSON.stringify( newChartOptions );
-    let dataChange = JSON.stringify( this.props.data ) != JSON.stringify( nextProps.data );
-    if( optionsChange ){
-      this.chartOptions = newChartOptions;
-      this.chart.reset( newChartOptions, nextProps.data );
-    } else if( dataChange ){
-      this.chart.resetData( nextProps.data );
-    };
-
   }
 
 }
