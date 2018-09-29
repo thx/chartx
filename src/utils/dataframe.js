@@ -46,10 +46,22 @@ export default function( data, opt ){
     if( opt && opt.dataZoom && opt.dataZoom.range ){
         _.extend( dataFrame.range, opt.dataZoom.range );
     };
-    
+
+    if( data.length && data[0].length && !~data[0].indexOf("__index__") ){
+        //如果数据中没有用户自己设置的__index__，那么就主动添加一个__index__，来记录元数据中的index
+        for( var i=0,l=data.length; i<l; i++ ){
+            if( !i ){
+                data[0].push( "__index__" );
+            } else {
+                data[i].push( i-1 );
+            }
+        }
+    }
 
     dataFrame.org = data;
     dataFrame.fields = data[0] ? data[0] : []; //所有的字段集合;
+
+    
 
     var total = [];//已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
     for(var a = 0, al = dataFrame.fields.length; a < al; a++){

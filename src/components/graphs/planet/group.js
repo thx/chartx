@@ -56,10 +56,10 @@ export default class PlanetGroup
                 strokeStyle : null,
                 _strokeStyle : "#092848", //和bar.fillStyle一样可以支持array function
                 triggerEventType : "click",
-                lineWidth : 2,
-                inds : [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
+                lineWidth : 2
             }
         };
+        this.selectInds = []; //源数据中__index__的集合，外面可以传入这个数据进来设置选中
 
         this.label = {
             enabled   : true,
