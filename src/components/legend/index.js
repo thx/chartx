@@ -58,18 +58,18 @@ export default class Legend extends Component
 
         this.position = "top" ; //图例所在的方向top,right,bottom,left
 
-        this.hv = "h"; //横向 top,bottom --> h left,right -- >v
+        this.direction = "h"; //横向 top,bottom --> h left,right -- >v
 
         this.sprite  = null;
 
         if( opt ){
             _.extend(true, this , opt );
 
-            if( !opt.hv && opt.position ){
+            if( !opt.direction && opt.position ){
                 if( this.position == "left" || this.position == "right" ){
-                    this.hv = 'v';
+                    this.direction = 'v';
                 } else {
-                    this.hv = 'h';
+                    this.direction = 'h';
                 };
             };
             
@@ -114,7 +114,7 @@ export default class Legend extends Component
         //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
         var _legend = new this( legendData, legendOpt, app );
         
-        if( _legend.hv == "h" ){
+        if( _legend.direction == "h" ){
             app.padding[ _legend.position ] += _legend.height;
         } else {
             app.padding[ _legend.position ] += _legend.width;
@@ -248,7 +248,7 @@ export default class Legend extends Component
                 height : me.icon.height
             };
 
-            if( me.hv == "v" ){
+            if( me.direction == "v" ){
                 if( y + me.icon.height > viewHeight ){
                     if( x > viewWidth*0.3 ){
                         isOver = true;
@@ -309,7 +309,7 @@ export default class Legend extends Component
 
         } );
 
-        if( this.hv == "h" ){
+        if( this.direction == "h" ){
             me.width = me.sprite.context.width  = width;
             me.height = me.sprite.context.height = me.icon.height * rows;
         } else {

@@ -57,7 +57,7 @@ const defaultProps = {
         lineWidth : 2
     },
     position : "bottom", //图例所在的方向top,right,bottom,left
-    hv : "h" //横向 top,bottom --> h left,right -- >v
+    direction : "h" //横向 top,bottom --> h left,right -- >v
 };
 
 export default class dataZoom extends Component
@@ -330,11 +330,11 @@ export default class dataZoom extends Component
         };
 
         //如果用户没有配置layoutType但是配置了position
-        if( !opt.hv && opt.position ){
+        if( !opt.direction && opt.position ){
             if( this.position == "left" || this.position == "right" ){
-                this.hv = 'v';
+                this.direction = 'v';
             } else {
-                this.hv = 'h';
+                this.direction = 'h';
             };
         };
         

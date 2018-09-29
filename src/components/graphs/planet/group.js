@@ -34,38 +34,36 @@ export default class PlanetGroup
             shapeType : "circle",
             maxR : 30,//15
             minR : 5,
-            lineWidth : 2,
+            lineWidth : 1,
             strokeStyle : "#fff",
             fillStyle : '#f2fbfb',
+            lineAlpha : 0.6,
             radius : 15, //也可以是个function,也可以配置{field:'pv'}来设置字段， 自动计算r
 
             focus : {
-                enabled : true
-            },
-            /*
-            select : {
                 enabled : true,
+                lineAlpha : 0.7,
                 lineWidth : 2,
-                strokeStyle : "#666"
+                strokeStyle : "#fff", //和bar.fillStyle一样可以支持array function
             },
-            */
-            //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+
             select : {
                 enabled : false,
-                alpha : 0.2,
-                strokeStyle : null,
-                _strokeStyle : "#092848", //和bar.fillStyle一样可以支持array function
-                triggerEventType : "click",
-                lineWidth : 2
+                lineAlpha : 1,
+                lineWidth : 2,
+                strokeStyle : "#fff", //和bar.fillStyle一样可以支持array function
+                triggerEventType : "click"
             }
         };
-        this.selectInds = []; //源数据中__index__的集合，外面可以传入这个数据进来设置选中
+        selectInds: [], //会从外面的index中传入一个统一的selectInds 引用
 
         this.label = {
             enabled   : true,
             fontColor : "#666",
             fontSize  : 13,
-            position  : null
+            align : "center",  //left center right
+            verticalAlign : "middle", //top middle bottom
+            position  : "center" //center,bottom,auto,function
         };
 
         this.sort = "desc";
@@ -89,9 +87,7 @@ export default class PlanetGroup
         if( this.node.maxR > this.pit.radius ){
             this.pit.radius = this.node.maxR
         };
-
         
-
         this.init();
     }
 
@@ -167,7 +163,7 @@ export default class PlanetGroup
                 label       : rowData[me.field],
 
                 focused     : false,
-                selected    : false
+                selected    : !!~_.indexOf( this.selectInds, rowData.__index__ )
             };
 
             planets.push( planetLayoutData );
@@ -244,7 +240,6 @@ export default class PlanetGroup
 
         //计算每个环的最大可以创建星球数量,然后把所有的数量相加做分母。
         //然后计算自己的比例去 planets 里面拿对应比例的数据
-
         _.each( _rings , function( ring , i ){
             //先计算上这个轨道上排排站一共可以放的下多少个星球
             //一个星球需要多少弧度
@@ -397,16 +392,24 @@ export default class PlanetGroup
                     point.y += Math.cos(_randomRadian) * _randomTransR;
                 };
 
-                var _fillStyle = me._getProp( me.node.fillStyle , i , ii , p );
-                var _strokeStyle = me._getProp( me.node.strokeStyle , i , ii , p );
+                var node = me.node;
+                if( p.selected ){
+                    node = me.node.select;
+                };
+
+                var _fillStyle = me._getProp( me.node.fillStyle , p );
+                var _strokeStyle = me._getProp( node.strokeStyle , p );
+                var _lineAlpha = me._getProp( node.lineAlpha, p );
+                var _lineWidth = me._getProp( node.lineWidth, p );
 
                 var circleCtx = {
                     x : point.x,
                     y : point.y,
                     r : r,
                     fillStyle: _fillStyle,
-                    lineWidth : me._getProp( me.node.lineWidth , i , ii , p ),
+                    lineWidth : _lineWidth,
                     strokeStyle : _strokeStyle,
+                    lineAlpha : _lineAlpha,
                     cursor: "pointer"
                 };
 
@@ -416,13 +419,12 @@ export default class PlanetGroup
                 p.iRing = i;
                 p.iPlanet = ii;
                 
-
-                var _node = new Circle({
+                var _circle = new Circle({
                     hoverClone: false,
                     context : circleCtx
                 });
 
-                _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                _circle.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
                     
                      e.eventInfo = {
                          title : null,
@@ -431,39 +433,50 @@ export default class PlanetGroup
                      if( this.nodeData.label ){
                          e.eventInfo.title = this.nodeData.label;
                      };
+
+                     if( me.node.focus.enabled ){
+                        if( e.type == "mouseover" ){
+                            me.focusAt( this.nodeData );
+                        }
+                        if( e.type == "mouseout" ){
+                            me.unfocusAt( this.nodeData );
+                        }
+                    };
             
                      //fire到root上面去的是为了让root去处理tips
                      me.root.fire( e.type, e );
+
                      if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
                         //如果开启了图表的选中交互
-                        var ind = me.dataFrame.range.start + this.iNode;
-                        if( _.indexOf( me.node.select.inds, ind ) > -1 ){
+                        //TODO:这里不能
+                        if( this.nodeData.selected ){
                             //说明已经选中了
-                            me.unselectAt( ind );
+                            me.unselectAt( this.nodeData );
                         } else {
-                            me.selectAt( ind );
+                            me.selectAt( this.nodeData );
                         }
                     };
-                     me._graphs.triggerEvent( me.node , e );
+                    me._graphs.triggerEvent( me.node , e );
                  });
 
                 //互相用属性引用起来
-                _node.nodeData = p;
-                p.node = _node;
+                _circle.nodeData = p;
+                p.nodeElement = _circle;
 
-                _node.ringInd = i;
-                _node.planetIndInRing = ii;
+                _circle.ringInd = i;
+                _circle.planetIndInRing = ii;
 
-                _ringSp.addChild( _node );
+                _ringSp.addChild( _circle );
 
                 //然后添加label
                 //绘制实心圆上面的文案
+                //x,y 默认安装圆心定位，也就是position == 'center'
                 var _labelCtx = {
                     x: point.x,
                     y: point.y, //point.y + r +3
                     fontSize: me.label.fontSize,
-                    textAlign: "center",
-                    textBaseline: "middle",
+                    textAlign: me.label.align,
+                    textBaseline: me.label.verticalAlign,
                     fillStyle: me.label.fontColor,
                     rotation : -_ringCtx.rotation,
                     rotateOrigin : {
@@ -471,66 +484,70 @@ export default class PlanetGroup
                         y : 0 //-(r + 3)
                     }
                 };
-                var _text = new Canvax.Display.Text( p.label , {
+                var _label = new Canvax.Display.Text( p.label , {
                     context: _labelCtx
                 });
 
-                var _labelWidth = _text.getTextWidth();
-                var _labelHeight = _text.getTextHeight();
+                var _labelWidth = _label.getTextWidth();
+                var _labelHeight = _label.getTextHeight();
 
-                if( me.label.position ){
-                    if( _.isFunction( me.label.position ) ){
-                        var _pos = me.label.position( {
-                            node : _node,
-                            circleR : r,
-                            circleCenter : {
-                                x : point.x,
-                                y : point.y
-                            },
-                            textWidth : _labelWidth,
-                            textHeight : _labelHeight
-                        } );
+                if( _labelWidth > r*2 ){
+                    _labelCtx.fontSize = me.label.fontSize - 3;
+                };
 
-                        
-                        _labelCtx.rotation = -_ringCtx.rotation;
-                        _labelCtx.rotateOrigin = {
-                            x : -( _pos.x - _labelCtx.x ),
-                            y : -( _pos.y - _labelCtx.y )
-                        };
-                        _labelCtx.x = _pos.x;
-                        _labelCtx.y = _pos.y;
-
-                        if( _labelWidth > r*2 ){
-                            _labelCtx.fontSize = me.label.fontSize - 3;
-                        }
-                    }
-
-
-                } else {
-                    //如果没有制定position。就用默认的布局方案。
+                //最开始提供这个function模式，是因为还没有实现center,bottom,auto
+                //只能用function的形式用户自定义实现
+                //现在已经实现了center,bottom,auto，但是也还是先留着吧，也不碍事
+                if( _.isFunction( me.label.position ) ){
+                    var _pos = me.label.position( {
+                        node : _circle,
+                        circleR : r,
+                        circleCenter : {
+                            x : point.x,
+                            y : point.y
+                        },
+                        textWidth : _labelWidth,
+                        textHeight : _labelHeight
+                    } );
+                    _labelCtx.rotation = -_ringCtx.rotation;
+                    _labelCtx.rotateOrigin = {
+                        x : -( _pos.x - _labelCtx.x ),
+                        y : -( _pos.y - _labelCtx.y )
+                    };
+                    _labelCtx.x = _pos.x;
+                    _labelCtx.y = _pos.y;
+                };
+                
+                if( me.label.position == 'auto' ){
                     if( _labelWidth > r*2){
-                        _labelCtx.y = point.y + r +3;
-                        _labelCtx.textBaseline = "top";
-                        _labelCtx.rotation = -_ringCtx.rotation;
-                        _labelCtx.rotateOrigin = {
-                            x : 0,
-                            y : -(r + 3)
-                        };
+                        setPositionToBottom();
+                    };
+                };
+                if( me.label.position == 'bottom' ){
+                    setPositionToBottom();
+                };
+                function setPositionToBottom(){
+                    _labelCtx.y = point.y + r +3;
+                    _labelCtx.textBaseline = "top";
+                    _labelCtx.rotation = -_ringCtx.rotation;
+                    _labelCtx.rotateOrigin = {
+                        x : 0,
+                        y : -(r + 3)
                     };
                 }
 
-                //TODO:这里其实应该是直接可以修改 _text.context. 属性的
+                //TODO:这里其实应该是直接可以修改 _label.context. 属性的
                 //但是这里版本的canvax有问题。先重新创建文本对象吧
-                _text = new Canvax.Display.Text( p.label , {
+                _label = new Canvax.Display.Text( p.label , {
                     context: _labelCtx
                 });
             
                 //互相用属性引用起来
-                _node.textNode = _text;
-                _text.nodeData = p;
-                p.textNode = _text;
+                _circle.labelElement = _label;
+                _label.nodeData = p;
+                p.labelElement = _label;
 
-                _ringSp.addChild( _text );
+                _ringSp.addChild( _label );
             } );
 
             me.sprite.addChild( _ringSp );
@@ -554,16 +571,70 @@ export default class PlanetGroup
             
             return me.node.minR + (rVal-this.__rValMin)/(this.__rValMax-this.__rValMin) * (me.node.maxR - me.node.minR);
         };
-        return me._getProp(r , ringInd , iNode , nodeData);
+        return me._getProp(r , nodeData);
     }
 
-    _getProp( p, ringInd, iNode, nodeData )
+    _getProp( p, nodeData )
     {
         var iGroup = this.iGroup;
         if( _.isFunction( p ) ){
-            //return p.apply( this , [ nodeData ] );
-            return p( nodeData );
+            return p.apply( this , [ nodeData, iGroup ] );
+            //return p( nodeData );
         };
         return p;
     }
+
+    getPlanetAt( target ){
+        var planet = target;
+        if( _.isNumber( target ) ){
+            _.each( this.planets , function( _planet ){
+                if(_planet.rowData.__index__ == target){
+                    planet = _planet;
+                    return false;
+                }
+            } );
+        };
+        return planet;
+    }
+
+    selectAt( ind ){
+        if( !this.node.select.enabled ) return;
+        var planet = this.getPlanetAt( ind );
+        planet.selected = true;
+        planet.nodeElement.context.lineWidth = this._getProp( this.node.select.lineWidth , planet );
+        planet.nodeElement.context.strokeStyle = this._getProp( this.node.select.strokeStyle , planet );
+        planet.nodeElement.context.lineAlpha = this._getProp( this.node.select.lineAlpha , planet ); 
+    }
+    unselectAt( ind ){
+        if( !this.node.select.enabled ) return;
+        var planet = this.getPlanetAt( ind );
+        planet.selected = false;
+        planet.nodeElement.context.lineWidth = this._getProp( this.node.lineWidth , planet );
+        planet.nodeElement.context.lineAlpha = this._getProp( this.node.lineAlpha , planet );
+    }
+
+    getSelectedNodes(){
+        return _.filter( this.planets, function( planet ){
+            return planet.selected;
+        } );
+    }
+
+    focusAt( ind ){
+        if( !this.node.focus.enabled ) return;
+        var planet = this.getPlanetAt( ind );
+        if( planet.selected ) return;
+        planet.focused = true;
+        planet.nodeElement.context.lineWidth = this._getProp( this.node.focus.lineWidth , planet );
+        planet.nodeElement.context.strokeStyle = this._getProp( this.node.focus.strokeStyle , planet );
+        planet.nodeElement.context.lineAlpha = this._getProp( this.node.focus.lineAlpha , planet ); 
+    }
+    unfocusAt( ind ){
+        if( !this.node.focus.enabled ) return;
+        var planet = this.getPlanetAt( ind );
+        if( planet.selected ) return;
+        planet.focused = false;
+        planet.nodeElement.context.lineWidth = this._getProp( this.node.lineWidth , planet );
+        planet.nodeElement.context.lineAlpha = this._getProp( this.node.lineAlpha , planet );
+    }
+
 }

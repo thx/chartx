@@ -54,6 +54,8 @@ export default class PlanetGraphs extends GraphsBase
             }
         };
 
+        this.selectInds = []; //源数据中__index__的集合，外面可以传入这个数据进来设置选中
+
         _.extend( true, this , opt );
 
         if( this.center.radius == 0 || !this.center.enabled ){
@@ -98,7 +100,7 @@ export default class PlanetGraphs extends GraphsBase
     {
         
         this.getAgreeNodeData( legendData, function( data ){
-            data.node.context.visible = true;
+            data.nodeElement.context.visible = true;
             data.textNode.context.visible = true;
         } );
     }
@@ -106,7 +108,7 @@ export default class PlanetGraphs extends GraphsBase
     hide( field , legendData)
     {
         this.getAgreeNodeData( legendData, function( data ){
-            data.node.context.visible = false;
+            data.nodeElement.context.visible = false;
             data.textNode.context.visible = false;
         } );
     }
@@ -120,7 +122,7 @@ export default class PlanetGraphs extends GraphsBase
                     var rowData = data.rowData;
                     if( legendData.name == rowData[ legendData.field ] ){
                         //这个数据符合
-                        //data.node.context.visible = false;
+                        //data.nodeElement.context.visible = false;
                         //data.textNode.context.visible = false;
                         callback && callback( data );
                     };
@@ -188,7 +190,8 @@ export default class PlanetGraphs extends GraphsBase
                     to : toR
                 },
                 width : me.width - _circleMaxR*2,
-                height: me.height - _circleMaxR*2
+                height: me.height - _circleMaxR*2,
+                selectInds : me.selectInds
             }, me._opt) , df , me );
 
             groupRStart = _g.rRange.to;
@@ -395,6 +398,36 @@ export default class PlanetGraphs extends GraphsBase
             })
         } );
         return nodes;
+    }
+
+
+    //ind 对应源数据中的index
+    selectAt( ind ){
+
+    }
+
+    //ind 对应源数据中的index
+    unselectAt( ind ){
+
+    }
+
+    getSelectedNodes(){
+        var arr = [];
+        _.each( this._ringGroups, function( _g ){
+            arr = arr.concat( _g.getSelectedNodes() );
+        } );
+        return arr;
+    }
+    getSelectedRowList(){
+        var arr = [];
+        _.each( this._ringGroups, function( _g ){
+            var rows = [];
+            _.each( _g.getSelectedNodes(), function( nodeData ){
+                rows.push( nodeData.rowData );
+            } );
+            arr = arr.concat( rows );
+        } );
+        return arr;
     }
 
 }
