@@ -14421,7 +14421,7 @@
 	                    shapeType: null,
 	                    label: null,
 
-	                    _node: null //对应的canvax 节点， 在widget之后赋值
+	                    nodeElement: null //对应的canvax 节点， 在widget之后赋值
 	                };
 
 	                this._setR(nodeLayoutData);
@@ -14542,16 +14542,16 @@
 	                var _context = me._getNodeContext(nodeData);
 	                var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$7;
 
-	                var _node = me._shapesp.getChildAt(iNode);
-	                if (!_node) {
-	                    _node = new Shape({
+	                var _nodeElement = me._shapesp.getChildAt(iNode);
+	                if (!_nodeElement) {
+	                    _nodeElement = new Shape({
 	                        id: "shape_" + iNode,
 	                        hoverClone: false,
 	                        context: _context
 	                    });
-	                    me._shapesp.addChild(_node);
+	                    me._shapesp.addChild(_nodeElement);
 
-	                    _node.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
+	                    _nodeElement.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function (e) {
 
 	                        e.eventInfo = {
 	                            title: null,
@@ -14565,16 +14565,16 @@
 	                        me.triggerEvent(me.node, e);
 	                    });
 	                } else {
-	                    //_node.context = _context;
-	                    //_.extend( _node.context, _context );
-	                    _node.animate(_context);
+	                    //_nodeElement.context = _context;
+	                    //_.extend( _nodeElement.context, _context );
+	                    _nodeElement.animate(_context);
 	                }
 	                //数据和canvax原件相互引用
-	                _node.nodeData = nodeData;
-	                _node.iNode = iNode;
-	                nodeData._node = _node;
+	                _nodeElement.nodeData = nodeData;
+	                _nodeElement.iNode = iNode;
+	                nodeData.nodeElement = _nodeElement;
 
-	                me.node.focus.enabled && _node.hover(function (e) {
+	                me.node.focus.enabled && _nodeElement.hover(function (e) {
 	                    me.focusAt(this.nodeData.iNode);
 	                }, function (e) {
 	                    !this.nodeData.selected && me.unfocusAt(this.nodeData.iNode);
@@ -14606,32 +14606,32 @@
 	                        _line.animate(_lineContext);
 	                    }
 
-	                    _node._line = _line;
+	                    _nodeElement._line = _line;
 	                }
 	                //如果有label
 	                if (nodeData.label && me.label.enabled) {
 
-	                    var _labelContext = me._getTextContext(nodeData);
 	                    var _label = me._textsp.getChildAt(iNode);
 	                    if (!_label) {
 	                        _label = new canvax.Display.Text(nodeData.label, {
 	                            id: "scat_text_" + iNode,
-	                            context: _labelContext
+	                            context: {}
 	                        });
 	                        me._textsp.addChild(_label);
 	                    } else {
 	                        _label.resetText(nodeData.label);
-	                        _label.animate(_labelContext);
 	                    }
+	                    var _labelContext = me._getTextContext(nodeData, _label);
+	                    _label.animate(_labelContext);
 
 	                    //图形节点和text文本相互引用
-	                    _node._label = _label;
-	                    _label._node = _node;
+	                    _nodeElement._label = _label;
+	                    _label.nodeElement = _nodeElement;
 	                }            });
 	        }
 	    }, {
 	        key: "_getTextPosition",
-	        value: function _getTextPosition(opt) {
+	        value: function _getTextPosition(opt, _label, _nodeElement) {
 	            var x = 0,
 	                y = 0;
 	            switch (this.label.position) {
@@ -14658,7 +14658,9 @@
 	                case "auto":
 	                    x = opt.x;
 	                    y = opt.y;
-	                    break;
+	                    if (_label.getTextWidth() > _nodeElement.content.r * 2) {
+	                        y = opt.y + opt.r + _label.getTextHeight() * 0.7;
+	                    }                    break;
 	            }
 	            var point = {
 	                x: x + this.label.offsetX,
@@ -14669,19 +14671,22 @@
 	        }
 	    }, {
 	        key: "_getTextContext",
-	        value: function _getTextContext(nodeData) {
-
+	        value: function _getTextContext(nodeData, _label, _nodeElement) {
 	            var textPoint = this._getTextPosition({
 	                x: nodeData.x,
 	                y: nodeData.y,
 	                r: nodeData.radius
-	            });
+	            }, _label, nodeData.nodeElement);
 
+	            var fontSize = this.label.fontSize;
+	            if (_label.getTextWidth() > _nodeElement.content.r * 2) {
+	                fontSize -= 2;
+	            }
 	            var ctx = {
 	                x: textPoint.x,
 	                y: textPoint.y,
 	                fillStyle: this.label.fontColor || nodeData.fillStyle,
-	                fontSize: this.label.fontSize,
+	                fontSize: fontSize,
 	                strokeStyle: this.label.strokeStyle || nodeData.fillStyle,
 	                lineWidth: this.label.lineWidth,
 	                textAlign: this.label.align,
@@ -14750,14 +14755,14 @@
 	            var l = this.data.length - 1;
 	            var me = this;
 	            _$21.each(this.data, function (nodeData) {
-	                nodeData._node.animate({
+	                nodeData.nodeElement.animate({
 	                    x: nodeData.x,
 	                    y: nodeData.y,
 	                    r: nodeData.radius
 	                }, {
 	                    onUpdate: function onUpdate(opt) {
 	                        if (this._label) {
-	                            var _textPoint = me._getTextPosition(opt);
+	                            var _textPoint = me._getTextPosition(opt, this._label, nodeData.nodeElement);
 	                            this._label.context.x = _textPoint.x;
 	                            this._label.context.y = _textPoint.y;
 	                        }                        if (this._line) {
@@ -14779,7 +14784,7 @@
 	            var nodeData = this.data[ind];
 	            if (!this.node.focus.enabled || nodeData.focused) return;
 
-	            var nctx = nodeData._node.context;
+	            var nctx = nodeData.nodeElement.context;
 	            nctx.lineWidth = this.node.focus.lineWidth;
 	            nctx.lineAlpha = this.node.focus.lineAlpha;
 	            nctx.fillAlpha = this.node.focus.fillAlpha;
@@ -14790,7 +14795,7 @@
 	        value: function unfocusAt(ind) {
 	            var nodeData = this.data[ind];
 	            if (!this.node.focus.enabled || !nodeData.focused) return;
-	            var nctx = nodeData._node.context;
+	            var nctx = nodeData.nodeElement.context;
 	            nctx.lineWidth = this.node.lineWidth;
 	            nctx.lineAlpha = this.node.lineAlpha;
 	            nctx.fillAlpha = this.node.fillAlpha;
@@ -14804,7 +14809,7 @@
 	            var nodeData = this.data[ind];
 	            if (!this.node.select.enabled || nodeData.selected) return;
 
-	            var nctx = nodeData._node.context;
+	            var nctx = nodeData.nodeElement.context;
 	            nctx.lineWidth = this.node.select.lineWidth;
 	            nctx.lineAlpha = this.node.select.lineAlpha;
 	            nctx.fillAlpha = this.node.select.fillAlpha;
@@ -14817,7 +14822,7 @@
 	            var nodeData = this.data[ind];
 	            if (!this.node.select.enabled || !nodeData.selected) return;
 
-	            var nctx = nodeData._node.context;
+	            var nctx = nodeData.nodeElement.context;
 
 	            if (nodeData.focused) {
 	                //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
@@ -17451,14 +17456,13 @@
 	                        setPositionToBottom();
 	                    }                    function setPositionToBottom() {
 	                        _labelCtx.y = point.y + r + 3;
-	                        _labelCtx.textBaseline = "top";
+	                        //_labelCtx.textBaseline = "top";
 	                        _labelCtx.rotation = -_ringCtx.rotation;
 	                        _labelCtx.rotateOrigin = {
 	                            x: 0,
-	                            y: -(r + 3)
+	                            y: -(r + _labelHeight * 0.7)
 	                        };
 	                    }
-
 	                    //TODO:这里其实应该是直接可以修改 _label.context. 属性的
 	                    //但是这里版本的canvax有问题。先重新创建文本对象吧
 	                    _label = new canvax.Display.Text(p.label, {

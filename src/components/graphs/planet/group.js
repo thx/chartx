@@ -528,13 +528,13 @@ export default class PlanetGroup
                 };
                 function setPositionToBottom(){
                     _labelCtx.y = point.y + r +3;
-                    _labelCtx.textBaseline = "top";
+                    //_labelCtx.textBaseline = "top";
                     _labelCtx.rotation = -_ringCtx.rotation;
                     _labelCtx.rotateOrigin = {
                         x : 0,
-                        y : -(r + 3)
+                        y : -(r + _labelHeight*0.7)
                     };
-                }
+                };
 
                 //TODO:这里其实应该是直接可以修改 _label.context. 属性的
                 //但是这里版本的canvax有问题。先重新创建文本对象吧
