@@ -63,15 +63,15 @@ export default class ScatGraphs extends GraphsBase
             format : function(txt, nodeData){ 
                 return txt 
             },
-            fontSize: 12,
-            fontColor: null,//"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
+            fontSize: 13,
+            fontColor: "#888",//"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
             strokeStyle : "#ffffff",
-            lineWidth : 2,
+            lineWidth : 0,
 
-            rotation : 0,
+            //rotation : 0, //柱状图中有需求， 这里没有目前
             align : "center",  //left center right
-            verticalAlign : "top", //top middle bottom
-            position : "bottom", //auto(目前等于center，还未实现),center,top,right,bottom,left
+            verticalAlign : "middle", //top middle bottom
+            position : "center", //auto(目前等于center，还未实现),center,top,right,bottom,left
             offsetX : 0,
             offsetY : 0
         };
@@ -402,21 +402,24 @@ export default class ScatGraphs extends GraphsBase
 
             //如果有label
             if( nodeData.label && me.label.enabled ){
-            
-                
+        
                 var _label = me._textsp.getChildAt( iNode );
+                var _labelContext = {};
                 if( !_label ){
                     _label = new Canvax.Display.Text( nodeData.label , {
                         id: "scat_text_"+iNode,
                         context: {}
                     });
+                    _labelContext = me._getTextContext( _label, _nodeElement );
+                    //_label.animate( _labelContext );
+                    _.extend( _label.context , _labelContext );
                     me._textsp.addChild( _label );
+                    
                 } else {
                     _label.resetText(  nodeData.label );
+                    _labelContext = me._getTextContext( _label, _nodeElement );
+                    _label.animate( _labelContext );
                 };
-
-                var _labelContext = me._getTextContext( nodeData, _label );
-                _label.animate( _labelContext );
 
                 //图形节点和text文本相互引用
                 _nodeElement._label = _label;
@@ -427,7 +430,7 @@ export default class ScatGraphs extends GraphsBase
      
     }
 
-    _getTextPosition( opt, _label, _nodeElement )
+    _getTextPosition( _label, opt )
     {
         var x=0,y=0;
         switch( this.label.position ){
@@ -454,8 +457,8 @@ export default class ScatGraphs extends GraphsBase
             case "auto" :
                 x = opt.x;
                 y = opt.y;
-                if( _label.getTextWidth() > _nodeElement.content.r*2 ){
-                    y = opt.y + opt.r + _label.getTextHeight() * 0.7;
+                if( _label.getTextWidth() > opt.r*2 ){
+                    y = opt.y + opt.r + _label.getTextHeight() * 0.5;
                 };
                 break;
         };
@@ -468,25 +471,21 @@ export default class ScatGraphs extends GraphsBase
         return point;
     }
 
-    _getTextContext( nodeData, _label, _nodeElement )
+    _getTextContext( _label, _nodeElement )
     {
-        var textPoint = this._getTextPosition( {
-            x : nodeData.x,
-            y : nodeData.y,
-            r : nodeData.radius
-        } , _label, nodeData.nodeElement );
+        var textPoint = this._getTextPosition( _label, _nodeElement.context );
 
         var fontSize = this.label.fontSize;
-        if( _label.getTextWidth() > _nodeElement.content.r*2 ){
+        if( _label.getTextWidth() > _nodeElement.context.r*2 ){
             fontSize -= 2;
         };
         
         var ctx = {
             x: textPoint.x,
             y: textPoint.y,
-            fillStyle: this.label.fontColor || nodeData.fillStyle,
+            fillStyle: this.label.fontColor || _nodeElement.context.fillStyle,
             fontSize: fontSize,
-            strokeStyle : this.label.strokeStyle || nodeData.fillStyle,
+            strokeStyle : this.label.strokeStyle || _nodeElement.context.fillStyle,
             lineWidth : this.label.lineWidth,
             textAlign : this.label.align,
             textBaseline : this.label.verticalAlign
@@ -505,6 +504,7 @@ export default class ScatGraphs extends GraphsBase
                 ctx.y = -(this.height/2);
             }; 
         };
+        
         return ctx;
     }
 
@@ -564,7 +564,7 @@ export default class ScatGraphs extends GraphsBase
             }, {
                 onUpdate: function( opt ){
                     if( this._label ){
-                        var _textPoint = me._getTextPosition( opt , this._label, nodeData.nodeElement );
+                        var _textPoint = me._getTextPosition( this._label, opt );
                         this._label.context.x = _textPoint.x;
                         this._label.context.y = _textPoint.y;
                     };

@@ -63,7 +63,9 @@ export default class PlanetGroup
             fontSize  : 13,
             align : "center",  //left center right
             verticalAlign : "middle", //top middle bottom
-            position  : "center" //center,bottom,auto,function
+            position  : "center", //center,bottom,auto,function
+            offsetX : 0, 
+            offsetY : 0
         };
 
         this.sort = "desc";
@@ -526,6 +528,7 @@ export default class PlanetGroup
                 if( me.label.position == 'bottom' ){
                     setPositionToBottom();
                 };
+                
                 function setPositionToBottom(){
                     _labelCtx.y = point.y + r +3;
                     //_labelCtx.textBaseline = "top";
@@ -535,6 +538,9 @@ export default class PlanetGroup
                         y : -(r + _labelHeight*0.7)
                     };
                 };
+
+                _labelCtx.x += me.label.offsetX;
+                _labelCtx.y += me.label.offsetY;
 
                 //TODO:这里其实应该是直接可以修改 _label.context. 属性的
                 //但是这里版本的canvax有问题。先重新创建文本对象吧

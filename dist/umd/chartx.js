@@ -3663,7 +3663,12 @@
 	                    //如果是个object
 	                    continue;
 	                }
-	                if (isNaN(to[p]) && to[p] !== '' && to[p] !== null && to[p] !== undefined) {
+	                //if( isNaN(to[p]) && to[p] !== '' && to[p] !== null && to[p] !== undefined ){
+	                if (isNaN(to[p]) && to[p] !== '' && to[p] !== null) {
+	                    //undefined已经被isNaN过滤了
+	                    //只有number才能继续走下去执行tween，而非number则直接赋值完事，
+	                    //TODO:不能用_.isNumber 因为 '1212' 这样的其实可以计算
+	                    context[p] = to[p];
 	                    delete to[p];
 	                    continue;
 	                }
@@ -14292,15 +14297,15 @@
 	            format: function format(txt, nodeData) {
 	                return txt;
 	            },
-	            fontSize: 12,
-	            fontColor: null, //"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
+	            fontSize: 13,
+	            fontColor: "#888", //"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
 	            strokeStyle: "#ffffff",
-	            lineWidth: 2,
+	            lineWidth: 0,
 
-	            rotation: 0,
+	            //rotation : 0, //柱状图中有需求， 这里没有目前
 	            align: "center", //left center right
-	            verticalAlign: "top", //top middle bottom
-	            position: "bottom", //auto(目前等于center，还未实现),center,top,right,bottom,left
+	            verticalAlign: "middle", //top middle bottom
+	            position: "center", //auto(目前等于center，还未实现),center,top,right,bottom,left
 	            offsetX: 0,
 	            offsetY: 0
 	        };
@@ -14612,18 +14617,21 @@
 	                if (nodeData.label && me.label.enabled) {
 
 	                    var _label = me._textsp.getChildAt(iNode);
+	                    var _labelContext = {};
 	                    if (!_label) {
 	                        _label = new canvax.Display.Text(nodeData.label, {
 	                            id: "scat_text_" + iNode,
 	                            context: {}
 	                        });
+	                        _labelContext = me._getTextContext(_label, _nodeElement);
+	                        //_label.animate( _labelContext );
+	                        _$21.extend(_label.context, _labelContext);
 	                        me._textsp.addChild(_label);
 	                    } else {
 	                        _label.resetText(nodeData.label);
+	                        _labelContext = me._getTextContext(_label, _nodeElement);
+	                        _label.animate(_labelContext);
 	                    }
-	                    var _labelContext = me._getTextContext(nodeData, _label);
-	                    _label.animate(_labelContext);
-
 	                    //图形节点和text文本相互引用
 	                    _nodeElement._label = _label;
 	                    _label.nodeElement = _nodeElement;
@@ -14631,7 +14639,7 @@
 	        }
 	    }, {
 	        key: "_getTextPosition",
-	        value: function _getTextPosition(opt, _label, _nodeElement) {
+	        value: function _getTextPosition(_label, opt) {
 	            var x = 0,
 	                y = 0;
 	            switch (this.label.position) {
@@ -14658,8 +14666,8 @@
 	                case "auto":
 	                    x = opt.x;
 	                    y = opt.y;
-	                    if (_label.getTextWidth() > _nodeElement.content.r * 2) {
-	                        y = opt.y + opt.r + _label.getTextHeight() * 0.7;
+	                    if (_label.getTextWidth() > opt.r * 2) {
+	                        y = opt.y + opt.r + _label.getTextHeight() * 0.5;
 	                    }                    break;
 	            }
 	            var point = {
@@ -14671,23 +14679,19 @@
 	        }
 	    }, {
 	        key: "_getTextContext",
-	        value: function _getTextContext(nodeData, _label, _nodeElement) {
-	            var textPoint = this._getTextPosition({
-	                x: nodeData.x,
-	                y: nodeData.y,
-	                r: nodeData.radius
-	            }, _label, nodeData.nodeElement);
+	        value: function _getTextContext(_label, _nodeElement) {
+	            var textPoint = this._getTextPosition(_label, _nodeElement.context);
 
 	            var fontSize = this.label.fontSize;
-	            if (_label.getTextWidth() > _nodeElement.content.r * 2) {
+	            if (_label.getTextWidth() > _nodeElement.context.r * 2) {
 	                fontSize -= 2;
 	            }
 	            var ctx = {
 	                x: textPoint.x,
 	                y: textPoint.y,
-	                fillStyle: this.label.fontColor || nodeData.fillStyle,
+	                fillStyle: this.label.fontColor || _nodeElement.context.fillStyle,
 	                fontSize: fontSize,
-	                strokeStyle: this.label.strokeStyle || nodeData.fillStyle,
+	                strokeStyle: this.label.strokeStyle || _nodeElement.context.fillStyle,
 	                lineWidth: this.label.lineWidth,
 	                textAlign: this.label.align,
 	                textBaseline: this.label.verticalAlign
@@ -14702,7 +14706,8 @@
 	                }                if (this.aniOrigin == "center") {
 	                    ctx.x = this.width / 2;
 	                    ctx.y = -(this.height / 2);
-	                }            }            return ctx;
+	                }            }
+	            return ctx;
 	        }
 	    }, {
 	        key: "_getNodeContext",
@@ -14762,7 +14767,7 @@
 	                }, {
 	                    onUpdate: function onUpdate(opt) {
 	                        if (this._label) {
-	                            var _textPoint = me._getTextPosition(opt, this._label, nodeData.nodeElement);
+	                            var _textPoint = me._getTextPosition(this._label, opt);
 	                            this._label.context.x = _textPoint.x;
 	                            this._label.context.y = _textPoint.y;
 	                        }                        if (this._line) {
@@ -17018,7 +17023,9 @@
 	            fontSize: 13,
 	            align: "center", //left center right
 	            verticalAlign: "middle", //top middle bottom
-	            position: "center" //center,bottom,auto,function
+	            position: "center", //center,bottom,auto,function
+	            offsetX: 0,
+	            offsetY: 0
 	        };
 
 	        this.sort = "desc";
@@ -17454,7 +17461,8 @@
 	                            setPositionToBottom();
 	                        }                    }                    if (me.label.position == 'bottom') {
 	                        setPositionToBottom();
-	                    }                    function setPositionToBottom() {
+	                    }
+	                    function setPositionToBottom() {
 	                        _labelCtx.y = point.y + r + 3;
 	                        //_labelCtx.textBaseline = "top";
 	                        _labelCtx.rotation = -_ringCtx.rotation;
@@ -17463,6 +17471,9 @@
 	                            y: -(r + _labelHeight * 0.7)
 	                        };
 	                    }
+	                    _labelCtx.x += me.label.offsetX;
+	                    _labelCtx.y += me.label.offsetY;
+
 	                    //TODO:这里其实应该是直接可以修改 _label.context. 属性的
 	                    //但是这里版本的canvax有问题。先重新创建文本对象吧
 	                    _label = new canvax.Display.Text(p.label, {
