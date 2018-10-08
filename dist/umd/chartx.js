@@ -17540,15 +17540,18 @@
 	            if (!this.node.select.enabled) return;
 	            var planet = this.getPlanetAt(ind);
 	            planet.selected = true;
-	            planet.nodeElement.context.lineWidth = this._getProp(this.node.select.lineWidth, planet);
-	            planet.nodeElement.context.strokeStyle = this._getProp(this.node.select.strokeStyle, planet);
-	            planet.nodeElement.context.lineAlpha = this._getProp(this.node.select.lineAlpha, planet);
+
+	            //可能这个数据没有显示的，就没有nodeElement
+	            if (planet.nodeElement) {
+	                planet.nodeElement.context.lineWidth = this._getProp(this.node.select.lineWidth, planet);
+	                planet.nodeElement.context.strokeStyle = this._getProp(this.node.select.strokeStyle, planet);
+	                planet.nodeElement.context.lineAlpha = this._getProp(this.node.select.lineAlpha, planet);
+	            }
 	            for (var i = 0; i < this.selectInds.length; i++) {
 	                if (ind === this.selectInds[i]) {
 	                    this.selectInds.splice(i--, 1);
 	                    break;
-	                }            }
-	        }
+	                }            }        }
 	        //这里的ind是原始的__index__
 
 	    }, {
@@ -17557,8 +17560,11 @@
 	            if (!this.node.select.enabled) return;
 	            var planet = this.getPlanetAt(ind);
 	            planet.selected = false;
-	            planet.nodeElement.context.lineWidth = this._getProp(this.node.lineWidth, planet);
-	            planet.nodeElement.context.lineAlpha = this._getProp(this.node.lineAlpha, planet);
+
+	            if (planet.nodeElement) {
+	                planet.nodeElement.context.lineWidth = this._getProp(this.node.lineWidth, planet);
+	                planet.nodeElement.context.lineAlpha = this._getProp(this.node.lineAlpha, planet);
+	            }
 	            this.selectInds.push(ind);
 	        }
 	    }, {
@@ -17575,10 +17581,11 @@
 	            var planet = this.getPlanetAt(ind);
 	            if (planet.selected) return;
 	            planet.focused = true;
-	            planet.nodeElement.context.lineWidth = this._getProp(this.node.focus.lineWidth, planet);
-	            planet.nodeElement.context.strokeStyle = this._getProp(this.node.focus.strokeStyle, planet);
-	            planet.nodeElement.context.lineAlpha = this._getProp(this.node.focus.lineAlpha, planet);
-	        }
+	            if (planet.nodeElement) {
+	                planet.nodeElement.context.lineWidth = this._getProp(this.node.focus.lineWidth, planet);
+	                planet.nodeElement.context.strokeStyle = this._getProp(this.node.focus.strokeStyle, planet);
+	                planet.nodeElement.context.lineAlpha = this._getProp(this.node.focus.lineAlpha, planet);
+	            }        }
 	    }, {
 	        key: "unfocusAt",
 	        value: function unfocusAt(ind) {
@@ -17586,9 +17593,11 @@
 	            var planet = this.getPlanetAt(ind);
 	            if (planet.selected) return;
 	            planet.focused = false;
-	            planet.nodeElement.context.lineWidth = this._getProp(this.node.lineWidth, planet);
-	            planet.nodeElement.context.lineAlpha = this._getProp(this.node.lineAlpha, planet);
-	        }
+
+	            if (planet.nodeElement) {
+	                planet.nodeElement.context.lineWidth = this._getProp(this.node.lineWidth, planet);
+	                planet.nodeElement.context.lineAlpha = this._getProp(this.node.lineAlpha, planet);
+	            }        }
 	    }]);
 	    return PlanetGroup;
 	}();
