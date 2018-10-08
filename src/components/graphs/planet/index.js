@@ -78,7 +78,7 @@ export default class PlanetGraphs extends GraphsBase
         });
 
         this.sprite.addChild( this.gridSp );
-        this.dataGroupHandle();
+        this._dataGroupHandle();
     }
 
     draw( opt )
@@ -88,50 +88,14 @@ export default class PlanetGraphs extends GraphsBase
 
         _.extend( true, this , opt );
 
-        this.drawGroups();
+        this._drawGroups();
 
-        this.drawCenter();
+        this._drawCenter();
 
         this.fire("complete");
     
     }
 
-    show( field , legendData)
-    {
-        
-        this.getAgreeNodeData( legendData, function( data ){
-            data.nodeElement.context.visible = true;
-            data.textNode.context.visible = true;
-        } );
-    }
-
-    hide( field , legendData)
-    {
-        this.getAgreeNodeData( legendData, function( data ){
-            data.nodeElement.context.visible = false;
-            data.textNode.context.visible = false;
-        } );
-    }
-
-    getAgreeNodeData( legendData , callback)
-    {
-        var me = this;
-        _.each( this._ringGroups, function( _g ){
-            _.each( _g._rings , function( ring , i ){
-                _.each( ring.planets, function( data , ii){
-                    var rowData = data.rowData;
-                    if( legendData.name == rowData[ legendData.field ] ){
-                        //这个数据符合
-                        //data.nodeElement.context.visible = false;
-                        //data.textNode.context.visible = false;
-                        callback && callback( data );
-                    };
-                });
-            });
-        } );
-    }
-
-    
     getLegendData()
     {
         var list = [];
@@ -169,7 +133,7 @@ export default class PlanetGraphs extends GraphsBase
         return _circleMaxR;
     }
 
-    drawGroups()
+    _drawGroups()
     {
         var me = this;
 
@@ -204,14 +168,14 @@ export default class PlanetGraphs extends GraphsBase
             
         } );
 
-        me.drawBack();
+        me._drawBack();
         
         _.each( me._ringGroups , function(_g){
             me.sprite.addChild( _g.sprite );
         } );
     }
 
-    drawCenter()
+    _drawCenter()
     {
         if( this.center.enabled ){
             //绘制中心实心圆
@@ -239,7 +203,7 @@ export default class PlanetGraphs extends GraphsBase
         }
     }
 
-    drawBack(){
+    _drawBack(){
         var me = this;
         
         if( me.grid.rings.section.length == 1 ){
@@ -344,7 +308,7 @@ export default class PlanetGraphs extends GraphsBase
         return res
     }
 
-    dataGroupHandle()
+    _dataGroupHandle()
     {
         var groupFieldInd = _.indexOf(this.dataFrame.fields , this.groupField);
         if( groupFieldInd >= 0 ){
@@ -374,6 +338,46 @@ export default class PlanetGraphs extends GraphsBase
         };
     }
 
+
+
+
+
+    //graphs方法
+
+    show( field , legendData)
+    {
+        this.getAgreeNodeData( legendData, function( data ){
+            data.nodeElement.context.visible = true;
+            data.textNode.context.visible = true;
+        } );
+    }
+
+    hide( field , legendData)
+    {
+        this.getAgreeNodeData( legendData, function( data ){
+            data.nodeElement.context.visible = false;
+            data.textNode.context.visible = false;
+        } );
+    }
+
+    getAgreeNodeData( legendData , callback)
+    {
+        var me = this;
+        _.each( this._ringGroups, function( _g ){
+            _.each( _g._rings , function( ring , i ){
+                _.each( ring.planets, function( data , ii){
+                    var rowData = data.rowData;
+                    if( legendData.name == rowData[ legendData.field ] ){
+                        //这个数据符合
+                        //data.nodeElement.context.visible = false;
+                        //data.textNode.context.visible = false;
+                        callback && callback( data );
+                    };
+                });
+            });
+        } );
+    }
+
     //获取所有有效的在布局中的nodeData
     getLayoutNodes(){
         var nodes = [];
@@ -400,17 +404,39 @@ export default class PlanetGraphs extends GraphsBase
         return nodes;
     }
 
-
     //ind 对应源数据中的index
     selectAt( ind ){
+        var me = this;
+        _.each( me._ringGroups, function( _g ){
+            _g.selectAt( ind );
+        } );
+    }
 
+    //selectAll
+    selectAll(){
+        var me = this;
+        _.each( me.dataFrame.getFieldData("__index__") , function( _ind ){
+            me.selectAt( _ind )
+        } );
     }
 
     //ind 对应源数据中的index
     unselectAt( ind ){
-
+        var me = this;
+        _.each( me._ringGroups, function( _g ){
+            _g.unselectAt( ind );
+        } );
     }
 
+    //unselectAll
+    unselectAll( ind ){
+        var me = this;
+        _.each( me.dataFrame.getFieldData("__index__") , function( _ind ){
+            me.unselectAt( _ind )
+        } );
+    }
+
+    //获取所有的节点数据
     getSelectedNodes(){
         var arr = [];
         _.each( this._ringGroups, function( _g ){
@@ -418,6 +444,8 @@ export default class PlanetGraphs extends GraphsBase
         } );
         return arr;
     }
+
+    //获取所有的节点数据对应的原始数据行
     getSelectedRowList(){
         var arr = [];
         _.each( this._ringGroups, function( _g ){

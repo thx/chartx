@@ -603,6 +603,8 @@ export default class PlanetGroup
         return planet;
     }
 
+
+    //这里的ind是原始的__index__
     selectAt( ind ){
         if( !this.node.select.enabled ) return;
         var planet = this.getPlanetAt( ind );
@@ -610,13 +612,21 @@ export default class PlanetGroup
         planet.nodeElement.context.lineWidth = this._getProp( this.node.select.lineWidth , planet );
         planet.nodeElement.context.strokeStyle = this._getProp( this.node.select.strokeStyle , planet );
         planet.nodeElement.context.lineAlpha = this._getProp( this.node.select.lineAlpha , planet ); 
+        for( var i = 0; i<this.selectInds.length; i++ ){
+            if( ind === this.selectInds[i] ){
+                this.selectInds.splice( i--, 1 );
+                break;
+            };
+        }
     }
+    //这里的ind是原始的__index__
     unselectAt( ind ){
         if( !this.node.select.enabled ) return;
         var planet = this.getPlanetAt( ind );
         planet.selected = false;
         planet.nodeElement.context.lineWidth = this._getProp( this.node.lineWidth , planet );
         planet.nodeElement.context.lineAlpha = this._getProp( this.node.lineAlpha , planet );
+        this.selectInds.push( ind );
     }
 
     getSelectedNodes(){

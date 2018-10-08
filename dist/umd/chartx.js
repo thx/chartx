@@ -17531,6 +17531,9 @@
 	                });
 	            }            return planet;
 	        }
+
+	        //这里的ind是原始的__index__
+
 	    }, {
 	        key: "selectAt",
 	        value: function selectAt(ind) {
@@ -17540,7 +17543,14 @@
 	            planet.nodeElement.context.lineWidth = this._getProp(this.node.select.lineWidth, planet);
 	            planet.nodeElement.context.strokeStyle = this._getProp(this.node.select.strokeStyle, planet);
 	            planet.nodeElement.context.lineAlpha = this._getProp(this.node.select.lineAlpha, planet);
+	            for (var i = 0; i < this.selectInds.length; i++) {
+	                if (ind === this.selectInds[i]) {
+	                    this.selectInds.splice(i--, 1);
+	                    break;
+	                }            }
 	        }
+	        //这里的ind是原始的__index__
+
 	    }, {
 	        key: "unselectAt",
 	        value: function unselectAt(ind) {
@@ -17549,6 +17559,7 @@
 	            planet.selected = false;
 	            planet.nodeElement.context.lineWidth = this._getProp(this.node.lineWidth, planet);
 	            planet.nodeElement.context.lineAlpha = this._getProp(this.node.lineAlpha, planet);
+	            this.selectInds.push(ind);
 	        }
 	    }, {
 	        key: "getSelectedNodes",
@@ -17656,7 +17667,7 @@
 	            });
 
 	            this.sprite.addChild(this.gridSp);
-	            this.dataGroupHandle();
+	            this._dataGroupHandle();
 	        }
 	    }, {
 	        key: "draw",
@@ -17666,44 +17677,11 @@
 
 	            _$27.extend(true, this, opt);
 
-	            this.drawGroups();
+	            this._drawGroups();
 
-	            this.drawCenter();
+	            this._drawCenter();
 
 	            this.fire("complete");
-	        }
-	    }, {
-	        key: "show",
-	        value: function show(field, legendData) {
-
-	            this.getAgreeNodeData(legendData, function (data) {
-	                data.nodeElement.context.visible = true;
-	                data.textNode.context.visible = true;
-	            });
-	        }
-	    }, {
-	        key: "hide",
-	        value: function hide(field, legendData) {
-	            this.getAgreeNodeData(legendData, function (data) {
-	                data.nodeElement.context.visible = false;
-	                data.textNode.context.visible = false;
-	            });
-	        }
-	    }, {
-	        key: "getAgreeNodeData",
-	        value: function getAgreeNodeData(legendData, callback) {
-	            _$27.each(this._ringGroups, function (_g) {
-	                _$27.each(_g._rings, function (ring, i) {
-	                    _$27.each(ring.planets, function (data, ii) {
-	                        var rowData = data.rowData;
-	                        if (legendData.name == rowData[legendData.field]) {
-	                            //这个数据符合
-	                            //data.nodeElement.context.visible = false;
-	                            //data.textNode.context.visible = false;
-	                            callback && callback(data);
-	                        }                    });
-	                });
-	            });
 	        }
 	    }, {
 	        key: "getLegendData",
@@ -17738,8 +17716,8 @@
 	            }            return _circleMaxR;
 	        }
 	    }, {
-	        key: "drawGroups",
-	        value: function drawGroups() {
+	        key: "_drawGroups",
+	        value: function _drawGroups() {
 	            var me = this;
 
 	            var groupRStart = this.center.radius + this.center.margin;
@@ -17772,15 +17750,15 @@
 	                });
 	            });
 
-	            me.drawBack();
+	            me._drawBack();
 
 	            _$27.each(me._ringGroups, function (_g) {
 	                me.sprite.addChild(_g.sprite);
 	            });
 	        }
 	    }, {
-	        key: "drawCenter",
-	        value: function drawCenter() {
+	        key: "_drawCenter",
+	        value: function _drawCenter() {
 	            if (this.center.enabled) {
 	                //绘制中心实心圆
 	                this._center = new Circle$7({
@@ -17807,8 +17785,8 @@
 	            }
 	        }
 	    }, {
-	        key: "drawBack",
-	        value: function drawBack() {
+	        key: "_drawBack",
+	        value: function _drawBack() {
 	            var me = this;
 
 	            if (me.grid.rings.section.length == 1) {
@@ -17901,8 +17879,8 @@
 	            }            return res;
 	        }
 	    }, {
-	        key: "dataGroupHandle",
-	        value: function dataGroupHandle() {
+	        key: "_dataGroupHandle",
+	        value: function _dataGroupHandle() {
 	            var groupFieldInd = _$27.indexOf(this.dataFrame.fields, this.groupField);
 	            if (groupFieldInd >= 0) {
 	                //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
@@ -17925,6 +17903,41 @@
 	                //如果分组字段不存在，则认为数据不需要分组，直接全部作为 group 的一个子集合
 	                this.groupDataFrames.push(this.dataFrame);
 	            }        }
+
+	        //graphs方法
+
+	    }, {
+	        key: "show",
+	        value: function show(field, legendData) {
+	            this.getAgreeNodeData(legendData, function (data) {
+	                data.nodeElement.context.visible = true;
+	                data.textNode.context.visible = true;
+	            });
+	        }
+	    }, {
+	        key: "hide",
+	        value: function hide(field, legendData) {
+	            this.getAgreeNodeData(legendData, function (data) {
+	                data.nodeElement.context.visible = false;
+	                data.textNode.context.visible = false;
+	            });
+	        }
+	    }, {
+	        key: "getAgreeNodeData",
+	        value: function getAgreeNodeData(legendData, callback) {
+	            _$27.each(this._ringGroups, function (_g) {
+	                _$27.each(_g._rings, function (ring, i) {
+	                    _$27.each(ring.planets, function (data, ii) {
+	                        var rowData = data.rowData;
+	                        if (legendData.name == rowData[legendData.field]) {
+	                            //这个数据符合
+	                            //data.nodeElement.context.visible = false;
+	                            //data.textNode.context.visible = false;
+	                            callback && callback(data);
+	                        }                    });
+	                });
+	            });
+	        }
 
 	        //获取所有有效的在布局中的nodeData
 
@@ -17960,13 +17973,48 @@
 
 	    }, {
 	        key: "selectAt",
-	        value: function selectAt(ind) {}
+	        value: function selectAt(ind) {
+	            var me = this;
+	            _$27.each(me._ringGroups, function (_g) {
+	                _g.selectAt(ind);
+	            });
+	        }
+
+	        //selectAll
+
+	    }, {
+	        key: "selectAll",
+	        value: function selectAll() {
+	            var me = this;
+	            _$27.each(me.dataFrame.getFieldData("__index__"), function (_ind) {
+	                me.selectAt(_ind);
+	            });
+	        }
 
 	        //ind 对应源数据中的index
 
 	    }, {
 	        key: "unselectAt",
-	        value: function unselectAt(ind) {}
+	        value: function unselectAt(ind) {
+	            var me = this;
+	            _$27.each(me._ringGroups, function (_g) {
+	                _g.unselectAt(ind);
+	            });
+	        }
+
+	        //unselectAll
+
+	    }, {
+	        key: "unselectAll",
+	        value: function unselectAll(ind) {
+	            var me = this;
+	            _$27.each(me.dataFrame.getFieldData("__index__"), function (_ind) {
+	                me.unselectAt(_ind);
+	            });
+	        }
+
+	        //获取所有的节点数据
+
 	    }, {
 	        key: "getSelectedNodes",
 	        value: function getSelectedNodes() {
@@ -17976,6 +18024,9 @@
 	            });
 	            return arr;
 	        }
+
+	        //获取所有的节点数据对应的原始数据行
+
 	    }, {
 	        key: "getSelectedRowList",
 	        value: function getSelectedRowList() {
