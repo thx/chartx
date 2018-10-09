@@ -40,6 +40,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             strokeStyle: '#cccccc'
         };
         this.axisLine = {
+            position   : "default",//位置，default在align的位置（left，right），可选 "center" 和 具体的值
             enabled    : 1, //是否有轴线
             lineWidth  : 1,
             strokeStyle: '#cccccc'
@@ -107,6 +108,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         this.field = _.flatten( [ this.field ] )[0];
 
         this._txts = [];
+        this._axisLine = null;
         //this._lines = []; //line目前直接绑定在xNode上面
     }
 
@@ -640,7 +642,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         //轴线
         if( this.axisLine.enabled ){
-            var _axisline = new Line({
+            var _axisLine = new Line({
                 context : {
                     start : {
                         x : 0,
@@ -654,7 +656,8 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                     strokeStyle : this.axisLine.strokeStyle
                 }
             });
-            this.sprite.addChild( _axisline );
+            this.sprite.addChild( _axisLine );
+            this._axisLine = _axisLine;
         }
 
     }

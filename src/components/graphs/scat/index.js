@@ -492,20 +492,24 @@ export default class ScatGraphs extends GraphsBase
         };
 
         if( this.animation && !this.inited ){
-            if( this.aniOrigin == "default" ){
-                ctx.y = 0;
-            };
-            if( this.aniOrigin == "origin" ){
-                ctx.x = 0;
-                ctx.y = 0;
-            };
-            if( this.aniOrigin == "center" ){
-                ctx.x = this.width/2;
-                ctx.y = -(this.height/2);
-            }; 
+            this._setCtxAniOrigin(ctx);
         };
         
         return ctx;
+    }
+
+    _setCtxAniOrigin( ctx ) {
+        if( this.aniOrigin == "default" ){
+            ctx.y = 0;
+        };
+        if( this.aniOrigin == "origin" ){
+            ctx.x = this.root._coord._yAxis[0]._axisLine.context.x;//0;
+            ctx.y = this.root._coord._xAxis._axisLine.context.y;//0;
+        };
+        if( this.aniOrigin == "center" ){
+            ctx.x = this.width/2;
+            ctx.y = -(this.height/2);
+        }; 
     }
 
     _getNodeContext( nodeData )
@@ -530,18 +534,7 @@ export default class ScatGraphs extends GraphsBase
 
         if( this.animation && !this.inited ){
             
-            if( this.aniOrigin == "default" ){
-                //ctx.x = 0;
-                ctx.y = 0;
-            }
-            if( this.aniOrigin == "origin" ){
-                ctx.x = 0;
-                ctx.y = 0;
-            }
-            if( this.aniOrigin == "center" ){
-                ctx.x = this.width/2;
-                ctx.y = -(this.height/2);
-            }
+            this._setCtxAniOrigin(ctx);
 
             ctx.r = 1;
         };
@@ -563,12 +556,12 @@ export default class ScatGraphs extends GraphsBase
                 r : nodeData.radius
             }, {
                 onUpdate: function( opt ){
-                    if( this._label ){
+                    if( this._label && this._label.context ){
                         var _textPoint = me._getTextPosition( this._label, opt );
                         this._label.context.x = _textPoint.x;
                         this._label.context.y = _textPoint.y;
                     };
-                    if( this._line ){
+                    if( this._line && this._line.context ){
                         this._line.context.start.y = opt.y+opt.r;
                     };
                 },

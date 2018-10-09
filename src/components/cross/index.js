@@ -19,8 +19,8 @@ export default class MarkLine extends Component
         this.height = opt.height || 0;
 
         //x,y都是准心的 x轴方向和y方向的 value值，不是真实的px，需要
-        this.x = null,
-        this.y = null
+        this.x = null;
+        this.y = null;
         
         //准心的位置
         this.aimPoint = {

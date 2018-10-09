@@ -42,6 +42,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             distance     : 2
         };
         this.axisLine = {//轴线
+            position     : "default",  //位置，default默认在min，可选 "center" 和 具体的值
             enabled      : 1,     
             lineWidth    : 1,
             strokeStyle  : '#cccccc'
@@ -105,6 +106,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.init(opt, data );
 
         this._getName();
+
+        this._axisLine = null;
     }
 
     init(opt, data )
@@ -865,6 +868,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 }
             });
             this.sprite.addChild( _axisLine );
+            this._axisLine = _axisLine;
         }
 
         if (this._title) {

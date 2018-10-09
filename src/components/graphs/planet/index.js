@@ -347,16 +347,16 @@ export default class PlanetGraphs extends GraphsBase
     show( field , legendData)
     {
         this.getAgreeNodeData( legendData, function( data ){
-            data.nodeElement.context.visible = true;
-            data.textNode.context.visible = true;
+            data.nodeElement && (data.nodeElement.context.visible = true);
+            data.labelElement && (data.labelElement.context.visible = true);
         } );
     }
 
     hide( field , legendData)
     {
         this.getAgreeNodeData( legendData, function( data ){
-            data.nodeElement.context.visible = false;
-            data.textNode.context.visible = false;
+            data.nodeElement && (data.nodeElement.context.visible = false);
+            data.labelElement && (data.labelElement.context.visible = false);
         } );
     }
 
@@ -370,7 +370,7 @@ export default class PlanetGraphs extends GraphsBase
                     if( legendData.name == rowData[ legendData.field ] ){
                         //这个数据符合
                         //data.nodeElement.context.visible = false;
-                        //data.textNode.context.visible = false;
+                        //data.labelElement.context.visible = false;
                         callback && callback( data );
                     };
                 });

@@ -91,6 +91,8 @@ export default class Rect_Component extends coorBase
             _yAxis.resetData( yAxisDataFrame );
         } );
 
+        this._resetXY_axisLine_pos();
+
         var _yAxis = this._yAxisLeft || this._yAxisRight;
         this._grid.reset({
             animation:false,
@@ -184,6 +186,8 @@ export default class Rect_Component extends coorBase
 
         this._initInduce();
 
+        this._resetXY_axisLine_pos();
+
         if( this.horizontal ){
 
             this._horizontal({
@@ -200,6 +204,41 @@ export default class Rect_Component extends coorBase
             */   
         }
     }
+
+    _resetXY_axisLine_pos(){
+        var me = this;
+        //设置下x y 轴的 _axisLine轴线的位置，默认 axisLine.position==default
+
+        var xAxisPosY;
+        if( this._xAxis.axisLine.position == 'center' ){
+            xAxisPosY = -this._yAxis[0].height / 2;
+        } 
+        if( _.isNumber( this._xAxis.axisLine.position ) ){
+            xAxisPosY = this._yAxis[0].getYposFromVal( this._xAxis.axisLine.position );
+        }
+        if( xAxisPosY !== undefined ){
+            this._xAxis._axisLine.context.y = xAxisPosY;
+        }
+
+        _.each( this._yAxis , function( _yAxis ){
+            //这个_yAxis是具体的y轴实例
+            var yAxisPosX;
+            if( _yAxis.axisLine.position == 'center' ){
+                yAxisPosX = me._xAxis.width / 2;
+            } 
+            if( _.isNumber( _yAxis.axisLine.position ) ){
+                yAxisPosX = me._xAxis.getPosX( {
+                    val : _yAxis.axisLine.position
+                } );
+            }
+            if( yAxisPosX !== undefined ){
+                _yAxis._axisLine.context.x = yAxisPosX;
+            }
+        } );
+
+    }
+
+
 
     getSizeAndOrigin(){
         
@@ -366,6 +405,7 @@ export default class Rect_Component extends coorBase
         var fieldMap = this.getFieldMapOf(field);
         var enabledFields = this.getEnabledFields()[ fieldMap.yAxis.align ];
         fieldMap.yAxis.resetData( this._getAxisDataFrame( enabledFields ) );
+        this._resetXY_axisLine_pos();
 
         //然后yAxis更新后，对应的背景也要更新
         this._grid.reset({

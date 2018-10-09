@@ -8875,6 +8875,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
             strokeStyle: '#cccccc'
         };
         _this.axisLine = {
+            position: "default", //位置，default在align的位置（left，right），可选 "center" 和 具体的值
             enabled: 1, //是否有轴线
             lineWidth: 1,
             strokeStyle: '#cccccc'
@@ -8941,6 +8942,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
         _this.field = _$9.flatten([_this.field])[0];
 
         _this._txts = [];
+        _this._axisLine = null;
         //this._lines = []; //line目前直接绑定在xNode上面
         return _this;
     }
@@ -9435,7 +9437,7 @@ var xAxis = function (_Canvax$Event$EventDi) {
                 }            }
             //轴线
             if (this.axisLine.enabled) {
-                var _axisline = new Line$1({
+                var _axisLine = new Line$1({
                     context: {
                         start: {
                             x: 0,
@@ -9449,7 +9451,8 @@ var xAxis = function (_Canvax$Event$EventDi) {
                         strokeStyle: this.axisLine.strokeStyle
                     }
                 });
-                this.sprite.addChild(_axisline);
+                this.sprite.addChild(_axisLine);
+                this._axisLine = _axisLine;
             }
         }
     }, {
@@ -9607,6 +9610,7 @@ var yAxis = function (_Canvax$Event$EventDi) {
             distance: 2
         };
         _this.axisLine = { //轴线
+            position: "default", //位置，default默认在min，可选 "center" 和 具体的值
             enabled: 1,
             lineWidth: 1,
             strokeStyle: '#cccccc'
@@ -9669,6 +9673,8 @@ var yAxis = function (_Canvax$Event$EventDi) {
         _this.init(opt, data);
 
         _this._getName();
+
+        _this._axisLine = null;
         return _this;
     }
 
@@ -10367,6 +10373,7 @@ var yAxis = function (_Canvax$Event$EventDi) {
                     }
                 });
                 this.sprite.addChild(_axisLine);
+                this._axisLine = _axisLine;
             }
 
             if (this._title) {
@@ -10662,6 +10669,8 @@ var Rect_Component = function (_coorBase) {
                 _yAxis.resetData(yAxisDataFrame);
             });
 
+            this._resetXY_axisLine_pos();
+
             var _yAxis = this._yAxisLeft || this._yAxisRight;
             this._grid.reset({
                 animation: false,
@@ -10752,6 +10761,8 @@ var Rect_Component = function (_coorBase) {
 
             this._initInduce();
 
+            this._resetXY_axisLine_pos();
+
             if (this.horizontal) {
 
                 this._horizontal({
@@ -10767,6 +10778,39 @@ var Rect_Component = function (_coorBase) {
                 this.origin.y = this._yAxis[0].height + _padding.top;
                 */
             }
+        }
+    }, {
+        key: "_resetXY_axisLine_pos",
+        value: function _resetXY_axisLine_pos() {
+            var me = this;
+            //设置下x y 轴的 _axisLine轴线的位置，默认 axisLine.position==default
+
+            var xAxisPosY;
+            if (this._xAxis.axisLine.position == 'center') {
+                xAxisPosY = -this._yAxis[0].height / 2;
+            }
+            if (_$12.isNumber(this._xAxis.axisLine.position)) {
+                xAxisPosY = this._yAxis[0].getYposFromVal(this._xAxis.axisLine.position);
+            }
+            if (xAxisPosY !== undefined) {
+                this._xAxis._axisLine.context.y = xAxisPosY;
+            }
+
+            _$12.each(this._yAxis, function (_yAxis) {
+                //这个_yAxis是具体的y轴实例
+                var yAxisPosX;
+                if (_yAxis.axisLine.position == 'center') {
+                    yAxisPosX = me._xAxis.width / 2;
+                }
+                if (_$12.isNumber(_yAxis.axisLine.position)) {
+                    yAxisPosX = me._xAxis.getPosX({
+                        val: _yAxis.axisLine.position
+                    });
+                }
+                if (yAxisPosX !== undefined) {
+                    _yAxis._axisLine.context.x = yAxisPosX;
+                }
+            });
         }
     }, {
         key: "getSizeAndOrigin",
@@ -10933,6 +10977,7 @@ var Rect_Component = function (_coorBase) {
             var fieldMap = this.getFieldMapOf(field);
             var enabledFields = this.getEnabledFields()[fieldMap.yAxis.align];
             fieldMap.yAxis.resetData(this._getAxisDataFrame(enabledFields));
+            this._resetXY_axisLine_pos();
 
             //然后yAxis更新后，对应的背景也要更新
             this._grid.reset({
@@ -14694,17 +14739,22 @@ var ScatGraphs = function (_GraphsBase) {
             };
 
             if (this.animation && !this.inited) {
-                if (this.aniOrigin == "default") {
-                    ctx.y = 0;
-                }                if (this.aniOrigin == "origin") {
-                    ctx.x = 0;
-                    ctx.y = 0;
-                }                if (this.aniOrigin == "center") {
-                    ctx.x = this.width / 2;
-                    ctx.y = -(this.height / 2);
-                }            }
+                this._setCtxAniOrigin(ctx);
+            }
             return ctx;
         }
+    }, {
+        key: "_setCtxAniOrigin",
+        value: function _setCtxAniOrigin(ctx) {
+            if (this.aniOrigin == "default") {
+                ctx.y = 0;
+            }            if (this.aniOrigin == "origin") {
+                ctx.x = this.root._coord._yAxis[0]._axisLine.context.x; //0;
+                ctx.y = this.root._coord._xAxis._axisLine.context.y; //0;
+            }            if (this.aniOrigin == "center") {
+                ctx.x = this.width / 2;
+                ctx.y = -(this.height / 2);
+            }        }
     }, {
         key: "_getNodeContext",
         value: function _getNodeContext(nodeData) {
@@ -14728,18 +14778,7 @@ var ScatGraphs = function (_GraphsBase) {
 
             if (this.animation && !this.inited) {
 
-                if (this.aniOrigin == "default") {
-                    //ctx.x = 0;
-                    ctx.y = 0;
-                }
-                if (this.aniOrigin == "origin") {
-                    ctx.x = 0;
-                    ctx.y = 0;
-                }
-                if (this.aniOrigin == "center") {
-                    ctx.x = this.width / 2;
-                    ctx.y = -(this.height / 2);
-                }
+                this._setCtxAniOrigin(ctx);
 
                 ctx.r = 1;
             }            return ctx;
@@ -14762,11 +14801,11 @@ var ScatGraphs = function (_GraphsBase) {
                     r: nodeData.radius
                 }, {
                     onUpdate: function onUpdate(opt) {
-                        if (this._label) {
+                        if (this._label && this._label.context) {
                             var _textPoint = me._getTextPosition(this._label, opt);
                             this._label.context.x = _textPoint.x;
                             this._label.context.y = _textPoint.y;
-                        }                        if (this._line) {
+                        }                        if (this._line && this._line.context) {
                             this._line.context.start.y = opt.y + opt.r;
                         }                    },
                     delay: Math.round(Math.random() * 300),
@@ -17915,16 +17954,16 @@ var PlanetGraphs = function (_GraphsBase) {
         key: "show",
         value: function show(field, legendData) {
             this.getAgreeNodeData(legendData, function (data) {
-                data.nodeElement.context.visible = true;
-                data.textNode.context.visible = true;
+                data.nodeElement && (data.nodeElement.context.visible = true);
+                data.labelElement && (data.labelElement.context.visible = true);
             });
         }
     }, {
         key: "hide",
         value: function hide(field, legendData) {
             this.getAgreeNodeData(legendData, function (data) {
-                data.nodeElement.context.visible = false;
-                data.textNode.context.visible = false;
+                data.nodeElement && (data.nodeElement.context.visible = false);
+                data.labelElement && (data.labelElement.context.visible = false);
             });
         }
     }, {
@@ -17937,7 +17976,7 @@ var PlanetGraphs = function (_GraphsBase) {
                         if (legendData.name == rowData[legendData.field]) {
                             //这个数据符合
                             //data.nodeElement.context.visible = false;
-                            //data.textNode.context.visible = false;
+                            //data.labelElement.context.visible = false;
                             callback && callback(data);
                         }                    });
                 });
@@ -23570,7 +23609,8 @@ var MarkLine$1 = function (_Component) {
         _this.height = opt.height || 0;
 
         //x,y都是准心的 x轴方向和y方向的 value值，不是真实的px，需要
-        _this.x = null, _this.y = null;
+        _this.x = null;
+        _this.y = null;
 
         //准心的位置
         _this.aimPoint = {
