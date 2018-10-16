@@ -29,4 +29,5 @@ export default class component extends Canvax.Event.EventDispatcher
     {
         
     }
+    
 }
