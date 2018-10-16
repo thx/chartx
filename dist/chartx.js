@@ -8007,7 +8007,7 @@ var Chartx = (function () {
 
 	var _$5 = canvax._;
 
-	var padding = 20;
+	var _padding = 20;
 
 	var Chart = function (_Canvax$Event$EventDi) {
 	    inherits$1(Chart, _Canvax$Event$EventDi);
@@ -8032,14 +8032,8 @@ var Chartx = (function () {
 	        _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
 	        _this.height = parseInt(_this.el.offsetHeight); //图表区域高
 
-	        //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
 	        //legend如果在top，就会把图表的padding.top修改，减去legend的height
-	        _this.padding = {
-	            top: padding,
-	            right: padding,
-	            bottom: padding,
-	            left: padding
-	        };
+	        _this.padding = _this._getPadding();
 
 	        //Canvax实例
 	        _this.canvax = new canvax.App({
@@ -8084,6 +8078,29 @@ var Chartx = (function () {
 	    }, {
 	        key: "draw",
 	        value: function draw() {}
+	    }, {
+	        key: "_getPadding",
+	        value: function _getPadding() {
+
+	            var paddingVal = _padding;
+	            if (this._opt.coord && "padding" in this._opt.coord) {
+	                if (!_$5.isObject(this._opt.coord.padding)) {
+	                    paddingVal = this._opt.coord.padding;
+	                }
+	            }            var paddingObj = {
+	                top: paddingVal,
+	                right: paddingVal,
+	                bottom: paddingVal,
+	                left: paddingVal
+	            };
+
+	            if (this._opt.coord && "padding" in this._opt.coord) {
+	                if (_$5.isObject(this._opt.coord.padding)) {
+	                    paddingObj = _$5.extend(paddingObj, this._opt.coord.padding);
+	                }
+	            }
+	            return paddingObj;
+	        }
 
 	        //ind 如果有就获取对应索引的具体颜色值
 
@@ -8153,12 +8170,7 @@ var Chartx = (function () {
 	            this._graphs = []; //绘图组件清空
 	            this.canvax.domView.innerHTML = "";
 	            //padding数据也要重置为起始值
-	            this.padding = {
-	                top: padding,
-	                right: padding,
-	                bottom: padding,
-	                left: padding
-	            };
+	            this.padding = this._getPadding();
 	        }
 
 	        /**

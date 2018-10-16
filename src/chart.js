@@ -5,7 +5,7 @@ import theme from "./theme"
 
 const _ = Canvax._;
 
-const padding = 20;
+const _padding = 20;
 
 export default class Chart extends Canvax.Event.EventDispatcher
 {
@@ -28,14 +28,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.width = parseInt(this.el.offsetWidth) //图表区域宽
         this.height = parseInt(this.el.offsetHeight) //图表区域高
 
-        //padding 不支持用户设置， 主要是给内部组件比如 配置了 legend的话，
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
-        this.padding = {
-            top: padding,
-            right: padding,
-            bottom: padding,
-            left: padding
-        };
+        this.padding = this._getPadding();
 
         //Canvax实例
 		this.canvax = new Canvax.App({
@@ -81,6 +75,30 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
     draw()
     {
+    }
+
+    _getPadding(){
+        
+        var paddingVal = _padding;
+        if( this._opt.coord && "padding" in this._opt.coord ){
+            if( !_.isObject(this._opt.coord.padding) ){
+                paddingVal = this._opt.coord.padding;
+            }
+        };
+        var paddingObj = {
+            top: paddingVal,
+            right: paddingVal,
+            bottom: paddingVal,
+            left: paddingVal
+        };
+        
+        if( this._opt.coord && "padding" in this._opt.coord ){
+            if( _.isObject(this._opt.coord.padding) ){
+                paddingObj = _.extend( paddingObj, this._opt.coord.padding )
+            }
+        };
+
+        return paddingObj;
     }
 
     //ind 如果有就获取对应索引的具体颜色值
@@ -148,12 +166,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this._graphs = [];    //绘图组件清空
         this.canvax.domView.innerHTML = "";
         //padding数据也要重置为起始值
-        this.padding = {
-            top   : padding,
-            right : padding,
-            bottom: padding,
-            left  : padding
-        };
+        this.padding = this._getPadding();
     }
 
     /**
