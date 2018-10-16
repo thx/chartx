@@ -1,0 +1,12 @@
+{
+    "assets":{
+        "type":"command",
+        "command":{
+            "cmd":[
+                "tnpm i",
+                "npm run rollup",
+                "mv ./dist $BUILD_DEST"
+            ]
+        }
+    }
+}

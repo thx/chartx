@@ -5,6 +5,9 @@
   "version": "1.0.73",
   "homepage": "https://thx.github.io/chartx/",
   "license": "MIT",
+  "magixCliConfig": {
+    "cloudBuild": true
+  },
   "keywords": [
     "chartx",
     "chart",
