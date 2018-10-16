@@ -8383,6 +8383,8 @@ define(function () { 'use strict';
 
 	        _this._graphs = [];
 
+	        //this.padding
+
 	        /*
 	        if( opt.graphs ){
 	            opt.graphs = _.flatten( [ opt.graphs ] );

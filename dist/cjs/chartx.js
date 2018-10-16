@@ -8383,6 +8383,8 @@ var Coord = function (_Chart) {
 
         _this._graphs = [];
 
+        //this.padding
+
         /*
         if( opt.graphs ){
             opt.graphs = _.flatten( [ opt.graphs ] );

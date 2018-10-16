@@ -8387,6 +8387,8 @@
 
 	        _this._graphs = [];
 
+	        //this.padding
+
 	        /*
 	        if( opt.graphs ){
 	            opt.graphs = _.flatten( [ opt.graphs ] );
