@@ -117,7 +117,7 @@ export default class dataZoom extends Component
         opt = _.extend( true, defaultProps , opt);
 
         if( opt.position == "bottom" ){
-            debugger
+            
             //目前dataZoom是固定在bottom位置的
             //_getDataZoomOpt中会矫正x
             opt.pos = {

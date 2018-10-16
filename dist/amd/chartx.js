@@ -14114,7 +14114,8 @@ define(function () { 'use strict';
 	                        layoutType: me.root._coord ? me.root._coord.xAxis.layoutType : me.root._xAxis.layoutType
 	                    });
 
-	                    var y = _$20.isNumber(_lineData[b]) ? _yAxis.getYposFromVal(_lineData[b]) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+	                    //var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+	                    var y = _$20.isNumber(Number(_lineData[b])) ? _yAxis.getYposFromVal(Number(_lineData[b])) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
 	                    var node = {
 	                        type: "line",
@@ -22452,7 +22453,7 @@ define(function () { 'use strict';
 	            opt = _$33.extend(true, defaultProps, opt);
 
 	            if (opt.position == "bottom") {
-	                debugger;
+
 	                //目前dataZoom是固定在bottom位置的
 	                //_getDataZoomOpt中会矫正x
 	                opt.pos = {
