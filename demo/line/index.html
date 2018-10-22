@@ -68,119 +68,145 @@ var data = [
 ]
 
 var options = {
-    coord : {
-        type : "rect",
-        //横向的图表，是坐标系横向了
-        //horizontal : true,
-
-        xAxis : {
-            field : "xfield",
-            label:{
-                rotation  : 30 
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "xfield",
+            label: {
+                rotation: 30
+            },
+            title: {
+                text: "我是xAxis"
             }
         },
-        yAxis : [
+        yAxis: [
             {
-                name : "left",
-                label:{
-                    rotation  : 30 
+                title: {
+                    text: "我是left"
+                },
+                label: {
+                    rotation: 30
                 }
             },
             {
-                name : "right"
+                title: {
+                    text: "我是right"
+                }
             }
         ]
     },
-    graphs : [
-    
-        { 
-            type : "line",
-            field : "uv" , 
-            //yAxisAlign:"left" ,
-            line : {
-                strokeStyle : "#eeccdd"
+    graphs: [
+        {
+            type: "line",
+            field: "uv",
+            yAxisAlign: "left",
+            line: {
+                strokeStyle: "#eeccdd"
             },
-            fill : {
-                alpha : [ 0.5 , 0 ]
+            fill: {
+                alpha: [
+                    0.5,
+                    0
+                ]
             },
-            node : {
-                //配置拐点才出现节点
-                corner : true
+            icon: {
+                corner: true
             },
-            label : {
-                enabled : true
+            label: {
+                enabled: true
             }
         },
-        
-        {   
-            type : "line",
-            field : ["pv"] , 
-            //yAxisAlign:"right",
-            line : {
-                lineType : "dashed",
-                strokeStyle : {
-                    lineargradient : [
-                        {position : 0    , color:"#ff7033"},
-                        {position : 0.1 , color:"#ff9933"},
-                        {position : 0.3 , color:"#2dafe3"},
-                        {position : 0.85 , color:"#449be3"},
-                        {position : 0.95 , color:"#7177e3"},
-                        {position : 1.0  , color:"#5744e3"}
+        {
+            type: "line",
+            field: [
+                "pv"
+            ],
+            yAxisAlign: "right",
+            line: {
+                lineType: "dashed",
+                strokeStyle: {
+                    lineargradient: [
+                        {
+                            position: 0,
+                            color: "#ff7033"
+                        },
+                        {
+                            position: 0.1,
+                            color: "#ff9933"
+                        },
+                        {
+                            position: 0.3,
+                            color: "#2dafe3"
+                        },
+                        {
+                            position: 0.85,
+                            color: "#449be3"
+                        },
+                        {
+                            position: 0.95,
+                            color: "#7177e3"
+                        },
+                        {
+                            position: 1,
+                            color: "#5744e3"
+                        }
                     ]
                 }
             },
-            label : {
-                enabled : true
+            label: {
+                enabled: true
             }
         }
     ],
-    legend : {
-        enabled : 1
+    legend: {
+        enabled: 1
     },
     dataZoom: {
-        range : {
-            start : 0,
-            end : 10
+        range: {
+            start: 0,
+            end: 10
         }
     },
-    tips : {
-        pointer : "line"
+    tips: {
+        pointer: "line"
     },
     markLine: [
         {
             markTo: "click",
-            label : {
-                enabled : true,
-                content : function( yval ){
-                    return 'click markline ：' + parseInt( yval )
+            label: {
+                enabled: true,
+                content: function (yval) {
+                    return 'click markline ：' + parseInt(yval)
                 },
-                fontSize : 14
+                fontSize: 14
             },
-            y : 210
+            y: 210
         },
         {
-            markTo: 'uv',
-            label : {
-                enabled : true,
-                fontSize : 14
+            markTo: "uv",
+            label: {
+                enabled: true,
+                fontSize: 14
             }
         },
         {
-            label : {
-                enabled : true,
-                fillStyle : "#777"
+            label: {
+                enabled: true,
+                fillStyle: "#777"
             },
             line: {
-                strokeStyle : "#777"
+                strokeStyle: "#777"
             },
-            y : 70
+            y: 70
         }
-    ]   
-};
+    ]
+}
+
 
 window.line = Chartx.create("canvasTest" , data , options)
 
 setTimeout( function(){
+    return;
     Chartx.create("canvasTest" , data , options)
 } , 3000)
 

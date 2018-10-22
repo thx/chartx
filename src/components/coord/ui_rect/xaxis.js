@@ -1,15 +1,16 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import DataSection from "../../../utils/datasection"
+import Axis from "../axis"
 
 const Line = Canvax.Shapes.Line;
 const _ = Canvax._;
 
-export default class xAxis extends Canvax.Event.EventDispatcher
+export default class xAxis extends Axis
 {
     constructor(opt, data, _coord)
     {
-        super();
+        super(opt, data, _coord);
 
         this._opt = opt;
 
@@ -61,7 +62,6 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             this.label.rotation = 90;
         };
 
-        this.maxTxtH = 0;
 
         this.pos = {
             x: 0,
@@ -86,8 +86,15 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         this.animation = true;
 
         //layoutType == "proportion"的时候才有效
-        this.maxVal = null; 
-        this.minVal = null; 
+        //1，如果数据中又正数和负数，则默认为0，
+        //2，如果dataSection最小值小于0，则baseNumber为最小值，
+        //3，如果dataSection最大值大于0，则baseNumber为最大值
+        //也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值
+        this.origin = null; 
+        this.originPos = null; //暂未开发，和yAxis中对应
+        this._originTrans = 0; //暂未开发，和yAxis中对应
+        this.max = null;
+        this.min = null;
 
         this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
 
@@ -100,12 +107,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
 
-        _.extend(true , this, opt);
-
         this.init(opt, data);
-
-        //xAxis的field只有一个值,
-        this.field = _.flatten( [ this.field ] )[0];
 
         this._txts = [];
         this._axisLine = null;
@@ -114,11 +116,16 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
     init(opt, data) 
     {
+        _.extend(true , this, opt);
+
+        //xAxis的field只有一个值
+        this.field = _.flatten( [ this.field ] )[0];
+
         this.sprite = new Canvax.Display.Sprite({
-            id: "xAxisSprite"
+            id: "xAxisSprite_"+new Date().getTime()
         });
         this.rulesSprite = new Canvax.Display.Sprite({
-            id: "rulesSprite"
+            id: "rulesSprite_"+new Date().getTime()
         });
         this.sprite.addChild( this.rulesSprite );
 
@@ -132,13 +139,13 @@ export default class xAxis extends Canvax.Event.EventDispatcher
 
         if( data && data.field ){
             this.field = data.field;
-        }
+        };
 
-        if(data && data.org){
+        if( data && data.org ){
             this.dataOrg = _.flatten( data.org );
         };
 
-        if( !this._opt.dataSection && this.dataOrg ){
+        if( ( !this._opt.dataSection || ( this._opt.dataSection && !this._opt.dataSection.length ) ) && this.dataOrg ){
             //如果没有传入指定的dataSection，才需要计算dataSection
             this.dataSection = this._initDataSection(this.dataOrg);
         };        
@@ -161,15 +168,20 @@ export default class xAxis extends Canvax.Event.EventDispatcher
             this.label.textAlign = "right";
         };
 
+        
+        this.setMinMaxOrigin();
+
         //取第一个数据来判断xaxis的刻度值类型是否为 number
-        !("minVal" in this._opt) && (this.minVal = _.min( this.dataSection ));
-        if( isNaN(this.minVal) || this.minVal==Infinity ){
-            this.minVal = 0;
+        /*
+        !("min" in this._opt) && (this.min = _.min( this.dataSection ));
+        if( isNaN(this.min) || this.min==Infinity ){
+            this.min = 0;
         };
-        !("maxVal" in this._opt) && (this.maxVal = _.max( this.dataSection ));
-        if( isNaN(this.maxVal) || this.maxVal==Infinity ){
-            this.maxVal = 1;
+        !("max" in this._opt) && (this.max = _.max( this.dataSection ));
+        if( isNaN(this.max) || this.max==Infinity ){
+            this.max = 1;
         };
+        */
 
         this._getName();
 
@@ -185,6 +197,10 @@ export default class xAxis extends Canvax.Event.EventDispatcher
     {
         var arr = _.flatten(data);
         if( this.layoutType == "proportion" ){
+            if( "origin" in this._opt ){
+                arr.push( this._opt.origin );
+            };
+
             if( arr.length == 1 ){
                arr.push( 0 );
                arr.push( arr[0]*2 );
@@ -236,7 +252,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         }
 
         if( this.layoutType == "proportion" ){
-            iNode = parseInt( x  / ((this.maxVal-this.minVal)/this.width ) );
+            iNode = parseInt( x  / ((this.max-this.min)/this.width ) );
         }
 
         return iNode
@@ -253,7 +269,7 @@ export default class xAxis extends Canvax.Event.EventDispatcher
         var x = x;
 
         if( this.layoutType == "proportion" ){
-            val = (this.maxVal-this.minVal) * ( x/this.width ) + this.minVal;
+            val = (this.max-this.min) * ( x/this.width ) + this.min;
         } else {
             x = this.getPosX({
                 val : val,
@@ -379,11 +395,11 @@ export default class xAxis extends Canvax.Event.EventDispatcher
                 x = ind / (dataLen - 1) * width;
             };
             if( layoutType == "proportion" ){
-                //按照数据真实的值在minVal - maxVal 区间中的比例值
+                //按照数据真实的值在minVal - max 区间中的比例值
                 if( val == undefined ){
-                    val = (ind * (this.maxVal - this.minVal)/(dataLen-1)) + this.minVal;
+                    val = (ind * (this.max - this.min)/(dataLen-1)) + this.min;
                 };
-                x = width * ( (val - this.minVal) / (this.maxVal - this.minVal) );
+                x = width * ( (val - this.min) / (this.max - this.min) );
             };
             if( layoutType == "peak" ){
                 //柱状图的就是peak

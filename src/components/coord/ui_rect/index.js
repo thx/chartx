@@ -213,8 +213,11 @@ export default class Rect_Component extends coorBase
         if( this._xAxis.axisLine.position == 'center' ){
             xAxisPosY = -this._yAxis[0].height / 2;
         } 
+        if( this._xAxis.axisLine.position == 'center' ){
+            xAxisPosY = -this._yAxis[0].height / 2;
+        } 
         if( _.isNumber( this._xAxis.axisLine.position ) ){
-            xAxisPosY = this._yAxis[0].getYposFromVal( this._xAxis.axisLine.position );
+            xAxisPosY = this._yAxis[0].getPosFromVal( this._xAxis.axisLine.position );
         }
         if( xAxisPosY !== undefined ){
             this._xAxis._axisLine.context.y = xAxisPosY;

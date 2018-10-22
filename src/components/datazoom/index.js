@@ -197,7 +197,7 @@ export default class dataZoom extends Component
                             //lineWidth: 1,
                             strokeStyle: "#ececec"
                         },
-                        icon: {
+                        node: {
                             enabled: false
                         },
                         area: {

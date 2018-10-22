@@ -190,7 +190,7 @@ export default class MarkLine extends Component
 
     _getYPos()
     {
-        return this._yAxis.getYposFromVal( this._getYVal() );;
+        return this._yAxis.getPosFromVal( this._getYVal() );;
     }
 
     _getLabel()

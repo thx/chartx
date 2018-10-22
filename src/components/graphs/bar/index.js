@@ -409,7 +409,7 @@ export default class BarGraphs extends GraphsBase
                     
                     var rectCtx = {
                         x: finalPos.x,
-                        y: rectData.yBasePoint.y,//0,
+                        y: rectData.yOriginPoint.y,//0,
                         width: finalPos.width,
                         height: finalPos.height,
                         fillStyle: finalPos.fillStyle,
@@ -659,18 +659,23 @@ export default class BarGraphs extends GraphsBase
                     if (me.proportion) {
                         y = -val / vCount * _yAxis.height;
                     } else {
-                        y = _yAxis.getYposFromVal( val );
+                        y = _yAxis.getPosFromVal( val );
                     };
 
-                    function _getFromY( tempBarData, v, i, val, y, yBasePoint ){
+                    var yOriginPoint = {
+                        value : _yAxis.origin,
+                        y     : _yAxis.originPos
+                    };
+
+                    function _getFromY( tempBarData, v, i, val, y ){
                         var preData = tempBarData[v - 1];
                         if( !preData ){
-                            return yBasePoint.y;
+                            return yOriginPoint.y;
                         };
 
                         var preY = preData[i].y;
                         var preVal = preData[i].value;
-                        var yBaseNumber = yBasePoint.value;
+                        var yBaseNumber = yOriginPoint.value;
                         if( val >= yBaseNumber ){
                             //如果大于基线的，那么就寻找之前所有大于基线的
                             if( preVal >= yBaseNumber ){
@@ -678,7 +683,7 @@ export default class BarGraphs extends GraphsBase
                                 preData[i].isLeaf = false;
                                 return preY;
                             } else {
-                                return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
+                                return _getFromY( tempBarData, v-1, i, val, y );
                             }
                         } else {
                             if( preVal < yBaseNumber ){
@@ -686,14 +691,14 @@ export default class BarGraphs extends GraphsBase
                                 preData[i].isLeaf = false;
                                 return preY;
                             } else {
-                                return _getFromY( tempBarData, v-1, i, val, y, yBasePoint );
+                                return _getFromY( tempBarData, v-1, i, val, y );
                             }
                         }
                     }
 
-                    //找到其着脚点,一般就是 yAxis.basePoint
-                    var fromY = _getFromY(tempBarData, v, i, val, y, _yAxis.basePoint);
-                    y += fromY - _yAxis.basePoint.y;
+                    //找到其着脚点,一般就是 yOriginPoint.y
+                    var fromY = _getFromY(tempBarData, v, i, val, y);
+                    y += fromY - yOriginPoint.y;
 
                     var nodeData = {
                         type    : "bar",
@@ -706,7 +711,7 @@ export default class BarGraphs extends GraphsBase
                         x       : x,
                         y       : y,
                         width   : barW,
-                        yBasePoint : _yAxis.basePoint,
+                        yOriginPoint : yOriginPoint,
                         isLeaf  : true,
                         xAxis   : _xAxis.getNodeInfoOfX( _x ),
                         iNode   : i,
@@ -732,7 +737,7 @@ export default class BarGraphs extends GraphsBase
 
     _getTextAlign( bar , rectData ){
         var align = this.label.align;
-        if( rectData.value < rectData.yBasePoint.value ){
+        if( rectData.value < rectData.yOriginPoint.value ){
             if( align == "left" ){
                 align = "right"
             } else if( align == "right" ){
@@ -790,7 +795,7 @@ export default class BarGraphs extends GraphsBase
         x -= me.label.offsetX;
 
         var i = 1;
-        if( rectData.value < rectData.yBasePoint.value ){
+        if( rectData.value < rectData.yOriginPoint.value ){
             i = -1;
         };
         y -= i * me.label.offsetY;

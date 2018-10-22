@@ -112,8 +112,14 @@ export default class LineGraphs extends GraphsBase
                     layoutType : me.root._coord ? me.root._coord.xAxis.layoutType : me.root._xAxis.layoutType
                 } );
                 
-                //var y = _.isNumber( _lineData[b] ) ? _yAxis.getYposFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
-                var y = _.isNumber( Number(_lineData[b]) ) ? _yAxis.getYposFromVal( Number(_lineData[b]) ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+                //var y = _.isNumber( _lineData[b] ) ? _yAxis.getPosFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+                
+                var y = _lineData[b];
+                if( !isNaN( y ) && y !== null && y !== undefined && y !== ""  ){
+                    y = _yAxis.getPosFromVal( y );
+                } else {
+                    y = undefined;
+                };
 
                 var node = {
                     type     : "line",

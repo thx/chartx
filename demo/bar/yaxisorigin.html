@@ -37,14 +37,14 @@
                 //第一行是表头。
                 var data= [
                     ["xfield","uv" ,"pv" ,"click", "ppc"],
-                    [ 1      , 101 , 20  , 33    , 53],
-                    [ 2      , 67  , 51  , 26    , 62],
-                    [ 3      , 130 , 50  , 50    , 23],
-                    [ 4      , 101 , 60  , 33    , 64],
+                    [ 1      , 101 , 20  , 133    , 53],
+                    [ 2      , 67  , 51  , 126    , 62],
+                    [ 3      , 130 , 50  , 150    , 23],
+                    [ 4      , 101 , 60  , 133    , 64],
                     [ 5      , 67  , 91  , 126   , 34 ],
-                    [ 6      , 30  , 50 , 90     , 21],
-                    [ 7      , 51  , 120 , 33    , 112],
-                    [ 8      , 67  , 51  , 86    , 231],
+                    [ 6      , 30  , 50 , 190     , 21],
+                    [ 7      , 51  , 120 , 133    , 112],
+                    [ 8      , 67  , 51  , 186    , 231],
                     [ 9      , 120 , 90  , 150   , 23 ]
                 
                 ];
@@ -54,37 +54,27 @@
                         xAxis : {
                             field : "xfield"
                         },
-                        yAxis : [
+                        yAxis : 
                             {
-                                name : "left"
-                            },
-                            {
-                                name : "right"
+                                origin : 0
                             }
-                        ]
                     },
-                    legend : {},
                     tips : {
                         pointer : "region"
                     },
-                    graphs : [
-                    
-                        {
-                            type : "bar",
-                            field : "click",
-                            yAxisAlign : "left",
-                            label : {
-                                enabled : true
-                            },
-                            node : {
-                                onclick: function( e, nodeData, graphs ){
-                                    debugger
-                                }
+                    graphs : {
+                        type : "bar",
+                        field : "click",
+                        label : {
+                            enabled : true
+                        },
+                        node : {
+                            onclick: function( e, nodeData, graphs ){
+                                debugger
                             }
-                            
                         }
                         
-                    ],
+                    },
                 
                     markLine :  [{
                         markTo: 'uv',

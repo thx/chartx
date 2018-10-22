@@ -1,15 +1,16 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import DataSection from "../../../utils/datasection"
+import Axis from "../axis"
 
 const Line = Canvax.Shapes.Line;
 const _ = Canvax._;
 
-export default class yAxis extends Canvax.Event.EventDispatcher
+export default class yAxis extends Axis
 {
-	constructor( opt, data ){
+	constructor( opt, data, _coord){
 
-        super();
+        super(opt, data, _coord);
 
         this._opt = opt;
         
@@ -21,15 +22,15 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.field   = [];   //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
         this.title  = {
-            text    : "",
-            shapeType  : "text",
-            fontColor  : '#999',
-            fontSize   : 12,
-            offset   : 2,
-            textAlign  : "center",
+            text         : "",
+            shapeType    : "text",
+            fontColor    : '#999',
+            fontSize     : 12,
+            offset       : 2,
+            textAlign    : "center",
             textBaseline : "middle",
-            strokeStyle : null,
-            lineHeight : 0
+            strokeStyle  : null,
+            lineHeight   : 0
         };
         this._title = null; //this.label对应的文本对象
 
@@ -70,26 +71,8 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
         
         this.layoutData = []; //dataSection 对应的layout数据{y:-100, value:'1000'}
-        this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
-        this.waterLine = null; //水位data，需要混入 计算 dataSection， 如果有设置waterLineData， dataSection的最高水位不会低于这个值
-
-        //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
-        this.dataSectionGroup = []; 
-
-        //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
-        this.middleweight = null; 
-
-        this.dataOrg = data.org || []; //源数据
 
         this.sprite = null;
-        
-        this.baseNumber = null; //默认为0，如果dataSection最小值小于0，则baseNumber为最小值，如果dataSection最大值大于0，则baseNumber为最大值
-        this.basePoint = null; //value为 baseNumber 的point {x,y}
-        this.min = null; 
-        this.max = null; //后面加的，目前还没用
-
-        this._yOriginTrans = 0;//当设置的 baseNumber 和datasection的min不同的时候，
-        
 
         //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
         //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
@@ -99,29 +82,18 @@ export default class yAxis extends Canvax.Event.EventDispatcher
 
         this.animation = true;
 
-        this.sort = null; //"asc" //排序，默认从小到大, desc为从大到小，之所以不设置默认值为asc，是要用null来判断用户是否进行了配置
-
-        this.layoutType = "proportion"; // rule , peak, proportion
-
-        this.init(opt, data );
-
-        this._getName();
+        this.layoutType = "proportion"; //rule , peak, proportion
 
         this._axisLine = null;
+
+        this.init(opt, data );
+        
     }
 
     init(opt, data )
     {
         _.extend(true , this, opt);
-
-        //extend会设置好this.field
-        //先要矫正子啊field确保一定是个array
-        if( !_.isArray(this.field) ){
-            this.field = [this.field];
-        };
-
-        this._initData();
-
+        
         this.sprite = new Canvax.Display.Sprite({
             id: "yAxisSprite_"+new Date().getTime()
         });
@@ -131,24 +103,51 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         this.sprite.addChild( this.rulesSprite );
     }
 
+    draw(opt)
+    {
+        _.extend(true, this, (opt || {} ));
+
+        //extend会设置好this.field
+        //先要矫正子啊field确保一定是个array
+        if( !_.isArray(this.field) ){
+            this.field = [this.field];
+        };
+        
+        this.initData();
+        
+        this.setMinMaxOrigin();
+
+        this._getName();
+        
+        this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
+        
+        this._trimYAxis();
+        this._widget( opt );
+
+        this.setX(this.pos.x);
+        this.setY(this.pos.y);
+        
+    }
+
     //配置和数据变化
     resetData( dataFrame )
     {
         this.dataSection = [];
         this.dataSectionGroup = [];
-
-        if( dataFrame && dataFrame.field ){
-            this.field = dataFrame.field;
-        }
-
-        if( dataFrame && dataFrame.org ){
-            this.dataOrg = dataFrame.org; //这里必须是data.org
+        if( dataFrame ){
+            dataFrame.field && (this.field = dataFrame.field);
+            dataFrame.org && (this.dataOrg = dataFrame.org);//这里必须是data.org
         };
         
-        this._initData();
+        this.draw();
+
+        /*
+        this.initData();
+        this.setMinMaxOrigin();
 
         this._trimYAxis();
         this._widget();
+        */
     }
 
     setX($n)
@@ -194,140 +193,16 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         }
     }
 
-    draw(opt)
-    {
-        !opt && (opt ={});
-        opt && _.extend(true, this, opt);
-        
-        this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
-        
-        this._trimYAxis();
-        this._widget( opt );
-
-        this.setX(this.pos.x);
-        this.setY(this.pos.y);
-
-
-    }
-
-    //更具y轴的值来输出对应的在y轴上面的位置
-    getYposFromVal( val )
-    {
-
-        var y = 0;
-        var dsgLen = this.dataSectionGroup.length;
-        var yGroupHeight = this.height / dsgLen ;
-
-        for( var i=0,l=dsgLen ; i<l ; i++ ){
-            var ds = this.dataSectionGroup[i];
-            var min = _.min(ds);
-            var max = _.max(ds);
-            var valInd = _.indexOf(ds , val);
-
-            if( (val >= min && val <= max) || valInd >= 0 ){
-                if( this.layoutType == "proportion" ){
-                    var _baseNumber = this.baseNumber;
-                    //如果 baseNumber 并不在这个区间
-                    if( _baseNumber < min || _baseNumber > max ){
-                        _baseNumber = min;
-                    } else {
-                        //如果刚好在这个区间Group
-
-                    }
-                    var maxGroupDisABS = Math.max( Math.abs( max-_baseNumber ) , Math.abs( _baseNumber-min ) );
-                    var amountABS = Math.abs( max - min );
-                    var h = (maxGroupDisABS/amountABS) * yGroupHeight;
-                    y = (val - _baseNumber) / maxGroupDisABS * h + i*yGroupHeight;
-                    
-                    if( isNaN(y) ){
-                        y = i*yGroupHeight;
-                    }
-                }
-                if( this.layoutType == "rule" ){
-                    //line 的xaxis就是 rule
-                    y = valInd / (ds.length - 1) * yGroupHeight;
-                }
-                if( this.layoutType == "peak" ){
-                    //bar的xaxis就是 peak
-                    y = ( yGroupHeight/ds.length ) * (valInd+1) - ( yGroupHeight/ds.length )/2;
-                }
-
-                y += this._yOriginTrans;
-                break;
-            }
-        };
-
-        if( isNaN(y) ){
-            y = 0;
-        };
-        
-        return -Math.abs(y);
-    }
-
-    getValFromYpos( y )
-    {
-        var start = this.layoutData[0];
-        var end   = this.layoutData.slice(-1)[0];
-        var val = (end.value-start.value) * ((y-start.y)/(end.y-start.y)) + start.value;
-        return val;
-    }
-
-    _getYOriginTrans( baseNumber )
-    {
-        var y = 0;
-        var dsgLen = this.dataSectionGroup.length;
-        var yGroupHeight = this.height / dsgLen ;
-
-        for( var i=0,l=dsgLen ; i<l ; i++ ){
-            var ds = this.dataSectionGroup[i];
-            var min = _.min(ds);
-            var max = _.max(ds);
-
-            var amountABS = Math.abs( max - min );
-
-            if( baseNumber >= min && baseNumber <= max ){
-                y = ( (baseNumber - min) / amountABS * yGroupHeight + i*yGroupHeight);
-                break;
-            }
-        };
-
-        y = isNaN(y) ? 0 : parseInt(y);
-
-        if( this.sort == "desc" ){
-            //如果是倒序的
-            y = -(yGroupHeight - Math.abs(y));
-        };
-
-        return y;
-    }
 
     _trimYAxis()
     {
         var me = this;
         var tmpData = [];
-
-        /*
-        //这里指的是坐标圆点0，需要移动的距离，因为如果有负数的话，最下面的坐标圆点应该是那个负数。
-        //this._yOriginTrans = this._getYOriginTrans( 0 );
-        var originVal = _.min(this.dataSection);
-        if( originVal < 0  ){
-            originVal = 0;
-        };
-        */
-
-        var originVal = this.baseNumber;
-        this._yOriginTrans = this._getYOriginTrans( originVal );
-
-        //设置 basePoint
-        this.basePoint = {
-            value: this.baseNumber,
-            y: this.getYposFromVal( this.baseNumber ),
-        };
         
         for (var i = 0, l = this.dataSection.length; i < l; i++) {
             var layoutData = {
                 value   : this.dataSection[ i ],
-                y       : this.getYposFromVal( this.dataSection[ i ] ),
+                y       : this.getPosFromVal( this.dataSection[ i ] ),
                 visible : true,
                 text    : ""
             };
@@ -378,281 +253,6 @@ export default class yAxis extends Canvax.Event.EventDispatcher
         dis = disMin + this.yMaxHeight % this.dataSection.length;
         dis = dis > disMax ? disMax : dis
         return dis
-    }
-
-    _setDataSection()
-    {
-        //如果有堆叠，比如[ ["uv","pv"], "click" ]
-        //那么这个 this.dataOrg， 也是个对应的结构
-        //vLen就会等于2
-        var vLen = 1;
-
-        _.each( this.field, function( f ){
-            vLen = Math.max( vLen, 1 );
-            if( _.isArray( f ) ){
-                _.each( f, function( _f ){
-                    vLen = Math.max( vLen, 2 );
-                } );
-            }
-        } );
-
-
-        if( vLen == 1 ){
-            return this._oneDimensional( );
-        };
-        if( vLen == 2 ){
-            return this._twoDimensional( );
-        };
-        
-    }
-
-    _oneDimensional()
-    {
-        var arr = _.flatten( this.dataOrg ); //_.flatten( data.org );
-
-        for( var i = 0, il=arr.length; i<il ; i++ ){
-            arr[i] =  arr[i] || 0;
-        };
-
-        return arr;
-    }
-
-    //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
-    _twoDimensional()
-    {
-        var d = this.dataOrg;
-        var arr = [];
-        var min;
-        _.each( d , function(d, i) {
-            if (!d.length) {
-                return
-            };
-
-            //有数据的情况下 
-            if (!_.isArray(d[0])) {
-                arr.push(d);
-                return;
-            };
-
-            var varr = [];
-            var len = d[0].length;
-            var vLen = d.length;
-
-            for (var i = 0; i < len; i++) {
-                var up_count = 0;
-                var up_i = 0;
-
-                var down_count = 0;
-                var down_i = 0;
-
-                for (var ii = 0; ii < vLen; ii++) {
-                    
-                    var _val = d[ii][i];
-                    if( !_val && _val !== 0 ){
-                        continue;
-                    };
-
-                    min == undefined && (min = _val)
-                    min = Math.min(min, _val);
-
-                    if (_val >= 0) {
-                        up_count += _val;
-                        up_i++
-                    } else {
-                        down_count += _val;
-                        down_i++
-                    }
-                }
-                up_i && varr.push(up_count);
-                down_i && varr.push(down_count);
-            };
-            arr.push(varr);
-        });
-        arr.push(min);
-        return _.flatten(arr);
-    }
-
-    _initData()
-    {
-        var me = this;
-        
-        var arr = this._setDataSection();
-
-        if( this.waterLine != null ){
-            arr.push( this.waterLine )
-        }
-
-        if( this._opt.min != null ){
-            arr.push( this.min )
-        };
-        if( arr.length == 1 ){
-            arr.push( arr[0]*2 );
-        };
-        
-        //如果用户传入了自定义的dataSection， 那么优先级最高
-        if ( !this._opt.dataSection ) {
-
-            if( this._opt.baseNumber != undefined ){
-                arr.push( this.baseNumber );
-            }; 
-            if( this._opt.minNumber != undefined ){
-                arr.push( this.minNumber );
-            }; 
-            if( this._opt.maxNumber != undefined ){
-                arr.push( this.maxNumber );
-            }; 
-
-            for( var ai=0,al=arr.length; ai<al; ai++ ){
-                arr[ai] = Number( arr[ai] );
-                if( isNaN( arr[ai] ) ){
-                    arr.splice( ai,1 );
-                    ai--;
-                    al--;
-                }
-            };
-
-            this.dataSection = DataSection.section(arr, 3);
-        } else {
-            this.dataSection = this._opt.dataSection;
-        };
-
-        //如果还是0
-        if (this.dataSection.length == 0) {
-            this.dataSection = [0]
-        };
-        if( _.min(this.dataSection) < this._opt.min ){
-            var minDiss = me._opt.min - _.min(me.dataSection);
-            //如果用户有硬性要求min，而且计算出来的dataSection还是比min小的话
-            _.each( this.dataSection, function( num, i ){
-                me.dataSection[i] += minDiss;
-            } );
-        };
-
-        //如果有 middleweight 设置，就会重新设置dataSectionGroup
-        this.dataSectionGroup = [ _.clone(this.dataSection) ];
-
-        this._sort();
-        this._setBottomAndBaseNumber();
-
-        this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
-    }
-
-    //yVal 要被push到datasection 中去的 值
-    setWaterLine( yVal )
-    {
-        if( yVal <= this.waterLine) return;
-        this.waterLine = yVal;
-        if( yVal < _.min(this.dataSection) || yVal > _.max(this.dataSection) ){
-            //waterLine不再当前section的区间内，需要重新计算整个datasection    
-            this._initData();
-        };
-    }
-
-    _sort()
-    {
-        if (this.sort) {
-            var sort = this._getSortType();
-            if (sort == "desc") {
-                this.dataSection.reverse();
-
-                //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
-                _.each( this.dataSectionGroup , function( dsg , i ){
-                    dsg.reverse();
-                } );
-                this.dataSectionGroup.reverse();
-                //dataSectionGroup reverse end
-            };
-        };
-    }
-
-    _getSortType()
-    {
-        var _sort;
-        if( _.isString(this.sort) ){
-            _sort = this.sort;
-        }
-        if( _.isArray(this.sort) ){
-            _sort = this.sort[ this.align == "left" ? 0 : 1 ];
-        }
-        if( !_sort ){
-            _sort = "asc";
-        }
-        return _sort;
-    }
-
-    _setBottomAndBaseNumber()
-    {
-        if( this.min == null ){
-            //this.min = this.dataSection[0];
-            this.min = _.min( this.dataSection );
-        };
-        
-        //没人情况下 baseNumber 就是datasection的最小值
-        if (this._opt.baseNumber == undefined || this._opt.baseNumber == null) {
-            this.baseNumber = 0;//this.dataSection[0];//_.min( this.dataSection );
-            if( _.max( this.dataSection ) < 0 ){
-                this.baseNumber = _.max( this.dataSection );
-            };
-            if( _.min( this.dataSection ) > 0 ){
-                this.baseNumber = _.min( this.dataSection );
-            };
-        };
-        
-    }
-
-    _middleweight()
-    {
-        if( this.middleweight ){
-            //支持多个量级的设置
-            //量级的设置只支持非sort的柱状图场景，否则这里修改过的datasection会和 _initData 中sort过的逻辑有冲突
-            if( !_.isArray( this.middleweight ) ){
-                this.middleweight = [ this.middleweight ];
-            };
-
-            //拿到dataSection中的min和 max 后，用middleweight数据重新设置一遍dataSection
-            var dMin = _.min( this.dataSection );
-            var dMax = _.max( this.dataSection );
-            var newDS = [ dMin ];
-            var newDSG = [];
-
-            for( var i=0,l=this.middleweight.length ; i<l ; i++ ){
-                var preMiddleweight = dMin;
-                if( i > 0 ){
-                    preMiddleweight = this.middleweight[ i-1 ];
-                };
-                var middleVal = preMiddleweight + parseInt( (this.middleweight[i] - preMiddleweight) / 2 );
-
-                newDS.push( middleVal );
-                newDS.push( this.middleweight[i] );
-
-                newDSG.push([
-                    preMiddleweight,
-                    middleVal,
-                    this.middleweight[i]
-                ]);
-            };
-            var lastMW =  this.middleweight.slice(-1)[0];
-
-            if( dMax > lastMW ){
-                newDS.push( lastMW + (dMax - lastMW) / 2 ) ;
-                newDS.push( dMax );
-                newDSG.push([
-                    lastMW,
-                    lastMW +(dMax - lastMW) / 2 ,
-                    dMax
-                ]);
-            }
-
-            
-
-            //好了。 到这里用简单的规则重新拼接好了新的 dataSection
-            this.dataSection = newDS;
-            this.dataSectionGroup = newDSG;
-
-            //因为重新设置过了 dataSection 所以要重新排序和设置bottom and base 值
-            this._sort();
-            this._setBottomAndBaseNumber();
-        };                
     }
 
     resetWidth(width)
@@ -740,11 +340,11 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                 });
 
                 var aniFrom = 20;
-                if( o.value == me.baseNumber ){
+                if( o.value == me.origin ){
                     aniFrom = 0;
                 };
 
-                if( o.value < me.baseNumber ){
+                if( o.value < me.origin ){
                     aniFrom = -20;
                 };
 
@@ -761,7 +361,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                                 y : 0
                             },
                             lineWidth: me.tickLine.lineWidth,
-                            strokeStyle: me._getProp(me.tickLine.strokeStyle)
+                            strokeStyle: me._getStyle(me.tickLine.strokeStyle)
                         }
                     });
                     yNode.addChild(line);
@@ -779,7 +379,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                         context: {
                             x: txtX,
                             y: posy + aniFrom,
-                            fillStyle: me._getProp(me.label.fontColor),
+                            fillStyle: me._getStyle(me.label.fontColor),
                             fontSize: me.label.fontSize,
                             rotation: -Math.abs(me.label.rotation),
                             textAlign: textAlign,
@@ -864,7 +464,7 @@ export default class yAxis extends Canvax.Event.EventDispatcher
                         y : -me.height
                     },
                     lineWidth   : me.axisLine.lineWidth,
-                    strokeStyle : me._getProp(me.axisLine.strokeStyle)
+                    strokeStyle : me._getStyle(me.axisLine.strokeStyle)
                 }
             });
             this.sprite.addChild( _axisLine );
@@ -879,19 +479,18 @@ export default class yAxis extends Canvax.Event.EventDispatcher
             };
             this.sprite.addChild(this._title);
         };
-
     }
 
 
-    _getProp(s)
+    _getStyle(s)
     {
         var res = s;
         if (_.isFunction(s)) {
             res = s.call( this , this );
-        }
+        };
         if( !s ){
             res = "#999";
-        }
+        };
         return res
     }
 }

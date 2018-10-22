@@ -163,7 +163,7 @@ export default class ScatGraphs extends GraphsBase
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
             var xPos = this.root._coord._xAxis.getPosX({ val : xValue });
-            var yPos = this.root._coord._getYaxisOfField( this.field ).getYposFromVal( yValue );
+            var yPos = this.root._coord._getYaxisOfField( this.field ).getPosFromVal( yValue );
 
             var fieldMap = this.root._coord.getFieldMapOf( this.field );
 
