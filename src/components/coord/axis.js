@@ -11,6 +11,9 @@ export default class axis
     {
         //super();
 
+        //轴总长
+        this.axisLength = 1;
+
         this.dataOrg = data.org || []; //源数据
         this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
         
@@ -68,7 +71,7 @@ export default class axis
             };
         };
         
-        this._originTrans = this._getYOriginTrans( this.origin , this.height );
+        this._originTrans = this._getYOriginTrans( this.origin );
         this.originPos = this.getPosFromVal( this.origin );
 
     }
@@ -309,11 +312,11 @@ export default class axis
         };                
     }
 
-    _getYOriginTrans( origin, length )
+    _getYOriginTrans( origin )
     {
         var y = 0;
         var dsgLen = this.dataSectionGroup.length;
-        var groupLength = this.length / dsgLen ;
+        var groupLength = this.axisLength / dsgLen ;
 
         for( var i=0,l=dsgLen ; i<l ; i++ ){
             var ds = this.dataSectionGroup[i];
@@ -343,7 +346,7 @@ export default class axis
 
         var y = 0;
         var dsgLen = this.dataSectionGroup.length;
-        var yGroupHeight = this.height / dsgLen ;
+        var yGroupHeight = this.axisLength / dsgLen ;
 
         for( var i=0,l=dsgLen ; i<l ; i++ ){
             var ds = this.dataSectionGroup[i];

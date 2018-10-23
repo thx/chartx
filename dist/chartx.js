@@ -8859,6 +8859,9 @@ var Chartx = (function () {
 
 	        //super();
 
+	        //轴总长
+	        this.axisLength = 1;
+
 	        this.dataOrg = data.org || []; //源数据
 	        this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
 
@@ -8910,7 +8913,7 @@ var Chartx = (function () {
 	                }                if (_$9.min(this.dataSection) > 0) {
 	                    this.origin = _$9.min(this.dataSection);
 	                }            }
-	            this._originTrans = this._getYOriginTrans(this.origin, this.height);
+	            this._originTrans = this._getYOriginTrans(this.origin);
 	            this.originPos = this.getPosFromVal(this.origin);
 	        }
 	    }, {
@@ -9122,10 +9125,10 @@ var Chartx = (function () {
 	            }        }
 	    }, {
 	        key: "_getYOriginTrans",
-	        value: function _getYOriginTrans(origin, length) {
+	        value: function _getYOriginTrans(origin) {
 	            var y = 0;
 	            var dsgLen = this.dataSectionGroup.length;
-	            var groupLength = this.length / dsgLen;
+	            var groupLength = this.axisLength / dsgLen;
 
 	            for (var i = 0, l = dsgLen; i < l; i++) {
 	                var ds = this.dataSectionGroup[i];
@@ -9153,7 +9156,7 @@ var Chartx = (function () {
 
 	            var y = 0;
 	            var dsgLen = this.dataSectionGroup.length;
-	            var yGroupHeight = this.height / dsgLen;
+	            var yGroupHeight = this.axisLength / dsgLen;
 
 	            for (var i = 0, l = dsgLen; i < l; i++) {
 	                var ds = this.dataSectionGroup[i];
@@ -9383,7 +9386,7 @@ var Chartx = (function () {
 	            };
 	            */
 
-	            this._getName();
+	            this._getTitle();
 
 	            this._setXAxisHeight();
 	        }
@@ -9531,8 +9534,8 @@ var Chartx = (function () {
 	                }            }
 	        }
 	    }, {
-	        key: "_getName",
-	        value: function _getName() {
+	        key: "_getTitle",
+	        value: function _getTitle() {
 	            if (this.title.text) {
 	                if (!this._title) {
 	                    this._title = new canvax.Display.Text(this.title.text, {
@@ -10066,12 +10069,11 @@ var Chartx = (function () {
 	                this.field = [this.field];
 	            }
 	            this.initData();
+	            this.axisLength = this.height = parseInt(this.yMaxHeight - this._getYAxisDisLine());
 
 	            this.setMinMaxOrigin();
 
-	            this._getName();
-
-	            this.height = parseInt(this.yMaxHeight - this._getYAxisDisLine());
+	            this._getTitle();
 
 	            this._trimYAxis();
 	            this._widget(opt);
@@ -10116,8 +10118,8 @@ var Chartx = (function () {
 	        //目前和xAxis一样
 
 	    }, {
-	        key: "_getName",
-	        value: function _getName() {
+	        key: "_getTitle",
+	        value: function _getTitle() {
 	            if (this.title.text) {
 	                if (!this._title) {
 	                    var rotation = 0;

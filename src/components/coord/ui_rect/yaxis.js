@@ -21,7 +21,7 @@ export default class yAxis extends Axis
         this.maxW    = 0;    //最大文本的 width
         this.field   = [];   //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
-        this.title  = {
+        this.title   = {
             text         : "",
             shapeType    : "text",
             fontColor    : '#999',
@@ -114,12 +114,11 @@ export default class yAxis extends Axis
         };
         
         this.initData();
-        
+        this.axisLength = this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
+    
         this.setMinMaxOrigin();
 
-        this._getName();
-        
-        this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
+        this._getTitle();
         
         this._trimYAxis();
         this._widget( opt );
@@ -163,7 +162,7 @@ export default class yAxis extends Axis
     }
 
     //目前和xAxis一样
-    _getName() 
+    _getTitle() 
     {
         if ( this.title.text ) {
             if( !this._title ){

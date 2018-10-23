@@ -183,7 +183,7 @@ export default class xAxis extends Axis
         };
         */
 
-        this._getName();
+        this._getTitle();
 
         this._setXAxisHeight();
 
@@ -338,7 +338,7 @@ export default class xAxis extends Axis
         }
     }
 
-    _getName()
+    _getTitle()
     {
         if ( this.title.text ) {
             if( !this._title ){
