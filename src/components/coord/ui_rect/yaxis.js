@@ -93,7 +93,9 @@ export default class yAxis extends Axis
     init(opt, data )
     {
         _.extend(true , this, opt);
-        
+
+        this._initHandle();
+
         this.sprite = new Canvax.Display.Sprite({
             id: "yAxisSprite_"+new Date().getTime()
         });
@@ -103,23 +105,29 @@ export default class yAxis extends Axis
         this.sprite.addChild( this.rulesSprite );
     }
 
-    draw(opt)
-    {
-        _.extend(true, this, (opt || {} ));
-
+    _initHandle(){
         //extend会设置好this.field
         //先要矫正子啊field确保一定是个array
         if( !_.isArray(this.field) ){
             this.field = [this.field];
         };
-        
         this.initData();
+        this._getTitle();
+        this._setYaxisWidth();
+    }
+
+    /**
+     * 
+     * opt  pos,yMaxHeight,resize
+     */
+    draw(opt)
+    {
+        _.extend(true, this, (opt || {} ));
+
         this.axisLength = this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
     
         this.setMinMaxOrigin();
 
-        this._getTitle();
-        
         this._trimYAxis();
         this._widget( opt );
 
@@ -137,16 +145,11 @@ export default class yAxis extends Axis
             dataFrame.field && (this.field = dataFrame.field);
             dataFrame.org && (this.dataOrg = dataFrame.org);//这里必须是data.org
         };
-        
+
+        this._initHandle();
+
         this.draw();
 
-        /*
-        this.initData();
-        this.setMinMaxOrigin();
-
-        this._trimYAxis();
-        this._widget();
-        */
     }
 
     setX($n)
@@ -190,6 +193,10 @@ export default class yAxis extends Axis
                 this._title.resetText( this.title.text );
             }
         }
+    }
+
+    _setYaxisWidth(){
+        //待实现
     }
 
 

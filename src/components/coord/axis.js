@@ -92,7 +92,6 @@ export default class axis
             }
         } );
 
-
         if( vLen == 1 ){
             return this._oneDimensional( );
         };
@@ -172,48 +171,57 @@ export default class axis
     {
         var me = this;
         
-        //如果用户传入了自定义的dataSection， 那么优先级最高
-        if ( !this._opt.dataSection || (this._opt.dataSection && !this._opt.dataSection.length ) ) {
-   
-            var arr = this._getDataSection();
+        if( this.layoutType == "proportion" ){
         
-            if( this.waterLine ){
-                arr.push( this.waterLine );
-            };
+            //如果用户传入了自定义的dataSection， 那么优先级最高
+            if ( !this._opt.dataSection || (this._opt.dataSection && !this._opt.dataSection.length ) ) {
+    
+                var arr = this._getDataSection();
 
-            if( "origin" in me._opt ){
-                arr.push( me._opt.origin );
-            };
-            
-            if( arr.length == 1 ){
-                arr.push( arr[0]*2 );
-            };
-
-            for( var ai=0,al=arr.length; ai<al; ai++ ){
-                arr[ai] = Number( arr[ai] );
-                if( isNaN( arr[ai] ) ){
-                    arr.splice( ai, 1 );
-                    ai--;
-                    al--;
+                if( this.waterLine ){
+                    arr.push( this.waterLine );
                 };
+
+                if( "origin" in me._opt ){
+                    arr.push( me._opt.origin );
+                };
+                
+                if( arr.length == 1 ){
+                    arr.push( arr[0]*2 );
+                };
+
+                for( var ai=0,al=arr.length; ai<al; ai++ ){
+                    arr[ai] = Number( arr[ai] );
+                    if( isNaN( arr[ai] ) ){
+                        arr.splice( ai, 1 );
+                        ai--;
+                        al--;
+                    };
+                };
+
+                this.dataSection = DataSection.section(arr, 3);
+            } else {
+                this.dataSection = this._opt.dataSection;
             };
 
-            this.dataSection = DataSection.section(arr, 3);
+            //如果还是0
+            if (this.dataSection.length == 0) {
+                this.dataSection = [0]
+            };
+
+            //如果有 middleweight 设置，就会重新设置dataSectionGroup
+            this.dataSectionGroup = [ _.clone(this.dataSection) ];
+
+            this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
+
+            this._sort();
+
         } else {
-            this.dataSection = this._opt.dataSection;
+            
+            this.dataSection = this._getDataSection();;
+            this.dataSectionGroup = [ this.dataSection ];
+
         };
-
-        //如果还是0
-        if (this.dataSection.length == 0) {
-            this.dataSection = [0]
-        };
-
-        //如果有 middleweight 设置，就会重新设置dataSectionGroup
-        this.dataSectionGroup = [ _.clone(this.dataSection) ];
-
-        this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
-
-        this._sort();
         
     }
 

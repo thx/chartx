@@ -68,8 +68,7 @@ export default class xAxis extends Axis
             y: 0
         };
 
-        this.dataOrg = []; //源数据
-        this.dataSection = []; //默认就等于源数据,也可以用户自定义传入来指定
+
         this._formatTextSection = []; //dataSection的值format后一一对应的值
         this._textElements = []; //_formatTextSection中每个文本对应的canvax.shape.Text对象
 
@@ -95,8 +94,6 @@ export default class xAxis extends Axis
         //function
         this.trimLayout = null;
 
-        this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
-
         this.init(opt, data);
 
         this._txts = [];
@@ -107,37 +104,26 @@ export default class xAxis extends Axis
     {
         _.extend(true , this, opt);
 
-        //xAxis的field只有一个值
-        this.field = _.flatten( [ this.field ] )[0];
+        this._initHandle();
 
         this.sprite = new Canvax.Display.Sprite({
             id: "xAxisSprite_"+new Date().getTime()
         });
         this.rulesSprite = new Canvax.Display.Sprite({
-            id: "rulesSprite_"+new Date().getTime()
+            id: "xRulesSprite_"+new Date().getTime()
         });
         this.sprite.addChild( this.rulesSprite );
 
-        this._initHandle( data );
-        
     }
 
-    _initHandle( data )
+    _initHandle()
     {
         var me = this;
 
-        if( data && data.field ){
-            this.field = data.field;
-        };
+        //xAxis的field只有一个值
+        this.field = _.flatten( [ this.field ] )[0];
 
-        if( data && data.org ){
-            this.dataOrg = _.flatten( data.org );
-        };
-
-        if( ( !this._opt.dataSection || ( this._opt.dataSection && !this._opt.dataSection.length ) ) && this.dataOrg ){
-            //如果没有传入指定的dataSection，才需要计算dataSection
-            this.dataSection = this._initDataSection(this.dataOrg);
-        };        
+        this.initData();
 
         me._formatTextSection = [];
         me._textElements = [];
@@ -157,44 +143,124 @@ export default class xAxis extends Axis
             this.label.textAlign = "right";
         };
 
-        
-        this.setMinMaxOrigin();
-
         this._getTitle();
-
         this._setXAxisHeight();
 
     }
 
-    /**
-     *return dataSection 默认为xAxis.dataOrg的的faltten
-     *即 [ [1,2,3,4] ] -- > [1,2,3,4]
-     */
-    _initDataSection(data)
+    draw(opt)
     {
-        var arr = _.flatten(data);
-        if( this.layoutType == "proportion" ){
-            if( "origin" in this._opt ){
-                arr.push( this._opt.origin );
-            };
+        //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
+        opt && _.extend(true, this, opt);
 
-            if( arr.length == 1 ){
-               arr.push( 0 );
-               arr.push( arr[0]*2 );
-            };
-            arr = arr.sort(function(a,b){return a-b});
-            arr = DataSection.section(arr)
-        };
-        return arr;
+        this.axisLength = this.width; //width来自opt坐标系传入
+
+        this.setMinMaxOrigin();
+        
+        this._trimXAxis();
+
+        this._widget( opt );
+
+        this.setX(this.pos.x);
+        this.setY(this.pos.y);
+
     }
 
     //配置和数据变化
     resetData( dataFrame )
     {
-
+        debugger
+        this.dataSection = [];
+        this.dataSectionGroup = [];
+        if( dataFrame ){
+            dataFrame.field && (this.field = dataFrame.field);
+            dataFrame.org && (this.dataOrg = dataFrame.org);//这里必须是data.org
+        };
         this._initHandle( dataFrame );
         this.draw();
     }
+
+    setX($n)
+    {
+        this.sprite.context.x = $n;
+        this.pos.x = $n;
+    }
+
+    setY($n)
+    {
+        this.sprite.context.y = $n;
+        this.pos.y = $n;
+    }
+
+    _getTitle()
+    {
+        if ( this.title.text ) {
+            if( !this._title ){
+                this._title = new Canvax.Display.Text(this.title.text, {
+                    context: {
+                        fontSize: this.title.fontSize,
+                        textAlign: this.title.textAlign,  //"center",//this.isH ? "center" : "left",
+                        textBaseline: this.title.textBaseline,//"middle", //this.isH ? "top" : "middle",
+                        fillStyle: this.title.fontColor,
+                        strokeStyle: this.title.strokeStyle,
+                        lineWidth : this.title.lineWidth,
+                        rotation: this.isH ? -180 : 0
+                    }
+                });
+            } else {
+                this._title.resetText( this.title.text );
+            }
+        }
+    }
+
+    _setXAxisHeight()
+    { //检测下文字的高等
+        var me = this;
+        if (!me.enabled) {
+            me.height = 0; 
+        } else {
+            var _maxTextHeight = 0;
+
+            if( this.label.enabled ){
+                _.each( me.dataSection, function( val, i ){
+
+                        //从_formatTextSection中取出对应的格式化后的文本
+                        var txt = me._textElements[i];
+            
+                        var textWidth = txt.getTextWidth();
+                        var textHeight = txt.getTextHeight();
+                        var width = textWidth; //文本在外接矩形width
+                        var height = textHeight;//文本在外接矩形height
+
+                        if (!!me.label.rotation) {
+                            //有设置旋转
+                            if ( me.label.rotation == 90 ) {
+                                width  = textHeight;
+                                height = textWidth;
+                            } else {
+                                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
+                                var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
+                                height = parseInt( sinR * textWidth );
+                                width = parseInt( cosR * textWidth );
+                            };
+                        };
+
+                        _maxTextHeight = Math.max( _maxTextHeight, height);
+                    
+                } );
+            };
+
+            this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
+
+            if (this._title) {
+                this.height += this._title.getTextHeight()
+            };
+
+        }
+    }
+    
+   
+
 
     getIndexOfVal(xvalue)
     {
@@ -269,90 +335,6 @@ export default class xAxis extends Axis
         return o;
     }
 
-    _setXAxisHeight()
-    { //检测下文字的高等
-        var me = this;
-        if (!me.enabled) {
-            me.height = 0; 
-        } else {
-            var _maxTextHeight = 0;
-
-            if( this.label.enabled ){
-                _.each( me.dataSection, function( val, i ){
-
-                        //从_formatTextSection中取出对应的格式化后的文本
-                        var txt = me._textElements[i];
-            
-                        var textWidth = txt.getTextWidth();
-                        var textHeight = txt.getTextHeight();
-                        var width = textWidth; //文本在外接矩形width
-                        var height = textHeight;//文本在外接矩形height
-
-                        if (!!me.label.rotation) {
-                            //有设置旋转
-                            if ( me.label.rotation == 90 ) {
-                                width  = textHeight;
-                                height = textWidth;
-                            } else {
-                                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
-                                var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
-                                height = parseInt( sinR * textWidth );
-                                width = parseInt( cosR * textWidth );
-                            };
-                        };
-
-                        _maxTextHeight = Math.max( _maxTextHeight, height);
-                    
-                } );
-            };
-
-            this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
-
-            if (this._title) {
-                this.height += this._title.getTextHeight()
-            };
-
-        }
-    }
-
-    _getTitle()
-    {
-        if ( this.title.text ) {
-            if( !this._title ){
-                this._title = new Canvax.Display.Text(this.title.text, {
-                    context: {
-                        fontSize: this.title.fontSize,
-                        textAlign: this.title.textAlign,  //"center",//this.isH ? "center" : "left",
-                        textBaseline: this.title.textBaseline,//"middle", //this.isH ? "top" : "middle",
-                        fillStyle: this.title.fontColor,
-                        strokeStyle: this.title.strokeStyle,
-                        lineWidth : this.title.lineWidth,
-                        rotation: this.isH ? -180 : 0
-                    }
-                });
-            } else {
-                this._title.resetText( this.title.text );
-            }
-        }
-    }
-    
-    draw(opt)
-    {
-        debugger
-        //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
-        opt && _.extend(true, this, opt);
-        
-        this.layoutData = this._trimXAxis( this.dataSection );
-        this._trimLayoutData();
-
-        this.sprite.context.x = this.pos.x;
-        this.sprite.context.y = this.pos.y;
-
-        this._widget( opt );
-
-    }
-
-
 
     //获取x对应的位置
     //val ind 至少要有一个
@@ -420,10 +402,10 @@ export default class xAxis extends Axis
         return ceilWidth;
     }
 
-    _trimXAxis($data) 
+    _trimXAxis() 
     {
         var tmpData = [];
-        var data = $data || this.dataSection;
+        var data = this.dataSection;
         
         this.ceilWidth = this._computerCeilWidth();
 
@@ -448,6 +430,10 @@ export default class xAxis extends Axis
 
             tmpData.push( o );
         };
+        this.layoutData = tmpData;
+
+        this._trimLayoutData();
+
         return tmpData;
     }
 
@@ -461,7 +447,7 @@ export default class xAxis extends Axis
         }
         
         if (_.isArray(res)) {
-            res = Tools.numAddSymbol(res);
+            res = numAddSymbol(res);
         }
         if (!res) {
             res = val;
