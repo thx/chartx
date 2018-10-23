@@ -85,16 +85,6 @@ export default class xAxis extends Axis
 
         this.animation = true;
 
-        //layoutType == "proportion"的时候才有效
-        //1，如果数据中又正数和负数，则默认为0，
-        //2，如果dataSection最小值小于0，则baseNumber为最小值，
-        //3，如果dataSection最大值大于0，则baseNumber为最大值
-        //也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值
-        this.origin = null; 
-        this.originPos = null; //暂未开发，和yAxis中对应
-        this._originTrans = 0; //暂未开发，和yAxis中对应
-        this.max = null;
-        this.min = null;
 
         this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
 
@@ -111,7 +101,6 @@ export default class xAxis extends Axis
 
         this._txts = [];
         this._axisLine = null;
-        //this._lines = []; //line目前直接绑定在xNode上面
     }
 
     init(opt, data) 
@@ -170,18 +159,6 @@ export default class xAxis extends Axis
 
         
         this.setMinMaxOrigin();
-
-        //取第一个数据来判断xaxis的刻度值类型是否为 number
-        /*
-        !("min" in this._opt) && (this.min = _.min( this.dataSection ));
-        if( isNaN(this.min) || this.min==Infinity ){
-            this.min = 0;
-        };
-        !("max" in this._opt) && (this.max = _.max( this.dataSection ));
-        if( isNaN(this.max) || this.max==Infinity ){
-            this.max = 1;
-        };
-        */
 
         this._getTitle();
 
@@ -361,6 +338,7 @@ export default class xAxis extends Axis
     
     draw(opt)
     {
+        debugger
         //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
         opt && _.extend(true, this, opt);
         

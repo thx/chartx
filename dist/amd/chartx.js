@@ -9291,17 +9291,6 @@ define(function () { 'use strict';
 
 	        _this.animation = true;
 
-	        //layoutType == "proportion"的时候才有效
-	        //1，如果数据中又正数和负数，则默认为0，
-	        //2，如果dataSection最小值小于0，则baseNumber为最小值，
-	        //3，如果dataSection最大值大于0，则baseNumber为最大值
-	        //也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值
-	        _this.origin = null;
-	        _this.originPos = null; //暂未开发，和yAxis中对应
-	        _this._originTrans = 0; //暂未开发，和yAxis中对应
-	        _this.max = null;
-	        _this.min = null;
-
 	        _this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
 
 	        _this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
@@ -9317,7 +9306,6 @@ define(function () { 'use strict';
 
 	        _this._txts = [];
 	        _this._axisLine = null;
-	        //this._lines = []; //line目前直接绑定在xNode上面
 	        return _this;
 	    }
 
@@ -9372,18 +9360,6 @@ define(function () { 'use strict';
 	                this.label.textAlign = "right";
 	            }
 	            this.setMinMaxOrigin();
-
-	            //取第一个数据来判断xaxis的刻度值类型是否为 number
-	            /*
-	            !("min" in this._opt) && (this.min = _.min( this.dataSection ));
-	            if( isNaN(this.min) || this.min==Infinity ){
-	                this.min = 0;
-	            };
-	            !("max" in this._opt) && (this.max = _.max( this.dataSection ));
-	            if( isNaN(this.max) || this.max==Infinity ){
-	                this.max = 1;
-	            };
-	            */
 
 	            this._getTitle();
 
@@ -9556,6 +9532,7 @@ define(function () { 'use strict';
 	    }, {
 	        key: "draw",
 	        value: function draw(opt) {
+	            debugger;
 	            //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
 	            opt && _$10.extend(true, this, opt);
 
