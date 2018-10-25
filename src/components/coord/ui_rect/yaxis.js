@@ -10,7 +10,7 @@ export default class yAxis extends Axis
 {
 	constructor( opt, data, _coord){
 
-        super(opt, data, _coord);
+        super(opt, data.org);
 
         this._opt = opt;
         
@@ -111,7 +111,7 @@ export default class yAxis extends Axis
         if( !_.isArray(this.field) ){
             this.field = [this.field];
         };
-        this.initData();
+        this.setDataSection();
         this._getTitle();
         this._setYaxisWidth();
     }
@@ -139,17 +139,10 @@ export default class yAxis extends Axis
     //配置和数据变化
     resetData( dataFrame )
     {
-        this.dataSection = [];
-        this.dataSectionGroup = [];
-        if( dataFrame ){
-            dataFrame.field && (this.field = dataFrame.field);
-            dataFrame.org && (this.dataOrg = dataFrame.org);//这里必须是data.org
-        };
-
+        this.field = dataFrame.field;
+        this.resetDataOrg( dataFrame.org );
         this._initHandle();
-
         this.draw();
-
     }
 
     setX($n)
@@ -206,9 +199,10 @@ export default class yAxis extends Axis
         var tmpData = [];
         
         for (var i = 0, l = this.dataSection.length; i < l; i++) {
+            
             var layoutData = {
                 value   : this.dataSection[ i ],
-                y       : this.getPosFromVal( this.dataSection[ i ] ),
+                y       : -Math.abs( this.getPosOfVal( this.dataSection[ i ] ) ),
                 visible : true,
                 text    : ""
             };

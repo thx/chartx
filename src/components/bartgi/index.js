@@ -115,7 +115,7 @@ export default class barTgi extends Component
         }
 
         _.each( this.data, function( tgi, i ){
-            var y = me._yAxis.getPosFromVal( tgi );
+            var y = -me._yAxis.getPosOfVal( tgi );
             var barData = me.barDatas[ i ];
 
             var _tgiLine = new Line({

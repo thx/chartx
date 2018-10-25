@@ -106,17 +106,14 @@ export default class LineGraphs extends GraphsBase
 
             for (var b = 0, bl = _lineData.length; b < bl; b++) {
                 var _xAxis = me.root._coord ? me.root._coord._xAxis : me.root._xAxis;
-                var x = _xAxis.getPosX( {
-                    ind : b,
-                    dataLen : bl,
-                    layoutType : me.root._coord ? me.root._coord.xAxis.layoutType : me.root._xAxis.layoutType
-                } );
+
+                var x = _xAxis.getPosOfInd( b );
                 
-                //var y = _.isNumber( _lineData[b] ) ? _yAxis.getPosFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+                //var y = _.isNumber( _lineData[b] ) ? _yAxis.getPosOfVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
                 
                 var y = _lineData[b];
                 if( !isNaN( y ) && y !== null && y !== undefined && y !== ""  ){
-                    y = _yAxis.getPosFromVal( y );
+                    y = -_yAxis.getPosOfVal( y );
                 } else {
                     y = undefined;
                 };

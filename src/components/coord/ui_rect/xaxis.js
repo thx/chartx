@@ -10,7 +10,7 @@ export default class xAxis extends Axis
 {
     constructor(opt, data, _coord)
     {
-        super(opt, data, _coord);
+        super(opt, data.org);
 
         this._opt = opt;
 
@@ -84,9 +84,6 @@ export default class xAxis extends Axis
 
         this.animation = true;
 
-
-        this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
-
         this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
 
         //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
@@ -123,7 +120,7 @@ export default class xAxis extends Axis
         //xAxis的field只有一个值
         this.field = _.flatten( [ this.field ] )[0];
 
-        this.initData();
+        this.setDataSection();
 
         me._formatTextSection = [];
         me._textElements = [];
@@ -169,13 +166,8 @@ export default class xAxis extends Axis
     //配置和数据变化
     resetData( dataFrame )
     {
-        debugger
-        this.dataSection = [];
-        this.dataSectionGroup = [];
-        if( dataFrame ){
-            dataFrame.field && (this.field = dataFrame.field);
-            dataFrame.org && (this.dataOrg = dataFrame.org);//这里必须是data.org
-        };
+        this.field = dataFrame.field;
+        this.resetDataOrg( dataFrame.org );
         this._initHandle( dataFrame );
         this.draw();
     }
@@ -259,53 +251,12 @@ export default class xAxis extends Axis
         }
     }
     
-   
-
-
-    getIndexOfVal(xvalue)
-    {
-        var i;
-        for( var ii=0,il=this.layoutData.length ; ii<il ; ii++ ){
-            var obj = this.layoutData[ii];
-            if(obj.value == xvalue){
-                i = ii;
-                break;
-            }
-        };
-
-        return i;
-    }
-
-    getIndexOfX( x )
-    {
-        var iNode = 0;
-        if( this.layoutType == "peak" ){
-            iNode = parseInt( x / this.ceilWidth );
-            if( iNode == this.dataOrg.length ){
-                iNode = this.dataOrg.length - 1;
-            }
-        }
-
-        if( this.layoutType == "rule" ){
-            iNode = parseInt((x + (this.ceilWidth / 2)) / this.ceilWidth);
-            if(this.dataOrg.length == 1 ){
-                //如果只有一个数据
-                iNode = 0;
-            }
-        }
-
-        if( this.layoutType == "proportion" ){
-            iNode = parseInt( x  / ((this.max-this.min)/this.width ) );
-        }
-
-        return iNode
-    }
 
     getNodeInfoOfX( x ){
         //nodeInfo 一般是给tips用，和data中得数据比就是少了个textWidth
         //这里和用 data 计算 layoutData的 trimgraphs 中不一样得是
         //这里的val获取必须在dataOrg中获取，统一的dataLen 也必须是用的 this.dataOrg.length
-        var ind = this.getIndexOfX( x );
+        var ind = this.getIndexOfPos( x );
 
         var val = this.dataOrg[ ind ];
         var dataLen = this.dataOrg.length;
@@ -314,12 +265,7 @@ export default class xAxis extends Axis
         if( this.layoutType == "proportion" ){
             val = (this.max-this.min) * ( x/this.width ) + this.min;
         } else {
-            x = this.getPosX({
-                val : val,
-                ind : ind,
-                dataLen: dataLen,
-                width : this.width
-            });
+            x = this.getPosOfInd( ind );
         };
 
         var o = {
@@ -335,94 +281,23 @@ export default class xAxis extends Axis
         return o;
     }
 
-
-    //获取x对应的位置
-    //val ind 至少要有一个
-    getPosX( opt )
-    {
-        var x = 0;
-        var val = opt.val; 
-        var ind = "ind" in opt ? opt.ind : _.indexOf( this.dataSection , val );//如果没有ind 那么一定要有val
-        var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
-        var width = "width" in opt ? opt.width : this.width;
-        var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
-
-        if( dataLen == 1 ){
-            x =  width / 2;
-        } else {
-            if( layoutType == "rule" ){
-                //折线图的xyaxis就是 rule
-                x = ind / (dataLen - 1) * width;
-            };
-            if( layoutType == "proportion" ){
-                //按照数据真实的值在minVal - max 区间中的比例值
-                if( val == undefined ){
-                    val = (ind * (this.max - this.min)/(dataLen-1)) + this.min;
-                };
-                x = width * ( (val - this.min) / (this.max - this.min) );
-            };
-            if( layoutType == "peak" ){
-                //柱状图的就是peak
-                var _ceilWidth = width / dataLen;
-                if( this.posParseToInt ){
-                    _ceilWidth = parseInt( _ceilWidth );
-                };
-
-                x = _ceilWidth * (ind+1) - _ceilWidth/2;
-            };
-        };
-
-        if( isNaN(x) ){
-            x = 0;
-        };
-
-        return parseInt( x , 10 );
-        
-    }
-
-    _computerCeilWidth(){
-        //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
-        var width = this.width;
-        var ceilWidth = width;
-        if( this.dataOrg.length ){
-            ceilWidth = width / this.dataOrg.length;
-            if( this.layoutType == "rule" ){
-                if( this.dataOrg.length == 1 ){
-                    ceilWidth = width / 2;
-                } else {
-                    ceilWidth = width / ( this.dataOrg.length - 1 )
-                }
-            }
-        };
-
-        if( this.posParseToInt ){
-            ceilWidth = parseInt( ceilWidth );
-        };
-        
-        return ceilWidth;
-    }
-
     _trimXAxis() 
     {
         var tmpData = [];
         var data = this.dataSection;
-        
-        this.ceilWidth = this._computerCeilWidth();
 
         for (var a = 0, al  = data.length; a < al; a++ ) {
             var text = this._formatTextSection[a];
             var txt = this._textElements[a];
-            
+            debugger
             var o = {
                 ind : a,
                 value   : data[a],
                 text    : text,
-                x       : this.getPosX({
+                x       : this.getPosOf( {
                     val : data[a],
-                    ind : a,
-                    dataLen: al,
-                    width : this.width
-                }),
+                    ind : a
+                } ),
                 textWidth: txt.getTextWidth(),
                 field : this.field,
                 visible: null //trimgrapsh的时候才设置

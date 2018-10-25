@@ -630,7 +630,8 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var fillPath = _.clone(bline.context.pointList);
 
         var path = "";
-        var originPos = this._yAxis.originPos;
+        
+        var originPos = -this._yAxis.originPos;
 
         var _currPath = null;
 

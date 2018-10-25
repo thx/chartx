@@ -162,11 +162,11 @@ export default class BarGraphs extends GraphsBase
         return color;
     }
 
-    _getBarWidth(ceilWidth, ceilWidth2)
+    _getBarWidth(cellWidth, ceilWidth2)
     {
         if (this.node.width) {
             if (_.isFunction(this.node.width)) {
-                this.node._width = this.node.width(ceilWidth);
+                this.node._width = this.node.width(cellWidth);
             } else {
                 this.node._width = this.node.width;
             }
@@ -174,8 +174,8 @@ export default class BarGraphs extends GraphsBase
             this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.2);
             
             //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
-            if (this.node._width == 1 && ceilWidth > 3) {
-                this.node._width = ceilWidth - 2;
+            if (this.node._width == 1 && cellWidth > 3) {
+                this.node._width = cellWidth - 2;
             };
         };
         this.node._width < 1 && (this.node._width = 1);
@@ -601,18 +601,18 @@ export default class BarGraphs extends GraphsBase
             hLen = this.enabledField.length;
         };
 
-        var ceilWidth = _xAxis.ceilWidth;
+        var cellWidth = _xAxis.getCellLength();
         //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
-        var ceilWidth2 = ceilWidth / (hLen + 1);
+        var ceilWidth2 = cellWidth / (hLen + 1);
 
         //知道了ceilWidth2 后 检测下 barW是否需要调整
-        var barW = this._getBarWidth(ceilWidth, ceilWidth2);
+        var barW = this._getBarWidth(cellWidth, ceilWidth2);
         var barDis = ceilWidth2 - barW;
         if( this.node.xDis != null ){
             barDis = this.node.xDis;
         };
         
-        var disLeft = (ceilWidth - barW*hLen - barDis*(hLen-1) ) / 2;
+        var disLeft = (cellWidth - barW*hLen - barDis*(hLen-1) ) / 2;
         if( preHLen ){
             disLeft += (barDis + barW) * preHLen;
         };
@@ -647,24 +647,20 @@ export default class BarGraphs extends GraphsBase
                         });
                     };
 
-                    var _x = _xAxis.getPosX( {
-                        ind : i,
-                        dataLen : me._dataLen,
-                        layoutType : _coord ? _coord.xAxis.layoutType : me.root._xAxis.layoutType
-                    } );
+                    var _x = _xAxis.getPosOfInd( i );
                     
-                    var x = _x - ceilWidth / 2 + disLeft + (barW + barDis)*b;
+                    var x = _x - cellWidth / 2 + disLeft + (barW + barDis)*b;
 
                     var y = 0;
                     if (me.proportion) {
                         y = -val / vCount * _yAxis.height;
                     } else {
-                        y = _yAxis.getPosFromVal( val );
+                        y = -_yAxis.getPosOfVal( val );
                     };
 
                     var yOriginPoint = {
                         value : _yAxis.origin,
-                        y     : _yAxis.originPos
+                        y     : -_yAxis.originPos
                     };
 
                     function _getFromY( tempBarData, v, i, val, y ){

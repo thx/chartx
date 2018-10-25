@@ -217,7 +217,7 @@ export default class Rect_Component extends coorBase
             xAxisPosY = -this._yAxis[0].height / 2;
         } 
         if( _.isNumber( this._xAxis.axisLine.position ) ){
-            xAxisPosY = this._yAxis[0].getPosFromVal( this._xAxis.axisLine.position );
+            xAxisPosY = -this._yAxis[0].getPosOfVal( this._xAxis.axisLine.position );
         }
         if( xAxisPosY !== undefined ){
             this._xAxis._axisLine.context.y = xAxisPosY;
@@ -228,15 +228,13 @@ export default class Rect_Component extends coorBase
             var yAxisPosX;
             if( _yAxis.axisLine.position == 'center' ){
                 yAxisPosX = me._xAxis.width / 2;
-            } 
+            }; 
             if( _.isNumber( _yAxis.axisLine.position ) ){
-                yAxisPosX = me._xAxis.getPosX( {
-                    val : _yAxis.axisLine.position
-                } );
-            }
+                yAxisPosX = me._xAxis.getPosOfVal( _yAxis.axisLine.position );
+            };
             if( yAxisPosX !== undefined ){
                 _yAxis._axisLine.context.x = yAxisPosX;
-            }
+            };
         } );
 
     }
@@ -339,11 +337,6 @@ export default class Rect_Component extends coorBase
 
         });
 
-    }
-
-    getPosX( opt )
-    {
-        return this._xAxis.getPosX( opt );
     }
 
     _getAxisDataFrame( fields )

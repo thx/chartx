@@ -307,7 +307,8 @@ export default class Tips extends Component {
             x = _coord.origin.x + e.eventInfo.xAxis.x;
         }
         if (this.pointer == "region") {
-            x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
+            var regionWidth = _coord._xAxis.getCellLengthOfPos( e.eventInfo.xAxis.x );
+            x = _coord.origin.x + e.eventInfo.xAxis.x - regionWidth / 2;
             if (e.eventInfo.xAxis.ind < 0) {
                 //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
                 x = _coord.origin.x;
@@ -335,10 +336,11 @@ export default class Tips extends Component {
                 });
             };
             if (this.pointer == "region") {
+                var regionWidth = _coord._xAxis.getCellLengthOfPos( x );
                 el = new Rect({
                     //xyToInt : false,
                     context: {
-                        width: _coord._xAxis.ceilWidth,
+                        width: regionWidth,
                         height: _coord.height,
                         x: x,
                         y: y,
@@ -393,7 +395,8 @@ export default class Tips extends Component {
         var el = this._tipsPointer;
         var x = _coord.origin.x + e.eventInfo.xAxis.x;
         if (this.pointer == "region") {
-            x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
+            var regionWidth = _coord._xAxis.getCellLengthOfPos( e.eventInfo.xAxis.x );
+            x = _coord.origin.x + e.eventInfo.xAxis.x - regionWidth / 2;
             if (e.eventInfo.xAxis.ind < 0) {
                 //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
                 x = _coord.origin.x;

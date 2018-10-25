@@ -8853,16 +8853,30 @@ var Line$1 = canvax.Shapes.Line;
 var _$9 = canvax._;
 
 var axis = function () {
-    function axis(opt, data, _coord) {
+    function axis(opt, dataOrg) {
         classCallCheck$1(this, axis);
 
         //super();
 
+        //源数据
+        //这个是一个一定会有两层数组的数据结构，是一个标准的dataFrame数据
+        // [ 
+        //    [   
+        //        [1,2,3],  
+        //        [1,2,3]    
+        //    ] 
+        //   ,[    
+        //        [1,2,3] 
+        //    ]   
+        // ]
+        this.dataOrg = dataOrg || [];
+        this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
+
         //轴总长
         this.axisLength = 1;
 
-        this.dataOrg = data.org || []; //源数据
-        this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
+        this.cellCount = this._getCellCount();
+        this._cellLength = 0; //数据变动的时候要置空
 
         //下面三个目前yAxis中实现了，后续统一都会实现
 
@@ -8883,8 +8897,8 @@ var axis = function () {
         this._originTrans = 0; //当设置的 origin 和datasection的min不同的时候，
 
         //min,max不需要外面配置，没意义
-        this.min = null;
-        this.max = null;
+        this._min = null;
+        this._max = null;
 
         this.layoutType = "proportion"; // rule , peak, proportion
 
@@ -8896,24 +8910,39 @@ var axis = function () {
     }
 
     createClass$1(axis, [{
+        key: "resetDataOrg",
+        value: function resetDataOrg(dataOrg) {
+            //配置和数据变化
+
+            this.dataSection = [];
+            this.dataSectionGroup = [];
+
+            this.dataOrg = dataOrg;
+
+            this.cellCount = this._getCellCount();
+
+            this._cellLength = 0;
+        }
+    }, {
         key: "setMinMaxOrigin",
         value: function setMinMaxOrigin() {
-            if (this.min == null) {
-                this.min = _$9.min(this.dataSection);
-            }            if (this.max == null) {
-                this.max = _$9.max(this.dataSection);
-            }
-            //默认情况下 origin 就是datasection的最小值
-            //如果用户设置了origin，那么就已用户的设置为准
-            if (!("origin" in this._opt)) {
-                this.origin = 0; //this.dataSection[0];//_.min( this.dataSection );
-                if (_$9.max(this.dataSection) < 0) {
-                    this.origin = _$9.max(this.dataSection);
-                }                if (_$9.min(this.dataSection) > 0) {
-                    this.origin = _$9.min(this.dataSection);
-                }            }
-            this._originTrans = this._getYOriginTrans(this.origin);
-            this.originPos = this.getPosFromVal(this.origin);
+            if (this.layoutType == "proportion") {
+                if (this._min == null) {
+                    this._min = _$9.min(this.dataSection);
+                }                if (this._max == null) {
+                    this._max = _$9.max(this.dataSection);
+                }
+                //默认情况下 origin 就是datasection的最小值
+                //如果用户设置了origin，那么就已用户的设置为准
+                if (!("origin" in this._opt)) {
+                    this.origin = 0; //this.dataSection[0];//_.min( this.dataSection );
+                    if (_$9.max(this.dataSection) < 0) {
+                        this.origin = _$9.max(this.dataSection);
+                    }                    if (_$9.min(this.dataSection) > 0) {
+                        this.origin = _$9.min(this.dataSection);
+                    }                }            }
+            this._originTrans = this._getOriginTrans(this.origin);
+            this.originPos = this.getPosOfVal(this.origin);
         }
     }, {
         key: "_getDataSection",
@@ -8923,18 +8952,13 @@ var axis = function () {
             //vLen就会等于2
             var vLen = 1;
 
-            _$9.each(this.field, function (f) {
-                vLen = Math.max(vLen, 1);
-                if (_$9.isArray(f)) {
-                    _$9.each(f, function (_f) {
-                        vLen = Math.max(vLen, 2);
-                    });
-                }
+            _$9.each(this.dataOrg, function (arr) {
+                vLen = Math.max(arr.length, vLen);
             });
 
             if (vLen == 1) {
                 return this._oneDimensional();
-            }            if (vLen == 2) {
+            }            if (vLen > 1) {
                 return this._twoDimensional();
             }        }
     }, {
@@ -9001,14 +9025,13 @@ var axis = function () {
             return _$9.flatten(arr);
         }
     }, {
-        key: "initData",
-        value: function initData() {
+        key: "setDataSection",
+        value: function setDataSection() {
             var me = this;
 
-            if (this.layoutType == "proportion") {
-
-                //如果用户传入了自定义的dataSection， 那么优先级最高
-                if (!this._opt.dataSection || this._opt.dataSection && !this._opt.dataSection.length) {
+            //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
+            if (!this._opt.dataSection || this._opt.dataSection && !this._opt.dataSection.length) {
+                if (this.layoutType == "proportion") {
 
                     var arr = this._getDataSection();
 
@@ -9029,23 +9052,28 @@ var axis = function () {
                             al--;
                         }                    }
                     this.dataSection = DataSection.section(arr, 3);
+
+                    //如果还是0
+                    if (this.dataSection.length == 0) {
+                        this.dataSection = [0];
+                    }
+                    //如果有 middleweight 设置，就会重新设置dataSectionGroup
+                    this.dataSectionGroup = [_$9.clone(this.dataSection)];
+
+                    this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
+
+                    this._sort();
                 } else {
-                    this.dataSection = this._opt.dataSection;
-                }
-                //如果还是0
-                if (this.dataSection.length == 0) {
-                    this.dataSection = [0];
-                }
-                //如果有 middleweight 设置，就会重新设置dataSectionGroup
-                this.dataSectionGroup = [_$9.clone(this.dataSection)];
 
-                this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
+                    //非proportion 也就是 rule peak 模式下面
+                    this.dataSection = _$9.flatten(this.dataOrg); //this._getDataSection();
+                    this.dataSectionGroup = [this.dataSection];
+                }            } else {
 
-                this._sort();
-            } else {
-
-                this.dataSection = this._getDataSection();                this.dataSectionGroup = [this.dataSection];
-            }        }
+                this.dataSection = this._opt.dataSection;
+                this.dataSectionGroup = [this.dataSection];
+            }
+        }
 
         //val 要被push到datasection 中去的 值
         //主要是用在markline等组件中，当自己的y值超出了yaxis的范围
@@ -9057,7 +9085,7 @@ var axis = function () {
             this.waterLine = val;
             if (val < _$9.min(this.dataSection) || val > _$9.max(this.dataSection)) {
                 //waterLine不再当前section的区间内，需要重新计算整个datasection    
-                this.initData();
+                this.setDataSection();
                 this.setMinMaxOrigin();
             }        }
     }, {
@@ -9066,6 +9094,7 @@ var axis = function () {
             if (this.sort) {
                 var sort = this._getSortType();
                 if (sort == "desc") {
+
                     this.dataSection.reverse();
 
                     //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
@@ -9081,9 +9110,6 @@ var axis = function () {
             var _sort;
             if (_$9.isString(this.sort)) {
                 _sort = this.sort;
-            }
-            if (_$9.isArray(this.sort)) {
-                _sort = this.sort[this.align == "left" ? 0 : 1];
             }
             if (!_sort) {
                 _sort = "asc";
@@ -9127,88 +9153,232 @@ var axis = function () {
                 this.dataSection = newDS;
                 this.dataSectionGroup = newDSG;
             }        }
+
+        //origin 对应 this.origin 的值
+
     }, {
-        key: "_getYOriginTrans",
-        value: function _getYOriginTrans(origin) {
-            var y = 0;
+        key: "_getOriginTrans",
+        value: function _getOriginTrans(origin) {
+            var pos = 0;
+
             var dsgLen = this.dataSectionGroup.length;
             var groupLength = this.axisLength / dsgLen;
 
             for (var i = 0, l = dsgLen; i < l; i++) {
+
                 var ds = this.dataSectionGroup[i];
-                var min = _$9.min(ds);
-                var max = _$9.max(ds);
 
-                var amountABS = Math.abs(max - min);
+                if (this.layoutType == "proportion") {
+                    var min = _$9.min(ds);
+                    var max = _$9.max(ds);
 
-                if (origin >= min && origin <= max) {
-                    y = (origin - min) / amountABS * groupLength + i * groupLength;
-                    break;
-                }
+                    var amountABS = Math.abs(max - min);
+
+                    if (origin >= min && origin <= max) {
+                        pos = (origin - min) / amountABS * groupLength + i * groupLength;
+                        break;
+                    }                }
             }
-            y = isNaN(y) ? 0 : parseInt(y);
-
             if (this.sort == "desc") {
                 //如果是倒序的
-                y = -(groupLength - Math.abs(y));
+                pos = -(groupLength - pos);
             }
-            return y;
+            return pos;
         }
     }, {
-        key: "getPosFromVal",
-        value: function getPosFromVal(val) {
+        key: "getPosOfVal",
+        value: function getPosOfVal(val) {
+            return this.getPosOf({
+                val: val
+            });
+        }
+    }, {
+        key: "getPosOfInd",
+        value: function getPosOfInd(ind) {
+            return this.getPosOf({
+                ind: ind
+            });
+        }
 
-            var y = 0;
-            var dsgLen = this.dataSectionGroup.length;
-            var yGroupHeight = this.axisLength / dsgLen;
+        //opt {val, ind} val 或者ind 一定有一个
 
-            for (var i = 0, l = dsgLen; i < l; i++) {
-                var ds = this.dataSectionGroup[i];
-                var min = _$9.min(ds);
-                var max = _$9.max(ds);
-                var valInd = _$9.indexOf(ds, val);
+    }, {
+        key: "getPosOf",
+        value: function getPosOf(opt) {
+            var pos;
 
-                if (val >= min && val <= max || valInd >= 0) {
-                    if (this.layoutType == "proportion") {
+            var cellCount = this._getCellCount(); //dataOrg上面的真实数据节点数，把轴分成了多少个节点
+
+            if (this.layoutType == "proportion") {
+                var dsgLen = this.dataSectionGroup.length;
+                var groupLength = this.axisLength / dsgLen;
+                for (var i = 0, l = dsgLen; i < l; i++) {
+                    var ds = this.dataSectionGroup[i];
+                    var min = _$9.min(ds);
+                    var max = _$9.max(ds);
+                    var val = "val" in opt ? opt.val : this.getValOfInd(opt.ind, ds);
+                    if (val >= min && val <= max) {
                         var _origin = this.origin;
                         //如果 origin 并不在这个区间
                         if (_origin < min || _origin > max) {
                             _origin = min;
-                        }
-                        var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
+                        }                        var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
                         var amountABS = Math.abs(max - min);
-                        var h = maxGroupDisABS / amountABS * yGroupHeight;
-                        y = (val - _origin) / maxGroupDisABS * h + i * yGroupHeight;
+                        var h = maxGroupDisABS / amountABS * groupLength;
+                        pos = (val - _origin) / maxGroupDisABS * h + i * groupLength;
 
-                        if (isNaN(y)) {
-                            y = i * yGroupHeight;
+                        if (isNaN(pos)) {
+                            pos = i * groupLength;
                         }
+                        break;
                     }
+                }
+            } else {
+                var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal(opt.val);
+
+                if (valInd != -1) {
                     if (this.layoutType == "rule") {
                         //line 的xaxis就是 rule
-                        y = valInd / (ds.length - 1) * yGroupHeight;
-                    }
-                    if (this.layoutType == "peak") {
+                        pos = valInd / (cellCount - 1) * this.axisLength;
+                    }                    if (this.layoutType == "peak") {
                         //bar的xaxis就是 peak
-                        y = yGroupHeight / ds.length * (valInd + 1) - yGroupHeight / ds.length / 2;
-                    }
+                        pos = this.axisLength / cellCount * (valInd + 1) - this.axisLength / cellCount / 2;
+                    }                }            }
+            !pos && (pos = 0);
 
-                    y += this._originTrans;
-                    break;
+            pos += this._originTrans;
+
+            return Math.abs(pos);
+        }
+
+        //这个目前没有用到
+
+    }, {
+        key: "getValOfPos",
+        value: function getValOfPos(pos) {}
+
+        //ds可选
+
+    }, {
+        key: "getValOfInd",
+        value: function getValOfInd(ind, ds) {
+
+            var org = ds ? [ds] : this.dataOrg;
+            var vals = [];
+
+            if (this.layoutType == "proportion") {
+                // proportion 中 index本身 目前来看是个伪命题，
+                vals.push(ds[ind]);
+            } else {
+                _$9.each(org, function (arr) {
+                    _$9.each(arr, function (list) {
+                        vals.push(list[ind]);
+                    });
+                });
+            }
+            if (vals.length > 1) {
+                return vals;
+            }            if (vals.length == 1) {
+                return vals[0];
+            }        }
+
+        //TODO 这个有问题
+
+    }, {
+        key: "getIndexOfPos",
+        value: function getIndexOfPos(pos) {
+            var ind = 0;
+
+            if (this.layoutType == "proportion") {
+                //proportion中的index以像素为单位
+                ind = parseInt(pos / ((this._max - this._min) / this.axisLength));
+            } else {
+                var cellLength = this.getCellLengthOfPos(pos);                var cellCount = this.cellCount;
+
+                if (this.layoutType == "peak") {
+                    ind = parseInt(pos / cellLength);
+                    if (ind == cellCount) {
+                        ind = cellCount - 1;
+                    }
                 }
-            }
-            if (isNaN(y)) {
-                y = 0;
-            }
-            return -Math.abs(y);
+                if (this.layoutType == "rule") {
+                    ind = parseInt((pos + cellLength / 2) / cellLength);
+                    if (cellCount == 1) {
+                        //如果只有一个数据
+                        ind = 0;
+                    }
+                }            }
+            return ind;
         }
     }, {
-        key: "getValFromPos",
-        value: function getValFromPos(y) {
-            var start = this.layoutData[0];
-            var end = this.layoutData.slice(-1)[0];
-            var val = (end.value - start.value) * ((y - start.y) / (end.y - start.y)) + start.value;
-            return val;
+        key: "getIndexOfVal",
+        value: function getIndexOfVal(val) {
+            var valInd = -1;
+            _$9.each(this.dataOrg, function (arr) {
+                _$9.each(arr, function (list) {
+                    var _ind = _$9.indexOf(list, val);
+                    if (_ind != -1) {
+                        valInd = _ind;
+                    }                });
+            });
+            return valInd;
+        }
+    }, {
+        key: "getCellLength",
+        value: function getCellLength() {
+
+            //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
+            var axisLength = this.axisLength;
+            var cellLength = axisLength;
+            var cellCount = this.cellCount;
+
+            if (cellCount) {
+
+                if (this.layoutType == "proportion") ; else {
+                    if (this._cellLength) {
+                        cellLength = this._cellLength;
+                    } else {
+                        //默认按照 peak 也就是柱状图的需要的布局方式
+                        cellLength = axisLength / cellCount;
+                        if (this.layoutType == "rule") {
+                            if (cellCount == 1) {
+                                cellLength = axisLength / 2;
+                            } else {
+                                cellLength = axisLength / (cellCount - 1);
+                            }
+                        }                        if (this.posParseToInt) {
+                            cellLength = parseInt(cellLength);
+                        }
+                        this._cellLength = cellLength;
+                    }
+                }
+            }
+            return cellLength;
+        }
+
+        //这个getCellLengthOfPos接口主要是给tips用，因为tips中只有x信息
+
+    }, {
+        key: "getCellLengthOfPos",
+        value: function getCellLengthOfPos(pos) {
+            return this.getCellLength();
+        }
+
+        //pos目前没用到，给后续的高级功能预留接口
+
+    }, {
+        key: "getCellLengthOfInd",
+        value: function getCellLengthOfInd(pos) {
+            return this.getCellLength();
+        }
+    }, {
+        key: "_getCellCount",
+        value: function _getCellCount() {
+            //总共有几个数据节点，默认平铺整个dataOrg，和x轴的需求刚好契合，而y轴目前不怎么需要用到这个
+            var cellCount = 0;
+            if (this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length) {
+                cellCount = this.dataOrg[0][0].length;
+            }            return cellCount;
         }
     }]);
     return axis;
@@ -9223,7 +9393,7 @@ var xAxis = function (_Axis) {
     function xAxis(opt, data, _coord) {
         classCallCheck$1(this, xAxis);
 
-        var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this, opt, data, _coord));
+        var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this, opt, data.org));
 
         _this._opt = opt;
 
@@ -9294,8 +9464,6 @@ var xAxis = function (_Axis) {
 
         _this.animation = true;
 
-        _this.ceilWidth = 0; //x方向一维均分长度, layoutType == peak 的时候要用到
-
         _this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
 
         //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
@@ -9333,7 +9501,7 @@ var xAxis = function (_Axis) {
             //xAxis的field只有一个值
             this.field = _$10.flatten([this.field])[0];
 
-            this.initData();
+            this.setDataSection();
 
             me._formatTextSection = [];
             me._textElements = [];
@@ -9378,13 +9546,9 @@ var xAxis = function (_Axis) {
     }, {
         key: "resetData",
         value: function resetData(dataFrame) {
-            debugger;
-            this.dataSection = [];
-            this.dataSectionGroup = [];
-            if (dataFrame) {
-                dataFrame.field && (this.field = dataFrame.field);
-                dataFrame.org && (this.dataOrg = dataFrame.org); //这里必须是data.org
-            }            this._initHandle(dataFrame);
+            this.field = dataFrame.field;
+            this.resetDataOrg(dataFrame.org);
+            this._initHandle(dataFrame);
             this.draw();
         }
     }, {
@@ -9459,50 +9623,12 @@ var xAxis = function (_Axis) {
                 }            }
         }
     }, {
-        key: "getIndexOfVal",
-        value: function getIndexOfVal(xvalue) {
-            var i;
-            for (var ii = 0, il = this.layoutData.length; ii < il; ii++) {
-                var obj = this.layoutData[ii];
-                if (obj.value == xvalue) {
-                    i = ii;
-                    break;
-                }
-            }
-            return i;
-        }
-    }, {
-        key: "getIndexOfX",
-        value: function getIndexOfX(x) {
-            var iNode = 0;
-            if (this.layoutType == "peak") {
-                iNode = parseInt(x / this.ceilWidth);
-                if (iNode == this.dataOrg.length) {
-                    iNode = this.dataOrg.length - 1;
-                }
-            }
-
-            if (this.layoutType == "rule") {
-                iNode = parseInt((x + this.ceilWidth / 2) / this.ceilWidth);
-                if (this.dataOrg.length == 1) {
-                    //如果只有一个数据
-                    iNode = 0;
-                }
-            }
-
-            if (this.layoutType == "proportion") {
-                iNode = parseInt(x / ((this.max - this.min) / this.width));
-            }
-
-            return iNode;
-        }
-    }, {
         key: "getNodeInfoOfX",
         value: function getNodeInfoOfX(x) {
             //nodeInfo 一般是给tips用，和data中得数据比就是少了个textWidth
             //这里和用 data 计算 layoutData的 trimgraphs 中不一样得是
             //这里的val获取必须在dataOrg中获取，统一的dataLen 也必须是用的 this.dataOrg.length
-            var ind = this.getIndexOfX(x);
+            var ind = this.getIndexOfPos(x);
 
             var val = this.dataOrg[ind];
             var dataLen = this.dataOrg.length;
@@ -9511,12 +9637,7 @@ var xAxis = function (_Axis) {
             if (this.layoutType == "proportion") {
                 val = (this.max - this.min) * (x / this.width) + this.min;
             } else {
-                x = this.getPosX({
-                    val: val,
-                    ind: ind,
-                    dataLen: dataLen,
-                    width: this.width
-                });
+                x = this.getPosOfInd(ind);
             }
             var o = {
                 ind: ind,
@@ -9530,86 +9651,23 @@ var xAxis = function (_Axis) {
 
             return o;
         }
-
-        //获取x对应的位置
-        //val ind 至少要有一个
-
-    }, {
-        key: "getPosX",
-        value: function getPosX(opt) {
-            var x = 0;
-            var val = opt.val;
-            var ind = "ind" in opt ? opt.ind : _$10.indexOf(this.dataSection, val); //如果没有ind 那么一定要有val
-            var dataLen = "dataLen" in opt ? opt.dataLen : this.dataSection.length;
-            var width = "width" in opt ? opt.width : this.width;
-            var layoutType = "layoutType" in opt ? opt.layoutType : this.layoutType;
-
-            if (dataLen == 1) {
-                x = width / 2;
-            } else {
-                if (layoutType == "rule") {
-                    //折线图的xyaxis就是 rule
-                    x = ind / (dataLen - 1) * width;
-                }                if (layoutType == "proportion") {
-                    //按照数据真实的值在minVal - max 区间中的比例值
-                    if (val == undefined) {
-                        val = ind * (this.max - this.min) / (dataLen - 1) + this.min;
-                    }                    x = width * ((val - this.min) / (this.max - this.min));
-                }                if (layoutType == "peak") {
-                    //柱状图的就是peak
-                    var _ceilWidth = width / dataLen;
-                    if (this.posParseToInt) {
-                        _ceilWidth = parseInt(_ceilWidth);
-                    }
-                    x = _ceilWidth * (ind + 1) - _ceilWidth / 2;
-                }            }
-            if (isNaN(x)) {
-                x = 0;
-            }
-            return parseInt(x, 10);
-        }
-    }, {
-        key: "_computerCeilWidth",
-        value: function _computerCeilWidth() {
-            //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
-            var width = this.width;
-            var ceilWidth = width;
-            if (this.dataOrg.length) {
-                ceilWidth = width / this.dataOrg.length;
-                if (this.layoutType == "rule") {
-                    if (this.dataOrg.length == 1) {
-                        ceilWidth = width / 2;
-                    } else {
-                        ceilWidth = width / (this.dataOrg.length - 1);
-                    }
-                }
-            }
-            if (this.posParseToInt) {
-                ceilWidth = parseInt(ceilWidth);
-            }
-            return ceilWidth;
-        }
     }, {
         key: "_trimXAxis",
         value: function _trimXAxis() {
             var tmpData = [];
             var data = this.dataSection;
 
-            this.ceilWidth = this._computerCeilWidth();
-
             for (var a = 0, al = data.length; a < al; a++) {
                 var text = this._formatTextSection[a];
                 var txt = this._textElements[a];
-
+                debugger;
                 var o = {
                     ind: a,
                     value: data[a],
                     text: text,
-                    x: this.getPosX({
+                    x: this.getPosOf({
                         val: data[a],
-                        ind: a,
-                        dataLen: al,
-                        width: this.width
+                        ind: a
                     }),
                     textWidth: txt.getTextWidth(),
                     field: this.field,
@@ -9931,7 +9989,7 @@ var yAxis = function (_Axis) {
     function yAxis(opt, data, _coord) {
         classCallCheck$1(this, yAxis);
 
-        var _this = possibleConstructorReturn$1(this, (yAxis.__proto__ || Object.getPrototypeOf(yAxis)).call(this, opt, data, _coord));
+        var _this = possibleConstructorReturn$1(this, (yAxis.__proto__ || Object.getPrototypeOf(yAxis)).call(this, opt, data.org));
 
         _this._opt = opt;
 
@@ -10033,7 +10091,7 @@ var yAxis = function (_Axis) {
             //先要矫正子啊field确保一定是个array
             if (!_$11.isArray(this.field)) {
                 this.field = [this.field];
-            }            this.initData();
+            }            this.setDataSection();
             this._getTitle();
             this._setYaxisWidth();
         }
@@ -10064,14 +10122,9 @@ var yAxis = function (_Axis) {
     }, {
         key: "resetData",
         value: function resetData(dataFrame) {
-            this.dataSection = [];
-            this.dataSectionGroup = [];
-            if (dataFrame) {
-                dataFrame.field && (this.field = dataFrame.field);
-                dataFrame.org && (this.dataOrg = dataFrame.org); //这里必须是data.org
-            }
+            this.field = dataFrame.field;
+            this.resetDataOrg(dataFrame.org);
             this._initHandle();
-
             this.draw();
         }
     }, {
@@ -10130,9 +10183,10 @@ var yAxis = function (_Axis) {
             var tmpData = [];
 
             for (var i = 0, l = this.dataSection.length; i < l; i++) {
+
                 var layoutData = {
                     value: this.dataSection[i],
-                    y: this.getPosFromVal(this.dataSection[i]),
+                    y: -Math.abs(this.getPosOfVal(this.dataSection[i])),
                     visible: true,
                     text: ""
                 };
@@ -10794,7 +10848,7 @@ var Rect_Component = function (_coorBase) {
                 xAxisPosY = -this._yAxis[0].height / 2;
             }
             if (_$13.isNumber(this._xAxis.axisLine.position)) {
-                xAxisPosY = this._yAxis[0].getPosFromVal(this._xAxis.axisLine.position);
+                xAxisPosY = -this._yAxis[0].getPosOfVal(this._xAxis.axisLine.position);
             }
             if (xAxisPosY !== undefined) {
                 this._xAxis._axisLine.context.y = xAxisPosY;
@@ -10805,16 +10859,11 @@ var Rect_Component = function (_coorBase) {
                 var yAxisPosX;
                 if (_yAxis.axisLine.position == 'center') {
                     yAxisPosX = me._xAxis.width / 2;
-                }
-                if (_$13.isNumber(_yAxis.axisLine.position)) {
-                    yAxisPosX = me._xAxis.getPosX({
-                        val: _yAxis.axisLine.position
-                    });
-                }
-                if (yAxisPosX !== undefined) {
+                }                if (_$13.isNumber(_yAxis.axisLine.position)) {
+                    yAxisPosX = me._xAxis.getPosOfVal(_yAxis.axisLine.position);
+                }                if (yAxisPosX !== undefined) {
                     _yAxis._axisLine.context.x = yAxisPosX;
-                }
-            });
+                }            });
         }
     }, {
         key: "getSizeAndOrigin",
@@ -10911,11 +10960,6 @@ var Rect_Component = function (_coorBase) {
                 ctx.rotation = 90;
                 ctx.rotateOrigin = origin;
             });
-        }
-    }, {
-        key: "getPosX",
-        value: function getPosX(opt) {
-            return this._xAxis.getPosX(opt);
         }
     }, {
         key: "_getAxisDataFrame",
@@ -12490,10 +12534,10 @@ var BarGraphs = function (_GraphsBase) {
         }
     }, {
         key: "_getBarWidth",
-        value: function _getBarWidth(ceilWidth, ceilWidth2) {
+        value: function _getBarWidth(cellWidth, ceilWidth2) {
             if (this.node.width) {
                 if (_$19.isFunction(this.node.width)) {
-                    this.node._width = this.node.width(ceilWidth);
+                    this.node._width = this.node.width(cellWidth);
                 } else {
                     this.node._width = this.node.width;
                 }
@@ -12501,8 +12545,8 @@ var BarGraphs = function (_GraphsBase) {
                 this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.2);
 
                 //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
-                if (this.node._width == 1 && ceilWidth > 3) {
-                    this.node._width = ceilWidth - 2;
+                if (this.node._width == 1 && cellWidth > 3) {
+                    this.node._width = cellWidth - 2;
                 }            }            this.node._width < 1 && (this.node._width = 1);
             this.node._width = parseInt(this.node._width);
             if (this.node._width > this.node.maxWidth) {
@@ -12889,17 +12933,17 @@ var BarGraphs = function (_GraphsBase) {
                 layoutGraphs = [this];
                 hLen = this.enabledField.length;
             }
-            var ceilWidth = _xAxis.ceilWidth;
+            var cellWidth = _xAxis.getCellLength();
             //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
-            var ceilWidth2 = ceilWidth / (hLen + 1);
+            var ceilWidth2 = cellWidth / (hLen + 1);
 
             //知道了ceilWidth2 后 检测下 barW是否需要调整
-            var barW = this._getBarWidth(ceilWidth, ceilWidth2);
+            var barW = this._getBarWidth(cellWidth, ceilWidth2);
             var barDis = ceilWidth2 - barW;
             if (this.node.xDis != null) {
                 barDis = this.node.xDis;
             }
-            var disLeft = (ceilWidth - barW * hLen - barDis * (hLen - 1)) / 2;
+            var disLeft = (cellWidth - barW * hLen - barDis * (hLen - 1)) / 2;
             if (preHLen) {
                 disLeft += (barDis + barW) * preHLen;
             }
@@ -12932,23 +12976,19 @@ var BarGraphs = function (_GraphsBase) {
                                 vCount += team[i];
                             });
                         }
-                        var _x = _xAxis.getPosX({
-                            ind: i,
-                            dataLen: me._dataLen,
-                            layoutType: _coord ? _coord.xAxis.layoutType : me.root._xAxis.layoutType
-                        });
+                        var _x = _xAxis.getPosOfInd(i);
 
-                        var x = _x - ceilWidth / 2 + disLeft + (barW + barDis) * b;
+                        var x = _x - cellWidth / 2 + disLeft + (barW + barDis) * b;
 
                         var y = 0;
                         if (me.proportion) {
                             y = -val / vCount * _yAxis.height;
                         } else {
-                            y = _yAxis.getPosFromVal(val);
+                            y = -_yAxis.getPosOfVal(val);
                         }
                         var yOriginPoint = {
                             value: _yAxis.origin,
-                            y: _yAxis.originPos
+                            y: -_yAxis.originPos
                         };
 
                         function _getFromY(tempBarData, v, i, val, y) {
@@ -13977,7 +14017,8 @@ var LineGraphsGroup = function (_Canvax$Event$EventDi) {
             var fillPath = _$20.clone(bline.context.pointList);
 
             var path = "";
-            var originPos = this._yAxis.originPos;
+
+            var originPos = -this._yAxis.originPos;
 
             var _currPath = null;
 
@@ -14117,17 +14158,14 @@ var LineGraphs = function (_GraphsBase) {
 
                 for (var b = 0, bl = _lineData.length; b < bl; b++) {
                     var _xAxis = me.root._coord ? me.root._coord._xAxis : me.root._xAxis;
-                    var x = _xAxis.getPosX({
-                        ind: b,
-                        dataLen: bl,
-                        layoutType: me.root._coord ? me.root._coord.xAxis.layoutType : me.root._xAxis.layoutType
-                    });
 
-                    //var y = _.isNumber( _lineData[b] ) ? _yAxis.getPosFromVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
+                    var x = _xAxis.getPosOfInd(b);
+
+                    //var y = _.isNumber( _lineData[b] ) ? _yAxis.getPosOfVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
                     var y = _lineData[b];
                     if (!isNaN(y) && y !== null && y !== undefined && y !== "") {
-                        y = _yAxis.getPosFromVal(y);
+                        y = -_yAxis.getPosOfVal(y);
                     } else {
                         y = undefined;
                     }
@@ -14453,8 +14491,9 @@ var ScatGraphs = function (_GraphsBase) {
                 var rowData = this.dataFrame.getRowData(i);
                 var xValue = rowData[xField];
                 var yValue = rowData[this.field];
-                var xPos = this.root._coord._xAxis.getPosX({ val: xValue });
-                var yPos = this.root._coord._getYaxisOfField(this.field).getPosFromVal(yValue);
+
+                var xPos = this.root._coord._xAxis.getPosOfVal(xValue);
+                var yPos = -this.root._coord._getYaxisOfField(this.field).getPosOfVal(yValue);
 
                 var fieldMap = this.root._coord.getFieldMapOf(this.field);
 
@@ -22708,7 +22747,7 @@ var MarkLine = function (_Component) {
     }, {
         key: "_getYPos",
         value: function _getYPos() {
-            return this._yAxis.getPosFromVal(this._getYVal());        }
+            return -this._yAxis.getPosOfVal(this._getYVal());        }
     }, {
         key: "_getLabel",
         value: function _getLabel() {
@@ -23209,7 +23248,8 @@ var Tips = function (_Component) {
                 x = _coord.origin.x + e.eventInfo.xAxis.x;
             }
             if (this.pointer == "region") {
-                x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
+                var regionWidth = _coord._xAxis.getCellLengthOfPos(e.eventInfo.xAxis.x);
+                x = _coord.origin.x + e.eventInfo.xAxis.x - regionWidth / 2;
                 if (e.eventInfo.xAxis.ind < 0) {
                     //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
                     x = _coord.origin.x;
@@ -23236,10 +23276,11 @@ var Tips = function (_Component) {
                         }
                     });
                 }                if (this.pointer == "region") {
+                    var regionWidth = _coord._xAxis.getCellLengthOfPos(x);
                     el = new Rect$12({
                         //xyToInt : false,
                         context: {
-                            width: _coord._xAxis.ceilWidth,
+                            width: regionWidth,
                             height: _coord.height,
                             x: x,
                             y: y,
@@ -23294,7 +23335,8 @@ var Tips = function (_Component) {
             var el = this._tipsPointer;
             var x = _coord.origin.x + e.eventInfo.xAxis.x;
             if (this.pointer == "region") {
-                x = _coord.origin.x + e.eventInfo.xAxis.x - _coord._xAxis.ceilWidth / 2;
+                var regionWidth = _coord._xAxis.getCellLengthOfPos(e.eventInfo.xAxis.x);
+                x = _coord.origin.x + e.eventInfo.xAxis.x - regionWidth / 2;
                 if (e.eventInfo.xAxis.ind < 0) {
                     //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
                     x = _coord.origin.x;
@@ -23420,7 +23462,7 @@ var barTgi = function (_Component) {
             }
 
             _$37.each(this.data, function (tgi, i) {
-                var y = me._yAxis.getPosFromVal(tgi);
+                var y = -me._yAxis.getPosOfVal(tgi);
                 var barData = me.barDatas[i];
 
                 var _tgiLine = new Line$10({
