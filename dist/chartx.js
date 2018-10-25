@@ -9637,9 +9637,12 @@ var Chartx = (function () {
 
 	            if (this.layoutType == "proportion") {
 	                val = (this.max - this.min) * (x / this.width) + this.min;
-	            } else {
-	                x = this.getPosOfInd(ind);
 	            }
+	            x = this.getPosOf({
+	                ind: ind,
+	                val: val
+	            });
+
 	            var o = {
 	                ind: ind,
 	                value: val,
