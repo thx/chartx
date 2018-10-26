@@ -470,11 +470,13 @@ export default class axis
 
     //ds可选
     getValOfInd( ind , ds ){
-        
+        var me = this;
         var org = ds? ds  : _.flatten( this.dataOrg );
         var val;
-debugger
+
         if( this.layoutType == "proportion" ){
+
+            /*
             var min = this._min;
             var max = this._max;
             if( ds ){
@@ -482,6 +484,18 @@ debugger
                 max = _.max( ds );
             };
             val = min + ( max-min )/this._getCellCount() * ind;
+            */
+debugger
+            var groupLength = this.axisLength / this.dataSectionGroup.length;
+            _.each( this.dataSectionGroup, function( ds, i ){
+                if( parseInt( ind/groupLength) == i || i==me.dataSectionGroup.length-1 ){
+                    var min = _.min( ds );
+                    var max = _.max( ds );
+                    val = min + ( max-min )/groupLength * ( ind - groupLength*i );
+                    return false;
+                }
+            } );
+            
         } else {
             val = org[ ind ];
         };
@@ -497,10 +511,8 @@ debugger
         var cellCount = this._getCellCount();
 
         if( this.layoutType == "proportion" ){
-            
             //proportion中的index以像素为单位 所以，传入的像素值就是index
             return pos;
-
         } else {
             
             if( this.layoutType == "peak" ){
