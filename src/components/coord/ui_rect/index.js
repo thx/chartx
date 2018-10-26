@@ -508,6 +508,7 @@ export default class Rect_Component extends coorBase
 
     getTipsInfoHandler( e )
     {
+        
         //这里只获取xAxis的刻度信息;
         var induceX = e.point.x;
         if( e.target !== this.induce ){

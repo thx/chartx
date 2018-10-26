@@ -10,13 +10,14 @@ export default class axis
     constructor(opt, dataOrg)
     {
         //super();
+        this.layoutType = "proportion"; // rule , peak, proportion
 
         //源数据
         //这个是一个一定会有两层数组的数据结构，是一个标准的dataFrame数据
         // [ 
         //    [   
         //        [1,2,3],  
-        //        [1,2,3]    
+        //        [1,2,3]    //这样有堆叠的数据只会出现在proportion的axis里，至少目前是这样
         //    ] 
         //   ,[    
         //        [1,2,3] 
@@ -28,8 +29,8 @@ export default class axis
         //轴总长
         this.axisLength = 1;
         
-        this.cellCount = this._getCellCount();
-        this._cellLength = 0; //数据变动的时候要置空
+        this._cellCount = null;
+        this._cellLength = null; //数据变动的时候要置空
 
         //下面三个目前yAxis中实现了，后续统一都会实现
     
@@ -54,7 +55,7 @@ export default class axis
         this._min = null; 
         this._max = null;
 
-        this.layoutType = "proportion"; // rule , peak, proportion
+        
 
         //"asc" 排序，默认从小到大, desc为从大到小
         //之所以不设置默认值为asc，是要用 null 来判断用户是否进行了配置
@@ -72,9 +73,8 @@ export default class axis
 
         this.dataOrg = dataOrg;
 
-        this.cellCount = this._getCellCount();
-
-        this._cellLength = 0;
+        this._cellCount = null
+        this._cellLength = null;
     
     }
 
@@ -104,92 +104,6 @@ export default class axis
         this._originTrans = this._getOriginTrans( this.origin );
         this.originPos = this.getPosOfVal( this.origin );
         
-    }
-
-    _getDataSection()
-    {
-        //如果有堆叠，比如[ ["uv","pv"], "click" ]
-        //那么这个 this.dataOrg， 也是个对应的结构
-        //vLen就会等于2
-        var vLen = 1;
-
-        _.each( this.dataOrg , function( arr ){
-            vLen = Math.max( arr.length, vLen );
-        } );
-
-        if( vLen == 1 ){
-            return this._oneDimensional( );
-        };
-        if( vLen > 1 ){
-            return this._twoDimensional( );
-        };
-        
-    }
-
-    _oneDimensional()
-    {
-        var arr = _.flatten( this.dataOrg ); //_.flatten( data.org );
-
-        for( var i = 0, il=arr.length; i<il ; i++ ){
-            arr[i] =  arr[i] || 0;
-        };
-
-        return arr;
-    }
-
-    //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
-    _twoDimensional()
-    {
-        var d = this.dataOrg;
-        var arr = [];
-        var min;
-        _.each( d , function(d, i) {
-            if (!d.length) {
-                return
-            };
-
-            //有数据的情况下 
-            if (!_.isArray(d[0])) {
-                arr.push(d);
-                return;
-            };
-
-            var varr = [];
-            var len = d[0].length;
-            var vLen = d.length;
-
-            for (var i = 0; i < len; i++) {
-                var up_count = 0;
-                var up_i = 0;
-
-                var down_count = 0;
-                var down_i = 0;
-
-                for (var ii = 0; ii < vLen; ii++) {
-                    
-                    var _val = d[ii][i];
-                    if( !_val && _val !== 0 ){
-                        continue;
-                    };
-
-                    min == undefined && (min = _val)
-                    min = Math.min(min, _val);
-
-                    if (_val >= 0) {
-                        up_count += _val;
-                        up_i++
-                    } else {
-                        down_count += _val;
-                        down_i++
-                    }
-                }
-                up_i && varr.push(up_count);
-                down_i && varr.push(down_count);
-            };
-            arr.push(varr);
-        });
-        arr.push(min);
-        return _.flatten(arr);
     }
 
     setDataSection()
@@ -251,6 +165,89 @@ export default class axis
 
         }
         
+    }
+    _getDataSection()
+    {
+        //如果有堆叠，比如[ ["uv","pv"], "click" ]
+        //那么这个 this.dataOrg， 也是个对应的结构
+        //vLen就会等于2
+        var vLen = 1;
+
+        _.each( this.dataOrg , function( arr ){
+            vLen = Math.max( arr.length, vLen );
+        } );
+
+        if( vLen == 1 ){
+            return this._oneDimensional( );
+        };
+        if( vLen > 1 ){
+            return this._twoDimensional( );
+        };
+        
+    }
+    _oneDimensional()
+    {
+        var arr = _.flatten( this.dataOrg ); //_.flatten( data.org );
+
+        for( var i = 0, il=arr.length; i<il ; i++ ){
+            arr[i] =  arr[i] || 0;
+        };
+
+        return arr;
+    }
+    //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
+    _twoDimensional()
+    {
+        var d = this.dataOrg;
+        var arr = [];
+        var min;
+        _.each( d , function(d, i) {
+            if (!d.length) {
+                return
+            };
+
+            //有数据的情况下 
+            if (!_.isArray(d[0])) {
+                arr.push(d);
+                return;
+            };
+
+            var varr = [];
+            var len = d[0].length;
+            var vLen = d.length;
+
+            for (var i = 0; i < len; i++) {
+                var up_count = 0;
+                var up_i = 0;
+
+                var down_count = 0;
+                var down_i = 0;
+
+                for (var ii = 0; ii < vLen; ii++) {
+                    
+                    var _val = d[ii][i];
+                    if( !_val && _val !== 0 ){
+                        continue;
+                    };
+
+                    min == undefined && (min = _val)
+                    min = Math.min(min, _val);
+
+                    if (_val >= 0) {
+                        up_count += _val;
+                        up_i++
+                    } else {
+                        down_count += _val;
+                        down_i++
+                    }
+                }
+                up_i && varr.push(up_count);
+                down_i && varr.push(down_count);
+            };
+            arr.push(varr);
+        });
+        arr.push(min);
+        return _.flatten(arr);
     }
 
     //val 要被push到datasection 中去的 值
@@ -393,18 +390,19 @@ export default class axis
         return pos;
     }
 
+
+
+
     getPosOfVal( val ){
         return this.getPosOf({
             val : val
         });
     }
-    
     getPosOfInd( ind ){
         return this.getPosOf({
             ind : ind
         });
     }
-
     //opt {val, ind} val 或者ind 一定有一个
     getPosOf( opt ){
         var pos;
@@ -464,51 +462,47 @@ export default class axis
         return Math.abs(pos);
     }
 
-
-    //这个目前没有用到
     getValOfPos( pos )
     {
-
+        var posInd = this.getIndexOfPos( pos );
+        return this.getValOfInd( posInd );   
     }
 
     //ds可选
     getValOfInd( ind , ds ){
         
-        var org = ds? [ ds ] : this.dataOrg;
-        var vals = [];
-
+        var org = ds? ds  : _.flatten( this.dataOrg );
+        var val;
+debugger
         if( this.layoutType == "proportion" ){
-            // proportion 中 index本身 目前来看是个伪命题，
-            vals.push( ds[ ind ] );
+            var min = this._min;
+            var max = this._max;
+            if( ds ){
+                min = _.min( ds );
+                max = _.max( ds );
+            };
+            val = min + ( max-min )/this._getCellCount() * ind;
         } else {
-            _.each( org, function( arr ){
-                _.each( arr, function( list ){
-                    vals.push( list[ ind ] );
-                } );
-            } );
+            val = org[ ind ];
         };
-
-        if( vals.length > 1 ){
-            return vals
-        };
-        if( vals.length == 1 ){
-            return vals[0]
-        };
-        
+        return val;
     }
 
-    //TODO 这个有问题
+
     getIndexOfPos( pos )
     {
         var ind = 0;
         
-        if( this.layoutType == "proportion" ){
-            //proportion中的index以像素为单位
-            ind = parseInt( pos  / ((this._max-this._min)/this.axisLength ) );
-        } else {
-            var cellLength = this.getCellLengthOfPos( pos );; //peak rule 会要用到
-            var cellCount = this.cellCount;
+        var cellLength = this.getCellLengthOfPos( pos );
+        var cellCount = this._getCellCount();
 
+        if( this.layoutType == "proportion" ){
+            
+            //proportion中的index以像素为单位 所以，传入的像素值就是index
+            return pos;
+
+        } else {
+            
             if( this.layoutType == "peak" ){
                 ind = parseInt( pos / cellLength );
                 if( ind == cellCount ){
@@ -517,7 +511,7 @@ export default class axis
             };
     
             if( this.layoutType == "rule" ){
-                ind = parseInt((pos + (cellLength / 2)) / cellLength);
+                ind = parseInt( (pos+(cellLength/2)) / cellLength );
                 if( cellCount == 1 ){
                     //如果只有一个数据
                     ind = 0;
@@ -542,40 +536,40 @@ export default class axis
     }
     
     getCellLength(){
+
+        if( this._cellLength !== null ){
+            return this._cellLength;
+        };
       
         //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
         var axisLength = this.axisLength;
         var cellLength = axisLength;
-        var cellCount = this.cellCount;
+        var cellCount = this._getCellCount();
 
         if( cellCount ){
 
             if( this.layoutType == "proportion" ){
-                //待开发，目前没有这个需求
-
+                cellLength = 1;
             } else {
-                if( this._cellLength ){
-                    cellLength = this._cellLength;
-                } else {
-                    //默认按照 peak 也就是柱状图的需要的布局方式
-                    cellLength = axisLength / cellCount;
-                    if( this.layoutType == "rule" ){
-                        if( cellCount == 1 ){
-                            cellLength = axisLength / 2;
-                        } else {
-                            cellLength = axisLength / ( cellCount - 1 )
-                        }
-                    };
-                    if( this.posParseToInt ){
-                        cellLength = parseInt( cellLength );
-                    };
 
-                    this._cellLength = cellLength;
-                }
-                
+                //默认按照 peak 也就是柱状图的需要的布局方式
+                cellLength = axisLength / cellCount;
+                if( this.layoutType == "rule" ){
+                    if( cellCount == 1 ){
+                        cellLength = axisLength / 2;
+                    } else {
+                        cellLength = axisLength / ( cellCount - 1 )
+                    };
+                };
+                if( this.posParseToInt ){
+                    cellLength = parseInt( cellLength );
+                };
+
             }
 
         };
+
+        this._cellLength = cellLength;
 
         return cellLength;
         
@@ -592,11 +586,21 @@ export default class axis
     }
 
     _getCellCount(){
+
+        if( this._cellCount !== null  ){
+            return this._cellCount;
+        };
+        
         //总共有几个数据节点，默认平铺整个dataOrg，和x轴的需求刚好契合，而y轴目前不怎么需要用到这个
         var cellCount = 0;
-        if( this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length  ){
-            cellCount = this.dataOrg[0][0].length;
+        if( this.layoutType == "proportion" ){
+            cellCount = this.axisLength;
+        } else {
+            if( this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length  ){
+                cellCount = this.dataOrg[0][0].length;
+            };
         };
+        this._cellCount = cellCount;
         return cellCount;
     }
 

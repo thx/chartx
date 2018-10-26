@@ -142,7 +142,6 @@ export default class xAxis extends Axis
 
         this._getTitle();
         this._setXAxisHeight();
-
     }
 
     draw(opt)
@@ -253,33 +252,21 @@ export default class xAxis extends Axis
     
 
     getNodeInfoOfX( x ){
-        //nodeInfo 一般是给tips用，和data中得数据比就是少了个textWidth
-        //这里和用 data 计算 layoutData的 trimgraphs 中不一样得是
-        //这里的val获取必须在dataOrg中获取，统一的dataLen 也必须是用的 this.dataOrg.length
+
         var ind = this.getIndexOfPos( x );
-
-        var val = this.dataOrg[ ind ];
-        var dataLen = this.dataOrg.length;
-        var x = x;
-
-        if( this.layoutType == "proportion" ){
-            val = (this.max-this.min) * ( x/this.width ) + this.min;
-        };
-   
-        x = this.getPosOf({
+        var val = this.getValOfInd( ind );
+        var pos = this.getPosOf( {
             ind : ind,
             val : val
-        });
+        } );
 
         var o = {
-            ind    : ind,
-            value  : val,
-            text   : val, //text是format后的数据
-            x      : x,
-            field  : this.field
+            ind   : ind,
+            value : val,
+            text  : this._getFormatText( val, ind), //text是format后的数据
+            x     : pos, //这里不能直接用鼠标的x
+            field : this.field
         };
-
-        o.text = this._getFormatText( val, ind, o );
 
         return o;
     }
@@ -292,7 +279,7 @@ export default class xAxis extends Axis
         for (var a = 0, al  = data.length; a < al; a++ ) {
             var text = this._formatTextSection[a];
             var txt = this._textElements[a];
-            debugger
+            
             var o = {
                 ind : a,
                 value   : data[a],
@@ -315,20 +302,14 @@ export default class xAxis extends Axis
         return tmpData;
     }
 
-    _getFormatText( val, i )
+    _getFormatText( val )
     {
-        var res;
-        if (_.isFunction(this.label.format)) {
+        var res = val;
+        if ( _.isFunction(this.label.format) ) {
             res = this.label.format.apply( this, arguments );
-        } else {
-            res = val
-        }
-        
-        if (_.isArray(res)) {
+        };
+        if ( _.isNumber(res) ) {
             res = numAddSymbol(res);
-        }
-        if (!res) {
-            res = val;
         };
         return res;
     }

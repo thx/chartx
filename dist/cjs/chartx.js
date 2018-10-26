@@ -8857,13 +8857,14 @@ var axis = function () {
         classCallCheck$1(this, axis);
 
         //super();
+        this.layoutType = "proportion"; // rule , peak, proportion
 
         //源数据
         //这个是一个一定会有两层数组的数据结构，是一个标准的dataFrame数据
         // [ 
         //    [   
         //        [1,2,3],  
-        //        [1,2,3]    
+        //        [1,2,3]    //这样有堆叠的数据只会出现在proportion的axis里，至少目前是这样
         //    ] 
         //   ,[    
         //        [1,2,3] 
@@ -8875,8 +8876,8 @@ var axis = function () {
         //轴总长
         this.axisLength = 1;
 
-        this.cellCount = this._getCellCount();
-        this._cellLength = 0; //数据变动的时候要置空
+        this._cellCount = null;
+        this._cellLength = null; //数据变动的时候要置空
 
         //下面三个目前yAxis中实现了，后续统一都会实现
 
@@ -8900,8 +8901,6 @@ var axis = function () {
         this._min = null;
         this._max = null;
 
-        this.layoutType = "proportion"; // rule , peak, proportion
-
         //"asc" 排序，默认从小到大, desc为从大到小
         //之所以不设置默认值为asc，是要用 null 来判断用户是否进行了配置
         this.sort = null;
@@ -8919,9 +8918,8 @@ var axis = function () {
 
             this.dataOrg = dataOrg;
 
-            this.cellCount = this._getCellCount();
-
-            this._cellLength = 0;
+            this._cellCount = null;
+            this._cellLength = null;
         }
     }, {
         key: "setMinMaxOrigin",
@@ -8943,6 +8941,56 @@ var axis = function () {
                     }                }            }
             this._originTrans = this._getOriginTrans(this.origin);
             this.originPos = this.getPosOfVal(this.origin);
+        }
+    }, {
+        key: "setDataSection",
+        value: function setDataSection() {
+            var me = this;
+
+            //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
+            if (!this._opt.dataSection || this._opt.dataSection && !this._opt.dataSection.length) {
+                if (this.layoutType == "proportion") {
+
+                    var arr = this._getDataSection();
+
+                    if (this.waterLine) {
+                        arr.push(this.waterLine);
+                    }
+                    if ("origin" in me._opt) {
+                        arr.push(me._opt.origin);
+                    }
+                    if (arr.length == 1) {
+                        arr.push(arr[0] * 2);
+                    }
+                    for (var ai = 0, al = arr.length; ai < al; ai++) {
+                        arr[ai] = Number(arr[ai]);
+                        if (isNaN(arr[ai])) {
+                            arr.splice(ai, 1);
+                            ai--;
+                            al--;
+                        }                    }
+                    this.dataSection = DataSection.section(arr, 3);
+
+                    //如果还是0
+                    if (this.dataSection.length == 0) {
+                        this.dataSection = [0];
+                    }
+                    //如果有 middleweight 设置，就会重新设置dataSectionGroup
+                    this.dataSectionGroup = [_$9.clone(this.dataSection)];
+
+                    this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
+
+                    this._sort();
+                } else {
+
+                    //非proportion 也就是 rule peak 模式下面
+                    this.dataSection = _$9.flatten(this.dataOrg); //this._getDataSection();
+                    this.dataSectionGroup = [this.dataSection];
+                }            } else {
+
+                this.dataSection = this._opt.dataSection;
+                this.dataSectionGroup = [this.dataSection];
+            }
         }
     }, {
         key: "_getDataSection",
@@ -8971,7 +9019,6 @@ var axis = function () {
             }
             return arr;
         }
-
         //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
 
     }, {
@@ -9023,56 +9070,6 @@ var axis = function () {
             });
             arr.push(min);
             return _$9.flatten(arr);
-        }
-    }, {
-        key: "setDataSection",
-        value: function setDataSection() {
-            var me = this;
-
-            //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
-            if (!this._opt.dataSection || this._opt.dataSection && !this._opt.dataSection.length) {
-                if (this.layoutType == "proportion") {
-
-                    var arr = this._getDataSection();
-
-                    if (this.waterLine) {
-                        arr.push(this.waterLine);
-                    }
-                    if ("origin" in me._opt) {
-                        arr.push(me._opt.origin);
-                    }
-                    if (arr.length == 1) {
-                        arr.push(arr[0] * 2);
-                    }
-                    for (var ai = 0, al = arr.length; ai < al; ai++) {
-                        arr[ai] = Number(arr[ai]);
-                        if (isNaN(arr[ai])) {
-                            arr.splice(ai, 1);
-                            ai--;
-                            al--;
-                        }                    }
-                    this.dataSection = DataSection.section(arr, 3);
-
-                    //如果还是0
-                    if (this.dataSection.length == 0) {
-                        this.dataSection = [0];
-                    }
-                    //如果有 middleweight 设置，就会重新设置dataSectionGroup
-                    this.dataSectionGroup = [_$9.clone(this.dataSection)];
-
-                    this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
-
-                    this._sort();
-                } else {
-
-                    //非proportion 也就是 rule peak 模式下面
-                    this.dataSection = _$9.flatten(this.dataOrg); //this._getDataSection();
-                    this.dataSectionGroup = [this.dataSection];
-                }            } else {
-
-                this.dataSection = this._opt.dataSection;
-                this.dataSectionGroup = [this.dataSection];
-            }
         }
 
         //val 要被push到datasection 中去的 值
@@ -9199,7 +9196,6 @@ var axis = function () {
                 ind: ind
             });
         }
-
         //opt {val, ind} val 或者ind 一定有一个
 
     }, {
@@ -9250,12 +9246,12 @@ var axis = function () {
 
             return Math.abs(pos);
         }
-
-        //这个目前没有用到
-
     }, {
         key: "getValOfPos",
-        value: function getValOfPos(pos) {}
+        value: function getValOfPos(pos) {
+            var posInd = this.getIndexOfPos(pos);
+            return this.getValOfInd(posInd);
+        }
 
         //ds可选
 
@@ -9263,37 +9259,33 @@ var axis = function () {
         key: "getValOfInd",
         value: function getValOfInd(ind, ds) {
 
-            var org = ds ? [ds] : this.dataOrg;
-            var vals = [];
-
+            var org = ds ? ds : _$9.flatten(this.dataOrg);
+            var val;
+            debugger;
             if (this.layoutType == "proportion") {
-                // proportion 中 index本身 目前来看是个伪命题，
-                vals.push(ds[ind]);
+                var min = this._min;
+                var max = this._max;
+                if (ds) {
+                    min = _$9.min(ds);
+                    max = _$9.max(ds);
+                }                val = min + (max - min) / this._getCellCount() * ind;
             } else {
-                _$9.each(org, function (arr) {
-                    _$9.each(arr, function (list) {
-                        vals.push(list[ind]);
-                    });
-                });
-            }
-            if (vals.length > 1) {
-                return vals;
-            }            if (vals.length == 1) {
-                return vals[0];
-            }        }
-
-        //TODO 这个有问题
-
+                val = org[ind];
+            }            return val;
+        }
     }, {
         key: "getIndexOfPos",
         value: function getIndexOfPos(pos) {
             var ind = 0;
 
+            var cellLength = this.getCellLengthOfPos(pos);
+            var cellCount = this._getCellCount();
+
             if (this.layoutType == "proportion") {
-                //proportion中的index以像素为单位
-                ind = parseInt(pos / ((this._max - this._min) / this.axisLength));
+
+                //proportion中的index以像素为单位 所以，传入的像素值就是index
+                return pos;
             } else {
-                var cellLength = this.getCellLengthOfPos(pos);                var cellCount = this.cellCount;
 
                 if (this.layoutType == "peak") {
                     ind = parseInt(pos / cellLength);
@@ -9327,32 +9319,33 @@ var axis = function () {
         key: "getCellLength",
         value: function getCellLength() {
 
+            if (this._cellLength !== null) {
+                return this._cellLength;
+            }
             //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
             var axisLength = this.axisLength;
             var cellLength = axisLength;
-            var cellCount = this.cellCount;
+            var cellCount = this._getCellCount();
 
             if (cellCount) {
 
-                if (this.layoutType == "proportion") ; else {
-                    if (this._cellLength) {
-                        cellLength = this._cellLength;
-                    } else {
-                        //默认按照 peak 也就是柱状图的需要的布局方式
-                        cellLength = axisLength / cellCount;
-                        if (this.layoutType == "rule") {
-                            if (cellCount == 1) {
-                                cellLength = axisLength / 2;
-                            } else {
-                                cellLength = axisLength / (cellCount - 1);
-                            }
-                        }                        if (this.posParseToInt) {
-                            cellLength = parseInt(cellLength);
-                        }
-                        this._cellLength = cellLength;
-                    }
-                }
+                if (this.layoutType == "proportion") {
+                    cellLength = 1;
+                } else {
+
+                    //默认按照 peak 也就是柱状图的需要的布局方式
+                    cellLength = axisLength / cellCount;
+                    if (this.layoutType == "rule") {
+                        if (cellCount == 1) {
+                            cellLength = axisLength / 2;
+                        } else {
+                            cellLength = axisLength / (cellCount - 1);
+                        }                    }                    if (this.posParseToInt) {
+                        cellLength = parseInt(cellLength);
+                    }                }
             }
+            this._cellLength = cellLength;
+
             return cellLength;
         }
 
@@ -9374,11 +9367,19 @@ var axis = function () {
     }, {
         key: "_getCellCount",
         value: function _getCellCount() {
+
+            if (this._cellCount !== null) {
+                return this._cellCount;
+            }
             //总共有几个数据节点，默认平铺整个dataOrg，和x轴的需求刚好契合，而y轴目前不怎么需要用到这个
             var cellCount = 0;
-            if (this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length) {
-                cellCount = this.dataOrg[0][0].length;
-            }            return cellCount;
+            if (this.layoutType == "proportion") {
+                cellCount = this.axisLength;
+            } else {
+                if (this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length) {
+                    cellCount = this.dataOrg[0][0].length;
+                }            }            this._cellCount = cellCount;
+            return cellCount;
         }
     }]);
     return axis;
@@ -9625,19 +9626,10 @@ var xAxis = function (_Axis) {
     }, {
         key: "getNodeInfoOfX",
         value: function getNodeInfoOfX(x) {
-            //nodeInfo 一般是给tips用，和data中得数据比就是少了个textWidth
-            //这里和用 data 计算 layoutData的 trimgraphs 中不一样得是
-            //这里的val获取必须在dataOrg中获取，统一的dataLen 也必须是用的 this.dataOrg.length
+
             var ind = this.getIndexOfPos(x);
-
-            var val = this.dataOrg[ind];
-            var dataLen = this.dataOrg.length;
-            var x = x;
-
-            if (this.layoutType == "proportion") {
-                val = (this.max - this.min) * (x / this.width) + this.min;
-            }
-            x = this.getPosOf({
+            var val = this.getValOfInd(ind);
+            var pos = this.getPosOf({
                 ind: ind,
                 val: val
             });
@@ -9645,12 +9637,10 @@ var xAxis = function (_Axis) {
             var o = {
                 ind: ind,
                 value: val,
-                text: val, //text是format后的数据
-                x: x,
+                text: this._getFormatText(val, ind), //text是format后的数据
+                x: pos, //这里不能直接用鼠标的x
                 field: this.field
             };
-
-            o.text = this._getFormatText(val, ind, o);
 
             return o;
         }
@@ -9663,7 +9653,7 @@ var xAxis = function (_Axis) {
             for (var a = 0, al = data.length; a < al; a++) {
                 var text = this._formatTextSection[a];
                 var txt = this._textElements[a];
-                debugger;
+
                 var o = {
                     ind: a,
                     value: data[a],
@@ -9686,19 +9676,12 @@ var xAxis = function (_Axis) {
         }
     }, {
         key: "_getFormatText",
-        value: function _getFormatText(val, i) {
-            var res;
+        value: function _getFormatText(val) {
+            var res = val;
             if (_$10.isFunction(this.label.format)) {
                 res = this.label.format.apply(this, arguments);
-            } else {
-                res = val;
-            }
-
-            if (_$10.isArray(res)) {
+            }            if (_$10.isNumber(res)) {
                 res = numAddSymbol(res);
-            }
-            if (!res) {
-                res = val;
             }            return res;
         }
     }, {
@@ -11130,6 +11113,7 @@ var Rect_Component = function (_coorBase) {
     }, {
         key: "getTipsInfoHandler",
         value: function getTipsInfoHandler(e) {
+
             //这里只获取xAxis的刻度信息;
             var induceX = e.point.x;
             if (e.target !== this.induce) {
@@ -23160,40 +23144,6 @@ var Tips = function (_Component) {
             });
             return str;
         }
-
-        /*
-        _getDefaultContent_bak( info )
-        {
-              if( !info.nodes.length ){
-                return null;
-            };
-             var str  = "<table style='border:none'>";
-            var self = this;
-             if( info.title !== undefined && info.title !== null &&info.title !== "" ){
-                str += "<tr><td colspan='2'>"+ info.title +"</td></tr>"
-            };
-             _.each( info.nodes , function( node , i ){
-                if( node.value === undefined || node.value === null ){
-                    return;
-                };
-                 
-                str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
-                
-                let tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-                let label = node.label || node.field || node.name;
-                if( label ){
-                    label += "：";
-                } else {
-                    label = "";
-                };
-            
-                str+="<td "+tsStyle+">"+ label +"</td>";
-                str += "<td "+tsStyle+">"+ (typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) +"</td></tr>";
-            });
-            str+="</table>";
-            return str;
-        }
-        */
 
         /**
          *获取back要显示的x

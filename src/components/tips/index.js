@@ -217,46 +217,6 @@ export default class Tips extends Component {
         return str;
     }
 
-    /*
-    _getDefaultContent_bak( info )
-    {
-
-
-        if( !info.nodes.length ){
-            return null;
-        };
-
-        var str  = "<table style='border:none'>";
-        var self = this;
-
-        if( info.title !== undefined && info.title !== null &&info.title !== "" ){
-            str += "<tr><td colspan='2'>"+ info.title +"</td></tr>"
-        };
-
-        _.each( info.nodes , function( node , i ){
-            if( node.value === undefined || node.value === null ){
-                return;
-            };
-
-            
-            str+= "<tr style='color:"+ (node.color || node.fillStyle || node.strokeStyle) +"'>";
-            
-            let tsStyle="style='border:none;white-space:nowrap;word-wrap:normal;'";
-            let label = node.label || node.field || node.name;
-            if( label ){
-                label += "：";
-            } else {
-                label = "";
-            };
-        
-            str+="<td "+tsStyle+">"+ label +"</td>";
-            str += "<td "+tsStyle+">"+ (typeof node.value == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value)) +"</td></tr>";
-        });
-        str+="</table>";
-        return str;
-    }
-    */
-
     /**
      *获取back要显示的x
      *并且校验是否超出了界限

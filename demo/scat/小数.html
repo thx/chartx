@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- scat</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+    ["xfield"    ,"money"    , "sex", 'house' , 'text'],
+    [ 0.276     , 201       , '女' , 123     , 'hello world'],
+    [ 0.367     , 278       , '女' , 113     , '你好再见'],
+    [ 0.324     , 238       , '男' , 103     , 'sdfdsfdsf'],
+    [ 0.234     , 340       , '男' , 166     , '对方水电费'],
+    [ 0.425     , 290       , '女' , 123     , '个人赛飞'],
+    [ -0.261     , 234       , '男' , 12      , '多福多寿'],
+    [ 0.217     , 201       , '女' , 2       , '歌热舞'],
+    [ 0.268     , 245       , '男' , 3       , '个人法尔'],
+    [ 0.523     , 364       , '男' , 34      , 'fsdfsd'],
+    [ 0.332     , 423       , '女' , 234     , 'sdfdsfsdwer'],
+    [ -0.226     , 201       , '女' , 346     , 'sdfsdfrthsdfawe'],
+    [ 0.327     , 247       , '女' , 234     , 'gherwfsdf'],
+    [ 0.284      , 234       , '男' , 25      , 'dfsdfwerwegscs'],
+    [ 0.224      , 205       , '男' , 35      , 'gwer'],
+    [ 0.325     , 232        , '女' , 645     , 'werb'],
+    [ 0.261      , 270       , '男' , 3       , 'hwers'],
+    [ 0.217      , -201       , '女' , 34      , 'werwg'],
+    [ 0.223     , 224       , '男' , 62      , 'drgd'],
+    [ 0.219     , 235       , '男' , 463     , 'wer2fs'],
+    [ 0.252      , 273       , '女' , 111     , 'wersv'],
+    [ 0.232     , -201       , '女' , 332     , 'hert'],
+    [ 0.362     , 225       , '女' , 112     , 'gewfz'],
+    [ 0.325     , 328       , '男' , 115     , 'herww'],
+    [ 0.234     , 224       , '男' , 235     , 'vrvcz'],
+    [ -0.325     , 239       , '女' , 214     , 'we'],
+    [ 0.261     , 230       , '男' , 2       , 'werwerwer23'],
+    [ 0.342     , -201       , '女' , 236     , '23423wf'],
+    [ 0.285     , 234       , '男' , 253     , 'se'],
+    [ 0.299     , 268       , '男' , 234     , 'werw2'],
+    [ 0.220     , 303       , '女' , 234     , '2sd'],
+    [ 0.276     , 201       , '女' , 43      , 'nickli'],
+    [ 0.228      , 245       , '男' , 423     , 'lidf'],
+    [ 0.219     , 224       , '男' , 654     , 'fwe'],
+    [ 0.322     , 330       , '女' , 5       , 'de'],
+    [ 0.453     , 261       , '女' , 24      , '22'],
+    [ 0.274     , 247       , '女' , 62      , 'vsdf'],
+    [ 0.284     , 234       , '男' , 897     , 'wer'],
+    [ 0.536     , 253       , '男' , 6       , 'sefrw'],
+    [ 0.335     , 242       , '女' , 234     , 'v'],
+    [ 0.263     , 232       , '男' , 524     , 'serw'],
+    [ 0.510     , 211       , '女' , 623     , 'wer23'],
+    [ 0.283     , 224       , '男' , 34      , '3234'],
+    [ 0.219     , 326       , '男' , 452     , 'dsdf'],
+    [ 0.273     , 303       , '女' , 333     , '2342'],
+    [ 0.347     , 231       , '女' , 552     , 'vvvs'],
+    [ 0.232     , 375       , '女' , 153     , 'xxoo'],
+    [ 0.332     , 283       , '男' , 234     , 'ww'],
+    [ 0.344     , 284       , '男' , 5       , '23'],
+    [ 0.235     , 229       , '女' , 777     , '23'],
+    [ 0.481     , 232       , '男' , 234     , 'dfw'],
+    [ 0.262     , 280        , '男' , 22      , 'wwf'],
+    [ 0.282     , 221       , '男' , 25      , 'g345'],
+    [ 0.234     , 223       , '男' , 342     , 'f23423'],
+    [ 0.524     , 279       , '女' , 3       , '2222']
+];
+
+var options = {
+    theme : ["red"],
+    coord: {
+        type : "rect",
+        xAxis : {
+            field :  "xfield",
+            origin : 0,
+            axisLine: {
+                position: 0
+            },
+            layoutType : "proportion" //注意：scat的layoutType必须是proportion，位置计算才会对
+        },
+        yAxis: {
+            origin : 0,
+            axisLine: {
+                position: 0
+            }
+        }
+    },
+    legend : {},
+    graphs : [
+        {
+            type : "scat",
+            field : "money",
+            aniOrigin: "origin",
+            node : {
+                radius : "house", //r可以配置为某个字段名字，就会自动计算比例
+                fillStyle : function( d ){
+                    if( d.rowData.sex == "男" ){
+                        return "#ff8533"
+                    } else {
+                        return "#73ace6"
+                    }
+                },
+                select : {
+                    enabled : true
+                },
+                onclick : function( e , nodeData ){
+                    console.log("onclick")
+                    if( !nodeData.selected ){
+                        this.selectAt( nodeData.iNode );
+                    } else {
+                        this.unselectAt( nodeData.iNode );
+                    };
+                },
+                ondblclick : function(){
+                    console.log("ondblclick")
+                }
+
+            },
+            label : {
+                enabled : true,
+                field : "text"
+            }
+        }
+    ],
+    tips : {
+        pointAnim: false
+    }
+};
+
+window.scat = Chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <p>
+                    联系人：@释剑
+                </p>
+                
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
