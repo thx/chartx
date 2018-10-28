@@ -8849,7 +8849,6 @@ var DataSection = {
     }
 };
 
-var Line$1 = canvax.Shapes.Line;
 var _$9 = canvax._;
 
 var axis = function () {
@@ -8888,6 +8887,8 @@ var axis = function () {
         this.dataSectionGroup = [];
         //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
         this.middleweight = null;
+
+        this.symmetric = false; //proportion下，是否需要设置数据为正负对称的数据，比如 [ 0,5,10 ] = > [ -10, 0 10 ]，象限坐标系的时候需要
 
         //1，如果数据中又正数和负数，则默认为0，
         //2，如果dataSection最小值小于0，则baseNumber为最小值，
@@ -8962,6 +8963,15 @@ var axis = function () {
                     if (arr.length == 1) {
                         arr.push(arr[0] * 2);
                     }
+                    if (this.symmetric) {
+                        //如果需要处理为对称数据
+                        var _min = _$9.min(arr);
+                        var _max = _$9.max(arr);
+                        if (Math.abs(_min) > Math.abs(_max)) {
+                            arr.push(Math.abs(_min));
+                        } else {
+                            arr.push(-Math.abs(_max));
+                        }                    }
                     for (var ai = 0, al = arr.length; ai < al; ai++) {
                         arr[ai] = Number(arr[ai]);
                         if (isNaN(arr[ai])) {
@@ -8971,6 +8981,15 @@ var axis = function () {
                         }                    }
                     this.dataSection = DataSection.section(arr, 3);
 
+                    if (this.symmetric) {
+                        //可能得到的区间是偶数， 非对称，强行补上
+                        var _min = _$9.min(this.dataSection);
+                        var _max = _$9.max(this.dataSection);
+                        if (Math.abs(_min) > Math.abs(_max)) {
+                            this.dataSection.push(Math.abs(_min));
+                        } else {
+                            this.dataSection.unshift(-Math.abs(_max));
+                        }                    }
                     //如果还是0
                     if (this.dataSection.length == 0) {
                         this.dataSection = [0];
@@ -9398,7 +9417,7 @@ var axis = function () {
     return axis;
 }();
 
-var Line$2 = canvax.Shapes.Line;
+var Line$1 = canvax.Shapes.Line;
 var _$10 = canvax._;
 
 var xAxis = function (_Axis) {
@@ -9814,7 +9833,7 @@ var xAxis = function (_Axis) {
                             } else {
                                 xNode._line.context.x = lineContext.x;
                             }                        } else {
-                            xNode._line = new Line$2({
+                            xNode._line = new Line$1({
                                 context: lineContext
                             });
                             xNode.addChild(xNode._line);
@@ -9848,7 +9867,7 @@ var xAxis = function (_Axis) {
                 }            }
             //轴线
             if (this.axisLine.enabled) {
-                var _axisLine = new Line$2({
+                var _axisLine = new Line$1({
                     context: {
                         start: {
                             x: 0,
@@ -9979,7 +9998,7 @@ var xAxis = function (_Axis) {
     return xAxis;
 }(axis);
 
-var Line$3 = canvax.Shapes.Line;
+var Line$2 = canvax.Shapes.Line;
 var _$11 = canvax._;
 
 var yAxis = function (_Axis) {
@@ -10322,7 +10341,7 @@ var yAxis = function (_Axis) {
                     if (me.tickLine.enabled) {
                         //线条
                         lineX = me.align == "left" ? -me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
-                        var line = new Line$3({
+                        var line = new Line$2({
                             context: {
                                 x: lineX,
                                 y: y,
@@ -10414,7 +10433,7 @@ var yAxis = function (_Axis) {
 
             //轴线
             if (me.axisLine.enabled) {
-                var _axisLine = new Line$3({
+                var _axisLine = new Line$2({
                     context: {
                         start: {
                             x: _originX,
@@ -10453,7 +10472,7 @@ var yAxis = function (_Axis) {
     return yAxis;
 }(axis);
 
-var Line$4 = canvax.Shapes.Line;
+var Line$3 = canvax.Shapes.Line;
 var Rect$1 = canvax.Shapes.Rect;
 var _$12 = canvax._;
 
@@ -10580,7 +10599,7 @@ var descartesGrid = function (_Canvax$Event$EventDi) {
             for (var a = 0, al = arr.length; a < al; a++) {
                 var o = arr[a];
 
-                var line = new Line$4({
+                var line = new Line$3({
                     id: "back_line_" + a,
                     context: {
                         y: o.y,
@@ -10605,7 +10624,7 @@ var descartesGrid = function (_Canvax$Event$EventDi) {
             var arr = self.yDirection.data;
             for (var a = 0, al = arr.length; a < al; a++) {
                 var o = arr[a];
-                var line = new Line$4({
+                var line = new Line$3({
                     context: {
                         x: o.x,
                         start: {
@@ -11381,7 +11400,7 @@ var Rect$3 = function (_CoordBase) {
     return Rect;
 }(Coord);
 
-var Line$5 = canvax.Shapes.Line;
+var Line$4 = canvax.Shapes.Line;
 var Circle$1 = canvax.Shapes.Circle;
 var Polygon$1 = canvax.Shapes.Polygon;
 
@@ -11519,7 +11538,7 @@ var polarGrid = function (_Canvax$Event$EventDi) {
                         me.sprite.addChild(me.induce);
                     }
                     _$15.each(points, function (point) {
-                        var _line = new Line$5({
+                        var _line = new Line$4({
                             context: {
                                 end: point,
                                 lineWidth: me.ring.lineWidth,
@@ -14330,7 +14349,7 @@ var LineGraphs = function (_GraphsBase) {
 
 var Circle$4 = canvax.Shapes.Circle;
 var Rect$7 = canvax.Shapes.Rect;
-var Line$6 = canvax.Shapes.Line;
+var Line$5 = canvax.Shapes.Line;
 var _$22 = canvax._;
 
 var ScatGraphs = function (_GraphsBase) {
@@ -14698,7 +14717,7 @@ var ScatGraphs = function (_GraphsBase) {
                     };
 
                     if (!_line) {
-                        _line = new Line$6({
+                        _line = new Line$5({
                             context: _lineContext
                         });
                         me._linesp.addChild(_line);
@@ -17694,7 +17713,7 @@ var PlanetGroup = function () {
 var _$28 = canvax._;
 var Text$3 = canvax.Display.Text;
 var Circle$7 = canvax.Shapes.Circle;
-var Line$7 = canvax.Shapes.Line;
+var Line$6 = canvax.Shapes.Line;
 var Rect$9 = canvax.Shapes.Rect;
 
 var PlanetGraphs = function (_GraphsBase) {
@@ -17929,7 +17948,7 @@ var PlanetGraphs = function (_GraphsBase) {
                     var tx = cx + _r * Math.cos(radian);
                     var ty = cy + _r * Math.sin(radian);
 
-                    me.gridSp.addChild(new Line$7({
+                    me.gridSp.addChild(new Line$6({
                         context: {
                             start: {
                                 x: cx,
@@ -21985,7 +22004,7 @@ var Legend = function (_Component) {
     return Legend;
 }(component);
 
-var Line$8 = canvax.Shapes.Line;
+var Line$7 = canvax.Shapes.Line;
 var Rect$11 = canvax.Shapes.Rect;
 var _$34 = canvax._;
 
@@ -22451,7 +22470,7 @@ var dataZoom = function (_Component) {
         key: "_addLine",
         value: function _addLine($o) {
             var o = $o || {};
-            var line = new Line$8({
+            var line = new Line$7({
                 id: o.id || '',
                 context: {
                     x: o.x || 0,
@@ -22948,7 +22967,7 @@ var MarkLine = function (_Component) {
 
 var _$36 = canvax._;
 var Rect$12 = canvax.Shapes.Rect;
-var Line$9 = canvax.Shapes.Line;
+var Line$8 = canvax.Shapes.Line;
 
 var Tips = function (_Component) {
     inherits$1(Tips, _Component);
@@ -23224,7 +23243,7 @@ var Tips = function (_Component) {
 
             if (!el) {
                 if (this.pointer == "line") {
-                    el = new Line$9({
+                    el = new Line$8({
                         //xyToInt : false,
                         context: {
                             x: x,
@@ -23347,7 +23366,7 @@ var Tips = function (_Component) {
     return Tips;
 }(component);
 
-var Line$10 = canvax.Shapes.Line;
+var Line$9 = canvax.Shapes.Line;
 var _$37 = canvax._;
 
 var barTgi = function (_Component) {
@@ -23431,7 +23450,7 @@ var barTgi = function (_Component) {
                 var y = -me._yAxis.getPosOfVal(tgi);
                 var barData = me.barDatas[i];
 
-                var _tgiLine = new Line$10({
+                var _tgiLine = new Line$9({
                     context: {
                         start: {
                             x: barData.x,
@@ -23613,7 +23632,7 @@ var waterMark = function () {
     return waterMark;
 }();
 
-var Line$11 = canvax.Shapes.Line;
+var Line$10 = canvax.Shapes.Line;
 var Sprite$2 = canvax.Display.Sprite;
 var Text$8 = canvax.Display.Text;
 var _$39 = canvax._;
@@ -23699,7 +23718,7 @@ var MarkLine$1 = function (_Component) {
             var me = this;
             var aimPoint = me.aimPoint;
 
-            me._hLine = new Line$11({ //横向线条
+            me._hLine = new Line$10({ //横向线条
                 context: {
                     start: {
                         x: 0,
@@ -23716,7 +23735,7 @@ var MarkLine$1 = function (_Component) {
             });
             me.sprite.addChild(me._hLine);
 
-            me._vLine = new Line$11({ //线条
+            me._vLine = new Line$10({ //线条
                 context: {
                     start: {
                         x: aimPoint.x,

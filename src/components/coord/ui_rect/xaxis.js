@@ -1,6 +1,5 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
-import DataSection from "../../../utils/datasection"
 import Axis from "../axis"
 
 const Line = Canvax.Shapes.Line;

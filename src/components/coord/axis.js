@@ -1,8 +1,6 @@
 import Canvax from "canvax"
-import {numAddSymbol} from "../../utils/tools"
 import DataSection from "../../utils/datasection"
 
-const Line = Canvax.Shapes.Line;
 const _ = Canvax._;
 
 export default class axis
@@ -42,6 +40,7 @@ export default class axis
         //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
         this.middleweight = null; 
 
+        this.symmetric = false; //proportion下，是否需要设置数据为正负对称的数据，比如 [ 0,5,10 ] = > [ -10, 0 10 ]，象限坐标系的时候需要
 
         //1，如果数据中又正数和负数，则默认为0，
         //2，如果dataSection最小值小于0，则baseNumber为最小值，
@@ -55,7 +54,6 @@ export default class axis
         this._min = null; 
         this._max = null;
 
-        
 
         //"asc" 排序，默认从小到大, desc为从大到小
         //之所以不设置默认值为asc，是要用 null 来判断用户是否进行了配置
@@ -128,6 +126,17 @@ export default class axis
                     arr.push( arr[0]*2 );
                 };
 
+                if( this.symmetric ){
+                    //如果需要处理为对称数据
+                    var _min = _.min( arr );
+                    var _max = _.max( arr );
+                    if( Math.abs( _min  ) > Math.abs( _max ) ){
+                        arr.push( Math.abs( _min  ) );
+                    } else {
+                        arr.push( -Math.abs( _max ) );
+                    };
+                }; 
+
                 for( var ai=0,al=arr.length; ai<al; ai++ ){
                     arr[ai] = Number( arr[ai] );
                     if( isNaN( arr[ai] ) ){
@@ -138,6 +147,17 @@ export default class axis
                 };
 
                 this.dataSection = DataSection.section(arr, 3);
+
+                if( this.symmetric ){
+                    //可能得到的区间是偶数， 非对称，强行补上
+                    var _min = _.min( this.dataSection );
+                    var _max = _.max( this.dataSection );
+                    if( Math.abs( _min  ) > Math.abs( _max ) ){
+                        this.dataSection.push( Math.abs( _min  ) );
+                    } else {
+                        this.dataSection.unshift( -Math.abs( _max ) );
+                    };
+                }; 
                 
                 //如果还是0
                 if (this.dataSection.length == 0) {

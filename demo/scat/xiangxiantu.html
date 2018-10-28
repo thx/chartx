@@ -96,12 +96,14 @@ var options = {
         type : "rect",
         xAxis : {
             field :  "uv",
+            symmetric: true,
             layoutType : "proportion", //注意：scat的layoutType必须是proportion，位置计算才会对
             axisLine: {
                 position: 0//"center"
             }
         },
         yAxis : {
+            symmetric: true,
             axisLine: {
                 position: 0//"center"
             }
