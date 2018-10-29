@@ -8875,6 +8875,7 @@
 	        // ]
 	        this.dataOrg = dataOrg || [];
 	        this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
+	        this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
 
 	        //轴总长
 	        this.axisLength = 1;
@@ -8927,8 +8928,11 @@
 	            this._cellLength = null;
 	        }
 	    }, {
-	        key: "setMinMaxOrigin",
-	        value: function setMinMaxOrigin() {
+	        key: "calculateProps",
+	        value: function calculateProps() {
+
+	            var me = this;
+
 	            if (this.layoutType == "proportion") {
 	                if (this._min == null) {
 	                    this._min = _$9.min(this.dataSection);
@@ -8946,6 +8950,19 @@
 	                    }                }            }
 	            this._originTrans = this._getOriginTrans(this.origin);
 	            this.originPos = this.getPosOfVal(this.origin);
+
+	            //get xxx OfPos的时候，要先来这里做一次寻找
+	            this.dataSectionLayout = [];
+	            _$9.each(this.dataSection, function (val, i) {
+	                me.dataSectionLayout.push({
+	                    val: val,
+	                    ind: me.getIndexOfVal(val),
+	                    pos: parseInt(me.getPosOf({
+	                        ind: i,
+	                        val: val
+	                    }), 10)
+	                });
+	            });
 	        }
 	    }, {
 	        key: "setDataSection",
@@ -9010,11 +9027,9 @@
 	                    this.dataSection = _$9.flatten(this.dataOrg); //this._getDataSection();
 	                    this.dataSectionGroup = [this.dataSection];
 	                }            } else {
-
 	                this.dataSection = this._opt.dataSection;
 	                this.dataSectionGroup = [this.dataSection];
-	            }
-	        }
+	            }        }
 	    }, {
 	        key: "_getDataSection",
 	        value: function _getDataSection() {
@@ -9106,7 +9121,7 @@
 	            if (val < _$9.min(this.dataSection) || val > _$9.max(this.dataSection)) {
 	                //waterLine不再当前section的区间内，需要重新计算整个datasection    
 	                this.setDataSection();
-	                this.setMinMaxOrigin();
+	                this.calculateProps();
 	            }        }
 	    }, {
 	        key: "_sort",
@@ -9205,9 +9220,36 @@
 	            }
 	            return pos;
 	        }
+
+	        //opt { val ind pos } 一次只能传一个
+
+	    }, {
+	        key: "_getLayoutDataOf",
+	        value: function _getLayoutDataOf(opt) {
+	            var props = ["val", "ind", "pos"];
+	            var prop;
+	            _$9.each(props, function (_p) {
+	                if (_p in opt) {
+	                    prop = _p;
+	                }
+	            });
+
+	            var layoutData;
+	            _$9.each(this.dataSectionLayout, function (item) {
+	                if (item[prop] === opt[prop]) {
+	                    layoutData = item;
+	                }            });
+
+	            return layoutData || {};
+	        }
 	    }, {
 	        key: "getPosOfVal",
 	        value: function getPosOfVal(val) {
+	            //先检查下 dataSectionLayout 中有没有对应的记录
+	            var _pos = this._getLayoutDataOf({ val: val }).pos;
+	            if (_pos != undefined) {
+	                return _pos;
+	            }
 	            return this.getPosOf({
 	                val: val
 	            });
@@ -9215,10 +9257,16 @@
 	    }, {
 	        key: "getPosOfInd",
 	        value: function getPosOfInd(ind) {
+	            //先检查下 dataSectionLayout 中有没有对应的记录
+	            var _pos = this._getLayoutDataOf({ ind: ind }).pos;
+	            if (_pos != undefined) {
+	                return _pos;
+	            }
 	            return this.getPosOf({
 	                ind: ind
 	            });
 	        }
+
 	        //opt {val, ind} val 或者ind 一定有一个
 
 	    }, {
@@ -9235,7 +9283,7 @@
 	                    var ds = this.dataSectionGroup[i];
 	                    var min = _$9.min(ds);
 	                    var max = _$9.max(ds);
-	                    var val = "val" in opt ? opt.val : this.getValOfInd(opt.ind, ds);
+	                    var val = "val" in opt ? opt.val : this._getValOfInd(opt.ind, ds);
 	                    if (val >= min && val <= max) {
 	                        var _origin = this.origin;
 	                        //如果 origin 并不在这个区间
@@ -9247,22 +9295,26 @@
 	                        pos = (val - _origin) / maxGroupDisABS * h + i * groupLength;
 
 	                        if (isNaN(pos)) {
-	                            pos = i * groupLength;
+	                            pos = parseInt(i * groupLength);
 	                        }
 	                        break;
 	                    }
 	                }
 	            } else {
-	                var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal(opt.val);
 
-	                if (valInd != -1) {
-	                    if (this.layoutType == "rule") {
-	                        //line 的xaxis就是 rule
-	                        pos = valInd / (cellCount - 1) * this.axisLength;
-	                    }                    if (this.layoutType == "peak") {
-	                        //bar的xaxis就是 peak
-	                        pos = this.axisLength / cellCount * (valInd + 1) - this.axisLength / cellCount / 2;
-	                    }                }            }
+	                if (cellCount == 1) {
+	                    //如果只有一数据，那么就全部默认在正中间
+	                    pos = this.axisLength / 2;
+	                } else {
+	                    var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal(opt.val);
+	                    if (valInd != -1) {
+	                        if (this.layoutType == "rule") {
+	                            //line 的xaxis就是 rule
+	                            pos = valInd / (cellCount - 1) * this.axisLength;
+	                        }                        if (this.layoutType == "peak") {
+	                            //bar的xaxis就是 peak
+	                            pos = this.axisLength / cellCount * (valInd + 1) - this.axisLength / cellCount / 2;
+	                        }                    }                }            }
 	            !pos && (pos = 0);
 
 	            pos += this._originTrans;
@@ -9272,8 +9324,12 @@
 	    }, {
 	        key: "getValOfPos",
 	        value: function getValOfPos(pos) {
-	            var posInd = this.getIndexOfPos(pos);
-	            return this.getValOfInd(posInd);
+	            //先检查下 dataSectionLayout 中有没有对应的记录
+	            var _val = this._getLayoutDataOf({ pos: pos }).val;
+	            if (_val != undefined) {
+	                return _val;
+	            }
+	            return this._getValOfInd(this.getIndexOfPos(pos));
 	        }
 
 	        //ds可选
@@ -9281,22 +9337,24 @@
 	    }, {
 	        key: "getValOfInd",
 	        value: function getValOfInd(ind, ds) {
+
+	            //先检查下 dataSectionLayout 中有没有对应的记录
+	            var _val = this._getLayoutDataOf({ ind: ind }).val;
+	            if (_val != undefined) {
+	                return _val;
+	            }
+	            return this._getValOfInd(ind, ds);
+	        }
+	    }, {
+	        key: "_getValOfInd",
+	        value: function _getValOfInd(ind, ds) {
 	            var me = this;
+
 	            var org = ds ? ds : _$9.flatten(this.dataOrg);
 	            var val;
 
 	            if (this.layoutType == "proportion") {
 
-	                /*
-	                var min = this._min;
-	                var max = this._max;
-	                if( ds ){
-	                    min = _.min( ds );
-	                    max = _.max( ds );
-	                };
-	                val = min + ( max-min )/this._getCellCount() * ind;
-	                */
-	                debugger;
 	                var groupLength = this.axisLength / this.dataSectionGroup.length;
 	                _$9.each(this.dataSectionGroup, function (ds, i) {
 	                    if (parseInt(ind / groupLength) == i || i == me.dataSectionGroup.length - 1) {
@@ -9313,6 +9371,12 @@
 	    }, {
 	        key: "getIndexOfPos",
 	        value: function getIndexOfPos(pos) {
+
+	            //先检查下 dataSectionLayout 中有没有对应的记录
+	            var _ind = this._getLayoutDataOf({ pos: pos }).ind;
+	            if (_ind != undefined) {
+	                return _ind;
+	            }
 	            var ind = 0;
 
 	            var cellLength = this.getCellLengthOfPos(pos);
@@ -9341,14 +9405,26 @@
 	    }, {
 	        key: "getIndexOfVal",
 	        value: function getIndexOfVal(val) {
+	            //先检查下 dataSectionLayout 中有没有对应的记录
+	            var _ind = this._getLayoutDataOf({ val: val }).ind;
+	            if (_ind != undefined) {
+	                return _ind;
+	            }
 	            var valInd = -1;
-	            _$9.each(this.dataOrg, function (arr) {
-	                _$9.each(arr, function (list) {
-	                    var _ind = _$9.indexOf(list, val);
-	                    if (_ind != -1) {
-	                        valInd = _ind;
-	                    }                });
-	            });
+	            if (this.layoutType == "proportion") {
+	                //因为在proportion中index 就是 pos
+	                //所以这里要返回pos
+	                valInd = this.getPosOfVal(val);
+	            } else {
+	                _$9.each(this.dataOrg, function (arr) {
+	                    _$9.each(arr, function (list) {
+	                        var _ind = _$9.indexOf(list, val);
+	                        if (_ind != -1) {
+	                            valInd = _ind;
+	                        }                    });
+	                });
+	            }
+
 	            return valInd;
 	        }
 	    }, {
@@ -9568,7 +9644,7 @@
 
 	            this.axisLength = this.width; //width来自opt坐标系传入
 
-	            this.setMinMaxOrigin();
+	            this.calculateProps();
 
 	            this._trimXAxis();
 
@@ -9664,7 +9740,7 @@
 	        value: function getNodeInfoOfX(x) {
 
 	            var ind = this.getIndexOfPos(x);
-	            var val = this.getValOfInd(ind);
+	            var val = this.getValOfInd(ind); //this.getValOfPos(x);//
 	            var pos = this.getPosOf({
 	                ind: ind,
 	                val: val
@@ -10130,7 +10206,7 @@
 
 	            this.axisLength = this.height = parseInt(this.yMaxHeight - this._getYAxisDisLine());
 
-	            this.setMinMaxOrigin();
+	            this.calculateProps();
 
 	            this._trimYAxis();
 	            this._widget(opt);
@@ -22350,7 +22426,6 @@
 	                    me._setRange("btnCenter");
 	                });
 	                this.rangeRect.on("dragend", function (e) {
-
 	                    me.dragEnd(me.range);
 	                });
 	                this.dataZoomBtns.addChild(this.rangeRect);
@@ -22404,6 +22479,7 @@
 	            var start = me._btnLeft.context.x / me.width * me.count;
 	            var end = (me._btnRight.context.x + me.btnWidth) / me.width * me.count;
 
+	            //console.log( (me._btnRight.context.x + me.btnWidth)+"|"+ me.width + "|" + me.count )
 	            if (this.axisLayoutType == "peak") {
 	                start = Math.round(start);
 	                end = Math.round(end);
@@ -22411,7 +22487,6 @@
 	                start = parseInt(start);
 	                end = parseInt(end);
 	            }
-
 	            if (trigger == "btnCenter") {
 	                //如果是拖动中间部分，那么要保持 end-start的总量一致
 	                if (end - start != _preDis) {
@@ -22652,15 +22727,11 @@
 	        key: "_getDataZoomOpt",
 	        value: function _getDataZoomOpt(opt, app) {
 
-	            var width = app._coord.width;
-	            if (app._coord._opt.horizontal) {
-	                width = app._coord.height;
-	            }
 	            var coordInfo = app._coord.getSizeAndOrigin();
 
 	            //初始化 datazoom 模块
 	            var dataZoomOpt = _$34.extend(true, opt, {
-	                width: coordInfo.width, //app._coord.width,
+	                width: parseInt(coordInfo.width), //app._coord.width,
 	                pos: {
 	                    x: coordInfo.origin.x //app._coord.origin.x,
 	                    //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height

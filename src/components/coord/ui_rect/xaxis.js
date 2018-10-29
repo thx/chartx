@@ -150,7 +150,7 @@ export default class xAxis extends Axis
 
         this.axisLength = this.width; //width来自opt坐标系传入
 
-        this.setMinMaxOrigin();
+        this.calculateProps();
         
         this._trimXAxis();
 
@@ -251,9 +251,9 @@ export default class xAxis extends Axis
     
 
     getNodeInfoOfX( x ){
-
+        
         var ind = this.getIndexOfPos( x );
-        var val = this.getValOfInd( ind );
+        var val = this.getValOfInd( ind );//this.getValOfPos(x);//
         var pos = this.getPosOf( {
             ind : ind,
             val : val

@@ -125,7 +125,7 @@ export default class yAxis extends Axis
 
         this.axisLength = this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
     
-        this.setMinMaxOrigin();
+        this.calculateProps();
 
         this._trimYAxis();
         this._widget( opt );

@@ -242,17 +242,12 @@ export default class dataZoom extends Component
 
     static _getDataZoomOpt( opt, app)
     {
-        
-        var width = app._coord.width;
-        if( app._coord._opt.horizontal ){
-            width = app._coord.height;
-        };
 
         var coordInfo = app._coord.getSizeAndOrigin();
         
         //初始化 datazoom 模块
         var dataZoomOpt = _.extend(true, opt, {
-            width: coordInfo.width,//app._coord.width,
+            width: parseInt( coordInfo.width ),//app._coord.width,
             pos: {
                 x: coordInfo.origin.x//app._coord.origin.x,
                 //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
@@ -531,7 +526,6 @@ export default class dataZoom extends Component
 
             });
             this.rangeRect.on("dragend" , function(e){
-                
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this.rangeRect );
@@ -592,14 +586,15 @@ export default class dataZoom extends Component
 
         var start = (me._btnLeft.context.x / me.width) * me.count;
         var end =  ((me._btnRight.context.x + me.btnWidth) / me.width) * me.count;
-
+       
+        //console.log( (me._btnRight.context.x + me.btnWidth)+"|"+ me.width + "|" + me.count )
         if( this.axisLayoutType == "peak" ){
             start = Math.round( start );
             end = Math.round( end );
         } else {
-            start = parseInt(start);
-            end = parseInt(end);
-        }
+            start = parseInt( start );
+            end = parseInt( end );
+        };
 
         if( trigger == "btnCenter" ){
             //如果是拖动中间部分，那么要保持 end-start的总量一致
@@ -608,8 +603,6 @@ export default class dataZoom extends Component
             }
         };
         
-        
-
         if( start != me.range.start || end != _end ){
             me.range.start = start;
             if( me.axisLayoutType == "peak" ){

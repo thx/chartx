@@ -23,7 +23,8 @@ export default class axis
         // ]
         this.dataOrg = dataOrg || []; 
         this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
-    
+        this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
+
         //轴总长
         this.axisLength = 1;
         
@@ -54,6 +55,7 @@ export default class axis
         this._min = null; 
         this._max = null;
 
+        
 
         //"asc" 排序，默认从小到大, desc为从大到小
         //之所以不设置默认值为asc，是要用 null 来判断用户是否进行了配置
@@ -76,8 +78,11 @@ export default class axis
     
     }
 
-    setMinMaxOrigin()
+    calculateProps()
     {
+        
+        var me = this;
+        
         if( this.layoutType == "proportion" ){
             if( this._min == null ){
                 this._min = _.min( this.dataSection );
@@ -101,6 +106,19 @@ export default class axis
         
         this._originTrans = this._getOriginTrans( this.origin );
         this.originPos = this.getPosOfVal( this.origin );
+
+        //get xxx OfPos的时候，要先来这里做一次寻找
+        this.dataSectionLayout = [];
+        _.each( this.dataSection, function( val, i ){
+            me.dataSectionLayout.push( {
+                val : val,
+                ind : me.getIndexOfVal( val ),
+                pos : parseInt(me.getPosOf({
+                    ind : i,
+                    val : val
+                }), 10)
+            } );
+        } );
         
     }
 
@@ -179,11 +197,9 @@ export default class axis
 
             };
         } else {
-
             this.dataSection = this._opt.dataSection;
             this.dataSectionGroup = [ this.dataSection ];
-
-        }
+        };
         
     }
     _getDataSection()
@@ -279,7 +295,7 @@ export default class axis
         if( val < _.min(this.dataSection) || val > _.max(this.dataSection) ){
             //waterLine不再当前section的区间内，需要重新计算整个datasection    
             this.setDataSection();
-            this.setMinMaxOrigin();
+            this.calculateProps();
         };
     }
 
@@ -410,19 +426,49 @@ export default class axis
         return pos;
     }
 
+    //opt { val ind pos } 一次只能传一个
+    _getLayoutDataOf( opt ){
+        var props = ["val","ind","pos"];
+        var prop;
+        _.each( props, function( _p ){
+            if( _p in opt ){
+                prop = _p;
+            }
+        } );
 
+        var layoutData;
+        _.each( this.dataSectionLayout, function( item ){
+            if( item[ prop ] === opt[ prop ] ){
+                layoutData = item;
+            };
+        } );
 
+        return layoutData || {};
+    }
 
     getPosOfVal( val ){
+        //先检查下 dataSectionLayout 中有没有对应的记录
+        var _pos = this._getLayoutDataOf({ val : val }).pos;
+        if( _pos != undefined ){
+            return _pos;
+        };
+
         return this.getPosOf({
             val : val
         });
     }
     getPosOfInd( ind ){
+        //先检查下 dataSectionLayout 中有没有对应的记录
+        var _pos = this._getLayoutDataOf({ ind : ind }).pos;
+        if( _pos != undefined ){
+            return _pos;
+        };
+
         return this.getPosOf({
             ind : ind
         });
     }
+
     //opt {val, ind} val 或者ind 一定有一个
     getPosOf( opt ){
         var pos;
@@ -436,7 +482,7 @@ export default class axis
                 var ds = this.dataSectionGroup[i];
                 var min = _.min(ds);
                 var max = _.max(ds);
-                var val = "val" in opt ? opt.val : this.getValOfInd( opt.ind , ds );
+                var val = "val" in opt ? opt.val : this._getValOfInd( opt.ind , ds );
                 if(val >= min && val <= max){
                     var _origin = this.origin;
                     //如果 origin 并不在这个区间
@@ -452,27 +498,33 @@ export default class axis
                     pos = (val - _origin) / maxGroupDisABS * h + i*groupLength;
                     
                     if( isNaN(pos) ){
-                        pos = i*groupLength;
+                        pos = parseInt( i*groupLength );
                     };
 
                     break;
                 }
             }
         } else {
-            var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal( opt.val );
-
-            if( valInd != -1 ){
-                if( this.layoutType == "rule" ){
-                    //line 的xaxis就是 rule
-                    pos = valInd / (cellCount - 1) * this.axisLength;
-                };
-                if( this.layoutType == "peak" ){
-                    //bar的xaxis就是 peak
-                    pos = (this.axisLength/cellCount) 
-                          * (valInd+1) 
-                          - (this.axisLength/cellCount)/2;
+    
+            if( cellCount == 1 ){
+                //如果只有一数据，那么就全部默认在正中间
+                pos = this.axisLength / 2;
+            } else {
+                var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal( opt.val );
+                if( valInd != -1 ){
+                    if( this.layoutType == "rule" ){
+                        //line 的xaxis就是 rule
+                        pos = valInd / (cellCount - 1) * this.axisLength;
+                    };
+                    if( this.layoutType == "peak" ){
+                        //bar的xaxis就是 peak
+                        pos = (this.axisLength/cellCount) 
+                              * (valInd+1) 
+                              - (this.axisLength/cellCount)/2;
+                    };
                 };
             };
+            
         };
             
         !pos && (pos = 0);
@@ -484,28 +536,36 @@ export default class axis
 
     getValOfPos( pos )
     {
-        var posInd = this.getIndexOfPos( pos );
-        return this.getValOfInd( posInd );   
+        //先检查下 dataSectionLayout 中有没有对应的记录
+        var _val = this._getLayoutDataOf({ pos : pos }).val;
+        if( _val != undefined ){
+            return _val;
+        };
+
+        return this._getValOfInd( this.getIndexOfPos( pos ) );
+        
     }
 
     //ds可选
     getValOfInd( ind , ds ){
+        
+        //先检查下 dataSectionLayout 中有没有对应的记录
+        var _val = this._getLayoutDataOf({ ind : ind }).val;
+        if( _val != undefined ){
+            return _val;
+        };
+
+        return this._getValOfInd( ind, ds );
+    }
+
+    _getValOfInd( ind , ds ){
         var me = this;
+
         var org = ds? ds  : _.flatten( this.dataOrg );
         var val;
 
         if( this.layoutType == "proportion" ){
 
-            /*
-            var min = this._min;
-            var max = this._max;
-            if( ds ){
-                min = _.min( ds );
-                max = _.max( ds );
-            };
-            val = min + ( max-min )/this._getCellCount() * ind;
-            */
-debugger
             var groupLength = this.axisLength / this.dataSectionGroup.length;
             _.each( this.dataSectionGroup, function( ds, i ){
                 if( parseInt( ind/groupLength) == i || i==me.dataSectionGroup.length-1 ){
@@ -525,6 +585,13 @@ debugger
 
     getIndexOfPos( pos )
     {
+
+        //先检查下 dataSectionLayout 中有没有对应的记录
+        var _ind = this._getLayoutDataOf({ pos : pos }).ind;
+        if( _ind != undefined ){
+            return _ind;
+        };
+
         var ind = 0;
         
         var cellLength = this.getCellLengthOfPos( pos );
@@ -555,15 +622,29 @@ debugger
     }
 
     getIndexOfVal( val ){
+        //先检查下 dataSectionLayout 中有没有对应的记录
+        var _ind = this._getLayoutDataOf({ val : val }).ind;
+        if( _ind != undefined ){
+            return _ind;
+        };
+
         var valInd = -1;
-        _.each( this.dataOrg, function( arr ){
-            _.each( arr, function( list ){
-                var _ind = _.indexOf( list , val );
-                if( _ind != -1 ){
-                    valInd = _ind;
-                };
+        if( this.layoutType == "proportion" ){
+            //因为在proportion中index 就是 pos
+            //所以这里要返回pos
+            valInd = this.getPosOfVal( val );
+        } else {
+            _.each( this.dataOrg, function( arr ){
+                _.each( arr, function( list ){
+                    var _ind = _.indexOf( list , val );
+                    if( _ind != -1 ){
+                        valInd = _ind;
+                    };
+                } );
             } );
-        } );
+        }
+
+        
         return valInd;
     }
     
