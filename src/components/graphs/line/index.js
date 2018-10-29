@@ -109,8 +109,6 @@ export default class LineGraphs extends GraphsBase
 
                 var x = _xAxis.getPosOfInd( b );
                 
-                //var y = _.isNumber( _lineData[b] ) ? _yAxis.getPosOfVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
-                
                 var y = _lineData[b];
                 if( !isNaN( y ) && y !== null && y !== undefined && y !== ""  ){
                     y = -_yAxis.getPosOfVal( y );

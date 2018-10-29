@@ -8849,6 +8849,8 @@ define(function () { 'use strict';
 	    }
 	};
 
+	//TODO 所有的get xxx OfVal 在非proportion下面如果数据有相同的情况，就会有风险
+
 	var _$9 = canvax._;
 
 	var axis = function () {
@@ -8896,7 +8898,7 @@ define(function () { 'use strict';
 	        //3，如果dataSection最大值大于0，则baseNumber为最大值
 	        //也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值
 	        this.origin = null;
-	        this.originPos = null; //value为 origin 对应的pos位置
+	        this.originPos = 0; //value为 origin 对应的pos位置
 	        this._originTrans = 0; //当设置的 origin 和datasection的min不同的时候，
 
 	        //min,max不需要外面配置，没意义
@@ -8930,6 +8932,7 @@ define(function () { 'use strict';
 	            var me = this;
 
 	            if (this.layoutType == "proportion") {
+
 	                if (this._min == null) {
 	                    this._min = _$9.min(this.dataSection);
 	                }                if (this._max == null) {
@@ -8943,10 +8946,10 @@ define(function () { 'use strict';
 	                        this.origin = _$9.max(this.dataSection);
 	                    }                    if (_$9.min(this.dataSection) > 0) {
 	                        this.origin = _$9.min(this.dataSection);
-	                    }                }            }
-	            this._originTrans = this._getOriginTrans(this.origin);
-	            this.originPos = this.getPosOfVal(this.origin);
-
+	                    }                }
+	                this._originTrans = this._getOriginTrans(this.origin);
+	                this.originPos = this.getPosOfVal(this.origin);
+	            }
 	            //get xxx OfPos的时候，要先来这里做一次寻找
 	            this.dataSectionLayout = [];
 	            _$9.each(this.dataSection, function (val, i) {
@@ -8959,6 +8962,7 @@ define(function () { 'use strict';
 	                    ind: i,
 	                    val: val
 	                }), 10);
+
 	                me.dataSectionLayout.push({
 	                    val: val,
 	                    ind: ind,
@@ -9312,6 +9316,9 @@ define(function () { 'use strict';
 	                    //如果只有一数据，那么就全部默认在正中间
 	                    pos = this.axisLength / 2;
 	                } else {
+	                    //TODO 这里在非proportion情况下，如果没有opt.ind 那么getIndexOfVal 其实是有风险的，
+	                    //因为可能有多个数据的val一样
+
 	                    var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal(opt.val);
 	                    if (valInd != -1) {
 	                        if (this.layoutType == "rule") {
@@ -9418,16 +9425,14 @@ define(function () { 'use strict';
 	        key: "getIndexOfVal",
 	        value: function getIndexOfVal(val) {
 
-	            /* val可能会重复，so 这里得到的会有问题，先去掉
-	            //先检查下 dataSectionLayout 中有没有对应的记录
-	            var _ind = this._getLayoutDataOf({ val : val }).ind;
-	            if( _ind != undefined ){
-	                return _ind;
-	            };
-	            */
-
 	            var valInd = -1;
 	            if (this.layoutType == "proportion") {
+
+	                //先检查下 dataSectionLayout 中有没有对应的记录
+	                var _ind = this._getLayoutDataOf({ val: val }).ind;
+	                if (_ind != undefined) {
+	                    return _ind;
+	                }
 	                //因为在proportion中index 就是 pos
 	                //所以这里要返回pos
 	                valInd = this.getPosOfVal(val);
@@ -10301,7 +10306,10 @@ define(function () { 'use strict';
 
 	                var layoutData = {
 	                    value: this.dataSection[i],
-	                    y: -Math.abs(this.getPosOfVal(this.dataSection[i])),
+	                    y: -Math.abs(this.getPosOf({
+	                        val: this.dataSection[i],
+	                        ind: i
+	                    })),
 	                    visible: true,
 	                    text: ""
 	                };
@@ -14277,8 +14285,6 @@ define(function () { 'use strict';
 	                    var _xAxis = me.root._coord ? me.root._coord._xAxis : me.root._xAxis;
 
 	                    var x = _xAxis.getPosOfInd(b);
-
-	                    //var y = _.isNumber( _lineData[b] ) ? _yAxis.getPosOfVal( _lineData[b] ) : undefined; //_lineData[b] 没有数据的都统一设置为undefined，说明这个地方没有数据
 
 	                    var y = _lineData[b];
 	                    if (!isNaN(y) && y !== null && y !== undefined && y !== "") {

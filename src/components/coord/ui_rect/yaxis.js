@@ -201,7 +201,10 @@ export default class yAxis extends Axis
             
             var layoutData = {
                 value   : this.dataSection[ i ],
-                y       : -Math.abs( this.getPosOfVal( this.dataSection[ i ] ) ),
+                y       : -Math.abs( this.getPosOf( {
+                    val : this.dataSection[ i ],
+                    ind : i
+                } ) ),
                 visible : true,
                 text    : ""
             };
